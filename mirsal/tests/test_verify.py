@@ -1,4 +1,4 @@
-"""The verifier catalogue: every check has a PASS fixture and a FAIL fixture (phase_01.md, "Rules")."""
+"""The verifier catalogue: every check has a PASS fixture and a FAIL fixture (Phase_01/README.md, "Rules")."""
 import hashlib
 import tempfile
 import unittest
@@ -264,6 +264,32 @@ class SlotStageTests(unittest.TestCase):
         self.assertGreater(c.detail["over_px"], 0)
         self.assertIsNone(verify.run("slot", {}, CFG)[0] if False else None)          # no layout -> the check does not apply (returns None)
 
+    def test_inside_frame_is_the_still_border_rule_per_frame(self):
+        ok = frames_of(disc_at(lambda t: 100, lambda t: 100))
+        self.assertTrue(ck(verify.run("slot", {"cell_frames": ok}, CFG), "inside_frame").ok)
+        drift = frames_of(disc_at(lambda t: 100 - t * 4.5, lambda t: 100))            # leaves its cell: the video is cropped
+        c = ck(verify.run("slot", {"cell_frames": drift}, CFG), "inside_frame")
+        self.assertFalse(c.ok)
+        self.assertGreater(c.detail["frame"], 10)
+        self.assertGreater(c.detail["frames_over"], 0)
+        self.assertIsNone(next((x for x in verify.run("slot", {"slot_frames": ok}, CFG) if x.id == "inside_frame"), None))   # a video-sheet slot has inside_slot instead
+
+    def test_out_of_bounds_animation_is_made_but_blocked_for_review(self):
+        import tempfile
+        from pathlib import Path
+        from mirsal import pipeline as pl
+        from mirsal.engine.video import AnimationResult
+        drift = frames_of(disc_at(lambda t: 100 - t * 4.5, lambda t: 100))
+        rep = verify.Report(verify.run("slot", {"cell_frames": drift}, CFG))
+        self.assertTrue(rep.ok)                                   # a WARN: the engine does not cancel the video
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "slices").mkdir()
+            st = {"name": "img-001-a-b", "review": {"still": "APPROVED", "anim": "NONE"}, "history": []}
+            pl.record_anim(Path(td), st, AnimationResult(1, "READY", None, rep, {}, b"webm"), "prepared video")
+            self.assertEqual((st["anim_status"], st["review"]["anim"]), ("READY", "BLOCKED"))
+            self.assertTrue((Path(td) / st["webm"]).exists())     # kept to look at
+            self.assertEqual((st["history"][-1]["decision"], st["history"][-1]["reason"]), ("BLOCK", "inside_frame"))
+
     def test_cross_slot(self):
         self.assertTrue(ck(verify.run("slot", {"slot_frames": frames_of(disc_at(lambda t: 100, lambda t: 100))}, CFG), "cross_slot").ok)
 
@@ -296,6 +322,20 @@ class AnimExtraTests(unittest.TestCase):
         pump = np.stack([synth.sticker_rgba("disc") if t % 2 else np.zeros((512, 512, 4), np.uint8) for t in range(6)])
         pump[::2, 200:260, 200:260] = 255
         self.assertFalse(verify.alpha_stable({"frames_out": pump}, CFG).ok)
+
+    def test_sharpness_is_what_survives_the_encode(self):
+        from mirsal.engine.video import edge_energy
+        sharp = synth.sticker_rgba("disc").copy()
+        yy, xx = np.mgrid[:512, :512]
+        sharp[..., :3] = (((xx // 4 + yy // 4) % 2) * 255).astype(np.uint8)[..., None]          # texture: a flat disc has no edge detail to lose
+        blur = cv2.GaussianBlur(sharp, (0, 0), 3)
+        self.assertGreater(edge_energy(sharp), edge_energy(blur))                          # a blur loses edge detail
+        ok = verify.sharpness({"metrics": {"sharp_kept": 1.0}}, CFG)
+        self.assertTrue(ok.ok)
+        bad = verify.sharpness({"metrics": {"sharp_kept": 0.5}}, CFG)
+        self.assertFalse(bad.ok)
+        self.assertEqual(bad.severity, verify.WARN)                                        # a warning: it never blocks an animation
+        self.assertIsNone(verify.sharpness({"metrics": {}}, CFG))                          # not measured -> not applicable
 
 
 class PackTests(unittest.TestCase):

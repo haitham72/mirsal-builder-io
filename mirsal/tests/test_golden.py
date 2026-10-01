@@ -1,4 +1,4 @@
-"""The golden path end to end through the console API (phase_01.md 1F): plan -> stills -> video sheet -> returned video -> animations -> pack.
+"""The golden path end to end through the console API (Phase_01/README.md 1F): plan -> stills -> video sheet -> returned video -> animations -> pack.
 Synthetic inputs only. The scenario of the plan: G2 rejects 5 and 6, the video blocks 1 and 2 (inside_slot), the final pack is 3, 4, 7, 8, 9."""
 import http.client
 import json

@@ -200,6 +200,29 @@ class Send(LibFixture):
         saved = next(p for p in self.lib.snapshot()["packs"] if p["id"] == self.pid)["telegram"]["sets"]
         self.assertEqual([i["sticker_id"] for t in saved if t["kind"] == "static" for i in t["items"]], [a["id"], c["id"]])
 
+    def test_the_pack_is_shown_inside_telegram(self):
+        """A set made by a bot is invisible until its link is opened: the bot writes the owner the link and sends the first sticker."""
+        self.connect()
+        self.add_static("One", "😀"); self.add_static("Two", "🎉")
+        r = tg.send(self.out, self.lib, self.pid, None, CFG)
+        self.assertTrue(r["notified"])
+        kinds = [m for m, _, _ in self.fake.f.messages]
+        self.assertEqual(kinds, ["sendMessage", "sendSticker"])
+        self.assertIn("https://t.me/addstickers/teddy_pack_by_mirsalbot", self.fake.f.messages[0][2])
+        self.assertEqual(self.fake.f.messages[1][2], "FILE00001")
+        n = len(self.fake.f.messages)
+        r = tg.send(self.out, self.lib, self.pid, None, CFG)                           # nothing new -> no second message
+        self.assertEqual((r["notified"], len(self.fake.f.messages)), (False, n))
+
+    def test_a_muted_owner_does_not_fail_the_send(self):
+        self.connect()
+        self.fake.f.mute = True
+        self.add_static("One", "😀")
+        r = tg.send(self.out, self.lib, self.pid, None, CFG)
+        self.assertEqual(r["sets"][0]["added"], 1)                                      # the pack exists
+        self.assertFalse(r["notified"])
+        self.assertIn("press Start", r["notify_error"])
+
     def test_more_than_50_goes_in_batches(self):
         self.connect()
         data = png(ring=12)

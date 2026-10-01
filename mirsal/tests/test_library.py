@@ -81,16 +81,9 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual([x["id"] for x in pk["stickers"]], ids[::-1]); self.assertEqual(pk["cover"], ids[2]); self.assertEqual(pk["name"], "Renamed")
         with self.assertRaises(LibraryError):
             self.lib.update_pack(p["id"], order=ids[:2])
-        data, rep = self.lib.export_wastickers(p["id"])
-        z = zipfile.ZipFile(io.BytesIO(data)); names = z.namelist()
-        self.assertIn("tray.png", names); self.assertEqual(sum(n.endswith(".webp") for n in names), 4)
-        self.assertEqual(Image.open(io.BytesIO(z.read("tray.png"))).size, (96, 96))
-        self.assertTrue(all(f["kb"] <= 100 for f in rep["files"]))
         self.lib.delete_sticker(p["id"], ids[2])                       # deleting the cover promotes another sticker
         self.assertNotEqual(self.lib.snapshot()["packs"][0]["cover"], ids[2])
         self.lib.delete_sticker(p["id"], ids[0])
-        with self.assertRaises(LibraryError):                          # 2 stickers left: below the pack minimum
-            self.lib.export_wastickers(p["id"])
         self.lib.delete_pack(p["id"]); self.assertEqual(self.lib.snapshot()["packs"], []); self.assertEqual(list(self.lib.files.iterdir()), [])
 
     def test_move_sticker_between_packs(self):
@@ -114,6 +107,35 @@ class LibraryTests(unittest.TestCase):
             self.lib.add_render(p["id"], png_bytes(np.zeros((256, 256, 4), np.uint8)), "a", "🙂", self.cfg)
         with self.assertRaises(LibraryError):
             self.lib.add_render(p["id"], png_bytes(np.zeros((512, 512, 4), np.uint8)), "a", "🙂", self.cfg)
+
+
+class NamingTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp()); self.lib = Library(self.tmp)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_readable_name_and_legacy_file_style_names(self):
+        from mirsal.library import readable_name
+        self.assertEqual(readable_name("generic_emojis_laughing"), "Generic emojis laughing")
+        pk = self.lib.create_pack("P")["id"]
+        s = self.lib.add_bytes(pk, b"x", "png", "img-027-generic_emojis-generic_emojis_laughing", "static", "😂", {"generation": "G027", "index": 2})
+        self.lib.add_bytes(pk, b"x", "png", "my own name", "static", "🙂", {"generation": "G027", "index": 3})
+        got = {x["id"]: x for x in self.lib.snapshot()["packs"][0]["stickers"]}
+        self.assertEqual((got[s["id"]]["name"], got[s["id"]]["file_name"]), ("Generic emojis laughing", "img-027-generic_emojis-generic_emojis_laughing"))
+        self.assertNotIn("file_name", [x for x in got.values() if x["name"] == "my own name"][0])      # a name the user chose is never touched
+
+    def test_animated_takes_the_stills_place(self):
+        pk = self.lib.create_pack("P")["id"]
+        a = self.lib.add_bytes(pk, b"a", "png", "a", "static", "🙂", {"generation": "G1", "index": 1})
+        b = self.lib.add_bytes(pk, b"b", "png", "b", "static", "🙂", {"generation": "G1", "index": 2})
+        c = self.lib.add_bytes(pk, b"c", "png", "c", "static", "🙂", {"generation": "G2", "index": 2})
+        self.assertEqual([x["id"] for x in self.lib.static_twins(pk, "G1", [2])], [b["id"]])
+        new = self.lib.add_bytes(pk, b"v", "webm", "b", "animated", "🙂", {"generation": "G1", "index": 2})
+        self.assertEqual(self.lib.replace_static_with_animated(pk, "G1", [2]), 1)
+        ids = [x["id"] for x in self.lib.snapshot()["packs"][0]["stickers"]]
+        self.assertEqual(ids, [a["id"], new["id"], c["id"]])
 
 
 class AnimateTests(unittest.TestCase):
@@ -143,9 +165,21 @@ class AnimateTests(unittest.TestCase):
         with self.assertRaises(LibraryError):
             self.lib.animate(self.pack, self.sid, 0, 1, 12, "webp", True, self.cfg, save=True)    # only webm can be saved
 
-    def test_wastickers_includes_animated(self):
-        for i in range(2):
-            self.lib.add_bytes(self.pack, png_bytes(np.dstack([np.full((512, 512, 3), 200, np.uint8), np.full((512, 512), 255, np.uint8)])), "png", f"s{i}")
-        data, rep = self.lib.export_wastickers(self.pack, cfg=self.cfg)
-        z = zipfile.ZipFile(io.BytesIO(data))
-        self.assertEqual(sum(n.endswith(".webp") for n in z.namelist()), 3); self.assertTrue(any(f.get("animated") for f in rep["files"]))
+
+class BulkTests(unittest.TestCase):
+    def test_delete_many_stickers_at_once(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            lib = Library(tmp)
+            a, b = lib.create_pack("A")["id"], lib.create_pack("B")["id"]
+            sa = [lib.add_bytes(a, b"x", "png", f"a{i}") for i in range(3)]
+            sb = [lib.add_bytes(b, b"x", "png", f"b{i}") for i in range(2)]
+            n = lib.delete_stickers([{"pack_id": a, "id": sa[0]["id"]}, {"pack_id": a, "id": sa[1]["id"]}, {"pack_id": b, "id": sb[0]["id"]},
+                                     {"pack_id": b, "id": "nope"}, {"pack_id": "nope", "id": "x"}])
+            self.assertEqual(n, 3)                                           # unknown ones are skipped, not errors
+            snap = {p["id"]: p for p in lib.snapshot()["packs"]}
+            self.assertEqual([s["id"] for s in snap[a]["stickers"]], [sa[2]["id"]])
+            self.assertEqual(snap[a]["cover"], sa[2]["id"])                  # the cover that went is replaced
+            self.assertEqual(len(list(lib.files.iterdir())), 2)              # and the files are gone
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)

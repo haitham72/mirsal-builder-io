@@ -36,6 +36,8 @@ class Fake:
         self.fail_429 = 0             # the next N calls answer 429 with retry_after 0
         self.responses = []           # every body that was sent back (the token must never be in one)
         self.counter = 0
+        self.messages = []            # what the bot wrote to people: (method, chat_id, text-or-file_id)
+        self.mute = False             # the owner never pressed Start / blocked the bot: sendMessage answers 403
 
 
 def make_handler(f: Fake):
@@ -77,6 +79,11 @@ def make_handler(f: Fake):
                 if not s:
                     return self._err(400, "Bad Request: STICKERSET_INVALID")
                 return self._reply(200, {"ok": True, "result": {"name": fields["name"], "title": s["title"], "stickers": s["stickers"]}})
+            if method in ("sendMessage", "sendSticker"):
+                if f.mute or fields.get("chat_id") not in f.started:
+                    return self._err(403, "Forbidden: bot can't initiate conversation with a user")
+                f.messages.append((method, fields["chat_id"], fields.get("text") or fields.get("sticker")))
+                return self._reply(200, {"ok": True, "result": {"message_id": len(f.messages)}})
             if fields.get("user_id") not in f.started:
                 return self._err(400, "Bad Request: user not found")
             if method == "createNewStickerSet":
@@ -110,7 +117,7 @@ def make_handler(f: Fake):
         def _add(self, name, item, files):
             ref = item["sticker"].replace("attach://", "")
             f.counter += 1
-            f.sets[name]["stickers"].append({"file_unique_id": f"AQAD{f.counter:05d}", "emoji": "".join(item["emoji_list"]), "bytes": len(files[ref])})
+            f.sets[name]["stickers"].append({"file_unique_id": f"AQAD{f.counter:05d}", "file_id": f"FILE{f.counter:05d}", "emoji": "".join(item["emoji_list"]), "bytes": len(files[ref])})
     return H
 
 

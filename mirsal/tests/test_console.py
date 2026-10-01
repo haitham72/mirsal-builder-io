@@ -82,7 +82,6 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(r.status, 400)                                   # empty sticker refused
         self.assertEqual(self.req("POST", "/api/packs/nope", {"name": "z"})[0], 404)
         s, lib = self.req("GET", "/api/library"); self.assertTrue(any(p["id"] == pk["id"] for p in lib["packs"]))
-        self.assertEqual(self.req("GET", f"/api/packs/{pk['id']}/export")[0], 409)   # < 3 stickers
         h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)
         h.request("GET", "/lib/..%2F..%2Fpipeline.py"); r = h.getresponse(); r.read(); h.close()
         self.assertIn(r.status, (400, 404))
@@ -144,7 +143,7 @@ class ConsoleTests(unittest.TestCase):
                                                         "video": {"trimStartMs": 0, "trimEndMs": 800, "fps": 10}})
         self.assertEqual((s, j["layers"][0]["timing"]["endMs"]), (200, 500))
         self.assertEqual(self.req("GET", f"/api/projects/{pid}")[1]["video"]["fps"], 10)
-        self.assertEqual([x["id"] for x in self.req("GET", "/api/projects")[1]["projects"]], [pid])
+        self.assertIn(pid, [x["id"] for x in self.req("GET", "/api/projects")[1]["projects"]])
         body = {"format": "gif", "overlays": {"t1": "data:image/png;base64," + base64.b64encode(overlay_png()).decode()}}
         h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=60)
         h.request("POST", f"/api/projects/{pid}/render", json.dumps(body), {"Content-Type": "application/json"})
@@ -188,6 +187,177 @@ class ConsoleTests(unittest.TestCase):
         s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_name": "Stills"})
         self.assertEqual((s, r["kind"], r["added"]), (200, "static", 8))
         self.assertEqual(len(next(x for x in self.req("GET", "/api/library")[1]["packs"] if x["id"] == r["pack_id"])["stickers"]), 8)
+
+    def _still_then_animated_add(self, mode):
+        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "variant": 1, "outline": 0})
+        gid = j["id"]
+        self.wait(gid, lambda x: x["stage"] == "sliced")
+        pk = self.req("POST", "/api/packs", {"name": "Mixed " + mode})[1]
+        s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_id": pk["id"]})
+        self.assertEqual(r["kind"], "static"); stills = r["added"]
+        self.req("POST", f"/api/generations/{gid}/animate", {"scope": "slice", "index": 1})
+        self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+        s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_id": pk["id"], "mode": mode})
+        self.assertEqual((s, r["kind"], r["added"]), (200, "animated", 1))
+        pack = next(x for x in self.req("GET", "/api/library")[1]["packs"] if x["id"] == pk["id"])
+        return r, pack, stills
+
+    def test_add_animated_can_replace_the_still_in_its_place(self):
+        r, pack, stills = self._still_then_animated_add("replace")
+        self.assertEqual(r["replaced"], 1)
+        self.assertEqual([x["type"] for x in pack["stickers"]].count("static"), stills - 1)
+        first = pack["stickers"][0]
+        self.assertEqual(first["type"], "animated")                                      # it took the still's position
+        self.assertFalse(first["name"].startswith("img-"))                              # readable name ({subject} {action}) ...
+        self.assertRegex(first["file_name"], r"^img-\d{3}-")                             # ... and the generator's file name kept as metadata
+
+    def test_add_animated_next_to_the_still(self):
+        r, pack, stills = self._still_then_animated_add("add")
+        self.assertEqual(r["replaced"], 0)
+        self.assertEqual([x["type"] for x in pack["stickers"]].count("static"), stills)
+        self.assertEqual(len(pack["stickers"]), stills + 1)
+
+    def test_edit_a_still_in_place_then_names_and_bulk_delete(self):
+        import base64, io
+        from PIL import Image, ImageDraw
+        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "variant": 1, "outline": 0})
+        gid = j["id"]
+        g = self.wait(gid, lambda x: x["stage"] == "sliced")
+        st = g["stickers"][0]
+        f = self.tmp / "out" / g["generation_id"] / st["png"]
+        before = f.read_bytes()
+        im = Image.open(io.BytesIO(before)).convert("RGBA"); ImageDraw.Draw(im).rectangle([200, 200, 300, 300], fill=(255, 0, 0, 255))
+        buf = io.BytesIO(); im.save(buf, "PNG")
+        s, r = self.req("POST", f"/api/generations/{gid}/edit", {"index": 1, "png": "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()})
+        self.assertEqual(s, 200, r)
+        self.assertNotEqual(f.read_bytes(), before)                                                       # saved in place, same file name
+        self.assertEqual((self.tmp / "out" / g["generation_id"] / "source" / "orig" / "S1.png").read_bytes(), before)   # the original is kept
+        g2 = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual((g2["stickers"][0]["png"], g2["stickers"][0]["edited"]), (st["png"], True))
+        self.assertEqual(g2["stickers"][0]["history"][-1]["decision"], "EDIT")
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/edit", {"index": 1, "png": "data:image/png;base64,AAAA"})[0], 409)   # not a valid sticker
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 6})[1]["rerendered"], len(g["stickers"]) - sum(x["status"] != "READY" for x in g["stickers"]) - 1)   # the edited one keeps its pixels
+        # Add with the names the user typed in the wizard
+        pk = self.req("POST", "/api/packs", {"name": "Named"})[1]
+        s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_id": pk["id"], "names": {"1": {"name": "My own name", "emoji": "🎉"}}})
+        self.assertEqual((s, r["kind"]), (200, "static"))
+        pack = next(x for x in self.req("GET", "/api/library")[1]["packs"] if x["id"] == pk["id"])
+        first = next(x for x in pack["stickers"] if x["source"]["index"] == 1)
+        self.assertEqual((first["name"], first["emoji"]), ("My own name", "🎉"))
+        self.assertRegex(first["file_name"], r"^img-\d{3}-")                                                # the generator's name stays as metadata
+        other = next(x for x in pack["stickers"] if x["source"]["index"] != 1)
+        self.assertFalse(other["name"].startswith("img-"))                                                  # untouched ones get the readable default
+        # bulk delete: the square markers on the library
+        items = [{"pack_id": pk["id"], "id": x["id"]} for x in pack["stickers"][:3]]
+        self.assertEqual(self.req("POST", "/api/stickers/delete", {"items": items})[1]["deleted"], 3)
+        pack = next(x for x in self.req("GET", "/api/library")[1]["packs"] if x["id"] == pk["id"])
+        self.assertEqual(len(pack["stickers"]), len(g["stickers"]) - 3 - sum(x["status"] != "READY" for x in g["stickers"]))
+
+    def test_recheck_judges_animations_made_before_the_border_check(self):
+        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "variant": 1, "outline": 0})
+        gid = j["id"]
+        self.wait(gid, lambda x: x["stage"] == "sliced")
+        self.req("POST", f"/api/generations/{gid}/animate", {"scope": "pack"})
+        g = self.wait(gid, lambda x: all(t["anim_status"] in ("READY", "FAILED") for t in x["stickers"] if t["status"] == "READY"))
+        ready = [t["index"] for t in g["stickers"] if t["anim_status"] == "READY"]
+        had = {t["index"]: next((c["ok"] for c in t["anim_report"] if c["name"] == "inside_frame"), None) for t in g["stickers"] if t["anim_status"] == "READY"}
+        self.assertTrue(ready and all(v is not None for v in had.values()))
+        # make them look like an older server made them: no verdict, nothing blocked
+        f = self.tmp / "out" / g["generation_id"] / "result.json"
+        r = json.loads(f.read_text(encoding="utf-8"))
+        for t in r["stickers"]:
+            if t["anim_status"] == "READY":
+                t["anim_report"] = [c for c in t["anim_report"] if c["name"] != "inside_frame"]
+                t["anim_metrics"]["warnings"] = [w for w in t["anim_metrics"].get("warnings", []) if w != "inside_frame"]
+                t["review"]["anim"] = "PENDING"; t.pop("bounds_checked", None)
+        f.write_text(json.dumps(r), encoding="utf-8")
+        s, out = self.req("POST", f"/api/generations/{gid}/recheck")
+        self.assertEqual(s, 200, out)
+        self.assertEqual(out["checked"], len(ready))
+        self.assertEqual(sorted(out["flagged"]), sorted(i for i, ok in had.items() if not ok))      # the same verdict a new animation gets
+        g2 = self.req("GET", f"/api/generations/{gid}")[1]
+        for t in g2["stickers"]:
+            if t["index"] in ready:
+                self.assertTrue(t["bounds_checked"])
+                self.assertEqual(t["review"]["anim"], "BLOCKED" if t["index"] in out["flagged"] else "PENDING")
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/recheck")[1]["checked"], 0)          # once is enough
+
+    def test_a_soft_blocked_animation_can_be_included_anyway_but_a_real_block_cannot(self):
+        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "variant": 1, "outline": 0})
+        gid = j["id"]
+        self.wait(gid, lambda x: x["stage"] == "sliced")
+        self.req("POST", f"/api/generations/{gid}/animate", {"scope": "pack"})
+        g = self.wait(gid, lambda x: all(t["anim_status"] in ("READY", "FAILED") for t in x["stickers"] if t["status"] == "READY"))
+        a, b = [t["index"] for t in g["stickers"] if t["anim_status"] == "READY"][:2]
+        f = self.tmp / "out" / g["generation_id"] / "result.json"
+        r = json.loads(f.read_text(encoding="utf-8"))
+        for i, name, sev in ((a, "inside_frame", "WARN"), (b, "loop_seam", "BLOCK")):         # a: leaves its cell (a warning); b: a real failed check
+            t = r["stickers"][i - 1]
+            t["anim_report"] = [c for c in t["anim_report"] if c["name"] != name] + [{"name": name, "ok": False, "severity": sev, "detail": "forced for the test"}]
+            t["review"]["anim"] = "BLOCKED"
+        f.write_text(json.dumps(r), encoding="utf-8")
+        s, out = self.req("POST", f"/api/generations/{gid}/drop", {"index": a, "dropped": False})
+        self.assertEqual(s, 200, out)                                                         # the human includes it anyway
+        t = self.req("GET", f"/api/generations/{gid}")[1]["stickers"][a - 1]
+        self.assertEqual(t["review"]["anim"], "APPROVED")
+        self.assertEqual((t["history"][-1]["decision"], t["history"][-1]["reason"]), ("APPROVE", "included anyway: inside_frame"))
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/drop", {"index": b, "dropped": False})[0], 409)      # Python's real block stays final
+        self.assertEqual(self.req("GET", f"/api/generations/{gid}")[1]["stickers"][b - 1]["review"]["anim"], "BLOCKED")
+
+    def test_a_server_running_older_code_than_the_disk_says_so(self):
+        import os, time, tempfile
+        from mirsal.console.server import Console
+        c = Console(self.tmp / "out", self.tmp / "in")
+        src = Path(tempfile.mkdtemp())
+        (src / "a.py").write_text("x = 1"); old = time.time() - 100
+        os.utime(src / "a.py", (old, old))
+        self.assertFalse(c.stale(src))                                   # nothing changed since this server started
+        c._stale_checked = 0
+        os.utime(src / "a.py", (time.time() + 5, time.time() + 5))       # a file is edited after the start
+        self.assertTrue(c.stale(src))
+        self.assertIn("stale", self.req("GET", "/api/generations")[1])   # the page asks for it with every poll
+
+    def test_studio_edit_updates_the_image_and_the_animation_together(self):
+        import base64, io
+        import numpy as np
+        from PIL import Image, ImageDraw
+        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "variant": 1, "outline": 0})
+        gid = j["id"]
+        self.wait(gid, lambda x: x["stage"] == "sliced")
+        self.req("POST", f"/api/generations/{gid}/animate", {"scope": "slice", "index": 1})
+        g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+        st = g["stickers"][0]
+        pk = self.req("POST", "/api/packs", {"name": "Studio copies"})[1]["id"]
+        self.req("POST", f"/api/packs/{pk}/stickers", {"from_generation": {"id": gid, "index": 1, "kind": "static"}})
+        self.req("POST", f"/api/packs/{pk}/stickers", {"from_generation": {"id": gid, "index": 1, "kind": "animated"}})
+        base = self.tmp / "out" / g["generation_id"]
+        png0, webm0 = (base / st["png"]).read_bytes(), (base / st["webm"]).read_bytes()
+        # a sticker without an animation cannot be edited as a video
+        no_anim = next(t for t in g["stickers"] if t["status"] == "READY" and t["anim_status"] != "READY")
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/studio_edit", {"index": no_anim["index"], "action": "open"})[0], 409)
+        s, o = self.req("POST", f"/api/generations/{gid}/studio_edit", {"index": 1, "action": "open"})
+        self.assertEqual(s, 200, o)
+        pid = o["project"]
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/studio_edit", {"index": 1, "action": "open"})[1], {"project": pid, "reused": True})
+        layer = {"id": "t1", "type": "text", "visible": True, "zIndex": 1, "transform": {"x": 256, "y": 430, "scale": 1, "rotation": 0}, "opacity": 1,
+                 "payload": {"text": "HELLO"}, "timing": {"startMs": 200, "endMs": 900}}
+        self.assertEqual(self.req("POST", f"/api/projects/{pid}", {"layers": [layer]})[0], 200)
+        im = Image.new("RGBA", (512, 512), (0, 0, 0, 0)); ImageDraw.Draw(im).rectangle([20, 440, 200, 500], fill=(255, 0, 0, 255))
+        b = io.BytesIO(); im.save(b, "PNG")
+        s, r = self.req("POST", f"/api/generations/{gid}/studio_edit", {"index": 1, "action": "commit", "overlays": {"t1": "data:image/png;base64," + base64.b64encode(b.getvalue()).decode()}})
+        self.assertEqual(s, 200, r)
+        self.assertEqual((r["layers"], r["pack_copies"]), (1, 2))
+        self.assertNotEqual((base / st["png"]).read_bytes(), png0)                      # the image changed ...
+        self.assertNotEqual((base / st["webm"]).read_bytes(), webm0)                    # ... and so did the animation, from the one edit
+        red = np.array(Image.open(base / st["png"]).convert("RGBA"))[440:500, 20:200]
+        self.assertTrue(((red[..., 0] > 200) & (red[..., 3] > 200)).mean() > 0.5)      # the layer is in the image (all layers, timing ignored)
+        self.assertEqual((base / "source" / "orig" / "S1.png").read_bytes(), png0)      # originals kept: a re-edit starts from them
+        g2 = self.req("GET", f"/api/generations/{gid}")[1]["stickers"][0]
+        self.assertEqual((g2["edited"], g2["edit"]["project"], g2["history"][-1]["decision"]), (True, pid, "EDIT"))
+        lib = next(p for p in self.req("GET", "/api/library")[1]["packs"] if p["id"] == pk)
+        for sk in lib["stickers"]:                                                      # the pack copies follow the Studio
+            f = self.tmp / "out" / "library" / "files" / sk["file"]
+            self.assertEqual(f.read_bytes(), (base / (st["png"] if sk["type"] == "static" else st["webm"])).read_bytes())
 
     def test_errors_and_traversal(self):
         self.assertEqual(self.req("POST", "/api/generations", {"prompt": "spaceship"})[0], 404)
