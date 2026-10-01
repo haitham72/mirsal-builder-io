@@ -185,3 +185,16 @@ class PrompterGridTests(unittest.TestCase):
         self.assertEqual(prompter.validate_plan({"stickers": st(1)})["grid"], [1, 1])
         with self.assertRaises(ValueError):
             prompter.validate_plan({"stickers": st(5)})
+
+
+class SpillTests(unittest.TestCase):
+    def test_green_inside_the_subject_is_a_warning_not_spill(self):
+        import cv2
+        s = _grid_sheet(300, [(150, 150)], r=80)
+        cv2.circle(s, (150, 150), 35, (120, 170, 110), -1)        # a muted green patch deep inside the subject (stays opaque)
+        rects, _ = split_grid(s, 1, 1)
+        r = process_sheet(s, CFG, rects)[0]
+        self.assertEqual(r.status, "READY", r.report.checks)
+        self.assertLessEqual(r.metrics["spill_px"], 20)
+        self.assertGreater(r.metrics["chroma_risk"], CFG.chroma_risk_warn)
+        self.assertEqual(r.metrics["warnings"], ["chroma_risk"])

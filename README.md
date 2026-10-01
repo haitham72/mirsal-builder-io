@@ -11,7 +11,8 @@ Always from the folder that holds `requirements.txt` (`Mirsal-Builder\mirsal`), 
 
 ```
 cd Mirsal-Builder\mirsal
-python -m venv .venv                       # once
+python -m venv .venv                       # once. Always use this venv: the Anaconda base env on the dev PC has a broken numpy
+                                           # (1.26 and 2.0 files mixed) that crashes onnxruntime; the venv is clean
 .venv\Scripts\Activate.ps1                 # Windows PowerShell (cmd: .venv\Scripts\activate.bat; macOS/Linux: source .venv/bin/activate)
 pip install -r requirements.txt            # once (offline machine: see "library policy" below)
 python -m mirsal doctor                    # health check: must say numpy/opencv/pillow OK and "libvpx-vp9 ready"
@@ -74,6 +75,8 @@ mirsal/                                                     # the project (own .
 
 A subject's variants are its `img-NNN-<subject>` folders in number order (`img-001..004-teddy_bear` = variants 1-4). The image in `img-NNN` is paired with `vid-NNN` **by the same folder number** (`pairing: folder`); several takes inside one folder pair by the same `(K)` number, and only as a last resort by position (`pairing: order`, flagged by `doctor`). **Names in the watch folders are final: nothing renames them.** The prompt is matched to a subject by whole words of the folder name (`teddy_bear` <- "teddy yellow bear for school"). In Phase 3 the API ticket replaces filename matching.
 
+**Copied clip sets are ignored.** If a variant's pre-sliced clips have the same per-cell file sizes as an earlier variant's (a stat call; media is never read), they are copies. They would animate the wrong stickers, so they are dropped: `clips_dup_of: "001"` is recorded on the pick and in `result.json`, `doctor` warns, and that variant uses its own 3x3 mp4. Found on the real inputs: vid-002/003/004's clips were byte copies of vid-001's.
+
 **Pre-sliced clips.** When `vid-NNN/slices/` holds clips whose name ends in `(n)` (n = grid cell 1-9, any prefix, `.mov` and/or `.webm`), the app uses them instead of slicing the 3x3 MP4. `mov` (ProRes 4444) is preferred (`clip_prefer`); see "Clip formats".
 
 ## Naming convention (outputs)
@@ -112,11 +115,18 @@ Event: `{ts, stage, status: start|done|error, ms, detail}`; `video_cell` sub-eve
 
 ## Engine
 
-Stills (`engine/sheet.py`, pure): split into thirds (no grid detection) -> per cell: sample background from the 4 px border ring (median), colour-difference key `d = K - max(other two)` with `t = 0.5 x median(d on ring)` (alpha linear between `t/2` and `t`) -> drop specks < 64 px (no erosion) -> despill the edge band only -> trim to bbox -> **one pack-wide scale** (median fit, clamped so nothing exceeds 0.85 x 512) -> premultiplied linear resize -> centre on 512x512 -> white outline (12 px) -> validate. Checks: `dimensions, transparent_corners, foreground, inside_cell, no_spill, static_file` (PNG, else lossless WEBP if > 512 KB). Blank cell -> `empty_subject`; subject touching the cell edge -> `inside_cell`.
+Stills (`engine/sheet.py`, pure): cut the sheet with `engine/grid.py` (below) -> per cell: sample background from the 4 px border ring (median), colour-difference key `d = K - max(other two)` with `t = 0.5 x median(d on ring)` (alpha linear between `t/2` and `t`) -> drop specks < 64 px (no erosion) -> despill the edge band only -> trim to bbox -> **one pack-wide scale** (median fit, clamped so nothing exceeds 0.85 x 512) -> premultiplied linear resize -> centre on 512x512 -> white outline (12 px) -> validate. Checks: `dimensions, transparent_corners, foreground, inside_cell, no_spill, static_file` (PNG, else lossless WEBP if > 512 KB). `no_spill` counts key-coloured opaque pixels **on the edge band only** (outline + despill band + 3 px from transparency). Key-coloured pixels deeper inside are the subject's own colours: they go to `metrics.chroma_risk` (share of the subject), with `warnings: ["chroma_risk"]` above 3%. That is a warning for the human, never a block. Measured on the 10 real sheets: every pixel the old whole-subject rule failed on was interior, with 0 on the edge. Blank cell -> `empty_subject`; subject touching the cell edge -> `inside_cell`.
 
 **Key-failure branch (`sheet.py`, stills).** A failed cell is never just dropped: (1) **dissect** - log why (border ring pollution, threshold, foreground and edge pixels); (2) **key again** on a bounded ladder chosen by the failure reason (`empty_subject`: sheet-wide background, then threshold x0.6; `no_spill`: threshold x0.75 + 6 px despill, then x0.6 + 10 px; other: sheet-wide background); `inside_cell` is ruled out at once because keying cannot fix a subject crossing its cell border; (3) **rule out** - `FAILED` with `metrics.ruled_out` and the full `metrics.attempts` log, which the console shows under "keying recovery". A future last rung is a matting re-key (see "Keyers"). Healthy cells are never retried.
 
-Video (`engine/video.py`): decode one cell at a time via `ffmpeg crop`; native fps (<= 30, never upsampled), <= 3 s; background sampled **once** from the first frame; **one transform per clip** (union bbox); loop close: if the last->first `loop_seam` exceeds `max(12, 1.5 x the clip's own median frame-to-frame change)`, the last 6 frames are cross-faded into the first ones; encode `libvpx-vp9 yuva420p` with CRF ladder 30/38/46/54/60 until <= 256 KB. Checks: `size_budget, codec_vp9, dimensions, fps, duration, no_audio, alpha_mode_tag, alpha_decoded` (decoded with `-c:v libvpx-vp9`, since the default decoder hides alpha), `loop_seam`.
+**Grid (`engine/grid.py`).** Grids are 3x3 (default), 2x2, or 1x1 (one regenerated sticker).
+- `detect_grid` counts the interior gutter bands: columns or rows that are at least 97% background and at least 1% of the side wide.
+- `split_grid` cuts in the middle of the background band nearest each expected line. Where there is no clear band, that one cut falls back to equal division; `method` is `gutter | equal | mixed | single`.
+- The rects are stored in `result.json` (`source.grid`), drawn as cut lines on the console's raw sheet, and reused for the 3x3 mp4: `scale_rects` maps them onto the video, since image-to-video keeps the layout. The live canvas preview uses the same rects.
+- Real AI sheets put gutters up to ~90 px off the thirds. Cutting at thirds sliced 12 of 90 real cells (`inside_cell`); cutting at the gutters slices none.
+- The prompter's `expand(task, grid)` returns one sticker per cell, and `validate_plan` infers the grid from the sticker count (9, 4, 1).
+
+Video (`engine/video.py`): decode one cell at a time via `ffmpeg crop` (measured rects, else thirds); native fps (<= 30, never upsampled), <= 3 s; background sampled **once** from the first frame; **one transform per clip** (union bbox); loop close: if the last->first `loop_seam` exceeds `max(12, 1.5 x the clip's own median frame-to-frame change)`, the last 6 frames are cross-faded into the first ones; encode `libvpx-vp9 yuva420p` with CRF ladder 30/38/46/54/60 until <= 256 KB. If the ffmpeg in use has no libvpx-vp9 (Anaconda's has none, and it also rejects `-deadline`), every requested cell fails at once with `no_vp9_encoder` and the fix in `metrics.error`, instead of a bare `exception` per cell (which is what happened to every earlier real run). Checks: `size_budget, codec_vp9, dimensions, fps, duration, no_audio, alpha_mode_tag, alpha_decoded` (decoded with `-c:v libvpx-vp9`, since the default decoder hides alpha), `loop_seam`.
 
 **Pre-sliced clips** skip the keying step: alpha haze below `clip_alpha_floor` (12) is zeroed (VP9 alpha leaves values 1-3 around the subject), specks are dropped, the edge band is despilled, then the same transform / loop close / encode / validation as above. `edge_touch_frames` is reported (warning only): it counts frames whose subject touches the slice border, meaning the slice may clip the character.
 
@@ -195,4 +205,9 @@ One page, eight screens (Chat is a local echo contact: send a sticker or text, i
 - 17 unit tests pass (stills, recovery ladder, pre-sliced clip path, folder/clip discovery, plan files, console lifecycle); the console UI was driven headlessly in Chromium (carousel, keyboard, thumbnails, no JS errors). Earlier list: statuses, detached detail survives, pack-consistent scale, golden determinism, blue-chroma with green subject, WEBP fallback, engine import boundary (no fastapi/psycopg/langgraph/anthropic/pydantic), synthetic video + loop close, console lifecycle end to end.
 - Real `teddy_bear` sheets (2048x2048 JPG): a first sheet gave 8/9 READY with `no_spill` on one slice; the current `img-001` sheet gives 9/9 READY in ~1 s. Haitham judges the look.
 - Real pre-sliced clip: `teddy_ (1).mov` -> READY 512x512 WEBM, 242 KB, ~17 s (encode dominates).
-- Real teddy video is 960x960, 24 fps, 4.04 s (cells are 320 px, upscaled to 512). Measured ~18 s per cell.
+- Real teddy video is 960x960, 24 fps, 4.04 s (cells are 320 px, upscaled to 512).
+- **Pass of 2026-10-01** (project venv, imageio-ffmpeg 7.1 with libvpx-vp9):
+  - all 10 prepared sheets come out **90/90 READY** (6 generic_emojis + 4 teddy); one generic cell carries a `chroma_risk` warning at 46%;
+  - all 4 teddy packs animate **36/36 READY** at 149-254 KB, ~5 s per sticker (~50 s per pack, down from ~18 s per sticker); teddy 001 from its `.mov` clips, 002-004 from their own mp4s. The generic_emojis have no videos;
+  - on the mp4 path, characters touch their slice edge in up to 72 of 96 frames (teddy 004): the video model moves them across the cut line. The 1F `inside_slot` gate is built for exactly this.
+- 41 unit tests pass, including grid (off-third gutters, 2x2, 1x1, mp4 with measured rects), prompter grids, copied-clip detection, and edge-band spill vs interior colour.

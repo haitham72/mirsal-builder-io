@@ -89,9 +89,16 @@ def _make(c: CellKey, cfg, pack: float) -> StickerResult:
     rep.add("foreground", (a > 127).sum() >= cfg.min_foreground_px)
     rep.add("inside_cell", c.edge_px <= cfg.edge_touch_px, f"{c.edge_px}px on cell border")
     opaque = a > 127
-    spill = int((opaque & (key_diff(img[..., :3], cfg.chroma) > c.keyed.t / 4)).sum())
-    m["spill_px"] = spill
-    rep.add("no_spill", spill <= max(20, 0.001 * int(opaque.sum())), f"{spill}px")
+    keyish = opaque & (key_diff(img[..., :3], cfg.chroma) > c.keyed.t / 4)
+    # Spill is key colour left ON THE EDGE (between subject and outline). Key-coloured pixels deep inside the subject are
+    # the subject's own colours (a green mouth, teal tears): measured on the real sheets, every failing pixel was interior.
+    dist = cv2.distanceTransform(opaque.astype(np.uint8), cv2.DIST_L2, 3)
+    edge = keyish & (dist <= cfg.outline_px + cfg.despill_band_px + 3)
+    spill, inner = int(edge.sum()), int((keyish & ~edge).sum())
+    m["spill_px"], m["chroma_risk"] = spill, round(inner / max(int(opaque.sum()), 1), 4)
+    if m["chroma_risk"] > cfg.chroma_risk_warn:   # warning, not a block: the human judges it at G2; Phase 3 re-keys on blue
+        m["warnings"] = ["chroma_risk"]
+    rep.add("no_spill", spill <= max(20, 0.001 * int(opaque.sum())), f"{spill}px on the edge band")
     data, fmt = encode_static(img, cfg)
     m["kb"], m["format"] = round(len(data) / 1024, 1), fmt
     rep.add("static_file", len(data) <= cfg.static_max_bytes, f"{m['kb']}KB {fmt}")

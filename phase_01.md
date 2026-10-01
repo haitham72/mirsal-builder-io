@@ -48,12 +48,19 @@ The phase has checkpoints 1A (static), 1B (animation), 1D (desktop builder, Part
 
 ### Next steps (ordered)
 
+**Findings from the 2026-10-01 pass** (fixed and recorded in README; kept here until Haitham approves):
+- **Every earlier WEBM failure had one cause.** The Anaconda ffmpeg on PATH has no libvpx-vp9 and rejects `-deadline`, so each cell died as `exception`. Now `imageio-ffmpeg` is installed in the project venv, and cells fail fast with `no_vp9_encoder` when that happens. Result: 36/36 READY.
+- **Variants 2-4 were animated with variant 1's teddies.** Their `slices/*.mov` are byte copies of vid-001's. The copies are now detected and ignored, and each variant uses its own mp4. *Haitham:* re-slice vid-002..004 or delete their `slices/` folders.
+- **Gutter cuts** replace equal thirds (stills 78/90 -> 90/90). `inside_cell` now means a real crossing, not a bad cut.
+- **`no_spill` misfired on subject colour**: 0 edge pixels, all interior. Interior key colour is now the `chroma_risk` warning. Follow-up: a saturated green part of a subject is keyed out completely and leaves an **enclosed transparent hole**, which `chroma_risk` cannot see. Add a `holes` metric (transparent regions enclosed by the subject's outer contour) before Phase 3's blue re-key relies on it.
+- The **Anaconda base env** has a mixed numpy 1.26/2.0 install that crashes onnxruntime. Always use `mirsal/.venv`.
+
 0. **Build checkpoint 1F (the golden path with review gates) before Phase 2.** Phase 2 persists exactly the contracts 1F defines (tags, reviews, history, video sheets); building Postgres first would mean a second schema migration for the core flow.
 0. **Rotation + inputs panel:** every Generate for a subject takes the next prepared variant (001..004, wrapping), img-NNN with vid-NNN; the console lists all prepared inputs with a Use button. Results written by older versions still render (the page used to go blank on them).
 0. **Done since the last review:** pre-sliced clip input (mov preferred), folder-per-variant pairing, key-failure branch (dissect -> key again -> rule out), click-to-enlarge carousel in the console. Measured: one real `.mov` cell -> READY 512x512 WEBM in ~17 s.
 1. **Haitham runs the real video pack** (`python -m mirsal serve` -> "Video -> full pack", or `python -m mirsal animate G001`) and reports per-cell `anim_reason`, `kb`, `loop_seam`, `loop_limit` from `result.json`. If cells still fail `loop_seam`, the answer is more crossfade frames (`loop_fade_frames`), not a looser limit.
-2. **Speed.** Measured ~18 s per cell (pack ~2.5 min) against the 60 s target. Levers, in order: process cells in a `multiprocessing` pool (cells are independent); start the CRF ladder from an estimate instead of always at 30; `-cpu-used 5`; keying at native 320 px then upscaling is already cheap, encode dominates.
-3. **Real-sheet robustness.** Real AI grids are rarely exactly on thirds. Add `grid_inset`/per-sheet cell offsets (or connected-component grouping as a fallback when `inside_cell` fails for 3+ cells). Add a per-cell `spill_ok` override in `prompts.json` for legitimately green props (slice 4).
+2. **Speed.** Now ~5 s per cell and ~50 s per 9-cell pack with ffmpeg 7.1 (imageio-ffmpeg), which meets the 60 s target; it was ~18 s per cell. Remaining levers if needed: Levers, in order: process cells in a `multiprocessing` pool (cells are independent); start the CRF ladder from an estimate instead of always at 30; `-cpu-used 5`; keying at native 320 px then upscaling is already cheap, encode dominates.
+3. **Real-sheet robustness.** Gutter cuts are done (`engine/grid.py`, 2026-10-01). Original note: real AI grids are rarely exactly on thirds. Add `grid_inset`/per-sheet cell offsets (or connected-component grouping as a fallback when `inside_cell` fails for 3+ cells). Add a per-cell `spill_ok` override in `prompts.json` for legitimately green props (slice 4).
 4. **Tracker -> pipeline.** `Phase_01/tracker/tracker.json` already records chosen image/video takes per subject. Let `sources.py` use `chosen_img`/`chosen_vid` when set instead of order pairing, so Haitham's picks drive variant selection.
 5. **`doctor` grows per phase** (Phase 2 adds Postgres; Phase 4 Redis; Phase 3 API keys/model weights). Port checks use Python sockets, not `lsof`.
 6. **H.264 vs PNG spill comparison** (1B exit item): print spill counts for the PNG and WEBM paths of the same cell.
@@ -380,9 +387,9 @@ The CLI writes the stickers to **`out/G00N/slices/img-NNN-<task_slug>-<key>.png`
 
 ### Checkpoint 1B — exit
 - [ ] A synthetic 3 s 30 fps grid MP4 (shapes bouncing on noisy green) gives 9 WEBMs that pass every check. *(unit test covers cells 1 and 9 only; extend to all 9)*
-- [ ] A real prepared video: each cell passes, or fails with a named reason. No crashes. *(pending Haitham's run; see Next steps 1)*
+- [x] A real prepared video: each cell passes, or fails with a named reason. No crashes. *(2026-10-01: 36/36 READY over 4 teddy variants; Haitham still judges the look)*
 - [ ] H.264's colour subsampling smears green at edges, so compare spill counts between the PNG and WEBM paths. Widen the video despill band only if the numbers say so. *(not done; Next steps 6)*
-- [ ] The whole 9-cell run finishes in a measured time, printed by the CLI (target under 60 s). *(measured ~2.5 min for a pack, misses 60 s; Next steps 2)*
+- [x] The whole 9-cell run finishes in a measured time (target under 60 s). *(2026-10-01: 43-56 s per pack on the 4 real teddy packs)*
 - [x] **Loops:** a synthetic clip whose end differs from its start gets crossfaded, and its `loop_seam` after the fix is below `LOOP_SEAM_MAX`. Every output WEBM reports its seam value.
 - [x] **Console, video (stages 5–7):** **Generate video → this slice** creates exactly one WEBM in `slices/` next to its PNG, and the tile starts looping. **→ full pack** fills the remaining eight. A variant without a video returns the clear message. *(single-slice path tested on synthetic; pack path awaits the real-video run)*
 - [x] `animate G002` animates variant 02 with **its own** video. A variant without `video.mp4` gets the clear message, and nothing fails. *(covered by the console test)*

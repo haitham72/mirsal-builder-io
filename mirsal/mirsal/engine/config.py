@@ -16,6 +16,7 @@ class EngineConfig:
     min_foreground_px: int = 400
     edge_touch_px: int = 8
     despill_band_px: int = 3
+    chroma_risk_warn: float = 0.03  # share of subject pixels near the key colour -> warning (Phase 3: blue re-key)
     static_max_bytes: int = 512 * 1024
     video_max_fps: float = 30.0
     video_max_seconds: float = 3.0
