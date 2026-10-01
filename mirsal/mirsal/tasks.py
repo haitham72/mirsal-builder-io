@@ -169,11 +169,12 @@ def inbox(out: Path, inp: Path) -> dict:
                 states.append("no matching task (made outside the app; prompts come from the stub or a <sheet>.json)")
             if any(p.clips_dup_of for p in ps):
                 states.append(f"clips: copies of {next(p.clips_dup_of for p in ps if p.clips_dup_of)} (ignored)")
-            rows.append({"kind": "folder", "task": None, "name": d.name, "subject": m[3], "states": states, "state": states[0], "sheets": files if kind == "img" else [],
+            vi = next((i + 1 for i, p in enumerate(picks.get(m[3], [])) if p.subject_id == m[2]), None)
+            rows.append({"kind": "folder", "task": None, "name": d.name, "subject": m[3], "variant": vi, "prompt": m[3].replace("_", " "), "states": states, "state": states[0], "sheets": files if kind == "img" else [],
                          "videos": files if kind == "vid" else [], "can_run": kind == "img" and bool(files), "problems": [], "paths": {kind: str(d)}, "generations": [], "ts": d.stat().st_mtime})
         else:
             fix = nearest_valid(d.name, kind, nxt)
-            why = (f"a {m[1]}- folder inside {'Images_gen' if kind == 'img' else 'videos_gen'}" if m else "does not match img-NNN-<subject> / vid-NNN-<subject>")
+            why = (f"is a {m[1]}- folder inside {'Images_gen' if kind == 'img' else 'videos_gen'}" if m else "does not match img-NNN-<subject> / vid-NNN-<subject>")
             rows.append({"kind": "invalid", "task": None, "name": d.name, "subject": None, "states": ["name invalid"], "state": "name invalid",
                          "sheets": [], "videos": [], "can_run": False, "paths": {kind: str(d)}, "generations": [], "ts": d.stat().st_mtime,
                          "problems": [{"what": why, "expected": "img-NNN-<subject> in Images_gen, vid-NNN-<subject> in videos_gen (NNN = 3 digits, subject = lowercase_snake)",

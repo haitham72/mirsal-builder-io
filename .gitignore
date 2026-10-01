@@ -22,3 +22,7 @@ _to_delete/
 # React gateway (Part G): dependencies and build output
 mirsal/web/node_modules/
 mirsal/mirsal/console/dist/
+
+# Browser-driver artifacts
+.playwright-mcp/
+/shot-*.png

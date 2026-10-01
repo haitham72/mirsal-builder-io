@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* Tokens ported from the desktop builder's studio.css :root (Mirsal blue, light surfaces, Inter). */
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+  --color-pri: #3b82f6;
+  --color-pri-d: #2563eb;
+  --color-pri-l: #eaf2ff;
+  --color-pri-l2: #dbeafe;
+  --color-pri-bd: #bfd7fe;
+  --color-tx: #1e293b;
+  --color-mut: #64748b;
+  --color-mut2: #94a3b8;
+  --color-bg: #f7f9fb;
+  --color-sf: #ffffff;
+  --color-bd: #e2e8f0;
+  --color-fill: #eef3f7;
+  --color-bad: #dc2626;
+  --color-bad-l: #fef2f2;
+  --color-run: #d97706;
+  --color-run-l: #fffbeb;
+  --color-ok: #059669;
+  --color-ok-l: #ecfdf5;
+  --radius-r: 14px;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-tx);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  font-feature-settings: "cv11", "ss01";
+}
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--color-pri); outline-offset: 2px; }
+
+/* The transparency backdrops of the sticker tiles: checker, light chat, dark chat, wallpaper. */
+.bg-checker { background: conic-gradient(#e6ebf0 25% , #fbfcfd 0 50%, #e6ebf0 0 75%, #fbfcfd 0) 0 0 / 16px 16px; }
+.bg-lightchat { background: #ffffff; }
+.bg-darkchat { background: #111827; }
+.bg-wall { background: linear-gradient(135deg, #f6b26b, #6fa8dc 40%, #93c47d 70%, #c27ba0); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

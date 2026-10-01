@@ -120,7 +120,7 @@ def make_handler(c: Console):
                 return self._send(200, (page if page.is_file() else INDEX).read_bytes(), "text/html; charset=utf-8")
             if path == "/legacy":
                 return self._send(200, INDEX.read_bytes(), "text/html; charset=utf-8")
-            if path.startswith("/assets/") or path == "/favicon.svg":
+            if path.startswith(("/assets/", "/fonts/")) or path == "/favicon.svg":
                 root = DIST.resolve()
                 f = (root / path.lstrip("/")).resolve()
                 if root not in f.parents or not f.is_file():
