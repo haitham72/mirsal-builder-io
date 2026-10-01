@@ -55,10 +55,13 @@ def vp9_missing(cells) -> list[AnimationResult] | None:
 
 
 def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_cell=None,
-                  rects: list | None = None, sheet_wh: tuple | None = None) -> list[AnimationResult]:
+                  rects: list | None = None, sheet_wh: tuple | None = None, layout: dict | None = None, refs: dict | None = None) -> list[AnimationResult]:
     """rects/sheet_wh: the still's measured cell rects on the sheet; mapped onto the video (same layout, any size).
-    Without them: equal thirds."""
+    Without them: equal thirds. layout (a video sheet's layout.json): its exact slot rectangles, plus the slot checks
+    (inside_slot, cross_slot) on every frame; refs = {slot: approved still's alpha} for identity_kept."""
     from .grid import scale_rects
+    if layout:
+        rects, sheet_wh = [tuple(sl["rect"]) for sl in layout["slots"]], tuple(layout["canvas"])
     cells = cells or list(range(1, (len(rects) if rects else 9) + 1))
     failed = vp9_missing(cells)
     if failed:
@@ -82,7 +85,7 @@ def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_ce
     results = []
     for idx in cells:
         try:
-            res = _one_cell(mp4, idx, vr[idx - 1], fps, cap_fps, max_frames, cfg)
+            res = _one_cell(mp4, idx, vr[idx - 1], fps, cap_fps, max_frames, cfg, bool(layout), (refs or {}).get(idx))
         except Exception as e:  # an animation failure never raises past here
             res = AnimationResult(idx, "FAILED", "exception", metrics={"error": str(e)[:300]})
         results.append(res)
@@ -91,12 +94,12 @@ def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_ce
     return results
 
 
-def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg) -> AnimationResult:
+def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alpha=None) -> AnimationResult:
     x, y, cw, ch = rect
     frames = ff.decode_cell(mp4, x, y, cw, ch, max_frames, cap_fps)   # one cell at a time
     calib = calibrate(frames[0], cfg.chroma, cfg.border_px, cfg.threshold)      # sample bg ONCE
     keyed = [key_image(f, cfg, calib).rgba for f in frames]
-    return _finish(idx, keyed, fps, cfg, {"source": "3x3 mp4", "threshold": round(calib[1], 1)})
+    return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1)}, slot, ref_alpha)
 
 
 def _clean_clip(frame: np.ndarray, cfg) -> np.ndarray:
@@ -143,7 +146,7 @@ def process_clips(clips: dict, cfg, on_cell=None) -> list[AnimationResult]:
     return results
 
 
-def _finish(idx, keyed, fps, cfg, m) -> AnimationResult:
+def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None) -> AnimationResult:
     union = None
     for k in keyed:
         b = bbox_of(k[..., 3])
@@ -157,12 +160,20 @@ def _finish(idx, keyed, fps, cfg, m) -> AnimationResult:
     ring[:2] = True; ring[-2:] = True; ring[:, :2] = True; ring[:, -2:] = True
     touch = sum(1 for k in keyed if (k[..., 3][ring] > 127).any())
     m["edge_touch_frames"] = touch                      # warning only: the slice may clip the character
+    pre = []
+    if slot:     # a returned video sheet: the slot's own geometry, judged BEFORE the (expensive) encode
+        m["subject_px_in_video"] = int(max(union[2] - union[0], union[3] - union[1]))     # metric only: no warning, no gate
+        pre = verify.run("slot", {"slot_frames": keyed, "metrics": m}, cfg)
+        if any(not c.ok and c.severity == verify.BLOCK for c in pre):
+            rep = Report(pre)
+            return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
     scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1]))
     m["scale"] = round(scale, 4)
     out = np.stack([render_sticker(k, union, scale, cfg) for k in keyed])       # ONE transform per clip
     # A seam is only visible if it is bigger than the clip's own normal frame-to-frame change.
     motion = lambda a: float(np.median([loop_seam(a[i], a[i + 1]) for i in range(len(a) - 1)])) if len(a) > 1 else 0.0
     limit = lambda a: max(cfg.loop_seam_max, cfg.loop_seam_ratio * motion(a))
+    m["motion"] = round(motion(out), 2)
     m["loop_seam_before"] = round(loop_seam(out[-1], out[0]), 2)
     if m["loop_seam_before"] > limit(out):
         out = close_loop(out, cfg.loop_fade_frames)
@@ -178,9 +189,42 @@ def _finish(idx, keyed, fps, cfg, m) -> AnimationResult:
             m["crf"] = crf
             if len(data) <= cfg.video_max_bytes:
                 break
-        inp = {"data": data, "info": ff.probe(path), "info_native": ff.probe(path, vp9_native=True), "alpha": ff.decode_alpha(path), "metrics": m}
-        rep = Report(verify.run("anim", inp, cfg))
+        inp = {"data": data, "info": ff.probe(path), "info_native": ff.probe(path, vp9_native=True), "alpha": ff.decode_alpha(path), "metrics": m,
+               "frames_out": out, "ref_alpha": ref_alpha}
+        rep = Report(pre + verify.run("anim", inp, cfg))
     m["kb"] = round(len(data) / 1024, 1)
     if rep.ok:
         return AnimationResult(idx, "READY", None, rep, m, data)
     return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
+
+
+def check_returned_video(mp4, layout: dict, sheet_rgb: np.ndarray, cfg, on_probe=None) -> list:
+    """The video-stage checks on a returned video, before any slicing: decodes, specs, layout_match (first frame vs the
+    video sheet), blank_slots_stay_empty (foreground in a slot that was blank on the sheet, any frame)."""
+    from .grid import scale_rects
+    info = ff.probe(mp4)
+    if on_probe:
+        on_probe(info)
+    first = None
+    if info["width"] and info["height"]:
+        try:
+            first = ff.decode_cell(mp4, 0, 0, info["width"] // 2 * 2, info["height"] // 2 * 2, 1, None)[0]
+        except Exception:
+            first = None
+    inp = {"info": info, "first_frame": first, "layout": layout, "sheet": sheet_rgb, "metrics": {}}
+    if first is not None:
+        W, H = info["width"], info["height"]
+        blank = [sl for sl in layout["slots"] if not sl["sticker"]]
+        rects = scale_rects([tuple(sl["rect"]) for sl in layout["slots"]], tuple(layout["canvas"]), (W, H))
+        fps = min(info["fps"] or cfg.video_max_fps, cfg.video_max_fps)
+        share = {}
+        for sl in blank:
+            x, y, w, h = rects[sl["slot"] - 1]
+            try:
+                frames = ff.decode_cell(mp4, x, y, w, h, int(cfg.video_max_seconds * fps), cfg.video_max_fps if info["fps"] > cfg.video_max_fps else None)
+                calib = calibrate(frames[0], cfg.chroma, cfg.border_px, cfg.threshold)
+                share[sl["slot"]] = max(float((key_image(f, cfg, calib).rgba[..., 3] > 127).mean()) for f in frames)
+            except Exception:
+                share[sl["slot"]] = 0.0
+        inp["blank_share"] = share
+    return verify.run("video", inp, cfg)

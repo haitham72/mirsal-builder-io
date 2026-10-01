@@ -75,7 +75,7 @@ def encode_static(rgba: np.ndarray, cfg):
     return bio.getvalue(), "webp"
 
 
-def _make(c: CellKey, cfg, pack: float) -> StickerResult:
+def _make(c: CellKey, cfg, pack: float, hashes: dict | None = None) -> StickerResult:
     S = cfg.size
     m = {"cell": list(c.rect), "bg": c.keyed.bg, "threshold": round(c.keyed.t, 1), "fg_px": c.fg_px, "bbox": list(c.bbox) if c.bbox else None}
 
@@ -85,7 +85,7 @@ def _make(c: CellKey, cfg, pack: float) -> StickerResult:
         m["scale"], m["scale_mode"] = round(s, 4), ("pack" if s >= pack - 1e-9 else "clamped")
         return render_sticker(c.keyed.rgba, c.bbox, s, cfg)
 
-    inp = {"cell": c, "metrics": m, "render": render, "encode": encode_static}
+    inp = {"cell": c, "metrics": m, "render": render, "encode": encode_static, "hashes": hashes}
     rep = Report(verify.run("still", inp, cfg))
     if rep.ok:
         return StickerResult(c.index, "READY", None, rep, m, inp["data"], inp["fmt"], inp.get("img"))
@@ -103,7 +103,7 @@ def _diagnose(c: CellKey, cfg) -> dict:
 def _ladder(reason: str, c: CellKey, gbg, gt) -> list:
     """Re-key steps per failure reason: (name, background, threshold, despill band). inside_cell cannot be fixed by keying."""
     t = c.keyed.t
-    if reason == "inside_cell":
+    if reason in ("inside_cell", "holes"):    # keying cannot fix a crossing subject, nor a green part of the subject keyed away
         return []
     if reason == "empty_subject":
         return [("sheet-wide background", gbg, gt, None), ("sheet-wide background, threshold x0.6", gbg, gt * 0.6, None)]
@@ -112,18 +112,20 @@ def _ladder(reason: str, c: CellKey, gbg, gt) -> list:
     return [("sheet-wide background", gbg, gt, None)]
 
 
-def _recover(c: CellKey, first: StickerResult, cfg, pack: float, gbg, gt) -> StickerResult:
+def _recover(c: CellKey, first: StickerResult, cfg, pack: float, gbg, gt, hashes=None) -> StickerResult:
     """Failed cell -> dissect -> key again (bounded ladder) -> finally rule it out. Every step is logged in metrics.attempts."""
     attempts = [{"name": "default", "ok": False, "reason": first.reason}]
     attempts.append({"name": "dissect", "ok": None, "note": _diagnose(c, cfg)})
     best = first
     steps = _ladder(first.reason, c, gbg, gt)
     if not steps:
-        attempts[-1]["note"]["verdict"] = "the subject crosses the cell border; keying cannot fix that (regenerate the sheet or adjust the grid)"
+        attempts[-1]["note"]["verdict"] = ("part of the subject was keyed away (an enclosed hole); re-keying on the same colour cannot fix that (Phase 3 re-keys on blue)"
+                                           if first.reason == "holes" else
+                                           "the subject crosses the cell border; keying cannot fix that (regenerate the sheet or adjust the grid)")
     for name, bg, t, band in steps:
         cfg2 = replace(cfg, despill_band_px=band or cfg.despill_band_px)
         c2 = _cellkey(c.index, c.rect, c.raw, key_image(c.raw, cfg2, (bg, float(t))))
-        r = _make(c2, cfg2, pack)
+        r = _make(c2, cfg2, pack, hashes)
         attempts.append({"name": name, "ok": r.status == "READY", "reason": r.reason})
         if r.status == "READY":
             r.metrics["recovered_by"] = name
@@ -141,11 +143,12 @@ def slice_cells(cells: list[CellKey], cfg) -> list[StickerResult]:
     pack = float(np.median(fits)) if fits else 1.0     # ONE pack-wide scale: no size jumping between poses
     gbg = [int(v) for v in np.median([c.keyed.bg for c in cells], axis=0)]
     gt = float(np.median([c.keyed.t for c in cells]))
+    hashes = {c.index: verify.cell_hash(c.keyed.rgba) for c in valid}
     results = []
     for c in cells:
-        r = _make(c, cfg, pack)
+        r = _make(c, cfg, pack, hashes)
         if r.status != "READY" and c.raw is not None:
-            r = _recover(c, r, cfg, pack, gbg, gt)
+            r = _recover(c, r, cfg, pack, gbg, gt, hashes)
         results.append(r)
     return results
 

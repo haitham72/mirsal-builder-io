@@ -71,3 +71,58 @@ def make_video(path: Path, cell=200, frames=90, fps=30, chroma="green"):
         p.stdin.write(np.concatenate([np.concatenate(cells[r * 3:r * 3 + 3], 1) for r in range(3)], 0).tobytes())
     p.stdin.close()
     assert p.wait() == 0
+
+
+def sticker_rgba(shape="disc", size=512, colour=YELLOW, ring=0):
+    """A 512x512 RGBA 'sticker' (transparent corners). ring > 0 adds a white die-cut outline of that width (what the video sheet must NOT have)."""
+    a = np.zeros((size, size), np.uint8)
+    c = size // 2
+    if shape == "disc":
+        cv2.circle(a, (c, c), 150, 255, -1, cv2.LINE_AA)
+    elif shape == "tall":
+        cv2.rectangle(a, (c - 60, c - 170), (c + 60, c + 170), 255, -1)
+    elif shape == "wide":
+        cv2.rectangle(a, (c - 170, c - 60), (c + 170, c + 60), 255, -1)
+    elif shape == "tri":
+        cv2.fillPoly(a, [np.array([[c, c - 160], [c - 150, c + 130], [c + 150, c + 130]])], 255, cv2.LINE_AA)
+    rgb = np.zeros((size, size, 3), np.uint8)
+    rgb[:] = colour
+    if ring:
+        grown = cv2.dilate(a, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * ring + 1, 2 * ring + 1)))
+        rgb[(grown > 0) & (a < 255)] = (255, 255, 255)
+        a = grown
+    return np.dstack([rgb, a])
+
+
+def make_layout_video(path: Path, sheet: np.ndarray, layout: dict, size=600, frames=60, fps=30, drift=None):
+    """A video 'made from' a video sheet: every filled slot's subject wiggles a little in place; slots in `drift`
+    ({slot: (dx, dy) total px at the video size}) slide steadily that way, so they leave their slot."""
+    import cv2
+    small = cv2.resize(sheet, (size, size), interpolation=cv2.INTER_AREA)
+    key = np.array(layout["key_rgb"], np.int16)
+    W = layout["canvas"][0]
+    k = size / W
+    sprites = {}
+    for sl in layout["slots"]:
+        if sl["sticker"]:
+            x, y, w, h = [int(round(v * k)) for v in sl["rect"]]
+            crop = small[y:y + h, x:x + w]
+            sprites[sl["slot"]] = ((x, y, w, h), crop, np.abs(crop.astype(np.int16) - key).max(-1) > 40)
+    base = np.empty_like(small); base[:] = np.array(layout["key_rgb"], np.uint8)
+    codec = "libx264" if "libx264" in subprocess.run([ff.ffmpeg_exe(), "-hide_banner", "-encoders"], capture_output=True).stdout.decode() else "mpeg4"
+    p = subprocess.Popen([ff.ffmpeg_exe(), "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{size}x{size}",
+                          "-r", str(fps), "-i", "-", "-c:v", codec, "-pix_fmt", "yuv420p", "-qscale:v" if codec == "mpeg4" else "-crf",
+                          "2" if codec == "mpeg4" else "16", str(path)], stdin=subprocess.PIPE)
+    for t in range(frames):
+        f = base.copy()
+        for slot, ((x, y, w, h), crop, m) in sprites.items():
+            if drift and slot in drift:
+                dx, dy = int(drift[slot][0] * t / (frames - 1)), int(drift[slot][1] * t / (frames - 1))
+            else:
+                dx, dy = int(round(8 * np.sin(2 * np.pi * t / frames))), 0
+            ys, xs = np.where(m)
+            ny, nx = np.clip(ys + dy, 0, h - 1), np.clip(xs + dx, 0, w - 1)
+            f[y + ny, x + nx] = crop[ys, xs]
+        p.stdin.write(f.tobytes())
+    p.stdin.close()
+    assert p.wait() == 0

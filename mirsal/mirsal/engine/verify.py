@@ -105,6 +105,8 @@ def run(stage: str, inp: dict, cfg) -> list[Check]:
         except Exception as e:                                     # pragma: no cover - defensive
             res = Check(cid, stage, BLOCK, False, None, None, {"error": str(e)[:200], "trace": traceback.format_exc()[-400:]},
                         f"verifier crashed: {e}", "verifier_error")
+        if res is None:                                            # not applicable to these inputs (e.g. no layout)
+            continue
         res.detail.setdefault("ms", round((time.perf_counter() - t0) * 1000, 1))
         out.append(res)
         if not res.ok and res.severity == WARN:
@@ -125,6 +127,70 @@ def _img(inp: dict) -> np.ndarray:
     if "img" not in inp:
         inp["img"] = inp["render"]()
     return inp["img"]
+
+
+# ================= sheet (on arrival, before slicing) =================
+@check("sheet", "sheet_decodes", BLOCK, gate=True)
+def sheet_decodes(inp, cfg):
+    img = inp.get("rgb")
+    if img is None and inp.get("data"):
+        arr = cv2.imdecode(np.frombuffer(inp["data"], np.uint8), cv2.IMREAD_COLOR)
+        img = None if arr is None else cv2.cvtColor(arr, cv2.COLOR_BGR2RGB)
+    ok = img is not None and img.ndim == 3 and img.shape[2] == 3 and img.size > 0
+    if ok:
+        inp["rgb"] = img
+    return _c("sheet", "sheet_decodes", BLOCK, ok, f"{img.shape[1]}x{img.shape[0]}" if ok else None, "RGB/RGBA image",
+              f"{img.shape[1]}x{img.shape[0]}" if ok else "the file does not decode")
+
+
+@check("sheet", "sheet_size", BLOCK)
+def sheet_size(inp, cfg):
+    side = int(min(inp["rgb"].shape[:2]))
+    return _c("sheet", "sheet_size", BLOCK, side >= cfg.min_sheet_px, side, cfg.min_sheet_px, f"shortest side {side}px")
+
+
+@check("sheet", "background_is_key", BLOCK)
+def background_is_key(inp, cfg):
+    from .chroma import border_mask
+    rgb, chroma = inp["rgb"], inp.get("chroma") or cfg.chroma
+    med = float(np.median(key_diff(rgb, chroma)[border_mask(rgb.shape[0], rgb.shape[1], cfg.border_px)]))
+    return _c("sheet", "background_is_key", BLOCK, med >= cfg.min_key_diff, round(med, 1), cfg.min_key_diff,
+              f"outer ring is {med:.0f} {chroma}-ward; a sheet without a {chroma} screen cannot be chroma keyed (matte keyer, Phase 3C)")
+
+
+@check("sheet", "grid_detected", BLOCK)
+def grid_detected(inp, cfg):
+    from .grid import detect_grid
+    want = tuple(inp.get("grid") or (3, 3))
+    got = detect_grid(inp["rgb"], inp.get("chroma") or cfg.chroma, cfg.border_px)
+    inp["detected_grid"] = got
+    return _c("sheet", "grid_detected", BLOCK, got == want, f"{got[0]}x{got[1]}", f"{want[0]}x{want[1]}", f"found {got[0]}x{got[1]}, plan says {want[0]}x{want[1]}")
+
+
+@check("sheet", "cut_clean", WARN)
+def cut_clean(inp, cfg):
+    from .grid import split_grid
+    rows, cols = inp.get("grid") or (3, 3)
+    rects, info = split_grid(inp["rgb"], rows, cols, inp.get("chroma") or cfg.chroma, cfg.border_px)
+    inp["rects"], inp["split_info"] = rects, info
+    return _c("sheet", "cut_clean", WARN, info["method"] in ("gutter", "single"), info["method"], "gutter", f"cut method: {info['method']}",
+              xs=info["xs"], ys=info["ys"])
+
+
+@check("sheet", "background_flat", WARN)
+def background_flat(inp, cfg):
+    from .chroma import calibrate
+    from .grid import background_profile
+    rgb, chroma = inp["rgb"], inp.get("chroma") or cfg.chroma
+    pc, pr = background_profile(rgb, chroma, cfg.border_px)
+    _, t = calibrate(rgb, chroma, cfg.border_px)
+    sel = np.zeros(rgb.shape[:2], bool)
+    sel[:, pc >= 0.97] = True
+    sel[pr >= 0.97, :] = True
+    sel &= key_diff(rgb, chroma) > t
+    ch = 1 if chroma == "green" else 2
+    std = float(rgb[..., ch][sel].std()) if sel.any() else 0.0
+    return _c("sheet", "background_flat", WARN, std <= cfg.max_bg_std, round(std, 2), cfg.max_bg_std, f"key-channel std-dev {std:.1f} over the gutters")
 
 
 # ================= still (one cell -> one sticker) =================
@@ -189,6 +255,69 @@ def chroma_risk(inp, cfg):
               f"{e['risk'] * 100:.1f}% of the subject is key-coloured")
 
 
+def _hole_share(alpha, min_px):
+    m = (alpha > 127).astype(np.uint8)
+    cs, hier = cv2.findContours(m, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    area = int(m.sum())
+    if hier is None or not area:
+        return 0.0, 0
+    holes = [cv2.contourArea(c) for c, h in zip(cs, hier[0]) if h[3] >= 0 and cv2.contourArea(c) >= min_px]
+    return float(sum(holes)) / area, len(holes)
+
+
+@check("still", "holes", WARN)
+def holes(inp, cfg):
+    """Transparent regions enclosed by the subject's outer contour: a green part of the subject keyed away."""
+    share, n = _hole_share(inp["cell"].keyed.rgba[..., 3], cfg.min_component_px)
+    inp["metrics"]["holes"] = round(share, 4)
+    sev = BLOCK if share > cfg.max_hole_share else WARN
+    return _c("still", "holes", sev, share <= cfg.min_hole_share, round(share, 4), cfg.max_hole_share if sev == BLOCK else cfg.min_hole_share,
+              f"{n} enclosed hole(s), {share * 100:.1f}% of the subject", count=n)
+
+
+@check("still", "single_subject", WARN)
+def single_subject(inp, cfg):
+    """More than one large part: two characters in one cell, or a neighbour bleeding in."""
+    c = inp["cell"]
+    m = (c.keyed.rgba[..., 3] > 127).astype(np.uint8)
+    bw, bh = c.bbox[2] - c.bbox[0], c.bbox[3] - c.bbox[1]
+    k = max(3, int(0.03 * max(bw, bh)))                 # parts closer than this belong to one character (the outline would join them)
+    n, lab = cv2.connectedComponents(cv2.dilate(m, np.ones((2 * k + 1, 2 * k + 1), np.uint8)), connectivity=8)
+    area = max(int(m.sum()), 1)
+    parts = sorted((int(((lab == i) & (m > 0)).sum()) for i in range(1, n)), reverse=True)
+    second = parts[1] / area if len(parts) > 1 else 0.0
+    return _c("still", "single_subject", WARN, second < cfg.min_part_share, round(second, 4), cfg.min_part_share,
+              f"{len(parts)} part(s); the second is {second * 100:.1f}% of the subject", parts=len(parts))
+
+
+def cell_hash(rgba: np.ndarray) -> np.ndarray:
+    """64-bit dHash of the keyed alpha-weighted luminance of the subject's bounding box."""
+    al = rgba[..., 3]
+    ys, xs = np.where(al > 25)
+    if not len(xs):
+        return np.zeros(64, bool)
+    crop = rgba[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    lum = cv2.cvtColor(crop[..., :3], cv2.COLOR_RGB2GRAY).astype(np.float32) * (crop[..., 3] / 255.0)
+    g = cv2.resize(lum, (9, 8), interpolation=cv2.INTER_AREA)
+    return (g[:, 1:] > g[:, :-1]).flatten()
+
+
+@check("still", "duplicate_cell", WARN)
+def duplicate_cell(inp, cfg):
+    """The model repeated a pose: this cell's hash is within dup_hamming of an earlier cell of the same sheet."""
+    hashes, c = inp.get("hashes"), inp["cell"]
+    if not hashes or c.index not in hashes:
+        return None
+    best, other = 64, None
+    for j, h in hashes.items():
+        if j < c.index and h is not None:
+            d = int((hashes[c.index] != h).sum())
+            if d < best:
+                best, other = d, j
+    return _c("still", "duplicate_cell", WARN, best > cfg.dup_hamming, best, cfg.dup_hamming,
+              f"hash distance {best} to cell {other}" if other else "no earlier cell", of=other)
+
+
 @check("still", "static_file", BLOCK)
 def static_file(inp, cfg):
     data, fmt = inp["encode"](_img(inp), cfg)
@@ -196,6 +325,55 @@ def static_file(inp, cfg):
     m = inp["metrics"]
     m["kb"], m["format"] = round(len(data) / 1024, 1), fmt
     return _c("still", "static_file", BLOCK, len(data) <= cfg.static_max_bytes, m["kb"], cfg.static_max_bytes // 1024, f"{m['kb']}KB {fmt}")
+
+
+
+# ================= slot (a returned video's slot, BEFORE the encode: a block here saves the encode) =================
+def _slot_edge(frames, cfg) -> int:
+    return max(2, int(round(cfg.slot_edge_frac * min(frames[0].shape[:2]))))
+
+
+@check("slot", "inside_slot", BLOCK)
+def inside_slot(inp, cfg):
+    """In any frame the subject reaches the slot border (within the edge band). Reports the first frame and the overshoot."""
+    frames = inp.get("slot_frames")
+    if frames is None:
+        return None
+    edge = _slot_edge(frames, cfg)
+    h, w = frames[0].shape[:2]
+    first, worst = None, 0
+    for t, f in enumerate(frames):
+        ys, xs = np.where(f[..., 3] > 127)
+        if not len(xs):
+            continue
+        gap = int(min(xs.min(), w - 1 - xs.max(), ys.min(), h - 1 - ys.max()))
+        if gap < edge:
+            first = t if first is None else first
+            worst = max(worst, edge - gap)
+    return _c("slot", "inside_slot", BLOCK, first is None, worst, 0,
+              f"frame {first}, {worst}px over the {edge}px edge band" if first is not None else "inside", frame=first, over_px=worst, edge_px=edge)
+
+
+@check("slot", "cross_slot", BLOCK)
+def cross_slot(inp, cfg):
+    """Foreground in the gutter between slots in any frame, apart from the slot's own subject: a character touching or merging."""
+    frames = inp.get("slot_frames")
+    if frames is None:
+        return None
+    h, w = frames[0].shape[:2]
+    core = np.zeros((h, w), bool)
+    core[h // 4:h - h // 4, w // 4:w - w // 4] = True
+    first, worst = None, 0
+    for t, f in enumerate(frames):
+        m = (f[..., 3] > 127).astype(np.uint8)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(m, connectivity=8)
+        for i in range(1, n):
+            area = int(st[i, cv2.CC_STAT_AREA])
+            if area >= cfg.min_component_px and not core[lab == i].any():     # a part that never enters the slot's core
+                first = t if first is None else first
+                worst = max(worst, area)
+    return _c("slot", "cross_slot", BLOCK, first is None, worst, 0,
+              f"{worst}px of foreign foreground, first at frame {first}" if first is not None else "gutter clean", frame=first, px=worst)
 
 
 # ================= anim (one encoded WEBM) =================
@@ -250,3 +428,162 @@ def alpha_decoded(inp, cfg):
 def loop_seam_check(inp, cfg):
     m = inp["metrics"]
     return _c("anim", "loop_seam", BLOCK, m["loop_seam"] <= m["loop_limit"], m["loop_seam"], m["loop_limit"], f"{m['loop_seam']} <= {m['loop_limit']}")
+
+
+def shape_iou(a: np.ndarray, b: np.ndarray, side: int = 64) -> float:
+    """IoU of two binary masks after trimming each to its bbox and fitting it (aspect kept) into side x side."""
+    def norm(m):
+        ys, xs = np.where(m)
+        if not len(xs):
+            return np.zeros((side, side), bool)
+        c = m[ys.min():ys.max() + 1, xs.min():xs.max() + 1].astype(np.uint8)
+        s = side / max(c.shape)
+        c = cv2.resize(c, (max(1, round(c.shape[1] * s)), max(1, round(c.shape[0] * s))), interpolation=cv2.INTER_AREA) > 0
+        out = np.zeros((side, side), bool)
+        y0, x0 = (side - c.shape[0]) // 2, (side - c.shape[1]) // 2
+        out[y0:y0 + c.shape[0], x0:x0 + c.shape[1]] = c
+        return out
+    a, b = norm(a), norm(b)
+    u = int((a | b).sum())
+    return float((a & b).sum()) / u if u else 0.0
+
+
+@check("anim", "identity_kept", WARN)
+def identity_kept(inp, cfg):
+    """Alpha IoU of the first frame vs the approved still (same normalisation): a low value means the video drifted to another pose."""
+    ref, out = inp.get("ref_alpha"), inp.get("frames_out")
+    if ref is None or out is None:
+        return None
+    iou = shape_iou(ref > 127, out[0][..., 3] > 127)
+    return _c("anim", "identity_kept", WARN, iou >= cfg.min_identity_iou, round(iou, 3), cfg.min_identity_iou, f"first frame matches the still at IoU {iou:.2f}")
+
+
+@check("anim", "motion_present", WARN)
+def motion_present(inp, cfg):
+    mo = inp["metrics"].get("motion")
+    if mo is None:
+        return None
+    return _c("anim", "motion_present", WARN, mo >= cfg.min_motion, mo, cfg.min_motion, f"median frame-to-frame change {mo}")
+
+
+@check("anim", "alpha_stable", WARN)
+def alpha_stable(inp, cfg):
+    out = inp.get("frames_out")
+    if out is None or len(out) < 2:
+        return None
+    area = np.array([(f[..., 3] > 127).sum() for f in out], np.float64)
+    cv = float(area.std() / max(area.mean(), 1.0))
+    return _c("anim", "alpha_stable", WARN, cv <= cfg.max_area_cv, round(cv, 3), cfg.max_area_cv, f"subject area varies by {cv * 100:.0f}% over the frames")
+
+
+# ================= video_sheet (G3 build) =================
+@check("video_sheet", "slots_match_approved", BLOCK)
+def slots_match_approved(inp, cfg):
+    sheet, lay, approved = inp["sheet"], inp["layout"], sorted(inp["approved"])
+    key = np.array(lay["key_rgb"], np.int16)
+    filled = sorted(int(sl["sticker"][1:]) for sl in lay["slots"] if sl["sticker"])
+    bad = []
+    for sl in lay["slots"]:
+        x, y, w, h = sl["rect"]
+        non_key = int((np.abs(sheet[y:y + h, x:x + w].astype(np.int16) - key).max(-1) > 0).sum())
+        if sl["sticker"] is None and non_key:
+            bad.append((sl["slot"], "blank slot is not pure key colour", non_key))
+        if sl["sticker"] is not None and non_key < cfg.min_foreground_px // 4:
+            bad.append((sl["slot"], "filled slot has no subject", non_key))
+    ok = filled == approved and not bad
+    return _c("video_sheet", "slots_match_approved", BLOCK, ok, filled, approved,
+              "filled slots are exactly the approved stickers; blank slots are pure key colour" if ok else f"filled {filled}, approved {approved}, problems {bad}", problems=bad)
+
+
+@check("video_sheet", "no_outline_on_sheet", BLOCK)
+def no_outline_on_sheet(inp, cfg):
+    """A white die-cut ring around a coloured subject: the outline is added once, after the returned video."""
+    sheet, lay = inp["sheet"], inp["layout"]
+    key = np.array(lay["key_rgb"], np.int16)
+    found = []
+    for sl in lay["slots"]:
+        if not sl["sticker"]:
+            continue
+        x, y, w, h = sl["rect"]
+        crop = sheet[y:y + h, x:x + w].astype(np.int16)
+        fg = (np.abs(crop - key).max(-1) > 24).astype(np.uint8)
+        dist_in = cv2.distanceTransform(fg, cv2.DIST_L2, 3)        # distance from each foreground pixel to the nearest background pixel
+        white = (crop.min(-1) >= 235) & ((crop.max(-1) - crop.min(-1)) <= 25)
+        outer = (dist_in >= 2.5) & (dist_in <= 6.0)            # just inside the anti-aliased edge: a die-cut ring is white here, a subject is not
+        # a ring is white all the way round while the subject itself is not white (a white bunny has no ring: it is white throughout)
+        if outer.sum() >= 50 and white[outer].mean() >= 0.9 and white[fg > 0].mean() < 0.7:
+            found.append(sl["slot"])
+    return _c("video_sheet", "no_outline_on_sheet", BLOCK, not found, found, [], "no white ring around the subjects" if not found else f"white outline found in slot(s) {found}", slots=found)
+
+
+# ================= video (returned, before slicing) =================
+@check("video", "video_decodes", BLOCK, gate=True)
+def video_decodes(inp, cfg):
+    i = inp["info"]
+    ok = bool(i.get("codec") and i.get("width") and inp.get("first_frame") is not None)
+    return _c("video", "video_decodes", BLOCK, ok, i.get("codec"), None, f"{i.get('codec')} {i.get('width')}x{i.get('height')}" if ok else "the video does not decode")
+
+
+@check("video", "video_specs", BLOCK)
+def video_specs(inp, cfg):
+    i = inp["info"]
+    ok = i["fps"] > 0 and i["duration"] >= cfg.min_video_s
+    return _c("video", "video_specs", BLOCK, ok, round(i["duration"], 2), cfg.min_video_s, f"{i['width']}x{i['height']} {i['fps']} fps, {i['duration']:.2f}s")
+
+
+def _slot_mask(rgb, cfg, chroma):
+    from .chroma import alpha_from_diff, calibrate
+    _, t = calibrate(rgb, chroma, cfg.border_px, None)
+    return alpha_from_diff(key_diff(rgb, chroma), t) > 0.5
+
+
+@check("video", "layout_match", BLOCK)
+def layout_match(inp, cfg):
+    """First frame vs the video sheet, per filled slot: proves the video was made from THIS sheet and slot n still holds S#n."""
+    lay, sheet, frame = inp["layout"], inp["sheet"], inp["first_frame"]
+    W, H = lay["canvas"]
+    fh, fw = frame.shape[:2]
+    chroma = inp.get("chroma") or cfg.chroma
+    ious = {}
+    for sl in lay["slots"]:
+        if not sl["sticker"]:
+            continue
+        x, y, w, h = sl["rect"]
+        vx0, vy0, vx1, vy1 = round(x * fw / W), round(y * fh / H), round((x + w) * fw / W), round((y + h) * fh / H)
+        a = _slot_mask(frame[vy0:vy1, vx0:vx1], cfg, chroma)
+        b = _slot_mask(cv2.resize(sheet[y:y + h, x:x + w], (vx1 - vx0, vy1 - vy0), interpolation=cv2.INTER_AREA), cfg, chroma)
+        u = int((a | b).sum())
+        ious[sl["slot"]] = round(float((a & b).sum()) / u, 3) if u else 0.0
+    worst = min(ious.values()) if ious else 0.0
+    bad = [k for k, v in ious.items() if v < cfg.min_layout_iou]
+    return _c("video", "layout_match", BLOCK, bool(ious) and not bad, worst, cfg.min_layout_iou,
+              f"lowest slot IoU {worst:.2f}" + (f"; slot(s) {bad} do not match the sheet" if bad else ""), ious=ious, bad=bad)
+
+
+@check("video", "blank_slots_stay_empty", BLOCK)
+def blank_slots_stay_empty(inp, cfg):
+    """Foreground in a slot that was blank on the sheet: the model invented a character. Blocks the generation's video, not the stickers."""
+    shares = inp.get("blank_share") or {}
+    bad = {k: round(v, 4) for k, v in shares.items() if v > cfg.blank_slot_max_share}
+    return _c("video", "blank_slots_stay_empty", BLOCK, not bad, max(shares.values()) if shares else 0.0, cfg.blank_slot_max_share,
+              "blank slots stayed empty" if not bad else f"foreground appeared in blank slot(s) {sorted(bad)}", bad=bad)
+
+
+# ================= pack (G5) =================
+@check("pack", "pack_limits", BLOCK)
+def pack_limits(inp, cfg):
+    st = inp["stickers"]
+    keys = [s["key"] for s in st]
+    problems = []
+    if not 1 <= len(st) <= cfg.pack_max:
+        problems.append(f"{len(st)} stickers (1-{cfg.pack_max})")
+    dup = sorted({k for k in keys if keys.count(k) > 1})
+    if dup:
+        problems.append(f"duplicate keys {dup}")
+    for s in st:
+        if not s.get("emoji"):
+            problems.append(f"{s['key']}: no emoji")
+        cap = cfg.video_max_bytes if s["kind"] == "animated" else cfg.static_max_bytes
+        if s["bytes"] > cap:
+            problems.append(f"{s['key']}: {s['bytes'] // 1024}KB > {cap // 1024}KB")
+    return _c("pack", "pack_limits", BLOCK, not problems, len(st), cfg.pack_max, "pack within Telegram limits" if not problems else "; ".join(problems), problems=problems)
