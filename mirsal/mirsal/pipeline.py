@@ -16,12 +16,15 @@ import cv2
 import numpy as np
 
 from . import prompter, sources
+from .engine import verify
 from .engine.config import EngineConfig
 from .engine.grid import detect_grid, split_grid
 from .engine.sheet import key_sheet, slice_cells, stitch_keyed
 from .engine.video import AnimationResult, pick_clip, process_clips, process_video
 
-STAGES = ["requested", "sheet_picked", "keyed", "sliced", "video_requested", "video_picked", "video_sliced"]
+STAGES = ["requested", "sheet_picked", "keyed", "sliced", "video_requested", "video_picked", "video_sliced",
+          "plan_reviewed", "stills_reviewed", "video_sheet_built", "video_sheet_reviewed", "video_returned", "anim_reviewed", "pack_final"]
+SLICED = STAGES.index("sliced")     # every stage from here on has the stills on disk
 
 
 class PipelineError(Exception):
@@ -47,11 +50,23 @@ def _atomic_write(path: Path, data: bytes) -> None:
     os.replace(tmp, path)
 
 
+def normalise(res: dict) -> dict:
+    """Results written before 1F lack the review fields: give them empty ones so every reader can rely on the shape."""
+    res.setdefault("reviews", {"plan": None, "video_sheet": {}, "pack": None})
+    res.setdefault("video_sheets", [])
+    res.setdefault("verify", {})
+    for st in res["stickers"]:
+        st.setdefault("tags", [st["key"]])
+        st.setdefault("review", {"still": "BLOCKED" if st["status"] == "FAILED" else "PENDING", "anim": "NONE"})
+        st.setdefault("history", [])
+    return res
+
+
 def read_result(out: Path, gid: int) -> dict:
     p = gen_dir(out, gid) / "result.json"
     if not p.exists():
         raise PipelineError(f"No generation G{gid:03d}", 404)
-    return json.loads(p.read_text(encoding="utf-8"))
+    return normalise(json.loads(p.read_text(encoding="utf-8")))
 
 
 def write_result(out: Path, gid: int, res: dict) -> None:
@@ -63,9 +78,11 @@ def read_events(out: Path, gid: int) -> list[dict]:
     return [json.loads(l) for l in p.read_text(encoding="utf-8").splitlines() if l.strip()] if p.exists() else []
 
 
-def emit(out: Path, gid: int, stage: str, status: str, ms: int = 0, detail=None) -> None:
-    line = json.dumps({"ts": round(time.time(), 3), "stage": stage, "status": status, "ms": ms, "detail": detail},
-                      ensure_ascii=False)
+def emit(out: Path, gid: int, stage: str, status: str, ms: int = 0, detail=None, actor: str | None = None, decision: str | None = None) -> None:
+    ev = {"ts": round(time.time(), 3), "stage": stage, "status": status, "ms": ms, "detail": detail}
+    if actor:                                  # gate decisions: who decided (python | human | vlm) and what
+        ev["actor"], ev["decision"] = actor, decision
+    line = json.dumps(ev, ensure_ascii=False)
     with open(gen_dir(out, gid) / "events.jsonl", "a", encoding="utf-8") as f:
         f.write(line + "\n")
 
@@ -129,7 +146,7 @@ def list_inputs(inp: Path) -> list[dict]:
 
 
 def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: sources.Pick | None = None, parent: int | None = None,
-          grid: tuple | None = None) -> int:
+          grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None) -> int:
     """Synchronous part: match source, run the prompter, allocate G00N. Returns the id fast.
     grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters."""
     if pick is None:
@@ -139,7 +156,11 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
             pick = picks[(variant or next_variant(out, base.subject, len(picks))) - 1] if (variant or len(picks) > 1) else base
     if not pick:
         raise PipelineError(f"No prepared set for that. Try: {', '.join(sources.known_subjects(inp)) or '(none found)'}", 404)
-    if pick.plan:   # hand-written prompts that match the sheet Haitham actually generated
+    if regen_plan:  # 1x1 regeneration of one sticker: the plan is that sticker's own (key, tags, emoji) in a single-cell template
+        plan = regen_plan
+    elif task and task.get("plan"):   # a task reserved in the Inbox: its saved plan (template + slots) is the plan
+        plan = prompter.validate_plan(json.loads(json.dumps(task["plan"])))
+    elif pick.plan:   # hand-written prompts that match the sheet Haitham actually generated
         try:
             plan = prompter.validate_plan(json.loads(pick.plan.read_text(encoding="utf-8")))
         except (ValueError, OSError) as e:
@@ -160,36 +181,74 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
                    "has_video": pick.has_video, "pairing": pick.pairing, "clips_dup_of": pick.clips_dup_of,
                    "clips": {str(n): {f: str(p) for f, p in d.items()} for n, d in pick.clips.items()}, "sheet_path": str(pick.sheet),
                    "video_path": str(pick.video) if pick.video else None},
-        "grid": plan["grid"], "stage": "requested", "error": None, "plan_source": pick.plan.name if pick.plan else "stub (prompter.py)",
+        "grid": plan["grid"], "stage": "requested", "error": None, "plan_source": "task " + task["id"] if task else pick.plan.name if pick.plan else "stub (prompter.py)",
         "sheet_prompt": plan.get("sheet_prompt", ""), "video_prompt": plan.get("video_prompt", ""),
-        "stickers": [{"index": s["index"], "key": s["key"], "emoji": s["emoji"], "prompt": s["prompt"],
-                      "name": media_name("img", gid, plan["task_slug"], s["key"]),
-                      "status": "PENDING", "reason": None, "report": [], "metrics": {}, "png": None,
-                      "anim_status": "NOT_REQUESTED", "anim_reason": None, "anim_metrics": {}, "webm": None}
-                     for s in plan["stickers"]],
+        "template_id": plan.get("template_id"), "template_version": plan.get("template_version"), "slots": plan.get("slots"),
+        "task_id": task["id"] if task else None, "name_key": plan["task_slug"], "regen_of": regen_of,
+        "verify_version": verify.VERIFY_VERSION,
+        "reviews": {"plan": (task or {}).get("plan_review"), "video_sheet": {}, "pack": None}, "video_sheets": [], "verify": {},
+        "stickers": [new_sticker(gid, plan["task_slug"], s) for s in plan["stickers"]],
     }
     write_result(out, gid, res)
     emit(out, gid, "requested", "done", 0, {"prompt": prompt, "task_slug": plan["task_slug"]})
     return gid
 
 
+def new_sticker(gid: int, task_slug: str, s: dict) -> dict:
+    return {"index": s["index"], "key": s["key"], "tags": s.get("tags") or [s["key"]], "emoji": s["emoji"], "prompt": s["prompt"],
+            "name": media_name("img", gid, task_slug, s["key"]),
+            "status": "PENDING", "reason": None, "report": [], "metrics": {}, "png": None,
+            "anim_status": "NOT_REQUESTED", "anim_reason": None, "anim_metrics": {}, "webm": None,
+            "review": {"still": "PENDING", "anim": "NONE"}, "history": []}
+
+
+def hist(st: dict, stage: str, actor: str, decision: str, reason: str | None = None, ref: str | None = None, detail=None) -> None:
+    """One line of a sticker's path through the golden path (Phase 2: one `reviews` row)."""
+    st.setdefault("history", []).append({"ts": round(time.time(), 3), "stage": stage, "actor": actor, "decision": decision,
+                                         "reason": reason, "ref": ref, "detail": detail})
+
+
+def block_detail(report: list) -> dict | None:
+    """The first failing BLOCK check of a report (dicts as stored in result.json), trimmed for a history line."""
+    c = next((c for c in report if not c.get("ok") and c.get("severity", "BLOCK") == "BLOCK"), None)
+    if not c:
+        return None
+    return {"check": c["name"], "value": c.get("value"), "limit": c.get("limit"), "note": c.get("detail"), "data": c.get("data")}
+
+
 def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
     res = read_result(out, gid)
     d = gen_dir(out, gid)
     try:
+        blocked = None
         with Stage(out, gid, "sheet_picked", pace) as s:
             src = Path(res["source"]["sheet_path"])
             dest = d / "source" / f"sheet{src.suffix.lower()}"
             shutil.copyfile(src, dest)
             res["source"]["sheet_copy"] = f"source/{dest.name}"
-            sheet = load_rgb(dest)
-            res["source"]["sheet_size"] = [int(sheet.shape[1]), int(sheet.shape[0])]
-            s.result = {"subject": res["source"]["subject"], "variant": res["source"]["variant"],
-                        "of": res["source"]["n_variants"], "file": src.name}
-            res["stage"] = "sheet_picked"; write_result(out, gid, res)
-        with Stage(out, gid, "keyed", pace) as s:
             rows, cols = res.get("grid") or (3, 3)
-            rects, ginfo = split_grid(sheet, rows, cols, cfg.chroma, cfg.border_px)
+            vin = {"data": dest.read_bytes(), "grid": (rows, cols), "chroma": cfg.chroma}
+            checks = verify.run("sheet", vin, cfg)                  # the sheet is judged on arrival, before anything is sliced
+            res["verify"]["sheet"] = [c.to_dict() for c in checks]
+            blocked = next((c for c in checks if not c.ok and c.severity == verify.BLOCK), None)
+            sheet = vin.get("rgb")
+            if sheet is not None:
+                res["source"]["sheet_size"] = [int(sheet.shape[1]), int(sheet.shape[0])]
+            s.result = {"subject": res["source"]["subject"], "variant": res["source"]["variant"],
+                        "of": res["source"]["n_variants"], "file": src.name,
+                        "blocked": blocked.id if blocked else None, "warnings": [c.id for c in checks if not c.ok and c.severity == verify.WARN]}
+            res["stage"] = "sheet_picked"; write_result(out, gid, res)
+        if blocked:
+            with Stage(out, gid, "sliced", pace) as s:
+                for st in res["stickers"]:
+                    st.update(status="FAILED", reason=blocked.id, report=[blocked.to_dict()], metrics={"sheet_blocked": True})
+                    st["review"]["still"] = "BLOCKED"
+                    hist(st, "sheet", "python", "BLOCK", blocked.id, detail={"check": blocked.id, "value": _json(blocked.value), "limit": _json(blocked.limit), "note": blocked.note})
+                s.result = {"ready": 0, "failed": len(res["stickers"]), "blocked": blocked.id}
+                res["stage"] = "sliced"; write_result(out, gid, res)
+            return
+        with Stage(out, gid, "keyed", pace) as s:
+            rects, ginfo = vin["rects"], vin["split_info"]
             res["source"]["grid"] = {"rows": rows, "cols": cols, "rects": [list(r) for r in rects], **ginfo}
             cells = key_sheet(sheet, cfg, rects)
             ok, buf = cv2.imencode(".png", cv2.cvtColor(stitch_keyed(cells, sheet.shape), cv2.COLOR_RGBA2BGRA))
@@ -199,16 +258,44 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
                         "grid": f"{rows}x{cols}", "cut": ginfo["method"], "xs": ginfo["xs"], "ys": ginfo["ys"]}
             res["stage"] = "keyed"; write_result(out, gid, res)
         with Stage(out, gid, "sliced", pace) as s:
+            (d / "source" / "plain").mkdir(exist_ok=True)
             for st, r in zip(res["stickers"], slice_cells(cells, cfg)):
                 st.update(status=r.status, reason=r.reason, report=r.report.checks, metrics=r.metrics)
                 if r.data:
                     st["png"] = f"slices/{st['name']}.{r.fmt}"
                     (d / st["png"]).write_bytes(r.data)
+                if r.plain is not None:    # the outline-free twin the video sheet is built from
+                    ok, buf = cv2.imencode(".png", cv2.cvtColor(r.plain, cv2.COLOR_RGBA2BGRA))
+                    (d / "source" / "plain" / f"S{st['index']}.png").write_bytes(buf.tobytes())
+                if r.status == "READY":
+                    st["review"]["still"] = "PENDING"
+                    hist(st, "sliced", "python", "PASS", detail={"warnings": r.metrics.get("warnings", [])})
+                else:
+                    st["review"]["still"] = "BLOCKED"
+                    hist(st, "sliced", "python", "BLOCK", r.reason, detail=block_detail(r.report.checks))
             ready = sum(1 for st in res["stickers"] if st["status"] == "READY")
             s.result = {"ready": ready, "failed": len(res["stickers"]) - ready}
             res["stage"] = "sliced"; write_result(out, gid, res)
     except Exception as e:
         res["error"] = str(e)[:300]; write_result(out, gid, res)
+
+
+def record_anim(d: Path, st: dict, r, ref: str) -> None:
+    """Store one animation result on its sticker: status, metrics, file, review state and the verifier's history line."""
+    st.update(anim_status=r.status, anim_reason=r.reason, anim_metrics=r.metrics, anim_report=r.report.checks)
+    if r.data:
+        st["webm"] = f"slices/{st['name'].replace('img-', 'vid-', 1)}.webm"
+        (d / st["webm"]).write_bytes(r.data)
+    if r.status == "READY":
+        st["review"]["anim"] = "PENDING"
+        hist(st, "video", "python", "PASS", ref=ref, detail={"warnings": r.metrics.get("warnings", [])})
+    else:
+        st["review"]["anim"] = "BLOCKED"
+        hist(st, "video", "python", "BLOCK", r.reason, ref, block_detail(r.report.checks) or {"check": r.reason, "note": r.metrics.get("error")})
+
+
+def _json(v):
+    return v.item() if hasattr(v, "item") else v
 
 
 # ---------- more ----------
@@ -222,12 +309,35 @@ def more(out: Path, inp: Path, from_id: int | None = None) -> int:
     return start(res["prompt"], out, inp, pick=nxt, parent=from_id)
 
 
+def regen(out: Path, inp: Path, gid: int, index: int, subject: str | None = None) -> int:
+    """Regenerate ONE sticker as a 1x1 run through the same engine. It becomes a new generation (`regen_of: G00N/S#`) whose single
+    sticker goes through G2 -> video -> G4 alone; the parent is never modified."""
+    from . import gates
+    res = read_result(out, gid)
+    if not 1 <= index <= len(res["stickers"]):
+        raise PipelineError(f"index 1..{len(res['stickers'])} required")
+    subj = subject or res["source"]["subject"]
+    picks = sources.scan(inp).get(subj)
+    if not picks:
+        raise PipelineError(f"No prepared sheet for '{subj}'. Put a 1x1 sheet in img-NNN-{subj}/.", 404)
+    pick = picks[next_variant(out, subj, len(picks)) - 1]
+    if detect_grid(load_rgb(pick.sheet)) != (1, 1):
+        raise PipelineError(f"{pick.sheet.name} is not a 1x1 sheet (one character on one canvas).", 409)
+    new = start(res["prompt"], out, inp, pick=pick, parent=gid, regen_of=f"{res['generation_id']}/S{index}", regen_plan=gates.regen_plan(res, index))
+    plan = res["reviews"].get("plan")
+    if plan and plan["decision"] == "APPROVE":
+        r2 = read_result(out, new)
+        r2["reviews"]["plan"] = {"decision": "APPROVE", "by": plan["by"], "ts": plan["ts"], "note": f"inherited from {res['generation_id']}"}
+        write_result(out, new, r2)
+    return new
+
+
 # ---------- animate ----------
 def check_animate(out: Path, gid: int, scope: str, index: int | None) -> dict:
     res = read_result(out, gid)
     if not res["source"]["has_video"]:
         raise PipelineError("No animation prepared for this variation.", 409)
-    if res["stage"] not in ("sliced", "video_picked", "video_sliced"):
+    if STAGES.index(res["stage"]) < SLICED:
         raise PipelineError("Stills are not ready yet.", 409)
     if scope not in ("pack", "slice"):
         raise PipelineError("scope must be 'pack' or 'slice'")
@@ -269,10 +379,7 @@ def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int |
         with Stage(out, gid, "video_sliced", pace) as s:
             def on_cell(r):
                 st = res["stickers"][r.index - 1]
-                st.update(anim_status=r.status, anim_reason=r.reason, anim_metrics=r.metrics)
-                if r.data:
-                    st["webm"] = f"slices/{st['name'].replace('img-', 'vid-', 1)}.webm"
-                    (d / st["webm"]).write_bytes(r.data)
+                record_anim(d, st, r, "prepared video")
                 write_result(out, gid, res)
                 emit(out, gid, "video_cell", "done", 0, {"index": r.index, "status": r.status, "reason": r.reason})
             for i in todo:
@@ -296,8 +403,11 @@ def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int |
 
 def state(out: Path, gid: int) -> dict:
     res = read_result(out, gid)
+    from . import gates
     res["events"] = read_events(out, gid)
     res["stages"] = STAGES
+    res["gate"] = gates.gate_info(res)
+    res["final"] = gates.final_indices(res)
     return res
 
 

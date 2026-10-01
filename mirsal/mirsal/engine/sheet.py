@@ -34,7 +34,8 @@ class StickerResult:
     metrics: dict = field(default_factory=dict)
     data: bytes | None = None
     fmt: str = "png"
-    img: np.ndarray | None = None   # the rendered 512x512 RGBA (not serialised; the video sheet builder reuses the pipeline's keyed cells)
+    img: np.ndarray | None = None   # the rendered 512x512 RGBA (not serialised)
+    plain: np.ndarray | None = None  # the same sticker WITHOUT the outline: what the video sheet is built from (the outline is added once, after the video)
 
 
 def _cellkey(index: int, rect: tuple, raw: np.ndarray, k: Keyed) -> CellKey:
@@ -79,16 +80,20 @@ def _make(c: CellKey, cfg, pack: float, hashes: dict | None = None) -> StickerRe
     S = cfg.size
     m = {"cell": list(c.rect), "bg": c.keyed.bg, "threshold": round(c.keyed.t, 1), "fg_px": c.fg_px, "bbox": list(c.bbox) if c.bbox else None}
 
+    scale = {}
+
     def render():
         bw, bh = c.bbox[2] - c.bbox[0], c.bbox[3] - c.bbox[1]
         s = min(pack, cfg.max_fit * S / max(bw, bh))
         m["scale"], m["scale_mode"] = round(s, 4), ("pack" if s >= pack - 1e-9 else "clamped")
+        scale["s"] = s
         return render_sticker(c.keyed.rgba, c.bbox, s, cfg)
 
     inp = {"cell": c, "metrics": m, "render": render, "encode": encode_static, "hashes": hashes}
     rep = Report(verify.run("still", inp, cfg))
     if rep.ok:
-        return StickerResult(c.index, "READY", None, rep, m, inp["data"], inp["fmt"], inp.get("img"))
+        plain = render_sticker(c.keyed.rgba, c.bbox, scale["s"], cfg, outline_px=0)
+        return StickerResult(c.index, "READY", None, rep, m, inp["data"], inp["fmt"], inp.get("img"), plain)
     return StickerResult(c.index, "FAILED", rep.first_failure, rep, m)
 
 

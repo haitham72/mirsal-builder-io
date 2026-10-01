@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
+from .. import gates
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
@@ -150,6 +151,8 @@ def make_handler(c: Console):
                 self.end_headers()
                 self.wfile.write(data)
                 return
+            if path == "/api/search":
+                return self._json(200, {"results": gates.search(c.out, parse_qs(urlparse(self.path).query).get("q", [""])[0])})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
             if path == "/api/generations":
@@ -280,6 +283,15 @@ def make_handler(c: Console):
                 return False
             return True
 
+        def _post_video(self, gid, aid, query):
+            """Raw video body, attached to video sheet A<n> (not matched by filename); slicing runs as the background job."""
+            if c.lock.locked():
+                raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+            data = self._raw(MAX_UPLOAD)
+            gates.attach_video(c.out, gid, aid, data, query.get("name", ["video.mp4"])[0])
+            c.submit(lambda: gates.slice_video(c.out, gid, aid, c.cfg, c.pace))
+            return self._json(202, {"id": gid, "sheet": aid})
+
         def _post(self):
             u = urlparse(self.path)
             path = unquote(u.path)
@@ -289,6 +301,9 @@ def make_handler(c: Console):
                 if self._post_library(path, parse_qs(u.query)):
                     return
                 raise pl.PipelineError("not found", 404)
+            parts = path.strip("/").split("/")
+            if len(parts) == 6 and parts[:2] == ["api", "generations"] and parts[3:4] == ["video_sheet"] and parts[5] == "video":
+                return self._post_video(int(parts[2]), parts[4], parse_qs(u.query))
             body = self._body()
             if path == "/api/generations":
                 prompt = str(body.get("prompt", "")).strip() or str(body.get("subject", "")).replace("_", " ").strip()
@@ -308,6 +323,22 @@ def make_handler(c: Console):
                     new = pl.more(c.out, c.inp, gid)
                     c.submit(lambda: pl.run_stills(c.out, new, c.cfg, c.pace))
                     return self._json(202, {"id": new})
+                if parts[3] == "review":
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    return self._json(200, gates.review(c.out, gid, str(body.get("gate", "")), str(body.get("decision", "")), body.get("index"), body.get("note")))
+                if parts[3] == "video_sheet":
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    return self._json(200, gates.build_sheet(c.out, gid, c.cfg))
+                if parts[3] == "regen":
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy", 409)
+                    new = pl.regen(c.out, c.inp, gid, int(body["index"]), body.get("subject"))
+                    c.submit(lambda: pl.run_stills(c.out, new, c.cfg, c.pace))
+                    return self._json(202, {"id": new})
+                if parts[3] == "pack_add":
+                    return self._json(200, c.lib.add_final(c.out, str(body["pack_id"]), gid))
                 if parts[3] == "animate":
                     scope, index = body.get("scope", "pack"), body.get("index")
                     index = int(index) if index is not None else None

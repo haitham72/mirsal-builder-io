@@ -73,6 +73,10 @@ def doctor() -> int:
             bad += 1; print("MISSING libvpx-vp9 in any ffmpeg found (needed for WEBM alpha). Fix, easiest first: `pip install imageio-ffmpeg` (its bundled build has it; offline: pip download it on a connected PC), or a full build from gyan.dev and set MIRSAL_FFMPEG=<path to ffmpeg.exe>")
     except Exception as e:
         bad += 1; print("MISSING ffmpeg:", e, "\n        put ffmpeg.exe on PATH, or set MIRSAL_FFMPEG=<path>")
+    from . import prompter
+    from .engine import verify
+    tpl = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
+    print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
     from . import sources
     subs = sources.known_subjects(input_root())
     from . import matte

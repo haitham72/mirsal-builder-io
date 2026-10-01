@@ -327,6 +327,15 @@ class Library:
         return self.add_bytes(pid, f.read_bytes(), f.suffix.lstrip("."), t.get("name") or f.stem, kind, t.get("emoji") or "🙂",
                               {"generation": st["generation_id"], "index": index})
 
+    def add_final(self, out: Path, pid: str, gid: int) -> dict:
+        """G5 -> Library: add every sticker of the approved final pack (approved at G2 AND G4) as an animated sticker."""
+        st = pl.state(out, gid)
+        pack = st["reviews"].get("pack")
+        if not pack or pack["decision"] != "APPROVE":
+            raise LibraryError("The pack is not final yet (G5): approve it first.", 409)
+        added = [self.add_from_generation(out, pid, gid, i, "animated") for i in pack["stickers"]]
+        return {"added": len(added), "stickers": [a.get("id") for a in added] if isinstance(added[0], dict) else []}
+
     def delete_sticker(self, pid: str, sid: str) -> None:
         with self.lock:
             db = self._load(); p = self._pack(db, pid)

@@ -10,6 +10,7 @@ from pathlib import Path
 import cv2
 
 from mirsal import pipeline as pl
+from mirsal.engine.config import EngineConfig
 from mirsal.console.server import serve
 from tests import synth
 
@@ -28,7 +29,7 @@ class ConsoleTests(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = Path(tempfile.mkdtemp())
         build_inputs(cls.tmp / "in")
-        cls.srv, cls.c = serve(cls.tmp / "out", cls.tmp / "in", 0, block=False)
+        cls.srv, cls.c = serve(cls.tmp / "out", cls.tmp / "in", 0, cfg=EngineConfig(min_sheet_px=256), block=False)   # the synthetic sheets are small
         cls.port = cls.srv.server_address[1]
         threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
 
