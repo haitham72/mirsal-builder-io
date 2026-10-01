@@ -4,7 +4,7 @@ A typed request becomes a sheet of 9 stickers made by Higgsfield, and an approve
 engine and review gates; the file store is the only state (no database). What the Higgsfield CLI offers, with measurements: [`higgsfield.md`](higgsfield.md).
 
 ```
-request ─(prompt template v2 + style + stroke [+ AI enhancer] [+ references])─► task (G1 approval)
+request ─(prompt template v3 + style + stroke [+ AI enhancer] [+ references])─► task (G1 approval)
         ─► sheet job ─► Higgsfield CLI (Nano Banana 2, 2k) ─► out/jobs/J###/result.png
         ─► Pick(sheet) ─► the unchanged stills run ─► G2 ─► video sheet (G3) ─► video job ─► Kling v3.0 ─► attach + slice ─► animations ─► pack
 ```
@@ -147,7 +147,7 @@ the job endpoints (`/api/jobs`, `/api/jobs/<id>[/claim|done|fail|requeue]`) from
 `composer.js` replaces the old input row of the Studio with the Generate menu: a dark stage lit by the logo's blue, the prompt as its centre, reference images inside the prompt box
 (button, drag-and-drop or paste), a bar with the **model** chip (opens the model dialog), **stroke** (none / thin 4 / medium 8 / bold 12 / max 16 px, previews drawn with the real width),
 the **AI enhancer** switch and **Generate** with its price inside the button (Higgsfield-style); below it the six style cards. Generate **starts at once** with the selection made before:
-no confirmation, a click is the decision (it is refused only when the price is above the balance). `composer.js` also puts the **Higgsfield credits at the top** (a pill whose drop-down shows the balance, today's spend, the Usage log and the recent batches), and `live.js` holds the credits chip (bottom of the rail, opens the **Usage** log), the **live edge sliders**, the **Earlier batches** history (every batch ever made, 5 at a time with Load more, from `GET /api/history`; opening one never loses another), the model
+no confirmation, a click is the decision (it is refused only when the price is above the balance). `composer.js` also puts the **Higgsfield credits at the top** (a pill whose drop-down shows the balance, today's spend, the Usage log and the recent batches), and `live.js` holds the credits chip (bottom of the rail, opens the **Usage** log), the **edge bar** (Stroke / Trim test on one thumbnail, Apply / Cancel / Undo), the **Earlier batches** history (every batch ever made, 5 at a time with Load more, from `GET /api/history`; opening one never loses another), the model
 dialog, the job cards that follow a running sheet or Kling job, and the **animation box under the green screen** on each batch without a video: a model drop-down and one priced button.
 It sends one request: the server approves the kept stills, builds and approves the video sheet (`gates.quick_sheet`, the click is the decision) and starts the Kling job; "use my own tool"
 keeps the manual download/upload path. Prepared sheets stay one click away in the chips under the stage (they never trigger a generation); without the Higgsfield CLI the old
@@ -159,10 +159,13 @@ prepared-sheet lookup runs. Everything below the stage (results, gates, packs) i
 
 ## Tests (`tests/test_live.py`, `test_jobs.py`, `test_expander.py`; fake CLI, no credits)
 
-Ticket-first and resume, the daily cap, the Kling 4k ban, catalog defaults, usage roll-up, v2 prompt properties, the AI enhancer (never while typing, off = no call, on = expand then send,
-failure = fallback with a reason), references, and a full run through the console: request → sheet job → stills → G2 → video sheet → G3 → Kling job → sliced.
+Ticket-first and resume, the daily cap, the Kling 4k ban, catalog defaults, usage roll-up, prompt v2 / v3 properties, the AI enhancer (never while typing, off = no call, on = expand then send,
+failure = fallback with a reason), references, a full run through the console (request → sheet job → stills → G2 → video sheet → G3 → Kling job → sliced), history paging, the gap and Loop,
+Retry, the named export folders and their root, allow anyway / allow all, **the edge** (a preview writes nothing; Apply makes one snapshot; the same edge twice adds none; Undo restores; the
+video and the pack commit a pending edge) and **the blue screen** (detect, key, video sheet, and the mark only when it is blue, on a synthetic blue sheet; the real failed batch G006 was re-run on a copy: 0/9 -> 9/9). 194 tests in the whole suite.
 
 ## Not built
 
-The vision judge (S6, with Haitham's 30 labels), `measure-cells` and the `slot_fill` tuning on real Kling runs (S4), the sheet-vs-single and outline decisions (S7), the 20-prompt AI lab rating (S5).
-`out/jobs/*.json` and `out/model_calls.jsonl` keep the shapes `phase_03.md` expects (only fields were added), so Phase 3 imports them unchanged.
+The vision judge (S6, with Haitham's 30 labels), `measure-cells` and the `slot_fill` tuning on real Kling runs (S4), the sheet-vs-single and outline decisions (S7), the 20-prompt AI lab rating (S5),
+and the leftovers of the original planner design that wait for Haitham's word (UAE content rules, English + Arabic Telegram keywords, 4x4 sheets): all listed in `../phase_02.md`.
+`out/jobs/*.json` and `out/model_calls.jsonl` keep the shapes `phase_03.md` expects (only fields were added), and 3A already imports them.
