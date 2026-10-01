@@ -182,7 +182,25 @@ def make_handler(c: Console):
             if path == "/api/ai":          # is the model available (never the key)
                 return self._json(200, llm.status())
             if path == "/api/search":
-                return self._json(200, {"results": gates.search(c.out, parse_qs(urlparse(self.path).query).get("q", [""])[0])})
+                q = parse_qs(urlparse(self.path).query).get("q", [""])[0]
+                try:  # Phase 3A: Postgres search when serving the real out/ with the database up, else files
+                    from ..store import db as _db, repo as _repo, sync as _sync
+                    import os as _os
+                    if _sync.is_default_out(c.out) and _os.environ.get("MIRSAL_DB_WRITE", "") not in ("0", "no", "off", "false") and _db.available():
+                        with _db.connect() as _c:
+                            rows = _repo.search(_c, q)
+                        return self._json(200, {"results": [{
+                            "generation": r["generation_id"], "id": int(r["generation_id"][1:]),
+                            "index": r["idx"], "key": r["key"], "tags": r["tags"], "name": r["name"],
+                            "task_slug": r["task_slug"], "status": r["status"], "reason": None,
+                            "review": {"still": r["still_review"], "anim": r["anim_review"]},
+                            "anim_status": r["animation_status"], "png": r["png"] or "", "webm": r["webm"] or "",
+                            "emoji": "".join(r["emoji"]), "final": r["still_review"] == "APPROVED" and (
+                                r["animation_status"] == "NOT_REQUESTED" or r["anim_review"] == "APPROVED"),
+                            "via": "postgres"} for r in rows], "via": "postgres"})
+                except Exception:
+                    pass
+                return self._json(200, {"results": gates.search(c.out, q), "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
             if path == "/api/generations":

@@ -89,6 +89,11 @@ def read_result(out: Path, gid: int) -> dict:
 
 def write_result(out: Path, gid: int, res: dict) -> None:
     _atomic_write(gen_dir(out, gid) / "result.json", json.dumps(res, indent=2, ensure_ascii=False).encode())
+    try:  # Phase 3A write-through: Postgres mirrors the file store when it is up; never raises
+        from .store import sync
+        sync.sync_result(out, gid, res)
+    except Exception:
+        pass
 
 
 def read_events(out: Path, gid: int) -> list[dict]:

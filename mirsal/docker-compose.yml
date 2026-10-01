@@ -1,0 +1,18 @@
+# Mirsal local services (Phase 3A: Postgres; Phase 4 adds redis).
+# Port 5434: 5433 is temporal_note-db, 5436 is sarab-postgres-db on this PC.
+# Dev-only password default; override with MIRSAL_PG_PASSWORD (never commit a real one).
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: mirsal-db
+    environment:
+      POSTGRES_USER: mirsal
+      POSTGRES_PASSWORD: ${MIRSAL_PG_PASSWORD:-mirsal_local}
+      POSTGRES_DB: mirsal
+    ports:
+      - "5434:5432"
+    volumes:
+      - mirsal_pgdata:/var/lib/postgresql/data
+
+volumes:
+  mirsal_pgdata:

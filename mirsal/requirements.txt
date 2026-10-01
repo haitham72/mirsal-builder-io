@@ -3,3 +3,4 @@ opencv-python-headless>=4.9
 pillow>=10
 imageio-ffmpeg>=0.5   # bundled ffmpeg fallback; a system ffmpeg on PATH is used first
 onnxruntime>=1.17   # optional: AI cutout for photos and video (see mirsal/models/README.md); GrabCut is the fallback
+psycopg[binary]>=3.2   # Phase 3A: Postgres state (mirsal-db on 5434); the engine never imports it

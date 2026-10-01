@@ -1,6 +1,6 @@
 # Phase_03 — supporting material for `../phase_03.md`
 
-Phase 3 is **Postgres** (3A: stable IDs like `G004/S3`, lineage, immutable history, search, tracing) and then the pool, photo, text and depth features (3B-3E). It was Phase 2 until 2026-10-01 (the old Phase 3's second half now follows it). The spec is **`../phase_03.md`**. **It starts only when Haitham confirms.**
+Phase 3 is **Postgres** (3A: stable IDs like `G004/S3`, lineage, immutable history, search, tracing) and then the pool, photo, text and depth features (3B-3E). It was Phase 2 until 2026-10-01 (the old Phase 3's second half now follows it). The spec is **`../phase_03.md`**. **3A started on Haitham's confirmation (2026-10-01, "proceed with the local postgres") and is built** (architecture in `README.md` in this folder); 3B-3E wait.
 
 - **3A needs no inputs from Haitham** except one decision: LangSmith cloud or self-hosted (`LANGSMITH_API_KEY`). Not blocking: the trace seam ships with the `none` backend and a fake-server test.
 - **Prerequisite:** the Phase 1 exits. Phase 2 (live generation) is what gives 3A most to import (`out/jobs/*.json`, `out/model_calls.jsonl`, VLM verdicts); the exact shapes are in `../phase_03.md`, "Notes from building 1F + 1G", and `../phase_02.md`, "Hands to Phase 3".

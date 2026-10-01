@@ -1,4 +1,5 @@
-"""python -m mirsal create "<prompt>" | more [G001] | animate [G001] [--slice N] | serve [--port N] [--pace S] [--workers N] | profile [G001] [--sweep 1,4,9] | recheck [G001|all]"""
+"""python -m mirsal create "<prompt>" | more [G001] | animate [G001] [--slice N] | serve [--port N] [--pace S] [--workers N] | profile [G001] [--sweep 1,4,9] | recheck [G001|all]
+   | db (up|migrate|reset --yes|import) | list | show G002 | history G002/S5 | search "<text>" [--approved --animated] | task <external-id> [--key <prefix>]"""
 from __future__ import annotations
 
 import argparse
@@ -23,7 +24,148 @@ def _show(out, gid, t0):
         print("ERROR:", r["error"])
 
 
+def _dbc():
+    """Connect or explain. Returns None (after printing) when Postgres is unreachable."""
+    from .store import db as _db
+    if not _db.available():
+        print(f"Postgres is not reachable at {_db.url()} (start it: python -m mirsal db up)")
+        return None
+    return _db.connect()
+
+
+def db_cmd(out, action: str, yes: bool) -> int:
+    from .store import db as _db
+    from .store import repo
+    if action == "up":
+        import subprocess
+        yml = out_root_compose()
+        r = subprocess.run(["docker", "compose", "-f", str(yml), "up", "-d"], capture_output=True, text=True)
+        print((r.stdout or "") + (r.stderr or ""))
+        if r.returncode:
+            return 1
+        for _ in range(30):
+            _db.reset_cache()
+            if _db.available():
+                break
+            time.sleep(1)
+        if not _db.available():
+            print("mirsal-db started but is not answering yet; retry migrate in a few seconds")
+            return 1
+        action = "migrate"
+    if action == "migrate":
+        try:
+            files = _db.migrate()
+        except Exception as e:
+            print(f"migrate failed: {e}")
+            return 1
+        print("migrated: " + (", ".join(files) or "nothing new"))
+        return 0
+    if action == "reset":
+        if not yes:
+            print("refusing: `db reset` destroys the local Mirsal database; pass --yes (dev only)")
+            return 1
+        try:
+            _db.reset("yes")
+            _db.migrate()
+        except Exception as e:
+            print(f"reset failed: {e}")
+            return 1
+        print("reset: local Mirsal database dropped and migrated fresh")
+        return 0
+    if action == "import":
+        c = _dbc()
+        if c is None:
+            return 1
+        with c:
+            try:
+                _db.migrate()
+            except Exception as e:
+                print(f"migrate failed: {e}")
+                return 1
+            nt = repo.import_tasks(c, out)
+            ok, bad = 0, []
+            for gid in pl.list_ids(out):
+                try:
+                    repo.save_generation(c, out, gid)
+                    ok += 1
+                except Exception as e:
+                    c.rollback()  # one bad generation must not poison the rest of the import
+                    bad.append(f"G{gid:03d}: {e}")
+        print(f"imported {ok} generation(s), {nt} task file(s)")
+        for b in bad:
+            print("FAILED " + b)
+        return 1 if bad else 0
+    return 1
+
+
+def out_root_compose():
+    from pathlib import Path as _P
+    return _P(__file__).resolve().parent.parent.parent / "docker-compose.yml"
+
+
+def store_cmd(args) -> int:
+    import json as _json
+    from .store import repo
+    c = _dbc()
+    if c is None:
+        return 1
+    with c:
+        if args.cmd == "list":
+            for g in repo.list_generations(c, args.limit):
+                print(f"{g['id']}  {g['task_slug'] or g['prompt'][:40]:<42} {g['ready'] or 0}/{g['n'] or 0} {g['status']}"
+                      + (f"  parent={g['parent_id']}" if g["parent_id"] else ""))
+            return 0
+        if args.cmd == "show":
+            gid = f"G{_gid(args.gid):03d}"
+            g = repo.get_generation(c, gid)
+            if not g:
+                print(f"no {gid} in Postgres (import: python -m mirsal db import)")
+                return 1
+            print(f"{g['id']}  {g['prompt']}\n  task={g['task_slug']} status={g['status']} parent={g['parent_id'] or '-'} "
+                  f"template={g['template_id']} v{g['template_version']} assets={len(g['assets'])}")
+            for s in g["stickers"]:
+                print(f"  S{s['idx']} {''.join(s['emoji'])} {s['key']:<48} {s['status']}"
+                      + (f" {s['reason']}" if s["reason"] else "")
+                      + f"  still={s['still_review']} anim={s['anim_review']} {s['animation_status']}")
+            return 0
+        if args.cmd == "history":
+            rows = repo.history(c, args.sid.upper())
+            if not rows:
+                print(f"no decisions for {args.sid} (import first: python -m mirsal db import)")
+                return 1
+            for r in rows:
+                print(f"{r['ts']}  {r['gate']:<11} {r['decision']:<8} {r['actor']:<6} {r['reason'] or ''}")
+            return 0
+        if args.cmd == "search":
+            rows = repo.search(c, args.query, approved=args.approved, animated=args.animated,
+                               generation=args.generation, since=args.since)
+            if args.as_json:
+                print(_json.dumps(rows, ensure_ascii=False, default=str))
+                return 0
+            for r in rows:
+                print(f"{r['generation_id']}/S{r['idx']} {''.join(r['emoji'])} {r['key']:<48} "
+                      f"still={r['still_review']} anim={r['anim_review']}  {r['png'] or r['webm'] or ''}")
+            if not rows:
+                print("no matches")
+            return 0
+        if args.cmd == "task":
+            rows = repo.find_task(c, external_id=args.ext, key_prefix=args.key)
+            if not rows:
+                print("no such task (import first: python -m mirsal db import)")
+                return 1
+            for t in rows:
+                print(f"{t['provider']}:{t['external_task_id']}  kind={t['kind']} name_key={t['name_key']} "
+                      f"status={t['status']} generation={t['generation_id'] or '-'}")
+            return 0
+    return 1
+
+
 def main(argv=None) -> int:
+    import sys as _sys
+    try:  # Windows consoles default to cp1252, which cannot print emoji: replace, never crash
+        _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser(prog="mirsal")
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("create"); c.add_argument("prompt")
@@ -37,6 +179,15 @@ def main(argv=None) -> int:
     s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0)
     for p_ in (s, a):
         p_.add_argument("--workers", type=int, help="cells animated at the same time (default: CPU count up to 9, or MIRSAL_ANIM_WORKERS)")
+    d = sub.add_parser("db", help="Postgres: up (start mirsal-db) | migrate | reset --yes (dev only) | import (backfill out/)")
+    d.add_argument("action", choices=["up", "migrate", "reset", "import"]); d.add_argument("--yes", action="store_true")
+    li = sub.add_parser("list", help="generations in Postgres, newest first"); li.add_argument("--limit", type=int, default=50)
+    sh = sub.add_parser("show", help="one generation: stickers, files, gate decisions"); sh.add_argument("gid")
+    hi = sub.add_parser("history", help="every decision for one sticker, in time order"); hi.add_argument("sid")
+    se = sub.add_parser("search", help="search stickers in Postgres (full-text, trigram fallback)"); se.add_argument("query")
+    se.add_argument("--approved", action="store_true"); se.add_argument("--animated", action="store_true")
+    se.add_argument("--generation"); se.add_argument("--since"); se.add_argument("--json", action="store_true", dest="as_json")
+    ta = sub.add_parser("task", help="what happened to a provider task id"); ta.add_argument("ext", nargs="?"); ta.add_argument("--key")
     args = ap.parse_args(argv)
     out, inp, cfg, t0 = out_root(), input_root(), EngineConfig(), time.perf_counter()
     if getattr(args, "workers", None):
@@ -56,6 +207,10 @@ def main(argv=None) -> int:
         return 0
     if args.cmd == "profile":
         return profile(out, _gid(args.gid), cfg, args.sweep)
+    if args.cmd == "db":
+        return db_cmd(out, args.action, args.yes)
+    if args.cmd in ("list", "show", "history", "search", "task"):
+        return store_cmd(args)
     try:
         if args.cmd == "serve":
             from .console.server import serve
@@ -138,6 +293,21 @@ def doctor() -> int:
     print("OK      AI expansion: " + (f"on, model {llm.model()}" if llm.configured() else f"off: add {llm.KEY_VAR} to mirsal/.env to let the AI expand a subject and name every sticker (the built-in sets are used meanwhile)"))
     import os
     print(f"OK      animation workers: {EngineConfig().anim_workers} of {os.cpu_count()} CPUs (MIRSAL_ANIM_WORKERS or serve --workers N changes it)")
+    try:
+        from .store import db as _db
+        if _db.available():
+            print(f"OK      Postgres: reachable ({_db.url().split('@')[-1]}); write-through "
+                  + ("on" if os.environ.get("MIRSAL_DB_WRITE", "") not in ("0", "no", "off", "false") and not os.environ.get("MIRSAL_OUT") else "off (MIRSAL_OUT copy or MIRSAL_DB_WRITE=0: use `db import`)"))
+        else:
+            print(f"NOTE    Postgres: not connected ({_db.url().split('@')[-1]}; start it: python -m mirsal db up)")
+    except Exception as e:
+        print(f"NOTE    Postgres: store unavailable ({e}; pip install -r requirements.txt)")
+    try:
+        from .obs import trace as _tr
+        st = _tr.status()
+        print(f"OK      trace backend: {st['backend']}" + (f" (reachable)" if st["reachable"] else " (unreachable)" if st["reachable"] is False else ""))
+    except Exception as e:
+        print(f"NOTE    trace: {e}")
     from . import telegram
     try:
         import ssl

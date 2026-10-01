@@ -12,7 +12,7 @@ High-quality **animated stickers** (not emoji) for Telegram: a request or a prep
 | Prompt for an independent LLM review (it writes `report.md`) | [`REVIEW_PROMPT.md`](REVIEW_PROMPT.md) |
 | **Phase 1 — built:** engine, verifier, gates, Studio, Telegram. Architecture, how to run, API, tests | [`Phase_01/README.md`](Phase_01/README.md), finish list in [`Phase_01/CLAUDE.md`](Phase_01/CLAUDE.md) |
 | **Phase 2 — next, ready to go:** prompt engine, vision check, live generation through Higgsfield (MCP) | [`phase_02.md`](phase_02.md), inputs in [`Phase_02/`](Phase_02/CLAUDE.md) |
-| **Phase 3 — waits for Haitham:** Postgres, tracing, pool, photo / text / depth stickers | [`phase_03.md`](phase_03.md), [`Phase_03/`](Phase_03/CLAUDE.md) |
+| **Phase 3 — 3A built, 3B-3E next:** Postgres, tracing, pool, photo / text / depth stickers | [`phase_03.md`](phase_03.md), arch in [`Phase_03/README.md`](Phase_03/README.md), inputs in [`Phase_03/`](Phase_03/CLAUDE.md) |
 | Phase 4 Redis + LangGraph + intelligence; Phase 5 API + hardening (+ reference client) | [`phase_04.md`](phase_04.md), [`phase_05.md`](phase_05.md) |
 | Design spec and mockup of the sandbox UI | [`ref/`](ref/) |
 

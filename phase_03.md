@@ -320,13 +320,18 @@ CREATE TABLE generation_events (
   - `--approved` hides gate-rejected stickers;
   - a key-only Phase 1 import is still findable.
 
-## Exit
-- [ ] Every command above works; the tests pass.
-- [ ] `import out/` brings in every Phase 1 run, including 1F reviews and video sheets, with one `prepared` task row per sheet and video.
-- [ ] `mirsal task <external_task_id>` and prefix search on `name_key` / `key` work, for prepared folders and for Higgsfield job ids alike.
-- [ ] `import out/` also brings in `out/jobs/*.json`, `out/model_calls.jsonl` and the VLM verdicts; running it twice adds nothing.
-- [ ] With `MIRSAL_TRACE=langsmith` one root run per generation appears with one feedback per gate decision, and `none` makes zero network calls (second half of 3A).
-- [ ] Haitham runs `list` / `show` / `history` / `search` after a restart and sees his history, with every approve/reject he made in the console.
+## Exit (3A built 2026-10-01; architecture in `Phase_03/README.md`)
+- [x] Every command works (`db/list/show/history/search/task`); 152 tests pass (`tests/test_store.py`: 10).
+- [x] `db import` brings in every Phase 1 run (92/92 incl. 1F reviews and video sheets; re-import adds zero rows),
+  with one `prepared` task row per generation (sheet; separate per-video rows deferred).
+- [x] `mirsal task <external_task_id>` and prefix search work for prepared folders (Higgsfield job ids: no Phase 2
+  outputs exist yet).
+- [ ] `import out/` also brings in `out/jobs/*.json`, `out/model_calls.jsonl` and the VLM verdicts — waits for
+  Phase 2 to produce them (`import_tasks` covers `out/tasks/*.json` only; `model_calls` table + `002` land then).
+- [~] Tracing seam done (`obs/trace.py`: `none` zero network calls, `langsmith` batched + droppable, gate-feedback
+  keys; fake-server tested). `mirsal trace backfill` waits for real runs.
+- [x] Restart proof done by the builder (`docker restart mirsal-db && show` returns everything); Haitham's own
+  `list/show/history/search` run still pending.
 
 ## Explicitly deferred (3A)
 - Sessions, interactions, feedback, preferences → Phase 4. Chat feedback ("I like 2 but not 3") is different from a gate decision: when Phase 4 receives it at an open gate, it writes `reviews` rows too.
