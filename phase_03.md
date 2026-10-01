@@ -292,7 +292,7 @@ class VideoGenerator(Protocol):
   - Phase 3 only sends that sheet to image-to-video **after G3** and stores the provider's task id in `video_sheets.ticket`. The returned video is attached by ticket, which replaces 1F's manual upload.
   - Slicing uses the layout's rectangles, and the `inside_slot` / `cross_slot` gate is the same Phase 1 code.
   - Measure the cross-cell interaction rate (`cross_slot` blocks / slots) and `subject_px_in_video` per provider. The fallback is per-sticker animation (a 1×1 sheet, one call per sticker), chosen per provider when either measure fails.
-- **Ticket-based pairing:** the provider call returns a ticket (task id); store it on the generation, and when the image and video arrive, attach them to that generation by ticket, not by filename or take number. The Phase 1 number-matching (and its `pairing: order` guess) then only serves manual sandbox files.
+- **Ticket-based pairing (the Phase 2 "hard truth"):** every provider call inserts a `tasks` row (`provider`, `external_task_id`, `kind`, `name_key`, `request`) **before** waiting, and fills `result_ref` and `status` when it returns. The provider call returns a ticket (task id); store it on the generation, and when the image and video arrive, attach them to that generation by ticket, not by filename or take number. The Phase 1 number-matching (and its `pairing: order` guess) then only serves manual sandbox files.
 - **Reliability:**
   - every call has a timeout and a max attempt count;
   - transient errors are retried up to 2 times; invalid input is never retried;

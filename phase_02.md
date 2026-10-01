@@ -70,6 +70,49 @@ mirsal/
 
 Phase 1 (Part D) stores packs in `out/library/library.json` (`packs[] -> stickers[]`: id, name, slug, cover, next counter, sticker file/type/emoji/kb/w/h/source, created). Model it as `packs` and `pack_stickers` (ordered by position, `emoji text[]` for Telegram's multi-tag rule, `source jsonb` = `{generation, index}` or `{editor: true}`), keep the same file naming `<img|vid>-<NNN>-<pack_slug>-<sticker_slug>`, and import the JSON once. The `Library` class becomes a repository with the same method names so the console keeps working unchanged.
 
+## The hard truth: request → external task id → database → search (Haitham, 2026-10-01)
+
+This is the one flow every phase must keep true:
+
+```
+user asks ("teddy bear")  ─►  external API returns a task id  ─►  Postgres stores {id, name_key}  ─►  dev lookup + key / semantic search
+```
+
+- **The external task id is the join key** between Mirsal and the provider. It is never derived from a filename. Phase 3's providers return it (WaveSpeed task id, OpenAI response id). Until then, the **prepared** inputs stand in for it: `provider = 'prepared'`, `external_task_id = 'img-001-teddy_bear'` (the watch-folder name, which is final and never renamed).
+- **`name_key`** is the human-readable, searchable key:
+  - for a task it is the plan's `task_slug` (`teddy_bear_school`);
+  - for a sticker it is its `key` (`teddy_bear_with_a_book`, = `tags[0]`).
+  Every file stem is built from them (`<media>-<NNN>-<task_slug>-<key>`), so a filename, a DB row and a search hit all say the same thing.
+- **Dev use:** `mirsal task <external_task_id>` and `mirsal task --key teddy_bear_school` print the task, its generation(s), the stickers, their files, and every verifier/human decision. The question "what happened to provider task X?" is answered in one command.
+- **Search use:** `search` matches `name_key`, key and tags exactly or by prefix first (fast, for dev and the UI), then full-text and trigram (Phase 2). Phase 3B adds vectors over the same rows (semantic). There is one query path; 3B extends it, it does not fork it.
+
+```sql
+CREATE TABLE tasks (
+  id               bigserial PRIMARY KEY,
+  provider         text NOT NULL,                  -- 'prepared' (Phases 1-2) | 'wavespeed' | 'openai' … (Phase 3)
+  external_task_id text NOT NULL,                  -- the provider's task id; for prepared inputs the watch-folder name
+  kind             text NOT NULL CHECK (kind IN ('sheet','video','single')),   -- single = 1x1 regen of one sticker
+  name_key         text NOT NULL,                  -- task_slug, e.g. 'teddy_bear_school'
+  generation_id    text REFERENCES generations(id),
+  video_sheet_id   text REFERENCES video_sheets(id),   -- set for kind = 'video'
+  status           text NOT NULL,                  -- REQUESTED | RUNNING | DONE | FAILED | TIMEOUT
+  request          jsonb NOT NULL,                 -- what was sent: template id + slot JSON, grid, model, seed
+  result_ref       jsonb,                          -- what came back: object key(s), sha256, provider metadata
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  completed_at     timestamptz,
+  UNIQUE (provider, external_task_id)              -- one row per provider task; re-delivery is idempotent
+);
+CREATE INDEX ON tasks (name_key);
+CREATE INDEX ON stickers (key text_pattern_ops);   -- prefix search on name keys ('teddy_bear_%')
+```
+
+- `video_sheets.ticket` (below) becomes a reference to `tasks.external_task_id` (kind `video`). There is one place for provider ids.
+- `db import` creates one `prepared` task row per imported generation (sheet) and one per video used.
+- **Tests:**
+  - importing the same prepared folder twice gives one task row;
+  - `mirsal task img-001-teddy_bear` lists every generation made from it;
+  - `search teddy_bear_with` (prefix) returns that sticker before any full-text hit.
+
 ## Schema (`001_init.sql`)
 
 ```sql
@@ -263,7 +306,8 @@ CREATE TABLE generation_events (
 
 ## Exit
 - [ ] Every command above works; the tests pass.
-- [ ] `import out/` brings in every Phase 1 run, including 1F reviews and video sheets.
+- [ ] `import out/` brings in every Phase 1 run, including 1F reviews and video sheets, with one `prepared` task row per sheet and video.
+- [ ] `mirsal task <external_task_id>` and prefix search on `name_key` / `key` work.
 - [ ] Haitham runs `list` / `show` / `history` / `search` after a restart and sees his history, with every approve/reject he made in the console.
 
 ## Explicitly deferred

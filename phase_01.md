@@ -193,8 +193,73 @@ The event payload gains `actor` and `decision`.
 - **After slicing:** Approve and Reject per tile for the animation.
 - **A "Final" tab** shows the pack (approved at G2 and G4) with "Add to pack".
 
+### The verifier (Python + OpenCV): the plan (Haitham, 2026-10-01: "plays a major role")
+
+**Role.** The verifier is the only actor whose verdict is final. It runs at every stage of the golden path *before* a human sees anything, and it decides what a human is **allowed** to approve. It is deterministic (same bytes in, same verdict out), never raises (a crash is a `BLOCK verifier_error` with the trace in `detail`), and never looks at meaning: Python judges *correct*, humans and the VLM judge *good*.
+
+**One module, one catalogue.** `mirsal/engine/verify.py` gathers every check. The checks already in `sheet.py` / `video.py` move into it unchanged, so there is no second implementation. Every check is one function with a fixed shape:
+
+```python
+@dataclass
+class Check:            # one row of the catalogue
+    id: str             # 'inside_slot'; also the reason string and the reviews.reason value
+    stage: str          # sheet | still | video_sheet | video | anim | pack
+    severity: str       # BLOCK (final, cannot be approved) | WARN (shown to the human at the gate)
+    value: float | int | str | None   # the measured metric
+    limit: float | int | str | None   # the threshold it was compared with (from EngineConfig)
+    ok: bool
+    detail: dict        # e.g. {"frame": 41, "over_px": 6}
+def run(stage, inputs, cfg) -> list[Check]        # runs every check of that stage, in catalogue order
+```
+
+- Thresholds live in `EngineConfig` only. A check never hard-codes a number.
+- `Report` becomes a view over `list[Check]`: the first `BLOCK` failure is the sticker's `reason`, and every `WARN` lands in `metrics.warnings`.
+- Every check result becomes a `history` entry (`actor: python`). In Phase 2 each one is a `reviews` row (`PASS` / `BLOCK`, plus `WARN` as detail), so "why was S5 blocked" is one query.
+- Cost budget: the stills checks for a 2K sheet stay under 1 s; the video checks add under 20% to the encode time. Each stage's timing is printed.
+
+**Catalogue** (new checks in bold; the existing ones keep their names):
+
+| Stage | Check | Severity | Measures |
+|---|---|---|---|
+| sheet (on arrival, before slicing) | **`sheet_decodes`** | BLOCK | the file decodes; RGB/RGBA; the size is read |
+| | **`sheet_size`** | BLOCK | shortest side ≥ `min_sheet_px` (1024; production sheets are 2K) |
+| | **`background_is_key`** | BLOCK | median key difference on the outer ring ≥ `min_key_diff`. A sheet without a green/blue screen cannot be chroma keyed; route it to the matte keyer (3C) instead |
+| | **`grid_detected`** | BLOCK | `detect_grid` equals the requested grid (3×3 / 2×2 / 1×1) |
+| | **`cut_clean`** | WARN | every cut line is a real gutter (`method` is `gutter`, not `equal`/`mixed`). An `equal` cut means a character crosses where the line should be |
+| | **`background_flat`** | WARN | key-colour std-dev across the gutters ≤ `max_bg_std` (a gradient or noisy screen keys worse) |
+| still (per cell) | `dimensions`, `transparent_corners`, `foreground`, `static_file` | BLOCK | as built |
+| | `inside_cell` | BLOCK | the subject touches its cut rectangle, i.e. it is cropped |
+| | `no_spill` | BLOCK | key colour on the edge band only (as built 2026-10-01) |
+| | `chroma_risk` | WARN | interior key-coloured share of the subject |
+| | **`holes`** | WARN; BLOCK above `max_hole_share` | transparent regions enclosed by the subject's outer contour (a green part keyed away). `cv2.findContours` with `RETR_CCOMP`: the area of the child contours divided by the subject area |
+| | **`single_subject`** | WARN | more than one large connected component (≥ `min_part_share` of the subject): two characters in one cell, or a neighbour bleeding in |
+| | **`duplicate_cell`** | WARN | perceptual hash (64-bit dHash of the keyed alpha + luminance) within `dup_hamming` of another cell in the same sheet: the model repeated a pose |
+| | **`blank_cell`** | BLOCK `empty_subject` | as built (foreground below the minimum) |
+| video_sheet (G3 build) | **`slots_match_approved`** | BLOCK | the filled slots are exactly the approved `S#`; blank slots are pure key colour |
+| | **`no_outline_on_sheet`** | BLOCK | no white ring around the subjects (the outline is added once, after the video) |
+| video (returned, before slicing) | **`video_decodes`**, **`video_specs`** | BLOCK | decodes; fps, duration and size are read; at least `min_video_s` long |
+| | **`layout_match`** | BLOCK | first frame vs the video sheet, per slot: IoU of the keyed alpha masks ≥ `min_layout_iou` (0.6). This proves the video was made from **this** sheet (the ticket's sanity check) and that slot `n` still holds `S#n` |
+| | **`blank_slots_stay_empty`** | BLOCK the generation's video, not the stickers | foreground in a slot that was blank on the sheet: the model invented a character. The approved slots are still sliced; the event is recorded |
+| anim (per slot) | **`inside_slot`** | BLOCK | in any frame the subject reaches the slot border (within `edge_touch_px`); reports the first frame and the overshoot in px. It replaces the `edge_touch_frames` warning on the layout path |
+| | **`cross_slot`** | BLOCK | foreground in the gutter between two slots in any frame (characters touching or merging) |
+| | **`identity_kept`** | WARN | alpha IoU of the first frame vs the approved still (after the same normalisation) ≥ `min_identity_iou`. A low value means the video drifted to another pose or character |
+| | **`motion_present`** | WARN | median frame-to-frame change ≥ `min_motion`: a "video" that does not move |
+| | **`alpha_stable`** | WARN | variance of the subject area over frames ≤ `max_area_cv` (flicker, matte pumping) |
+| | `loop_seam`, `size_budget`, `codec_vp9`, `dimensions`, `fps`, `duration`, `no_audio`, `alpha_mode_tag`, `alpha_decoded` | BLOCK | as built |
+| pack (G5) | **`pack_limits`** | BLOCK | 1-120 stickers (Telegram), unique `key`s, ≥1 emoji each, every file within its format limits |
+
+**Rules.**
+- `BLOCK` is final: the API refuses an APPROVE on a blocked sticker (409), and the UI shows the check, its value and its limit.
+- A `WARN` badge shows on the tile and the human decides. Phase 3's VLM reads the same warnings as context.
+- The verifier never repairs pixels. Repair stays in the keyer's recovery ladder (re-key) and the loop closer, and both are re-verified after they act.
+- A new check ships with **two synthetic fixtures** (one that passes and one that fails it) in `tests/test_verify.py`, plus its row in this table and in the README.
+- Checks are versioned (`VERIFY_VERSION`, stored on every result), so Phase 2 can tell which rule set judged an old sticker.
+
+**Order to build:** (1) move the existing checks into `verify.py` behind `Check`, with no behaviour change (golden results identical on the 10 real sheets); (2) the sheet stage; (3) `holes`, `single_subject`, `duplicate_cell`; (4) the video-sheet and video stages, with 1F's layout slicing; (5) pack.
+
 ### Checkpoint 1F — exit
 
+- [ ] `engine/verify.py` holds the whole catalogue above; moving the existing checks into it changes nothing on the 10 real sheets (90/90 READY, same reasons and metrics); every new check has a pass fixture and a fail fixture.
 - [ ] A synthetic end-to-end test reproduces the example exactly:
   - G2 rejects 5 and 6, and the video sheet has 7 filled slots with 5 and 6 blank;
   - in a synthetic returned video, slots 1 and 2 drift over their slot edge, so 1 and 2 get an `inside_slot` BLOCK;
