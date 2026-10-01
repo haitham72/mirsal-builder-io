@@ -1,4 +1,4 @@
-# Phase 2 — Generation: prompt engine, vision check, live generation through Higgsfield (MCP)
+# Phase 2 — Generation: prompt engine, vision check, live generation through Higgsfield (CLI)
 
 > **Order changed 2026-10-01 (Haitham): this phase was Phase 3.** Live generation now comes **before** Postgres (which is Phase 3). It removes the manual Higgsfield loop and the cause of the out-of-bounds animations, and nothing in it needs a database: it runs on the file store Phase 1 already has (`out/tasks/*.json`, `out/G00N/result.json`, `out/library/`). Phase 3 imports what this phase writes.
 
@@ -11,7 +11,7 @@
 **Goal:** great prompts in, verified stickers out, generated live. The parts:
 1. **Prompt engine.** A short request is extracted, a character + style lock is built, and the saved template is filled (never rewritten).
 2. **Vision quality check.** A VLM pre-reviews every sticker; Python checks the pixels. The human still decides.
-3. **Generation.** The image sheet and then the video are made live by Higgsfield, driven through its MCP connector by an operator session, and fed into the unchanged Phase 1 engine. The video always comes from the **normalised** video sheet.
+3. **Generation.** The image sheet and then the video are made live by Higgsfield, driven through its CLI (the server fulfils the jobs itself; an operator session can run the same commands), and fed into the unchanged Phase 1 engine. The video always comes from the **normalised** video sheet.
 4. **Quality work.** Measured, not guessed.
 
 **Not in this phase:** Postgres, LangSmith, vectors/pool, photo/text/depth features (all Phase 3), Redis, LangGraph, a frontend rewrite (Phases 4-5).
@@ -29,16 +29,12 @@
 4. Telegram needs no change here (images and video are proven).
 
 ### What exists already (do not rebuild)
-- **Engine:** key → slice → scale → outline → validators; `verify.py` (44 checks); `build_video_sheet()` + layout slicing; `inside_frame` / `inside_slot` / `cross_slot`; `recheck_bounds`; the animation cache; `python -m mirsal profile`.
-- **Prompts:** `prompter.py` (deterministic slot filler, `render_plan`, `validate_plan`), the saved templates (`prompts/templates/*_v1.txt`), tags 1-5, the margin clause.
-- **Tickets:** `tasks.py` / `out/tasks/NNN.json` (reserved names, `request`, `provider`, `external_task_id`), `POST /api/plan`, `POST /api/tasks`, `POST /api/generations {task}`, the video upload `POST /api/generations/<id>/video_sheet/<A>/video`.
-- **UI:** Generate as five views, the Pack wizard, one-click Send to Telegram, History for the prepared samples.
+Everything in `Phase_01/README.md` and `Phase_02/README.md`: the engine and verifier, the gates, the prompt lab and v2 templates, jobs and their CLI fulfiller, the model catalog, the usage log, the Generate menu with the AI enhancer, references and live Kling animation.
 
 ### Build order (each step ends with something Haitham can see; stop at each gate)
 | Step | What | Done when |
 |---|---|---|
-| **S3** | **First real sheet:** write `docs/operator.md`; a job is claimed (ticket first), `higgsfield generate create nano_banana_flash --resolution 2k --wait --json` runs, the sheet is downloaded, and `job done` closes it (operator session or an in-Mirsal fulfiller; also test the no-`--wait` create once and record the id at create time). The sheet goes through the unchanged stills run and G2. | A real generated teddy-bear sheet reaches the Stickers view and its stills pass `inside_cell`. |
-| **S4** | **Normalised video:** the video job is built from `build_video_sheet()` (one scale, margins) after G3; Kling v3.0 animates it (start image = end image for a loop; `pro` gives 1440 px = 480 px per 3x3 cell, `std` only 320; see `Phase_02/higgsfield.md`); the returned video is attached by ticket and sliced; `inside_slot` / `cross_slot` / `inside_frame` judge it; `python -m mirsal measure-cells` reports the share of cells flagged. | A real generated video is sliced; the flagged share is measured and recorded; `slot_fill` is tuned until it is near zero or the per-sticker fallback is chosen. |
+| **S4** | **Normalised video: the Kling job from an approved video sheet is built** (attach + slice, `pro` = 480 px per sticker). Left: run it on real sheets and **measure** — `python -m mirsal measure-cells` (not built) reports the share of cells flagged by `inside_slot` / `cross_slot` / `inside_frame`; tune `slot_fill`, or fall back to one sticker per video / 2x2. First real run: G002 (J004, in flight when this was written). | The flagged share is measured and recorded; `slot_fill` is tuned until it is near zero or the per-sticker fallback is chosen. |
 | **S5** | **LLM slot filler** (built: `expander.py`, `llm.py`, the reviewer; architecture in `Phase_02/README.md`). Left: the 20-prompt AI lab (`mirsal prompt lab --ai`) and Haitham's rating. | 20 prompts from the prompt lab pass lint; Haitham rates them. |
 | **S6** | **Vision judge** (Part 2) + the bounded regeneration rules; every call appended to `out/model_calls.jsonl`. | The judge agrees with Haitham on at least 80% of 30 labelled stickers. |
 | **S7** | **Quality work** (Part 4): sheet vs single, outline A/B, measurements in `docs/phase2_measurements.md`. | Exit below. |
@@ -48,8 +44,8 @@
 - S5 decision made: the slot filler and reviewer use `OPENAI_API_KEY` (`llm.py`). Still open for S6: the judge on the same key, or an agent judge in the operator session.
 - 30 sticker labels for S6, a rating for the first live sheets.
 
-### Rules for the operator session
-Follow `docs/operator.md`: claim before calling Higgsfield (the ticket is stored first), one job at a time, stop on any error and `job fail` with the reason, never retry a paid call more than the plan says, never open or judge media (Python and the human judge), never write inside `Phase_01/Images_gen|videos_gen`.
+### Rules for whoever runs jobs
+The server fulfils jobs itself (`jobs.fulfil` through the Higgsfield CLI); an operator session can run `mirsal hf run J###` or the claim/done/fail commands. Ticket first (create without waiting, claim, then wait); one paid call at a time; never retry a paid call; `generate cost` before every call; Nano Banana 2 at 2k and Kling v3.0, never Kling 4k; never open or judge media (Python and the human judge); never write inside `Phase_01/Images_gen|videos_gen`; tests never reach the real CLI (`MIRSAL_NO_REAL_CLI`).
 
 ---
 
@@ -288,40 +284,7 @@ Flat solid pure {key colour} chroma-key background, no floor, no shadow on the b
 
 ---
 
-## Part 3 — Generation (live, through Higgsfield MCP)
-
-### The job interface (the seam; any provider fits behind it)
-
-```python
-class ImageGenerator(Protocol):
-    def generate(self, prompt: str, aspect: str, seed: int | None, reference: bytes | None = None) -> GenOutput: ...
-class VideoGenerator(Protocol):
-    def animate(self, image_png: bytes, prompt: str, duration_s: float, seed: int | None) -> GenOutput: ...
-# GenOutput: bytes, provider, model, seed_used, latency_ms, cost | None, raw_meta
-```
-
-The Protocols stay for any HTTP provider later. For the Higgsfield MCP the implementation is an **`OperatorProvider`**: Mirsal writes a job file, the operator fulfils it with the MCP tools, Mirsal reads the result.
-
-```
-out/jobs/J001.json
-{ "id": "J001", "kind": "sheet" | "video" | "single",
-  "task": "001",                        // the out/tasks/NNN.json it belongs to (reserved names, template + slots)
-  "generation": "G084" | null,          // set for video jobs
-  "provider": "higgsfield-mcp", "model": null,          // the operator fills the model it used
-  "request": { "prompt": "...", "aspect": "1:1", "grid": [3,3], "key_colour": "green",
-               "input_image": "out/G084/video_sheet/A1/sheet.png" | null, "duration_s": 3, "last_frame_equals_first": true },
-  "status": "REQUESTED" | "CLAIMED" | "DONE" | "FAILED" | "TIMEOUT",
-  "external_task_id": null,             // the Higgsfield job id; set at CLAIM, BEFORE waiting (idempotent retry)
-  "result": { "file": "out/jobs/J001/result.png", "sha256": "...", "bytes": 0, "width": 0, "height": 0 } | null,
-  "cost": null, "error": null, "created_at": "...", "claimed_at": null, "completed_at": null }
-```
-
-- **Commands (the operator calls these through the shell):** `mirsal jobs [--status REQUESTED] [--json]`, `mirsal job show J001 --json` (everything needed to call Higgsfield), `mirsal job claim J001 --ticket <higgsfield id>`, `mirsal job done J001 --file <path> --model <name> [--cost <credits>]`, `mirsal job fail J001 --reason "..."`. The server exposes the same as `GET /api/jobs`, `GET /api/jobs/<id>`, `POST /api/jobs` (create), `POST /api/jobs/<id>/claim|done|fail`.
-- **`done` attaches the result:** a `sheet` job starts the stills run exactly as a prepared sheet does (`ModelSource.find()` returns the same `Pick` the engine already takes, so the engine cannot tell generated input from prepared input); a `video` job goes through the existing returned-video route (`inside_slot` / `cross_slot` / `inside_frame` judge it); a `single` job is the 1×1 regeneration of one sticker.
-- **Ticket first (the "hard truth" of `CLAUDE.md` rule 10, on the file store):** `claim` writes `external_task_id` before the operator waits. A crashed operator re-run finds the CLAIMED job and resumes by its ticket instead of paying twice. `out/tasks/NNN.json` gets the same `external_task_id`. Phase 3 imports both as `tasks` rows unchanged (`provider = 'higgsfield-mcp'`).
-- **Timeouts and cost:** a job older than `JOB_TIMEOUT` (default 20 min) shows `TIMEOUT` and can be re-queued by a human; the estimated credit cost is printed before a job is created and again at `done`; a daily cap (`MIRSAL_DAILY_CREDITS`) refuses new paid jobs.
-- **Reliability:** every call has a timeout and a max attempt count; transient errors retry at most 2 times, invalid input never; there is never a "while not good" loop; if the video provider is down, stickers still work.
-- **The page:** Generate shows "No prepared sheet for this request" with **Generate it** (creates the sheet job and the reserved names) and a waiting state with the elapsed time; History keeps listing the prepared samples. The `Phase_01` watch folders stay as test data; they are removed only when Haitham says so.
+## Part 3 — Generation (live, through Higgsfield)
 
 ### Sizes and margins are normalised before anything goes to the video model (Haitham, 2026-10-01)
 
@@ -329,15 +292,6 @@ The prepared Higgsfield sheets and videos in `Phase_01` are pre-rendered and **n
 - **`slot_fill` is the dial, tuned by measurement per provider.** `python -m mirsal measure-cells` reports, for a set of generations: the share of cells flagged by `inside_slot` / `inside_frame`, the cross-cell interaction rate (`cross_slot` blocks / slots) and `subject_px_in_video`. Target: nothing flagged. If tuning fails, the fallback is per-sticker animation (a 1×1 sheet and one call per sticker), chosen per provider.
 - The image prompt keeps its margin clause so the stills pass `inside_cell` first.
 - Slicing uses the layout's rectangles and the same Phase 1 gates.
-
-### The operator loop (what the Claude Code session does)
-
-1. `mirsal jobs --status REQUESTED --json`; take the oldest.
-2. `mirsal job show J001 --json`; check the cost against the daily budget.
-3. `higgsfield generate create <model> ... --json` **without `--wait`** (with `--wait` the job id only appears after the job has finished, which would break ticket-first); **immediately** `mirsal job claim J001 --ticket <id>`.
-4. `higgsfield generate wait <id>` until done or the timeout; download `result_url`.
-5. `mirsal job done J001 --file <path> --model <name> --cost <credits>` (or `job fail`).
-6. Report one line per job. Repeat until none is waiting. The exact commands and parameters are in `Phase_02/higgsfield.md`.
 
 ### Engine changes allowed in this phase
 The two new Python checks of Part 2 if still missing, `split_grid()` extensions (16:9, 4×4), and the `slot_fill` setting. Existing engine functions stay unchanged, including `build_video_sheet()` and layout slicing.
@@ -371,7 +325,7 @@ The two new Python checks of Part 2 if still missing, `split_grid()` extensions 
 
 
 ## Hands to Phase 3
-- `out/jobs/*.json` and `out/tasks/*.json` with `external_task_id` / `provider = 'higgsfield-mcp'`: imported as `tasks` rows.
+- `out/jobs/*.json` and `out/tasks/*.json` with `external_task_id` / `provider = 'higgsfield-cli'`: imported as `tasks` rows.
 - `out/model_calls.jsonl` (one line per LLM / image / video / VLM call with latency and cost): imported as `model_calls`.
 - `plan` with `{template_id, template_version, slots}` and the planner / judge versions on every generation; the VLM verdicts in `result.json` as `actor = 'vlm'` history lines, imported as `reviews` rows.
 - The normalised video sheet and its `layout.json`, and the measurements in `docs/phase2_measurements.md`.

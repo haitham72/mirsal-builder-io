@@ -5,20 +5,19 @@ workspace is selected. Mirsal never holds Higgsfield credentials; it only writes
 `Phase_02/higgsfield.md` (S0: the real commands, parameters, costs and the standing model choices:
 Nano Banana 2 at 2k, Kling v3.0, never `4k`) before running jobs. Never run `higgsfield auth token`.
 
-## The loop
+## The server does this itself
+
+Pressing Generate in the Studio (or `POST /api/live/sheet`, `/api/live/video`) creates the job and the server runs `jobs.fulfil` in the
+background: `generate cost` -> `generate create` WITHOUT waiting -> `claim` with the returned id (ticket first) -> `generate wait` -> download ->
+`done`. A job that is already CLAIMED (a crashed run) resumes by its ticket. An operator session can do the same by hand:
 
 ```
-mirsal jobs --status REQUESTED --json          # take the oldest
-mirsal job show J001 --json                   # everything needed to call Higgsfield
-# check the cost against the daily budget (Haitham's number for the day)
-# higgsfield generate cost ...   then   higgsfield generate create <model> ... --wait --json
-mirsal job claim J001 --ticket <higgsfield id>   # IMMEDIATELY, before waiting
-# poll the Higgsfield job until done or the timeout; download the result
-mirsal job done J001 --file <path> --model <name> [--cost <credits>]
-# or: mirsal job fail J001 --reason "..."
+mirsal jobs --status REQUESTED --json          # what is waiting
+mirsal hf run J005                             # fulfil one job through the CLI (cost check, ticket first, wait, done)
+mirsal hf status                               # credits and plan
+mirsal hf models --type video                  # the full Higgsfield list with parameters (cached in out/higgsfield_models.json)
+# or the individual steps: mirsal job claim J005 --ticket <id> ... mirsal job done J005 --file <path> --model <name> --cost <n>
 ```
-
-One line per job when done. Repeat until none is waiting.
 
 ## Rules
 

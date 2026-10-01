@@ -26,7 +26,7 @@ Everything here was observed on this PC with the Higgsfield **CLI** (`higgsfield
 ## Standing choices (Haitham, 2026-10-01)
 
 - **Images: Nano Banana 2 (`nano_banana_flash`) at 2k.** 2 credits, about 22 s.
-- **Video: Kling v3.0 (`kling3_0`). Never use its `4k` mode** (18 credits for 3 s; Haitham's rule). The quality dial is `std` vs `pro` below.
+- **Video: Kling v3.0 (`kling3_0`). Never use its `4k` mode** (18 credits for 3 s; Haitham's rule). Always `pro` (`std` returns 960 px for a square sheet and looked pixelated); Grok always 1080p.
 
 ## What was run
 

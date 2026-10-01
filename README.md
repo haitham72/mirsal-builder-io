@@ -11,7 +11,7 @@ High-quality **animated stickers** (not emoji) for Telegram: a request or a prep
 | Session state, open list, next prompt | [`HANDOFF.md`](HANDOFF.md) |
 | Prompt for an independent LLM review (it writes `report.md`) | [`REVIEW_PROMPT.md`](REVIEW_PROMPT.md) |
 | **Phase 1 — built:** engine, verifier, gates, Studio, Telegram. Architecture, how to run, API, tests | [`Phase_01/README.md`](Phase_01/README.md), finish list in [`Phase_01/CLAUDE.md`](Phase_01/CLAUDE.md) |
-| **Phase 2 — offline parts built, live generation next:** prompt lab, file jobs, slot reviewer are built; live generation through Higgsfield (MCP) needs an authorised session | [`phase_02.md`](phase_02.md) (open steps), arch in [`Phase_02/README.md`](Phase_02/README.md), inputs in [`Phase_02/`](Phase_02/CLAUDE.md) |
+| **Phase 2 — live generation built, measuring next:** prompt lab, jobs, the Higgsfield CLI fulfiller, model selector, usage log, the Generate menu; the vision judge and the measurements are open | [`phase_02.md`](phase_02.md) (open steps), arch in [`Phase_02/README.md`](Phase_02/README.md), inputs in [`Phase_02/`](Phase_02/CLAUDE.md) |
 | **Phase 3 — 3A, 3B lexical pool and 3C photo core built; 3B vectors, 3D, 3E next:** Postgres, tracing, pool, photo / text / depth stickers | [`phase_03.md`](phase_03.md), arch in [`Phase_03/README.md`](Phase_03/README.md), inputs in [`Phase_03/`](Phase_03/CLAUDE.md) |
 | Phase 4 Redis + LangGraph + intelligence; Phase 5 API + hardening (+ reference client) | [`phase_04.md`](phase_04.md), [`phase_05.md`](phase_05.md) |
 | Design spec and mockup of the sandbox UI | [`ref/`](ref/) |
