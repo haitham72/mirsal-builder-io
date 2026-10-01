@@ -9,7 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates, llm, tasks, telegram, watch
+from .. import gates, jobs, llm, tasks, telegram, watch
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
@@ -203,6 +203,14 @@ def make_handler(c: Console):
                 return self._json(200, {"results": gates.search(c.out, q), "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
+            if path == "/api/jobs":      # S2: jobs for the operator (Generate page polls while waiting)
+                st = parse_qs(urlparse(self.path).query).get("status", [None])[0]
+                return self._json(200, {"jobs": jobs.list(c.out, st)})
+            if path.startswith("/api/jobs/") and len(path.strip("/").split("/")) == 3:
+                try:
+                    return self._json(200, jobs.read(c.out, path.strip("/").split("/")[2]))
+                except jobs.JobError as e:
+                    raise pl.PipelineError(str(e), e.code)
             if path == "/api/generations":
                 return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": pl.summary(c.out)})
             if path.startswith("/api/generations/"):
@@ -374,6 +382,29 @@ def make_handler(c: Console):
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
                 return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
+            if path == "/api/jobs":      # S2: the Generate page creates a sheet job ("Generate it"), the operator fulfils it
+                try:
+                    return self._json(200, jobs.create(c.out, str(body.get("kind", "sheet")),
+                                                       task=body.get("task"), generation=body.get("generation"),
+                                                       request=body.get("request") or {}))
+                except jobs.JobError as e:
+                    raise pl.PipelineError(str(e), e.code)
+            jp = path.strip("/").split("/")
+            if len(jp) == 4 and jp[:2] == ["api", "jobs"]:
+                try:
+                    act = jp[3]
+                    if act == "claim":
+                        return self._json(200, jobs.claim(c.out, jp[2], str(body.get("ticket", ""))))
+                    if act == "done":
+                        return self._json(200, jobs.done(c.out, jp[2], str(body.get("file", "")),
+                                                         str(body.get("model", "")), body.get("cost")))
+                    if act == "fail":
+                        return self._json(200, jobs.fail(c.out, jp[2], str(body.get("reason", ""))))
+                    if act == "requeue":
+                        return self._json(200, jobs.requeue(c.out, jp[2]))
+                except jobs.JobError as e:
+                    raise pl.PipelineError(str(e), e.code)
+                raise pl.PipelineError("not found", 404)
             if path == "/api/generations" and body.get("task"):      # Run: a generation linked to its reserved task
                 if c.lock.locked():
                     raise pl.PipelineError("busy", 409)

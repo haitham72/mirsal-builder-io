@@ -56,9 +56,41 @@ def _parse(text: str):
     return json.loads(m.group(0))
 
 
-def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=None) -> dict:
+REVIEW_SYSTEM = """You review sticker slot JSON. You are given a request and a slot object with subject_description and cells (label, key, tags, emoji). Reply with ONE JSON object and nothing else:
+{"ok": true/false, "problems": ["<short concrete problem>"]}.
+Rules: cells must be distinct and animatable (a character that can move in place); subject_description must match the request without adding another character; every cell needs 1-2 fitting emoji. Say ok only when all hold."""
+
+
+def review(slots: dict, n: int, subject_slug: str, request: str, complete=None) -> dict:
+    """The small slot reviewer (S5): code lint first, then a cheap second model answering {ok, problems[]}.
+    The reviewer never edits the template; a failed review fails cleanly to the built-in sets."""
+    cells = []
+    for c in slots.get("cells") or []:
+        tags = list(c.get("tags") or [])
+        em = c.get("emoji")
+        cells.append({"label": c.get("label", ""), "key": tags[0] if tags else prompter.slug(str(c.get("label", ""))),
+                      "tags": tags[1:], "emoji": [em] if isinstance(em, str) and em.strip() else (em or [])})
+    problems = _lint(cells, n, subject_slug, request)
+    if not str(slots.get("subject_description", "")).strip():
+        problems.append("subject_description is empty")
+    if problems:
+        return {"ok": False, "problems": problems, "model": None}
+    complete = complete or llm.complete
+    if complete is llm.complete and not llm.configured():
+        return {"ok": True, "problems": [], "model": None}  # lint passed; no second model without a key
+    try:
+        text, meta = complete(REVIEW_SYSTEM, f"Request: {request}\nSlots: {json.dumps(slots, ensure_ascii=False)}",
+                              json_mode=True)
+        ans = _parse(text)
+        probs = [str(p) for p in ans.get("problems", []) if str(p).strip()]
+        return {"ok": bool(ans.get("ok")) and not probs, "problems": probs, "model": meta.get("model")}
+    except (llm.LLMError, ValueError) as e:
+        return {"ok": True, "problems": [], "model": None, "review_error": str(e)[:200]}
+
+
+def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=None, review_ai: bool = False) -> dict:
     """The plan for a typed request, in `prompter.expand`'s exact shape, plus `expanded_by` ('ai' | 'deterministic'), `expand_model`, `expand_error`.
-    `complete(system, user) -> (text, meta)` is injectable for tests."""
+    `complete(system, user) -> (text, meta)` is injectable for tests. `review_ai` runs the slot reviewer after the lint."""
     base = prompter.expand(task, grid)
     base["expanded_by"] = "deterministic"
     if not use_ai:
@@ -89,6 +121,16 @@ def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=No
     if problems:
         base["expand_error"] = "The AI answer did not pass the checks (" + "; ".join(problems)[:200] + "): using the built-in sets."
         return base
+    if review_ai:
+        rv = review({"subject_description": str(ai.get("subject_description", "")), "cells": [
+            {"label": c.get("label", ""), "tags": [prompter.slug(str(c.get("key") or c.get("label", "")))]
+             + [str(t) for t in (c.get("tags") or [])],
+             "emoji": "".join([e for e in (c.get("emoji") or []) if isinstance(e, str)])} for c in ai["cells"]]},
+            n, subject_slug, task, complete=complete)
+        base["review"] = {k: v for k, v in rv.items() if k != "review_error"}
+        if not rv["ok"]:
+            base["expand_error"] = "The slot reviewer rejected the answer (" + "; ".join(rv["problems"])[:200] + "): using the built-in sets."
+            return base
     cells = []
     words = " ".join([task, ai["subject_description"]] + [str(c.get("label", "")) for c in ai["cells"]]).lower()
     for i, c in enumerate(ai["cells"], 1):
@@ -102,6 +144,12 @@ def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=No
     built = prompter.render_plan(slots, base["template_id"], base["template_version"])
     base.update(slots=slots, sheet_prompt=built["sheet_prompt"], video_prompt=built["video_prompt"], expanded_by="ai", expand_model=meta.get("model"))
     base.pop("expand_error", None)
+    if complete is llm.complete:  # ledger only for real calls (fakes in tests never log)
+        from . import model_calls as _mc
+        _mc.append(None, "LLM_PLAN", "openai", str(meta.get("model") or llm.model()), status="OK",
+                   latency_ms=meta.get("ms"), tokens_in=meta.get("tokens_in"), tokens_out=meta.get("tokens_out"),
+                   extra={"task": task, "grid": f"{rows}x{cols}", "reviewed": review_ai,
+                          "review_model": (base.get("review") or {}).get("model")})
     base["stickers"] = [{"index": c["pos"], "id": f"prompt{c['pos']:02d}", "prompt": built["prompts"][c["pos"]], "key": c["tags"][0], "tags": c["tags"], "emoji": c["emoji"]}
                         for c in cells]
     return base

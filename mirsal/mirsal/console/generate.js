@@ -416,8 +416,16 @@ ACT.ghiggs=async()=>{const p=$('prompt').value.trim();if(!p)return;
   dlg(`<div class=vdlg><h2>Prompt for Higgsfield</h2><div class=mut>Nothing prepared matches “${esc(p)}”. Generate the sheet, name the folder as shown below, and it appears here.</div>
    <h3>Sheet prompt</h3><textarea readonly rows=9 id=hp1>${esc(r.j.sheet_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp1>Copy sheet prompt</button></div>
    <h3>Video prompt</h3><textarea readonly rows=5 id=hp2>${esc(r.j.video_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp2>Copy video prompt</button></div>
-   <div id=hres></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class="btn pri" data-act=hreserve>Reserve the folder names</button></div></div>`)};
+   <div id=hres></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class=btn data-act=hgenop>No prepared sheet: generate it</button><button class="btn pri" data-act=hreserve>Reserve the folder names</button></div></div>`)};
 ACT.hcopy=async el=>{try{await navigator.clipboard.writeText($(el.dataset.t).value);toast('Copied')}catch(e){toast('Copy failed',1)}};
+ACT.hgenop=async()=>{const p=$('prompt').value.trim();if(!p)return;
+  const r=await post('/api/jobs',{kind:'sheet',request:{prompt:p,grid:[3,3]}});if(!r.ok)return toast(r.j.error,1);
+  const id=r.j.id,t0=Date.now();
+  $('hres').innerHTML=`<div class=card style="margin:10px 0">Job <b>${esc(id)}</b> requested — waiting for the generator (<span id=hjela>0s</span>). The operator claims it, calls Higgsfield, and completes it; the sheet then runs through the stills like a prepared one.</div>`;
+  const iv=setInterval(async()=>{const g=await api('/api/jobs/'+id),el=$('hjela');if(!g.ok||!el){clearInterval(iv);return}
+    el.textContent=Math.round((Date.now()-t0)/1000)+'s · '+g.j.status;
+    if(g.j.status==='DONE'||g.j.status==='FAILED'){clearInterval(iv);
+      if(el&&el.parentElement)el.parentElement.innerHTML+=g.j.status==='DONE'?`<div class=mut>Sheet arrived: <code>${esc(g.j.result.file)}</code> (${Math.round(g.j.result.bytes/1024)} KB).</div>`:`<div class=mut>Failed: ${esc(g.j.error||'unknown')}</div>`}},5000)};
 ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:'flat_vector',ai:GAI.configured});if(!r.ok)return toast(r.j.error,1);
   $('hres').innerHTML=`<div class=card style="margin:10px 0"><b>Create these two folders and name the downloads into them</b><br><code>${esc(r.j.paths.img)}</code><br><code>${esc(r.j.paths.vid)}</code><div class=mut>The sheet goes in <b>${esc(r.j.folders.img)}</b>, the video in <b>${esc(r.j.folders.vid)}</b>. Then press Generate again.</div></div>`};
 

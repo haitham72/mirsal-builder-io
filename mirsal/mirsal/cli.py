@@ -160,6 +160,133 @@ def store_cmd(args) -> int:
     return 1
 
 
+LAB_INPUTS = [  # S1 prompt lab: English, Arabic, Arabizi, occasion, green subject, constraint, blends
+    "yellow teddy bear in Pixar 3D iOS style",
+    "yellow teddy bear in toon cel shade with ios 3d genmoji style",
+    "a cute yellow emoji face, 16 reactions",
+    "falcon dancing",
+    "banana shocked",
+    "camel as cupcake",
+    "dog as banana",
+    "dog with bananas",
+    "teddy bear playing football",
+    "teddy bear with no dancing",
+    "green frog with big eyes",
+    "watermelon sticker pack",
+    "dubai skyline at night",
+    "arabic coffee celebration",
+    "eid mubarak stickers",
+    "\u062f\u0628 \u064a\u0631\u0642\u0635",
+    "\u0635\u0642\u0631 \u0633\u0639\u064a\u062f",
+    "\u062a\u062f\u064a \u0628\u064a\u0631 \u0645\u0628\u0633\u0648\u0637",
+    "sakr yarkos",
+    "teddy bear mabsout",
+]
+
+
+def prompt_cmd(out, args) -> int:
+    from . import tasks as _t
+    if (args.request or "") == "lab":
+        ok = 0
+        for req in LAB_INPUTS:
+            try:
+                plan = _t.preview(req, "3x3", args.style, ai=False)
+                from . import prompter as _pr
+                _pr.validate_plan(dict(plan))
+                n, key = len(plan["stickers"]), plan["slots"]["key_colour"]
+                uniq = len({s["key"] for s in plan["stickers"]})
+                good = n == 9 and uniq == 9 and all(s["emoji"] for s in plan["stickers"])
+                ok += good
+                print(f"{'ok  ' if good else 'FAIL'}  {req[:52]:<54} {n} cells, {uniq} unique keys, key={key}")
+            except Exception as e:
+                print(f"FAIL  {req[:52]:<54} {e}")
+        print(f"{ok}/{len(LAB_INPUTS)} lab inputs pass lint")
+        return 0 if ok == len(LAB_INPUTS) else 1
+    if not (args.request or "").strip():
+        print('usage: mirsal prompt "<request>" [--grid 3x3|2x2|1x1] [--style ID] [--ai] | mirsal prompt lab')
+        return 1
+    try:
+        plan = _t.preview(args.request, args.grid, args.style, ai=args.ai)
+        if args.review_ai and args.ai:
+            from . import expander as _ex
+            plan = _ex.expand(args.request, tuple(plan["grid"]), use_ai=True, review_ai=True)
+    except Exception as e:
+        print(f"plan failed: {e}")
+        return 1
+    from . import prompter as _pr
+    try:
+        _pr.validate_plan(dict(plan))
+        lint = "lint: PASS"
+    except ValueError as e:
+        lint = f"lint: FAIL {e}"
+    sl = plan["slots"]
+    print(f"task: {plan['task_slug']}  grid: {plan['grid']}  template: {plan['template_id']} v{plan['template_version']}  "
+          f"expanded_by: {plan.get('expanded_by', 'deterministic')}  {lint}")
+    print(f"subject: {sl.get('subject_description')}  style: {sl.get('style_id')}  key: {sl.get('key_colour')}")
+    for s in plan["stickers"]:
+        print(f"  {s['index']} {s['emoji']} {s['key']:<48} {' | '.join(s['tags'][1:])}")
+    if args.mode == "single":
+        for s in plan["stickers"]:
+            print(f"--- single S{s['index']} ---\n{s['prompt']}")
+    else:
+        print(f"--- sheet prompt ---\n{plan['sheet_prompt']}\n--- video prompt ---\n{plan['video_prompt']}")
+    return 0
+
+
+def _job_line(j: dict) -> str:
+    el = ""
+    if j.get("created_at"):
+        import time as _ti
+        el = f"  elapsed={int(_ti.time() - j['created_at'])}s"
+    return (f"{j['id']}  {j['kind']:<6} {j['status']:<9} task={j.get('task') or '-'} "
+            f"ticket={j.get('external_task_id') or '-'}{el}"
+            + (f"  error={j['error']}" if j.get("error") else ""))
+
+
+def jobs_cmd(out, args) -> int:
+    import json as _json
+    from . import jobs as _j
+    try:
+        rows = _j.list(out, args.status)
+    except Exception as e:
+        print(e)
+        return 1
+    if args.as_json:
+        print(_json.dumps(rows, ensure_ascii=False))
+        return 0
+    for j in rows:
+        print(_job_line(j))
+    if not rows:
+        print("no jobs" + (f" with status {args.status}" if args.status else ""))
+    return 0
+
+
+def job_cmd(out, args) -> int:
+    import json as _json
+    from . import jobs as _j
+    try:
+        if args.action == "show":
+            j = _j.read(out, args.jid or "")
+            print(_json.dumps(j, indent=2, ensure_ascii=False))
+        elif args.action == "create":
+            j = _j.create(out, args.kind, task=args.task, generation=args.generation,
+                          request={"note": "created from the CLI"})
+            print(_job_line(j))
+        elif args.action == "claim":
+            print(_job_line(_j.claim(out, args.jid or "", args.ticket or "")))
+        elif args.action == "done":
+            j = _j.done(out, args.jid or "", args.file or "", args.model or "", args.cost)
+            print(_job_line(j) + f"  file={j['result']['file']} sha={j['result']['sha256'][:12]}")
+        elif args.action == "fail":
+            print(_job_line(_j.fail(out, args.jid or "", args.reason)))
+        elif args.action == "requeue":
+            print(_job_line(_j.requeue(out, args.jid or "")))
+        return 0
+    except _j.JobError as e:
+        print(e)
+        return 1
+
+
 def main(argv=None) -> int:
     import sys as _sys
     try:  # Windows consoles default to cp1252, which cannot print emoji: replace, never crash
@@ -188,6 +315,17 @@ def main(argv=None) -> int:
     se.add_argument("--approved", action="store_true"); se.add_argument("--animated", action="store_true")
     se.add_argument("--generation"); se.add_argument("--since"); se.add_argument("--json", action="store_true", dest="as_json")
     ta = sub.add_parser("task", help="what happened to a provider task id"); ta.add_argument("ext", nargs="?"); ta.add_argument("--key")
+    pr = sub.add_parser("prompt", help='print locks, concepts and template-built prompts (S1 lab: "prompt lab")')
+    pr.add_argument("request", nargs="?"); pr.add_argument("--grid", default="3x3"); pr.add_argument("--style", default="flat_vector")
+    pr.add_argument("--ai", action="store_true"); pr.add_argument("--review-ai", action="store_true")
+    pr.add_argument("--mode", default="sheet", choices=["sheet", "single"])
+    js = sub.add_parser("jobs", help="pending generation jobs for the operator"); js.add_argument("--status")
+    js.add_argument("--json", action="store_true", dest="as_json")
+    jo = sub.add_parser("job", help="show|create|claim|done|fail|requeue one job")
+    jo.add_argument("action", choices=["show", "create", "claim", "done", "fail", "requeue"]); jo.add_argument("jid", nargs="?")
+    jo.add_argument("--kind", default="sheet"); jo.add_argument("--task"); jo.add_argument("--generation")
+    jo.add_argument("--ticket"); jo.add_argument("--file"); jo.add_argument("--model"); jo.add_argument("--cost", type=float)
+    jo.add_argument("--reason", default="")
     args = ap.parse_args(argv)
     out, inp, cfg, t0 = out_root(), input_root(), EngineConfig(), time.perf_counter()
     if getattr(args, "workers", None):
@@ -211,6 +349,12 @@ def main(argv=None) -> int:
         return db_cmd(out, args.action, args.yes)
     if args.cmd in ("list", "show", "history", "search", "task"):
         return store_cmd(args)
+    if args.cmd == "prompt":
+        return prompt_cmd(out, args)
+    if args.cmd == "jobs":
+        return jobs_cmd(out, args)
+    if args.cmd == "job":
+        return job_cmd(out, args)
     try:
         if args.cmd == "serve":
             from .console.server import serve
