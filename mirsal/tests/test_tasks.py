@@ -46,7 +46,7 @@ class InboxTests(Api):
         d.mkdir(parents=True)
         self.assertEqual(row()["state"], "reserved, waiting for file")
         cv2.imwrite(str(d / "sheet.png"), cv2.cvtColor(shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)]), cv2.COLOR_RGB2BGR))
-        self.assertEqual((row()["state"], row()["can_run"]), ("sheet arrived", True))   # flips within one poll
+        self.assertEqual((row()["states"][:2], row()["can_run"]), (["sheet arrived", "no video yet"], True))   # flips within one poll
         (watch / "videos_gen" / t["folders"]["vid"]).mkdir(parents=True)
         (watch / "videos_gen" / t["folders"]["vid"] / "x.mp4").write_bytes(b"0")
         self.assertIn("video arrived", row()["states"])
@@ -74,12 +74,28 @@ class InboxTests(Api):
         rows = {r["name"]: r for r in self.req("GET", "/api/inbox")[1]["rows"]}
         self.assertTrue(any("no matching task" in x for x in rows["img-001-blob"]["states"]))   # a sheet made outside the app is flagged
 
-    def test_legacy_console_and_missing_dist(self):
-        s, body = self.req("GET", "/legacy")
+    def test_one_press_is_one_folder_and_never_advances(self):
+        """A prompt without an explicit folder used to rotate to the next prepared variant on every press (001 -> 002 -> ...)."""
+        ids = []
+        for _ in range(2):
+            s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school"})
+            self.assertEqual(s, 202, j)
+            ids.append(self.wait(j["id"], lambda x: x["stage"] == "sliced")["source"]["variant"])
+        self.assertEqual(ids, [1, 1])
+        s, j = self.req("POST", "/api/generations", {"prompt": "blob", "variant": 2})   # an explicit folder is honoured
+        self.assertEqual(self.wait(j["id"], lambda x: x["stage"] == "sliced")["source"]["variant"], 2)
+        row = next(r for r in self.req("GET", "/api/inbox")[1]["rows"] if r["name"] == "img-001-blob")
+        self.assertGreaterEqual(len(row["generations"]), 3)                              # the Inbox lists what was made from the folder
+        self.assertIn("no video yet", row["state"])
+
+    def test_the_builder_is_the_one_page(self):
+        s, html = self.req("GET", "/")
         self.assertEqual(s, 200)
-        self.assertIn(b"Mirsal", body)
-        self.assertEqual(self.req("GET", "/")[0], 200)
-        self.assertEqual(self.req("GET", "/assets/..%2F..%2Fserver.py")[0], 404)   # an escape from dist/ is refused
+        for needle in (b"s-generate", b"s-history", b"/ui/generate.js", b"/ui/history.js"):
+            self.assertIn(needle, html)
+        for f in ("generate.js", "history.js", "app.js", "studio.css"):
+            self.assertEqual(self.req("GET", f"/ui/{f}")[0], 200)
+        self.assertEqual(self.req("GET", "/assets/index.js")[0], 404)         # no second front end is served any more
 
 
 if __name__ == "__main__":

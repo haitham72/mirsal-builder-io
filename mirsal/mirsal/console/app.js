@@ -5,7 +5,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const api=async(u,o)=>{const r=await fetch(u,o);let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}};
 const post=(u,b)=>api(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});
 let toastT=0;function toast(m,bad){const t=$('toast');t.textContent=m||'';t.className=(m?'on ':'')+(bad?'bad':'');clearTimeout(toastT);if(m)toastT=setTimeout(()=>t.className='',bad?6000:3500)}
-const say=t=>{$('msg').textContent=t||''};
+const say=t=>{const m=$('msg');if(m)m.innerHTML=t||''};   // callers escape what they pass
 const ICONS={
  gen:'<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
  lib:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
@@ -24,7 +24,7 @@ const ICONS={
  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',chev:'<path d="M9 6l6 6-6 6"/>',
  download:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',up:'<path d="M6 15l6-6 6 6"/>',down:'<path d="M6 9l6 6 6-6"/>',back:'<path d="M15 6l-6 6 6 6"/>',
- plus:'<path d="M12 5v14M5 12h14"/>',play:'<path d="M8 5l11 7-11 7z"/>',photo:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',hist:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',folder:'<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',film:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4v16M16 4v16M3 9h5M16 9h5M3 15h5M16 15h5"/>',telegram:'<path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/><path d="M9 13l8-6"/>',play:'<path d="M8 5l11 7-11 7z"/>',photo:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
  eyeb:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',check:'<path d="M5 12l5 5 9-10"/>',first:'<path d="M6 5v14M18 6l-9 6 9 6z"/>',last:'<path d="M18 5v14M6 6l9 6-9 6z"/>',prev:'<path d="M15 6l-6 6 6 6"/>',next:'<path d="M9 6l6 6-6 6"/>'};
 const ic=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
 
@@ -57,12 +57,12 @@ const coverMedia=p=>{const s=p.stickers.find(x=>x.id===p.cover)||p.stickers[0];r
 const packById=id=>LIB.packs.find(p=>p.id===id);
 
 /* ---------- router */
-const SCREENS=['generate','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
-const RAIL=[['generate','gen','Generate'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
-let route_='library',PACK_ID=null;
+const SCREENS=['generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
+const RAIL=[['generate','gen','Generate'],['history','hist','History'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
+let route_='generate',PACK_ID=null;
 function drawRail(){$('rail').innerHTML=`<div class=logo>M</div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
 ACT.nav=el=>{location.hash='#/'+el.dataset.to};
-function route(){const h=location.hash.replace(/^#\/?/,'')||'library',ps=h.split('/'),n=ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'library';
+function route(){const h=location.hash.replace(/^#\/?/,'')||'generate',ps=h.split('/'),n=ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'generate';
  SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCol2();if(RENDER[route_])RENDER[route_](a)}
 window.addEventListener('hashchange',route);
 
@@ -107,126 +107,3 @@ RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{}
   <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span><span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
   <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span></div></div>
   <p class=mut>Photo cutout uses the engine's chroma key for green/blue screens and OpenCV GrabCut otherwise (offline). A learned matte model is planned for Phase 3C.</p></div>`};
-
-/* ================= Generate: the lifecycle console (Phase 1) ================= */
-let sel=null,bg='checker',last='',open=new Set(),busy=false,cur=null,mi=null;
-$('go').onclick=async()=>{const p=$('prompt').value.trim();if(!p)return;const r=await post('/api/generations',{prompt:p});say(r.ok?'':r.j.error);if(r.ok){sel=r.j.id;last=''}};
-$('more').onclick=async()=>{if(!sel)return;const r=await post(`/api/generations/${sel}/more`);say(r.ok?'':r.j.error);if(r.ok){sel=r.j.id;last=''}};
-async function useInput(subject,variant){const r=await post('/api/generations',{prompt:$('prompt').value.trim()||subject.replace(/_/g,' '),variant});say(r.ok?'':r.j.error);if(r.ok){sel=r.j.id;last=''}}
-async function loadInputs(){const r=await api('/api/inputs');if(!r.ok)return;$('inputs').innerHTML=r.j.inputs.length?r.j.inputs.map(s=>`<div class=gen style="cursor:default"><b>${s.subject}</b>${s.variants.map(v=>`<div class=chk style="margin:4px 0"><b>${String(v.folder)}</b> ${v.sheet}<br><span class=mut>${v.video?'3x3 video':'no video'} · ${v.clips} clips · pairing ${v.pairing}${v.plan?' · prompts '+v.plan:' · stub labels'}</span> <button class="btn sm" onclick="useInput('${s.subject}',${v.variant})">Use</button></div>`).join('')}</div>`).join(''):'<div class=mut>No prepared inputs found. Check Phase_01/Images_gen (run: python -m mirsal doctor).</div>'}
-// live preview: the paired 3x3 video is played in the browser, each cell keyed + framed like its sticker, so a click shows motion at once.
-const PV={gid:null,all:false,idx:new Set(),v:null,cal:{},t:-1};
-function pvOn(i){return PV.gid===sel&&(PV.all||PV.idx.has(i))}
-function pvVideo(){if(PV.v&&PV.v.dataset.gid==sel)return PV.v;if(PV.v){PV.v.pause();PV.v.remove()}
-  const v=document.createElement('video');v.muted=true;v.loop=true;v.playsInline=true;v.dataset.gid=sel;v.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none';
-  v.src=`/src/${sel}/video`;document.body.appendChild(v);v.play().catch(()=>{});PV.v=v;PV.cal={};PV.t=-1;return v}
-// cell i of the video: the still's measured cut (source.grid.rects on the sheet) scaled to the video, else equal thirds
-function vcell(g,v,i){const G=g&&g.source.grid,sw=g&&g.source.sheet_size;if(G&&sw){const r=G.rects[i-1],kx=v.videoWidth/sw[0],ky=v.videoHeight/sw[1];return[r[0]*kx,r[1]*ky,r[2]*kx,r[3]*ky]}
-  const w=v.videoWidth/3,h=v.videoHeight/3;return[((i-1)%3)*w,((i-1)/3|0)*h,w,h]}
-function pvCalibrate(v,i){
-  const [X,Y,cw,ch]=vcell(cur,v,i),S=96,c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d',{willReadFrequently:true});
-  x.drawImage(v,X,Y,cw,ch,0,0,S,S);const d=x.getImageData(0,0,S,S).data,D=[];
-  for(let y=0;y<S;y++)for(let xx=0;xx<S;xx++){if(y>2&&y<S-3&&xx>2&&xx<S-3)continue;const o=(y*S+xx)*4,r=d[o],g=d[o+1],b=d[o+2];D.push(g-Math.max(r,b))}
-  D.sort((a,b)=>a-b);return Math.max(.5*D[D.length>>1],8)}
-function pvDraw(cv,i){
-  const v=PV.v,g=cur;if(!v||!g||v.readyState<2||!v.videoWidth)return;
-  const t=g.stickers[i-1],m=t.metrics||{},c=m.cell,b=m.bbox,S=cv.width,[X,Y,cw,ch]=vcell(g,v,i);
-  let fx=.5,fy=.5,fs=1;if(c&&b&&m.scale){fx=(b[0]+b[2])/2/c[2];fy=(b[1]+b[3])/2/c[3];fs=Math.min(3,(512/m.scale)/c[2])}
-  const side=fs*(cw+ch)/2,cx=X+fx*cw,cy=Y+fy*ch;let sx=cx-side/2,sy=cy-side/2,sw=side,sh=side;
-  const x0=Math.max(sx,X),y0=Math.max(sy,Y),x1=Math.min(sx+sw,X+cw),y1=Math.min(sy+sh,Y+ch),k=S/side;
-  const ctx=cv.getContext('2d',{willReadFrequently:true});ctx.clearRect(0,0,S,S);if(x1<=x0||y1<=y0)return;
-  ctx.drawImage(v,x0,y0,x1-x0,y1-y0,(x0-sx)*k,(y0-sy)*k,(x1-x0)*k,(y1-y0)*k);
-  if(PV.cal[i]===undefined)PV.cal[i]=pvCalibrate(v,i);const T=PV.cal[i],im=ctx.getImageData(0,0,S,S),d=im.data;
-  for(let o=0;o<d.length;o+=4){if(!d[o+3])continue;const r=d[o],gg=d[o+1],bb=d[o+2],mx=Math.max(r,bb);let a=2*(T-(gg-mx))/T;a=a<0?0:a>1?1:a;
-    if(a<.98&&a>0&&gg>mx)d[o+1]=mx;d[o+3]=d[o+3]*a}
-  ctx.putImageData(im,0,0);cv.dataset.d=1}
-function pvLoop(){requestAnimationFrame(pvLoop);const v=PV.v;if(!v||PV.gid!=sel||!cur)return;
-  const fresh=v.currentTime!==PV.t;PV.t=v.currentTime;
-  document.querySelectorAll('canvas[data-pv]').forEach(cv=>{if(fresh||!cv.dataset.d)pvDraw(cv,+cv.dataset.pv)})}
-requestAnimationFrame(pvLoop);
-const canvasFor=(i,size)=>`<canvas data-pv=${i} width=${size} height=${size}></canvas><span class=livebadge>live preview</span>`;
-async function playVideo(scope,index){
-  if(!cur)return;
-  if(PV.gid!=sel){PV.gid=sel;PV.all=false;PV.idx=new Set()}
-  if(scope==='pack')PV.all=true;else PV.idx.add(index);
-  if(cur.source.video_path)pvVideo();
-  last='';
-  const r=await post(`/api/generations/${sel}/animate`,{scope,index});
-  say(r.ok?(r.j.message||'live preview playing; encoding the final 512×512 WEBM…'):r.status===409?'live preview playing (final encode waits: another job is running)':r.j.error)}
-const setbg=b=>{bg=b;last='';if(mi!==null)drawModal()};
-function openModal(i){mi=i;drawModal()}
-function closeModal(){mi=null;$('modal').classList.remove('on')}
-function step(d){if(cur){const n=cur.stickers.length;mi=((mi-1+d+n)%n)+1;drawModal()}}
-document.addEventListener('keydown',e=>{if(mi===null)return;if(e.key==='Escape')closeModal();if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
-const bgBtns=()=>['checker','light','dark','wall'].map(x=>`<button class="${x==bg?'act':''}" onclick="setbg('${x}')">${x}</button>`).join('');
-function drawModal(){
-  if(mi===null||!cur)return;
-  const g=cur,t=g.stickers[mi-1],s=g.source,base=`/out/${g.generation_id}/`,m=t.metrics||{},c=m.cell,b=m.bbox,am=t.anim_metrics||{};
-  let raw='';if(c&&s.sheet_copy){const col=(c[0]/c[2])|0,row=(c[1]/c[3])|0;raw=`<div class=box style="background-image:url(${base+s.sheet_copy});background-size:300% 300%;background-position:${col*50}% ${row*50}%">${b?`<div class=bbox style="left:${b[0]/c[2]*100}%;top:${b[1]/c[3]*100}%;width:${(b[2]-b[0])/c[2]*100}%;height:${(b[3]-b[1])/c[3]*100}%"></div>`:''}</div>`}
-  const still=t.png?`<img src="${base+t.png}">`:`<div class=mut style="padding:12px">${t.status}${t.reason?': '+t.reason:''}</div>`;
-  const live=pvOn(t.index)&&t.status==='READY'&&s.video_path;
-  const vid=t.webm?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:live?canvasFor(t.index,384):`<div class=mut style="padding:12px">${t.anim_status==='NOT_REQUESTED'&&t.status==='READY'&&s.has_video?`<button class="btn pri sm" onclick="playVideo('slice',${t.index})">▶ Animate this</button>`:''} </div><div class=mut style="padding:0 12px">${t.anim_status}${t.anim_reason?': '+t.anim_reason:''}</div>`;
-  const chk=(t.report||[]).map(r=>`<div class=chk><span class="${r.ok?'p':'f'}">${r.ok?'✓':'✗'} ${r.name}</span> <span class=mut>${r.detail||''}</span></div>`).join('');
-  const att=(m.attempts||[]).map(a=>a.note?`<div class=chk>🔍 <b>dissect</b>: ${Object.entries(a.note).map(([k,v])=>k+' '+v).join(' · ')}</div>`:`<div class=chk>${a.ok?'✓':'✗'} <b>${a.name}</b> ${a.reason?'('+a.reason+')':''}</div>`).join('')+(m.ruled_out?'<div class=chk style="color:var(--bad)">ruled out: keying could not be repaired</div>':'')+(m.recovered_by?`<div class=chk class=p>recovered by: ${m.recovered_by}</div>`:'');
-  const kv=o=>Object.entries(o).filter(([k])=>!['attempts','cell','bbox','recovered_by','ruled_out'].includes(k)).map(([k,v])=>`<span>${k}</span><span>${typeof v==='object'?JSON.stringify(v):v}</span>`).join('');
-  const thumbs=g.stickers.map(x=>`<div class="thumb ${x.status} ${x.index===mi?'on':''}" onclick="openModal(${x.index})" title="${x.name}">${x.png?`<img src="${base+x.png}">`:x.index}</div>`).join('');
-  const ready=t.status==='READY';
-  $('modal').innerHTML=`<div class=mbox><div class=mrow><button class="btn nav" onclick="step(-1)">‹</button>
-    <div style="flex:1"><b>${t.emoji} ${t.index}/${cur.stickers.length} · ${t.name}</b><div class=mut>${t.prompt}</div></div>
-    <div class=toggles>${bgBtns()}</div>${ready?`<button class=btn data-act=editgen data-i=${t.index}>${ic('edit')} Edit</button><button class="btn pri" data-act=addgen data-i=${t.index}>${ic('plus')} Add to pack</button>`:''}<button class="btn nav" onclick="step(1)">›</button><button class=btn onclick="closeModal()">✕</button></div>
-    <div class=mpanes>
-      <div class=pane><div class=mut>raw cell + bounding box</div>${raw||'<div class=mut>n/a</div>'}</div>
-      <div class=pane><div class=mut>sticker (${m.format||'-'}, ${m.kb||'-'}KB)</div><div class="box bg-${bg}">${still}</div></div>
-      <div class=pane><div class=mut>video ${t.webm?am.source||'':live?'live preview (final WEBM encoding…)':''} ${am.kb?am.kb+'KB':''}</div><div class="box bg-${bg}">${vid}</div>${t.webm?`<div class=row><button class="btn sm" data-act=addgen data-i=${t.index} data-k=animated>${ic('plus')} Add animated to pack</button></div>`:''}</div>
-    </div>
-    <div class=mpanes><div class=pane><b>checks</b>${chk||'<div class=mut>none</div>'}${att?'<br><b>keying recovery</b>'+att:''}</div>
-      <div class=pane><b>metrics</b><div class=kv>${kv(m)}</div>${Object.keys(am).length?'<br><b>video metrics</b><div class=kv>'+kv(am)+'</div>':''}</div></div>
-    <div class=thumbs>${thumbs}</div><div class=mut>← → to browse, Esc to close</div></div>`;
-  $('modal').classList.add('on');$('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};
-}
-ACT.addgen=el=>{const i=+el.dataset.i,k=el.dataset.k||'static',gid=sel;pickPack(async pid=>{const r=await post(`/api/packs/${pid}/stickers`,{from_generation:{id:gid,index:i,kind:k}});
-  if(r.ok){await loadLib();toast(`Added "${r.j.name}" to ${packById(pid)?.name||'pack'}`)}else toast(r.j.error,1)})};
-ACT.editgen=el=>{const t=cur.stickers[+el.dataset.i-1];closeModal();Ed.openImage(`/out/${cur.generation_id}/${t.png}`,{outlined:true,name:t.name,emoji:t.emoji})};
-function stepState(events,stage){const e=events.filter(x=>x.stage===stage);if(!e.length)return{s:'',ms:''};const l=e[e.length-1];return{s:l.status,ms:l.ms?l.ms+' ms':'',d:l.detail}}
-function detailText(d){if(!d)return'';if(typeof d==='string')return d;return Object.entries(d).map(([k,v])=>k+': '+(typeof v==='object'?JSON.stringify(v):v)).join(' · ')}
-// the measured cut lines (gutter cuts), or the thirds overlay for results written before grids were measured
-function cutLines(s){const G=s.grid,W=s.sheet_size;if(!G||!W)return'<div class=grid3></div>';
-  return G.xs.slice(1,-1).map(x=>`<i class=cutv style="left:${100*x/W[0]}%"></i>`).join('')+G.ys.slice(1,-1).map(y=>`<i class=cuth style="top:${100*y/W[1]}%"></i>`).join('')}
-function render(g){
-  const s=g.source,base=`/out/${g.generation_id}/`;
-  const steps=g.stages.map(st=>{const x=stepState(g.events,st);return`<div class="step ${x.s}"><b>${st}</b><small>${x.s||'pending'} ${x.ms}</small><br><small>${esc(detailText(x.d).slice(0,80))}</small></div>`}).join('');
-  const sheet=s.sheet_copy?`<div><div class=mut>raw sheet (${s.sheet_size.join('×')}) · ${s.sheet}</div><div class=sheetbox style="background-image:url(${base+s.sheet_copy})">${cutLines(s)}</div></div>`:'';
-  const keyed=s.keyed?`<div><div class=mut>keyed (background removed)</div><div class="sheetbox bg-${bg}" style="background-size:100% 100%"><img src="${base+s.keyed}" style="width:100%;height:100%"></div></div>`:'';
-  const tiles=g.stickers.map(t=>{
-    const m=t.metrics||{},c=m.cell,b=m.bbox;let raw='';
-    if(c&&s.sheet_copy){const col=(c[0]/c[2])|0,row=(c[1]/c[3])|0;raw=`<div class=raw style="background-image:url(${base+s.sheet_copy});background-size:300% 300%;background-position:${col*50}% ${row*50}%">${b?`<div class=bbox style="left:${b[0]/c[2]*100}%;top:${b[1]/c[3]*100}%;width:${(b[2]-b[0])/c[2]*100}%;height:${(b[3]-b[1])/c[3]*100}%"></div>`:''}</div>`}
-    const clipw=!s.video_path&&((s.clips||{})[t.index]||{}).webm,live=pvOn(t.index)&&t.status==='READY';
-    const out=t.webm?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:live&&s.video_path?canvasFor(t.index,192):live&&clipw?`<video src="/src/${sel}/clip/${t.index}" autoplay loop muted playsinline></video><span class=livebadge>live preview</span>`:t.png?`<img src="${base+t.png}">`:`<span class=mut style="padding:6px;display:block">${t.status}${t.reason?': '+t.reason:''}</span>`;
-    const chk=(t.report||[]).map(r=>`<span class="${r.ok?'p':'f'}">${r.ok?'✓':'✗'} ${r.name}</span>`).join(' ');
-    const an=t.anim_status!=='NOT_REQUESTED'?`<div class=chk>video: ${t.anim_status}${t.anim_reason?' ('+t.anim_reason+')':''} ${t.anim_metrics.kb?t.anim_metrics.kb+'KB seam '+t.anim_metrics.loop_seam:''}</div>`:'';
-    const can=t.status==='READY'&&s.has_video&&t.anim_status!=='READY';
-    return`<div class="tile ${t.status}"><div class=pv onclick="openModal(${t.index})" title="click to enlarge">${raw}<div class="out bg-${bg}">${out}</div></div>
-      <h4 onclick="openModal(${t.index})">${t.emoji} ${t.name}</h4><div class=mut>${t.prompt}</div>
-      <div class=chk>${t.status} ${m.scale_mode?'· '+m.scale_mode+' scale '+m.scale:''} ${m.kb?'· '+m.kb+'KB':''} ${m.recovered_by?'· recovered: '+m.recovered_by:''} ${m.ruled_out?'· ruled out':''}</div>
-      <details data-k=${t.index} ${open.has(t.index)?'open':''}><summary class=mut>checks</summary><div class=chk>${chk}</div><div class=chk>${JSON.stringify(m)}</div></details>${an}
-      <div class=row><button class="btn sm" ${can?'':'disabled'} onclick="playVideo('slice',${t.index})">▶ Animate this</button>${t.status==='READY'?`<button class="btn sm" data-act=editgen data-i=${t.index}>Edit</button><button class="btn sm" data-act=addgen data-i=${t.index} data-k=${t.webm?'animated':'static'}>+ Pack</button>`:''}</div></div>`}).join('');
-  const anyReady=g.stickers.some(t=>t.status==='READY'),allReady=g.stickers.filter(t=>t.status==='READY').length;
-  return`<h1>${g.generation_id} · ${g.task_slug} · ${s.subject} variant ${s.variant}/${s.n_variants} ${g.busy?'<span class=badge>working…</span>':''}</h1>
-   <div class=mut>${esc(g.prompt)}</div><div class=mut>labels from: <b>${g.plan_source||"stub (prompter.py)"}</b>${(g.plan_source||"stub").startsWith("stub")?" (invented by the stub, NOT read from the image)":""}</div><details><summary class=mut>sheet / video prompt (copy)</summary><textarea readonly rows=5>${g.sheet_prompt||''}</textarea><textarea readonly rows=3>${g.video_prompt||''}</textarea></details>${g.error?`<p style="color:var(--bad)">${g.error}</p>`:''}
-   <div class=steps>${steps}</div>
-   <div class=panel><div class=toggles>background: ${bgBtns()}</div><br><div class=pair>${sheet}${keyed}</div></div>
-   <div class=panel><div class=row style="margin-top:0"><b>Slices (512×512 max, in slices/)</b>
-     <button class="btn pri" ${anyReady&&s.has_video?'':'disabled'} onclick="playVideo('pack')">▶ Animate all ${g.stickers.length}</button>
-     <button class=btn ${allReady?'':'disabled'} data-act=addall>${ic('plus')} Add all ${allReady} to pack</button>
-     ${s.has_video?'':'<span class=mut>no video prepared for this variation</span>'}</div><div class=tiles>${tiles}</div></div>`}
-ACT.addall=()=>{const gid=sel,ready=cur.stickers.filter(t=>t.status==='READY').map(t=>t.index);pickPack(async pid=>{let n=0,bad='';for(const i of ready){const r=await post(`/api/packs/${pid}/stickers`,{from_generation:{id:gid,index:i,kind:'static'}});if(r.ok)n++;else bad=r.j.error}
-  await loadLib();toast(`Added ${n} stickers to ${packById(pid)?.name||'pack'}${bad?' ('+bad+')':''}`,!!bad)},'Add all to pack')};
-async function tick(){try{await tick2()}catch(e){$('msg').textContent='UI error: '+e.message}}
-async function tick2(){
-  if(route_!=='generate'&&mi===null)return;
-  const l=await api('/api/generations');if(l.ok){busy=l.j.busy;const h=l.j.health||{};$('health').innerHTML=h.vp9===false?'<div class=warn>⚠ this ffmpeg cannot encode VP9 → the final WEBM will fail. Live preview still works. Run <code>python -m mirsal doctor</code>.</div>':'';
-    $('list').innerHTML=l.j.generations.map(g=>`<div class="gen ${g.id==sel?'sel':''}" onclick="sel=${g.id};last=''"><b>${g.generation_id}</b> <span class=badge>${g.stage}</span><br><small>${g.subject} v${g.variant} · ${esc(g.prompt)}</small></div>`).join('');if(sel===null&&l.j.generations.length)sel=l.j.generations[0].id}
-  if(sel!==null){const r=await api('/api/generations/'+sel);if(r.ok){const k=JSON.stringify(r.j)+bg;if(k!==last){document.querySelectorAll('details[data-k]').forEach(d=>d.open?open.add(+d.dataset.k):open.delete(+d.dataset.k));last=k;cur=r.j;$('main').innerHTML=render(r.j);if(mi!==null)drawModal()}}}
-}
-RENDER.generate=()=>{last='';tick()};
-setInterval(tick,500);loadInputs();setInterval(()=>{if(route_==='generate')loadInputs()},5000);

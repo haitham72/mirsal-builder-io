@@ -8,16 +8,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates, tasks
+from .. import gates, tasks, watch
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
 from ..video_project import MAX_UPLOAD, Projects, decode_overlays
 
 UI = Path(__file__).parent
-INDEX = UI / "index.html"            # the legacy vanilla console: served at /legacy, and at / when the React app is not built
-DIST = UI / "dist"                    # the React gateway (mirsal/web, `npm run build`)
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 class Console:
@@ -102,7 +101,7 @@ def make_handler(c: Console):
         def _guard(self, fn):
             try:
                 fn()
-            except (pl.PipelineError, LibraryError) as e:
+            except (pl.PipelineError, LibraryError, watch.WatchError) as e:
                 self._json(e.code, {"error": str(e)})
             except (ValueError, KeyError, TypeError) as e:
                 self._json(400, {"error": f"bad request: {e}"})
@@ -116,16 +115,13 @@ def make_handler(c: Console):
         def _get(self):
             path = unquote(urlparse(self.path).path)
             if path == "/":
-                page = DIST / "index.html"
-                return self._send(200, (page if page.is_file() else INDEX).read_bytes(), "text/html; charset=utf-8")
-            if path == "/legacy":
                 return self._send(200, INDEX.read_bytes(), "text/html; charset=utf-8")
-            if path.startswith(("/assets/", "/fonts/")) or path == "/favicon.svg":
-                root = DIST.resolve()
-                f = (root / path.lstrip("/")).resolve()
-                if root not in f.parents or not f.is_file():
-                    raise pl.PipelineError("not found", 404)
-                return self._file(f)
+            if path == "/api/watch":       # History: the real watch folders, image and video side by side, plus the trash
+                return self._json(200, {"images": str(c.inp / "Images_gen"), "videos": str(c.inp / "videos_gen"),
+                                        "rows": watch.list_rows(c.inp, c.out, pl.generations_by_folder(c.out)), "trash": watch.list_trash(c.out)})
+            if path.startswith("/api/watch/thumb/"):
+                f = watch.thumb_path(c.inp, c.out, path.rsplit("/", 1)[1])
+                return self._send(200, f.read_bytes(), "image/jpeg")
             if path == "/api/tasks":
                 return self._json(200, {"tasks": tasks.list_tasks(c.out)})
             if path.startswith("/api/tasks/"):
@@ -321,6 +317,12 @@ def make_handler(c: Console):
             if len(parts) == 6 and parts[:2] == ["api", "generations"] and parts[3:4] == ["video_sheet"] and parts[5] == "video":
                 return self._post_video(int(parts[2]), parts[4], parse_qs(u.query))
             body = self._body()
+            if path == "/api/watch/remove":      # to the trash, never straight to nothing
+                return self._json(200, watch.remove(c.inp, c.out, str(body.get("number", "")), str(body.get("subject", ""))))
+            if path == "/api/watch/restore":
+                return self._json(200, watch.restore(c.inp, c.out, str(body.get("id", ""))))
+            if path == "/api/watch/purge":
+                return self._json(200, watch.purge(c.out, str(body.get("id", ""))))
             if path == "/api/plan":      # preview only: nothing is reserved
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector")))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
@@ -329,7 +331,8 @@ def make_handler(c: Console):
                 if c.lock.locked():
                     raise pl.PipelineError("busy", 409)
                 t = tasks.read_task(c.out, body["task"])
-                gid = pl.start(t["prompt"], c.out, c.inp, pick=tasks.pick_for_task(c.inp, t, int(body.get("take", 0))), task=t)
+                gid = pl.start(t["prompt"], c.out, c.inp, pick=tasks.pick_for_task(c.inp, t, int(body.get("take", 0))), task=t,
+                               outline=int(body["outline"]) if body.get("outline") is not None else None)
                 tasks.link_generation(c.out, t["id"], gid)
                 c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
                 return self._json(202, {"id": gid})
@@ -339,7 +342,9 @@ def make_handler(c: Console):
                     raise pl.PipelineError("prompt required")
                 if c.lock.locked():
                     raise pl.PipelineError("busy", 409)
-                gid = pl.start(prompt, c.out, c.inp, int(body["variant"]) if body.get("variant") else None)
+                gid = pl.start(prompt, c.out, c.inp, int(body["variant"]) if body.get("variant") else None,
+                               outline=int(body["outline"]) if body.get("outline") is not None else None)
+                pl.approve_plan(c.out, gid, "approved by pressing Generate")
                 c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
                 return self._json(202, {"id": gid})
             parts = path.strip("/").split("/")
@@ -365,13 +370,25 @@ def make_handler(c: Console):
                     new = pl.regen(c.out, c.inp, gid, int(body["index"]), body.get("subject"))
                     c.submit(lambda: pl.run_stills(c.out, new, c.cfg, c.pace))
                     return self._json(202, {"id": new})
+                if parts[3] == "quick_sheet":
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    return self._json(200, gates.quick_sheet(c.out, gid, c.cfg))
+                if parts[3] == "drop":
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    return self._json(200, gates.drop(c.out, gid, int(body["index"]), bool(body.get("dropped", True))))
+                if parts[3] == "add":
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    return self._json(200, gates.quick_add(c.out, gid, c.lib, body.get("pack_id"), body.get("pack_name")))
                 if parts[3] == "pack_add":
                     return self._json(200, c.lib.add_final(c.out, str(body["pack_id"]), gid))
                 if parts[3] == "animate":
                     scope, index = body.get("scope", "pack"), body.get("index")
                     index = int(index) if index is not None else None
                     res = pl.check_animate(c.out, gid, scope, index)
-                    wanted = [index] if scope == "slice" else [s["index"] for s in res["stickers"] if s["status"] == "READY"]
+                    wanted = [index] if scope == "slice" else [s["index"] for s in res["stickers"] if s["status"] == "READY" and s["review"]["still"] != "REJECTED"]
                     if all(res["stickers"][i - 1]["anim_status"] == "READY" for i in wanted):
                         return self._json(200, {"noop": True, "message": "Already animated."})
                     c.submit(lambda: pl.run_animate(c.out, gid, c.cfg, scope, index, c.pace))

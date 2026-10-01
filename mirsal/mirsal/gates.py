@@ -78,11 +78,12 @@ def gate_info(res: dict) -> dict:
         return {"active": "rejected", "message": "The plan was rejected."}
     pend = [s["index"] for s in S if s["status"] == "READY" and s["review"]["still"] == "PENDING"]
     sheet = active_sheet(res)
-    if pend and not sheet:
+    animated = any(s["anim_status"] in ("READY", "FAILED") for s in S)       # animated from the prepared video: no video sheet involved
+    if pend and not sheet and not animated:
         return {"active": "still", "message": f"G2: approve or reject the stills ({len(pend)} pending).", "pending": pend}
-    if not sheet:
+    if not sheet and not animated:
         return {"active": "video_sheet_build", "message": "Build the video sheet from the approved stills."}
-    st = sheet["status"]
+    st = sheet["status"] if sheet else "SLICED"
     if st == "BUILT":
         return {"active": "video_sheet", "message": f"G3: approve or reject video sheet {sheet['id']}.", "sheet": sheet["id"]}
     if st in ("APPROVED", "VIDEO_BLOCKED"):
@@ -292,6 +293,7 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
     """Background job: video-stage checks on the returned video, then each approved slot is decoded from the layout's exact
     rectangles, re-keyed on every frame, boundary-checked and encoded. Python's blocks are recorded on the sticker's history."""
     res = pl.read_result(out, gid)
+    cfg = pl.cfg_for(res, cfg)
     v = sheet_of(res, aid)
     d = pl.gen_dir(out, gid)
     try:
@@ -337,6 +339,92 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
     except Exception as e:
         res["error"] = str(e)[:300]
         pl.write_result(out, gid, res)
+
+
+# ---------- the simple flow: one click per step ----------
+def _ensure_plan(out: Path, gid: int, note: str) -> dict:
+    res = pl.read_result(out, gid)
+    if not res["reviews"].get("plan"):
+        pl.approve_plan(out, gid, note)
+        res = pl.read_result(out, gid)
+    _plan_ok(res)
+    return res
+
+
+def _approve_stills(out: Path, gid: int, res: dict, note: str) -> None:
+    """The stickers that were not dropped (x) and passed Python are approved at G2; skipped once a video sheet locks the stills."""
+    if active_sheet(res) or not any(s["status"] == "READY" and s["review"]["still"] == "PENDING" for s in res["stickers"]):
+        return
+    review(out, gid, "still", "APPROVE", "ready", note)
+
+
+def quick_sheet(out: Path, gid: int, cfg: EngineConfig) -> dict:
+    """'Make a video': approve the kept stills, build the video sheet and approve it for sending (the download is the decision)."""
+    res = _ensure_plan(out, gid, "approved by pressing Make a video")
+    _approve_stills(out, gid, res, "approved by Make a video")
+    res = pl.read_result(out, gid)
+    sheet = active_sheet(res)
+    if not sheet:
+        build_sheet(out, gid, cfg)
+        res = pl.read_result(out, gid)
+        sheet = active_sheet(res)
+    if sheet["status"] == "BUILT":
+        review(out, gid, "video_sheet", "APPROVE", sheet["id"], "approved by Make a video")
+    return {"sheet": sheet["id"]}
+
+
+def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: str | None = None) -> dict:
+    """'Add to pack': approve what was kept at G2 / G4, approve the final pack (G5) and add it to a Library pack.
+    Animated stickers when the video was made, the stills when it was not. Anything already added to that pack is skipped."""
+    res = _ensure_plan(out, gid, "approved by pressing Add")
+    _approve_stills(out, gid, res, "approved by Add")
+    res = pl.read_result(out, gid)
+    animated = any(s["anim_status"] == "READY" for s in res["stickers"])
+    if animated:
+        pack = res["reviews"].get("pack")
+        if pack and pack["decision"] == "APPROVE":
+            review(out, gid, "pack", "REJECT", note="reopened to add more")
+        if any(s["anim_status"] == "READY" and s["review"]["anim"] == "PENDING" for s in pl.read_result(out, gid)["stickers"]):
+            review(out, gid, "anim", "APPROVE", "ready", "approved by Add")
+        res = pl.read_result(out, gid)
+        keep = final_indices(res)
+        kind = "animated"
+        if not keep:
+            raise refuse("Nothing to add: every sticker was dropped or blocked.")
+        review(out, gid, "pack", "APPROVE", note="approved by Add")
+    else:
+        keep = [s["index"] for s in res["stickers"] if s["status"] == "READY" and s["review"]["still"] == "APPROVED"]
+        kind = "static"
+        if not keep:
+            raise refuse("Nothing to add: every sticker was dropped or blocked.")
+    pid = pack_id or (lib.create_pack(pack_name or "My stickers")["id"])
+    res = pl.read_result(out, gid)
+    done = res.setdefault("added", {}).setdefault(pid, [])
+    added = []
+    for i in keep:
+        key = f"{kind}:{i}"
+        if key in done:
+            continue
+        lib.add_from_generation(out, pid, gid, i, kind)
+        done.append(key)
+        added.append(i)
+    pl.write_result(out, gid, res)
+    pl.emit(out, gid, "added_to_pack", "done", 0, {"pack": pid, "kind": kind, "stickers": added}, "human", "APPROVE")
+    return {"added": len(added), "already": len(keep) - len(added), "kind": kind, "pack_id": pid, "indices": keep}
+
+
+def drop(out: Path, gid: int, index: int, dropped: bool) -> dict:
+    """The x on a tile: drop a sticker from the set (a human reject at the stage it is in), or bring it back. Never deletes."""
+    res = pl.read_result(out, gid)
+    _plan_ok(res) if res["reviews"].get("plan") else pl.approve_plan(out, gid, "approved by the first decision")
+    res = pl.read_result(out, gid)
+    animated = any(s["anim_status"] in ("READY", "FAILED") for s in res["stickers"])
+    st = res["stickers"][int(index) - 1]
+    gate = "anim" if animated and st["anim_status"] == "READY" else "still"
+    if gate == "anim" and res["reviews"].get("pack") and res["reviews"]["pack"]["decision"] == "APPROVE":
+        review(out, gid, "pack", "REJECT", note="reopened: a sticker was changed")
+    review(out, gid, gate, "REJECT" if dropped else "APPROVE", int(index), "dropped from the set" if dropped else "brought back")
+    return {"index": int(index), "dropped": dropped, "gate": gate}
 
 
 # ---------- 1x1 regeneration ----------

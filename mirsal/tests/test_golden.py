@@ -119,14 +119,13 @@ class GoldenPathTests(Api):
             self.assertTrue(1 <= len(s["tags"]) <= 5 and s["tags"][0] == s["key"], s["tags"])
             self.assertIn("generous empty margin on every side", s["prompt"])
             self.assertEqual(s["history"][0]["actor"], "python")
-        self.assertEqual((g["gate"]["active"], g["template_id"]), ("plan", "sheet_3x3"))
+        self.assertEqual((g["gate"]["active"], g["template_id"]), ("still", "sheet_3x3"))       # pressing Generate approved the plan (G1)
+        self.assertEqual(g["reviews"]["plan"]["note"], "approved by pressing Generate")
         self.assertTrue((self.tmp / "out" / g["generation_id"] / "source" / "plain" / "S5.png").exists())
 
         # gate order, server side
-        self.review(gid, "still", "APPROVE", "ready", expect=409)               # G1 first
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 409)       # no plan approval, no still decided
         self.review(gid, "anim", "APPROVE", "ready", expect=409)                # nothing sliced yet
-        self.review(gid, "plan", "APPROVE", note="looks right")
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 409)   # no still decided yet
 
         # G2: approve all READY, then reject 5 and 6 (a decision can change until A1 is built)
@@ -205,6 +204,22 @@ class GoldenPathTests(Api):
         self.review(j["id"], "plan", "APPROVE")
         self.review(j["id"], "still", "APPROVE", 1, expect=409)                                # nobody can approve a FAILED sticker
         self.assertEqual(self.req("POST", f"/api/generations/{j['id']}/video_sheet")[0], 409)
+
+    def test_the_outline_is_a_choice(self):
+        """The white die-cut stroke is not forced: 0 gives the plain sticker, a width gives that stroke, both are stored with the generation."""
+        alpha = lambda g, rel: np.array(Image.open(self.tmp / "out" / g["generation_id"] / rel).convert("RGBA"))[..., 3]
+        opaque = lambda a: int((a > 127).sum())
+        gid0, g0 = self.new("create a blob for school", outline=0)
+        gid12, g12 = self.new("create a blob for school")
+        gid24, g24 = self.new("create a blob for school", outline=24)
+        self.assertEqual([g0["outline_px"], g12["outline_px"], g24["outline_px"]], [0, 12, 24])
+        self.assertEqual(g0["stickers"][0]["status"], "READY")
+        plain = alpha(g0, "source/plain/S1.png")
+        self.assertTrue((alpha(g0, g0["stickers"][0]["png"]) == plain).all())             # outline 0: the sticker IS the plain cutout
+        a12, a24 = opaque(alpha(g12, g12["stickers"][0]["png"])), opaque(alpha(g24, g24["stickers"][0]["png"]))
+        self.assertGreater(a12, opaque(plain) * 1.1)
+        self.assertGreater(a24, a12)                                                       # a wider stroke is a wider stroke
+        self.assertEqual(self.req("POST", "/api/generations", {"prompt": "blob", "outline": 99})[0], 400)
 
     def test_rejected_plan_stops_everything(self):
         gid, g = self.new("create a blob for school")

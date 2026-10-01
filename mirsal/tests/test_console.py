@@ -98,7 +98,7 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(len(ready), 8)
         self.assertEqual(g["grid"], [3, 3]); self.assertEqual(g["source"]["grid"]["method"], "gutter")
         for t in ready:
-            self.assertTrue(t["png"].startswith("slices/img-001-blob_school-blob_"), t["png"])
+            self.assertTrue(t["png"].startswith(f"slices/img-{gid:03d}-blob_school-blob_"), t["png"])
             self.assertTrue((self.c.out / g["generation_id"] / t["png"]).exists())
         stages = [(e["stage"], e["status"]) for e in g["events"]]
         self.assertEqual(stages, [("requested", "done")] + [(x, y) for x in ("sheet_picked", "keyed", "sliced") for y in ("start", "done")])
@@ -108,7 +108,7 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(s, 202)
         g = self.wait(gid, lambda j: j["stickers"][0]["anim_status"] in ("READY", "FAILED"))
         self.assertEqual(g["stickers"][0]["anim_status"], "READY", g["stickers"][0]["anim_metrics"])
-        self.assertEqual(g["stickers"][0]["webm"], "slices/vid-001-blob_school-blob_with_a_book.webm")
+        self.assertEqual(g["stickers"][0]["webm"], f"slices/vid-{gid:03d}-blob_school-blob_with_a_book.webm")
         self.assertEqual(len(list((self.c.out / g["generation_id"] / "slices").glob("*.webm"))), 1)
         s, j = self.req("POST", f"/api/generations/{gid}/animate", {"scope": "slice", "index": 1})
         self.assertEqual((s, j["noop"]), (200, True))
@@ -153,6 +153,41 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(self.req("POST", f"/api/projects/{pid}/render", {"format": "webp", "overlays": {}, "save": {"pack_id": "x"}})[0], 400)   # only WebM goes into packs
         self.assertEqual(self.req("POST", "/api/projects?name=x.txt")[0], 400)
         self.assertEqual(self.req("POST", f"/api/projects/{pid}/delete")[0], 200); self.assertEqual(self.req("GET", f"/api/projects/{pid}")[0], 404)
+
+    def test_the_simple_flow_animate_then_add(self):
+        """type -> stickers -> drop one -> Animate -> Add: the gates are decided behind those clicks and each decision is on record."""
+        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "variant": 1, "outline": 0})
+        gid = j["id"]
+        g = self.wait(gid, lambda x: x["stage"] == "sliced")
+        self.assertEqual((g["outline_px"], g["reviews"]["plan"]["note"]), (0, "approved by pressing Generate"))
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/drop", {"index": 5})[0], 409)       # a blocked sticker cannot be dropped
+        s, j = self.req("POST", f"/api/generations/{gid}/drop", {"index": 3})
+        self.assertEqual((s, j.get("gate"), j.get("error")), (200, "still", None))
+        s, j = self.req("POST", f"/api/generations/{gid}/animate", {"scope": "slice", "index": 1})
+        self.assertEqual(s, 202)
+        g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+        pk = self.req("POST", "/api/packs", {"name": "Flow"})[1]
+        s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_id": pk["id"]})
+        self.assertEqual((s, r["kind"], r["added"], r["indices"]), (200, "animated", 1, [1]))          # only what was animated and kept
+        s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_id": pk["id"]})
+        self.assertEqual((s, r["added"], r["already"]), (200, 0, 1))                                   # pressing Add twice adds nothing twice
+        g = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual(g["final"], [1])
+        self.assertEqual([(h["actor"], h["decision"]) for h in g["stickers"][2]["history"] if h["stage"] == "still"], [("human", "REJECT")])   # S3: dropped, on record
+        lib = self.req("GET", "/api/library")[1]
+        pack = next(x for x in lib["packs"] if x["id"] == pk["id"])
+        self.assertEqual([x["type"] for x in pack["stickers"]], ["animated"])
+        # a drop after the pack was approved reopens it instead of failing
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/drop", {"index": 1, "dropped": True})[1]["gate"], "anim")
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/add", {"pack_id": pk["id"]})[0], 409)   # nothing left to add
+
+    def test_add_without_a_video_adds_the_stills(self):
+        s, j = self.req("POST", "/api/generations", {"prompt": "blob", "variant": 2})
+        gid = j["id"]
+        self.wait(gid, lambda x: x["stage"] == "sliced")
+        s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_name": "Stills"})
+        self.assertEqual((s, r["kind"], r["added"]), (200, "static", 8))
+        self.assertEqual(len(next(x for x in self.req("GET", "/api/library")[1]["packs"] if x["id"] == r["pack_id"])["stickers"]), 8)
 
     def test_errors_and_traversal(self):
         self.assertEqual(self.req("POST", "/api/generations", {"prompt": "spaceship"})[0], 404)

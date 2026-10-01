@@ -138,8 +138,11 @@ def inbox(out: Path, inp: Path) -> dict:
         for p in ps:
             by_id.setdefault((subject, p.subject_id), []).append(p)
     nxt = next_number(out, inp)
+    from .pipeline import generations_by_folder
+    made = generations_by_folder(out)
     tasks = {t["id"]: t for t in list_tasks(out)}
     rows, seen = [], set()
+    img_names = {d.name for k, d in watch_dirs(inp) if k == "img"}
     for t in sorted(tasks.values(), key=lambda t: -t["number"]):
         img, vid = t["folders"]["img"], t["folders"]["vid"]
         subj = img.split("-", 2)[2]
@@ -147,31 +150,37 @@ def inbox(out: Path, inp: Path) -> dict:
         ifiles, vfiles = _files(img_root / img, sources.IMG_EXT), _files(vid_root / vid, sources.VID_EXT)
         ps = by_id.get((subj, t["id"]), [])
         states = ["reserved, waiting for file"] if not ifiles else ["sheet arrived"]
-        if vfiles or any(p.video for p in ps):
-            states.append("video arrived")
+        has_video = bool(vfiles) or any(p.has_video for p in ps)
+        if ifiles:
+            states.append("video arrived" if has_video else "no video yet")
         for p in ps:
             if p.clips_dup_of:
                 states.append(f"clips: copies of {p.clips_dup_of} (ignored)")
                 break
         rows.append({"kind": "task", "task": t["id"], "name": img, "vid_name": vid, "subject": subj, "prompt": t["prompt"], "grid": t["plan"]["grid"],
                      "states": states, "state": " · ".join(states),
-                     "sheets": ifiles, "videos": vfiles, "paths": t["paths"], "generations": t.get("generations", []),
+                     "sheets": ifiles, "videos": vfiles, "paths": t["paths"], "generations": sorted(set(t.get("generations", [])) | set(made.get((subj, t["id"]), []))), "has_video": has_video,
                      "can_run": bool(ifiles), "problems": [], "ts": t["created"]})
     for kind, d in watch_dirs(inp):
         if d.name in seen:
             continue
         m = sources.DIR_RE.match(d.name)
+        if m and m[1] == "vid" and kind == "vid" and any(n.startswith(f"img-{m[2]}-") for n in img_names):
+            continue          # its video is already shown on the image folder's row
         if m and m[1] == kind:
             files = _files(d, sources.IMG_EXT if kind == "img" else sources.VID_EXT)
             ps = by_id.get((m[3], m[2]), [])
+            has_video = any(p.has_video for p in ps) or (kind == "vid" and bool(files))
             states = ["sheet arrived" if kind == "img" and files else "video arrived" if files else "empty folder"]
             if kind == "img" and files:
+                states.append("video arrived" if has_video else "no video yet")
                 states.append("no matching task (made outside the app; prompts come from the stub or a <sheet>.json)")
             if any(p.clips_dup_of for p in ps):
                 states.append(f"clips: copies of {next(p.clips_dup_of for p in ps if p.clips_dup_of)} (ignored)")
             vi = next((i + 1 for i, p in enumerate(picks.get(m[3], [])) if p.subject_id == m[2]), None)
-            rows.append({"kind": "folder", "task": None, "name": d.name, "subject": m[3], "variant": vi, "prompt": m[3].replace("_", " "), "states": states, "state": states[0], "sheets": files if kind == "img" else [],
-                         "videos": files if kind == "vid" else [], "can_run": kind == "img" and bool(files), "problems": [], "paths": {kind: str(d)}, "generations": [], "ts": d.stat().st_mtime})
+            rows.append({"kind": "folder", "task": None, "name": d.name, "subject": m[3], "variant": vi, "prompt": m[3].replace("_", " "), "states": states, "state": " · ".join(x for x in states if not x.startswith("no matching") and "ignored" not in x), "sheets": files if kind == "img" else [],
+                         "videos": files if kind == "vid" else [], "can_run": kind == "img" and bool(files), "problems": [], "paths": {kind: str(d)},
+                         "generations": made.get((m[3], m[2]), []) if kind == "img" else [], "has_video": has_video, "ts": d.stat().st_mtime})
         else:
             fix = nearest_valid(d.name, kind, nxt)
             why = (f"is a {m[1]}- folder inside {'Images_gen' if kind == 'img' else 'videos_gen'}" if m else "does not match img-NNN-<subject> / vid-NNN-<subject>")

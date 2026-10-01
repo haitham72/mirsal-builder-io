@@ -31,7 +31,7 @@ test("the 1F scenario, driven from the UI with no console errors", async ({ page
   await expect(page.getByText("img-002-teddy_bear").first()).toBeVisible();
 
   // Run: a generation linked to its task; G2: approve all, reject 5 and 6
-  await page.getByRole("button", { name: "Run", exact: true }).first().click();
+  await page.getByRole("button", { name: "Generate", exact: true }).first().click();
   await expect(page.getByText("G2: approve or reject the stills (9 pending)")).toBeVisible({ timeout: 30_000 });
   await page.getByRole("button", { name: "Approve all READY" }).click();
   await page.getByRole("button", { name: "Reject", exact: true }).nth(4).click();

@@ -138,6 +138,18 @@ def next_variant(out: Path, subject: str, n: int) -> int:
     return 1
 
 
+def generations_by_folder(out: Path) -> dict:
+    """{(subject, folder number): ['G028', ...]} - which generations were made from which watch folder (oldest first)."""
+    found: dict = {}
+    for gid in list_ids(out):
+        try:
+            s = read_result(out, gid)["source"]
+        except Exception:
+            continue
+        found.setdefault((s["subject"], s.get("subject_id")), []).append(f"G{gid:03d}")
+    return found
+
+
 def list_inputs(inp: Path) -> list[dict]:
     return [{"subject": subj, "variants": [
         {"variant": p.variant, "folder": p.subject_id, "sheet": p.sheet.name, "video": p.video.name if p.video else None,
@@ -146,14 +158,17 @@ def list_inputs(inp: Path) -> list[dict]:
 
 
 def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: sources.Pick | None = None, parent: int | None = None,
-          grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None) -> int:
+          grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None,
+          outline: int | None = None) -> int:
     """Synchronous part: match source, run the prompter, allocate G00N. Returns the id fast.
     grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters."""
+    if outline is not None and not 0 <= int(outline) <= 40:
+        raise PipelineError("outline must be 0 (none) to 40 px")
     if pick is None:
         base = sources.find(inp, prompt, 1)
         if base:
             picks = sources.scan(inp)[base.subject]
-            pick = picks[(variant or next_variant(out, base.subject, len(picks))) - 1] if (variant or len(picks) > 1) else base
+            pick = picks[min(max(variant or 1, 1), len(picks)) - 1]      # explicit folder, else the first: it never advances by itself
     if not pick:
         raise PipelineError(f"No prepared set for that. Try: {', '.join(sources.known_subjects(inp)) or '(none found)'}", 404)
     if regen_plan:  # 1x1 regeneration of one sticker: the plan is that sticker's own (key, tags, emoji) in a single-cell template
@@ -186,12 +201,21 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         "template_id": plan.get("template_id"), "template_version": plan.get("template_version"), "slots": plan.get("slots"),
         "task_id": task["id"] if task else None, "name_key": plan["task_slug"], "regen_of": regen_of,
         "verify_version": verify.VERIFY_VERSION,
+        "outline_px": int(outline) if outline is not None else EngineConfig().outline_px,    # the white die-cut stroke is a choice, kept with the generation
         "reviews": {"plan": (task or {}).get("plan_review"), "video_sheet": {}, "pack": None}, "video_sheets": [], "verify": {},
         "stickers": [new_sticker(gid, plan["task_slug"], s) for s in plan["stickers"]],
     }
     write_result(out, gid, res)
     emit(out, gid, "requested", "done", 0, {"prompt": prompt, "task_slug": plan["task_slug"]})
     return gid
+
+
+def approve_plan(out: Path, gid: int, note: str) -> None:
+    """Pressing Generate on a prepared folder is the human's G1 decision (the same as saving a task in the Inbox)."""
+    res = read_result(out, gid)
+    if not res["reviews"].get("plan"):
+        res["reviews"]["plan"] = {"decision": "APPROVE", "by": "human", "ts": round(time.time(), 3), "note": note}
+        write_result(out, gid, res)
 
 
 def new_sticker(gid: int, task_slug: str, s: dict) -> dict:
@@ -216,8 +240,15 @@ def block_detail(report: list) -> dict | None:
     return {"check": c["name"], "value": c.get("value"), "limit": c.get("limit"), "note": c.get("detail"), "data": c.get("data")}
 
 
+def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
+    """The engine config of one generation: the server's, with the outline width that was chosen for it (0 = no stroke)."""
+    px = res.get("outline_px")
+    return cfg if px is None else replace(cfg, outline_px=int(px))
+
+
 def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
     res = read_result(out, gid)
+    cfg = cfg_for(res, cfg)
     d = gen_dir(out, gid)
     try:
         blocked = None
@@ -323,7 +354,8 @@ def regen(out: Path, inp: Path, gid: int, index: int, subject: str | None = None
     pick = picks[next_variant(out, subj, len(picks)) - 1]
     if detect_grid(load_rgb(pick.sheet)) != (1, 1):
         raise PipelineError(f"{pick.sheet.name} is not a 1x1 sheet (one character on one canvas).", 409)
-    new = start(res["prompt"], out, inp, pick=pick, parent=gid, regen_of=f"{res['generation_id']}/S{index}", regen_plan=gates.regen_plan(res, index))
+    new = start(res["prompt"], out, inp, pick=pick, parent=gid, regen_of=f"{res['generation_id']}/S{index}", regen_plan=gates.regen_plan(res, index),
+                outline=res.get("outline_px"))
     plan = res["reviews"].get("plan")
     if plan and plan["decision"] == "APPROVE":
         r2 = read_result(out, new)
@@ -352,8 +384,9 @@ def check_animate(out: Path, gid: int, scope: str, index: int | None) -> dict:
 
 def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int | None = None, pace: float = 0.0) -> dict:
     res = check_animate(out, gid, scope, index)
+    cfg = cfg_for(res, cfg)
     d = gen_dir(out, gid)
-    wanted = [index] if scope == "slice" else [s["index"] for s in res["stickers"] if s["status"] == "READY"]
+    wanted = [index] if scope == "slice" else [s["index"] for s in res["stickers"] if s["status"] == "READY" and s["review"]["still"] != "REJECTED"]
     todo = [i for i in wanted if res["stickers"][i - 1]["anim_status"] != "READY"]
     emit(out, gid, "video_requested", "done", 0, {"scope": scope if scope == "pack" else f"slice S{index}", "cells": todo})
     if not todo:
@@ -418,6 +451,8 @@ def summary(out: Path) -> list[dict]:
             r = read_result(out, gid)
         except Exception:
             continue
+        s = r["source"]
         rows.append({"id": gid, "generation_id": r["generation_id"], "prompt": r["prompt"], "stage": r["stage"],
-                     "subject": r["source"]["subject"], "variant": r["source"]["variant"], "error": r["error"]})
+                     "subject": s["subject"], "variant": s["variant"], "error": r["error"],
+                     "folder": f"img-{s.get('subject_id')}-{s['subject']}" if s.get("subject_id") else None})
     return rows

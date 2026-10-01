@@ -195,6 +195,7 @@ export interface InboxRow {
   sheets: string[];
   videos: string[];
   can_run: boolean;
+  has_video?: boolean;
   paths: Record<string, string>;
   generations: string[];
   problems: { what: string; expected: string; nearest: string }[];

@@ -166,7 +166,7 @@ function Prepare() {
   );
 }
 
-const stateTone = (r: InboxRow) => (r.kind === "invalid" ? "bad" : r.states.some((s) => s.includes("no matching task") || s.includes("ignored")) ? "warn" : r.sheets.length ? "ok" : "neutral");
+const stateTone = (r: InboxRow) => (r.kind === "invalid" ? "bad" : r.sheets.length ? "ok" : "neutral");
 
 function Row({ r }: { r: InboxRow }) {
   const go = useUI((s) => s.go);
@@ -176,41 +176,53 @@ function Row({ r }: { r: InboxRow }) {
       go("generate", res.id);
     },
   );
+  const last = r.generations[r.generations.length - 1];
   return (
     <li className="border-b border-bd/70 py-3.5 last:border-0">
-      <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex items-center gap-3">
         <span className="grid size-11 shrink-0 place-items-center rounded-full border border-bd bg-pri-l text-pri-d" aria-hidden>
           {r.kind === "invalid" ? <TriangleAlert className="size-5" /> : <FolderOpen className="size-5" />}
         </span>
-        <code className="text-[14px] font-semibold">{r.name}</code>
-        <CopyButton text={r.name} label="Copy" />
-        <Badge tone={stateTone(r) as "bad" | "warn" | "ok" | "neutral"}>{r.state}</Badge>
-        <div className="ml-auto flex items-center gap-1.5">
-          {r.generations.slice(-1).map((g) => (
-            <Button key={g} size="sm" variant="ghost" onClick={() => go("generate", Number(g.slice(1)))}>
-              Open {g}
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <code className="text-[14px] font-semibold">{r.name}</code>
+            <CopyButton text={r.name} label="Copy" />
+          </div>
+          <div className="mt-1">
+            <Badge tone={stateTone(r) as "bad" | "warn" | "ok" | "neutral"}>{r.state}</Badge>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {r.kind !== "invalid" && last && (
+            <Button variant="pri" onClick={() => go("generate", Number(last.slice(1)))} title="Open the result that already exists for this folder">
+              Open {last}
             </Button>
-          ))}
+          )}
           {r.kind !== "invalid" && (
-            <Button variant="pri" disabled={!r.can_run || run.isPending} onClick={() => run.mutate([])}>
+            <Button
+              variant={last ? "soft" : "pri"}
+              size={last ? "sm" : "md"}
+              disabled={!r.can_run || run.isPending}
+              onClick={() => run.mutate([])}
+              title={last ? "Make another generation from this same folder" : "Key, slice and check this sheet"}
+            >
               <Play />
-              Run
+              {last ? "Run again" : "Generate"}
             </Button>
           )}
         </div>
       </div>
       {r.kind === "task" && (
-        <p className="mt-1 truncate text-xs text-mut">
+        <p className="mt-1 truncate pl-14 text-xs text-mut">
           {r.prompt} · {r.grid?.[0]}×{r.grid?.[1]} · video folder <span className="font-mono">{r.vid_name}</span>
         </p>
       )}
       {(r.sheets.length > 0 || r.videos.length > 0) && (
-        <p className="mt-1 truncate font-mono text-[11px] text-mut">{[...r.sheets, ...r.videos].join("  ")}</p>
+        <p className="mt-1 truncate pl-14 font-mono text-[11px] text-mut2">{[...r.sheets, ...r.videos].join("  ")}</p>
       )}
-      {r.states.filter((s) => s.includes("no matching") || s.includes("ignored")).map((s) => (
-        <p key={s} className="mt-1 flex items-start gap-1 text-xs text-run">
-          <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
-          {s}
+      {r.states.filter((s) => s.includes("ignored")).map((s) => (
+        <p key={s} className="mt-1 pl-14 text-xs text-mut2">
+          {s}: its own video is used instead.
         </p>
       ))}
       {r.problems.map((p) => (
@@ -238,6 +250,7 @@ function Watch() {
         <p className="text-[13px] text-mut">
           Checked every two seconds. Next free number: <b>{q.data ? String(q.data.next_number).padStart(3, "0") : "..."}</b>
         </p>
+        <p className="text-[12.5px] text-mut2">One press is one folder: Generate runs that folder, and Open shows what it already made.</p>
         {q.data && (
           <p className="mt-0.5 truncate font-mono text-[11px] text-mut" title={`${q.data.paths.images}\n${q.data.paths.videos}`}>
             {q.data.paths.images}
@@ -253,7 +266,7 @@ function Watch() {
 
 export default function Inbox() {
   return (
-    <div className="grid gap-8 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+    <div className="grid gap-8 xl:grid-cols-[minmax(0,4fr)_minmax(0,6fr)]">
       <Prepare />
       <Watch />
     </div>

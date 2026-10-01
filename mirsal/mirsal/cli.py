@@ -77,11 +77,6 @@ def doctor() -> int:
     from .engine import verify
     tpl = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
     print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
-    from datetime import datetime
-    from .console.server import DIST
-    page = DIST / "index.html"
-    print(f"OK      frontend: dist built {datetime.fromtimestamp(page.stat().st_mtime):%Y-%m-%d %H:%M}" if page.is_file()
-          else "NOTE    frontend: legacy console (React app not built: cd web && npm ci && npm run build)")
     from . import sources
     subs = sources.known_subjects(input_root())
     from . import matte

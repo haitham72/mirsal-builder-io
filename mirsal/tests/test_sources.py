@@ -78,7 +78,8 @@ class PlanFileTests(unittest.TestCase):
 
 
 class RotationTests(unittest.TestCase):
-    def test_generate_cycles_through_variants(self):
+    def test_generate_never_advances_to_the_next_folder_by_itself(self):
+        """One press is one folder. (It used to rotate 001 -> 002 -> 003 -> 001 on every press, which made a pre-generated test set unusable.)"""
         import cv2
         from mirsal import pipeline as pl
         from tests import synth
@@ -93,8 +94,10 @@ class RotationTests(unittest.TestCase):
                 gid = pl.start("blob", out, root)
                 s = pl.read_result(out, gid)["source"]
                 got.append((s["variant"], s["subject_id"], Path(s["video_path"]).name))
-            self.assertEqual(got, [(1, "001", "vid-001-blob.mp4"), (2, "002", "vid-002-blob.mp4"), (3, "003", "vid-003-blob.mp4"), (1, "001", "vid-001-blob.mp4")])
-            self.assertEqual(pl.read_result(out, pl.start("blob", out, root, variant=3))["source"]["variant"], 3)   # explicit pick still works
+            self.assertEqual(got, [(1, "001", "vid-001-blob.mp4")] * 4)
+            self.assertEqual(pl.read_result(out, pl.start("blob", out, root, variant=3))["source"]["variant"], 3)   # an explicit folder is honoured
+            self.assertEqual(pl.read_result(out, pl.start("blob", out, root, variant=2))["source"]["subject_id"], "002")
+            self.assertEqual(pl.generations_by_folder(out)[("blob", "001")], ["G001", "G002", "G003", "G004"])
 
 
 class DuplicateClipTests(unittest.TestCase):
