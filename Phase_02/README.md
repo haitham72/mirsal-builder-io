@@ -54,11 +54,16 @@ request â”€(prompt template v2 + style + stroke [+ AI enhancer] [+ references])â
 - **Loop is a choice, off by default** (like the stroke): the saved plan has `slots.loop`, the composer has a Loop chip, the animation box a Loop checkbox. Off: `video_v2` contains no loop
   wording at all and the Kling job gets only a start image; on: "seamless loop", "End on the starting pose so the clip loops" and start = end image. The engine closes loops itself
   (`close_loop` cross-fades a clip whose end does not match its start), so the model never needs the word.
-- **The edge is live and never loses a video.** Stroke and trim are sliders (not a dialog): the server redraws the stills in about 0.2 s per batch (coalesced, always the latest value) and,
-  on release, re-applies the edge to the animations **from the stored video** (`gates.reslice`, no credits). Animation cells of a video sheet are in the animation cache, keyed by the video,
-  the slot, the approved still and every setting incl. the edge, so a setting used before comes back in about 2 s (each stroke/trim pair is its own cached snapshot); a new one takes about 13 s
-  for 9 stickers. The video sheet is built from the stroke-free stickers on purpose, so changing the stroke never needs a new Kling video. If the animations were left stale, the edge bar
-  offers **Apply to animations** (`POST /api/generations/<id>/reslice`).
+- **The edge is a preview until it is applied, and it never loses a video.** Stroke and trim are sliders in the edge bar (and in the open thumbnail's view). Dragging one changes **one
+  thumbnail only**: the open one, else the last one picked, else the first. Outside the open view that is a **floating card** under the sliders (the test sticker, large, on the checkerboard,
+  with **Apply** and **Cancel**); in the open view the big sticker pane is the preview. The grid is never touched, nothing is stored and nothing is re-rendered while a slider moves
+  (`GET /api/generations/<id>/edge_preview?index=&outline=&erode=`, one PNG rendered from the stroke-free twin by the same `apply_edge` the real render uses).
+  **Apply** (`POST /api/generations/<id>/edge {outline, erode}`) saves **one snapshot** (`result.json edge_history`, seeded with how the batch started) and applies the edge to the whole batch:
+  the stills are re-rendered (about 0.2 s) and the animations are re-cut from the stored video (`gates.reslice`, no credits; the animation cache keys on the edge, so a setting used before comes
+  back in about 2 s and a new one takes about 13 s for 9 stickers). **Undo** steps back one real snapshot (the log is replayed as a stack: an `undo` entry pops, so two Undos never flip between two
+  values) and is itself recorded; **Cancel** only drops the test. The same edge twice changes nothing and adds no snapshot. Besides Apply, a pending edge is applied automatically in exactly
+  two moments: when the **video is generated from the image** (`POST /api/live/video {outline, erode}`) and when the **stickers go into a pack** (the add endpoint); both go through
+  `Console.commit_edge`, which refuses while another job holds the pipeline. The video sheet is built from the stroke-free stickers on purpose, so changing the stroke never needs a new Kling video.
 - **The returned video stays visible.** The Animation view shows the Kling video with the slot lines (a light 720 px `preview.mp4` is made when the video is attached, or on demand for older
   ones), and a batch with a Kling video counts as having a video everywhere in the UI.
 - **Warnings in plain words.** A kept-with-a-check sticker says what Python noticed and what to do (for example "looks almost the same as S1: the same pose drawn twice? Kept: drop one with the
@@ -68,24 +73,34 @@ request â”€(prompt template v2 + style + stroke [+ AI enhancer] [+ references])â
 ## Files and names (`export.py`)
 
 The engine keeps its files in `out/G00N/` and `out/jobs/` under its own names (`<media>-<NNN>-<task_slug>-<key>.<ext>`, which the database and the pack use; they never change). For copy
-and paste, every live batch is also **mirrored** into properly named folders after each step (`sync`, never raising, add and refresh only):
+and paste, every live batch is also **mirrored** into properly named folders **inside the repo** after each step (`sync`, never raising, add and refresh only):
 
 ```
-out/export/images/img-004-batman_lego/
+generated/images/img-004-batman_lego/
     img-004-batman_lego-sheet-nano_banana_flash-2k-20261001.png
     img-004-batman_lego-s1-ready_to_fight-stroke12px-trim0px-20261001.png      sheet position, action, stroke, trim, date
-    prompts.txt                                                               prompts, models, credits, Higgsfield ids
-out/export/videos/vid-004-batman_lego/
+    prompts.txt                                                               prompts, models, credits, Higgsfield ids (and "KEY: blue" when it is blue)
+generated/videos/vid-004-batman_lego/
     vid-004-batman_lego-video-kling3_0-pro-3s-20261001.mp4
     vid-004-batman_lego-videosheet-gap26-20261001.png                          the sheet that was sent (gap in %)
     vid-004-batman_lego-s1-ready_to_fight-stroke12px-trim0px-20261001.webm
 ```
 
-The folder is `out/export` or the one named by **`MIRSAL_EXPORT_DIR`** (for example a folder you copy from every day; never a watch folder). The server mirrors **every** live batch at start (`sync_all`, so batches made before the mirror existed get their folders) and the newest ones after each step.
+The root is `<repo>/generated` (git-ignored) for the project's own `out/`, `out/export` for any other data folder (a copy, a test), or the folder named by **`MIRSAL_EXPORT_DIR`**; never a watch
+folder. The server mirrors **every** live batch at start (`sync_all`) and the newest ones after each step. (VS Code greys or hides git-ignored files when `explorer.excludeGitIgnore` is on.)
 
-`sN` sorts the files in sheet order and ties them to S1..S9; **each stroke/trim setting is its own snapshot** (new names, old files are kept). The date is the file's own date. The watch folders
+`sN` sorts the files in sheet order and ties them to S1..S9. **Only an applied edge makes new files**: each Apply (or the video / pack moment) is its own snapshot with new names and the old files are kept;
+dragging a slider writes nothing. The date is the file's own date. The watch folders
 (`Phase_01/Images_gen`, `videos_gen`) are never written to: a returned Kling video is laid out for the normalised video sheet, so pairing it with the raw sheet there would be wrong (and a
 prepared pair dropped there is picked up as before). `POST /api/generations/<id>/reveal` opens the batch's folder in the file manager (the Studio's **Open folder**), `GET .../files` returns the paths.
+
+## The screen colour (blue key)
+
+The sheet prompt asks for the key in `slots.key_colour` (green; blue when the AI enhancer sees a green subject, `expander.GREEN_WORDS`). What the model **returns** wins: `run_stills` measures the outer ring
+(`chroma.detect_key`, the colour with the higher key difference, `asked` when neither is clear so the sheet check still blocks it) and, when the screen is blue, writes `key_colour: "blue"` on the batch.
+`pipeline.cfg_for` then makes every later step use `chroma = "blue"` (keyer, despill, the sheet check, the **video sheet**, the keying of the returned video) and `video_prompt_for` names the screen
+that was really sent. It is **marked only when it is blue**: the task file gets `key_colour: "blue"` (plus `key_detected: true` when the prompt had asked for green, i.e. the model drifted), `prompts.txt` gets a
+`KEY: blue` line and the batch header a "Blue key" chip; a green screen leaves no mark anywhere. A sheet with neither screen is still blocked (`background_is_key`).
 
 ## The queue (`GET /api/jobs`, `live.js`)
 
@@ -100,8 +115,9 @@ again from scratch when nothing was created.
 An animation that Python blocked for **leaving or crossing its slot** (`inside_slot`, `cross_slot`) has no file, because the block saves the encode. The user can **allow it** by clicking the
 sticker's warning banner, its "Allow anyway" button, its chip, or its cell on the video sheet (`POST /api/generations/<id>/allow {index, allow}`): the permission is stored on the sticker
 (`anim_override`), recorded in its history as a human APPROVE ("allowed anyway: cross_slot"), the cell is cut again with that check downgraded to a warning (still listed, "allowed by you"), and
-every later re-slice (an edge change) keeps it. Taking it back (the tile's "undo") blocks it again. Technical blocks (format, size, codec, loop) cannot be allowed, and the review gate itself
-still refuses a blocked animation. Rejected and blocked animations are shown at full strength with a coloured outline instead of being buried under hatching.
+every later re-slice (an edge change) keeps it. **Allow all (n)** under the sheet's chips allows every blocked animation of the batch in one request (`{all: true}`, one re-cut of all of them), **Take all back (n)** reverses what was allowed, and every cell on the video sheet is a toggle (click: allow; click an allowed one: take it back). Taking one back (the tile's "undo") blocks it again. Technical blocks (format, size, codec, loop) cannot be allowed, and the review gate itself
+still refuses a blocked animation. **Dashed + faded means "will NOT be exported"** (a dropped sticker, a blocked animation, a sheet cell outside the set) and **solid means exported** (a kept-with-a-check cell has a thin solid outline); a faded item is never disabled: it stays
+clickable, can be opened, brought back or allowed.
 
 ## Jobs (`jobs.py`)
 
