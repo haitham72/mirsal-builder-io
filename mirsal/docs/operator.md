@@ -1,8 +1,9 @@
-# Operator loop (Phase 2 S3): fulfilling Mirsal jobs with the Higgsfield MCP tools
+# Operator loop (Phase 2 S3): fulfilling Mirsal jobs with the Higgsfield CLI
 
-The operator is a Claude Code session where the Higgsfield connector is authorised.
-Mirsal never holds Higgsfield credentials; it only writes job files. Read
-`Phase_02/higgsfield_mcp.md` (S0: the real tool names and parameters) before running jobs.
+The operator is a Claude Code session (or a script) on a PC where `higgsfield auth login` is done and a
+workspace is selected. Mirsal never holds Higgsfield credentials; it only writes job files. Read
+`Phase_02/higgsfield.md` (S0: the real commands, parameters, costs and the standing model choices:
+Nano Banana 2 at 2k, Kling v3.0, never `4k`) before running jobs. Never run `higgsfield auth token`.
 
 ## The loop
 
@@ -10,7 +11,7 @@ Mirsal never holds Higgsfield credentials; it only writes job files. Read
 mirsal jobs --status REQUESTED --json          # take the oldest
 mirsal job show J001 --json                   # everything needed to call Higgsfield
 # check the cost against the daily budget (Haitham's number for the day)
-# call the Higgsfield tool for the job kind with the prompt (+ input image for video)
+# higgsfield generate cost ...   then   higgsfield generate create <model> ... --wait --json
 mirsal job claim J001 --ticket <higgsfield id>   # IMMEDIATELY, before waiting
 # poll the Higgsfield job until done or the timeout; download the result
 mirsal job done J001 --file <path> --model <name> [--cost <credits>]

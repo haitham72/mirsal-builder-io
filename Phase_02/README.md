@@ -1,8 +1,10 @@
-# Phase 2 — built so far: prompt lab (S1), file jobs (S2), slot reviewer (S5 remainder)
+# Phase 2 — built so far: Higgsfield discovery (S0), prompt lab (S1), file jobs (S2), slot reviewer (S5 remainder)
 
-Live generation runs on the file store (no database). The live steps (S0/S3/S4: real Higgsfield
-calls) wait for a session where the Higgsfield MCP tools exist — this session has none, so the
-seams are built and proven with a fake operator; nothing is simulated as real.
+Live generation runs on the file store (no database). Higgsfield is driven through its **CLI**
+(`Phase_02/higgsfield.md`: the measured models, params, costs and outputs, and the standing choices
+Nano Banana 2 at 2k and Kling v3.0, never 4k). S0 made one sheet and two videos (std, pro) for
+12.25 credits, all in `out/model_calls.jsonl`; the jobs seam below is proven with a fake operator and
+is what S3 connects to the CLI.
 
 ## S1 — prompt lab, offline (`mirsal prompt`)
 
@@ -34,8 +36,7 @@ waiting period (a human act, never automatic). Every transition appends to `out/
   that creates the sheet job and polls `GET /api/jobs/<id>` every 5 s with the elapsed time until
   DONE/FAILED. The button walkthrough in a browser awaits Haitham (no browser in this session);
   the API behind it is covered by tests.
-- Operator loop: `mirsal/docs/operator.md`. `Phase_02/higgsfield_mcp.md` (S0) is still unwritten:
-  it needs the authorised session.
+- Operator loop: `mirsal/docs/operator.md`.
 
 ## S5 remainder — slot reviewer (`expander.review`)
 
@@ -52,6 +53,6 @@ the reviewer (lint + fake-model accept/reject, never a live call).
 
 ## Not built (needs the authorised session or Haitham)
 
-S0 discovery + `higgsfield_mcp.md`, S3 first real sheet, S4 normalised video + `measure-cells`,
+S3 first real sheet through the unchanged stills run, S4 normalised video + `measure-cells`,
 S6 vision judge + 30 labels, S7 measurements. `out/jobs/*.json` and `out/model_calls.jsonl` keep the
 shapes `phase_03.md` expects, so Phase 3 imports them unchanged.

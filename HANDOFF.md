@@ -13,6 +13,7 @@ Built unattended on their standing order; each needs their verdict. On approval 
 | Gate | What to check | How |
 |---|---|---|
 | **S1 prompt text** | The prompts match your golden prompts in English, Arabic and Arabizi. | `python -m mirsal prompt "<request>"`, `prompt lab` (20 inputs), `prompt "<request>" --ai`; compare with `Phase_02/prompt_samples.md`. |
+| **S0 Higgsfield test outputs** | The first sheet and clips are what you expect; choose Kling `std` (960 px, 3.75 credits) or `pro` (1440 px, 4.5 credits). | Files in `mirsal/out/s0/` (`image_nb2.png`, `video_kling.mp4`, `video_kling_pro.mp4`); numbers in `Phase_02/higgsfield.md`. |
 | **S2 jobs** | The "generate it" button works in the browser; a job shows up and completes. | Studio -> Higgsfield dialog -> "No prepared sheet: generate it"; `python -m mirsal jobs`; `mirsal/docs/operator.md` for the operator loop. |
 | **S5 AI lab** | The AI-filled concepts are good. | `prompt lab --ai` (20 prompts), rate them. |
 | **3A Postgres** | History and search survive a restart on your real data. | `python -m mirsal db up`, `db import`, `list`, `show G078`, `search "teddy book"`, then `docker restart mirsal-db` and `show` again. Needs the real `out/` (original PC). |
@@ -22,7 +23,7 @@ Built unattended on their standing order; each needs their verdict. On approval 
 
 ## 2. Next work
 
-1. **S0, then S3, S4 (then S6, S7) once Higgsfield is reachable.** Higgsfield's help center says Claude Code uses its **CLI** (`npm i -g @higgsfield/cli`, then `higgsfield auth login`, which Haitham runs in a terminal), not the MCP connector (`https://mcp.higgsfield.ai/mcp`, added in claude.ai Settings -> Connectors). Neither is set up on this PC yet. Never simulate a call; if neither the CLI nor the tools work, stop and tell Haitham. S0: list every tool, model, parameter, limit and credit cost; make one test image and one test video; write `Phase_02/higgsfield_mcp.md` (job id returned? synchronous or polled? first/last frame or loop? output size/format/duration, cost per call, rate limits). That doc decides how S3-S4 are built. Where reality disagrees with `phase_02.md`, enhance the plan and say why.
+1. **S3, then S4 (then S6, S7) with the Higgsfield CLI** (S0 is done: `Phase_02/higgsfield.md`; the CLI is logged in, workspace selected, 3992.87 credits). S3: fulfil a `sheet` job end to end: create **without `--wait`**, claim with the returned id (ticket first), `generate wait`, download, `job done`, then let the unchanged stills run and G2 judge it; test the no-`--wait` create shape once and record it. Models are fixed: Nano Banana 2 at 2k, Kling v3.0 (`std` or `pro`), **never Kling `4k`**. Decide at S3 whether an in-Mirsal fulfiller replaces the operator session. Never simulate a call; run `generate cost` first.
 2. **Backlog** (each small, with a failing-then-passing test, no visible change):
    - `engine/video.py:293 _CRF_HINT` is a module-level global mutated by parallel workers: make it per-call or lock it (VP9 size is not strictly monotonic in crf).
    - `console/server.py` has no Origin/Host allow-list: a web page the owner visits can POST to it (trash/restore, the Telegram config, bulk delete).

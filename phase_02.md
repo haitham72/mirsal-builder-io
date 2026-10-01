@@ -4,7 +4,7 @@
 
 **Prerequisite:** the Phase 1 exits (1A, 1B, 1D, 1F golden path + verifier, 1G the simple flow, 1H Send to Telegram, proven live). **No database.**
 
-**Supporting material:** `Phase_02/prompt_samples.md` (Haitham's golden prompts: a generic 4×4 sheet and the teddy-bear meta-prompt) and `Phase_02/CLAUDE.md`. Written in this phase: `Phase_02/higgsfield_mcp.md` (what the connector offers, step S0) and `docs/operator.md` (how the operator runs jobs).
+**Supporting material:** `Phase_02/prompt_samples.md` (Haitham's golden prompts: a generic 4×4 sheet and the teddy-bear meta-prompt) and `Phase_02/CLAUDE.md`. Written in this phase: `Phase_02/higgsfield.md` (what the Higgsfield CLI offers, step S0, done) and `docs/operator.md` (how the operator runs jobs).
 
 **Phase 1 contract to build on:** `mirsal/prompter.py` already defines the plan JSON (`task`, `task_slug`, `guidelines`, `sheet_prompt`, `video_prompt`, `stickers[{index,id,prompt,key,emoji}]`). The Part 1 planner **extends** that shape (it adds `extraction`, locks, keywords) and must keep `task_slug` and each cell's `key`, because every output file is named `<media>-<NNN>-<task_slug>-<key>` and the pool (3B) indexes by `key`. Phase 1's `prompter.expand` stays as the `--no-llm` path and as the offline test double.
 
@@ -24,7 +24,7 @@
 
 ### Decisions (Haitham, 2026-10-01)
 1. **Order:** generation (this phase) before Postgres (Phase 3).
-2. **Live provider: Higgsfield through its MCP connector**, which Haitham has already authorised in claude.ai. An MCP connector is a tool of a Claude Code session, not an HTTP API that the Mirsal server can call, so the generation is done by an **operator**: a Claude Code session with the Higgsfield tools that fulfils **jobs** Mirsal writes. Mirsal never holds Higgsfield credentials. A plain HTTP provider (WaveSpeed, Higgsfield REST) stays possible later behind the same job interface; production (Phase 5) will need one, because an MCP operator is a development tool.
+2. **Live provider: Higgsfield through its CLI** (`higgsfield`, measured in `Phase_02/higgsfield.md`; Claude Code does not use Higgsfield's MCP connector). Mirsal never holds Higgsfield credentials: the CLI keeps its own OAuth login. The CLI is a scriptable subprocess that prints JSON (`generate create ... --wait --json`, job ids usable as media inputs), so the same **jobs** interface can be fulfilled by an **operator** session running those commands or by a fulfiller inside Mirsal; decide at S3. Models fixed by Haitham: **Nano Banana 2 (`nano_banana_flash`) at 2k** for sheets, **Kling v3.0 (`kling3_0`)** for animation, **never its `4k` mode**. A plain HTTP provider stays possible behind the same interface.
 3. **Nothing raw goes to the video model.** The video is made from the normalised video sheet (Part 3). The prepared Higgsfield samples in `Phase_01` stay as they are.
 4. Telegram needs no change here (images and video are proven).
 
@@ -37,9 +37,8 @@
 ### Build order (each step ends with something Haitham can see; stop at each gate)
 | Step | What | Done when |
 |---|---|---|
-| **S0** | **Discover Higgsfield.** *Finding 2026-10-01 (Higgsfield help center, https://higgsfield.ai/creator-hub/help-center/integrations/how-do-i-connect-higgsfield-to-ai-agent, to be verified here): Claude Code does not use the MCP connector (`https://mcp.higgsfield.ai/mcp`, for claude.ai / Claude Desktop); it uses a CLI: `npm i -g @higgsfield/cli`, `higgsfield auth login`, optional skills `npx skills add higgsfield-ai/skills`. A paid plan is required and every generation deducts credits. If the CLI works, the operator can be a plain process (no MCP session) and a provider behind the same jobs interface becomes possible; rewrite `docs/operator.md` after S0.* Use whichever path works: the CLI from Bash, or the MCP tools if `/mcp` shows them. List its tools, models, parameters, limits and credit cost; make **one test image and one test video**; write `Phase_02/higgsfield_mcp.md`. | Haitham sees the two test outputs and the doc names the tools, whether a job id is returned, whether a last frame / loop is supported, output size and format, and the cost per call. |
-| **S3** | **First real sheet:** write `docs/operator.md`; Haitham runs one Claude Code session ("run the pending Mirsal jobs") that claims the job, calls Higgsfield, downloads the sheet, and `job done`s it. The sheet goes through the unchanged stills run and G2. | A real generated teddy-bear sheet reaches the Stickers view and its stills pass `inside_cell`. |
-| **S4** | **Normalised video:** the video job is built from `build_video_sheet()` (one scale, margins) after G3; the operator animates it; the returned video is attached by ticket and sliced; `inside_slot` / `cross_slot` / `inside_frame` judge it; `python -m mirsal measure-cells` reports the share of cells flagged. | A real generated video is sliced; the flagged share is measured and recorded; `slot_fill` is tuned until it is near zero or the per-sticker fallback is chosen. |
+| **S3** | **First real sheet:** write `docs/operator.md`; a job is claimed (ticket first), `higgsfield generate create nano_banana_flash --resolution 2k --wait --json` runs, the sheet is downloaded, and `job done` closes it (operator session or an in-Mirsal fulfiller; also test the no-`--wait` create once and record the id at create time). The sheet goes through the unchanged stills run and G2. | A real generated teddy-bear sheet reaches the Stickers view and its stills pass `inside_cell`. |
+| **S4** | **Normalised video:** the video job is built from `build_video_sheet()` (one scale, margins) after G3; Kling v3.0 animates it (start image = end image for a loop; `pro` gives 1440 px = 480 px per 3x3 cell, `std` only 320; see `Phase_02/higgsfield.md`); the returned video is attached by ticket and sliced; `inside_slot` / `cross_slot` / `inside_frame` judge it; `python -m mirsal measure-cells` reports the share of cells flagged. | A real generated video is sliced; the flagged share is measured and recorded; `slot_fill` is tuned until it is near zero or the per-sticker fallback is chosen. |
 | **S5** | **LLM slot filler** (built: `expander.py`, `llm.py`, the reviewer; architecture in `Phase_02/README.md`). Left: the 20-prompt AI lab (`mirsal prompt lab --ai`) and Haitham's rating. | 20 prompts from the prompt lab pass lint; Haitham rates them. |
 | **S6** | **Vision judge** (Part 2) + the bounded regeneration rules; every call appended to `out/model_calls.jsonl`. | The judge agrees with Haitham on at least 80% of 30 labelled stickers. |
 | **S7** | **Quality work** (Part 4): sheet vs single, outline A/B, measurements in `docs/phase2_measurements.md`. | Exit below. |
@@ -335,10 +334,10 @@ The prepared Higgsfield sheets and videos in `Phase_01` are pre-rendered and **n
 
 1. `mirsal jobs --status REQUESTED --json`; take the oldest.
 2. `mirsal job show J001 --json`; check the cost against the daily budget.
-3. Call the Higgsfield tool for the job's kind with the prompt (and the input image for a video); **immediately** `mirsal job claim J001 --ticket <id>`.
-4. Poll the Higgsfield job until done or the timeout; download the result.
+3. `higgsfield generate create <model> ... --json` **without `--wait`** (with `--wait` the job id only appears after the job has finished, which would break ticket-first); **immediately** `mirsal job claim J001 --ticket <id>`.
+4. `higgsfield generate wait <id>` until done or the timeout; download `result_url`.
 5. `mirsal job done J001 --file <path> --model <name> --cost <credits>` (or `job fail`).
-6. Report one line per job. Repeat until none is waiting. The exact tool names and parameters come from S0 (`Phase_02/higgsfield_mcp.md`).
+6. Report one line per job. Repeat until none is waiting. The exact commands and parameters are in `Phase_02/higgsfield.md`.
 
 ### Engine changes allowed in this phase
 The two new Python checks of Part 2 if still missing, `split_grid()` extensions (16:9, 4×4), and the `slot_fill` setting. Existing engine functions stay unchanged, including `build_video_sheet()` and layout slicing.
