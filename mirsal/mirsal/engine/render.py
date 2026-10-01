@@ -1,29 +1,11 @@
 """Scale + white outline + report, shared by stills and video frames."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
 import cv2
 import numpy as np
 
 from .chroma import despill
-
-
-@dataclass
-class Report:
-    checks: list = field(default_factory=list)
-
-    def add(self, name: str, ok, detail="") -> bool:
-        self.checks.append({"name": name, "ok": bool(ok), "detail": str(detail)})
-        return bool(ok)
-
-    @property
-    def ok(self) -> bool:
-        return all(c["ok"] for c in self.checks)
-
-    @property
-    def first_failure(self):
-        return next((c["name"] for c in self.checks if not c["ok"]), None)
+from .verify import Report  # noqa: F401  (re-exported: Report moved to verify.py)
 
 
 def bbox_of(alpha_u8: np.ndarray, floor: int = 25):

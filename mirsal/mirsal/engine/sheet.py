@@ -8,8 +8,10 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from . import verify
 from .chroma import Keyed, border_mask, key_diff, key_image
-from .render import Report, bbox_of, fit_scale, render_sticker
+from .render import bbox_of, fit_scale, render_sticker
+from .verify import Report
 
 
 @dataclass
@@ -32,6 +34,7 @@ class StickerResult:
     metrics: dict = field(default_factory=dict)
     data: bytes | None = None
     fmt: str = "png"
+    img: np.ndarray | None = None   # the rendered 512x512 RGBA (not serialised; the video sheet builder reuses the pipeline's keyed cells)
 
 
 def _cellkey(index: int, rect: tuple, raw: np.ndarray, k: Keyed) -> CellKey:
@@ -74,36 +77,18 @@ def encode_static(rgba: np.ndarray, cfg):
 
 def _make(c: CellKey, cfg, pack: float) -> StickerResult:
     S = cfg.size
-    rep, m = Report(), {"cell": list(c.rect), "bg": c.keyed.bg, "threshold": round(c.keyed.t, 1),
-                        "fg_px": c.fg_px, "bbox": list(c.bbox) if c.bbox else None}
-    if not (c.bbox and c.fg_px >= cfg.min_foreground_px):
-        rep.add("foreground", False, f"{c.fg_px}px < {cfg.min_foreground_px}")
-        return StickerResult(c.index, "FAILED", "empty_subject", rep, m)
-    bw, bh = c.bbox[2] - c.bbox[0], c.bbox[3] - c.bbox[1]
-    s = min(pack, cfg.max_fit * S / max(bw, bh))
-    m["scale"], m["scale_mode"] = round(s, 4), ("pack" if s >= pack - 1e-9 else "clamped")
-    img = render_sticker(c.keyed.rgba, c.bbox, s, cfg)
-    a = img[..., 3]
-    rep.add("dimensions", img.shape == (S, S, 4), img.shape)
-    rep.add("transparent_corners", all(a[y, x] == 0 for y in (0, S - 1) for x in (0, S - 1)))
-    rep.add("foreground", (a > 127).sum() >= cfg.min_foreground_px)
-    rep.add("inside_cell", c.edge_px <= cfg.edge_touch_px, f"{c.edge_px}px on cell border")
-    opaque = a > 127
-    keyish = opaque & (key_diff(img[..., :3], cfg.chroma) > c.keyed.t / 4)
-    # Spill is key colour left ON THE EDGE (between subject and outline). Key-coloured pixels deep inside the subject are
-    # the subject's own colours (a green mouth, teal tears): measured on the real sheets, every failing pixel was interior.
-    dist = cv2.distanceTransform(opaque.astype(np.uint8), cv2.DIST_L2, 3)
-    edge = keyish & (dist <= cfg.outline_px + cfg.despill_band_px + 3)
-    spill, inner = int(edge.sum()), int((keyish & ~edge).sum())
-    m["spill_px"], m["chroma_risk"] = spill, round(inner / max(int(opaque.sum()), 1), 4)
-    if m["chroma_risk"] > cfg.chroma_risk_warn:   # warning, not a block: the human judges it at G2; Phase 3 re-keys on blue
-        m["warnings"] = ["chroma_risk"]
-    rep.add("no_spill", spill <= max(20, 0.001 * int(opaque.sum())), f"{spill}px on the edge band")
-    data, fmt = encode_static(img, cfg)
-    m["kb"], m["format"] = round(len(data) / 1024, 1), fmt
-    rep.add("static_file", len(data) <= cfg.static_max_bytes, f"{m['kb']}KB {fmt}")
+    m = {"cell": list(c.rect), "bg": c.keyed.bg, "threshold": round(c.keyed.t, 1), "fg_px": c.fg_px, "bbox": list(c.bbox) if c.bbox else None}
+
+    def render():
+        bw, bh = c.bbox[2] - c.bbox[0], c.bbox[3] - c.bbox[1]
+        s = min(pack, cfg.max_fit * S / max(bw, bh))
+        m["scale"], m["scale_mode"] = round(s, 4), ("pack" if s >= pack - 1e-9 else "clamped")
+        return render_sticker(c.keyed.rgba, c.bbox, s, cfg)
+
+    inp = {"cell": c, "metrics": m, "render": render, "encode": encode_static}
+    rep = Report(verify.run("still", inp, cfg))
     if rep.ok:
-        return StickerResult(c.index, "READY", None, rep, m, data, fmt)
+        return StickerResult(c.index, "READY", None, rep, m, inp["data"], inp["fmt"], inp.get("img"))
     return StickerResult(c.index, "FAILED", rep.first_failure, rep, m)
 
 

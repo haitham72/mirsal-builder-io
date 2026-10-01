@@ -9,8 +9,10 @@ from pathlib import Path
 import numpy as np
 
 from . import ffmpeg as ff
+from . import verify
 from .chroma import calibrate, despill, key_image, remove_specks
-from .render import Report, bbox_of, fit_scale, render_sticker
+from .render import bbox_of, fit_scale, render_sticker
+from .verify import Report
 
 
 @dataclass
@@ -176,17 +178,8 @@ def _finish(idx, keyed, fps, cfg, m) -> AnimationResult:
             m["crf"] = crf
             if len(data) <= cfg.video_max_bytes:
                 break
-        rep.add("size_budget", len(data) <= cfg.video_max_bytes, f"{len(data) // 1024}KB @crf{m['crf']}")
-        info = ff.probe(path)
-        rep.add("codec_vp9", info["codec"] == "vp9", info["codec"])
-        rep.add("dimensions", (info["width"], info["height"]) == (cfg.size, cfg.size), f"{info['width']}x{info['height']}")
-        rep.add("fps", 0 < info["fps"] <= cfg.video_max_fps + 0.01, info["fps"])
-        rep.add("duration", info["duration"] <= cfg.video_max_seconds + 0.02, round(info["duration"], 3))
-        rep.add("no_audio", not info["audio"])
-        rep.add("alpha_mode_tag", ff.probe(path, vp9_native=True)["alpha_mode"] or info["alpha_mode"])
-        al = ff.decode_alpha(path)
-        rep.add("alpha_decoded", len(al) > 0 and al[..., 3].min() < 8 and al[..., 3].max() > 247)
-        rep.add("loop_seam", m["loop_seam"] <= m["loop_limit"], f"{m['loop_seam']} <= {m['loop_limit']}")
+        inp = {"data": data, "info": ff.probe(path), "info_native": ff.probe(path, vp9_native=True), "alpha": ff.decode_alpha(path), "metrics": m}
+        rep = Report(verify.run("anim", inp, cfg))
     m["kb"] = round(len(data) / 1024, 1)
     if rep.ok:
         return AnimationResult(idx, "READY", None, rep, m, data)
