@@ -14,7 +14,7 @@ Built unattended on their standing order; each needs their verdict. On approval 
 |---|---|---|
 | **S1 prompt text** | The prompts match your golden prompts in English, Arabic and Arabizi. | `python -m mirsal prompt "<request>"`, `prompt lab` (20 inputs), `prompt "<request>" --ai`; compare with `Phase_02/prompt_samples.md`. |
 | **S0/S3 first live results** | The sheets are what you expect: G001 (angel reading a newspaper), G002 (batman lego), the S0 tests. | `mirsal/out/G001`, `G002`, `mirsal/out/s0/` (`compare_kling.html` plays std next to pro); numbers in `Phase_02/higgsfield.md`. |
-| **Generate menu** | The new menu (references, stroke, styles, model, AI enhancer, instant Generate) and the animation box under the green screen feel right; style and logo images are placeholders until you drop yours into `mirsal/mirsal/console/assets/{styles,vendors}/`. | Restart `python -m mirsal serve`, hard-reload the page. |
+| **Generate menu and the edge** | The menu (references, stroke, styles, model, AI enhancer, Loop, instant Generate), the credits pill with history at the top, the live Stroke/Trim sliders, the Gap slider with its preview and the Earlier batches list feel right; style and logo images are placeholders until you drop yours into `mirsal/mirsal/console/assets/{styles,vendors}/`. G002's stale animations were restored from its stored video (backup: `mirsal/out/G002/result.json.bak-before-reslice`). | Restart `python -m mirsal serve`, hard-reload the page. |
 | **S2 jobs** | The "generate it" button works in the browser; a job shows up and completes. | Studio -> Higgsfield dialog -> "No prepared sheet: generate it"; `python -m mirsal jobs`; `mirsal/docs/operator.md` for the operator loop. |
 | **S5 AI lab** | The AI-filled concepts are good. | `prompt lab --ai` (20 prompts), rate them. |
 | **3A Postgres** | History and search survive a restart on your real data. | `python -m mirsal db up`, `db import`, `list`, `show G078`, `search "teddy book"`, then `docker restart mirsal-db` and `show` again. Needs the real `out/` (original PC). |
@@ -24,7 +24,7 @@ Built unattended on their standing order; each needs their verdict. On approval 
 
 ## 2. Next work
 
-1. **S4 measurement, then S6, S7.** S0 and S3 are built and ran for real (G001, G002); the Kling path is built. Left: re-run G002 with `pro` and `slot_fill` 0.66 (the first clip, J004, was `std` and pixelated), write `measure-cells` and record the flagged share, then tune `slot_fill` or choose 2x2 / one sticker per video. Never simulate a call; Kling is always `pro`, never `4k`; a test can never reach the real CLI (`MIRSAL_NO_REAL_CLI`).
+1. **S4 measurement, then S6, S7.** S0 and S3 are built and ran for real (G001, G002); the Kling path is built. Left: re-run G002 with `pro` and the new gap (the first clip, J004, was `std` and pixelated), write `measure-cells` and record the flagged share, then choose the default gap or 2x2 / one sticker per video. Never simulate a call; Kling is always `pro`, never `4k`; a test can never reach the real CLI (`MIRSAL_NO_REAL_CLI`).
 2. **Backlog** (each small, with a failing-then-passing test, no visible change):
    - `engine/video.py:293 _CRF_HINT` is a module-level global mutated by parallel workers: make it per-call or lock it (VP9 size is not strictly monotonic in crf).
    - `console/server.py` has no Origin/Host allow-list: a web page the owner visits can POST to it (trash/restore, the Telegram config, bulk delete).
@@ -38,7 +38,7 @@ Waiting for Haitham's go: 3B vectors and its eval set, 3C real-photo judgement, 
 
 The seam to keep: **jobs as files** (`out/jobs/J###.json`, ticket stored *before* waiting) so a plain HTTP provider can replace the MCP operator later; the engine stays ignorant of who fulfils a job.
 
-**While doing the live steps:** append every paid or model call to `out/model_calls.jsonl`; if a day's total would burn a large share of the credits left, pause and tell Haitham. Never open or judge media yourself (ffprobe, `doctor`, the verifier, metrics, file sizes; test outputs under `mirsal/out/`, never inside `Phase_01/Images_gen|videos_gen`). Do not block on a gate: finish the step, record the evidence, move on. The video is made from the **normalised video sheet** (`build_video_sheet`, `slot_fill` = 0.66), never from raw samples; on the old samples 3 of 9 teddy and 8 of 9 emoji animations left their cell, S4 must bring that near zero. Check each change against `phase_03.md` (Phase 3 imports `out/jobs/*.json`, `out/model_calls.jsonl` and the task tickets).
+**While doing the live steps:** append every paid or model call to `out/model_calls.jsonl`; if a day's total would burn a large share of the credits left, pause and tell Haitham. Never open or judge media yourself (ffprobe, `doctor`, the verifier, metrics, file sizes; test outputs under `mirsal/out/`, never inside `Phase_01/Images_gen|videos_gen`). Do not block on a gate: finish the step, record the evidence, move on. The video is made from the **normalised video sheet** (`build_video_sheet`, `slot_fill` = 0.74 (the user slides it per batch)), never from raw samples; on the old samples 3 of 9 teddy and 8 of 9 emoji animations left their cell, S4 must bring that near zero. Check each change against `phase_03.md` (Phase 3 imports `out/jobs/*.json`, `out/model_calls.jsonl` and the task tickets).
 
 ## 3. Guardrails
 

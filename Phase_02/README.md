@@ -42,12 +42,28 @@ request â”€(prompt template v2 + style + stroke [+ AI enhancer] [+ references])â
 - Logos: `console/assets/vendors/<logo>.svg` (Google, ByteDance, Kuaishou fetched once from the Simple Icons set); OpenAI and xAI get a monogram until Haitham drops `openai.svg` / `xai.svg`
   into that folder. The app logo is `console/assets/brand/mirsal-logo.png` (the white-background JPEG in `ref/` made transparent).
 
-## Video quality (measured on G002, 2026-10-01)
+## Video quality, the gap, Loop and the edge (measured on G002, 2026-10-01)
 
-The first Kling clip was `std`: 960x960 for the whole sheet, 320 px per slot, and the sticker filled only 55% of its slot, so about 176 px of picture were scaled 2x to the 512 px sticker:
-that is the pixelation. Now Kling is always `pro` (1440 px, 480 px per slot) and `slot_fill` is 0.66 (was 0.55; the gap between two stickers drops by about a quarter, from nearly a whole
-sticker wide to about 60% of one), so the picture per sticker is about 317 px. A 2x2 sheet would give each sticker 2.25 times the pixels of a 3x3 one (open question for Haitham).
-`video_v2` also asks for "a wide range of emotions" and "highly expressive faces and bodies".
+- **Pixels.** The first Kling clip was `std`: 960x960 for the whole sheet, 320 px per slot, the sticker filled 55% of its slot, so about 176 px of picture were scaled 2x to 512:
+  that is the pixelation. Kling is now always `pro` (1440 px, 480 px per slot; `std` is not offered) and Grok always 1080p. A 2x2 sheet would give each sticker 2.25x the pixels of a 3x3
+  one (open question).
+- **The gap is the user's to slide.** The server fills each slot to `slot_fill` (0.74, so the free space per slot went 45% -> 34% -> 26%) and the animation box shows a **Gap** slider
+  (8-50%) with a small preview of the exact sheet that would be sent (`GET /api/generations/<id>/sheet_preview?fill=`, built on the fly, never stored). `POST /api/live/video {slot_fill}` builds the
+  sheet at that fill; if the user moved the slider after a sheet was built, the old sheet is **rejected (never deleted)** and a new one is built. The fill is stored on the sheet (`slot_fill`).
+  A fuller slot leaves less room for expressive motion, so more cells can fail the out-of-bounds checks (those are warnings the user can include anyway).
+- **Loop is a choice, off by default** (like the stroke): the saved plan has `slots.loop`, the composer has a Loop chip, the animation box a Loop checkbox. Off: `video_v2` contains no loop
+  wording at all and the Kling job gets only a start image; on: "seamless loop", "End on the starting pose so the clip loops" and start = end image. The engine closes loops itself
+  (`close_loop` cross-fades a clip whose end does not match its start), so the model never needs the word.
+- **The edge is live and never loses a video.** Stroke and trim are sliders (not a dialog): the server redraws the stills in about 0.2 s per batch (coalesced, always the latest value) and,
+  on release, re-applies the edge to the animations **from the stored video** (`gates.reslice`, no credits). Animation cells of a video sheet are in the animation cache, keyed by the video,
+  the slot, the approved still and every setting incl. the edge, so a setting used before comes back in about 2 s (each stroke/trim pair is its own cached snapshot); a new one takes about 13 s
+  for 9 stickers. The video sheet is built from the stroke-free stickers on purpose, so changing the stroke never needs a new Kling video. If the animations were left stale, the edge bar
+  offers **Apply to animations** (`POST /api/generations/<id>/reslice`).
+- **The returned video stays visible.** The Animation view shows the Kling video with the slot lines (a light 720 px `preview.mp4` is made when the video is attached, or on demand for older
+  ones), and a batch with a Kling video counts as having a video everywhere in the UI.
+- **Warnings in plain words.** A kept-with-a-check sticker says what Python noticed and what to do (for example "looks almost the same as S1: the same pose drawn twice? Kept: drop one with the
+  x"), not a check name.
+- `video_v2` also asks for "a wide range of emotions" and "highly expressive faces and bodies".
 
 ## Jobs (`jobs.py`)
 
@@ -77,7 +93,7 @@ the job endpoints (`/api/jobs`, `/api/jobs/<id>[/claim|done|fail|requeue]`) from
 `composer.js` replaces the old input row of the Studio with the Generate menu: a dark stage lit by the logo's blue, the prompt as its centre, reference images inside the prompt box
 (button, drag-and-drop or paste), a bar with the **model** chip (opens the model dialog), **stroke** (none / thin 4 / medium 8 / bold 12 / max 16 px, previews drawn with the real width),
 the **AI enhancer** switch and **Generate** with its price inside the button (Higgsfield-style); below it the six style cards. Generate **starts at once** with the selection made before:
-no confirmation, a click is the decision (it is refused only when the price is above the balance). `live.js` holds the credits chip (bottom of the rail, opens the **Usage** log), the model
+no confirmation, a click is the decision (it is refused only when the price is above the balance). `composer.js` also puts the **Higgsfield credits at the top** (a pill whose drop-down shows the balance, today's spend, the Usage log and the recent batches), and `live.js` holds the credits chip (bottom of the rail, opens the **Usage** log), the **live edge sliders**, the **Earlier batches** history (every batch ever made, 5 at a time with Load more, from `GET /api/history`; opening one never loses another), the model
 dialog, the job cards that follow a running sheet or Kling job, and the **animation box under the green screen** on each batch without a video: a model drop-down and one priced button.
 It sends one request: the server approves the kept stills, builds and approves the video sheet (`gates.quick_sheet`, the click is the decision) and starts the Kling job; "use my own tool"
 keeps the manual download/upload path. Prepared sheets stay one click away in the chips under the stage (they never trigger a generation); without the Higgsfield CLI the old
