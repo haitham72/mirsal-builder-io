@@ -67,6 +67,14 @@ const CATOF={inside_cell:'bounds',inside_slot:'bounds',inside_frame:'bounds',cro
   no_spill:'key',chroma_risk:'key',holes:'key',background_is_key:'key',background_flat:'key',alpha_stable:'key',transparent_corners:'key',
   identity_kept:'look',motion_present:'look',single_subject:'look',duplicate_cell:'look',
   sharpness:'look',size_budget:'spec',codec_vp9:'spec',dimensions:'spec',fps:'spec',duration:'spec',no_audio:'spec',alpha_mode_tag:'spec',alpha_decoded:'spec',static_file:'spec',telegram_sticker:'spec',telegram_stroke:'spec'};
+/* warnings in plain words: what Python noticed, and what you can do. The sticker stays in your set; nothing is removed for you. */
+const WARNWHY={
+  duplicate_cell:(t,c)=>`looks almost the same as S${(c&&c.data&&c.data.of)||'another sticker'} (the same pose drawn twice?). Kept: drop one with the x if you do not want both`,
+  single_subject:()=>'two separate pieces in this cell (a second character, or a neighbour bleeding in). Kept: look at it and drop it if it is wrong',
+  chroma_risk:(t,c)=>`part of the character is close to the green-screen colour${c&&c.value!=null?` (${(c.value*100).toFixed(0)}% of it)`:''}, so some of it may have been cut away. Kept: check the edges`,
+  holes:()=>'a hole inside the character, probably a green part that the green-screen cut removed. Kept: check it',
+  edge_trimmed:()=>'the trim took off more than the thin rim. Kept: check the edge or lower the trim'};
+const plainWarn=(t,w)=>{const c=(t.report||[]).find(r=>r.name===w),f=WARNWHY[w];return f?f(t,c):'kept, check: '+w};
 /* what is wrong with a sticker at a stage ('still' | 'anim'): hard ones first, then by kind */
 function issuesOf(t,stage){const out=[],add=(id,text,soft)=>out.push({cat:CATOF[id]||'bad',id,text,soft:!!soft});
   if(stage==='anim'){
@@ -76,7 +84,7 @@ function issuesOf(t,stage){const out=[],add=(id,text,soft)=>out.push({cat:CATOF[
     if(t.review.anim==='REJECTED')add('dropped','dropped from the set');
   }else{
     if(t.status==='FAILED')add(t.reason,'blocked: '+(t.reason||'failed'));
-    else(((t.metrics||{}).warnings)||[]).forEach(w=>add(w,'kept, check: '+w,true));
+    else(((t.metrics||{}).warnings)||[]).forEach(w=>add(w,plainWarn(t,w),true));
     if(t.review.still==='REJECTED')add('dropped','dropped from the set');
   }
   return out.sort((a,b)=>(a.soft-b.soft)||CATORDER.indexOf(a.cat)-CATORDER.indexOf(b.cat))}
@@ -100,6 +108,7 @@ function issueSvg(g,stage,k=1){const W=g.source.sheet_size[0],sw=Math.max(2,W/45
 const keptAnim=g=>g.stickers.filter(t=>t.anim_status==='READY'&&t.review.still!=='REJECTED'&&!['REJECTED','BLOCKED'].includes(t.review.anim));
 const keptOf=g=>animPhase(g)?keptAnim(g):keptStills(g);
 const sheetOf=g=>[...g.video_sheets].reverse().find(v=>v.status!=='REJECTED');
+const hasVid=g=>!!(g.source.has_video||(sheetOf(g)&&sheetOf(g).video));
 const sessionGens=()=>SES.gens.map(id=>GM.get(id)).filter(Boolean);
 const included=()=>sessionGens().filter(g=>!SES.off.includes(g.number));
 const nAdded=(g,pid)=>keptOf(g).filter(t=>((g.added||{})[pid]||[]).includes(`${animPhase(g)?'animated':'static'}:${t.index}`)).length;
@@ -159,7 +168,7 @@ function tileHtml(g,t,mode){const base=`/out/${g.generation_id}/`,anim=mode==='a
 function batchHtml(g,k,total,mode){
   const inc=!SES.off.includes(g.number),s=g.source;
   const head=`<div class=gbhead>${total>1?`<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc?'checked':''}> <b>Batch ${k+1}</b></label>`:`<b>Batch ${k+1}</b>`}
-    <span class=mut>sheet ${s.subject_id} · ${g.generation_id}${s.has_video?'':' · no video prepared'}</span>
+    <span class=mut>sheet ${s.subject_id} · ${g.generation_id}${hasVid(g)?'':' · no video prepared'}</span>
     <span class=gbact>${s.has_video||making(g)||(typeof liveReadyNow==='function'&&liveReadyNow())?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
     ${total>1?`<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>`:''}</span></div>`;
   if(making(g))return`<section class=gbatch>${head}<div class=gwork><div class=spin></div><b>Making your stickers…</b><div class=mut>${g.stage==='requested'?'Reading the sheet':g.stage==='sheet_picked'?'Removing the background':'Cutting and checking each sticker'}</div></div></section>`;
@@ -171,7 +180,7 @@ function gview(){
   const inc=included(),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
   const todoAnim=inc.filter(g=>g.source.has_video&&(!animPhase(g)||g.stickers.some(t=>t.anim_status==='STALE'))&&!processing(g)&&!ANIM.has(g.number)&&keptStills(g).length);
   const busyAnim=gs.some(g=>processing(g)||(ANIM.has(g.number)&&!animPhase(g)));
-  const done=inc.reduce((a,g)=>a+g.stickers.filter(t=>['READY','FAILED'].includes(t.anim_status)).length,0),tot=inc.reduce((a,g)=>a+(g.source.has_video?keptStills(g).length:0),0);
+  const done=inc.reduce((a,g)=>a+g.stickers.filter(t=>['READY','FAILED'].includes(t.anim_status)).length,0),tot=inc.reduce((a,g)=>a+(hasVid(g)?keptStills(g).length:0),0);
   const pk=SES.pack&&packById(SES.pack),added=pk?inc.reduce((a,g)=>a+nAdded(g,SES.pack),0):0,allAdded=pk&&n>0&&added>=n;
   const kind=inc.some(g=>animPhase(g))?'animated ':'';
   let bar;
@@ -181,7 +190,6 @@ function gview(){
   else bar=`<span class=gstat>${n} ${kind}sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}${allAdded?` · added to “${esc(pk.name)}”`:''}</span><button class="btn pri gbig" data-act=gadd ${n&&!allAdded?'':'disabled'}>${allAdded?'Added ✓':`Add ${n} to a pack`}</button>${allAdded?`<button class="btn gbig" data-act=gopenpack>Open pack</button>`:''}`;
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
     <button class="btn" data-act=gmore ${ready&&!busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
-    <button class="btn" data-act=gedge ${ready&&!busyAnim?'':'disabled'} title="White outline and rim trim for these stickers">Edge</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
    ${stepsHtml({gs,ready,busyAnim,done,tot,pk,allAdded,n})}
@@ -194,7 +202,7 @@ function gbodyHtml(gs,c){const t=GS.tab;
   if(t==='plan')return planView(gs[0]);
   if(t==='anim'&&!gs.some(animPhase)&&!c.busyAnim&&!gs.some(g=>PVON.has(g.number)))return animEmpty(gs,c);
   return gs.map((g,k)=>batchHtml(g,k,gs.length,t==='anim'?'anim':'still')).join('')}
-function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);
+function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);   // a prepared video; a Kling video has already produced the animations
   return`<section class=gplan style="text-align:center;padding:44px 16px"><h2 style="margin:0 0 6px">${hasVid?'Animate your stickers':'No video prepared for this sheet'}</h2>
    <div class=mut style="max-width:560px;margin:0 auto 18px">${hasVid?`${c.n} sticker${c.n===1?'':'s'} will be animated from the prepared video. Each animation is checked frame by frame (size, loop, and whether the character stays inside its cell) and shows up here as soon as it is ready.`
      :(typeof liveReadyNow==='function'&&liveReadyNow()?'Generate the animation on the Stickers view: the box under the green screen has the model and the price.':'Make a video from the sheet in your own tool, then add it with “Make a video…” on the Stickers view.')}</div>
@@ -216,32 +224,14 @@ ACT.greqgo=()=>{const p=($('greq').value||'').trim();if(!p){say('Write what you 
 function stepsHtml(c){const {gs,ready,busyAnim,done,tot,pk,allAdded,n}=c,g0=gs[0],cnt=f=>gs.reduce((a,g)=>a+g.stickers.filter(f).length,0);
   const good=cnt(t=>t.status==='READY'),kept=cnt(t=>t.status==='READY'&&t.review.still!=='REJECTED'),dropped=cnt(t=>t.review.still==='REJECTED'),blocked=cnt(t=>t.status==='FAILED'),oobN=cnt(isOob),
     animOk=cnt(t=>t.anim_status==='READY'&&!isOob(t)&&t.review.anim!=='REJECTED'&&t.review.still!=='REJECTED'),aDrop=cnt(t=>t.anim_status==='READY'&&t.review.anim==='REJECTED'&&t.review.still!=='REJECTED'),animFail=cnt(t=>t.anim_status==='FAILED');
-  const anim=gs.some(animPhase),hasVid=gs.some(g=>g.source.has_video);
+  const anim=gs.some(animPhase),hasVid_=gs.some(hasVid);
   const S=[['Request','done',esc(SES.prompt||g0.prompt||''),'request'],
    ['Prompt',g0.sheet_prompt?'done':'todo',`${esc(g0.template_id||'plan')}${g0.template_version?' v'+g0.template_version:''} · tags`,'plan'],
    ['Stickers',ready?(good?'done':'warn'):'run',ready?`${kept} kept${dropped?`, ${dropped} dropped`:''}${blocked?`, ${blocked} blocked`:''}`:'Making…','stickers'],
-   ['Animation',busyAnim?'run':anim?(oobN||animFail?'warn':'done'):'todo',busyAnim?`Animating ${done} of ${tot}…`:anim?`${animOk} ready${aDrop?`, ${aDrop} dropped`:''}${oobN?`, ${oobN} out of bounds (off)`:''}${animFail?`, ${animFail} failed`:''}`:hasVid?'Not started':'No video prepared','anim'],
+   ['Animation',busyAnim?'run':anim?(oobN||animFail?'warn':'done'):'todo',busyAnim?`Animating ${done} of ${tot}…`:anim?`${animOk} ready${aDrop?`, ${aDrop} dropped`:''}${oobN?`, ${oobN} out of bounds (off)`:''}${animFail?`, ${animFail} failed`:''}`:hasVid_?'Not started':'No video prepared','anim'],
    ['Pack',allAdded?'done':'todo',allAdded?`Added to “${esc(pk.name)}”`:'Not added yet','pack']];
   const mark=(st,i)=>st==='done'?ic('check'):st==='run'?'<span class=spin></span>':st==='warn'?'!':i+1;
   return`<div class=gsteps>${S.map(([l,st,sub,tab],i)=>`<button class="gst ${st} ${tab===GS.tab?'cur':''}" ${tab==='pack'?`data-act=gadd ${ready&&n?'':'disabled'}`:`data-act=gtab data-t=${tab}`}><span class=gsm>${mark(st,i)}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g,'')}">${sub}</small></span></button>`).join('')}</div>`}
-
-/* ---------- Edge: the white outline and the rim trim of the included batches (POST .../appearance). The stills are redrawn from the clean cut-out
-   (no re-keying); animations made with the old edge are marked stale and are made again by the next Animate. */
-const EDGE={outline:0,erode:0};
-ACT.gedge=()=>{const g=included()[0];if(!g)return;EDGE.outline=g.outline_px||0;EDGE.erode=g.erode_px||0;edgeDlg()};
-function edgeDlg(){const gs=included(),nAn=gs.reduce((a,g)=>a+g.stickers.filter(t=>t.webm&&t.anim_status==='READY').length,0),
-    seg=(k,vals,unit)=>`<div class=tabs style="margin:0;gap:6px;flex-wrap:wrap">${vals.map(v=>`<button class="tab ${EDGE[k]===v?'on':''}" data-act=gedgeset data-k=${k} data-v=${v} style="padding:6px 14px;font-size:13px">${v?v+' '+unit:'None'}</button>`).join('')}</div>`;
-  dlg(`<div class=vdlg style="max-width:520px"><h2>Edge</h2>
-   <div class=mut>The white border around each sticker and how much of the cut-out's rim is trimmed. Applies to ${gs.length} batch${gs.length===1?'':'es'}; the stickers are redrawn from the clean cut-out, nothing is re-keyed.</div>
-   <div style="margin:14px 0 6px"><b>White outline</b></div>${seg('outline',[0,4,8,12,16],'px')}
-   <div style="margin:14px 0 6px"><b>Trim the rim</b> <span class=mut>removes a dark key line on the edge</span></div>${seg('erode',[0,1,2,3,4],'px')}
-   ${nAn?`<div class=warn style="margin-top:12px">${nAn} animation${nAn===1?' was':'s were'} made with the old edge. After this, press Animate to make ${nAn===1?'it':'them'} again.</div>`:''}
-   <div class=row style="justify-content:flex-end;margin-top:14px"><button class=btn data-act=gedgecancel>Cancel</button><button class="btn pri" data-act=gedgeapply>Apply</button></div></div>`)}
-ACT.gedgeset=el=>{EDGE[el.dataset.k]=+el.dataset.v;edgeDlg()};
-ACT.gedgecancel=()=>closeDlg();
-ACT.gedgeapply=async()=>{closeDlg();let n=0,stale=0;
-  for(const g of included()){const r=await postWait(`/api/generations/${g.number}/appearance`,{outline:EDGE.outline,erode:EDGE.erode},'Finishing the previous job…');if(!r.ok){toast(r.j.error,1);break}n+=r.j.rerendered||0;stale+=(r.j.stale||[]).length}
-  glast='';await tick(true);toast(`Edge applied: ${n} sticker${n===1?'':'s'} redrawn${stale?`, ${stale} animation${stale===1?'':'s'} to make again (press Animate)`:''}`)};
 
 /* ---------- Plan: the prompts the sheet and video were made from, and the 1-5 tags per cell */
 const copyBox=(title,text,id,rows)=>`<div class=pbox><div class=pbh><b>${title}</b><button class="btn sm" data-act=hcopy data-t=${id}>Copy</button></div><textarea readonly id=${id} rows=${rows}>${esc(text||'')}</textarea></div>`;
@@ -254,7 +244,7 @@ ACT.gtab=el=>{GS.tab=el.dataset.t;glast='';tick(true)};
 let PQ=0,PT=null;
 function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('gplan'))return;
   if(p.length<2){$('gplan').innerHTML='';return}
-  PT=setTimeout(async()=>{const n=++PQ,r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',ai:false}),el=$('gplan');if(n!==PQ||!el)return;
+  PT=setTimeout(async()=>{const n=++PQ,r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:false}),el=$('gplan');if(n!==PQ||!el)return;
     if(!r.ok){el.innerHTML='';return}
     const open=el.querySelector('details')&&el.querySelector('details').open;
     el.innerHTML=`<details class=gpv ${open?'open':''}><summary>Prompt preview <span class=mut>template ${esc(r.j.template_id)} v${r.j.template_version} · ${r.j.stickers.length} cell prompt${r.j.stickers.length>1?'s':''}, 1 to 5 tags each · ${(typeof aiOn==='function'&&aiOn())?'the AI enhancer writes the 9 concepts when you press Generate':'built-in sets, no AI call'}</span></summary>
@@ -356,14 +346,20 @@ function vcutSvg(g,k){return cutSvg(g,true,false,k)+issueSvg(g,'anim',k)}
 function animStats(g){const S=g.stickers.filter(t=>t.status==='READY'),A=S.filter(t=>t.anim_status==='READY'),kb=A.map(t=>(t.anim_metrics||{}).kb||0);
   return{total:S.length,done:A.length,oob:S.filter(isOob),fail:S.filter(t=>t.anim_status==='FAILED'),avg:kb.length?Math.round(kb.reduce((a,b)=>a+b,0)/kb.length):0,max:Math.max(0,...kb),
     ms:A.filter(t=>(t.anim_metrics||{}).cache!=='hit').reduce((a,t)=>a+(((t.anim_metrics||{}).ms||{}).finish||0),0),cached:A.filter(t=>(t.anim_metrics||{}).cache==='hit').length}}
-function videoBox(g,k){const sz=g.source.sheet_size;return g.source.video_path&&sz
-  ?`<div class=sbox style="background:#111"><video src="/src/${g.number}/video" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${sz[0]}/${sz[1]};object-fit:fill"></video><svg viewBox="0 0 ${sz[0]} ${sz[1]}" preserveAspectRatio="none">${vcutSvg(g,k)}</svg></div>`
-  :`<div class="gbadmsg mut" style="padding:26px 10px">These animations come from pre-sliced clips, so there is no single video sheet for this batch.</div>`}
-function videoPanel(g){const s=g.source,vi=s.video_info||{},a=animStats(g),bad=a.oob.length+a.fail.length;
+const LAY=new Map();      // a video sheet's layout.json, fetched once
+function layoutOf(g,v){const k=g.number+v.id;if(LAY.has(k))return LAY.get(k);LAY.set(k,null);
+  fetch(`/out/${g.generation_id}/${v.layout}`).then(r=>r.json()).then(j=>{LAY.set(k,j);glast='';tick(true)}).catch(()=>{});return null}
+function videoBox(g,k){const sz=g.source.sheet_size,v=sheetOf(g);
+  if(g.source.video_path&&sz)return`<div class=sbox style="background:#111"><video src="/src/${g.number}/video" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${sz[0]}/${sz[1]};object-fit:fill"></video><svg viewBox="0 0 ${sz[0]} ${sz[1]}" preserveAspectRatio="none">${vcutSvg(g,k)}</svg></div>`;
+  if(v&&v.video){const [W,H]=v.canvas||[1,1],lay=layoutOf(g,v),sw=Math.max(2,W/450)*k;
+    const rects=lay?lay.slots.map(sl=>`<rect x="${sl.rect[0]}" y="${sl.rect[1]}" width="${sl.rect[2]}" height="${sl.rect[3]}" fill="none" stroke="#2563eb" stroke-width="${sw}" stroke-dasharray="${W/50} ${W/90}" opacity="${sl.sticker?1:.35}"/>`).join(''):'';
+    return`<div class=sbox style="background:#111"><video src="/out/${g.generation_id}/${v.preview||v.video}" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${W}/${H};object-fit:fill"></video><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${rects}${issueSvg(g,'anim',k)}</svg></div>`}
+  return`<div class="gbadmsg mut" style="padding:26px 10px">These animations come from pre-sliced clips, so there is no single video sheet for this batch.</div>`}
+function videoPanel(g){const s=g.source,vs=sheetOf(g),vi=Object.assign({},vs&&vs.video_info||{},s.video_info||{}),a=animStats(g),bad=a.oob.length+a.fail.length;
   return`<aside class=gsheet><div class=gshead><b>Video sheet</b><span class=gspace></span><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?`, ${a.oob.length} out`:''}</span></div>
    ${videoBox(g,2)}
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'anim')).join('')}</div>
-   <div class="kv vkv"><span>source</span><span>${esc(vi.mode||(s.video_path?'3x3 mp4':'clips'))}${vi.size?' · '+esc(vi.size):''}${vi.fps?' · '+vi.fps+' fps':''}</span>
+   <div class="kv vkv"><span>source</span><span>${esc(vi.mode||(s.video_path?'3x3 mp4':vs&&vs.video?'video sheet':'clips'))}${vi.size?' · '+esc(vi.size):vi.width?' · '+vi.width+'×'+vi.height:''}${vi.fps?' · '+vi.fps+' fps':''}</span>
     <span>out of bounds</span><span>${a.oob.length?a.oob.map(t=>'S'+t.index).join(', '):'none'}</span><span>no animation</span><span>${a.fail.length?a.fail.map(t=>'S'+t.index).join(', '):'none'}</span>
     <span>size</span><span>${a.done?`${a.avg} KB average, ${a.max} KB largest`:'-'}</span><span>work</span><span>${a.done?`${(a.ms/1000).toFixed(1)} s${a.cached?` · ${a.cached} from the cache`:''}`:'-'}</span></div>
    <div class=gsfoot><span class=mut>blue = cuts</span><button class="link" data-act=gvsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'anim')}</aside>`}
@@ -413,7 +409,7 @@ ACT.gsclose=()=>{SV.g=null;closeDlg()};
 
 /* ---------- "Get the Higgsfield prompt": when nothing prepared matches the request */
 ACT.ghiggs=async()=>{const p=$('prompt').value.trim();if(!p)return;
-  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
+  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
   dlg(`<div class=vdlg><h2>Prompt for Higgsfield</h2><div class=mut>Nothing prepared matches “${esc(p)}”. Generate the sheet, name the folder as shown below, and it appears here.</div>
    <h3>Sheet prompt</h3><textarea readonly rows=9 id=hp1>${esc(r.j.sheet_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp1>Copy sheet prompt</button></div>
    <h3>Video prompt</h3><textarea readonly rows=5 id=hp2>${esc(r.j.video_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp2>Copy video prompt</button></div>
@@ -427,7 +423,7 @@ ACT.hgenop=async()=>{const p=$('prompt').value.trim();if(!p)return;
     el.textContent=Math.round((Date.now()-t0)/1000)+'s · '+g.j.status;
     if(g.j.status==='DONE'||g.j.status==='FAILED'){clearInterval(iv);
       if(el&&el.parentElement)el.parentElement.innerHTML+=g.j.status==='DONE'?`<div class=mut>Sheet arrived: <code>${esc(g.j.result.file)}</code> (${Math.round(g.j.result.bytes/1024)} KB).</div>`:`<div class=mut>Failed: ${esc(g.j.error||'unknown')}</div>`}},5000)};
-ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
+ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
   $('hres').innerHTML=`<div class=card style="margin:10px 0"><b>Create these two folders and name the downloads into them</b><br><code>${esc(r.j.paths.img)}</code><br><code>${esc(r.j.paths.vid)}</code><div class=mut>The sheet goes in <b>${esc(r.j.folders.img)}</b>, the video in <b>${esc(r.j.folders.vid)}</b>. Then press Generate again.</div></div>`};
 
 /* ---------- one sticker, larger */

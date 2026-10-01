@@ -2,9 +2,9 @@
    and the cards that follow a running sheet / Kling job. Everything here calls a real endpoint (/api/higgsfield, /api/models, /api/usage, /api/live/*);
    the engine and the review gates are unchanged: a finished sheet runs through the same stills run, a video only starts from an approved video sheet. */
 'use strict';
-const LIVE={hf:null,m:null,style:'flat_vector',img:{id:'',options:{}},vid:{id:'',options:{}},jobs:[],est:{}};
-try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[]}}catch(e){}
-const lsave=()=>gstore('mirsal.live',JSON.stringify({style:LIVE.style,img:LIVE.img,vid:LIVE.vid,jobs:LIVE.jobs}));
+const LIVE={hf:null,m:null,style:'flat_vector',img:{id:'',options:{}},vid:{id:'',options:{}},jobs:[],est:{},loop:false,fill:null};
+try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[];LIVE.loop=!!s.loop;LIVE.fill=typeof s.fill==='number'?s.fill:null}}catch(e){}
+const lsave=()=>gstore('mirsal.live',JSON.stringify({style:LIVE.style,img:LIVE.img,vid:LIVE.vid,jobs:LIVE.jobs,loop:LIVE.loop,fill:LIVE.fill}));
 const fcr=n=>n==null?'?':(+n).toLocaleString(undefined,{maximumFractionDigits:2});
 const lkind=k=>k==='image'||k==='video'?k:(k==='sheet'||k==='single'?'image':'video');
 
@@ -19,7 +19,7 @@ const optSummary=(m,sel)=>m?m.options.map(o=>sel.options[o.name]!=null?(o.name==
 
 /* ---------- credits chip (bottom of the rail) and the usage log */
 async function refreshHf(){const r=await api('/api/higgsfield');if(r.ok){const was=LIVE.hf&&!LIVE.hf.error&&LIVE.hf.available;LIVE.hf=r.j;drawChip();if(!!was!==!!(r.j&&!r.j.error&&r.j.available)&&typeof composerDraw==='function')composerDraw()}}
-function drawChip(){const rail=$('rail');if(!rail)return;let b=document.getElementById('lvchip');if(!b){b=document.createElement('button');b.id='lvchip';b.className='lv-chip';b.dataset.act='lusage';rail.appendChild(b)}
+function drawChip(){if(typeof cpDrawTop==='function')cpDrawTop();const rail=$('rail');if(!rail)return;let b=document.getElementById('lvchip');if(!b){b=document.createElement('button');b.id='lvchip';b.className='lv-chip';b.dataset.act='lusage';rail.appendChild(b)}
   const h=LIVE.hf;b.title=!h?'Higgsfield':h.error?h.error:`${fcr(h.credits)} credits left · ${fcr(h.spent_today)} spent today · ${h.plan||''} plan. Click for the usage log.`;
   b.className='lv-chip'+(h&&(h.error||h.available===false)?' off':'');
   b.innerHTML=!h?'<b>…</b><small>credits</small>':h.available===false?'<b>off</b><small>Higgsfield</small>':h.error?'<b>!</b><small>Higgsfield</small>':`<b>${h.credits>=100?Math.round(h.credits).toLocaleString():fcr(Math.round(h.credits*10)/10)}</b><small>credits</small>`}
@@ -78,8 +78,8 @@ const liveReadyNow=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{prompt,ai:typeof aiOn==='function'&&aiOn(),refs:[]});return true}
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
-  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:LIVE.style,ai:!!ctx.ai,outline:GS.outline,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[]}
-    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options};
+  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:!!LIVE.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[]}
+    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop};
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…');
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
@@ -89,13 +89,26 @@ async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image')
 
 /* ---------- the animation box under the green screen: a model drop-down and one priced button (no dialog, no confirmation) */
 const lcached=kind=>{const {model,sel}=lsel(kind);return model?LIVE.est[kind+model.id+JSON.stringify(sel.options)]:undefined};
-function vgenBox(g){if(!liveReadyNow()||g.source.has_video||making(g))return'';
+const fillNow=()=>LIVE.fill!=null?LIVE.fill:(LIVE.m&&LIVE.m.slot_fill)||0.74;
+const gapPct=f=>Math.round((1-f)*100);
+const previewUrl=(g,f)=>`/api/generations/${g.number}/sheet_preview?fill=${f.toFixed(3)}&px=520&k=${typeof keptStills==='function'?keptStills(g).map(t=>t.index).join(''):''}`;
+function vgenBox(g){const vs=typeof sheetOf==='function'?sheetOf(g):null;
+  if(vs&&['VIDEO_RETURNED','SLICED'].includes(vs.status))return`<div class="lv-vgen done"><span>${vs.status==='SLICED'?'Animated':'Video received'}${vs.video_info&&vs.video_info.width?` · ${vs.video_info.width}×${vs.video_info.height}`:''}</span></div>`;
+  if(!liveReadyNow()||g.source.has_video||making(g))return'';
   const run=LIVE.jobs.find(j=>j.kind==='video'&&j.gen===g.number&&!j.error);
   if(run)return`<div class="lv-vgen run"><div class=spin></div><span>Animating with ${esc(run.model)}…<small data-lvt="${run.t0}">${Math.round((Date.now()-run.t0)/1000)}s</small></span></div>`;
-  const {model,sel}=lsel('video'),c=lcached('video');if(c===undefined)lcost('video',true).then(fillPrices);
+  const {model,sel}=lsel('video'),c=lcached('video'),f=fillNow();if(c===undefined)lcost('video',true).then(fillPrices);
   return`<div class=lv-vgen><select class=lv-vsel data-lvvid aria-label="Animation model">${LIVE.m.video.map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)}</option>`).join('')}</select>
    <button class="btn pri lv-vgo" data-act=lvgen data-g=${g.number} ${keptStills(g).length?'':'disabled'}>Generate<span class=lv-vp data-lvprice=video>${c==null?(c===undefined?'…':''):'◈ '+fcr(c)}</span></button></div>
-   <div class=lv-vnote>${esc(optSummary(model,sel))} · <button class=link data-act=gvideo data-g=${g.number}>use my own tool</button></div>`}
+   <label class=lv-gap title="Space between the stickers on the sheet that is sent. Set for you; slide it to make the stickers bigger (smaller gap) or safer (bigger gap)">Gap <input type=range min=8 max=50 step=1 value="${gapPct(f)}" data-lvgap data-g=${g.number}><output>${gapPct(f)}%</output></label>
+   <img class=lv-vprev data-lvprev src="${previewUrl(g,f)}" alt="The sheet that will be sent" loading=lazy>
+   <div class=lv-vnote><label class=lv-chk title="Off: the clip plays once, and Mirsal closes the loop itself. On: the video model is told to loop and to end on its first pose."><input type=checkbox data-lvloop ${LIVE.loop?'checked':''}> Loop</label> · ${esc(optSummary(model,sel))} · <button class=link data-act=gvideo data-g=${g.number}>use my own tool</button></div>`}
+let GPT=null;
+document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset.lvgap!==undefined))return;
+  LIVE.fill=1-(+t.value)/100;t.nextElementSibling.textContent=t.value+'%';clearTimeout(GPT);
+  GPT=setTimeout(()=>{const g=GM.get(+t.dataset.g),img=t.closest('.gsheet')&&t.closest('.gsheet').querySelector('[data-lvprev]');if(g&&img)img.src=previewUrl(g,LIVE.fill)},120)});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvgap!==undefined)lsave();
+  if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw();if(typeof planPreview==='function')planPreview()}});
 function fillPrices(){const c=lcached('video');document.querySelectorAll('[data-lvprice=video]').forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c))}
 ACT.lvgen=async el=>{el.disabled=true;const ok=await liveStart('video',{g:+el.dataset.g});if(!ok)el.disabled=false;glast='';if(typeof tick==='function')tick(true)};
 
@@ -114,7 +127,7 @@ async function liveTick(){if(LTB||!LIVE.jobs.length)return;LTB=true;try{
       LIVE.jobs=LIVE.jobs.filter(x=>x.id!==j.id);await refreshHf();
       toast(`${j.kind==='sheet'?'Sheet':'Animation'} ready: ${fcr(s.cost)} credits used${LIVE.hf&&LIVE.hf.credits!=null?`, ${fcr(LIVE.hf.credits)} left`:''}`);
       if(j.kind==='sheet'){SES={prompt:j.label,gens:[+String(s.generation).replace(/\D/g,'')],off:[],pack:''};saveSes();GS.tab='stickers';glast='';
-        for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();location.hash='#/studio'}
+        for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();location.hash='#/studio';histReload()}
       else{GS.tab='anim';glast=''}
       if(typeof tick==='function')tick(true)}}
   lsave();drawLive()}finally{LTB=false}}
@@ -123,9 +136,64 @@ setInterval(()=>{document.querySelectorAll('[data-lvt]').forEach(e=>e.textConten
 
 /* ---------- start-up and hooks into the Studio screen */
 const _rg=RENDER.generate;
-const showPanel=()=>{typeof composerMount==='function'?composerMount():livePanel()};
+const showPanel=()=>{typeof composerMount==='function'?composerMount():livePanel();ensureBars();histReload();drawEdge()};
 RENDER.generate=async function(){await _rg.apply(this,arguments);showPanel();drawLive()};
 async function liveInit(){const [m,h]=await Promise.all([api('/api/models'),api('/api/higgsfield')]);if(m.ok){LIVE.m=m.j;if(!m.j.styles.some(s=>s.id===LIVE.style))LIVE.style=m.j.default_style;lsel('image');lsel('video')}
   if(h.ok)LIVE.hf=h.j;drawChip();if(route_==='generate'){showPanel();drawLive()};liveTick()}
 setInterval(refreshHf,20000);
 liveInit();
+
+
+/* ---------- live edge: stroke and trim sliders. The stills are redrawn on the server within ~0.2 s (coalesced, always the latest value); on release the
+   animations of a Kling video are re-applied from the stored video (no credits), so nothing is ever lost by changing the edge. */
+const EG={outline:null,erode:null,busy:false,dirty:false,final:false,drag:false};
+const edgeBatches=()=>typeof included==='function'?included().filter(g=>g.stickers.some(t=>t.status==='READY')):[];
+function ensureBars(){const g=document.querySelector('.gen2');if(!g)return;
+  if(!document.getElementById('gedge')){const e=document.createElement('div');e.id='gedge';const ref=document.getElementById('glive');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
+  if(!document.getElementById('ghist')){const h=document.createElement('section');h.id='ghist';g.appendChild(h)}}
+function drawEdge(){const el=document.getElementById('gedge');if(!el)return;const gs=edgeBatches();
+  if(!gs.length){el.innerHTML='';el.removeAttribute('data-built');return}
+  const g=gs[0],o=EG.outline!=null?EG.outline:(g.outline_px||0),e=EG.erode!=null?EG.erode:(g.erode_px||0),
+    working=gs.some(x=>x.stickers.some(t=>t.anim_status==='PROCESSING')),
+    stale=gs.some(x=>x.stickers.some(t=>t.anim_status==='STALE')&&sheetOf(x)&&sheetOf(x).video&&!working);
+  if(!el.dataset.built){el.dataset.built='1';el.className='lv-edge';
+    el.innerHTML=`<b>Edge</b><label>Stroke <input type=range min=0 max=24 step=1 data-edge=outline><output></output></label>
+     <label>Trim <input type=range min=0 max=6 step=1 data-edge=erode><output></output></label><span class=lv-est id=gedgest></span>
+     <button class="btn sm" id=gedgeapply data-act=gresl hidden>Apply to animations</button>`}
+  if(!EG.drag){const a=el.querySelector('[data-edge=outline]'),b=el.querySelector('[data-edge=erode]');
+    a.value=o;a.nextElementSibling.textContent=o+' px';b.value=e;b.nextElementSibling.textContent=e+' px'}
+  $('gedgest').textContent=EG.busy?'Updating…':working?'Updating animations…':stale?'The animations still have the old edge':'';
+  $('gedgeapply').hidden=!stale}
+function edgeSet(t){const k=t.dataset.edge;EG[k]=+t.value;t.nextElementSibling.textContent=t.value+' px';
+  if(k==='outline'){GS.outline=+t.value;gstore('mirsal.outline',GS.outline);if(typeof cpDrawBar==='function')cpDrawBar()}}
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.edge){EG.drag=true;edgeSet(t);edgePump(false)}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.edge){edgeSet(t);EG.drag=false;edgePump(true)}});
+async function edgePump(final){EG.final=EG.final||final;if(EG.busy){EG.dirty=true;return}EG.busy=true;drawEdge();
+  try{do{EG.dirty=false;const rs=EG.final;EG.final=false;
+      for(const g of edgeBatches()){const r=await postWait(`/api/generations/${g.number}/appearance`,{outline:EG.outline!=null?EG.outline:(g.outline_px||0),erode:EG.erode!=null?EG.erode:(g.erode_px||0),reslice:rs},'Finishing the previous step…');
+        if(!r.ok){toast(r.j.error||'Could not change the edge',1);break}}
+      glast='';if(typeof tick==='function')await tick(true)}while(EG.dirty||EG.final)}
+  finally{EG.busy=false;if(!EG.drag){EG.outline=null;EG.erode=null}drawEdge()}}
+ACT.gresl=async()=>{for(const g of edgeBatches()){if(!(sheetOf(g)&&sheetOf(g).video))continue;const r=await postWait(`/api/generations/${g.number}/reslice`,{},'Finishing the previous step…');if(!r.ok)toast(r.j.error||'Could not apply the edge',1)}
+  glast='';if(typeof tick==='function')tick(true)};
+setInterval(drawEdge,800);
+
+/* ---------- persistent history of batches: every batch ever made, 5 at a time (nothing is lost when another batch is opened) */
+const HB={items:[],more:false,total:0,loading:false,limit:5};
+const ago=ts=>{if(!ts)return'';const s=Math.max(0,Date.now()/1000-ts);return s<90?'just now':s<5400?Math.round(s/60)+' min ago':s<129600?Math.round(s/3600)+' h ago':s<2592000?Math.round(s/86400)+' d ago':new Date(ts*1000).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'})};
+async function histLoad(more){if(HB.loading)return;HB.loading=true;
+  const off=more?HB.items.length:0,lim=more?HB.limit:Math.max(HB.limit,HB.items.length),r=await api(`/api/history?offset=${off}&limit=${lim}`);HB.loading=false;
+  if(r.ok){HB.items=more?HB.items.concat(r.j.items):r.j.items;HB.more=r.j.more;HB.total=r.j.total}drawHist();if(typeof cpDrawTop==='function')cpDrawTop()}
+const histReload=()=>histLoad(false);
+const histItem=it=>`<button class="lv-hitem ${SES.gens.includes(it.id)?'on':''}" data-act=hopen data-id=${it.id}><span class=lv-hth>${it.thumbs.map(u=>`<img src="/out/${esc(it.generation_id)}/${esc(u)}" loading=lazy alt="">`).join('')}</span>
+  <span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' ')))}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · ${ago(it.created)}</small></span></button>`;
+function drawHist(){const el=document.getElementById('ghist');if(!el)return;
+  if(!HB.items.length){el.innerHTML='';return}
+  el.innerHTML=`<div class=lv-hh><h2>Earlier batches</h2><span class=mut>${HB.total} in total</span></div><div class=lv-hlist>${HB.items.map(histItem).join('')}</div>
+   ${HB.more?`<div class=lv-hmore><button class=btn data-act=hmore>Load more</button></div>`:''}`}
+ACT.hmore=()=>histLoad(true);
+ACT.hopen=el=>{const it=HB.items.find(x=>x.id===+el.dataset.id);if(!it)return;
+  SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;
+  for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
+  if(typeof CP!=='undefined')CP.menu=false;if(location.hash!=='#/studio')location.hash='#/studio';
+  if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});drawHist();if(typeof cpDrawTop==='function')cpDrawTop()};

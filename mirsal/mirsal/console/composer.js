@@ -3,7 +3,7 @@
    Generate always makes a NEW sheet with Higgsfield when it is available (prepared sheets stay one click away in the chips below); without it, the old
    lookup of prepared sheets runs. Every control is wired: the model/style/stroke/references go to /api/live/sheet exactly as shown. */
 'use strict';
-const CP={refs:[],pop:null,ai:false,go:false};
+const CP={refs:[],pop:null,ai:false,go:false,menu:false};
 try{CP.ai=localStorage.getItem('mirsal.ai')==='1'}catch(e){}
 const aiOn=()=>CP.ai&&!!(typeof GAI!=='undefined'&&GAI.configured);
 const STROKES=[[0,'None'],[4,'Thin'],[8,'Medium'],[12,'Bold'],[16,'Max']];
@@ -17,7 +17,7 @@ function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m|
   g.querySelectorAll(':scope > .sh, :scope > .gform, :scope > .gopts, #lvpanel').forEach(n=>n.remove());
   const w=document.createElement('section');w.id='cpwrap';w.className='cp';g.insertBefore(w,g.firstChild);
   w.innerHTML=`<div class=cp-halo></div>
-   <header class=cp-head><img class=cp-orb src=/assets/brand/mirsal-logo.png alt=""><h1>Studio</h1></header>
+   <header class=cp-head><img class=cp-orb src=/assets/brand/mirsal-logo.png alt=""><h1>Studio</h1><span class=cp-gap></span><div class=cp-top id=cptop></div></header>
    <div class=cp-box id=cpbox>
     <div class=cp-refs id=cprefs></div>
     <textarea id=prompt rows=2 placeholder="Describe your stickers, for example: an angel reading a newspaper" autocomplete=off spellcheck=false></textarea>
@@ -35,7 +35,20 @@ function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m|
   box.addEventListener('drop',e=>{if(e.dataTransfer&&e.dataTransfer.files.length){e.preventDefault();cpAddFiles([...e.dataTransfer.files])}});
   p.addEventListener('paste',e=>{const fs=[...(e.clipboardData&&e.clipboardData.files||[])].filter(f=>f.type.startsWith('image/'));if(fs.length){e.preventDefault();cpAddFiles(fs)}});
   composerDraw()}
-function composerDraw(){if(!document.getElementById('cpwrap'))return;cpDrawRefs();cpDrawBar();cpDrawStyles()}
+function composerDraw(){if(!document.getElementById('cpwrap'))return;cpDrawRefs();cpDrawBar();cpDrawStyles();cpDrawTop()}
+
+/* ---------- Higgsfield credits at the top, with a drop-down: balance, today's spend, the usage log and the recent batches */
+function cpDrawTop(){const el=$('cptop');if(!el)return;const h=LIVE.hf;
+  if(!h||h.available===false){el.innerHTML=`<span class=cp-cr off title="${esc(h&&h.error||'Higgsfield is not available')}">Higgsfield off</span>`;return}
+  const items=(typeof HB!=='undefined'?HB.items:[]).slice(0,8);
+  el.innerHTML=`<button class="cp-cr ${CP.menu?'open':''}" data-act=cpmenu aria-haspopup=true aria-expanded=${CP.menu} title="Higgsfield credits left. Click for the usage and your recent batches."><span class=cp-coin>◈</span><b>${h.error?'!':fcr(Math.round(h.credits*10)/10)}</b><small>credits</small><i></i></button>
+   ${CP.menu?`<div class=cp-menu role=menu><div class=cp-mh><div><small>Credits left</small><b>${h.error?'?':fcr(h.credits)}</b></div><div><small>Spent today</small><b>${fcr(h.spent_today)}</b></div><button class="btn sm" data-act=lusage>Usage log</button></div>
+     ${h.error?`<div class=cp-mw>${esc(h.error)}</div>`:''}
+     <div class=cp-ml>${items.length?items.map(it=>`<button data-act=hopen data-id=${it.id}><span class=cp-mt>${it.thumbs.slice(0,1).map(u=>`<img src="/out/${esc(it.generation_id)}/${esc(u)}" alt="">`).join('')}</span><span><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' ')))}</b><small>${esc(it.generation_id)} · ${ago(it.created)}</small></span></button>`).join(''):'<div class=cp-mw>No batches yet.</div>'}</div>
+     ${HB.more?'<button class="btn sm cp-mmore" data-act=hmore>Load more</button>':''}</div>`:''}`}
+ACT.cpmenu=e=>{CP.menu=!CP.menu;cpDrawTop();if(e&&e.stopPropagation)e.stopPropagation()};
+document.addEventListener('click',e=>{if(CP.menu&&!inside(e,'cp-top')){CP.menu=false;cpDrawTop()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CP.menu){CP.menu=false;cpDrawTop()}});
 
 /* ---------- reference images (inside the prompt box) */
 function cpDrawRefs(){const el=$('cprefs');if(!el)return;const {model}=lsel('image'),ok=!model||model.refs!==false;
@@ -59,14 +72,17 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
   el.innerHTML=`<button class=cp-chip data-act=lmodels title="Choose the image model">${logoHtml(model)}<span><b>${esc(model?model.label:'Model')}</b><em>${esc(optSummary(model,sel))}</em></span></button>
    <div class=cp-pw><button class="cp-chip ${CP.pop==='stroke'?'open':''}" data-act=cpstroke aria-haspopup=true aria-expanded=${CP.pop==='stroke'}>${glyph(st)}<span><b>Stroke</b><em>${strokeName(st)}</em></span></button>
     ${CP.pop==='stroke'?`<div class=cp-pop role=menu>${STROKES.map(([px,n])=>`<button role=menuitemradio aria-checked=${px===st} class="${px===st?'on':''}" data-act=cpstrokeset data-px=${px}>${glyph(px)}<span><b>${n}</b><em>${px?px+' px':'no border'}</em></span></button>`).join('')}</div>`:''}</div>
+   <button class="cp-chip cp-ai ${LIVE.loop?'on':''}" data-act=cploop aria-pressed=${!!LIVE.loop} title="Off: the animation plays once through and Mirsal closes the loop itself. On: the video prompt asks for a loop and Kling ends on its first pose. A loop wording makes the stickers bounce several times in the 3 seconds."><span class=cp-sw><i></i></span><span><b>Loop</b><em>${LIVE.loop?'On':'Off'}</em></span></button>
    <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${GAI&&GAI.configured?'Writes nine different, expressive concepts from your text before the sheet is sent. One small OpenAI call; off = your text goes straight into the prompt template.':'Add OPENAI_API_KEY to mirsal/.env to use the AI enhancer.'}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
    <span class=cp-gap></span>
    <button id=go class=cp-go data-act=ggo title="Starts at once with the model, style and stroke shown here. The number is the price in Higgsfield credits.">Generate${liveReady()?'<span class=cp-bp id=cpprice>…</span>':''}</button>`;
   if(liveReady())lcost('image',true).then(c=>{const e=$('cpprice');if(e)e.textContent=c==null?'':'◈ '+fcr(c)})}
+ACT.cploop=()=>{LIVE.loop=!LIVE.loop;lsave();cpDrawBar();document.querySelectorAll('[data-lvloop]').forEach(c=>c.checked=LIVE.loop);planPreview()};
 ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar();planPreview()};
 ACT.cpstroke=e=>{CP.pop=CP.pop==='stroke'?null:'stroke';cpDrawBar();if(e&&e.stopPropagation)e.stopPropagation()};
 ACT.cpstrokeset=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);CP.pop=null;cpDrawBar()};
-document.addEventListener('click',e=>{if(CP.pop&&!e.target.closest('.cp-pw')){CP.pop=null;cpDrawBar()}});
+const inside=(e,cls)=>e.composedPath().some(n=>n.classList&&n.classList.contains(cls));      // the path at the time of the click: the clicked node may already be replaced by a redraw
+document.addEventListener('click',e=>{if(CP.pop&&!inside(e,'cp-pw')){CP.pop=null;cpDrawBar()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CP.pop){CP.pop=null;cpDrawBar()}});
 drawOutline=function(){cpDrawBar()};                 // the old On/Off pills are gone; the Request tab's On/Off still sets GS.outline and lands here
 
