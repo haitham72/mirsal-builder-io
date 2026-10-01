@@ -45,7 +45,7 @@ The phase has checkpoints 1A (static), 1B (animation), 1D (desktop builder, Part
 | 1C console | **Built**; see Part C. |
 | 1D desktop Sticker Builder | **Built, 25 tests green, headless-browser walk-through on synthetic data; waiting on Haitham's gate** (Part D). |
 | 1G gateway frontend (React) | **Built 2026-10-01** (Inbox, Generate + gates, Video sheet, History; 3 Playwright specs green). **Waiting on Haitham: one real loop** (Part G exit). Ports of Parts D/E (Library, Create, Editor, Pack manager, animated editor, Prepare) are not done: they stay on `/legacy`. |
-| 1F golden path + review gates | **Built 2026-10-01**, 90 unit tests green, synthetic scenario passes end to end. **Waiting on Haitham: a real teddy sheet through every gate** (his box in the 1F exit). It is the spine of the product and the prerequisite for Phase 2. See "Golden path" below. |
+| 1F golden path + review gates | **Built 2026-10-01**, 86 unit tests green, synthetic scenario passes end to end. **Waiting on Haitham: a real teddy sheet through every gate** (his box in the 1F exit). It is the spine of the product and the prerequisite for Phase 2. See "Golden path" below. |
 
 ### Next steps (ordered)
 

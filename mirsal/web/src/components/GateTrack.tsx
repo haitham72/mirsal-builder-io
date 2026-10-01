@@ -48,12 +48,12 @@ export function gateStates(g: Generation): Gate[] {
 export function GateTrack({ g }: { g: Generation }) {
   const gates = gateStates(g);
   return (
-    <ol aria-label="Gates" className="grid grid-cols-5 gap-0 overflow-hidden rounded-2xl border border-bd bg-sf">
+    <ol aria-label="Gates" className="grid grid-cols-5 gap-0 overflow-hidden rounded-2xl bg-fill/70">
       {gates.map((x, i) => (
         <li
           key={x.id}
           aria-current={x.state === "active" ? "step" : undefined}
-          className={cn("relative px-3.5 py-2.5", i > 0 && "border-l border-bd", x.state === "active" && "bg-pri-l", x.state === "stop" && "bg-bad-l")}
+          className={cn("relative px-3.5 py-2.5", i > 0 && "border-l border-white", x.state === "active" && "bg-pri-l", x.state === "stop" && "bg-bad-l")}
         >
           <div className="flex items-center gap-2">
             <span

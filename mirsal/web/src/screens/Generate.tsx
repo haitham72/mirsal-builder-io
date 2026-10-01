@@ -39,16 +39,16 @@ function SheetView({ g }: { g: Generation }) {
   if (!src || !size) return null;
   const [w, h] = size;
   return (
-    <section aria-label="Sheet" className="rounded-2xl border border-bd bg-sf p-3">
+    <section aria-label="Sheet" className="rounded-2xl bg-fill/60 p-3">
       <div className="mb-2 flex items-center gap-2">
         <h3 className="text-[13px] font-semibold">Sheet</h3>
         {grid && <Badge tone={grid.method === "gutter" || grid.method === "single" ? "ok" : "warn"}>cut at {grid.method === "gutter" ? "the gutters" : grid.method}</Badge>}
-        <div className="ml-auto inline-flex gap-0.5 rounded-lg bg-fill p-0.5">
+        <div className="ml-auto inline-flex gap-1.5">
           {[
             [false, "Raw"],
             [true, "Keyed"],
           ].map(([k, l]) => (
-            <button key={String(l)} aria-pressed={keyed === k} onClick={() => setKeyed(k as boolean)} className={cn("rounded-md px-2 py-0.5 text-xs font-semibold text-mut", keyed === k && "bg-sf text-tx shadow-sm")}>
+            <button key={String(l)} aria-pressed={keyed === k} onClick={() => setKeyed(k as boolean)} className={cn("rounded-full bg-fill px-3 py-0.5 text-xs font-semibold text-[#4b5b6b]", keyed === k && "bg-pri text-white")}>
               {l as string}
             </button>
           ))}
@@ -91,7 +91,7 @@ function Tile({ g, s, canStill, canAnim, showAnim }: { g: Generation; s: Sticker
   );
   const dim = s.review.still === "REJECTED" || (showAnim && s.review.anim === "REJECTED");
   return (
-    <motion.li layout="position" transition={{ duration: 0.18 }} className={cn("overflow-hidden rounded-2xl border bg-sf", selected === s.index ? "border-pri ring-2 ring-pri-l2" : "border-bd")}>
+    <motion.li layout="position" transition={{ duration: 0.18 }} className={cn("overflow-hidden rounded-[20px] border bg-sf", selected === s.index ? "border-pri ring-2 ring-pri-l2" : "border-bd/70 hover:border-bd")}>
       <button onClick={() => select(selected === s.index ? null : s.index)} className="block w-full text-left" aria-label={`Open S${s.index} ${s.key}`}>
         <div className={cn("relative aspect-square", backdropClass[backdrop], dim && "opacity-45")}>
           {media}
@@ -364,8 +364,8 @@ function GateActions({ g }: { g: Generation }) {
   const animate = useAct(() => api.animate(id, "pack"), (r) => (r.noop ? "Already animated." : "Animating with the prepared video."));
   const a = g.gate.active;
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-bd bg-sf px-3.5 py-2.5">
-      <p className="mr-auto text-[13px] font-medium" aria-live="polite">
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-fill/70 px-4 py-2.5">
+      <p className="mr-auto text-[13.5px] font-medium" aria-live="polite">
         {g.gate.message}
       </p>
       {a === "plan" && (
@@ -469,7 +469,7 @@ export default function Generate({ id }: { id: number | null }) {
     <div className="space-y-3">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight">
             {g.generation_id} <span className="font-medium text-mut">{g.name_key}</span>
           </h1>
           <p className="text-xs text-mut">
@@ -478,7 +478,7 @@ export default function Generate({ id }: { id: number | null }) {
             {g.regen_of ? ` · regeneration of ${g.regen_of}` : ""}
           </p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto xl:hidden">
           <GenPicker id={id} />
         </div>
       </header>
@@ -507,12 +507,12 @@ export default function Generate({ id }: { id: number | null }) {
               <div className="flex flex-wrap items-center gap-2">
                 <BackdropPicker />
                 {hasAnim && (
-                  <div className="inline-flex gap-0.5 rounded-lg bg-fill p-0.5">
+                  <div className="inline-flex gap-1.5">
                     {[
                       [false, "Stills"],
                       [true, "Animations"],
                     ].map(([k, l]) => (
-                      <button key={String(l)} aria-pressed={animView === k} onClick={() => setShowAnim(k as boolean)} className={cn("rounded-md px-2 py-0.5 text-xs font-semibold text-mut", animView === k && "bg-sf text-tx shadow-sm")}>
+                      <button key={String(l)} aria-pressed={animView === k} onClick={() => setShowAnim(k as boolean)} className={cn("rounded-full bg-fill px-3.5 py-1 text-[13px] font-semibold text-[#4b5b6b]", animView === k && "bg-pri text-white")}>
                         {l as string}
                       </button>
                     ))}

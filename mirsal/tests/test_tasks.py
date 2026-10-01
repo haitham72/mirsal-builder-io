@@ -79,7 +79,7 @@ class InboxTests(Api):
         self.assertEqual(s, 200)
         self.assertIn(b"Mirsal", body)
         self.assertEqual(self.req("GET", "/")[0], 200)
-        self.assertEqual(self.req("GET", "/assets/..%2Findex.html")[0], 404)
+        self.assertEqual(self.req("GET", "/assets/..%2F..%2Fserver.py")[0], 404)   # an escape from dist/ is refused
 
 
 if __name__ == "__main__":

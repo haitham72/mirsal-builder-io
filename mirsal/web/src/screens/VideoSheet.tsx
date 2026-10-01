@@ -237,15 +237,15 @@ export default function VideoSheetScreen({ id }: { id: number | null }) {
   return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-center gap-4">
-        <h1 className="text-xl font-bold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight">
           {g.generation_id} <span className="font-medium text-mut">video sheet</span>
         </h1>
-        <div className="ml-auto">
+        <div className="ml-auto xl:hidden">
           <GenPicker id={id} />
         </div>
       </header>
       <GateTrack g={g} />
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-bd bg-sf px-3.5 py-2.5">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-fill/70 px-4 py-2.5">
         <p className="mr-auto text-[13px] font-medium" aria-live="polite">
           {g.gate.message}
         </p>

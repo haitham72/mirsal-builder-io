@@ -70,10 +70,10 @@ test("the 1F scenario, driven from the UI with no console errors", async ({ page
 
   // History: search finds a sticker and shows its path
   await page.getByRole("button", { name: "History" }).click();
-  await page.locator("input[type=search]").fill("backpack");
+  await page.getByRole("searchbox", { name: "Search stickers" }).fill("backpack");
   await page.getByRole("button", { name: /G001\/S3 / }).click();
   await expect(page.getByText("pack approve by human")).toBeVisible();
-  await page.locator("input[type=search]").fill("with_a_book");
+  await page.getByRole("searchbox", { name: "Search stickers" }).fill("with_a_book");
   await page.getByRole("button", { name: /G001\/S1 / }).click();
   await expect(page.getByText(/inside_slot .* \(frame \d+/)).toBeVisible();
 

@@ -15,7 +15,7 @@ function Path({ row }: { row: SearchRow }) {
   const s = q.data?.stickers.find((x) => x.index === row.index);
   if (!s) return <p className="px-3 pb-3 text-xs text-mut">Loading the path…</p>;
   return (
-    <div className="grid gap-4 border-t border-bd px-3 py-3 md:grid-cols-2">
+    <div className="mb-3 grid gap-4 rounded-2xl bg-fill/60 px-4 py-3 md:grid-cols-2">
       <div>
         <h4 className="mb-1 text-[13px] font-semibold">Path of {row.generation}/S{row.index}</h4>
         <HistoryList items={s.history} />
@@ -46,7 +46,7 @@ export default function History() {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-xl font-bold tracking-tight">History</h1>
+        <h1 className="text-2xl font-bold tracking-tight">History</h1>
         <p className="text-[13px] text-mut">Every sticker with its full path: what Python checked, what you decided, and why. Search by key, tag, name or task.</p>
       </header>
       <div className="flex flex-wrap items-center gap-2">
@@ -70,13 +70,13 @@ export default function History() {
       </div>
       {res.isError && <p className="text-bad">{(res.error as Error).message}</p>}
       {res.data && rows.length === 0 && <Empty title="Nothing matches">Try a shorter word, a tag such as the pose or the subject, or clear the search.</Empty>}
-      <ul className="space-y-2">
+      <ul>
         {rows.map((r) => {
           const k = `${r.generation}/${r.index}`;
           return (
-            <li key={k} className="overflow-hidden rounded-2xl border border-bd bg-sf">
-              <button className="grid w-full grid-cols-[64px_1fr_auto] items-center gap-3 p-2.5 text-left" aria-expanded={open === k} onClick={() => setOpen(open === k ? null : k)}>
-                <div className={cn("aspect-square overflow-hidden rounded-lg", backdropClass[backdrop])}>{r.png && <img src={out(r.generation, r.png)} alt="" className="size-full object-contain" />}</div>
+            <li key={k} className="border-b border-bd/70 last:border-0">
+              <button className="grid w-full grid-cols-[56px_1fr_auto] items-center gap-3.5 rounded-2xl px-2 py-3 text-left hover:bg-[#f4f8fb]" aria-expanded={open === k} onClick={() => setOpen(open === k ? null : k)}>
+                <div className={cn("aspect-square overflow-hidden rounded-xl border border-bd/70", backdropClass[backdrop])}>{r.png && <img src={out(r.generation, r.png)} alt="" className="size-full object-contain" />}</div>
                 <div className="min-w-0">
                   <p className="truncate font-mono text-[12.5px] font-semibold">
                     {r.generation}/S{r.index} {r.key}

@@ -95,13 +95,13 @@ export const backdropClass: Record<Backdrop, string> = { checker: "bg-checker", 
 export function BackdropPicker() {
   const { backdrop, setBackdrop } = useUI();
   return (
-    <div role="group" aria-label="Preview background" className="inline-flex gap-0.5 rounded-lg bg-fill p-0.5">
+    <div role="group" aria-label="Preview background" className="inline-flex gap-1.5">
       {BACKDROPS.map(([k, l]) => (
         <button
           key={k}
           aria-pressed={backdrop === k}
           onClick={() => setBackdrop(k)}
-          className={cn("rounded-md px-2 py-0.5 text-xs font-semibold text-mut", backdrop === k && "bg-sf text-tx shadow-sm")}
+          className={cn("rounded-full bg-fill px-3.5 py-1 text-[13px] font-semibold text-[#4b5b6b] hover:bg-[#e5ecf2]", backdrop === k && "bg-pri text-white hover:bg-pri")}
         >
           {l}
         </button>
@@ -130,7 +130,7 @@ export function Notice() {
 
 export function Empty({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed border-bd bg-sf/60 px-6 py-10 text-center">
+    <div className="rounded-2xl bg-fill/60 px-6 py-12 text-center">
       <p className="font-semibold">{title}</p>
       {children && <div className="mx-auto mt-1 max-w-md text-[13px] text-mut">{children}</div>}
     </div>

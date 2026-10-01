@@ -52,7 +52,7 @@ function Prepare() {
   return (
     <section aria-labelledby="prep" className="space-y-4">
       <div>
-        <h2 id="prep" className="text-[17px] font-bold tracking-tight">
+        <h2 id="prep" className="text-xl font-bold tracking-tight">
           Prepare a task
         </h2>
         <p className="text-[13px] text-mut">Describe the subject, check the prompt, reserve the folder names, then generate in Higgsfield.</p>
@@ -92,12 +92,12 @@ function Prepare() {
               setTask(null);
             }}
             placeholder="teddy bear for school"
-            className="h-10 w-full rounded-xl border border-transparent bg-fill px-3 focus:border-pri focus:bg-white"
+            className="h-11 w-full rounded-xl border border-transparent bg-fill px-3.5 focus:border-pri focus:bg-white"
           />
         </label>
         <div>
           <span className="mb-1 block text-[13px] font-semibold">Grid</span>
-          <div role="radiogroup" aria-label="Grid" className="inline-flex h-10 gap-0.5 rounded-xl bg-fill p-1">
+          <div role="radiogroup" aria-label="Grid" className="inline-flex h-11 items-center gap-1.5">
             {GRIDS.map((g) => (
               <button
                 key={g}
@@ -107,7 +107,7 @@ function Prepare() {
                   setGrid(g);
                   setTask(null);
                 }}
-                className={cn("rounded-lg px-3 text-[13px] font-semibold text-mut", grid === g && "bg-sf text-tx shadow-sm")}
+                className={cn("h-9 rounded-full bg-fill px-5 text-[14px] font-semibold text-[#4b5b6b]", grid === g && "bg-pri text-white shadow-[0_4px_12px_#3b82f633]")}
               >
                 {g.replace("x", "×")}
               </button>
@@ -177,8 +177,11 @@ function Row({ r }: { r: InboxRow }) {
     },
   );
   return (
-    <li className="rounded-xl border border-bd bg-sf p-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <li className="border-b border-bd/70 py-3.5 last:border-0">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className="grid size-11 shrink-0 place-items-center rounded-full border border-bd bg-pri-l text-pri-d" aria-hidden>
+          {r.kind === "invalid" ? <TriangleAlert className="size-5" /> : <FolderOpen className="size-5" />}
+        </span>
         <code className="text-[14px] font-semibold">{r.name}</code>
         <CopyButton text={r.name} label="Copy" />
         <Badge tone={stateTone(r) as "bad" | "warn" | "ok" | "neutral"}>{r.state}</Badge>
@@ -189,7 +192,7 @@ function Row({ r }: { r: InboxRow }) {
             </Button>
           ))}
           {r.kind !== "invalid" && (
-            <Button size="sm" variant="pri" disabled={!r.can_run || run.isPending} onClick={() => run.mutate([])}>
+            <Button variant="pri" disabled={!r.can_run || run.isPending} onClick={() => run.mutate([])}>
               <Play />
               Run
             </Button>
@@ -229,7 +232,7 @@ function Watch() {
   return (
     <section aria-labelledby="watch" className="space-y-3">
       <div>
-        <h2 id="watch" className="text-[17px] font-bold tracking-tight">
+        <h2 id="watch" className="text-xl font-bold tracking-tight">
           Watch folders
         </h2>
         <p className="text-[13px] text-mut">
@@ -243,7 +246,7 @@ function Watch() {
       </div>
       {q.isError && <p className="text-[13px] text-bad">{(q.error as Error).message}</p>}
       {q.data && q.data.rows.length === 0 && <Empty title="No folders yet">Reserve a task on the left. Its folder shows up here as soon as you create it.</Empty>}
-      <ul className="space-y-2">{q.data?.rows.map((r) => <Row key={`${r.kind}-${r.name}`} r={r} />)}</ul>
+      <ul>{q.data?.rows.map((r) => <Row key={`${r.kind}-${r.name}`} r={r} />)}</ul>
     </section>
   );
 }
