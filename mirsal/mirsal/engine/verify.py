@@ -1,4 +1,4 @@
-"""The verifier: ONE catalogue of every check on the golden path (phase_01.md, "The verifier").
+"""The verifier: ONE catalogue of every check on the golden path (Phase_01/README.md, "The verifier").
 
 Python judges what is *correct*; humans (and from Phase 3 the VLM) judge what is *good*. A BLOCK failure is final: the
 API refuses an APPROVE on it. A WARN is shown to the human at the gate. The verifier is deterministic (same bytes in,
@@ -17,9 +17,9 @@ from dataclasses import dataclass, field
 import cv2
 import numpy as np
 
-from .chroma import key_diff
+from .chroma import border_mask, key_diff
 
-VERIFY_VERSION = 1          # stored on every result: Phase 2 can tell which rule set judged an old sticker
+VERIFY_VERSION = 2          # stored on every result: Phase 2 can tell which rule set judged an old sticker
 BLOCK, WARN = "BLOCK", "WARN"
 
 
@@ -372,6 +372,23 @@ def inside_slot(inp, cfg):
               f"frame {first}, {worst}px over the {edge}px edge band" if first is not None else "inside", frame=first, over_px=worst, edge_px=edge)
 
 
+@check("slot", "inside_frame", WARN)
+def inside_frame(inp, cfg):
+    """The video twin of the still's inside_cell, for a cell cut from a prepared 3x3 video or a pre-sliced clip: in any frame, more than
+    edge_touch_px opaque pixels in the border ring (border_px wide) means the character leaves its cell and the animation is cropped.
+    A WARN for the engine (the video is still made so it can be looked at); the pipeline turns it into a blocked review so it cannot be added."""
+    frames = inp.get("cell_frames")
+    if frames is None:
+        return None
+    ring = border_mask(frames[0].shape[0], frames[0].shape[1], cfg.border_px)
+    counts = [int((f[..., 3][ring] > 127).sum()) for f in frames]
+    worst = max(counts)
+    first = next((t for t, n in enumerate(counts) if n > cfg.edge_touch_px), None)
+    return _c("slot", "inside_frame", WARN, worst <= cfg.edge_touch_px, worst, cfg.edge_touch_px,
+              f"frame {first}: {counts[first]}px on the cell border ({sum(n > cfg.edge_touch_px for n in counts)} of {len(counts)} frames over)" if first is not None
+              else f"{worst}px on the cell border at most", frame=first, frames_over=sum(n > cfg.edge_touch_px for n in counts))
+
+
 @check("slot", "cross_slot", BLOCK)
 def cross_slot(inp, cfg):
     """Foreground in the gutter between slots in any frame, apart from the slot's own subject: a character touching or merging."""
@@ -492,6 +509,14 @@ def alpha_stable(inp, cfg):
     area = np.array([(f[..., 3] > 127).sum() for f in out], np.float64)
     cv = float(area.std() / max(area.mean(), 1.0))
     return _c("anim", "alpha_stable", WARN, cv <= cfg.max_area_cv, round(cv, 3), cfg.max_area_cv, f"subject area varies by {cv * 100:.0f}% over the frames")
+
+
+@check("anim", "sharpness", WARN)
+def sharpness(inp, cfg):
+    k = inp["metrics"].get("sharp_kept")
+    if k is None:
+        return None
+    return _c("anim", "sharpness", WARN, k >= cfg.min_sharp_kept, k, cfg.min_sharp_kept, f"{k:.2f}x of the edge detail survives the encode")
 
 
 # ================= video_sheet (G3 build) =================

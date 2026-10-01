@@ -5,9 +5,11 @@ Used by the CLI and by the console. Picking steps are lookups over prepared file
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import shutil
+import threading
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -21,7 +23,7 @@ from .engine.config import EngineConfig
 from .engine.grid import detect_grid, split_grid
 from .engine.render import apply_edge
 from .engine.sheet import encode_static, key_sheet, slice_cells, stitch_keyed
-from .engine.video import AnimationResult, pick_clip, process_clips, process_video
+from .engine.video import AnimationResult, AnimCache, pick_clip, process_clips, process_video
 
 STAGES = ["requested", "sheet_picked", "keyed", "sliced", "video_requested", "video_picked", "video_sliced",
           "plan_reviewed", "stills_reviewed", "video_sheet_built", "video_sheet_reviewed", "video_returned", "anim_reviewed", "pack_final"]
@@ -45,10 +47,23 @@ def list_ids(out: Path) -> list[int]:
     return sorted(int(m[1]) for d in out.iterdir() if (m := re.fullmatch(r"G(\d{3,})", d.name)))
 
 
+_IO_LOCK = threading.RLock()     # one reader or writer of result.json at a time inside this process
+
+
 def _atomic_write(path: Path, data: bytes) -> None:
+    """tmp file + os.replace. On Windows the replace fails with WinError 5 while anything (a polling request, an
+    antivirus scan) has the target open, so in-process readers take the same lock and a foreign holder is retried."""
     tmp = path.with_name(path.name + ".tmp")
-    tmp.write_bytes(data)
-    os.replace(tmp, path)
+    with _IO_LOCK:
+        tmp.write_bytes(data)
+        for attempt in range(40):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:
+                if attempt == 39:
+                    raise
+                time.sleep(0.05)
 
 
 def normalise(res: dict) -> dict:
@@ -68,7 +83,8 @@ def read_result(out: Path, gid: int) -> dict:
     p = gen_dir(out, gid) / "result.json"
     if not p.exists():
         raise PipelineError(f"No generation G{gid:03d}", 404)
-    return normalise(json.loads(p.read_text(encoding="utf-8")))
+    with _IO_LOCK:
+        return normalise(json.loads(p.read_text(encoding="utf-8")))
 
 
 def write_result(out: Path, gid: int, res: dict) -> None:
@@ -327,7 +343,11 @@ def record_anim(d: Path, st: dict, r, ref: str) -> None:
     if r.data:
         st["webm"] = f"slices/{st['name'].replace('img-', 'vid-', 1)}.webm"
         (d / st["webm"]).write_bytes(r.data)
-    if r.status == "READY":
+    oob = next((c for c in (r.report.checks if r.status == "READY" else []) if c["name"] == "inside_frame" and not c["ok"]), None)
+    if oob:       # made, but the character leaves its cell: kept for inspection, blocked for review so it cannot be added
+        st["review"]["anim"] = "BLOCKED"
+        hist(st, "video", "python", "BLOCK", "inside_frame", ref, {"check": "inside_frame", "value": oob.get("value"), "limit": oob.get("limit"), "note": oob.get("detail"), "data": oob.get("data")})
+    elif r.status == "READY":
         st["review"]["anim"] = "PENDING"
         hist(st, "video", "python", "PASS", ref=ref, detail={"warnings": r.metrics.get("warnings", [])})
     else:
@@ -337,6 +357,200 @@ def record_anim(d: Path, st: dict, r, ref: str) -> None:
 
 def _json(v):
     return v.item() if hasattr(v, "item") else v
+
+
+# ---------- Studio edit: layers over a sticker, exported to BOTH its image and its animation ----------
+def _original(d: Path, st: dict, kind: str) -> Path:
+    """The file as the generator made it, kept once in source/orig/; every Studio edit starts from it, so re-editing never stacks on a previous edit."""
+    rel = st["webm"] if kind == "webm" else st["png"]
+    orig = d / "source" / "orig" / (Path(rel).name if kind == "webm" else f"S{st['index']}.png")
+    if not orig.exists():
+        orig.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(d / rel, orig)
+    return orig
+
+
+def studio_edit_open(out: Path, gid: int, index: int, projects, cfg: EngineConfig) -> dict:
+    """Open (or reopen) the layered edit of a sticker that has an animation: a video project made from the ORIGINAL animation, whose layers are the
+    edit. The project lives in the Studio; nothing is baked into the generator's files until `studio_edit_commit`."""
+    res = read_result(out, gid)
+    if not 1 <= index <= len(res["stickers"]):
+        raise PipelineError(f"index 1..{len(res['stickers'])} required")
+    st = res["stickers"][index - 1]
+    if st.get("anim_status") != "READY" or not st.get("webm"):
+        raise PipelineError("This sticker has no animation yet: edit its image from the Stickers view.", 409)
+    pid = (st.get("edit") or {}).get("project")
+    if pid:
+        try:
+            projects.get(pid)
+            return {"project": pid, "reused": True}
+        except Exception:
+            pass
+    d = gen_dir(out, gid)
+    base = _original(d, st, "webm")
+    proj = projects.create(base.read_bytes(), st["name"] + ".webm")
+    fps = int(max(6, min(cfg.video_max_fps, round((st.get("anim_metrics") or {}).get("fps") or 24))))
+    projects.update(proj["id"], {"video": {"fps": fps}, "name": st["key"].replace("_", " ")[:60]})
+    st["edit"] = {"project": proj["id"], "layers": [], "at": None}
+    write_result(out, gid, res)
+    return {"project": proj["id"], "reused": False}
+
+
+def studio_edit_commit(out: Path, gid: int, index: int, projects, overlays: dict, cfg: EngineConfig, lib=None) -> dict:
+    """Export the Studio edit: the animation is re-rendered from the original with the layers (with their timing), and the same layers are composited
+    onto the original image (all visible layers, timing ignored). Both files are replaced in place (same names, same S#); the originals stay in
+    source/orig/; the pack copies of this sticker take the new files."""
+    import numpy as np
+    from .library import LibraryError, decode_image, png_bytes, validate_render
+    from .video_project import _over
+    res = read_result(out, gid)
+    st = res["stickers"][index - 1]
+    pid = (st.get("edit") or {}).get("project")
+    if not pid:
+        raise PipelineError("Open the edit first.", 409)
+    try:
+        proj = projects.get(pid)
+        data, _mime, ext, info = projects.render(pid, "webm", overlays)
+    except LibraryError as e:
+        raise PipelineError(str(e), e.code if hasattr(e, "code") else 409)
+    if ext != "webm" or len(data) > cfg.video_max_bytes:
+        raise PipelineError(f"The edited animation is {len(data) // 1024} KB, over Telegram's {cfg.video_max_bytes // 1024} KB limit. Remove a layer or shorten it.", 409)
+    d = gen_dir(out, gid)
+    base_png = _original(d, st, "png")
+    img = decode_image(base_png.read_bytes())
+    drawn = []
+    for L in sorted(proj["layers"], key=lambda x: x["zIndex"]):
+        if L["visible"] and L["id"] in overlays:
+            ov = decode_image(overlays[L["id"]])
+            if ov.shape[:2] != img.shape[:2]:
+                import cv2
+                ov = cv2.resize(ov, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_AREA)
+            img = _over(img, ov)
+            drawn.append({"type": L["type"], "text": (L.get("payload") or {}).get("text") or (L.get("payload") or {}).get("char"), "timing": L.get("timing")})
+    try:
+        body, ext2, _ = validate_render(png_bytes(img), cfg)
+    except LibraryError as e:
+        raise PipelineError(str(e), 409)
+    (d / st["webm"]).write_bytes(data)
+    cur = Path(st["png"])
+    if ext2 != cur.suffix.lstrip("."):
+        (d / st["png"]).unlink(missing_ok=True)
+        st["png"] = str(cur.with_suffix("." + ext2)).replace("\\", "/")
+    (d / st["png"]).write_bytes(body)
+    now = round(time.time(), 3)
+    st["edited"], st["edited_at"] = True, now
+    st["edit"].update(layers=drawn, at=now)
+    st["metrics"]["kb"] = max(1, len(body) // 1024)
+    st.setdefault("anim_metrics", {})["kb"] = round(len(data) / 1024, 1)
+    st["anim_metrics"]["edited"] = True
+    hist(st, "video", "human", "EDIT", reason="edited in the Studio: image and animation", detail={"layers": drawn})
+    write_result(out, gid, res)
+    emit(out, gid, "still_edited", "done", 0, {"index": index, "studio": True, "layers": len(drawn)}, "human", "EDIT")
+    refreshed = lib.refresh_from_generation(out, res["generation_id"], index, d / st["png"], d / st["webm"]) if lib else 0
+    return {"index": index, "edited_at": now, "layers": len(drawn), "kb_video": round(len(data) / 1024, 1), "kb_image": st["metrics"]["kb"], "pack_copies": refreshed}
+
+
+# ---------- judge animations that were made before the border check existed ----------
+def recheck_bounds(out: Path, gid: int, cfg: EngineConfig) -> dict:
+    """Animations made by older code have no `inside_frame` verdict, so a character that leaves its cell was never flagged. This runs that one check on
+    the SOURCE cell of every READY animation that lacks a verdict (decode + key only, no render, no encode, ~1 s for 9 cells), records it exactly as a
+    new animation would be (the check in `anim_report`, a warning, `review.anim = BLOCKED` on a failure, a history line) and marks the sticker
+    `bounds_checked`. A sticker the human already rejected stays rejected. Video-sheet slots have `inside_slot` and are skipped."""
+    from concurrent.futures import ThreadPoolExecutor
+    from .engine import ffmpeg as ff
+    from .engine.grid import scale_rects
+    from .engine.video import bounds_check, keyed_cell, keyed_clip
+    res = read_result(out, gid)
+    cfg = cfg_for(res, cfg)
+    src = res["source"]
+    clips = {int(k): {f: Path(p) for f, p in v.items()} for k, v in src.get("clips", {}).items()}
+    mp4 = Path(src["video_path"]) if src.get("video_path") and Path(src["video_path"]).is_file() else None
+    todo = []
+    for st in res["stickers"]:
+        names = {c["name"] for c in st.get("anim_report") or []}
+        how = (st.get("anim_metrics") or {}).get("source") or ""
+        if st["anim_status"] == "READY" and not st.get("bounds_checked") and not names & {"inside_frame", "inside_slot"} and (how == "3x3 mp4" or how.startswith("clip:")):
+            todo.append((st["index"], how))
+    if not todo:
+        return {"checked": 0, "flagged": []}
+    geo = None
+    if mp4 and any(h == "3x3 mp4" for _, h in todo):
+        info = ff.probe(mp4)
+        g = src.get("grid")
+        W, H = info["width"], info["height"]
+        vr = scale_rects(g["rects"], tuple(src["sheet_size"]), (W, H)) if g else [(c * (W // 3), r * (H // 3), W // 3, H // 3) for r in range(3) for c in range(3)]
+        cap = cfg.video_max_fps if info["fps"] > cfg.video_max_fps else None
+        fps = cfg.video_max_fps if cap else info["fps"]
+        geo = (vr, cap, int(math.floor(cfg.video_max_seconds * fps)))
+
+    def one(item):
+        i, how = item
+        try:
+            if how == "3x3 mp4":
+                if not geo:
+                    return i, None
+                keyed = keyed_cell(mp4, geo[0][i - 1], geo[1], geo[2], cfg)
+            else:
+                fmt = how.split(":", 1)[1]
+                if i not in clips or fmt not in clips[i]:
+                    return i, None
+                keyed = keyed_clip(clips[i][fmt], cfg)
+            return i, bounds_check(keyed, cfg)
+        except Exception:
+            return i, None
+    with ThreadPoolExecutor(max_workers=max(1, min(cfg.anim_workers, len(todo)))) as ex:
+        checks = list(ex.map(one, todo))
+    flagged = []
+    for i, chk in checks:
+        if chk is None:
+            continue
+        st = res["stickers"][i - 1]
+        st["bounds_checked"] = True
+        st.setdefault("anim_report", []).append(chk.to_dict())
+        if not chk.ok:
+            st.setdefault("anim_metrics", {}).setdefault("warnings", []).append("inside_frame")
+            if st["review"]["anim"] != "REJECTED":
+                st["review"]["anim"] = "BLOCKED"
+            hist(st, "video", "python", "BLOCK", "inside_frame", "bounds recheck",
+                 {"check": "inside_frame", "value": chk.value, "limit": chk.limit, "note": chk.note, "data": chk.to_dict()["data"]})
+            flagged.append(i)
+    write_result(out, gid, res)
+    emit(out, gid, "bounds_rechecked", "done", 0, {"checked": [i for i, c in checks if c is not None], "flagged": flagged})
+    return {"checked": sum(c is not None for _, c in checks), "flagged": flagged}
+
+
+# ---------- edit a still in place (the sticker editor's Save, opened from Generate) ----------
+def edit_still(out: Path, gid: int, index: int, png: bytes, cfg: EngineConfig, lib=None) -> dict:
+    """Replace one still with the editor's 512x512 result, in place: same file name, same S#. The original is kept once in source/orig/ so
+    nothing is lost; the animation (made from the video, not from the still) is untouched."""
+    from .library import LibraryError, validate_render
+    res = read_result(out, gid)
+    if not 1 <= index <= len(res["stickers"]):
+        raise PipelineError(f"index 1..{len(res['stickers'])} required")
+    st = res["stickers"][index - 1]
+    if st["status"] != "READY" or not st.get("png"):
+        raise PipelineError(f"S{index} is not a READY still.", 409)
+    try:
+        body, ext, _ = validate_render(png, cfg)
+    except LibraryError as e:
+        raise PipelineError(str(e), 409)
+    d = gen_dir(out, gid)
+    f, orig = d / st["png"], d / "source" / "orig" / f"S{index}.png"
+    if not orig.exists():
+        orig.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(f, orig)
+    if ext != f.suffix.lstrip("."):            # over the PNG limit: Telegram takes a lossless WebP just as well; the file keeps its name, the extension follows
+        f.unlink(missing_ok=True)
+        st["png"] = str(Path(st["png"]).with_suffix("." + ext)).replace("\\", "/")
+        f = d / st["png"]
+    f.write_bytes(body)
+    st["edited"], st["edited_at"] = True, round(time.time(), 3)
+    st["metrics"]["kb"] = max(1, len(body) // 1024)
+    hist(st, "still", "human", "EDIT", reason="edited in the sticker editor")
+    write_result(out, gid, res)
+    emit(out, gid, "still_edited", "done", 0, {"index": index}, "human", "EDIT")
+    refreshed = lib.refresh_from_generation(out, res["generation_id"], index, d / st["png"], None) if lib else 0
+    return {"index": index, "edited_at": st["edited_at"], "kb": st["metrics"]["kb"], "has_animation": st.get("anim_status") == "READY", "pack_copies": refreshed}
 
 
 # ---------- appearance (re-finish the edge of an existing generation) ----------
@@ -366,7 +580,7 @@ def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None =
         if st["status"] != "READY":
             continue
         plain = d / "source" / "plain" / f"S{st['index']}.png"
-        if not plain.exists():                            # generations written before the plain twins
+        if st.get("edited") or not plain.exists():              # an edited still keeps the user's pixels                            # generations written before the plain twins
             continue
         rgba = cv2.cvtColor(cv2.imdecode(np.fromfile(str(plain), np.uint8), cv2.IMREAD_UNCHANGED), cv2.COLOR_BGRA2RGBA)
         fin = apply_edge(rgba[..., :3].astype(np.float32), rgba[..., 3].astype(np.float32) / 255.0,
@@ -388,6 +602,7 @@ def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None =
         st["metrics"]["outline_px"], st["metrics"]["erode_px"] = cfg.outline_px, cfg.erode_px
         ok, buf = cv2.imencode(".png", cv2.cvtColor(fin, cv2.COLOR_RGBA2BGRA))
         (d / st["png"]).write_bytes(buf.tobytes())
+        st["rendered_at"] = round(time.time(), 3)                  # the page puts it in the image URL, so the new edge is fetched, not the cached old one
         hist(st, "appearance", "human", "PASS", detail={"outline_px": cfg.outline_px, "erode_px": cfg.erode_px})
         rerendered += 1
         if st.get("webm"):
@@ -456,6 +671,27 @@ def check_animate(out: Path, gid: int, scope: str, index: int | None) -> dict:
     return res
 
 
+def animate_cells(res: dict, cfg: EngineConfig, cells: list[int], on_cell=None, cache: AnimCache | None = None) -> list[AnimationResult]:
+    """Animate these cells of a generation from its prepared sources (pre-sliced clips where there are any, else the 3x3 mp4).
+    Nothing is saved here; `cache` (out/cache/anim) lets the same source cell come back without being rendered again."""
+    clips = {int(k): {f: Path(p) for f, p in v.items()} for k, v in res["source"].get("clips", {}).items()}
+    mp4 = Path(res["source"]["video_path"]) if res["source"].get("video_path") else None
+    use_clips = [i for i in cells if i in clips]
+    use_mp4 = [i for i in cells if i not in clips and mp4]
+    missing = [i for i in cells if i not in use_clips and i not in use_mp4]
+    results = []
+    for i in missing:
+        results.append(AnimationResult(i, "FAILED", "no_video_source"))
+        on_cell and on_cell(results[-1])
+    if use_clips:
+        results += process_clips({i: clips[i] for i in use_clips}, cfg, on_cell=on_cell, cache=cache)
+    if use_mp4:
+        g = res["source"].get("grid")
+        results += process_video(mp4, cfg, use_mp4, on_cell=on_cell, rects=g["rects"] if g else None,
+                                 sheet_wh=tuple(res["source"]["sheet_size"]) if g else None, cache=cache)
+    return results
+
+
 def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int | None = None, pace: float = 0.0) -> dict:
     res = check_animate(out, gid, scope, index)
     cfg = cfg_for(res, cfg)
@@ -492,19 +728,15 @@ def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int |
             for i in todo:
                 res["stickers"][i - 1]["anim_status"] = "PROCESSING"
             write_result(out, gid, res)
-            results = []
-            for i in missing:
-                results.append(AnimationResult(i, "FAILED", "no_video_source")); on_cell(results[-1])
-            if use_clips:
-                results += process_clips({i: clips[i] for i in use_clips}, cfg, on_cell=on_cell)
-            if use_mp4:
-                g = res["source"].get("grid")
-                results += process_video(mp4, cfg, use_mp4, on_cell=on_cell, rects=g["rects"] if g else None,
-                                         sheet_wh=tuple(res["source"]["sheet_size"]) if g else None)
+            results = animate_cells(res, cfg, todo, on_cell, AnimCache(out / "cache" / "anim"))
             s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
             res["stage"] = "video_sliced"; write_result(out, gid, res)
     except Exception as e:
-        res["error"] = str(e)[:300]; write_result(out, gid, res)
+        res["error"] = str(e)[:300]
+        for i in todo:       # cells the job never reached go back to "not requested", else the UI shows "Animating…" forever
+            if res["stickers"][i - 1]["anim_status"] == "PROCESSING":
+                res["stickers"][i - 1]["anim_status"] = "NOT_REQUESTED"
+        write_result(out, gid, res)
     return {"noop": False}
 
 

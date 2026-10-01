@@ -1,4 +1,4 @@
-"""The golden path's review gates (phase_01.md, checkpoint 1F). The rules live here, in Python, and every phase keeps them:
+"""The golden path's review gates (Phase_01/README.md, checkpoint 1F). The rules live here, in Python, and every phase keeps them:
 
   G1 plan -> sheet -> Python blocks bad cells -> G2 stills -> video sheet (built from the approved stills only) -> G3 video sheet
   -> returned video attached to A<n> -> Python blocks bad slots -> G4 animations -> G5 pack (stickers approved at G2 AND G4)
@@ -136,9 +136,17 @@ def _targets(res: dict, index, decision: str, which: str, ready_field: str, read
         raise pl.PipelineError(f"index 1..{len(S)} required")
     s = S[i - 1]
     if s[ready_field] != ready_value or s["review"][which] == "BLOCKED":
-        why = s["reason"] if which == "still" else s.get("anim_reason")
-        raise refuse(f"S{i} is blocked by Python ({why or s[ready_field].lower()}): nobody can approve or reject it.")
+        if not (which == "anim" and s[ready_field] == ready_value and soft_block(s)):
+            why = s["reason"] if which == "still" else s.get("anim_reason")
+            raise refuse(f"S{i} is blocked by Python ({why or s[ready_field].lower()}): nobody can approve or reject it.")
     return [s]
+
+
+def soft_block(s: dict) -> bool:
+    """An animation that WAS made and failed only WARN-level checks (the character leaves its cell). It is switched off by default
+    (review.anim BLOCKED), but Python's verdict on it is a warning, not a block, so the human may include it anyway."""
+    failed = [c for c in s.get("anim_report") or [] if not c.get("ok")]
+    return s.get("anim_status") == "READY" and bool(failed) and all(c.get("severity") == "WARN" for c in failed)
 
 
 def _g_still(out, gid, res, decision, index, note, by):
@@ -167,8 +175,9 @@ def _g_anim(out, gid, res, decision, index, note, by):
         raise refuse("Locked: the pack is already final (G5). Reject the pack to change animation decisions.")
     done = []
     for s in _targets(res, index, decision, "anim", "anim_status", "READY"):
+        override = s["review"]["anim"] == "BLOCKED" and decision == "APPROVE"
         s["review"]["anim"] = "APPROVED" if decision == "APPROVE" else "REJECTED"
-        pl.hist(s, "anim", by, decision, reason=note)
+        pl.hist(s, "anim", by, decision, reason="included anyway: " + ", ".join(c["name"] for c in s["anim_report"] if not c.get("ok")) if override else note)
         pl.emit(out, gid, "review", "done", 0, {"gate": "anim", "index": s["index"], "note": note}, by, decision)
         done.append(s["index"])
     if not any(s["anim_status"] == "READY" and s["review"]["anim"] == "PENDING" for s in res["stickers"]):
@@ -373,9 +382,10 @@ def quick_sheet(out: Path, gid: int, cfg: EngineConfig) -> dict:
     return {"sheet": sheet["id"]}
 
 
-def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: str | None = None) -> dict:
+def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: str | None = None, mode: str = "add", names: dict | None = None) -> dict:
     """'Add to pack': approve what was kept at G2 / G4, approve the final pack (G5) and add it to a Library pack.
-    Animated stickers when the video was made, the stills when it was not. Anything already added to that pack is skipped."""
+    Animated stickers when the video was made, the stills when it was not. Anything already added to that pack is skipped.
+    mode: when an animated sticker's still is already in the pack, 'add' keeps both, 'replace' puts the animated one in the still's place."""
     res = _ensure_plan(out, gid, "approved by pressing Add")
     _approve_stills(out, gid, res, "approved by Add")
     res = pl.read_result(out, gid)
@@ -405,12 +415,17 @@ def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: s
         key = f"{kind}:{i}"
         if key in done:
             continue
-        lib.add_from_generation(out, pid, gid, i, kind)
+        o = (names or {}).get(str(i)) or {}
+        lib.add_from_generation(out, pid, gid, i, kind, o.get("name"), o.get("emoji"))
         done.append(key)
         added.append(i)
+    replaced = 0
+    if kind == "animated" and mode == "replace" and added:
+        replaced = lib.replace_static_with_animated(pid, res["generation_id"], added)
+        done[:] = [k for k in done if not (k.startswith("static:") and int(k.split(":")[1]) in added)]
     pl.write_result(out, gid, res)
-    pl.emit(out, gid, "added_to_pack", "done", 0, {"pack": pid, "kind": kind, "stickers": added}, "human", "APPROVE")
-    return {"added": len(added), "already": len(keep) - len(added), "kind": kind, "pack_id": pid, "indices": keep}
+    pl.emit(out, gid, "added_to_pack", "done", 0, {"pack": pid, "kind": kind, "stickers": added, "replaced_stills": replaced}, "human", "APPROVE")
+    return {"added": len(added), "already": len(keep) - len(added), "replaced": replaced, "kind": kind, "pack_id": pid, "indices": keep}
 
 
 def drop(out: Path, gid: int, index: int, dropped: bool) -> dict:

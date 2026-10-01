@@ -1,4 +1,4 @@
-"""python -m mirsal create "<prompt>" | more [G001] | animate [G001] [--slice N] | serve [--port N] [--pace S]"""
+"""python -m mirsal create "<prompt>" | more [G001] | animate [G001] [--slice N] | serve [--port N] [--pace S] [--workers N] | profile [G001] [--sweep 1,4,9] | recheck [G001|all]"""
 from __future__ import annotations
 
 import argparse
@@ -31,11 +31,31 @@ def main(argv=None) -> int:
         m = sub.add_parser(n); m.add_argument("gid", nargs="?")
     a = sub.add_parser("animate"); a.add_argument("gid", nargs="?"); a.add_argument("--slice", type=int)
     sub.add_parser("doctor")
+    rc = sub.add_parser("recheck", help="run the border check on animations made before it existed"); rc.add_argument("gid", nargs="?", default="all")
+    pr = sub.add_parser("profile", help="time the animation of a generation stage by stage (nothing is saved)")
+    pr.add_argument("gid", nargs="?"); pr.add_argument("--sweep", default="", help="worker counts to compare, e.g. 1,4,9")
     s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0)
+    for p_ in (s, a):
+        p_.add_argument("--workers", type=int, help="cells animated at the same time (default: CPU count up to 9, or MIRSAL_ANIM_WORKERS)")
     args = ap.parse_args(argv)
     out, inp, cfg, t0 = out_root(), input_root(), EngineConfig(), time.perf_counter()
+    if getattr(args, "workers", None):
+        from dataclasses import replace
+        cfg = replace(cfg, anim_workers=max(1, args.workers))
     if args.cmd == "doctor":
         return doctor()
+    if args.cmd == "recheck":
+        ids = pl.list_ids(out) if args.gid == "all" else [_gid(args.gid)]
+        tot = bad = 0
+        for gid in ids:
+            r = pl.recheck_bounds(out, gid, cfg)
+            tot += r["checked"]; bad += len(r["flagged"])
+            if r["checked"]:
+                print(f"G{gid:03d}: checked {r['checked']}, out of bounds: {', '.join('S' + str(i) for i in r['flagged']) or 'none'}")
+        print(f"{tot} animations checked, {bad} leave their cell and are now blocked for review")
+        return 0
+    if args.cmd == "profile":
+        return profile(out, _gid(args.gid), cfg, args.sweep)
     try:
         if args.cmd == "serve":
             from .console.server import serve
@@ -53,6 +73,43 @@ def main(argv=None) -> int:
     except pl.PipelineError as e:
         print(e)
         return 1
+
+
+def profile(out, gid, cfg, sweep: str) -> int:
+    """Where the time goes when a generation is animated: every cell, every stage (milliseconds), then the whole batch at each worker count.
+    Runs the real engine on the prepared source, without the result cache and without saving anything."""
+    import os
+    from dataclasses import replace
+    gid = gid or pl.latest_id(out)
+    res = pl.read_result(out, gid)
+    if not res["source"]["has_video"]:
+        print(f"G{gid:03d} has no prepared video."); return 1
+    cfg = pl.cfg_for(res, cfg)
+    cells = [s["index"] for s in res["stickers"] if s["status"] == "READY"]
+    src = res["source"]
+    print(f"G{gid:03d} {res['task_slug']}: {len(cells)} cells, source {'pre-sliced clips' if src.get('clips') else '3x3 mp4'} ({(src.get('video_info') or {}).get('size', '')}), "
+          f"{os.cpu_count()} CPUs, default workers {cfg.anim_workers}\n")
+    counts = [int(x) for x in sweep.split(",") if x.strip()] or [1, cfg.anim_workers]
+    stages = ["decode", "key", "bounds", "render", "seam", "encode", "probe", "verify"]
+    for n, w in enumerate(dict.fromkeys(counts)):
+        t0 = time.perf_counter()
+        results = sorted(pl.animate_cells(res, replace(cfg, anim_workers=w), cells), key=lambda r: r.index)
+        wall = time.perf_counter() - t0
+        if n == 0:
+            print("cell " + "".join(f"{x:>8}" for x in stages) + "   encodes   total  result")
+            tot = dict.fromkeys(stages, 0)
+            for r in results:
+                ms = r.metrics.get("ms", {})
+                for x in stages:
+                    tot[x] += ms.get(x, 0)
+                print(f"S{r.index:<3} " + "".join(f"{ms.get(x, 0):>8}" for x in stages) + f"   {ms.get('encodes', 0):>7}  {sum(ms.get(x, 0) for x in stages):>6}  {r.status}"
+                      + (f" {r.reason}" if r.reason else "") + (" (out of bounds)" if (r.report.get('inside_frame') and not r.report.get('inside_frame').ok) else ""))
+            grand = sum(tot.values()) or 1
+            print("sum  " + "".join(f"{tot[x]:>8}" for x in stages) + f"   {'':>7}  {grand:>6}   ms of work in total")
+            print("share" + "".join(f"{100 * tot[x] / grand:>7.0f}%" for x in stages) + "\n")
+            print(f"workers  wall time   (work / wall = how many cores were really busy)")
+        print(f"{w:>7}  {wall:>7.1f} s   {sum(sum(r.metrics.get('ms', {}).get(x, 0) for x in stages) for r in results) / 1000 / wall:>5.1f}x")
+    return 0
 
 
 def doctor() -> int:
@@ -77,7 +134,16 @@ def doctor() -> int:
     from .engine import verify
     tpl = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
     print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
+    from . import llm
+    print("OK      AI expansion: " + (f"on, model {llm.model()}" if llm.configured() else "off: add ANTHROPIC_API_KEY to mirsal/.env to let the AI expand a subject and name every sticker (the built-in sets are used meanwhile)"))
+    import os
+    print(f"OK      animation workers: {EngineConfig().anim_workers} of {os.cpu_count()} CPUs (MIRSAL_ANIM_WORKERS or serve --workers N changes it)")
     from . import telegram
+    try:
+        import ssl
+        ssl.create_default_context(); print("OK      TLS: system certificate store loads")
+    except ssl.SSLError as e:
+        telegram._ssl_context(); print(f"NOTE    TLS: this PC's certificate store has malformed entries ({e.reason}); Mirsal skips them, Telegram still works")
     t = telegram.status(out_root())
     print(f"OK      Telegram: connected as @{t['bot']} (user {t['user_id']})" if t["configured"] else "NOTE    Telegram: not connected (optional: Settings -> Telegram, or MIRSAL_TELEGRAM_TOKEN and MIRSAL_TELEGRAM_USER)")
     from . import sources

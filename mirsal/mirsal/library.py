@@ -28,13 +28,32 @@ from .engine.config import EngineConfig
 from .engine.sheet import encode_static
 from .prompter import slug
 
-# Export limits live here, not in the UI (adjust when a target changes).
-WA_STATIC_MAX = 100 * 1024
-WA_TRAY_MAX = 50 * 1024
+# Animated WebP download limit (the editor's WebP/GIF downloads; Telegram needs none of it).
 WA_ANIM_MAX = 500 * 1024
-WA_PACK_MIN, WA_PACK_MAX = 3, 30
 CUTOUT_MAX_SIDE = 1024
 GREEN_RING_MIN = 40      # median key-channel excess on the border ring that means "this is a green/blue screen"
+
+
+
+def readable_name(key: str) -> str:
+    """'generic_emojis_laughing' -> 'Generic emojis laughing' ({subject} {action}), what the user sees; the file name stays in `file_name`."""
+    t = " ".join(str(key).replace("-", " ").replace("_", " ").split())
+    return (t[:1].upper() + t[1:])[:60] or "Sticker"
+
+
+_GEN_NAME = re.compile(r"^(?:img|vid)-\d{3,}-[a-z0-9_]+-(?P<key>.+)$")
+
+
+def _legacy_names(db: dict) -> dict:
+    """Stickers added before the readable name existed carry the file-style name; move it to `file_name` and show the readable one."""
+    for p in db.get("packs", []):
+        for s in p.get("stickers", []):
+            if "file_name" not in s and (s.get("source") or {}).get("generation"):
+                m = _GEN_NAME.match(s.get("name", ""))
+                if m:
+                    s["file_name"] = s["name"]
+                    s["name"] = readable_name(m["key"])
+    return db
 
 
 class LibraryError(Exception):
@@ -188,11 +207,8 @@ def encode_frames(frames, fps: float, fmt: str, loop: bool, cfg: EngineConfig, i
             import tempfile
             with tempfile.TemporaryDirectory() as td:
                 out = Path(td) / "o.webm"
-                for crf in cfg.crf_ladder:
-                    ff.encode_webm(frames, fps, crf, out)
-                    data = out.read_bytes(); info["crf"] = crf
-                    if len(data) <= cfg.video_max_bytes:
-                        break
+                from .engine.video import _encode_fit            # the same fit the animations get: the best crf that is under the budget
+                info["crf"], data, _ = _encode_fit(frames, fps, cfg, out)
                 if len(data) > cfg.video_max_bytes:
                     raise LibraryError(f"{len(data) // 1024}KB is over the {cfg.video_max_bytes // 1024}KB limit even at the lowest quality; trim it or lower the frame rate")
             mime = "video/webm"
@@ -227,7 +243,7 @@ class Library:
         if not self.db_path.exists():
             return {"packs": []}
         try:
-            return json.loads(self.db_path.read_text(encoding="utf-8"))
+            return _legacy_names(json.loads(self.db_path.read_text(encoding="utf-8")))
         except ValueError:
             shutil.copy(self.db_path, self.db_path.with_suffix(".corrupt.json"))
             return {"packs": []}
@@ -315,7 +331,7 @@ class Library:
         s["checks"] = checks
         return s
 
-    def add_from_generation(self, out: Path, pid: str, gid: int, index: int, kind: str = "static") -> dict:
+    def add_from_generation(self, out: Path, pid: str, gid: int, index: int, kind: str = "static", name: str | None = None, emoji: str | None = None) -> dict:
         st = pl.state(out, gid)
         t = st["stickers"][index - 1]
         rel = t.get("webm") if kind == "animated" else t.get("png")
@@ -324,8 +340,70 @@ class Library:
         f = Path(out) / st["generation_id"] / rel
         if not f.is_file():
             raise LibraryError("sticker file is missing", 404)
-        return self.add_bytes(pid, f.read_bytes(), f.suffix.lstrip("."), t.get("name") or f.stem, kind, t.get("emoji") or "🙂",
-                              {"generation": st["generation_id"], "index": index})
+        s = self.add_bytes(pid, f.read_bytes(), f.suffix.lstrip("."), (name or "").strip()[:60] or readable_name(t.get("key") or f.stem), kind, (emoji or "").strip()[:20] or t.get("emoji") or "🙂",
+                           {"generation": st["generation_id"], "index": index})
+        return self.set_file_name(pid, s["id"], t.get("name") or f.stem)
+
+    def replace_file(self, pid: str, sid: str, data: bytes, ext: str) -> dict:
+        """New content for an existing sticker (same id, name, emoji, position, cover). A different extension renames the file (png -> webp)."""
+        with self.lock:
+            db = self._load(); p = self._pack(db, pid)
+            s = next((s for s in p["stickers"] if s["id"] == sid), None)
+            if not s:
+                raise LibraryError("no such sticker", 404)
+            fname = f"{Path(s['file']).stem}.{ext}"
+            (self.files / fname).write_bytes(data)
+            if fname != s["file"]:
+                self._unlink(db, s["file"]); s["file"] = fname
+            s["kb"] = max(1, len(data) // 1024); s["edited"] = time.time()
+            self._save(db)
+            return s
+
+    def refresh_from_generation(self, out: Path, gen_id: str, index: int, png: Path | None, webm: Path | None) -> int:
+        """A sticker edited in the Studio is the single source: every pack copy of that generation sticker takes the new file (static copies the image,
+        animated copies the animation). Names, emoji and order stay."""
+        with self.lock:
+            targets = [(p["id"], s["id"], s["type"]) for p in self._load()["packs"] for s in p["stickers"]
+                       if (s.get("source") or {}).get("generation") == gen_id and (s.get("source") or {}).get("index") == index]
+        n = 0
+        for pid, sid, kind in targets:
+            f = webm if kind == "animated" else png
+            if f and f.is_file():
+                self.replace_file(pid, sid, f.read_bytes(), f.suffix.lstrip(".")); n += 1
+        return n
+
+    def set_file_name(self, pid: str, sid: str, file_name: str) -> dict:
+        """The generator's file name (img-027-generic_emojis-generic_emojis_laughing) is kept as metadata, apart from the readable name."""
+        with self.lock:
+            db = self._load(); s = next(s for s in self._pack(db, pid)["stickers"] if s["id"] == sid)
+            s["file_name"] = file_name
+            self._save(db)
+            return s
+
+    def static_twins(self, pid: str, gen_id: str, indices: list[int]) -> list[dict]:
+        """The still stickers of this pack that came from the same sticker (generation + index) as the animated ones about to be added."""
+        with self.lock:
+            p = self._pack(self._load(), pid)
+        return [s for s in p["stickers"] if s["type"] == "static" and (s.get("source") or {}).get("generation") == gen_id and (s.get("source") or {}).get("index") in indices]
+
+    def replace_static_with_animated(self, pid: str, gen_id: str, indices: list[int]) -> int:
+        """Each animated sticker takes the place (position, cover) of its still twin and the still is deleted."""
+        with self.lock:
+            db = self._load(); p = self._pack(db, pid); n = 0
+            for i in indices:
+                src = lambda s: (s.get("source") or {}).get("generation") == gen_id and (s.get("source") or {}).get("index") == i
+                old = next((s for s in p["stickers"] if s["type"] == "static" and src(s)), None)
+                new = next((s for s in reversed(p["stickers"]) if s["type"] == "animated" and src(s)), None)
+                if not old or not new:
+                    continue
+                at = p["stickers"].index(old)
+                p["stickers"].remove(new); p["stickers"].remove(old)
+                p["stickers"].insert(at, new)
+                if p["cover"] == old["id"]:
+                    p["cover"] = new["id"]
+                self._unlink(db, old["file"]); n += 1
+            self._save(db)
+            return n
 
     def add_final(self, out: Path, pid: str, gid: int) -> dict:
         """G5 -> Library: add every sticker of the approved final pack (approved at G2 AND G4) as an animated sticker."""
@@ -355,6 +433,23 @@ class Library:
                 p["cover"] = p["stickers"][0]["id"] if p["stickers"] else None
             self._unlink(db, s["file"])
             self._save(db)
+
+    def delete_stickers(self, items: list[dict]) -> int:
+        """Bulk delete: items = [{pack_id, id}, ...]. One save; a cover that goes is replaced by the pack's first sticker."""
+        n = 0
+        with self.lock:
+            db = self._load()
+            for it in items:
+                p = next((p for p in db["packs"] if p["id"] == it.get("pack_id")), None)
+                s = next((s for s in (p or {}).get("stickers", []) if s["id"] == it.get("id")), None)
+                if not s:
+                    continue
+                p["stickers"].remove(s)
+                if p["cover"] == s["id"]:
+                    p["cover"] = p["stickers"][0]["id"] if p["stickers"] else None
+                self._unlink(db, s["file"]); n += 1
+            self._save(db)
+        return n
 
     def move_sticker(self, pid: str, sid: str, to: str) -> dict:
         """Move a sticker to another pack (file is renamed to the target pack's naming convention)."""
@@ -414,52 +509,3 @@ class Library:
                              {"from": s["id"], "trim": [info["start"], info["end"]], "fps": info["fps"]})
         new["info"] = info
         return new
-
-    # ---- export
-    def export_wastickers(self, pid: str, author: str = "Mirsal", cfg: EngineConfig | None = None) -> tuple[bytes, dict]:
-        """<pack>.wastickers = zip of title.txt, author.txt, tray.png (96x96), static 512x512 WebP <=100KB and animated WebP <=500KB.
-        The format sticker-import apps read. Animated stickers that cannot be converted (no ffmpeg/libwebp) are skipped and reported."""
-        cfg = cfg or EngineConfig()
-        with self.lock:
-            db = self._load(); p = self._pack(db, pid)
-        items = p["stickers"][:WA_PACK_MAX]
-        if len(p["stickers"]) < WA_PACK_MIN:
-            raise LibraryError(f"a WhatsApp pack needs at least {WA_PACK_MIN} stickers (this pack has {len(p['stickers'])})", 409)
-        bio, report = io.BytesIO(), {"stickers": 0, "skipped_animated": [], "files": []}
-        with zipfile.ZipFile(bio, "w", zipfile.ZIP_DEFLATED) as z:
-            z.writestr("title.txt", p["name"]); z.writestr("author.txt", author)
-            cover = next((s for s in items if s["id"] == p["cover"]), items[0])
-            if cover["type"] != "static":
-                cover = next((s for s in items if s["type"] == "static"), cover)
-            if cover["type"] == "static":
-                tray = Image.open(self.files / cover["file"]).convert("RGBA")
-            else:
-                f0 = ff.decode_full(self.files / cover["file"], 512, 512, 1, None)[0]
-                tray = Image.fromarray(f0, "RGBA")
-            tray = tray.resize((96, 96), Image.LANCZOS)
-            tb = io.BytesIO(); tray.save(tb, "PNG", optimize=True)
-            if tb.tell() > WA_TRAY_MAX:
-                raise LibraryError("tray icon is over 50KB")
-            z.writestr("tray.png", tb.getvalue())
-            for i, s in enumerate(items, 1):
-                stem = f"{i:02d}-{Path(s['file']).stem}"
-                if s["type"] == "animated":
-                    try:
-                        data, _, _, info = anim_export(self.files / s["file"], 0, cfg.video_max_seconds, 15, "webp", True, cfg)
-                    except LibraryError as e:
-                        report["skipped_animated"].append(f"{s['name']} ({e})"); continue
-                    z.writestr(stem + ".webp", data)
-                    report["files"].append({"name": s["name"], "kb": info["kb"], "quality": info.get("quality"), "animated": True})
-                    report["stickers"] += 1
-                    continue
-                im = Image.open(self.files / s["file"]).convert("RGBA")
-                for q in (90, 80, 70, 60, 50, 40, 30):
-                    b = io.BytesIO(); im.save(b, "WEBP", quality=q, method=4, exact=True)
-                    if b.tell() <= WA_STATIC_MAX:
-                        break
-                if b.tell() > WA_STATIC_MAX:
-                    raise LibraryError(f"'{s['name']}' cannot be compressed under 100KB")
-                z.writestr(stem + ".webp", b.getvalue())
-                report["files"].append({"name": s["name"], "kb": b.tell() // 1024, "quality": q})
-                report["stickers"] += 1
-        return bio.getvalue(), report

@@ -1,4 +1,4 @@
-"""Send a Library pack to Telegram (checkpoint 1H, phase_01.md Part H).
+"""Send a Library pack to Telegram (checkpoint 1H, Phase_01/README.md Part H).
 
 Bot API (createNewStickerSet / addStickerToSet / getStickerSet), stdlib only. Every sticker is judged by the verifier's `telegram`
 stage BEFORE any network call. A Telegram set holds one kind of sticker, so a mixed pack becomes two sets (video + static). Sending
@@ -134,7 +134,9 @@ def _scrub(text: str, token: str | None) -> str:
     return text.replace(token, "<token>") if token else text
 
 
-MAP = [("user not found", "Telegram does not know that user id yet: open your bot in Telegram, press Start, then try again."),
+MAP = [("can't initiate conversation", "Open your bot in Telegram and press Start, so it is allowed to message you."),
+       ("bot was blocked", "You blocked the bot in Telegram: unblock it so it can message you."),
+       ("user not found", "Telegram does not know that user id yet: open your bot in Telegram, press Start, then try again."),
        ("chat not found", "Telegram does not know that user id yet: open your bot in Telegram, press Start, then try again."),
        ("peer_id_invalid", "Telegram does not know that user id yet: open your bot in Telegram, press Start, then try again."),
        ("already occupied", "That pack name is already taken on Telegram. Choose another name."),
@@ -321,7 +323,24 @@ def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConf
         items = [{"sticker_id": sid, "file_unique_id": tg.get("file_unique_id")} for sid, tg in zip(ids, got.get("stickers", []))]
         lib.set_telegram(pid, st["kind"], {"kind": st["kind"], "name": st["name"], "link": f"https://t.me/addstickers/{st['name']}", "items": items})
         report.append({"kind": st["kind"], "name": st["name"], "link": f"https://t.me/addstickers/{st['name']}", "added": len(new), "total": len(st["items"])})
-    return {"sets": report, "warnings": p["warnings"], "bot": bot}
+    notified, notify_error = False, None
+    for st in report:
+        if st["added"]:
+            try:
+                notify(token, user, st)
+                notified = True
+            except TelegramError as e:           # the pack exists either way; only the message to the owner failed
+                notify_error = str(e)
+    return {"sets": report, "warnings": p["warnings"], "bot": bot, "notified": notified, "notify_error": notify_error}
+
+
+def notify(token: str, user: str, st: dict) -> None:
+    """Show the pack inside Telegram itself: the bot writes the owner the 'Add stickers' link and sends the pack's first sticker.
+    (A set made by a bot is not installed for anyone until its link is opened; this puts the link and a sticker in the owner's chat.)"""
+    _call(token, "sendMessage", {"chat_id": user, "text": f"Your sticker pack is ready ({st['total']} stickers): {st['link']}\nOpen the link and press Add Stickers."})
+    got = _call(token, "getStickerSet", {"name": st["name"]})
+    if got.get("stickers"):
+        _call(token, "sendSticker", {"chat_id": user, "sticker": got["stickers"][0]["file_id"]})
 
 
 # ---------- the no-credentials fallback: files to upload by hand to @stickers ----------

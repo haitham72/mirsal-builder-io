@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 
 import numpy as np
 
@@ -49,8 +50,11 @@ def has_vp9() -> bool:
         return False
 
 
+LOW_PRIORITY = 0x00004000 if sys.platform == "win32" else 0     # BELOW_NORMAL_PRIORITY_CLASS: children of a render batch yield to the rest of the PC
+
+
 def _run(args, **kw):
-    return subprocess.run([ffmpeg_exe(), "-hide_banner", *args], capture_output=True, **kw)
+    return subprocess.run([ffmpeg_exe(), "-hide_banner", *args], capture_output=True, creationflags=LOW_PRIORITY, **kw)
 
 
 def probe(path, vp9_native: bool = False) -> dict:
@@ -90,17 +94,16 @@ def encode_webm(frames_rgba: np.ndarray, fps: float, crf: int, out_path) -> None
          "-s", f"{w}x{h}", "-r", f"{fps}", "-i", "-", "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p",
          "-auto-alt-ref", "0", "-b:v", "0", "-crf", str(crf), "-deadline", "good", "-cpu-used", "4",
          "-row-mt", "1", "-an", str(out_path)],
-        input=np.ascontiguousarray(frames_rgba).tobytes(), capture_output=True)
+        input=np.ascontiguousarray(frames_rgba).tobytes(), capture_output=True, creationflags=LOW_PRIORITY)
     if p.returncode != 0:
         raise RuntimeError("encode failed: " + p.stderr.decode("utf-8", "replace")[-300:])
 
 
-def decode_alpha(webm, frames: int = 4) -> np.ndarray:
-    """Decode with libvpx-vp9 (the default vp9 decoder hides alpha, so probe-only checks lie)."""
+def decode_alpha(webm, frames: int = 4, wh: tuple | None = None) -> np.ndarray:
+    """Decode with libvpx-vp9 (the default vp9 decoder hides alpha, so probe-only checks lie). wh = (width, height) when the caller already knows it (saves an ffmpeg launch)."""
     p = _run(["-loglevel", "error", "-c:v", "libvpx-vp9", "-i", str(webm), "-frames:v", str(frames),
               "-f", "rawvideo", "-pix_fmt", "rgba", "-"])
-    probe_info = probe(webm)
-    w, h = probe_info["width"], probe_info["height"]
+    w, h = wh if wh else (lambda i: (i["width"], i["height"]))(probe(webm))
     n = len(p.stdout) // (w * h * 4) if w and h else 0
     return np.frombuffer(p.stdout[: n * w * h * 4], np.uint8).reshape(n, h, w, 4) if n else np.zeros((0, 1, 1, 4), np.uint8)
 
@@ -128,7 +131,7 @@ def encode_anim(frames_rgba: np.ndarray, fps: float, fmt: str, quality: int, loo
                      "-loop", "0" if loop else "-1", "-an", "-f", "gif", "-"]
     else:
         raise ValueError("format must be webp or gif")
-    p = subprocess.run([ffmpeg_exe(), *cmd], input=np.ascontiguousarray(frames_rgba).tobytes(), capture_output=True)
+    p = subprocess.run([ffmpeg_exe(), *cmd], input=np.ascontiguousarray(frames_rgba).tobytes(), capture_output=True, creationflags=LOW_PRIORITY)
     if p.returncode != 0 or not p.stdout:
         raise RuntimeError(f"{fmt} encode failed: " + p.stderr.decode("utf-8", "replace")[-300:])
     return p.stdout

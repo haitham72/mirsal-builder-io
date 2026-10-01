@@ -1,6 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+import os
+
+from dataclasses import dataclass, asdict, field
+
+
+def default_workers() -> int:
+    """Cells animated at the same time. MIRSAL_ANIM_WORKERS (or `serve --workers N`) overrides; lower it if the PC hits a limit (RAM, CPU, disk)."""
+    try:
+        n = int(os.environ.get("MIRSAL_ANIM_WORKERS", ""))
+    except ValueError:
+        n = 0
+    return max(1, n) if n else max(1, min(6, (os.cpu_count() or 4) // 2))
 
 
 @dataclass(frozen=True)
@@ -22,7 +33,8 @@ class EngineConfig:
     video_max_fps: float = 30.0
     video_max_seconds: float = 3.0
     video_max_bytes: int = 256 * 1024
-    crf_ladder: tuple = (30, 38, 46, 54, 60)
+    crf_ladder: tuple = (30, 34, 38, 42, 46, 50, 54, 58, 62)       # finer rungs: the fit lands closer to the 256 KB budget (measured 2026-10-01: crf 46 left 8-25% unused)
+    anim_workers: int = field(default_factory=default_workers)     # cells animated at the same time (each is keyed, rendered and encoded independently)
     loop_seam_max: float = 12.0     # absolute floor
     loop_seam_ratio: float = 1.5    # seam may be up to this x the clip's own frame-to-frame motion
     loop_fade_frames: int = 6
@@ -43,6 +55,7 @@ class EngineConfig:
     slot_edge_frac: float = 0.015   # inside_slot: edge band = this x the slot's short side (min 2 px)
     min_identity_iou: float = 0.5   # identity_kept: shape IoU of video frame 0 vs the approved still
     min_motion: float = 0.5         # motion_present: median frame-to-frame change
+    min_sharp_kept: float = 0.8     # sharpness: share of the edge detail that survives the encode (real: 1.00-1.03 at the budget)
     max_area_cv: float = 0.35       # alpha_stable: coefficient of variation of the subject area over the frames
     slot_fill: float = 0.55         # video sheet: the largest subject's longest side is at most this share of its slot (>= 22% margin)
     sheet_canvas: int = 2048        # video sheet canvas (square)
