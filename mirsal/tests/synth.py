@@ -26,7 +26,7 @@ def cell_art(i, size, seed, chroma="green", subj=YELLOW, t=0):
         cv2.circle(c, (cx, cy), 50, subj, -1, cv2.LINE_AA)
     elif i == 2:   # thin 2px outline
         cv2.circle(c, (cx, cy), 55, RED, 2, cv2.LINE_AA)
-        cv2.circle(c, (cx, cy), 30, subj, -1, cv2.LINE_AA)
+        cv2.circle(c, (cx, cy), 48, subj, -1, cv2.LINE_AA)   # tight to the ring: a wide gap would be an enclosed hole (verify.holes)
     elif i == 3:   # soft drop shadow
         sh = np.zeros(c.shape[:2], np.float32)
         cv2.circle(sh, (cx + 8, cy + 10), 50, 1.0, -1)

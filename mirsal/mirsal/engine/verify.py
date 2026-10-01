@@ -267,8 +267,9 @@ def _hole_share(alpha, min_px):
 
 @check("still", "holes", WARN)
 def holes(inp, cfg):
-    """Transparent regions enclosed by the subject's outer contour: a green part of the subject keyed away."""
-    share, n = _hole_share(inp["cell"].keyed.rgba[..., 3], cfg.min_component_px)
+    """Transparent regions enclosed by the subject's outer contour that survive the die-cut outline: a green part of the subject
+    keyed away. Measured on the finished sticker, so the gap inside a thin ring (which the outline closes) is not a hole."""
+    share, n = _hole_share(_img(inp)[..., 3], cfg.min_component_px)
     inp["metrics"]["holes"] = round(share, 4)
     sev = BLOCK if share > cfg.max_hole_share else WARN
     return _c("still", "holes", sev, share <= cfg.min_hole_share, round(share, 4), cfg.max_hole_share if sev == BLOCK else cfg.min_hole_share,
