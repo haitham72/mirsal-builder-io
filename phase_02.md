@@ -336,3 +336,15 @@ CREATE TABLE generation_events (
 - `video_sheets` with a `ticket` column: Phase 3's video API attaches its task id there instead of the manual upload.
 - `search` + `search_log`: Phase 3B adds vectors and Arabic keywords to the same query path instead of creating a second one.
 - Clean seams for Phase 3's LangSmith tracing: `pipeline.Stage` (one span per stage) and the review route (one feedback per decision). Phase 3 adds `trace_run_id` to `generation_events` and `reviews`.
+
+## Notes from building 1F + 1G (2026-10-01): exact shapes to import
+
+Written after the Phase 1 build so the migration matches what is on disk (README, "The golden path" and "The Inbox"):
+- **`history[]` per sticker** is `{ts, stage, actor, decision, reason, ref, detail}` with `stage` in `sheet | sliced | still | video_sheet | video | anim | pack`, `actor` in `python | human` (`vlm` from Phase 3), `decision` in `PASS | BLOCK | APPROVE | REJECT`, `ref` = the video sheet id (`A1`) where one applies, and `detail` = the failing check as `{check, value, limit, note, data}` (for `inside_slot`: `data.frame`, `data.over_px`). One entry becomes one `reviews` row; `detail` goes to `reviews.detail jsonb`. Generation-level decisions are in `result.reviews` (`plan`, `video_sheet{A1}`, `pack` with its `stickers[]`), each `{decision, by, ts, note}`: they become `reviews` rows with `sticker_id` NULL.
+- **Checks are stored on the result too:** `stickers[].report[]` and `anim_report[]` (`{name, ok, detail, severity, stage, value, limit, data}`), `verify.sheet[]`, `video_sheets[].verify[]` and `.video_checks[]`. `verify_version` is on the result. A `WARN` is a failing row with `severity: "WARN"`.
+- **`video_sheets[]`** holds `{id, slots, grid, file, layout, video, video_name, status, blocked, block, video_flags, video_info, canvas, video_prompt}`; status `VIDEO_BLOCKED` is new (the returned video failed `layout_match`/`video_specs`/`video_decodes` and nothing was sliced; the upload can be repeated). `layout.json` is `{canvas, key_rgb, grid, slots[{slot, sticker, rect, subject_rect, scale, subject_px}], verify_version}`.
+- **Files:** every still has an outline-free twin at `source/plain/S#.png` (the video sheet is built from it): store it as an `assets` row of kind `PLAIN_STICKER` next to the still.
+- **`tasks`:** `out/tasks/NNN.json` is `{id, number, provider, external_task_id, name_key, status, created, prompt, grid, style_id, folders{img,vid}, paths, request{template_id, template_version, slots, grid}, plan, plan_review, generations[]}`. Results carry `task_id`, `name_key`, `regen_of`, `template_id`, `template_version`, `slots`.
+- **Events** carry optional `actor` and `decision`; new stages: `plan_reviewed, stills_reviewed, video_sheet_built, video_sheet_reviewed, video_returned, video_flag, anim_reviewed, pack_final` and a per-decision `review` event with `detail {gate, index, note}`.
+- **`GET /api/search?q=`** exists as a file search; the Postgres search replaces its body, not the route or the row shape (`{generation, id, index, key, tags, name, task_slug, status, reason, review, anim_status, png, webm, emoji, final}`).
+

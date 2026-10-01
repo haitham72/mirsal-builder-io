@@ -120,7 +120,7 @@ RULES: same character, proportions, materials and lighting in every cell; full b
 - The Lint section is the slot reviewer's code half.
 - `extraction`, the content rules and the few-shot examples stay as they are.
 
-**Phase 1 adopts the shape now** (checkpoint 1F): `prompter.expand` fills the same slot JSON deterministically and renders the same template files, so Phase 3 swaps only the filler.
+**Phase 1 adopts the shape now** (checkpoint 1F): `prompter.expand` fills the same slot JSON deterministically and renders the same template files, so Phase 3 swaps only the filler. **Built 2026-10-01:** `mirsal/prompts/templates/{sheet_3x3,sheet_2x2,single_1x1,video}_v1.txt`, `prompter.render_plan(slots, template_id, version)` (the one function that turns slots into prompts) and `validate_plan`, which rebuilds the sheet and video prompts from `{template_id, template_version, slots}`. Per-cell `tags` (1-5, `tags[0]` = key) and the margin clause are in place; the Phase 3 lint checks the assembled text for the clause. The Inbox (`tasks.py`) already stores `request = {template_id, template_version, slots, grid}` on `out/tasks/NNN.json`.
 
 ### Original design (kept until the gate; superseded where the template note above differs)
 

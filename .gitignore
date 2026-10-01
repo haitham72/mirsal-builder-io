@@ -26,3 +26,7 @@ mirsal/mirsal/console/dist/
 # Browser-driver artifacts
 .playwright-mcp/
 /shot-*.png
+
+# Playwright E2E output
+mirsal/web/test-results/
+mirsal/web/playwright-report/

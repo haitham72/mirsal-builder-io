@@ -44,8 +44,8 @@ The phase has checkpoints 1A (static), 1B (animation), 1D (desktop builder, Part
 | 1B video + console video (pre-sliced clips) | **Built and tested on synthetic clips** (2 of 9 cells in the unit test, loop close proven). **Real video not yet passing end to end:** the first real run (before the seam-ratio and CRF-60 fixes) gave 1 READY, 6 `loop_seam`, 1 `size_budget`. **Waiting on Haitham's run** (frame processing is done on his PC while the VPS network block is sorted). |
 | 1C console | **Built**; see Part C. |
 | 1D desktop Sticker Builder | **Built, 25 tests green, headless-browser walk-through on synthetic data; waiting on Haitham's gate** (Part D). |
-| 1G gateway frontend (React) | **Not built. Added 2026-10-01.** Haitham's manual Higgsfield loop runs through it until Phase 3. See Part G. |
-| 1F golden path + review gates | **Not built. Added 2026-10-01 after Haitham's review; it is the spine of the product and the prerequisite for Phase 2.** See "Golden path" below. |
+| 1G gateway frontend (React) | **Built 2026-10-01** (Inbox, Generate + gates, Video sheet, History; 3 Playwright specs green). **Waiting on Haitham: one real loop** (Part G exit). Ports of Parts D/E (Library, Create, Editor, Pack manager, animated editor, Prepare) are not done: they stay on `/legacy`. |
+| 1F golden path + review gates | **Built 2026-10-01**, 90 unit tests green, synthetic scenario passes end to end. **Waiting on Haitham: a real teddy sheet through every gate** (his box in the 1F exit). It is the spine of the product and the prerequisite for Phase 2. See "Golden path" below. |
 
 ### Next steps (ordered)
 
@@ -56,7 +56,17 @@ The phase has checkpoints 1A (static), 1B (animation), 1D (desktop builder, Part
 - **`no_spill` misfired on subject colour**: 0 edge pixels, all interior. Interior key colour is now the `chroma_risk` warning. Follow-up: a saturated green part of a subject is keyed out completely and leaves an **enclosed transparent hole**, which `chroma_risk` cannot see. Add a `holes` metric (transparent regions enclosed by the subject's outer contour) before Phase 3's blue re-key relies on it.
 - The **Anaconda base env** has a mixed numpy 1.26/2.0 install that crashes onnxruntime. Always use `mirsal/.venv`.
 
-0. **Build checkpoints 1F (golden path + verifier) and 1G (the React gateway) before Phase 2,** in this order: `verify.py` (existing checks first, no behaviour change) → the 1F backend → the 1G screens. Phase 2 persists exactly the contracts 1F defines (tags, reviews, history, video sheets); building Postgres first would mean a second schema migration for the core flow.
+**Findings from building 1F + 1G (2026-10-01; kept until Haitham approves the gates):**
+- **`holes` first measured on the keyed cell and blocked a test fixture** (a thin ring with a wide gap round a disc: hole share 2.1). It is now measured on the finished sticker, where the 12 px outline closes small gaps; a ring with a really wide gap still BLOCKs. Decide with real stickers whether `max_hole_share` (0.30) is right; on the 10 real sheets the largest share is 0.074 before the outline and the check fired nothing after it.
+- **`duplicate_cell` and `single_subject` fired on none of the 90 real cells** (smallest cell-pair hash distance 5, `dup_hamming` is 4). They fire on the synthetic fixtures; real-sheet behaviour is a question for Haitham's first real run.
+- **`cross_slot` blames both sides** when one slot's character crosses into another's gutter (the intruder also trips its own `inside_slot`). Python's block is final, so this errs on the safe side; refining it needs per-frame identity tracking across slots and is left until real returned videos show whether it matters.
+- **A video sheet needs the outline-free sticker, so the pipeline now writes `source/plain/S#.png`** next to each still (rendered from the same keyed cell, recovery included), instead of re-keying later and risking a different result.
+- **`min_sheet_px` (1024) blocks the synthetic 600 px test sheets**, so the console tests construct the server with `EngineConfig(min_sheet_px=256)`. Production sheets are 2K.
+- **The synthetic fixture cell 2** (a 2 px ring round a disc) now hugs its ring; see the first finding.
+- **Claude-in-Chrome tools were not available** in the session that built 1G; the screens were walked in Playwright's Chromium (screenshots reviewed, zero console errors) and the same walk-through is a committed spec (`npm run e2e`).
+- **Not built, by design:** the VLM pre-review (Phase 3), Postgres (Phase 2), SSE (Phase 5A), mobile. The Inbox's task is a JSON file; Phase 2 imports it as a `tasks` row unchanged.
+
+0. **Build checkpoints 1F (golden path + verifier) and 1G (the React gateway) before Phase 2** *(built 2026-10-01; the gates stay open until Haitham's real runs)*, in this order: `verify.py` (existing checks first, no behaviour change) → the 1F backend → the 1G screens. Phase 2 persists exactly the contracts 1F defines (tags, reviews, history, video sheets); building Postgres first would mean a second schema migration for the core flow.
 0. **Rotation + inputs panel:** every Generate for a subject takes the next prepared variant (001..004, wrapping), img-NNN with vid-NNN; the console lists all prepared inputs with a Use button. Results written by older versions still render (the page used to go blank on them).
 0. **Done since the last review:** pre-sliced clip input (mov preferred), folder-per-variant pairing, key-failure branch (dissect -> key again -> rule out), click-to-enlarge carousel in the console. Measured: one real `.mov` cell -> READY 512x512 WEBM in ~17 s.
 1. **Haitham runs the real video pack** (`python -m mirsal serve` -> "Video -> full pack", or `python -m mirsal animate G001`) and reports per-cell `anim_reason`, `kb`, `loop_seam`, `loop_limit` from `result.json`. If cells still fail `loop_seam`, the answer is more crossfade frames (`loop_fade_frames`), not a looser limit.
@@ -260,19 +270,19 @@ def run(stage, inputs, cfg) -> list[Check]        # runs every check of that sta
 
 ### Checkpoint 1F — exit
 
-- [ ] `engine/verify.py` holds the whole catalogue above; moving the existing checks into it changes nothing on the 10 real sheets (90/90 READY, same reasons and metrics); every new check has a pass fixture and a fail fixture.
-- [ ] A synthetic end-to-end test reproduces the example exactly:
+- [x] `engine/verify.py` holds the whole catalogue above; moving the existing checks into it changes nothing on the 10 real sheets (90/90 READY, same reasons and metrics); every new check has a pass fixture and a fail fixture. *(done 2026-10-01: 38 checks over 7 stages; the move changed nothing on the 10 real sheets: identical status, reason, metrics and PNG hashes, 90/90 READY; pass and fail fixtures in `tests/test_verify.py`; measured thresholds in README)*
+- [x] A synthetic end-to-end test reproduces the example exactly: *(done: `tests/test_golden.py` through the API and `web/e2e/golden.spec.ts` from the page)*
   - G2 rejects 5 and 6, and the video sheet has 7 filled slots with 5 and 6 blank;
   - in a synthetic returned video, slots 1 and 2 drift over their slot edge, so 1 and 2 get an `inside_slot` BLOCK;
   - G4 approves the rest, and the final pack is 3, 4, 7, 8, 9;
   - every sticker's `history` tells its path.
-- [ ] `build_video_sheet` passes a golden-hash test. Blank slots are pure key colour, the sheet has no white outline, and the final WEBMs have the outline exactly once (alpha-ring test).
-- [ ] Prompter: every cell has 1–5 tags, the first one is the key, and the prompt contains the margin clause. Old prompts files without `tags` still load.
-- [ ] Gate order is enforced (409s). FAILED stickers cannot be approved. A decision can be changed until the next stage starts.
-- [ ] Console: every gate can be driven from the page (headless walk-through), with no dead buttons.
-- [ ] `subject_px_in_video` is recorded per slot (metric only).
-- [ ] A 2×2 synthetic sheet and a 1×1 single-sticker regen go through every gate; a sheet with off-third gutters is cut at the gutters (no `inside_cell` from the cut).
-- [ ] Prompter: `prompts.json` holds `{template_id, template_version, slots}` and the final prompt is rebuilt from the template file (`mirsal/prompts/templates/sheet_3x3_v1.txt`, `sheet_2x2_v1.txt`, `single_1x1_v1.txt`). The stub fills the slots deterministically; Phase 3 swaps only the filler.
+- [x] `build_video_sheet` passes a golden-hash test. Blank slots are pure key colour, the sheet has no white outline, and the final WEBMs have the outline exactly once (alpha-ring test). *(done; the alpha-ring test measures a 12 px outline once on the final WEBMs)*
+- [x] Prompter: every cell has 1–5 tags, the first one is the key, and the prompt contains the margin clause. Old prompts files without `tags` still load. *(done)*
+- [x] Gate order is enforced (409s). FAILED stickers cannot be approved. A decision can be changed until the next stage starts. *(done)*
+- [x] Console: every gate can be driven from the page (headless walk-through), with no dead buttons. *(done: Playwright, real Chromium, zero console errors)*
+- [x] `subject_px_in_video` is recorded per slot (metric only). *(done)*
+- [x] A 2×2 synthetic sheet and a 1×1 single-sticker regen go through every gate; a sheet with off-third gutters is cut at the gutters (no `inside_cell` from the cut). *(done)*
+- [x] Prompter: `prompts.json` holds `{template_id, template_version, slots}` and the final prompt is rebuilt from the template file (`mirsal/prompts/templates/sheet_3x3_v1.txt`, `sheet_2x2_v1.txt`, `single_1x1_v1.txt`). The stub fills the slots deterministically; Phase 3 swaps only the filler. *(done)*
 - [ ] **Haitham** runs it on a real teddy sheet:
   1. approve some stickers and reject some;
   2. build the video sheet;
@@ -677,10 +687,10 @@ The frontend is his **gateway** for that loop and for every 1F gate. Phase 5B's 
 - **Verification:** each screen is walked through in Chrome (the claude-in-chrome tools) on synthetic inputs, with screenshots and zero console errors, before it is called done.
 
 **Checkpoint 1G — exit:**
-- [ ] `npm run build` → `python -m mirsal serve` serves the React app; with no `dist/`, the legacy console still works.
-- [ ] Inbox: reserving a task shows the copyable prompt and folder names. Creating that folder with a sheet flips it to `sheet arrived` within one poll. A misnamed folder is flagged with the expected name.
-- [ ] The 1F synthetic scenario (reject 5, 6 → video blocks 1, 2 → final 3, 4, 7, 8, 9) can be driven entirely from the UI.
-- [ ] A Chrome walk-through of screens 1–4 with no console errors.
+- [x] `npm run build` → `python -m mirsal serve` serves the React app; with no `dist/`, the legacy console still works. *(done)*
+- [x] Inbox: reserving a task shows the copyable prompt and folder names. Creating that folder with a sheet flips it to `sheet arrived` within one poll. A misnamed folder is flagged with the expected name. *(done: flips within one 2 s poll)*
+- [x] The 1F synthetic scenario (reject 5, 6 → video blocks 1, 2 → final 3, 4, 7, 8, 9) can be driven entirely from the UI. *(done)*
+- [x] A Chrome walk-through of screens 1–4 with no console errors. *(done in Playwright's Chromium, screenshots reviewed; the Claude-in-Chrome tools were not available in that session, so Haitham's own look in Chrome is part of his box below)*
 - [ ] **Haitham** does one real loop: reserve → Higgsfield → name the files → run → gates → video sheet → Higgsfield video → upload → final pack.
 
 ---
