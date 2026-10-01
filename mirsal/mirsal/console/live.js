@@ -2,9 +2,9 @@
    and the cards that follow a running sheet / Kling job. Everything here calls a real endpoint (/api/higgsfield, /api/models, /api/usage, /api/live/*);
    the engine and the review gates are unchanged: a finished sheet runs through the same stills run, a video only starts from an approved video sheet. */
 'use strict';
-const LIVE={hf:null,m:null,style:'flat_vector',img:{id:'',options:{}},vid:{id:'',options:{}},jobs:[],est:{},loop:false,fill:null};
-try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[];LIVE.loop=!!s.loop;LIVE.fill=typeof s.fill==='number'?s.fill:null}}catch(e){}
-const lsave=()=>gstore('mirsal.live',JSON.stringify({style:LIVE.style,img:LIVE.img,vid:LIVE.vid,jobs:LIVE.jobs,loop:LIVE.loop,fill:LIVE.fill}));
+const LIVE={hf:null,m:null,style:'flat_vector',img:{id:'',options:{}},vid:{id:'',options:{}},jobs:[],est:{},loop:false,fill:null,q:[],typ:{},dis:[]};
+try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[];LIVE.loop=!!s.loop;LIVE.fill=typeof s.fill==='number'?s.fill:null;LIVE.dis=Array.isArray(s.dis)?s.dis:[]}}catch(e){}
+const lsave=()=>gstore('mirsal.live',JSON.stringify({style:LIVE.style,img:LIVE.img,vid:LIVE.vid,jobs:LIVE.jobs,loop:LIVE.loop,fill:LIVE.fill,dis:LIVE.dis.slice(-60)}));
 const fcr=n=>n==null?'?':(+n).toLocaleString(undefined,{maximumFractionDigits:2});
 const lkind=k=>k==='image'||k==='video'?k:(k==='sheet'||k==='single'?'image':'video');
 
@@ -95,7 +95,8 @@ const previewUrl=(g,f)=>`/api/generations/${g.number}/sheet_preview?fill=${f.toF
 function vgenBox(g){const vs=typeof sheetOf==='function'?sheetOf(g):null;
   if(vs&&['VIDEO_RETURNED','SLICED'].includes(vs.status))return`<div class="lv-vgen done"><span>${vs.status==='SLICED'?'Animated':'Video received'}${vs.video_info&&vs.video_info.width?` · ${vs.video_info.width}×${vs.video_info.height}`:''}</span></div>`;
   if(!liveReadyNow()||g.source.has_video||making(g))return'';
-  const run=LIVE.jobs.find(j=>j.kind==='video'&&j.gen===g.number&&!j.error);
+  const qj=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&QACTIVE.includes(j.status)),
+    run=LIVE.jobs.find(j=>j.kind==='video'&&j.gen===g.number&&!j.error)||(qj&&{model:(lfind('video',qj.model)||{label:qj.model||'the model'}).label,t0:(qj.claimed_at||qj.created_at)*1000});
   if(run)return`<div class="lv-vgen run"><div class=spin></div><span>Animating with ${esc(run.model)}…<small data-lvt="${run.t0}">${Math.round((Date.now()-run.t0)/1000)}s</small></span></div>`;
   const {model,sel}=lsel('video'),c=lcached('video'),f=fillNow();if(c===undefined)lcost('video',true).then(fillPrices);
   return`<div class=lv-vgen><select class=lv-vsel data-lvvid aria-label="Animation model">${LIVE.m.video.map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)}</option>`).join('')}</select>
@@ -113,13 +114,50 @@ function fillPrices(){const c=lcached('video');document.querySelectorAll('[data-
 ACT.lvgen=async el=>{el.disabled=true;const ok=await liveStart('video',{g:+el.dataset.g});if(!ok)el.disabled=false;glast='';if(typeof tick==='function')tick(true)};
 
 /* ---------- running jobs */
-function drawLive(){const el=document.getElementById('glive');if(!el)return;
-  el.innerHTML=LIVE.jobs.map(j=>`<div class="card lv-job ${j.error?'bad':''}">${j.error?'<span class=lv-x>!</span>':'<div class=spin></div>'}<div style="flex:1;min-width:0"><b>${j.error?'That did not work':j.kind==='sheet'?`Making the sheet with ${esc(j.model)}`:`Animating with ${esc(j.model)}`}</b>
-    <div class=mut>${esc(j.label)}${j.ai?' · AI-enhanced':''} · job ${esc(j.id)} · ${j.error?esc(j.error):`<span data-lvt="${j.t0}">${Math.round((Date.now()-j.t0)/1000)}s</span> · ${esc(j.status||'waiting for Higgsfield')} · ≈ ${fcr(j.est)} credits`}</div></div>
-    ${j.error?`<button class="btn sm" data-act=ljdismiss data-id="${esc(j.id)}">Dismiss</button>`:''}</div>`).join('')}
-ACT.ljdismiss=el=>{LIVE.jobs=LIVE.jobs.filter(j=>j.id!==el.dataset.id);lsave();drawLive()};
+/* The queue: every job the server knows, with its real state, so a long video can be followed (and survives a reload). Typical durations come from the ledger. */
+const QACTIVE=['REQUESTED','CLAIMED'];
+const mmss=sec=>{sec=Math.max(0,Math.round(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')};
+const hhmm=ts=>new Date(ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+function qRows(){const now=Date.now()/1000;
+  return(LIVE.q||[]).filter(j=>!LIVE.dis.includes(j.id)&&(QACTIVE.includes(j.status)&&now-(j.created_at||0)<86400||(j.completed_at||0)>now-900||(['FAILED','TIMEOUT'].includes(j.status)&&now-(j.created_at||0)<86400)))
+    .sort((a,b)=>(b.created_at||0)-(a.created_at||0)).slice(0,8)}
+function qState(j){const now=Date.now()/1000,typ=(LIVE.typ||{})[(j.kind==='video'?'video:':'image:')+j.model],started=j.claimed_at||j.created_at,el=(j.completed_at||now)-started,
+    num=j.generation?+String(j.generation).replace(/\D/g,''):null,g=num?GM.get(num):null;
+  if(j.status==='REQUESTED')return{t:'Waiting to start',pct:3,cls:'run',el};
+  if(j.status==='CLAIMED'){const dl=j.stage==='downloading',pct=dl?96:typ?Math.min(94,5+el/typ*89):null;
+    return{t:dl?'Downloading the result':'Higgsfield is working',pct,cls:'run',el,typ}}
+  if(j.status==='DONE'){
+    if(j.kind==='video'&&g){const n=g.stickers.filter(t=>t.status==='READY').length,doneN=g.stickers.filter(t=>['READY','FAILED'].includes(t.anim_status)).length,work=g.stickers.some(t=>['PROCESSING','STALE'].includes(t.anim_status));
+      if(work)return{t:`Cutting the animations: ${doneN} of ${n}`,pct:96+4*doneN/Math.max(1,n),cls:'run',el};
+      return{t:`Done · ${g.stickers.filter(t=>t.anim_status==='READY').length} of ${n} animated`,pct:100,cls:'done',el}}
+    return{t:j.kind==='sheet'?'Done · sheet received':'Done',pct:100,cls:'done',el}}
+  const why=String(j.error||''),hint=/nsfw/i.test(why)?'Higgsfield\'s content filter refused this request (status nsfw): change the wording':/\b50[0-4]\b|unavailable/i.test(why)?'Higgsfield had a temporary problem (HTTP 5xx)':why;
+  return{t:j.status==='TIMEOUT'?'Timed out waiting':'Failed: '+hint,pct:100,cls:'bad',el,retry:!/nsfw/i.test(why),ticket:!!j.external_task_id}}
+const QOPEN=(()=>{try{return localStorage.getItem('mirsal.qopen')==='1'}catch(e){return false}})();
+let QO=QOPEN;
+function ensureQueue(){let el=document.getElementById('lvqueue');if(!el){el=document.createElement('aside');el.id='lvqueue';document.body.appendChild(el)}return el}
+function qRow(j){const st=qState(j),m=lfind(j.kind==='video'?'video':'image',j.model),lab=(j.request&&j.request.label)||'',
+    opts=j.params?Object.entries(j.params).filter(([k])=>!['aspect_ratio','sound'].includes(k)).map(([k,v])=>k==='duration'?v+' s':v).join(' · '):'';
+  return`<div class="lv-qr ${st.cls}"><span class=lv-qi>${ic(j.kind==='video'?'film':'photo')}</span><div class=lv-qm>
+    <b>${j.kind==='video'?'Animation':'Sheet'}${lab?` · “${esc(lab.length>34?lab.slice(0,34)+'…':lab)}”`:''}</b>
+    <div class=lv-qbar>${st.pct==null?'<i class=ind></i>':`<i style="width:${st.pct.toFixed(0)}%"></i>`}</div>
+    <small><span class=lv-qs>${esc(st.t)}</span>${st.cls==='run'||st.cls==='done'?` · ${mmss(st.el)}${st.typ&&j.status==='CLAIMED'?` of about ${mmss(st.typ)}`:''}`:''}</small>
+    <small class=mut>${esc(j.id)} · ${esc(m?m.label:(j.model||''))}${opts?' · '+esc(opts):''}${j.cost||j.cost_estimate?` · ◈ ${fcr(j.cost||j.cost_estimate)}`:''} · ${hhmm(j.claimed_at||j.created_at)}${j.generation?` · ${esc(j.generation)}`:''}${j.external_task_id?` · <code>${esc(String(j.external_task_id).slice(0,8))}</code> <button class=link data-act=qcopy data-t="${esc(j.external_task_id)}">copy id</button>`:''}</small>
+    </div>${st.retry?`<button class="btn sm" data-act=qretry data-id="${esc(j.id)}" title="${st.ticket?'Wait for the same Higgsfield job again: no second charge':'Send it again'}">Retry</button>`:''}${QACTIVE.includes(j.status)?'':`<button class="iconbtn" data-act=ljdismiss data-id="${esc(j.id)}" title="Remove from the list">${ic('x')}</button>`}</div>`}
+function drawLive(){const el=ensureQueue(),rows=qRows();
+  if(!rows.length){el.innerHTML='';el.className='';return}
+  const run=rows.filter(j=>QACTIVE.includes(j.status)),bad=rows.filter(j=>qState(j).cls==='bad').length,first=run[0],fs=first&&qState(first);
+  const head=run.length?`<span class=spin></span><span><b>${run.length} running</b><small>${first.kind==='video'?'Animation':'Sheet'} · ${esc(fs.t)} · ${mmss(fs.el)}${fs.typ&&first.status==='CLAIMED'?` of ~${mmss(fs.typ)}`:''}</small></span>`
+    :`<span class="lv-dot ${bad?'bad':'ok'}"></span><span><b>Queue</b><small>${bad?`${bad} failed`:'all done'}</small></span>`;
+  el.className='on'+(QO?' open':'');
+  el.innerHTML=`<button class=lv-qhead data-act=qtoggle aria-expanded=${QO}>${head}<i class=lv-caret></i></button>${QO?`<div class=lv-qlist>${rows.map(qRow).join('')}</div>`:''}`}
+ACT.qtoggle=()=>{QO=!QO;try{localStorage.setItem('mirsal.qopen',QO?'1':'0')}catch(e){}drawLive()};
+async function qRefresh(){const r=await api('/api/jobs');if(r.ok){LIVE.q=r.j.jobs;LIVE.typ=r.j.typical||{}}drawLive();if(typeof cpDrawTop==='function')cpDrawTop()}
+ACT.qretry=async el=>{const r=await post(`/api/jobs/${el.dataset.id}/retry`);if(!r.ok)return toast(r.j.error||'Could not retry',1);toast('Retrying '+el.dataset.id);LIVE.dis=LIVE.dis.filter(x=>x!==el.dataset.id);qRefresh()};
+ACT.qcopy=async el=>{try{await navigator.clipboard.writeText(el.dataset.t);toast('Higgsfield job id copied')}catch(e){toast('Copy failed',1)}};
+ACT.ljdismiss=el=>{LIVE.dis.push(el.dataset.id);LIVE.jobs=LIVE.jobs.filter(j=>j.id!==el.dataset.id);lsave();drawLive()};
 let LTB=false;
-async function liveTick(){if(LTB||!LIVE.jobs.length)return;LTB=true;try{
+async function liveTick(){if(LTB)return;LTB=true;try{
   for(const j of [...LIVE.jobs]){if(j.error)continue;const r=await api('/api/jobs/'+j.id);if(!r.ok){if(r.status===404){LIVE.jobs=LIVE.jobs.filter(x=>x.id!==j.id)}continue}
     const s=r.j;j.status=s.status==='REQUESTED'?'starting':s.status==='CLAIMED'?'Higgsfield is working':s.status.toLowerCase();
     if(s.status==='FAILED'||s.status==='TIMEOUT'){j.error=s.error||s.status.toLowerCase();refreshHf()}
@@ -130,14 +168,16 @@ async function liveTick(){if(LTB||!LIVE.jobs.length)return;LTB=true;try{
         for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();location.hash='#/studio';histReload()}
       else{GS.tab='anim';glast=''}
       if(typeof tick==='function')tick(true)}}
-  lsave();drawLive()}finally{LTB=false}}
+  lsave();await qRefresh()}finally{LTB=false}}
 setInterval(liveTick,2500);
-setInterval(()=>{document.querySelectorAll('[data-lvt]').forEach(e=>e.textContent=Math.round((Date.now()-(+e.dataset.lvt))/1000)+'s')},1000);
+setInterval(()=>{document.querySelectorAll('[data-lvt]').forEach(e=>e.textContent=Math.round((Date.now()-(+e.dataset.lvt))/1000)+'s');if(qRows().some(j=>QACTIVE.includes(j.status)||qState(j).cls==='run'))drawLive()},1000);
 
 /* ---------- start-up and hooks into the Studio screen */
 const _rg=RENDER.generate;
 const showPanel=()=>{typeof composerMount==='function'?composerMount():livePanel();ensureBars();histReload();drawEdge()};
 RENDER.generate=async function(){await _rg.apply(this,arguments);showPanel();drawLive()};
+setInterval(()=>{if(qRows().some(j=>QACTIVE.includes(j.status)))drawLive()},1000);
+qRefresh();
 async function liveInit(){const [m,h]=await Promise.all([api('/api/models'),api('/api/higgsfield')]);if(m.ok){LIVE.m=m.j;if(!m.j.styles.some(s=>s.id===LIVE.style))LIVE.style=m.j.default_style;lsel('image');lsel('video')}
   if(h.ok)LIVE.hf=h.j;drawChip();if(route_==='generate'){showPanel();drawLive()};liveTick()}
 setInterval(refreshHf,20000);
@@ -149,7 +189,7 @@ liveInit();
 const EG={outline:null,erode:null,busy:false,dirty:false,final:false,drag:false};
 const edgeBatches=()=>typeof included==='function'?included().filter(g=>g.stickers.some(t=>t.status==='READY')):[];
 function ensureBars(){const g=document.querySelector('.gen2');if(!g)return;
-  if(!document.getElementById('gedge')){const e=document.createElement('div');e.id='gedge';const ref=document.getElementById('glive');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
+  if(!document.getElementById('gedge')){const e=document.createElement('div');e.id='gedge';const ref=document.getElementById('gres');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
   if(!document.getElementById('ghist')){const h=document.createElement('section');h.id='ghist';g.appendChild(h)}}
 function drawEdge(){const el=document.getElementById('gedge');if(!el)return;const gs=edgeBatches();
   if(!gs.length){el.innerHTML='';el.removeAttribute('data-built');return}
@@ -186,7 +226,7 @@ async function histLoad(more){if(HB.loading)return;HB.loading=true;
   if(r.ok){HB.items=more?HB.items.concat(r.j.items):r.j.items;HB.more=r.j.more;HB.total=r.j.total}drawHist();if(typeof cpDrawTop==='function')cpDrawTop()}
 const histReload=()=>histLoad(false);
 const histItem=it=>`<button class="lv-hitem ${SES.gens.includes(it.id)?'on':''}" data-act=hopen data-id=${it.id}><span class=lv-hth>${it.thumbs.map(u=>`<img src="/out/${esc(it.generation_id)}/${esc(u)}" loading=lazy alt="">`).join('')}</span>
-  <span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' ')))}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · ${ago(it.created)}</small></span></button>`;
+  <span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' ')))}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}</small></span></button>`;
 function drawHist(){const el=document.getElementById('ghist');if(!el)return;
   if(!HB.items.length){el.innerHTML='';return}
   el.innerHTML=`<div class=lv-hh><h2>Earlier batches</h2><span class=mut>${HB.total} in total</span></div><div class=lv-hlist>${HB.items.map(histItem).join('')}</div>
