@@ -209,3 +209,64 @@ a.btn{text-decoration:none;color:inherit}a.btn.pri{color:#fff}
 .sgrid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr);gap:18px;align-items:start}.sbox{position:relative;border-radius:14px;overflow:hidden;background:#0a0}.sbox img{display:block;width:100%}.sbox svg{position:absolute;inset:0;width:100%;height:100%}
 .sside h3{margin:0 0 6px;font-size:14px}.stbl{width:100%;border-collapse:collapse;font-size:12px}.stbl th,.stbl td{text-align:left;padding:3px 6px;border-bottom:1px solid var(--bd)}
 @media (max-width:900px){.sgrid{grid-template-columns:1fr}}
+
+/* ---- Generate: green-screen sheet beside the stickers, Plan tab, live prompt preview (ported from the React app) ---- */
+.gbody{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.gsheet{position:sticky;top:8px;background:var(--fill);border-radius:20px;padding:12px}
+.gshead{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px}.gshead .tabs{margin:0;gap:4px}.gshead .tab{padding:3px 11px;font-size:12px}.gspace{flex:1}
+.gcut{font-size:11.5px;font-weight:600;border-radius:6px;padding:1px 7px;background:#fef3c7;color:#92400e}.gcut.ok{background:#dcfce7;color:#166534}
+.gsheet .sbox{border-radius:12px}.gsfoot{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:11.5px}.gsfoot .link{margin-left:auto;white-space:nowrap}.gshead b,.gcut{white-space:nowrap}
+@media (max-width:1000px){.gbody{grid-template-columns:1fr}.gsheet{position:static}}
+.gplan,.gpv{background:var(--sf);border:1px solid var(--bd);border-radius:20px;box-shadow:var(--sh);padding:16px}
+.gpv{margin:12px 4px 0;padding:10px 16px}.gpv summary{cursor:pointer;font-weight:600;font-size:13.5px}.gpv summary .mut{font-weight:500;margin-left:8px}.gpv[open] summary{margin-bottom:10px}
+.pcols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+.pbox{margin-bottom:12px}.pbh{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:13px}.pbox textarea{width:100%;font:12px/1.45 ui-monospace,Consolas,monospace;background:var(--fill);border:0;border-radius:12px;padding:10px;resize:vertical}
+.pcells{list-style:none;margin:0;padding:0;display:grid;gap:8px}.pcells li{border:1px solid var(--bd);border-radius:12px;padding:8px 12px;font-size:12.5px}.pcells li b{font-size:13px}
+.ptags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.ptags span{background:var(--pri-l);color:var(--pri-d);border-radius:6px;padding:0 7px;font-size:11.5px;font-weight:600}
+@media (max-width:900px){.pcols{grid-template-columns:1fr}}
+.sbox.bg-checker{background:conic-gradient(#e9edf1 25%,#fbfcfd 0 50%,#e9edf1 0 75%,#fbfcfd 0) 0 0/18px 18px}.sbox.bg-light{background:#fff}.sbox.bg-dark{background:#111827}.sbox.bg-wall{background:linear-gradient(135deg,#f6b26b,#6fa8dc 40%,#93c47d 70%,#c27ba0)}
+/* ---- Generate header (Request > Prompt > Stickers > Animation > Pack) and out-of-bounds tiles ---- */
+.gsteps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--fill);border-radius:18px;overflow:hidden;margin:0 4px 16px}
+.gst{display:flex;align-items:center;gap:10px;padding:12px 16px;border:0;border-left:1px solid #fff;background:none;text-align:left;font:inherit;min-width:0}.gst:first-child{border-left:0}
+button.gst{cursor:pointer}button.gst:hover{background:#ffffff80}
+.gsm{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:#fff;color:var(--mut);border:2px solid var(--bd)}
+.gsm svg{width:15px;height:15px}.gsm .spin{width:16px;height:16px;border-width:2px}
+.gst.done .gsm{background:var(--ok);border-color:var(--ok);color:#fff}.gst.run .gsm{border-color:var(--pri-l2)}.gst.warn .gsm{background:#fef3c7;border-color:#f59e0b;color:#92400e}
+.gsl{min-width:0;display:flex;flex-direction:column}.gsl b{font-size:14px}.gsl small{color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gst.warn .gsl small{color:#92400e}
+@media (max-width:900px){.gsteps{grid-template-columns:repeat(2,1fr)}}
+/* issue colours (generate.js CAT): --cc is the colour of the tile's main problem. Hatched = not in the set, light outline = kept with a check */
+.gt.iss{border-color:var(--cc);box-shadow:0 0 0 2px color-mix(in srgb,var(--cc) 25%,transparent)}.gt.iss .gtv{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--cc) 24%,transparent) 0 10px,transparent 10px 20px)}
+.gt.issw{border-color:color-mix(in srgb,var(--cc) 65%,#fff)}.gt.blk .gx{background:var(--pri);color:#fff}
+.isstag{position:absolute;left:0;right:0;bottom:0;background:var(--cc);color:var(--ct,#fff);font-size:12px;font-weight:700;text-align:center;padding:4px 0;pointer-events:none}
+.giss{margin-top:2px;font-size:12.5px;color:color-mix(in srgb,var(--cc) 60%,#000)}.giss i,.lgd i,.cdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--cc);margin-right:6px;flex:none}.gincl{margin-top:6px}
+.lgrow{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:11.5px}.lgd{display:inline-flex;align-items:center;color:color-mix(in srgb,var(--cc) 55%,#000);font-weight:600}.lgnote{margin-top:2px;font-size:11px}
+/* ---- bulk select (square marker), pack wizard, header steps as tabs ---- */
+.cell .selbox{position:absolute;left:7px;top:7px;width:20px;height:20px;border:2px solid #fff;border-radius:6px;background:#0000002e;box-shadow:0 0 0 1px #0005;cursor:pointer;z-index:3;opacity:0;transition:opacity .12s;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.cell:hover .selbox,.selmode .cell .selbox,.cell .selbox.on{opacity:1}.cell .selbox.on{background:var(--pri);border-color:var(--pri)}.cell .selbox.on::after{content:'¹3'}
+.cell.sel{outline:3px solid var(--pri);outline-offset:-3px}.cell .badge2{left:34px}
+.selbar{display:flex;align-items:center;gap:14px;margin:6px 0 12px;padding:8px 14px;background:var(--pri-l);border-radius:14px;position:sticky;top:0;z-index:5}.selbar b{margin-right:auto}
+.gst.cur{background:#fff;box-shadow:inset 0 -3px 0 var(--pri)}.gst:disabled{opacity:.55;cursor:default}
+.pw{width:auto}.dbox:has(.pw){width:min(1010px,96vw);overflow-x:hidden}
+.pwgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;margin-top:12px;align-items:start}
+.pwstep{display:flex;align-items:center;gap:8px;margin:0 0 8px}.pwn{width:22px;height:22px;border-radius:50%;background:var(--pri);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.pwtw{background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:13px}.pwtw .radio{display:flex;gap:8px;margin:6px 0 0}
+.pwprev{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;padding:12px;border-radius:14px;max-height:330px;overflow:auto}
+.pwprev div{aspect-ratio:1;position:relative}.pwprev img,.pwprev video{width:100%;height:100%;object-fit:contain}.pwprev span{position:absolute;right:2px;bottom:0;font-size:14px}
+.pwrows{max-height:440px;overflow:auto;padding-right:4px}.pwrow{display:flex;gap:10px;align-items:center;margin-bottom:8px}.pwth{width:46px;height:46px;flex:none;border-radius:10px;background:var(--fill);padding:3px}.pwth img,.pwth video{width:100%;height:100%;object-fit:contain}
+.pwfields{display:flex;gap:6px}.pwfields input{padding:6px 10px}.pwfields .pwemo{width:64px;flex:none;text-align:center}.pwrow small{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:900px){.pwgrid{grid-template-columns:1fr}}
+/* ---- Animation view: video sheet panel, cell chips; box selection ---- */
+.vchips{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 8px}
+.vchip{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--bd);background:#fff;font-weight:700;font-size:12px;padding:0;color:var(--mut)}
+.vchip.ok{background:#dcfce7;border-color:#86efac;color:#166534}
+.vchip.iss{background:color-mix(in srgb,var(--cc) 18%,#fff);border-color:var(--cc);color:color-mix(in srgb,var(--cc) 55%,#000)}.vchip.iss:not(.soft){background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--cc) 38%,transparent) 0 3px,transparent 3px 6px)}.vchip.iss.soft{border-style:dashed}
+.vchip.busy{background:var(--pri-l);border-color:var(--pri);color:var(--pri-d)}.vchip.skip{opacity:.45}
+.vkv{margin:8px 0;font-size:12px}.gsheet .sbox video{max-width:100%}
+.animdlg .stbl{font-size:11.5px}.animdlg .stbl th,.animdlg .stbl td{white-space:nowrap}
+.marquee{position:fixed;z-index:60;border:1px solid var(--pri);background:#3b82f633;border-radius:3px;pointer-events:none}
+body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:transparent}.cell.msel{outline:3px solid var(--pri);outline-offset:-3px}
+.animdlg .sgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}.animdlg .stbl th{white-space:normal;vertical-align:bottom}.dbox:has(.animdlg){overflow-x:hidden}
+
+/* sticker detail: the path (every decision) */
+.hrow{font-size:12.5px;padding:3px 0;border-bottom:1px solid var(--bd)}.hrow:last-child{border-bottom:0}

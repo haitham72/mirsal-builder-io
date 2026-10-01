@@ -3,7 +3,7 @@
 'use strict';
 Object.assign(ICONS,{trim:'<path d="M7 4v16M17 4v16M7 12h10"/>',gif:'<rect x="3" y="6" width="18" height="12" rx="3"/><path d="M9.5 10.5a2 2 0 100 3M12.5 10v4M15 14v-4h2"/>',wand:'<path d="M5 19L17 7l2 2L7 21z"/><path d="M14 4v3M12.5 5.5h3M19 12v2M18 13h2"/>',film:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9h16M4 15h16M9 4v16M15 4v16"/>'});
 const PV_FONTS=['Inter','Segoe UI','Arial','Georgia','Impact','Trebuchet MS','Courier New'],PV_EMOJI=EMOJIS,CAP_S=3,GIF_CAP_S=10;
-const P={id:null,p:null,n:0,imgs:[],masks:{},keyed:{},t:0,playing:true,tool:'trim',sel:null,drag:null,undo:[],redo:[],busy:false,bg:'checker',token:0,saved:'saved',last:0,stk:{},timer:null,calib:null,out:''};
+const P={studio:null,packEdit:null,id:null,p:null,n:0,imgs:[],masks:{},keyed:{},t:0,playing:true,tool:'trim',sel:null,drag:null,undo:[],redo:[],busy:false,bg:'checker',token:0,saved:'saved',last:0,stk:{},timer:null,calib:null,out:''};
 const pms=s=>Math.round(s*1000),pfs=ms=>(ms/1000).toFixed(2);
 const pdur=()=>P.p.source.duration*1000,pfrm=t=>Math.max(0,Math.min(P.n-1,Math.floor(t/1000*P.p.source.previewFps)));
 const pL=()=>P.p.layers.find(l=>l.id===P.sel);
@@ -13,6 +13,8 @@ const pfmt=()=>P.p.export.format;
 async function importVideo(f){toast('Reading the video…');
  const r=await fetch('/api/projects?name='+encodeURIComponent(f.name),{method:'POST',body:f});let j={};try{j=await r.json()}catch(e){}
  if(!r.ok)return toast(j.error||'import failed',1);location.hash='#/prepare/'+j.id}
+async function editAnimatedSticker(pack_id,sticker_id){const r=await post('/api/projects/from_sticker',{pack_id,sticker_id});if(!r.ok)return toast(r.j.error,1);
+  P.packEdit={pack_id,sticker_id,project:r.j.id};P.studio=null;location.hash='#/prepare/'+r.j.id}
 ACT.anproject=async()=>{const r=await post('/api/projects/from_sticker',{pack_id:A.pid,sticker_id:A.sid});if(!r.ok)return toast(r.j.error,1);location.hash='#/prepare/'+r.j.id};
 ACT.openproj=el=>{location.hash='#/prepare/'+el.dataset.id};
 ACT.delproj=el=>confirmDlg('Delete this video project and its source?',async()=>{const r=await post(`/api/projects/${el.dataset.id}/delete`);if(!r.ok)toast(r.j.error,1);RENDER.create()});
@@ -22,6 +24,7 @@ RENDER.prepare=async id=>{const el=$('s-prepare');await loadLib();
  if(!id){el.innerHTML='<div class=pnl style="margin:40px auto;padding:40px;width:420px;align-self:flex-start;text-align:center"><h2>No video open</h2><p class=mut>Create → drop a video or GIF.</p><button class="btn pri" data-act=nav data-to=create>Create</button></div>';return}
  if(P.id===id&&P.p){pdraw();return}
  const r=await api('/api/projects/'+id);if(!r.ok){el.innerHTML=`<div class=pnl style="margin:40px auto;padding:40px;width:420px;align-self:flex-start"><h2>Project not found</h2><button class="btn pri" data-act=nav data-to=create>Create</button></div>`;return}
+ if(P.studio&&P.studio.project!==id)P.studio=null;if(P.packEdit&&P.packEdit.project!==id)P.packEdit=null;
  const tk=++P.token;Object.assign(P,{id,p:r.j,t:r.j.video.trimStartMs,playing:true,tool:'trim',sel:null,undo:[],redo:[],keyed:{},masks:{},saved:'saved',out:'',stk:{}});
  P.n=P.p.source.frames;P.imgs=[];let ok=0;
  for(let i=0;i<P.n;i++){const im=new Image();im.onload=()=>{ok++};im.src=`/proj/${id}/f/${i}`;P.imgs.push(im)}
@@ -76,7 +79,7 @@ function pdraw(){if(route_!=='prepare'||!P.p)return;const p=P.p,el=$('s-prepare'
  if(!$('pcv')){el.innerHTML=`<div class="an-l pnl" id=pl></div><div class=an-c><div class="an-pv pnl"><div class="stage bg-${P.bg}" id=pstage><canvas id=pcv width=512 height=512></canvas></div></div>
   <div class=pnl style="padding:8px"><div class=an-ctl id=pctl></div></div><div class="tl pnl" id=ptl></div></div><div class="an-r pnl" id=pr></div>`;LASTSNAP=snap();bindTl()}
  $('pstage').className='stage bg-'+P.bg;
- $('pl').innerHTML=`<div class=row style="margin:0 0 6px"><button class="btn sm" data-act=nav data-to=create>${ic('back')} Create</button></div>
+ $('pl').innerHTML=`<div class=row style="margin:0 0 6px">${P.studio?`<button class="btn sm" data-act=pstudioback>${ic('back')} Studio</button>`:P.packEdit?`<button class="btn sm" data-act=ppackback>${ic('back')} Pack</button>`:`<button class="btn sm" data-act=nav data-to=create>${ic('back')} Create</button>`}</div>
   <div class=ph style="padding:0 4px">${ic('film')} <input type=text id=pname value="${esc(p.name)}" style="border:0;background:none;font-weight:600;width:170px"></div>
   <div class=ptools>${PTOOLS.map(([k,i,l])=>`<button class="tool ${P.tool===k?'on':''}" data-act=ptool data-t=${k}>${ic(i)}<span>${l}</span></button>`).join('')}</div>
   <div class=ph style="margin:14px 4px 6px">Layers</div><div class=frl>${[...p.layers].sort((a,b)=>b.zIndex-a.zIndex).map(L=>`<div class="lay ${L.id===P.sel?'on':''}" data-act=psel data-id=${L.id}><span class=th>${L.type==='emoji'?esc(L.payload.char):L.type==='text'?ic('text'):ic('sticker')}</span><span class=nm>${esc(L.type==='text'?String(L.payload.text||'').split('\n')[0]||'Text':L.type==='emoji'?'Emoji':'Sticker')}${L.timing?` <small class=mut>${pfs(L.timing.startMs)}–${pfs(L.timing.endMs)}s</small>`:''}</span>
@@ -129,11 +132,16 @@ function pright(soft){if(!$('pr'))return;const p=P.p,tool=P.tool,L=pL(),rm=p.vid
   if(q)h+=pinsp(L)}
  else if(tool==='emoji'){h=`<div class=ph>Emoji</div><div class=emo>${PV_EMOJI.map(c=>`<button data-act=paddemoji data-c="${c}">${c}</button>`).join('')}</div>`;if(L&&L.type==='emoji')h+=fld('Size',rng('size',L.payload.size,40,300,4))+pinsp(L)}
  else if(tool==='sticker'){const sts=LIB.packs.flatMap(k=>k.stickers).filter(s=>s.type==='static');h=`<div class=ph>Sticker</div><div class=mut style="margin-bottom:8px;font-size:12px">Add one of your static stickers on top of the video.</div><div class=emo>${sts.map(s=>`<button data-act=paddstk data-f="${esc(s.file)}" title="${esc(s.name)}"><img src="/lib/${encodeURIComponent(s.file)}" style="width:100%"></button>`).join('')||'<span class=mut>No static stickers yet.</span>'}</div>`;if(L&&L.type==='sticker')h+=fld('Size',rng('size',L.payload.size,60,512,4))+pinsp(L)}
- const e=p.export;h+=`<div class=ph style="margin-top:20px;border-top:1px solid var(--bd);padding-top:14px">Export</div>
+ const e=p.export;
+ if(P.studio)h+=`<div class=ph style="margin-top:20px;border-top:1px solid var(--bd);padding-top:14px">Save</div><div class=mut style="font-size:12px;margin-bottom:8px">Your layers live in the Studio on top of the original animation. <b>Save to sticker</b> exports them to the animation <b>and</b> the image together (text shows in the image whenever it is visible), updates its copies in packs, and goes back to the Studio.</div>
+  <div class=row><button class="btn pri" data-act=pstudiosave style="flex:1;justify-content:center" ${P.busy?'disabled':''}>${ic('check')} ${P.busy?'Saving…':'Save to sticker'}</button></div><div class=mut id=pout style="font-size:12px">${esc(P.out)}</div>`;
+ else if(P.packEdit)h+=`<div class=ph style="margin-top:20px;border-top:1px solid var(--bd);padding-top:14px">Save</div>
+  <div class=row><button class="btn pri" data-act=ppackreplace style="flex:1;justify-content:center" ${P.busy?'disabled':''}>${ic('check')} ${P.busy?'Saving…':'Save to sticker'}</button></div><div class=mut style="font-size:12px;margin-bottom:8px">Replaces this sticker in its pack. Use Save as a new sticker below to keep both.</div>`;
+ h+=`<div class=ph style="margin-top:20px;border-top:1px solid var(--bd);padding-top:14px">Export</div>
   ${fld('Format',['webm|WebM (Telegram, VP9 + alpha, ≤256KB)','webp|WebP (WhatsApp, ≤500KB)','gif|GIF (plays anywhere)'].map(s=>{const[k,l]=s.split('|');return`<label class=radio><input type=radio name=pfmt data-pk=fmt value=${k} ${e.format===k?'checked':''}> ${l}</label>`}).join(''))}
   <div class=row style="margin:0 0 10px"><div class=fld style="flex:1;margin:0"><label>Name</label><input type=text data-pk=ename value="${esc(e.name||p.name)}"></div><div class=fld style="width:70px;margin:0"><label>Emoji</label><input type=text data-pk=eemoji value="${esc(e.emoji)}"></div></div>
   <div class=row><button class="btn pri" data-act=prender style="flex:1;justify-content:center" ${P.busy?'disabled':''}>${ic('download')} ${P.busy?'Encoding…':'Download '+e.format.toUpperCase()}</button></div>
-  <div class=row><button class=btn data-act=psavepack style="flex:1;justify-content:center" ${P.busy?'disabled':''} title="Encodes a WebM sticker and adds it to a pack">${ic('plus')} Save to pack (WebM)</button></div><div class=mut id=pout style="font-size:12px">${esc(P.out)}</div>`;
+  <div class=row><button class=btn data-act=psavepack style="flex:1;justify-content:center" ${P.busy?'disabled':''} title="Encodes a WebM sticker and adds it to a pack">${ic('plus')} ${P.packEdit?'Save as a new sticker (WebM)':'Save to pack (WebM)'}</button></div><div class=mut id=pout style="font-size:12px">${esc(P.out)}</div>`;
  $('pr').innerHTML=h}
 
 /* ---------- events */
@@ -190,3 +198,15 @@ async function prCall(save,pid){if(P.busy)return;P.busy=true;pright();if(!await 
  const blob=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${(e.name||P.p.name).replace(/[^\w-]+/g,'_')}.${e.format}`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
  P.out=`Exported ${info.kb}KB · ${info.frames} frames @ ${info.fps} fps${info.clipped?' · clipped to '+(e.format==='gif'?GIF_CAP_S:CAP_S)+'s':''}${info.keyed?' · background removed':''}`;const q=await api('/api/projects/'+P.id);if(q.ok)P.p.videoBackgroundRemoval=q.j.videoBackgroundRemoval;pright();toast(`Exported ${e.format.toUpperCase()} (${info.kb}KB)`)}
 ACT.prender=()=>prCall(false);ACT.psavepack=()=>pickPack(pid=>prCall(true,pid),'Save WebM sticker to pack');
+/* ---------- Save to sticker: Studio edit (image + animation) and pack edit (replace) */
+const prLayers=()=>{const ov={};P.p.layers.forEach(L=>{if(L.visible)ov[L.id]=bake(L)});return ov};
+ACT.pstudiosave=async()=>{if(P.busy||!P.studio)return;P.busy=true;pright();if(!await saveNow()){P.busy=false;return pright()}
+  const S=P.studio,r=await post(`/api/generations/${S.gen}/studio_edit`,{index:S.index,action:'commit',overlays:prLayers()});P.busy=false;
+  if(!r.ok){P.out=r.j.error;pright();return dlg(`<h2>Could not save</h2><div class=warn>${esc(r.j.error)}</div><div class=row style="justify-content:flex-end"><button class="btn pri" data-act=dlgx>OK</button></div>`)}
+  P.studio=null;await loadLib();toast(`Saved: image and animation updated${r.j.pack_copies?` · ${r.j.pack_copies} pack cop${r.j.pack_copies===1?'y':'ies'} refreshed`:''}`);location.hash='#/studio'};
+ACT.ppackreplace=async()=>{if(P.busy||!P.packEdit)return;P.busy=true;pright();if(!await saveNow()){P.busy=false;return pright()}
+  const E=P.packEdit,r=await fetch(`/api/projects/${P.id}/render`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({format:'webm',overlays:prLayers(),save:{replace:{pack_id:E.pack_id,sticker_id:E.sticker_id}}})});
+  let j={};try{j=await r.json()}catch(e){}P.busy=false;
+  if(!r.ok){P.out=j.error||'save failed';pright();return dlg(`<h2>Could not save</h2><div class=warn>${esc(P.out)}</div><div class=row style="justify-content:flex-end"><button class="btn pri" data-act=dlgx>OK</button></div>`)}
+  P.packEdit=null;await loadLib();toast('Sticker updated');location.hash='#/pack/'+E.pack_id};
+ACT.pstudioback=()=>{P.studio=null;location.hash='#/studio'};ACT.ppackback=()=>{const E=P.packEdit;P.packEdit=null;location.hash=E?'#/pack/'+E.pack_id:'#/library'};

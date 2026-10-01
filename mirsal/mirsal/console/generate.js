@@ -3,9 +3,10 @@
    Animate and Add act on every included batch. The review gates are still decided and recorded by the server behind those clicks:
    Generate approves the plan, the x on a tile is a human reject, Add approves what was kept and the pack. */
 'use strict';
+let GSTALE=false,GAI={configured:false};
 const GM=new Map();                       // generation id -> its latest state
 let SES={prompt:'',gens:[],off:[],pack:''},bg='checker',glast='',MD=null,VG=null,GINP=[],GHEALTH=null;
-const GS={outline:12,tile:220};
+const GS={outline:12,tile:220,tab:'stickers'};
 const ANIM=new Set();                     // batches the user pressed Animate on, until the server reports them animating
 try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.outline=+o>0?12:0;const t=+localStorage.getItem('mirsal.tile');if(t>=130&&t<=420)GS.tile=t;
   const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens,off:s.off||[],pack:s.pack||''}}catch(e){}
@@ -43,7 +44,8 @@ function pvDraw(cv,g,p,i){const v=p.v;if(!v||v.readyState<2||!v.videoWidth)retur
   for(let o=0;o<d.length;o+=4){if(!d[o+3])continue;const r=d[o],gg=d[o+1],bb=d[o+2],mx=Math.max(r,bb);let a=2*(T-(gg-mx))/T;a=a<0?0:a>1?1:a;
     if(a<.98&&a>0&&gg>mx)d[o+1]=mx;d[o+3]=d[o+3]*a}
   ctx.putImageData(im,0,0);cv.dataset.d=1}
-function pvLoop(){requestAnimationFrame(pvLoop);
+let PVT=0;
+function pvLoop(now){requestAnimationFrame(pvLoop);if(now-PVT<80)return;PVT=now;
   document.querySelectorAll('canvas[data-pv]').forEach(cv=>{const g=GM.get(+cv.dataset.g),p=PVS.get(+cv.dataset.g);if(!g||!p)return;
     const fresh=p.v.currentTime!==p.t;if(fresh||!cv.dataset.d)pvDraw(cv,g,p,+cv.dataset.pv)});
   PVS.forEach(p=>p.t=p.v.currentTime)}
@@ -55,7 +57,47 @@ const animPhase=g=>g.stickers.some(t=>['READY','FAILED'].includes(t.anim_status)
 const processing=g=>g.stickers.some(t=>t.anim_status==='PROCESSING');
 const isOff=(g,t)=>animPhase(g)&&t.anim_status==='READY'?t.review.anim==='REJECTED':t.review.still==='REJECTED';
 const keptStills=g=>g.stickers.filter(t=>t.status==='READY'&&t.review.still!=='REJECTED');
-const keptAnim=g=>g.stickers.filter(t=>t.anim_status==='READY'&&t.review.still!=='REJECTED'&&t.review.anim!=='REJECTED');
+const isOob=t=>t.anim_status==='READY'&&t.review.anim==='BLOCKED';      // made, but the character leaves its cell: blocked for review, kept to look at
+const oobNote=t=>{const c=(t.anim_report||[]).find(r=>r.name==='inside_frame');return c?c.detail:'leaves its cell'};
+/* ---------- issue colours: ONE colour per kind of problem, the same on the tile, the chip, the hatch on the sheets and in the legend.
+   [colour, name, text colour on that colour]. Hatched = not in the set; dashed / light outline = kept with a check. */
+const CAT={bounds:['#f97316','Out of bounds','#fff'],key:['#a855f7','Bad green screen','#fff'],loop:['#eab308','Bad loop','#422006'],look:['#ec4899','Look or motion','#fff'],spec:['#3b82f6','File or Telegram limit','#fff'],bad:['#ef4444','Dropped or blocked','#fff']};
+const CATORDER=Object.keys(CAT);
+const CATOF={inside_cell:'bounds',inside_slot:'bounds',inside_frame:'bounds',cross_slot:'bounds',edge_trimmed:'bounds',loop_seam:'loop',
+  no_spill:'key',chroma_risk:'key',holes:'key',background_is_key:'key',background_flat:'key',alpha_stable:'key',transparent_corners:'key',
+  identity_kept:'look',motion_present:'look',single_subject:'look',duplicate_cell:'look',
+  sharpness:'look',size_budget:'spec',codec_vp9:'spec',dimensions:'spec',fps:'spec',duration:'spec',no_audio:'spec',alpha_mode_tag:'spec',alpha_decoded:'spec',static_file:'spec',telegram_sticker:'spec',telegram_stroke:'spec'};
+/* what is wrong with a sticker at a stage ('still' | 'anim'): hard ones first, then by kind */
+function issuesOf(t,stage){const out=[],add=(id,text,soft)=>out.push({cat:CATOF[id]||'bad',id,text,soft:!!soft});
+  if(stage==='anim'){
+    if(t.status!=='READY'||t.review.still==='REJECTED')return out;
+    if(t.anim_status==='FAILED')add(t.anim_reason,'no animation: '+(t.anim_reason||'failed'));
+    if(t.anim_status==='READY')(t.anim_report||[]).filter(c=>!c.ok).forEach(c=>add(c.name,c.name==='inside_frame'?oobNote(t):(c.detail||c.name),c.severity==='WARN'));
+    if(t.review.anim==='REJECTED')add('dropped','dropped from the set');
+  }else{
+    if(t.status==='FAILED')add(t.reason,'blocked: '+(t.reason||'failed'));
+    else(((t.metrics||{}).warnings)||[]).forEach(w=>add(w,'kept, check: '+w,true));
+    if(t.review.still==='REJECTED')add('dropped','dropped from the set');
+  }
+  return out.sort((a,b)=>(a.soft-b.soft)||CATORDER.indexOf(a.cat)-CATORDER.indexOf(b.cat))}
+function mark(t,stage){const is=issuesOf(t,stage);if(!is.length)return null;
+  const inSet=stage==='anim'?t.anim_status==='READY'&&!['REJECTED','BLOCKED'].includes(t.review.anim):t.status==='READY'&&t.review.still!=='REJECTED';
+  return{cat:is[0].cat,issues:is,accepted:inSet}}
+function chip(g,t,stage){const m=mark(t,stage);let cls,title,st='';
+  if(m){cls='iss'+(m.accepted?' soft':'');st=` style="--cc:${CAT[m.cat][0]}"`;title=`S${t.index}: ${m.issues.map(i=>CAT[i.cat][1]+' - '+i.text).join('; ')}${m.accepted?'':' (not in the set)'}`}
+  else if(stage==='anim'){const c=cellState(t);cls=c;title=`S${t.index}: ${CELLTXT[c]}`}
+  else{cls='ok';title=`S${t.index}: accepted`}
+  return`<button class="vchip ${cls}"${st} data-act=gopen data-g=${g.number} data-i=${t.index} title="${esc(title)}">${t.index}</button>`}
+function legend(g,stage){const cs=new Set();g.stickers.forEach(t=>{const m=mark(t,stage);if(m)m.issues.forEach(i=>cs.add(i.cat))});
+  return cs.size?`<div class=lgrow>${CATORDER.filter(c=>cs.has(c)).map(c=>`<span class=lgd style="--cc:${CAT[c][0]}"><i></i>${CAT[c][1]}</span>`).join('')}</div><div class="mut lgnote">hatched = not in the set, dashed = kept with a check</div>`:''}
+/* the in-place marks on a sheet of size sheet_size: a hatch over every cell that is not in the set, a dashed outline over one kept with a check */
+function issueSvg(g,stage,k=1){const W=g.source.sheet_size[0],sw=Math.max(2,W/450)*k,step=W/64,cats=new Set();let body='';
+  g.stickers.forEach(t=>{const c=(t.metrics||{}).cell,m=c&&mark(t,stage);if(!m)return;cats.add(m.cat);const col=CAT[m.cat][0],r=`x="${c[0]}" y="${c[1]}" width="${c[2]}" height="${c[3]}"`;
+    body+=m.accepted?`<rect ${r} fill="none" stroke="${col}" stroke-width="${sw*1.6}" stroke-dasharray="${W/80} ${W/120}"/>`
+      :`<rect ${r} fill="url(#hz-${m.cat}-${Math.round(W)})" stroke="${col}" stroke-width="${sw*1.8}"/>`});
+  const defs=[...cats].map(cat=>{const col=CAT[cat][0];return`<pattern id="hz-${cat}-${Math.round(W)}" width="${step}" height="${step}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${step}" height="${step}" fill="${col}" fill-opacity=".16"/><line x1="0" y1="0" x2="0" y2="${step}" stroke="${col}" stroke-opacity=".9" stroke-width="${step*.3}"/></pattern>`}).join('');
+  return(defs?`<defs>${defs}</defs>`:'')+body}
+const keptAnim=g=>g.stickers.filter(t=>t.anim_status==='READY'&&t.review.still!=='REJECTED'&&!['REJECTED','BLOCKED'].includes(t.review.anim));
 const keptOf=g=>animPhase(g)?keptAnim(g):keptStills(g);
 const sheetOf=g=>[...g.video_sheets].reverse().find(v=>v.status!=='REJECTED');
 const sessionGens=()=>SES.gens.map(id=>GM.get(id)).filter(Boolean);
@@ -65,17 +107,17 @@ const nAdded=(g,pid)=>keptOf(g).filter(t=>((g.added||{})[pid]||[]).includes(`${a
 /* ---------- the screen */
 RENDER.generate=async()=>{
   $('s-generate').innerHTML=`<div class=gen2>
-   <div class=sh>${ic('gen')} Sticker generator</div>
+   <div class=sh>${ic('gen')} Studio</div>
    <div class=gform>${ic('search')}<input id=prompt type=text placeholder="Describe the stickers, for example: teddy bear for school" autocomplete=off><button id=go class="btn pri gbig" data-act=ggo>Generate</button></div>
    <div class=gopts><span class=mut>White outline</span><div class=tabs id=opills></div><span class=mut id=ohint></span></div>
-   <div id=gsug class=gsug></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
-  $('prompt').value=SES.prompt||'';$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
+   <div id=gsug class=gsug></div><div id=gplan></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
+  $('prompt').value=SES.prompt||'';$('prompt').oninput=planPreview;planPreview();$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
   document.documentElement.style.setProperty('--tile',GS.tile+'px');
   drawOutline();glast='';await loadInputs();drawSug();tick(true)};
 function drawOutline(){const on=GS.outline>0;$('opills').innerHTML=[[12,'On'],[0,'Off']].map(([px,l])=>`<button class="tab ${(on?12:0)===px?'on':''}" data-act=goutline data-px=${px}>${l}</button>`).join('');
   $('ohint').textContent=on?'white border around each sticker, also on the animation':'stickers are cut out with no border'}
-ACT.goutline=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);drawOutline()};
-async function loadInputs(){const r=await api('/api/inputs');if(r.ok)GINP=r.j.inputs;const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health}
+ACT.goutline=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);drawOutline();glast='';tick(true)};
+async function loadInputs(){const r=await api('/api/inputs');if(r.ok)GINP=r.j.inputs;const a=await api('/api/ai');if(a.ok)GAI=a.j;const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health}
 function drawSug(){const el=$('gsug');if(!el)return;
   el.innerHTML=GINP.length?`<span class=mut>Prepared sheets:</span>`+GINP.map(s=>`<button class=chip2 data-act=gsug data-s="${esc(s.subject)}">${esc(s.subject.replace(/_/g,' '))} <small>${s.variants.length} ${s.variants.length>1?'sheets':'sheet'}</small></button>`).join(''):`<span class=mut>No prepared sheets found in Phase_01/Images_gen. Use History to check the folders.</span>`}
 ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');ACT.ggo()};
@@ -100,27 +142,33 @@ document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList
 document.addEventListener('input',e=>{if(e.target.id==='gsize'){GS.tile=+e.target.value;document.documentElement.style.setProperty('--tile',GS.tile+'px');gstore('mirsal.tile',GS.tile)}});
 
 /* ---------- the result */
-function tileHtml(g,t){const base=`/out/${g.generation_id}/`,off=isOff(g,t),bad=t.status==='FAILED',live=!off&&PVON.has(g.number)&&t.status==='READY'&&g.source.video_path&&!t.webm;
-  const m=t.webm&&t.anim_status==='READY'?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:live?`<canvas data-g=${g.number} data-pv=${t.index} width=288 height=288></canvas><span class=livebadge>live preview</span>`:t.png?`<img src="${base+t.png}" loading=lazy>`:`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
-  const warn=(t.metrics.warnings||[]).concat(t.anim_metrics&&t.anim_metrics.warnings||[]);
-  return`<div class="gt ${off?'off':''} ${bad?'bad':''}"><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}</div><span class=gem>${esc(t.emoji)}</span>
-    ${t.status==='READY'&&t.anim_status!=='FAILED'?`<button class=gx data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=${off?0:1} title="${off?'Bring this one back':'Drop this one from the set'}">${off?ic('plus'):ic('x')}</button>`:''}
-    <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${bad?`<div class=gprob>Blocked: ${esc(t.reason)}</div>`:t.anim_status==='FAILED'?`<div class=gprob>No animation: ${esc(t.anim_reason)}</div>`:warn.length?`<div class=gwarn>check: ${esc(warn.join(', '))}</div>`:''}${off?'<div class=gwarn>Dropped</div>':''}</div></div>`}
-function batchHtml(g,k,total){
+function tileHtml(g,t,mode){const base=`/out/${g.generation_id}/`,anim=mode==='anim',ap=animPhase(g),
+    off=anim?(t.review.anim==='REJECTED'||t.review.still==='REJECTED'):t.review.still==='REJECTED',blk=anim&&isOob(t),
+    mk=mark(t,anim?'anim':'still'),hard=mk&&!mk.accepted,
+    live=anim&&!off&&PVON.has(g.number)&&t.status==='READY'&&g.source.video_path&&!t.webm,hasV=t.webm&&t.anim_status==='READY';
+  let m;
+  if(!anim)m=t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" loading=lazy>`:`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
+  else m=hasV?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:live?`<canvas data-g=${g.number} data-pv=${t.index} width=288 height=288></canvas><span class=livebadge>live preview</span>`
+    :t.anim_status==='FAILED'?`<div class=gbadmsg>${esc(t.anim_reason||'No animation')}</div>`:t.anim_status==='STALE'?`<div class="gbadmsg mut">${esc(t.anim_reason||'Animate again')}</div>`:t.status==='READY'?`<div class="gbadmsg mut">Not animated yet</div>`:`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
+  const canX=t.status==='READY'&&(anim?ap&&t.anim_status!=='FAILED':!ap);
+  const lines=mk?mk.issues.slice(0,2).map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join(''):'';
+  return`<div class="gt ${off?'off':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${hard&&!off?`<span class=isstag>${esc(CAT[mk.cat][1])}</span>`:''}</div><span class=gem>${esc(t.emoji)}</span>
+    ${canX?`<button class=gx data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=${off||blk?0:1} title="${blk?'Include this animation anyway':off?'Bring this one back':'Drop this one from the set'}">${off||blk?ic('plus'):ic('x')}</button>`:''}
+    <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=0>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
+function batchHtml(g,k,total,mode){
   const inc=!SES.off.includes(g.number),s=g.source;
   const head=`<div class=gbhead>${total>1?`<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc?'checked':''}> <b>Batch ${k+1}</b></label>`:`<b>Batch ${k+1}</b>`}
     <span class=mut>sheet ${s.subject_id} · ${g.generation_id}${s.has_video?'':' · no video prepared'}</span>
     <span class=gbact>${s.has_video||making(g)?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
-    <button class="btn sm" data-act=gsheet data-g=${g.number} title="The raw and keyed sheet, the measured cut lines, each sticker's boundary and the sheet analysis">${ic('eye')} Green screen & cuts</button>
     ${total>1?`<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>`:''}</span></div>`;
   if(making(g))return`<section class=gbatch>${head}<div class=gwork><div class=spin></div><b>Making your stickers…</b><div class=mut>${g.stage==='requested'?'Reading the sheet':g.stage==='sheet_picked'?'Removing the background':'Cutting and checking each sticker'}</div></div></section>`;
   const sheetErr=g.stickers.every(t=>t.status==='FAILED')&&(g.verify.sheet||[]).find(c=>!c.ok&&c.severity!=='WARN');
   if(sheetErr)return`<section class=gbatch>${head}<div class=gwork><b>This sheet cannot be used</b><div class=mut>${esc(sheetErr.detail||sheetErr.name)}</div></div></section>`;
-  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t)).join('')}</div></section>`}
+  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?videoPanel(g):sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
 function gview(){
   const gs=sessionGens();if(!gs.length)return'';
   const inc=included(),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
-  const todoAnim=inc.filter(g=>g.source.has_video&&!animPhase(g)&&!processing(g)&&!ANIM.has(g.number)&&keptStills(g).length);
+  const todoAnim=inc.filter(g=>g.source.has_video&&(!animPhase(g)||g.stickers.some(t=>t.anim_status==='STALE'))&&!processing(g)&&!ANIM.has(g.number)&&keptStills(g).length);
   const busyAnim=gs.some(g=>processing(g)||(ANIM.has(g.number)&&!animPhase(g)));
   const done=inc.reduce((a,g)=>a+g.stickers.filter(t=>['READY','FAILED'].includes(t.anim_status)).length,0),tot=inc.reduce((a,g)=>a+(g.source.has_video?keptStills(g).length:0),0);
   const pk=SES.pack&&packById(SES.pack),added=pk?inc.reduce((a,g)=>a+nAdded(g,SES.pack),0):0,allAdded=pk&&n>0&&added>=n;
@@ -132,36 +180,143 @@ function gview(){
   else bar=`<span class=gstat>${n} ${kind}sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}${allAdded?` · added to “${esc(pk.name)}”`:''}</span><button class="btn pri gbig" data-act=gadd ${n&&!allAdded?'':'disabled'}>${allAdded?'Added ✓':`Add ${n} to a pack`}</button>${allAdded?`<button class="btn gbig" data-act=gopenpack>Open pack</button>`:''}`;
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
     <button class="btn" data-act=gmore ${ready&&!busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
+    <button class="btn" data-act=gedge ${ready&&!busyAnim?'':'disabled'} title="White outline and rim trim for these stickers">Edge</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
-   ${gs.map((g,k)=>batchHtml(g,k,gs.length)).join('')}
-   <div class=gbar>${bar}</div>
-   <details class=gmore><summary class=mut>Prompt</summary><div class=mut>${esc(gs[0].plan_source||'')}</div><textarea readonly rows=4>${esc(gs[0].sheet_prompt||'')}</textarea></details>`}
+   ${stepsHtml({gs,ready,busyAnim,done,tot,pk,allAdded,n})}
+   ${gbodyHtml(gs,{inc,todoAnim,busyAnim,n})}
+   <div class=gbar>${bar}</div>`}
+
+/* what the page shows under the header: each step is a real view */
+function gbodyHtml(gs,c){const t=GS.tab;
+  if(t==='request')return requestView(gs);
+  if(t==='plan')return planView(gs[0]);
+  if(t==='anim'&&!gs.some(animPhase)&&!c.busyAnim&&!gs.some(g=>PVON.has(g.number)))return animEmpty(gs,c);
+  return gs.map((g,k)=>batchHtml(g,k,gs.length,t==='anim'?'anim':'still')).join('')}
+function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);
+  return`<section class=gplan style="text-align:center;padding:44px 16px"><h2 style="margin:0 0 6px">${hasVid?'Animate your stickers':'No video prepared for this sheet'}</h2>
+   <div class=mut style="max-width:560px;margin:0 auto 18px">${hasVid?`${c.n} sticker${c.n===1?'':'s'} will be animated from the prepared video. Each animation is checked frame by frame (size, loop, and whether the character stays inside its cell) and shows up here as soon as it is ready.`
+     :'Make a video from the sheet in your own tool, then add it with “Make a video…” on the Stickers view.'}</div>
+   ${hasVid?`<button class="btn pri gbig" data-act=ganimate ${c.todoAnim.length?'':'disabled'}>${ic('play')} Animate</button>`:''}</section>`}
+
+/* Request: the original request, editable; generating again starts a new session */
+function requestView(gs){const g=gs[0],s=g.source,on=GS.outline>0;
+  return`<section class=gplan><div class=pcols><div><div class=pbh><b>Your request</b></div>
+    <textarea id=greq rows=3 style="width:100%;font:inherit;font-size:15px;background:var(--fill);border:0;border-radius:12px;padding:12px">${esc(SES.prompt||g.prompt||'')}</textarea>
+    <div class=row><span class=mut>White outline</span><div class=tabs style="margin:0;gap:6px">${[[12,'On'],[0,'Off']].map(([px,l])=>`<button class="tab ${(on?12:0)===px?'on':''}" data-act=goutline data-px=${px} style="padding:6px 16px;font-size:13px">${l}</button>`).join('')}</div></div>
+    <div class=row style="margin-top:12px"><button class="btn pri gbig" data-act=greqgo>Generate again with this request</button></div>
+    <div class=mut style="margin-top:6px">This starts a new session. The stickers you have now stay in History.</div></div>
+   <ul class=pcells><li><b>Subject</b><div class=mut>${esc(titleCase(s.subject))}</div></li><li><b>Prepared sheets used</b><div class=mut>${gs.map(x=>`sheet ${x.source.subject_id} (${x.generation_id})`).join(', ')}</div></li>
+    <li><b>Grid</b><div class=mut>${g.grid[0]}×${g.grid[1]}, ${g.stickers.length} stickers per batch</div></li><li><b>Template</b><div class=mut>${esc(g.template_id||'hand-written plan')}${g.template_version?' v'+g.template_version:''}</div></li>
+    <li><b>Edge</b><div class=mut>${g.outline_px?g.outline_px+' px white outline':'no outline'}${g.erode_px?`, ${g.erode_px} px trimmed`:''}</div></li></ul></div></section>`}
+ACT.greqgo=()=>{const p=($('greq').value||'').trim();if(!p){say('Write what you want first.');return}$('prompt').value=p;GS.tab='stickers';create(p,0,false)};
+
+/* ---------- the header: Request > Prompt > Stickers > Animation > Pack (where this request stands, from what the server reports) */
+function stepsHtml(c){const {gs,ready,busyAnim,done,tot,pk,allAdded,n}=c,g0=gs[0],cnt=f=>gs.reduce((a,g)=>a+g.stickers.filter(f).length,0);
+  const good=cnt(t=>t.status==='READY'),kept=cnt(t=>t.status==='READY'&&t.review.still!=='REJECTED'),dropped=cnt(t=>t.review.still==='REJECTED'),blocked=cnt(t=>t.status==='FAILED'),oobN=cnt(isOob),
+    animOk=cnt(t=>t.anim_status==='READY'&&!isOob(t)&&t.review.anim!=='REJECTED'&&t.review.still!=='REJECTED'),aDrop=cnt(t=>t.anim_status==='READY'&&t.review.anim==='REJECTED'&&t.review.still!=='REJECTED'),animFail=cnt(t=>t.anim_status==='FAILED');
+  const anim=gs.some(animPhase),hasVid=gs.some(g=>g.source.has_video);
+  const S=[['Request','done',esc(SES.prompt||g0.prompt||''),'request'],
+   ['Prompt',g0.sheet_prompt?'done':'todo',`${esc(g0.template_id||'plan')}${g0.template_version?' v'+g0.template_version:''} · tags`,'plan'],
+   ['Stickers',ready?(good?'done':'warn'):'run',ready?`${kept} kept${dropped?`, ${dropped} dropped`:''}${blocked?`, ${blocked} blocked`:''}`:'Making…','stickers'],
+   ['Animation',busyAnim?'run':anim?(oobN||animFail?'warn':'done'):'todo',busyAnim?`Animating ${done} of ${tot}…`:anim?`${animOk} ready${aDrop?`, ${aDrop} dropped`:''}${oobN?`, ${oobN} out of bounds (off)`:''}${animFail?`, ${animFail} failed`:''}`:hasVid?'Not started':'No video prepared','anim'],
+   ['Pack',allAdded?'done':'todo',allAdded?`Added to “${esc(pk.name)}”`:'Not added yet','pack']];
+  const mark=(st,i)=>st==='done'?ic('check'):st==='run'?'<span class=spin></span>':st==='warn'?'!':i+1;
+  return`<div class=gsteps>${S.map(([l,st,sub,tab],i)=>`<button class="gst ${st} ${tab===GS.tab?'cur':''}" ${tab==='pack'?`data-act=gadd ${ready&&n?'':'disabled'}`:`data-act=gtab data-t=${tab}`}><span class=gsm>${mark(st,i)}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g,'')}">${sub}</small></span></button>`).join('')}</div>`}
+
+/* ---------- Edge: the white outline and the rim trim of the included batches (POST .../appearance). The stills are redrawn from the clean cut-out
+   (no re-keying); animations made with the old edge are marked stale and are made again by the next Animate. */
+const EDGE={outline:0,erode:0};
+ACT.gedge=()=>{const g=included()[0];if(!g)return;EDGE.outline=g.outline_px||0;EDGE.erode=g.erode_px||0;edgeDlg()};
+function edgeDlg(){const gs=included(),nAn=gs.reduce((a,g)=>a+g.stickers.filter(t=>t.webm&&t.anim_status==='READY').length,0),
+    seg=(k,vals,unit)=>`<div class=tabs style="margin:0;gap:6px;flex-wrap:wrap">${vals.map(v=>`<button class="tab ${EDGE[k]===v?'on':''}" data-act=gedgeset data-k=${k} data-v=${v} style="padding:6px 14px;font-size:13px">${v?v+' '+unit:'None'}</button>`).join('')}</div>`;
+  dlg(`<div class=vdlg style="max-width:520px"><h2>Edge</h2>
+   <div class=mut>The white border around each sticker and how much of the cut-out's rim is trimmed. Applies to ${gs.length} batch${gs.length===1?'':'es'}; the stickers are redrawn from the clean cut-out, nothing is re-keyed.</div>
+   <div style="margin:14px 0 6px"><b>White outline</b></div>${seg('outline',[0,4,8,12,16],'px')}
+   <div style="margin:14px 0 6px"><b>Trim the rim</b> <span class=mut>removes a dark key line on the edge</span></div>${seg('erode',[0,1,2,3,4],'px')}
+   ${nAn?`<div class=warn style="margin-top:12px">${nAn} animation${nAn===1?' was':'s were'} made with the old edge. After this, press Animate to make ${nAn===1?'it':'them'} again.</div>`:''}
+   <div class=row style="justify-content:flex-end;margin-top:14px"><button class=btn data-act=gedgecancel>Cancel</button><button class="btn pri" data-act=gedgeapply>Apply</button></div></div>`)}
+ACT.gedgeset=el=>{EDGE[el.dataset.k]=+el.dataset.v;edgeDlg()};
+ACT.gedgecancel=()=>closeDlg();
+ACT.gedgeapply=async()=>{closeDlg();let n=0,stale=0;
+  for(const g of included()){const r=await postWait(`/api/generations/${g.number}/appearance`,{outline:EDGE.outline,erode:EDGE.erode},'Finishing the previous job…');if(!r.ok){toast(r.j.error,1);break}n+=r.j.rerendered||0;stale+=(r.j.stale||[]).length}
+  glast='';await tick(true);toast(`Edge applied: ${n} sticker${n===1?'':'s'} redrawn${stale?`, ${stale} animation${stale===1?'':'s'} to make again (press Animate)`:''}`)};
+
+/* ---------- Plan: the prompts the sheet and video were made from, and the 1-5 tags per cell */
+const copyBox=(title,text,id,rows)=>`<div class=pbox><div class=pbh><b>${title}</b><button class="btn sm" data-act=hcopy data-t=${id}>Copy</button></div><textarea readonly id=${id} rows=${rows}>${esc(text||'')}</textarea></div>`;
+function planView(g){const pl=g.reviews&&g.reviews.plan;
+  return`<section class=gplan><div class=pcols><div>${copyBox('Sheet prompt',g.sheet_prompt,'pp1',11)}${copyBox('Video prompt',g.video_prompt,'pp2',6)}
+   <p class=mut>Template <b>${esc(g.template_id||'hand-written plan')}</b>${g.template_version?' v'+g.template_version:''} · plan from ${esc(g.plan_source||'')}${pl?` · ${esc(pl.decision.toLowerCase())}d by ${esc(pl.by)}`:''}</p></div>
+   <ul class=pcells>${g.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=mut>${esc(t.prompt)}</div><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></section>`}
+ACT.gtab=el=>{GS.tab=el.dataset.t;glast='';tick(true)};
+/* the same prompts, live under the request box while typing (nothing is reserved) */
+let PQ=0,PT=null;
+function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('gplan'))return;
+  if(p.length<2){$('gplan').innerHTML='';return}
+  PT=setTimeout(async()=>{const n=++PQ,r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:'flat_vector',ai:GAI.configured}),el=$('gplan');if(n!==PQ||!el)return;
+    if(!r.ok){el.innerHTML='';return}
+    const open=el.querySelector('details')&&el.querySelector('details').open;
+    el.innerHTML=`<details class=gpv ${open?'open':''}><summary>Prompt preview <span class=mut>template ${esc(r.j.template_id)} v${r.j.template_version} · ${r.j.stickers.length} cell prompt${r.j.stickers.length>1?'s':''}, 1 to 5 tags each · ${r.j.expanded_by==='ai'?`<b>expanded by AI</b> (${esc(r.j.expand_model||'')}): every sticker has its key name`:'built-in sets'}</span></summary>
+      ${r.j.expand_error?`<div class=warn>${esc(r.j.expand_error)}</div>`:''}
+      <div class=pcols><div>${copyBox('Sheet prompt',r.j.sheet_prompt,'pv1',9)}${copyBox('Video prompt',r.j.video_prompt,'pv2',5)}</div>
+      <ul class=pcells>${r.j.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></details>`},450)}
 
 /* ---------- Animate, Add */
 ACT.ganimate=async()=>{const todo=included().filter(g=>g.source.has_video&&!animPhase(g)&&!processing(g)&&keptStills(g).length);if(!todo.length)return;
-  todo.forEach(g=>{ANIM.add(g.number);PVON.add(g.number);if(g.source.video_path)pvEnsure(g)});glast='';tick(true);
+  todo.forEach(g=>{ANIM.add(g.number);PVON.add(g.number);if(g.source.video_path)pvEnsure(g)});GS.tab='anim';glast='';tick(true);
   for(const g of todo){const r=await postWait(`/api/generations/${g.number}/animate`,{scope:'pack'},'Waiting for the previous animation…');if(!r.ok){toast(r.j.error,1);ANIM.delete(g.number)}}};
-ACT.gdrop=async el=>{const r=await postWait(`/api/generations/${el.dataset.g}/drop`,{index:+el.dataset.i,dropped:el.dataset.off==='1'});if(!r.ok)toast(r.j.error,1);glast='';tick(true)};
-ACT.gadd=async()=>{await loadLib();const inc=included(),n=inc.reduce((a,g)=>a+keptOf(g).length,0);if(!n)return;
+ACT.gdrop=async el=>{const r=await postWait(`/api/generations/${el.dataset.g}/drop`,{index:+el.dataset.i,dropped:el.dataset.off==='1'});if(!r.ok)toast(r.j.error,1);
+  else if(el.dataset.off==='0'&&el.closest('.blk'))toast(`S${el.dataset.i} is included anyway: it will be added with the rest (the marker stays)`);glast='';await tick(true);if(MD)gmodal()};
+/* Pack: a three-step modal. 1 the pack (and replace-or-add when stills of the same stickers are already in it), 2 how it looks on each
+   background, 3 the names the library will show (name, emoji, and the generator's file name, which never changes) */
+let PW=null;
+const rname=k=>{const t=String(k).replace(/[-_]+/g,' ').trim();return(t.charAt(0).toUpperCase()+t.slice(1)).slice(0,60)};
+const PWBG=[['chat','Chat'],['light','Light'],['dark','Dark'],['checker','Transparent'],['wall','Wallpaper']];
+ACT.gadd=async()=>{await loadLib();const inc=included(),rows=[];
+  for(const g of inc)for(const t of keptOf(g))rows.push({g:g.number,gen:g.generation_id,i:t.index,anim:animPhase(g),src:`/out/${g.generation_id}/${animPhase(g)?t.webm:t.png}`,name:rname(t.key),emoji:t.emoji,file:t.name});
+  if(!rows.length)return;
   const ps=LIB.packs,def=SES.pack&&packById(SES.pack)?SES.pack:'',base=titleCase(inc[0].source.subject);
   let name=base,k=2;while(ps.some(p=>p.name.toLowerCase()===name.toLowerCase()))name=`${base} ${k++}`;
-  const anim=inc.some(g=>animPhase(g));
-  dlg(`<h2>Add to a pack</h2><div class=mut>${n} ${anim?'animated stickers':'stickers'} from ${inc.length} batch${inc.length===1?'':'es'}</div>
-   <label class=radio><input type=radio name=gp value=new ${def?'':'checked'}> <b>New pack</b></label>
-   <div class=fld><input type=text id=gpname value="${esc(name)}" maxlength=60 placeholder="Pack name" autocomplete=off></div>
-   ${ps.length?`<label class=radio><input type=radio name=gp value=old ${def?'checked':''}> <b>An existing pack</b></label>
-   <div class=fld><select id=gpold>${ps.map(p=>`<option value="${p.id}" ${p.id===def?'selected':''}>${esc(p.name)} (${p.stickers.length})</option>`).join('')}</select></div>`:''}
-   <div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=gaddgo>Add ${n}</button></div>`);
-  const nm=$('gpname');nm.onfocus=()=>{const r=document.querySelector('input[name=gp][value=new]');if(r)r.checked=true};if(!def){nm.focus();nm.select()}
-  nm.onkeydown=e=>{if(e.key==='Enter')ACT.gaddgo()};const old=$('gpold');if(old)old.onfocus=()=>{document.querySelector('input[name=gp][value=old]').checked=true}};
-ACT.gaddgo=async()=>{const mode=(document.querySelector('input[name=gp]:checked')||{}).value||'new';let pid;
-  if(mode==='old')pid=$('gpold').value;
-  else{const nm=$('gpname').value.trim();if(!nm){toast('Give the pack a name',1);return}const r=await post('/api/packs',{name:nm});if(!r.ok)return toast(r.j.error,1);pid=r.j.id}
-  closeDlg();let added=0,err='';
-  for(const g of included()){if(!keptOf(g).length)continue;const r=await postWait(`/api/generations/${g.number}/add`,{pack_id:pid});if(r.ok)added+=r.j.added;else err=r.j.error}
+  PW={rows,anim:rows.some(r=>r.anim)};
+  const prev=r=>r.anim?`<video src="${r.src}" autoplay loop muted playsinline></video>`:`<img src="${r.src}">`;
+  dlg(`<div class=pw><h2 style="margin:0">Add to a pack</h2><div class=mut>${rows.length} ${PW.anim?'animated stickers':'stickers'} from ${inc.length} batch${inc.length===1?'':'es'}</div>
+   <div class=pwgrid><div>
+    <div class=pwstep><span class=pwn>1</span><b>Choose the pack</b></div>
+    <label class=radio><input type=radio name=gp value=new ${def?'':'checked'}> <b>New pack</b></label>
+    <div class=fld><input type=text id=gpname value="${esc(name)}" maxlength=60 placeholder="Pack name" autocomplete=off></div>
+    ${ps.length?`<label class=radio><input type=radio name=gp value=old ${def?'checked':''}> <b>An existing pack</b></label>
+    <div class=fld><select id=gpold>${ps.map(p=>`<option value="${p.id}" ${p.id===def?'selected':''}>${esc(p.name)} (${p.stickers.length})</option>`).join('')}</select></div>`:''}
+    <div id=pwtwins></div>
+    <div class=pwstep style="margin-top:16px"><span class=pwn>2</span><b>How it looks</b><select id=pwbg style="width:auto;margin-left:auto;padding:4px 10px">${PWBG.map(([k,l])=>`<option value=${k}>${l}</option>`).join('')}</select></div>
+    <div id=pwprev class="pwprev bg-chat">${rows.map(r=>`<div title="${esc(r.name)}">${prev(r)}<span>${esc(r.emoji)}</span></div>`).join('')}</div>
+   </div><div>
+    <div class=pwstep><span class=pwn>3</span><b>Names in your library</b></div>
+    <div class=mut style="margin-bottom:8px">Rename if you like. Telegram needs at least one emoji per sticker. The file name is kept as it came from the generator.</div>
+    <div class=pwrows>${rows.map((r,x)=>`<div class=pwrow><div class=pwth>${prev(r)}</div><div style="flex:1;min-width:0"><div class=pwfields><input type=text data-r=${x} data-k=name value="${esc(r.name)}" maxlength=60><input type=text data-r=${x} data-k=emoji value="${esc(r.emoji)}" maxlength=20 class=pwemo></div><small class=mut title="${esc(r.file)}">${esc(r.file)}</small></div></div>`).join('')}</div>
+   </div></div>
+   <div class=row style="justify-content:flex-end;margin-top:14px"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" id=pwgo data-act=pwgo></button></div></div>`);
+  $('pwbg').onchange=e=>{$('pwprev').className='pwprev bg-'+e.target.value};
+  const nm=$('gpname'),old=$('gpold');nm.onfocus=()=>{document.querySelector('input[name=gp][value=new]').checked=true;pwSync()};
+  if(old){old.onfocus=()=>{document.querySelector('input[name=gp][value=old]').checked=true;pwSync()};old.onchange=pwSync}
+  document.querySelectorAll('input[name=gp]').forEach(r=>r.onchange=pwSync);nm.oninput=pwSync;pwSync();if(!def){nm.focus();nm.select()}};
+function pwPack(){const mode=(document.querySelector('input[name=gp]:checked')||{}).value||'new';return mode==='old'&&$('gpold')?{old:true,id:$('gpold').value}:{old:false,name:$('gpname').value.trim()}}
+/* the pack changed: ask replace-or-add when it already holds the still of an animated sticker, and name the button */
+function pwSync(){const p=pwPack(),pk=p.old?packById(p.id):null;
+  const twins=!PW.anim||!pk?0:PW.rows.filter(r=>pk.stickers.some(s=>s.type==='static'&&s.source&&s.source.generation===r.gen&&s.source.index===r.i)).length;
+  const keep=(document.querySelector('input[name=pwmode]:checked')||{}).value||'replace';
+  $('pwtwins').innerHTML=twins?`<div class=pwtw><b>${twins} ${twins===1?'is':'are'} in “${esc(pk.name)}” as ${twins===1?'a still':'stills'} already.</b>
+    <label class=radio><input type=radio name=pwmode value=replace ${keep==='replace'?'checked':''}> Replace the ${twins===1?'still':'stills'} with the animated ${twins===1?'one':'ones'}</label>
+    <label class=radio><input type=radio name=pwmode value=add ${keep==='add'?'checked':''}> Add next to ${twins===1?'it':'them'}</label></div>`:'';
+  $('pwgo').textContent=`Add ${PW.rows.length} to “${p.old?pk.name:(p.name||'new pack')}”`}
+ACT.pwgo=async()=>{const p=pwPack();let pid;
+  if(p.old)pid=p.id;else{if(!p.name){toast('Give the pack a name',1);return}const r=await post('/api/packs',{name:p.name});if(!r.ok)return toast(r.j.error,1);pid=r.j.id}
+  const mode=(document.querySelector('input[name=pwmode]:checked')||{}).value==='add'?'add':'replace',names={};
+  document.querySelectorAll('.pwrows input').forEach(i=>{const r=PW.rows[+i.dataset.r];(names[r.g]=names[r.g]||{})[r.i]=Object.assign(names[r.g][r.i]||{},{[i.dataset.k]:i.value.trim()})});
+  closeDlg();await gaddrun(pid,mode,names)};
+async function gaddrun(pid,mode,names){let added=0,replaced=0,err='';
+  for(const g of included()){if(!keptOf(g).length)continue;const r=await postWait(`/api/generations/${g.number}/add`,{pack_id:pid,mode,names:(names||{})[g.number]||{}});if(r.ok){added+=r.j.added;replaced+=r.j.replaced||0}else err=r.j.error}
   await loadLib();SES.pack=pid;saveSes();glast='';tick(true);
-  if(err)toast(err,1);else toast(added?`Added ${added} to “${packById(pid).name}”`:'Those are already in that pack')};
+  if(err)toast(err,1);else toast(replaced?`Replaced ${replaced} still${replaced===1?'':'s'} with animated stickers in “${packById(pid).name}”`:added?`Added ${added} to “${packById(pid).name}”`:'Those are already in that pack')}
 ACT.gopenpack=()=>{if(SES.pack)location.hash='#/pack/'+SES.pack};
 
 /* ---------- Make a video...: the one multi-step path, for a batch without a prepared video */
@@ -184,15 +339,63 @@ ACT.gcopyprompt=async()=>{const g=GM.get(VG),v=g&&sheetOf(g);try{await navigator
 
 /* ---------- Green screen & cuts: the raw / keyed sheet, the measured cut lines, each sticker's boundary, and the analysis */
 const SV={g:null,view:'raw',lines:true,boxes:true};
+/* the measured cut lines (dashed), the cell numbers and each sticker's boundary, as SVG over a sheet of size sheet_size */
+function cutSvg(g,lines,boxes,k=1,stage='still'){const s=g.source,[W,H]=s.sheet_size,G=s.grid,sw=Math.max(2,W/450)*k;let svg='';
+  if(G&&lines)svg+=G.xs.slice(1,-1).map(x=>`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#2563eb" stroke-width="${sw}" stroke-dasharray="${W/50} ${W/90}"/>`).join('')+G.ys.slice(1,-1).map(y=>`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#2563eb" stroke-width="${sw}" stroke-dasharray="${W/50} ${W/90}"/>`).join('');
+  g.stickers.forEach(t=>{const m=t.metrics||{},c=m.cell,b=m.bbox;if(!c)return;
+    if(lines)svg+=`<text x="${c[0]+W/90}" y="${c[1]+W/22}" font-size="${W/26}" font-weight="700" fill="#2563eb" stroke="#fff" stroke-width="${W/380}" paint-order="stroke">${t.index}</text>`;
+    const mk=boxes&&mark(t,stage);
+    if(boxes&&b)svg+=`<rect x="${c[0]+b[0]}" y="${c[1]+b[1]}" width="${b[2]-b[0]}" height="${b[3]-b[1]}" fill="none" stroke="${mk&&!mk.accepted?CAT[mk.cat][0]:'#facc15'}" stroke-width="${sw*1.4}"/>`});
+  return svg+(boxes?issueSvg(g,stage,k):'')}
+/* The Animation view's left panel, the twin of the green-screen panel: the prepared video as one sheet with the same cut lines, a chip per
+   cell showing how it came out, and the analysis at a glance; "Full analysis" has every number and every check that did not pass. */
+const cellState=t=>t.status!=='READY'?'skip':isOob(t)?'oob':t.anim_status==='READY'?'ok':t.anim_status==='FAILED'?'fail':t.anim_status==='PROCESSING'?'busy':'todo';
+const CELLTXT={ok:'ready',oob:'out of bounds',fail:'no animation',busy:'working',todo:'not animated',skip:'no still'};
+function vcutSvg(g,k){return cutSvg(g,true,false,k)+issueSvg(g,'anim',k)}
+function animStats(g){const S=g.stickers.filter(t=>t.status==='READY'),A=S.filter(t=>t.anim_status==='READY'),kb=A.map(t=>(t.anim_metrics||{}).kb||0);
+  return{total:S.length,done:A.length,oob:S.filter(isOob),fail:S.filter(t=>t.anim_status==='FAILED'),avg:kb.length?Math.round(kb.reduce((a,b)=>a+b,0)/kb.length):0,max:Math.max(0,...kb),
+    ms:A.filter(t=>(t.anim_metrics||{}).cache!=='hit').reduce((a,t)=>a+(((t.anim_metrics||{}).ms||{}).finish||0),0),cached:A.filter(t=>(t.anim_metrics||{}).cache==='hit').length}}
+function videoBox(g,k){const sz=g.source.sheet_size;return g.source.video_path&&sz
+  ?`<div class=sbox style="background:#111"><video src="/src/${g.number}/video" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${sz[0]}/${sz[1]};object-fit:fill"></video><svg viewBox="0 0 ${sz[0]} ${sz[1]}" preserveAspectRatio="none">${vcutSvg(g,k)}</svg></div>`
+  :`<div class="gbadmsg mut" style="padding:26px 10px">These animations come from pre-sliced clips, so there is no single video sheet for this batch.</div>`}
+function videoPanel(g){const s=g.source,vi=s.video_info||{},a=animStats(g),bad=a.oob.length+a.fail.length;
+  return`<aside class=gsheet><div class=gshead><b>Video sheet</b><span class=gspace></span><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?`, ${a.oob.length} out`:''}</span></div>
+   ${videoBox(g,2)}
+   <div class=vchips>${g.stickers.map(t=>chip(g,t,'anim')).join('')}</div>
+   <div class="kv vkv"><span>source</span><span>${esc(vi.mode||(s.video_path?'3x3 mp4':'clips'))}${vi.size?' · '+esc(vi.size):''}${vi.fps?' · '+vi.fps+' fps':''}</span>
+    <span>out of bounds</span><span>${a.oob.length?a.oob.map(t=>'S'+t.index).join(', '):'none'}</span><span>no animation</span><span>${a.fail.length?a.fail.map(t=>'S'+t.index).join(', '):'none'}</span>
+    <span>size</span><span>${a.done?`${a.avg} KB average, ${a.max} KB largest`:'-'}</span><span>work</span><span>${a.done?`${(a.ms/1000).toFixed(1)} s${a.cached?` · ${a.cached} from the cache`:''}`:'-'}</span></div>
+   <div class=gsfoot><span class=mut>blue = cuts</span><button class="link" data-act=gvsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'anim')}</aside>`}
+const AV={g:null};
+ACT.gvsheet=el=>{AV.g=+el.dataset.g;animDlg()};
+ACT.gaclose=()=>{AV.g=null;closeDlg()};
+function animDlg(){const g=GM.get(AV.g);if(!g)return;const s=g.source,vi=s.video_info||{},a=animStats(g);
+  const rows=g.stickers.map(t=>{const m=t.anim_metrics||{},ms=m.ms||{},ins=(t.anim_report||[]).find(c=>c.name==='inside_frame'),st=cellState(t),mk=mark(t,'anim'),col=mk?CAT[mk.cat][0]:st==='ok'?'var(--ok)':'var(--mut)';
+    return`<tr><td>${t.index}</td><td style="color:${col}">${mk?esc(CAT[mk.cat][1])+(st==='fail'?': '+esc(t.anim_reason||''):''):CELLTXT[st]}</td><td>${m.frames_out||''}</td><td>${m.fps||''}</td><td>${m.kb||''}</td><td>${m.crf||''}</td>
+      <td>${m.loop_seam!==undefined?m.loop_seam+' / '+m.loop_limit:''}</td><td>${ins?ins.value+' px'+(ins.data&&ins.data.frames_over?`, ${ins.data.frames_over} frames`:''):''}</td><td>${m.cache==='hit'?'from the cache':ms.finish!==undefined?(ms.finish/1000).toFixed(1)+' s':''}</td></tr>`}).join('');
+  const bad=g.stickers.flatMap(t=>(t.anim_report||[]).filter(c=>!c.ok).map(c=>`<div class=chk><i class=cdot style="--cc:${CAT[CATOF[c.name]||'bad'][0]}"></i><span class="${c.severity==='WARN'?'w':'f'}">S${t.index} ${esc(c.name)}</span> <span class=mut>${esc(c.detail||'')}</span></div>`)).join('');
+  dlg(`<div class="sheetdlg animdlg"><div class=mrow><h2 style="margin:0">Video sheet & analysis <span class=mut style="font-weight:500">${g.generation_id} · sheet ${s.subject_id}</span></h2><button class=btn data-act=gaclose>✕</button></div>
+   <div class=sgrid><div>${videoBox(g,1.4)}<div class=mut style="margin-top:8px">Blue dashed lines: where the video is cut into one animation per sticker.</div>${legend(g,'anim')}</div>
+    <div class=sside><h3>Source</h3><div class=kv style="margin:6px 0 12px"><span>mode</span><span>${esc(vi.mode||'')}</span>${vi.file?`<span>file</span><span>${esc(vi.file)}</span><span>video</span><span>${esc(vi.size||'')} · ${vi.fps||''} fps · ${vi.duration||''} s · ${esc(vi.codec||'')}</span>`:`<span>clips</span><span>${esc(vi.clip_format||'')} (one transparent clip per sticker)</span>`}
+     <span>animated</span><span>${a.done} of ${a.total}</span><span>work this time</span><span>${(a.ms/1000).toFixed(1)} s${a.cached?` · ${a.cached} read back from the cache`:''}</span></div>
+     <h3>Every animation</h3><table class=stbl><tr><th>#</th><th>result</th><th>frames</th><th>fps</th><th>KB</th><th>crf</th><th>loop seam / limit</th><th>on the border</th><th>time</th></tr>${rows}</table>
+     <h3 style="margin-top:12px">Checks that did not pass</h3>${bad||'<div class=mut>Every check passed.</div>'}</div></div></div>`)}
+/* the same sheet, always on the Generate page beside the stickers (Raw / Keyed per batch) */
+const SHK=new Set();
+function sheetPanel(g){const s=g.source,size=s.sheet_size;if(!size||!s.sheet_copy)return'';
+  const keyed=SHK.has(g.number)&&s.keyed,base=`/out/${g.generation_id}/`,G=s.grid,[W,H]=size;
+  const cut=G?`<span class="gcut ${G.method==='gutter'||G.method==='single'?'ok':'warn'}">${G.method==='gutter'?'cut at gutters':'cut: '+esc(G.method)}</span>`:'';
+  return`<aside class=gsheet><div class=gshead><b>Green screen</b><span class=gspace></span><div class=tabs>
+    <button class="tab ${keyed?'':'on'}" data-act=gshk data-g=${g.number} data-k=0>Raw</button><button class="tab ${keyed?'on':''}" data-act=gshk data-g=${g.number} data-k=1 ${s.keyed?'':'disabled'}>Keyed</button></div></div>
+   <div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+(keyed?s.keyed:s.sheet_copy)}" alt="${keyed?'Background removed':'Raw sheet'}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
+   <div class=vchips>${g.stickers.map(t=>chip(g,t,'still')).join('')}</div>
+   <div class=gsfoot>${cut}<span class=mut>blue = cuts, yellow = sticker edge</span><button class="link" data-act=gsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'still')}</aside>`}
+ACT.gshk=el=>{const n=+el.dataset.g;if(el.dataset.k==='1')SHK.add(n);else SHK.delete(n);glast='';tick(true)};
 ACT.gsheet=el=>{SV.g=+el.dataset.g;SV.view='raw';SV.lines=true;SV.boxes=true;sheetDlg()};
 function sheetDlg(){const g=GM.get(SV.g);if(!g)return;const s=g.source,base=`/out/${g.generation_id}/`,size=s.sheet_size,G=s.grid;if(!size||!s.sheet_copy)return toast('This sheet has not been read yet',1);
   const [W,H]=size,keyedEv=[...g.events].reverse().find(e=>e.stage==='keyed'&&e.status==='done'),kd=(keyedEv&&keyedEv.detail)||{},th=(kd.threshold||[]).slice().sort((a,b)=>a-b);
   const img=SV.view==='keyed'&&s.keyed?base+s.keyed:base+s.sheet_copy;
-  let svg='';const sw=Math.max(2,W/450);
-  if(G&&SV.lines)svg+=G.xs.slice(1,-1).map(x=>`<line x1=${x} y1=0 x2=${x} y2=${H} stroke="#2563eb" stroke-width=${sw} stroke-dasharray="${W/50} ${W/90}"/>`).join('')+G.ys.slice(1,-1).map(y=>`<line x1=0 y1=${y} x2=${W} y2=${y} stroke="#2563eb" stroke-width=${sw} stroke-dasharray="${W/50} ${W/90}"/>`).join('');
-  g.stickers.forEach(t=>{const m=t.metrics||{},c=m.cell,b=m.bbox;if(!c)return;
-    if(SV.lines)svg+=`<text x=${c[0]+W/90} y=${c[1]+W/22} font-size=${W/26} font-weight=700 fill="#2563eb" stroke="#fff" stroke-width=${W/380} paint-order=stroke>${t.index}</text>`;
-    if(SV.boxes&&b)svg+=`<rect x=${c[0]+b[0]} y=${c[1]+b[1]} width=${b[2]-b[0]} height=${b[3]-b[1]} fill=none stroke="${t.status==='FAILED'?'#ef4444':'#facc15'}" stroke-width=${sw*1.4}/>`});
+  const svg=cutSvg(g,SV.lines,SV.boxes);
   const checks=(g.verify.sheet||[]).map(c=>`<div class=chk><span class="${c.ok?'p':(c.severity==='WARN'?'w':'f')}">${c.ok?'✓':c.severity==='WARN'?'!':'✗'} ${esc(c.name)}</span> <span class=mut>${esc(c.detail||'')}</span></div>`).join('');
   const rows=g.stickers.map(t=>{const m=t.metrics||{};return`<tr><td>${t.index}</td><td>${t.status==='READY'?'<span style="color:var(--ok)">ready</span>':`<span style="color:var(--bad)">${esc(t.reason||t.status)}</span>`}</td><td>${m.fg_px!==undefined?m.fg_px:''}</td><td>${m.threshold!==undefined?m.threshold:''}</td><td>${m.scale||''}</td><td>${esc((m.warnings||[]).join(', '))}</td></tr>`}).join('');
   dlg(`<div class=sheetdlg><div class=mrow><h2 style="margin:0">Green screen & cuts <span class=mut style="font-weight:500">${g.generation_id} · sheet ${s.subject_id} · ${W}×${H}</span></h2><button class=btn data-act=gsclose>✕</button></div>
@@ -202,46 +405,83 @@ function sheetDlg(){const g=GM.get(SV.g);if(!g)return;const s=g.source,base=`/ou
     <div class=sside><h3>Analysis</h3>${checks||'<div class=mut>No sheet checks recorded.</div>'}
      <div class=kv style="margin:10px 0"><span>background sampled</span><span>${kd.bg?`rgb(${kd.bg.join(', ')})`:'?'}</span><span>key threshold</span><span>${th.length?`${th[0]} to ${th[th.length-1]} (per cell)`:'?'}</span><span>cut</span><span>${esc(kd.cut||(G&&G.method)||'?')}${G&&G.method!=='gutter'&&G.method!=='single'?' (a character may cross a cut)':''}</span><span>grid</span><span>${g.grid[0]}×${g.grid[1]}</span></div>
      <table class=stbl><tr><th>#</th><th>result</th><th>subject px</th><th>threshold</th><th>scale</th><th>warnings</th></tr>${rows}</table>
-     <div class=mut style="margin-top:8px">Blue dashed lines: where the sheet is cut (in the gaps between characters). Yellow boxes: each sticker's measured boundary; red: blocked.</div></div></div></div>`)}
+     <div class=mut style="margin-top:8px">Blue dashed lines: where the sheet is cut (in the gaps between characters). Yellow boxes: each sticker's measured boundary.</div>${legend(g,'still')}</div></div></div>`)}
 ACT.gsview=el=>{SV.view=el.dataset.v;sheetDlg()};
 ACT.gstog=el=>{SV[el.dataset.k]=el.checked;sheetDlg()};
 ACT.gsclose=()=>{SV.g=null;closeDlg()};
 
 /* ---------- "Get the Higgsfield prompt": when nothing prepared matches the request */
 ACT.ghiggs=async()=>{const p=$('prompt').value.trim();if(!p)return;
-  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:'flat_vector'});if(!r.ok)return toast(r.j.error,1);
+  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:'flat_vector',ai:GAI.configured});if(!r.ok)return toast(r.j.error,1);
   dlg(`<div class=vdlg><h2>Prompt for Higgsfield</h2><div class=mut>Nothing prepared matches “${esc(p)}”. Generate the sheet, name the folder as shown below, and it appears here.</div>
    <h3>Sheet prompt</h3><textarea readonly rows=9 id=hp1>${esc(r.j.sheet_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp1>Copy sheet prompt</button></div>
    <h3>Video prompt</h3><textarea readonly rows=5 id=hp2>${esc(r.j.video_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp2>Copy video prompt</button></div>
    <div id=hres></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class="btn pri" data-act=hreserve>Reserve the folder names</button></div></div>`)};
 ACT.hcopy=async el=>{try{await navigator.clipboard.writeText($(el.dataset.t).value);toast('Copied')}catch(e){toast('Copy failed',1)}};
-ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:'flat_vector'});if(!r.ok)return toast(r.j.error,1);
+ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:'flat_vector',ai:GAI.configured});if(!r.ok)return toast(r.j.error,1);
   $('hres').innerHTML=`<div class=card style="margin:10px 0"><b>Create these two folders and name the downloads into them</b><br><code>${esc(r.j.paths.img)}</code><br><code>${esc(r.j.paths.vid)}</code><div class=mut>The sheet goes in <b>${esc(r.j.folders.img)}</b>, the video in <b>${esc(r.j.folders.vid)}</b>. Then press Generate again.</div></div>`};
 
 /* ---------- one sticker, larger */
-function gmodal(){if(!MD)return;const g=GM.get(MD.g);if(!g){MD=null;return}const t=g.stickers[MD.i-1],base=`/out/${g.generation_id}/`;
-  const still=t.png?`<img src="${base+t.png}">`:`<div class=mut style="padding:12px">${esc(t.status)}${t.reason?': '+esc(t.reason):''}</div>`;
+function gmodal(){if(!MD)return;const g=GM.get(MD.g);if(!g){MD=null;return}const t=g.stickers[MD.i-1],base=`/out/${g.generation_id}/`,ap=animPhase(g),v=t.edited_at||t.rendered_at||0;
+  const still=t.png?`<img src="${base+t.png}?e=${v}">`:`<div class=mut style="padding:12px">${esc(t.status)}${t.reason?': '+esc(t.reason):''}</div>`;
   const vid=t.webm&&t.anim_status==='READY'?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:`<div class=mut style="padding:12px">${t.anim_status==='NOT_REQUESTED'?'Not animated yet':esc(t.anim_status)+(t.anim_reason?': '+esc(t.anim_reason):'')}</div>`;
-  const rows=cs=>(cs||[]).map(r=>`<div class=chk><span class="${r.ok?'p':(r.severity==='WARN'?'w':'f')}">${r.ok?'✓':r.severity==='WARN'?'!':'✗'} ${esc(r.name)}</span> <span class=mut>${esc(r.detail||'')}</span></div>`).join('');
+  const rows=cs=>(cs||[]).filter(r=>MD.all||!r.ok).map(r=>`<div class=chk><i class=cdot style="--cc:${r.ok?'#22c55e':CAT[CATOF[r.name]||'bad'][0]}"></i><span class="${r.ok?'p':(r.severity==='WARN'?'w':'f')}">${r.ok?'✓':r.severity==='WARN'?'!':'✗'} ${esc(r.name)}</span> <span class=mut>${esc(r.detail||'')}</span></div>`).join('');
+  const mk=mark(t,ap?'anim':'still'),m=t.metrics||{},am=t.anim_metrics||{},
+    meas=[['scale',m.scale],['scale mode',m.scale_mode],['key threshold',m.threshold],['still KB',m.kb],['holes',m.holes],['frames',am.frames_out],['fps',am.fps],['animation KB',am.kb],['crf',am.crf],['loop seam',am.loop_seam!==undefined?am.loop_seam+' / '+am.loop_limit:undefined]].filter(x=>x[1]!==undefined&&x[1]!==null&&x[1]!==''),
+    off=ap&&t.anim_status==='READY'?['REJECTED','BLOCKED'].includes(t.review.anim):t.review.still==='REJECTED',
+    act=t.status==='READY'&&(!ap||t.anim_status==='READY')?`<button class="btn ${off?'pri':''}" data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=${off?0:1}>${off?(ap&&t.review.anim==='BLOCKED'?'Include anyway':'Bring back'):'Drop from the set'}</button>`:'',
+    path=(t.history||[]).slice().reverse().map(h=>`<div class=hrow><span class=mut>${new Date(h.ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span> <b>${esc(h.stage)}</b> ${esc(h.actor)} ${esc(h.decision)}${h.reason?` <span class=mut>· ${esc(h.reason)}</span>`:''}</div>`).join('');
+  const bad=(t.report||[]).concat(t.anim_report||[]).some(r=>!r.ok);
   $('modal').innerHTML=`<div class=mbox style="width:min(900px,96vw)"><div class=mrow><button class="btn nav" data-act=gstep data-d=-1>‹</button>
    <div style="flex:1"><b>${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=mut>${esc(t.tags.join(' · '))}</div></div>
-   ${t.status==='READY'?`<button class=btn data-act=gedit>${ic('edit')} Edit</button>`:''}<button class="btn nav" data-act=gstep data-d=1>›</button><button class=btn data-act=gmclose>✕</button></div>
+   ${t.status==='READY'?`<button class=btn data-act=gedit title="${t.anim_status==='READY'?'Text, emoji and trim over the animation; one Save updates the image and the animation':'Add text or emoji'}">${ic('edit')} Edit${t.anim_status==='READY'?' (image + animation)':''}</button>`:''}<button class="btn nav" data-act=gstep data-d=1>›</button><button class=btn data-act=gmclose>✕</button></div>
+   ${mk?`<div style="margin:6px 0 2px">${mk.issues.map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join('')}</div>`:''}
    <div class=mpanes><div class=pane><div class=mut>Sticker</div><div class="box bg-${bg}">${still}</div></div><div class=pane><div class=mut>Animation</div><div class="box bg-${bg}">${vid}</div></div></div>
-   <details ${t.status==='FAILED'||(t.report||[]).some(r=>!r.ok)?'open':''}><summary class=mut>What Python checked</summary>${rows(t.report)||'<div class=mut>nothing yet</div>'}${rows(t.anim_report)}</details>
+   ${act?`<div class=row style="margin:8px 0 2px">${act}</div>`:''}
+   <details ${bad?'open':''}><summary class=mut>What Python checked</summary>${rows(t.report)}${rows(t.anim_report)||''}${(rows(t.report)||rows(t.anim_report))?'':`<div class=mut>${(t.report||[]).length||(t.anim_report||[]).length?'Every check passed.':'nothing yet'}</div>`}
+    <button class=link data-act=gmall>${MD.all?'Show only problems':'Show every check'}</button></details>
+   <details><summary class=mut>Path (every decision, newest first)</summary>${path||'<div class=mut>no decisions yet</div>'}</details>
+   ${meas.length?`<details><summary class=mut>Measurements</summary><div class="kv vkv">${meas.map(x=>`<span>${x[0]}</span><span>${esc(String(x[1]))}</span>`).join('')}</div></details>`:''}
    <div class=mut style="margin-top:8px">${esc(t.prompt)}</div><div class=mut>← → to browse, Esc to close</div></div>`;
   $('modal').classList.add('on');$('modal').onclick=e=>{if(e.target.id==='modal')ACT.gmclose()}}
-ACT.gopen=el=>{MD={g:+el.dataset.g,i:+el.dataset.i};gmodal()};
+ACT.gmall=()=>{MD.all=!MD.all;gmodal()};
+ACT.gopen=el=>{MD={g:+el.dataset.g,i:+el.dataset.i,all:!!(MD&&MD.all)};gmodal()};
 ACT.gmclose=()=>{MD=null;$('modal').classList.remove('on')};
 ACT.gstep=el=>{if(!MD)return;const g=GM.get(MD.g),n=g.stickers.length;MD.i=((MD.i-1+(+el.dataset.d)+n)%n)+1;gmodal()};
-ACT.gedit=()=>{const g=GM.get(MD.g),t=g.stickers[MD.i-1];ACT.gmclose();Ed.openImage(`/out/${g.generation_id}/${t.png}`,{outlined:g.outline_px>0,name:t.name,emoji:t.emoji})};
+ACT.gedit=()=>{const g=GM.get(MD.g),t=g.stickers[MD.i-1];ACT.gmclose();return studioEditSticker(g.number,t.index);Ed.openImage(`/out/${g.generation_id}/${t.png}?e=${t.edited_at||0}`,{back:{gen:g.number,index:t.index},outlined:g.outline_px>0,name:t.name,emoji:t.emoji})};
 document.addEventListener('keydown',e=>{if(!MD)return;if(e.key==='Escape')ACT.gmclose();if(e.key==='ArrowRight')ACT.gstep({dataset:{d:1}});if(e.key==='ArrowLeft')ACT.gstep({dataset:{d:-1}})});
+
+/* animations made before the border check existed have no verdict: judge them once (the server decodes the source cells, no re-encode) */
+const RECHK=new Set();
+function autoRecheck(g){if(RECHK.has(g.number)||processing(g)||making(g))return;
+  const old=t=>t.anim_status==='READY'&&!t.bounds_checked&&!(t.anim_report||[]).some(c=>c.name==='inside_frame'||c.name==='inside_slot')&&(((t.anim_metrics||{}).source||'')==='3x3 mp4'||String((t.anim_metrics||{}).source||'').startsWith('clip:'));
+  if(!g.stickers.some(old))return;RECHK.add(g.number);
+  post(`/api/generations/${g.number}/recheck`).then(r=>{if(!r.ok&&r.status===409){RECHK.delete(g.number);return}
+    if(r.ok&&r.j.flagged.length)toast(`${g.generation_id}: ${r.j.flagged.map(i=>'S'+i).join(', ')} leave${r.j.flagged.length===1?'s':''} the cell and ${r.j.flagged.length===1?'is':'are'} now blocked (checked now, these were made before the check existed)`,1);
+    glast='';tick(true)})}
+
+/* ---------- Edit a sticker from the Studio, a pack or the library
+   A sticker WITH an animation is edited as layers (text, emoji, stickers, with timing) over its ORIGINAL animation in the video editor; Save to sticker
+   exports the layers to the animation AND the image together, and the pack copies follow. A sticker without one is edited in the image editor.
+   The edit lives in the Studio (a project); the generator's files stay in source/orig. */
+async function studioEditAnim(gnum,index){const r=await postWait(`/api/generations/${gnum}/studio_edit`,{index,action:'open'},'Waiting for the previous step…');if(!r.ok)return toast(r.j.error,1);
+  P.studio={gen:gnum,index,project:r.j.project};P.packEdit=null;location.hash='#/prepare/'+r.j.project}
+async function studioEditSticker(gnum,index){const r=await api('/api/generations/'+gnum);if(!r.ok)return toast('That batch is not available any more',1);const g=r.j,t=g.stickers[index-1],anim=t.anim_status==='READY'&&t.webm;
+  if(!SES.gens.includes(g.number)){SES={prompt:g.prompt||'',gens:[g.number],off:[],pack:''};saveSes()}GS.tab=anim?'anim':'stickers';
+  if(anim)return studioEditAnim(g.number,index);
+  Ed.openImage(`/out/${g.generation_id}/${t.png}?e=${t.edited_at||0}`,{back:{gen:g.number,index},outlined:g.outline_px>0,name:t.name,emoji:t.emoji})}
+/* send a created sticker back to the Studio: its batch, on the right view */
+ACT.openstudio=async el=>{const gid=+String(el.dataset.gen||'').replace(/\D/g,'');const r=await api('/api/generations/'+gid);if(!r.ok)return toast('That batch is not available any more',1);
+  const t=r.j.stickers[+el.dataset.i-1];SES={prompt:r.j.prompt||'',gens:[gid],off:[],pack:''};saveSes();GS.tab=el.dataset.view||(t&&t.anim_status==='READY'?'anim':'stickers');glast='';location.hash='#/studio'};
+ACT.lcstudioedit=el=>{const s=LCL[LCI];lcClose();studioEditSticker(+String(s.source.generation).replace(/\D/g,''),s.source.index)};
+ACT.lcopenstudio=()=>{const s=LCL[LCI];lcClose();ACT.openstudio({dataset:{gen:s.source.generation,i:s.source.index}})};
 
 /* ---------- polling: only while this screen is open */
 async function tick(force){try{
   if(route_!=='generate'&&!MD&&VG===null&&SV.g===null)return;
-  const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health;
-  const hh=$('ghealth');if(hh)hh.innerHTML=GHEALTH&&GHEALTH.vp9===false?'<div class=warn>This ffmpeg cannot encode VP9, so animations will fail. Run <code>python -m mirsal doctor</code>.</div>':'';
-  let key='';for(const id of SES.gens){const r=await api('/api/generations/'+id);if(r.ok){GM.set(id,r.j);key+=JSON.stringify(r.j)}else if(r.status===404){SES.gens=SES.gens.filter(x=>x!==id);saveSes()}}
+  const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health;GSTALE=!!(h.ok&&h.j.stale);
+  const hh=$('ghealth');if(hh)hh.innerHTML=(GSTALE?'<div class=warn><b>This server is running older code than the files on disk.</b> New buttons may say “not found” and fixes will not apply until you restart it: press Ctrl+C in its terminal, then run <code>python -m mirsal serve</code> from the <code>mirsal</code> folder.</div>':'')+(GHEALTH&&GHEALTH.vp9===false?'<div class=warn>This ffmpeg cannot encode VP9, so animations will fail. Run <code>python -m mirsal doctor</code>.</div>':'');
+  let key='';for(const id of SES.gens){const r=await api('/api/generations/'+id);if(r.ok){GM.set(id,r.j);key+=JSON.stringify(r.j);autoRecheck(r.j)}else if(r.status===404){SES.gens=SES.gens.filter(x=>x!==id);saveSes()}}
   for(const id of [...ANIM]){const g=GM.get(id);if(g&&animPhase(g)&&!processing(g))ANIM.delete(id)}
   key+=bg+SES.off.join()+SES.pack+[...ANIM].join()+(LIB.packs||[]).length;
   if(force||key!==glast){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg()}

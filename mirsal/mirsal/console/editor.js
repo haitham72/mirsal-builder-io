@@ -58,7 +58,7 @@ const pushLayer=L=>{E.layers.push(L);E.sel=L.id;commit();ui();redraw()};
 
 /* ---------- sessions */
 function startSession(layers,o={}){Object.assign(E,{layers:[],sel:null,tool:'select',undo:[],redo:[],pool:E.pool,name:o.name||'sticker',emoji:o.emoji||'🙂',pack:o.pack||Ed.targetPack||null,
-  srcBlob:o.srcBlob||null,info:o.info||null,outlined:!!o.outlined,active:true,border:{on:!o.outlined,w:12,color:'#ffffff',shadow:true,blur:8}});
+  srcBlob:o.srcBlob||null,info:o.info||null,back:o.back||null,outlined:!!o.outlined,active:true,border:{on:!o.outlined,w:12,color:'#ffffff',shadow:true,blur:8}});
  E.layers=layers;E.sel=layers.length?layers[layers.length-1].id:null;E.mainId=layers[0]&&layers[0].type==='subject'?layers[0].id:null;
  commit();location.hash='#/editor';if(route_==='editor')RENDER.editor()}
 async function blobToImg(b){return await createImageBitmap(b)}
@@ -105,7 +105,7 @@ function ui(){if(!E.active||!$('edl'))return;const L=cur_();
   <button class=iconbtn data-act=edundo ${E.undo.length>1?'':'disabled'} title="Undo (Ctrl+Z)">${ic('undo')}</button><button class=iconbtn data-act=edredo ${E.redo.length?'':'disabled'} title="Redo (Ctrl+Y)">${ic('redo')}</button>
   <select id=edzoom>${[.5,.75,1,1.5,2].map(z=>`<option value=${z} ${z===E.zoom?'selected':''}>${z*100}%</option>`).join('')}</select>
   <select id=edpv title="Preview background">${['checker','light','dark','chat'].map(b=>`<option value=${b} ${b===E.bgv?'selected':''}>${b}</option>`).join('')}</select>
-  <button class="btn pri" data-act=edsave style="padding:8px 26px">Save</button><button class=iconbtn data-act=edback title="Close">${ic('x')}</button>`;
+  <button class="btn pri" data-act=edsave style="padding:8px 26px" title="${E.back?'Save the changes to this sticker and go back to the Studio':'Save to a pack'}">${E.back?'Save to sticker':'Save'}</button><button class=iconbtn data-act=edback title="${E.back?'Back to the Studio without saving':'Close'}">${ic('x')}</button>`;
  $('edzoom').onchange=e=>zoomTo(+e.target.value);$('edpv').onchange=e=>{E.bgv=e.target.value;$('edv').className='ed-view pnl vbg-'+E.bgv};
  $('edl').innerHTML=`<div class=ph style="padding:8px 10px 0">Layers</div>${TOOLS.map(([k,i,l])=>`<button class="tool ${E.tool===k?'on':''}" data-act=edtool data-t=${k}>${ic(i)}${l}</button>`).join('')}
   <div class=divl></div><div class=row style="justify-content:flex-end;margin:0 6px"><button class=iconbtn data-act=addtext title="Add text layer">${ic('plus')}</button></div>
@@ -144,7 +144,7 @@ const S_ED=$('s-editor');
 S_ED.addEventListener('input',e=>{const n=e.target.dataset&&e.target.dataset.inp;if(!n||!INP[n])return;INP[n](e.target);redraw();if(e.target.type==='range'||e.target.type==='number')S_ED.querySelectorAll('[data-inp="'+n+'"]').forEach(x=>{if(x!==e.target&&(x.type==='range'||x.type==='number'))x.value=e.target.value});if(n==='text'||n==='tsize')ui2()});
 S_ED.addEventListener('change',e=>{const n=e.target.dataset&&e.target.dataset.inp;if(!n||!INP[n])return;INP[n](e.target);redraw();commit();ui()});
 function ui2(){const L=cur_();if(L&&$('edl')){const rows=$('edl').querySelectorAll('.lay');rows.forEach(r=>{if(+r.dataset.id===L.id)r.querySelector('.nm').textContent=label(L)})}}
-ACT.edback=()=>{location.hash='#/create'};ACT.edundo=undo;ACT.edredo=redo;
+ACT.edback=()=>{if(E.back){E.back=null;E.active=false;location.hash='#/studio'}else location.hash='#/create'};ACT.edundo=undo;ACT.edredo=redo;
 
 ACT.edtool=el=>{E.tool=el.dataset.t;if((E.tool==='erase'||E.tool==='restore')&&!(cur_()&&cur_().type==='subject')){const s=E.layers.find(l=>l.type==='subject');if(s)E.sel=s.id}ui();redraw();$('edc')&&($('edc').style.cursor=E.tool==='erase'||E.tool==='restore'?'crosshair':E.tool==='select'?'default':'default')};
 ACT.laysel=el=>{E.sel=+el.dataset.id;ui();redraw()};
@@ -197,7 +197,11 @@ document.addEventListener('keyup',e=>{if(e.code==='Space')E.space=false});
 /* ---------- Export (DESKTOP_06) */
 function finalCanvas(){const c=off();compose(c.getContext('2d'),true);return c}
 ACT.edsave=async()=>{if(!E.layers.some(l=>l.vis)){return toast('Nothing to save: every layer is hidden',1)}
- const c=finalCanvas();E.dataUrl=c.toDataURL('image/png');E.blob=await new Promise(r=>c.toBlob(r,'image/png'));E.saved=null;location.hash='#/export'};
+ const c=finalCanvas();E.dataUrl=c.toDataURL('image/png');
+ if(E.back){/* opened from Generate: the edit is saved in place and we go back, we never left that screen */
+  const b=E.back,r=await post(`/api/generations/${b.gen}/edit`,{index:b.index,png:E.dataUrl});if(!r.ok)return dlg(`<h2>Could not save</h2><div class=warn>${esc(r.j.error||'The server did not answer. Restart it and try again.')}</div><div class=mut>Your edit is still open in the editor.</div><div class=row style="justify-content:flex-end"><button class="btn pri" data-act=dlgx>OK</button></div>`);
+  E.back=null;E.active=false;E.dataUrl='';toast('Sticker saved');location.hash='#/studio';return}
+ E.blob=await new Promise(r=>c.toBlob(r,'image/png'));E.saved=null;location.hash='#/export'};
 RENDER.export=async()=>{await loadLib();const el=$('s-export');
  if(!E.dataUrl){el.innerHTML=`<div class=card style="margin:40px auto;width:420px;text-align:center;padding:30px"><h2>Nothing to export</h2><button class="btn pri" data-act=nav data-to=create>Create</button></div>`;return}
  const packs=LIB.packs,pid=E.pack&&packById(E.pack)?E.pack:packs.length?packs[packs.length-1].id:'__new',sv=E.saved;

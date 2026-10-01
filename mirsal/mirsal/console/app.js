@@ -58,11 +58,11 @@ const packById=id=>LIB.packs.find(p=>p.id===id);
 
 /* ---------- router */
 const SCREENS=['generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
-const RAIL=[['generate','gen','Generate'],['history','hist','History'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
+const RAIL=[['generate','gen','Studio'],['history','hist','History'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
 let route_='generate',PACK_ID=null;
 function drawRail(){$('rail').innerHTML=`<div class=logo>M</div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
-ACT.nav=el=>{location.hash='#/'+el.dataset.to};
-function route(){const h=location.hash.replace(/^#\/?/,'')||'generate',ps=h.split('/'),n=ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'generate';
+ACT.nav=el=>{location.hash='#/'+(el.dataset.to==='generate'?'studio':el.dataset.to)};
+function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'generate',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'generate';
  SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCol2();if(RENDER[route_])RENDER[route_](a)}
 window.addEventListener('hashchange',route);
 
@@ -78,6 +78,52 @@ function drawCol2(){const on=['library','pack','chat'].includes(route_);document
 
 /* ---------- Library (DESKTOP_01) */
 let PACKS_ALL=false,LCL=[],LCI=null;
+/* bulk selection (the square marker on a sticker), shared by the pack screen and My Stickers */
+const SEL=new Map(),selKey=(p,i)=>p+':'+i;
+const selRefresh=()=>{if(route_==='pack')drawPack();else if(route_==='library')libBody()};
+ACT.lsel=el=>{const k=selKey(el.dataset.p,el.dataset.id);if(SEL.has(k))SEL.delete(k);else SEL.set(k,{pack_id:el.dataset.p,id:el.dataset.id});selRefresh()};
+ACT.lselall=()=>{(route_==='pack'?(packById(PACK_ID)||{stickers:[]}).stickers.map(s=>({pack_id:PACK_ID,id:s.id})):LCL.map(s=>({pack_id:s.pack_id,id:s.id}))).forEach(x=>SEL.set(selKey(x.pack_id,x.id),x));selRefresh()};
+ACT.lselnone=()=>{SEL.clear();selRefresh()};
+ACT.lseldel=()=>{const items=[...SEL.values()];if(!items.length)return;
+  confirmDlg(`Delete ${items.length} sticker${items.length===1?'':'s'}? This cannot be undone.`,async()=>{const r=await post('/api/stickers/delete',{items});if(!r.ok)return toast(r.j.error,1);
+    SEL.clear();await loadLib();drawCol2();selRefresh();toast(`Deleted ${r.j.deleted} sticker${r.j.deleted===1?'':'s'}`)})};
+/* Explorer-style selection on the pack screen and My Stickers: drag a box on empty space (a plain drag selects only what it touches, Shift adds,
+   Ctrl un-selects what it touches again), Ctrl/Shift+click on a sticker toggles it, Ctrl+A selects all, Esc clears. A plain press on a sticker still
+   opens it / drags it to reorder. */
+const MQ={m:null,quiet:0};
+const selScroller=el=>{for(let n=el;n&&n!==document.body;n=n.parentElement){const o=getComputedStyle(n).overflowY;if((o==='auto'||o==='scroll')&&n.scrollHeight>n.clientHeight)return n}return document.scrollingElement};
+const cellKey=c=>{const b=c.querySelector('.selbox');return b?selKey(b.dataset.p,b.dataset.id):null};
+const cellItem=c=>{const b=c.querySelector('.selbox');return b?{pack_id:b.dataset.p,id:b.dataset.id}:null};
+function mqRect(m){const x0=m.x0-m.sc.scrollLeft,y0=m.y0-m.sc.scrollTop;return{l:Math.min(x0,m.cx),t:Math.min(y0,m.cy),r:Math.max(x0,m.cx),b:Math.max(y0,m.cy)}}
+function mqHits(m,R){return[...m.grid.querySelectorAll('.cell')].filter(c=>{const r=c.getBoundingClientRect();return r.left<R.r&&r.right>R.l&&r.top<R.b&&r.bottom>R.t})}
+function mqResult(m,hits){const out=new Map(m.mode==='replace'?[]:m.base);
+  hits.forEach(c=>{const k=cellKey(c);if(!k)return;if(m.mode==='toggle'){if(out.has(k))out.delete(k);else out.set(k,cellItem(c))}else out.set(k,cellItem(c))});return out}
+function mqUpdate(){const m=MQ.m;if(!m)return;const R=mqRect(m);
+  if(!m.moved){if(Math.hypot(m.cx-(m.x0-m.sc.scrollLeft),m.cy-(m.y0-m.sc.scrollTop))<5)return;m.moved=true;document.body.classList.add('marq');m.grid.classList.add('mdim');m.box=document.createElement('div');m.box.className='marquee';document.body.appendChild(m.box)}
+  Object.assign(m.box.style,{left:R.l+'px',top:R.t+'px',width:(R.r-R.l)+'px',height:(R.b-R.t)+'px'});
+  const res=mqResult(m,mqHits(m,R));m.grid.querySelectorAll('.cell').forEach(c=>c.classList.toggle('msel',res.has(cellKey(c))))}
+function mqScroll(){const m=MQ.m;if(!m)return;const r=m.sc===document.scrollingElement?{top:0,bottom:innerHeight}:m.sc.getBoundingClientRect();
+  const d=m.cy<r.top+44?-(r.top+44-m.cy)/3:m.cy>r.bottom-44?(m.cy-(r.bottom-44))/3:0;if(d&&m.moved){m.sc.scrollTop+=d;mqUpdate()}m.raf=requestAnimationFrame(mqScroll)}
+function mqEnd(commit){const m=MQ.m;if(!m)return;MQ.m=null;cancelAnimationFrame(m.raf);document.body.classList.remove('marq');m.grid.classList.remove('mdim');if(m.box)m.box.remove();
+  if(m.moved&&commit){const res=mqResult(m,mqHits(m,mqRect(m)));SEL.clear();res.forEach((v,k)=>SEL.set(k,v));MQ.quiet=Date.now()+250;selRefresh()}
+  else if(!m.moved&&commit&&m.mode==='replace'&&SEL.size){SEL.clear();selRefresh()}else if(m.moved)selRefresh()}
+document.addEventListener('mousedown',e=>{if(e.button!==0||MQ.m)return;const scr=e.target.closest('#s-pack,#s-library');if(!scr)return;
+  const grid=scr.querySelector('.grid.selgrid');if(!grid)return;
+  if(e.target.closest('button,input,select,textarea,a,label,.selbox,.selbar,.hov,.cap,.phead,.tabs,.fab,.seeall'))return;
+  const mod=e.shiftKey||e.ctrlKey||e.metaKey;if(e.target.closest('.cell')&&!mod)return;
+  e.preventDefault();const sc=selScroller(grid);
+  MQ.m={grid,sc,x0:e.clientX+sc.scrollLeft,y0:e.clientY+sc.scrollTop,cx:e.clientX,cy:e.clientY,mode:e.ctrlKey||e.metaKey?'toggle':e.shiftKey?'add':'replace',moved:false,base:new Map(SEL),box:null,raf:0};
+  MQ.m.raf=requestAnimationFrame(mqScroll)});
+document.addEventListener('mousemove',e=>{if(!MQ.m)return;MQ.m.cx=e.clientX;MQ.m.cy=e.clientY;mqUpdate()});
+document.addEventListener('mouseup',()=>mqEnd(true));
+window.addEventListener('blur',()=>mqEnd(false));
+document.addEventListener('click',e=>{if(Date.now()<MQ.quiet){e.stopPropagation();e.preventDefault();return}
+  if(!(e.ctrlKey||e.metaKey||e.shiftKey))return;const c=e.target.closest('.selgrid .cell');if(!c||e.target.closest('.hov,.selbox'))return;
+  const k=cellKey(c);if(!k)return;e.stopPropagation();e.preventDefault();if(SEL.has(k))SEL.delete(k);else SEL.set(k,cellItem(c));selRefresh()},true);
+document.addEventListener('keydown',e=>{if(!['pack','library'].includes(route_)||/input|textarea|select/i.test((document.activeElement||{}).tagName||'')||$('dlg').classList.contains('on')||$('modal').classList.contains('on'))return;
+  if(e.key==='Escape'&&SEL.size){SEL.clear();selRefresh()}
+  else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'&&document.querySelector('.grid.selgrid')){e.preventDefault();ACT.lselall()}});
+function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
 RENDER.library=async()=>{await loadLib();drawCol2();
  $('s-library').innerHTML=`<div style="max-width:1000px;margin:0 auto"><div class=sh>${ic('sticker')} Sticker Library</div>
   <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
@@ -89,21 +135,22 @@ ACT.seeall=el=>{if(el.dataset.k==='st'){LIBTAB='mine'}else PACKS_ALL=!PACKS_ALL;
 function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.emoji+' '+(s.pack||'')).toLowerCase().includes(q);
  const stTile=(s,i)=>`<div class=st data-act=lcopen data-i=${i} title="${esc(s.name)}">${media(s)}<span class=em>${esc(s.emoji)}</span></div>`;
  let h='';
- if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Generate a pack from a prepared sheet, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Generate</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
+ if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Make a pack in the Studio, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Open Studio</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
  else if(LIBTAB==='recent'){const rs=LIB.recent.filter(hit),ps=LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q)||p.stickers.some(hit)),shown=PACKS_ALL?ps:ps.slice(0,4);
   LCL=rs;
   h=`<div class=row style="justify-content:space-between;margin:6px 0"><h2>Recent</h2><button class=seeall data-act=seeall data-k=st>See all ${ic('chev')}</button></div><div class=strip>${rs.map(stTile).join('')||'<span class=mut>No matches.</span>'}</div>
   <div class=row style="justify-content:space-between;margin:14px 0 8px"><h2>My Packs</h2>${ps.length>4?`<button class=seeall data-act=seeall data-k=pk>${PACKS_ALL?'Show less':'See all'} ${ic('chev')}</button>`:''}</div>
   <div class=plist>${shown.map(p=>`<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${p.stickers.length} stickers</small></div>${ic('chev')}</div>`).join('')||'<div class=mut style="padding:14px">No packs.</div>'}</div>`}
  else{const all=LIB.packs.flatMap(p=>p.stickers.map(s=>({...s,pack_id:p.id,pack:p.name}))).filter(hit);LCL=all;
-  h=`<div class=grid>${all.map((s,i)=>`<div class=cell data-act=lcopen data-i=${i}>${media(s)}<div class=cap>${esc(s.emoji)} ${esc(s.name)}</div></div>`).join('')||'<span class=mut>No matches.</span>'}</div>`}
+  h=`<div class=mut style="margin-bottom:8px">Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects). Then delete them together.</div>${selBarHtml(all.length)}<div class="grid selgrid ${SEL.size?'selmode':''}">${all.map((s,i)=>`<div class="cell ${SEL.has(selKey(s.pack_id,s.id))?'sel':''}" data-act=lcopen data-i=${i}><span class="selbox ${SEL.has(selKey(s.pack_id,s.id))?'on':''}" data-act=lsel data-p=${s.pack_id} data-id=${s.id} title="Select"></span>${media(s)}<div class=cap>${esc(s.emoji)} ${esc(s.name)}</div></div>`).join('')||'<span class=mut>No matches.</span>'}</div>`}
  $('libbody').innerHTML=h}
 ACT.openpack=el=>{location.hash='#/pack/'+el.dataset.id};
 ACT.newpack=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');
 
 /* ---------- Settings */
-RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard();
+RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{};
  $('s-settings').innerHTML=`<div style="max-width:760px;margin:0 auto"><h1>Settings & health</h1><div class=card style="margin-top:12px"><div class=kv>
   <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span><span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
   <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span></div></div>
+  <div class=card style="margin-top:16px"><h2>AI expansion</h2>${ai.configured?`<div class=kv><span>model</span><span><b>${esc(ai.model)}</b></span></div><div class=mut>Type a subject and the AI expands it into the full set, with a key name, tags and emoji for every sticker (Studio, Prompt).</div>`:`<div class=mut>Off. Add <code>ANTHROPIC_API_KEY=…</code> to <code>mirsal/.env</code> (git-ignored) and restart the server: the AI then expands a subject and names every sticker. Until then the built-in sets are used.</div>`}</div>
   ${tgc}<p class=mut style="margin-top:16px">Photo cutout uses the engine's chroma key for green/blue screens and OpenCV GrabCut otherwise (offline). A learned matte model is planned for Phase 3C.</p></div>`};

@@ -4,11 +4,12 @@ from __future__ import annotations
 import json
 import mimetypes
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates, tasks, telegram, watch
+from .. import gates, llm, tasks, telegram, watch
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
@@ -23,6 +24,7 @@ class Console:
     def __init__(self, out: Path, inp: Path, pace: float = 0.0, cfg: EngineConfig | None = None):
         self.out, self.inp, self.pace, self.cfg = out, inp, pace, cfg or EngineConfig()
         self.lock = threading.Lock()   # held while a job runs
+        self.started, self._stale_checked, self._stale = time.time(), 0.0, False
         self._health = None
         self.lib = Library(out)
         self.projects = Projects(out, self.cfg)
@@ -38,6 +40,16 @@ class Console:
             except Exception as e:
                 self._health = {"ffmpeg": None, "vp9": False, "error": str(e)}
         return self._health
+
+    def stale(self, root: Path | None = None) -> bool:
+        """True when a Python file of this program was changed after this server started: Python reads code once, so this process is then running
+        older code than the files on disk (the page itself is read from disk on every load, so it can be newer than the backend)."""
+        now = time.time()
+        if now - self._stale_checked > 3:
+            self._stale_checked = now
+            root = root or Path(__file__).resolve().parents[1]
+            self._stale = any(f.stat().st_mtime > self.started for f in root.rglob("*.py") if "__pycache__" not in f.parts)
+        return self._stale
 
     def submit(self, fn) -> None:
         if not self.lock.acquire(blocking=False):
@@ -167,23 +179,14 @@ def make_handler(c: Console):
                 if not f.is_file():
                     raise pl.PipelineError("not found", 404)
                 return self._file(f)
-            if path.startswith("/api/packs/") and path.endswith("/export"):
-                data, rep = c.lib.export_wastickers(path.split("/")[3], cfg=c.cfg)
-                name = next(p["name"] for p in c.lib.snapshot()["packs"] if p["id"] == path.split("/")[3])
-                self.send_response(200)
-                self.send_header("Content-Type", "application/octet-stream")
-                self.send_header("Content-Length", str(len(data)))
-                self.send_header("Content-Disposition", f'attachment; filename="{name}.wastickers"')
-                self.send_header("X-Export-Report", json.dumps(rep, ensure_ascii=True))
-                self.end_headers()
-                self.wfile.write(data)
-                return
+            if path == "/api/ai":          # is the model available (never the key)
+                return self._json(200, llm.status())
             if path == "/api/search":
                 return self._json(200, {"results": gates.search(c.out, parse_qs(urlparse(self.path).query).get("q", [""])[0])})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
             if path == "/api/generations":
-                return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "generations": pl.summary(c.out)})
+                return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": pl.summary(c.out)})
             if path.startswith("/api/generations/"):
                 gid = int(path.rsplit("/", 1)[1])
                 st = pl.state(c.out, gid)
@@ -235,6 +238,9 @@ def make_handler(c: Console):
                     raise LibraryError("only WebM can be saved into a pack (Telegram-style animated sticker)")
                 data, mime, ext, info = pr.render(parts[2], fmt, decode_overlays(b.get("overlays")))
                 sv = b.get("save")
+                if sv and sv.get("replace"):            # the project of a pack sticker: put the result back into that sticker
+                    rp = sv["replace"]
+                    return self._json(200, dict(lib.replace_file(rp["pack_id"], rp["sticker_id"], data, "webm"), info=info))
                 if sv:
                     if ext != "webm":
                         raise LibraryError("only WebM can be saved into a pack (Telegram-style animated sticker)")
@@ -338,6 +344,8 @@ def make_handler(c: Console):
                 return self._json(200, telegram.save_config(c.out, str(body.get("token", "")), str(body.get("user_id", ""))))
             if path == "/api/telegram/disconnect":
                 return self._json(200, telegram.disconnect(c.out))
+            if path == "/api/stickers/delete":      # bulk delete from the library: [{pack_id, id}, ...]
+                return self._json(200, {"deleted": c.lib.delete_stickers([x for x in body.get("items", []) if isinstance(x, dict)])})
             if path == "/api/watch/remove":      # to the trash, never straight to nothing
                 return self._json(200, watch.remove(c.inp, c.out, str(body.get("number", "")), str(body.get("subject", ""))))
             if path == "/api/watch/restore":
@@ -345,9 +353,9 @@ def make_handler(c: Console):
             if path == "/api/watch/purge":
                 return self._json(200, watch.purge(c.out, str(body.get("id", ""))))
             if path == "/api/plan":      # preview only: nothing is reserved
-                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector")))
+                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
-                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector")))
+                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
             if path == "/api/generations" and body.get("task"):      # Run: a generation linked to its reserved task
                 if c.lock.locked():
                     raise pl.PipelineError("busy", 409)
@@ -404,6 +412,25 @@ def make_handler(c: Console):
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     return self._json(200, gates.quick_sheet(c.out, gid, c.cfg))
+                if parts[3] == "recheck":    # judge animations made before the border check existed (decode + key only)
+                    if not c.lock.acquire(blocking=False):
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    try:
+                        return self._json(200, pl.recheck_bounds(c.out, gid, c.cfg))
+                    finally:
+                        c.lock.release()
+                if parts[3] == "studio_edit":    # layered edit of a sticker with an animation: open (-> project id) / commit (-> image + animation updated)
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    if body.get("action") == "commit":
+                        return self._json(200, pl.studio_edit_commit(c.out, gid, int(body["index"]), c.projects, decode_overlays(body.get("overlays")), c.cfg, c.lib))
+                    return self._json(200, pl.studio_edit_open(c.out, gid, int(body["index"]), c.projects, c.cfg))
+                if parts[3] == "edit":       # the sticker editor, opened from Generate: save the still in place
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    import base64
+                    png = base64.b64decode(str(body.get("png", "")).split(",", 1)[-1] or b"")
+                    return self._json(200, pl.edit_still(c.out, gid, int(body["index"]), png, c.cfg, c.lib))
                 if parts[3] == "drop":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
@@ -411,7 +438,8 @@ def make_handler(c: Console):
                 if parts[3] == "add":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
-                    return self._json(200, gates.quick_add(c.out, gid, c.lib, body.get("pack_id"), body.get("pack_name")))
+                    return self._json(200, gates.quick_add(c.out, gid, c.lib, body.get("pack_id"), body.get("pack_name"), "replace" if body.get("mode") == "replace" else "add",
+                                                   {str(k): v for k, v in (body.get("names") or {}).items() if isinstance(v, dict)}))
                 if parts[3] == "pack_add":
                     return self._json(200, c.lib.add_final(c.out, str(body["pack_id"]), gid))
                 if parts[3] == "animate":
