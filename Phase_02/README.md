@@ -11,8 +11,8 @@ request ─(prompt template v2 + style + stroke [+ AI enhancer] [+ references])�
 
 ## Prompts (`prompter.py`, `emotions.py`, `styles.py`, `prompts/templates/`)
 
-- **Template-locked.** A saved template per grid (`sheet_3x3`, `sheet_2x2`, `single_1x1`, `video`) is filled from a small slot JSON; nobody free-writes a prompt. New plans use **v2**
-  (`TEMPLATE_VERSION`); a saved plan keeps its own version, and `render_plan(..., 1)` still rebuilds the v1 text exactly.
+- **Template-locked.** A saved template per grid (`sheet_3x3`, `sheet_2x2`, `single_1x1`, `video`) is filled from a small slot JSON; nobody free-writes a prompt. New plans use **v3**
+  (`TEMPLATE_VERSION`; v2 is kept as it was, so batches made with it rebuild to the prompt that was sent; v3 asks for "a wide range of emotions AND different states of action" so no two characters share a pose); a saved plan keeps its own version, and `render_plan(..., 1)` still rebuilds the v1 text exactly.
 - **v2 wording is measured, not guessed.** v1 said "sticker" (image models answer with a white die-cut border) and "equal cells / row-major" (Nano Banana 2 painted a
   checkerboard of two greens: bg G 215/252 across cells). v2 says "one illustration of 9 characters arranged in 3 rows of 3 on a single seamless background",
   lists them as `Character N: …`, forbids outlines, and asks for one identical key colour. Measured on Nano Banana 2 at 2k: white-ring share 4.8% → 0.0000, per-cell
@@ -64,6 +64,44 @@ request ─(prompt template v2 + style + stroke [+ AI enhancer] [+ references])�
 - **Warnings in plain words.** A kept-with-a-check sticker says what Python noticed and what to do (for example "looks almost the same as S1: the same pose drawn twice? Kept: drop one with the
   x"), not a check name.
 - `video_v2` also asks for "a wide range of emotions" and "highly expressive faces and bodies".
+
+## Files and names (`export.py`)
+
+The engine keeps its files in `out/G00N/` and `out/jobs/` under its own names (`<media>-<NNN>-<task_slug>-<key>.<ext>`, which the database and the pack use; they never change). For copy
+and paste, every live batch is also **mirrored** into properly named folders after each step (`sync`, never raising, add and refresh only):
+
+```
+out/export/images/img-004-batman_lego/
+    img-004-batman_lego-sheet-nano_banana_flash-2k-20261001.png
+    img-004-batman_lego-s1-ready_to_fight-stroke12px-trim0px-20261001.png      sheet position, action, stroke, trim, date
+    prompts.txt                                                               prompts, models, credits, Higgsfield ids
+out/export/videos/vid-004-batman_lego/
+    vid-004-batman_lego-video-kling3_0-pro-3s-20261001.mp4
+    vid-004-batman_lego-videosheet-gap26-20261001.png                          the sheet that was sent (gap in %)
+    vid-004-batman_lego-s1-ready_to_fight-stroke12px-trim0px-20261001.webm
+```
+
+The folder is `out/export` or the one named by **`MIRSAL_EXPORT_DIR`** (for example a folder you copy from every day; never a watch folder). The server mirrors **every** live batch at start (`sync_all`, so batches made before the mirror existed get their folders) and the newest ones after each step.
+
+`sN` sorts the files in sheet order and ties them to S1..S9; **each stroke/trim setting is its own snapshot** (new names, old files are kept). The date is the file's own date. The watch folders
+(`Phase_01/Images_gen`, `videos_gen`) are never written to: a returned Kling video is laid out for the normalised video sheet, so pairing it with the raw sheet there would be wrong (and a
+prepared pair dropped there is picked up as before). `POST /api/generations/<id>/reveal` opens the batch's folder in the file manager (the Studio's **Open folder**), `GET .../files` returns the paths.
+
+## The queue (`GET /api/jobs`, `live.js`)
+
+The **Queue** is a small panel fixed at the bottom left next to the credits (collapsed: "N running · stage · elapsed of about typical", or "N failed"; open: the rows, expanding upward, state remembered). It lists every job the server knows (it survives a reload): kind, request, model and settings, credits, start time, the Higgsfield job id (with a copy button), a progress bar
+against the typical duration of that model (median of the ledger), and the real stage: waiting to start, Higgsfield is working (elapsed against typical), downloading the result, cutting the
+animations (n of 9 for a video), done, or the reason it failed in plain words (for example a content-filter refusal, `nsfw`, or a temporary HTTP 5xx). A running job also shows on the credits pill.
+**Retry** (`POST /api/jobs/<id>/retry`, `jobs.resume`; not offered for a content-filter refusal, which cannot succeed) waits for the SAME Higgsfield job again when the job has a ticket (a 503 while waiting must not lose a paid video or pay twice), and sends it
+again from scratch when nothing was created.
+
+## Allow anyway (a human override, `gates.allow_animation`)
+
+An animation that Python blocked for **leaving or crossing its slot** (`inside_slot`, `cross_slot`) has no file, because the block saves the encode. The user can **allow it** by clicking the
+sticker's warning banner, its "Allow anyway" button, its chip, or its cell on the video sheet (`POST /api/generations/<id>/allow {index, allow}`): the permission is stored on the sticker
+(`anim_override`), recorded in its history as a human APPROVE ("allowed anyway: cross_slot"), the cell is cut again with that check downgraded to a warning (still listed, "allowed by you"), and
+every later re-slice (an edge change) keeps it. Taking it back (the tile's "undo") blocks it again. Technical blocks (format, size, codec, loop) cannot be allowed, and the review gate itself
+still refuses a blocked animation. Rejected and blocked animations are shown at full strength with a coloured outline instead of being buried under hatching.
 
 ## Jobs (`jobs.py`)
 
