@@ -44,6 +44,7 @@ The phase has checkpoints 1A (static), 1B (animation), 1D (desktop builder, Part
 | 1B video + console video (pre-sliced clips) | **Built and tested on synthetic clips** (2 of 9 cells in the unit test, loop close proven). **Real video not yet passing end to end:** the first real run (before the seam-ratio and CRF-60 fixes) gave 1 READY, 6 `loop_seam`, 1 `size_budget`. **Waiting on Haitham's run** (frame processing is done on his PC while the VPS network block is sorted). |
 | 1C console | **Built**; see Part C. |
 | 1D desktop Sticker Builder | **Built, 25 tests green, headless-browser walk-through on synthetic data; waiting on Haitham's gate** (Part D). |
+| 1G gateway frontend (React) | **Not built. Added 2026-10-01.** Haitham's manual Higgsfield loop runs through it until Phase 3. See Part G. |
 | 1F golden path + review gates | **Not built. Added 2026-10-01 after Haitham's review; it is the spine of the product and the prerequisite for Phase 2.** See "Golden path" below. |
 
 ### Next steps (ordered)
@@ -604,6 +605,83 @@ Try: Create -> drop a real photo -> Auto cutout -> add text/emoji -> Border -> S
 ### Gate for Part E (Haitham)
 
 Try: Create -> drop a short mp4 -> Trim -> Text (type, move, set "visible from/to" with the bar under the timeline) -> Emoji -> Background (green screen clip, then a normal clip with the AI matte) -> GIF -> Download; then Save to pack (needs libvpx-vp9: `python -m mirsal doctor`) and Send to chat. Also drop a photo with a busy background and compare Auto vs GrabCut. Report: cutout quality on your photos and clips, anything in the Prepare layout that feels wrong versus section 21, and which next step comes first.
+
+---
+
+## Part G — The gateway frontend (checkpoint 1G; React, added 2026-10-01)
+
+**Why now.** Until Phase 3 automates generation, Haitham works by hand:
+1. he writes or copies a prompt;
+2. he generates in **Higgsfield**;
+3. he names the downloaded files into the watch folders;
+4. he checks the result in the app.
+
+The frontend is his **gateway** for that loop and for every 1F gate. Phase 5B's stack is therefore brought forward. Phase 5B keeps the parts that need Phase 4–5 (Conversational mode, sessions, SSE, mobile).
+
+**Stack (decided):**
+- **Vite + React + TypeScript**, **Tailwind CSS v4**, **shadcn/ui** (Radix primitives; the code is copied into the repo, not a runtime dependency), **lucide-react** icons.
+- **TanStack Query** for server state. It polls `/api/generations/<id>` every 500 ms now and swaps to SSE in Phase 5A.
+- **Zustand** for local UI state (selection, gate panel, background toggle).
+- **Motion** for tile transitions.
+- No heavy UI kit (MUI/Ant): those fight the Mirsal look.
+- Design tokens come from today's `studio.css` `:root` (Mirsal blue `#3B82F6`, light surfaces, Inter) and `ref/Mirsal-Builder.jpg`, so it is a port, not a redesign.
+
+**Where and how it runs:**
+- **Source:** `mirsal/web/`, with `package.json` and a committed `package-lock.json`.
+- **Build:** `npm run build` writes `mirsal/mirsal/console/dist/`.
+- **Serving:** the existing stdlib server serves `dist/` at `/`.
+- **Dev:** `npm run dev` runs Vite with a proxy to `127.0.0.1:8770`.
+- **Fallback:** if `dist/` is missing, `/` falls back to today's vanilla console. That console stays at `/legacy` until each screen reaches parity and is then deleted.
+- **No Node at runtime.** `python -m mirsal serve` is still the only command Haitham needs after a build. `doctor` reports `frontend: dist built <date>` or `legacy`.
+
+**Screens, in build order (each one usable on its own):**
+
+1. **Inbox (new, the gateway).**
+   - **Prepare a task:** pick a subject, grid (3×3 / 2×2) and style. The page shows the template + slot JSON and the final prompt with a **Copy** button for Higgsfield, plus the video prompt.
+   - Saving **reserves the next folder names** (`img-NNN-<subject>`, `vid-NNN-<subject>`) and writes the task to `out/tasks/<NNN>.json` (`provider: "higgsfield-manual"`, `external_task_id` = the reserved folder name, `name_key` = `task_slug`, `request` = template + slots). This is the Phase 2 `tasks` row, as JSON for now. **The app still never writes inside the watch folders.** Haitham creates the folder with the shown name; a copy-name button and the exact path are shown.
+   - **Watch:** the page lists every watch folder with its state:
+     - `reserved, waiting for file`;
+     - `sheet arrived`;
+     - `video arrived`;
+     - `clips: copies of 001 (ignored)`;
+     - `name invalid`, with the expected pattern and the nearest valid name.
+   - It flags a sheet with no matching task (made outside the app; its prompts come from the stub or a `<sheet>.json`).
+   - **Run:** one click on an arrived sheet starts a generation that is linked to its task, so the prompt used is stored with the result.
+2. **Generate + gates** (the 1F spine):
+   - the stepper;
+   - the raw sheet with the **measured cut lines**;
+   - the tile grid on checker / light / dark / wallpaper;
+   - per tile, the verifier's checks (BLOCK in red with value vs limit, WARN as a badge) and Approve / Reject;
+   - "Approve all READY";
+   - the gate bar G1–G5 with the 409 messages shown inline.
+3. **Video sheet:**
+   - build A1 and preview it with slot numbers;
+   - **Copy prompt + Download sheet** for Higgsfield;
+   - **Upload returned video**, attached to A1;
+   - per-slot results with `inside_slot` / `cross_slot` (frame and overshoot);
+   - G4, then the **Final** pack (G2 ∧ G4) → Add to pack.
+4. **History & search:** each sticker's path (verifier, human, later VLM), and search by `name_key` / key / tags. File search for now; it becomes the Postgres search in Phase 2 behind the same `GET /api/search`.
+5. **Ports of Parts D/E** (Library, Create/Editor, Pack manager, animated editor, Prepare). They stay on `/legacy` until ported; port them one at a time, component for component, keeping the `compose()` pixel logic.
+
+**API additions (stdlib server; the seed of 5A):**
+- `GET/POST /api/tasks` (reserve: returns the folder names);
+- `GET /api/inbox` (watch-folder states, name validation);
+- the 1F gate routes;
+- `GET /api/search?q=`;
+- the existing routes unchanged.
+
+**Rules:**
+- Every control calls a real endpoint (rule 6).
+- Every gate rule is enforced server-side; the UI only displays it.
+- Media is shown to Haitham, never judged by the builder.
+- **Verification:** each screen is walked through in Chrome (the claude-in-chrome tools) on synthetic inputs, with screenshots and zero console errors, before it is called done.
+
+**Checkpoint 1G — exit:**
+- [ ] `npm run build` → `python -m mirsal serve` serves the React app; with no `dist/`, the legacy console still works.
+- [ ] Inbox: reserving a task shows the copyable prompt and folder names. Creating that folder with a sheet flips it to `sheet arrived` within one poll. A misnamed folder is flagged with the expected name.
+- [ ] The 1F synthetic scenario (reject 5, 6 → video blocks 1, 2 → final 3, 4, 7, 8, 9) can be driven entirely from the UI.
+- [ ] A Chrome walk-through of screens 1–4 with no console errors.
+- [ ] **Haitham** does one real loop: reserve → Higgsfield → name the files → run → gates → video sheet → Higgsfield video → upload → final pack.
 
 ---
 

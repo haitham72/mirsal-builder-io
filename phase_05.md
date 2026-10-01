@@ -76,6 +76,8 @@ GET   /api/health  /api/health/models  /api/health/storage
 
 ## 5B — Frontend (Vite + React + TypeScript)
 
+**Brought forward (2026-10-01):** the stack, the app shell and the Inbox / Generate / gates / video-sheet / history screens are built in Phase 1 Part G (`mirsal/web/`). 5B **extends** that app: Conversational mode, sessions, SSE in place of polling, the remaining Part D/E ports if any are left on `/legacy`, and mobile. It does not start a second frontend.
+
 **Layout:**
 - A generation workspace where the stickers dominate, on a checkerboard so transparency is visible.
 - Tiles fill in progressively, each with its status: generating / processing / judging / ✓ / rejected / failed.

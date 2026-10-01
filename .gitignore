@@ -18,3 +18,7 @@ Phase_01/Images_gen/
 Phase_01/videos_gen/
 # Old backups pending deletion
 _to_delete/
+
+# React gateway (Part G): dependencies and build output
+mirsal/web/node_modules/
+mirsal/mirsal/console/dist/
