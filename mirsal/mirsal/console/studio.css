@@ -195,3 +195,8 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 
 .link{border:0;background:none;color:var(--pri-d);font-weight:600;font-size:13px;padding:4px 6px;border-radius:8px}.link:hover{background:var(--pri-l)}.link:disabled{opacity:.4}
 .gpack b{color:var(--tx)}
+/* ---- Send to Telegram (telegram.js) ---- */
+.tgdlg{width:min(540px,92vw)}.tgdlg h2 svg,.tgdlg .check svg,.vdlg h2 svg{width:22px;height:22px;vertical-align:-4px;margin-right:4px}.tgdlg h3{margin:14px 0 4px;font-size:15px}.tgdlg code{background:var(--fill);padding:1px 6px;border-radius:6px}
+.tgdlg a.link{text-decoration:none}.tgdlg .fld{margin:8px 0}.tgdlg .fld label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+.dbox:has(.tgdlg){width:min(560px,94vw)}.dbox:has(.vdlg){width:min(900px,94vw)}.tgdlg,.vdlg{width:auto}.tgdlg input{width:100%}
+a.btn{text-decoration:none;color:inherit}a.btn.pri{color:#fff}

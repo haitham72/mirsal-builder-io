@@ -8,7 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates, tasks, watch
+from .. import gates, tasks, telegram, watch
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
@@ -16,7 +16,7 @@ from ..video_project import MAX_UPLOAD, Projects, decode_overlays
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 class Console:
@@ -101,7 +101,7 @@ def make_handler(c: Console):
         def _guard(self, fn):
             try:
                 fn()
-            except (pl.PipelineError, LibraryError, watch.WatchError) as e:
+            except (pl.PipelineError, LibraryError, watch.WatchError, telegram.TelegramError) as e:
                 self._json(e.code, {"error": str(e)})
             except (ValueError, KeyError, TypeError) as e:
                 self._json(400, {"error": f"bad request: {e}"})
@@ -116,6 +116,21 @@ def make_handler(c: Console):
             path = unquote(urlparse(self.path).path)
             if path == "/":
                 return self._send(200, INDEX.read_bytes(), "text/html; charset=utf-8")
+            if path == "/api/telegram":      # connected or not and which bot: never the token
+                return self._json(200, telegram.status(c.out))
+            if path.startswith("/api/packs/") and path.endswith("/telegram"):          # dry run: what would be created, every problem
+                st = telegram.status(c.out)
+                name = parse_qs(urlparse(self.path).query).get("name", [None])[0]
+                return self._json(200, dict(telegram.plan(c.lib, path.split("/")[3], st["bot"], name, c.cfg), status=st))
+            if path.startswith("/api/packs/") and path.endswith("/telegram.zip"):      # no-credentials fallback: files for @stickers
+                data, name = telegram.zip_for_stickers_bot(c.lib, path.split("/")[3])
+                self.send_response(200)
+                self.send_header("Content-Type", "application/zip")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Content-Disposition", f'attachment; filename="{name}-for-stickers-bot.zip"')
+                self.end_headers()
+                self.wfile.write(data)
+                return
             if path == "/api/watch":       # History: the real watch folders, image and video side by side, plus the trash
                 return self._json(200, {"images": str(c.inp / "Images_gen"), "videos": str(c.inp / "videos_gen"),
                                         "rows": watch.list_rows(c.inp, c.out, pl.generations_by_folder(c.out)), "trash": watch.list_trash(c.out)})
@@ -261,6 +276,8 @@ def make_handler(c: Console):
                 self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order")))
             elif len(parts) == 4 and parts[3] == "delete":
                 lib.delete_pack(parts[2]); self._json(200, {"ok": True})
+            elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)
+                self._json(200, telegram.send(c.out, lib, parts[2], (self._body().get("name") or None), c.cfg))
             elif len(parts) == 4 and parts[3] == "stickers":
                 b = self._body()
                 g = b.get("from_generation") or {}
@@ -317,6 +334,10 @@ def make_handler(c: Console):
             if len(parts) == 6 and parts[:2] == ["api", "generations"] and parts[3:4] == ["video_sheet"] and parts[5] == "video":
                 return self._post_video(int(parts[2]), parts[4], parse_qs(u.query))
             body = self._body()
+            if path == "/api/telegram/config":
+                return self._json(200, telegram.save_config(c.out, str(body.get("token", "")), str(body.get("user_id", ""))))
+            if path == "/api/telegram/disconnect":
+                return self._json(200, telegram.disconnect(c.out))
             if path == "/api/watch/remove":      # to the trash, never straight to nothing
                 return self._json(200, watch.remove(c.inp, c.out, str(body.get("number", "")), str(body.get("subject", ""))))
             if path == "/api/watch/restore":

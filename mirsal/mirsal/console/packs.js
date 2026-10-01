@@ -12,7 +12,7 @@ function drawPack(){
    <div class=pt><h1 style="margin:0">${esc(p.name)}</h1><span class=mut>${n} stickers${anim?` · ${anim} animated`:''} · WhatsApp packs take 3–30 stickers</span></div>
    <div class=pa>
     <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button><button class=btn data-act=pkrename>${ic('edit')} Rename</button>
-    <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button><button class="btn pri" data-act=pkexport ${n?'':'disabled'}>${ic('download')} Export .wastickers</button>
+    <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button><button class=btn data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button><button class="btn pri" data-act=pkexport ${n?'':'disabled'}>${ic('download')} Export .wastickers</button>
     <button class="btn dng" data-act=pkdel>${ic('trash')}</button></div></div></div>
   <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Hover a sticker for preview, edit, cover and delete.</span></div>
   ${n?`<div class=grid id=pkgrid>${p.stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder">${s.id===p.cover?'<span class=badge2>cover</span>':''}${media(s)}

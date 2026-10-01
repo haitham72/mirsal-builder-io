@@ -336,6 +336,14 @@ class Library:
         added = [self.add_from_generation(out, pid, gid, i, "animated") for i in pack["stickers"]]
         return {"added": len(added), "stickers": [a.get("id") for a in added] if isinstance(added[0], dict) else []}
 
+    def set_telegram(self, pid: str, kind: str, block: dict) -> None:
+        """Remember the Telegram set made from this pack (one per kind), so sending again only adds what is new."""
+        with self.lock:
+            db = self._load(); p = self._pack(db, pid)
+            sets = [t for t in p.setdefault("telegram", {}).setdefault("sets", []) if t["kind"] != kind]
+            p["telegram"]["sets"] = sets + [block]
+            self._save(db)
+
     def delete_sticker(self, pid: str, sid: str) -> None:
         with self.lock:
             db = self._load(); p = self._pack(db, pid)

@@ -102,8 +102,8 @@ ACT.openpack=el=>{location.hash='#/pack/'+el.dataset.id};
 ACT.newpack=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');
 
 /* ---------- Settings */
-RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{};
+RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard();
  $('s-settings').innerHTML=`<div style="max-width:760px;margin:0 auto"><h1>Settings & health</h1><div class=card style="margin-top:12px"><div class=kv>
   <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span><span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
   <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span></div></div>
-  <p class=mut>Photo cutout uses the engine's chroma key for green/blue screens and OpenCV GrabCut otherwise (offline). A learned matte model is planned for Phase 3C.</p></div>`};
+  ${tgc}<p class=mut style="margin-top:16px">Photo cutout uses the engine's chroma key for green/blue screens and OpenCV GrabCut otherwise (offline). A learned matte model is planned for Phase 3C.</p></div>`};

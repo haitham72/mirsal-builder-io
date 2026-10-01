@@ -77,6 +77,9 @@ def doctor() -> int:
     from .engine import verify
     tpl = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
     print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
+    from . import telegram
+    t = telegram.status(out_root())
+    print(f"OK      Telegram: connected as @{t['bot']} (user {t['user_id']})" if t["configured"] else "NOTE    Telegram: not connected (optional: Settings -> Telegram, or MIRSAL_TELEGRAM_TOKEN and MIRSAL_TELEGRAM_USER)")
     from . import sources
     subs = sources.known_subjects(input_root())
     from . import matte

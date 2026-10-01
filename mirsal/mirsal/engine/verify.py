@@ -588,3 +588,86 @@ def pack_limits(inp, cfg):
         if s["bytes"] > cap:
             problems.append(f"{s['key']}: {s['bytes'] // 1024}KB > {cap // 1024}KB")
     return _c("pack", "pack_limits", BLOCK, not problems, len(st), cfg.pack_max, "pack within Telegram limits" if not problems else "; ".join(problems), problems=problems)
+
+
+# ================= telegram (Send to Telegram, checkpoint 1H): judged BEFORE any network call =================
+import re as _re
+
+_TG_NAME = _re.compile(r"^[A-Za-z](?:[A-Za-z0-9]|_(?!_))*$")
+
+
+def tg_set_name_problems(name: str, bot: str | None) -> list[str]:
+    """Telegram's rules for a sticker set name: 1-64 chars, letters/digits/underscore, starts with a letter, no double
+    underscore, and it must end with _by_<botusername> (case-insensitive)."""
+    p = []
+    if not 1 <= len(name) <= 64:
+        p.append("the name must be 1-64 characters")
+    if not _TG_NAME.match(name or ""):
+        p.append("use letters, digits and single underscores, starting with a letter")
+    if bot and not name.lower().endswith(f"_by_{bot.lower()}"):
+        p.append(f"the name must end with _by_{bot}")
+    return p
+
+
+def has_white_stroke(rgba: np.ndarray) -> bool:
+    """The die-cut outline Telegram asks for on static stickers: the outermost ring of the subject is white all the way round
+    while the subject itself is not white (a white subject has no ring)."""
+    fg = (rgba[..., 3] > 127).astype(np.uint8)
+    if not fg.any():
+        return False
+    dist = cv2.distanceTransform(fg, cv2.DIST_L2, 3)
+    white = (rgba[..., :3].min(-1) >= 235) & ((rgba[..., :3].max(-1).astype(np.int16) - rgba[..., :3].min(-1)) <= 25)
+    ring = (dist >= 2.5) & (dist <= 6.0)
+    return bool(ring.sum() >= 50 and white[ring].mean() >= 0.85 and white[fg > 0].mean() < 0.7)
+
+
+@check("telegram", "telegram_sticker", BLOCK)
+def telegram_sticker(inp, cfg):
+    """One sticker against Telegram's format table (video: WebM VP9 + alpha; static: PNG/WebP + transparency)."""
+    kind, p = inp["kind"], []
+    cap = cfg.video_max_bytes if kind == "video" else cfg.static_max_bytes
+    w, h = inp["w"], inp["h"]
+    if max(w, h) != cfg.size or min(w, h) > cfg.size:
+        p.append(f"{w}x{h}: one side must be exactly {cfg.size} and neither above it")
+    if inp["bytes"] > cap:
+        p.append(f"{inp['bytes'] // 1024} KB is over the {cap // 1024} KB limit")
+    if not inp.get("alpha"):
+        p.append("no transparency")
+    if kind == "video":
+        i = inp["info"]
+        if i.get("codec") != "vp9":
+            p.append(f"codec {i.get('codec')} (VP9 is required)")
+        if i.get("fps", 0) > cfg.video_max_fps + 0.01:
+            p.append(f"{i['fps']} fps (max {cfg.video_max_fps:g})")
+        if i.get("duration", 0) > cfg.video_max_seconds + 0.05:
+            p.append(f"{i['duration']:.1f} s (max {cfg.video_max_seconds:g})")
+        if i.get("audio"):
+            p.append("has an audio track")
+    n = len(inp.get("emoji") or [])
+    if not 1 <= n <= cfg.tg_emoji_max:
+        p.append(f"{n} emoji (1-{cfg.tg_emoji_max} required)")
+    return _c("telegram", "telegram_sticker", BLOCK, not p, inp["bytes"], cap, "; ".join(p) if p else "meets Telegram's format", problems=p)
+
+
+@check("telegram", "telegram_stroke", WARN)
+def telegram_stroke(inp, cfg):
+    if inp["kind"] != "static" or inp.get("stroke") is None:
+        return None
+    return _c("telegram", "telegram_stroke", WARN, bool(inp["stroke"]), None, None,
+              "has the white stroke Telegram asks for on static stickers" if inp["stroke"] else "no white stroke: Telegram asks for one on static stickers (generate with the outline on)")
+
+
+@check("telegram_set", "telegram_set", BLOCK)
+def telegram_set(inp, cfg):
+    """One set: 1-120 stickers of one kind, unique keys, a valid name ending _by_<bot>."""
+    st, p = inp["stickers"], []
+    if not 1 <= len(st) <= cfg.pack_max:
+        p.append(f"{len(st)} stickers (1-{cfg.pack_max})")
+    keys = [s["key"] for s in st]
+    dup = sorted({k for k in keys if keys.count(k) > 1})
+    if dup:
+        p.append(f"duplicate keys {dup}")
+    p += tg_set_name_problems(inp["name"], inp.get("bot"))
+    if not 1 <= len(inp.get("title", "")) <= 64:
+        p.append("the title must be 1-64 characters")
+    return _c("telegram", "telegram_set", BLOCK, not p, len(st), cfg.pack_max, "; ".join(p) if p else "set is valid", problems=p)

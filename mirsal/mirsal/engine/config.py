@@ -46,6 +46,7 @@ class EngineConfig:
     slot_fill: float = 0.55         # video sheet: the largest subject's longest side is at most this share of its slot (>= 22% margin)
     sheet_canvas: int = 2048        # video sheet canvas (square)
     pack_max: int = 120             # Telegram sticker pack limit
+    tg_emoji_max: int = 20          # Telegram: 1-20 emoji per sticker
 
     def to_dict(self) -> dict:
         return asdict(self)

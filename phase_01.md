@@ -44,7 +44,7 @@ The phase has checkpoints 1A (static), 1B (animation), 1D (desktop builder, Part
 | 1B video + console video (pre-sliced clips) | **Built and tested on synthetic clips** (2 of 9 cells in the unit test, loop close proven). **Real video not yet passing end to end:** the first real run (before the seam-ratio and CRF-60 fixes) gave 1 READY, 6 `loop_seam`, 1 `size_budget`. **Waiting on Haitham's run** (frame processing is done on his PC while the VPS network block is sorted). |
 | 1C console | **Built**; see Part C. |
 | 1D desktop Sticker Builder | **Built, 25 tests green, headless-browser walk-through on synthetic data; waiting on Haitham's gate** (Part D). |
-| 1G gateway frontend (React) | **Built 2026-10-01** (Inbox, Generate + gates, Video sheet, History; 3 Playwright specs green). **Waiting on Haitham: one real loop** (Part G exit). Ports of Parts D/E (Library, Create, Editor, Pack manager, animated editor, Prepare) are not done: they stay on `/legacy`. |
+| 1G frontend | **Redone 2026-10-01 at Haitham's request (see "Part G" note):** the common path is one panel in the desktop builder (type -> stickers -> Animate -> Add), History shows the real watch folders with Remove, the outline is a choice, one press is one folder. The React pass below is parked. *First React pass:* **Built 2026-10-01** (Inbox, Generate + gates, Video sheet, History; 3 Playwright specs green). **Waiting on Haitham: one real loop** (Part G exit). Ports of Parts D/E (Library, Create, Editor, Pack manager, animated editor, Prepare) are not done: they stay on `/legacy`. |
 | 1F golden path + review gates | **Built 2026-10-01**, 86 unit tests green, synthetic scenario passes end to end. **Waiting on Haitham: a real teddy sheet through every gate** (his box in the 1F exit). It is the spine of the product and the prerequisite for Phase 2. See "Golden path" below. |
 
 ### Next steps (ordered)
@@ -620,6 +620,8 @@ Try: Create -> drop a short mp4 -> Trim -> Text (type, move, set "visible from/t
 
 ## Part G — The gateway frontend (checkpoint 1G; React, added 2026-10-01)
 
+> **Superseded 2026-10-01 (Haitham: "too many choices, too many menus, the legacy builder was easy and appealing").** What exists now: the **simple flow** in the desktop builder's own shell (`console/generate.js`, `history.js`; README, "The simple flow" and "History"). The React app described below was built, tested (Playwright) and then parked in `mirsal/web/`: it is not served and not maintained. The stack decision below (React) is withdrawn; nothing in the plan needs a build step again. The Inbox backend (`tasks.py`) stays: the page uses it when nothing prepared matches a request (the Higgsfield prompt dialog). What Haitham asked for instead: (1) four actions, `type -> stickers -> Animate -> Add`, with the gates decided behind them; (2) **History = the real folders `Phase_01\Images_gen` and `videos_gen`, with Remove** (to a restorable trash); (3) the white outline is a choice; (4) a press never cycles to the next folder. Rejected: separate Inbox / Stickers / Video / History menus, a per-sticker approve/reject, a plan step.
+
 **Why now.** Until Phase 3 automates generation, Haitham works by hand:
 1. he writes or copies a prompt;
 2. he generates in **Higgsfield**;
@@ -692,6 +694,71 @@ The frontend is his **gateway** for that loop and for every 1F gate. Phase 5B's 
 - [x] The 1F synthetic scenario (reject 5, 6 → video blocks 1, 2 → final 3, 4, 7, 8, 9) can be driven entirely from the UI. *(done)*
 - [x] A Chrome walk-through of screens 1–4 with no console errors. *(done in Playwright's Chromium, screenshots reviewed; the Claude-in-Chrome tools were not available in that session, so Haitham's own look in Chrome is part of his box below)*
 - [ ] **Haitham** does one real loop: reserve → Higgsfield → name the files → run → gates → video sheet → Higgsfield video → upload → final pack.
+
+---
+
+## Part H — Send to Telegram (checkpoint 1H; added 2026-10-01 from `Phase_01/telegram-plan.md`)
+
+**Source.** `Phase_01/telegram-plan.md` is Telegram's own documentation (sticker formats, the importing API, Bodymovin-TG), pasted in as Haitham's input. It is not edited. This part turns it into a plan.
+
+**Goal.** From a Library pack, one click ("Send to Telegram") creates a real Telegram sticker pack and gives the link `https://t.me/addstickers/<name>`. Re-sending the same pack adds only what is new. Nothing leaves the machine except the stickers Haitham sends, to `api.telegram.org`.
+
+### What the document demands of our output
+
+| Telegram says | What we do |
+|---|---|
+| **Video stickers:** WEBM, VP9 + alpha, ≤256 KB, 512 px (at least one side), 30 FPS, ≤3 s | This is exactly what the engine already produces (`anim` checks). **This is the main path.** |
+| **Static stickers:** PNG or WEBP with a transparent layer, ≤512 KB, 512 px; *"should use a white stroke and shadow"* | The white stroke is the outline (a per-generation choice, on by default). **The shadow is not built:** the Telegram export offers "Telegram look" (stroke + soft shadow) on a copy at export time, never on the library file. A static sticker with no stroke gets a `WARN`, not a block. |
+| **Animated stickers:** TGS (Lottie, made in After Effects with Bodymovin-TG), ≤64 KB | **Not produced and not in Phase 1.** Our animations are video stickers. Animated WEBP is *not* supported by Telegram, so no WebP animation goes to Telegram. A TGS/Lottie converter is a later, separate idea. |
+| **Every sticker needs ≥1 emoji** (up to 20) | Already a rule (`pack_limits`); the export maps `emoji` to `emoji_list`. |
+| **Importing SDK** (iOS/Android, Telegram ≥ 7.8): every import creates a *new* pack; Telegram says not to use it to share stickers | **Phase 5C (mobile).** Not used on desktop. |
+| **@stickers bot** is the official manual route to share a pack | Offered as a no-credentials fallback (a zip to upload by hand). |
+
+### Mechanism: the Bot API, plus a manual fallback
+
+| Option | Needs | Verdict |
+|---|---|---|
+| **A. Bot API** (`createNewStickerSet`, `addStickerToSet`, `getStickerSet`, `setStickerSetThumbnail`) | a bot token (from @BotFather), the owner's numeric Telegram user id, internet to `api.telegram.org` | **Build.** Automatic; the pack is owned by Haitham's user id; the standard route for apps that make stickers. |
+| **B. Upload folder for @stickers** | nothing | **Build (small).** A zip: `NN-<key>.webm|png` plus `stickers.txt` (file, emoji) and the steps. Works offline and is the check that the files are acceptable. |
+| C. Importing SDK from a mobile host app | Phase 5C | Later. |
+
+Stdlib only (`urllib`, a hand-written multipart body): no new dependency (rule 8).
+
+### Rules the exporter enforces before any network call (`verify` stage `telegram`)
+
+- **Per sticker (BLOCK):** a video sticker is WebM/VP9 with alpha, ≤256 KB, ≤3 s, ≤30 fps, 512 on one side; a static sticker is PNG/WEBP with real transparency, ≤512 KB, 512 on one side; 1-20 emoji. **WARN:** a static sticker with no white stroke.
+- **Per set (BLOCK):** 1-120 stickers, unique keys. A set holds **one kind only** (static *or* video), so a mixed Library pack becomes two Telegram sets: `<name>_v_by_<bot>` and `<name>_s_by_<bot>` (no suffix when the pack has one kind).
+- **Names:** title 1-64 chars; set name 1-64 chars, letters/digits/underscores, starts with a letter, no double underscore, **must end with `_by_<botusername>`** (case-insensitive). The exporter builds it from the pack name and shows it; one field to edit.
+- Creation takes up to 50 stickers; the rest go through `addStickerToSet` one by one. The first sticker (or the pack cover) is the set thumbnail.
+
+### Idempotent re-send
+
+`library.json` keeps, per pack, `telegram: {sets: [{kind, name, link, items: [{sticker_id, file_unique_id}]}]}`. Sending again creates nothing twice: it adds the stickers that are not in the set yet. Stickers deleted from the Library pack are **reported, not deleted on Telegram** (Phase 1 does not sync deletions). A name already taken by someone else is reported with a suggested free name.
+
+### Credentials and privacy
+
+- Token and user id come from `MIRSAL_TELEGRAM_TOKEN` / `MIRSAL_TELEGRAM_USER`, or from the Settings screen, which saves them to `out/telegram.json` (`out/` is gitignored). The token is never logged, never returned by the API (only `bot @name connected`), and only ever sent to Telegram.
+- A Telegram pack is public to anyone with the link. The dialog says so before it creates anything.
+- `doctor` prints whether Telegram is configured (no network call); the Settings screen's "Test" calls `getMe`.
+
+### UX: one click
+
+Pack screen: **Send to Telegram**. One dialog: what will be created (for example "5 animated stickers + 3 static stickers = 2 sets"), the warnings, the set name, **Create on Telegram**. Then progress, then the link (Open in Telegram, Copy link). If Telegram is not connected, the same dialog first asks for the two values (with where to get them) and carries on. Secondary link: **Download for @stickers (zip)**. Errors are plain: `bot not started: open your bot in Telegram and press Start`, `name already taken`, `file too big: S3 is 300 KB, the limit is 256 KB`.
+
+### Tests (no real bot needed)
+
+`mirsal/telegram.py` takes its API base from `MIRSAL_TELEGRAM_API` (default `https://api.telegram.org`). The tests run a stdlib fake Telegram server that implements `getMe`, `createNewStickerSet`, `addStickerToSet`, `getStickerSet`, `setStickerSetThumbnail`, and returns the real error shapes (400 with `description`, 429 with `retry_after`). They cover: name rules, the static/video split, the 50-then-add batching, idempotent re-send, the error mapping, the zip, and that the token never appears in any response or log.
+
+### Checkpoint 1H: exit
+
+- [x] Exporter, validator, fake-server tests and the zip fallback are built and green. *(2026-10-01: `telegram.py`, verify stages `telegram` / `telegram_set`, `tests/test_telegram.py` 19 tests, `tests/fake_telegram.py`)*
+- [x] Pack screen: Send to Telegram works end to end against the fake server, driven from the page. *(walked in Chromium: connect -> plan -> create two sets -> links; the same calls are in the API test)*
+- [x] Settings: connect, test, disconnect; `doctor` reports it. *(connecting calls `getMe`, so connect is the test; the Settings card also shows the bot and disconnects)*
+- [ ] **Haitham** creates a bot with @BotFather, presses Start on it, enters the token and his numeric user id, and sends one real pack: the link opens in Telegram, the video stickers loop, the emoji match, a second send adds only what is new. *(Needs his token: nothing can be proven against the real service without it.)*
+
+**Open decisions for Haitham** (defaults chosen; say if you want otherwise): (1) the "Telegram look" shadow for static stickers is optional and off by default; (2) deletions are not synced to Telegram; (3) packs are public by link (Telegram's only model for sets made by a bot); (4) TGS/Lottie is out of Phase 1.
+
+**Effects on later phases.** Phase 2 imports the `telegram` block of `library.json` with the pack (stable ids, link, `file_unique_id`s). Phase 5C uses Telegram's importing SDK for the mobile host app and reuses the same validator. Rule 1 in `CLAUDE.md` already states the format limits and stays the single source of them (`EngineConfig`).
 
 ---
 
