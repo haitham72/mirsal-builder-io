@@ -8,7 +8,7 @@ const GM=new Map();                       // generation id -> its latest state
 let SES={prompt:'',gens:[],off:[],pack:''},bg='checker',glast='',MD=null,VG=null,GINP=[],GHEALTH=null;
 const GS={outline:12,tile:220,tab:'stickers'};
 const ANIM=new Set();                     // batches the user pressed Animate on, until the server reports them animating
-try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.outline=+o>0?12:0;const t=+localStorage.getItem('mirsal.tile');if(t>=130&&t<=420)GS.tile=t;
+try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.outline=[0,4,8,12,16].includes(+o)?+o:(+o>0?12:0);const t=+localStorage.getItem('mirsal.tile');if(t>=130&&t<=420)GS.tile=t;
   const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens,off:s.off||[],pack:s.pack||''}}catch(e){}
 const gstore=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const saveSes=()=>gstore('mirsal.session',JSON.stringify(SES));
@@ -110,7 +110,7 @@ RENDER.generate=async()=>{
    <div class=sh>${ic('gen')} Studio</div>
    <div class=gform>${ic('search')}<input id=prompt type=text placeholder="Describe the stickers, for example: teddy bear for school" autocomplete=off><button id=go class="btn pri gbig" data-act=ggo>Generate</button></div>
    <div class=gopts><span class=mut>White outline</span><div class=tabs id=opills></div><span class=mut id=ohint></span></div>
-   <div id=gsug class=gsug></div><div id=gplan></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
+   <div id=gsug class=gsug></div><div id=gplan></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=glive></div><div id=gres></div></div>`;
   $('prompt').value=SES.prompt||'';$('prompt').oninput=planPreview;planPreview();$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
   document.documentElement.style.setProperty('--tile',GS.tile+'px');
   drawOutline();glast='';await loadInputs();drawSug();tick(true)};
@@ -126,7 +126,8 @@ ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');ACT.ggo()};
 async function create(prompt,variant,more){
   say('');const body={prompt,variant:variant||undefined,outline:GS.outline};
   const r=await postWait('/api/generations',body,'Finishing the previous sheet…');
-  if(!r.ok){say(`${esc(r.j.error||'Could not start')} ${r.status===404?`<button class="btn sm" data-act=ghiggs>Get the Higgsfield prompt for this</button>`:''}`);return false}
+  if(!r.ok){if(r.status===404&&typeof liveOffer==='function'&&liveOffer(prompt)){say('');return false}
+  say(`${esc(r.j.error||'Could not start')} ${r.status===404?`<button class="btn sm" data-act=ghiggs>Get the Higgsfield prompt for this</button>`:''}`);return false}
   if(more){SES.gens.push(r.j.id)}else{SES={prompt,gens:[r.j.id],off:[],pack:''};for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear()}
   saveSes();glast='';MD=null;tick(true);return true}
 ACT.ggo=()=>{const p=$('prompt').value.trim();if(!p){say('Write what you want first, for example <b>teddy bear for school</b>.');return}create(p,0,false)};
@@ -159,7 +160,7 @@ function batchHtml(g,k,total,mode){
   const inc=!SES.off.includes(g.number),s=g.source;
   const head=`<div class=gbhead>${total>1?`<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc?'checked':''}> <b>Batch ${k+1}</b></label>`:`<b>Batch ${k+1}</b>`}
     <span class=mut>sheet ${s.subject_id} · ${g.generation_id}${s.has_video?'':' · no video prepared'}</span>
-    <span class=gbact>${s.has_video||making(g)?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
+    <span class=gbact>${s.has_video||making(g)||(typeof liveReadyNow==='function'&&liveReadyNow())?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
     ${total>1?`<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>`:''}</span></div>`;
   if(making(g))return`<section class=gbatch>${head}<div class=gwork><div class=spin></div><b>Making your stickers…</b><div class=mut>${g.stage==='requested'?'Reading the sheet':g.stage==='sheet_picked'?'Removing the background':'Cutting and checking each sticker'}</div></div></section>`;
   const sheetErr=g.stickers.every(t=>t.status==='FAILED')&&(g.verify.sheet||[]).find(c=>!c.ok&&c.severity!=='WARN');
@@ -196,7 +197,7 @@ function gbodyHtml(gs,c){const t=GS.tab;
 function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);
   return`<section class=gplan style="text-align:center;padding:44px 16px"><h2 style="margin:0 0 6px">${hasVid?'Animate your stickers':'No video prepared for this sheet'}</h2>
    <div class=mut style="max-width:560px;margin:0 auto 18px">${hasVid?`${c.n} sticker${c.n===1?'':'s'} will be animated from the prepared video. Each animation is checked frame by frame (size, loop, and whether the character stays inside its cell) and shows up here as soon as it is ready.`
-     :'Make a video from the sheet in your own tool, then add it with “Make a video…” on the Stickers view.'}</div>
+     :(typeof liveReadyNow==='function'&&liveReadyNow()?'Generate the animation on the Stickers view: the box under the green screen has the model and the price.':'Make a video from the sheet in your own tool, then add it with “Make a video…” on the Stickers view.')}</div>
    ${hasVid?`<button class="btn pri gbig" data-act=ganimate ${c.todoAnim.length?'':'disabled'}>${ic('play')} Animate</button>`:''}</section>`}
 
 /* Request: the original request, editable; generating again starts a new session */
@@ -253,10 +254,10 @@ ACT.gtab=el=>{GS.tab=el.dataset.t;glast='';tick(true)};
 let PQ=0,PT=null;
 function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('gplan'))return;
   if(p.length<2){$('gplan').innerHTML='';return}
-  PT=setTimeout(async()=>{const n=++PQ,r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:'flat_vector',ai:GAI.configured}),el=$('gplan');if(n!==PQ||!el)return;
+  PT=setTimeout(async()=>{const n=++PQ,r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',ai:false}),el=$('gplan');if(n!==PQ||!el)return;
     if(!r.ok){el.innerHTML='';return}
     const open=el.querySelector('details')&&el.querySelector('details').open;
-    el.innerHTML=`<details class=gpv ${open?'open':''}><summary>Prompt preview <span class=mut>template ${esc(r.j.template_id)} v${r.j.template_version} · ${r.j.stickers.length} cell prompt${r.j.stickers.length>1?'s':''}, 1 to 5 tags each · ${r.j.expanded_by==='ai'?`<b>expanded by AI</b> (${esc(r.j.expand_model||'')}): every sticker has its key name`:'built-in sets'}</span></summary>
+    el.innerHTML=`<details class=gpv ${open?'open':''}><summary>Prompt preview <span class=mut>template ${esc(r.j.template_id)} v${r.j.template_version} · ${r.j.stickers.length} cell prompt${r.j.stickers.length>1?'s':''}, 1 to 5 tags each · ${(typeof aiOn==='function'&&aiOn())?'the AI enhancer writes the 9 concepts when you press Generate':'built-in sets, no AI call'}</span></summary>
       ${r.j.expand_error?`<div class=warn>${esc(r.j.expand_error)}</div>`:''}
       <div class=pcols><div>${copyBox('Sheet prompt',r.j.sheet_prompt,'pv1',9)}${copyBox('Video prompt',r.j.video_prompt,'pv2',5)}</div>
       <ul class=pcells>${r.j.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></details>`},450)}
@@ -389,7 +390,7 @@ function sheetPanel(g){const s=g.source,size=s.sheet_size;if(!size||!s.sheet_cop
     <button class="tab ${keyed?'':'on'}" data-act=gshk data-g=${g.number} data-k=0>Raw</button><button class="tab ${keyed?'on':''}" data-act=gshk data-g=${g.number} data-k=1 ${s.keyed?'':'disabled'}>Keyed</button></div></div>
    <div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+(keyed?s.keyed:s.sheet_copy)}" alt="${keyed?'Background removed':'Raw sheet'}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'still')).join('')}</div>
-   <div class=gsfoot>${cut}<span class=mut>blue = cuts, yellow = sticker edge</span><button class="link" data-act=gsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'still')}</aside>`}
+   <div class=gsfoot>${cut}<span class=mut>blue = cuts, yellow = sticker edge</span><button class="link" data-act=gsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'still')}${typeof vgenBox==='function'?vgenBox(g):''}</aside>`}
 ACT.gshk=el=>{const n=+el.dataset.g;if(el.dataset.k==='1')SHK.add(n);else SHK.delete(n);glast='';tick(true)};
 ACT.gsheet=el=>{SV.g=+el.dataset.g;SV.view='raw';SV.lines=true;SV.boxes=true;sheetDlg()};
 function sheetDlg(){const g=GM.get(SV.g);if(!g)return;const s=g.source,base=`/out/${g.generation_id}/`,size=s.sheet_size,G=s.grid;if(!size||!s.sheet_copy)return toast('This sheet has not been read yet',1);
@@ -412,7 +413,7 @@ ACT.gsclose=()=>{SV.g=null;closeDlg()};
 
 /* ---------- "Get the Higgsfield prompt": when nothing prepared matches the request */
 ACT.ghiggs=async()=>{const p=$('prompt').value.trim();if(!p)return;
-  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:'flat_vector',ai:GAI.configured});if(!r.ok)return toast(r.j.error,1);
+  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
   dlg(`<div class=vdlg><h2>Prompt for Higgsfield</h2><div class=mut>Nothing prepared matches “${esc(p)}”. Generate the sheet, name the folder as shown below, and it appears here.</div>
    <h3>Sheet prompt</h3><textarea readonly rows=9 id=hp1>${esc(r.j.sheet_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp1>Copy sheet prompt</button></div>
    <h3>Video prompt</h3><textarea readonly rows=5 id=hp2>${esc(r.j.video_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp2>Copy video prompt</button></div>
@@ -426,7 +427,7 @@ ACT.hgenop=async()=>{const p=$('prompt').value.trim();if(!p)return;
     el.textContent=Math.round((Date.now()-t0)/1000)+'s · '+g.j.status;
     if(g.j.status==='DONE'||g.j.status==='FAILED'){clearInterval(iv);
       if(el&&el.parentElement)el.parentElement.innerHTML+=g.j.status==='DONE'?`<div class=mut>Sheet arrived: <code>${esc(g.j.result.file)}</code> (${Math.round(g.j.result.bytes/1024)} KB).</div>`:`<div class=mut>Failed: ${esc(g.j.error||'unknown')}</div>`}},5000)};
-ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:'flat_vector',ai:GAI.configured});if(!r.ok)return toast(r.j.error,1);
+ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
   $('hres').innerHTML=`<div class=card style="margin:10px 0"><b>Create these two folders and name the downloads into them</b><br><code>${esc(r.j.paths.img)}</code><br><code>${esc(r.j.paths.vid)}</code><div class=mut>The sheet goes in <b>${esc(r.j.folders.img)}</b>, the video in <b>${esc(r.j.folders.vid)}</b>. Then press Generate again.</div></div>`};
 
 /* ---------- one sticker, larger */

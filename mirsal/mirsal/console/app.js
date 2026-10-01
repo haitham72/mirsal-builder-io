@@ -60,7 +60,7 @@ const packById=id=>LIB.packs.find(p=>p.id===id);
 const SCREENS=['generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
 const RAIL=[['generate','gen','Studio'],['history','hist','History'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
 let route_='generate',PACK_ID=null;
-function drawRail(){$('rail').innerHTML=`<div class=logo>M</div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
+function drawRail(){$('rail').innerHTML=`<div class=logo><img src=/assets/brand/mirsal-logo.png alt=Mirsal></div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
 ACT.nav=el=>{location.hash='#/'+(el.dataset.to==='generate'?'studio':el.dataset.to)};
 function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'generate',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'generate';
  SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCol2();if(RENDER[route_])RENDER[route_](a)}
