@@ -246,7 +246,7 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
             if not start.is_file():
                 raise JobError(f"the start image is missing: {start}", 400)
             media["start_image"] = str(start)
-            if _mcat.find("video", model).get("end_image") and req.get("loop", True):
+            if _mcat.find("video", model).get("end_image") and req.get("loop", False):
                 media["end_image"] = str(start)
         with _PAID:
             if resume:

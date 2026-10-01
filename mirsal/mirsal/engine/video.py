@@ -213,8 +213,11 @@ def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_ce
     fps = cfg.video_max_fps if cap_fps else info["fps"]
     max_frames = int(math.floor(cfg.video_max_seconds * fps))
     src = _stat_id(mp4)
-    use_cache = None if layout or refs else cache          # a returned video sheet is judged against its own approved stills: not cached
-    return _run_cells(cells, lambda idx: _cached(use_cache, use_cache and use_cache.key(cfg, "mp4", src, list(vr[idx - 1]), fps, cap_fps, max_frames), idx,
+    def refkey(idx):                                        # a video sheet is judged against its own approved still, so the still is part of the key
+        a = (refs or {}).get(idx)
+        return hashlib.sha1(a.tobytes()).hexdigest()[:16] if a is not None else None
+    use_cache = cache
+    return _run_cells(cells, lambda idx: _cached(use_cache, use_cache and use_cache.key(cfg, "mp4", src, list(vr[idx - 1]), fps, cap_fps, max_frames, bool(layout), refkey(idx)), idx,
                                                   lambda: _one_cell(mp4, idx, vr[idx - 1], fps, cap_fps, max_frames, cfg, bool(layout), (refs or {}).get(idx))),
                       cfg, on_cell)
 

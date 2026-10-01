@@ -215,7 +215,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
     (d / "slices").mkdir()
     (d / "prompts.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
     res = {
-        "generation_id": f"G{gid:03d}", "number": gid, "parent": parent, "prompt": prompt, "task": plan["task"], "task_slug": plan["task_slug"],
+        "generation_id": f"G{gid:03d}", "number": gid, "created": round(time.time(), 3), "parent": parent, "prompt": prompt, "task": plan["task"], "task_slug": plan["task_slug"],
         "source": {"subject": pick.subject, "subject_id": pick.subject_id, "variant": pick.variant,
                    "n_variants": pick.n_variants, "sheet": pick.sheet.name, "video": pick.video.name if pick.video else None,
                    "has_video": pick.has_video, "pairing": pick.pairing, "clips_dup_of": pick.clips_dup_of,
@@ -612,7 +612,8 @@ def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None =
         rerendered += 1
         if st.get("webm"):
             st["anim_status"] = "STALE"
-            st["anim_reason"] = "edge changed: Animate again to apply it"
+            st["anim_reason"] = ("edge changed: applied again from the stored video" if any(v.get("video") for v in res.get("video_sheets", []))
+                                 else "edge changed: Animate again to apply it")
             st["review"]["anim"] = "NONE"
             stale.append(st["index"])
     write_result(out, gid, res)
@@ -753,6 +754,30 @@ def state(out: Path, gid: int) -> dict:
     res["gate"] = gates.gate_info(res)
     res["final"] = gates.final_indices(res)
     return res
+
+
+def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
+    """Every batch ever made, newest first, a page at a time (the Studio's persistent history): title, time, counts and up to four thumbnails."""
+    ids = list(reversed(list_ids(out)))
+    offset, limit = max(0, int(offset)), max(1, min(int(limit), 50))
+    items = []
+    for gid in ids[offset:offset + limit]:
+        try:
+            r = read_result(out, gid)
+        except Exception:
+            continue
+        d = gen_dir(out, gid)
+        ready = [s for s in r["stickers"] if s.get("status") == "READY" and s.get("png")]
+        try:
+            created = r.get("created") or round((d / "prompts.json").stat().st_mtime, 3)
+        except OSError:
+            created = None
+        items.append({"id": gid, "generation_id": r["generation_id"], "prompt": r.get("prompt") or r["source"].get("subject", ""), "created": created,
+                      "stage": r["stage"], "error": r.get("error"), "ready": len(ready),
+                      "animated": sum(1 for s in ready if s.get("anim_status") == "READY"),
+                      "thumbs": [f"{s['png']}?e={s.get('rendered_at') or s.get('edited_at') or 0}" for s in ready[:4]],
+                      "outline_px": r.get("outline_px")})
+    return {"items": items, "more": offset + limit < len(ids), "total": len(ids)}
 
 
 def summary(out: Path) -> list[dict]:

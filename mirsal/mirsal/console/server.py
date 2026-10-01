@@ -97,6 +97,8 @@ class Console:
         end = time.time() + timeout
         for t in list(self._jobs):
             t.join(max(0.0, end - time.time()))
+        while self.lock.locked() and time.time() < end:          # the pipeline step that a finished job started (stills, slicing) too
+            time.sleep(0.1)
 
     def _submit_when_free(self, fn, tries: int = 600) -> None:
         for _ in range(tries):
@@ -148,13 +150,14 @@ class Console:
             raise pl.PipelineError("Use at most 4 reference images.", 400)
         return out
 
-    def video_prompt_for(self, gid: int, aid: str) -> str:
+    def video_prompt_for(self, gid: int, aid: str, loop: bool = False) -> str:
         """The Kling prompt for the sheet that was actually built: per-sticker motions for the approved slots only (empty slots get no motion)."""
         res = pl.read_result(self.out, gid)
         entry = gates.sheet_of(res, aid)
         try:
             plan = json.loads((pl.gen_dir(self.out, gid) / "prompts.json").read_text(encoding="utf-8"))
             slots = json.loads(json.dumps(plan["slots"]))
+            slots["loop"] = bool(loop)                    # the choice made when the video is sent wins over the one saved with the plan
             keep = set(entry["slots"])
             slots["cells"] = [c for c in slots["cells"] if c["pos"] in keep]
             if slots["cells"] and plan.get("template_id"):
@@ -323,10 +326,18 @@ def make_handler(c: Console):
                 return self._json(200, {"results": gates.search(c.out, q), "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
+            if path.startswith("/api/generations/") and path.endswith("/sheet_preview"):      # the video sheet at a given fill, small and not stored
+                q = parse_qs(urlparse(self.path).query)
+                fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))
+                png = gates.preview_sheet(c.out, int(path.split("/")[3]), c.cfg, fill, int(q.get("px", ["420"])[0]))
+                return self._send(200, png, "image/png")
+            if path == "/api/history":              # the Studio's persistent history of batches, a page at a time
+                q = parse_qs(urlparse(self.path).query)
+                return self._json(200, pl.history(c.out, int(q.get("offset", ["0"])[0]), int(q.get("limit", ["5"])[0])))
             if path == "/api/higgsfield":          # is the CLI there, the balance, today's spend (never a credential)
                 return self._json(200, c.hf_account())
             if path == "/api/models":              # the selector: curated models + every other Higgsfield model, and the style presets
-                return self._json(200, dict(model_catalog.catalog(), styles=styles.PRESETS, default_style=styles.DEFAULT))
+                return self._json(200, dict(model_catalog.catalog(), styles=styles.PRESETS, default_style=styles.DEFAULT, slot_fill=c.cfg.slot_fill))
             if path == "/api/usage":
                 return self._json(200, usage.summary(c.out, int(parse_qs(urlparse(self.path).query).get("limit", ["100"])[0])))
             if path.startswith("/assets/"):
@@ -504,7 +515,7 @@ def make_handler(c: Console):
                     refs = c.ref_files(body.get("refs"))
                     if refs and not model_catalog.find("image", model).get("refs"):
                         raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
-                    t = tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")))
+                    t = tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")))
                     prompt = t["plan"]["sheet_prompt"] + ("\n" + prompter.REFERENCE_CLAUSE if refs else "")
                     est = higgsfield.cost(model, params, prompt, **({"image_references": [str(c.out / r) for r in refs]} if refs else {}))
                     job = jobs.create(c.out, "sheet", task=t["id"], request={
@@ -515,10 +526,18 @@ def make_handler(c: Console):
                             "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
                 gid = int(body["generation"])
                 aid = str(body.get("sheet") or "")
+                fill = None if body.get("slot_fill") is None else min(0.92, max(0.5, float(body["slot_fill"])))
+                loop = bool(body.get("loop"))
                 if not aid:                      # one click: approve the kept stills, build the video sheet and approve it (the click is the decision), as "Make a video" did
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
-                    aid = gates.quick_sheet(c.out, gid, c.cfg)["sheet"]
+                    from dataclasses import replace as _replace
+                    cfg_v = c.cfg if fill is None else _replace(c.cfg, slot_fill=fill)
+                    cur = gates.active_sheet(pl.read_result(c.out, gid))
+                    if cur and cur["status"] in ("BUILT", "APPROVED") and not cur.get("video") and fill is not None \
+                            and abs(float(cur.get("slot_fill") or c.cfg.slot_fill) - fill) > 0.004:      # the gap was changed: a new sheet, the old one is rejected (never deleted)
+                        gates.review(c.out, gid, "video_sheet", "REJECT", cur["id"], "gap changed before sending")
+                    aid = gates.quick_sheet(c.out, gid, cfg_v)["sheet"]
                 res = pl.read_result(c.out, gid)
                 entry = gates.sheet_of(res, aid)
                 if entry.get("status") not in ("APPROVED", "VIDEO_BLOCKED"):
@@ -527,8 +546,8 @@ def make_handler(c: Console):
                 start = pl.gen_dir(c.out, gid) / entry["file"]
                 est = higgsfield.cost(model, params, "x", start_image=str(start))
                 job = jobs.create(c.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
-                    "model": model, "options": body.get("options") or {}, "prompt": c.video_prompt_for(gid, aid),
-                    "start_image": str(start), "sheet": aid, "label": res.get("prompt", "")})
+                    "model": model, "options": body.get("options") or {}, "prompt": c.video_prompt_for(gid, aid, loop),
+                    "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop})
                 c.fulfil_async(job["id"], after=c.attach_video_from_job)
                 return {"job": job["id"], "estimate": est, "model": model, "params": params}
             except (higgsfield.HiggsError, jobs.JobError, model_catalog.CatalogError) as e:
@@ -562,9 +581,9 @@ def make_handler(c: Console):
             if path == "/api/watch/purge":
                 return self._json(200, watch.purge(c.out, str(body.get("id", ""))))
             if path == "/api/plan":      # preview only: nothing is reserved
-                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
+                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
-                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
+                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
             if path.startswith("/api/live/"):
                 return self._json(200, self._live(path.rsplit("/", 1)[1], body))
             if path == "/api/jobs":      # S2: the Generate page creates a sheet job ("Generate it"), the operator fulfils it
@@ -628,10 +647,19 @@ def make_handler(c: Console):
                 if parts[3] == "appearance":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
-                    return self._json(200, pl.set_appearance(
+                    res_ = pl.set_appearance(
                         c.out, gid, c.cfg,
                         int(body["outline"]) if body.get("outline") is not None else None,
-                        int(body["erode"]) if body.get("erode") is not None else None))
+                        int(body["erode"]) if body.get("erode") is not None else None)
+                    if body.get("reslice") and any(v["status"] == "SLICED" and v.get("video") for v in pl.read_result(c.out, gid)["video_sheets"]):
+                        c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
+                        res_["resliced"] = True
+                    return self._json(200, res_)
+                if parts[3] == "reslice":        # apply the batch's current edge to the animations again, from the stored video (no credits)
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
+                    return self._json(202, {"id": gid})
                 if parts[3] == "video_sheet":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)

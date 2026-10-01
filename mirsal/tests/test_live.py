@@ -241,6 +241,21 @@ class LiveConsoleTests(Base):
             time.sleep(0.3)
         self.fail("timeout: " + what)
 
+    def test_history_lists_every_batch_five_at_a_time_and_survives_opening_another(self):
+        import json as _j
+        for n in range(1, 8):                                                                       # seven finished batches on disk
+            d = self.out / f"G{n:03d}"
+            (d / "slices").mkdir(parents=True)
+            (d / "prompts.json").write_text("{}", encoding="utf-8")
+            res = {"generation_id": f"G{n:03d}", "number": n, "prompt": f"batch {n}", "stage": "sliced", "error": None, "source": {"subject": "blob"},
+                   "stickers": [{"index": i, "key": f"k{i}", "status": "READY", "png": f"slices/S{i}.png", "anim_status": "READY" if n % 2 else "NOT_REQUESTED"} for i in range(1, 10)]}
+            (d / "result.json").write_text(_j.dumps(res), encoding="utf-8")
+        p1 = self.req("GET", "/api/history?limit=5")[1]
+        self.assertEqual(([i["generation_id"] for i in p1["items"]], p1["more"], p1["total"]), (["G007", "G006", "G005", "G004", "G003"], True, 7))
+        p2 = self.req("GET", "/api/history?limit=5&offset=5")[1]
+        self.assertEqual(([i["generation_id"] for i in p2["items"]], p2["more"]), (["G002", "G001"], False))
+        self.assertEqual((p1["items"][0]["ready"], p1["items"][0]["animated"], len(p1["items"][0]["thumbs"]), p1["items"][0]["prompt"]), (9, 9, 4, "batch 7"))
+
     def test_models_account_usage_and_assets_endpoints(self):
         s, j = self.req("GET", "/api/models")
         self.assertEqual(s, 200)
@@ -333,6 +348,43 @@ class LiveConsoleTests(Base):
         self.assertIn("highly expressive", prompt)
         self.assertEqual(self.req("POST", "/api/live/cost", {"kind": "video", "model": "kling3_0", "options": {"mode": "std"}})[0], 400)   # std is not offered any more
 
+    def _stills_ready(self, prompt="blob"):
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": prompt})
+        job = self.until(lambda: (lambda x: x if x.get("generation") and x["status"] == "DONE" else None)(self.req("GET", "/api/jobs/" + j["job"])[1]), "sheet job")
+        gid = int(job["generation"][1:])
+        self.until(lambda: (lambda x: x if x["stage"] == "sliced" and not x["busy"] else None)(self.req("GET", f"/api/generations/{gid}")[1]), "stills")
+        return gid
+
+    def test_the_gap_is_a_slider_and_loop_is_a_choice(self):
+        gid = self._stills_ready()
+        # the preview sheet follows the gap: a fuller slot means bigger stickers on the same canvas
+        import io
+        def ink(fill):
+            h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)
+            h.request("GET", f"/api/generations/{gid}/sheet_preview?fill={fill}&px=300"); r = h.getresponse(); data = r.read(); h.close()
+            self.assertEqual((r.status, r.getheader("Content-Type")), (200, "image/png"))
+            im = np.asarray(Image.open(io.BytesIO(data)).convert("RGB")).astype(int)
+            self.assertEqual(max(im.shape[:2]), 300)
+            return float(((np.abs(im - np.array([0, 255, 0])).max(-1)) > 40).mean())
+        self.assertGreater(ink(0.9), ink(0.5) * 1.5)
+        # an old sheet built at the default gap is rejected (not deleted) and rebuilt when the slider moved; Loop on brings the wording and the end image back
+        for i in range(1, 10):
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/review", {"gate": "still", "decision": "APPROVE", "index": i})[0], 200)
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
+        s, v = self.req("POST", "/api/live/video", {"generation": gid, "slot_fill": 0.6, "loop": True})
+        self.assertEqual(s, 200, v)
+        st = self.req("GET", f"/api/generations/{gid}")[1]
+        sheets = {x["id"]: x for x in st["video_sheets"]}
+        self.assertEqual((sheets["A1"]["status"], sheets["A2"]["slot_fill"]), ("REJECTED", 0.6))
+        self.assertEqual(sheets["A1"]["slot_fill"], self.c.cfg.slot_fill)
+        create = next(c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"])
+        self.assertEqual(create[create.index("--start-image") + 1], create[create.index("--end-image") + 1])
+        self.assertIn("seamless loop", create[create.index("--prompt") + 1])
+        # the plan keeps the choice too: Loop off is the default in the saved video prompt
+        task = self.req("GET", "/api/tasks")[1]["tasks"][0]
+        self.assertFalse(task["plan"]["slots"]["loop"])
+        self.assertNotIn("loop", task["plan"]["video_prompt"].lower())
+
     def test_from_a_request_to_a_sliced_kling_animation(self):
         s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "grid": "3x3", "style_id": "toon_shade", "outline": 12})
         self.assertEqual(s, 200, j)
@@ -370,11 +422,34 @@ class LiveConsoleTests(Base):
         self.assertEqual(vjob["status"], "DONE", vjob)
         create = [c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"]][0]
         self.assertEqual(create[create.index("--mode") + 1], "pro")
-        self.assertEqual(create[create.index("--start-image") + 1], create[create.index("--end-image") + 1])       # start = end image: a loop
+        self.assertNotIn("--end-image", create)                                                                     # Loop is off by default: no forced return to the first pose
+        self.assertNotIn("loop", create[create.index("--prompt") + 1].lower())                                      # and no loop wording that makes the stickers bounce
         self.assertIn("1. ", [l for l in create[create.index("--prompt") + 1].splitlines() if l[:3] == "1. "][0])  # per-character motion lines
         final = self.until(lambda: (lambda x: x if next(v for v in x["video_sheets"] if v["id"] == "A1")["status"] in ("SLICED", "VIDEO_BLOCKED") and not x["busy"] else None)(
             self.req("GET", f"/api/generations/{gid}")[1]), "slicing")
         self.assertEqual(next(v for v in final["video_sheets"] if v["id"] == "A1")["status"], "SLICED")
+        # a light preview of the returned video exists for the browser, next to the full-size original
+        sheet = next(v for v in final["video_sheets"] if v["id"] == "A1")
+        self.assertTrue((self.out / st["generation_id"] / sheet["video"]).is_file())
+        self.assertTrue(sheet.get("preview") and (self.out / st["generation_id"] / sheet["preview"]).is_file())
+        # changing the edge afterwards never loses the video: it is re-applied to the stored video, no new job and no credits
+        jobs_before = len(self.req("GET", "/api/jobs")[1]["jobs"])
+        s, r = self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 6, "erode": 1, "reslice": True})
+        self.assertEqual((s, r["outline_px"], r["erode_px"], r.get("resliced")), (200, 6, 1, True), r)
+        again = self.until(lambda: (lambda x: x if not x["busy"] and all(t["anim_status"] in ("READY", "FAILED") for t in x["stickers"]) else None)(
+            self.req("GET", f"/api/generations/{gid}")[1]), "re-applied animations")
+        self.assertEqual(next(v for v in again["video_sheets"] if v["id"] == "A1")["status"], "SLICED")
+        notready = [(t["index"], t["anim_status"], t.get("anim_reason")) for t in again["stickers"] if t["anim_status"] != "READY"]
+        self.assertGreaterEqual(9 - len(notready), 7, notready)                       # a stroke can tip a borderline synthetic clip over a Python check; never more than that
+        self.assertTrue(all(st_ == "FAILED" and why for _, st_, why in notready), notready)   # and every one that is not ready says which check
+        self.assertFalse([t for t in again["stickers"] if t["anim_status"] == "STALE"])
+        self.assertEqual(len(self.req("GET", "/api/jobs")[1]["jobs"]), jobs_before)                                  # nothing was sent to Higgsfield again
+        s, r2 = self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 6, "erode": 1, "reslice": True})   # the same edge again is a cache hit
+        again2 = self.until(lambda: (lambda x: x if not x["busy"] and not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]) else None)(
+            self.req("GET", f"/api/generations/{gid}")[1]), "cached re-apply")
+        self.assertTrue(all((t.get("anim_metrics") or {}).get("cache") == "hit" for t in again2["stickers"] if t["anim_status"] == "READY"))
+        h = self.req("GET", "/api/history?limit=1")[1]
+        self.assertEqual((len(h["items"]), h["items"][0]["generation_id"], h["items"][0]["animated"], h["more"] is False), (1, st["generation_id"], sum(1 for t in again2["stickers"] if t["anim_status"] == "READY"), True))
         u = self.req("GET", "/api/usage")[1]
         self.assertEqual((u["credits_spent"], u["runs"][0]["generation"]), (6.5, st["generation_id"]))
         self.assertEqual(sorted(m["credits"] for m in u["by_model"]), [2.0, 4.5])

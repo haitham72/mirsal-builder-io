@@ -77,7 +77,7 @@ def nearest_valid(name: str, kind: str, number: int) -> str:
     return f"{kind}-{num:03d}-{prompter.slug(rest) or 'subject'}"
 
 
-def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", ai: bool = False) -> dict:
+def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False) -> dict:
     """The plan for a typed task, for the Inbox to show before anything is reserved: template, slot JSON, final prompts."""
     g = GRID_NAMES.get(grid) if isinstance(grid, str) else tuple(grid)
     if g not in prompter.GRIDS:
@@ -88,6 +88,7 @@ def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat
         raise sources_error(f"unknown style '{style_id}'")
     plan = expander.expand(str(prompt).strip(), g, use_ai=ai)       # ai: the model expands the subject and names every sticker; else the built-in sets
     plan["slots"]["style_id"] = style_id
+    plan["slots"]["loop"] = bool(loop)               # Loop is a choice: off = no loop wording in the video prompt, no end image
     built = prompter.render_plan(plan["slots"], plan["template_id"], plan["template_version"])
     plan["sheet_prompt"], plan["video_prompt"] = built["sheet_prompt"], built["video_prompt"]
     for s in plan["stickers"]:
@@ -100,9 +101,9 @@ def subject_of(plan: dict) -> str:
     return prompter.slug(" ".join(w for w in plan["subject"].split() if w not in prompter.COLORS | prompter.STOP)) or "sticker"
 
 
-def reserve(out: Path, inp: Path, prompt: str, grid="3x3", style_id: str = "flat_vector", ai: bool = False) -> dict:
+def reserve(out: Path, inp: Path, prompt: str, grid="3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False) -> dict:
     """Save the task: this IS the G1 approval of the plan (recorded on the task and copied onto every generation run from it)."""
-    plan = preview(prompt, grid, style_id, ai)
+    plan = preview(prompt, grid, style_id, ai, loop)
     n = next_number(out, inp)
     subj = subject_of(plan)
     img, vid = f"img-{n:03d}-{subj}", f"vid-{n:03d}-{subj}"

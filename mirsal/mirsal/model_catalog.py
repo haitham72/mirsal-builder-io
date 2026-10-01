@@ -43,7 +43,7 @@ IMAGE = [
 
 VIDEO = [
     {"id": "kling3_0", "label": "Kling v3.0", "logo": "kuaishou", "default": True, "end_image": True,
-     "note": "Start = end image gives a loop. Always pro: 1440 px for a square sheet (std is 960 px and looks pixelated); the 4k mode is never offered.",
+     "note": "With Loop on, the start image is also the end image. Always pro: 1440 px for a square sheet (std is 960 px and looks pixelated); the 4k mode is never offered.",
      "fixed": {"aspect_ratio": "1:1", "sound": "off"},
      "options": [_opt("mode", "Quality", ["pro"], "pro", "pro: 1440 px"),
                  _opt("duration", "Seconds", [3, 5], 3)]},

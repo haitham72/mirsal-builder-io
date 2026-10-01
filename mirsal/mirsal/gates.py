@@ -21,7 +21,7 @@ from . import pipeline as pl
 from . import prompter
 from .engine import verify
 from .engine.config import EngineConfig
-from .engine.video import check_returned_video, process_video
+from .engine.video import check_returned_video, process_video, AnimCache
 from .engine.video_sheet import build_video_sheet
 
 GATES = ("plan", "still", "video_sheet", "anim", "pack")
@@ -262,7 +262,8 @@ def build_sheet(out: Path, gid: int, cfg: EngineConfig) -> dict:
     blocked = next((c for c in checks if not c.ok and c.severity == verify.BLOCK), None)
     entry = {"id": aid, "slots": approved, "grid": [rows, cols], "file": f"video_sheet/{aid}/sheet.png", "layout": f"video_sheet/{aid}/layout.json",
              "video": None, "status": "BUILT", "ts": round(time.time(), 3), "verify": [c.to_dict() for c in checks],
-             "blocked": blocked.id if blocked else None, "canvas": layout["canvas"], "video_prompt": res.get("video_prompt", "")}
+             "blocked": blocked.id if blocked else None, "canvas": layout["canvas"], "video_prompt": res.get("video_prompt", ""),
+             "slot_fill": cfg.slot_fill}
     res["video_sheets"].append(entry)
     for i in approved:
         pl.hist(res["stickers"][i - 1], "video_sheet", "python", "BLOCK" if blocked else "PASS", blocked.id if blocked else None, aid)
@@ -276,6 +277,53 @@ def build_sheet(out: Path, gid: int, cfg: EngineConfig) -> dict:
 
 
 # ---------- 7-8: the returned video ----------
+def _make_preview(src: Path) -> str | None:
+    """A light copy (720 px wide at most, no audio) for the browser; the full-size original stays the engine's source. Optional: None on any failure."""
+    import subprocess
+    dest = src.with_name("preview.mp4")
+    try:
+        from .engine import ffmpeg as ff
+        exe = ff.ffmpeg_exe()
+        enc = subprocess.run([exe, "-hide_banner", "-encoders"], capture_output=True, text=True, timeout=30).stdout
+        codec = ["-c:v", "libx264", "-crf", "28", "-preset", "veryfast"] if "libx264" in enc else ["-c:v", "mpeg4", "-qscale:v", "6"]
+        r = subprocess.run([exe, "-y", "-loglevel", "error", "-i", str(src), "-vf", "scale='min(720,iw)':-2", "-an", *codec, "-pix_fmt", "yuv420p",
+                            "-movflags", "+faststart", str(dest)], capture_output=True, timeout=120)
+        return dest.name if r.returncode == 0 and dest.is_file() else None
+    except Exception:
+        return None
+
+
+def preview_sheet(out: Path, gid: int, cfg: EngineConfig, fill: float, px: int = 420) -> bytes:
+    """The video sheet the kept stickers would make at this fill, as a small PNG, built on the fly and not stored: the Studio shows it while the gap slider moves."""
+    from dataclasses import replace
+    res = pl.read_result(out, gid)
+    kept = [s["index"] for s in res["stickers"] if s["status"] == "READY" and s["review"]["still"] != "REJECTED"]
+    if not kept:
+        raise refuse("There are no kept stickers to put on a video sheet.")
+    d = pl.gen_dir(out, gid)
+    plain = {i: _read_rgba(d / "source" / "plain" / f"S{i}.png") for i in kept}
+    sheet, _ = build_video_sheet(plain, kept, replace(cfg, slot_fill=float(fill)), tuple(res["grid"]))
+    scale = px / max(sheet.shape[:2])
+    small = cv2.resize(sheet, (max(1, round(sheet.shape[1] * scale)), max(1, round(sheet.shape[0] * scale))), interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".png", cv2.cvtColor(small, cv2.COLOR_RGB2BGR))
+    return buf.tobytes()
+
+
+def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
+    """Apply the batch's CURRENT stroke and trim to the animations of every sliced video sheet, from the video that is already stored: no new video,
+    no credits. Repeated settings come back from the animation cache at once."""
+    res = pl.read_result(out, gid)
+    for v in res["video_sheets"]:
+        if v["status"] == "SLICED" and v.get("video"):
+            if not v.get("preview"):                         # a video stored before the light preview existed: make it now
+                pv = _make_preview(pl.gen_dir(out, gid) / v["video"])
+                if pv:
+                    r2 = pl.read_result(out, gid)
+                    next(x for x in r2["video_sheets"] if x["id"] == v["id"])["preview"] = f"video_sheet/{v['id']}/{pv}"
+                    pl.write_result(out, gid, r2)
+            slice_video(out, gid, v["id"], cfg, pace)
+
+
 def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "video.mp4") -> dict:
     """Synchronous part: validate the gate order and store the upload next to the sheet it belongs to. Slicing is slice_video()."""
     res = pl.read_result(out, gid)
@@ -292,7 +340,9 @@ def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "vi
         old.unlink()
     dest = d / "video_sheet" / aid / f"video{ext}"
     dest.write_bytes(data)
-    v.update(video=f"video_sheet/{aid}/{dest.name}", video_name=filename, status="VIDEO_RETURNED", block=None, video_flags=[], video_checks=[])
+    pv = _make_preview(dest)
+    v.update(video=f"video_sheet/{aid}/{dest.name}", video_name=filename, status="VIDEO_RETURNED", block=None, video_flags=[], video_checks=[],
+             preview=f"video_sheet/{aid}/{pv}" if pv else None)
     _stage(res, "video_returned")
     pl.write_result(out, gid, res)
     return {"sheet": aid, "bytes": len(data)}
@@ -341,7 +391,7 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
                 pl.write_result(out, gid, res)
                 pl.emit(out, gid, "video_cell", "done", 0, {"index": r.index, "status": r.status, "reason": r.reason}, "python", "PASS" if r.status == "READY" else "BLOCK")
             pl.write_result(out, gid, res)
-            results = process_video(mp4, cfg, cells=v["slots"], on_cell=on_cell, layout=layout, refs=refs)
+            results = process_video(mp4, cfg, cells=v["slots"], on_cell=on_cell, layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"))
             v["status"] = "SLICED"
             s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
             _stage(res, "video_sliced"); pl.write_result(out, gid, res)

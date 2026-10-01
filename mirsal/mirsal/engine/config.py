@@ -57,7 +57,7 @@ class EngineConfig:
     min_motion: float = 0.5         # motion_present: median frame-to-frame change
     min_sharp_kept: float = 0.8     # sharpness: share of the edge detail that survives the encode (real: 1.00-1.03 at the budget)
     max_area_cv: float = 0.35       # alpha_stable: coefficient of variation of the subject area over the frames
-    slot_fill: float = 0.66         # video sheet: the largest subject's longest side is at most this share of its slot (>= 17% margin). Was 0.55: the gap between two stickers was almost as wide as a sticker
+    slot_fill: float = 0.74         # video sheet: the largest subject's longest side is at most this share of its slot (>= 13% margin). 0.55 -> 0.66 -> 0.74: each step took a quarter off the gap between two stickers
     sheet_canvas: int = 2048        # video sheet canvas (square)
     pack_max: int = 120             # Telegram sticker pack limit
     tg_emoji_max: int = 20          # Telegram: 1-20 emoji per sticker

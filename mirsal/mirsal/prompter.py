@@ -101,7 +101,9 @@ def render_plan(slots: dict, template_id: str, version: int = TEMPLATE_VERSION) 
     lines = "\n".join(lab(c) for c in cells) if len(cells) > 1 else cells[0]["label"]
     motions = "\n".join(f"{c['pos']}. {c.get('motion') or c['label'] + ', with big lively expressive movement in place'}" for c in cells)
     common = dict(rows=rows, cols=cols, n=rows * cols, subject_description=slots["subject_description"], style=styles.phrase(slots.get("style_id"), version),
-                  cells=lines, key_name=key_name, key_hex=key_hex, motions=motions)
+                  cells=lines, key_name=key_name, key_hex=key_hex, motions=motions,
+                  clip="seamless loop" if slots.get("loop") else "clip",           # v2 video: the word "loop" is only there when the user chose Loop (the engine closes loops itself)
+                  ending="End on the starting pose so the clip loops." if slots.get("loop") else "")
     sheet = load_template(template_id, version).format(**common).strip()
     video = load_template("video", version).format(seconds=3, motion=GUIDELINES["motion"].split(", seamless")[0], **common).strip()
     return {"sheet_prompt": sheet, "video_prompt": video, "prompts": {c["pos"]: cell_prompt(slots, c) for c in cells}}
