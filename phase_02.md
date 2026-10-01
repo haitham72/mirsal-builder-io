@@ -48,7 +48,7 @@
 
 ### What Haitham provides
 - Keeps the Higgsfield connector authorised in the operator session; a daily credit budget for tests (the operator stops at it).
-- One decision at S5: Anthropic API key for the filler and the judge, or agent-written slots and an agent judge.
+- S5 decision made: the slot filler and reviewer use `OPENAI_API_KEY` (`llm.py`). Still open for S6: the judge on the same key, or an agent judge in the operator session.
 - 30 sticker labels for S6, a rating for the first live sheets.
 
 ### Rules for the operator session

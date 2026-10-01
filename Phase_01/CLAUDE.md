@@ -1,6 +1,6 @@
 # Phase_01 — supporting material, status and finish list
 
-Phase 1 is the sticker engine, the verifier, the golden path with its gates, the Studio (the desktop builder) and Send to Telegram. **It is built, tested (130+ tests) and in use. What is left is the finish list below.** The architecture is in **`README.md` in this folder**; there is no `phase_01.md` any more (removed 2026-10-01 at Haitham's request: Phase 1 is built, its plan items are recorded in the README, its history is in git).
+Phase 1 is the sticker engine, the verifier, the golden path with its gates, the Studio (the desktop builder) and Send to Telegram. **It is built, tested (166 tests across all built phases) and in use. What is left is the finish list below.** The architecture is in **`README.md` in this folder**; there is no `phase_01.md` any more (removed 2026-10-01 at Haitham's request: Phase 1 is built, its plan items are recorded in the README, its history is in git).
 
 ## Finish list (Haitham, 2026-10-01: "perfect phase 01 first; every step adds 1-5% and it compounds")
 Done when Haitham approves; then Phase 1 closes and this list is deleted.

@@ -74,7 +74,7 @@ mirsal/
 - `search "teddy book"` (book first), `"tedy bok"` (book at rank 0), `"penguin skiing"` (nothing),
   `--approved --animated` filters; `task img-001-teddy_bear` lists its generations.
 - `docker restart mirsal-db && show` returns everything.
-- 152 tests green (`tests/test_store.py`: 10 — round trip, pre-1F, idempotency, history order, search,
+- 152 tests green at the 3A commit (166 now; `tests/test_store.py`: 10 — round trip, pre-1F, idempotency, history order, search,
   task prefix, tmp-out isolation, engine boundary incl. `redis`, trace none + langsmith fake-server).
 
 ## Beyond 3A (landed after, covered by their own tests)

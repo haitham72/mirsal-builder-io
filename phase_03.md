@@ -321,7 +321,7 @@ CREATE TABLE generation_events (
   - a key-only Phase 1 import is still findable.
 
 ## Exit (3A built 2026-10-01; architecture in `Phase_03/README.md`)
-- [x] Every command works (`db/list/show/history/search/task`); 152 tests pass (`tests/test_store.py`: 10).
+- [x] Every command works (`db/list/show/history/search/task`); 152 tests passed at the 3A commit (`tests/test_store.py`: 10; 166 now).
 - [x] `db import` brings in every Phase 1 run (92/92 incl. 1F reviews and video sheets; re-import adds zero rows),
   with one `prepared` task row per generation (sheet; separate per-video rows deferred).
 - [x] `mirsal task <external_task_id>` and prefix search work for prepared folders (Higgsfield job ids: no Phase 2
