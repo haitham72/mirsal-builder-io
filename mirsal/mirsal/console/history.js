@@ -22,9 +22,9 @@ function hDraw(){const el=$('s-history');if(!el||route_!=='history')return;
    ${HS.trash.length?`<div class=sh style="margin-top:26px">${ic('trash')} Removed <span class=mut style="font-weight:500">kept until you delete them for good</span></div><div class=plist>${HS.trash.map(t=>`<div class=hrow trash>
       <div class=hmain><b>${esc(t.subject.replace(/_/g,' '))}</b> <span class=mut>${t.number} · ${ago(t.removed)} · ${bytes(t.bytes||0)}</span><div class=mut>${t.items.map(i=>esc(i.name)).join(' + ')}</div></div>
       <div class=hact><button class="btn sm" data-act=hrestore data-id="${t.id}">Restore</button><button class="btn sm dng" data-act=hpurge data-id="${t.id}">Delete for good</button></div></div>`).join('')}</div>`:''}</div>`}
-ACT.hopen=el=>{sel=+el.dataset.g;glast='';location.hash='#/generate'};
+ACT.hopen=el=>{openGen(+el.dataset.g);location.hash='#/generate'};
 ACT.hgen=async el=>{const subj=el.dataset.s,num=el.dataset.n;await loadInputs();const inp=GINP.find(x=>x.subject===subj),v=inp&&inp.variants.find(x=>String(x.folder)===String(num));
-  const r=await post('/api/generations',{prompt:subj.replace(/_/g,' '),variant:v?v.variant:1,outline:GS.outline});if(!r.ok)return toast(r.j.error,1);sel=r.j.id;glast='';location.hash='#/generate'};
+  const r=await post('/api/generations',{prompt:subj.replace(/_/g,' '),variant:v?v.variant:1,outline:GS.outline});if(!r.ok)return toast(r.j.error,1);openGen(r.j.id);location.hash='#/generate'};
 ACT.hremove=el=>{const r=HS.rows.find(x=>x.number===el.dataset.n&&x.subject===el.dataset.s);if(!r)return;
   const names=[r.img&&r.img.name,r.vid&&r.vid.name].filter(Boolean),size=(r.img?r.img.bytes:0)+(r.vid?r.vid.bytes:0);
   confirmDlg(`Remove ${names.join(' and ')}? (${bytes(size)}) They move to the trash below and can be restored.`,async()=>{

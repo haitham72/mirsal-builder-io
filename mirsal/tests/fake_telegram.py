@@ -61,7 +61,11 @@ def make_handler(f: Fake):
             if not m or m[1] != TOKEN:
                 return self._err(401, "Unauthorized")
             method = m[2]
-            fields, files = parse_multipart(body, self.headers["Content-Type"]) if body else ({}, {})
+            if "json" in (self.headers.get("Content-Type") or ""):
+                raw = json.loads(body or b"{}")
+                fields, files = {k: (json.dumps(v) if isinstance(v, (list, dict)) else str(v)) for k, v in raw.items()}, {}
+            else:
+                fields, files = parse_multipart(body, self.headers["Content-Type"]) if body else ({}, {})
             f.calls.append((method, {k: v for k, v in fields.items() if k != "stickers"}))
             if f.fail_429 > 0:
                 f.fail_429 -= 1

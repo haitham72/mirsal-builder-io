@@ -10,6 +10,7 @@ import io
 import json
 import os
 import re
+import ssl
 import time
 import urllib.error
 import urllib.request
@@ -84,6 +85,51 @@ def disconnect(out: Path) -> dict:
 
 
 # ---------- HTTP ----------
+_CTX = None
+
+
+def _ssl_context() -> ssl.SSLContext:
+    """The system trust store, tolerant of a malformed certificate. On some Windows PCs (found on Haitham's) one bad entry in the store makes
+    ssl.create_default_context() raise [ASN1: NOT_ENOUGH_DATA] and nothing can connect; load the store one certificate at a time and skip the bad ones.
+    Corporate root certificates in the store are kept, so a network that inspects TLS still works."""
+    global _CTX
+    if _CTX is not None:
+        return _CTX
+    try:
+        _CTX = ssl.create_default_context()
+        return _CTX
+    except ssl.SSLError:
+        pass
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ctx.verify_mode, ctx.check_hostname = ssl.CERT_REQUIRED, True
+    loaded = 0
+    if hasattr(ssl, "enum_certificates"):                      # Windows
+        for store in ("ROOT", "CA"):
+            try:
+                certs = ssl.enum_certificates(store)
+            except OSError:
+                continue
+            for der, enc, _trust in certs:
+                if enc == "x509_asn":
+                    try:
+                        ctx.load_verify_locations(cadata=der)
+                        loaded += 1
+                    except ssl.SSLError:
+                        continue
+    try:
+        ctx.load_default_certs()                               # other platforms (or whatever else loads cleanly)
+    except ssl.SSLError:
+        pass
+    if not loaded:
+        try:
+            import certifi
+            ctx.load_verify_locations(cafile=certifi.where())
+        except Exception:
+            pass
+    _CTX = ctx
+    return ctx
+
+
 def _scrub(text: str, token: str | None) -> str:
     return text.replace(token, "<token>") if token else text
 
@@ -118,12 +164,15 @@ def _multipart(fields: dict, files: dict) -> tuple[bytes, str]:
 
 def _call(token: str, method: str, fields: dict, files: dict | None = None, timeout: float = 60.0):
     """One Bot API call. 429 waits retry_after (up to 3 tries); every failure becomes a plain TelegramError without the token in it."""
-    body, ctype = _multipart({k: (json.dumps(v) if isinstance(v, (list, dict)) else str(v)) for k, v in fields.items()}, files or {})
+    if files:
+        body, ctype = _multipart({k: (json.dumps(v) if isinstance(v, (list, dict)) else str(v)) for k, v in fields.items()}, files)
+    else:                                                    # no files: plain JSON (an empty multipart body got HTTP 400 from the real service)
+        body, ctype = json.dumps(fields).encode("utf-8"), "application/json"
     url = f"{api_base()}/bot{token}/{method}"
     for attempt in range(3):
         req = urllib.request.Request(url, data=body, headers={"Content-Type": ctype}, method="POST")
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as r:
+            with urllib.request.urlopen(req, timeout=timeout, context=_ssl_context() if url.startswith("https") else None) as r:
                 data = json.loads(r.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
             try:

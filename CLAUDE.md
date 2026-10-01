@@ -14,6 +14,8 @@ Two interfaces sharing one generation engine:
 
 Never collapse into monolithic LLM prompt; separate creative intent → spec → generation → processing → validation → animation → persistence.
 
+**Session hand-off:** read `phase_01.md`, "Session hand-off, 2026-10-01", before touching the UI or Telegram. It lists what is unverified (the Generate session rewrite), the open Telegram live test and Haitham's feedback with status. Never commit a Telegram token; the one Haitham pasted in chat must be revoked.
+
 ## Rules
 
 1. **Telegram sticker specs:** WEBM/VP9 + alpha (video); PNG/WEBP + transparency (static). Max 256 KB, 512×512, 30 FPS, 3s max. Every sticker tagged with ≥1 emoji.
