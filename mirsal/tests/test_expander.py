@@ -30,12 +30,12 @@ class Fake:
 
 class ExpanderTests(unittest.TestCase):
     def setUp(self):
-        self.key = os.environ.pop("ANTHROPIC_API_KEY", None)
+        self.key = os.environ.pop(llm.KEY_VAR, None)
         llm._ENV_LOADED = True                       # do not read a real mirsal/.env during the tests
 
     def tearDown(self):
         if self.key is not None:
-            os.environ["ANTHROPIC_API_KEY"] = self.key
+            os.environ[llm.KEY_VAR] = self.key
 
     def test_ai_names_every_sticker_and_the_template_builds_the_prompts(self):
         f = Fake(good())
@@ -75,7 +75,7 @@ class ExpanderTests(unittest.TestCase):
     def test_no_key_means_the_built_in_sets_and_says_so(self):
         plan = expander.expand("falcon", (3, 3), use_ai=True)
         self.assertEqual(plan["expanded_by"], "deterministic")
-        self.assertIn("ANTHROPIC_API_KEY", plan["expand_error"])
+        self.assertIn(llm.KEY_VAR, plan["expand_error"])
         self.assertEqual(expander.expand("falcon", (3, 3))["expanded_by"], "deterministic")      # AI off: untouched behaviour
         with self.assertRaises(llm.LLMError):
             llm.complete("s", "u")

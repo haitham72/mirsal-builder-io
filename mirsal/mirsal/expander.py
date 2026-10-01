@@ -65,7 +65,7 @@ def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=No
         return base
     complete = complete or llm.complete
     if complete is llm.complete and not llm.configured():
-        base["expand_error"] = "No AI key (add ANTHROPIC_API_KEY to mirsal/.env): using the built-in sets."
+        base["expand_error"] = f"No AI key (add {llm.KEY_VAR} to mirsal/.env): using the built-in sets."
         return base
     rows, cols = grid
     n = rows * cols

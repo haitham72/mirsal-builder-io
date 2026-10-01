@@ -135,7 +135,7 @@ def doctor() -> int:
     tpl = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
     print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
     from . import llm
-    print("OK      AI expansion: " + (f"on, model {llm.model()}" if llm.configured() else "off: add ANTHROPIC_API_KEY to mirsal/.env to let the AI expand a subject and name every sticker (the built-in sets are used meanwhile)"))
+    print("OK      AI expansion: " + (f"on, model {llm.model()}" if llm.configured() else f"off: add {llm.KEY_VAR} to mirsal/.env to let the AI expand a subject and name every sticker (the built-in sets are used meanwhile)"))
     import os
     print(f"OK      animation workers: {EngineConfig().anim_workers} of {os.cpu_count()} CPUs (MIRSAL_ANIM_WORKERS or serve --workers N changes it)")
     from . import telegram
