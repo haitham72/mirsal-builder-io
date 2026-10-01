@@ -201,5 +201,13 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(t.dropped, 1)  # the 500 was dropped, the pipeline never noticed
 
 
+class ComposeFileTests(unittest.TestCase):
+    """`db up` finds the compose file that is tracked in git (needs no database)."""
+
+    def test_compose_path_exists(self):
+        from mirsal.cli import out_root_compose
+        self.assertTrue(out_root_compose().is_file(), out_root_compose())
+
+
 if __name__ == "__main__":
     unittest.main()

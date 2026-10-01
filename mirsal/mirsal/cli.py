@@ -100,7 +100,7 @@ def db_cmd(out, action: str, yes: bool) -> int:
 
 def out_root_compose():
     from pathlib import Path as _P
-    return _P(__file__).resolve().parent.parent.parent / "docker-compose.yml"
+    return _P(__file__).resolve().parent.parent / "docker-compose.yml"
 
 
 def store_cmd(args) -> int:

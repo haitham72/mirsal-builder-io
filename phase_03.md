@@ -320,18 +320,10 @@ CREATE TABLE generation_events (
   - `--approved` hides gate-rejected stickers;
   - a key-only Phase 1 import is still findable.
 
-## Exit (3A built 2026-10-01; architecture in `Phase_03/README.md`)
-- [x] Every command works (`db/list/show/history/search/task`); 152 tests passed at the 3A commit (`tests/test_store.py`: 10; 166 now).
-- [x] `db import` brings in every Phase 1 run (92/92 incl. 1F reviews and video sheets; re-import adds zero rows),
-  with one `prepared` task row per generation (sheet; separate per-video rows deferred).
-- [x] `mirsal task <external_task_id>` and prefix search work for prepared folders (Higgsfield job ids: no Phase 2
-  outputs exist yet).
+## Exit (3A built; architecture in `Phase_03/README.md`; only the open items remain)
 - [ ] `import out/` also brings in `out/jobs/*.json`, `out/model_calls.jsonl` and the VLM verdicts — waits for
   Phase 2 to produce them (`import_tasks` covers `out/tasks/*.json` only; `model_calls` table + `002` land then).
-- [~] Tracing seam done (`obs/trace.py`: `none` zero network calls, `langsmith` batched + droppable, gate-feedback
-  keys; fake-server tested). `mirsal trace backfill` waits for real runs.
-- [x] Restart proof done by the builder (`docker restart mirsal-db && show` returns everything); Haitham's own
-  `list/show/history/search` run still pending.
+- [ ] `mirsal trace backfill` (the tracing seam in `obs/trace.py` is built): waits for real runs.
 
 ## Explicitly deferred (3A)
 - Sessions, interactions, feedback, preferences → Phase 4. Chat feedback ("I like 2 but not 3") is different from a gate decision: when Phase 4 receives it at an open gate, it writes `reviews` rows too.
@@ -503,11 +495,9 @@ ALTER TABLE search_log ADD COLUMN parsed jsonb, ADD COLUMN gap_generated int NOT
 
 **Eval set:** `Phase_02/search_queries.md` holds ~30 queries (English, Arabic, Arabizi), each with the sticker IDs Haitham considers relevant, plus ≥5 that should return nothing.
 
-**3B exit (lexical pass built 2026-10-01; vectors deferred):**
-- [x] `pool search "teddy waving"` returns only waving teddies (ranked); `"falcon dancing"` / `"teddy dancing"` return **zero** (no such stickers; never the closest junk). Free, no model calls. (`mirsal/pool.py`, `tests/test_pool.py`: 4.)
+**3B exit (lexical pass built; vectors deferred; only the open items remain):**
 - [ ] Measured on the eval set (`Phase_03/search_queries.md`, pending from Haitham): precision@5 ≥ 0.8. Recorded in `docs/phase3_measurements.md` when the eval lands.
 - [~] Gap flow: "Found N · generate M more?" (confirmation required; the price is not shown yet — no provider pricing without live calls; generation stays manual).
-- [x] `pool reindex` covers every earlier generation (140 approved indexed); `pool hide` removes from search without deleting.
 - [ ] Search latency baseline for Phase 4's Redis cache (measure when the eval lands).
 - Deferred to the embedding pass: `EMBED_MODEL` vectors + HNSW (`subject_vec/action_vec` NULLABLE until then), Arabic LLM query parser (deterministic patterns now), `pool_version` cache key (no Redis yet).
 
@@ -546,10 +536,8 @@ It needs the Phase 1 engine (scale, outline, validators) and Phase 3 storage; no
 - A synthetic fur-edge shape keeps a soft gradient.
 - Default mode makes **zero network calls** (sockets blocked in the test).
 
-**3C exit (offline core built 2026-10-01; `tests/test_photo.py`: 2):**
-- [x] `photo dog.jpg` gives a clean subject sticker in ≤3 s (synthetic green-screen: chroma path, 512 PNG, validated).
+**3C exit (offline core built; only the open items remain):**
 - [ ] On Haitham's 10+ real photos (`Phase_03/photos/`, still pending), he judges the edges clean. IoU ≥ 0.92 on composites.
-- [x] No network calls in default mode (chroma/GrabCut; AI matte only when installed).
 - Deferred: BiRefNet upgrade, SAM 2 click-to-refine, `--subject N`, paid AI motion, `SOURCE_PHOTO` asset rows, HEIC/iPhone Portrait input (Pillow reads browser-common formats today).
 
 ---
