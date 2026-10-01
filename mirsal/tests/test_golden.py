@@ -312,6 +312,34 @@ class GoldenPathTests(Api):
         self.assertEqual(self.review(r["number"], "pack", "APPROVE")["final"], [1])
         self.assertEqual(self.req("GET", f"/api/generations/{gid}")[1]["stickers"][4]["review"]["still"], "PENDING")   # the parent is never modified
 
+    def test_a_human_can_allow_a_slot_block_and_take_it_back(self):
+        gid, g = self.new("blob")
+        self.review(gid, "still", "APPROVE", "ready")
+        aid, g = self.drive_video(gid, drift={1: (-70, 0)})
+        S = {s["index"]: s for s in g["stickers"]}
+        self.assertEqual((S[1]["anim_status"], S[1]["anim_reason"]), ("FAILED", "inside_slot"))
+        self.review(gid, "anim", "APPROVE", 1, expect=409)                                   # the review gate still refuses a blocked animation
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 3})[0], 409)   # a READY one has nothing to allow
+        s_, j = self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": True})
+        self.assertEqual(s_, 202, j)
+        g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+        s1 = g["stickers"][0]
+        self.assertEqual(s1["anim_override"], ["inside_slot"])
+        chk = next(c for c in s1["anim_report"] if c["name"] == "inside_slot")
+        self.assertEqual((chk["ok"], chk["severity"]), (False, "WARN"))                       # still listed, downgraded to a warning, marked as allowed
+        self.assertIn("allowed by you", chk["detail"])
+        self.assertTrue(s1["webm"] and s1["review"]["anim"] == "PENDING")                     # it exists and enters the set like any other animation
+        h = next(x for x in reversed(s1["history"]) if x["actor"] == "human" and x["stage"] == "video")
+        self.assertEqual((h["decision"], h["reason"]), ("APPROVE", "allowed anyway: inside_slot"))
+        # an edge change re-cuts every animation from the stored video and keeps the permission
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 4, "erode": 0, "reslice": True})[0], 200)
+        g = self.wait(gid, lambda x: not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]))
+        self.assertEqual((g["stickers"][0]["anim_status"], g["stickers"][0]["anim_override"]), ("READY", ["inside_slot"]))
+        # withdrawn: blocked again
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": False})[0], 202)
+        g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
+        self.assertEqual((g["stickers"][0]["anim_reason"], g["stickers"][0]["anim_override"]), ("inside_slot", []))
+
     def test_wrong_video_is_blocked_before_slicing(self):
         gid, g = self.new("create a blob for school")
         self.review(gid, "plan", "APPROVE"); self.review(gid, "still", "APPROVE", "ready")

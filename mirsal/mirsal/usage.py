@@ -51,6 +51,15 @@ def _labels() -> dict:
     return {m["id"]: (m["label"], m["logo"]) for k in model_catalog.KINDS.values() for m in k}
 
 
+def typical(out: Path) -> dict:
+    """Median seconds per 'image:<model>' / 'video:<model>' from the ledger, for the queue's 'about 2:45' estimate."""
+    by: dict = {}
+    for r in read_rows(out):
+        if str(r.get("provider", "")).startswith("higgsfield") and r.get("status", "OK") == "OK" and r.get("latency_ms") and r.get("kind") in ("IMAGE_SHEET", "IMAGE_SINGLE", "VIDEO"):
+            by.setdefault(("video:" if r["kind"] == "VIDEO" else "image:") + str(r.get("model")), []).append(r["latency_ms"] / 1000)
+    return {k: round(sorted(v)[len(v) // 2]) for k, v in by.items()}
+
+
 def summary(out: Path, limit: int = 100) -> dict:
     out = Path(out)
     rows, labels = read_rows(out), _labels()

@@ -757,9 +757,18 @@ def state(out: Path, gid: int) -> dict:
 
 
 def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
-    """Every batch ever made, newest first, a page at a time (the Studio's persistent history): title, time, counts and up to four thumbnails."""
-    ids = list(reversed(list_ids(out)))
+    """Every batch ever made, the most recently EDITED first (any change to a batch counts: a new stroke, an animation, a decision), a page at a time:
+    title, times, counts and up to four thumbnails."""
+    stamped = []
+    for gid in list_ids(out):
+        try:
+            stamped.append(((gen_dir(out, gid) / "result.json").stat().st_mtime, gid))
+        except OSError:
+            continue
+    stamped.sort(reverse=True)
+    ids = [g for _, g in stamped]
     offset, limit = max(0, int(offset)), max(1, min(int(limit), 50))
+    edited = dict((g, t) for t, g in stamped)
     items = []
     for gid in ids[offset:offset + limit]:
         try:
@@ -773,7 +782,7 @@ def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
         except OSError:
             created = None
         items.append({"id": gid, "generation_id": r["generation_id"], "prompt": r.get("prompt") or r["source"].get("subject", ""), "created": created,
-                      "stage": r["stage"], "error": r.get("error"), "ready": len(ready),
+                      "edited": round(edited[gid], 3), "stage": r["stage"], "error": r.get("error"), "ready": len(ready),
                       "animated": sum(1 for s in ready if s.get("anim_status") == "READY"),
                       "thumbs": [f"{s['png']}?e={s.get('rendered_at') or s.get('edited_at') or 0}" for s in ready[:4]],
                       "outline_px": r.get("outline_px")})

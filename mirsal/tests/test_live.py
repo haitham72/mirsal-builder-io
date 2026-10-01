@@ -115,6 +115,28 @@ class FulfilTests(Base):
         self.assertEqual(done["status"], "DONE")
         self.assertFalse([c for c in self.cli.calls if c[:2] == ["generate", "create"]])
 
+    def test_a_retry_waits_for_the_same_higgsfield_job_and_never_pays_twice(self):
+        j, _ = self.sheet_job()
+        boom = {"n": 0}
+
+        def flaky(ticket):
+            boom["n"] += 1
+            if boom["n"] == 1:
+                raise higgsfield.HiggsError("Higgsfield API error (HTTP 503) request failed with status 503 Service Unavailable")
+        self.cli.wait_hook = flaky
+        failed = jobs.fulfil(self.out, j["id"])
+        self.assertEqual((failed["status"], failed["external_task_id"]), ("FAILED", "fake-job-1"))          # the job exists at Higgsfield; only the waiting broke
+        again = jobs.resume(self.out, j["id"])
+        self.assertEqual((again["status"], again["external_task_id"], again["error"]), ("CLAIMED", "fake-job-1", None))
+        done = jobs.fulfil(self.out, j["id"])
+        self.assertEqual(done["status"], "DONE")
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)               # one paid creation in total
+        with self.assertRaises(jobs.JobError):
+            jobs.resume(self.out, j["id"])                                                                     # a finished job has nothing to retry
+        j2, _ = self.sheet_job()
+        jobs.fail(self.out, j2["id"], "nothing was created")
+        self.assertEqual(jobs.resume(self.out, j2["id"])["status"], "REQUESTED")                               # no ticket: asked again from scratch
+
     def test_provider_failure_marks_the_job_failed_with_the_reason(self):
         j, _ = self.sheet_job()
         self.cli.wait_hook = lambda t: (_ for _ in ()).throw(higgsfield.HiggsError("boom"))
@@ -177,7 +199,7 @@ class FulfilTests(Base):
 class PromptV2Tests(unittest.TestCase):
     def test_v2_prompts_avoid_the_words_that_caused_the_white_outline_and_the_checkerboard(self):
         p = prompter.expand("teddy bear", (3, 3))
-        self.assertEqual(p["template_version"], 2)
+        self.assertEqual(p["template_version"], prompter.TEMPLATE_VERSION)
         sheet = p["sheet_prompt"].lower()
         for bad in ("sticker", "grid", "cell", "gap", "row-major", "panel line"):
             self.assertNotIn(bad, sheet.replace("no tiled panels", ""), bad)
@@ -255,6 +277,20 @@ class LiveConsoleTests(Base):
         p2 = self.req("GET", "/api/history?limit=5&offset=5")[1]
         self.assertEqual(([i["generation_id"] for i in p2["items"]], p2["more"]), (["G002", "G001"], False))
         self.assertEqual((p1["items"][0]["ready"], p1["items"][0]["animated"], len(p1["items"][0]["thumbs"]), p1["items"][0]["prompt"]), (9, 9, 4, "batch 7"))
+
+    def test_the_export_folder_is_a_choice_and_every_live_batch_is_mirrored(self):
+        from mirsal import export
+        elsewhere = self.tmp / "my_stickers"
+        os.environ["MIRSAL_EXPORT_DIR"] = str(elsewhere)
+        try:
+            gid = self._stills_ready("export blob")
+            self.assertEqual(export.sync_all(self.out), 1)                                      # the back-fill at server start
+            imgs = elsewhere / "images" / "img-001-export_blob"
+            self.assertTrue(imgs.is_dir() and any(p.name.startswith("img-001-export_blob-s1-") for p in imgs.iterdir()))
+            self.assertFalse((self.out / "export").exists() and any((self.out / "export" / "images").glob("img-001-export_blob")))
+            self.assertEqual(self.req("GET", f"/api/generations/{gid}/files")[1]["package"], str(imgs))
+        finally:
+            os.environ.pop("MIRSAL_EXPORT_DIR", None)
 
     def test_models_account_usage_and_assets_endpoints(self):
         s, j = self.req("GET", "/api/models")
@@ -394,7 +430,7 @@ class LiveConsoleTests(Base):
         job = self.until(lambda: (lambda x: x if x.get("generation") and x["status"] == "DONE" else None)(self.req("GET", "/api/jobs/J001")[1]), "sheet job done")
         gid = int(job["generation"][1:])
         st = self.until(lambda: (lambda x: x if x["stage"] == "sliced" and not x["busy"] else None)(self.req("GET", f"/api/generations/{gid}")[1]), "stills")
-        self.assertEqual(st["template_version"], 2)
+        self.assertEqual(st["template_version"], prompter.TEMPLATE_VERSION)
         self.assertIn(styles.PHRASE["toon_shade"], st["sheet_prompt"])
         self.assertEqual(sum(1 for t in st["stickers"] if t["status"] == "READY"), 9)
         self.assertEqual(self.req("GET", f"/api/tasks/{task_id}")[1]["external_task_id"], "fake-job-1")        # the Higgsfield id, stored before waiting
@@ -448,6 +484,20 @@ class LiveConsoleTests(Base):
         again2 = self.until(lambda: (lambda x: x if not x["busy"] and not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]) else None)(
             self.req("GET", f"/api/generations/{gid}")[1]), "cached re-apply")
         self.assertTrue(all((t.get("anim_metrics") or {}).get("cache") == "hit" for t in again2["stickers"] if t["anim_status"] == "READY"))
+        # properly named folders for copy and paste: images/img-NNN-subject and videos/vid-NNN-subject, every stroke/trim setting its own snapshot (nothing is deleted)
+        import re
+        imgs, vids = self.out / "export" / "images" / "img-001-blob", self.out / "export" / "videos" / "vid-001-blob"
+        stick = lambda: [p.name for p in imgs.iterdir() if re.fullmatch(r"img-001-blob-s\d-[a-z_0-9]+-stroke\d+px-trim\d+px-\d{8}\.png", p.name)] if imgs.is_dir() else []
+        self.until(lambda: any("stroke6px-trim1px" in n for n in stick()), "the new stroke snapshot is mirrored")
+        names = sorted(p.name for p in imgs.iterdir())
+        self.assertTrue(any(re.fullmatch(r"img-001-blob-sheet-nano_banana_flash-2k-\d{8}\.png", n) for n in names), names)
+        self.assertGreaterEqual(len(stick()), 18)                                                            # the first edge and the second: both kept
+        self.assertTrue(any("stroke6px" not in n for n in stick()))
+        self.assertTrue((imgs / "prompts.txt").is_file())
+        vnames = sorted(p.name for p in vids.iterdir())
+        self.assertTrue(any(re.fullmatch(r"vid-001-blob-video-kling3_0-pro-3s-\d{8}\.mp4", n) for n in vnames), vnames)
+        self.assertTrue(any(re.fullmatch(r"vid-001-blob-videosheet-gap\d+-\d{8}\.png", n) for n in vnames), vnames)
+        self.assertTrue(any(re.fullmatch(r"vid-001-blob-s\d-[a-z_0-9]+-stroke\d+px-trim\d+px-\d{8}\.webm", n) for n in vnames), vnames)
         h = self.req("GET", "/api/history?limit=1")[1]
         self.assertEqual((len(h["items"]), h["items"][0]["generation_id"], h["items"][0]["animated"], h["more"] is False), (1, st["generation_id"], sum(1 for t in again2["stickers"] if t["anim_status"] == "READY"), True))
         u = self.req("GET", "/api/usage")[1]

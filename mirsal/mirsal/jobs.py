@@ -190,6 +190,21 @@ def requeue(out: Path, jid: str) -> dict:
     return _write(p, job)
 
 
+def resume(out: Path, jid: str) -> dict:
+    """A human retry of a FAILED or TIMEOUT job. With a Higgsfield ticket the job goes back to CLAIMED, so `fulfil` waits for the SAME Higgsfield job again (a transient
+    503 while waiting must not lose a paid video, and must not pay twice). Without a ticket nothing was created yet: it is simply requested again."""
+    cur = read(out, jid)
+    if cur["status"] not in ("FAILED", "TIMEOUT"):
+        raise JobError(f"{cur['id']} is {cur['status']}, nothing to retry", 409)
+    p = _path(out, jid)
+    job = json.loads(p.read_text(encoding="utf-8"))
+    if job.get("external_task_id"):
+        job.update(status="CLAIMED", error=None, claimed_at=_now(), completed_at=None, stage="working")
+    else:
+        job.update(status="REQUESTED", error=None, claimed_at=None, completed_at=None, created_at=_now())
+    return _write(p, job)
+
+
 def update(out: Path, jid: str, **fields) -> dict:
     """Merge bookkeeping fields (params, cost_estimate, generation) into a job file."""
     p = _path(out, jid)
@@ -258,8 +273,11 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
                     raise JobError(f"the daily credit cap ({cap:g}) would be exceeded by this {est:g}-credit call", 402)
                 ticket = hf.create(model, params, prompt, **media)
                 claim(out, jid, ticket)                      # IMMEDIATELY, before waiting
-                update(out, jid, params=dict(params, **({"references": len(refs)} if refs else {})), cost_estimate=est, model=model)
+                update(out, jid, params=dict(params, **({"references": len(refs)} if refs else {})), cost_estimate=est, model=model, stage="working")
+            if resume:
+                update(out, jid, stage="working")
             res = hf.wait(ticket, timeout_s=max(120, min(timeout_s(), 3600) - 60))
+            update(out, jid, stage="downloading")
             ext = (res["result_url"].split("?")[0].rsplit(".", 1)[-1] or "bin")[:5].lower()
             tmp = jobs_dir(out) / jid.upper() / f"download.{ext}"
             hf.download(res["result_url"], tmp)

@@ -1,6 +1,7 @@
 """Part B: prepared grid MP4 (3x3 / 2x2 / 1x1) -> transparent looping WEBM per cell. Same keyer as stills, same settings."""
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import json
 import math
@@ -185,8 +186,9 @@ def _run_cells(cells, fn, cfg, on_cell=None) -> list[AnimationResult]:
 
 def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_cell=None,
                   rects: list | None = None, sheet_wh: tuple | None = None, layout: dict | None = None, refs: dict | None = None,
-                  cache: AnimCache | None = None) -> list[AnimationResult]:
-    """rects/sheet_wh: the still's measured cell rects on the sheet; mapped onto the video (same layout, any size).
+                  cache: AnimCache | None = None, waive: dict | None = None) -> list[AnimationResult]:
+    """waive = {slot: {check ids}}: slot-geometry blocks (inside_slot, cross_slot) that a human has allowed for that cell; they become warnings.
+    rects/sheet_wh: the still's measured cell rects on the sheet; mapped onto the video (same layout, any size).
     Without them: equal thirds. layout (a video sheet's layout.json): its exact slot rectangles, plus the slot checks
     (inside_slot, cross_slot) on every frame; refs = {slot: approved still's alpha} for identity_kept."""
     from .grid import scale_rects
@@ -217,19 +219,19 @@ def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_ce
         a = (refs or {}).get(idx)
         return hashlib.sha1(a.tobytes()).hexdigest()[:16] if a is not None else None
     use_cache = cache
-    return _run_cells(cells, lambda idx: _cached(use_cache, use_cache and use_cache.key(cfg, "mp4", src, list(vr[idx - 1]), fps, cap_fps, max_frames, bool(layout), refkey(idx)), idx,
-                                                  lambda: _one_cell(mp4, idx, vr[idx - 1], fps, cap_fps, max_frames, cfg, bool(layout), (refs or {}).get(idx))),
+    return _run_cells(cells, lambda idx: _cached(use_cache, use_cache and use_cache.key(cfg, "mp4", src, list(vr[idx - 1]), fps, cap_fps, max_frames, bool(layout), refkey(idx), sorted((waive or {}).get(idx, ()))), idx,
+                                                  lambda: _one_cell(mp4, idx, vr[idx - 1], fps, cap_fps, max_frames, cfg, bool(layout), (refs or {}).get(idx), (waive or {}).get(idx, ()))),
                       cfg, on_cell)
 
 
-def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alpha=None) -> AnimationResult:
+def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alpha=None, waive=()) -> AnimationResult:
     x, y, cw, ch = rect
     t0 = time.perf_counter()
     frames = ff.decode_cell(mp4, x, y, cw, ch, max_frames, cap_fps)   # one cell at a time
     t_dec = _ms(t0); t1 = time.perf_counter()
     calib = calibrate(frames[0], cfg.chroma, cfg.border_px, cfg.threshold)      # sample bg ONCE
     keyed = [key_image(f, cfg, calib).rgba for f in frames]
-    return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1), "ms": {"decode": t_dec, "key": _ms(t1)}}, slot, ref_alpha)
+    return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1), "ms": {"decode": t_dec, "key": _ms(t1)}}, slot, ref_alpha, waive)
 
 
 def keyed_cell(mp4, rect, cap_fps, max_frames, cfg) -> list:
@@ -320,7 +322,7 @@ def _encode_fit(frames, fps, cfg, path) -> tuple[int, bytes, int]:
     return ladder[i], got[i], len(got)
 
 
-def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None) -> AnimationResult:
+def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> AnimationResult:
     ms = m.setdefault("ms", {})                       # where the time went, per stage (read by `python -m mirsal profile` and kept in result.json)
     t_all = time.perf_counter(); t = time.perf_counter()
     union = None
@@ -342,9 +344,13 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None) -> AnimationRes
         m["subject_px_in_video"] = int(max(union[2] - union[0], union[3] - union[1]))     # metric only: no warning, no gate
     pre = verify.run("slot", {"slot_frames" if slot else "cell_frames": keyed, "metrics": m}, cfg)
     ms["bounds"] = _ms(t)
-    if any(not c.ok and c.severity == verify.BLOCK for c in pre):
+    blocks = [c for c in pre if not c.ok and c.severity == verify.BLOCK]
+    if any(c.id not in waive for c in blocks):
         rep = Report(pre)
         return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
+    if blocks:                       # every block was allowed by a human click (stored on the sticker): kept as a warning, still listed
+        m["waived"] = [c.id for c in blocks]
+        pre = [dataclasses.replace(c, severity=verify.WARN, note=(c.note + " (allowed by you)").strip()) if c in blocks else c for c in pre]
     scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1]))
     m["scale"] = round(scale, 4)
     t = time.perf_counter()

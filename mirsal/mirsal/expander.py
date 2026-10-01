@@ -15,7 +15,7 @@ BANNED = {"text", "caption", "logo", "watermark", "flag", "transparent", "shadow
 SYSTEM = """You plan sticker packs. You are given a short request (any language) and a grid size. Reply with ONE JSON object and nothing else:
 {"subject_description": "<one line: the single character/subject, its look, identical in every cell>",
  "cells": [ {"label": "<the expression plus body language, 6-14 words, English>", "motion": "<one sentence: how this character moves when animated in place, English>", "key": "<snake_case action, 1-4 words, no subject>", "tags": ["<0-3 extra snake_case search words>"], "emoji": ["<1-2 emoji that fit the pose>"]} ]}
-Rules: exactly N cells, all completely different; cover a WIDE range of emotions and reactions (for example joy, love, laughter, pride, doubt, sadness, anger, shock, fear, embarrassment, boredom, mischief, sleepiness), each exaggerated and readable at small size; every label animatable (a character that can move in place);
+Rules: exactly N cells, all completely different; cover a WIDE range of emotions and reactions (for example joy, love, laughter, pride, doubt, sadness, anger, shock, fear, embarrassment, boredom, mischief, sleepiness), each exaggerated and readable at small size, and in a different state of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two share a pose or a silhouette; every label animatable (a character that can move in place);
 no text, captions, logos, flags or real people in any label; keep the user's subject and constraints, never add another character; labels in English even when the request is Arabic or Arabizi."""
 
 

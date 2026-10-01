@@ -11,7 +11,7 @@ TEMPLATES = Path(__file__).parent / "prompts" / "templates"
 MARGIN = ("full body, centred, generous empty margin on every side (at least 20% of the cell), "
           "nothing touching or crossing the cell edge")
 STYLES = dict(styles.PHRASE)           # id -> phrase (v2 templates); styles.phrase() gives the v1 wording for plans saved with v1
-TEMPLATE_VERSION = 2                   # new plans use v2; a saved plan keeps its own version
+TEMPLATE_VERSION = 3                   # new plans use v3; a saved plan keeps its own version
 KEYS = {"green": ("green", "#00FF00"), "blue": ("blue", "#0000FF")}
 TAG_RE = re.compile(r"[^a-z0-9]+")
 GUIDELINES = {

@@ -309,6 +309,49 @@ def preview_sheet(out: Path, gid: int, cfg: EngineConfig, fill: float, px: int =
     return buf.tobytes()
 
 
+OVERRIDABLE = ("inside_slot", "cross_slot")      # the two slot-geometry checks of a returned video are judgement calls; every technical block stays final
+
+
+def check_allow(out: Path, gid: int, index: int, allow: bool = True) -> tuple[dict, str]:
+    """Validate a human override on one animation and return (the sticker, the video sheet id). Raises with the reason when it cannot be allowed."""
+    res = pl.read_result(out, gid)
+    if not 1 <= int(index) <= len(res["stickers"]):
+        raise pl.PipelineError(f"index 1..{len(res['stickers'])} required")
+    st = res["stickers"][int(index) - 1]
+    v = next((x for x in reversed(res["video_sheets"]) if x["status"] == "SLICED" and x.get("video") and int(index) in x["slots"]), None)
+    if not v:
+        raise refuse("Only an animation cut from a returned video can be allowed.")
+    if not allow:
+        if not st.get("anim_override"):
+            raise refuse("Nothing was allowed for this sticker.")
+        return st, v["id"]
+    failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
+    if st.get("anim_status") != "FAILED" or not failed:
+        raise refuse("This animation was not blocked, so there is nothing to allow.")
+    bad = [f for f in failed if f not in OVERRIDABLE]
+    if bad:
+        raise refuse(f"This one failed a technical check ({', '.join(bad)}: format, size or codec) and cannot be allowed. Only a character that leaves or crosses its slot can.")
+    return st, v["id"]
+
+
+def allow_animation(out: Path, gid: int, index: int, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
+    """The human override: allow an animation that Python blocked for leaving or crossing its slot (or take the permission back). The decision is stored on the sticker
+    and in its history (actor human), the cell is cut again with the check downgraded to a warning, and every later re-slice keeps it."""
+    st, aid = check_allow(out, gid, index, allow)
+    res = pl.read_result(out, gid)
+    st = res["stickers"][int(index) - 1]
+    if allow:
+        failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
+        st["anim_override"] = sorted(set(st.get("anim_override") or []) | set(failed))
+        pl.hist(st, "video", "human", "APPROVE", "allowed anyway: " + ", ".join(failed), aid, {"override": failed})
+    else:
+        was = st.get("anim_override") or []
+        st["anim_override"] = []
+        pl.hist(st, "video", "human", "REJECT", "allowance withdrawn: " + ", ".join(was), aid, {"override": was})
+    pl.write_result(out, gid, res)
+    slice_video(out, gid, aid, cfg, pace, only=[int(index)])
+
+
 def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
     """Apply the batch's CURRENT stroke and trim to the animations of every sliced video sheet, from the video that is already stored: no new video,
     no credits. Repeated settings come back from the animation cache at once."""
@@ -348,7 +391,7 @@ def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "vi
     return {"sheet": aid, "bytes": len(data)}
 
 
-def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 0.0) -> None:
+def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 0.0, only: list | None = None) -> None:
     """Background job: video-stage checks on the returned video, then each approved slot is decoded from the layout's exact
     rectangles, re-keyed on every frame, boundary-checked and encoded. Python's blocks are recorded on the sticker's history."""
     res = pl.read_result(out, gid)
@@ -379,7 +422,8 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
             _stage(res, "video_returned"); pl.write_result(out, gid, res)
         with pl.Stage(out, gid, "video_sliced", pace) as s:
             refs = {}
-            for i in v["slots"]:
+            todo = [i for i in v["slots"] if only is None or i in only]
+            for i in todo:
                 st = res["stickers"][i - 1]
                 if st.get("png"):
                     refs[i] = _read_rgba(d / st["png"])[..., 3]
@@ -391,7 +435,8 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
                 pl.write_result(out, gid, res)
                 pl.emit(out, gid, "video_cell", "done", 0, {"index": r.index, "status": r.status, "reason": r.reason}, "python", "PASS" if r.status == "READY" else "BLOCK")
             pl.write_result(out, gid, res)
-            results = process_video(mp4, cfg, cells=v["slots"], on_cell=on_cell, layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"))
+            waive = {i: set(res["stickers"][i - 1].get("anim_override") or []) for i in todo}          # slot blocks a human allowed, kept across every re-slice
+            results = process_video(mp4, cfg, cells=todo, on_cell=on_cell, layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"), waive=waive)
             v["status"] = "SLICED"
             s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
             _stage(res, "video_sliced"); pl.write_result(out, gid, res)

@@ -9,7 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates, higgsfield, jobs, llm, model_catalog, prompter, sources, styles, tasks, telegram, usage, watch
+from .. import export, gates, higgsfield, jobs, llm, model_catalog, prompter, sources, styles, tasks, telegram, usage, watch
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
@@ -58,6 +58,10 @@ class Console:
     # ---------- Higgsfield: live generation (account, models, jobs fulfilled by the CLI) ----------
     def _warm_models(self) -> None:
         try:
+            export.sync_all(self.out)
+        except Exception:
+            pass
+        try:
             model_catalog.set_dump(higgsfield.load_models(self.out))
         except Exception:
             pass
@@ -88,6 +92,7 @@ class Console:
                     pass
             finally:
                 self._acct = (0.0, None)                 # the balance changed: the next read asks Higgsfield again
+                export.sync_recent(self.out)
         t = threading.Thread(target=run, daemon=True)
         self._jobs = [x for x in self._jobs if x.is_alive()] + [t]
         t.start()
@@ -183,6 +188,7 @@ class Console:
                 fn()
             finally:
                 self.lock.release()
+                export.sync_recent(self.out)
         threading.Thread(target=run, daemon=True).start()
 
 
@@ -326,6 +332,11 @@ def make_handler(c: Console):
                 return self._json(200, {"results": gates.search(c.out, q), "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
+            if path.startswith("/api/generations/") and path.endswith("/files"):         # where this batch's files are (the named folder for copy and paste)
+                gid = int(path.split("/")[3])
+                res = pl.read_result(c.out, gid)
+                pk = export.package_dir(c.out, res)
+                return self._json(200, {"package": str(pk) if pk and pk.is_dir() else None, "stickers": str(pl.gen_dir(c.out, gid) / "slices"), "batch": str(pl.gen_dir(c.out, gid))})
             if path.startswith("/api/generations/") and path.endswith("/sheet_preview"):      # the video sheet at a given fill, small and not stored
                 q = parse_qs(urlparse(self.path).query)
                 fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))
@@ -348,7 +359,7 @@ def make_handler(c: Console):
                 return self._send(200, a[0], a[1])
             if path == "/api/jobs":      # S2: jobs for the operator (Generate page polls while waiting)
                 st = parse_qs(urlparse(self.path).query).get("status", [None])[0]
-                return self._json(200, {"jobs": jobs.list(c.out, st)})
+                return self._json(200, {"jobs": jobs.list(c.out, st), "typical": usage.typical(c.out)})
             if path.startswith("/api/jobs/") and len(path.strip("/").split("/")) == 3:
                 try:
                     return self._json(200, jobs.read(c.out, path.strip("/").split("/")[2]))
@@ -606,6 +617,10 @@ def make_handler(c: Console):
                         return self._json(200, jobs.fail(c.out, jp[2], str(body.get("reason", ""))))
                     if act == "requeue":
                         return self._json(200, jobs.requeue(c.out, jp[2]))
+                    if act == "retry":           # a human retry: same Higgsfield job when it has a ticket (no second charge), else a fresh request
+                        job = jobs.resume(c.out, jp[2])
+                        c.fulfil_async(job["id"], after=c.start_from_job if job["kind"] == "sheet" else c.attach_video_from_job if job["kind"] == "video" else None)
+                        return self._json(200, job)
                 except jobs.JobError as e:
                     raise pl.PipelineError(str(e), e.code)
                 raise pl.PipelineError("not found", 404)
@@ -651,10 +666,28 @@ def make_handler(c: Console):
                         c.out, gid, c.cfg,
                         int(body["outline"]) if body.get("outline") is not None else None,
                         int(body["erode"]) if body.get("erode") is not None else None)
+                    export.sync_recent(c.out)
                     if body.get("reslice") and any(v["status"] == "SLICED" and v.get("video") for v in pl.read_result(c.out, gid)["video_sheets"]):
                         c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
                         res_["resliced"] = True
                     return self._json(200, res_)
+                if parts[3] == "reveal":         # open the batch's named folder in the file manager (a path the server computed, never one sent by the page)
+                    import os as _os, subprocess as _sp, sys as _sys
+                    res = pl.read_result(c.out, gid)
+                    pk = export.package_dir(c.out, res)
+                    target = pk if pk and pk.is_dir() else pl.gen_dir(c.out, gid) / "slices"
+                    if _sys.platform == "win32":
+                        _os.startfile(str(target))
+                    else:
+                        _sp.Popen(["open" if _sys.platform == "darwin" else "xdg-open", str(target)])
+                    return self._json(200, {"opened": str(target)})
+                if parts[3] == "allow":          # a human allows (or takes back) an animation Python blocked for leaving or crossing its slot
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    idx, allow = int(body["index"]), bool(body.get("allow", True))
+                    gates.check_allow(c.out, gid, idx, allow)
+                    c.submit(lambda: gates.allow_animation(c.out, gid, idx, allow, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
+                    return self._json(202, {"id": gid, "index": idx, "allow": allow})
                 if parts[3] == "reslice":        # apply the batch's current edge to the animations again, from the stored video (no credits)
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
