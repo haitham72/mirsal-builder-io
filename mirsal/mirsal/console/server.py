@@ -155,6 +155,40 @@ class Console:
             raise pl.PipelineError("Use at most 4 reference images.", 400)
         return out
 
+    def _commit_edge_locked(self, gid: int, outline, erode, via: str = "apply") -> bool:
+        """Make a stroke/trim real for the whole batch and SAVE A SNAPSHOT of it (result.json edge_history). The stills are re-rendered, the animations are re-cut from the
+        stored video (or re-animated from a prepared one). The caller holds the pipeline lock. No-op when the batch already has exactly this edge."""
+        res = pl.read_result(self.out, gid)
+        was_o, was_e = res.get("outline_px", 0), res.get("erode_px", 0)
+        o = was_o if outline is None else int(outline)
+        e = was_e if erode is None else int(erode)
+        if (o, e) == (was_o, was_e):
+            return False
+        pl.set_appearance(self.out, gid, self.cfg, o, e)
+        res = pl.read_result(self.out, gid)
+        hist = res.get("edge_history") or [{"outline": was_o, "erode": was_e, "ts": res.get("created"), "via": "initial"}]
+        res["edge_history"] = hist + [{"outline": o, "erode": e, "ts": round(time.time(), 3), "via": via}]
+        pl.write_result(self.out, gid, res)
+        cfg = pl.cfg_for(res, self.cfg)
+        if any(v["status"] == "SLICED" and v.get("video") for v in res["video_sheets"]):
+            gates.reslice(self.out, gid, cfg, self.pace)
+        elif res["source"].get("has_video") and any(st.get("anim_status") == "STALE" for st in res["stickers"]):
+            pl.run_animate(self.out, gid, cfg, "pack", None, self.pace)
+        export.sync_recent(self.out)
+        return True
+
+    def commit_edge(self, gid: int, outline, erode, via: str) -> bool:
+        """The automatic moments an edge chosen in the Studio becomes real: when the video is generated from the image (via 'video') and when the stickers go into a pack
+        (via 'pack'). Until then the sliders only preview."""
+        if outline is None and erode is None:
+            return False
+        if not self.lock.acquire(blocking=False):
+            raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+        try:
+            return self._commit_edge_locked(gid, outline, erode, via)
+        finally:
+            self.lock.release()
+
     def video_prompt_for(self, gid: int, aid: str, loop: bool = False) -> str:
         """The Kling prompt for the sheet that was actually built: per-sticker motions for the approved slots only (empty slots get no motion)."""
         res = pl.read_result(self.out, gid)
@@ -163,6 +197,7 @@ class Console:
             plan = json.loads((pl.gen_dir(self.out, gid) / "prompts.json").read_text(encoding="utf-8"))
             slots = json.loads(json.dumps(plan["slots"]))
             slots["loop"] = bool(loop)                    # the choice made when the video is sent wins over the one saved with the plan
+            slots["key_colour"] = res.get("key_colour") or "green"      # the screen the video sheet really has (blue only when the sheet came back blue)
             keep = set(entry["slots"])
             slots["cells"] = [c for c in slots["cells"] if c["pos"] in keep]
             if slots["cells"] and plan.get("template_id"):
@@ -337,6 +372,10 @@ def make_handler(c: Console):
                 res = pl.read_result(c.out, gid)
                 pk = export.package_dir(c.out, res)
                 return self._json(200, {"package": str(pk) if pk and pk.is_dir() else None, "stickers": str(pl.gen_dir(c.out, gid) / "slices"), "batch": str(pl.gen_dir(c.out, gid))})
+            if path.startswith("/api/generations/") and path.endswith("/edge_preview"):         # ONE sticker with a stroke/trim, rendered on the fly (a preview, never stored)
+                q = parse_qs(urlparse(self.path).query)
+                png = pl.edge_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), int(q.get("outline", ["0"])[0]), int(q.get("erode", ["0"])[0]), int(q.get("px", ["420"])[0]))
+                return self._send(200, png, "image/png")
             if path.startswith("/api/generations/") and path.endswith("/sheet_preview"):      # the video sheet at a given fill, small and not stored
                 q = parse_qs(urlparse(self.path).query)
                 fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))
@@ -536,6 +575,7 @@ def make_handler(c: Console):
                     return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
                             "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
                 gid = int(body["generation"])
+                c.commit_edge(gid, body.get("outline"), body.get("erode"), "video")             # the edge chosen in the Studio becomes real here
                 aid = str(body.get("sheet") or "")
                 fill = None if body.get("slot_fill") is None else min(0.92, max(0.5, float(body["slot_fill"])))
                 loop = bool(body.get("loop"))
@@ -684,10 +724,23 @@ def make_handler(c: Console):
                 if parts[3] == "allow":          # a human allows (or takes back) an animation Python blocked for leaving or crossing its slot
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
-                    idx, allow = int(body["index"]), bool(body.get("allow", True))
-                    gates.check_allow(c.out, gid, idx, allow)
-                    c.submit(lambda: gates.allow_animation(c.out, gid, idx, allow, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
-                    return self._json(202, {"id": gid, "index": idx, "allow": allow})
+                    allow = bool(body.get("allow", True))
+                    idx = gates.allowable(pl.read_result(c.out, gid), allow) if body.get("all") else [int(body["index"])]
+                    if not idx:
+                        raise pl.PipelineError("There is nothing to allow." if allow else "Nothing was allowed in this batch.", 409)
+                    for i in idx:
+                        gates.check_allow(c.out, gid, i, allow)
+                    c.submit(lambda: gates.allow_animations(c.out, gid, idx, allow, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
+                    return self._json(202, {"id": gid, "indexes": idx, "index": idx[0], "allow": allow})
+                if parts[3] == "edge":           # Apply / Undo: save a snapshot of the edge and apply it to the whole batch (in the background)
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    o, e = body.get("outline"), body.get("erode")
+                    if o is None and e is None:
+                        raise pl.PipelineError("outline or erode required")
+                    via = "undo" if body.get("via") == "undo" else "apply"
+                    c.submit(lambda: c._commit_edge_locked(gid, o, e, via))
+                    return self._json(202, {"id": gid})
                 if parts[3] == "reslice":        # apply the batch's current edge to the animations again, from the stored video (no credits)
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
@@ -733,6 +786,7 @@ def make_handler(c: Console):
                 if parts[3] == "add":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    c.commit_edge(gid, body.get("outline"), body.get("erode"), "pack")        # the edge chosen in the Studio becomes real here
                     return self._json(200, gates.quick_add(c.out, gid, c.lib, body.get("pack_id"), body.get("pack_name"), "replace" if body.get("mode") == "replace" else "add",
                                                    {str(k): v for k, v in (body.get("names") or {}).items() if isinstance(v, dict)}))
                 if parts[3] == "pack_add":

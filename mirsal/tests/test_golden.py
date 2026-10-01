@@ -340,6 +340,28 @@ class GoldenPathTests(Api):
         g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
         self.assertEqual((g["stickers"][0]["anim_reason"], g["stickers"][0]["anim_override"]), ("inside_slot", []))
 
+    def test_allow_all_and_every_cell_toggles(self):
+        gid, g = self.new("blob")
+        self.review(gid, "still", "APPROVE", "ready")
+        aid, g = self.drive_video(gid, drift={1: (-70, 0), 2: (0, -70)})
+        st = lambda x: {s["index"]: s for s in x["stickers"]}
+        self.assertEqual([st(g)[i]["anim_status"] for i in (1, 2)], ["FAILED", "FAILED"])
+        s_, j = self.req("POST", f"/api/generations/{gid}/allow", {"all": True, "allow": False})
+        self.assertEqual(s_, 409, j)                                                              # nothing has been allowed yet
+        s_, j = self.req("POST", f"/api/generations/{gid}/allow", {"all": True})
+        self.assertEqual((s_, j["indexes"]), (202, [1, 2]), j)                                    # one click, both blocked cells, one re-cut
+        g = self.wait(gid, lambda x: all(st(x)[i]["anim_status"] == "READY" for i in (1, 2)))
+        self.assertEqual([st(g)[i]["anim_override"] for i in (1, 2)], [["inside_slot"], ["inside_slot"]])
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"all": True})[0], 409)   # nothing left to allow
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": False})[0], 202)    # a cell toggles back on its own
+        g = self.wait(gid, lambda x: st(x)[1]["anim_status"] == "FAILED" and st(x)[2]["anim_status"] == "READY")
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"all": True, "allow": False})[1]["indexes"], [2])   # take all back: only what was allowed
+        g = self.wait(gid, lambda x: st(x)[2]["anim_status"] == "FAILED")
+        self.assertEqual([st(g)[i]["anim_override"] for i in (1, 2)], [[], []])
+        # and the very same two again with one click
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"all": True})[1]["indexes"], [1, 2])
+        self.wait(gid, lambda x: all(st(x)[i]["anim_status"] == "READY" for i in (1, 2)))
+
     def test_wrong_video_is_blocked_before_slicing(self):
         gid, g = self.new("create a blob for school")
         self.review(gid, "plan", "APPROVE"); self.review(gid, "still", "APPROVE", "ready")

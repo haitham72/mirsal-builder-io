@@ -17,8 +17,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from . import prompter, sources
-from .engine import verify
+from . import prompter, sources, tasks
+from .engine import chroma, verify
 from .engine.config import EngineConfig
 from .engine.grid import detect_grid, split_grid
 from .engine.render import apply_edge
@@ -274,11 +274,14 @@ def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
         kw["outline_px"] = int(res["outline_px"])
     if res.get("erode_px") is not None:
         kw["erode_px"] = int(res["erode_px"])
+    if res.get("key_colour") == "blue":       # the sheet came with a blue screen (green is the default and is never written): keyer, despill and video sheet follow it
+        kw["chroma"] = "blue"
     return cfg if not kw else replace(cfg, **kw)
 
 
 def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
     res = read_result(out, gid)
+    base = cfg
     cfg = cfg_for(res, cfg)
     d = gen_dir(out, gid)
     try:
@@ -289,6 +292,18 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
             shutil.copyfile(src, dest)
             res["source"]["sheet_copy"] = f"source/{dest.name}"
             rows, cols = res.get("grid") or (3, 3)
+            asked = (res.get("slots") or {}).get("key_colour", "green")
+            try:
+                key, key_score = chroma.detect_key(load_rgb(dest), base.border_px, asked, base.min_key_diff)      # the screen the sheet REALLY has wins over the one that was asked for
+            except Exception:
+                key, key_score = asked, {}
+            if key == "blue":
+                res["key_colour"] = "blue"          # written only for blue: green is the default
+            else:
+                res.pop("key_colour", None)
+            cfg = cfg_for(res, replace(base, chroma="green") if key != "blue" else base)
+            if res.get("task_id"):
+                tasks.annotate_key(out, res["task_id"], key, asked)
             vin = {"data": dest.read_bytes(), "grid": (rows, cols), "chroma": cfg.chroma}
             checks = verify.run("sheet", vin, cfg)                  # the sheet is judged on arrival, before anything is sliced
             res["verify"]["sheet"] = [c.to_dict() for c in checks]
@@ -563,6 +578,23 @@ def edit_still(out: Path, gid: int, index: int, png: bytes, cfg: EngineConfig, l
 # finished image. These checks run on the new file; the keying-stage verdicts (blank_cell, inside_cell,
 # no_spill, chroma_risk, single_subject, duplicate_cell) and their metrics stay as Python recorded them.
 APPEARANCE_CHECKS = ("dimensions", "transparent_corners", "foreground", "holes", "edge_trimmed", "static_file")
+
+
+def edge_preview(out: Path, gid: int, index: int, outline: int, erode: int, px: int = 420) -> bytes:
+    """One sticker as it would look with this stroke and trim, rendered from its stroke-free twin by the same function the real render uses. Nothing is stored:
+    the Studio shows it on ONE thumbnail while a slider moves, and the edge only becomes real on Apply, when the video is generated, or when the stickers go into a pack."""
+    if not 0 <= int(outline) <= 40 or not 0 <= int(erode) <= 8:
+        raise PipelineError("outline must be 0..40 px and erode 0..8 px")
+    plain = gen_dir(out, gid) / "source" / "plain" / f"S{int(index)}.png"
+    if not plain.is_file():
+        raise PipelineError("This sticker has no stroke-free original to preview.", 404)
+    rgba = cv2.cvtColor(cv2.imdecode(np.fromfile(str(plain), np.uint8), cv2.IMREAD_UNCHANGED), cv2.COLOR_BGRA2RGBA)
+    fin = apply_edge(rgba[..., :3].astype(np.float32), rgba[..., 3].astype(np.float32) / 255.0, int(outline), int(erode))
+    if px and max(fin.shape[:2]) > px:
+        k = px / max(fin.shape[:2])
+        fin = cv2.resize(fin, (max(1, round(fin.shape[1] * k)), max(1, round(fin.shape[0] * k))), interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode(".png", cv2.cvtColor(fin, cv2.COLOR_RGBA2BGRA))
+    return buf.tobytes()
 
 
 def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None = None, erode: int | None = None) -> dict:

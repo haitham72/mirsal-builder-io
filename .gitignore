@@ -2,6 +2,7 @@
 Phase_03/photos/
 # Build outputs
 mirsal/out/
+generated/
 mirsal/.venv/
 # Python / offline wheels
 __pycache__/

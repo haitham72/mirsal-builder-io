@@ -38,9 +38,13 @@ def is_live(out: Path, res: dict) -> bool:
 
 
 def export_root(out: Path) -> Path:
-    """out/export, or the folder named by MIRSAL_EXPORT_DIR (for example a folder you copy from every day). Never a watch folder."""
+    """<repo>/generated for the project's own data folder (so the files are visible in the repo, next to Phase_01 and mirsal/), out/export for any other data
+    folder (a copy, a test), or the folder named by MIRSAL_EXPORT_DIR. Never a watch folder."""
     env = os.environ.get("MIRSAL_EXPORT_DIR")
-    return Path(env) if env else Path(out) / "export"
+    if env:
+        return Path(env)
+    from .paths import PROJECT, REPO
+    return REPO / "generated" if Path(out).resolve() == (PROJECT / "out").resolve() else Path(out) / "export"
 
 
 def package_dirs(out: Path, res: dict) -> tuple[Path, Path] | None:
@@ -117,6 +121,9 @@ def sync(out: Path, gid: int) -> Path | None:
             parts = [(vj or {}).get("model") or "video", p.get("mode") or p.get("resolution") or "", f"{p['duration']}s" if p.get("duration") else ""]
             _copy(mf, vids / ("-".join([vid, "video"] + [x for x in parts if x] + [_day(mf)]) + mf.suffix.lower()))
     lines = [f"{res['generation_id']}  {res.get('prompt', '')}", ""]
+    if res.get("key_colour") == "blue":          # noted only when it is blue (green is the default)
+        asked = (res.get("slots") or {}).get("key_colour", "green")
+        lines += ["KEY: blue" + ("" if asked == "blue" else f" (the sheet came back blue although {asked} was asked; keyed as blue)"), ""]
     try:
         plan = json.loads((d / "prompts.json").read_text(encoding="utf-8"))
         lines += ["SHEET PROMPT", plan.get("sheet_prompt", ""), ""]

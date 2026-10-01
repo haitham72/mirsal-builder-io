@@ -114,8 +114,31 @@ def reserve(out: Path, inp: Path, prompt: str, grid="3x3", style_id: str = "flat
             "paths": {"img": str(Path(inp) / "Images_gen" / img), "vid": str(Path(inp) / "videos_gen" / vid)},
             "request": {"template_id": plan["template_id"], "template_version": plan["template_version"], "slots": plan["slots"], "grid": plan["grid"]},
             "plan": plan, "plan_review": {"decision": "APPROVE", "by": "human", "ts": now, "note": "approved when the task was reserved"}, "generations": []}
+    if plan["slots"].get("key_colour") == "blue":      # annotated only when it is blue: green is the default and is never written
+        task["key_colour"] = "blue"
     _write(tasks_dir(out) / f"{n:03d}.json", task)
     return task
+
+
+def annotate_key(out: Path, number: str, key: str, asked: str = "green") -> None:
+    """The sheet came back with this screen colour. The task says `key_colour: blue` only when it is blue (`key_detected` when blue was not what the prompt asked for,
+    i.e. the model drifted); a green screen leaves no mark, and a blue mark from a prompt that asked for blue is removed if the sheet came back green."""
+    try:
+        t = read_task(out, number)
+    except Exception:
+        return
+    before = (t.get("key_colour"), t.get("key_detected"))
+    if key == "blue":
+        t["key_colour"] = "blue"
+        if asked != "blue":
+            t["key_detected"] = True
+        else:
+            t.pop("key_detected", None)
+    else:
+        t.pop("key_colour", None)
+        t.pop("key_detected", None)
+    if (t.get("key_colour"), t.get("key_detected")) != before:
+        _write(tasks_dir(out) / f"{int(number):03d}.json", t)
 
 
 def link_generation(out: Path, number: str, gid: int) -> None:

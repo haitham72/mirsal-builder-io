@@ -377,7 +377,7 @@ class LiveConsoleTests(Base):
         self.assertEqual(s, 200, v)
         st = self.req("GET", f"/api/generations/{gid}")[1]
         self.assertIn(next(x for x in st["video_sheets"] if x["id"] == "A1")["status"], ("APPROVED", "VIDEO_RETURNED", "SLICED", "VIDEO_BLOCKED"))
-        create = next(c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"])
+        create = self.until(lambda: next((c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"]), None), "the Kling create call")   # sent by the job thread
         self.assertEqual(create[create.index("--mode") + 1], "pro")                          # always pro: 1440 px, never std
         prompt = create[create.index("--prompt") + 1]
         self.assertIn("wide range of emotions", prompt)
@@ -390,6 +390,119 @@ class LiveConsoleTests(Base):
         gid = int(job["generation"][1:])
         self.until(lambda: (lambda x: x if x["stage"] == "sliced" and not x["busy"] else None)(self.req("GET", f"/api/generations/{gid}")[1]), "stills")
         return gid
+
+    def _png(self, path):
+        h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=60)
+        h.request("GET", path); r = h.getresponse(); data = r.read(); h.close()
+        return r.status, r.getheader("Content-Type"), data
+
+    def _idle(self, gid):
+        return self.until(lambda: (lambda x: x if not x["busy"] else None)(self.req("GET", f"/api/generations/{gid}")[1]), "the batch to be idle")
+
+    def test_the_edge_is_a_preview_until_applied_then_one_snapshot_that_undo_restores(self):
+        import io
+        gid = self._stills_ready()
+        slices = self.out / f"G{gid:03d}" / "slices"
+        stamp = lambda: sorted((p.name, p.stat().st_mtime_ns) for p in slices.glob("*"))
+        before, files = self.req("GET", f"/api/generations/{gid}")[1], stamp()
+
+        def visible(o, e=0):
+            s, ct, data = self._png(f"/api/generations/{gid}/edge_preview?index=1&outline={o}&erode={e}&px=200")
+            self.assertEqual((s, ct), (200, "image/png"))
+            return int((np.asarray(Image.open(io.BytesIO(data)).convert("RGBA"))[..., 3] > 128).sum())
+        self.assertGreater(visible(12), visible(0))                                   # a stroke adds area, a trim takes it away
+        self.assertLess(visible(0, 3), visible(0, 0))
+        for o in range(0, 14, 2):                                                    # dragging a slider: every position is only a render
+            visible(o)
+        after = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual(stamp(), files)                                              # nothing was written or re-rendered
+        self.assertEqual((after["outline_px"], after.get("edge_history")), (before["outline_px"], before.get("edge_history")))
+        self.assertEqual(self._png(f"/api/generations/{gid}/edge_preview?index=1&outline=99&erode=0")[0], 400)
+
+        # Apply: ONE snapshot (seeded with how the batch started), the whole batch re-rendered
+        was = before["outline_px"]
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/edge", {"outline": 6, "erode": 1, "via": "apply"})[0], 202)
+        res = self._idle(gid)
+        self.assertEqual((res["outline_px"], res["erode_px"]), (6, 1))
+        self.assertEqual([(h["outline"], h["erode"], h["via"]) for h in res["edge_history"]], [(was, 0, "initial"), (6, 1, "apply")])
+        self.assertTrue(all((s.get("metrics") or {}).get("outline_px") == 6 for s in res["stickers"] if s["status"] == "READY"))
+        # the same edge again changes nothing and adds no snapshot
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/edge", {"outline": 6, "erode": 1})[0], 202)
+        self.assertEqual(len(self._idle(gid)["edge_history"]), 2)
+        # Undo goes back to the previous snapshot (and is itself recorded, never a deletion)
+        prev = res["edge_history"][-2]
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/edge", {"outline": prev["outline"], "erode": prev["erode"], "via": "undo"})[0], 202)
+        res = self._idle(gid)
+        self.assertEqual((res["outline_px"], res["erode_px"]), (was, 0))
+        self.assertEqual([h["via"] for h in res["edge_history"]], ["initial", "apply", "undo"])
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/edge", {})[0], 400)
+
+    def test_a_pending_edge_becomes_real_exactly_at_video_generation_and_at_the_pack(self):
+        gid = self._stills_ready()
+        was = self.req("GET", f"/api/generations/{gid}")[1]["outline_px"]
+        self.assertFalse(self.c.commit_edge(gid, None, None, "video"))                # nothing pending: nothing happens
+        s, v = self.req("POST", "/api/live/video", {"generation": gid, "outline": 5, "erode": 1})   # image -> video
+        self.assertEqual(s, 200, v)
+        res = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual((res["outline_px"], res["erode_px"], res["edge_history"][-1]["via"]), (5, 1, "video"))
+        self.c.wait_jobs(90)
+        self.assertTrue(self.c.commit_edge(gid, 3, 0, "pack"))                         # video -> pack (the add endpoint calls this)
+        res = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual((res["outline_px"], res["edge_history"][-1]["via"], res["edge_history"][0]["outline"]), (3, "pack", was))
+        self.assertFalse(self.c.commit_edge(gid, 3, 0, "pack"))                        # already exactly this edge: no second snapshot
+        self.assertEqual(len(self.req("GET", f"/api/generations/{gid}")[1]["edge_history"]), 3)
+
+    def test_a_blue_screen_sheet_is_keyed_as_blue_and_marked_only_because_it_is_blue(self):
+        from mirsal import export, pipeline as pl
+        from mirsal.engine import chroma
+        green = shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)])
+        blue = np.ascontiguousarray(green[..., [0, 2, 1]])                                  # the same sheet on a blue screen
+        self.assertEqual(chroma.detect_key(green)[0], "green")
+        self.assertEqual(chroma.detect_key(blue)[0], "blue")
+        self.assertEqual(chroma.detect_key(np.full((300, 300, 3), 128, np.uint8), asked="blue")[0], "blue")     # no screen at all: the colour that was asked, and the sheet check blocks it
+        self.assertEqual(pl.cfg_for({"key_colour": "blue"}, EngineConfig()).chroma, "blue")
+        self.assertEqual(pl.cfg_for({}, EngineConfig()).chroma, "green")
+        os.environ["MIRSAL_EXPORT_DIR"] = str(self.tmp / "exp")
+        try:
+            self.files["png"] = png_bytes(blue)
+            gid = self._stills_ready("blue blob")
+            res = self.req("GET", f"/api/generations/{gid}")[1]
+            self.assertEqual(res["key_colour"], "blue")
+            self.assertGreaterEqual(sum(1 for s in res["stickers"] if s["status"] == "READY"), 7)       # keyed, not refused by the green check
+            self.assertFalse([c for c in res["verify"]["sheet"] if not c["ok"] and c["name"] == "background_is_key"])
+            task = _tasks.read_task(self.out, res["task_id"])
+            self.assertEqual((task["key_colour"], task.get("key_detected")), ("blue", True))           # green was asked, the model returned blue
+            imgs = export.sync(self.out, gid)
+            self.assertIn("KEY: blue (the sheet came back blue although green was asked", (imgs / "prompts.txt").read_text(encoding="utf-8"))
+            for i in range(1, 10):                                                                      # the video sheet follows: a blue screen, and the video prompt says nothing else
+                self.req("POST", f"/api/generations/{gid}/review", {"gate": "still", "decision": "APPROVE", "index": i})
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
+            vs = np.asarray(Image.open(self.out / f"G{gid:03d}" / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
+            self.assertEqual(vs[3, 3].tolist(), [0, 0, 255])
+            self.assertNotIn("green", self.c.video_prompt_for(gid, "A1").lower())
+            # a green sheet leaves no mark at all
+            self.files["png"] = png_bytes(green)
+            gid2 = self._stills_ready("green blob")
+            res2 = self.req("GET", f"/api/generations/{gid2}")[1]
+            self.assertNotIn("key_colour", res2)
+            task2 = _tasks.read_task(self.out, res2["task_id"])
+            self.assertNotIn("key_colour", task2)
+            self.assertNotIn("KEY:", (export.sync(self.out, gid2) / "prompts.txt").read_text(encoding="utf-8"))
+        finally:
+            os.environ.pop("MIRSAL_EXPORT_DIR", None)
+
+    def test_the_export_root_is_inside_the_repo_for_the_project_data_only(self):
+        from mirsal import export
+        from mirsal.paths import PROJECT, REPO
+        os.environ.pop("MIRSAL_EXPORT_DIR", None)
+        self.assertEqual(export.export_root(PROJECT / "out"), REPO / "generated")      # visible in the repo, next to Phase_01 and mirsal/
+        self.assertEqual(export.export_root(self.out), self.out / "export")            # a copy of the data or a test never writes into the repo
+        self.assertIn("generated/", (REPO / ".gitignore").read_text(encoding="utf-8").splitlines())
+        os.environ["MIRSAL_EXPORT_DIR"] = str(self.tmp / "mine")
+        try:
+            self.assertEqual(export.export_root(PROJECT / "out"), self.tmp / "mine")
+        finally:
+            os.environ.pop("MIRSAL_EXPORT_DIR", None)
 
     def test_the_gap_is_a_slider_and_loop_is_a_choice(self):
         gid = self._stills_ready()

@@ -236,6 +236,7 @@ def _read_rgba(path: Path) -> np.ndarray:
 def build_sheet(out: Path, gid: int, cfg: EngineConfig) -> dict:
     """Build video sheet A<n> from the stills approved at G2: same slot positions, rejected slots blank, no outline, flat key colour."""
     res = pl.read_result(out, gid)
+    cfg = pl.cfg_for(res, cfg)                       # a blue-screen batch gets a blue video sheet
     _plan_ok(res)
     if pl.STAGES.index(res["stage"]) < pl.SLICED or res.get("error"):
         raise refuse("The stills are not sliced yet.")
@@ -297,6 +298,7 @@ def preview_sheet(out: Path, gid: int, cfg: EngineConfig, fill: float, px: int =
     """The video sheet the kept stickers would make at this fill, as a small PNG, built on the fly and not stored: the Studio shows it while the gap slider moves."""
     from dataclasses import replace
     res = pl.read_result(out, gid)
+    cfg = pl.cfg_for(res, cfg)
     kept = [s["index"] for s in res["stickers"] if s["status"] == "READY" and s["review"]["still"] != "REJECTED"]
     if not kept:
         raise refuse("There are no kept stickers to put on a video sheet.")
@@ -334,22 +336,43 @@ def check_allow(out: Path, gid: int, index: int, allow: bool = True) -> tuple[di
     return st, v["id"]
 
 
-def allow_animation(out: Path, gid: int, index: int, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
-    """The human override: allow an animation that Python blocked for leaving or crossing its slot (or take the permission back). The decision is stored on the sticker
-    and in its history (actor human), the cell is cut again with the check downgraded to a warning, and every later re-slice keeps it."""
-    st, aid = check_allow(out, gid, index, allow)
+def allowable(res: dict, allow: bool = True) -> list[int]:
+    """The stickers a human can allow right now (blocked only by the slot-geometry checks), or, for allow=False, the ones that carry a permission to take back."""
+    out = []
+    for st in res["stickers"]:
+        if allow:
+            failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
+            if st.get("anim_status") == "FAILED" and failed and all(f in OVERRIDABLE for f in failed):
+                out.append(st["index"])
+        elif st.get("anim_override"):
+            out.append(st["index"])
+    return out
+
+
+def allow_animations(out: Path, gid: int, indexes: list, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
+    """The human override: allow animations that Python blocked for leaving or crossing their slot (or take the permission back), several at once and cut again in ONE pass.
+    Each decision is stored on its sticker and in its history (actor human); the check is downgraded to a warning on the next cut, and every later re-slice keeps it."""
+    indexes = sorted({int(i) for i in indexes})
+    aid = None
+    for i in indexes:
+        aid = check_allow(out, gid, i, allow)[1]
     res = pl.read_result(out, gid)
-    st = res["stickers"][int(index) - 1]
-    if allow:
-        failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
-        st["anim_override"] = sorted(set(st.get("anim_override") or []) | set(failed))
-        pl.hist(st, "video", "human", "APPROVE", "allowed anyway: " + ", ".join(failed), aid, {"override": failed})
-    else:
-        was = st.get("anim_override") or []
-        st["anim_override"] = []
-        pl.hist(st, "video", "human", "REJECT", "allowance withdrawn: " + ", ".join(was), aid, {"override": was})
+    for i in indexes:
+        st = res["stickers"][i - 1]
+        if allow:
+            failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
+            st["anim_override"] = sorted(set(st.get("anim_override") or []) | set(failed))
+            pl.hist(st, "video", "human", "APPROVE", "allowed anyway: " + ", ".join(failed), aid, {"override": failed})
+        else:
+            was = st.get("anim_override") or []
+            st["anim_override"] = []
+            pl.hist(st, "video", "human", "REJECT", "allowance withdrawn: " + ", ".join(was), aid, {"override": was})
     pl.write_result(out, gid, res)
-    slice_video(out, gid, aid, cfg, pace, only=[int(index)])
+    slice_video(out, gid, aid, cfg, pace, only=indexes)
+
+
+def allow_animation(out: Path, gid: int, index: int, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
+    allow_animations(out, gid, [index], allow, cfg, pace)
 
 
 def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:

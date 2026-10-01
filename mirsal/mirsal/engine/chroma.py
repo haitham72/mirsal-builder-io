@@ -26,6 +26,16 @@ def border_mask(h: int, w: int, px: int) -> np.ndarray:
     return m
 
 
+def detect_key(rgb: np.ndarray, border_px: int = 4, asked: str = "green", min_diff: float = 60.0) -> tuple[str, dict]:
+    """Which screen the sheet really has, judged on its outer ring: the colour whose key difference is highest. Image tools drift (a blue screen when green was asked,
+    or the other way round), and the plan may have asked for blue on purpose (a green subject). When neither colour is clear, `asked` is returned so the sheet check
+    still blocks it with the colour that was expected. Returns (colour, {green: score, blue: score})."""
+    m = border_mask(rgb.shape[0], rgb.shape[1], border_px)
+    score = {ch: round(float(np.median(key_diff(rgb, ch)[m])), 1) for ch in ("green", "blue")}
+    best = max(score, key=score.get)
+    return (best if score[best] >= min_diff else asked), score
+
+
 def calibrate(rgb: np.ndarray, chroma: str, border_px: int = 4, override: float | None = None):
     """Sample the REAL background from the outer ring (AI tools never give a true #00FF00)."""
     m = border_mask(rgb.shape[0], rgb.shape[1], border_px)
