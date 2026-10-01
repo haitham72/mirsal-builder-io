@@ -8,14 +8,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates
+from .. import gates, tasks
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
 from ..video_project import MAX_UPLOAD, Projects, decode_overlays
 
 UI = Path(__file__).parent
-INDEX = UI / "index.html"
+INDEX = UI / "index.html"            # the legacy vanilla console: served at /legacy, and at / when the React app is not built
+DIST = UI / "dist"                    # the React gateway (mirsal/web, `npm run build`)
 UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
@@ -115,7 +116,22 @@ def make_handler(c: Console):
         def _get(self):
             path = unquote(urlparse(self.path).path)
             if path == "/":
+                page = DIST / "index.html"
+                return self._send(200, (page if page.is_file() else INDEX).read_bytes(), "text/html; charset=utf-8")
+            if path == "/legacy":
                 return self._send(200, INDEX.read_bytes(), "text/html; charset=utf-8")
+            if path.startswith("/assets/") or path == "/favicon.svg":
+                root = DIST.resolve()
+                f = (root / path.lstrip("/")).resolve()
+                if root not in f.parents or not f.is_file():
+                    raise pl.PipelineError("not found", 404)
+                return self._file(f)
+            if path == "/api/tasks":
+                return self._json(200, {"tasks": tasks.list_tasks(c.out)})
+            if path.startswith("/api/tasks/"):
+                return self._json(200, tasks.read_task(c.out, path.rsplit("/", 1)[1]))
+            if path == "/api/inbox":
+                return self._json(200, tasks.inbox(c.out, c.inp))
             if path.startswith("/ui/") and path[4:] in UI_FILES:
                 ct = UI_FILES[path[4:]]
                 return self._send(200, (UI / path[4:]).read_bytes(), ct if ct.startswith("font") else ct + "; charset=utf-8")
@@ -305,6 +321,18 @@ def make_handler(c: Console):
             if len(parts) == 6 and parts[:2] == ["api", "generations"] and parts[3:4] == ["video_sheet"] and parts[5] == "video":
                 return self._post_video(int(parts[2]), parts[4], parse_qs(u.query))
             body = self._body()
+            if path == "/api/plan":      # preview only: nothing is reserved
+                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector")))
+            if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
+                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector")))
+            if path == "/api/generations" and body.get("task"):      # Run: a generation linked to its reserved task
+                if c.lock.locked():
+                    raise pl.PipelineError("busy", 409)
+                t = tasks.read_task(c.out, body["task"])
+                gid = pl.start(t["prompt"], c.out, c.inp, pick=tasks.pick_for_task(c.inp, t, int(body.get("take", 0))), task=t)
+                tasks.link_generation(c.out, t["id"], gid)
+                c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
+                return self._json(202, {"id": gid})
             if path == "/api/generations":
                 prompt = str(body.get("prompt", "")).strip() or str(body.get("subject", "")).replace("_", " ").strip()
                 if not prompt:
