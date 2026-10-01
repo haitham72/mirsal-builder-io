@@ -77,6 +77,15 @@ mirsal/
 - 152 tests green (`tests/test_store.py`: 10 — round trip, pre-1F, idempotency, history order, search,
   task prefix, tmp-out isolation, engine boundary incl. `redis`, trace none + langsmith fake-server).
 
+## Beyond 3A (landed after, covered by their own tests)
+
+- **3B lexical pool** (`mirsal/pool.py`, `migrations/003_pool.sql`, `tests/test_pool.py`: 4): deterministic
+  query parse, `pool reindex/hide/search` (140 approved indexed on the real DB), quality gate (zero,
+  never junk), gap counts. Vectors + embeddings + eval set deferred to the embedding pass.
+- **3C offline core** (`mirsal photo`, `tests/test_photo.py`: 2): cutout seam (`library.cutout`) + the
+  Phase 1 edge finish -> validated 512 sticker in `out/photo/` (private, `shared: false`). Real-photo
+  judgement + stronger models deferred.
+
 ## Deliberately not in 3A (stays in phase_03.md)
 
 - `out/jobs/*.json` + `out/model_calls.jsonl` + VLM verdicts: no Phase 2 outputs exist yet; `import_tasks`

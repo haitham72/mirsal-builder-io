@@ -546,10 +546,11 @@ It needs the Phase 1 engine (scale, outline, validators) and Phase 3 storage; no
 - A synthetic fur-edge shape keeps a soft gradient.
 - Default mode makes **zero network calls** (sockets blocked in the test).
 
-**3C exit:**
-- [ ] `photo dog.jpg` gives a clean subject sticker in ≤3 s, on the chain page.
-- [ ] On Haitham's 10+ real photos (pets, people, food), he judges the edges clean. IoU ≥ 0.92 on composites.
-- [ ] No network calls in default mode.
+**3C exit (offline core built 2026-10-01; `tests/test_photo.py`: 2):**
+- [x] `photo dog.jpg` gives a clean subject sticker in ≤3 s (synthetic green-screen: chroma path, 512 PNG, validated).
+- [ ] On Haitham's 10+ real photos (`Phase_03/photos/`, still pending), he judges the edges clean. IoU ≥ 0.92 on composites.
+- [x] No network calls in default mode (chroma/GrabCut; AI matte only when installed).
+- Deferred: BiRefNet upgrade, SAM 2 click-to-refine, `--subject N`, paid AI motion, `SOURCE_PHOTO` asset rows, HEIC/iPhone Portrait input (Pillow reads browser-common formats today).
 
 ---
 

@@ -314,6 +314,57 @@ def pool_cmd(args) -> int:
         return 0
 
 
+def photo_cmd(out, args, cfg) -> int:
+    """3C, offline core: photo -> cutout (existing alpha | chroma | AI matte | GrabCut) -> the Phase 1
+    edge finish -> a validated 512 sticker in out/photo/. Private by default (shared=false, no pool row)."""
+    import json as _json
+    from pathlib import Path as _P
+    import numpy as _np
+    from .engine.render import bbox_of, fit_scale, render_sticker
+    from .library import LibraryError, cutout, decode_image, png_bytes, validate_render
+    src = _P(str(args.file or ""))
+    if not src.is_file():
+        print(f"no such photo: {args.file}")
+        return 1
+    if src.stat().st_size > 50 * 1024 * 1024:
+        print("photo is over 50 MB")
+        return 1
+    try:
+        rgba = decode_image(src.read_bytes())
+    except LibraryError as e:
+        print(e)
+        return 1
+    if args.outline < 0 or args.outline > 40 or args.erode < 0 or args.erode > 8:
+        print("outline is 0-40, erode is 0-8")
+        return 1
+    try:
+        cut, info = cutout(rgba, cfg, args.method)
+    except LibraryError as e:
+        print(e)
+        return 1
+    bb = bbox_of(_np.ascontiguousarray(cut[..., 3]))
+    if not bb:
+        print("no subject found")
+        return 1
+    sticker = render_sticker(cut, bb, fit_scale(bb, cfg), cfg, args.outline, args.erode)
+    try:
+        body, ext, checks = validate_render(png_bytes(sticker), cfg)
+    except LibraryError as e:
+        print(e)
+        return 1
+    d = _P(out) / "photo"
+    d.mkdir(parents=True, exist_ok=True)
+    stem = f"photo-{src.stem[:40]}"
+    (d / f"{stem}.{ext}").write_bytes(body)
+    (d / f"{stem}.json").write_text(_json.dumps(
+        {"src": str(src), "method": info.get("method"), "foreground": info.get("foreground"),
+         "outline_px": args.outline, "erode_px": args.erode, "shared": False,
+         "checks": checks, "warning": info.get("warning")}, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"{stem}.{ext}  method={info.get('method')} foreground={info.get('foreground')} "
+          + " ".join(f"{n}={'ok' if ok else 'FAIL'}({d_})" for n, ok, d_ in checks))
+    return 0
+
+
 def main(argv=None) -> int:
     import sys as _sys
     try:  # Windows consoles default to cp1252, which cannot print emoji: replace, never crash
@@ -356,6 +407,9 @@ def main(argv=None) -> int:
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
     po.add_argument("action", choices=["search", "reindex", "hide"]); po.add_argument("query", nargs="?")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
+    ph = sub.add_parser("photo", help="a photo -> a cut-out 512 sticker (3C; on-device by default)")
+    ph.add_argument("file"); ph.add_argument("--method", default="auto", choices=["auto", "matte", "grabcut"])
+    ph.add_argument("--outline", type=int, default=12); ph.add_argument("--erode", type=int, default=0)
     args = ap.parse_args(argv)
     out, inp, cfg, t0 = out_root(), input_root(), EngineConfig(), time.perf_counter()
     if getattr(args, "workers", None):
@@ -387,6 +441,8 @@ def main(argv=None) -> int:
         return job_cmd(out, args)
     if args.cmd == "pool":
         return pool_cmd(args)
+    if args.cmd == "photo":
+        return photo_cmd(out, args, cfg)
     try:
         if args.cmd == "serve":
             from .console.server import serve
