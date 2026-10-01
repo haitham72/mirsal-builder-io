@@ -33,6 +33,7 @@ mirsal/web/playwright-report/
 
 # Secrets: never commit tokens (Telegram bot token lives in env or out/telegram.json)
 Phase_01/telegram.md
+mirsal/telegram-id.md
 **/telegram.json
 .tgcred
 opencode.json

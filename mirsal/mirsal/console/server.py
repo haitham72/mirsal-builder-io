@@ -9,15 +9,16 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates, jobs, llm, tasks, telegram, watch
+from .. import gates, higgsfield, jobs, llm, model_catalog, prompter, sources, styles, tasks, telegram, usage, watch
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
 from ..video_project import MAX_UPLOAD, Projects, decode_overlays
+from . import placeholders
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 class Console:
@@ -28,6 +29,9 @@ class Console:
         self._health = None
         self.lib = Library(out)
         self.projects = Projects(out, self.cfg)
+        self._acct = (0.0, None)
+        self._jobs = []
+        threading.Thread(target=self._warm_models, daemon=True).start()
 
     def health(self) -> dict:
         """Can the final WEBM be encoded here? (live preview never needs ffmpeg)"""
@@ -50,6 +54,122 @@ class Console:
             root = root or Path(__file__).resolve().parents[1]
             self._stale = any(f.stat().st_mtime > self.started for f in root.rglob("*.py") if "__pycache__" not in f.parts)
         return self._stale
+
+    # ---------- Higgsfield: live generation (account, models, jobs fulfilled by the CLI) ----------
+    def _warm_models(self) -> None:
+        try:
+            model_catalog.set_dump(higgsfield.load_models(self.out))
+        except Exception:
+            pass
+
+    def hf_account(self) -> dict:
+        now = time.time()
+        if self._acct[1] is not None and now - self._acct[0] < 6:
+            return self._acct[1]
+        if not higgsfield.available():
+            d = {"available": False, "error": "The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login)."}
+        else:
+            try:
+                d = dict(higgsfield.account(), available=True)
+            except higgsfield.HiggsError as e:
+                d = {"available": True, "error": str(e)}
+        d["spent_today"] = usage.spent_today(self.out)
+        self._acct = (now, d)
+        return d
+
+    def fulfil_async(self, jid: str, after=None) -> None:
+        def run():
+            try:
+                jobs.fulfil(self.out, jid, on_done=after)
+            except Exception as e:                       # fulfil handles provider errors itself; this is a last net
+                try:
+                    jobs.fail(self.out, jid, f"unexpected: {e}")
+                except Exception:
+                    pass
+            finally:
+                self._acct = (0.0, None)                 # the balance changed: the next read asks Higgsfield again
+        t = threading.Thread(target=run, daemon=True)
+        self._jobs = [x for x in self._jobs if x.is_alive()] + [t]
+        t.start()
+
+    def wait_jobs(self, timeout: float = 60.0) -> None:
+        """Wait for the background provider jobs (tests call this before they unplug their fake CLI)."""
+        end = time.time() + timeout
+        for t in list(self._jobs):
+            t.join(max(0.0, end - time.time()))
+
+    def _submit_when_free(self, fn, tries: int = 600) -> None:
+        for _ in range(tries):
+            try:
+                return self.submit(fn)
+            except pl.PipelineError:
+                time.sleep(1)
+        raise pl.PipelineError("the pipeline stayed busy for 10 minutes", 409)
+
+    def start_from_job(self, job: dict) -> None:
+        """A sheet job is DONE: run the unchanged stills run on the returned sheet, exactly as for a prepared sheet (the app never writes into the watch folders)."""
+        t = tasks.read_task(self.out, job["task"])
+        sheet = self.out / job["result"]["file"]
+        pick = sources.Pick(subject=tasks.subject_of(t["plan"]), subject_id=t["id"], variant=1, n_variants=1, sheet=sheet, video=None)
+        outline = (job.get("request") or {}).get("outline")
+        gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None)
+        tasks.link_generation(self.out, t["id"], gid)
+        jobs.attach_generation(self.out, job["id"], gid)
+        self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
+
+    def save_ref(self, data: bytes, name: str) -> dict:
+        """Store an uploaded reference image as out/refs/R###.<ext> (a real image, at most 15 MB); the sheet job then lists it, so the run is reproducible."""
+        import io
+        from PIL import Image, UnidentifiedImageError
+        try:
+            im = Image.open(io.BytesIO(data))
+            im.verify()
+            fmt, size = (im.format or "").lower(), Image.open(io.BytesIO(data)).size
+        except (UnidentifiedImageError, OSError, ValueError):
+            raise pl.PipelineError("That file is not an image I can read (use PNG, JPG or WebP).", 400)
+        ext = {"png": ".png", "jpeg": ".jpg", "webp": ".webp"}.get(fmt)
+        if not ext:
+            raise pl.PipelineError("Reference images must be PNG, JPG or WebP.", 400)
+        d = self.out / "refs"
+        d.mkdir(parents=True, exist_ok=True)
+        n = max([int(f.stem[1:]) for f in d.glob("R*.*") if f.stem[1:].isdigit()] or [0]) + 1
+        f = d / f"R{n:03d}{ext}"
+        f.write_bytes(data)
+        return {"id": f"R{n:03d}", "file": f"refs/{f.name}", "url": f"/out/refs/{f.name}", "width": size[0], "height": size[1], "bytes": len(data), "name": Path(name).name[:80]}
+
+    def ref_files(self, ids) -> list[str]:
+        out = []
+        for i in ids or []:
+            f = next(iter(sorted((self.out / "refs").glob(f"{str(i)}.*"))), None) if str(i).startswith("R") and str(i)[1:].isdigit() else None
+            if not f:
+                raise pl.PipelineError(f"No reference image {i}", 400)
+            out.append(f"refs/{f.name}")
+        if len(out) > 4:
+            raise pl.PipelineError("Use at most 4 reference images.", 400)
+        return out
+
+    def video_prompt_for(self, gid: int, aid: str) -> str:
+        """The Kling prompt for the sheet that was actually built: per-sticker motions for the approved slots only (empty slots get no motion)."""
+        res = pl.read_result(self.out, gid)
+        entry = gates.sheet_of(res, aid)
+        try:
+            plan = json.loads((pl.gen_dir(self.out, gid) / "prompts.json").read_text(encoding="utf-8"))
+            slots = json.loads(json.dumps(plan["slots"]))
+            keep = set(entry["slots"])
+            slots["cells"] = [c for c in slots["cells"] if c["pos"] in keep]
+            if slots["cells"] and plan.get("template_id"):
+                from .. import prompter
+                return prompter.render_plan(slots, plan["template_id"], plan.get("template_version", 2))["video_prompt"]
+        except (OSError, ValueError, KeyError):
+            pass
+        return entry.get("video_prompt") or res.get("video_prompt") or ""
+
+    def attach_video_from_job(self, job: dict) -> None:
+        req = job.get("request") or {}
+        gid = int(str(job["generation"]).lstrip("G"))
+        data = (self.out / job["result"]["file"]).read_bytes()
+        gates.attach_video(self.out, gid, req["sheet"], data, f"{job['id']}.mp4")
+        self._submit_when_free(lambda: gates.slice_video(self.out, gid, req["sheet"], self.cfg, self.pace))
 
     def submit(self, fn) -> None:
         if not self.lock.acquire(blocking=False):
@@ -203,6 +323,18 @@ def make_handler(c: Console):
                 return self._json(200, {"results": gates.search(c.out, q), "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
+            if path == "/api/higgsfield":          # is the CLI there, the balance, today's spend (never a credential)
+                return self._json(200, c.hf_account())
+            if path == "/api/models":              # the selector: curated models + every other Higgsfield model, and the style presets
+                return self._json(200, dict(model_catalog.catalog(), styles=styles.PRESETS, default_style=styles.DEFAULT))
+            if path == "/api/usage":
+                return self._json(200, usage.summary(c.out, int(parse_qs(urlparse(self.path).query).get("limit", ["100"])[0])))
+            if path.startswith("/assets/"):
+                parts = path.strip("/").split("/")
+                a = placeholders.find(parts[1], parts[2]) if len(parts) == 3 else None
+                if not a:
+                    raise pl.PipelineError("not found", 404)
+                return self._send(200, a[0], a[1])
             if path == "/api/jobs":      # S2: jobs for the operator (Generate page polls while waiting)
                 st = parse_qs(urlparse(self.path).query).get("status", [None])[0]
                 return self._json(200, {"jobs": jobs.list(c.out, st)})
@@ -353,6 +485,55 @@ def make_handler(c: Console):
             c.submit(lambda: gates.slice_video(c.out, gid, aid, c.cfg, c.pace))
             return self._json(202, {"id": gid, "sheet": aid})
 
+        def _live(self, what, body):
+            """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
+            `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>."""
+            if what not in ("cost", "sheet", "video"):
+                raise pl.PipelineError("not found", 404)
+            if not higgsfield.available():
+                raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
+            kind = "video" if what == "video" or body.get("kind") == "video" else "image"
+            try:
+                model, params = model_catalog.resolve(kind, body.get("model"), body.get("options"))
+                if what == "cost":
+                    try:
+                        return {"credits": higgsfield.cost(model, params, "x"), "model": model, "params": params}
+                    except higgsfield.HiggsError as e:
+                        return {"credits": None, "error": str(e), "model": model, "params": params}
+                if what == "sheet":
+                    refs = c.ref_files(body.get("refs"))
+                    if refs and not model_catalog.find("image", model).get("refs"):
+                        raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
+                    t = tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")))
+                    prompt = t["plan"]["sheet_prompt"] + ("\n" + prompter.REFERENCE_CLAUSE if refs else "")
+                    est = higgsfield.cost(model, params, prompt, **({"image_references": [str(c.out / r) for r in refs]} if refs else {}))
+                    job = jobs.create(c.out, "sheet", task=t["id"], request={
+                        "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
+                        "outline": int(body["outline"]) if body.get("outline") is not None else None})
+                    c.fulfil_async(job["id"], after=c.start_from_job)
+                    return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
+                            "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
+                gid = int(body["generation"])
+                aid = str(body.get("sheet") or "")
+                if not aid:                      # one click: approve the kept stills, build the video sheet and approve it (the click is the decision), as "Make a video" did
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    aid = gates.quick_sheet(c.out, gid, c.cfg)["sheet"]
+                res = pl.read_result(c.out, gid)
+                entry = gates.sheet_of(res, aid)
+                if entry.get("status") not in ("APPROVED", "VIDEO_BLOCKED"):
+                    raise pl.PipelineError(f"{aid} is {entry.get('status')}: approve the video sheet (G3) first, a human decides before anything is sent to be animated "
+                                           "(a sheet that already has its video sliced cannot be animated again).", 409)
+                start = pl.gen_dir(c.out, gid) / entry["file"]
+                est = higgsfield.cost(model, params, "x", start_image=str(start))
+                job = jobs.create(c.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
+                    "model": model, "options": body.get("options") or {}, "prompt": c.video_prompt_for(gid, aid),
+                    "start_image": str(start), "sheet": aid, "label": res.get("prompt", "")})
+                c.fulfil_async(job["id"], after=c.attach_video_from_job)
+                return {"job": job["id"], "estimate": est, "model": model, "params": params}
+            except (higgsfield.HiggsError, jobs.JobError, model_catalog.CatalogError) as e:
+                raise pl.PipelineError(str(e), getattr(e, "code", 400))
+
         def _post(self):
             u = urlparse(self.path)
             path = unquote(u.path)
@@ -362,6 +543,8 @@ def make_handler(c: Console):
                 if self._post_library(path, parse_qs(u.query)):
                     return
                 raise pl.PipelineError("not found", 404)
+            if path == "/api/live/ref":          # a reference image for the next sheet (raw body, ?name=file.png)
+                return self._json(200, c.save_ref(self._raw(15 * 1024 * 1024), parse_qs(u.query).get("name", ["ref.png"])[0]))
             parts = path.strip("/").split("/")
             if len(parts) == 6 and parts[:2] == ["api", "generations"] and parts[3:4] == ["video_sheet"] and parts[5] == "video":
                 return self._post_video(int(parts[2]), parts[4], parse_qs(u.query))
@@ -382,6 +565,8 @@ def make_handler(c: Console):
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
                 return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai"))))
+            if path.startswith("/api/live/"):
+                return self._json(200, self._live(path.rsplit("/", 1)[1], body))
             if path == "/api/jobs":      # S2: the Generate page creates a sheet job ("Generate it"), the operator fulfils it
                 try:
                     return self._json(200, jobs.create(c.out, str(body.get("kind", "sheet")),

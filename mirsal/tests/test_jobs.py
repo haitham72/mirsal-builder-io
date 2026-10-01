@@ -26,7 +26,7 @@ class JobsTests(unittest.TestCase):
 
     def test_fake_operator_flow(self):
         j = jobs.create(self.out, "sheet", task="011", request={"prompt": "falcon"})
-        self.assertEqual((j["id"], j["status"], j["provider"]), ("J001", "REQUESTED", "higgsfield-mcp"))
+        self.assertEqual((j["id"], j["status"], j["provider"]), ("J001", "REQUESTED", "higgsfield-cli"))
         with self.assertRaises(jobs.JobError):  # done before claim
             jobs.done(self.out, "J001", __file__, "m")
         j = jobs.claim(self.out, "J001", "higgs-123")

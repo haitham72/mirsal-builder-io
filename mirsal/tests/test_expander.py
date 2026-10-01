@@ -89,6 +89,20 @@ class ExpanderTests(unittest.TestCase):
         p = tasks.preview("falcon", "3x3", "flat_vector", ai=True)           # no key here -> built-in sets, and it says so
         self.assertEqual((p["expanded_by"], len(p["stickers"])), ("deterministic", 9))
 
+class MotionTests(unittest.TestCase):
+    def test_motion_lines_from_the_model_reach_the_video_prompt(self):
+        answer = json.dumps({"subject_description": "a small cartoon owl", "cells": [
+            {"label": f"owl pose number {i} with a huge expression", "motion": f"the owl does move number {i} with a bounce", "key": f"pose_{i}", "tags": [], "emoji": ["🦉"]}
+            for i in range(1, 10)]})
+        plan = expander.expand("owl", (3, 3), use_ai=True, complete=Fake(answer))
+        self.assertEqual(plan["expanded_by"], "ai")
+        self.assertEqual(plan["slots"]["cells"][3]["motion"], "the owl does move number 4 with a bounce")
+        self.assertIn("4. the owl does move number 4 with a bounce", plan["video_prompt"])
+        bad = json.loads(answer)
+        bad["cells"][0]["motion"] = "adds a caption and a logo"
+        self.assertTrue(expander._lint(bad["cells"], 9, "owl", "owl"))                         # banned words are caught in motions too
+
+
 
 if __name__ == "__main__":
     unittest.main()

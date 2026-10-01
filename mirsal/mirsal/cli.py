@@ -287,6 +287,32 @@ def job_cmd(out, args) -> int:
         return 1
 
 
+def hf_cmd(out, args) -> int:
+    from . import higgsfield as _hf, jobs as _j
+    try:
+        if args.action == "status":
+            a = _hf.account()
+            print(f"Higgsfield: {a['credits']:g} credits, plan {a['plan'] or '?'}")
+        elif args.action == "models":
+            d = _hf.load_models(out, refresh=args.refresh)
+            if not d:
+                print("The Higgsfield CLI is not installed and there is no cached list.")
+                return 1
+            print("models: " + ", ".join(f"{t} {d['counts'].get(t, 0)}" for t in _hf.TYPES) + f"  ->  {out / _hf.DUMP_NAME}")
+            if args.type:
+                for m in d.get(args.type, []):
+                    ps = ", ".join(p["name"] + ("=" + "/".join(map(str, p["enum"])) if p.get("enum") else "") for p in m["params"] if p["name"] not in ("prompt",))
+                    print(f"  {m['job_type']:<34} {m['display_name']:<30} {ps}")
+        elif args.action == "run":
+            j = _j.fulfil(out, args.jid or "")
+            print(_job_line(j) + (f"  cost={j['cost']:g}" if j.get("cost") else "") + (f"  {j['error']}" if j.get("error") else ""))
+            return 0 if j["status"] == "DONE" else 1
+        return 0
+    except (_hf.HiggsError, _j.JobError) as e:
+        print(e)
+        return 1
+
+
 def pool_cmd(args) -> int:
     import json as _json
     from . import pool as _pool
@@ -404,6 +430,9 @@ def main(argv=None) -> int:
     jo.add_argument("--kind", default="sheet"); jo.add_argument("--task"); jo.add_argument("--generation")
     jo.add_argument("--ticket"); jo.add_argument("--file"); jo.add_argument("--model"); jo.add_argument("--cost", type=float)
     jo.add_argument("--reason", default="")
+    hf = sub.add_parser("hf", help="Higgsfield CLI: status (credits) | models [--type image|video] [--refresh] (full list) | run J### (fulfil a job)")
+    hf.add_argument("action", choices=["status", "models", "run"]); hf.add_argument("jid", nargs="?")
+    hf.add_argument("--type", choices=["image", "video", "audio", "text"]); hf.add_argument("--refresh", action="store_true")
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
     po.add_argument("action", choices=["search", "reindex", "hide"]); po.add_argument("query", nargs="?")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
@@ -439,6 +468,8 @@ def main(argv=None) -> int:
         return jobs_cmd(out, args)
     if args.cmd == "job":
         return job_cmd(out, args)
+    if args.cmd == "hf":
+        return hf_cmd(out, args)
     if args.cmd == "pool":
         return pool_cmd(args)
     if args.cmd == "photo":
@@ -523,6 +554,15 @@ def doctor() -> int:
     print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
     from . import llm
     print("OK      AI expansion: " + (f"on, model {llm.model()}" if llm.configured() else f"off: add {llm.KEY_VAR} to mirsal/.env to let the AI expand a subject and name every sticker (the built-in sets are used meanwhile)"))
+    from . import higgsfield as _hf
+    if not _hf.available():
+        print("NOTE    Higgsfield: CLI not installed (npm i -g @higgsfield/cli, then higgsfield auth login): live generation is off, prepared sheets still work")
+    else:
+        try:
+            _a = _hf.account()
+            print(f"OK      Higgsfield: {_a['credits']:g} credits, plan {_a['plan'] or '?'} (live generation on; Nano Banana 2 at 2k and Kling v3.0 by default, Kling 4k is never used)")
+        except _hf.HiggsError as e:
+            print(f"NOTE    Higgsfield: installed but not usable ({str(e)[:140]}): run higgsfield auth login")
     import os
     print(f"OK      animation workers: {EngineConfig().anim_workers} of {os.cpu_count()} CPUs (MIRSAL_ANIM_WORKERS or serve --workers N changes it)")
     try:

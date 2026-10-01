@@ -176,8 +176,9 @@ class VideoSheetTests(unittest.TestCase):
                 self.assertTrue((s1[y:y + h, x:x + w] == np.array([0, 255, 0], np.uint8)).all())
             else:                                 # the subject stays inside its slot with a generous margin (<= 55% of the slot)
                 sx, sy, sw, sh = sl["subject_rect"]
-                self.assertLessEqual(max(sw, sh), 0.55 * min(w, h) + 1)
-                self.assertGreaterEqual(min(sx - x, sy - y, x + w - sx - sw, y + h - sy - sh), 0.2 * min(w, h))
+                fill = EngineConfig().slot_fill
+                self.assertLessEqual(max(sw, sh), fill * min(w, h) + 1)
+                self.assertGreaterEqual(min(sx - x, sy - y, x + w - sx - sw, y + h - sy - sh), (1 - fill) / 2 * min(w, h) - 1)
 
     def test_checks_pass_on_a_built_sheet(self):
         sheet, lay = build()

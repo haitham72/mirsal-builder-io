@@ -5,10 +5,13 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from . import emotions, styles
+
 TEMPLATES = Path(__file__).parent / "prompts" / "templates"
 MARGIN = ("full body, centred, generous empty margin on every side (at least 20% of the cell), "
           "nothing touching or crossing the cell edge")
-STYLES = {"flat_vector": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions"}
+STYLES = dict(styles.PHRASE)           # id -> phrase (v2 templates); styles.phrase() gives the v1 wording for plans saved with v1
+TEMPLATE_VERSION = 2                   # new plans use v2; a saved plan keeps its own version
 KEYS = {"green": ("green", "#00FF00"), "blue": ("blue", "#0000FF")}
 TAG_RE = re.compile(r"[^a-z0-9]+")
 GUIDELINES = {
@@ -22,24 +25,28 @@ GUIDELINES = {
 # (key suffix, phrase, emoji) x 9 per context. Row-major cell order.
 ACTIONS = {
     "school": [
-        ("with_a_book", "holding a book", "📚"), ("raising_hand", "raising a hand", "✋"),
-        ("with_a_backpack", "wearing a backpack", "🎒"), ("writing", "writing in a notebook", "📝"),
-        ("with_a_pencil", "holding a big pencil", "✏️"), ("thinking", "thinking with a hand on chin", "🤔"),
-        ("with_a_star", "holding a gold star", "⭐"), ("sleeping_at_desk", "sleeping at a desk", "😴"),
-        ("waving_goodbye", "waving goodbye", "👋"),
+        ("with_a_book", "hugging a thick book to the chest with a proud smile", "📚", "flips the book open and shut, bobs happily"),
+        ("raising_hand", "raising a hand eagerly, bouncing, mouth open to answer", "✋", "arm shoots up, bounces on tiptoes, waves for attention"),
+        ("with_a_backpack", "wearing an oversized backpack with a first-day grin", "🎒", "bounces, the straps jiggle, the backpack swings"),
+        ("writing", "writing in a notebook, tongue out in concentration", "📝", "pencil scribbles, head follows the line, tongue wiggles"),
+        ("with_a_pencil", "holding a giant pencil like a sword, determined face", "✏️", "twirls the pencil and strikes a determined pose"),
+        ("thinking", "thinking hard, chin in hand, one eyebrow raised", "🤔", "taps the chin, eyes look up, slow nod"),
+        ("with_a_star", "proudly holding up a shiny gold star, beaming", "⭐", "the star sparkles, held high, hops with pride"),
+        ("sleeping_at_desk", "dozing off at a desk, head drooping, drool bubble", "😴", "head nods down and jerks up, the bubble inflates"),
+        ("waving_goodbye", "waving goodbye with a big grin, backpack on", "👋", "waves in a wide arc, bounces, blows a kiss"),
     ],
     "birthday": [
-        ("with_a_cake", "holding a birthday cake", "🎂"), ("with_a_balloon", "holding a balloon", "🎈"),
-        ("with_a_gift", "holding a gift box", "🎁"), ("party_hat", "wearing a party hat", "🥳"),
-        ("blowing_a_horn", "blowing a party horn", "🎉"), ("making_a_wish", "making a wish with closed eyes", "🌟"),
-        ("laughing", "laughing", "😂"), ("with_confetti", "surrounded by confetti", "🎊"), ("waving", "waving hello", "👋"),
+        ("with_a_cake", "carrying a birthday cake with lit candles, delighted face", "🎂", "candles flicker, the cake wobbles, sways happily"),
+        ("with_a_balloon", "holding a bunch of floating balloons, giddy", "🎈", "balloons bob, the feet lift slightly off the ground"),
+        ("with_a_gift", "hugging a big gift box with a bow, bursting with joy", "🎁", "shakes the box, the ribbon bounces, hops with excitement"),
+        ("party_hat", "wearing a party hat, cheering with sparkling eyes", "🥳", "the hat wobbles, cheers and claps"),
+        ("blowing_a_horn", "blowing a party horn, cheeks puffed", "🎉", "the horn unrolls and rolls back, cheeks puff"),
+        ("making_a_wish", "eyes closed making a wish, hands clasped, glowing smile", "🌟", "sways gently, sparkles pulse, eyes open with a gasp"),
+        ("laughing", "laughing out loud with tears of joy", "😂", "shoulders shake, doubles over laughing"),
+        ("with_confetti", "arms up in a shower of confetti, ecstatic", "🎊", "confetti falls, jumps and spins"),
+        ("waving", "waving hello in a party hat", "👋", "waves wildly and bounces"),
     ],
-    "default": [
-        ("waving", "waving hello", "👋"), ("laughing", "laughing out loud", "😂"), ("with_a_heart", "holding a heart", "❤️"),
-        ("thumbs_up", "giving a thumbs up", "👍"), ("thinking", "thinking with a hand on chin", "🤔"),
-        ("crying", "crying", "😢"), ("angry", "angry with crossed arms", "😡"),
-        ("sleeping", "sleeping", "😴"), ("celebrating", "celebrating with arms up", "🎉"),
-    ],
+    "default": None,        # built from emotions.pick(): a wide, expressive mix per request
 }
 VERBS = {"create", "make", "generate", "draw", "design", "build", "give", "me"}
 STOP = {"a", "an", "the", "of", "and", "to", "my", "some"}
@@ -52,6 +59,8 @@ def slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
 
 
+REFERENCE_CLAUSE = ("Reference: the attached image shows the subject to draw. Keep its design, colours and proportions for every character; "
+                    "change only the expression and the pose.")
 GRIDS = {(3, 3), (2, 2), (1, 1)}     # user's choice: 3x3 (default) or 2x2; 1x1 = regenerate one sticker
 TEMPLATE_OF = {(3, 3): "sheet_3x3", (2, 2): "sheet_2x2", (1, 1): "single_1x1"}
 
@@ -82,15 +91,17 @@ def cell_prompt(slots: dict, cell: dict) -> str:
     return f"{slots['subject_description']} {cell['label']}, {MARGIN}"
 
 
-def render_plan(slots: dict, template_id: str, version: int = 1) -> dict:
+def render_plan(slots: dict, template_id: str, version: int = TEMPLATE_VERSION) -> dict:
     """Rebuild the final prompts from the saved template file + the slot JSON. Deterministic, so a plan is never only free text:
     Phase 3's LLM fills `slots`, this function turns them into prompts."""
     rows, cols = TEMPLATE_GRID[template_id]
     key_name, key_hex = KEYS[slots.get("key_colour", "green")]
     cells = sorted(slots["cells"], key=lambda c: c["pos"])
-    lines = "\n".join(f"{c['pos']}. {c['label']}" for c in cells) if len(cells) > 1 else cells[0]["label"]
-    common = dict(rows=rows, cols=cols, n=rows * cols, subject_description=slots["subject_description"], style=STYLES.get(slots.get("style_id"), STYLES["flat_vector"]),
-                  cells=lines, key_name=key_name, key_hex=key_hex)
+    lab = (lambda c: f"Character {c['pos']}: {c['label']}") if int(version) >= 2 else (lambda c: f"{c['pos']}. {c['label']}")   # v2 avoids list formatting (image models read it as tiled panels)
+    lines = "\n".join(lab(c) for c in cells) if len(cells) > 1 else cells[0]["label"]
+    motions = "\n".join(f"{c['pos']}. {c.get('motion') or c['label'] + ', with big lively expressive movement in place'}" for c in cells)
+    common = dict(rows=rows, cols=cols, n=rows * cols, subject_description=slots["subject_description"], style=styles.phrase(slots.get("style_id"), version),
+                  cells=lines, key_name=key_name, key_hex=key_hex, motions=motions)
     sheet = load_template(template_id, version).format(**common).strip()
     video = load_template("video", version).format(seconds=3, motion=GUIDELINES["motion"].split(", seamless")[0], **common).strip()
     return {"sheet_prompt": sheet, "video_prompt": video, "prompts": {c["pos"]: cell_prompt(slots, c) for c in cells}}
@@ -113,22 +124,23 @@ def expand(task: str, grid: tuple = (3, 3)) -> dict:
     task_slug = subject_slug + (f"_{ctx_slug}" if ctx_slug else "")
     ctx_tags = [w for w in ctx_words if len(w) > 2][:1]
     cells, stickers = [], []
-    for i, (suffix, phrase, emoji) in enumerate(ACTIONS[kind][: rows * cols], 1):
+    entries = ACTIONS[kind][: rows * cols] if ACTIONS[kind] else emotions.pick(rows * cols, subject_slug)
+    for i, (suffix, phrase, emoji, motion) in enumerate(entries, 1):
         key = f"{subject_slug}_{suffix}"                  # searchable action name; also the file name tail
         words = [w for w in re.findall(r"[a-z0-9]+", phrase) if len(w) > 2 and w not in STOP and w not in {"with", "holding", "wearing"}]
         tags = clean_tags(key, words[:3] + ctx_tags)
-        cells.append({"pos": i, "label": phrase, "tags": tags, "emoji": emoji})
+        cells.append({"pos": i, "label": phrase, "tags": tags, "emoji": emoji, "motion": motion})
     slots = {"subject_description": subject, "style_id": "flat_vector", "mode": TEMPLATE_OF[(rows, cols)], "cells": cells,
              "action_guidance": kind, "key_colour": "green"}
     tid = TEMPLATE_OF[(rows, cols)]
-    built = render_plan(slots, tid, 1)
+    built = render_plan(slots, tid, TEMPLATE_VERSION)
     for c in cells:
         stickers.append({"index": c["pos"], "id": f"prompt{c['pos']:02d}", "prompt": built["prompts"][c["pos"]], "key": c["tags"][0],
                          "tags": c["tags"], "emoji": c["emoji"]})
     g = {k: v.format(rows=rows, cols=cols, n=rows * cols) for k, v in GUIDELINES.items()}
     return {
         "task": body, "task_slug": task_slug, "subject": subject, "context": context, "kind": kind, "grid": [rows, cols],
-        "template_id": tid, "template_version": 1, "slots": slots,
+        "template_id": tid, "template_version": TEMPLATE_VERSION, "slots": slots,
         "guidelines": g,
         "sheet_prompt": built["sheet_prompt"],
         "video_prompt": built["video_prompt"],

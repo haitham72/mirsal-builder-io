@@ -1,6 +1,6 @@
-"""Phase 2 S2: jobs as files. Mirsal writes the job, an operator session fulfils it with the
-Higgsfield MCP tools, Mirsal reads the result. The engine stays ignorant of who fulfils the job,
-so a plain HTTP provider can replace the MCP operator later behind the same interface.
+"""Phase 2: jobs as files. Mirsal writes the job; it is fulfilled by `fulfil()` (the Higgsfield CLI, see higgsfield.py) or by an operator
+session using the same claim/done/fail calls. The engine stays ignorant of who fulfils the job, so another provider can replace the CLI
+behind the same interface.
 
 Ticket first (CLAUDE.md rule 10): claim() writes external_task_id BEFORE the operator waits, so a
 crashed operator re-run resumes by ticket instead of paying twice."""
@@ -10,12 +10,13 @@ import hashlib
 import json
 import os
 import shutil
+import threading
 import time
 from pathlib import Path
 
 KINDS = ("sheet", "video", "single")
 STATUSES = ("REQUESTED", "CLAIMED", "DONE", "FAILED", "TIMEOUT")
-PROVIDER = "higgsfield-mcp"
+PROVIDER = "higgsfield-cli"
 
 KIND_CALL = {"sheet": "IMAGE_SHEET", "video": "VIDEO", "single": "IMAGE_SINGLE"}
 
@@ -159,7 +160,8 @@ def done(out: Path, jid: str, file: str, model: str, cost=None) -> dict:
     _write(p, job)
     _mc.append(out, KIND_CALL[job["kind"]], job["provider"], job["model"], status="OK",
                latency_ms=int((t0 - (job.get("claimed_at") or t0)) * 1000),
-               cost=job["cost"], extra={"job": job["id"], "sha256": digest})
+               cost=job["cost"], extra={"job": job["id"], "sha256": digest, "external_task_id": job.get("external_task_id"),
+                                        "task": job.get("task"), "params": job.get("params"), "output": job["result"]["file"]})
     return job
 
 
@@ -186,3 +188,94 @@ def requeue(out: Path, jid: str) -> dict:
         raise JobError(f"{job['id']} is {job['status']}, nothing to re-queue", 409)
     job.update(status="REQUESTED", error=None, claimed_at=None, created_at=_now())  # a fresh waiting period
     return _write(p, job)
+
+
+def update(out: Path, jid: str, **fields) -> dict:
+    """Merge bookkeeping fields (params, cost_estimate, generation) into a job file."""
+    p = _path(out, jid)
+    job = json.loads(p.read_text(encoding="utf-8"))
+    job.update(fields)
+    return _write(p, job)
+
+
+def attach_generation(out: Path, jid: str, gid: int) -> dict:
+    return update(out, jid, generation=f"G{int(gid):03d}")
+
+
+_PAID = threading.Lock()      # one paid provider call at a time, whoever asks
+
+
+def _daily_cap() -> float | None:
+    try:
+        v = float(os.environ.get("MIRSAL_DAILY_CREDITS", ""))
+        return v if v > 0 else None
+    except ValueError:
+        return None
+
+
+def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
+    """Run one job through the Higgsfield CLI. Ticket first: the job is created WITHOUT waiting, its id is stored with `claim` before the
+    wait begins, and a job that is already CLAIMED (a crashed run) resumes by its ticket instead of paying twice. Never retries a paid call.
+    Returns the job (DONE or FAILED); `on_done(job)` runs after a successful completion."""
+    from . import higgsfield as _hf, model_catalog as _mcat, usage as _usage
+    hf = hf or _hf
+    out = Path(out)
+    job = read(out, jid)
+    resume = job["status"] == "CLAIMED" and bool(job.get("external_task_id"))
+    if not resume and job["status"] not in ("REQUESTED", "TIMEOUT"):
+        raise JobError(f"{job['id']} is {job['status']}, nothing to run", 409)
+    req = job.get("request") or {}
+    kind = "video" if job["kind"] == "video" else "image"
+    try:
+        model, params = _mcat.resolve(kind, req.get("model"), req.get("options"))
+        prompt = str(req.get("prompt") or "")
+        if not prompt.strip():
+            raise JobError("the job has no prompt", 400)
+        media = {}
+        refs = [Path(r) if Path(r).is_absolute() else out / r for r in (req.get("refs") or [])]
+        if refs:
+            if not _mcat.find(kind, model).get("refs"):
+                raise JobError(f"{_mcat.find(kind, model)['label']} does not take reference images", 400)
+            missing = [str(r) for r in refs if not r.is_file()]
+            if missing:
+                raise JobError(f"reference image missing: {missing[0]}", 400)
+            media["image_references"] = [str(r) for r in refs]
+        if kind == "video":
+            start = Path(str(req.get("start_image") or ""))
+            start = start if start.is_absolute() else out / start
+            if not start.is_file():
+                raise JobError(f"the start image is missing: {start}", 400)
+            media["start_image"] = str(start)
+            if _mcat.find("video", model).get("end_image") and req.get("loop", True):
+                media["end_image"] = str(start)
+        with _PAID:
+            if resume:
+                ticket, est = job["external_task_id"], job.get("cost_estimate")
+            else:
+                est = hf.cost(model, params, prompt, **media)
+                cap = _daily_cap()
+                if cap is not None and _usage.spent_today(out) + est > cap:
+                    raise JobError(f"the daily credit cap ({cap:g}) would be exceeded by this {est:g}-credit call", 402)
+                ticket = hf.create(model, params, prompt, **media)
+                claim(out, jid, ticket)                      # IMMEDIATELY, before waiting
+                update(out, jid, params=dict(params, **({"references": len(refs)} if refs else {})), cost_estimate=est, model=model)
+            res = hf.wait(ticket, timeout_s=max(120, min(timeout_s(), 3600) - 60))
+            ext = (res["result_url"].split("?")[0].rsplit(".", 1)[-1] or "bin")[:5].lower()
+            tmp = jobs_dir(out) / jid.upper() / f"download.{ext}"
+            hf.download(res["result_url"], tmp)
+        job = done(out, jid, str(tmp), model, cost=est)
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+    except (JobError, _mcat.CatalogError, _hf.HiggsError) as e:
+        code = getattr(e, "code", 500)
+        if job["status"] in ("REQUESTED", "CLAIMED", "TIMEOUT") or read(out, jid)["status"] in ("REQUESTED", "CLAIMED", "TIMEOUT"):
+            fail(out, jid, str(e))
+        return read(out, jid)
+    if on_done:
+        try:
+            on_done(job)
+        except Exception as e:                             # the sheet is safe in out/jobs; say what did not follow
+            job = update(out, jid, follow_up_error=str(e)[:300])
+    return job

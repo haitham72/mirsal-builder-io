@@ -24,7 +24,7 @@ class InboxTests(Api):
         before = tree(watch)
         s, plan = self.req("POST", "/api/plan", {"prompt": "teddy bear for school", "grid": "2x2"})
         self.assertEqual((s, plan["template_id"], len(plan["stickers"])), (200, "sheet_2x2", 4))
-        self.assertIn("2x2 sticker sheet", plan["sheet_prompt"])
+        self.assertIn("2 rows of 2", plan["sheet_prompt"])
         self.assertEqual(self.req("POST", "/api/plan", {"prompt": "x", "grid": "5x5"})[0], 400)
         self.assertEqual(self.req("POST", "/api/plan", {"prompt": "  "})[0], 400)
         s, t = self.req("POST", "/api/tasks", {"prompt": "teddy bear for school", "grid": "3x3"})

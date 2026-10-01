@@ -177,7 +177,7 @@ class PrompterGridTests(unittest.TestCase):
         self.assertEqual(len(prompter.expand("teddy bear")["stickers"]), 9)
         p = prompter.expand("teddy bear", (2, 2))
         self.assertEqual((p["grid"], len(p["stickers"])), ([2, 2], 4))
-        self.assertIn("2x2", p["sheet_prompt"])
+        self.assertIn("2 rows of 2", p["sheet_prompt"])
 
     def test_validate_infers_grid_and_rejects_odd_counts(self):
         st = lambda n: [{"index": i, "prompt": "p", "key": f"k{i}", "emoji": "x"} for i in range(1, n + 1)]
