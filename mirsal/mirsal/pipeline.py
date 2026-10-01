@@ -19,7 +19,8 @@ from . import prompter, sources
 from .engine import verify
 from .engine.config import EngineConfig
 from .engine.grid import detect_grid, split_grid
-from .engine.sheet import key_sheet, slice_cells, stitch_keyed
+from .engine.render import apply_edge
+from .engine.sheet import encode_static, key_sheet, slice_cells, stitch_keyed
 from .engine.video import AnimationResult, pick_clip, process_clips, process_video
 
 STAGES = ["requested", "sheet_picked", "keyed", "sliced", "video_requested", "video_picked", "video_sliced",
@@ -55,6 +56,7 @@ def normalise(res: dict) -> dict:
     res.setdefault("reviews", {"plan": None, "video_sheet": {}, "pack": None})
     res.setdefault("video_sheets", [])
     res.setdefault("verify", {})
+    res.setdefault("erode_px", EngineConfig().erode_px)   # generations written before the erosion setting
     for st in res["stickers"]:
         st.setdefault("tags", [st["key"]])
         st.setdefault("review", {"still": "BLOCKED" if st["status"] == "FAILED" else "PENDING", "anim": "NONE"})
@@ -159,11 +161,13 @@ def list_inputs(inp: Path) -> list[dict]:
 
 def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: sources.Pick | None = None, parent: int | None = None,
           grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None,
-          outline: int | None = None) -> int:
+          outline: int | None = None, erode: int | None = None) -> int:
     """Synchronous part: match source, run the prompter, allocate G00N. Returns the id fast.
     grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters."""
     if outline is not None and not 0 <= int(outline) <= 40:
         raise PipelineError("outline must be 0 (none) to 40 px")
+    if erode is not None and not 0 <= int(erode) <= 8:
+        raise PipelineError("erode must be 0 (none) to 8 px")
     if pick is None:
         base = sources.find(inp, prompt, 1)
         if base:
@@ -202,6 +206,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         "task_id": task["id"] if task else None, "name_key": plan["task_slug"], "regen_of": regen_of,
         "verify_version": verify.VERIFY_VERSION,
         "outline_px": int(outline) if outline is not None else EngineConfig().outline_px,    # the white die-cut stroke is a choice, kept with the generation
+        "erode_px": int(erode) if erode is not None else EngineConfig().erode_px,          # fringe trim, kept with the generation; 0 = none
         "reviews": {"plan": (task or {}).get("plan_review"), "video_sheet": {}, "pack": None}, "video_sheets": [], "verify": {},
         "stickers": [new_sticker(gid, plan["task_slug"], s) for s in plan["stickers"]],
     }
@@ -241,9 +246,14 @@ def block_detail(report: list) -> dict | None:
 
 
 def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
-    """The engine config of one generation: the server's, with the outline width that was chosen for it (0 = no stroke)."""
-    px = res.get("outline_px")
-    return cfg if px is None else replace(cfg, outline_px=int(px))
+    """The engine config of one generation: the server's, with the edge finish that was chosen for it
+    (outline_px 0 = no stroke, erode_px 0 = no trim)."""
+    kw = {}
+    if res.get("outline_px") is not None:
+        kw["outline_px"] = int(res["outline_px"])
+    if res.get("erode_px") is not None:
+        kw["erode_px"] = int(res["erode_px"])
+    return cfg if not kw else replace(cfg, **kw)
 
 
 def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
@@ -329,6 +339,69 @@ def _json(v):
     return v.item() if hasattr(v, "item") else v
 
 
+# ---------- appearance (re-finish the edge of an existing generation) ----------
+# The full "still" stage judges keying (needs the cell); an appearance re-render only re-judges the
+# finished image. These checks run on the new file; the keying-stage verdicts (blank_cell, inside_cell,
+# no_spill, chroma_risk, single_subject, duplicate_cell) and their metrics stay as Python recorded them.
+APPEARANCE_CHECKS = ("dimensions", "transparent_corners", "foreground", "holes", "edge_trimmed", "static_file")
+
+
+def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None = None, erode: int | None = None) -> dict:
+    """Change the edge finish stored with a generation and re-render its stills from the outline-free
+    `source/plain/S#.png` (cheap: no re-keying). Animation files keep their old edge, so any sticker with a
+    webm is marked STALE: the next Animate re-renders its frames from the source video. Returns the new state."""
+    if outline is not None and not 0 <= int(outline) <= 40:
+        raise PipelineError("outline must be 0 (none) to 40 px")
+    if erode is not None and not 0 <= int(erode) <= 8:
+        raise PipelineError("erode must be 0 (none) to 8 px")
+    res = read_result(out, gid)
+    if outline is not None:
+        res["outline_px"] = int(outline)
+    if erode is not None:
+        res["erode_px"] = int(erode)
+    cfg = cfg_for(res, cfg)
+    d = gen_dir(out, gid)
+    rerendered, stale = 0, []
+    for st in res["stickers"]:
+        if st["status"] != "READY":
+            continue
+        plain = d / "source" / "plain" / f"S{st['index']}.png"
+        if not plain.exists():                            # generations written before the plain twins
+            continue
+        rgba = cv2.cvtColor(cv2.imdecode(np.fromfile(str(plain), np.uint8), cv2.IMREAD_UNCHANGED), cv2.COLOR_BGRA2RGBA)
+        fin = apply_edge(rgba[..., :3].astype(np.float32), rgba[..., 3].astype(np.float32) / 255.0,
+                         cfg.outline_px, cfg.erode_px)
+        metrics: dict = {}
+        img_bgra = cv2.cvtColor(fin, cv2.COLOR_RGBA2BGRA)
+        ok, buf = cv2.imencode(".png", img_bgra)
+        data = buf.tobytes()
+        report = verify.run("still", {"plain": rgba[..., 3], "metrics": metrics, "img": fin,
+                                      "render": lambda: fin,
+                                      "encode": lambda img, c: (data, "png")}, cfg, only=APPEARANCE_CHECKS)
+        fresh = {c.id: c.to_dict() for c in report}
+        if any(c["severity"] == "BLOCK" and not c["ok"] for c in fresh.values()):
+            continue                                     # never writes a file the verifier BLOCKs; the old still stands
+        kept = [c for c in st.get("report", []) if c.get("name") not in fresh]
+        order = [c for c, _, _, _ in verify.CATALOGUE.get("still", [])]
+        st["report"] = sorted(kept + list(fresh.values()), key=lambda c: order.index(c["name"]) if c["name"] in order else 99)
+        st.get("metrics", {}).update({k: v for k, v in metrics.items() if k in ("holes", "kb", "format")})
+        st["metrics"]["outline_px"], st["metrics"]["erode_px"] = cfg.outline_px, cfg.erode_px
+        ok, buf = cv2.imencode(".png", cv2.cvtColor(fin, cv2.COLOR_RGBA2BGRA))
+        (d / st["png"]).write_bytes(buf.tobytes())
+        hist(st, "appearance", "human", "PASS", detail={"outline_px": cfg.outline_px, "erode_px": cfg.erode_px})
+        rerendered += 1
+        if st.get("webm"):
+            st["anim_status"] = "STALE"
+            st["anim_reason"] = "edge changed: Animate again to apply it"
+            st["review"]["anim"] = "NONE"
+            stale.append(st["index"])
+    write_result(out, gid, res)
+    emit(out, gid, "appearance", "done", 0, {"outline_px": res["outline_px"], "erode_px": res["erode_px"],
+                                             "rerendered": rerendered, "stale": stale})
+    return {"ok": True, "outline_px": res["outline_px"], "erode_px": res["erode_px"],
+            "rerendered": rerendered, "stale": stale}
+
+
 # ---------- more ----------
 def more(out: Path, inp: Path, from_id: int | None = None) -> int:
     from_id = from_id or latest_id(out)
@@ -337,7 +410,8 @@ def more(out: Path, inp: Path, from_id: int | None = None) -> int:
     nxt = sources.variant_of(inp, s["subject"], s["variant"] + 1)
     if not nxt:
         raise PipelineError(f"That's all {s['n_variants']} prepared variations of {s['subject']}.", 409)
-    return start(res["prompt"], out, inp, pick=nxt, parent=from_id)
+    return start(res["prompt"], out, inp, pick=nxt, parent=from_id,
+                   outline=res.get("outline_px"), erode=res.get("erode_px"))   # a batch keeps the session's edge finish
 
 
 def regen(out: Path, inp: Path, gid: int, index: int, subject: str | None = None) -> int:
@@ -355,7 +429,7 @@ def regen(out: Path, inp: Path, gid: int, index: int, subject: str | None = None
     if detect_grid(load_rgb(pick.sheet)) != (1, 1):
         raise PipelineError(f"{pick.sheet.name} is not a 1x1 sheet (one character on one canvas).", 409)
     new = start(res["prompt"], out, inp, pick=pick, parent=gid, regen_of=f"{res['generation_id']}/S{index}", regen_plan=gates.regen_plan(res, index),
-                outline=res.get("outline_px"))
+                outline=res.get("outline_px"), erode=res.get("erode_px"))
     plan = res["reviews"].get("plan")
     if plan and plan["decision"] == "APPROVE":
         r2 = read_result(out, new)

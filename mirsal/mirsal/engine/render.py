@@ -20,9 +20,32 @@ def fit_scale(bbox, cfg) -> float:
     return cfg.fit * cfg.size / max(x1 - x0, y1 - y0, 1)
 
 
-def render_sticker(rgba: np.ndarray, bbox, scale: float, cfg, outline_px: int | None = None) -> np.ndarray:
-    """Trim to bbox -> premultiply -> resize -> un-premultiply -> centre on SxS -> white outline. Never stretches."""
+def apply_edge(rgb: np.ndarray, alpha: np.ndarray, outline_px: int, erode_px: int) -> np.ndarray:
+    """Trim N px of key fringe, then draw the white die-cut ring outside the trimmed edge.
+
+    rgb: float32 HxWx3, straight (un-premultiplied) colour. alpha: float32 HxW, 0..1.
+    Returns uint8 HxWx4. The stored RGB is exact for its alpha: a viewer renders
+    rgb*out_a + bg*(1-out_a) with no second application (the old code composited the
+    subject over white *and* kept alpha, washing the edge out twice)."""
+    A = np.clip(alpha, 0, 1)
+    if erode_px > 0:
+        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * erode_px + 1, 2 * erode_px + 1))
+        A = cv2.erode(A, k)
+    if outline_px > 0:
+        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * outline_px + 1, 2 * outline_px + 1))
+        ad = cv2.GaussianBlur(cv2.dilate(A, k), (0, 0), 1.0)
+        out_a = np.clip(np.maximum(ad, A), 0, 1)
+    else:
+        out_a = A
+    denom = np.maximum(out_a, 1e-4)
+    rgb = (rgb * A[..., None] + 255.0 * (out_a - A)[..., None]) / denom[..., None]
+    return np.clip(np.dstack([rgb, out_a * 255.0]) + 0.5, 0, 255).astype(np.uint8)
+
+
+def render_sticker(rgba: np.ndarray, bbox, scale: float, cfg, outline_px: int | None = None, erode_px: int | None = None) -> np.ndarray:
+    """Trim to bbox -> premultiply -> resize -> un-premultiply -> centre on SxS -> edge finish. Never stretches."""
     r = cfg.outline_px if outline_px is None else outline_px
+    e = cfg.erode_px if erode_px is None else erode_px
     x0, y0, x1, y1 = bbox
     crop = rgba[y0:y1, x0:x1].astype(np.float32)
     a = crop[..., 3:4] / 255.0
@@ -38,11 +61,4 @@ def render_sticker(rgba: np.ndarray, bbox, scale: float, cfg, outline_px: int | 
     A = np.clip(canvas[..., 3], 0, 1)
     rgb = np.where(A[..., None] > 1e-4, canvas[..., :3] / np.maximum(A[..., None], 1e-4), 0)
     rgb = despill(np.clip(rgb + 0.5, 0, 255).astype(np.uint8), A, cfg.chroma, cfg.despill_band_px).astype(np.float32)
-    if r > 0:
-        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1, 2 * r + 1))
-        ad = cv2.GaussianBlur(cv2.dilate(A, k), (0, 0), 1.0)
-        out_a = np.maximum(ad, A)
-        rgb = rgb * A[..., None] + 255.0 * (1 - A[..., None])   # subject over white outline
-    else:
-        out_a = A
-    return np.clip(np.dstack([rgb, out_a * 255.0]) + 0.5, 0, 255).astype(np.uint8)
+    return apply_edge(rgb, A, r, e)

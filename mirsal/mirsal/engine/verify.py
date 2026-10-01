@@ -94,11 +94,14 @@ def check(stage: str, cid: str, severity: str, gate: bool = False):
     return deco
 
 
-def run(stage: str, inp: dict, cfg) -> list[Check]:
-    """Run every check of `stage` in catalogue order. Never raises: a crashing check is a BLOCK `verifier_error`."""
+def run(stage: str, inp: dict, cfg, only: tuple | None = None) -> list[Check]:
+    """Run every check of `stage` in catalogue order (or only the ids in `only`, which also skips their gate).
+    Never raises: a crashing check is a BLOCK `verifier_error`."""
     out: list[Check] = []
     m = inp.setdefault("metrics", {})
     for cid, severity, fn, gate in CATALOGUE.get(stage, []):
+        if only is not None and cid not in only:
+            continue
         t0 = time.perf_counter()
         try:
             res = fn(inp, cfg)
@@ -198,7 +201,21 @@ def background_flat(inp, cfg):
 def blank_cell(inp, cfg):
     c = inp["cell"]
     ok = bool(c.bbox and c.fg_px >= cfg.min_foreground_px)
-    return _c("still", "blank_cell", BLOCK, ok, c.fg_px, cfg.min_foreground_px, f"{c.fg_px}px < {cfg.min_foreground_px}", reason="empty_subject")
+    return _c("still", "blank_cell", BLOCK, ok, c.fg_px, cfg.min_foreground_px, "foreground below minimum", reason="empty_subject")
+
+
+@check("still", "edge_trimmed", WARN)
+def edge_trimmed(inp, cfg):
+    """The appearance pass kept the subject: the re-rendered alpha still covers most of the plain alpha.
+    `inp['plain']` is the alpha before trimming; absent (normal run) this is not applicable."""
+    plain = inp.get("plain")
+    if plain is None:
+        return None
+    after = int((_img(inp)[..., 3] > 127).sum())
+    before = max(int((plain > 127).sum()), 1)
+    share = after / before
+    return _c("still", "edge_trimmed", WARN, share >= 0.90, round(share, 4), 0.90,
+              f"erosion kept {share * 100:.1f}% of the subject")
 
 
 @check("still", "dimensions", BLOCK)

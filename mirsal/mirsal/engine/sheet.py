@@ -92,7 +92,7 @@ def _make(c: CellKey, cfg, pack: float, hashes: dict | None = None) -> StickerRe
     inp = {"cell": c, "metrics": m, "render": render, "encode": encode_static, "hashes": hashes}
     rep = Report(verify.run("still", inp, cfg))
     if rep.ok:
-        plain = render_sticker(c.keyed.rgba, c.bbox, scale["s"], cfg, outline_px=0)
+        plain = render_sticker(c.keyed.rgba, c.bbox, scale["s"], cfg, outline_px=0, erode_px=0)   # untrimmed base for the video sheet and later re-renders
         return StickerResult(c.index, "READY", None, rep, m, inp["data"], inp["fmt"], inp.get("img"), plain)
     return StickerResult(c.index, "FAILED", rep.first_failure, rep, m)
 

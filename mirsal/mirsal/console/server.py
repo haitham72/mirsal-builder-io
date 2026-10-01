@@ -353,7 +353,8 @@ def make_handler(c: Console):
                     raise pl.PipelineError("busy", 409)
                 t = tasks.read_task(c.out, body["task"])
                 gid = pl.start(t["prompt"], c.out, c.inp, pick=tasks.pick_for_task(c.inp, t, int(body.get("take", 0))), task=t,
-                               outline=int(body["outline"]) if body.get("outline") is not None else None)
+                               outline=int(body["outline"]) if body.get("outline") is not None else None,
+                               erode=int(body["erode"]) if body.get("erode") is not None else None)
                 tasks.link_generation(c.out, t["id"], gid)
                 c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
                 return self._json(202, {"id": gid})
@@ -364,7 +365,8 @@ def make_handler(c: Console):
                 if c.lock.locked():
                     raise pl.PipelineError("busy", 409)
                 gid = pl.start(prompt, c.out, c.inp, int(body["variant"]) if body.get("variant") else None,
-                               outline=int(body["outline"]) if body.get("outline") is not None else None)
+                               outline=int(body["outline"]) if body.get("outline") is not None else None,
+                               erode=int(body["erode"]) if body.get("erode") is not None else None)
                 pl.approve_plan(c.out, gid, "approved by pressing Generate")
                 c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
                 return self._json(202, {"id": gid})
@@ -381,6 +383,13 @@ def make_handler(c: Console):
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     return self._json(200, gates.review(c.out, gid, str(body.get("gate", "")), str(body.get("decision", "")), body.get("index"), body.get("note")))
+                if parts[3] == "appearance":
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    return self._json(200, pl.set_appearance(
+                        c.out, gid, c.cfg,
+                        int(body["outline"]) if body.get("outline") is not None else None,
+                        int(body["erode"]) if body.get("erode") is not None else None))
                 if parts[3] == "video_sheet":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
