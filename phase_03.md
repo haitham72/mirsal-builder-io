@@ -233,6 +233,7 @@ Flat solid pure {key colour} chroma-key background, no floor, no shadow on the b
 ## Part 2 — Vision quality check
 
 **Python first** (deterministic; its facts are final):
+- **These live in Phase 1's verifier now** (`engine/verify.py`, 1F catalogue): `background_flat`, `chroma_risk` (interior key colour, WARN at 3%), `holes`, `layout_match`, `inside_slot` / `cross_slot` and the rest. Phase 3 adds no second checker. It *acts* on their verdicts: `chroma_risk` / `holes` above threshold → blue re-key; `cut_clean` / `grid_detected` failures → sheet regeneration. The original text follows.
 - The Phase 1 validators, plus two new checks:
   - `background_flat`: the key-colour variance across the gutters is low, i.e. the model really drew a flat key background.
   - `chroma_risk`: the share of subject pixels whose hue is near the key colour but below the key threshold. These are subject colours the key could eat. Above ~3%, flag the sticker `CHROMA_RISK`.
@@ -285,7 +286,7 @@ class VideoGenerator(Protocol):
 
 - **Vendor:** WaveSpeed first. Port the working client and price table from `proposals/Mirsal-chat-emojis/api/wavespeed.py` and `spike/genmoji.py`.
 - Build one image and one video provider. Keys go in `.env` only.
-- `ModelSource` implements the Phase 1 source interface in `sources.py` (`find(prompt, variant) -> Pick`: sheet, optional video, subject, variant), so the engine and the store can't tell generated input from prepared input. Generated sheets are written under the same `Images_gen/img-NNN-<subject>/` convention so the pairing, tracker and console keep working unchanged.
+- `ModelSource` implements the Phase 1 source interface in `sources.py` (`find(prompt, variant) -> Pick`: sheet, optional video, subject, variant), so the engine and the store can't tell generated input from prepared input. **Changed 2026-10-01:** the `Phase_01` watch folders are mock samples and are **removed in Phase 3**, together with 1G's `higgsfield-manual` provider and the folder-number pairing. Generated sheets and videos are stored as assets under `out/` (object keys per generation) and linked by `tasks.external_task_id` (the Phase 2 "hard truth"), never by folder names. 1G's Inbox keeps working: it lists API tasks instead of watch folders.
 - **Restricted network:** every provider client sits behind the Protocols above with recorded fixtures for tests; `mirsal doctor` checks keys and reachability; `--offline` stays first class.
 - **Animation sheet: built in Phase 1** as `build_video_sheet()` (checkpoint 1F; it was planned here as `build_animation_sheet`).
   - It recomposes the stickers approved at G2 onto a flat-chroma canvas: same slots, rejected slots blank, subject at most 55% of the slot, no outline. It writes `layout.json`.

@@ -177,7 +177,7 @@ Enhancement owed to Phase 4: Phase 1 emits `sliced` as one event for all nine ce
 - `interactions`: id, session_id, seq, user_message, assistant_message, intents, resolved jsonb, result_generation_id, created_at.
 - `feedback`: id, session_id, interaction_id, generation_id, sticker_id, polarity, scope TEMPORARY|PERSISTENT, text, preserve jsonb, change jsonb.
 - `generation_references`: source/target generation and sticker, `role` STYLE|POSE|SUBJECT|EXPRESSION|COMPOSITION|COLOR|ANIMATION, created_at.
-- `stickers` gains `inherited_from`.
+- `stickers.inherited_from` already exists since Phase 2 (1x1 regen). Edits use it the same way.
 - LangGraph checkpoint tables.
 
 **4A exit:**

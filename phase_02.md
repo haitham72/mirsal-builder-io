@@ -1,12 +1,13 @@
 # Phase 2 — Postgres (durable state, identity, lineage)
 
-**Prerequisite:** Phase 1 exits (1A, 1B, 1D and **1F, the golden path with review gates**) are met.
+**Prerequisite:** Phase 1 exits (1A, 1B, 1D, **1F, the golden path with review gates and the verifier**, and **1G, the React gateway**) are met.
 
 **Read `README.md` first.** It documents Phase 1 as built: the `<media>-<NNN>-<task_slug>-<key>` naming, `result.json`, `events.jsonl`, the prompter contract and the input pairing. Then read `phase_01.md`, "Golden path", for the gates (G1 plan, G2 stills, G3 video sheet, G4 animation, G5 pack), `tags`, `history` and `video_sheets`. This phase persists exactly that; it invents no new shapes.
 
 **Goal:** every generation, sticker, asset and **decision** gets a stable ID, survives restarts and can be **searched in Postgres**.
 - `G004/S3` is addressable forever, with its prompt, name, tags, emoji, validation report, files, parent generation, and every approve/reject it received (who, at which gate, why).
 - Nothing is ever overwritten.
+- A 1x1 regen of one sticker is a new generation (`regen_of`, `parent_id`); its other stickers are `inherited_from` the parent's rows. No files are copied.
 
 The behaviour stays the same as in Phase 1. This phase adds memory and search, not features: it is about **seamless integration**, so the console and CLI behave exactly as before, now backed by Postgres.
 
@@ -107,6 +108,8 @@ CREATE INDEX ON stickers (key text_pattern_ops);   -- prefix search on name keys
 ```
 
 - `video_sheets.ticket` (below) becomes a reference to `tasks.external_task_id` (kind `video`). There is one place for provider ids.
+- **Migration order:** `tasks` references `generations` and `video_sheets`, so `001_init.sql` creates it after both.
+- **1G's manual tasks** (`out/tasks/<NNN>.json`, `provider = 'higgsfield-manual'`, `external_task_id` = the reserved folder name) import as `tasks` rows unchanged.
 - `db import` creates one `prepared` task row per imported generation (sheet) and one per video used.
 - **Tests:**
   - importing the same prepared folder twice gives one task row;
@@ -124,7 +127,10 @@ CREATE FUNCTION mirsal_words(text)    RETURNS text LANGUAGE sql IMMUTABLE AS $$ 
 
 CREATE TABLE generations (
   id            text PRIMARY KEY,                 -- 'G004' (from generation_seq, zero-padded ≥3)
-  parent_id     text REFERENCES generations(id),  -- 'another' / later edits
+  parent_id     text REFERENCES generations(id),  -- 'another' / later edits / a 1x1 regen
+  grid          int[] NOT NULL DEFAULT '{3,3}',   -- {rows,cols}: {3,3} | {2,2} | {1,1} (1F)
+  regen_of      text,                             -- 'G004/S5' when this generation is a single-sticker 1x1 regen
+  verify_version text NOT NULL,                   -- the verifier rule set that judged it (1F VERIFY_VERSION)
   prompt        text NOT NULL,                    -- exactly what the user typed
   subject       text NOT NULL,
   source        text NOT NULL,                    -- 'prepared' now (was 'fixture'); 'model' in Phase 3
@@ -142,9 +148,10 @@ CREATE TABLE generations (
 CREATE TABLE stickers (
   id               text PRIMARY KEY,              -- 'G004/S3'
   generation_id    text NOT NULL REFERENCES generations(id),
-  idx              int  NOT NULL,                 -- 1..9, row-major
+  idx              int  NOT NULL,                 -- 1..rows*cols, row-major
   name             text NOT NULL,                 -- file stem: 'img-004-teddy_bear_school-teddy_bear_with_a_book'
   key              text NOT NULL,                 -- searchable action name: 'teddy_bear_with_a_book' (Phase 3B pool key)
+  inherited_from   text REFERENCES stickers(id),  -- moved here from Phase 4: a 1x1 regen generation inherits its other stickers
   tags             text[] NOT NULL,               -- 1..5 from the plan (1F); tags[1] = key
   concept          text,                          -- filled by the Phase 3 planner; NULL for Phase 1 prompts
   prompt           text NOT NULL,
@@ -275,7 +282,7 @@ CREATE TABLE generation_events (
 3. Write `repo.py`. `save_generation(result)` is **one transaction**: the generation row, 9 sticker rows and all asset rows. The run's status becomes visible only after the commit.
 4. `create` / `another` / `animate` **and the 1F gate routes** (`review`, `video_sheet`, the returned-video upload) write through the repo. A gate decision is one transaction: the `reviews` row, the mirrored `still_review`/`anim_review` and the event. Keep writing `result.json` too, as a portable export.
 5. Add `list`, `show <id>`, `history <G###/S#>` and `search "<text>" [filters]`. Switch the console's Library search box to `GET /api/search` when the database is up, and keep the `library.json` search when it is not (doctor says which one is active).
-6. `mirsal db import out/` backfills Phase 1 runs from `result.json` (including `parent`, `tags`, per-sticker `history` → `reviews` rows, and `video_sheets` with their `layout.json`), `prompts.json` and `events.jsonl`. It is idempotent: re-running it skips generations, events and reviews already present. Results written before 1F have no `tags` (use `[key]`) and no `history`: import their Python verdicts as `actor = 'python'` PASS/BLOCK rows from `status`/`reason`, and leave the human gates `PENDING`.
+6. `mirsal db import out/` backfills `out/tasks/*.json` (1G) as `tasks` rows, then Phase 1 runs from `result.json` (including `parent`, `tags`, per-sticker `history` → `reviews` rows, and `video_sheets` with their `layout.json`), `prompts.json` and `events.jsonl`. It is idempotent: re-running it skips generations, events and reviews already present. Results written before 1F have no `tags` (use `[key]`) and no `history`: import their Python verdicts as `actor = 'python'` PASS/BLOCK rows from `status`/`reason`, and leave the human gates `PENDING`.
 7. **Ingest (moved here from Phase 1):** `mirsal ingest <file> --task <subject> [--kind img|vid]` copies a raw download into `Images_gen/`/`videos_gen/` as the next `{task}-##`, records it as a `SOURCE_SHEET`/`SOURCE_VIDEO` asset with its sha256, and keeps image and video linked by the same `##`. Manual sandbox files stay valid; the app never renames anything in a watch folder without this explicit command.
 
 ---

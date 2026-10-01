@@ -57,7 +57,7 @@ mirsal/                                                     # the project (own .
     prompter.py     # stub of the AI prompter: task text -> 9 modular prompts (plain JSON)
     sources.py      # PhaseDirSource: scans the folders above by naming convention; never opens media
     pipeline.py     # the 7-stage lifecycle, events, result.json; used by CLI and console
-    engine/         # PURE: numpy/OpenCV/Pillow/ffmpeg only (config, chroma, render, sheet, video, ffmpeg)
+    engine/         # PURE: numpy/OpenCV/Pillow/ffmpeg only (config, chroma, grid, render, sheet, video, ffmpeg)
     console/        # server.py (stdlib) + index.html shell + studio.css + app.js / packs.js / editor.js (vanilla JS, no CDN)
     library.py      # packs, saved stickers, photo cutout, .wastickers export (desktop builder)
     matte.py        # optional AI cutout: U2-Net / IS-Net through onnxruntime only (models in mirsal/models/)
