@@ -30,3 +30,8 @@ mirsal/mirsal/console/dist/
 # Playwright E2E output
 mirsal/web/test-results/
 mirsal/web/playwright-report/
+
+# Secrets: never commit tokens (Telegram bot token lives in env or out/telegram.json)
+Phase_01/telegram.md
+**/telegram.json
+.tgcred
