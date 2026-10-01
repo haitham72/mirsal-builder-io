@@ -1,6 +1,6 @@
 # Phase_04 — supporting material for `../phase_04.md`
 
-Phase 4 adds LangGraph and creative intelligence: understanding which sticker the user means, feedback, "dog as banana" templates, annotation and memory, driven from a terminal chat. The spec is **`../phase_04.md`**. Prerequisite: the Phase 3 exit.
+Phase 4 adds LangGraph and creative intelligence: understanding which sticker the user means, feedback, "dog as banana" templates, annotation and memory, driven from a terminal chat. The spec is **`../phase_04.md`**. Prerequisite: the Phase 2 exit.
 
 - **Haitham will add here (pending):**
   - `resolver_utterances.md`: 40 labelled chat lines → the exact sticker IDs they mean, for the ≥95% accuracy eval in 4A;

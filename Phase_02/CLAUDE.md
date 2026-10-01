@@ -1,9 +1,13 @@
 # Phase_02 — supporting material for `../phase_02.md`
 
-Phase 2 adds Postgres: stable IDs (`G004/S3`), lineage and immutable history, with the same behaviour as Phase 1. The spec is **`../phase_02.md`**. Prerequisite: the Phase 1 exits (1A, 1B, 1D, 1F, 1G).
+Phase 2 is **live generation**: the prompt engine, the vision check, and generation through **Higgsfield (MCP)**, on the file store (no database). It was Phase 3 until 2026-10-01 (Haitham reordered: generation first, Postgres second). The spec is **`../phase_02.md`**; start at its "Ready to go" section. This folder holds Haitham's inputs to it.
 
-- **Prerequisite added 2026-10-01:** Phase 1 checkpoint **1F** (golden path with review gates, `../phase_01.md`). Phase 2 persists its contracts (`tags`, `reviews`, `history`, `video_sheets`, 1G's `out/tasks/*.json` as `tasks` rows) and makes everything searchable in Postgres.
-- **1F and 1G are built (2026-10-01):** the exact shapes to import are in `../phase_02.md`, "Notes from building 1F + 1G".
-- **No inputs from Haitham.** Don't wait for any. LangSmith is **not** in this phase (moved to Phase 3 on 2026-10-01); this phase is seamless Postgres integration.
-- **Port:** use 5434. 5433 is `temporal_note-db` and 5437 is the old Mirsal POC. `mirsal doctor` checks it with a Python socket (no `lsof`; the dev PC is Windows).
-- **Read `../README.md` first** (Phase 1 as built), and keep the lean-dependency rules (CLAUDE.md rule 8). The PC has internet since 2026-10-01, so `docker pull` and `pip install` into `mirsal/.venv` are fine; `docker save/load` stays the fallback.
+- `prompt_samples.md` holds Haitham's golden prompts and the prompt-lab test inputs.
+  - Seed `mirsal/prompts/examples/` from it.
+  - Build `planner_v1.md` from its teddy-bear meta-prompt. Its JSON output format is the planner schema.
+- `higgsfield_mcp.md` (**written in step S0**): the connector's tools, models, parameters, limits, credit cost, whether a job id comes back, whether a last frame / loop is supported. The rest of the phase is built from it, so S0 comes first.
+- **From Haitham:** keep the Higgsfield connector authorised in the operator session (a connector shows up as tools only in a session where it is authorised); a daily credit budget for tests; at S5 one decision: Anthropic API key for the slot filler and the judge, or agent-written slots and an agent judge; 30 sticker labels (approve / reject) at S6; ratings of the first live sheets.
+- **Gates:** S0 (the two test outputs) -> S1 (prompt lab) -> S2 (jobs) -> S3 (first real sheet) -> S4 (normalised video, measured) -> S5 (LLM filler) -> S6 (vision judge) -> S7 (quality work), each reviewed before the next.
+- **Prompt templates:** the master prompts are saved template files per grid (3x3, 2x2, 1x1 regen) filled by a small slot JSON plus a small reviewer (`../phase_02.md` Part 1). Haitham iterates prompt quality later by versioning templates and style presets.
+- New examples from Haitham go into `prompt_samples.md`, not into new files.
+- **Read `../Phase_01/README.md` first** (Phase 1 as built), keep the lean-dependency rules (CLAUDE.md rule 8), never commit a key (`.env` only), and never open or judge media (Python and the human judge).

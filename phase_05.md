@@ -10,6 +10,8 @@ Both operate on the same structured state from Phase 4. The UI renders state; it
 
 > It must feel like creative software, not a chatbot. Stickers dominate the screen; text is secondary.
 
+> **Delivery (Haitham, 2026-10-01): the shipped product is the API (5A) and an integration into the existing Mirsal app, not a new front end.** The screens in this repo (the desktop builder in `mirsal/mirsal/console/`, the parked React gateway, and 5B below) are a **sandbox / proposal**: they drive and demonstrate the API and are the reference client. So 5B is "reference client + contract tests", and the work that must be right is 5A: stable, versioned JSON contracts (OpenAPI), ids for everything (generation, sticker, pack, job, studio edit), idempotency, auth, and the same behaviour the sandbox shows. Every feature gets its engine function and JSON shape first; the screen follows.
+
 There are three checkpoints: **5A** HTTP API + workers, **5B** frontend, **5C** production hardening + export.
 
 ---
@@ -47,13 +49,13 @@ GET   /api/health  /api/health/models  /api/health/storage
 
 **Events:**
 - `generation_started, concepts_created, sheet_generating, sheet_generated, sheet_rejected, sticker_processing, sticker_judging, sticker_ready, sticker_rejected, sticker_failed, review_requested, review_decided, video_sheet_ready, animation_started, animation_ready, animation_failed, pack_complete, generation_failed`.
-- The review events carry the golden-path gate (`plan | still | video_sheet | anim | pack`, `phase_01.md` 1F). The UI shows Approve / Reject at every open gate. `POST /api/generations/{id}/review {gate, decision, sticker_id?, note?}` resumes the Phase 4 `interrupt()`. Its rules are Phase 1's: Python blocks are final, and the gate order is enforced.
+- The review events carry the golden-path gate (`plan | still | video_sheet | anim | pack`, `Phase_01/README.md` 1F). The UI shows Approve / Reject at every open gate. `POST /api/generations/{id}/review {gate, decision, sticker_id?, note?}` resumes the Phase 4 `interrupt()`. Its rules are Phase 1's: Python blocks are final, and the gate order is enforced.
 - Payload: `{event, generation_id, sticker_id, asset_id, index, asset_url}`.
 - Generation continues if the browser disconnects.
 
 **Reference image upload (Creator Mode):**
 - Validate by **content** (not the declared MIME), extension, size and dimensions, and store the file as a `SOURCE` asset.
-- `ImageGenerator.generate(reference=...)` (from Phase 3) receives the upload for image-to-image. The Phase 4 slots carry identity traits, and the judge scores `identity_match`.
+- `ImageGenerator.generate(reference=...)` (from Phase 2) receives the upload for image-to-image. The Phase 4 slots carry identity traits, and the judge scores `identity_match`.
 
 **Packs vs generations:** a generation is a creative event, and a pack is a user-curated collection.
 - Migration `008_packs.sql`: `packs` (id, session_id, name, cover_sticker_id, created_at) and `pack_stickers` (pack_id, sticker_id, position, active, created_at).

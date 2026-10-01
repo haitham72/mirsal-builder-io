@@ -1,350 +1,381 @@
-# Phase 2 — Postgres (durable state, identity, lineage)
+# Phase 2 — Generation: prompt engine, vision check, live generation through Higgsfield (MCP)
 
-**Prerequisite:** Phase 1 exits (1A, 1B, 1D, **1F, the golden path with review gates and the verifier**, and **1G, the React gateway**) are met.
+> **Order changed 2026-10-01 (Haitham): this phase was Phase 3.** Live generation now comes **before** Postgres (which is Phase 3). It removes the manual Higgsfield loop and the cause of the out-of-bounds animations, and nothing in it needs a database: it runs on the file store Phase 1 already has (`out/tasks/*.json`, `out/G00N/result.json`, `out/library/`). Phase 3 imports what this phase writes.
 
-**Read `README.md` first.** It documents Phase 1 as built: the `<media>-<NNN>-<task_slug>-<key>` naming, `result.json`, `events.jsonl`, the prompter contract and the input pairing. Then read `phase_01.md`, "Golden path", for the gates (G1 plan, G2 stills, G3 video sheet, G4 animation, G5 pack), `tags`, `history` and `video_sheets`. This phase persists exactly that; it invents no new shapes.
+**Prerequisite:** the Phase 1 exits (1A, 1B, 1D, 1F golden path + verifier, 1G the simple flow, 1H Send to Telegram, proven live). **No database.**
 
-**Goal:** every generation, sticker, asset and **decision** gets a stable ID, survives restarts and can be **searched in Postgres**.
-- `G004/S3` is addressable forever, with its prompt, name, tags, emoji, validation report, files, parent generation, and every approve/reject it received (who, at which gate, why).
-- Nothing is ever overwritten.
-- A 1x1 regen of one sticker is a new generation (`regen_of`, `parent_id`); its other stickers are `inherited_from` the parent's rows. No files are copied.
+**Supporting material:** `Phase_02/prompt_samples.md` (Haitham's golden prompts: a generic 4×4 sheet and the teddy-bear meta-prompt) and `Phase_02/CLAUDE.md`. Written in this phase: `Phase_02/higgsfield_mcp.md` (what the connector offers, step S0) and `docs/operator.md` (how the operator runs jobs).
 
-The behaviour stays the same as in Phase 1. This phase adds memory and search, not features: it is about **seamless integration**, so the console and CLI behave exactly as before, now backed by Postgres.
+**Phase 1 contract to build on:** `mirsal/prompter.py` already defines the plan JSON (`task`, `task_slug`, `guidelines`, `sheet_prompt`, `video_prompt`, `stickers[{index,id,prompt,key,emoji}]`). The Part 1 planner **extends** that shape (it adds `extraction`, locks, keywords) and must keep `task_slug` and each cell's `key`, because every output file is named `<media>-<NNN>-<task_slug>-<key>` and the pool (3B) indexes by `key`. Phase 1's `prompter.expand` stays as the `--no-llm` path and as the offline test double.
 
-**Not in this phase:** generation APIs, LLMs, LangGraph, **LangSmith (moved to Phase 3, decided 2026-10-01)**, Redis, or vector search. There is no new web server or frontend: the Phase 1 console stays, writes through the repo, and its existing Library search box switches to Postgres.
+**Goal:** great prompts in, verified stickers out, generated live. The parts:
+1. **Prompt engine.** A short request is extracted, a character + style lock is built, and the saved template is filled (never rewritten).
+2. **Vision quality check.** A VLM pre-reviews every sticker; Python checks the pixels. The human still decides.
+3. **Generation.** The image sheet and then the video are made live by Higgsfield, driven through its MCP connector by an operator session, and fed into the unchanged Phase 1 engine. The video always comes from the **normalised** video sheet.
+4. **Quality work.** Measured, not guessed.
 
----
+**Not in this phase:** Postgres, LangSmith, vectors/pool, photo/text/depth features (all Phase 3), Redis, LangGraph, a frontend rewrite (Phases 4-5).
 
-## What Haitham sees at the end
-
-```
-python -m mirsal create "banana with big eyes"   # same as Phase 1, now also written to Postgres
-python -m mirsal another                          # G002, parent = G001
-python -m mirsal list                             # G001 banana 01 9/9 ✓ · G002 banana 02 8/9 ✓ …
-python -m mirsal show G002                        # stickers, names, tags, emoji, status, reasons, files, parent, gate decisions
-python -m mirsal history G002/S5                  # sliced PASS (python) → G2 REJECT (human, "too dark") …
-python -m mirsal search "teddy book"              # G002/S1 teddy_bear_with_a_book 📚 · still APPROVED · anim APPROVED …
-python -m mirsal search "teddy" --approved --animated
-docker restart mirsal-db && python -m mirsal show G002   # still there
-```
-
-`show` prints each sticker's files and the console URL. `preview.html` no longer exists: the Phase 1 Lifecycle Console replaced it, and Phase 5 supersedes the console.
+> The LLM writes the creative content. Code writes the constraints. Python judges what is *correct*; the VLM judges what is *good*.
 
 ---
 
-## Principles
+## Ready to go (start here)
 
-1. **Postgres is the state; the disk is the media.** Rows hold paths + hashes + metadata, never image bytes.
-2. **Immutable history.** Generations and assets are append-only.
-   - A re-run, "another", or later an edit creates a **new** generation with `parent_id` set.
-   - Files are never overwritten: paths include the generation id.
-   - Only status columns may be updated, e.g. `animation_status` when `animate` runs later.
-3. **Natural language is never an identifier.** IDs are `G###` and `G###/S#`, allocated by Postgres.
-4. **The engine doesn't change.** Persistence is an adapter that consumes `StickerResult` / `result.json`. The boundary test gains `psycopg`: the engine must not import it.
-5. **Store versions for reproducibility:** `engine_version` and the manifest as used. Phase 3 adds model and seed.
-6. **Decisions are append-only rows.** Every Python block or pass, human approve or reject, and (from Phase 3) VLM verdict is one `reviews` row. The sticker's `still_review` / `anim_review` columns only mirror the latest row; they are status columns in the sense of principle 2. A sticker's history is a query, never a stored blob.
-7. **Postgres is the search surface.** Anything Haitham can see in the console can be found with `mirsal search` or the Library search box: prompt, task, key, tags, emoji, status, gate decision, generation, date.
-8. **The gate rules stay in Python** (Phase 1's `pipeline.py`). The repo stores decisions; it does not decide. This is what lets Phase 4's LangGraph `interrupt()` take over the *waiting* without moving the rules.
+### Decisions (Haitham, 2026-10-01)
+1. **Order:** generation (this phase) before Postgres (Phase 3).
+2. **Live provider: Higgsfield through its MCP connector**, which Haitham has already authorised in claude.ai. An MCP connector is a tool of a Claude Code session, not an HTTP API that the Mirsal server can call, so the generation is done by an **operator**: a Claude Code session with the Higgsfield tools that fulfils **jobs** Mirsal writes. Mirsal never holds Higgsfield credentials. A plain HTTP provider (WaveSpeed, Higgsfield REST) stays possible later behind the same job interface; production (Phase 5) will need one, because an MCP operator is a development tool.
+3. **Nothing raw goes to the video model.** The video is made from the normalised video sheet (Part 3). The prepared Higgsfield samples in `Phase_01` stay as they are.
+4. Telegram needs no change here (images and video are proven).
 
----
+### What exists already (do not rebuild)
+- **Engine:** key → slice → scale → outline → validators; `verify.py` (44 checks); `build_video_sheet()` + layout slicing; `inside_frame` / `inside_slot` / `cross_slot`; `recheck_bounds`; the animation cache; `python -m mirsal profile`.
+- **Prompts:** `prompter.py` (deterministic slot filler, `render_plan`, `validate_plan`), the saved templates (`prompts/templates/*_v1.txt`), tags 1-5, the margin clause.
+- **Tickets:** `tasks.py` / `out/tasks/NNN.json` (reserved names, `request`, `provider`, `external_task_id`), `POST /api/plan`, `POST /api/tasks`, `POST /api/generations {task}`, the video upload `POST /api/generations/<id>/video_sheet/<A>/video`.
+- **UI:** Generate as five views, the Pack wizard, one-click Send to Telegram, History for the prepared samples.
 
-## Where things live
+### Build order (each step ends with something Haitham can see; stop at each gate)
+| Step | What | Done when |
+|---|---|---|
+| **S0** | **Discover the Higgsfield MCP** in a Claude Code session (`/mcp`; the tools only appear once the connector is authorised in *that* session). List its tools, models, parameters, limits and credit cost; make **one test image and one test video**; write `Phase_02/higgsfield_mcp.md`. | Haitham sees the two test outputs and the doc names the tools, whether a job id is returned, whether a last frame / loop is supported, output size and format, and the cost per call. |
+| **S1** | **Prompt lab, offline:** `mirsal prompt "<request>" [--mode single] [--grid 2x2]` prints locks, 9 concepts, the sheet / single / video prompts from the saved templates, lint verdicts. Deterministic filler first (`prompter.expand`); the LLM filler plugs in at S5. | `prompt` runs for English, Arabic and Arabizi requests and Haitham approves the text against `prompt_samples.md`. |
+| **S2** | **Jobs:** `mirsal/jobs.py` + `POST/GET /api/jobs`, `mirsal jobs`, `mirsal job show|claim|done|fail`; a Generate-page path "No prepared sheet: generate it" that creates a sheet job and shows "waiting for the generator" (elapsed time). Tests with a fake operator. | A job created in the UI is visible with `mirsal jobs`; a fake operator completes it and the batch appears. |
+| **S3** | **First real sheet:** write `docs/operator.md`; Haitham runs one Claude Code session ("run the pending Mirsal jobs") that claims the job, calls Higgsfield, downloads the sheet, and `job done`s it. The sheet goes through the unchanged stills run and G2. | A real generated teddy-bear sheet reaches the Stickers view and its stills pass `inside_cell`. |
+| **S4** | **Normalised video:** the video job is built from `build_video_sheet()` (one scale, margins) after G3; the operator animates it; the returned video is attached by ticket and sliced; `inside_slot` / `cross_slot` / `inside_frame` judge it; `python -m mirsal measure-cells` reports the share of cells flagged. | A real generated video is sliced; the flagged share is measured and recorded; `slot_fill` is tuned until it is near zero or the per-sticker fallback is chosen. |
+| **S5** | **LLM slot filler: pulled forward into Phase 1 (2026-10-01) and built** (`mirsal/expander.py`, `mirsal/llm.py`, `POST /api/plan {ai: true}`): lint + one repair round + the built-in sets as fallback; the template still builds every prompt. What is left here: Haitham's `ANTHROPIC_API_KEY` in `mirsal/.env`, the small **slot reviewer** (a cheap second model answering `{ok, problems[]}`), and running the 20-prompt lab through it. The alternative the plan allowed (the operator writes the slot JSON, Python lints it) still works through the same lint. | 20 prompts from the prompt lab pass lint; Haitham rates them. |
+| **S6** | **Vision judge** (Part 2) + the bounded regeneration rules; every call appended to `out/model_calls.jsonl`. | The judge agrees with Haitham on at least 80% of 30 labelled stickers. |
+| **S7** | **Quality work** (Part 4): sheet vs single, outline A/B, measurements in `docs/phase2_measurements.md`. | Exit below. |
 
-```
-mirsal/
-  docker-compose.yml          # pgvector/pgvector:pg16 (plain Postgres 16 + pgvector, used from Phase 3B), container mirsal-db, host port 5434
-  migrations/001_init.sql     # plain SQL, applied in order by `mirsal db migrate`
-  mirsal/store/
-    db.py                     # psycopg 3 connection (DATABASE_URL from .env)
-    repo.py                   # save_generation(), get_generation(), list_generations(), add_asset(), set_animation_status(),
-                              # add_review(), history(sticker_id), save_video_sheet(), search(query, filters)
-    assets.py                 # AssetStore interface + LocalAssetStore (disk). S3-compatible store is a later swap.
-```
+### What Haitham provides
+- Keeps the Higgsfield connector authorised in the operator session; a daily credit budget for tests (the operator stops at it).
+- One decision at S5: Anthropic API key for the filler and the judge, or agent-written slots and an agent judge.
+- 30 sticker labels for S6, a rating for the first live sheets.
 
-**Port 5434:** 5433 is already taken by the workspace's `temporal_note-db`. `mirsal doctor` (introduced in Phase 1, extended here) checks the port with a Python socket, which works on Windows, macOS and Linux (no `lsof`).
-
-**Restricted network:** the dev PC has poor internet. Load the `pgvector/pgvector:pg16` image from a tarball (`docker save` on a connected machine, `docker load` here), and vendor the `psycopg[binary]` wheel next to the Phase 1 wheels (see README "library policy"). If Docker itself is unavailable, the repo layer must stay behind `repo.py` so a plain local Postgres install works with the same `DATABASE_URL`.
-
----
-
-## The Phase 1 library migrates here
-
-Phase 1 (Part D) stores packs in `out/library/library.json` (`packs[] -> stickers[]`: id, name, slug, cover, next counter, sticker file/type/emoji/kb/w/h/source, created). Model it as `packs` and `pack_stickers` (ordered by position, `emoji text[]` for Telegram's multi-tag rule, `source jsonb` = `{generation, index}` or `{editor: true}`), keep the same file naming `<img|vid>-<NNN>-<pack_slug>-<sticker_slug>`, and import the JSON once. The `Library` class becomes a repository with the same method names so the console keeps working unchanged.
-
-## The hard truth: request → external task id → database → search (Haitham, 2026-10-01)
-
-This is the one flow every phase must keep true:
-
-```
-user asks ("teddy bear")  ─►  external API returns a task id  ─►  Postgres stores {id, name_key}  ─►  dev lookup + key / semantic search
-```
-
-- **The external task id is the join key** between Mirsal and the provider. It is never derived from a filename. Phase 3's providers return it (WaveSpeed task id, OpenAI response id). Until then, the **prepared** inputs stand in for it: `provider = 'prepared'`, `external_task_id = 'img-001-teddy_bear'` (the watch-folder name, which is final and never renamed).
-- **`name_key`** is the human-readable, searchable key:
-  - for a task it is the plan's `task_slug` (`teddy_bear_school`);
-  - for a sticker it is its `key` (`teddy_bear_with_a_book`, = `tags[0]`).
-  Every file stem is built from them (`<media>-<NNN>-<task_slug>-<key>`), so a filename, a DB row and a search hit all say the same thing.
-- **Dev use:** `mirsal task <external_task_id>` and `mirsal task --key teddy_bear_school` print the task, its generation(s), the stickers, their files, and every verifier/human decision. The question "what happened to provider task X?" is answered in one command.
-- **Search use:** `search` matches `name_key`, key and tags exactly or by prefix first (fast, for dev and the UI), then full-text and trigram (Phase 2). Phase 3B adds vectors over the same rows (semantic). There is one query path; 3B extends it, it does not fork it.
-
-```sql
-CREATE TABLE tasks (
-  id               bigserial PRIMARY KEY,
-  provider         text NOT NULL,                  -- 'prepared' (Phases 1-2) | 'wavespeed' | 'openai' … (Phase 3)
-  external_task_id text NOT NULL,                  -- the provider's task id; for prepared inputs the watch-folder name
-  kind             text NOT NULL CHECK (kind IN ('sheet','video','single')),   -- single = 1x1 regen of one sticker
-  name_key         text NOT NULL,                  -- task_slug, e.g. 'teddy_bear_school'
-  generation_id    text REFERENCES generations(id),
-  video_sheet_id   text REFERENCES video_sheets(id),   -- set for kind = 'video'
-  status           text NOT NULL,                  -- REQUESTED | RUNNING | DONE | FAILED | TIMEOUT
-  request          jsonb NOT NULL,                 -- what was sent: template id + slot JSON, grid, model, seed
-  result_ref       jsonb,                          -- what came back: object key(s), sha256, provider metadata
-  created_at       timestamptz NOT NULL DEFAULT now(),
-  completed_at     timestamptz,
-  UNIQUE (provider, external_task_id)              -- one row per provider task; re-delivery is idempotent
-);
-CREATE INDEX ON tasks (name_key);
-CREATE INDEX ON stickers (key text_pattern_ops);   -- prefix search on name keys ('teddy_bear_%')
-```
-
-- `video_sheets.ticket` (below) becomes a reference to `tasks.external_task_id` (kind `video`). There is one place for provider ids.
-- **Migration order:** `tasks` references `generations` and `video_sheets`, so `001_init.sql` creates it after both.
-- **1G's manual tasks** (`out/tasks/<NNN>.json`, `provider = 'higgsfield-manual'`, `external_task_id` = the reserved folder name) import as `tasks` rows unchanged.
-- `db import` creates one `prepared` task row per imported generation (sheet) and one per video used.
-- **Tests:**
-  - importing the same prepared folder twice gives one task row;
-  - `mirsal task img-001-teddy_bear` lists every generation made from it;
-  - `search teddy_bear_with` (prefix) returns that sticker before any full-text hit.
-
-## Schema (`001_init.sql`)
-
-```sql
-CREATE SEQUENCE generation_seq;
-
--- IMMUTABLE helpers for the stickers.search_doc generated column
-CREATE FUNCTION array_to_text(text[]) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT array_to_string($1, ' ') $$;
-CREATE FUNCTION mirsal_words(text)    RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT replace($1, '_', ' ') $$;
-
-CREATE TABLE generations (
-  id            text PRIMARY KEY,                 -- 'G004' (from generation_seq, zero-padded ≥3)
-  parent_id     text REFERENCES generations(id),  -- 'another' / later edits / a 1x1 regen
-  grid          int[] NOT NULL DEFAULT '{3,3}',   -- {rows,cols}: {3,3} | {2,2} | {1,1} (1F)
-  regen_of      text,                             -- 'G004/S5' when this generation is a single-sticker 1x1 regen
-  verify_version text NOT NULL,                   -- the verifier rule set that judged it (1F VERIFY_VERSION)
-  prompt        text NOT NULL,                    -- exactly what the user typed
-  subject       text NOT NULL,
-  source        text NOT NULL,                    -- 'prepared' now (was 'fixture'); 'model' in Phase 3
-  source_ref    jsonb NOT NULL,                   -- {"subject":"teddy_bear","subject_id":"001","variant":2,"sheet":"img-001-teddy_bear (5).jpg","video":"vid-001-teddy_bear (2).mp4"}
-  task          text NOT NULL,                    -- prompter output: 'teddy yellow bear for school'
-  task_slug     text NOT NULL,                    -- 'teddy_bear_school' (file-name middle)
-  sheet_prompt  text,
-  video_prompt  text,
-  plan          jsonb NOT NULL,                   -- prompts.json as used (guidelines + 9 stickers). Replaces the old manifest column.
-  engine_version text NOT NULL,
-  status        text NOT NULL,                    -- READY | PARTIAL | FAILED
-  created_at    timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE stickers (
-  id               text PRIMARY KEY,              -- 'G004/S3'
-  generation_id    text NOT NULL REFERENCES generations(id),
-  idx              int  NOT NULL,                 -- 1..rows*cols, row-major
-  name             text NOT NULL,                 -- file stem: 'img-004-teddy_bear_school-teddy_bear_with_a_book'
-  key              text NOT NULL,                 -- searchable action name: 'teddy_bear_with_a_book' (Phase 3B pool key)
-  inherited_from   text REFERENCES stickers(id),  -- moved here from Phase 4: a 1x1 regen generation inherits its other stickers
-  tags             text[] NOT NULL,               -- 1..5 from the plan (1F); tags[1] = key
-  concept          text,                          -- filled by the Phase 3 planner; NULL for Phase 1 prompts
-  prompt           text NOT NULL,
-  emoji            text[] NOT NULL,
-  status           text NOT NULL,                 -- READY | FAILED (superset enum in models.py)
-  reason           text,
-  report           jsonb NOT NULL,                -- validator checks
-  metrics          jsonb NOT NULL,                -- bbox, scale, spill count, timings
-  animation_status text NOT NULL DEFAULT 'NOT_REQUESTED',
-  animation_reason text,
-  still_review     text NOT NULL DEFAULT 'PENDING',  -- mirror of the latest G2 row in reviews: PENDING | APPROVED | REJECTED | BLOCKED
-  anim_review      text NOT NULL DEFAULT 'PENDING',  -- mirror of the latest G4 row (BLOCKED = Python, e.g. inside_slot)
-  video_sheet_id   text,                          -- the A<n> it was animated from (FK added below)
-  search_doc       tsvector GENERATED ALWAYS AS (  -- mirsal_words() must exist first: array_to_string is only STABLE,
-                     to_tsvector('simple',        -- and Postgres refuses non-IMMUTABLE generated columns
-                       coalesce(prompt,'') || ' ' || mirsal_words(key) || ' ' || mirsal_words(array_to_text(tags)))) STORED,
-  UNIQUE (generation_id, idx)
-);
-
-CREATE TABLE assets (
-  id            bigserial PRIMARY KEY,
-  generation_id text NOT NULL REFERENCES generations(id),
-  sticker_id    text REFERENCES stickers(id),     -- NULL for SOURCE_SHEET / SOURCE_VIDEO
-  kind          text NOT NULL CHECK (kind IN ('SOURCE_SHEET','SOURCE_VIDEO','KEYED_SHEET','PROMPTS','PNG','WEBP','WEBM',
-                                              'VIDEO_SHEET','VIDEO_LAYOUT','RETURNED_VIDEO')),
-  video_sheet_id text,                            -- set for VIDEO_SHEET / VIDEO_LAYOUT / RETURNED_VIDEO
-  object_key    text NOT NULL,                    -- relative key under the asset root
-  sha256        text NOT NULL,
-  mime          text NOT NULL,
-  bytes         int  NOT NULL,
-  width         int, height int, fps real, duration real,
-  created_at    timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE INDEX ON stickers (concept);
-CREATE INDEX ON generations (parent_id);
-
--- 1F: the video sheet built from the approved stills (G3), and the video that came back for it
-CREATE TABLE video_sheets (
-  id            text PRIMARY KEY,                 -- 'G004/A1'
-  generation_id text NOT NULL REFERENCES generations(id),
-  attempt       int  NOT NULL,                    -- A1, A2 … (a new sheet after a changed G2 decision is a new attempt)
-  slots         int[] NOT NULL,                   -- sticker idx placed on the sheet, e.g. {1,2,3,4,7,8,9}
-  layout        jsonb NOT NULL,                   -- layout.json as written (canvas, key_rgb, grid, slot rects, scale)
-  status        text NOT NULL,                    -- BUILT | APPROVED | REJECTED | VIDEO_RETURNED | SLICED
-  ticket        text,                             -- Phase 3: provider task id; NULL for a manual upload
-  created_at    timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (generation_id, attempt)
-);
-ALTER TABLE stickers ADD FOREIGN KEY (video_sheet_id) REFERENCES video_sheets(id);
-ALTER TABLE assets   ADD FOREIGN KEY (video_sheet_id) REFERENCES video_sheets(id);
-
--- every decision at every gate, by every actor; append-only
-CREATE TABLE reviews (
-  id             bigserial PRIMARY KEY,
-  generation_id  text NOT NULL REFERENCES generations(id),
-  sticker_id     text REFERENCES stickers(id),      -- NULL for whole-generation gates (plan, video_sheet, pack)
-  video_sheet_id text REFERENCES video_sheets(id),  -- set for G3 and for G4 rows
-  gate           text NOT NULL CHECK (gate IN ('plan','still','video_sheet','anim','pack')),
-  actor          text NOT NULL CHECK (actor IN ('python','human','vlm')),   -- 'vlm' from Phase 3
-  decision       text NOT NULL CHECK (decision IN ('PASS','BLOCK','APPROVE','REJECT')),
-  reason         text,                              -- python: the check name (no_spill, inside_slot …); human: free note
-  detail         jsonb,                             -- e.g. {"frame": 41, "over_px": 6}
-  user_id        text NOT NULL DEFAULT 'local',     -- Phase 5 adds real users
-  ts             timestamptz NOT NULL,
-  UNIQUE (generation_id, sticker_id, gate, actor, ts)  -- makes `db import` idempotent
-);
-CREATE INDEX ON reviews (sticker_id, ts);
-
--- search (principle 7). pg_trgm ships in the pgvector image's contrib.
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE INDEX ON stickers USING gin (search_doc);
-CREATE INDEX ON stickers USING gin (tags);
-CREATE INDEX ON stickers USING gin (key gin_trgm_ops);    -- typo-tolerant fallback ("tedy bok")
-CREATE INDEX ON generations USING gin (prompt gin_trgm_ops);
-```
-
-**Why `'simple'` and not `'english'`:** keys and tags are already normalized slugs, and the `english` stemmer would merge words Phase 3B must keep apart. Arabic keywords arrive in Phase 3 (`keywords` jsonb); they get their own `simple` vector then.
-
-**Search (`repo.search`, `mirsal search`, `GET /api/search?q=` for the console's Library box):**
-1. Full-text match on `search_doc` (prompt, key and tags), ranked with `ts_rank`.
-2. Exact tag match boosts the rank.
-3. If nothing is found, fall back to trigram similarity on `key` and `generations.prompt`.
-4. Filters: `--approved` (`still_review = 'APPROVED'`), `--animated` (`anim_review = 'APPROVED'`), `--gate-rejected`, `--generation G004`, `--since`.
-5. Every hit shows its id, key, emoji, both review states and its file.
-6. The query and the hit ids are written to `search_log`:
-
-   ```sql
-   CREATE TABLE search_log (id bigserial PRIMARY KEY, query text NOT NULL, filters jsonb NOT NULL DEFAULT '{}',
-                            hit_ids text[] NOT NULL, latency_ms int, created_at timestamptz NOT NULL DEFAULT now());
-   ```
-
-   Phase 3B `ALTER`s it (adds `parsed`, `gap_generated`). It does not create it again. The Phase 2 lexical search is the latency baseline that 3B's hybrid search reports against.
-
-**History (`repo.history(sticker_id)`, `mirsal history G004/S5`):**
-- Returns the `reviews` rows plus the `generation_events` rows for that sticker, in time order.
-- This is exactly the path shown in the console's carousel.
-
-**Lifecycle events** (Phase 1 writes them; persist them, they are the audit trail and what Phase 5's SSE replays):
-
-```sql
-CREATE TABLE generation_events (
-  id            bigserial PRIMARY KEY,
-  generation_id text NOT NULL REFERENCES generations(id),
-  ts            timestamptz NOT NULL,
-  stage         text NOT NULL,     -- requested | plan_reviewed | sheet_picked | keyed | sliced | stills_reviewed | video_sheet_built
-                                   -- | video_sheet_reviewed | video_requested | video_returned | video_picked | video_sliced | video_cell
-                                   -- | anim_reviewed | pack_final   (1F added the review and video-sheet stages)
-  status        text NOT NULL,     -- start | done | error
-  ms            int,
-  detail        jsonb,
-  actor         text,              -- python | human | vlm (1F); NULL for plain engine steps
-  UNIQUE (generation_id, ts, stage, status)      -- makes `db import` idempotent
-);
-```
-
-**Object keys** follow `G004/slices/img-004-teddy_bear_school-teddy_bear_with_a_book.png` (or `.webp` if the PNG exceeded 512 KB), `G004/slices/vid-004-teddy_bear_school-teddy_bear_with_a_book.webm`, `G004/source/sheet.jpg`, `G004/source/keyed.png` and `G004/prompts.json`. They are relative to `ASSET_ROOT` (default `mirsal/out/`), so the resolved paths are exactly Phase 1's `out/G004/...`. `generations.parent_id` comes from `result.json`'s `parent`.
-
-**Status rule:** a generation is `READY` if all its stickers are READY (9 for a sheet; 1 or more for Phase 3C/3D photo and text stickers), `PARTIAL` if some are, and `FAILED` if none. A partial pack is a valid pack. The gate result is separate from this status: the **final pack** is the stickers with `still_review = 'APPROVED'` and, if animated, `anim_review = 'APPROVED'`.
+### Rules for the operator session
+Follow `docs/operator.md`: claim before calling Higgsfield (the ticket is stored first), one job at a time, stop on any error and `job fail` with the reason, never retry a paid call more than the plan says, never open or judge media (Python and the human judge), never write inside `Phase_01/Images_gen|videos_gen`.
 
 ---
 
+## Part 1 — Prompt engine
 
-## Build steps
+### Template-locked prompts (Haitham, 2026-10-01: this overrides "the planner writes the prompt" below)
 
-1. Write `docker-compose.yml` and `.env.example` (`DATABASE_URL`, `ASSET_ROOT`).
-2. Add `mirsal db up | migrate | reset` (reset is dev only and asks for confirmation).
-3. Write `repo.py`. `save_generation(result)` is **one transaction**: the generation row, 9 sticker rows and all asset rows. The run's status becomes visible only after the commit.
-4. `create` / `another` / `animate` **and the 1F gate routes** (`review`, `video_sheet`, the returned-video upload) write through the repo. A gate decision is one transaction: the `reviews` row, the mirrored `still_review`/`anim_review` and the event. Keep writing `result.json` too, as a portable export.
-5. Add `list`, `show <id>`, `history <G###/S#>` and `search "<text>" [filters]`. Switch the console's Library search box to `GET /api/search` when the database is up, and keep the `library.json` search when it is not (doctor says which one is active).
-6. `mirsal db import out/` backfills `out/tasks/*.json` (1G) as `tasks` rows, then Phase 1 runs from `result.json` (including `parent`, `tags`, per-sticker `history` → `reviews` rows, and `video_sheets` with their `layout.json`), `prompts.json` and `events.jsonl`. It is idempotent: re-running it skips generations, events and reviews already present. Results written before 1F have no `tags` (use `[key]`) and no `history`: import their Python verdicts as `actor = 'python'` PASS/BLOCK rows from `status`/`reason`, and leave the human gates `PENDING`.
-7. **Ingest (moved here from Phase 1):** `mirsal ingest <file> --task <subject> [--kind img|vid]` copies a raw download into `Images_gen/`/`videos_gen/` as the next `{task}-##`, records it as a `SOURCE_SHEET`/`SOURCE_VIDEO` asset with its sha256, and keeps image and video linked by the same `##`. Manual sandbox files stay valid; the app never renames anything in a watch folder without this explicit command.
+**The master prompt is a saved file, picked by grid, never rewritten.** The LLM only fills a **small JSON** whose fields plug into named slots. Prompt quality is iterated later by editing and versioning the templates and the slot rules, not by letting a model rewrite the whole prompt each time.
+
+```
+request ─► SLOT FILLER (LLM, tiny JSON) ─► SLOT REVIEWER (small model + code lint) ─► template[grid] + slots (code) ─► final prompt
+```
+
+**Templates** live in `mirsal/prompts/templates/`, are versioned, and are chosen by grid:
+- `sheet_3x3_v1.txt` and `sheet_2x2_v1.txt` (the user's choice; 3×3 is the default);
+- `single_1x1_v1.txt`, used to regenerate **one** sticker: the user picks a sticker and asks for a regen, and only that sticker is handled, as a 1×1 sheet through the same engine;
+- `video_v1.txt`.
+
+The stored prompt record is `{template_id, template_version, slots}`, never a free-text blob. "Update the prompt" therefore means swapping slot values. The final string is always rebuilt from the template, so two generations differ exactly by their slot diff.
+
+**Template shape** (sheet; `{…}` are slots, everything else is fixed text):
+
+```
+Create a sticker sheet pack of {subject_description}.
+STYLE: {style}
+LAYOUT: {cols}×{rows} grid, {n} separate stickers of the same character, wide even gaps between cells, generous outer margin,
+every character fully inside its own cell with empty space on every side, no character touching or crossing its cell edge, no interaction between cells.
+CELLS:
+{cells}                         ← one line each: "1.1: happy", "1.2: laughing", "1.3: envy", "2.1: thumbs up", …
+BACKGROUND: solid flat pure chroma-key {key_colour} (#00FF00 | #0000FF), no texture, no gradient, no floor, no shadow on the background.
+RULES: same character, proportions, materials and lighting in every cell; full body, centred; no text, no logos, no borders, no dividers.
+```
+
+**Slot JSON** (the only thing the LLM writes; strict schema):
+
+```json
+{ "subject_description": "a cute yellow teddy bear with a round head, small rounded ears and a button nose",
+  "style_id": "ios3d_backlit", "style_extra": "",
+  "mode": "subject | subject_action",
+  "cells": [ {"pos": "1.1", "label": "happy", "tags": ["teddy_bear_happy", "happy", "smile"], "emoji": ["😄"]} ],
+  "action_guidance": null,
+  "key_colour": "green" }
+```
+
+**Two request shapes:**
+- **Specific subject** ("teddy bear"), `mode: subject`: each cell gets a **high-level label only** (`1.1: happy, 1.2: laughing, 1.3: envy, 1.4: thumbs up …`). The image model fills in the pose.
+- **Subject doing something** ("teddy bear playing football"), `mode: subject_action`: the labels become short action lines ("1.1: kicking the ball, ball fully inside the cell"). `action_guidance` adds one shared sentence that guides the image model a little more (props, framing). Labels stay short; this is guidance, not a rewritten prompt.
+
+**Slot reviewer:**
+- **Code lint first:**
+  - schema;
+  - exactly `rows×cols` cells, with positions `r.c` in order;
+  - unique labels;
+  - 1–5 tags with `tags[0]` the key, and ≥1 emoji;
+  - the green-word rule → `key_colour`;
+  - banned words.
+- **Then a small model** (`claude-haiku-4-5-20251001`, configurable) answers `{ok, problems[]}`: are the labels distinct and animatable? Does `subject_description` match the request without adding to it? Does `style_id` fit the words the user gave?
+- One repair round is allowed, then the result fails cleanly.
+- The reviewer never edits the template and never writes prose into it.
+
+**Style presets** (`mirsal/prompts/styles.yaml`; the `{style}` slot is the preset text, plus `style_extra` when the user adds words; enhanced 2026-10-01):
+
+| id | text dropped into `{style}` |
+|---|---|
+| `ios3d_backlit` (default) | premium iOS-style 3D emoji pack, soft rim backlight and gentle glow around the silhouette, cute oversized features, rounded edges everywhere, glossy vinyl material with subtle subsurface warmth, smooth gradients, soft studio key light, clean readable shapes at small size |
+| `genmoji` | Apple-Genmoji-like glossy 3D, chubby rounded proportions, big expressive eyes, polished plastic-candy finish, soft ambient occlusion, bright friendly colours |
+| `toon_cel` | flat toon cel shading, bold clean vector outlines, two-tone shadows, saturated flat colours, crisp graphic shapes, no texture noise |
+| `pixar_cinematic` | cinematic 3D character render, creamy key light, warm rim glow, soft depth, appealing squash-and-stretch proportions, film-quality materials |
+| `chibi_kawaii` | kawaii chibi, big head small body, marshmallow-soft shapes, pastel candy gloss, sparkle highlights in the eyes, blush cheeks |
+| `clay_3d` | smooth matte clay / plasticine 3D, rounded chunky forms, soft warm shadows, slightly imperfect handmade toy feel |
+| `sticker_flat` | classic flat vector sticker, thick uniform outline, solid fills, minimal shading, high contrast, instantly readable |
+| `yellow_face` | premium glossy round yellow emoji face, identical face construction in every cell, polished 3D finish, soft studio lighting |
+
+- Style names never appear in published metadata (the trademark rule in Lint).
+- New styles are rows in this file, A/B tested in the prompt lab. Code never changes for a new style.
+
+**What the rest of Part 1 becomes:**
+- The planner below is the **slot filler**. `character_lock` → `subject_description`, `style_lock` → `style_id` + `style_extra`, and `cells[].action` → `cells[].label`.
+- The "Assemble" templates below are the first versions of the template files.
+- The Lint section is the slot reviewer's code half.
+- `extraction`, the content rules and the few-shot examples stay as they are.
+
+**Phase 1 adopts the shape now** (checkpoint 1F): `prompter.expand` fills the same slot JSON deterministically and renders the same template files, so Phase 2 swaps only the filler. **Built 2026-10-01:** `mirsal/prompts/templates/{sheet_3x3,sheet_2x2,single_1x1,video}_v1.txt`, `prompter.render_plan(slots, template_id, version)` (the one function that turns slots into prompts) and `validate_plan`, which rebuilds the sheet and video prompts from `{template_id, template_version, slots}`. Per-cell `tags` (1-5, `tags[0]` = key) and the margin clause are in place; the Phase 2 lint checks the assembled text for the clause. The Inbox (`tasks.py`) already stores `request = {template_id, template_version, slots, grid}` on `out/tasks/NNN.json`.
+
+### Original design (kept until the gate; superseded where the template note above differs)
+
+```
+request ─► PLANNER (one LLM call, strict JSON) ─► lint (code) ─► ASSEMBLE (code) ─► sheet prompt  (mode: sheet, default)
+                                                                              └─► 9 single prompts (mode: single)
+```
+
+### Planner output (the structured plan)
+
+```json
+{
+  "task": "yellow teddy bear in toon cel shade + iOS 3D genmoji", "task_slug": "teddy_bear_toon",
+  "extraction": { "subject": "yellow teddy bear", "attributes": [], "style_words": "toon cel shade + iOS 3D genmoji",
+                  "occasion": null, "tone": "playful", "constraints": [] },
+  "character_lock": "a cute yellow teddy bear: round head, small rounded ears, button nose, big glossy dark eyes, soft plush fur texture, chubby short limbs",
+  "style_lock": "premium iOS-3D Genmoji-style sticker with toon cel shading: rounded forms, bold clean outlines, two-tone cel shading, glossy subtle highlights, soft cinematic key light, appealing proportions, readable at small size",
+  "cells": [
+    { "index": 1, "name": "Big Hug", "key": "teddy_bear_big_hug", "tags": ["teddy_bear_big_hug", "hug", "love"],
+      "concept": "HUG", "emoji": ["🤗"],
+      "action": "arms wide open going in for a huge hug, eyes squeezed shut with joy",
+      "motion": "arms open and close in a squeeze", "key_color_risk": false,
+      "keywords": { "en": ["hug", "love", "teddy"], "ar": ["حضن", "حب"] } }
+  ],
+  "key_color": "green"
+}
+```
+
+**Planner system prompt (`mirsal/prompts/planner_v1.md`)** is built from Haitham's teddy-bear meta-prompt (`Phase_02/prompt_samples.md`), with these changes:
+- **Output** is the JSON above, not markdown. Pixel and background wording is removed from the planner's job.
+- **Character lock:** one identical character across all cells: proportions, head, face, eyes, colours, materials, accessories, lighting, camera.
+- **Style lock:** translate *whatever* style words the user gives into concrete visual properties (rendering, materials, finish, lighting, proportions, colour, shape language, polish). **Blends are allowed**, e.g. "toon cel shade + iOS 3D genmoji". With no style words, the planner copies the default preset text verbatim.
+- **Variety:** nine completely different actions or reactions, mixing comedy, extreme reactions, emotions, physical actions, celebrations, failures, surprises, cute moments, dramatic poses, absurd situations and useful chat reactions. No two cells share a pose; a slightly changed mouth is not a new pose.
+- **Sticker composition:** one character, full body, centered, clear silhouette, readable at emoji size, props only when they strengthen the concept. Prefer actions that animate clearly (bounce, wave, dance, jump, spin, laugh).
+- **Clean output:** no text, captions, speech bubbles, logos, watermarks, borders, frames, extra characters or scenery.
+- **Boundary:** creative inside the request and never changes it. `constraints` ("no dancing") are obeyed.
+- **UAE content rules** are ported from `proposals/Mirsal-chat-emojis/api/planner.py` into `mirsal/prompts/content_rules.md`:
+  - no flags, emblems or text;
+  - no real people, rulers, royals or religious figures;
+  - the falcon is always "a young brown saker falcon chick…";
+  - Emirati dress: kandura + ghutra + black agal, or abaya + shayla; never a red-and-white shemagh; no shoe soles;
+  - Commemoration Day is solemn: no confetti, candles or doves.
+- Input can be English, Arabic, Gulf dialect, Arabizi or mixed. The output is always English.
+- **Few-shot:** the 2–3 golden examples closest to the input, taken from `mirsal/prompts/examples/`, which is seeded from `Phase_02/prompt_samples.md`.
+
+**Model:** `claude-sonnet-5`, configurable. It uses a strict JSON schema, gets one repair attempt, and then fails cleanly.
+
+**`--no-llm`:** a fixed 9-concept list (Happy 😄, Laughing 😂, In love 😍, Surprised 😮, Sad 😢, Angry 😠, Sleeping 😴, Thumbs up 👍, Dancing 💃) plus the default preset, so the pipeline runs offline and in CI. This is Phase 1's `prompter.expand`, which already has context action sets (school, birthday, default); extend those sets rather than writing a second offline planner.
+
+### Style presets (`mirsal/prompts/styles.yaml`)
+
+These are anchors, used verbatim when the user names no style and as reference text when the planner translates style words. Seeds:
+- `genmoji` (the default): glossy Apple-Genmoji-style 3D, cute rounded proportions;
+- `ios3d`: iOS-Pixar glossy, vinyl sheen, subsurface warmth;
+- `toon`: flat toon cel-shaded, bold vector lines, two-tone shading;
+- `pixar`: cinematic 3D, creamy key light, warm rim glow;
+- `chibi`: kawaii chibi, marshmallow shapes, candy gloss;
+- `yellow_face`: the premium glossy yellow face character from the generic sample.
+
+A `--style <id>` flag forces a preset.
+
+### Lint (code; blocks a bad plan before any money is spent)
+
+- It has exactly `rows×cols` cells, unique `concept` and `name` values, and every cell has an action, a name and ≥1 emoji. Emoji are Telegram's required tags, max 20, and the **first one** drives Telegram's suggestions.
+- **Keywords:** each cell has English **and Arabic** search keywords. The Telegram limit is 0–20 keywords with ≤64 characters total, so trim to fit, English first.
+- `character_lock` and `style_lock` are non-empty.
+- `task_slug` and every `key` match `[a-z0-9_]+`, keys are unique, start with the subject slug and stay under 60 characters (they become file names on Windows too: no reserved names, path length checked).
+- **Tags (the 1F contract):** every cell has 1–5 `tags`, each `[a-z0-9_]+`, and `tags[0] == key`. Tags describe the *sliced output* (what the single sticker shows), not the sheet. They are English slugs and are separate from `keywords` (en + ar, Telegram search).
+- **Margin:** every single-mode prompt and the sheet prompt contain the margin clause. The lint checks the assembled text, so a template edit cannot silently drop it.
+- Banned words are absent: text, caption, logo, watermark, flag, "transparent background", "contact shadow", "drop shadow", and names from a real-person list.
+- **No trademarks in public metadata:** names and keywords may not contain Genmoji, Apple, Pixar, Disney or similar. They may appear inside generation prompts as style words, never in anything published to Telegram.
+- `key_color` follows the chroma rule: **blue** if the subject, a lock or any action matches the green-word list (green, leaf, plant, grass, palm, mint, lime, olive, emerald, cactus, tree, frog, watermelon, avocado…), or if any `key_color_risk` is set. Otherwise **green**.
+- The assembled prompt is under the model's length limit.
+
+### Assemble (code, deterministic templates, versioned)
+
+**Sheet mode** (the default; one image, from Haitham's generic-sheet structure):
+
+```
+Create a clean, high-quality sticker sheet of {N} different stickers of the same character, arranged in a perfectly aligned {cols}×{rows} grid.
+ASPECT RATIO: 1:1 square.
+CHARACTER (identical in every cell): {character_lock}
+STYLE: {style_lock}. All {N} stickers share the EXACT same character, visual style, proportions, lighting, material and size.
+GRID LAYOUT: {cols} columns × {rows} rows, evenly spaced, wide gaps between cells, generous outer margins, no overlapping; every character fully inside its own cell; no interaction between cells.
+BACKGROUND: solid pure {chroma-key green (#00FF00) | chroma-key blue (#0000FF)}, flat, no texture, no gradient, no floor, no shadow cast onto the background, no extra elements.
+{N} UNIQUE STICKERS:
+1. {name} — {action}
+…
+COMPOSITION: one character per cell, full body, centered, immediately recognizable and visually distinct, readable at small emoji size.
+No duplicate poses, no distorted faces, no missing or extra stickers, no text, no watermark, no border, no dividers.
+```
+
+**Single mode** (9 images, from Haitham's teddy-bear per-cell structure; also used to regenerate one rejected cell):
+
+```
+{character_lock}. {action}. {style_lock}. One character, full body, centered, clear silhouette, generous empty margin on every side (at least 20% of the frame), nothing touching or crossing the frame edge.
+Flat solid pure {key colour} chroma-key background, no floor, no shadow on the background, no text, no border.
+```
+
+**Video prompt:** `{per-cell motion}. Static camera, each character stays centered in its own cell, the background stays flat solid {key colour} with no shadows, glow or colour change, smooth looping motion that ends exactly where it starts, no text.`
+- When the provider supports a last frame (as the old POC's `ltx2.5-loop` did), pass **last frame = first frame** for a true seamless loop.
+- Phase 1's `loop_seam` crossfade stays as the safety net.
+
+**Outline:** the prompt does **not** ask for a die-cut outline by default; Python draws it (Phase 1). The A/B in Part 4 decides whether to switch to a model-drawn outline with `outline_px: 0`. Never both.
+
+**Grid:** 3×3 is the default. 4×4 is supported (the generic-emoji layout). Aspect ratio is 1:1 by default; 16:9 is allowed.
 
 ---
 
-## Tests
-- Use a throwaway database per test session (create/drop a temp DB on the same container).
-- Round trip: save → load a generation, and every field matches.
-- Immutability: `another` creates a new generation, and G001's rows and files are byte-identical before and after.
-- Lineage: G1 → G2 → G3 through `another`; walking `parent_id` from G3 returns G2, then G1.
-- Partial pack: the blank-cell synthetic sheet stores `PARTIAL` with S4 `FAILED(empty_subject)`.
-- Hash integrity: every asset's `sha256` matches its file.
-- Restart: `docker restart mirsal-db`, and `show` still returns everything.
-- Boundary: the engine does not import `psycopg`.
-- Events: importing the same `events.jsonl` twice adds no rows; event order per generation matches the file.
-- Names: `stickers.name` is unique per generation and matches the file on disk; `key` matches `prompts.json`.
-- Parent: `more` in Phase 1 wrote `parent`; import sets `parent_id` from it (G002 -> G001).
-- **Golden path round trip:** the 1F synthetic scenario (G2 rejects 5 and 6; `inside_slot` blocks 1 and 2; G4 approves the rest) stored, then reloaded:
-  - `history G00N/S5` ends with `still REJECT human`;
-  - `history G00N/S1` ends with `anim BLOCK python inside_slot`;
-  - the final-pack query returns exactly 3, 4, 7, 8, 9;
-  - `video_sheets.slots = {1,2,3,4,7,8,9}`.
-- **Append-only reviews:** changing a decision adds a row and never updates one; the mirror column follows the latest row; approving a `BLOCK`ed sticker is refused by the repo as well as by the pipeline.
-- **Search:**
-  - `search "teddy book"` finds the sticker whose tags hold `book`;
-  - `search "tedy bok"` finds it through the trigram fallback;
-  - `--approved` hides gate-rejected stickers;
-  - a key-only Phase 1 import is still findable.
+---
 
-## Exit
-- [ ] Every command above works; the tests pass.
-- [ ] `import out/` brings in every Phase 1 run, including 1F reviews and video sheets, with one `prepared` task row per sheet and video.
-- [ ] `mirsal task <external_task_id>` and prefix search on `name_key` / `key` work.
-- [ ] Haitham runs `list` / `show` / `history` / `search` after a restart and sees his history, with every approve/reject he made in the console.
+## Part 2 — Vision quality check
 
-## Explicitly deferred
-- Sessions, interactions, feedback, preferences → Phase 4. Chat feedback ("I like 2 but not 3") is different from a gate decision: when Phase 4 receives it at an open gate, it writes `reviews` rows too.
-- LangSmith tracing → Phase 3. LangGraph `interrupt()` at the gates → Phase 4. The gate rules and the `reviews` table do not change.
-- Model-call logging, seeds → Phase 3.
-- Pack curation tables (pack vs generation) → Phase 5.
-- **Redis → Phase 4** (event streams, job progress, locks, hot caches). Postgres stays the only durable store.
-- Vector search → Phase 3, checkpoint 3B (semantic sticker pool). The image already ships pgvector, so there is no container swap later.
+**Python first** (deterministic; its facts are final):
+- **These live in Phase 1's verifier now** (`engine/verify.py`, 1F catalogue): `background_flat`, `chroma_risk` (interior key colour, WARN at 3%), `holes`, `layout_match`, `inside_slot` / `cross_slot` and the rest. Phase 2 adds no second checker. It *acts* on their verdicts: `chroma_risk` / `holes` above threshold → blue re-key; `cut_clean` / `grid_detected` failures → sheet regeneration. The original text follows.
+- The Phase 1 validators, plus two new checks:
+  - `background_flat`: the key-colour variance across the gutters is low, i.e. the model really drew a flat key background.
+  - `chroma_risk`: the share of subject pixels whose hue is near the key colour but below the key threshold. These are subject colours the key could eat. Above ~3%, flag the sticker `CHROMA_RISK`.
+- **Grid detection: built in Phase 1 (1F) as `split_grid()`**, needed for 2×2 and for real sheets whose gutters are off-thirds. Phase 2 extends it to 16:9 and 4×4 if those return. Original note: `split_grid()` projects the background mask onto the x and y axes and cuts at the widest background bands near each expected line. Generated sheets have outer padding and uneven gaps (the generic sample is 16:9 with padding), so equal thirds would cut characters. Fixed equal division stays as the fallback, and for prepared sheets.
+
+**VLM second:**
+- `VisionJudge.judge_sticker(png, cell, pack_ctx) -> Judgement`, where `pack_ctx` holds `character_lock`, `style_lock` and a reference sticker (the first approved one) for consistency.
+- **Output:**
+
+  ```json
+  { "decision": "APPROVE|REJECT", "confidence": 0.0,
+    "concept_match": true, "emoji_fit": true, "character_match": true, "style_match": true,
+    "reasons": [] }
+  ```
+- **Reasons** come from a fixed list: DUPLICATE, WEAK_CONCEPT, AMBIGUOUS_ACTION, STYLE_DRIFT, IDENTITY_DRIFT, SEVERE_ARTIFACT, POOR_COMPOSITION, ANIMATION_RISK, CHROMA_RISK, MISSING_REQUIRED_ELEMENT, ANATOMY_ERROR, OBJECT_DEFORMATION, EMOJI_MISMATCH, UNWANTED_TEXT.
+- `emoji_fit` asks whether the assigned emoji describes the visible expression or action. If not, the VLM may suggest a better emoji. The suggestion is stored, and applied only if Haitham's config allows automatic emoji correction.
+- **Sheet check:** one call per sheet asks whether the count is right, whether the cells are isolated (no cross-cell interaction or touching), and whether any cell is missing or duplicated.
+
+**The division of labour is strict.** The VLM never overrides Python on dimensions, alpha or bounds, and Python never judges funny, cute or expressive.
+
+**Implementation:** use one OpenAI-compatible vision client (`VISION_BASE_URL`, `VISION_MODEL`, `VISION_TIMEOUT`, `VISION_MAX_TOKENS`, `VISION_CONCURRENCY`).
+- It targets **vLLM** serving a Qwen-VL model. The same client works against LM Studio or a hosted endpoint. A Claude-vision implementation sits behind the same `VisionJudge` interface.
+- **Hardware note:** vLLM needs an NVIDIA GPU; on a machine without one use LM Studio or Claude until a GPU box is available.
+- **Never trust `response_format` from a local model.** LM Studio was measured not enforcing JSON schemas on qwen3-4b in this workspace. Always parse, validate against the Pydantic schema, attempt one repair, and log the raw output when that fails.
+- **Policy if the VLM is down:** `FAIL_CLOSED` (the default: stickers stay `READY`, flagged "unjudged") or `DETERMINISTIC_ONLY`.
+
+**Where the VLM sits in the golden path (`Phase_01/README.md`, 1F):**
+- The VLM is a **pre-reviewer**, not the gate. Its verdict is a history line with `actor = 'vlm'` (a `reviews` row once Phase 3 imports it) at the same gate (`still` before G2, `anim` before G4).
+- The console shows it next to the tile ("VLM: REJECT · STYLE_DRIFT"), and the human still decides.
+- With `auto_approve_vlm = true` (off by default), a VLM APPROVE also sets `still_review`/`anim_review` and the human gate is skipped; it is recorded as such.
+- From Phase 3 every VLM verdict is also LangSmith feedback (key `vlm_still` / `vlm_anim`), so the judge calibration can compare VLM and human feedback on the same runs.
+
+**Decisions and recovery (all bounded):**
+- **Statuses:** `READY` (Python ok) → `JUDGING` → `APPROVED | REJECTED` (VLM), then the human G2. The automatic regenerations below act on VLM rejections only. A human REJECT at G2 regenerates only when the human asks ("Regenerate" on the tile), never on its own.
+- **More than 2 of 9 rejected, or the sheet check fails:** regenerate the whole sheet with a new seed, at most 3 sheet attempts. Keep the best as `PARTIAL`, or `FAILED` if 0 stickers are approved.
+- **1–2 rejected:** regenerate only those cells in **single mode**, passing the first approved sticker as a reference image when the provider supports it (for character consistency). At most 2 attempts per cell. Approved stickers are never touched.
+- **`CHROMA_RISK` on any cell:** regenerate the sheet once with the **other** key colour, and record `chroma_reason: "vision/pixel chroma risk"`.
+
+---
+
+## Part 3 — Generation (live, through Higgsfield MCP)
+
+### The job interface (the seam; any provider fits behind it)
+
+```python
+class ImageGenerator(Protocol):
+    def generate(self, prompt: str, aspect: str, seed: int | None, reference: bytes | None = None) -> GenOutput: ...
+class VideoGenerator(Protocol):
+    def animate(self, image_png: bytes, prompt: str, duration_s: float, seed: int | None) -> GenOutput: ...
+# GenOutput: bytes, provider, model, seed_used, latency_ms, cost | None, raw_meta
+```
+
+The Protocols stay for any HTTP provider later. For the Higgsfield MCP the implementation is an **`OperatorProvider`**: Mirsal writes a job file, the operator fulfils it with the MCP tools, Mirsal reads the result.
+
+```
+out/jobs/J001.json
+{ "id": "J001", "kind": "sheet" | "video" | "single",
+  "task": "001",                        // the out/tasks/NNN.json it belongs to (reserved names, template + slots)
+  "generation": "G084" | null,          // set for video jobs
+  "provider": "higgsfield-mcp", "model": null,          // the operator fills the model it used
+  "request": { "prompt": "...", "aspect": "1:1", "grid": [3,3], "key_colour": "green",
+               "input_image": "out/G084/video_sheet/A1/sheet.png" | null, "duration_s": 3, "last_frame_equals_first": true },
+  "status": "REQUESTED" | "CLAIMED" | "DONE" | "FAILED" | "TIMEOUT",
+  "external_task_id": null,             // the Higgsfield job id; set at CLAIM, BEFORE waiting (idempotent retry)
+  "result": { "file": "out/jobs/J001/result.png", "sha256": "...", "bytes": 0, "width": 0, "height": 0 } | null,
+  "cost": null, "error": null, "created_at": "...", "claimed_at": null, "completed_at": null }
+```
+
+- **Commands (the operator calls these through the shell):** `mirsal jobs [--status REQUESTED] [--json]`, `mirsal job show J001 --json` (everything needed to call Higgsfield), `mirsal job claim J001 --ticket <higgsfield id>`, `mirsal job done J001 --file <path> --model <name> [--cost <credits>]`, `mirsal job fail J001 --reason "..."`. The server exposes the same as `GET /api/jobs`, `GET /api/jobs/<id>`, `POST /api/jobs` (create), `POST /api/jobs/<id>/claim|done|fail`.
+- **`done` attaches the result:** a `sheet` job starts the stills run exactly as a prepared sheet does (`ModelSource.find()` returns the same `Pick` the engine already takes, so the engine cannot tell generated input from prepared input); a `video` job goes through the existing returned-video route (`inside_slot` / `cross_slot` / `inside_frame` judge it); a `single` job is the 1×1 regeneration of one sticker.
+- **Ticket first (the "hard truth" of `CLAUDE.md` rule 10, on the file store):** `claim` writes `external_task_id` before the operator waits. A crashed operator re-run finds the CLAIMED job and resumes by its ticket instead of paying twice. `out/tasks/NNN.json` gets the same `external_task_id`. Phase 3 imports both as `tasks` rows unchanged (`provider = 'higgsfield-mcp'`).
+- **Timeouts and cost:** a job older than `JOB_TIMEOUT` (default 20 min) shows `TIMEOUT` and can be re-queued by a human; the estimated credit cost is printed before a job is created and again at `done`; a daily cap (`MIRSAL_DAILY_CREDITS`) refuses new paid jobs.
+- **Reliability:** every call has a timeout and a max attempt count; transient errors retry at most 2 times, invalid input never; there is never a "while not good" loop; if the video provider is down, stickers still work.
+- **The page:** Generate shows "No prepared sheet for this request" with **Generate it** (creates the sheet job and the reserved names) and a waiting state with the elapsed time; History keeps listing the prepared samples. The `Phase_01` watch folders stay as test data; they are removed only when Haitham says so.
+
+### Sizes and margins are normalised before anything goes to the video model (Haitham, 2026-10-01)
+
+The prepared Higgsfield sheets and videos in `Phase_01` are pre-rendered and **not** normalised, and it shows: the border check finds characters leaving their cell in 3 of 9 teddy animations and 8 of 9 generic-emoji animations (G069), and 60 of the 88 generic-emoji animations made so far touch their cell edge. So the video job never takes the raw generated sheet. Its `input_image` is the output of `build_video_sheet()` (built in Phase 1): ONE scale for the whole sheet (the stickers keep their relative sizes), each subject centred and at most `slot_fill` of its slot (55% today), margin on every side, flat chroma, no outline, plus `layout.json`.
+- **`slot_fill` is the dial, tuned by measurement per provider.** `python -m mirsal measure-cells` reports, for a set of generations: the share of cells flagged by `inside_slot` / `inside_frame`, the cross-cell interaction rate (`cross_slot` blocks / slots) and `subject_px_in_video`. Target: nothing flagged. If tuning fails, the fallback is per-sticker animation (a 1×1 sheet and one call per sticker), chosen per provider.
+- The image prompt keeps its margin clause so the stills pass `inside_cell` first.
+- Slicing uses the layout's rectangles and the same Phase 1 gates.
+
+### The operator loop (what the Claude Code session does)
+
+1. `mirsal jobs --status REQUESTED --json`; take the oldest.
+2. `mirsal job show J001 --json`; check the cost against the daily budget.
+3. Call the Higgsfield tool for the job's kind with the prompt (and the input image for a video); **immediately** `mirsal job claim J001 --ticket <id>`.
+4. Poll the Higgsfield job until done or the timeout; download the result.
+5. `mirsal job done J001 --file <path> --model <name> --cost <credits>` (or `job fail`).
+6. Report one line per job. Repeat until none is waiting. The exact tool names and parameters come from S0 (`Phase_02/higgsfield_mcp.md`).
+
+### Engine changes allowed in this phase
+The two new Python checks of Part 2 if still missing, `split_grid()` extensions (16:9, 4×4), and the `slot_fill` setting. Existing engine functions stay unchanged, including `build_video_sheet()` and layout slicing.
+
+---
+
+## Part 4 — Quality work (the heart of the phase)
+
+1. **Prompt lab:** run `prompt` on 20 inputs, including Haitham's own ("yellow teddy bear in Pixar 3D iOS style", "yellow teddy bear in toon cel shade with ios 3d genmoji style", the generic 4×4 yellow faces), Arabic and Arabizi requests, a UAE occasion, a green subject, and a constraint. Haitham reviews them against `prompt_samples.md`, and the planner prompt is iterated (`planner_v2`, …), with every version kept.
+2. **Sheet vs single:** the same 5 requests in both modes. Compare character consistency (the VLM `character_match` rate plus Haitham's eye), pass rate and cost, and pick the default.
+3. **Outline A/B:** Python outline vs model die-cut outline, on 5 requests.
+4. **Judge calibration:** Haitham labels 30 stickers approve/reject. The VLM must agree on ≥80%, or `judge_v1` is tuned. Record agreement per reason.
+5. Everything is recorded in `docs/phase2_measurements.md`: pass rate, rating, cost, latency, judge agreement and decisions.
+
+## Tests (offline, no network)
+- **Fake planner:** the lint catches injected faults (8 cells, a duplicate concept, "transparent background", "contact shadow", a green subject on a green key, an empty style lock).
+- **Style handling:** a `--style` flag wins; no style words → the default preset verbatim; a blend passes through to `style_lock`.
+- **Golden assembly:** 5 fixed plans → exact sheet and single prompt strings, in 3×3 and 4×4.
+- **`split_grid()`:** golden tests on synthetic sheets with outer padding, uneven gutters, and 16:9 4×4.
+- **Fake VLM:** 1 rejection → single-cell regeneration only; 3 rejections → sheet regeneration; `CHROMA_RISK` → a blue-key rerun; VLM down → both policies; invalid JSON → repair, then fail with the raw output logged.
+- **Fake image/video generators** reuse the synthetic sheets and MP4; retry limits and timeouts hold.
+
+## Exit (Phase 2)
+- [ ] `prompt` produces locks + 9 concepts + sheet and single prompts for English, Arabic and Arabizi, and Haitham approves them against `prompt_samples.md`.
+- [ ] Measured: ≥80% of live `create` runs end with ≥7/9 **approved**; Haitham's average rating is ≥4/5.
+- [ ] The judge agrees with Haitham on ≥80% of 30 stickers.
+- [ ] The sheet-vs-single and outline decisions are made and recorded.
+- [ ] A real video made from the **normalised** video sheet is sliced; the flagged share (`measure-cells`) is recorded and `slot_fill` is chosen.
+- [ ] Haitham ran at least one full request live: type -> job -> Higgsfield sheet -> stills -> video job -> animations -> pack -> Telegram.
+- [ ] Every LLM, image, video and VLM call is a line in `out/model_calls.jsonl` with latency and cost.
+
 
 ## Hands to Phase 3
-- Stable IDs.
-- A transactional repo.
-- An `AssetStore` interface.
-- `generations.source` / `source_ref`, ready for `model`.
-- `generations.plan` has the prompter contract's shape, so the Phase 3 planner output drops in unchanged.
-- `generation_events`, which Phase 4 mirrors into Redis streams and Phase 5 replays over SSE.
-- `reviews`: the Phase 3 VLM writes its verdicts here as `actor = 'vlm'`, before the human gates.
-- `video_sheets` with a `ticket` column: Phase 3's video API attaches its task id there instead of the manual upload.
-- `search` + `search_log`: Phase 3B adds vectors and Arabic keywords to the same query path instead of creating a second one.
-- Clean seams for Phase 3's LangSmith tracing: `pipeline.Stage` (one span per stage) and the review route (one feedback per decision). Phase 3 adds `trace_run_id` to `generation_events` and `reviews`.
-
-## Notes from building 1F + 1G (2026-10-01): exact shapes to import
-
-Written after the Phase 1 build so the migration matches what is on disk (README, "The golden path" and "The Inbox"):
-- **`history[]` per sticker** is `{ts, stage, actor, decision, reason, ref, detail}` with `stage` in `sheet | sliced | still | video_sheet | video | anim | pack`, `actor` in `python | human` (`vlm` from Phase 3), `decision` in `PASS | BLOCK | APPROVE | REJECT`, `ref` = the video sheet id (`A1`) where one applies, and `detail` = the failing check as `{check, value, limit, note, data}` (for `inside_slot`: `data.frame`, `data.over_px`). One entry becomes one `reviews` row; `detail` goes to `reviews.detail jsonb`. Generation-level decisions are in `result.reviews` (`plan`, `video_sheet{A1}`, `pack` with its `stickers[]`), each `{decision, by, ts, note}`: they become `reviews` rows with `sticker_id` NULL.
-- **Checks are stored on the result too:** `stickers[].report[]` and `anim_report[]` (`{name, ok, detail, severity, stage, value, limit, data}`), `verify.sheet[]`, `video_sheets[].verify[]` and `.video_checks[]`. `verify_version` is on the result. A `WARN` is a failing row with `severity: "WARN"`.
-- **`video_sheets[]`** holds `{id, slots, grid, file, layout, video, video_name, status, blocked, block, video_flags, video_info, canvas, video_prompt}`; status `VIDEO_BLOCKED` is new (the returned video failed `layout_match`/`video_specs`/`video_decodes` and nothing was sliced; the upload can be repeated). `layout.json` is `{canvas, key_rgb, grid, slots[{slot, sticker, rect, subject_rect, scale, subject_px}], verify_version}`.
-- **Files:** every still has an outline-free twin at `source/plain/S#.png` (the video sheet is built from it): store it as an `assets` row of kind `PLAIN_STICKER` next to the still.
-- **`tasks`:** `out/tasks/NNN.json` is `{id, number, provider, external_task_id, name_key, status, created, prompt, grid, style_id, folders{img,vid}, paths, request{template_id, template_version, slots, grid}, plan, plan_review, generations[]}`. Results carry `task_id`, `name_key`, `regen_of`, `template_id`, `template_version`, `slots`.
-- **Events** carry optional `actor` and `decision`; new stages: `plan_reviewed, stills_reviewed, video_sheet_built, video_sheet_reviewed, video_returned, video_flag, anim_reviewed, pack_final` and a per-decision `review` event with `detail {gate, index, note}`.
-- **`GET /api/search?q=`** exists as a file search; the Postgres search replaces its body, not the route or the row shape (`{generation, id, index, key, tags, name, task_slug, status, reason, review, anim_status, png, webm, emoji, final}`).
-
+- `out/jobs/*.json` and `out/tasks/*.json` with `external_task_id` / `provider = 'higgsfield-mcp'`: imported as `tasks` rows.
+- `out/model_calls.jsonl` (one line per LLM / image / video / VLM call with latency and cost): imported as `model_calls`.
+- `plan` with `{template_id, template_version, slots}` and the planner / judge versions on every generation; the VLM verdicts in `result.json` as `actor = 'vlm'` history lines, imported as `reviews` rows.
+- The normalised video sheet and its `layout.json`, and the measurements in `docs/phase2_measurements.md`.
+- A `ModelSource` behind the unchanged source interface.

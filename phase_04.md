@@ -1,6 +1,6 @@
 # Phase 4 — LangGraph + Creative Intelligence
 
-**Prerequisite:** Phase 3 exit is met.
+**Prerequisite:** Phase 2 exit is met.
 
 **Goal:** the system understands creative direction and remembers it.
 - A LangGraph graph orchestrates the Phase 1–3 pipeline.
@@ -51,7 +51,7 @@ mirsal/mirsal/llm/
 mirsal/prompts/   # versioned prompt files: intent_v1.md, resolver_v1.md, planner_v1.md, judge_v1.md, annotator_v1.md, reducer_v1.md
 mirsal/mirsal/transformations/
   base.py  registry.py  banana.py
-# mirsal/mirsal/vision/ (VisionJudge) exists since Phase 3; 4C adds annotator.py
+# mirsal/mirsal/vision/ (VisionJudge) exists since Phase 2; 4C adds annotator.py
 ```
 
 **Phase 1 code is wrapped, not rewritten:** `pipeline.start`, `run_stills` and `run_animate` become node bodies; `pipeline.emit` is the single event sink, and Phase 4 adds a Redis-Stream sink beside the `events.jsonl` one (same `{ts, stage, status, ms, detail}` payload).
@@ -75,7 +75,7 @@ load_session → classify_intent → resolve_references ─┬─ NEW / ANOTHER 
 update_memory runs after respond on every turn.
 ```
 
-**Golden-path gates become `interrupt()` nodes** (`phase_01.md` 1F; decisions in the Phase 2 `reviews` table):
+**Golden-path gates become `interrupt()` nodes** (`Phase_01/README.md` 1F; decisions in the Phase 3 `reviews` table):
 
 ```
 plan ─► G1 interrupt ─► generate_sheet ─► process ─► judge(vlm) ─► G2 interrupt ─► build_video_sheet ─► G3 interrupt
@@ -115,7 +115,7 @@ plan ─► G1 interrupt ─► generate_sheet ─► process ─► judge(vlm) 
 | **Job progress** | `…:job:{generation_id}` (hash) | status, current node, attempt, started_at. Mirrors Postgres; for live display only. |
 | **Session lock** | `…:lock:session:{session_id}` | `SET NX PX 300000`: one turn at a time per session. Released on finish; expiry covers crashes. |
 | **Session hot state** | `…:session:{session_id}` | Read-through/write-through copy of the `sessions` row (summary, focus, settings). |
-| **Planner cache** | `…:plan:{sha256(normalized request, style, grid, mode, planner_version, content_rules_version)}` | The Phase 3 plan JSON; 7 days. |
+| **Planner cache** | `…:plan:{sha256(normalized request, style, grid, mode, planner_version, content_rules_version)}` | The Phase 2 plan JSON; 7 days. |
 | **VLM judge cache** | `…:vlm:judge:{asset_sha256}:{model}:{judge_version}:{slot_hash}` | Judgement; 30 days. |
 | **VLM annotation cache** | `…:vlm:annot:{asset_sha256}:{model}:{annotator_version}` | Annotation; 30 days. It falls back to `stickers.annotation` in Postgres on a miss. |
 | **Pool: query parse** | `…:pool:parse:{sha256(normalized query)}:{parser_version}` | The parsed `{subject, action, …}`; 7 days. |
@@ -177,7 +177,7 @@ Enhancement owed to Phase 4: Phase 1 emits `sliced` as one event for all nine ce
 - `interactions`: id, session_id, seq, user_message, assistant_message, intents, resolved jsonb, result_generation_id, created_at.
 - `feedback`: id, session_id, interaction_id, generation_id, sticker_id, polarity, scope TEMPORARY|PERSISTENT, text, preserve jsonb, change jsonb.
 - `generation_references`: source/target generation and sticker, `role` STYLE|POSE|SUBJECT|EXPRESSION|COMPOSITION|COLOR|ANIMATION, created_at.
-- `stickers.inherited_from` already exists since Phase 2 (1x1 regen). Edits use it the same way.
+- `stickers.inherited_from` already exists since Phase 3 (1x1 regen). Edits use it the same way.
 - LangGraph checkpoint tables.
 
 **4A exit:**
@@ -190,13 +190,13 @@ Enhancement owed to Phase 4: Phase 1 emits `sliced` as one event for all nine ce
 
 ## 4B — Persistent slots + transformation templates
 
-**The Phase 3 planner is extended, not replaced.** Extraction, style presets, content rules, the enhance template and the golden examples all stay. 4B adds persistent slots, templates, and session context: preferences, feedback, references.
+**The Phase 2 planner is extended, not replaced.** Extraction, style presets, content rules, the enhance template and the golden examples all stay. 4B adds persistent slots, templates, and session context: preferences, feedback, references.
 
 **The planner's output grows:**
-- The Phase 3 plan (`extraction`, `character_lock`, `style_lock`, `cells[]`) gains `transformation` {type, source_subject, target_subject} and per-cell slot fields {`concept_id`, `subject`, `target`, `creative_role`, `required`}.
+- The Phase 2 plan (`extraction`, `character_lock`, `style_lock`, `cells[]`) gains `transformation` {type, source_subject, target_subject} and per-cell slot fields {`concept_id`, `subject`, `target`, `creative_role`, `required`}.
 - The **slot** is persistent meaning; the prompt is generated from the slot. Later "make number 1 more energetic" edits S1's slot, so there is nothing to re-infer.
 - **Validation (deterministic):** exactly 9 slots, no duplicate concept_ids, every slot has a prompt + name + emoji + subject/target, and required template slots are present. Poses within the pack must differ: the same action with a slightly changed mouth is a duplicate.
-- The animate-friendly concept rules and the creative boundary are the same as in Phase 3.
+- The animate-friendly concept rules and the creative boundary are the same as in Phase 2.
 
 **Transformation intents:**
 - `SUBJECT_AS_TARGET` ("dog as banana" → the dog *becomes* banana-like and keeps its identity);
@@ -216,10 +216,10 @@ Enhancement owed to Phase 4: Phase 1 emits `sliced` as one event for all nine ce
 - **The user overrides templates:** "dog as banana, no dancing" removes `BANANA_DANCE`; "all nine different banana reactions" replaces the structure.
 - The LLM decides the *realization* (a moonwalk vs arms-up for BANANA_DANCE) but can't swap the slot's meaning (not "sleeping banana").
 - **Subject identity:** with a reference image (Phase 5 upload), the slots carry identity traits (breed, markings, ear shape, proportions) for the prompt.
-- Store `transformation_id` and `transformation_version` on the generation. The full plan is already in `generations.plan`, and `planner_version` has existed since Phase 3. Old generations keep their versions when templates change.
+- Store `transformation_id` and `transformation_version` on the generation. The full plan is already in `generations.plan`, and `planner_version` has existed since Phase 2. Old generations keep their versions when templates change.
 - **Prompt injection:** user text and reference content are creative data, never instructions. Schema validation rejects any output outside the plan schema.
 
-**Migration `006_transformations.sql`:** `generations` gains `transformation_id`, `transformation_version`. (`plan` jsonb already exists from Phase 3.)
+**Migration `006_transformations.sql`:** `generations` gains `transformation_id`, `transformation_version`. (`plan` jsonb already exists from Phase 2.)
 
 **Template catalog is code, not a DB table** (deliberate). Templates live in `transformations/*.py` with a `version` constant, so changes are reviewed and covered by the 4B tests. A DB-editable catalog, with trigger patterns editable without a deploy, is deferred until non-developers need to edit templates.
 
@@ -233,7 +233,7 @@ Enhancement owed to Phase 4: Phase 1 emits `sliced` as one event for all nine ce
 
 ## 4C — Annotation, multi-reference, memory
 
-**The vision judge exists since Phase 3** (Python checks, the VLM judge, the sheet check, the reasons list, the down-policy and concurrency cap). In 4C the judge gets **slot context**: `concept_id`, `creative_role`, the transformation, and the required template slots. It can then reject `MISSING_REQUIRED_ELEMENT` and `PACK_INCONSISTENCY` against the template, not just the cell prompt.
+**The vision judge exists since Phase 2** (Python checks, the VLM judge, the sheet check, the reasons list, the down-policy and concurrency cap). In 4C the judge gets **slot context**: `concept_id`, `creative_role`, the transformation, and the required template slots. It can then reject `MISSING_REQUIRED_ELEMENT` and `PACK_INCONSISTENCY` against the template, not just the cell prompt.
 
 **Annotation** (for approved stickers; the same model, a separate prompt):
 - `{visual_summary, subject, pose, expression, style_profile {outline, finish, proportions, palette, shading}, colors, animation_notes[]}`.
