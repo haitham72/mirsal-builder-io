@@ -503,12 +503,13 @@ ALTER TABLE search_log ADD COLUMN parsed jsonb, ADD COLUMN gap_generated int NOT
 
 **Eval set:** `Phase_02/search_queries.md` holds ~30 queries (English, Arabic, Arabizi), each with the sticker IDs Haitham considers relevant, plus ≥5 that should return nothing.
 
-**3B exit:**
-- [ ] `search "falcon dancing"` returns only dancing falcons, not a dancing banana or a sleeping falcon. It is free, with no image calls in `model_calls`.
-- [ ] Measured on the eval set: precision@5 ≥ 0.8, and **0 results** on every should-return-nothing query. The thresholds are recorded in `docs/phase3_measurements.md`.
-- [ ] The gap flow: "found N, generate M more?", with the price shown. The generated stickers are indexed and findable on the very next search.
-- [ ] `pool reindex` covers every earlier generation. A hidden sticker never appears.
-- [ ] Search latency is measured with no cache; this is the baseline Phase 4's Redis cache must beat.
+**3B exit (lexical pass built 2026-10-01; vectors deferred):**
+- [x] `pool search "teddy waving"` returns only waving teddies (ranked); `"falcon dancing"` / `"teddy dancing"` return **zero** (no such stickers; never the closest junk). Free, no model calls. (`mirsal/pool.py`, `tests/test_pool.py`: 4.)
+- [ ] Measured on the eval set (`Phase_03/search_queries.md`, pending from Haitham): precision@5 ≥ 0.8. Recorded in `docs/phase3_measurements.md` when the eval lands.
+- [~] Gap flow: "Found N · generate M more?" (confirmation required; the price is not shown yet — no provider pricing without live calls; generation stays manual).
+- [x] `pool reindex` covers every earlier generation (140 approved indexed); `pool hide` removes from search without deleting.
+- [ ] Search latency baseline for Phase 4's Redis cache (measure when the eval lands).
+- Deferred to the embedding pass: `EMBED_MODEL` vectors + HNSW (`subject_vec/action_vec` NULLABLE until then), Arabic LLM query parser (deterministic patterns now), `pool_version` cache key (no Redis yet).
 
 ---
 

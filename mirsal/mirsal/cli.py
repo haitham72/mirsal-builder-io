@@ -287,6 +287,33 @@ def job_cmd(out, args) -> int:
         return 1
 
 
+def pool_cmd(args) -> int:
+    import json as _json
+    from . import pool as _pool
+    c = _dbc()
+    if c is None:
+        return 1
+    with c:
+        if args.action == "reindex":
+            print(f"indexed { _pool.reindex(c)} sticker(s)")
+            return 0
+        if args.action == "hide":
+            print("hidden" if _pool.hide(c, (args.query or "").upper()) else "no such indexed sticker")
+            return 0
+        res = _pool.search(c, args.query or "", count=args.count)
+        if args.as_json:
+            print(_json.dumps(res, ensure_ascii=False, default=str))
+            return 0
+        print(f"parsed: subject={res['parsed']['subject']!r} action={res['parsed']['action']!r}")
+        for h in res["hits"]:
+            print(f"  {h['sticker_id']} {''.join(h['emoji'])} {h['key']:<44} rank={h['rank']}")
+        if res["missing"]:
+            print(f"Found {res['found']} - generate {res['missing']} more? (confirm first: generation is never automatic)")
+        elif not res["hits"]:
+            print("no pool matches (zero, never the closest junk)")
+        return 0
+
+
 def main(argv=None) -> int:
     import sys as _sys
     try:  # Windows consoles default to cp1252, which cannot print emoji: replace, never crash
@@ -326,6 +353,9 @@ def main(argv=None) -> int:
     jo.add_argument("--kind", default="sheet"); jo.add_argument("--task"); jo.add_argument("--generation")
     jo.add_argument("--ticket"); jo.add_argument("--file"); jo.add_argument("--model"); jo.add_argument("--cost", type=float)
     jo.add_argument("--reason", default="")
+    po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
+    po.add_argument("action", choices=["search", "reindex", "hide"]); po.add_argument("query", nargs="?")
+    po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
     args = ap.parse_args(argv)
     out, inp, cfg, t0 = out_root(), input_root(), EngineConfig(), time.perf_counter()
     if getattr(args, "workers", None):
@@ -355,6 +385,8 @@ def main(argv=None) -> int:
         return jobs_cmd(out, args)
     if args.cmd == "job":
         return job_cmd(out, args)
+    if args.cmd == "pool":
+        return pool_cmd(args)
     try:
         if args.cmd == "serve":
             from .console.server import serve
