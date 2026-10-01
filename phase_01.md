@@ -51,7 +51,7 @@ The phase has checkpoints 1A (static), 1B (animation), 1D (desktop builder, Part
 
 **Findings from the 2026-10-01 pass** (fixed and recorded in README; kept here until Haitham approves):
 - **Every earlier WEBM failure had one cause.** The Anaconda ffmpeg on PATH has no libvpx-vp9 and rejects `-deadline`, so each cell died as `exception`. Now `imageio-ffmpeg` is installed in the project venv, and cells fail fast with `no_vp9_encoder` when that happens. Result: 36/36 READY.
-- **Variants 2-4 were animated with variant 1's teddies.** Their `slices/*.mov` are byte copies of vid-001's. The copies are now detected and ignored, and each variant uses its own mp4. *Haitham:* re-slice vid-002..004 or delete their `slices/` folders.
+- **Variants 2-4 were animated with variant 1's teddies.** Their `slices/*.mov` are byte copies of vid-001's. The copies are now detected and ignored, and each variant uses its own mp4. No action needed: the watch folders are mock samples and are removed entirely in Phase 3. The duplicate detection stays as a guard for manual inputs.
 - **Gutter cuts** replace equal thirds (stills 78/90 -> 90/90). `inside_cell` now means a real crossing, not a bad cut.
 - **`no_spill` misfired on subject colour**: 0 edge pixels, all interior. Interior key colour is now the `chroma_risk` warning. Follow-up: a saturated green part of a subject is keyed out completely and leaves an **enclosed transparent hole**, which `chroma_risk` cannot see. Add a `holes` metric (transparent regions enclosed by the subject's outer contour) before Phase 3's blue re-key relies on it.
 - The **Anaconda base env** has a mixed numpy 1.26/2.0 install that crashes onnxruntime. Always use `mirsal/.venv`.
