@@ -79,12 +79,13 @@ function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{pr
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
   const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:!!LIVE.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[]}
-    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop};
+    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…');
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
   LIVE.jobs.push({id:r.j.job,kind:isSheet?'sheet':'video',label:isSheet?ctx.prompt:`Batch ${ctx.g}`,model:m?m.label:r.j.model,est:r.j.estimate,t0:Date.now(),gen:isSheet?null:ctx.g,ai:r.j.expanded_by==='ai'});
   if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
+  if(!isSheet&&egDirty())egClear();
   lsave();say('');drawLive();liveTick();refreshHf();return true}
 
 /* ---------- the animation box under the green screen: a model drop-down and one priced button (no dialog, no confirmation) */
@@ -174,7 +175,7 @@ setInterval(()=>{document.querySelectorAll('[data-lvt]').forEach(e=>e.textConten
 
 /* ---------- start-up and hooks into the Studio screen */
 const _rg=RENDER.generate;
-const showPanel=()=>{typeof composerMount==='function'?composerMount():livePanel();ensureBars();histReload();drawEdge()};
+const showPanel=()=>{typeof composerMount==='function'?composerMount():livePanel();ensureBars();histReload();egSync()};
 RENDER.generate=async function(){await _rg.apply(this,arguments);showPanel();drawLive()};
 setInterval(()=>{if(qRows().some(j=>QACTIVE.includes(j.status)))drawLive()},1000);
 qRefresh();
@@ -184,39 +185,75 @@ setInterval(refreshHf,20000);
 liveInit();
 
 
-/* ---------- live edge: stroke and trim sliders. The stills are redrawn on the server within ~0.2 s (coalesced, always the latest value); on release the
-   animations of a Kling video are re-applied from the stored video (no credits), so nothing is ever lost by changing the edge. */
-const EG={outline:null,erode:null,busy:false,dirty:false,final:false,drag:false};
+/* ---------- the edge (stroke and trim) is a PREVIEW until it is applied. Dragging a slider changes ONE thumbnail only: the open one, else the last picked, else the first
+   (nothing is stored or re-rendered). Apply saves a snapshot of the edge and applies it to the whole batch; Undo drops the preview, or restores the previous snapshot.
+   The edge is also applied (and snapshotted) when the video is generated from the image and when the stickers go into a pack. */
+const EG={outline:null,erode:null,pick:null,busy:false,drag:false};
 const edgeBatches=()=>typeof included==='function'?included().filter(g=>g.stickers.some(t=>t.status==='READY')):[];
 function ensureBars(){const g=document.querySelector('.gen2');if(!g)return;
   if(!document.getElementById('gedge')){const e=document.createElement('div');e.id='gedge';const ref=document.getElementById('gres');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
   if(!document.getElementById('ghist')){const h=document.createElement('section');h.id='ghist';g.appendChild(h)}}
-function drawEdge(){const el=document.getElementById('gedge');if(!el)return;const gs=edgeBatches();
-  if(!gs.length){el.innerHTML='';el.removeAttribute('data-built');return}
-  const g=gs[0],o=EG.outline!=null?EG.outline:(g.outline_px||0),e=EG.erode!=null?EG.erode:(g.erode_px||0),
-    working=gs.some(x=>x.stickers.some(t=>t.anim_status==='PROCESSING')),
-    stale=gs.some(x=>x.stickers.some(t=>t.anim_status==='STALE')&&sheetOf(x)&&sheetOf(x).video&&!working);
-  if(!el.dataset.built){el.dataset.built='1';el.className='lv-edge';
-    el.innerHTML=`<b>Edge</b><label>Stroke <input type=range min=0 max=24 step=1 data-edge=outline><output></output></label>
-     <label>Trim <input type=range min=0 max=6 step=1 data-edge=erode><output></output></label><span class=lv-est id=gedgest></span>
-     <button class="btn sm" id=gedgeapply data-act=gresl hidden>Apply to animations</button>`}
-  if(!EG.drag){const a=el.querySelector('[data-edge=outline]'),b=el.querySelector('[data-edge=erode]');
-    a.value=o;a.nextElementSibling.textContent=o+' px';b.value=e;b.nextElementSibling.textContent=e+' px'}
-  $('gedgest').textContent=EG.busy?'Updating…':working?'Updating animations…':stale?'The animations still have the old edge':'';
-  $('gedgeapply').hidden=!stale}
-function edgeSet(t){const k=t.dataset.edge;EG[k]=+t.value;t.nextElementSibling.textContent=t.value+' px';
-  if(k==='outline'){GS.outline=+t.value;gstore('mirsal.outline',GS.outline);if(typeof cpDrawBar==='function')cpDrawBar()}}
-document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.edge){EG.drag=true;edgeSet(t);edgePump(false)}});
-document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.edge){edgeSet(t);EG.drag=false;edgePump(true)}});
-async function edgePump(final){EG.final=EG.final||final;if(EG.busy){EG.dirty=true;return}EG.busy=true;drawEdge();
-  try{do{EG.dirty=false;const rs=EG.final;EG.final=false;
-      for(const g of edgeBatches()){const r=await postWait(`/api/generations/${g.number}/appearance`,{outline:EG.outline!=null?EG.outline:(g.outline_px||0),erode:EG.erode!=null?EG.erode:(g.erode_px||0),reslice:rs},'Finishing the previous step…');
-        if(!r.ok){toast(r.j.error||'Could not change the edge',1);break}}
-      glast='';if(typeof tick==='function')await tick(true)}while(EG.dirty||EG.final)}
-  finally{EG.busy=false;if(!EG.drag){EG.outline=null;EG.erode=null}drawEdge()}}
-ACT.gresl=async()=>{for(const g of edgeBatches()){if(!(sheetOf(g)&&sheetOf(g).video))continue;const r=await postWait(`/api/generations/${g.number}/reslice`,{},'Finishing the previous step…');if(!r.ok)toast(r.j.error||'Could not apply the edge',1)}
-  glast='';if(typeof tick==='function')tick(true)};
-setInterval(drawEdge,800);
+/* Undo replays the log as a stack: an applied edge is pushed, an undo entry pops it, so Undo always steps back one real snapshot (and never flips between two) */
+function egCommitted(){const g=edgeBatches()[0];if(!g)return{o:0,e:0,hist:[],prev:null};
+  const st=[];(g.edge_history||[]).forEach(h=>{if(h.via==='undo')st.length>1&&st.pop();else st.push(h)});
+  return{o:g.outline_px||0,e:g.erode_px||0,hist:g.edge_history||[],prev:st.length>1?st[st.length-2]:null}}
+const egVals=()=>{const c=egCommitted();return{o:EG.outline!=null?EG.outline:c.o,e:EG.erode!=null?EG.erode:c.e}};
+const egDirty=()=>{const c=egCommitted(),v=egVals();return edgeBatches().length>0&&(v.o!==c.o||v.e!==c.e)};
+const egClear=()=>{EG.outline=null;EG.erode=null};
+function egPick(g,i){EG.pick={g,i}}
+/* the one thumbnail that shows the preview */
+function egTarget(){const ok=(g,i)=>{const b=GM.get(g),t=b&&b.stickers[i-1];return !!(t&&t.status==='READY'&&t.png)};
+  if(typeof MD!=='undefined'&&MD&&ok(MD.g,MD.i))return{g:MD.g,i:MD.i};
+  if(EG.pick&&ok(EG.pick.g,EG.pick.i)&&edgeBatches().some(b=>b.number===EG.pick.g))return EG.pick;
+  for(const b of edgeBatches()){const t=b.stickers.find(t=>t.status==='READY'&&t.png);if(t)return{g:b.number,i:t.index}}return null}
+function edgeControlsHtml(){return`<label>Stroke <input type=range min=0 max=24 step=1 value=0 data-edge=outline><output>0 px</output></label>
+  <label>Trim <input type=range min=0 max=6 step=1 value=0 data-edge=erode><output>0 px</output></label>
+  <span class=lv-eact><button class="btn sm pri" data-act=egapply>Apply</button><button class="btn sm" data-act=egundo>Undo</button></span><span class=lv-est data-eghint></span>`}
+/* bring every edge control (the bar and the open thumbnail's) in line with the state; never rebuild or move the slider that is being dragged */
+function egSync(){const bar=document.getElementById('gedge'),gs=edgeBatches();
+  if(bar){if(!gs.length){bar.innerHTML='';bar.removeAttribute('data-built')}
+    else if(!bar.dataset.built){bar.dataset.built='1';bar.className='lv-edge';bar.innerHTML='<b>Edge</b>'+edgeControlsHtml()}}
+  const c=egCommitted(),v=egVals(),dirty=egDirty(),prev=c.prev,t=egTarget(),
+    working=gs.some(x=>x.stickers.some(s=>['PROCESSING','STALE'].includes(s.anim_status)));
+  document.querySelectorAll('[data-edge]').forEach(i=>{const k=i.dataset.edge,val=k==='outline'?v.o:v.e;if(!(EG.drag&&i===document.activeElement)){i.value=val;if(i.nextElementSibling)i.nextElementSibling.textContent=val+' px'}});
+  document.querySelectorAll('[data-act=egapply]').forEach(b=>b.disabled=!dirty||EG.busy);
+  document.querySelectorAll('[data-act=egundo]').forEach(b=>{b.disabled=EG.busy||!(dirty||prev);b.textContent=dirty?'Cancel':'Undo';b.title=dirty?'Drop the test':prev?`Go back to the previous snapshot (stroke ${prev.outline} px, trim ${prev.erode} px)`:'Nothing to undo'});
+  document.querySelectorAll('[data-eghint]').forEach(h=>{h.textContent=EG.busy?'Applying…':working?'Updating the animations…':dirty?`Testing on S${t?t.i:'?'} only. Apply saves a snapshot and uses it on all.`
+    :`Applied: stroke ${c.o} px, trim ${c.e} px${c.hist.length>1?` · ${c.hist.filter(h=>h.via!=='undo').length} snapshots`:''}`})}
+/* the preview itself. Outside the open view it is a floating card under the sliders (the grid is never touched): the target sticker, large, on the checkerboard,
+   with Apply and Cancel on it. In the open view the big sticker pane is the preview. Both refresh in place while a slider moves. */
+let EGT=null;
+function egCard(show,url,t,v){let c=document.getElementById('egcard');
+  if(!show){if(c)c.remove();return}
+  if(!c){c=document.createElement('div');c.id='egcard';c.innerHTML='<div class="egcimg bg-checker"><img alt=""><span class=egbadge>test</span></div><div class=egccap></div><div class=egcbtn><button class="btn sm pri" data-act=egapply>Apply</button><button class="btn sm" data-act=egundo>Cancel</button></div>';document.body.appendChild(c)}
+  const im=c.querySelector('img');if(im.getAttribute('src')!==url)im.src=url;
+  c.querySelector('.egccap').textContent=`S${t.i} · stroke ${v.o} px, trim ${v.e} px · Apply uses it on all`;
+  const bar=document.getElementById('gedge'),r=bar?bar.getBoundingClientRect():null,w=Math.min(300,innerWidth-24);
+  c.style.width=w+'px';c.style.left=Math.max(12,Math.min(innerWidth-w-12,r?r.left:12))+'px';c.style.top=Math.max(70,Math.min(innerHeight-w-110,r?r.bottom+8:90))+'px'}
+function applyEdgePreview(){const dirty=egDirty(),t=dirty?egTarget():null,v=egVals(),modal=typeof MD!=='undefined'&&MD,
+    url=t?`/api/generations/${t.g}/edge_preview?index=${t.i}&outline=${v.o}&erode=${v.e}&px=${modal?520:360}`:'',
+    box=modal?document.querySelector('#modal .mpanes .pane:first-child .box'):null;
+  document.querySelectorAll('.egprev,.egbadge').forEach(x=>{if(x.closest('#egcard'))return;if(!(t&&box&&x.parentElement===box))x.remove()});
+  if(t&&box){let im=box.querySelector(':scope > .egprev');if(!im){im=document.createElement('img');im.className='egprev';im.alt='';box.appendChild(im);const b=document.createElement('span');b.className='egbadge';b.textContent='test';box.appendChild(b)}
+    if(im.getAttribute('src')!==url)im.src=url}
+  egCard(!!t&&!modal,url,t,v)}
+const egRefresh=()=>{egSync();clearTimeout(EGT);EGT=setTimeout(applyEdgePreview,40)};
+addEventListener('scroll',()=>{if(document.getElementById('egcard'))applyEdgePreview()},{passive:true});addEventListener('resize',()=>{if(document.getElementById('egcard'))applyEdgePreview()});
+document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset.edge))return;EG.drag=true;EG[t.dataset.edge]=+t.value;if(t.nextElementSibling)t.nextElementSibling.textContent=t.value+' px';egRefresh()});
+document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.edge){EG.drag=false;egSync()}});
+ACT.egapply=async()=>{if(!egDirty()||EG.busy)return;const v=egVals();EG.busy=true;egSync();
+  try{for(const g of edgeBatches()){const r=await postWait(`/api/generations/${g.number}/edge`,{outline:v.o,erode:v.e,via:'apply'},'Finishing the previous step…');if(!r.ok){toast(r.j.error||'Could not apply the edge',1);return}}
+    egClear();toast('Edge applied to all: snapshot saved')}
+  finally{EG.busy=false;glast='';if(typeof tick==='function')await tick(true);egSync();applyEdgePreview()}};
+ACT.egundo=async()=>{if(EG.busy)return;
+  if(egDirty()){egClear();egSync();applyEdgePreview();return}                                  // drop the preview
+  const c=egCommitted(),prev=c.prev;if(!prev)return;     // go back to the previous snapshot
+  EG.busy=true;egSync();
+  try{for(const g of edgeBatches()){const r=await postWait(`/api/generations/${g.number}/edge`,{outline:prev.outline,erode:prev.erode,via:'undo'},'Finishing the previous step…');if(!r.ok){toast(r.j.error||'Could not undo',1);return}}
+    toast(`Back to stroke ${prev.outline} px, trim ${prev.erode} px`)}
+  finally{EG.busy=false;glast='';if(typeof tick==='function')await tick(true);egSync();applyEdgePreview()}};
+['pointerup','keyup','blur'].forEach(ev=>document.addEventListener(ev,e=>{if(EG.drag&&e.target&&e.target.dataset&&e.target.dataset.edge)EG.drag=false},true));
+setInterval(()=>{egSync();applyEdgePreview()},800);       // egSync leaves the slider that is being dragged alone
 
 /* ---------- persistent history of batches: every batch ever made, 5 at a time (nothing is lost when another batch is opened) */
 const HB={items:[],more:false,total:0,loading:false,limit:5};
@@ -233,7 +270,7 @@ function drawHist(){const el=document.getElementById('ghist');if(!el)return;
    ${HB.more?`<div class=lv-hmore><button class=btn data-act=hmore>Load more</button></div>`:''}`}
 ACT.hmore=()=>histLoad(true);
 ACT.hopen=el=>{const it=HB.items.find(x=>x.id===+el.dataset.id);if(!it)return;
-  SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;
+  SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
   if(typeof CP!=='undefined')CP.menu=false;if(location.hash!=='#/studio')location.hash='#/studio';
   if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});drawHist();if(typeof cpDrawTop==='function')cpDrawTop()};

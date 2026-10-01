@@ -59,8 +59,8 @@ const isOff=(g,t)=>animPhase(g)&&t.anim_status==='READY'?t.review.anim==='REJECT
 const keptStills=g=>g.stickers.filter(t=>t.status==='READY'&&t.review.still!=='REJECTED');
 const isOob=t=>t.anim_status==='READY'&&t.review.anim==='BLOCKED';      // made, but the character leaves its cell: blocked for review, kept to look at
 const oobNote=t=>{const c=(t.anim_report||[]).find(r=>r.name==='inside_frame');return c?c.detail:'leaves its cell'};
-/* ---------- issue colours: ONE colour per kind of problem, the same on the tile, the chip, the hatch on the sheets and in the legend.
-   [colour, name, text colour on that colour]. Hatched = not in the set; dashed / light outline = kept with a check. */
+/* ---------- issue colours: ONE colour per kind of problem, the same on the tile, the chip, the marks on the sheets and in the legend.
+   [colour, name, text colour on that colour]. DASHED + FADED = will not be exported (never disabled: it stays clickable and can be brought back or allowed); solid = exported, with a check. */
 const CAT={bounds:['#f97316','Out of bounds','#fff'],key:['#a855f7','Bad green screen','#fff'],loop:['#eab308','Bad loop','#422006'],look:['#ec4899','Look or motion','#fff'],spec:['#3b82f6','File or Telegram limit','#fff'],bad:['#ef4444','Dropped or blocked','#fff']};
 const CATORDER=Object.keys(CAT);
 const CATOF={inside_cell:'bounds',inside_slot:'bounds',inside_frame:'bounds',cross_slot:'bounds',edge_trimmed:'bounds',loop_seam:'loop',
@@ -78,6 +78,8 @@ const plainWarn=(t,w)=>{const c=(t.report||[]).find(r=>r.name===w),f=WARNWHY[w];
 const ANIMWHY={inside_slot:'the character leaves its own slot on the sheet',cross_slot:'the character reaches into a neighbour\'s slot',empty_subject:'nothing was found in its slot',loop_seam:'the loop does not close',size_budget:'the file is over the size limit'};
 const OVERRIDABLE=['inside_slot','cross_slot'];
 /* an animation Python blocked for leaving or crossing its slot: a human may allow it (a judgement call). Technical blocks (format, size, codec) stay final. */
+const hasAllowed=t=>(t.anim_override||[]).length>0;
+const clickAllow=t=>canAllow(t)||hasAllowed(t);
 function canAllow(t){const bl=(t.anim_report||[]).filter(c=>!c.ok&&c.severity==='BLOCK');return t.anim_status==='FAILED'&&bl.length>0&&bl.every(c=>OVERRIDABLE.includes(c.name))}
 /* what is wrong with a sticker at a stage ('still' | 'anim'): hard ones first, then by kind */
 function issuesOf(t,stage){const out=[],add=(id,text,soft)=>out.push({cat:CATOF[id]||'bad',id,text,soft:!!soft});
@@ -99,15 +101,16 @@ function chip(g,t,stage){const m=mark(t,stage);let cls,title,st='';
   if(m){cls='iss'+(m.accepted?' soft':'');st=` style="--cc:${CAT[m.cat][0]}"`;title=`S${t.index}: ${m.issues.map(i=>CAT[i.cat][1]+' - '+i.text).join('; ')}${m.accepted?'':' (not in the set)'}`}
   else if(stage==='anim'){const c=cellState(t);cls=c;title=`S${t.index}: ${CELLTXT[c]}`}
   else{cls='ok';title=`S${t.index}: accepted`}
-  return`<button class="vchip ${cls}"${st} data-act=${stage==='anim'&&canAllow(t)?'gallow':'gopen'} data-g=${g.number} data-i=${t.index} title="${esc(title+(stage==='anim'&&canAllow(t)?' · click to allow it anyway':''))}">${t.index}</button>`}
+  return`<button class="vchip ${cls}"${st} data-act=${stage==='anim'&&clickAllow(t)?'gallow':'gopen'} data-g=${g.number} data-i=${t.index} title="${esc(title+(stage==='anim'&&clickAllow(t)?(hasAllowed(t)?' · click to take the permission back':' · click to allow it anyway'):''))}">${t.index}</button>`}
 function legend(g,stage){const cs=new Set();g.stickers.forEach(t=>{const m=mark(t,stage);if(m)m.issues.forEach(i=>cs.add(i.cat))});
-  return cs.size?`<div class=lgrow>${CATORDER.filter(c=>cs.has(c)).map(c=>`<span class=lgd style="--cc:${CAT[c][0]}"><i></i>${CAT[c][1]}</span>`).join('')}</div><div class="mut lgnote">solid outline = not in the set, dashed = kept with a check; click a solid one to allow it when it can be</div>`:''}
-/* the in-place marks on a sheet of size sheet_size: a hatch over every cell that is not in the set, a dashed outline over one kept with a check */
+  return cs.size?`<div class=lgrow>${CATORDER.filter(c=>cs.has(c)).map(c=>`<span class=lgd style="--cc:${CAT[c][0]}"><i></i>${CAT[c][1]}</span>`).join('')}</div><div class="mut lgnote">dashed and faded = will NOT be exported (click it to allow it when it can be); solid = exported, with a check</div>`:''}
+/* the in-place marks on a sheet of size sheet_size: a dashed faded box over every cell that is not in the set, a solid thin outline over one kept with a check */
 function issueSvg(g,stage,k=1){const W=g.source.sheet_size?g.source.sheet_size[0]:((sheetOf(g)||{}).canvas||[2048])[0],sw=Math.max(2,W/450)*k;let body='';
   g.stickers.forEach(t=>{const c=(stage==='anim'&&layoutOfCell(g,t.index))||(t.metrics||{}).cell,m=c&&mark(t,stage);if(!m)return;const col=CAT[m.cat][0],r=`x="${c[0]}" y="${c[1]}" width="${c[2]}" height="${c[3]}"`,
-      click=stage==='anim'&&canAllow(t)?` data-act=gallow data-g=${g.number} data-i=${t.index} style="pointer-events:all;cursor:pointer"`:'';
-    body+=m.accepted?`<rect ${r} fill="none" stroke="${col}" stroke-width="${sw*1.6}" stroke-dasharray="${W/80} ${W/120}"/>`
-      :`<rect ${r} fill="${col}" fill-opacity=".10" stroke="${col}" stroke-width="${sw*2}"${click}/>`});
+      click=stage==='anim'&&clickAllow(t)?` data-act=gallow data-g=${g.number} data-i=${t.index} style="pointer-events:all;cursor:pointer"`:'',
+      tip=click?`<title>${hasAllowed(t)?'Allowed by you: click to take it back':'Blocked: click to allow it anyway'}</title>`:'';
+    body+=m.accepted?`<rect ${r} fill="${click?col:'none'}" fill-opacity="${click?.06:0}" stroke="${col}" stroke-width="${sw*1.1}"${click}>${tip}</rect>`
+      :`<rect ${r} fill="#fff" fill-opacity=".34" stroke="${col}" stroke-width="${sw*2}" stroke-dasharray="${W/55} ${W/110}"${click}>${tip}</rect>`});
   return body}
 const keptAnim=g=>g.stickers.filter(t=>t.anim_status==='READY'&&t.review.still!=='REJECTED'&&!['REJECTED','BLOCKED'].includes(t.review.anim));
 const keptOf=g=>animPhase(g)?keptAnim(g):keptStills(g);
@@ -166,13 +169,14 @@ function tileHtml(g,t,mode){const base=`/out/${g.generation_id}/`,anim=mode==='a
     :t.anim_status==='FAILED'?`<div class=gbadmsg><b>No animation</b><div class=mut style="margin:4px 0 8px">${esc(ANIMWHY[t.anim_reason]||t.anim_reason||'failed')}</div>${canAllow(t)?`<button class="btn sm pri" data-act=gallow data-g=${g.number} data-i=${t.index}>Allow anyway</button>`:''}</div>`:t.anim_status==='STALE'?`<div class="gbadmsg mut">${esc(t.anim_reason||'Animate again')}</div>`:t.status==='READY'?`<div class="gbadmsg mut">Not animated yet</div>`:`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
   const canX=t.status==='READY'&&(anim?ap&&t.anim_status!=='FAILED':!ap);
   const lines=mk?mk.issues.slice(0,2).map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join(''):'';
-  return`<div class="gt ${off?'off':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${hard&&!off?`<span class="isstag${canAllow(t)?' clk':''}" ${canAllow(t)?`data-act=gallow data-g=${g.number} data-i=${t.index} title="Click to allow this animation anyway"`:''}>${esc(CAT[mk.cat][1])}${canAllow(t)?' · click to allow':''}</span>`:''}</div><span class=gem>${esc(t.emoji)}</span>
+  return`<div class="gt ${off?'off':''} ${off||hard||blk?'nx':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${hard&&!off?`<span class="isstag${canAllow(t)?' clk':''}" ${canAllow(t)?`data-act=gallow data-g=${g.number} data-i=${t.index} title="Click to allow this animation anyway"`:''}>${esc(CAT[mk.cat][1])}${canAllow(t)?' · click to allow':''}</span>`:''}${off?'<span class="isstag offtag">Not in the set</span>':''}</div><span class=gem>${esc(t.emoji)}</span>
     ${canX?`<button class=gx data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=${off||blk?0:1} title="${blk?'Include this animation anyway':off?'Bring this one back':'Drop this one from the set'}">${off||blk?ic('plus'):ic('x')}</button>`:''}
     <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=0>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${anim&&(t.anim_override||[]).length?`<div class=gwarn style="color:var(--pri-d)">allowed by you · <button class=link data-act=gunallow data-g=${g.number} data-i=${t.index}>undo</button></div>`:''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
 function batchHtml(g,k,total,mode){
   const inc=!SES.off.includes(g.number),s=g.source;
   const head=`<div class=gbhead>${total>1?`<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc?'checked':''}> <b>Batch ${k+1}</b></label>`:`<b>Batch ${k+1}</b>`}
     <span class=mut>sheet ${s.subject_id} · ${g.generation_id}${hasVid(g)?'':' · no video prepared'}</span>
+    ${g.key_colour==='blue'?`<span class=keychip title="This sheet has a blue screen, so it was keyed as blue (and the video sheet is blue too). Nothing to do.">Blue key</span>`:''}
     <span class=gbact>${s.has_video||making(g)||(typeof liveReadyNow==='function'&&liveReadyNow())?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
     <button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
     ${total>1?`<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>`:''}</span></div>`;
@@ -311,7 +315,7 @@ ACT.pwgo=async()=>{const p=pwPack();let pid;
   const mode=(document.querySelector('input[name=pwmode]:checked')||{}).value==='add'?'add':'replace',names={};
   document.querySelectorAll('.pwrows input').forEach(i=>{const r=PW.rows[+i.dataset.r];(names[r.g]=names[r.g]||{})[r.i]=Object.assign(names[r.g][r.i]||{},{[i.dataset.k]:i.value.trim()})});
   closeDlg();await gaddrun(pid,mode,names)};
-async function gaddrun(pid,mode,names){let added=0,replaced=0,err='';
+async function gaddrun(pid,mode,names){let added=0,replaced=0,err='';const edge=typeof egDirty==='function'&&egDirty()?{outline:egVals().o,erode:egVals().e}:{};
   for(const g of included()){if(!keptOf(g).length)continue;const r=await postWait(`/api/generations/${g.number}/add`,{pack_id:pid,mode,names:(names||{})[g.number]||{}});if(r.ok){added+=r.j.added;replaced+=r.j.replaced||0}else err=r.j.error}
   await loadLib();SES.pack=pid;saveSes();glast='';tick(true);
   if(err)toast(err,1);else toast(replaced?`Replaced ${replaced} still${replaced===1?'':'s'} with animated stickers in “${packById(pid).name}”`:added?`Added ${added} to “${packById(pid).name}”`:'Those are already in that pack')}
@@ -366,6 +370,7 @@ function videoPanel(g){const s=g.source,vs=sheetOf(g),vi=Object.assign({},vs&&vs
   return`<aside class=gsheet><div class=gshead><b>Video sheet</b><span class=gspace></span><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?`, ${a.oob.length} out`:''}</span></div>
    ${videoBox(g,2)}
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'anim')).join('')}</div>
+   ${allowAllRow(g)}
    <div class="kv vkv"><span>source</span><span>${esc(vi.mode||(s.video_path?'3x3 mp4':vs&&vs.video?'video sheet':'clips'))}${vi.size?' · '+esc(vi.size):vi.width?' · '+vi.width+'×'+vi.height:''}${vi.fps?' · '+vi.fps+' fps':''}</span>
     <span>out of bounds</span><span>${a.oob.length?a.oob.map(t=>'S'+t.index).join(', '):'none'}</span><span>no animation</span><span>${a.fail.length?a.fail.map(t=>'S'+t.index).join(', '):'none'}</span>
     <span>size</span><span>${a.done?`${a.avg} KB average, ${a.max} KB largest`:'-'}</span><span>work</span><span>${a.done?`${(a.ms/1000).toFixed(1)} s${a.cached?` · ${a.cached} from the cache`:''}`:'-'}</span></div>
@@ -449,15 +454,16 @@ function gmodal(){if(!MD)return;const g=GM.get(MD.g);if(!g){MD=null;return}const
    ${t.status==='READY'?`<button class=btn data-act=gedit title="${t.anim_status==='READY'?'Text, emoji and trim over the animation; one Save updates the image and the animation':'Add text or emoji'}">${ic('edit')} Edit${t.anim_status==='READY'?' (image + animation)':''}</button>`:''}<button class="btn nav" data-act=gstep data-d=1>›</button><button class=btn data-act=gmclose>✕</button></div>
    ${mk?`<div style="margin:6px 0 2px">${mk.issues.map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join('')}</div>`:''}
    <div class=mpanes><div class=pane><div class=mut>Sticker</div><div class="box bg-${bg}">${still}</div></div><div class=pane><div class=mut>Animation</div><div class="box bg-${bg}">${vid}</div></div></div>
+   ${typeof edgeControlsHtml==='function'&&t.status==='READY'?`<div class="lv-edge lv-edge-m"><b>Edge</b>${edgeControlsHtml()}</div>`:''}
    ${act?`<div class=row style="margin:8px 0 2px">${act}</div>`:''}
    <details ${bad?'open':''}><summary class=mut>What Python checked</summary>${rows(t.report)}${rows(t.anim_report)||''}${(rows(t.report)||rows(t.anim_report))?'':`<div class=mut>${(t.report||[]).length||(t.anim_report||[]).length?'Every check passed.':'nothing yet'}</div>`}
     <button class=link data-act=gmall>${MD.all?'Show only problems':'Show every check'}</button></details>
    <details><summary class=mut>Path (every decision, newest first)</summary>${path||'<div class=mut>no decisions yet</div>'}</details>
    ${meas.length?`<details><summary class=mut>Measurements</summary><div class="kv vkv">${meas.map(x=>`<span>${x[0]}</span><span>${esc(String(x[1]))}</span>`).join('')}</div></details>`:''}
    <div class=mut style="margin-top:8px">${esc(t.prompt)}</div><div class=mut>← → to browse, Esc to close</div></div>`;
-  $('modal').classList.add('on');$('modal').onclick=e=>{if(e.target.id==='modal')ACT.gmclose()}}
+  $('modal').classList.add('on');$('modal').onclick=e=>{if(e.target.id==='modal')ACT.gmclose()};if(typeof egSync==='function'){egSync();applyEdgePreview()}}
 ACT.gmall=()=>{MD.all=!MD.all;gmodal()};
-ACT.gopen=el=>{MD={g:+el.dataset.g,i:+el.dataset.i,all:!!(MD&&MD.all)};gmodal()};
+ACT.gopen=el=>{MD={g:+el.dataset.g,i:+el.dataset.i,all:!!(MD&&MD.all)};if(typeof egPick==='function')egPick(MD.g,MD.i);gmodal()};
 ACT.gmclose=()=>{MD=null;$('modal').classList.remove('on')};
 ACT.gstep=el=>{if(!MD)return;const g=GM.get(MD.g),n=g.stickers.length;MD.i=((MD.i-1+(+el.dataset.d)+n)%n)+1;gmodal()};
 ACT.gedit=()=>{const g=GM.get(MD.g),t=g.stickers[MD.i-1];ACT.gmclose();return studioEditSticker(g.number,t.index);Ed.openImage(`/out/${g.generation_id}/${t.png}?e=${t.edited_at||0}`,{back:{gen:g.number,index:t.index},outlined:g.outline_px>0,name:t.name,emoji:t.emoji})};
@@ -496,14 +502,20 @@ async function tick(force){try{
   let key='';for(const id of SES.gens){const r=await api('/api/generations/'+id);if(r.ok){GM.set(id,r.j);key+=JSON.stringify(r.j);autoRecheck(r.j)}else if(r.status===404){SES.gens=SES.gens.filter(x=>x!==id);saveSes()}}
   for(const id of [...ANIM]){const g=GM.get(id);if(g&&animPhase(g)&&!processing(g))ANIM.delete(id)}
   key+=bg+SES.off.join()+SES.pack+[...ANIM].join()+(LIB.packs||[]).length;
-  if(force||key!==glast){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg()}
+  if(force||key!==glast){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg();if(typeof applyEdgePreview==='function')applyEdgePreview()}
 }catch(e){const m=$('msg');if(m)m.textContent='Something went wrong: '+e.message}}
 setInterval(tick,700);loadLib();
 
 const layoutOfCell=(g,i)=>{const v=sheetOf(g),lay=v&&LAY.get(g.number+v.id);const sl=lay&&lay.slots.find(x=>x.slot===i);return sl?sl.rect:null};
 ACT.gallow=async el=>{const g=GM.get(+el.dataset.g),t=g&&g.stickers[+el.dataset.i-1];if(!t)return;
-  if(canAllow(t)){const r=await postWait(`/api/generations/${g.number}/allow`,{index:t.index,allow:true},'Finishing the previous step…');if(!r.ok)return toast(r.j.error||'Could not allow it',1);toast(`S${t.index} is allowed: cutting its animation…`)}
+  if(canAllow(t)||hasAllowed(t)){const allow=!hasAllowed(t)||canAllow(t),r=await postWait(`/api/generations/${g.number}/allow`,{index:t.index,allow},'Finishing the previous step…');if(!r.ok)return toast(r.j.error||'Could not change it',1);toast(allow?`S${t.index} is allowed: cutting its animation…`:`S${t.index}: the permission is taken back`)}
   else if(isOob(t))return ACT.gdrop({dataset:{g:el.dataset.g,i:el.dataset.i,off:0}});
   glast='';if(typeof tick==='function')tick(true)};
 ACT.gunallow=async el=>{const g=GM.get(+el.dataset.g);if(!g)return;const r=await postWait(`/api/generations/${g.number}/allow`,{index:+el.dataset.i,allow:false},'Finishing the previous step…');if(!r.ok)return toast(r.j.error||'Could not take it back',1);
   toast(`S${el.dataset.i}: the permission is taken back`);glast='';if(typeof tick==='function')tick(true)};
+
+function allowAllRow(g){const a=g.stickers.filter(canAllow).length,b=g.stickers.filter(hasAllowed).length;if(!a&&!b)return'';
+  return`<div class=lv-allow>${a?`<button class="btn sm pri" data-act=gallowall data-g=${g.number} data-allow=1 title="Allow every animation that Python blocked for leaving or crossing its slot">Allow all (${a})</button>`:''}
+   ${b?`<button class="btn sm" data-act=gallowall data-g=${g.number} data-allow=0 title="Block the animations you allowed again">Take all back (${b})</button>`:''}<span class=mut>or click a cell on the sheet</span></div>`}
+ACT.gallowall=async el=>{const g=GM.get(+el.dataset.g);if(!g)return;const allow=el.dataset.allow==='1',r=await postWait(`/api/generations/${g.number}/allow`,{all:true,allow},'Finishing the previous step…');
+  if(!r.ok)return toast(r.j.error||'Could not change it',1);toast(allow?`Allowed ${r.j.indexes.length}: cutting their animations…`:`Took back ${r.j.indexes.length}`);glast='';if(typeof tick==='function')tick(true)};
