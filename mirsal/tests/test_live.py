@@ -444,7 +444,7 @@ class LiveConsoleTests(Base):
         self.assertEqual(s, 200)
         self.assertEqual((j["defaults"], j["default_style"]), ({"image": "nano_banana_flash", "video": "kling3_0"}, "flat_vector"))
         self.assertEqual([m["id"] for m in j["video"]], ["kling3_0", "grok_video_v15"])
-        self.assertEqual(len(j["styles"]), 6)
+        self.assertEqual([s["id"] for s in j["styles"]], [s["id"] for s in styles.PRESETS])      # the page gets exactly the presets, however many there are
         s, j = self.req("GET", "/api/higgsfield")
         self.assertEqual((s, j["available"], j["credits"], j["plan"]), (200, True, 100.5, "creator"))
         for kind, name in (("styles", "glossy_3d"), ("vendors", "openai"), ("vendors", "google")):

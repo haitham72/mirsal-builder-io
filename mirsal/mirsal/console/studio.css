@@ -357,17 +357,8 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .lv-edge>b{font-weight:600}.lv-edge label{display:flex;align-items:center;gap:10px;color:var(--mut);font-weight:500}.lv-edge input[type=range]{width:170px}
 .lv-edge output{min-width:38px;color:var(--tx);font-variant-numeric:tabular-nums;font-weight:600}.lv-est{color:var(--mut);margin-left:auto}
 #ghist{margin:26px 4px 40px}.lv-hhead{display:flex;align-items:baseline;gap:12px;margin:0 4px 8px}.lv-ht{font-size:var(--fs-l);font-weight:600}
-.lv-hlist{display:flex;flex-direction:column;gap:8px}
-.lv-hcard{border:1px solid var(--bd);background:var(--sf);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.lv-hcard.on{border-color:var(--pri);background:var(--pri-l)}.lv-hcard.open{border-color:var(--pri)}
-.lv-hitem{display:flex;align-items:center;gap:16px;text-align:left;width:100%;min-width:0;padding:2px;margin:-2px;background:none;border:0;border-radius:var(--r-m);cursor:pointer}
-.lv-hitem:hover{background:var(--pri-l)}.lv-hitem:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
-.lv-hitem .lv-caret,.lv-hsh .lv-caret,.lv-hgh .lv-caret{margin:0 0 0 auto;transform:rotate(-45deg)}.lv-hitem[aria-expanded=true]>.lv-caret,.lv-hsh[aria-expanded=true]>.lv-caret,.lv-hgh[aria-expanded=true]>.lv-caret{transform:rotate(45deg);margin-top:-3px}
-.lv-hdet{margin:0 4px 2px 14px;padding:6px 0 6px 12px;border-left:2px solid var(--bd);display:flex;flex-direction:column;gap:6px}
-/* the batch's own Studio view inside the card: the same header, views and bar as the session above, at card width */
-.gcardview{display:flex;flex-direction:column;gap:4px;margin:2px 0 2px 14px;padding:10px 12px;border-left:2px solid var(--bd);min-width:0}
-.gcardview .gsteps{margin:0 0 4px;position:static}.gcardview .gst{padding:9px 12px}.gcardview .gsheet{position:static}
-.gcardview .gbar{position:static;margin:8px -8px 0;padding:10px 8px;background:none}
+.lv-hsh .lv-caret,.lv-hgh .lv-caret{margin:0 0 0 auto;transform:rotate(-45deg)}.lv-hsh[aria-expanded=true]>.lv-caret,.lv-hgh[aria-expanded=true]>.lv-caret{transform:rotate(45deg);margin-top:-3px}
+.lv-hdet{margin:0 0 2px;display:flex;flex-direction:column;gap:6px}
 .lv-hsh{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:6px 10px;border:1px solid var(--bd);background:var(--sf);border-radius:var(--r-m);cursor:pointer}.lv-hsh:hover{border-color:var(--pri)}
 .lv-hsh img,.lv-hnoimg{width:36px;height:36px;flex:none;object-fit:contain;border-radius:var(--r-s);background:conic-gradient(#e9edf1 25%,#fbfcfd 0 50%,#e9edf1 0 75%,#fbfcfd 0) 0 0/10px 10px}
 .lv-hsm{display:flex;flex-direction:column;min-width:0;flex:1}.lv-hsm b{font-weight:600;font-size:var(--fs-m)}.lv-hsm small{font-size:var(--fs-s)}
@@ -459,10 +450,10 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
  body.col2 #c2tog{left:10px}
 }
 
-/* interaction: every interactive thing answers a hover and a keyboard focus the same way (the template is .lv-hitem / .sess-row), and moves a little, never abruptly */
+/* interaction: every interactive thing answers a hover and a keyboard focus the same way (the template is .sess-row), and moves a little, never abruptly */
 a:focus-visible,button:focus-visible,[data-act]:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
 .tab:hover{background:#e3ecf3}.tab.on:hover{background:var(--pri-d)}
 .seeall:hover{text-decoration:underline}
 .vchip:hover{border-color:var(--pri);color:var(--pri-d)}
-.btn,.tab,.rbtn,.crow,.iconbtn,.lv-hrow,.lv-hitem,.cp-chip,.cp-style,.vchip{transition:background-color .15s,border-color .15s,box-shadow .2s,color .15s}
+.btn,.tab,.rbtn,.crow,.iconbtn,.lv-hrow,.cp-chip,.cp-style,.vchip{transition:background-color .15s,border-color .15s,box-shadow .2s,color .15s}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;scroll-behavior:auto!important}}

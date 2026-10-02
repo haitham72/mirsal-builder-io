@@ -259,7 +259,7 @@ setInterval(()=>{egSync();applyEdgePreview()},800);       // egSync leaves the s
 
 /* ---------- persistent history of batches: every batch ever made, in the shared second column (docs/design.md 6). The API is paged (50 at a time, it reads one result.json per batch);
    the column asks for the next page by itself when it is scrolled near the end, so the person sees one list that scrolls and no "Load more". Page 1 is read again now and then and merged
-   over what is already loaded (nothing that was loaded is dropped), and a batch that is open is always found: older pages are read until it is. */
+   over what is already loaded (nothing that was loaded is dropped). */
 const HB={items:[],more:false,total:0,loading:false,page:50,loaded:false,tried:false,sig:''};
 const ago=ts=>{if(!ts)return'';const s=Math.max(0,Date.now()/1000-ts);return s<90?'just now':s<5400?Math.round(s/60)+' min ago':s<129600?Math.round(s/3600)+' h ago':s<2592000?Math.round(s/86400)+' d ago':new Date(ts*1000).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'})};
 const hbSig=()=>HB.items.map(x=>[x.id,x.edited,x.ready,x.animated].join(':')).join(',')+'|'+HB.total;
@@ -270,27 +270,24 @@ async function histLoad(more,quiet){if(HB.loading)return;HB.loading=true;
     else{const fresh=new Set(r.j.items.map(x=>x.id));HB.items=r.j.items.concat(HB.items.filter(x=>!fresh.has(x.id)))}
     HB.total=r.j.total;HB.more=HB.items.length<HB.total;HB.loaded=true}
   const sig=hbSig(),same=sig===HB.sig;HB.sig=sig;
-  if(!(quiet&&same)){drawHist();hxSync();if(typeof cpDrawTop==='function')cpDrawTop()}
-  if(r.ok&&HB.more&&HB.items.length<500&&[...HX.open].some(id=>!HB.items.some(x=>x.id===id)))histLoad(true)}
+  if(!(quiet&&same)){drawHist();hxSync();if(typeof cpDrawTop==='function')cpDrawTop()}}
 const histReload=()=>histLoad(false);
 /* while the Studio or Create is showing, the column is read again every 10 s (a batch that was edited or finished moves to the top); it redraws only when something changed */
 setInterval(()=>{if(!document.hidden&&['generate','create'].includes(route_))histLoad(false,true)},10000);
-/* A batch is one entry of the column (histRow: its stickers as the sheet's own grid, 3x3 or 2x2, `cells` from GET /api/history, with its title, G###, counts and edited time) and, once
-   opened, one CARD in the Studio's main area (histItem). Any number of cards can be open at once, stacked; inside a card each sticker opens to its generation history grouped by stage,
-   each stage to its lines (GET /api/generations/<id>/history). Which cards are open is remembered (localStorage mirsal.hbopen); the sticker and stage folds last for the visit. A batch
-   that was edited since it was read is read again, and a card that is open stays open while the list is re-read. */
-const HX={open:new Set(),det:{},so:new Set(),go:new Set(),all:new Set(),cap:{},vlmThen:null};
-try{JSON.parse(localStorage.getItem('mirsal.hbopen')||'[]').forEach(n=>{if(Number.isInteger(n))HX.open.add(n)})}catch(e){}
-const hxSave=()=>{try{localStorage.setItem('mirsal.hbopen',JSON.stringify([...HX.open]))}catch(e){}};
+/* A batch is one entry of the column (histRow: its stickers as the sheet's own grid, 3x3 or 2x2, `cells` from GET /api/history, with its title, G###, counts and edited time). A click on it
+   makes it THE batch the Studio presents (ACT.hopen: the Studio's own view of it, nothing else beside it). Under that view the batch's own history stays: each sticker opens to its generation
+   history grouped by stage, each stage to its lines (GET /api/generations/<id>/history), and the AI captions; the sticker and stage folds last for the visit. A batch that was edited since it
+   was read is read again. */
+const HX={det:{},so:new Set(),go:new Set(),all:new Set(),cap:{},vlmThen:null};
 async function hxLoad(id,edited){const d=HX.det[id]=HX.det[id]||{};d.state='loading';drawHist();
   const r=await api(`/api/generations/${id}/history`),g=await api('/api/generations/'+id);
   if(r.ok){d.state='ok';d.data=r.j;d.edited=edited}else{d.state='err';d.err=(r.j&&r.j.error)||'Could not read the history'}
   if(g.ok&&typeof GM!=='undefined')GM.set(id,g.j);              // the Studio view of the card reads the batch from the same map as the session
   drawHist()}
-/* an open card is read again when its batch was edited since, or while it is still working (an animation finishing, a sheet being cut) */
-function hxSync(){for(const id of HX.open){const it=HB.items.find(x=>x.id===id);if(!it)continue;const d=HX.det[id],
-    g=typeof GM!=='undefined'?GM.get(id):null,busy=!!(g&&((typeof making==='function'&&making(g))||(typeof processing==='function'&&processing(g))||(typeof ANIM!=='undefined'&&ANIM.has(g.number))));
-    if(!d||(d.state==='ok'&&(d.edited!==it.edited||busy)))hxLoad(id,it.edited)}}
+/* the presented batch is read again when it was edited since, or while it is still working (an animation finishing, a sheet being cut) */
+function hxSync(){for(const id of SES.gens){const it=HB.items.find(x=>x.id===id),d=HX.det[id],
+    g=typeof GM!=='undefined'?GM.get(id):null,busy=!!(g&&((typeof making==='function'&&making(g))||(typeof processing==='function'&&processing(g))||(typeof ANIM!=='undefined'&&ANIM.has(g.number)))),edited=it?it.edited:0;
+    if(!d||(d.state==='ok'&&(d.edited!==edited||busy)))hxLoad(id,edited)}}
 const hxTime=ts=>ts?new Date(ts*1000).toLocaleString([],{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
 const hxCls=d=>/APPROVE|PASS/.test(d||'')?'ok':/REJECT|BLOCK|FAIL/.test(d||'')?'bad':'';
 const hxFacts=d=>Object.entries(d).map(([k,v])=>esc(k.replace(/_/g,' '))+' '+esc(Array.isArray(v)?v.join(', '):String(v))).join(' · ');
@@ -333,7 +330,7 @@ async function hcapRun(id){if(HX.cap[id]&&['loading','working'].includes(HX.cap[
   c.state='ok';drawHist()}
 function hxBatch(it){const d=HX.det[it.id];
   if(!d||d.state==='loading')return'<div class="mut lv-hempty lv-hdet">Reading the stickers…</div>';
-  if(d.state==='err')return`<div class="mut lv-hempty lv-hdet">${esc(d.err)} <button class=link data-act=hbx data-id=${it.id} data-retry=1>Try again</button></div>`;
+  if(d.state==='err')return`<div class="mut lv-hempty lv-hdet">${esc(d.err)} <button class=link data-act=hretry data-id=${it.id}>Try again</button></div>`;
   const c=HX.cap[it.id];
   return`<div class=lv-hdet><div class=lv-hbar><button class="btn sm" data-act=hcap data-id=${it.id} ${c&&['loading','working'].includes(c.state)?'disabled':''} title="Write a one-sentence caption of what each sticker shows (AI vision)">${c?'Caption again':'AI captions'}</button>
     <span class=mut>${c?'':'What does each sticker show? Needs your yes to AI vision (asked once).'}</span></div>${hxCaps(it.id)}
@@ -342,15 +339,9 @@ const histTitle=it=>esc(titleCase(String(it.prompt||'').replace(/_/g,' '))||it.g
 const histInfo=it=>`${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}`;
 /* the stickers of a batch, in the sheet's own grid (a 2x2 batch draws four cells, a 3x3 nine; a cell with no picture yet is the checkerboard) */
 const histGrid=it=>`<span class=lv-hth style="--c:${Math.max(1,Math.min(6,(it.grid&&it.grid[1])||3))}">${(it.cells||[]).map(c=>c.png?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="S${c.index} · ${esc(String(c.status||'').toLowerCase())}"></span>`).join('')}</span>`;
-/* one entry of the column: a click opens the batch's card in the Studio (and closes it again when the Studio is showing). `on` = its card is open, `cur` = it is the batch the Studio works on. */
-const histRow=it=>{const open=HX.open.has(it.id);
-  return`<button class="lv-hrow${open?' on':''}${SES.gens.includes(it.id)?' cur':''}" data-act=hbx data-id=${it.id} aria-pressed=${open} title="${open?'Close':'Open'} ${esc(it.generation_id)} in the Studio">${histGrid(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(it)}</small></span></button>`};
-/* an open batch, in the Studio's main area. **What the card shows is that batch's Studio view** (`studioFor` in generate.js: the same working Request > Prompt > Stickers > Animation > Pack
-   header, its own tab in CT, its own buttons) so an earlier batch is one click away from being worked on again; below it the per-sticker history and the AI captions stay
-   (GET /api/generations/<id>/history and /captions). */
-const histItem=it=>{const g=typeof GM!=='undefined'?GM.get(it.id):null;
-  return`<div class="lv-hcard open${SES.gens.includes(it.id)?' on':''}" data-id=${it.id}><button class=lv-hitem data-act=hbx data-id=${it.id} aria-expanded=true title="Close ${esc(it.generation_id)}">${histGrid(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(it)}</small></span><i class=lv-caret></i></button>
-   ${g&&typeof studioFor==='function'?studioFor(g):'<div class="mut lv-hempty lv-hdet">Reading the batch…</div>'}${hxBatch(it)}</div>`};
+/* one entry of the column: a click presents the batch in the Studio. `on` = it is the batch the Studio presents now. */
+const histRow=it=>{const on=SES.gens.includes(it.id);
+  return`<button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${it.id} aria-pressed=${on} title="Show ${esc(it.generation_id)} in the Studio">${histGrid(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(it)}</small></span></button>`};
 /* the column: a title and the whole list, newest edit first; the next page is asked for when the list is scrolled near its end (no "Load more") */
 function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
   <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histRow).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div>`}
@@ -360,15 +351,11 @@ function histCol(){const c2=document.getElementById('col2');if(!c2)return;
   else{const l=document.getElementById('c2hist'),top=l.scrollTop;c2.querySelector('.c2n').textContent=HB.loaded?`${HB.total} in total`:'';l.innerHTML=HB.items.map(histRow).join('')||l.innerHTML;l.scrollTop=top}
   if(!HB.loaded){if(!HB.tried){HB.tried=true;histLoad(false)}}
   else{const l=document.getElementById('c2hist');if(HB.more&&!HB.loading&&l.scrollHeight<=l.clientHeight+320)histLoad(true)}}
+/* under the Studio's view of the presented batch: that batch's own history and AI captions (one block per batch of the session; a session has one batch unless Create more was used) */
 function drawHist(){if(['generate','create'].includes(route_))histCol();const el=document.getElementById('ghist');if(!el)return;
-  const open=HB.items.filter(it=>HX.open.has(it.id));
-  el.innerHTML=open.length?`<div class=lv-hhead><span class=lv-ht>Open batches</span><span class=mut>${open.length} open · pick another in the column on the left</span></div><div class=lv-hlist id=ghlist>${open.map(histItem).join('')}</div>`:''}
-/* a click on a batch: on the Studio it opens (or closes) the batch's card in place and brings it into view; anywhere else it opens the card and goes to the Studio, where the card is */
-ACT.hbx=el=>{const id=+el.dataset.id,it=HB.items.find(x=>x.id===id);if(!it)return;const here=route_==='generate';
-  if(HX.open.has(id)&&!el.dataset.retry&&here)HX.open.delete(id);
-  else{HX.open.add(id);const d=HX.det[id];if(!d||d.state==='err'||d.edited!==it.edited)hxLoad(id,it.edited)}
-  hxSave();if(!here){location.hash='#/studio';return}
-  drawHist();if(HX.open.has(id))requestAnimationFrame(()=>{const c=document.querySelector(`.lv-hcard[data-id="${id}"]`);if(c)c.scrollIntoView({behavior:'smooth',block:'start'})})};
+  el.innerHTML=SES.gens.map(id=>{const d=HX.det[id];if(!d)hxLoad(id,0);const it={id},gid=d&&d.data?d.data.generation_id:'G'+String(id).padStart(3,'0');
+    return`<div class=lv-hhead><span class=lv-ht>History of ${esc(gid)}</span><span class=mut>every decision on its stickers, and the AI captions</span></div>${hxBatch(it)}`}).join('')}
+ACT.hretry=el=>hxLoad(+el.dataset.id,0);
 const hxFlip=(set,k)=>{set.has(k)?set.delete(k):set.add(k);drawHist()};
 ACT.hsx=el=>hxFlip(HX.so,el.dataset.k);
 ACT.hgx=el=>hxFlip(HX.go,el.dataset.k);

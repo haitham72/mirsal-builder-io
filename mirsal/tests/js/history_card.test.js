@@ -1,5 +1,5 @@
-// The markup of the Earlier-batches column and of an open batch's card in live.js (the DOM half runs only in a browser). The statements are read out of the file and run with the few
-// globals they use stubbed, so the markup is checked for real: the sheet's own grid, the plain title, one row per batch, and the card that only an opened batch gets.
+// The markup of the Earlier-batches column and of the history under the presented batch in live.js (the DOM half runs only in a browser). The statements are read out of the file and run with the few
+// globals they use stubbed, so the markup is checked for real: the sheet's own grid, the plain title, one row per batch, and the history block of the batch the Studio presents.
 // Run: node --test tests/js     (MIRSAL_LIVE_JS points the test at another copy of live.js)
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -38,15 +38,16 @@ function load() {
     titleCase: s => s.replace(/(^|\s)([a-z])/g, (_, a, b) => a + b.toUpperCase()),
     ago: () => '2 d ago',
     SES: { gens: [] },
-    HX: { open: new Set(), det: {} },
-    hxBatch: it => `<div class=lv-hdet>detail of ${it.generation_id}</div>`,
+    HX: { det: {} },
+    hxBatch: it => `<div class=lv-hdet>detail of ${it.id}</div>`,
+    hxLoad: () => {},
     HB: { items: [], more: false, total: 0, loaded: true },
     route_: 'library',
     histCol: () => {},
     document: { getElementById: () => null },
   };
-  const body = ['const histTitle=', 'const histInfo=', 'const histGrid=', 'const histRow=', 'const histItem=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
-  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histGrid,histRow,histItem,histColHTML,drawHist};')(...Object.values(sandbox));
+  const body = ['const histTitle=', 'const histInfo=', 'const histGrid=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
+  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histGrid,histRow,histColHTML,drawHist};')(...Object.values(sandbox));
   return { ...sandbox, ...api, env: sandbox };          // env: the globals the statements closed over (mutate them, not the copy)
 }
 
@@ -73,27 +74,15 @@ test('the row says which batch it is and a cell with no picture is a cell, not a
   assert.ok(!/src="[^"]*null/.test(html), 'no src built from a missing png');
 });
 
-test('a row is one button that opens the batch; an open batch and the batch the Studio works on are marked', () => {
+test('a row is one button that presents the batch; the batch the Studio presents is marked', () => {
   const hx = load();
   const it = BATCH([3, 3]);
-  const closed = hx.histRow(it);
-  assert.match(closed, /^<button class="lv-hrow" data-act=hbx data-id=5 aria-pressed=false/);
-  assert.ok(!closed.includes('detail of'), 'a row never carries the batch itself');
-  hx.HX.open.add(5);
-  assert.match(hx.histRow(it), /class="lv-hrow on"[^>]*aria-pressed=true/);
+  assert.match(hx.histRow(it), /^<button class="lv-hrow" data-act=hopen data-id=5 aria-pressed=false/);
   hx.SES.gens = [5];
-  assert.match(hx.histRow(it), /class="lv-hrow on cur"/);
-  assert.ok(!hx.histRow(it).includes('data-act=hopen'), 'only the credits pill opens a batch as the Studio session');
-});
-
-test('an open card is that batch: its header closes it and its own detail sits under it', () => {
-  const hx = load();
-  const open = hx.histItem(BATCH([3, 3]));
-  assert.match(open, /^<div class="lv-hcard open" data-id=5>/);
-  assert.match(open, /data-act=hbx data-id=5 aria-expanded=true/);
-  assert.ok(open.includes('detail of G005'), 'the per-sticker history and captions stay in the card');
-  assert.ok(open.includes('Reading the batch…'), 'until the batch is read the card says so');
-  assert.ok(open.indexOf('detail of') > open.indexOf('Reading the batch'), 'the detail is below the Studio view');
+  assert.match(hx.histRow(it), /class="lv-hrow on"[^>]*aria-pressed=true/);
+  hx.SES.gens = [6];
+  assert.ok(!/lv-hrow on/.test(hx.histRow(it)), 'another batch is presented: this row is not marked');
+  assert.ok(!hx.histRow(it).includes('data-act=hbx'), 'no second way to open a batch');
 });
 
 test('the column title is plain text, every batch is a row and nothing says Load more', () => {
@@ -111,17 +100,16 @@ test('the column title is plain text, every batch is a row and nothing says Load
   assert.match(hx.histColHTML(), /No batches yet/);
 });
 
-test('the Studio shows only the batches that are open, each as a card, in the main area', () => {
+test('under the Studio view only the presented batch has its history, and nothing when none is', () => {
   const hx = load();
   const el = { innerHTML: '' };
   hx.env.document.getElementById = id => (id === 'ghist' ? el : null);
-  hx.env.HB.items = [1, 2, 3, 4].map(n => ({ ...BATCH([3, 3]), id: n, generation_id: `G00${n}` }));
+  hx.env.HX.det = { 5: { state: 'ok', data: { generation_id: 'G005' } } };
   hx.drawHist();
-  assert.equal(el.innerHTML, '', 'nothing open: nothing in the main area');
-  hx.env.HX.open = new Set([1, 3]);
+  assert.equal(el.innerHTML, '', 'no batch presented: nothing under the view');
+  hx.env.SES.gens = [5];
   hx.drawHist();
-  assert.match(el.innerHTML, /<span class=lv-ht>Open batches<\/span>/);
-  assert.equal((el.innerHTML.match(/class="lv-hcard open/g) || []).length, 2, 'two cards open at once');
-  assert.ok(el.innerHTML.indexOf('detail of G001') < el.innerHTML.indexOf('detail of G003'), 'each detail sits under its own card, in order');
-  assert.ok(!el.innerHTML.includes('detail of G002'), 'a closed batch shows nothing');
+  assert.match(el.innerHTML, /History of G005/);
+  assert.equal((el.innerHTML.match(/detail of/g) || []).length, 1, 'one batch, one history');
+  assert.ok(el.innerHTML.includes('detail of 5'));
 });
