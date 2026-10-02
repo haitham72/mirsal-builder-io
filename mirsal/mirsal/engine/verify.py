@@ -1,4 +1,4 @@
-"""The verifier: ONE catalogue of every check on the golden path (Phase_01/README.md, "The verifier").
+"""The verifier: ONE catalogue of every check on the golden path (docs/engine-and-studio.md, "The verifier").
 
 Python judges what is *correct*; humans (and from Phase 3 the VLM) judge what is *good*. A BLOCK failure is final: the
 API refuses an APPROVE on it. A WARN is shown to the human at the gate. The verifier is deterministic (same bytes in,

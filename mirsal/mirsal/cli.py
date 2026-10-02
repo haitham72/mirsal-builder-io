@@ -83,6 +83,8 @@ def db_cmd(out, action: str, yes: bool) -> int:
                 print(f"migrate failed: {e}")
                 return 1
             nt = repo.import_tasks(c, out)
+            nj = repo.import_jobs(c, out)               # Phase 2: claimed jobs update their task rows
+            nm = repo.import_model_calls(c, out)        # Phase 2: the model-call ledger
             ok, bad = 0, []
             for gid in pl.list_ids(out):
                 try:
@@ -91,11 +93,30 @@ def db_cmd(out, action: str, yes: bool) -> int:
                 except Exception as e:
                     c.rollback()  # one bad generation must not poison the rest of the import
                     bad.append(f"G{gid:03d}: {e}")
-        print(f"imported {ok} generation(s), {nt} task file(s)")
+        print(f"imported {ok} generation(s), {nt} task file(s), {nj} job(s), {nm} new model call(s)")
         for b in bad:
             print("FAILED " + b)
         return 1 if bad else 0
     return 1
+
+
+def trace_cmd(out, args) -> int:
+    from .obs import trace
+    st = trace.status()
+    if args.action == "status":
+        print(f"trace backend: {st['backend']}" + (f", project {st['project']}, reachable: {st['reachable']}" if st["backend"] == "langsmith" else
+              " (set MIRSAL_TRACE=langsmith and LANGSMITH_API_KEY to send runs; the project is MIRSAL_LANGSMITH_PROJECT, default mirsal)"))
+        return 0
+    if st["backend"] != "langsmith":
+        print("MIRSAL_TRACE is not langsmith: nothing to send (set it and LANGSMITH_API_KEY first)")
+        return 1
+    c = _dbc()
+    if c is None:
+        return 1
+    with c:
+        r = trace.backfill(c, out, args.since)
+    print(f"replayed {r['events']} event run(s) and {r['reviews']} gate decision(s) to project {st['project']}")
+    return 0
 
 
 def out_root_compose():
@@ -320,19 +341,31 @@ def pool_cmd(args) -> int:
     if c is None:
         return 1
     with c:
+        if args.action == "status":
+            st = _pool.status(c)
+            print(f"{st['indexed']} indexed, {st['with_vectors']} with vectors, {st['missing_vectors']} missing vectors, {st['hidden']} hidden, "
+                  f"{st['approved_not_indexed']} approved but not indexed")
+            return 0
         if args.action == "reindex":
-            print(f"indexed { _pool.reindex(c)} sticker(s)")
+            vec = not getattr(args, "no_vectors", False)
+            try:
+                n = _pool.reindex(c, vectors=vec)
+            except Exception as e:                       # an embedding backend that is down never blocks the lexical index
+                print(f"indexed (vectors skipped: {e})")
+                return 1
+            print(f"indexed {n} new sticker(s)" + (f", filled vectors for {_pool.reindex.last_embedded}" if vec else ""))
             return 0
         if args.action == "hide":
             print("hidden" if _pool.hide(c, (args.query or "").upper()) else "no such indexed sticker")
             return 0
-        res = _pool.search(c, args.query or "", count=args.count)
+        res = _pool.search(c, args.query or "", count=args.count, style=getattr(args, "style", None))
         if args.as_json:
             print(_json.dumps(res, ensure_ascii=False, default=str))
             return 0
-        print(f"parsed: subject={res['parsed']['subject']!r} action={res['parsed']['action']!r}")
+        print(f"parsed: subject={res['parsed']['subject']!r} action={res['parsed']['action']!r}  mode={res['mode']} {res['ms']} ms")
         for h in res["hits"]:
-            print(f"  {h['sticker_id']} {''.join(h['emoji'])} {h['key']:<44} rank={h['rank']}")
+            print(f"  {h['sticker_id']} {''.join(h['emoji'])} {h['key']:<44} rank={h['rank']}"
+                  + (f" cos={h['cos_subject']}/{h['cos_action']}" if "cos_subject" in h else ""))
         if res["missing"]:
             print(f"Found {res['found']} - generate {res['missing']} more? (confirm first: generation is never automatic)")
         elif not res["hits"]:
@@ -433,8 +466,17 @@ def main(argv=None) -> int:
     hf = sub.add_parser("hf", help="Higgsfield CLI: status (credits) | models [--type image|video] [--refresh] (full list) | run J### (fulfil a job)")
     hf.add_argument("action", choices=["status", "models", "run"]); hf.add_argument("jid", nargs="?")
     hf.add_argument("--type", choices=["image", "video", "audio", "text"]); hf.add_argument("--refresh", action="store_true")
+    jd = sub.add_parser("judge", help="S6: the vision model pre-reviews a generation's stickers (history lines with actor vlm; a human still decides)")
+    jd.add_argument("gid", nargs="?"); jd.add_argument("--anim", action="store_true", help="judge the animations (4 frames of each) instead of the stills")
+    jd.add_argument("--force", action="store_true", help="ask again even where a verdict of this judge version exists")
+    jd.add_argument("--status", action="store_true", help="which model, which policy")
+    mc = sub.add_parser("measure-cells", help="S4: the share of video cells that leave their slot, per slot_fill (reads result files only)")
+    mc.add_argument("--json", action="store_true", dest="as_json"); mc.add_argument("--record", action="store_true", help="append to docs/measurements.md")
+    tr = sub.add_parser("trace", help="tracing: status | backfill [--since DATE] (replay Postgres rows with no trace run to LangSmith)")
+    tr.add_argument("action", choices=["status", "backfill"]); tr.add_argument("--since")
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
-    po.add_argument("action", choices=["search", "reindex", "hide"]); po.add_argument("query", nargs="?")
+    po.add_argument("action", choices=["search", "reindex", "hide", "status"]); po.add_argument("query", nargs="?")
+    po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
     ph = sub.add_parser("photo", help="a photo -> a cut-out 512 sticker (3C; on-device by default)")
     ph.add_argument("file"); ph.add_argument("--method", default="auto", choices=["auto", "matte", "grabcut"])
@@ -446,14 +488,20 @@ def main(argv=None) -> int:
         cfg = replace(cfg, anim_workers=max(1, args.workers))
     if args.cmd == "doctor":
         return doctor()
+    from .writer_lock import WriterBusy, WriterLock
     if args.cmd == "recheck":
         ids = pl.list_ids(out) if args.gid == "all" else [_gid(args.gid)]
         tot = bad = 0
-        for gid in ids:
-            r = pl.recheck_bounds(out, gid, cfg)
-            tot += r["checked"]; bad += len(r["flagged"])
-            if r["checked"]:
-                print(f"G{gid:03d}: checked {r['checked']}, out of bounds: {', '.join('S' + str(i) for i in r['flagged']) or 'none'}")
+        try:
+            with WriterLock(out, "mirsal recheck"):          # a running server also writes result.json: one writer at a time
+                for gid in ids:
+                    r = pl.recheck_bounds(out, gid, cfg)
+                    tot += r["checked"]; bad += len(r["flagged"])
+                    if r["checked"]:
+                        print(f"G{gid:03d}: checked {r['checked']}, out of bounds: {', '.join('S' + str(i) for i in r['flagged']) or 'none'}")
+        except WriterBusy as e:
+            print(e)
+            return 1
         print(f"{tot} animations checked, {bad} leave their cell and are now blocked for review")
         return 0
     if args.cmd == "profile":
@@ -470,6 +518,37 @@ def main(argv=None) -> int:
         return job_cmd(out, args)
     if args.cmd == "hf":
         return hf_cmd(out, args)
+    if args.cmd == "judge":
+        from .vision import judge as _vj
+        if args.status:
+            print(_vj.status())
+            return 0
+        if _vj.status()["provider"] == "none":
+            print("No vision backend: start LM Studio (MIRSAL_LOCAL_URL) or set OPENAI_API_KEY.")
+            return 1
+        from .writer_lock import WriterBusy, WriterLock
+        try:
+            with WriterLock(out, "mirsal judge"):
+                r = _vj.judge_generation(out, _gid(args.gid) or pl.latest_id(out), "anim" if args.anim else "still", force=args.force)
+        except (pl.PipelineError, WriterBusy) as e:
+            print(e)
+            return 1
+        print(f"{r['generation']} {r['scope']}: judged {r['judged']} ({r['cached']} cached), approved {r['approved']}, rejected {r['rejected']}, "
+              f"unjudged {r['unjudged']} · model {r['model']} ({r['version']}) · {r['calls']} call(s)")
+        rec = r["recovery"]
+        print(f"recovery (a recommendation, nothing is spent): {rec['action']}" + (f" {rec['cells']}" if rec["cells"] else "") + f" · {rec['reason']}")
+        return 0
+    if args.cmd == "measure-cells":
+        import json as _json
+        from pathlib import Path as _Path
+        from . import measure
+        m = measure.measure(out)
+        print(_json.dumps(m, ensure_ascii=False, indent=2) if args.as_json else measure.render(m))
+        if args.record and m["cells"]:
+            print("recorded in", measure.record(out, m, _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"))
+        return 0
+    if args.cmd == "trace":
+        return trace_cmd(out, args)
     if args.cmd == "pool":
         return pool_cmd(args)
     if args.cmd == "photo":
@@ -479,16 +558,17 @@ def main(argv=None) -> int:
             from .console.server import serve
             serve(out, inp, args.port, args.pace, cfg)
             return 0
-        if args.cmd == "create":
-            gid = pl.start(args.prompt, out, inp); pl.run_stills(out, gid, cfg)
-        elif args.cmd in ("more", "another"):
-            gid = pl.more(out, inp, _gid(args.gid)); pl.run_stills(out, gid, cfg)
-        else:
-            gid = _gid(args.gid) or pl.latest_id(out)
-            pl.run_animate(out, gid, cfg, "slice" if args.slice else "pack", args.slice)
+        with WriterLock(out, f"mirsal {args.cmd}"):          # create / more / animate write result.json: one writer at a time
+            if args.cmd == "create":
+                gid = pl.start(args.prompt, out, inp); pl.run_stills(out, gid, cfg)
+            elif args.cmd in ("more", "another"):
+                gid = pl.more(out, inp, _gid(args.gid)); pl.run_stills(out, gid, cfg)
+            else:
+                gid = _gid(args.gid) or pl.latest_id(out)
+                pl.run_animate(out, gid, cfg, "slice" if args.slice else "pack", args.slice)
         _show(out, gid, t0)
         return 0
-    except pl.PipelineError as e:
+    except (pl.PipelineError, WriterBusy) as e:
         print(e)
         return 1
 
@@ -575,6 +655,27 @@ def doctor() -> int:
     except Exception as e:
         print(f"NOTE    Postgres: store unavailable ({e}; pip install -r requirements.txt)")
     try:
+        from .store import sync as _sync
+        ws = _sync.status()
+        if ws["failed"]:
+            print(f"NOTE    Postgres write-through: {ws['failed']} failed, {ws['ok']} ok in this process; last error: {ws['last_error']}")
+    except Exception:
+        pass
+    try:
+        from . import cache as _cache
+        _c = _cache.default()
+        print(f"OK      Redis: {_c.engine}" + (f" ({_c.url})" if _c.engine == 'redis' else " (not reachable: the in-memory fallback is used; start it: python -m mirsal db up)"))
+    except Exception as e:
+        print(f"NOTE    Redis: {e}")
+    try:
+        from . import llm as _llm
+        from .vision import judge as _vj
+        ls = _llm.status()
+        print(f"OK      language model: {ls['provider']} {ls['model'] or ''}; local server {ls['local']['url']} " + ("reachable" if ls['local']['reachable'] else "not reachable")
+              + f"; vision judge: {_vj.status()['provider']} {_vj.status()['model']} ({_vj.status()['policy']})")
+    except Exception as e:
+        print(f"NOTE    language model: {e}")
+    try:
         from .obs import trace as _tr
         st = _tr.status()
         print(f"OK      trace backend: {st['backend']}" + (f" (reachable)" if st["reachable"] else " (unreachable)" if st["reachable"] is False else ""))
@@ -593,8 +694,7 @@ def doctor() -> int:
     from . import matte
     ms, mf = matte.status(), matte.status(True)
     print(f"OK      AI matte {ms['model']} (photos), {mf['model']} (video)" if ms["ok"] else f"NOTE    AI matte off, photos use GrabCut (optional): {ms['reason']}")
-    print(("OK      " if subs else "MISSING ") + f"input {input_root()}  subjects: {', '.join(subs) or 'none'}")
-    bad += 0 if subs else 1
+    print(("OK      " if subs else "NOTE    ") + f"prepared sheets in {input_root()}  subjects: {', '.join(subs) or 'none (optional: live generation and Create work without them)'}")
     for subject, picks in sources.scan(input_root()).items():
         clips = sum(1 for p in picks if p.clips)
         print(f"        {subject}: {len(picks)} variant(s), {sum(1 for p in picks if p.video)} with a 3x3 video, {clips} with pre-sliced clips")

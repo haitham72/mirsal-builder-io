@@ -1,4 +1,4 @@
-"""The golden path's review gates (Phase_01/README.md, checkpoint 1F). The rules live here, in Python, and every phase keeps them:
+"""The golden path's review gates (docs/engine-and-studio.md, checkpoint 1F). The rules live here, in Python, and every phase keeps them:
 
   G1 plan -> sheet -> Python blocks bad cells -> G2 stills -> video sheet (built from the approved stills only) -> G3 video sheet
   -> returned video attached to A<n> -> Python blocks bad slots -> G4 animations -> G5 pack (stickers approved at G2 AND G4)

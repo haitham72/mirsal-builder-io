@@ -1,9 +1,9 @@
-/* History: the real watch folders (Phase_01/Images_gen and Phase_01/videos_gen), image and video side by side, with Remove.
+/* History: the real watch folders (inputs/Images_gen and inputs/videos_gen), image and video side by side, with Remove.
    Remove moves a folder pair to the trash (out/trash) where it can be restored under its own name; the media is not in git. */
 'use strict';
 const HS={rows:[],trash:[],images:'',videos:''};
 const bytes=n=>n>=1048576?(n/1048576).toFixed(1)+' MB':n>=1024?Math.round(n/1024)+' KB':n+' B';
-const ago=ts=>{const m=Math.round((Date.now()/1000-ts)/60);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':new Date(ts*1000).toLocaleDateString()};
+const hAgo=ts=>{const m=Math.round((Date.now()/1000-ts)/60);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':new Date(ts*1000).toLocaleDateString()};
 async function hLoad(){const r=await api('/api/watch');if(r.ok){Object.assign(HS,r.j);hDraw()}else toast(r.j.error||'Could not read the folders',1)}
 RENDER.history=async()=>{$('s-history').innerHTML='<div class=hwrap><div class=sh>'+ic('hist')+' History</div><div class=mut>Loading the folders…</div></div>';await hLoad()};
 function hSide(label,s,kind){
@@ -20,7 +20,7 @@ function hDraw(){const el=$('s-history');if(!el||route_!=='history')return;
       <div class=hact><button class="btn sm pri" data-act=hgen data-s="${esc(r.subject)}" data-n=${r.number} ${r.img?'':'disabled'}>${ic('gen')} Generate</button>
         <button class="btn sm dng" data-act=hremove data-s="${esc(r.subject)}" data-n=${r.number}>${ic('trash')} Remove</button></div></div>`).join('')||'<div class="card" style="text-align:center;padding:36px"><h2>The watch folders are empty</h2><p class=mut>Put a sheet in <code>Images_gen/img-001-subject</code>. Its video goes in <code>videos_gen/vid-001-subject</code>.</p></div>'}</div>
    ${HS.trash.length?`<div class=sh style="margin-top:26px">${ic('trash')} Removed <span class=mut style="font-weight:500">kept until you delete them for good</span></div><div class=plist>${HS.trash.map(t=>`<div class=hrow trash>
-      <div class=hmain><b>${esc(t.subject.replace(/_/g,' '))}</b> <span class=mut>${t.number} · ${ago(t.removed)} · ${bytes(t.bytes||0)}</span><div class=mut>${t.items.map(i=>esc(i.name)).join(' + ')}</div></div>
+      <div class=hmain><b>${esc(t.subject.replace(/_/g,' '))}</b> <span class=mut>${t.number} · ${hAgo(t.removed)} · ${bytes(t.bytes||0)}</span><div class=mut>${t.items.map(i=>esc(i.name)).join(' + ')}</div></div>
       <div class=hact><button class="btn sm" data-act=hrestore data-id="${t.id}">Restore</button><button class="btn sm dng" data-act=hpurge data-id="${t.id}">Delete for good</button></div></div>`).join('')}</div>`:''}</div>`}
 ACT.hopen=el=>{openGen(+el.dataset.g);location.hash='#/studio'};
 ACT.hgen=async el=>{const subj=el.dataset.s,num=el.dataset.n;await loadInputs();const inp=GINP.find(x=>x.subject===subj),v=inp&&inp.variants.find(x=>String(x.folder)===String(num));

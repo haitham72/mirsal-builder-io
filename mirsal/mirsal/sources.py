@@ -1,4 +1,4 @@
-"""PhaseDirSource: discovers Haitham's prepared inputs by the Phase_01 naming convention (read-only, never renames).
+"""PhaseDirSource: discovers Haitham's prepared inputs by the inputs/ naming convention (read-only, never renames).
 
   Images_gen/img-NNN-<subject>/<file>.jpg            one folder per variant; NNN is the variant's folder number
   videos_gen/vid-NNN-<subject>/<file>.mp4            the 3x3 video of the SAME NNN

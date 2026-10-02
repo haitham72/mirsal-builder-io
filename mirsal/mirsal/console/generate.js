@@ -135,7 +135,7 @@ function drawOutline(){const on=GS.outline>0;$('opills').innerHTML=[[12,'On'],[0
 ACT.goutline=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);drawOutline();glast='';tick(true)};
 async function loadInputs(){const r=await api('/api/inputs');if(r.ok)GINP=r.j.inputs;const a=await api('/api/ai');if(a.ok)GAI=a.j;const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health}
 function drawSug(){const el=$('gsug');if(!el)return;
-  el.innerHTML=GINP.length?`<span class=mut>Prepared sheets:</span>`+GINP.map(s=>`<button class=chip2 data-act=gsug data-s="${esc(s.subject)}">${esc(s.subject.replace(/_/g,' '))} <small>${s.variants.length} ${s.variants.length>1?'sheets':'sheet'}</small></button>`).join(''):`<span class=mut>No prepared sheets found in Phase_01/Images_gen.</span>`}
+  el.innerHTML=GINP.length?`<span class=mut>Prepared sheets:</span>`+GINP.map(s=>`<button class=chip2 data-act=gsug data-s="${esc(s.subject)}">${esc(s.subject.replace(/_/g,' '))} <small>${s.variants.length} ${s.variants.length>1?'sheets':'sheet'}</small></button>`).join(''):`<span class=mut>No prepared sheets found in inputs/Images_gen.</span>`}
 ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');ACT.ggo()};
 
 /* a new request starts a session with Batch 1; "Create more" adds the next batch */

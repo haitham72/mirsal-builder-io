@@ -105,9 +105,21 @@ def emit(out: Path, gid: int, stage: str, status: str, ms: int = 0, detail=None,
     ev = {"ts": round(time.time(), 3), "stage": stage, "status": status, "ms": ms, "detail": detail}
     if actor:                                  # gate decisions: who decided (python | human | vlm) and what
         ev["actor"], ev["decision"] = actor, decision
+    try:                                       # tracing (backend none: returns None at once): the run id rides on the event
+        from .obs import trace
+        rid = trace.emit_event(out, gid, ev)
+        if rid:
+            ev["trace_run_id"] = rid
+    except Exception:
+        pass
     line = json.dumps(ev, ensure_ascii=False)
     with open(gen_dir(out, gid) / "events.jsonl", "a", encoding="utf-8") as f:
         f.write(line + "\n")
+    try:                                       # the same event on the Redis stream (Phase 5 names); events.jsonl stays the record
+        from . import events as _events
+        _events.publish(out, gid, ev)
+    except Exception:
+        pass
 
 
 def latest_id(out: Path) -> int:
@@ -350,6 +362,11 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
                 else:
                     st["review"]["still"] = "BLOCKED"
                     hist(st, "sliced", "python", "BLOCK", r.reason, detail=block_detail(r.report.checks))
+                try:                       # sticker_ready / sticker_failed, one per sticker as it is cut (Redis stream, best effort)
+                    from . import events as _events
+                    _events.sticker_events(out, gid, [st])
+                except Exception:
+                    pass
             ready = sum(1 for st in res["stickers"] if st["status"] == "READY")
             s.result = {"ready": ready, "failed": len(res["stickers"]) - ready}
             res["stage"] = "sliced"; write_result(out, gid, res)

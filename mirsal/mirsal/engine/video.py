@@ -295,13 +295,14 @@ def process_clips(clips: dict, cfg, on_cell=None, cache: AnimCache | None = None
     return _run_cells(clips, lambda idx: _cached(cache, cache and cache.key(cfg, "clip", _stat_id(pick_clip(clips[idx], cfg)[1])), idx, lambda: one(idx)), cfg, on_cell)
 
 
-_CRF_HINT = [3]       # ladder index that fitted the last clip (3 = crf 42): the next clip of the same video starts there
+CRF_START = 3         # ladder index every fit starts at (3 = crf 42): most clips land within a rung or two of it
 
 
-def _encode_fit(frames, fps, cfg, path) -> tuple[int, bytes, int]:
-    """The best quality (lowest crf of the ladder) whose WEBM fits the size budget. Starts where the last clip fitted and walks to the
-    boundary, so most clips take 2 encodes instead of walking the whole ladder from the top. If nothing fits the last rung is returned
-    (the size_budget check then blocks it)."""
+def _encode_fit(frames, fps, cfg, path, start: int = CRF_START) -> tuple[int, bytes, int]:
+    """The best quality (lowest crf of the ladder) whose WEBM fits the size budget. Starts at `start` and walks to the boundary, so most
+    clips take 2 encodes instead of walking the whole ladder from the top. The start is an argument, never shared state: VP9 size is not
+    strictly monotonic in crf, so a start that depended on which clip another worker thread fitted last made the same clip get different
+    crfs. If nothing fits the last rung is returned (the size_budget check then blocks it)."""
     ladder = cfg.crf_ladder
     got: dict[int, bytes] = {}
 
@@ -309,7 +310,7 @@ def _encode_fit(frames, fps, cfg, path) -> tuple[int, bytes, int]:
         ff.encode_webm(frames, fps, ladder[i], path)
         got[i] = path.read_bytes()
         return len(got[i]) <= cfg.video_max_bytes
-    i = min(_CRF_HINT[0], len(ladder) - 1)
+    i = min(start, len(ladder) - 1)
     if fits(i):
         while i > 0 and fits(i - 1):
             i -= 1
@@ -318,7 +319,6 @@ def _encode_fit(frames, fps, cfg, path) -> tuple[int, bytes, int]:
         while i < len(ladder) and not fits(i):
             i += 1
         i = min(i, len(ladder) - 1)
-    _CRF_HINT[0] = i
     return ladder[i], got[i], len(got)
 
 

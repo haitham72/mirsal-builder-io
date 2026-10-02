@@ -1,4 +1,4 @@
-"""History = the real watch folders (Phase_01/Images_gen and Phase_01/videos_gen), with Remove.
+"""History = the real watch folders (inputs/Images_gen and inputs/videos_gen), with Remove.
 
 A sheet folder img-NNN-<subject> and its video folder vid-NNN-<subject> are one row. Remove never deletes outright: the folders move
 to <out>/trash/<id>/ (the media is not in git, so a mistaken click must be undoable) and can be restored under their own names

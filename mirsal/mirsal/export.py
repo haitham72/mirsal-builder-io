@@ -38,7 +38,7 @@ def is_live(out: Path, res: dict) -> bool:
 
 
 def export_root(out: Path) -> Path:
-    """<repo>/generated for the project's own data folder (so the files are visible in the repo, next to Phase_01 and mirsal/), out/export for any other data
+    """<repo>/generated for the project's own data folder (so the files are visible in the repo, next to inputs/ and mirsal/), out/export for any other data
     folder (a copy, a test), or the folder named by MIRSAL_EXPORT_DIR. Never a watch folder."""
     env = os.environ.get("MIRSAL_EXPORT_DIR")
     if env:

@@ -1,4 +1,4 @@
-"""The verifier catalogue: every check has a PASS fixture and a FAIL fixture (Phase_01/README.md, "Rules")."""
+"""The verifier catalogue: every check has a PASS fixture and a FAIL fixture (docs/engine-and-studio.md, "Rules")."""
 import hashlib
 import tempfile
 import unittest

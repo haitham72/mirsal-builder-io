@@ -1,4 +1,4 @@
-"""Send a Library pack to Telegram (checkpoint 1H, Phase_01/README.md Part H).
+"""Send a Library pack to Telegram (checkpoint 1H, docs/engine-and-studio.md Part H).
 
 Bot API (createNewStickerSet / addStickerToSet / getStickerSet), stdlib only. Every sticker is judged by the verifier's `telegram`
 stage BEFORE any network call. A Telegram set holds one kind of sticker, so a mixed pack becomes two sets (video + static). Sending

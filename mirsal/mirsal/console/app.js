@@ -62,14 +62,15 @@ const RAIL=[['generate','gen','Studio'],['library','lib','Library'],['chat','cha
 let route_='generate',PACK_ID=null;
 function drawRail(){$('rail').innerHTML=`<div class=logo><img src=/assets/brand/mirsal-logo.png alt=Mirsal></div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
 ACT.nav=el=>{location.hash='#/'+(el.dataset.to==='generate'?'studio':el.dataset.to)};
-function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'generate',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'generate';
+function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'agent',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'agent';document.body.classList.toggle('agent-view',route_==='agent');
  SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCol2();if(RENDER[route_])RENDER[route_](a)}
 window.addEventListener('hashchange',route);
 
 /* ---------- second column: packs (occupies the chat-list position of the Mirsal mockup; every row is a real pack) */
 let C2Q='';
-function drawCol2(){const on=['library','pack','chat'].includes(route_);document.body.classList.toggle('col2',on);if(!on)return;
+function drawCol2(){const on=['library','pack','chat','agent'].includes(route_);document.body.classList.toggle('col2',on);if(!on)return;
  if(route_==='chat')return chList();
+ if(route_==='agent')return typeof agList==='function'?agList():0;
  const q=C2Q.trim().toLowerCase(),cur=route_==='pack'?PACK_ID:null;
  $('col2').innerHTML=`<div class=c2h><h1>Packs</h1><button class=iconbtn data-act=newpack title="New pack">${ic('plus')}</button></div>
   <div class=c2s><input type=search id=c2q placeholder="Search packs…" value="${esc(C2Q)}"></div>

@@ -307,7 +307,8 @@ class ConsoleTests(unittest.TestCase):
     def test_a_server_running_older_code_than_the_disk_says_so(self):
         import os, time, tempfile
         from mirsal.console.server import Console
-        c = Console(self.tmp / "out", self.tmp / "in")
+        c = Console(Path(tempfile.mkdtemp()) / "out", self.tmp / "in")        # its own out/: the running server already holds the writer lock of self.tmp/out
+        self.addCleanup(c.release_writer)
         src = Path(tempfile.mkdtemp())
         (src / "a.py").write_text("x = 1"); old = time.time() - 100
         os.utime(src / "a.py", (old, old))

@@ -14,16 +14,18 @@ from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
 from ..video_project import MAX_UPLOAD, Projects, decode_overlays
+from ..writer_lock import WriterLock
 from . import placeholders
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "prepare.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 class Console:
     def __init__(self, out: Path, inp: Path, pace: float = 0.0, cfg: EngineConfig | None = None):
         self.out, self.inp, self.pace, self.cfg = out, inp, pace, cfg or EngineConfig()
+        self._writer = WriterLock(out, "mirsal serve").acquire()   # one writer of result.json per out/ (raises WriterBusy)
         self.lock = threading.Lock()   # held while a job runs
         self.started, self._stale_checked, self._stale = time.time(), 0.0, False
         self._health = None
@@ -32,6 +34,9 @@ class Console:
         self._acct = (0.0, None)
         self._jobs = []
         threading.Thread(target=self._warm_models, daemon=True).start()
+
+    def release_writer(self) -> None:
+        self._writer.release()
 
     def health(self) -> dict:
         """Can the final WEBM be encoded here? (live preview never needs ffmpeg)"""
@@ -119,7 +124,10 @@ class Console:
         sheet = self.out / job["result"]["file"]
         pick = sources.Pick(subject=tasks.subject_of(t["plan"]), subject_id=t["id"], variant=1, n_variants=1, sheet=sheet, video=None)
         outline = (job.get("request") or {}).get("outline")
-        gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None)
+        req = job.get("request") or {}
+        parent = req.get("parent")                         # a chat edit: the new batch is a child of the one it improves (lineage, never a copy)
+        gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None,
+                       parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None)
         tasks.link_generation(self.out, t["id"], gid)
         jobs.attach_generation(self.out, job["id"], gid)
         self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
@@ -214,6 +222,113 @@ class Console:
         gates.attach_video(self.out, gid, req["sheet"], data, f"{job['id']}.mp4")
         self._submit_when_free(lambda: gates.slice_video(self.out, gid, req["sheet"], self.cfg, self.pace))
 
+    def live(self, what, body):
+        """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
+        `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>."""
+        if what not in ("cost", "sheet", "video"):
+            raise pl.PipelineError("not found", 404)
+        if not higgsfield.available():
+            raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
+        kind = "video" if what == "video" or body.get("kind") == "video" else "image"
+        try:
+            model, params = model_catalog.resolve(kind, body.get("model"), body.get("options"))
+            if what == "cost":
+                try:
+                    return {"credits": higgsfield.cost(model, params, "x"), "model": model, "params": params}
+                except higgsfield.HiggsError as e:
+                    return {"credits": None, "error": str(e), "model": model, "params": params}
+            if what == "sheet":
+                refs = self.ref_files(body.get("refs"))
+                if refs and not model_catalog.find("image", model).get("refs"):
+                    raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
+                t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")))
+                prompt = t["plan"]["sheet_prompt"] + ("\n" + prompter.REFERENCE_CLAUSE if refs else "")
+                est = higgsfield.cost(model, params, prompt, **({"image_references": [str(self.out / r) for r in refs]} if refs else {}))
+                job = jobs.create(self.out, "sheet", task=t["id"], request={
+                    "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
+                    "outline": int(body["outline"]) if body.get("outline") is not None else None,
+                "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None})
+                self.fulfil_async(job["id"], after=self.start_from_job)
+                return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
+                        "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
+            gid = int(body["generation"])
+            self.commit_edge(gid, body.get("outline"), body.get("erode"), "video")             # the edge chosen in the Studio becomes real here
+            aid = str(body.get("sheet") or "")
+            fill = None if body.get("slot_fill") is None else min(0.92, max(0.5, float(body["slot_fill"])))
+            loop = bool(body.get("loop"))
+            if not aid:                      # one click: approve the kept stills, build the video sheet and approve it (the click is the decision), as "Make a video" did
+                if self.lock.locked():
+                    raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                from dataclasses import replace as _replace
+                cfg_v = self.cfg if fill is None else _replace(self.cfg, slot_fill=fill)
+                cur = gates.active_sheet(pl.read_result(self.out, gid))
+                if cur and cur["status"] in ("BUILT", "APPROVED") and not cur.get("video") and fill is not None \
+                        and abs(float(cur.get("slot_fill") or self.cfg.slot_fill) - fill) > 0.004:      # the gap was changed: a new sheet, the old one is rejected (never deleted)
+                    gates.review(self.out, gid, "video_sheet", "REJECT", cur["id"], "gap changed before sending")
+                aid = gates.quick_sheet(self.out, gid, cfg_v)["sheet"]
+            res = pl.read_result(self.out, gid)
+            entry = gates.sheet_of(res, aid)
+            if entry.get("status") not in ("APPROVED", "VIDEO_BLOCKED"):
+                raise pl.PipelineError(f"{aid} is {entry.get('status')}: approve the video sheet (G3) first, a human decides before anything is sent to be animated "
+                                       "(a sheet that already has its video sliced cannot be animated again).", 409)
+            start = pl.gen_dir(self.out, gid) / entry["file"]
+            est = higgsfield.cost(model, params, "x", start_image=str(start))
+            job = jobs.create(self.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
+                "model": model, "options": body.get("options") or {}, "prompt": self.video_prompt_for(gid, aid, loop),
+                "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop})
+            self.fulfil_async(job["id"], after=self.attach_video_from_job)
+            return {"job": job["id"], "estimate": est, "model": model, "params": params}
+        except (higgsfield.HiggsError, jobs.JobError, model_catalog.CatalogError) as e:
+            raise pl.PipelineError(str(e), getattr(e, "code", 400))
+
+    def idem(self, scope: str, key, fn):
+        """Idempotency (Phase 5A): the same Idempotency-Key within 24 h returns the first answer and runs nothing again. The key is scoped
+        (a generation create and a chat message never collide) and held under a lock while the first request runs. No key: just run."""
+        key = str(key or "").strip()
+        if not key:
+            return fn()
+        from .. import cache as cachemod
+        cc = cachemod.default()
+        ck = cc.key("idem", scope, cachemod.digest(key))
+        try:
+            with cc.lock("idem:" + ck, 30_000):
+                hit = cc.get(ck, "idem")
+                if hit is not None:
+                    return dict(hit, idempotent=True)
+                r = fn()
+                cc.set(ck, r, 24 * 3600)
+                return r
+        except cachemod.Busy:
+            raise pl.PipelineError("a request with this Idempotency-Key is still running", 409)
+
+    # ---------- the agentic chat (Phase 4): sessions with memory, the graph over this same engine ----------
+    def chat_parts(self):
+        from ..agent import graph as ag
+        from ..agent.brain import Brain
+        from ..agent.memory import SessionStore
+        from ..agent.tools import ConsoleTools
+        store = SessionStore(self.out)
+        tools = ConsoleTools(self)
+        return store, tools, ag.Agent(store, tools, Brain(out=self.out)), ag
+
+    def chat_send(self, sid: str, body: dict) -> dict:
+        """Start one turn in the background and answer at once: the page polls the session and sees the steps as they are written."""
+        store, tools, agent, _ = self.chat_parts()
+        text = str(body.get("text") or "")
+        action = body.get("action") if isinstance(body.get("action"), dict) else None
+        if not text.strip() and not action:
+            raise pl.PipelineError("say something first")
+        turn = agent.prepare(sid, text, [str(x) for x in (body.get("selected") or [])], action)      # 409 when the last message is still running
+        t = threading.Thread(target=agent.execute, args=(turn,), daemon=True)
+        self._chat_threads = [x for x in getattr(self, "_chat_threads", []) if x.is_alive()] + [t]
+        t.start()
+        return {"id": sid, "message": turn.msg["id"]}
+
+    def wait_chat(self, timeout: float = 60.0) -> None:
+        end = time.time() + timeout
+        for t in list(getattr(self, "_chat_threads", [])):
+            t.join(max(0.0, end - time.time()))
+
     def submit(self, fn) -> None:
         if not self.lock.acquire(blocking=False):
             raise pl.PipelineError("busy", 409)
@@ -261,6 +376,38 @@ def make_handler(c: Console):
             self.end_headers()
             self.wfile.write(data)
 
+        def _sse(self, gid: int, after: str):
+            """Server-sent events for one generation from the Redis stream (replay after Last-Event-ID, a ping every ~5 s, ends at pack_complete /
+            generation_failed or after 10 minutes). The generation keeps running when the browser goes away."""
+            from .. import events
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Accel-Buffering", "no")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+            end, idle, last = time.time() + 600, 0, after
+            try:
+                while time.time() < end:
+                    rows = events.read(gid, last)
+                    if rows:
+                        for sid, payload in rows:
+                            self.wfile.write(events.sse_frame(sid, payload))
+                            last = sid
+                        self.wfile.flush()
+                        idle = 0
+                        if any(p.get("event") in events.TERMINAL for _, p in rows):
+                            return
+                    else:
+                        idle += 1
+                        if idle % 25 == 0:
+                            self.wfile.write(b": ping\n\n")
+                            self.wfile.flush()
+                        time.sleep(0.2)
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                return
+
         def _json(self, code, obj):
             self._send(code, json.dumps(obj, ensure_ascii=False), "application/json; charset=utf-8")
 
@@ -274,7 +421,42 @@ def make_handler(c: Console):
             n = int(self.headers.get("Content-Length") or 0)
             return json.loads(self.rfile.read(n) or b"{}") if n else {}
 
+        def _foreign(self) -> str | None:
+            """Why this request must not be served, or None. The server binds 127.0.0.1 only, but a page the owner visits can still
+            POST to it from the browser (trash, the Telegram config, bulk delete) and a DNS-rebinding page can read it: so the Host
+            must be our own and a browser-sent Origin on anything that is not a read must be our own too. A client that sends no
+            Origin (curl, the tests, the CLI) passes; a browser always sends one on a cross-origin POST."""
+            port = self.server.server_address[1]
+            hosts = {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"}
+            if (self.headers.get("Host") or "").lower() not in hosts:
+                return "unexpected Host header"
+            if self.command in ("GET", "HEAD", "OPTIONS"):
+                return None
+            origin = self.headers.get("Origin")
+            if origin is not None and origin.lower() not in {f"http://{h}" for h in hosts}:
+                return "cross-origin request refused"
+            if (self.headers.get("Sec-Fetch-Site") or "same-origin") not in ("same-origin", "none"):
+                return "cross-site request refused"
+            return None
+
+        def _unauth(self) -> bool:
+            """MIRSAL_API_TOKEN (Phase 5C): when it is set, a caller that is not this server's own page (a browser sends Sec-Fetch-Site: same-origin
+            for the Studio) must send `Authorization: Bearer <token>`. Unset = the local sandbox behaves as before."""
+            import hmac
+            import os as _os
+            tok = _os.environ.get("MIRSAL_API_TOKEN", "")
+            if not tok or self.headers.get("Sec-Fetch-Site") == "same-origin":
+                return False
+            auth = self.headers.get("Authorization") or ""
+            got = auth[7:] if auth.startswith("Bearer ") else ""
+            return not hmac.compare_digest(got.encode(), tok.encode())
+
         def _guard(self, fn):
+            why = self._foreign()
+            if why:
+                return self._json(403, {"error": why})
+            if self._unauth():
+                return self._json(401, {"error": "an API token is required (Authorization: Bearer <token>)"})
             try:
                 fn()
             except (pl.PipelineError, LibraryError, watch.WatchError, telegram.TelegramError) as e:
@@ -292,6 +474,20 @@ def make_handler(c: Console):
             path = unquote(urlparse(self.path).path)
             if path == "/":
                 return self._send(200, INDEX.read_bytes(), "text/html; charset=utf-8")
+            gp = path.strip("/").split("/")
+            if len(gp) == 4 and gp[:2] == ["api", "generations"] and gp[3] == "events" and gp[2].isdigit():      # SSE: stream ids are the event ids
+                q = parse_qs(urlparse(self.path).query)
+                return self._sse(int(gp[2]), (q.get("after", [""])[0] or self.headers.get("Last-Event-ID") or "0-0"))
+            if path.startswith("/api/assets/") and len(gp) == 3:        # a short-lived signed link (see POST /api/assets/sign)
+                from ..store.assets import AssetError, LocalAssetStore
+                try:
+                    store = LocalAssetStore(c.out)
+                    f = store.path(store.verify(gp[2]))
+                except AssetError as e:
+                    return self._json(e.code, {"error": str(e)})
+                if not f.is_file():
+                    return self._json(404, {"error": "no such asset"})
+                return self._file(f)
             if path == "/api/telegram":      # connected or not and which bot: never the token
                 return self._json(200, telegram.status(c.out))
             if path.startswith("/api/packs/") and path.endswith("/telegram"):          # dry run: what would be created, every problem
@@ -345,6 +541,29 @@ def make_handler(c: Console):
                 return self._file(f)
             if path == "/api/ai":          # is the model available (never the key)
                 return self._json(200, llm.status())
+            if path == "/api/chat/agent":     # which model runs the chat, and whether the vision judge is up
+                from ..agent import brain as _brain
+                return self._json(200, {"agent": _brain.target(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
+                                        "live": higgsfield.available()})
+            if path == "/api/chat/sessions":
+                return self._json(200, {"sessions": c.chat_parts()[0].list()})
+            if path.startswith("/api/chat/sessions/") and len(path.strip("/").split("/")) == 4:
+                from ..agent.memory import SessionError as _SE
+                store, tools, _agent, ag = c.chat_parts()
+                try:
+                    return self._json(200, ag.hydrate(store, tools, store.load(path.rsplit("/", 1)[1])))
+                except _SE as e:
+                    raise pl.PipelineError(str(e), e.code)
+            if path in ("/api/health", "/api/health/models", "/api/health/storage"):     # what is this app connected to, and is it healthy
+                from .. import health as _h
+                if path.endswith("/models"):
+                    return self._json(200, _h.models())
+                if path.endswith("/storage"):
+                    return self._json(200, _h.storage(c.out))
+                return self._json(200, _h.snapshot(c.out))
+            if path == "/api/vision":        # the vision judge: which model, which policy
+                from ..vision import judge as _vj
+                return self._json(200, _vj.status())
             if path == "/api/search":
                 q = parse_qs(urlparse(self.path).query).get("q", [""])[0]
                 try:  # Phase 3A: Postgres search when serving the real out/ with the database up, else files
@@ -547,62 +766,7 @@ def make_handler(c: Console):
             return self._json(202, {"id": gid, "sheet": aid})
 
         def _live(self, what, body):
-            """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
-            `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>."""
-            if what not in ("cost", "sheet", "video"):
-                raise pl.PipelineError("not found", 404)
-            if not higgsfield.available():
-                raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
-            kind = "video" if what == "video" or body.get("kind") == "video" else "image"
-            try:
-                model, params = model_catalog.resolve(kind, body.get("model"), body.get("options"))
-                if what == "cost":
-                    try:
-                        return {"credits": higgsfield.cost(model, params, "x"), "model": model, "params": params}
-                    except higgsfield.HiggsError as e:
-                        return {"credits": None, "error": str(e), "model": model, "params": params}
-                if what == "sheet":
-                    refs = c.ref_files(body.get("refs"))
-                    if refs and not model_catalog.find("image", model).get("refs"):
-                        raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
-                    t = tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")))
-                    prompt = t["plan"]["sheet_prompt"] + ("\n" + prompter.REFERENCE_CLAUSE if refs else "")
-                    est = higgsfield.cost(model, params, prompt, **({"image_references": [str(c.out / r) for r in refs]} if refs else {}))
-                    job = jobs.create(c.out, "sheet", task=t["id"], request={
-                        "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
-                        "outline": int(body["outline"]) if body.get("outline") is not None else None})
-                    c.fulfil_async(job["id"], after=c.start_from_job)
-                    return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
-                            "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
-                gid = int(body["generation"])
-                c.commit_edge(gid, body.get("outline"), body.get("erode"), "video")             # the edge chosen in the Studio becomes real here
-                aid = str(body.get("sheet") or "")
-                fill = None if body.get("slot_fill") is None else min(0.92, max(0.5, float(body["slot_fill"])))
-                loop = bool(body.get("loop"))
-                if not aid:                      # one click: approve the kept stills, build the video sheet and approve it (the click is the decision), as "Make a video" did
-                    if c.lock.locked():
-                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
-                    from dataclasses import replace as _replace
-                    cfg_v = c.cfg if fill is None else _replace(c.cfg, slot_fill=fill)
-                    cur = gates.active_sheet(pl.read_result(c.out, gid))
-                    if cur and cur["status"] in ("BUILT", "APPROVED") and not cur.get("video") and fill is not None \
-                            and abs(float(cur.get("slot_fill") or c.cfg.slot_fill) - fill) > 0.004:      # the gap was changed: a new sheet, the old one is rejected (never deleted)
-                        gates.review(c.out, gid, "video_sheet", "REJECT", cur["id"], "gap changed before sending")
-                    aid = gates.quick_sheet(c.out, gid, cfg_v)["sheet"]
-                res = pl.read_result(c.out, gid)
-                entry = gates.sheet_of(res, aid)
-                if entry.get("status") not in ("APPROVED", "VIDEO_BLOCKED"):
-                    raise pl.PipelineError(f"{aid} is {entry.get('status')}: approve the video sheet (G3) first, a human decides before anything is sent to be animated "
-                                           "(a sheet that already has its video sliced cannot be animated again).", 409)
-                start = pl.gen_dir(c.out, gid) / entry["file"]
-                est = higgsfield.cost(model, params, "x", start_image=str(start))
-                job = jobs.create(c.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
-                    "model": model, "options": body.get("options") or {}, "prompt": c.video_prompt_for(gid, aid, loop),
-                    "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop})
-                c.fulfil_async(job["id"], after=c.attach_video_from_job)
-                return {"job": job["id"], "estimate": est, "model": model, "params": params}
-            except (higgsfield.HiggsError, jobs.JobError, model_catalog.CatalogError) as e:
-                raise pl.PipelineError(str(e), getattr(e, "code", 400))
+            return c.live(what, body)
 
         def _post(self):
             u = urlparse(self.path)
@@ -635,6 +799,31 @@ def make_handler(c: Console):
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
                 return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
+            if path.startswith("/api/chat/sessions"):
+                from ..agent.memory import SessionError as _SE
+                cp = path.strip("/").split("/")
+                store = c.chat_parts()[0]
+                try:
+                    if cp == ["api", "chat", "sessions"]:
+                        return self._json(200, store.create(body.get("title"), body.get("settings") if isinstance(body.get("settings"), dict) else None))
+                    if len(cp) == 5 and cp[4] == "messages":
+                        return self._json(202, c.idem("chat:" + cp[3], self.headers.get("Idempotency-Key"), lambda: c.chat_send(cp[3], body)))
+                    if len(cp) == 5 and cp[4] == "settings":
+                        sess = store.load(cp[3])
+                        allowed = {"grid": ("2x2", "3x3"), "ask_before_spending": (True, False), "ai": (True, False)}
+                        for k, v in body.items():
+                            if k in allowed and v in allowed[k]:
+                                sess["settings"][k] = v
+                            elif k == "style_id" and isinstance(v, str):
+                                sess["settings"][k] = v
+                        store.save(sess)
+                        return self._json(200, {"settings": sess["settings"]})
+                    if len(cp) == 5 and cp[4] == "delete":
+                        store.delete(cp[3])
+                        return self._json(200, {"deleted": cp[3]})
+                except _SE as e:
+                    raise pl.PipelineError(str(e), e.code)
+                raise pl.PipelineError("not found", 404)
             if path.startswith("/api/live/"):
                 return self._json(200, self._live(path.rsplit("/", 1)[1], body))
             if path == "/api/jobs":      # S2: the Generate page creates a sheet job ("Generate it"), the operator fulfils it
@@ -674,18 +863,32 @@ def make_handler(c: Console):
                 tasks.link_generation(c.out, t["id"], gid)
                 c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
                 return self._json(202, {"id": gid})
+            if path == "/api/assets/sign":      # {key, ttl?}: a signed, expiring link to one file under out/ (never a path the page invents)
+                from ..store.assets import AssetError, LocalAssetStore
+                store = LocalAssetStore(c.out)
+                try:
+                    key = str(body.get("key") or "")
+                    if not store.exists(key):
+                        raise AssetError("no such asset", 404)
+                    ttl = max(5, min(int(body.get("ttl", 300)), 3600))
+                    return self._json(200, {"url": store.url(key, ttl), "expires_in": ttl})
+                except AssetError as e:
+                    raise pl.PipelineError(str(e), e.code)
             if path == "/api/generations":
                 prompt = str(body.get("prompt", "")).strip() or str(body.get("subject", "")).replace("_", " ").strip()
                 if not prompt:
                     raise pl.PipelineError("prompt required")
-                if c.lock.locked():
-                    raise pl.PipelineError("busy", 409)
-                gid = pl.start(prompt, c.out, c.inp, int(body["variant"]) if body.get("variant") else None,
-                               outline=int(body["outline"]) if body.get("outline") is not None else None,
-                               erode=int(body["erode"]) if body.get("erode") is not None else None)
-                pl.approve_plan(c.out, gid, "approved by pressing Generate")
-                c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
-                return self._json(202, {"id": gid})
+
+                def create():
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy", 409)
+                    gid = pl.start(prompt, c.out, c.inp, int(body["variant"]) if body.get("variant") else None,
+                                   outline=int(body["outline"]) if body.get("outline") is not None else None,
+                                   erode=int(body["erode"]) if body.get("erode") is not None else None)
+                    pl.approve_plan(c.out, gid, "approved by pressing Generate")
+                    c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
+                    return {"id": gid}
+                return self._json(202, c.idem("generation", self.headers.get("Idempotency-Key"), create))
             parts = path.strip("/").split("/")
             if len(parts) == 4 and parts[:2] == ["api", "generations"]:
                 gid = int(parts[2])
@@ -756,6 +959,15 @@ def make_handler(c: Console):
                     new = pl.regen(c.out, c.inp, gid, int(body["index"]), body.get("subject"))
                     c.submit(lambda: pl.run_stills(c.out, new, c.cfg, c.pace))
                     return self._json(202, {"id": new})
+                if parts[3] == "judge":          # the vision model pre-reviews the stickers (S6): history lines only, a human still decides
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    from ..vision import judge as _vj
+                    if _vj.status()["provider"] == "none":
+                        raise pl.PipelineError("No vision backend: start LM Studio (MIRSAL_LOCAL_URL) or set OPENAI_API_KEY.", 409)
+                    scope = "anim" if body.get("scope") == "anim" else "still"
+                    c.submit(lambda: _vj.judge_generation(c.out, gid, scope, force=bool(body.get("force"))))
+                    return self._json(202, {"id": gid, "scope": scope})
                 if parts[3] == "quick_sheet":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)

@@ -5,7 +5,7 @@
   Watch   -> every watch folder with its state; misnamed folders are flagged with the nearest valid name
   Run     -> a generation linked to its task, so the prompt that was used is stored with the result
 
-The app NEVER writes inside the watch folders (Phase_01/Images_gen, videos_gen): Haitham creates the folder with the shown name."""
+The app NEVER writes inside the watch folders (inputs/Images_gen, videos_gen): Haitham creates the folder with the shown name."""
 from __future__ import annotations
 
 import json

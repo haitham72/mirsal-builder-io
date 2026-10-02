@@ -9,7 +9,13 @@ REPO = PROJECT.parent                                     # .../Mirsal-Builder
 
 
 def input_root() -> Path:
-    return Path(os.environ.get("MIRSAL_INPUT", REPO / "Phase_01"))
+    """The folder that holds Images_gen/ and videos_gen/ (the watch folders). `inputs/` in the repo; an older checkout that still keeps
+    them under Phase_01/ keeps working (nothing is renamed or moved). MIRSAL_INPUT overrides both."""
+    env = os.environ.get("MIRSAL_INPUT")
+    if env:
+        return Path(env)
+    legacy = REPO / "Phase_01"
+    return legacy if (legacy / "Images_gen").is_dir() and not (REPO / "inputs" / "Images_gen").is_dir() else REPO / "inputs"
 
 
 def out_root() -> Path:

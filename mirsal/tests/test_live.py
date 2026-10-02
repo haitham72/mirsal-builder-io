@@ -495,7 +495,7 @@ class LiveConsoleTests(Base):
         from mirsal import export
         from mirsal.paths import PROJECT, REPO
         os.environ.pop("MIRSAL_EXPORT_DIR", None)
-        self.assertEqual(export.export_root(PROJECT / "out"), REPO / "generated")      # visible in the repo, next to Phase_01 and mirsal/
+        self.assertEqual(export.export_root(PROJECT / "out"), REPO / "generated")      # visible in the repo, next to inputs/ and mirsal/
         self.assertEqual(export.export_root(self.out), self.out / "export")            # a copy of the data or a test never writes into the repo
         self.assertIn("generated/", (REPO / ".gitignore").read_text(encoding="utf-8").splitlines())
         os.environ["MIRSAL_EXPORT_DIR"] = str(self.tmp / "mine")
