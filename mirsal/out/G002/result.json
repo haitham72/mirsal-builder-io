@@ -1,0 +1,5393 @@
+{
+  "generation_id": "G002",
+  "number": 2,
+  "parent": null,
+  "prompt": "batman lego",
+  "task": "batman lego",
+  "task_slug": "batman_lego",
+  "source": {
+    "subject": "batman_lego",
+    "subject_id": "004",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "D:\\Vscode\\mirsal-builder-io\\mirsal\\out\\jobs\\J003\\result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          733,
+          691
+        ],
+        [
+          733,
+          0,
+          713,
+          691
+        ],
+        [
+          1446,
+          0,
+          602,
+          691
+        ],
+        [
+          0,
+          691,
+          733,
+          680
+        ],
+        [
+          733,
+          691,
+          713,
+          680
+        ],
+        [
+          1446,
+          691,
+          602,
+          680
+        ],
+        [
+          0,
+          1371,
+          733,
+          677
+        ],
+        [
+          733,
+          1371,
+          713,
+          677
+        ],
+        [
+          1446,
+          1371,
+          602,
+          677
+        ]
+      ],
+      "xs": [
+        0,
+        733,
+        1446,
+        2048
+      ],
+      "ys": [
+        0,
+        691,
+        1371,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "video_sliced",
+  "error": null,
+  "plan_source": "task 004",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell.\nStyle: hand-drawn illustration, marker and pencil texture, wobbly confident lines, warm playful colours.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:\nCharacter 1: Ready to fight\nCharacter 2: Throwing batarang\nCharacter 3: Listening carefully\nCharacter 4: On the move\nCharacter 5: Victory pose\nCharacter 6: Detective thinking\nCharacter 7: Gliding in air\nCharacter 8: Surprised reaction\nCharacter 9: Calling for help\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second seamless loop. Every character performs its own big, expressive, cartoon-style animation in place, inside its own cell:\n1. Ready to fight, with big lively expressive movement in place\n2. Throwing batarang, with big lively expressive movement in place\n3. Listening carefully, with big lively expressive movement in place\n4. On the move, with big lively expressive movement in place\n5. Victory pose, with big lively expressive movement in place\n6. Detective thinking, with big lively expressive movement in place\n7. Gliding in air, with big lively expressive movement in place\n8. Surprised reaction, with big lively expressive movement in place\n9. Calling for help, with big lively expressive movement in place\nAnimation style: exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.\nEnd on the starting pose so the clip loops.",
+  "template_id": "sheet_3x3",
+  "template_version": 2,
+  "slots": {
+    "subject_description": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell",
+    "style_id": "hand_drawn",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "Ready to fight",
+        "tags": [
+          "batman_lego_ready_to_fight",
+          "action",
+          "hero",
+          "vigilante"
+        ],
+        "emoji": "🦇👊"
+      },
+      {
+        "pos": 2,
+        "label": "Throwing batarang",
+        "tags": [
+          "batman_lego_throwing_batarang",
+          "action",
+          "weapon",
+          "throw"
+        ],
+        "emoji": "🦇🌀"
+      },
+      {
+        "pos": 3,
+        "label": "Listening carefully",
+        "tags": [
+          "batman_lego_listening_carefully",
+          "alert",
+          "focus",
+          "ears"
+        ],
+        "emoji": "🦇👂"
+      },
+      {
+        "pos": 4,
+        "label": "On the move",
+        "tags": [
+          "batman_lego_on_the_move",
+          "running",
+          "action",
+          "dynamic"
+        ],
+        "emoji": "🦇🏃"
+      },
+      {
+        "pos": 5,
+        "label": "Victory pose",
+        "tags": [
+          "batman_lego_victory_pose",
+          "celebration",
+          "win",
+          "happy"
+        ],
+        "emoji": "🦇✌️"
+      },
+      {
+        "pos": 6,
+        "label": "Detective thinking",
+        "tags": [
+          "batman_lego_detective_thinking",
+          "thinking",
+          "investigate",
+          "smart"
+        ],
+        "emoji": "🦇🕵️"
+      },
+      {
+        "pos": 7,
+        "label": "Gliding in air",
+        "tags": [
+          "batman_lego_gliding_in_air",
+          "flight",
+          "action",
+          "cape"
+        ],
+        "emoji": "🦇🪁"
+      },
+      {
+        "pos": 8,
+        "label": "Surprised reaction",
+        "tags": [
+          "batman_lego_surprised_reaction",
+          "shock",
+          "reaction",
+          "wow"
+        ],
+        "emoji": "🦇😲"
+      },
+      {
+        "pos": 9,
+        "label": "Calling for help",
+        "tags": [
+          "batman_lego_calling_for_help",
+          "signal",
+          "communication",
+          "urgent"
+        ],
+        "emoji": "🦇📞"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green"
+  },
+  "task_id": "004",
+  "name_key": "batman_lego",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 0,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1790873683.495,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {
+      "A1": {
+        "decision": "APPROVE",
+        "by": "human",
+        "ts": 1790873786.693,
+        "note": "approved by Make a video"
+      }
+    },
+    "pack": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1790874105.714,
+      "note": "approved by Add",
+      "stickers": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  "video_sheets": [
+    {
+      "id": "A1",
+      "slots": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grid": [
+        3,
+        3
+      ],
+      "file": "video_sheet/A1/sheet.png",
+      "layout": "video_sheet/A1/layout.json",
+      "video": "video_sheet/A1/video.mp4",
+      "status": "SLICED",
+      "ts": 1790873786.584,
+      "verify": [
+        {
+          "name": "slots_match_approved",
+          "ok": true,
+          "detail": "filled slots are exactly the approved stickers; blank slots are pure key colour",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "limit": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "data": {
+            "problems": [],
+            "ms": 129.8
+          }
+        },
+        {
+          "name": "no_outline_on_sheet",
+          "ok": true,
+          "detail": "no white ring around the subjects",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [],
+          "limit": [],
+          "data": {
+            "slots": [],
+            "ms": 312.7
+          }
+        }
+      ],
+      "blocked": null,
+      "canvas": [
+        2048,
+        2048
+      ],
+      "video_prompt": "Animate this illustration sheet as a 3-second seamless loop. Every character performs its own big, expressive, cartoon-style animation in place, inside its own cell:\n1. Ready to fight, with big lively expressive movement in place\n2. Throwing batarang, with big lively expressive movement in place\n3. Listening carefully, with big lively expressive movement in place\n4. On the move, with big lively expressive movement in place\n5. Victory pose, with big lively expressive movement in place\n6. Detective thinking, with big lively expressive movement in place\n7. Gliding in air, with big lively expressive movement in place\n8. Surprised reaction, with big lively expressive movement in place\n9. Calling for help, with big lively expressive movement in place\nAnimation style: exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.\nEnd on the starting pose so the clip loops.",
+      "video_name": "J004.mp4",
+      "block": null,
+      "video_flags": [],
+      "video_checks": [
+        {
+          "name": "video_decodes",
+          "ok": true,
+          "detail": "h264 960x960",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": "h264",
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "video_specs",
+          "ok": true,
+          "detail": "960x960 24.0 fps, 3.04s",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 3.04,
+          "limit": 1.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "layout_match",
+          "ok": true,
+          "detail": "lowest slot IoU 0.96",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.961,
+          "limit": 0.6,
+          "data": {
+            "ious": {
+              "1": 0.972,
+              "2": 0.961,
+              "3": 0.973,
+              "4": 0.969,
+              "5": 0.966,
+              "6": 0.973,
+              "7": 0.972,
+              "8": 0.963,
+              "9": 0.972
+            },
+            "bad": [],
+            "ms": 33.9
+          }
+        },
+        {
+          "name": "blank_slots_stay_empty",
+          "ok": true,
+          "detail": "blank slots stayed empty",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.0,
+          "limit": 0.002,
+          "data": {
+            "bad": {},
+            "ms": 0.0
+          }
+        }
+      ],
+      "video_info": {
+        "codec": "h264",
+        "width": 960,
+        "height": 960,
+        "fps": 24.0,
+        "duration": 3.04
+      },
+      "preview": "video_sheet/A1/preview.mp4"
+    }
+  ],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 52.0
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 238 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 238.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 11.2
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 34.3
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            733,
+            1446,
+            2048
+          ],
+          "ys": [
+            0,
+            691,
+            1371,
+            2048
+          ],
+          "ms": 33.5
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 1.5 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.46,
+        "limit": 12.0,
+        "data": {
+          "ms": 79.9
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "batman_lego_ready_to_fight",
+      "tags": [
+        "batman_lego_ready_to_fight",
+        "action",
+        "hero",
+        "vigilante"
+      ],
+      "emoji": "🦇👊",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Ready to fight, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_ready_to_fight",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 144715,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 67114,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 67.114,
+          "data": {
+            "ms": 3.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "173.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 173.8,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          733,
+          691
+        ],
+        "bg": [
+          2,
+          243,
+          4
+        ],
+        "threshold": 119.5,
+        "fg_px": 144715,
+        "bbox": [
+          142,
+          72,
+          578,
+          642
+        ],
+        "scale": 0.6806,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 173.8,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_ready_to_fight.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 319,
+          "key": 175,
+          "bounds": 62,
+          "render": 1157,
+          "seam": 265,
+          "encode": 2616,
+          "encodes": 2,
+          "probe": 129,
+          "verify": 38,
+          "finish": 4287
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          74,
+          80,
+          268,
+          246
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 194,
+        "scale": 2.0454,
+        "motion": 92.05,
+        "loop_seam_before": 10.58,
+        "loop_seam": 10.58,
+        "loop_limit": 138.07,
+        "frames_out": 72,
+        "crf": 42,
+        "sharp_kept": 0.99,
+        "kb": 248.0
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_ready_to_fight.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.927,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.704,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873875.022,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.572,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.716,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.78,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.069,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.701,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876108.021,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 16.1
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 27.3
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "248KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 248,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "10.58 <= 138.07",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 10.58,
+          "limit": 138.07,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.974,
+          "limit": 0.5,
+          "data": {
+            "ms": 17.6
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 92.05",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 92.05,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 3% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.035,
+          "limit": 0.35,
+          "data": {
+            "ms": 19.3
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.99x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.99,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.701
+    },
+    {
+      "index": 2,
+      "key": "batman_lego_throwing_batarang",
+      "tags": [
+        "batman_lego_throwing_batarang",
+        "action",
+        "weapon",
+        "throw"
+      ],
+      "emoji": "🦇🌀",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Throwing batarang, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_throwing_batarang",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 141677,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 58392,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 58.392,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 26 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 26,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "158.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 158.3,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          733,
+          0,
+          713,
+          691
+        ],
+        "bg": [
+          2,
+          243,
+          4
+        ],
+        "threshold": 119.5,
+        "fg_px": 141677,
+        "bbox": [
+          11,
+          85,
+          689,
+          642
+        ],
+        "scale": 0.6419,
+        "scale_mode": "clamped",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 158.3,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_throwing_batarang.png",
+      "anim_status": "FAILED",
+      "anim_reason": "cross_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 319,
+          "key": 171,
+          "bounds": 56
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          60,
+          66,
+          310,
+          238
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 250
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1790873712.931,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.704,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873870.865,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "cross_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "cross_slot",
+            "value": 780,
+            "limit": 0,
+            "note": "780px of foreign foreground, first at frame 8",
+            "data": {
+              "frame": 8,
+              "px": 780,
+              "ms": 24.5
+            }
+          }
+        },
+        {
+          "ts": 1790874820.744,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.801,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.095,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.718,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876103.436,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "cross_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "cross_slot",
+            "value": 780,
+            "limit": 0,
+            "note": "780px of foreign foreground, first at frame 8",
+            "data": {
+              "frame": 8,
+              "px": 780,
+              "ms": 21.9
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 15.5
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "780px of foreign foreground, first at frame 8",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 780,
+          "limit": 0,
+          "data": {
+            "frame": 8,
+            "px": 780,
+            "ms": 21.9
+          }
+        }
+      ],
+      "rendered_at": 1790875007.718
+    },
+    {
+      "index": 3,
+      "key": "batman_lego_listening_carefully",
+      "tags": [
+        "batman_lego_listening_carefully",
+        "alert",
+        "focus",
+        "ears"
+      ],
+      "emoji": "🦇👂",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Listening carefully, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_listening_carefully",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 133596,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 62026,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 62.026,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "162.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 162.1,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1446,
+          0,
+          602,
+          691
+        ],
+        "bg": [
+          2,
+          243,
+          4
+        ],
+        "threshold": 119.0,
+        "fg_px": 133596,
+        "bbox": [
+          46,
+          71,
+          417,
+          654
+        ],
+        "scale": 0.6806,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 162.1,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_listening_carefully.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 333,
+          "key": 170,
+          "bounds": 62,
+          "render": 1163,
+          "seam": 251,
+          "encode": 3948,
+          "encodes": 3,
+          "probe": 99,
+          "verify": 21,
+          "finish": 5547
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          87,
+          74,
+          218,
+          240
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 166,
+        "scale": 2.3904,
+        "motion": 34.88,
+        "loop_seam_before": 6.74,
+        "loop_seam": 6.74,
+        "loop_limit": 52.33,
+        "frames_out": 72,
+        "crf": 38,
+        "sharp_kept": 1.0,
+        "kb": 243.3
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_listening_carefully.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.934,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.704,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873876.18,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.572,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.766,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.819,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.118,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.733,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876108.988,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 16.7
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 27.1
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "243KB @crf38",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 243,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "6.74 <= 52.33",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 6.74,
+          "limit": 52.33,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.971,
+          "limit": 0.5,
+          "data": {
+            "ms": 1.5
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 34.88",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 34.88,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 2% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.02,
+          "limit": 0.35,
+          "data": {
+            "ms": 19.0
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.733
+    },
+    {
+      "index": 4,
+      "key": "batman_lego_on_the_move",
+      "tags": [
+        "batman_lego_on_the_move",
+        "running",
+        "action",
+        "dynamic"
+      ],
+      "emoji": "🦇🏃",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell On the move, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_on_the_move",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 139200,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 64430,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 64.43,
+          "data": {
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "165.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 165.9,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          691,
+          733,
+          680
+        ],
+        "bg": [
+          2,
+          243,
+          4
+        ],
+        "threshold": 119.5,
+        "fg_px": 139200,
+        "bbox": [
+          105,
+          49,
+          652,
+          619
+        ],
+        "scale": 0.6806,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 165.9,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_on_the_move.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 333,
+          "key": 167,
+          "bounds": 62,
+          "render": 1138,
+          "seam": 245,
+          "encode": 2622,
+          "encodes": 2,
+          "probe": 136,
+          "verify": 30,
+          "finish": 4237
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          70,
+          81,
+          264,
+          246
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 194,
+        "scale": 2.0454,
+        "motion": 94.27,
+        "loop_seam_before": 9.67,
+        "loop_seam": 9.67,
+        "loop_limit": 141.41,
+        "frames_out": 72,
+        "crf": 42,
+        "sharp_kept": 0.99,
+        "kb": 246.1
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_on_the_move.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.939,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.705,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873875.212,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.572,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.792,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.84,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.143,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.75,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876107.79,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 16.4
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 28.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "246KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 246,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "9.67 <= 141.41",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 9.67,
+          "limit": 141.41,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.95",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.951,
+          "limit": 0.5,
+          "data": {
+            "ms": 7.7
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 94.27",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 94.27,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 4% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.043,
+          "limit": 0.35,
+          "data": {
+            "ms": 22.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.99x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.99,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.75
+    },
+    {
+      "index": 5,
+      "key": "batman_lego_victory_pose",
+      "tags": [
+        "batman_lego_victory_pose",
+        "celebration",
+        "win",
+        "happy"
+      ],
+      "emoji": "🦇✌️",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Victory pose, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_victory_pose",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 168853,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 78207,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 78.20700000000001,
+          "data": {
+            "ms": 2.4
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 19 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 19,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "199.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 199.4,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          733,
+          691,
+          713,
+          680
+        ],
+        "bg": [
+          2,
+          243,
+          4
+        ],
+        "threshold": 119.5,
+        "fg_px": 168853,
+        "bbox": [
+          87,
+          39,
+          540,
+          629
+        ],
+        "scale": 0.6806,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 199.4,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_victory_pose.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 332,
+          "key": 168,
+          "bounds": 63,
+          "render": 1042,
+          "seam": 208,
+          "encode": 2726,
+          "encodes": 2,
+          "probe": 141,
+          "verify": 22,
+          "finish": 4207
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          96,
+          60,
+          224,
+          250
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 190,
+        "scale": 2.0884,
+        "motion": 64.88,
+        "loop_seam_before": 6.56,
+        "loop_seam": 6.56,
+        "loop_limit": 97.32,
+        "frames_out": 72,
+        "crf": 42,
+        "sharp_kept": 1.0,
+        "kb": 235.0
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_victory_pose.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.943,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.705,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873874.878,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.572,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.818,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.86,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.167,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.767,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876107.602,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 17.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 27.7
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "234KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 234,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "6.56 <= 97.32",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 6.56,
+          "limit": 97.32,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.968,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 64.88",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 64.88,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 1% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.011,
+          "limit": 0.35,
+          "data": {
+            "ms": 18.7
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.767
+    },
+    {
+      "index": 6,
+      "key": "batman_lego_detective_thinking",
+      "tags": [
+        "batman_lego_detective_thinking",
+        "thinking",
+        "investigate",
+        "smart"
+      ],
+      "emoji": "🦇🕵️",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Detective thinking, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_detective_thinking",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134604,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 62346,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 62.346000000000004,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 9 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 9,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "163.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 163.2,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1446,
+          691,
+          602,
+          680
+        ],
+        "bg": [
+          2,
+          243,
+          4
+        ],
+        "threshold": 119.5,
+        "fg_px": 134604,
+        "bbox": [
+          59,
+          36,
+          432,
+          633
+        ],
+        "scale": 0.6806,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 163.2,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_detective_thinking.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 318,
+          "key": 174,
+          "bounds": 62,
+          "render": 1139,
+          "seam": 221,
+          "encode": 3868,
+          "encodes": 3,
+          "probe": 104,
+          "verify": 20,
+          "finish": 5418
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          84,
+          76,
+          212,
+          242
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 166,
+        "scale": 2.3904,
+        "motion": 34.77,
+        "loop_seam_before": 7.43,
+        "loop_seam": 7.43,
+        "loop_limit": 52.16,
+        "frames_out": 72,
+        "crf": 38,
+        "sharp_kept": 0.99,
+        "kb": 224.3
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_detective_thinking.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.947,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.705,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873876.044,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.572,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.84,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.879,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.19,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.782,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876108.805,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 16.0
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 28.2
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "224KB @crf38",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 224,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "7.43 <= 52.16",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 7.43,
+          "limit": 52.16,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.93",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.932,
+          "limit": 0.5,
+          "data": {
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 34.77",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 34.77,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 2% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.017,
+          "limit": 0.35,
+          "data": {
+            "ms": 18.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.99x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.99,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.782
+    },
+    {
+      "index": 7,
+      "key": "batman_lego_gliding_in_air",
+      "tags": [
+        "batman_lego_gliding_in_air",
+        "flight",
+        "action",
+        "cape"
+      ],
+      "emoji": "🦇🪁",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Gliding in air, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_gliding_in_air",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 149201,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 63176,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 63.176,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "161.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 161.1,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1371,
+          733,
+          677
+        ],
+        "bg": [
+          2,
+          243,
+          4
+        ],
+        "threshold": 119.5,
+        "fg_px": 149201,
+        "bbox": [
+          55,
+          61,
+          724,
+          551
+        ],
+        "scale": 0.6505,
+        "scale_mode": "clamped",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 161.1,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_gliding_in_air.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 132,
+          "key": 160,
+          "bounds": 79,
+          "render": 1153,
+          "seam": 222,
+          "encode": 2624,
+          "encodes": 2,
+          "probe": 129,
+          "verify": 47,
+          "finish": 4257
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          72,
+          94,
+          258,
+          240
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 186,
+        "scale": 2.1333,
+        "motion": 75.41,
+        "loop_seam_before": 12.04,
+        "loop_seam": 12.04,
+        "loop_limit": 113.11,
+        "frames_out": 72,
+        "crf": 42,
+        "sharp_kept": 0.99,
+        "kb": 248.3
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_gliding_in_air.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.951,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.705,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873875.413,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.573,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.863,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.9,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.215,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.799,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876108.273,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 22.8
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 29.3
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "248KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 248,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "12.04 <= 113.11",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 12.04,
+          "limit": 113.11,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.975,
+          "limit": 0.5,
+          "data": {
+            "ms": 12.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 75.41",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 75.41,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.046,
+          "limit": 0.35,
+          "data": {
+            "ms": 34.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.99x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.99,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.799
+    },
+    {
+      "index": 8,
+      "key": "batman_lego_surprised_reaction",
+      "tags": [
+        "batman_lego_surprised_reaction",
+        "shock",
+        "reaction",
+        "wow"
+      ],
+      "emoji": "🦇😲",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Surprised reaction, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_surprised_reaction",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 147873,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 68581,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 68.581,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "2 enclosed hole(s), 0.6% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0057,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 12 to cell 5",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 12,
+          "limit": 4,
+          "data": {
+            "of": 5,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "175.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 175.4,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          733,
+          1371,
+          713,
+          677
+        ],
+        "bg": [
+          2,
+          243,
+          5
+        ],
+        "threshold": 119.0,
+        "fg_px": 147873,
+        "bbox": [
+          105,
+          49,
+          541,
+          613
+        ],
+        "scale": 0.6806,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0057,
+        "kb": 175.4,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_surprised_reaction.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 115.0,
+        "ms": {
+          "decode": 127,
+          "key": 151,
+          "bounds": 127,
+          "render": 903,
+          "seam": 155,
+          "encode": 2204,
+          "encodes": 2,
+          "probe": 117,
+          "verify": 19,
+          "finish": 3528
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          92,
+          56,
+          226,
+          248
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 192,
+        "scale": 2.0667,
+        "motion": 72.31,
+        "loop_seam_before": 12.11,
+        "loop_seam": 12.11,
+        "loop_limit": 108.46,
+        "frames_out": 72,
+        "crf": 42,
+        "sharp_kept": 0.99,
+        "kb": 252.6
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_surprised_reaction.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.955,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790873785.705,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873878.38,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.573,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.889,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.92,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.239,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.815,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876111.605,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 42.9
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 30.7
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "252KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 252,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "12.11 <= 108.46",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 12.11,
+          "limit": 108.46,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.95",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.955,
+          "limit": 0.5,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 72.31",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 72.31,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 4% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.043,
+          "limit": 0.35,
+          "data": {
+            "ms": 16.6
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.99x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.99,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.815
+    },
+    {
+      "index": 9,
+      "key": "batman_lego_calling_for_help",
+      "tags": [
+        "batman_lego_calling_for_help",
+        "signal",
+        "communication",
+        "urgent"
+      ],
+      "emoji": "🦇📞",
+      "prompt": "LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell Calling for help, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-002-batman_lego-batman_lego_calling_for_help",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 151610,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 70064,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "3px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 3,
+          "limit": 70.06400000000001,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "1 enclosed hole(s), 1.3% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0127,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 11 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 11,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "186.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 186.2,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1446,
+          1371,
+          602,
+          677
+        ],
+        "bg": [
+          3,
+          243,
+          4
+        ],
+        "threshold": 119.0,
+        "fg_px": 151610,
+        "bbox": [
+          30,
+          47,
+          492,
+          619
+        ],
+        "scale": 0.6806,
+        "scale_mode": "pack",
+        "spill_px": 3,
+        "chroma_risk": 0.0,
+        "holes": 0.0127,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 186.2,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-002-batman_lego-batman_lego_calling_for_help.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 116.0,
+        "ms": {
+          "decode": 149,
+          "key": 146,
+          "bounds": 69,
+          "render": 1062,
+          "seam": 187,
+          "encode": 2305,
+          "encodes": 2,
+          "probe": 112,
+          "verify": 23,
+          "finish": 3762
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          78,
+          78,
+          228,
+          238
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 160,
+        "scale": 2.48,
+        "motion": 37.29,
+        "loop_seam_before": 7.28,
+        "loop_seam": 7.28,
+        "loop_limit": 55.94,
+        "frames_out": 72,
+        "crf": 42,
+        "sharp_kept": 0.99,
+        "kb": 227.0
+      },
+      "webm": "slices/vid-002-batman_lego-batman_lego_calling_for_help.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1790873712.959,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1790873785.706,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790873786.584,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873786.693,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1790873878.668,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790874105.573,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874105.714,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790874820.916,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790874827.939,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 8,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875000.263,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 16,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790875007.832,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1790876112.09,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 5,
+            "ms": 21.6
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 26.2
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "226KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 226,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "7.28 <= 55.94",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 7.28,
+          "limit": 55.94,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.971,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 37.29",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 37.29,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 1% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.006,
+          "limit": 0.35,
+          "data": {
+            "ms": 20.5
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.99x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.99,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1790875007.832
+    }
+  ],
+  "added": {
+    "20b742ee": [
+      "animated:1",
+      "animated:3",
+      "animated:4",
+      "animated:5",
+      "animated:6",
+      "animated:7",
+      "animated:8",
+      "animated:9"
+    ]
+  }
+}

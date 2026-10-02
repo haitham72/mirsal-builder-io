@@ -27,8 +27,18 @@ request â”€(prompt template v3 + style + stroke [+ AI enhancer] [+ references])â
   explained to the model by `prompter.REFERENCE_CLAUSE`. A model that does not take references refuses them.
 - **AI enhancer** (`expander.py`, `llm.py`, OpenAI): **off by default and never called while typing.** On, `POST /api/live/sheet {ai: true}` first has the model write the subject
   description and 9 distinct, expressive cells (label, motion, key, tags, emoji), lints them (one repair round), and only then builds and sends the prompt. Off, the typed text goes
-  into the template with the built-in emotion sets. A failed AI step falls back to the built-in sets and the response says why (`expanded_by`, `expand_error`).
+  into the template with the built-in emotion sets. A failed AI step falls back to the built-in sets and the response says why (`expanded_by`, `expand_error`). A
+  transformation is **not** a failure: the template writes the cells (`expanded_by: "transformation"`, no `expand_error`) and the page reports that the enhancer was
+  not asked instead of showing an error.
   `mirsal prompt "<request>" [--ai]` prints the same plan; `prompt lab` runs 20 inputs (English, Arabic, Arabizi).
+- **Transformations** (`transformations/`, run first by `expander.expand`, with or without the AI): "dog as banana", "turn my cat into a pizza", "a frog shaped like a pear" are ONE new character
+  (a banana with the dog's face), not a dog next to a banana. `detect` needs `as`, `into`, `turned into`, `shaped like` or `looks like`; "dog with bananas", "a dog holding / eating a banana", "dog and
+  banana", a role or costume ("dog as a pilot"), a size comparison and requests about stickers themselves are **not** transformations and take the normal plan. The versioned template
+  `subject_as_target` v1 guarantees the cells **dance, shock and squash** (wording sharpened per target by a lexicon: `banana.py`; any other target gets the generic wording), fills the rest of the
+  grid from the emotion bank, puts the "one single character, not holding or wearing it" sentence into every prompt, flips a green target (avocado) to a blue screen, and lints itself
+  (`validate`: required cells present, nothing the user ruled out, a full grid). The user overrides in the request: "no dancing", "without squash or shock", "no crying" (a required cell they
+  name is dropped; any other word is kept out of every cell). Stored with the generation as `slots.transformation = {id, version, flavour, subject, target, required, forbidden}`. The chat adds a
+  note to its steps and the plan card carries `transformation`; the planner cache key includes `transformations.signature()`. English patterns only (Arabic / Arabizi requests are not detected yet).
 
 ## The Higgsfield CLI (`higgsfield.py`, `model_catalog.py`)
 
@@ -128,9 +138,28 @@ clickable, can be opened, brought back or allowed.
 3. `generate create` **without `--wait`**, then `claim` with the returned id **immediately** (ticket first, mirrored into `out/tasks/NNN.json`);
 4. `generate wait`, download the result, `done` (copies it to `out/jobs/J###/result.<ext>`, writes the ledger line with cost, params and the Higgsfield id).
 
-A job already CLAIMED resumes by its ticket and never creates a second paid job. One paid call at a time (`_PAID` lock). Provider errors end as `FAILED` with the reason.
-`Console.fulfil_async` runs it in a thread; on a finished **sheet** `Console.start_from_job` builds a `Pick` from the result file (the app never writes into the watch folders), starts
+A job already CLAIMED resumes by its ticket and never creates a second paid job. One paid call at a time (a lock in the process and a file lock `out/.paid.lock` across processes). Provider errors end as `FAILED` with the reason.
+`Console.fulfil_async` runs it in a thread (or hands it to the durable queue, below); on a finished **sheet** `Console.start_from_job` builds a `Pick` from the result file (the app never writes into the watch folders), starts
 the generation linked to the task, and runs the stills; on a finished **video** `attach_video_from_job` attaches and slices it. A video job needs a video sheet **approved at G3**.
+
+### The durable queue and workers (`jobqueue.py`, migration `007_job_queue`)
+
+By default a job is fulfilled by a thread of the server, so a server restart loses the wait and the follow-up. With **`MIRSAL_JOB_MODE=queue`** (and Postgres up) the server only *enqueues* the job
+(`job_queue` row `QUEUED`); one or more **`python -m mirsal worker`** processes claim rows (`FOR UPDATE SKIP LOCKED`: two workers never get the same job), run `jobs.fulfil` and mark the row; the
+server's ingest loop then follows up every `DONE` row exactly once (`Console.follow_up`: a sheet starts the stills run, a video is attached and sliced), leased for ten minutes so a crash before it
+finished just lets the lease run out. Jobs that were finished while the server was down are followed up when it starts.
+
+| row | meaning |
+|---|---|
+| `QUEUED` | waiting (also after a retry with backoff 30 s, 60 s, ...) |
+| `RUNNING` | a worker holds it (`locked_by`, `locked_at`); a row with no finish after the job timeout + 5 min is **reaped** back to `QUEUED` (the ticket in the job file makes the next run resume, not pay again) |
+| `DONE` | the job file holds the result; `ingested_at` says the server followed up |
+| `FAILED` | **the provider** said no: never retried automatically, because a retry can spend credits; a human retries (`mirsal queue retry J004`, or the Studio's Retry) |
+| `DEAD` | **the worker itself** failed `max_attempts` (3) times (disk, a bug): needs a human |
+
+`out/jobs/J###.json` stays the truth for the request, ticket and result; the table only says who runs it and when (`mirsal queue sync` re-enqueues unfinished job files after a database reset).
+Workers add durability and isolation, **not paid concurrency**: the paid-call lock is shared, so one paid call runs at a time on the machine however many workers there are.
+`GET /api/health` shows the mode and the counts; `mirsal queue status` prints them with the rows that need a human.
 
 ## Credits and usage (`usage.py`, `out/model_calls.jsonl`)
 

@@ -1,8 +1,11 @@
 """Lifecycle Console server: stdlib http.server + one index.html. Binds 127.0.0.1. One background job at a time."""
 from __future__ import annotations
 
+import contextvars
 import json
 import mimetypes
+import os
+import re
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -13,6 +16,7 @@ from .. import export, gates, higgsfield, jobs, llm, model_catalog, prompter, so
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
+from ..users import LOCAL, UserError, UserStore
 from ..video_project import MAX_UPLOAD, Projects, decode_overlays
 from ..writer_lock import WriterLock
 from . import placeholders
@@ -22,6 +26,19 @@ INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib
 UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
+# What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,
+# usage and balance, tasks, the operator's job actions and the user list. Generation paths are checked for ownership too (a stranger's batch is a 404).
+_GEN_PATH = re.compile(r"^/api/generations/(\d+)(?:/(\w+))?$")
+_OUT_PATH = re.compile(r"^/out/G(\d+)/")
+_SRC_PATH = re.compile(r"^/src/(\d+)/")
+_KEY_PATH = re.compile(r"^G(\d+)/")
+MEMBER_GEN_POST = {"review", "more", "regen", "animate", "video_sheet", "quick_sheet", "drop", "allow", "judge", "appearance", "edge", "reslice", "recheck"}
+MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events"}
+MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/search", "/api/generations", "/api/jobs"}
+MEMBER_POST = {"/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
+RATE_DEFAULTS = {"r": 3000, "w": 240}                 # requests per minute per token holder (MIRSAL_RATE_READ / MIRSAL_RATE_WRITE; 0 = off)
+
+
 class Console:
     def __init__(self, out: Path, inp: Path, pace: float = 0.0, cfg: EngineConfig | None = None):
         self.out, self.inp, self.pace, self.cfg = out, inp, pace, cfg or EngineConfig()
@@ -29,14 +46,34 @@ class Console:
         self.lock = threading.Lock()   # held while a job runs
         self.started, self._stale_checked, self._stale = time.time(), 0.0, False
         self._health = None
+        self.users = UserStore(out)
+        self._ingest = None
+        self._ingest_stop = threading.Event()
         self.lib = Library(out)
         self.projects = Projects(out, self.cfg)
         self._acct = (0.0, None)
         self._jobs = []
         threading.Thread(target=self._warm_models, daemon=True).start()
+        from .. import jobqueue
+        if jobqueue.mode(out) == "queue":                 # jobs a worker finished while the server was down are followed up now
+            self._start_ingest()
 
     def release_writer(self) -> None:
+        self._ingest_stop.set()
         self._writer.release()
+
+    def visible(self, user: dict, gid: int) -> bool:
+        """May this user see generation `gid`? An owner sees all; a member only what they own (and an unknown number is simply not theirs)."""
+        if user.get("role") == "owner":
+            return True
+        try:
+            return pl.read_result(self.out, int(gid)).get("owner", "local") == user["id"]
+        except Exception:
+            return False
+
+    def actor(self) -> dict:
+        """Who is acting on this thread (the request's user, or the job's/chat's user copied into the thread)."""
+        return self.users.get(pl.current_owner()) or dict(LOCAL, id=pl.current_owner(), role="member", can_spend=False)
 
     def health(self) -> dict:
         """Can the final WEBM be encoded here? (live preview never needs ffmpeg)"""
@@ -86,7 +123,60 @@ class Console:
         self._acct = (now, d)
         return d
 
+    # ---------- the durable queue (jobqueue.py): in queue mode a worker process runs the job and this loop follows up on it ----------
+    def _start_ingest(self) -> None:
+        if self._ingest is not None and self._ingest.is_alive():
+            return
+        self._ingest_stop.clear()
+        self._ingest = threading.Thread(target=self._ingest_loop, daemon=True)
+        self._ingest.start()
+
+    def _ingest_loop(self) -> None:
+        from .. import jobqueue
+        from ..store import db
+        while not self._ingest_stop.is_set():
+            try:
+                with db.connect() as conn:
+                    rows = jobqueue.take_ingest(conn)
+                for r in rows:
+                    self.follow_up(r["job_id"])
+            except Exception:
+                pass                                       # the database is away for a moment: try again next round
+            self._ingest_stop.wait(2.0)
+
+    def follow_up(self, jid: str) -> None:
+        """What `fulfil(on_done=...)` does in thread mode, for a job a worker finished: a sheet starts the stills run, a video is attached and sliced. Exactly once per job."""
+        from .. import jobqueue
+        from ..store import db
+        job = jobs.read(self.out, jid)
+        after = {"sheet": self.start_from_job, "video": self.attach_video_from_job}.get(job["kind"])
+        try:
+            if after:
+                after(job)
+        except Exception as e:                             # the sheet is safe in out/jobs; say what did not follow
+            jobs.update(self.out, jid, follow_up_error=str(e)[:300])
+        finally:
+            try:
+                with db.connect() as conn:
+                    jobqueue.mark_ingested(conn, jid)
+            except Exception:
+                pass
+            self._acct = (0.0, None)
+            export.sync_recent(self.out)
+
     def fulfil_async(self, jid: str, after=None) -> None:
+        from .. import jobqueue
+        if jobqueue.mode(self.out) == "queue":
+            try:
+                from ..store import db
+                job = jobs.read(self.out, jid)
+                with db.connect() as conn:
+                    jobqueue.enqueue(conn, jid, job["kind"], (job.get("request") or {}).get("user") or "local")
+                self._start_ingest()
+                return
+            except Exception:
+                pass                                       # Postgres is unreachable right now: the thread way still works
+
         def run():
             try:
                 jobs.fulfil(self.out, jid, on_done=after)
@@ -126,8 +216,12 @@ class Console:
         outline = (job.get("request") or {}).get("outline")
         req = job.get("request") or {}
         parent = req.get("parent")                         # a chat edit: the new batch is a child of the one it improves (lineage, never a copy)
-        gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None,
-                       parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None)
+        tok = pl.OWNER.set(req.get("user") or "local")     # the batch belongs to whoever asked for the sheet
+        try:
+            gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None,
+                           parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None)
+        finally:
+            pl.OWNER.reset(tok)
         tasks.link_generation(self.out, t["id"], gid)
         jobs.attach_generation(self.out, job["id"], gid)
         self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
@@ -227,6 +321,12 @@ class Console:
         `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>."""
         if what not in ("cost", "sheet", "video"):
             raise pl.PipelineError("not found", 404)
+        who = self.actor()
+        if what in ("sheet", "video"):                       # who may spend comes before anything about the provider is revealed
+            if not who.get("can_spend") or who.get("disabled"):
+                raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
+            if what == "video" and not self.visible(who, int(body["generation"])):
+                raise pl.PipelineError("No such batch", 404)
         if not higgsfield.available():
             raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
         kind = "video" if what == "video" or body.get("kind") == "video" else "image"
@@ -247,7 +347,7 @@ class Console:
                 job = jobs.create(self.out, "sheet", task=t["id"], request={
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
                     "outline": int(body["outline"]) if body.get("outline") is not None else None,
-                "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None})
+                    "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"]})
                 self.fulfil_async(job["id"], after=self.start_from_job)
                 return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
                         "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
@@ -275,7 +375,7 @@ class Console:
             est = higgsfield.cost(model, params, "x", start_image=str(start))
             job = jobs.create(self.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
                 "model": model, "options": body.get("options") or {}, "prompt": self.video_prompt_for(gid, aid, loop),
-                "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop})
+                "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop, "user": who["id"]})
             self.fulfil_async(job["id"], after=self.attach_video_from_job)
             return {"job": job["id"], "estimate": est, "model": model, "params": params}
         except (higgsfield.HiggsError, jobs.JobError, model_catalog.CatalogError) as e:
@@ -302,24 +402,29 @@ class Console:
             raise pl.PipelineError("a request with this Idempotency-Key is still running", 409)
 
     # ---------- the agentic chat (Phase 4): sessions with memory, the graph over this same engine ----------
-    def chat_parts(self):
+    def chat_parts(self, user: dict | None = None):
+        """The chat of one user: an owner sees every chat, a member only their own (a stranger's chat is a 404)."""
         from ..agent import graph as ag
         from ..agent.brain import Brain
         from ..agent.memory import SessionStore
         from ..agent.tools import ConsoleTools
-        store = SessionStore(self.out)
-        tools = ConsoleTools(self)
+        user = user or LOCAL
+        store = SessionStore(self.out, user=user["id"], see_all=user.get("role") == "owner")
+        tools = ConsoleTools(self, user)
         return store, tools, ag.Agent(store, tools, Brain(out=self.out)), ag
 
-    def chat_send(self, sid: str, body: dict) -> dict:
+    def chat_send(self, sid: str, body: dict, user: dict | None = None) -> dict:
         """Start one turn in the background and answer at once: the page polls the session and sees the steps as they are written."""
-        store, tools, agent, _ = self.chat_parts()
+        user = user or LOCAL
+        store, tools, agent, _ = self.chat_parts(user)
         text = str(body.get("text") or "")
         action = body.get("action") if isinstance(body.get("action"), dict) else None
         if not text.strip() and not action:
             raise pl.PipelineError("say something first")
         turn = agent.prepare(sid, text, [str(x) for x in (body.get("selected") or [])], action)      # 409 when the last message is still running
-        t = threading.Thread(target=agent.execute, args=(turn,), daemon=True)
+        ctx = contextvars.copy_context()                    # the turn runs in a thread: it must act as this user (batches it starts are theirs)
+        ctx.run(pl.OWNER.set, user["id"])
+        t = threading.Thread(target=ctx.run, args=(agent.execute, turn), daemon=True)
         self._chat_threads = [x for x in getattr(self, "_chat_threads", []) if x.is_alive()] + [t]
         t.start()
         return {"id": sid, "message": turn.msg["id"]}
@@ -439,30 +544,91 @@ def make_handler(c: Console):
                 return "cross-site request refused"
             return None
 
-        def _unauth(self) -> bool:
-            """MIRSAL_API_TOKEN (Phase 5C): when it is set, a caller that is not this server's own page (a browser sends Sec-Fetch-Site: same-origin
-            for the Studio) must send `Authorization: Bearer <token>`. Unset = the local sandbox behaves as before."""
-            import hmac
-            import os as _os
-            tok = _os.environ.get("MIRSAL_API_TOKEN", "")
-            if not tok or self.headers.get("Sec-Fetch-Site") == "same-origin":
-                return False
-            auth = self.headers.get("Authorization") or ""
-            got = auth[7:] if auth.startswith("Bearer ") else ""
-            return not hmac.compare_digest(got.encode(), tok.encode())
+        def _who(self, path: str) -> dict | None:
+            """The caller (users.py `authenticate`), or None for 401. The page's own files and a signed asset link carry no secret (the link IS the
+            credential), so a browser can always open the Studio and an <img> can use a link."""
+            if self.command == "GET" and (path == "/" or path.startswith("/ui/") or path.startswith("/assets/")):
+                return dict(LOCAL, via="static")
+            if self.command == "GET" and path.startswith("/api/assets/") and path.count("/") == 3:
+                return dict(LOCAL, via="signed")
+            return c.users.authenticate(self.headers.get("Authorization"), self.headers.get("Sec-Fetch-Site") == "same-origin")
+
+        def _authorize(self, user: dict, path: str):
+            """None = allowed, else (status, body). Owners may do everything; a member reaches the chat, search, and what they own."""
+            if user.get("role") == "owner":
+                return None
+            post = self.command == "POST"
+            deny, gone = (403, {"error": "this account cannot do that (owner only)"}), (404, {"error": "not found"})
+            m = _GEN_PATH.match(path)
+            if m:
+                gid, act = int(m.group(1)), m.group(2)
+                if (act not in MEMBER_GEN_POST) if post else (act is not None and act not in MEMBER_GEN_GET):
+                    return deny
+                return None if c.visible(user, gid) else gone
+            m = None if post else (_OUT_PATH.match(path) or _SRC_PATH.match(path))
+            if m:
+                return None if c.visible(user, int(m.group(1))) else gone
+            if path.startswith("/api/chat/"):
+                return None
+            if (path in MEMBER_POST) if post else (path in MEMBER_GET):
+                return None
+            parts = path.strip("/").split("/")
+            if not post and len(parts) == 3 and parts[:2] == ["api", "jobs"]:          # one job: only the one this user asked for
+                try:
+                    return None if (jobs.read(c.out, parts[2]).get("request") or {}).get("user") == user["id"] else gone
+                except Exception:
+                    return gone
+            return deny
+
+        def _wait(self, user: dict, path: str) -> int:
+            """Seconds to wait when this token holder is over its per-minute allowance, else 0. The open sandbox and the owner's own page are never
+            limited (the Studio polls a lot); health checks and event streams are exempt too."""
+            if user.get("via") != "token" or path.startswith("/api/health") or path.endswith("/events"):
+                return 0
+            kind = "w" if self.command == "POST" else "r"
+            try:
+                limit = int(os.environ.get("MIRSAL_RATE_WRITE" if kind == "w" else "MIRSAL_RATE_READ", RATE_DEFAULTS[kind]))
+            except ValueError:
+                limit = RATE_DEFAULTS[kind]
+            if limit <= 0:
+                return 0
+            from .. import cache as cachemod
+            now = time.time()
+            cc = cachemod.default()
+            n = cc.window_count(cc.key("rate", cachemod.digest(str(c.out)), user["id"], kind, int(now // 60)), 65)
+            return (int(60 - now % 60) + 1) if n > limit else 0
 
         def _guard(self, fn):
             why = self._foreign()
             if why:
                 return self._json(403, {"error": why})
-            if self._unauth():
+            path = unquote(urlparse(self.path).path)
+            user = self._who(path)
+            if user is None:
                 return self._json(401, {"error": "an API token is required (Authorization: Bearer <token>)"})
+            deny = self._authorize(user, path)
+            if deny:
+                return self._json(*deny)
+            wait = self._wait(user, path)
+            if wait:
+                b = json.dumps({"error": f"too many requests: wait {wait} s"}).encode()
+                self.send_response(429)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(b)))
+                self.send_header("Retry-After", str(wait))
+                self.end_headers()
+                self.wfile.write(b)
+                return
+            self.user = user
+            tok = pl.OWNER.set(user["id"])           # batches this request creates are stamped with this user
             try:
                 fn()
-            except (pl.PipelineError, LibraryError, watch.WatchError, telegram.TelegramError) as e:
+            except (pl.PipelineError, LibraryError, watch.WatchError, telegram.TelegramError, UserError) as e:
                 self._json(e.code, {"error": str(e)})
             except (ValueError, KeyError, TypeError) as e:
                 self._json(400, {"error": f"bad request: {e}"})
+            finally:
+                pl.OWNER.reset(tok)
 
         def do_GET(self):
             self._guard(self._get)
@@ -482,12 +648,17 @@ def make_handler(c: Console):
                 from ..store.assets import AssetError, LocalAssetStore
                 try:
                     store = LocalAssetStore(c.out)
-                    f = store.path(store.verify(gp[2]))
+                    f = store.path(store.verify(gp[2]))             # signed by someone who could see the file; the signature is the credential
                 except AssetError as e:
                     return self._json(e.code, {"error": str(e)})
                 if not f.is_file():
                     return self._json(404, {"error": "no such asset"})
                 return self._file(f)
+            if path == "/api/me":            # who the server thinks you are (and what you may do): for clients that hold a token
+                u = self.user
+                return self._json(200, {"id": u["id"], "name": u.get("name"), "role": u["role"], "can_spend": bool(u.get("can_spend")), "via": u.get("via")})
+            if path == "/api/users":
+                return self._json(200, {"users": c.users.list()})
             if path == "/api/telegram":      # connected or not and which bot: never the token
                 return self._json(200, telegram.status(c.out))
             if path.startswith("/api/packs/") and path.endswith("/telegram"):          # dry run: what would be created, every problem
@@ -546,14 +717,17 @@ def make_handler(c: Console):
                 return self._json(200, {"agent": _brain.target(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
                                         "live": higgsfield.available()})
             if path == "/api/chat/sessions":
-                return self._json(200, {"sessions": c.chat_parts()[0].list()})
+                return self._json(200, {"sessions": c.chat_parts(self.user)[0].list()})
             if path.startswith("/api/chat/sessions/") and len(path.strip("/").split("/")) == 4:
                 from ..agent.memory import SessionError as _SE
-                store, tools, _agent, ag = c.chat_parts()
+                store, tools, _agent, ag = c.chat_parts(self.user)
                 try:
                     return self._json(200, ag.hydrate(store, tools, store.load(path.rsplit("/", 1)[1])))
                 except _SE as e:
                     raise pl.PipelineError(str(e), e.code)
+            if path == "/api/openapi.json":      # the HTTP contract (console/openapi.py; tests/test_openapi.py guards it against drift)
+                from . import openapi as _oa
+                return self._json(200, _oa.build(f"http://{self.headers.get('Host') or '127.0.0.1'}"))
             if path in ("/api/health", "/api/health/models", "/api/health/storage"):     # what is this app connected to, and is it healthy
                 from .. import health as _h
                 if path.endswith("/models"):
@@ -566,12 +740,13 @@ def make_handler(c: Console):
                 return self._json(200, _vj.status())
             if path == "/api/search":
                 q = parse_qs(urlparse(self.path).query).get("q", [""])[0]
+                see = (lambda g: c.visible(self.user, int(str(g).lstrip("G")))) if self.user.get("role") != "owner" else (lambda g: True)
                 try:  # Phase 3A: Postgres search when serving the real out/ with the database up, else files
                     from ..store import db as _db, repo as _repo, sync as _sync
                     import os as _os
                     if _sync.is_default_out(c.out) and _os.environ.get("MIRSAL_DB_WRITE", "") not in ("0", "no", "off", "false") and _db.available():
                         with _db.connect() as _c:
-                            rows = _repo.search(_c, q)
+                            rows = [r for r in _repo.search(_c, q) if see(r["generation_id"])]
                         return self._json(200, {"results": [{
                             "generation": r["generation_id"], "id": int(r["generation_id"][1:]),
                             "index": r["idx"], "key": r["key"], "tags": r["tags"], "name": r["name"],
@@ -583,7 +758,7 @@ def make_handler(c: Console):
                             "via": "postgres"} for r in rows], "via": "postgres"})
                 except Exception:
                     pass
-                return self._json(200, {"results": gates.search(c.out, q), "via": "files"})
+                return self._json(200, {"results": [r for r in gates.search(c.out, q) if see(r["generation"])], "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
             if path.startswith("/api/generations/") and path.endswith("/files"):         # where this batch's files are (the named folder for copy and paste)
@@ -617,13 +792,18 @@ def make_handler(c: Console):
                 return self._send(200, a[0], a[1])
             if path == "/api/jobs":      # S2: jobs for the operator (Generate page polls while waiting)
                 st = parse_qs(urlparse(self.path).query).get("status", [None])[0]
-                return self._json(200, {"jobs": jobs.list(c.out, st), "typical": usage.typical(c.out)})
+                rows = jobs.list(c.out, st)
+                if self.user.get("role") != "owner":
+                    return self._json(200, {"jobs": [j for j in rows if (j.get("request") or {}).get("user") == self.user["id"]]})
+                return self._json(200, {"jobs": rows, "typical": usage.typical(c.out)})
             if path.startswith("/api/jobs/") and len(path.strip("/").split("/")) == 3:
                 try:
                     return self._json(200, jobs.read(c.out, path.strip("/").split("/")[2]))
                 except jobs.JobError as e:
                     raise pl.PipelineError(str(e), e.code)
             if path == "/api/generations":
+                if self.user.get("role") != "owner":
+                    return self._json(200, {"busy": c.lock.locked(), "generations": [g for g in pl.summary(c.out) if g.get("owner") == self.user["id"]]})
                 return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": pl.summary(c.out)})
             if path.startswith("/api/generations/"):
                 gid = int(path.rsplit("/", 1)[1])
@@ -783,6 +963,26 @@ def make_handler(c: Console):
             if len(parts) == 6 and parts[:2] == ["api", "generations"] and parts[3:4] == ["video_sheet"] and parts[5] == "video":
                 return self._post_video(int(parts[2]), parts[4], parse_qs(u.query))
             body = self._body()
+            if path == "/api/users":                  # owner: a new account; its token is shown once and never stored
+                pub, token = c.users.create(str(body.get("name", "")), str(body.get("role", "member")), bool(body.get("can_spend", False)))
+                from ..store import sync as _sync
+                _sync.sync_users(c.out)
+                return self._json(200, {"user": pub, "token": token})
+            up = path.strip("/").split("/")
+            if len(up) == 4 and up[:2] == ["api", "users"]:
+                act = up[3]
+                if act in ("disable", "enable"):
+                    r = {"user": c.users.set_disabled(up[2], act == "disable")}
+                elif act == "rotate":
+                    pub, token = c.users.rotate(up[2])
+                    r = {"user": pub, "token": token}
+                elif act == "update":
+                    r = {"user": c.users.update(up[2], body.get("can_spend"), body.get("role"), body.get("name"))}
+                else:
+                    raise pl.PipelineError("not found", 404)
+                from ..store import sync as _sync
+                _sync.sync_users(c.out)
+                return self._json(200, r)
             if path == "/api/telegram/config":
                 return self._json(200, telegram.save_config(c.out, str(body.get("token", "")), str(body.get("user_id", ""))))
             if path == "/api/telegram/disconnect":
@@ -802,12 +1002,13 @@ def make_handler(c: Console):
             if path.startswith("/api/chat/sessions"):
                 from ..agent.memory import SessionError as _SE
                 cp = path.strip("/").split("/")
-                store = c.chat_parts()[0]
+                store = c.chat_parts(self.user)[0]
                 try:
                     if cp == ["api", "chat", "sessions"]:
                         return self._json(200, store.create(body.get("title"), body.get("settings") if isinstance(body.get("settings"), dict) else None))
                     if len(cp) == 5 and cp[4] == "messages":
-                        return self._json(202, c.idem("chat:" + cp[3], self.headers.get("Idempotency-Key"), lambda: c.chat_send(cp[3], body)))
+                        store.load(cp[3])                                    # a stranger's chat is a 404 before anything is cached or started
+                        return self._json(202, c.idem("chat:" + cp[3], self.headers.get("Idempotency-Key"), lambda: c.chat_send(cp[3], body, self.user)))
                     if len(cp) == 5 and cp[4] == "settings":
                         sess = store.load(cp[3])
                         allowed = {"grid": ("2x2", "3x3"), "ask_before_spending": (True, False), "ai": (True, False)}
@@ -854,6 +1055,8 @@ def make_handler(c: Console):
                     raise pl.PipelineError(str(e), e.code)
                 raise pl.PipelineError("not found", 404)
             if path == "/api/generations" and body.get("task"):      # Run: a generation linked to its reserved task
+                if self.user.get("role") != "owner":
+                    raise pl.PipelineError("this account cannot do that (owner only)", 403)
                 if c.lock.locked():
                     raise pl.PipelineError("busy", 409)
                 t = tasks.read_task(c.out, body["task"])
@@ -870,8 +1073,12 @@ def make_handler(c: Console):
                     key = str(body.get("key") or "")
                     if not store.exists(key):
                         raise AssetError("no such asset", 404)
+                    if self.user.get("role") != "owner":
+                        m = _KEY_PATH.match(key)
+                        if not m or not c.visible(self.user, int(m.group(1))):
+                            raise AssetError("no such asset", 404)
                     ttl = max(5, min(int(body.get("ttl", 300)), 3600))
-                    return self._json(200, {"url": store.url(key, ttl), "expires_in": ttl})
+                    return self._json(200, {"url": store.url(key, ttl, self.user["id"]), "expires_in": ttl})
                 except AssetError as e:
                     raise pl.PipelineError(str(e), e.code)
             if path == "/api/generations":
@@ -888,7 +1095,7 @@ def make_handler(c: Console):
                     pl.approve_plan(c.out, gid, "approved by pressing Generate")
                     c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
                     return {"id": gid}
-                return self._json(202, c.idem("generation", self.headers.get("Idempotency-Key"), create))
+                return self._json(202, c.idem("generation:" + self.user["id"], self.headers.get("Idempotency-Key"), create))
             parts = path.strip("/").split("/")
             if len(parts) == 4 and parts[:2] == ["api", "generations"]:
                 gid = int(parts[2])

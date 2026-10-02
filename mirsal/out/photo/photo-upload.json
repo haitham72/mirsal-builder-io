@@ -1,0 +1,26 @@
+{
+  "src": "..\\ref\\upload.jpeg",
+  "method": "chroma_green",
+  "foreground": 0.289,
+  "outline_px": 12,
+  "erode_px": 0,
+  "shared": false,
+  "checks": [
+    [
+      "dimensions",
+      true,
+      "512x512"
+    ],
+    [
+      "foreground",
+      true,
+      "91598px"
+    ],
+    [
+      "size",
+      true,
+      "193KB png"
+    ]
+  ],
+  "warning": null
+}

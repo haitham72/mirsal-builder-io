@@ -19,6 +19,7 @@ area you touch (`docs/`). Where things are built and how they fit is in those do
 | **First live results, jobs, Generate menu, edge** | G001-G008 and `mirsal/out/s0/`; "Generate it" in the Studio; the credits pill, Queue panel, Allow anyway, Stroke / Trim with Apply / Undo |
 | **One real animated pack, and Kling `pro` at the default gap** | a real run (spends credits) to close S4: `python -m mirsal measure-cells` then shows the flagged share (first numbers: 0.74 gap = 5.6%, 0.80 = 88.9%, 0.84 = 44.4%) |
 | **A real chat -> Create run** | with you present: type a request in the AI chat, press Create (spends about 2 credits for a sheet); nothing in the chat has been run against the real Higgsfield yet, only against fakes and prepared sheets |
+| **Accounts, rate limits, OpenAPI, the worker queue, transformations** (built 2026-10-02, tested only on fakes and synthetic sheets) | `python -m mirsal user add Amira` then `curl -H "Authorization: Bearer <token>" localhost:8789/api/me` and `/api/openapi.json`; an account sees only its own chats and batches (404 for a stranger's) and cannot spend unless `--spend`; for the queue run `python -m mirsal serve` with `MIRSAL_JOB_MODE=queue` plus `python -m mirsal worker` and one real "Create" (about 2 credits; never run against real credits unattended); try "dog as banana" and "dog as banana, no dancing" in the chat and check the plan card |
 | **LangSmith** | open project `mirsal` in the account behind the key; decide cloud vs self-hosted; set `MIRSAL_TRACE=langsmith` in `mirsal/.env` to record real runs (off by default) |
 | **Decisions** | keep or delete the parked React gateway `mirsal/web/`; a daily credit cap (`MIRSAL_DAILY_CREDITS`); a backup command for `out/`; Arabic prompt handling; moderation policy before any public API |
 
@@ -28,8 +29,7 @@ Closed by Haitham on 2026-10-02: Telegram sends work on several accounts; merge 
 
 **Engine and Studio (was Phase 1)**
 - The Studio's JavaScript has no tests except the chat helpers (node, `tests/js`); add a browser smoke test for issue colours and Include anyway.
-- A second request while a job runs gets 409; a real server-side queue would queue it. `result.json` is read-modify-write under one in-process lock plus the cross-process writer lock: two request threads can still interleave inside the server.
-- No rate limiting on the server (localhost only).
+- A second request while the *pipeline* is busy gets 409 (the provider jobs have their own durable queue now: `docs/generation.md`). `result.json` is read-modify-write under one in-process lock plus the cross-process writer lock: two request threads can still interleave inside the server.
 
 **Live generation (was Phase 2)**
 - S4 re-run with Kling `pro` and the default gap decision (`slot_fill`); S7 decisions: one 3x3 sheet vs single stickers, the engine's outline vs a model-drawn one.
@@ -47,7 +47,7 @@ Closed by Haitham on 2026-10-02: Telegram sends work on several accounts; merge 
 - Library packs still live in `out/library/library.json` (the old plan moved them to `packs` / `pack_stickers`; wait for the app's pack curation). `reviews.trace_run_id` exists and nothing writes it. Per-video task rows. An S3-compatible store behind `AssetStore`.
 
 **Agent and chat (was Phase 4)**
-- Transformation templates ("dog as banana": required slots dance / shock / squash of the target, "dog with bananas" is not a transformation, the user can override "no dancing") are not built; the plan comes from the slot filler.
+- Transformation templates are built (`docs/generation.md`); open: Arabic / Arabizi detection, more lexicons beside `banana.py` (pizza, avocado, ...), and your examples in `docs/inputs/resolver_utterances.md` to check the detector against (it was written from the one example "dog as banana").
 - Annotation: what is visible on an approved sticker (`stickers.annotation`, cached by image hash), `build_context(HIGH)` with the real images, annotation text added to the pool's `search_text`.
 - Multi-reference: "make 5 like 2" copies sticker 2 into `out/refs/` and sends it as a reference image; the other roles (pose, expression, ...) are recorded (`generation_references`) but not yet worded into prompts.
 - The 40-utterance resolver eval (>= 95% exact ids) needs `docs/inputs/resolver_utterances.md` from you; transformation examples likewise.
@@ -55,8 +55,8 @@ Closed by Haitham on 2026-10-02: Telegram sends work on several accounts; merge 
 - The chat polls; streaming the agent's steps over SSE is not built. There is no terminal `mirsal chat` (the AI screen replaced it). The reducer's model summary has only run against fakes.
 
 **API and production (was Phase 5)**
-- An OpenAPI document and generated TypeScript types; user accounts and per-user authorization (`010_users`: `user_id` on sessions, generations, packs; Redis keys switch from `u:local`); rate limiting.
-- A durable `jobs` table with `mirsal worker` processes (`FOR UPDATE SKIP LOCKED`, dead-letter after the maximum); Postgres as the durable idempotency backstop; per-job temp directories and retention policies.
+- Accounts are built (owner / member, `docs/api.md`); not per user yet: packs and the library (owner-only), reference images, the Redis cache keys (`u:local`), and a browser login for a member (a member uses the API with a token).
+- Postgres as the durable idempotency backstop; per-job temp directories and retention policies; the Studio has no queue panel for DEAD rows yet (`mirsal queue status` shows them); `MIRSAL_JOB_MODE=queue` has only run against the fake CLI, never a real paid job.
 - JSON logs (`request_id, session_id, generation_id`), timing and quality metrics (time to first sticker, approval and regeneration rates), the regression suites (visual, chroma, transformation, conversation datasets) in one command.
 - The React frontend: decide whether `mirsal/web/` is extended or deleted; the editor's mobile screens.
 

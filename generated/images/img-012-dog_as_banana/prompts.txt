@@ -1,0 +1,23 @@
+G009  dog as a banana
+
+SHEET PROMPT
+One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.
+Subject: a dog transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the dog's face, expression and personality on it; it is not a dog standing next to a banana, not a dog holding or wearing a banana, and not a dog with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.
+Style: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Reading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:
+Character 1: dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile
+Character 2: shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open
+Character 3: squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling
+Character 4: blowing a kiss with a wink, a small heart floating away
+Character 5: laughing so hard tears of joy fly out, mouth wide open
+Character 6: hugging a big red heart, eyes sparkling, blushing cheeks
+Character 7: holding a golden trophy overhead, triumphant
+Character 8: rolling eyes with a bored deadpan face
+Character 9: sad and drooping, a single tear, slumped shoulders
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours for all 9 characters.
+Background: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Spacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.
+
+SHEET: nano_banana_flash  {"aspect_ratio": "1:1", "resolution": "2k"}  credits 2.0  Higgsfield b256fecc-7dd5-45b3-b024-7567d8ddda77

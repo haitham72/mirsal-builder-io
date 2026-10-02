@@ -171,7 +171,7 @@ def _cover(words: list, hay: list) -> tuple:
 _SELECT = """SELECT si.sticker_id, si.subject, si.action, si.search_text, si.topics,
                   s.key, s.emoji, s.generation_id, s.animation_status,
                   (SELECT object_key FROM assets WHERE sticker_id = s.id AND kind IN ('PNG','WEBP') LIMIT 1) AS png{extra}
-           FROM sticker_index si JOIN stickers s ON s.id = si.sticker_id
+           FROM sticker_index si JOIN stickers s ON s.id = si.sticker_id JOIN generations g ON g.id = s.generation_id
            WHERE si.hidden = false AND si.shared = true AND s.still_review = 'APPROVED'{where}"""
 
 
@@ -179,7 +179,12 @@ def _style_clause(style: str | None) -> tuple:
     return (" AND si.search_text ILIKE %s", ["%\u2014 " + str(style).strip()]) if style else ("", [])
 
 
-def _vector_hits(conn, parsed: dict, query: str, style, embedder) -> list | None:
+def _owner_clause(viewer: str | None) -> tuple:
+    """A member searches only the generations they own (files are served by owner, so a hit they could not open is never shown)."""
+    return (" AND g.owner = %s", [viewer]) if viewer else ("", [])
+
+
+def _vector_hits(conn, parsed: dict, query: str, style, embedder, viewer: str | None = None) -> list | None:
     """Candidates scored by cosine, or None when vectors cannot be used right now (no vectors stored, or no embedding backend)."""
     with conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM sticker_index WHERE subject_vec IS NOT NULL AND action_vec IS NOT NULL")
@@ -197,10 +202,11 @@ def _vector_hits(conn, parsed: dict, query: str, style, embedder) -> list | None
         return None
     from . import embed as _e
     sty, sargs = _style_clause(style)
+    oc, oargs = _owner_clause(viewer)
     sql = _SELECT.format(extra=", 1 - (si.subject_vec <=> %s::vector) AS cs, 1 - (si.action_vec <=> %s::vector) AS ca",
-                         where=" AND si.subject_vec IS NOT NULL AND si.action_vec IS NOT NULL" + sty) + " ORDER BY si.subject_vec <=> %s::vector LIMIT 300"
+                         where=" AND si.subject_vec IS NOT NULL AND si.action_vec IS NOT NULL" + sty + oc) + " ORDER BY si.subject_vec <=> %s::vector LIMIT 300"
     with conn.cursor() as cur:
-        cur.execute(sql, [_e.literal(qs), _e.literal(qa or qs), *sargs, _e.literal(qs)])
+        cur.execute(sql, [_e.literal(qs), _e.literal(qa or qs), *sargs, *oargs, _e.literal(qs)])
         cols = [d[0] for d in cur.description]
         rows = [dict(zip(cols, r)) for r in cur.fetchall()]
     out = []
@@ -215,13 +221,14 @@ def _vector_hits(conn, parsed: dict, query: str, style, embedder) -> list | None
     return out
 
 
-def _lexical_hits(conn, parsed: dict, query: str, style, only_unembedded: bool) -> list:
+def _lexical_hits(conn, parsed: dict, query: str, style, only_unembedded: bool, viewer: str | None = None) -> list:
     sw, aw = _words(parsed["subject"]), _words(parsed["action"])
     sty, sargs = _style_clause(style)
-    where = (" AND (si.subject_vec IS NULL OR si.action_vec IS NULL)" if only_unembedded else "") + sty
+    oc, oargs = _owner_clause(viewer)
+    where = (" AND (si.subject_vec IS NULL OR si.action_vec IS NULL)" if only_unembedded else "") + sty + oc
     out = []
     with conn.cursor() as cur:
-        cur.execute(_SELECT.format(extra="", where=where), sargs)
+        cur.execute(_SELECT.format(extra="", where=where), [*sargs, *oargs])
         cols = [d[0] for d in cur.description]
         for r in cur.fetchall():
             cand = dict(zip(cols, r))
@@ -240,7 +247,8 @@ def _lexical_hits(conn, parsed: dict, query: str, style, only_unembedded: bool) 
     return out
 
 
-def search(conn, query: str, count: int = 9, style: str | None = None, embedder=None, vectors: bool | None = None, per_gen: int | None = None) -> dict:
+def search(conn, query: str, count: int = 9, style: str | None = None, embedder=None, vectors: bool | None = None, per_gen: int | None = None,
+           viewer: str | None = None) -> dict:
     """Pool-first search. Returns {parsed, hits, found, missing, mode, ms}: never spends, never generates. `mode`: vector (cosine + gate),
     lexical (no vectors / no embedding backend) or hybrid (vectors plus a lexical pass over rows not embedded yet). vectors=False forces lexical.
     `style` keeps only stickers made in that style_id. `per_gen` is the diversity cap (default PER_GEN = 2 hits per generation; the chat passes `count` to list a whole pack)."""
@@ -248,14 +256,14 @@ def search(conn, query: str, count: int = 9, style: str | None = None, embedder=
     parsed = parse_query(query)
     hits, mode = None, "lexical"
     if vectors is not False:
-        hits = _vector_hits(conn, parsed, query, style, embedder)
+        hits = _vector_hits(conn, parsed, query, style, embedder, viewer)
     if hits is not None:
         mode = "vector"
-        extra = _lexical_hits(conn, parsed, query, style, only_unembedded=True)
+        extra = _lexical_hits(conn, parsed, query, style, only_unembedded=True, viewer=viewer)
         if extra:
             mode, hits = "hybrid", hits + extra
     else:
-        hits = _lexical_hits(conn, parsed, query, style, only_unembedded=False)
+        hits = _lexical_hits(conn, parsed, query, style, only_unembedded=False, viewer=viewer)
     hits.sort(key=lambda h: -h["rank"])
     seen, taken, final, cap = set(), {}, [], (PER_GEN if per_gen is None else max(1, int(per_gen)))
     for h in hits:  # diversity + near-duplicate collapse (same text -> the better rank wins)

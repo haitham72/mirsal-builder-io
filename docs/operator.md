@@ -19,6 +19,11 @@ mirsal hf models --type video                  # the full Higgsfield list with p
 # or the individual steps: mirsal job claim J005 --ticket <id> ... mirsal job done J005 --file <path> --model <name> --cost <n>
 ```
 
+## Workers and the durable queue
+
+For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` for `mirsal serve` and run `python -m mirsal worker` (any number; `--once` drains and exits, `--kinds sheet`, `--poll 2`).
+`mirsal queue status | retry J004 | reap | sync` looks after the table. A provider failure is **not** retried by a worker (it can cost credits again); retry it yourself. Details: `docs/generation.md`, "The durable queue and workers".
+
 ## Rules
 
 - **Ticket first.** `claim` stores `external_task_id` before the operator waits. A crashed

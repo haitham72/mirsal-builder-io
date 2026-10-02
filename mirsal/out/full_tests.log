@@ -1,0 +1,81 @@
+........................................................C:\Python314\Lib\unittest\case.py:615: ResourceWarning: unclosed <socket.socket fd=2740, family=2, type=1, proto=0, laddr=('127.0.0.1', 59426)>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.....ok    yellow teddy bear in Pixar 3D iOS style                9 cells, 9 unique keys, key=green
+ok    yellow teddy bear in toon cel shade with ios 3d genm   9 cells, 9 unique keys, key=green
+ok    a cute yellow emoji face, 16 reactions                 9 cells, 9 unique keys, key=green
+ok    falcon dancing                                         9 cells, 9 unique keys, key=green
+ok    banana shocked                                         9 cells, 9 unique keys, key=green
+ok    camel as cupcake                                       9 cells, 9 unique keys, key=green
+ok    dog as banana                                          9 cells, 9 unique keys, key=green
+ok    dog with bananas                                       9 cells, 9 unique keys, key=green
+ok    teddy bear playing football                            9 cells, 9 unique keys, key=green
+ok    teddy bear with no dancing                             9 cells, 9 unique keys, key=green
+ok    green frog with big eyes                               9 cells, 9 unique keys, key=green
+ok    watermelon sticker pack                                9 cells, 9 unique keys, key=green
+ok    dubai skyline at night                                 9 cells, 9 unique keys, key=green
+ok    arabic coffee celebration                              9 cells, 9 unique keys, key=green
+ok    eid mubarak stickers                                   9 cells, 9 unique keys, key=green
+ok    دب يرقص                                                9 cells, 9 unique keys, key=green
+ok    صقر سعيد                                               9 cells, 9 unique keys, key=green
+ok    تدي بير مبسوط                                          9 cells, 9 unique keys, key=green
+ok    sakr yarkos                                            9 cells, 9 unique keys, key=green
+ok    teddy bear mabsout                                     9 cells, 9 unique keys, key=green
+20/20 lab inputs pass lint
+task: frog_big_eyes  grid: [2, 2]  template: sheet_2x2 v3  expanded_by: deterministic  lint: PASS
+subject: green frog  style: flat_vector  key: green
+  1 😂 frog_laughing                                    laughing | hard | tears | big
+  2 😭 frog_crying                                      bawling | big | streaming
+  3 😡 frog_angry                                       furious | steaming | fists | big
+  4 😵‍💫 frog_dizzy                                       dizzy | spiral | eyes | big
+--- sheet prompt ---
+One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.
+Subject: green frog.
+Style: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Reading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:
+Character 1: laughing so hard tears of joy fly out, mouth wide open
+Character 2: bawling with big streaming tears and a trembling lip
+Character 3: furious, steaming, fists clenched, deep scowl
+Character 4: dizzy with spiral eyes, wobbling on the spot
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours for all 4 characters.
+Background: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Spacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.
+--- video prompt ---
+Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:
+1. doubles over, shoulders shaking, tiny hops, wipes a tear
+2. sobs with heaving shoulders, tears stream in two arcs
+3. stomps in place, steam puffs from the head, body shakes with rage
+4. sways in circles, little stars orbit the head
+Animation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.
+Keep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.
+Empty slots stay empty: do not add any character, object or effect to them.
+Static camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.
+Keep each character's design, proportions and colours unchanged and do not add outlines or borders.
+.........................................................C:\Python314\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 500: 'Internal Server Error'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+C:\Python314\Lib\unittest\case.py:615: ResourceWarning: unclosed <socket.socket fd=3024, family=2, type=1, proto=0, laddr=('127.0.0.1', 59100)>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.......C:\Python314\Lib\unittest\suite.py:84: ResourceWarning: unclosed <socket.socket fd=3128, family=2, type=1, proto=0, laddr=('127.0.0.1', 55599)>
+  return self.run(*args, **kwds)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+C:\Python314\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 401: 'Unauthorized'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+............C:\Python314\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 403: 'Forbidden'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+..C:\Python314\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 400: 'Bad Request'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+..C:\Python314\Lib\tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 429: 'Too Many Requests'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.................................................
+----------------------------------------------------------------------
+Ran 190 tests in 151.944s
+
+OK
+usage: mirsal prompt "<request>" [--grid 3x3|2x2|1x1] [--style ID] [--ai] | mirsal prompt lab
+no such photo: C:\Users\User\AppData\Local\Temp\tmpml5nckx8\missing.jpg
+not an image I can read: cannot identify image file <_io.BytesIO object at 0x0000021698AEF510>
+photo-dog.png  method=chroma_green foreground=0.234 dimensions=ok(512x512) foreground=ok(154768px) size=ok(44KB png)
+exit=0

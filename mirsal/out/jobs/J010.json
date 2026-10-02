@@ -1,0 +1,39 @@
+{
+  "id": "J010",
+  "kind": "video",
+  "task": "angel reading a newspaper",
+  "generation": "G001",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {
+      "mode": "pro",
+      "duration": "3"
+    },
+    "prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. waves the raised hand in wide arcs while bouncing on tiptoes\n2. vibrates with joy, jumps up and down, claps\n3. the heart pulses, sways side to side, squeezes the heart\n4. bobs the hand, nods approvingly, tilts the head\n5. eyes circle slowly, head tilts back with a sigh\n6. sighs, shoulders sag, droops slowly lower\n7. stomps in place, steam puffs from the head, body shakes with rage\n8. shivers fast, knees knock, cowers lower\n9. rubs the hands, eyebrows wiggle, sneaky giggle\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "start_image": "D:\\Vscode\\mirsal-builder-io\\mirsal\\out\\G001\\video_sheet\\A1\\sheet.png",
+    "sheet": "A1",
+    "label": "angel reading a newspaper",
+    "loop": false
+  },
+  "status": "DONE",
+  "external_task_id": "2af144c4-09c9-4b9b-adcf-5fc55684d3fd",
+  "result": {
+    "file": "jobs/J010/result.mp4",
+    "sha256": "6f375d36f9d1a0afd4d577b8049d1d265812f90313895ecbef78bbb024762faf",
+    "bytes": 9880868
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1790876149.897,
+  "claimed_at": 1790876155.536,
+  "completed_at": 1790876352.77,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5
+}

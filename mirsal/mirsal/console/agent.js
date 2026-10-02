@@ -23,7 +23,9 @@ const AIU=(()=>{
   return st.some(x=>x.status==='PENDING')||(!!c.animating&&st.some(x=>x.status==='READY'&&['PENDING','RUNNING'].includes(x.anim_status)))};
  const needPoll=s=>!!s&&(s.working||(s.messages||[]).some(m=>(m.cards||[]).some(cardLive)));
  const sid=h=>{const m=/^#?\/?agent\/(S\d+)/.exec(h||'');return m?m[1]:null};
- return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid};
+ /* the last assistant message: only its plan card is the live one (a pending Create belongs to the newest plan) */
+ const lastBot=ms=>{const a=ms||[];for(let i=a.length-1;i>=0;i--)if(a[i]&&a[i].role!=='user')return a[i];return null};
+ return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid,lastBot};
 })();
 if(typeof module!=='undefined')module.exports=AIU;
 
@@ -142,7 +144,7 @@ function traceHTML(m,work){
   return `<div class="${cls}"><i class=tr-mk></i>${t}${d&&isOpen?`<div class=tr-d>${s.detail.lines.map(l=>`<div>${AIU.esc(l)}</div>`).join('')}</div>`:''}</div>`}).join('')+`</div>`}
 
 function cardHTML(c,m,i){
- if(c.type==='plan'){const done=!(A.sess&&A.sess.pending)||m!==lastBot();
+ if(c.type==='plan'){const last=AIU.lastBot((A.sess&&A.sess.messages)||[]),done=!(A.sess&&A.sess.pending)||!last||m.id!==last.id;
   return `<div class="ai-card plan${done?' is-done':''}"><div class=ai-ch><b>${AIU.esc(c.subject)}</b><small>${c.count} stickers · ${AIU.esc(c.grid)} · ${AIU.esc(c.style)}</small></div>
    <div class=plan-tags>${(c.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div>
    <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`Costs <b>${AIU.credits(c.estimate)}</b>${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}</div>
@@ -223,12 +225,16 @@ async function agSend(text,action){
  const sid=await ensureSession();if(!sid)return;A.busy=true;busyUi();
  const r=await post(`/api/chat/sessions/${sid}/messages`,{text,action,selected:[...A.sel]});
  if(!r.ok){A.busy=false;busyUi();return toast(r.status===409?'Still working on your last message.':(r.j.error||'Could not send'),1)}
- A.sel.clear();selChips();A.setOpen=false;setSet();await loadSession(sid,true);startPoll();
+ A.sel.clear();selChips();A.setOpen=false;setSet();
+ try{await loadSession(sid,true)}catch(e){}            // a paint error must not stop this turn from being polled
+ startPoll();
 }
 function startPoll(){clearTimeout(A.poll);A.since=A.since||Date.now();
  const tick=async()=>{if(route_!=='agent'||document.hidden||!A.sid){A.busy=false;return}
-  const s=await loadSession(A.sid,true);
-  if(AIU.needPoll(s)){A.busy=!!(s&&s.working);A.poll=setTimeout(tick,s&&s.working?700:(Date.now()-A.since>120000?4000:1600))}
+  let s=null;
+  try{s=await loadSession(A.sid,true)}catch(e){s=null}                  // one failed frame must never stop the polling (a paint error used to freeze the chat at "Thinking")
+  if(!s){if(A.sid){A.busy=false;busyUi();A.poll=setTimeout(tick,2500)}return}   // a failed read: try again (a 404 has already cleared A.sid)
+  if(AIU.needPoll(s)){A.busy=!!s.working;A.poll=setTimeout(tick,s.working?700:(Date.now()-A.since>120000?4000:1600))}
   else{A.busy=false;A.since=0;busyUi();await loadSessions();agList()}};
  A.poll=setTimeout(tick,500)}
 

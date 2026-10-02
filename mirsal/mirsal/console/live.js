@@ -84,7 +84,8 @@ async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image')
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
   LIVE.jobs.push({id:r.j.job,kind:isSheet?'sheet':'video',label:isSheet?ctx.prompt:`Batch ${ctx.g}`,model:m?m.label:r.j.model,est:r.j.estimate,t0:Date.now(),gen:isSheet?null:ctx.g,ai:r.j.expanded_by==='ai'});
-  if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
+  if(isSheet&&ctx.ai&&r.j.expanded_by==='transformation')toast('Transformation: the built-in template wrote the cells, so the AI enhancer was not asked');
+  else if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
   if(!isSheet&&egDirty())egClear();
   lsave();say('');drawLive();liveTick();refreshHf();return true}
 

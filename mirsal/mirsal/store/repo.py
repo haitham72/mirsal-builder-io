@@ -118,9 +118,9 @@ def save_generation(conn, out: Path, gid: int) -> str:
         cur.execute(
             """INSERT INTO generations (id, parent_id, grid, regen_of, verify_version, prompt, subject,
                   source, source_ref, task, task_slug, sheet_prompt, video_prompt, plan, engine_version,
-                  status, name_key, task_id, template_id, template_version, slots, outline_px, erode_px)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-               ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status, plan=EXCLUDED.plan,
+                  status, name_key, task_id, template_id, template_version, slots, outline_px, erode_px, owner)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET owner=EXCLUDED.owner, status=EXCLUDED.status, plan=EXCLUDED.plan,
                  slots=EXCLUDED.slots, outline_px=EXCLUDED.outline_px, erode_px=EXCLUDED.erode_px,
                  task_id=EXCLUDED.task_id, name_key=EXCLUDED.name_key""",
             (gen_id, _parent_id(res.get("parent")), grid, res.get("regen_of"), str(res.get("verify_version") or ""),
@@ -131,7 +131,7 @@ def save_generation(conn, out: Path, gid: int) -> str:
              res.get("task_id"), res.get("template_id"),
              (str(res.get("template_version")) if res.get("template_version") is not None else None),
              json.dumps(res.get("slots")) if res.get("slots") is not None else None,
-             res.get("outline_px"), res.get("erode_px")))
+             res.get("outline_px"), res.get("erode_px"), str(res.get("owner") or "local")))
 
         # video sheets first (stickers + assets reference them)
         vs_map: dict = {}
@@ -550,18 +550,38 @@ def find_task(conn, external_id: str | None = None, key_prefix: str | None = Non
         return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
+def import_users(conn, out: Path) -> int:
+    """out/users.json -> users (digests only). Idempotent. Returns the rows present."""
+    from ..users import UserStore
+    n = 0
+    path = Path(out) / "users.json"
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8")).get("users", [])
+    except (OSError, ValueError):
+        raw = []
+    for u in raw:
+        with conn.cursor() as cur:
+            cur.execute("""INSERT INTO users (id, name, role, can_spend, token_sha256, disabled, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s)
+                           ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, role = EXCLUDED.role, can_spend = EXCLUDED.can_spend,
+                             token_sha256 = EXCLUDED.token_sha256, disabled = EXCLUDED.disabled""",
+                        (u["id"], u["name"], u["role"], bool(u.get("can_spend")), u.get("token_sha256", ""), bool(u.get("disabled")), _ts(u.get("created"))))
+        n += 1
+    conn.commit()
+    return n
+
+
 def save_session(conn, s: dict) -> str:
     """One chat session (out/sessions/S###.json) into sessions + interactions + feedback. Idempotent; the file stays the primary store."""
     with conn.cursor() as cur:
         cur.execute(
-            """INSERT INTO sessions (id, title, settings, focus, subjects, preferences, summary, created_at, updated_at)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-               ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, settings = EXCLUDED.settings, focus = EXCLUDED.focus,
+            """INSERT INTO sessions (id, title, settings, focus, subjects, preferences, summary, created_at, updated_at, user_id)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET user_id = EXCLUDED.user_id, title = EXCLUDED.title, settings = EXCLUDED.settings, focus = EXCLUDED.focus,
                  subjects = EXCLUDED.subjects, preferences = EXCLUDED.preferences, summary = EXCLUDED.summary,
                  updated_at = EXCLUDED.updated_at""",
             (s["id"], s.get("title") or "", json.dumps(s.get("settings") or {}), json.dumps(s.get("focus") or {}),
              json.dumps(s.get("subjects") or [], ensure_ascii=False), json.dumps(s.get("preferences") or {}, ensure_ascii=False),
-             json.dumps(s.get("summary") or {}, ensure_ascii=False), _ts(s.get("created")), _ts(s.get("updated"))))
+             json.dumps(s.get("summary") or {}, ensure_ascii=False), _ts(s.get("created")), _ts(s.get("updated")), s.get("user") or "local"))
         for it in s.get("interactions") or []:
             cur.execute(
                 """INSERT INTO interactions (session_id, seq, user_message, assistant_message, intents, resolved,

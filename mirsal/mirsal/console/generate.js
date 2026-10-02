@@ -258,7 +258,7 @@ function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('
   PT=setTimeout(async()=>{const n=++PQ,r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:false}),el=$('gplan');if(n!==PQ||!el)return;
     if(!r.ok){el.innerHTML='';return}
     const open=el.querySelector('details')&&el.querySelector('details').open;
-    el.innerHTML=`<details class=gpv ${open?'open':''}><summary>Prompt preview <span class=mut>template ${esc(r.j.template_id)} v${r.j.template_version} · ${r.j.stickers.length} cell prompt${r.j.stickers.length>1?'s':''}, 1 to 5 tags each · ${(typeof aiOn==='function'&&aiOn())?'the AI enhancer writes the 9 concepts when you press Generate':'built-in sets, no AI call'}</span></summary>
+    el.innerHTML=`<details class=gpv ${open?'open':''}><summary>Prompt preview <span class=mut>template ${esc(r.j.template_id)} v${r.j.template_version} · ${r.j.stickers.length} cell prompt${r.j.stickers.length>1?'s':''}, 1 to 5 tags each · ${r.j.expanded_by==='transformation'?'the transformation template wrote these cells, no AI call':(typeof aiOn==='function'&&aiOn())?'the AI enhancer writes the 9 concepts when you press Generate':'built-in sets, no AI call'}</span></summary>
       ${r.j.expand_error?`<div class=warn>${esc(r.j.expand_error)}</div>`:''}
       <div class=pcols><div>${copyBox('Sheet prompt',r.j.sheet_prompt,'pv1',9)}${copyBox('Video prompt',r.j.video_prompt,'pv2',5)}</div>
       <ul class=pcells>${r.j.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></details>`},450)}

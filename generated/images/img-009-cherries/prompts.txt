@@ -1,0 +1,23 @@
+G006  cherries in love
+
+SHEET PROMPT
+One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.
+Subject: a pair of bright red cherries with green stems, round and shiny, always paired together.
+Style: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Reading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:
+Character 1: cherries smiling sweetly with eyes closed and leaning into each other lovingly
+Character 2: cherries blushing deeply with shy eyes and holding stems tightly
+Character 3: cherries jumping up joyfully with wide grins and stems high
+Character 4: cherries sitting side by side with one cherry reaching out to touch the other
+Character 5: cherries spinning slowly together in a loving embrace
+Character 6: cherries leaning backward with eyes wide in surprise and stems tangled
+Character 7: cherries lying down on their sides with sleepy half-closed eyes
+Character 8: cherries standing proud with chests out and smiling confidently
+Character 9: cherries looking mischievous with sly smiles and one cherry winking
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours for all 9 characters.
+Background: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Spacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.
+
+SHEET: nano_banana_flash  {"aspect_ratio": "1:1", "resolution": "2k"}  credits 2.0  Higgsfield 220670b3-3b95-4f62-bbf7-8d14b758a841

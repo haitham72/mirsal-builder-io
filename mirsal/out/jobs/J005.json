@@ -1,0 +1,31 @@
+{
+  "id": "J005",
+  "kind": "sheet",
+  "task": "005",
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:\nCharacter 1: Mickey grinning widely, flashing his golden chain proudly\nCharacter 2: Mickey looking surprised, eyes wide and mouth open, holding chain tight\nCharacter 3: Mickey laughing heartily, head thrown back with eyes closed\nCharacter 4: Mickey sad and drooping, chain hanging limply around his neck\nCharacter 5: Mickey angry, eyebrows furrowed, fists clenched beside his chain\nCharacter 6: Mickey blushing shyly, looking down at his golden chain\nCharacter 7: Mickey sleepy, eyes half-closed, chain resting quietly\nCharacter 8: Mickey curious, tilting head with one eyebrow raised, chain gleaming\nCharacter 9: Mickey mischievous, smirking with one eye squinting, chain swinging slyly\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "mickey mouse with big golden chain",
+    "refs": [],
+    "outline": 0
+  },
+  "status": "FAILED",
+  "external_task_id": "94b0d25f-1cc3-43e1-a0f5-666adf9983bd",
+  "result": null,
+  "cost": null,
+  "error": "Error: job 94b0d25f-1cc3-43e1-a0f5-666adf9983bd ended with status \"nsfw\"",
+  "created_at": 1790874312.349,
+  "claimed_at": 1790874313.505,
+  "completed_at": 1790874328.838,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0
+}

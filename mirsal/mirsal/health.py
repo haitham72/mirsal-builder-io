@@ -41,6 +41,19 @@ def providers() -> dict:
     return {"higgsfield": {"available": higgsfield.available()}}
 
 
+def queue(out: Path) -> dict:
+    """The job queue: `threads` (jobs are files fulfilled by threads of the server) or `queue` (Postgres `job_queue` drained by `mirsal worker` processes) with its counts."""
+    from . import jobqueue
+    d = {"mode": jobqueue.mode(out), "wanted": jobqueue.enabled()}
+    if d["mode"] == "queue":
+        from .store import db
+        with db.connect() as c:
+            d.update(jobqueue.stats(c))
+    elif d["wanted"]:
+        d["note"] = "MIRSAL_JOB_MODE=queue is set but Postgres is not available for this out/: jobs run in threads"
+    return d
+
+
 def storage(out: Path) -> dict:
     out = Path(out)
     du = shutil.disk_usage(out if out.exists() else out.parent)
@@ -52,11 +65,11 @@ def storage(out: Path) -> dict:
 def snapshot(out: Path) -> dict:
     t0 = time.perf_counter()
     d = {"database": _safe(database, {"ok": False}), "redis": _safe(redis, {"ok": False}), "models": _safe(models, {}),
-         "providers": _safe(providers, {}), "storage": _safe(lambda: storage(out), {"ok": False})}
+         "providers": _safe(providers, {}), "storage": _safe(lambda: storage(out), {"ok": False}), "queue": _safe(lambda: queue(out), {})}
     d["ok"] = bool(d["database"].get("ok", False) or True) and d["storage"].get("ok", False)      # the file store is the truth: Postgres being down is a warning
     d["warnings"] = [w for w in (
         "Postgres is not connected: history and search use files only" if not d["database"].get("ok") else None,
         "Postgres write-through is failing: " + str((d["database"].get("write_through") or {}).get("last_error")) if d["database"].get("degraded") else None,
-        d["redis"].get("note")) if w]
+        d["redis"].get("note"), d["queue"].get("note")) if w]
     d["ms"] = int((time.perf_counter() - t0) * 1000)
     return d

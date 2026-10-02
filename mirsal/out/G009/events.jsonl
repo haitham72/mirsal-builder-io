@@ -1,0 +1,7 @@
+{"ts": 1790905547.158, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "dog as a banana", "task_slug": "dog_as_banana"}}
+{"ts": 1790905547.2, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790905547.568, "stage": "sheet_picked", "status": "done", "ms": 367, "detail": {"subject": "dog_as_banana", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "warnings": []}}
+{"ts": 1790905547.569, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790905547.916, "stage": "keyed", "status": "done", "ms": 346, "detail": {"bg": [5, 229, 9], "threshold": [110.0, 110.0, 110.0, 110.5, 110.5, 110.5, 110.5, 110.5, 110.5], "grid": "3x3", "cut": "gutter", "xs": [0, 738, 1310, 2048], "ys": [0, 688, 1360, 2048]}}
+{"ts": 1790905547.917, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790905548.456, "stage": "sliced", "status": "done", "ms": 539, "detail": {"ready": 9, "failed": 0}}

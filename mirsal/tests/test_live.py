@@ -526,7 +526,7 @@ class LiveConsoleTests(Base):
         sheets = {x["id"]: x for x in st["video_sheets"]}
         self.assertEqual((sheets["A1"]["status"], sheets["A2"]["slot_fill"]), ("REJECTED", 0.6))
         self.assertEqual(sheets["A1"]["slot_fill"], self.c.cfg.slot_fill)
-        create = next(c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"])
+        create = self.until(lambda: next((c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"]), None), "the Kling create call")      # the job runs in a thread
         self.assertEqual(create[create.index("--start-image") + 1], create[create.index("--end-image") + 1])
         self.assertIn("seamless loop", create[create.index("--prompt") + 1])
         # the plan keeps the choice too: Loop off is the default in the saved video prompt

@@ -72,6 +72,15 @@ test('the page polls while anything still moves and stops when it does not', () 
   assert.equal(U.needPoll(null), false);
 });
 
+test('only the last assistant message holds the pending plan card', () => {
+  const ms = [{ id: 'm1', role: 'user' }, { id: 'm2', role: 'assistant' }, { id: 'm3', role: 'user' }, { id: 'm4', role: 'assistant' }];
+  assert.equal(U.lastBot(ms), ms[3]);          // the newest plan card is the live one
+  assert.equal(U.lastBot([ms[0], ms[1], ms[2]]), ms[1]);
+  assert.equal(U.lastBot([{ id: 'm1', role: 'user' }]), null);
+  assert.equal(U.lastBot([]), null);
+  assert.equal(U.lastBot(null), null);         // nothing to hang on: the card renders as done
+});
+
 test('the session id is read from the hash', () => {
   assert.equal(U.sid('#/agent/S012'), 'S012');
   assert.equal(U.sid('#/agent'), null);

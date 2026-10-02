@@ -17,9 +17,29 @@ class ToolError(Exception):
 
 
 class ConsoleTools:
-    def __init__(self, c):
+    def __init__(self, c, user: dict | None = None):
         self.c = c
         self.out = Path(c.out)
+        self.user = user or {"id": "local", "role": "owner", "can_spend": True}
+
+    @property
+    def member(self) -> bool:
+        return self.user.get("role") != "owner"
+
+    def _see(self, gid: str) -> None:
+        """A member reaches only the batches they own; anything else is 'not found' (a 404 never reveals that it exists)."""
+        if not self.member:
+            return
+        try:
+            res = pl.read_result(self.out, int(gid[1:]))
+        except Exception:
+            raise ToolError("No such batch", 404)
+        if res.get("owner", "local") != self.user["id"]:
+            raise ToolError("No such batch", 404)
+
+    def _may_spend(self) -> None:
+        if self.live() and not self.user.get("can_spend"):
+            raise ToolError("This account cannot start paid generation (it would spend the owner's credits). Ask the owner to allow it.", 403)
 
     # ---- reads -------------------------------------------------------------------------------------------------------------------
     def live(self) -> bool:
@@ -27,6 +47,8 @@ class ConsoleTools:
         return higgsfield.available()
 
     def credits(self) -> float | None:
+        if self.member:                       # the owner's balance is not a member's business
+            return None
         try:
             a = self.c.hf_account()
             return a.get("credits") if a.get("available") else None
@@ -36,9 +58,9 @@ class ConsoleTools:
     def plan(self, prompt: str, grid: str, style_id: str, ai: bool) -> dict:
         """The plan for a request, from the Redis planner cache when this exact request (normalised: case, spaces, end punctuation) was planned
         before with the same templates and model: 0 model calls. A plan the AI failed to expand (it fell back to the built-in sets) is never cached."""
-        from .. import cache as cachemod, llm, prompter
+        from .. import cache as cachemod, llm, prompter, transformations
         c = cachemod.default()
-        versions = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
+        versions = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt")) + [transformations.signature()]
         key = c.key("plan", cachemod.digest(cachemod.normalize_request(prompt), grid, style_id, bool(ai), ",".join(versions),
                                               llm.model() if ai and llm.configured() else "-"))
         hit = c.get(key, "plan")
@@ -63,6 +85,7 @@ class ConsoleTools:
 
     def generation(self, gid: str) -> dict:
         """The sticker list of one batch for the chat (ids, keys, emoji, status, reviews, file urls)."""
+        self._see(gid)
         res = pl.read_result(self.out, int(gid[1:]))
         stickers = []
         for s in res["stickers"]:
@@ -91,13 +114,22 @@ class ConsoleTools:
             if sync.is_default_out(self.out) and db.available():
                 from .. import pool
                 with db.connect() as conn:
-                    r = pool.search(conn, q, count=12, per_gen=12)
+                    r = pool.search(conn, q, count=12, per_gen=12, viewer=self.user["id"] if self.member else None)
                 return [{"id": h["sticker_id"], "key": h["key"], "png": url(h["generation_id"], h.get("png")), "emoji": "".join(h.get("emoji") or [])}
                         for h in r["hits"]]
         except Exception:
             pass
+        rows = gates.search(self.out, q, 24)
+        if self.member:
+            rows = [r for r in rows if self._owns(r["generation"])]
         return [{"id": f"{r['generation']}/S{r['index']}", "key": r["key"], "png": url(r["generation"], r.get("png")), "emoji": r.get("emoji")}
-                for r in gates.search(self.out, q, 24)]
+                for r in rows]
+
+    def _owns(self, gid: str) -> bool:
+        try:
+            return pl.read_result(self.out, int(gid[1:])).get("owner", "local") == self.user["id"]
+        except Exception:
+            return False
 
     def reference_from_sticker(self, sid: str) -> str:
         """A finished sticker as a reference image for the next sheet ("make 5 like 2"): copied into out/refs/ as R###, the Studio's own reference store."""
@@ -111,6 +143,9 @@ class ConsoleTools:
     def create(self, prompt: str, grid: str = "3x3", style_id: str = "flat_vector", ai: bool = True, parent: str | None = None,
                regen_of: str | None = None, refs: list | None = None) -> dict:
         """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); otherwise the prepared-sheet lookup, exactly as the page does."""
+        self._may_spend()
+        if parent:
+            self._see(parent)
         try:
             if self.live():
                 body = {"prompt": prompt, "grid": grid, "style_id": style_id, "ai": ai, "refs": refs or []}
@@ -131,6 +166,7 @@ class ConsoleTools:
 
     def more(self, gid: str) -> dict:
         """The next prepared variation of the same subject (no provider): the Studio's 'Create more' on a prepared set."""
+        self._see(gid)
         try:
             if self.c.lock.locked():
                 raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
@@ -142,6 +178,8 @@ class ConsoleTools:
 
     def animate(self, gid: str, loop: bool = False) -> dict:
         """One click, as the Studio's animate button: approve the kept stills, build and approve the video sheet, start Kling."""
+        self._see(gid)
+        self._may_spend()
         try:
             r = self.c.live("video", {"generation": int(gid[1:]), "loop": loop})
             return {"job": r["job"], "estimate": r.get("estimate")}
@@ -150,6 +188,7 @@ class ConsoleTools:
 
     def review(self, gid: str, decision: str, indexes: list, note: str = "from the chat") -> dict:
         """Human decisions at the stills gate for the given stickers. Python's blocks stay final: a refused sticker is reported, not forced."""
+        self._see(gid)
         done, refused = [], []
         for i in indexes:
             try:
@@ -160,6 +199,7 @@ class ConsoleTools:
         return {"done": done, "refused": refused}
 
     def ready_indexes(self, gid: str) -> list:
+        self._see(gid)
         res = pl.read_result(self.out, int(gid[1:]))
         return [s["index"] for s in res["stickers"] if s["status"] == "READY"]
 

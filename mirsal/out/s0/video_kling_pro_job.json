@@ -1,0 +1,47 @@
+[
+  {
+    "created_at": "2026-10-01T16:13:44.47943Z",
+    "display_name": "Kling v3.0",
+    "id": "6a57263e-9cbf-43c8-8478-ac4b7e1c2a8f",
+    "job_type": "kling3_0",
+    "min_result_url": null,
+    "params": {
+      "aspect_ratio": "1:1",
+      "cfg_scale": 0.5,
+      "duration": 3,
+      "enhance_prompt": false,
+      "height": 1080,
+      "kling_element_ids": [],
+      "kling_elements": [],
+      "medias": [
+        {
+          "data": {
+            "id": "8c96df9f-a88c-4279-886d-ba0bdbb05216",
+            "type": "image_job",
+            "url": "https://d8j0ntlcm91z4.cloudfront.net/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_160942_8c96df9f-a88c-4279-886d-ba0bdbb05216.png"
+          },
+          "role": "start_image"
+        },
+        {
+          "data": {
+            "id": "8c96df9f-a88c-4279-886d-ba0bdbb05216",
+            "type": "image_job",
+            "url": "https://d8j0ntlcm91z4.cloudfront.net/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_160942_8c96df9f-a88c-4279-886d-ba0bdbb05216.png"
+          },
+          "role": "end_image"
+        }
+      ],
+      "mode": "pro",
+      "multi_prompt": [],
+      "multi_shot_mode": "custom",
+      "multi_shots": false,
+      "prompt": "Animate this sticker sheet as a 3-second seamless loop: each character moves in place, no interaction between cells, static camera.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the flat pure green (#00FF00) background exactly as it is: no shadows, no gradient, no noise.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+      "reference_elements": [],
+      "sound": "off",
+      "width": 1080
+    },
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_161344_6a57263e-9cbf-43c8-8478-ac4b7e1c2a8f.mp4",
+    "status": "completed",
+    "thumbnail_url": "https://cdn.higgsfield.ai/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_161344_6a57263e-9cbf-43c8-8478-ac4b7e1c2a8f_thumbnail.webp"
+  }
+]

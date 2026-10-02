@@ -1,0 +1,32 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Kling std vs pro</title>
+<style>
+ body{margin:0;background:#111;color:#eee;font:14px/1.4 system-ui,sans-serif;padding:16px}
+ h1{font-size:18px;margin:0 0 4px} .sub{color:#aaa;margin-bottom:14px}
+ .row{display:flex;gap:16px;flex-wrap:wrap} .col{flex:1 1 420px;min-width:320px}
+ video{width:100%;aspect-ratio:1/1;background:#00e01b;display:block;border-radius:8px}
+ .cap{display:flex;justify-content:space-between;margin:6px 2px 14px;color:#ccc} b{color:#fff}
+ .ctl{margin:10px 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+ button{background:#2a2a2a;color:#eee;border:1px solid #444;border-radius:8px;padding:6px 12px;cursor:pointer}
+ .zoom{display:flex;gap:16px;flex-wrap:wrap} .zoom div{flex:1 1 300px;aspect-ratio:1/1;overflow:hidden;border-radius:8px;position:relative;background:#00e01b}
+ .zoom video{position:absolute;width:300%;left:-100%;top:-100%;border-radius:0;aspect-ratio:auto}
+</style>
+<h1>Kling v3.0: std vs pro (same sheet, same prompt, 3 s, start = end image)</h1>
+<div class=sub>Both play in sync. The lower pair shows the middle cell magnified 3x, so you compare the sharpness one cell gets.</div>
+<div class=ctl><button onclick="all(v=>v.paused?v.play():v.pause())">Play / pause</button><button onclick="all(v=>v.currentTime=0)">Restart</button>
+ <label><input type=checkbox id=sl> slow motion (0.25x)</label></div>
+<div class=row>
+ <div class=col><video id=a src="video_kling.mp4" autoplay loop muted playsinline></video><div class=cap><span><b>std</b> 960x960 · 320 px per cell</span><span>3.75 credits · 82 s</span></div></div>
+ <div class=col><video id=b src="video_kling_pro.mp4" autoplay loop muted playsinline></video><div class=cap><span><b>pro</b> 1440x1440 · 480 px per cell</span><span>4.5 credits · 167 s</span></div></div>
+</div>
+<div class=zoom>
+ <div><video id=c src="video_kling.mp4" autoplay loop muted playsinline></video></div>
+ <div><video id=d src="video_kling_pro.mp4" autoplay loop muted playsinline></video></div>
+</div>
+<script>
+ const vs=[...document.querySelectorAll('video')];function all(f){vs.forEach(f)}
+ document.getElementById('sl').onchange=e=>all(v=>v.playbackRate=e.target.checked?.25:1);
+ // keep the std and pro clips of each pair in sync
+ const sync=()=>{const t=vs[1].currentTime;if(Math.abs(vs[0].currentTime-t)>.08)vs[0].currentTime=t;if(Math.abs(vs[2].currentTime-t)>.08)vs[2].currentTime=t;if(Math.abs(vs[3].currentTime-t)>.08)vs[3].currentTime=t};
+ setInterval(sync,200);
+</script>

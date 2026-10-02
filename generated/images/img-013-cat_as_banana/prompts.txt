@@ -1,0 +1,41 @@
+G010  cat as a banana
+
+SHEET PROMPT
+One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.
+Subject: a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.
+Style: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Reading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:
+Character 1: dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile
+Character 2: shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open
+Character 3: squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling
+Character 4: waving hello with a big happy grin
+Character 5: huge shiny puppy eyes, hands clasped, begging please
+Character 6: flexing a muscle proudly, chest out, huge grin
+Character 7: rolling eyes with a bored deadpan face
+Character 8: sad and drooping, a single tear, slumped shoulders
+Character 9: furious, steaming, fists clenched, deep scowl
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours for all 9 characters.
+Background: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Spacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.
+
+SHEET: nano_banana_flash  {"aspect_ratio": "1:1", "resolution": "2k"}  credits 2.0  Higgsfield 881c8a59-d3db-44c7-99c0-c217b1826d5f
+
+VIDEO (J018): kling3_0  {"aspect_ratio": "1:1", "sound": "off", "mode": "pro", "duration": "3"}  credits 4.5  Higgsfield a23dc2e8-8f3d-481f-b77b-16365548e929
+VIDEO PROMPT
+Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:
+1. the banana body sways and curves to a beat, the peel flaps swing, a little hop and a spin
+2. the peel flaps slip down with a jolt, the eyes pop wide, the whole banana trembles
+3. squashes flat then springs back to its curved shape, dazed, stars orbit
+4. waves the raised hand in wide arcs while bouncing on tiptoes
+5. wrings the hands, eyes shimmer, small hopeful bounce
+6. the arm flexes and pulses, chest puffs, nods
+7. eyes circle slowly, head tilts back with a sigh
+8. sighs, shoulders sag, droops slowly lower
+9. stomps in place, steam puffs from the head, body shakes with rage
+Animation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.
+Keep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.
+Empty slots stay empty: do not add any character, object or effect to them.
+Static camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.
+Keep each character's design, proportions and colours unchanged and do not add outlines or borders.

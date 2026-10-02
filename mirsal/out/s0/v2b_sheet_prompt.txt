@@ -1,0 +1,18 @@
+One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.
+Subject: teddy bear.
+Style: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Reading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:
+Character 1: arms wide open, ready for a big hug, warm smile
+Character 2: dancing with joyful moves, eyes closed, big smile
+Character 3: huge shiny puppy eyes, hands clasped, begging please
+Character 4: making an OK sign with a cheerful squint
+Character 5: thinking hard, chin in hand, one eyebrow raised
+Character 6: sad and drooping, a single tear, slumped shoulders
+Character 7: grumpy with arms crossed, pouting, turned slightly away
+Character 8: shocked, jaw dropped, eyes huge, hands on cheeks
+Character 9: embarrassed and blushing, hiding the face behind paws, peeking
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours for all 9 characters.
+Background: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Spacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.

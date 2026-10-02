@@ -1,0 +1,47 @@
+task: teddy_bear  grid: [3, 3]  template: sheet_3x3 v2  expanded_by: deterministic  lint: PASS
+subject: teddy bear  style: flat_vector  key: green
+  1 🤗 teddy_bear_open_arms                             arms | wide | open
+  2 💃 teddy_bear_dancing                               dancing | joyful | moves
+  3 🥺 teddy_bear_puppy_eyes                            huge | shiny | puppy
+  4 👌 teddy_bear_ok_sign                               making | sign | cheerful
+  5 🤔 teddy_bear_thinking                              thinking | hard | chin
+  6 😞 teddy_bear_sad                                   sad | drooping | single
+  7 😤 teddy_bear_grumpy                                grumpy | arms | crossed
+  8 😱 teddy_bear_shocked                               shocked | jaw | dropped
+  9 😳 teddy_bear_embarrassed                           embarrassed | blushing | hiding
+--- sheet prompt ---
+One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.
+Subject: teddy bear.
+Style: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Reading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:
+Character 1: arms wide open, ready for a big hug, warm smile
+Character 2: dancing with joyful moves, eyes closed, big smile
+Character 3: huge shiny puppy eyes, hands clasped, begging please
+Character 4: making an OK sign with a cheerful squint
+Character 5: thinking hard, chin in hand, one eyebrow raised
+Character 6: sad and drooping, a single tear, slumped shoulders
+Character 7: grumpy with arms crossed, pouting, turned slightly away
+Character 8: shocked, jaw dropped, eyes huge, hands on cheeks
+Character 9: embarrassed and blushing, hiding the face behind paws, peeking
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours for all 9 characters.
+Background: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Spacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.
+--- video prompt ---
+Animate this illustration sheet as a 3-second seamless loop. Every character performs its own big, expressive, cartoon-style animation in place, inside its own cell:
+1. leans in with open arms, rocks side to side, squeezes an invisible hug
+2. shimmies the hips, arms swing, spins once
+3. wrings the hands, eyes shimmer, small hopeful bounce
+4. bobs the hand, nods approvingly, tilts the head
+5. taps the chin, eyes glance up and to the side, a slow nod
+6. sighs, shoulders sag, droops slowly lower
+7. huffs, taps a foot, puffs the cheeks
+8. recoils with a jolt, trembles, hands slam onto the cheeks
+9. shy sway, peeks through the fingers then hides again
+Animation style: exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.
+Keep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.
+Empty slots stay empty: do not add any character, object or effect to them.
+Static camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.
+Keep each character's design, proportions and colours unchanged and do not add outlines or borders.
+End on the starting pose so the clip loops.

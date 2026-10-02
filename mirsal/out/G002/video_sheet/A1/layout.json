@@ -1,0 +1,180 @@
+{
+ "canvas": [
+  2048,
+  2048
+ ],
+ "key_rgb": [
+  0,
+  255,
+  0
+ ],
+ "grid": [
+  3,
+  3
+ ],
+ "slots": [
+  {
+   "slot": 1,
+   "sticker": "S1",
+   "rect": [
+    0,
+    0,
+    682,
+    682
+   ],
+   "subject_rect": [
+    213,
+    173,
+    256,
+    335
+   ],
+   "scale": 0.8623,
+   "subject_px": 51256
+  },
+  {
+   "slot": 2,
+   "sticker": "S2",
+   "rect": [
+    682,
+    0,
+    683,
+    682
+   ],
+   "subject_rect": [
+    836,
+    186,
+    375,
+    309
+   ],
+   "scale": 0.8623,
+   "subject_px": 45127
+  },
+  {
+   "slot": 3,
+   "sticker": "S3",
+   "rect": [
+    1365,
+    0,
+    683,
+    682
+   ],
+   "subject_rect": [
+    1597,
+    170,
+    218,
+    342
+   ],
+   "scale": 0.8623,
+   "subject_px": 47150
+  },
+  {
+   "slot": 4,
+   "sticker": "S4",
+   "rect": [
+    0,
+    682,
+    682,
+    683
+   ],
+   "subject_rect": [
+    180,
+    856,
+    321,
+    335
+   ],
+   "scale": 0.8623,
+   "subject_px": 49378
+  },
+  {
+   "slot": 5,
+   "sticker": "S5",
+   "rect": [
+    682,
+    682,
+    683,
+    683
+   ],
+   "subject_rect": [
+    890,
+    850,
+    266,
+    347
+   ],
+   "scale": 0.8623,
+   "subject_px": 59928
+  },
+  {
+   "slot": 6,
+   "sticker": "S6",
+   "rect": [
+    1365,
+    682,
+    683,
+    683
+   ],
+   "subject_rect": [
+    1597,
+    848,
+    219,
+    350
+   ],
+   "scale": 0.8623,
+   "subject_px": 47424
+  },
+  {
+   "slot": 7,
+   "sticker": "S7",
+   "rect": [
+    0,
+    1365,
+    682,
+    683
+   ],
+   "subject_rect": [
+    153,
+    1569,
+    375,
+    275
+   ],
+   "scale": 0.8623,
+   "subject_px": 48238
+  },
+  {
+   "slot": 8,
+   "sticker": "S8",
+   "rect": [
+    682,
+    1365,
+    683,
+    683
+   ],
+   "subject_rect": [
+    895,
+    1541,
+    256,
+    331
+   ],
+   "scale": 0.8623,
+   "subject_px": 52451
+  },
+  {
+   "slot": 9,
+   "sticker": "S9",
+   "rect": [
+    1365,
+    1365,
+    683,
+    683
+   ],
+   "subject_rect": [
+    1571,
+    1539,
+    271,
+    335
+   ],
+   "scale": 0.8623,
+   "subject_px": 53459
+  }
+ ],
+ "verify_version": 2
+}

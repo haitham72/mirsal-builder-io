@@ -1,0 +1,18 @@
+Illustration sheet: a 3x3 arrangement of 9 separate characters, one per equal cell of an invisible grid, with wide empty gaps between them.
+Subject: teddy bear.
+Style: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Each cell shows a clearly different, highly expressive emotion and pose, row-major:
+1. arms wide open, ready for a big hug, warm smile
+2. dancing with joyful moves, eyes closed, big smile
+3. huge shiny puppy eyes, hands clasped, begging please
+4. making an OK sign with a cheerful squint
+5. thinking hard, chin in hand, one eyebrow raised
+6. sad and drooping, a single tear, slumped shoulders
+7. grumpy with arms crossed, pouting, turned slightly away
+8. shocked, jaw dropped, eyes huge, hands on cheeks
+9. embarrassed and blushing, hiding the face behind paws, peeking
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours in all 9 cells.
+Background: one single flat pure green (#00FF00) colour over the entire image, the identical exact shade in every cell and in the gaps between the characters; no visible cell, panel or grid lines, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Margin: every character is full body, centred in its cell, with a generous empty margin on every side (at least 20% of its cell), nothing touching or crossing a cell edge.

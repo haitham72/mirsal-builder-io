@@ -1,0 +1,5 @@
+{"ts": 1790878733.158, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "cherries in love", "task_slug": "cherries_love"}}
+{"ts": 1790878733.165, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790878733.45, "stage": "sheet_picked", "status": "done", "ms": 285, "detail": {"subject": "cherries", "variant": 1, "of": 1, "file": "result.png", "blocked": "background_is_key", "warnings": ["cut_clean"]}}
+{"ts": 1790878733.451, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790878733.544, "stage": "sliced", "status": "done", "ms": 93, "detail": {"ready": 0, "failed": 9, "blocked": "background_is_key"}}

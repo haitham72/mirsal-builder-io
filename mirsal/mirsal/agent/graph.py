@@ -275,12 +275,17 @@ class Agent:
             t.trace.step("added your preferences", {"lines": [p.strip() for p in prefs.split(",") if p.strip()]})
         for n in notes:
             t.trace.note(n)
+        tr = plan.get("transformation")
+        if tr:                                    # "dog as banana": say that it is ONE new character, and which cells the template guarantees
+            t.trace.note(f"a transformation: the whole character is a {tr['target']} with the {tr['subject']}'s face"
+                         + (f"; {', '.join(tr['required'])} included" if tr.get("required") else "")
+                         + (f"; left out as you asked: {', '.join(tr['forbidden'])}" if tr.get("forbidden") else ""))
         subject = plan.get("subject") or guess
         t.res.generation = None
         est = self.tools.estimate("image") if self.tools.live() else None
         card = {"type": "plan", "subject": subject, "grid": st["grid"], "style": STYLE_NAMES.get(st["style_id"], st["style_id"]),
                 "count": len(names), "names": names, "estimate": est, "balance": self.tools.credits(), "prompt": prompt,
-                "free": not self.tools.live()}
+                "free": not self.tools.live(), **({"transformation": {k: tr[k] for k in ("id", "subject", "target", "required")}} if tr else {})}
         spend = self.tools.live()
         if spend and st.get("ask_before_spending", True):
             sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"],
@@ -652,10 +657,11 @@ def _with_pending(t: Turn, spec: dict) -> Turn:
     return t
 
 
-def run_turn(console, sid: str, text: str, selected: list | None = None, action: dict | None = None) -> dict:
+def run_turn(console, sid: str, text: str, selected: list | None = None, action: dict | None = None, user: dict | None = None) -> dict:
     """The entry the server calls: the Studio's Console, one session id, the user's text (or a button action) and the UI selection."""
-    store = SessionStore(console.out)
-    agent = Agent(store, ConsoleTools(console), Brain(out=console.out))
+    user = user or {"id": "local", "role": "owner", "can_spend": True}
+    store = SessionStore(console.out, user=user["id"], see_all=user.get("role") == "owner")
+    agent = Agent(store, ConsoleTools(console, user), Brain(out=console.out))
     return agent.run_turn(sid, text, selected, action)
 
 

@@ -149,6 +149,26 @@ class Cache:
             self.set(key, v, ttl)
         return v
 
+    def window_count(self, key: str, ttl: int) -> int:
+        """Count one event in a fixed window: the first call sets the expiry, later calls only count. Returns the count so far (rate limits)."""
+        if self._r is not None:
+            try:
+                n = int(self._r.incr(key))
+                if n == 1:
+                    self._r.expire(key, ttl)
+                return n
+            except Exception:
+                self._down()
+        with self._mu:
+            e = self._mem.get(key)
+            if e and (e[0] is None or e[0] > time.time()):
+                n = int(json.loads(e[1])) + 1
+                self._mem[key] = (e[0], json.dumps(n))
+            else:
+                n = 1
+                self._mem[key] = (time.time() + ttl, json.dumps(1))
+            return n
+
     # ---- hashes (job progress: live display only, mirrors Postgres) ------------------------------------------------
     def hset(self, key: str, mapping: dict, ttl: int | None = None) -> None:
         mapping = {str(k): json.dumps(v, default=str) for k, v in mapping.items()}

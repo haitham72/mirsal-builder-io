@@ -88,6 +88,21 @@ def sync_model_call(out, line: str) -> bool:
         return False
 
 
+def sync_users(out) -> bool:
+    """out/users.json changed: mirror it into Postgres (digests only). Best effort, never raises."""
+    try:
+        if not enabled(out) or not db.available():
+            _note("skipped")
+            return False
+        with db.connect() as c:
+            repo.import_users(c, Path(out))
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False
+
+
 def sync_session(out, sess: dict) -> bool:
     """A chat session changed: mirror it into Postgres. Best effort, never raises."""
     try:

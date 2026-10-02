@@ -98,6 +98,10 @@ def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=No
     `complete(system, user) -> (text, meta)` is injectable for tests. `review_ai` runs the slot reviewer after the lint."""
     base = prompter.expand(task, grid)
     base["expanded_by"] = "deterministic"
+    from . import transformations                          # "dog as banana": one new character, built by a versioned template (no model needed, so none is asked)
+    transformed = transformations.plan(base, task, *grid)
+    if transformed:
+        return transformed
     if not use_ai:
         return base
     complete = complete or llm.complete

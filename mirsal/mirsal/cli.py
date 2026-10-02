@@ -85,6 +85,7 @@ def db_cmd(out, action: str, yes: bool) -> int:
             nt = repo.import_tasks(c, out)
             nj = repo.import_jobs(c, out)               # Phase 2: claimed jobs update their task rows
             nm = repo.import_model_calls(c, out)        # Phase 2: the model-call ledger
+            repo.import_users(c, out)                   # who may call (digests only)
             ok, bad = 0, []
             for gid in pl.list_ids(out):
                 try:
@@ -98,6 +99,93 @@ def db_cmd(out, action: str, yes: bool) -> int:
             print("FAILED " + b)
         return 1 if bad else 0
     return 1
+
+
+def worker_cmd(out, args) -> int:
+    """`mirsal worker`: drain the durable queue. One paid call at a time across all workers (a lock under out/); Ctrl-C stops after the current job."""
+    from . import jobqueue
+    from .store import db
+    if not db.available():
+        print("ERROR   Postgres is not reachable: the queue lives there (python -m mirsal db up)")
+        return 1
+    wid = args.wid or jobqueue.worker_id()
+    print(f"worker {wid} on {out} (poll {args.poll}s{', once' if args.once else ''}; Ctrl-C to stop)")
+    try:
+        n = jobqueue.work(out, wid, poll=args.poll, once=args.once, kinds=[k for k in (args.kinds or "").split(",") if k] or None)
+    except KeyboardInterrupt:
+        print("stopped")
+        return 0
+    print(f"ran {n} job(s)")
+    return 0
+
+
+def queue_cmd(out, args) -> int:
+    from . import jobqueue, jobs as _jobs
+    from .store import db
+    if not db.available():
+        print("ERROR   Postgres is not reachable: the queue lives there (python -m mirsal db up)")
+        return 1
+    with db.connect() as c:
+        if args.action == "status":
+            s = jobqueue.stats(c)
+            print(f"mode: {jobqueue.mode(out)}  (set MIRSAL_JOB_MODE=queue for the server to use it)")
+            print("  ".join(f"{k}={v}" for k, v in s.items()))
+            with c.cursor() as cur:
+                cur.execute("SELECT job_id, kind, status, attempts, max_attempts, locked_by, error FROM job_queue WHERE status IN ('RUNNING','FAILED','DEAD') ORDER BY enqueued_at DESC LIMIT 15")
+                for r in cur.fetchall():
+                    print(f"  {r[0]} {r[1]:<6} {r[2]:<7} attempt {r[3]}/{r[4]} {r[5] or ''} {r[6] or ''}")
+        elif args.action == "reap":
+            print(f"reaped {jobqueue.reap(c)} job(s)")
+        elif args.action == "sync":
+            print(f"enqueued {jobqueue.sync_from_files(c, out)} unfinished job file(s)")
+        else:
+            if not args.job:
+                print("which job? (mirsal jobs)")
+                return 2
+            try:
+                job = _jobs.resume(out, args.job)               # the same Higgsfield job when it has a ticket (no second charge), else requested again
+            except _jobs.JobError as e:
+                print(f"ERROR   {e}")
+                return 1
+            print(f"{job['id']}: {'queued' if jobqueue.enqueue(c, job['id'], job['kind'], (job.get('request') or {}).get('user') or 'local') else 'already on the queue'}")
+    return 0
+
+
+def user_cmd(out, args) -> int:
+    """`mirsal user ...`: accounts live in out/users.json (digests only). A token is printed ONCE, when it is made; there is no way to read it back."""
+    from .store import sync
+    from .users import UserError, UserStore
+    st = UserStore(out)
+    try:
+        if args.action == "list":
+            rows = st.list()
+            for u in rows:
+                print(f"{u['id']}  {u['name']:<24} {u['role']:<7} {'spends' if u.get('can_spend') else 'no spend':<9} {'DISABLED' if u.get('disabled') else ''}")
+            if not rows:
+                print("no users: the local sandbox is open (everyone is the owner). Add one to turn authentication on.")
+            return 0
+        if args.action == "add":
+            u, token = st.create(args.who or "", "owner" if args.owner else "member", bool(args.spend))
+            print(f"{u['id']}  {u['name']}  ({u['role']}{', may spend' if u['can_spend'] else ''})")
+            print(f"token (shown once, keep it): {token}")
+        else:
+            if not args.who:
+                print("which user id? (mirsal user list)")
+                return 2
+            if args.action == "rotate":
+                u, token = st.rotate(args.who)
+                print(f"{u['id']}  new token (shown once, the old one stopped working): {token}")
+            elif args.action in ("disable", "enable"):
+                u = st.set_disabled(args.who, args.action == "disable")
+                print(f"{u['id']}  {'disabled' if u['disabled'] else 'enabled'}")
+            else:
+                u = st.update(args.who, can_spend=args.action == "allow-spend")
+                print(f"{u['id']}  {'may spend' if u['can_spend'] else 'cannot spend'}")
+        sync.sync_users(out)
+        return 0
+    except UserError as e:
+        print(f"ERROR   {e}")
+        return 1
 
 
 def trace_cmd(out, args) -> int:
@@ -474,6 +562,16 @@ def main(argv=None) -> int:
     mc.add_argument("--json", action="store_true", dest="as_json"); mc.add_argument("--record", action="store_true", help="append to docs/measurements.md")
     ms_ = sub.add_parser("measure-sharpness", help="how soft each stored animation is next to its own still (edge detail ratio and the blur it equals)")
     ms_.add_argument("--json", action="store_true", dest="as_json"); ms_.add_argument("--record", action="store_true", help="append to docs/measurements.md")
+    oa = sub.add_parser("openapi", help="the HTTP contract: print it, or write it (--json FILE) and TypeScript types (--ts FILE)")
+    oa.add_argument("--json", dest="json_file"); oa.add_argument("--ts", dest="ts_file")
+    us = sub.add_parser("user", help="accounts for the API: add | list | disable | enable | rotate | allow-spend | deny-spend (a token is shown once)")
+    us.add_argument("action", choices=["add", "list", "disable", "enable", "rotate", "allow-spend", "deny-spend"]); us.add_argument("who", nargs="?", help="a name (add) or a user id (the rest)")
+    us.add_argument("--owner", action="store_true", help="add: an owner (sees and does everything), not a member"); us.add_argument("--spend", action="store_true", help="add: may start paid generation")
+    wk = sub.add_parser("worker", help="run provider jobs from the durable queue (needs Postgres; the server enqueues them when MIRSAL_JOB_MODE=queue)")
+    wk.add_argument("--once", action="store_true", help="run what is due now, then exit"); wk.add_argument("--poll", type=float, default=2.0, help="seconds to sleep when idle")
+    wk.add_argument("--id", dest="wid"); wk.add_argument("--kinds", help="only these kinds, comma separated (sheet,video,single)")
+    qu = sub.add_parser("queue", help="the job queue: status | retry JOB | reap | sync (enqueue unfinished job files)")
+    qu.add_argument("action", choices=["status", "retry", "reap", "sync"]); qu.add_argument("job", nargs="?")
     tr = sub.add_parser("trace", help="tracing: status | backfill [--since DATE] (replay Postgres rows with no trace run to LangSmith)")
     tr.add_argument("action", choices=["status", "backfill"]); tr.add_argument("--since")
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
@@ -549,6 +647,20 @@ def main(argv=None) -> int:
         if args.record and m["cells"]:
             print("recorded in", measure.record(out, m, _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"))
         return 0
+    if args.cmd == "openapi":
+        import json as _json
+        from pathlib import Path as _Path
+        from .console import openapi as _oa
+        spec = _oa.build()
+        if args.json_file:
+            _Path(args.json_file).write_text(_json.dumps(spec, indent=2), encoding="utf-8")
+        if args.ts_file:
+            _Path(args.ts_file).write_text(_oa.typescript(spec), encoding="utf-8")
+        if not (args.json_file or args.ts_file):
+            print(_json.dumps(spec, indent=2))
+        else:
+            print(f"{sum(len(v) for v in spec['paths'].values())} operations, {len(spec['components']['schemas'])} schemas")
+        return 0
     if args.cmd == "measure-sharpness":
         import json as _json
         from pathlib import Path as _Path
@@ -562,6 +674,10 @@ def main(argv=None) -> int:
                 fh.write("\n## measure-sharpness " + _t.strftime("%Y-%m-%d %H:%M") + "\n\n```\n" + measure.render_sharpness(m) + "\n```\n")
             print("recorded in", f)
         return 0
+    if args.cmd == "user":
+        return user_cmd(out, args)
+    if args.cmd in ("worker", "queue"):
+        return worker_cmd(out, args) if args.cmd == "worker" else queue_cmd(out, args)
     if args.cmd == "trace":
         return trace_cmd(out, args)
     if args.cmd == "pool":
@@ -682,6 +798,11 @@ def doctor() -> int:
         print(f"OK      Redis: {_c.engine}" + (f" ({_c.url})" if _c.engine == 'redis' else " (not reachable: the in-memory fallback is used; start it: python -m mirsal db up)"))
     except Exception as e:
         print(f"NOTE    Redis: {e}")
+    try:
+        from . import jobqueue as _jq
+        print(f"OK      job queue: {_jq.mode(out_root())}" + ("" if _jq.mode(out_root()) == "queue" else "  (jobs run in threads of the server; MIRSAL_JOB_MODE=queue + `python -m mirsal worker` for durable jobs)"))
+    except Exception as e:
+        print(f"NOTE    job queue: {e}")
     try:
         from . import llm as _llm
         from .vision import judge as _vj

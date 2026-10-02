@@ -1,0 +1,39 @@
+{
+  "id": "J016",
+  "kind": "sheet",
+  "task": "012",
+  "generation": "G009",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a dog transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the dog's face, expression and personality on it; it is not a dog standing next to a banana, not a dog holding or wearing a banana, and not a dog with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile\nCharacter 2: shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open\nCharacter 3: squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling\nCharacter 4: blowing a kiss with a wink, a small heart floating away\nCharacter 5: laughing so hard tears of joy fly out, mouth wide open\nCharacter 6: hugging a big red heart, eyes sparkling, blushing cheeks\nCharacter 7: holding a golden trophy overhead, triumphant\nCharacter 8: rolling eyes with a bored deadpan face\nCharacter 9: sad and drooping, a single tear, slumped shoulders\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "dog as a banana",
+    "refs": [],
+    "outline": 0,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "b256fecc-7dd5-45b3-b024-7567d8ddda77",
+  "result": {
+    "file": "jobs/J016/result.png",
+    "sha256": "f6d6584f04a6f8d86efb6f9010098a5cfc8739dc98284d13fd79ab3e8bdf82a2",
+    "bytes": 4099292
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790905522.796,
+  "claimed_at": 1790905523.955,
+  "completed_at": 1790905547.023,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

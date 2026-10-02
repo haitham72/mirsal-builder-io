@@ -50,8 +50,10 @@ def gid_of(g) -> str:
 
 
 class SessionStore:
-    def __init__(self, out: Path, cache=None):
+    def __init__(self, out: Path, cache=None, user: str = "local", see_all: bool = True):
+        """`user` owns what it creates; `see_all` (owners) lists and opens every chat, a member only their own (someone else's chat is a 404, not a 403)."""
         self.out = Path(out)
+        self.user, self.see_all = user, see_all
         self.dir = self.out / "sessions"
         if cache is None:
             from .. import cache as _c
@@ -68,7 +70,7 @@ class SessionStore:
         with _IO:
             self.dir.mkdir(parents=True, exist_ok=True)
             n = max([int(f.stem[1:]) for f in self.dir.glob("S*.json") if f.stem[1:].isdigit()] or [0]) + 1
-            s = {"id": f"S{n:03d}", "title": title or "New chat", "created": _now(), "updated": _now(),
+            s = {"id": f"S{n:03d}", "user": self.user, "title": title or "New chat", "created": _now(), "updated": _now(),
                  "settings": {**DEFAULT_SETTINGS, **(settings or {})}, "focus": {"generation": None, "stickers": []},
                  "subjects": [], "preferences": {"persistent": []}, "feedback": [], "interactions": [], "messages": [],
                  "summary": {"narrative": "", "upto": 0}, "pending": None}
@@ -80,7 +82,10 @@ class SessionStore:
         with _IO:
             if not f.is_file():
                 raise SessionError(f"No session {sid}", 404)
-            return json.loads(f.read_text(encoding="utf-8"))
+            s = json.loads(f.read_text(encoding="utf-8"))
+            if not self.see_all and s.get("user", "local") != self.user:
+                raise SessionError(f"No session {sid}", 404)
+            return s
 
     def save(self, s: dict) -> None:
         s["updated"] = _now()
@@ -116,6 +121,8 @@ class SessionStore:
                 s = json.loads(f.read_text(encoding="utf-8"))
             except (OSError, ValueError):
                 continue
+            if not self.see_all and s.get("user", "local") != self.user:
+                continue
             rows.append({"id": s["id"], "title": s.get("title"), "updated": s.get("updated"), "created": s.get("created"),
                          "subjects": [x["name"] for x in s.get("subjects", [])], "turns": len(s.get("interactions", [])),
                          "focus": (s.get("focus") or {}).get("generation")})
@@ -124,6 +131,7 @@ class SessionStore:
 
     def delete(self, sid: str) -> None:
         f = self._path(sid)
+        self.load(sid)                                   # a member cannot delete someone else's chat (404)
         with _IO:
             if f.is_file():
                 f.unlink()

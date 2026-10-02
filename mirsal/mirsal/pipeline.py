@@ -47,6 +47,15 @@ def list_ids(out: Path) -> list[int]:
     return sorted(int(m[1]) for d in out.iterdir() if (m := re.fullmatch(r"G(\d{3,})", d.name)))
 
 
+import contextvars
+
+OWNER = contextvars.ContextVar("mirsal_owner", default="local")     # who is acting: the request's user, copied into the threads it starts
+
+
+def current_owner() -> str:
+    return OWNER.get()
+
+
 _IO_LOCK = threading.RLock()     # one reader or writer of result.json at a time inside this process
 
 
@@ -227,7 +236,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
     (d / "slices").mkdir()
     (d / "prompts.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
     res = {
-        "generation_id": f"G{gid:03d}", "number": gid, "created": round(time.time(), 3), "parent": parent, "prompt": prompt, "task": plan["task"], "task_slug": plan["task_slug"],
+        "generation_id": f"G{gid:03d}", "number": gid, "owner": current_owner(), "created": round(time.time(), 3), "parent": parent, "prompt": prompt, "task": plan["task"], "task_slug": plan["task_slug"],
         "source": {"subject": pick.subject, "subject_id": pick.subject_id, "variant": pick.variant,
                    "n_variants": pick.n_variants, "sheet": pick.sheet.name, "video": pick.video.name if pick.video else None,
                    "has_video": pick.has_video, "pairing": pick.pairing, "clips_dup_of": pick.clips_dup_of,
@@ -846,7 +855,7 @@ def summary(out: Path) -> list[dict]:
         except Exception:
             continue
         s = r["source"]
-        rows.append({"id": gid, "generation_id": r["generation_id"], "prompt": r["prompt"], "stage": r["stage"],
+        rows.append({"id": gid, "generation_id": r["generation_id"], "owner": r.get("owner", "local"), "prompt": r["prompt"], "stage": r["stage"],
                      "subject": s["subject"], "variant": s["variant"], "error": r["error"],
                      "folder": f"img-{s.get('subject_id')}-{s['subject']}" if s.get("subject_id") else None})
     return rows

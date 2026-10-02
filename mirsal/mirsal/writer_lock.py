@@ -23,8 +23,8 @@ class WriterBusy(Exception):
 
 
 class WriterLock:
-    def __init__(self, out: Path, who: str = "mirsal"):
-        self.path = Path(out) / ".writer.lock"
+    def __init__(self, out: Path, who: str = "mirsal", name: str = ".writer.lock"):
+        self.path = Path(out) / name
         self.who = who
         self._fh = None
 
@@ -47,13 +47,16 @@ class WriterLock:
         except OSError:
             return "another Mirsal process"
 
-    def acquire(self) -> "WriterLock":
+    def acquire(self, wait: bool = False) -> "WriterLock":
+        """Take the lock or raise WriterBusy; with `wait` block (polling) until the holder lets go (the paid-call lock of jobs.py waits for the other worker's job)."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         fh = open(self.path, "a+b")
-        if not self._try(fh):
-            fh.close()
-            raise WriterBusy(f"{self.holder()} is writing {self.path.parent}: stop it first, or use it instead "
-                             f"(two writers of result.json can lose a decision)")
+        while not self._try(fh):
+            if not wait:
+                fh.close()
+                raise WriterBusy(f"{self.holder()} is writing {self.path.parent}: stop it first, or use it instead "
+                                 f"(two writers of result.json can lose a decision)")
+            time.sleep(0.5)
         fh.seek(0)
         fh.truncate(0)
         fh.write(f"{self.who} (pid {os.getpid()}, since {time.strftime('%H:%M:%S')})".encode())

@@ -1,0 +1,318 @@
+{
+ "id": "S002",
+ "user": "local",
+ "title": "hi",
+ "created": 1790906453.768,
+ "updated": 1790906496.721,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "ask_before_spending": true,
+  "ai": true
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1790906453.978,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1790906461.755,
+   "user": "who are you",
+   "assistant": "I am your friendly AI assistant ready to help with any sticker questions! Since nothing has been created yet, I don't have specific batch details to share right now.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1790906496.721,
+   "user": "i need superman as watermelon",
+   "assistant": "Here's the plan for **i need superman as watermelon**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1790906453.826
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790906453.935
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1790906453.946
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1790906453.957
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1790906453.968
+    }
+   ],
+   "ts": 1790906453.826,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "who are you",
+   "cards": [],
+   "steps": [],
+   "ts": 1790906458.944
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "I am your friendly AI assistant ready to help with any sticker questions! Since nothing has been created yet, I don't have specific batch details to share right now.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1790906458.98
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1790906459.006
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1790906461.722
+    }
+   ],
+   "ts": 1790906458.944,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "i need superman as watermelon",
+   "cards": [],
+   "steps": [],
+   "ts": 1790906496.072
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Here's the plan for **i need superman as watermelon**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "i need superman as watermelon",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "i need superman as watermelon dancing",
+      "i need superman as watermelon shocked",
+      "i need superman as watermelon squashed",
+      "i need superman as watermelon blowing a kiss",
+      "i need superman as watermelon thank you",
+      "i need superman as watermelon winner",
+      "i need superman as watermelon eye roll",
+      "i need superman as watermelon sad",
+      "i need superman as watermelon angry"
+     ],
+     "estimate": 2.0,
+     "balance": 3941.12,
+     "prompt": "i need superman as watermelon",
+     "free": false,
+     "transformation": {
+      "id": "subject_as_target",
+      "subject": "i need superman",
+      "target": "watermelon",
+      "required": [
+       "dance",
+       "shock",
+       "squash"
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating i need superman as watermelon",
+     "detail": null,
+     "status": "running",
+     "ts": 1790906496.098
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790906496.124
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "i need superman as watermelon dancing",
+       "i need superman as watermelon shocked",
+       "i need superman as watermelon squashed",
+       "i need superman as watermelon blowing a kiss",
+       "i need superman as watermelon thank you",
+       "i need superman as watermelon winner",
+       "i need superman as watermelon eye roll",
+       "i need superman as watermelon sad",
+       "i need superman as watermelon angry"
+      ]
+     },
+     "status": "done",
+     "ts": 1790906496.181
+    },
+    {
+     "kind": "note",
+     "label": "a transformation: the whole character is a watermelon with the i need superman's face; dance, shock, squash included",
+     "detail": null,
+     "status": "done",
+     "ts": 1790906496.192
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790906496.709
+    }
+   ],
+   "ts": 1790906496.072,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": {
+  "type": "create",
+  "prompt": "i need superman as watermelon",
+  "subject": "i need superman as watermelon",
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "ai": true,
+  "estimate": 2.0
+ }
+}

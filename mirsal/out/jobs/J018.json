@@ -1,0 +1,41 @@
+{
+  "id": "J018",
+  "kind": "video",
+  "task": "cat as a banana",
+  "generation": "G010",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {
+      "mode": "pro",
+      "duration": "3"
+    },
+    "prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. the banana body sways and curves to a beat, the peel flaps swing, a little hop and a spin\n2. the peel flaps slip down with a jolt, the eyes pop wide, the whole banana trembles\n3. squashes flat then springs back to its curved shape, dazed, stars orbit\n4. waves the raised hand in wide arcs while bouncing on tiptoes\n5. wrings the hands, eyes shimmer, small hopeful bounce\n6. the arm flexes and pulses, chest puffs, nods\n7. eyes circle slowly, head tilts back with a sigh\n8. sighs, shoulders sag, droops slowly lower\n9. stomps in place, steam puffs from the head, body shakes with rage\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "start_image": "D:\\Vscode\\mirsal-builder-io\\mirsal\\out\\G010\\video_sheet\\A1\\sheet.png",
+    "sheet": "A1",
+    "label": "cat as a banana",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "a23dc2e8-8f3d-481f-b77b-16365548e929",
+  "result": {
+    "file": "jobs/J018/result.mp4",
+    "sha256": "029247a906eebe538a6d42afdd4d078f0a4032c22b002fe9b4289792ace8dba5",
+    "bytes": 5208312
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1790905655.433,
+  "claimed_at": 1790905659.609,
+  "completed_at": 1790905832.601,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "downloading"
+}

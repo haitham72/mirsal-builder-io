@@ -1,0 +1,2294 @@
+{
+  "generation_id": "G008",
+  "number": 8,
+  "created": 1790879697.048,
+  "parent": null,
+  "prompt": "cherries in love with green backscreen",
+  "task": "cherries in love with green backscreen",
+  "task_slug": "cherries_love_with_green_backscreen",
+  "source": {
+    "subject": "cherries",
+    "subject_id": "011",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "D:\\Vscode\\mirsal-builder-io\\mirsal\\out\\jobs\\J015\\result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          695,
+          675
+        ],
+        [
+          695,
+          0,
+          686,
+          675
+        ],
+        [
+          1381,
+          0,
+          667,
+          675
+        ],
+        [
+          0,
+          675,
+          695,
+          682
+        ],
+        [
+          695,
+          675,
+          686,
+          682
+        ],
+        [
+          1381,
+          675,
+          667,
+          682
+        ],
+        [
+          0,
+          1357,
+          695,
+          691
+        ],
+        [
+          695,
+          1357,
+          686,
+          691
+        ],
+        [
+          1381,
+          1357,
+          667,
+          691
+        ]
+      ],
+      "xs": [
+        0,
+        695,
+        1381,
+        2048
+      ],
+      "ys": [
+        0,
+        675,
+        1357,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "task 011",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a pair of bright red cherries with green leaves, smiling faces, joined by their stems.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: cherry couple gazing lovingly into each other's eyes\nCharacter 2: cherries blushing shyly while holding hands\nCharacter 3: cherries laughing heartily, eyes closed in joy\nCharacter 4: cherries sitting side by side, legs dangling happily\nCharacter 5: cherries running hand in hand with wide smiles\nCharacter 6: cherries spinning playfully in a circle, laughing\nCharacter 7: cherries lying down together, eyes closed peacefully\nCharacter 8: cherries reaching out to each other with hopeful smiles\nCharacter 9: cherries frowning with crossed arms, feeling jealous\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. they sway gently side to side as if dancing slowly\n2. they bounce lightly up and down with a bashful tilt\n3. they shake their bodies with soft, joyful trembling\n4. they gently swing their legs back and forth in rhythm\n5. they move their legs rapidly, bouncing as they run\n6. they twirl quickly around their stems, dizzy with fun\n7. they gently rise and fall as if breathing in sync\n8. their stems stretch and bend slowly toward each other\n9. they stomp softly and shake their heads in frustration\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure blue (#0000FF) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "cherry couple gazing lovingly into each other's eyes",
+        "tags": [
+          "cherries_loving_gaze",
+          "romantic",
+          "sweet",
+          "affection"
+        ],
+        "emoji": "🍒❤️",
+        "motion": "they sway gently side to side as if dancing slowly"
+      },
+      {
+        "pos": 2,
+        "label": "cherries blushing shyly while holding hands",
+        "tags": [
+          "cherries_shy_blush",
+          "embarrassed",
+          "cute",
+          "bashful"
+        ],
+        "emoji": "😊🌸",
+        "motion": "they bounce lightly up and down with a bashful tilt"
+      },
+      {
+        "pos": 3,
+        "label": "cherries laughing heartily, eyes closed in joy",
+        "tags": [
+          "cherries_joyful_laugh",
+          "happiness",
+          "fun",
+          "cheerful"
+        ],
+        "emoji": "😂🍒",
+        "motion": "they shake their bodies with soft, joyful trembling"
+      },
+      {
+        "pos": 4,
+        "label": "cherries sitting side by side, legs dangling happily",
+        "tags": [
+          "cherries_happy_sit",
+          "content",
+          "relaxed",
+          "peaceful"
+        ],
+        "emoji": "🍒😌",
+        "motion": "they gently swing their legs back and forth in rhythm"
+      },
+      {
+        "pos": 5,
+        "label": "cherries running hand in hand with wide smiles",
+        "tags": [
+          "cherries_running_together",
+          "active",
+          "playful",
+          "energetic"
+        ],
+        "emoji": "🏃‍♂️🍒",
+        "motion": "they move their legs rapidly, bouncing as they run"
+      },
+      {
+        "pos": 6,
+        "label": "cherries spinning playfully in a circle, laughing",
+        "tags": [
+          "cherries_playful_spin",
+          "fun",
+          "mischief",
+          "carefree"
+        ],
+        "emoji": "🍒😄",
+        "motion": "they twirl quickly around their stems, dizzy with fun"
+      },
+      {
+        "pos": 7,
+        "label": "cherries lying down together, eyes closed peacefully",
+        "tags": [
+          "cherries_peaceful_rest",
+          "calm",
+          "love",
+          "sleepy"
+        ],
+        "emoji": "😴🍒",
+        "motion": "they gently rise and fall as if breathing in sync"
+      },
+      {
+        "pos": 8,
+        "label": "cherries reaching out to each other with hopeful smiles",
+        "tags": [
+          "cherries_hopeful_reach",
+          "hope",
+          "longing",
+          "romantic"
+        ],
+        "emoji": "🤲🍒",
+        "motion": "their stems stretch and bend slowly toward each other"
+      },
+      {
+        "pos": 9,
+        "label": "cherries frowning with crossed arms, feeling jealous",
+        "tags": [
+          "cherries_jealousy",
+          "anger",
+          "envy",
+          "displeased"
+        ],
+        "emoji": "😠🍒",
+        "motion": "they stomp softly and shake their heads in frustration"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "blue",
+    "loop": false
+  },
+  "task_id": "011",
+  "name_key": "cherries_love_with_green_backscreen",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 0,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1790879669.734,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 46.7
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 163 blue-ward; a sheet without a blue screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 163.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 11.3
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 37.5
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            695,
+            1381,
+            2048
+          ],
+          "ys": [
+            0,
+            675,
+            1357,
+            2048
+          ],
+          "ms": 33.7
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 6.7 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 6.73,
+        "limit": 12.0,
+        "data": {
+          "ms": 73.7
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "cherries_loving_gaze",
+      "tags": [
+        "cherries_loving_gaze",
+        "romantic",
+        "sweet",
+        "affection"
+      ],
+      "emoji": "🍒❤️",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherry couple gazing lovingly into each other's eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_loving_gaze",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 123154,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.2
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 62347,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "6px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 6,
+          "limit": 62.347,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.2% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0017,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "3 enclosed hole(s), 20.5% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.2052,
+          "limit": 0.01,
+          "data": {
+            "count": 3,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "138.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 138.1,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          695,
+          675
+        ],
+        "bg": [
+          8,
+          90,
+          254
+        ],
+        "threshold": 82.0,
+        "fg_px": 123154,
+        "bbox": [
+          102,
+          62,
+          588,
+          619
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 6,
+        "chroma_risk": 0.0017,
+        "holes": 0.2052,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 138.1,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_loving_gaze.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.342,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "cherries_shy_blush",
+      "tags": [
+        "cherries_shy_blush",
+        "embarrassed",
+        "cute",
+        "bashful"
+      ],
+      "emoji": "😊🌸",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries blushing shyly while holding hands, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_shy_blush",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 123359,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 62347,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 62.347,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "2 enclosed hole(s), 1.4% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0136,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 5 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 5,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "140.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 140.0,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          695,
+          0,
+          686,
+          675
+        ],
+        "bg": [
+          8,
+          90,
+          254
+        ],
+        "threshold": 82.0,
+        "fg_px": 123359,
+        "bbox": [
+          84,
+          62,
+          576,
+          612
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.001,
+        "holes": 0.0136,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 140.0,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_shy_blush.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.346,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "cherries_joyful_laugh",
+      "tags": [
+        "cherries_joyful_laugh",
+        "happiness",
+        "fun",
+        "cheerful"
+      ],
+      "emoji": "😂🍒",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries laughing heartily, eyes closed in joy, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_joyful_laugh",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 126812,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 64117,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "1px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 1,
+          "limit": 64.117,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.8% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0082,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.1% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0013,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 6 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 6,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "143.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 143.0,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1381,
+          0,
+          667,
+          675
+        ],
+        "bg": [
+          9,
+          90,
+          254
+        ],
+        "threshold": 82.0,
+        "fg_px": 126812,
+        "bbox": [
+          78,
+          62,
+          576,
+          620
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 1,
+        "chroma_risk": 0.0082,
+        "holes": 0.0013,
+        "kb": 143.0,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_joyful_laugh.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.35,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "cherries_happy_sit",
+      "tags": [
+        "cherries_happy_sit",
+        "content",
+        "relaxed",
+        "peaceful"
+      ],
+      "emoji": "🍒😌",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries sitting side by side, legs dangling happily, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_happy_sit",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 128294,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 19.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 63359,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "5px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 5,
+          "limit": 63.359,
+          "data": {
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0006,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "3 enclosed hole(s), 20.1% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.2013,
+          "limit": 0.01,
+          "data": {
+            "count": 3,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 13 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 13,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "141.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 141.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          675,
+          695,
+          682
+        ],
+        "bg": [
+          9,
+          90,
+          255
+        ],
+        "threshold": 82.0,
+        "fg_px": 128294,
+        "bbox": [
+          37,
+          55,
+          656,
+          597
+        ],
+        "scale": 0.7031,
+        "scale_mode": "clamped",
+        "spill_px": 5,
+        "chroma_risk": 0.0006,
+        "holes": 0.2013,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 141.4,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_happy_sit.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.354,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "cherries_running_together",
+      "tags": [
+        "cherries_running_together",
+        "active",
+        "playful",
+        "energetic"
+      ],
+      "emoji": "🏃‍♂️🍒",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries running hand in hand with wide smiles, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_running_together",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 130782,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 66209,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "9px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 9,
+          "limit": 66.209,
+          "data": {
+            "ms": 2.6
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.7% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0066,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "1 enclosed hole(s), 22.5% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.2247,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 7 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 7,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "150.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 150.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          695,
+          675,
+          686,
+          682
+        ],
+        "bg": [
+          9,
+          90,
+          255
+        ],
+        "threshold": 82.0,
+        "fg_px": 130782,
+        "bbox": [
+          45,
+          55,
+          655,
+          620
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 9,
+        "chroma_risk": 0.0066,
+        "holes": 0.2247,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 150.6,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_running_together.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.358,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "cherries_playful_spin",
+      "tags": [
+        "cherries_playful_spin",
+        "fun",
+        "mischief",
+        "carefree"
+      ],
+      "emoji": "🍒😄",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries spinning playfully in a circle, laughing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_playful_spin",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 118145,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 59753,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "8px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 8,
+          "limit": 59.753,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.4% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0038,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "2 enclosed hole(s), 13.5% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.1347,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 15 to cell 5",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 15,
+          "limit": 4,
+          "data": {
+            "of": 5,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "135.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 135.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1381,
+          675,
+          667,
+          682
+        ],
+        "bg": [
+          9,
+          90,
+          254
+        ],
+        "threshold": 61.5,
+        "fg_px": 118145,
+        "bbox": [
+          32,
+          75,
+          621,
+          605
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 8,
+        "chroma_risk": 0.0038,
+        "holes": 0.1347,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 135.7,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                9,
+                90,
+                254
+              ],
+              "threshold": 82.0,
+              "fg_px": 120278,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_playful_spin.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.361,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "cherries_peaceful_rest",
+      "tags": [
+        "cherries_peaceful_rest",
+        "calm",
+        "love",
+        "sleepy"
+      ],
+      "emoji": "😴🍒",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries lying down together, eyes closed peacefully, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_peaceful_rest",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 126707,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 64087,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "6px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 6,
+          "limit": 64.087,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "3 enclosed hole(s), 19.7% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.1973,
+          "limit": 0.01,
+          "data": {
+            "count": 3,
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 12 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 12,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "134.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1357,
+          695,
+          691
+        ],
+        "bg": [
+          9,
+          91,
+          255
+        ],
+        "threshold": 82.0,
+        "fg_px": 126707,
+        "bbox": [
+          95,
+          77,
+          630,
+          591
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 6,
+        "chroma_risk": 0.0,
+        "holes": 0.1973,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 134.4,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_peaceful_rest.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.365,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "cherries_hopeful_reach",
+      "tags": [
+        "cherries_hopeful_reach",
+        "hope",
+        "longing",
+        "romantic"
+      ],
+      "emoji": "🤲🍒",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries reaching out to each other with hopeful smiles, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_hopeful_reach",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 126887,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 19.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 64139,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 64.139,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "1.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0103,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 10 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 10,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "142.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 142.1,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          695,
+          1357,
+          686,
+          691
+        ],
+        "bg": [
+          9,
+          91,
+          254
+        ],
+        "threshold": 82.0,
+        "fg_px": 126887,
+        "bbox": [
+          61,
+          67,
+          623,
+          613
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0103,
+        "holes": 0.0,
+        "kb": 142.1,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_hopeful_reach.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.369,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "cherries_jealousy",
+      "tags": [
+        "cherries_jealousy",
+        "anger",
+        "envy",
+        "displeased"
+      ],
+      "emoji": "😠🍒",
+      "prompt": "a pair of bright red cherries with green leaves, smiling faces, joined by their stems cherries frowning with crossed arms, feeling jealous, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-008-cherries_love_with_green_backscreen-cherries_jealousy",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 122303,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 61769,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 61.769,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.6% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.006,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "1 enclosed hole(s), 20.8% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.2079,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": false,
+          "detail": "hash distance 3 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 3,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "138.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 138.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1381,
+          1357,
+          667,
+          691
+        ],
+        "bg": [
+          9,
+          90,
+          254
+        ],
+        "threshold": 82.0,
+        "fg_px": 122303,
+        "bbox": [
+          81,
+          60,
+          571,
+          617
+        ],
+        "scale": 0.7111,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.006,
+        "holes": 0.2079,
+        "warnings": [
+          "holes",
+          "duplicate_cell"
+        ],
+        "kb": 138.6,
+        "format": "png"
+      },
+      "png": "slices/img-008-cherries_love_with_green_backscreen-cherries_jealousy.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790879698.373,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes",
+              "duplicate_cell"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "key_colour": "blue"
+}

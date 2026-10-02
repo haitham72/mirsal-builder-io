@@ -6,6 +6,7 @@ Ticket first (CLAUDE.md rule 10): claim() writes external_task_id BEFORE the ope
 crashed operator re-run resumes by ticket instead of paying twice."""
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -225,6 +226,18 @@ def attach_generation(out: Path, jid: str, gid: int) -> dict:
 _PAID = threading.Lock()      # one paid provider call at a time, whoever asks
 
 
+@contextlib.contextmanager
+def _paid(out: Path):
+    """The in-process lock covers threads; the file lock under out/ covers worker processes (`mirsal worker`), so two paid calls never overlap on one machine."""
+    from .writer_lock import WriterLock
+    with _PAID:
+        lock = WriterLock(Path(out), "a paid provider call", ".paid.lock").acquire(wait=True)
+        try:
+            yield
+        finally:
+            lock.release()
+
+
 def _daily_cap() -> float | None:
     try:
         v = float(os.environ.get("MIRSAL_DAILY_CREDITS", ""))
@@ -268,7 +281,7 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
             media["start_image"] = str(start)
             if _mcat.find("video", model).get("end_image") and req.get("loop", False):
                 media["end_image"] = str(start)
-        with _PAID:
+        with _paid(out):
             if resume:
                 ticket, est = job["external_task_id"], job.get("cost_estimate")
             else:

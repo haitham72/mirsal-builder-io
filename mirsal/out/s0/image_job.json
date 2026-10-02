@@ -1,0 +1,23 @@
+[
+  {
+    "created_at": "2026-10-01T16:08:47.23227Z",
+    "display_name": "Nano Banana Pro",
+    "id": "fe52590a-53fa-4f34-bf60-351199a2b578",
+    "job_type": "nano_banana_pro",
+    "min_result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_160847_fe52590a-53fa-4f34-bf60-351199a2b578_min.webp",
+    "params": {
+      "application": null,
+      "aspect_ratio": "1:1",
+      "batch_size": 1,
+      "height": 2048,
+      "input_image": null,
+      "input_images": [],
+      "prompt": "3x3 sticker sheet, 9 separate characters in equal cells, wide gaps between characters, no character touches or crosses its cell edge.\nSubject: teddy bear.\nStyle: flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions.\nCells, row-major:\n1. waving hello\n2. laughing out loud\n3. holding a heart\n4. giving a thumbs up\n5. thinking with a hand on chin\n6. crying\n7. angry with crossed arms\n8. sleeping\n9. celebrating with arms up\nConsistency: same character design, proportions and colours in all 9 cells.\nBackground: flat pure green (#00FF00) background, no shadows, no floor, no gradients, no noise.\nMargin: every character is full body, centred, with a generous empty margin on every side (at least 20% of its cell).",
+      "resolution": "2k",
+      "surface": null,
+      "width": 2048
+    },
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_160847_fe52590a-53fa-4f34-bf60-351199a2b578.png",
+    "status": "completed"
+  }
+]

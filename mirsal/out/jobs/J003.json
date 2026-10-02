@@ -1,0 +1,35 @@
+{
+  "id": "J003",
+  "kind": "sheet",
+  "task": "004",
+  "generation": "G002",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: LEGO Batman minifigure, black suit with yellow bat symbol, black cape and cowl, identical in every cell.\nStyle: hand-drawn illustration, marker and pencil texture, wobbly confident lines, warm playful colours.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:\nCharacter 1: Ready to fight\nCharacter 2: Throwing batarang\nCharacter 3: Listening carefully\nCharacter 4: On the move\nCharacter 5: Victory pose\nCharacter 6: Detective thinking\nCharacter 7: Gliding in air\nCharacter 8: Surprised reaction\nCharacter 9: Calling for help\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "batman lego",
+    "refs": [],
+    "outline": 0
+  },
+  "status": "DONE",
+  "external_task_id": "42d9a290-000a-4c75-905e-c1e29979638e",
+  "result": {
+    "file": "jobs/J003/result.png",
+    "sha256": "e9018ccaa96f2a4e35cf6c2e0767f6ddc3e51c9557b8296ce3ed8d2a47feccd2",
+    "bytes": 5417399
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790873684.459,
+  "claimed_at": 1790873686.062,
+  "completed_at": 1790873711.504,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0
+}

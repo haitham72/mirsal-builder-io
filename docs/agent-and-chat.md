@@ -76,7 +76,9 @@ The small queue the chat shows while the agent works (`message.steps[]`, `{kind,
 └  plan ready · about 2 credits
 ```
 
-While the agent works the last row reads "Thinking"; when it is done the trace collapses to one line ("5 steps · plan ready") that opens it again.
+While the agent works the last row reads "Thinking"; when it is done the trace collapses to one line ("5 steps · plan ready") that opens it again. The page polls the
+session while anything still moves: only the **newest** assistant message holds the live plan card (the pending Create), and a read or paint that fails is retried
+instead of ending the polling (a frame that throws must never freeze the chat on "Thinking").
 
 ## The screen (`#/agent`, the landing page of the Studio shell)
 
