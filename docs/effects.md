@@ -1,6 +1,6 @@
 # docs/effects.md — particle effects: the burst that Telegram plays when you press an emoji
 
-**Status: engine and prompts built and measured on real Kling clips (2026-10-02); the pack-level flow, routes, the `#/effects` screen, the Create tile and the chat intent are NOT built yet (§8).**
+**Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). NOT built: the AI-chat intent, an AI-drawn sprite sheet for the simulated mode, real tile art / examples (§8).**
 Haitham asked for this on 2026-10-02: when someone presses an emoji in Telegram a burst of small pieces explodes from it (a strawberry bursts strawberries, a heart hearts). The product
 is the same thing as **animated stickers**: one 3-second WEBM per effect, starting from nothing and ending with nothing, tagged with the source emoji.
 
@@ -68,18 +68,22 @@ Anim checks that describe a character that stays itself (`loop_seam`, `alpha_sta
 | `generation/jobs.py` | `request.t2v` (no start image), parallel jobs (`paid_parallel`) |
 | tests | `test_particles` (38), `test_effect_video`, `test_effect_plan`, `test_effect_prompts`, `test_live.FulfilTests` (t2v, parallel, cap in flight) |
 
-## 7. The contract that is planned (not built)
+## 7. The contract (built: `flow/effects.py`, `console/server.py` `_effects`, `docs/api.md`)
 
-`E###` records under `out/effects/E###/effect.json` `{id, pack_id, stickers[{sticker_id, name, emoji, group}], mode: sim|video, grid, groups[{id, subject, elements, key, stickers, presets}],
-video{job, grid, cells[{index, sticker_id, checks, file}]}, results[{id, sticker_id, file, bytes, checks, params}], history[]}` and routes `GET/POST /api/effects`, `GET /api/effects/{id}`,
-`POST /api/effects/{id}/plan` (edit pieces), `/estimate` (price + prompt, free), `/video` (`{go: true}` spends), `/preview` (mode A, WebP), `/render`, `/add` (the click that puts results into the
-pack, recorded in the history).
+`E###` records under `out/effects/E###/effect.json` `{id, pack_id, pack_name, mode: sim|video, grid, note, status: NEW|READY|VIDEO_REQUESTED|RESULTS|DONE|ERROR, stickers[{sticker_id, name, emoji, file, src}],
+groups[{id, subject, elements, style, key, stickers, moods, preset, by, sprites}], per_sticker, notes, analysed_by, video{group: {job, grid, key, status, cells, cost}}, results[{id, mode, group, cell | sticker_id,
+file, bytes, status, checks, warnings, blocks, metrics, params, added_to}], history[]}`, `src/` (the source pictures), `results/R###.webm`, `previews/<digest>.webp`. Routes: `GET/POST /api/effects`,
+`GET /api/effects/{id}`, `POST .../analyse | plan | estimate | video | preview | render | add`. The analysis runs in a background thread (consent: `allow_vlm`), the video needs `go: true`, a result that breaks a
+Telegram limit is FAILED and cannot be added, everything else can. **Adding is the person's click** (history `APPROVE`); a video result goes to the stickers of its group cell by cell (round robin).
 
-## 8. Open
+## 8. The screen (built) and what is open
 
-1. `flow/effects.py` (the E### lifecycle: create, analyse in the background, video job and its `on_done`, per-cell results, preview / render for mode A, add to pack), the routes of §7, `docs/api.md`.
-2. Mode A sprites: the pack's own stickers as pieces (free), and the AI sprite sheet as an ordinary batch (`outline 0`, base plan with the pieces as cells).
-3. The screen (`console/effects.js`): **Create gets a "Particle effects" tool**, `#/effects`: pick a pack, pick stickers, analyse (edit the pieces), choose Simulate (sliders + live preview) or Video
-   (price, 2x2 default), render, add. Also reachable from the AI chat.
-4. The chat intent ("make particle effects for my Superman pack") with a plan card (subjects, count, total price).
-5. Real tile art / examples; a 3x3-specific prompt (smaller pieces, bigger margins) if 3x3 matters; the green-frame start/end variant if 2x2 ever fails.
+The screen (`console/effects.js`, `studio.css` `.fx-*`): 1 choose the pack, 2 which stickers, 3 Simulate or Video (2x2 default, a warning on 3x3), a note for your own pieces, then the effect: per group the pieces
+(editable chips, the screen colour, who chose them), Simulate rows with presets, **explosion / gravity / vortex / pieces / spin sliders** and a live preview (debounced, the same engine at 256 px), Render; Video with the
+price in the button (`estimate`, free) and the job's state; the results with their warnings in words and "Add N to the pack". The Queue pill cannot cover the last buttons (`.page.fx` bottom padding).
+
+Open:
+1. **The AI chat entry** ("make particle effects for my Superman pack"): an intent that creates the effect, shows a plan card (subjects, count, price) and answers with a card that opens `#/effects/E###`.
+2. **An AI-drawn sprite sheet for the simulated mode** (a button that makes a 2x2 sheet of the pieces through the normal batch pipeline with outline 0; today a person makes it in the Studio and types the batch number).
+3. Real tile art / examples, mobile layout check, 3x3-specific prompt, the green-frame start/end variant only if 2x2 ever fails.
+4. A real end-to-end paid run from the screen (the price and the job path are tested on a fake CLI; the real Kling path was exercised by the two experiment clips through `jobs.fulfil`).

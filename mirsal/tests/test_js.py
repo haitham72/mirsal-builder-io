@@ -262,6 +262,25 @@ class ShellTests(unittest.TestCase):
             self.assertIn(sel, css)
         self.assertNotIn("#ai-sheet", js)
 
+    def test_the_particle_effects_screen_is_wired_into_create_and_calls_the_api(self):
+        """docs/effects.md: Create has a Particle effects tool that opens #/effects; the screen reads and writes only /api/effects (nothing is decided in the browser), a paid video needs
+        `go`, and the fixed Queue pill must not be able to cover its last buttons."""
+        import re
+        ui = self.ui()
+        fx = (ui / "effects.js").read_text(encoding="utf-8")
+        html = (ui / "index.html").read_text(encoding="utf-8")
+        self.assertIn("id=s-effects", html)
+        self.assertIn("/ui/effects.js", html)
+        self.assertIn('"effects.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
+        app = (ui / "app.js").read_text(encoding="utf-8")
+        self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
+        self.assertIn("effects:'create'", app, "the rail keeps Create lit on the effects screen")
+        self.assertIn("data-act=fxopen", (ui / "editor.js").read_text(encoding="utf-8"), "a tool of Create")
+        for route in ("/api/effects", "/estimate", "/video", "/preview", "/render", "/add", "/plan"):
+            self.assertIn(route, fx)
+        self.assertIn("go:true", fx.replace(" ", ""), "the click on 'Make the video' is the go-ahead, and it shows the price")
+        self.assertIn(".page.fx{padding-bottom", (ui / "studio.css").read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()
