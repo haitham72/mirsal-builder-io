@@ -336,6 +336,14 @@ def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
     return cfg if not kw else replace(cfg, **kw)
 
 
+# A sheet that fails a check of the sheet stage is NOT thrown away (Haitham, 2026-10-02: "Python blocking the imported images is stupid, it does not let me bypass it, done, nothing
+# happens"). Two touching characters used to cost eight good stickers. Now only a file that does not open stops the cut; a layout problem (the grid it found is not the grid
+# planned, a small sheet) is recorded on every sticker as a warning and the sheet is cut anyway: every cell is then judged on its OWN checks and a human decides at G2. A sheet
+# with no key screen at all (`background_is_key`) still stops, because every cell would come out wrong, but ONE click ("Cut it anyway", `recut`) cuts it.
+SHEET_FATAL = {"sheet_decodes"}                  # nothing can be cut from a file that does not open
+SHEET_PROCEED = {"grid_detected", "sheet_size"}  # layout problems: cut anyway, say so
+
+
 def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
     res = read_result(out, gid)
     base = cfg
@@ -346,7 +354,8 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
         with Stage(out, gid, "sheet_picked", pace) as s:
             src = Path(res["source"]["sheet_path"])
             dest = d / "source" / f"sheet{src.suffix.lower()}"
-            shutil.copyfile(src, dest)
+            if not (dest.exists() and src.resolve() == dest.resolve()):          # a recut reads the copy this batch already holds
+                shutil.copyfile(src, dest)
             res["source"]["sheet_copy"] = f"source/{dest.name}"
             rows, cols = res.get("grid") or (3, 3)
             asked = (res.get("slots") or {}).get("key_colour", "green")
@@ -364,13 +373,18 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
             vin = {"data": dest.read_bytes(), "grid": (rows, cols), "chroma": cfg.chroma}
             checks = verify.run("sheet", vin, cfg)                  # the sheet is judged on arrival, before anything is sliced
             res["verify"]["sheet"] = [c.to_dict() for c in checks]
-            blocked = next((c for c in checks if not c.ok and c.severity == verify.BLOCK), None)
+            hard = [c for c in checks if not c.ok and c.severity == verify.BLOCK]
+            forced = bool(res.get("cut_anyway"))                  # the human clicked "Cut it anyway"
+            blocked = next((c for c in hard if c.id in SHEET_FATAL or (c.id not in SHEET_PROCEED and not forced)), None)
+            issues = [c for c in hard if c is not blocked]
+            res["sheet_issues"] = [{"check": c.id, "value": _json(c.value), "limit": _json(c.limit), "note": c.note, "forced": c.id not in SHEET_PROCEED} for c in issues]
             sheet = vin.get("rgb")
             if sheet is not None:
                 res["source"]["sheet_size"] = [int(sheet.shape[1]), int(sheet.shape[0])]
             s.result = {"subject": res["source"]["subject"], "variant": res["source"]["variant"],
                         "of": res["source"]["n_variants"], "file": src.name,
-                        "blocked": blocked.id if blocked else None, "warnings": [c.id for c in checks if not c.ok and c.severity == verify.WARN]}
+                        "blocked": blocked.id if blocked else None, "cut_anyway": [c.id for c in issues],
+                        "warnings": [c.id for c in checks if not c.ok and c.severity == verify.WARN]}
             res["stage"] = "sheet_picked"; write_result(out, gid, res)
         if blocked:
             with Stage(out, gid, "sliced", pace) as s:
@@ -395,6 +409,9 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
             (d / "source" / "plain").mkdir(exist_ok=True)
             for st, r in zip(res["stickers"], slice_cells(cells, cfg)):
                 st.update(status=r.status, reason=r.reason, report=r.report.checks, metrics=r.metrics)
+                for iss in res.get("sheet_issues") or []:        # the sheet had a layout problem and was cut anyway: this cell may be mis-cut, the human decides
+                    hist(st, "sheet", "python", "WARN", iss["check"], detail={**iss, "cut_anyway": True})
+                    st["metrics"] = {**(st.get("metrics") or {}), "sheet_issue": iss["check"]}
                 if r.data:
                     st["png"] = f"slices/{st['name']}.{r.fmt}"
                     (d / st["png"]).write_bytes(r.data)
@@ -417,6 +434,35 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
             res["stage"] = "sliced"; write_result(out, gid, res)
     except Exception as e:
         res["error"] = str(e)[:300]; write_result(out, gid, res)
+
+
+def recut_check(out: Path, gid: int) -> None:
+    """The refusals of `recut`, raised before anything is queued so the page gets a 409 and not a silent no-op."""
+    res = read_result(out, gid)
+    if res.get("stage") not in ("sliced", "stills_reviewed") and not res.get("error"):
+        raise PipelineError("This batch is not waiting on its sheet.", 409)
+    if res.get("video_sheets") or any((st.get("review") or {}).get("still") in ("APPROVED", "REJECTED") for st in res["stickers"]):
+        raise PipelineError("Stickers of this batch were already decided: cutting again would lose those decisions.", 409)
+
+
+def recut(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, by: str = "human") -> None:
+    """The human's "Cut it anyway": cut a batch whose sheet the sheet stage stopped (a sheet with no key screen, or an older batch from before layout problems were cut anyway), from the
+    sheet that is stored, free of charge. Every sticker's history gets the click, every cell is then judged on its own checks and the human decides at G2 as usual. Refused once any
+    sticker has a human decision or a video sheet was built from the stills (their decisions would be lost)."""
+    recut_check(out, gid)
+    res = read_result(out, gid)
+    src = Path(res["source"].get("sheet_path") or "")
+    kept = res["source"].get("sheet_copy")
+    if not src.is_file() and kept and (gen_dir(out, gid) / kept).is_file():
+        res["source"]["sheet_path"] = str(gen_dir(out, gid) / kept)             # the original download moved: the copy stored in the batch is the same file
+    elif not src.is_file():
+        raise PipelineError("The stored sheet is missing: make the sheet again.", 409)
+    res["cut_anyway"] = True
+    res.pop("error", None)
+    for st in res["stickers"]:
+        hist(st, "sheet", by, "APPROVE", "cut anyway", detail={"override": True})
+    write_result(out, gid, res)
+    run_stills(out, gid, cfg, pace)
 
 
 def record_anim(d: Path, st: dict, r, ref: str) -> None:

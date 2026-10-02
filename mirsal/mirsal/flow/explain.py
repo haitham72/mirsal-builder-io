@@ -2,7 +2,8 @@
 
 A sheet that arrives and fails a BLOCK check of the sheet stage leaves a batch whose nine stickers are all FAILED with the same reason. To a person that looked like "the task was
 never retrieved" (the sheet WAS downloaded and paid for); this module says what happened, in words, and what to do. Pure: it reads a `result.json` dict and (optionally) a job
-dict, it never decides anything and never loosens a check (`CLAUDE.md` rule 10: Python's BLOCK is final)."""
+dict, it never decides anything. Since 2026-10-02 a layout problem no longer stops a sheet (it is cut anyway, `pipeline.SHEET_PROCEED`); what still stops one is a file that does not open
+or a sheet with no key screen, and for the latter the card offers one free click: "Cut it anyway" (`pipeline.recut`)."""
 from __future__ import annotations
 
 import re
@@ -52,4 +53,5 @@ def sheet_problem(res: dict, job: dict | None = None) -> dict | None:
     received = None
     if m or job:
         received = {"job": (job or {}).get("id") or (m.group(1) if m else None), "cost": (job or {}).get("cost")}
-    return {**c, "title": h["title"], "why": _fill(h["why"], c), "fix": h["fix"], "received": received, "retry": True}
+    return {**c, "title": h["title"], "why": _fill(h["why"], c), "fix": h["fix"], "received": received, "retry": True,
+            "cut_anyway": check != "sheet_decodes"}

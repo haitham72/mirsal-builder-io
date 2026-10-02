@@ -43,6 +43,9 @@ def build_inputs(root: Path):
     put("blob", shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)]))
     put("quad", shape_sheet(1200, [(x, y) for y in (300, 900) for x in (300, 900)], r=110))
     put("solo", shape_sheet(1200, [(600, 600)], r=140))
+    touch = shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)])         # two characters of the middle row are joined across the gutter
+    cv2.rectangle(touch, (200, 560), (600, 640), synth.YELLOW, -1)
+    put("touch", touch)
     d = root / "Images_gen" / "img-001-bad"; d.mkdir(parents=True)
     grey = np.full((1200, 1200, 3), 128, np.uint8)
     cv2.circle(grey, (600, 600), 200, synth.YELLOW, -1)
@@ -204,6 +207,31 @@ class GoldenPathTests(Api):
         self.review(j["id"], "plan", "APPROVE")
         self.review(j["id"], "still", "APPROVE", 1, expect=409)                                # nobody can approve a FAILED sticker
         self.assertEqual(self.req("POST", f"/api/generations/{j['id']}/video_sheet")[0], 409)
+
+    def test_a_layout_problem_cuts_the_sheet_anyway_and_a_stopped_sheet_has_one_free_click(self):
+        """Haitham, 2026-10-02: "Python blocking the imported images is stupid, it does not let me bypass it". Two characters touching across the gutter used to throw the whole
+        sheet away (9 of 9 FAILED, no file). Now the sheet is cut, every cell is judged on its own, the problem is a warning on every sticker, and a human decides at G2. A sheet
+        with no key screen still stops, but one free click ("Cut it anyway") cuts it; a file that does not open is the only hard stop."""
+        gid, g = self.new("create a touch one")
+        sheet = next(c for c in g["verify"]["sheet"] if c["name"] == "grid_detected")
+        self.assertFalse(sheet["ok"], "the sheet really has a layout problem (the grid found is not the planned one)")
+        ready = [x for x in g["stickers"] if x["status"] == "READY"]
+        self.assertGreaterEqual(len(ready), 5, "the good cells survive")
+        self.assertFalse(any((x.get("metrics") or {}).get("sheet_blocked") for x in g["stickers"]), "nothing is thrown away")
+        issue = [h for h in ready[0]["history"] if h["stage"] == "sheet"]
+        self.assertEqual((issue[0]["decision"], issue[0]["reason"]), ("WARN", "grid_detected"), "the problem is a warning, in the sticker's own history")
+        self.assertTrue(all(x["png"] for x in ready))
+        self.review(gid, "plan", "APPROVE")
+        self.review(gid, "still", "APPROVE", ready[0]["index"])                              # and a human can decide on a cell of such a sheet like on any other
+
+        bad_id, bad = self.new("create a bad one")                                          # no key screen at all: stopped, with the click
+        self.assertEqual({x["reason"] for x in bad["stickers"]}, {"background_is_key"})
+        self.assertEqual(self.req("POST", f"/api/generations/{bad_id}/recut")[0], 202)
+        cut = self.wait(bad_id, lambda x: any((h["decision"] == "APPROVE" and h["reason"] == "cut anyway") for h in x["stickers"][0]["history"]) and x["stage"] == "sliced")
+        self.assertTrue(any(x["png"] for x in cut["stickers"]) or all(x["reason"] != "background_is_key" or not (x.get("metrics") or {}).get("sheet_blocked") for x in cut["stickers"]),
+                        "the sheet was cut: the cells are judged one by one now")
+        self.assertFalse(any((x.get("metrics") or {}).get("sheet_blocked") for x in cut["stickers"]))
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/recut")[0], 409, "a batch with decisions is not cut again behind them")
 
     def test_the_outline_is_a_choice(self):
         """The white die-cut stroke is not forced: 0 gives the plain sticker, a width gives that stroke, both are stored with the generation."""

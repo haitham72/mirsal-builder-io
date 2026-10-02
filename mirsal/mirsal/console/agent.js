@@ -170,7 +170,8 @@ function cardHTML(c,m,i){
 /* a sheet Python blocked: what happened in words, what was already paid, and one button that states the price (the click is the go-ahead) */
 function problemHTML(p,gid){const got=p.received?`The sheet was received${p.received.job?' ('+AIU.esc(p.received.job)+')':''}${p.received.cost?' and paid for ('+AIU.credits(p.received.cost)+')':''}; nothing is lost, this batch just has no stickers.`:'';
  return `<div class=ai-problem><b>${AIU.esc(p.title)}</b><span>${AIU.esc(p.why)}</span><span>${AIU.esc(p.fix)}</span><small>${got}</small>
-  <button class="ai-chip pri" data-act=agretry data-g="${AIU.esc(gid)}">Try the sheet again · ${p.retry_estimate?AIU.credits(p.retry_estimate):'price shown by the provider'}</button></div>`}
+  ${p.cut_anyway?`<button class="ai-chip pri" data-act=agcut data-g="${AIU.esc(gid)}" title="Cut the sheet that was received, as it is, for free">Cut it anyway · free</button>`:''}
+  <button class="ai-chip${p.cut_anyway?'':' pri'}" data-act=agretry data-g="${AIU.esc(gid)}">Try the sheet again · ${p.retry_estimate?AIU.credits(p.retry_estimate):'price shown by the provider'}</button></div>`}
 /* the creator's run: where it stands, as a short list; what it stopped for is the message under it, with its buttons */
 function runHTML(r){if(!r)return '';
  const rows=(r.steps||[]).map(s=>`<li class="${s.state}"><i></i>${AIU.esc(s.label)}</li>`).join('');
@@ -219,6 +220,7 @@ function selChips(){const el=$('ai-sel');if(!el)return;const n=A.sel.size;
  const ta=$('ai-in');if(ta)ta.placeholder=n?'e.g. make these more energetic':'Make or change stickers'}
 ACT.agchip=el=>agSend(el.dataset.text);
 ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
+ACT.agcut=async el=>{const r=await post(`/api/generations/${el.dataset.g}/recut`);if(!r.ok)return toast(r.j.error||'Could not cut the sheet',1);toast('Cutting the sheet…');if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});
 ACT.agtrace=el=>{const k=el.dataset.m;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstep=el=>{const k=el.dataset.k;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};

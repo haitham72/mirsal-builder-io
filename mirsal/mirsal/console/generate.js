@@ -185,7 +185,8 @@ function batchHtml(g,k,total,mode){
   if(sheetErr){const p=g.problem;      /* the server explains a blocked sheet in words (flow/explain.py): what happened, what was paid, what to do; Python's block stays final */
     return`<section class=gbatch>${head}<div class=gwork><b>${esc(p?p.title:'This sheet cannot be used')}</b><div class=mut>${esc(p?p.why:(sheetErr.detail||sheetErr.name))}</div>
      ${p?`<div class=mut>${esc(p.fix)}</div>${p.received?`<div class=mut>The sheet was received${p.received.job?' ('+esc(p.received.job)+')':''}${p.received.cost?' and paid for ('+p.received.cost+' credits)':''}: nothing is lost, this batch just has no stickers. It stays in History.</div>`:''}
-     <button class="btn pri" data-act=gretrysheet data-g=${g.number}>Try the sheet again</button>`:''}</div></section>`}
+     ${p.cut_anyway?`<button class="btn pri" data-act=gcutany data-g=${g.number} title="Cut the sheet that was received, as it is, for free: you decide on every cell yourself">Cut it anyway</button>`:''}
+     <button class="btn${p.cut_anyway?'':' pri'}" data-act=gretrysheet data-g=${g.number}>Try the sheet again</button>`:''}</div></section>`}
   return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?`<div class=gleft>${videoPanel(g)}${sheetPanel(g)}</div>`:sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
 /* what a set of batches stands at right now: the counts the header and the bottom bar read. One implementation, used by the header and the bottom bar. */
 function gstats(gs){const inc=gs.filter(g=>!SES.off.includes(g.number)),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
@@ -233,6 +234,8 @@ function requestView(gs){const g=gs[0],s=g.source,on=GS.outline>0;
    <ul class=pcells><li><b>Subject</b><div class=mut>${esc(titleCase(s.subject))}</div></li><li><b>Prepared sheets used</b><div class=mut>${gs.map(x=>`sheet ${x.source.subject_id} (${x.generation_id})`).join(', ')}</div></li>
     <li><b>Grid</b><div class=mut>${g.grid[0]}×${g.grid[1]}, ${g.stickers.length} stickers per batch</div></li><li><b>Template</b><div class=mut>${esc(g.template_id||'hand-written plan')}${g.template_version?' v'+g.template_version:''}</div></li>
     <li><b>Edge</b><div class=mut>${g.outline_px?g.outline_px+' px white outline':'no outline'}${g.erode_px?`, ${g.erode_px} px trimmed`:''}</div></li></ul></div></section>`}
+/* "Cut it anyway": free, from the sheet already received (pipeline.recut); every cell is judged on its own and you decide at G2 */
+ACT.gcutany=async el=>{const r=await post(`/api/generations/${el.dataset.g}/recut`);if(!r.ok)return toast(r.j.error||'Could not cut the sheet',1);toast('Cutting the sheet…');glast='';tick(true)};
 ACT.gretrysheet=el=>{const g=GM.get(+el.dataset.g);if(!g)return;$('prompt').value=g.prompt||'';GS.tab='stickers';create(g.prompt||'',0,false)};     /* the same path as Generate: the live price is shown before anything is sent */
 ACT.greqgo=el=>{const p=(($('greq')||{}).value||'').trim();
   if(!p){say('Write what you want first.');return}$('prompt').value=p;GS.tab='stickers';create(p,0,false)};

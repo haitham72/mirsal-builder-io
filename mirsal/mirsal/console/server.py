@@ -42,7 +42,7 @@ _RID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 _LOG_IDS = (re.compile(r"^/api/generations/(\d+)"), "generation_id", "G"), (re.compile(r"^/api/chat/sessions/(S\d+)"), "session_id", "")
 _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)/")
-MEMBER_GEN_POST = {"review", "more", "regen", "animate", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck"}
+MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck"}
 MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
 MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/search", "/api/generations", "/api/jobs"}
 MEMBER_POST = {"/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
@@ -1346,6 +1346,10 @@ def make_handler(c: Console):
                         c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
                         res_["resliced"] = True
                     return self._json(200, res_)
+                if parts[3] == "recut":          # "Cut it anyway": cut a batch whose sheet was stopped, from the stored sheet, free (pipeline.recut)
+                    pl.recut_check(c.out, gid)
+                    c.submit(lambda: pl.recut(c.out, gid, c.cfg, c.pace, by=self.user.get("id") or "human"))
+                    return self._json(202, {"id": gid})
                 if parts[3] == "reveal":         # open the batch's folder in the file manager (a path the server computed, never one sent by the page)
                     import os as _os, subprocess as _sp, sys as _sys
                     target = pl.gen_dir(c.out, gid) / "slices"

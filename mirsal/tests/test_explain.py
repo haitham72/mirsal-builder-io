@@ -34,3 +34,10 @@ class ExplainTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CutAnywayTests(unittest.TestCase):
+    def test_a_stopped_sheet_offers_the_free_click_unless_the_file_does_not_open(self):
+        from mirsal.flow import explain
+        self.assertTrue(explain.sheet_problem(blocked("background_is_key", 3, 40))["cut_anyway"])
+        self.assertFalse(explain.sheet_problem(blocked("sheet_decodes", None, None))["cut_anyway"])
