@@ -659,3 +659,32 @@ class FriendlyChat(Base):
         self.assertIn("Eid mubarak greetings", m["text"])
         self.assertNotIn("G096", m["text"])
         self.assertNotIn("G096", [s["label"] for s in m["steps"] if s["kind"] == "task"][0])
+
+
+class BlockedSheet(Base):
+    """2026-10-02 (G094): a sheet that was downloaded and paid for but could not be cut says so in words, and one button makes a new one."""
+
+    def _blocked(self):
+        self.seed("G094", subject="falcon stickers")
+        g = self.tools.gens["G094"]
+        g["prompt"], g["grid"] = "falcon stickers", [3, 3]
+        g["problem"] = {"check": "grid_detected", "title": "The sheet came back, but Python could not find the grid", "why": "found 3x2, plan says 3x3", "fix": "A new sheet usually fixes it.",
+                        "received": {"job": "J027", "cost": 2.0}, "retry": True, "retry_estimate": 2.0}
+        for s in g["stickers"]:
+            s["status"] = "FAILED"
+
+    def test_try_the_sheet_again_starts_a_new_batch_with_the_same_words_and_spends_once(self):
+        self._blocked()
+        m = self.say("", action={"type": "retry_sheet", "generation": "G094"})
+        creates = [c for c in self.tools.calls if c[0] == "create"]
+        self.assertEqual(len(creates), 1)
+        self.assertEqual(creates[0][1], "falcon stickers")
+        self.assertEqual(m["cards"][0]["type"], "generation")
+        self.assertIn("falcon stickers", m["text"])
+        self.assertNotIn("G094", m["text"])
+
+    def test_a_healthy_sheet_has_nothing_to_redo_and_nothing_is_spent(self):
+        self.seed("G012")
+        m = self.say("", action={"type": "retry_sheet", "generation": "G012"})
+        self.assertFalse([c for c in self.tools.calls if c[0] == "create"])
+        self.assertIn("nothing to redo", m["text"])

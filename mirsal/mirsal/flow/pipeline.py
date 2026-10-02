@@ -806,7 +806,22 @@ def state(out: Path, gid: int) -> dict:
     res["stages"] = STAGES
     res["gate"] = gates.gate_info(res)
     res["final"] = gates.final_indices(res)
+    res["problem"] = problem_of(out, res)
     return res
+
+
+def problem_of(out: Path, res: dict) -> dict | None:
+    """Plain words for a sheet the sheet stage blocked (flow/explain.py), with the paid job that brought it (its cost is read from the job file)."""
+    from . import explain
+    p = explain.sheet_problem(res)
+    if p and p.get("received") and p["received"].get("job"):
+        try:
+            from ..generation import jobs
+            j = jobs.read(out, p["received"]["job"])
+            p["received"]["cost"] = j.get("cost")
+        except Exception:
+            pass
+    return p
 
 
 def _grid_of(res: dict) -> tuple:

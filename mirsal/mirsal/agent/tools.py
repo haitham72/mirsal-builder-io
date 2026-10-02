@@ -5,6 +5,7 @@ re-implements generation, gating or search. `FakeTools` (tests) implements the s
 unless the user said so: every method that costs credits is called only after a confirmation (or the user's "don't ask me" setting)."""
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from ..flow import gates, pipeline as pl
@@ -89,10 +90,18 @@ class ConsoleTools:
         """What one call of the default model costs (a sheet; a video needs a built video sheet and is priced when it is sent)."""
         if not self.live():
             return None
+        memo = getattr(self.c, "_estimates", None)
+        if memo is None:
+            memo = self.c._estimates = {}
+        hit = memo.get(kind)
+        if hit and time.time() - hit[0] < 60:                    # the card polls every second; a price does not change that fast
+            return hit[1]
         try:
-            return self.c.live("cost", {"kind": kind}).get("credits")
+            v = self.c.live("cost", {"kind": kind}).get("credits")
         except Exception:
             return None
+        memo[kind] = (time.time(), v)
+        return v
 
     def generation(self, gid: str) -> dict:
         """The sticker list of one batch for the chat (ids, keys, emoji, status, reviews, file urls)."""
@@ -105,8 +114,14 @@ class ConsoleTools:
                              "anim": s["review"]["anim"], "anim_status": s.get("anim_status"),
                              "png": f"/out/{gid}/{s['png']}" if s.get("png") else None,
                              "webm": f"/out/{gid}/{s['webm']}" if s.get("webm") else None, "prompt": s.get("prompt")})
-        return {"generation": gid, "stage": res.get("stage"), "error": res.get("error"), "prompt": res.get("prompt"),
+        return {"generation": gid, "stage": res.get("stage"), "error": res.get("error"), "prompt": res.get("prompt"), "problem": self._problem(res),
                 "parent": f"G{int(res['parent']):03d}" if res.get("parent") else None, "grid": res.get("grid"), "stickers": stickers}
+
+    def _problem(self, res: dict) -> dict | None:
+        p = pl.problem_of(self.out, res)
+        if p:
+            p["retry_estimate"] = self.estimate("image")
+        return p
 
     def job(self, jid: str) -> dict:
         from ..generation import jobs

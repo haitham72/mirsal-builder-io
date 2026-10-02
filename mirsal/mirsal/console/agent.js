@@ -15,7 +15,7 @@ const AIU=(()=>{
  /* a message's signature: the page only rebuilds a message whose signature changed (so carousels keep their scroll and videos keep playing) */
  const sig=m=>JSON.stringify([m.status,m.text,(m.steps||[]).map(s=>[s.kind,s.label,s.status,s.detail&&s.detail.lines&&s.detail.lines.length]),m.chips,
   (m.cards||[]).map(c=>[c.type,c.generation,c.job,c.job_status,c.job_stage,c.animating,c.estimate,c.names&&c.names.length,
-   ((c.data&&c.data.stickers)||c.stickers||[]).map(s=>[s.id,s.status,s.still,s.anim_status,!!s.png,!!s.webm])])]);
+   ((c.data&&c.data.stickers)||c.stickers||[]).map(s=>[s.id,s.status,s.still,s.anim_status,!!s.png,!!s.webm]),c.data&&c.data.problem&&c.data.problem.check])]);
  /* does anything on this card still move? (then the page keeps polling) */
  const cardLive=c=>{if(c.type!=='generation')return false;
   if(c.job&&!c.generation)return !['FAILED','TIMEOUT'].includes(c.job_status);
@@ -153,6 +153,7 @@ function cardHTML(c,m,i){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
   let note='';
   if(!gid){note=c.job_status==='FAILED'||c.job_status==='TIMEOUT'?`<span class=ai-err>The model could not make this sheet${c.job_error?': '+AIU.esc(c.job_error):''}. Nothing more was spent.</span>`:`Drawing the sheet${c.job_stage?' · '+AIU.esc(c.job_stage):''}…`}
+  else if(c.data&&c.data.problem)note=problemHTML(c.data.problem,gid);
   else if(!st.length)note='Cutting the stickers…';else if(st.some(x=>x.status==='PENDING'))note='Cutting the stickers…';
   else if(c.animating&&st.some(x=>['PENDING','RUNNING'].includes(x.anim_status)))note='Animating…';
   const meta=gid?`${gid}${c.data&&c.data.parent?' · from '+c.data.parent:''} · ${ready} ready`:'';
@@ -161,6 +162,10 @@ function cardHTML(c,m,i){
  if(c.type==='stickers'){return `<div class="ai-card"><div class=ai-ch><b>${c.stickers.length===1?'Sticker':'Stickers'}</b><small>${c.stickers.length} found</small></div>${carHTML(c.stickers.map(x=>({...x,status:'READY',name:x.key})),null)}</div>`}
  return ''}
 
+/* a sheet Python blocked: what happened in words, what was already paid, and one button that states the price (the click is the go-ahead) */
+function problemHTML(p,gid){const got=p.received?`The sheet was received${p.received.job?' ('+AIU.esc(p.received.job)+')':''}${p.received.cost?' and paid for ('+AIU.credits(p.received.cost)+')':''}; nothing is lost, this batch just has no stickers.`:'';
+ return `<div class=ai-problem><b>${AIU.esc(p.title)}</b><span>${AIU.esc(p.why)}</span><span>${AIU.esc(p.fix)}</span><small>${got}</small>
+  <button class="ai-chip pri" data-act=agretry data-g="${AIU.esc(gid)}">Try the sheet again · ${p.retry_estimate?AIU.credits(p.retry_estimate):'price shown by the provider'}</button></div>`}
 function carHTML(st,gid){
  const tiles=st?st:Array.from({length:6},(_,i)=>({id:'w'+i,index:i+1,status:'PENDING',wait:true}));
  const n=tiles.length;
@@ -202,6 +207,7 @@ function selChips(){const el=$('ai-sel');if(!el)return;const n=A.sel.size;
  const ta=$('ai-in');if(ta)ta.placeholder=n?'e.g. make these more energetic':'Make or change stickers'}
 ACT.agchip=el=>agSend(el.dataset.text);
 ACT.agaction=el=>agSend('',{type:el.dataset.type});
+ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});
 ACT.agtrace=el=>{const k=el.dataset.m;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstep=el=>{const k=el.dataset.k;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstudio=el=>{const n=+String(el.dataset.g).replace(/\D/g,'');if(typeof SES!=='undefined'){SES={prompt:'',gens:[n],off:[],pack:''};if(typeof saveSes==='function')saveSes()}location.hash='#/studio'};

@@ -111,7 +111,7 @@ class Agent:
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "another": self.n_another,
                  "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -145,7 +145,7 @@ class Agent:
             for m in sess["messages"]:                           # we hold the lock, so nobody is running a turn: a "working" message is one that died with its server
                 if m.get("status") == "working":
                     m.update(status="error", text=m.get("text") or INTERRUPTED)
-            label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No"}.get((action or {}).get("type"), "")
+            label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "retry_sheet": "Try the sheet again", "vision_yes": "Allow AI vision", "vision_no": "Keep AI vision off"}.get((action or {}).get("type"), "")
             self.store.add_message(sess, "user", label)
             msg = self.store.add_message(sess, "assistant", "", status="working")
             self.store.save(sess)
@@ -196,6 +196,8 @@ class Agent:
         answered = False
         if t.action and t.action.get("type") in ("confirm", "cancel"):
             t.intents, t.conf = [t.action["type"].upper()], 1.0
+        elif t.action and t.action.get("type") == "retry_sheet":
+            t.intents, t.conf = ["RETRY"], 1.0
         elif t.action and t.action.get("type") in ("vision_yes", "vision_no"):
             t.intents, t.conf = ["VISION"], 1.0
         elif asked and asked.get("intents") and is_sticker_answer(t.text, bool(t.selected)):
@@ -212,12 +214,12 @@ class Agent:
                     t.intents, t.conf = got, 0.7
         names = {"NEW": "a new set", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
-                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
+                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                  "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "ASK": "ask", "SEARCH": "search",
-                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision"}
+                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
 
@@ -708,6 +710,30 @@ class Agent:
         t.trace.step(said)
         t.trace.end("saved")
         t.reply = f"Done: {said}, from now on."
+        return {}
+
+    def n_retry(self, state: State) -> dict:
+        """"Try the sheet again" on a batch whose sheet Python blocked (`flow/explain.py`). The button states the price, so the click is the go-ahead; the new sheet is a new batch
+        with the same words, the blocked one stays as it is (nothing is deleted)."""
+        t: Turn = state["turn"]
+        gid = str((t.action or {}).get("generation") or "")
+        try:
+            card = self.tools.generation(gid)
+        except ToolError as e:
+            t.reply = str(e)
+            return {}
+        if not card.get("problem"):
+            t.reply = "That sheet is fine, there is nothing to redo."
+            return {}
+        name = self._nm(t.sess, gid)
+        grid = "x".join(str(x) for x in (card.get("grid") or [3, 3])) if isinstance(card.get("grid"), list) else (card.get("grid") or t.sess["settings"]["grid"])
+        subj = self.store.subject_for_generation(t.sess, gid)
+        p = next((q for q in (subj or {}).get("passes", []) if q.get("generation") == gid), {})
+        t.trace.retitle(f"a new sheet for {name}")
+        t.trace.step("the first sheet could not be cut: " + str(card["problem"].get("check") or ""))
+        self._start_create(t, {"prompt": card.get("prompt") or name, "subject": (subj or {}).get("name") or name, "grid": grid,
+                               "style_id": p.get("style_id") or t.sess["settings"]["style_id"], "ai": True},
+                           note=f"a new sheet for {name}: the first could not be cut")
         return {}
 
     def n_vision(self, state: State) -> dict:
