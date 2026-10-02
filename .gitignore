@@ -53,3 +53,8 @@ opencode.json
 mirsal/.env
 .env
 deploy/.env
+
+# macOS and agent worktrees: never committed
+.DS_Store
+**/.DS_Store
+.claude/worktrees/

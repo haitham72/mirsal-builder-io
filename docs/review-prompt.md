@@ -27,7 +27,7 @@ Your job is to find what is **wrong, risky, missing or overclaimed**, and to say
 **Mirsal Builder**: high-quality **animated stickers** (not emoji) for Telegram. A user asks (in a chat or a prompt); the app makes a 3x3 sheet with an image model (Higgsfield / Nano Banana 2), cuts and chroma-keys it into 512x512 stickers, a deterministic **verifier** (44 checks over 9 stages) blocks bad ones, a **human approves at five gates**, the approved stickers are laid out on a video sheet, animated (Kling v3.0), every frame is boundary-checked, and the pack goes to a Telegram set. A local multimodal model **pre-reviews** (never approves). An **agentic chat** (LangGraph, memory per subject, a step trace, priced plan cards) drives the same engine the Studio uses.
 Delivery decision by the owner: **the product is an API / app for an existing Mirsal app; the screens here are a sandbox.** Judge the API contracts and the engine more than UI polish.
 
-Stack: Python 3.14 stdlib server (`127.0.0.1:8770`), numpy / OpenCV / Pillow / ffmpeg engine, Postgres+pgvector (`:5434`), Redis (`:6380`, disposable), LM Studio (`:1234`, hardcoded models `qwen3.5-4b:2` and `nomic-embed-text-v1.5`), LangGraph, vanilla JS UI. Read `README.md` first.
+Stack: Python 3.14 stdlib server (`127.0.0.1:8770`), numpy / OpenCV / Pillow / ffmpeg engine, Postgres+pgvector (`:5434`), Redis (`:6380`, disposable), LM Studio or vLLM (`:1234`, whatever model the server lists, probed for real; the embedding model `nomic-embed-text-v1.5` is hardcoded), LangGraph, vanilla JS UI. Read `README.md` first.
 
 ## 2. Reading order (do it in this order, then the code)
 

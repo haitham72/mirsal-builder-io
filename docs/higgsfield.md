@@ -52,3 +52,9 @@ Prices from `generate cost`: Nano Banana 2 1k 1.5 / 2k 2 / 4k 3 credits; Kling v
 ## Other models seen, not tested
 
 Video: `veo3_1`, `seedance_2_0` (start/end image, duration, 480p-4k), `kling3_0_turbo`, `kling2_6`, `minimax_h3`, plus tools `sam_3_video` (Remove Background: could give alpha directly, S7 candidate), `topaz_video`, `bytedance_video_upscale`, `fps_boost`, `depth_anything_video`. Image: `gpt_image_2_5`, `seedream_v5_pro`, `ideogram_4_5`, `recraft_v4_1`, `flux_2`, `image_background_remover`. 34 image and 30+ video job types in total (`model list`).
+
+## Kling v3.0, text only (measured 2026-10-02, for the particle effects)
+
+`higgsfield model get kling3_0`: `prompt` is the only required parameter; `start_image` and `end_image` are optional objects. Price (`higgsfield generate cost`): **4.5 credits** pro 3 s, 3.75 std 3 s. Two real text-only clips,
+1:1 pro 3 s, no start image, a grid of burst cells on a blue screen (J037 2x2, J038 3x3; 1440x1440, 24 fps, 3.04 s, 4.6-5.7 MB, 63-84 s wall time): 2x2 every cell starts empty, the burst begins at 0.33 s and no piece
+crosses a cell; 3x3 starts empty but pieces cross cells (10-26 % of the edge strip) and none ends empty. Details and the table: `docs/effects.md` §3.

@@ -1,0 +1,53 @@
+{
+  "id": "J038",
+  "kind": "video",
+  "task": null,
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {},
+    "prompt": "A flat, perfectly even, solid #0000FF blue screen with no shadows, no floor, no gradient, no text and no borders. Static camera, square frame, 3 seconds. The frame is an invisible grid of 3 by 3 equal square cells and nothing ever crosses from one cell into another. In EVERY cell at the same time, the same small burst effect plays: ripe red strawberries, tiny yellow seeds and small green leaves, all related to strawberry. Timeline for each cell: from 0.0 to 0.4 seconds the cell is completely empty blue screen. At 0.4 seconds the pieces appear at the exact centre of the cell and burst outward in a spiralling vortex, growing a little as they fly. From about 1.2 seconds gravity takes over: the pieces slow down, arc and fall downward out of the cell. By 2.6 seconds every piece has left the cell and the cell is completely empty blue screen again until the end at 3.0 seconds. The pieces are small and separate, never touching the cell edge; only the pieces listed are drawn, never one large central strawberry. Look: glossy cartoon look, bold clean shapes, vivid colours. Each cell is a different take of the same effect: cell 1 (top row, left): a tight fast vortex; cell 2 (top row, middle): a wide gentle burst; cell 3 (top row, right): a slow lazy swirl; cell 4 (middle row, left): a sharp pop that rises high first; cell 5 (middle row, middle): a clockwise spiral; cell 6 (middle row, right): a counter-clockwise spiral; cell 7 (bottom row, left): a heavy fall with large pieces; cell 8 (bottom row, middle): a light floaty fall with small pieces; cell 9 (bottom row, right): a fountain that shoots straight up.",
+    "t2v": true,
+    "label": "effect strawberry 3x3",
+    "effect": {
+      "template": "effect_video",
+      "version": 1,
+      "grid": [
+        3,
+        3
+      ],
+      "key": "blue",
+      "plan": {
+        "subject": "strawberry",
+        "elements": [
+          "ripe red strawberries",
+          "tiny yellow seeds",
+          "small green leaves"
+        ],
+        "style": "glossy cartoon look, bold clean shapes, vivid colours"
+      }
+    }
+  },
+  "status": "DONE",
+  "external_task_id": "7a563669-746d-4cdb-ab88-5a9028fbbf2b",
+  "result": {
+    "file": "jobs/J038/result.mp4",
+    "sha256": "482c252122a45200efee060a51af9a768bf52f8c11955424986b54169fe0d92e",
+    "bytes": 4584245
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1790956920.841,
+  "claimed_at": 1790956922.142,
+  "completed_at": 1790957005.064,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "downloading"
+}

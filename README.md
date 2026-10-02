@@ -44,6 +44,7 @@ Python's blocks are final; a human approves at every gate; the vision model only
 | **Store and search** | Postgres mirror (generations, decisions, tasks, jobs, ledger, chats), the sticker pool with local vector search, photo cutouts, LangSmith tracing. [docs/store-and-search.md](docs/store-and-search.md) |
 | **Vision judge** | a local multimodal model pre-reviews stickers and animations; uncalibrated until 30 labels exist. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
 | **HTTP API** | JSON routes, SSE events per generation, idempotency keys, signed asset links, accounts (owner / member tokens, per-user ownership), per-minute rate limits, an OpenAPI document, health. [docs/api.md](docs/api.md) |
+| **Particle effects** | Telegram-style bursts for a pack's emoji: a text-only Kling clip (2x2 cells that start and end empty) or a simulated burst with gravity / explosion / vortex sliders, output 3 s WEBM stickers tagged with the emoji. Engine and Kling measurements built, the screen and the flow still open. [docs/effects.md](docs/effects.md) |
 | **Design** | one shell and one palette for every screen: the rail, the second column, the token set, the style tiles, and the Earlier-batches column. [docs/design.md](docs/design.md) |
 | **Independent review** | a ready-made prompt for another LLM to audit the whole app: [docs/review-prompt.md](docs/review-prompt.md) |
 | **Measurements** | recorded numbers — slot fill, search precision, vision-judge agreement, sharpness; no opinions: [docs/measurements.md](docs/measurements.md) |
@@ -56,7 +57,7 @@ Python's blocks are final; a human approves at every gate; the vision model only
 | Studio and API | `127.0.0.1:8770` (`serve --port N`; stdlib server, localhost only) |
 | Postgres + pgvector | `localhost:5434` (`mirsal-db`; 5433, 5436 and 5437 belong to other projects: never touched) |
 | Redis | `localhost:6380` (`mirsal-redis`; 6379 is another project's) |
-| LM Studio | `localhost:1234`: **`qwen3.5-4b:2`** for the assistant, the plan expansion and the vision judge (hardcoded), **`text-embedding-nomic-embed-text-v1.5`** for the pool (hardcoded) |
+| LM Studio (or vLLM) | `localhost:1234` (`MIRSAL_LOCAL_URL`): **whatever the server lists** for the assistant, the plan expansion and the vision judge (the chat's model dropdown; a real readiness probe; a `:N` instance suffix falls back to the base id), **`text-embedding-nomic-embed-text-v1.5`** for the pool (hardcoded) |
 | Higgsfield | the `higgsfield` CLI (logged in): Nano Banana 2 at 2k for sheets, Kling v3.0 `pro` for animation, never 4k; every paid call is a line in `out/model_calls.jsonl` |
 | OpenAI | optional fallback only (`OPENAI_API_KEY`) |
 

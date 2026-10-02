@@ -79,3 +79,9 @@ G002            8         0.65        0.58           1.3        8
 G003            9         1.00        0.97           0.1        0
 G005            9         1.17        1.02           0.0        0
 ```
+
+## Particle effects: Kling text-only clips (2026-10-02)
+
+Two clips for the strawberry burst (`docs/effects.md` §3 has the method and the table), judged by `alpha / background coverage per cell and frame`, never by eye: 2x2 (J037) 4 of 4 cells empty at the start, burst from
+0.33 s, edge crossing <= 0.24 %, 1 of 4 empty at the end (0.7 % covered on the others), engine output 4 READY stickers of 199-237 KB; 3x3 (J038) 9 of 9 empty at the start, edge crossing 10-26 %, 0 of 9 empty at the
+end. Particle simulator: 90 frames x 30 particles in 0.53 s at 512 px, 0.15 s at 256 px; the five presets encode to 201-245 KB WebM (crf 38-46).
