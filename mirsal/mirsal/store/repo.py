@@ -37,6 +37,15 @@ def _ts(v) -> datetime:
         return datetime.now(tz=timezone.utc)
 
 
+def _uuid(v) -> str | None:
+    """A trace run id from an event line, or None when it is not a UUID (never fails an import)."""
+    import uuid
+    try:
+        return str(uuid.UUID(str(v))) if v else None
+    except ValueError:
+        return None
+
+
 def _grid(res: dict) -> list:
     g = res.get("grid")
     if isinstance(g, (list, tuple)) and len(g) == 2:
@@ -230,12 +239,12 @@ def save_generation(conn, out: Path, gid: int) -> str:
 
         for ev in events:
             cur.execute(
-                """INSERT INTO generation_events (generation_id, ts, stage, status, ms, detail, actor)
-                   VALUES (%s,%s,%s,%s,%s,%s,%s)
+                """INSERT INTO generation_events (generation_id, ts, stage, status, ms, detail, actor, trace_run_id)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
                    ON CONFLICT (generation_id, ts, stage, status) DO NOTHING""",
                 (gen_id, _ts(ev.get("ts")), str(ev.get("stage") or ""), str(ev.get("status") or ""),
                  ev.get("ms"), json.dumps(ev.get("detail")) if ev.get("detail") is not None else None,
-                 ev.get("actor")))
+                 ev.get("actor"), _uuid(ev.get("trace_run_id"))))
 
         # the prepared inputs stand in for the provider: one task row per generation
         ext = f"img-{str(src.get('subject_id') or '000')}-{src.get('subject') or 'unknown'}"
@@ -262,7 +271,8 @@ def _gen_review(cur, gen_id: str, gate: str, v: dict, vsid: str | None) -> None:
 
 
 def import_tasks(conn, out: Path) -> int:
-    """Backfill out/tasks/*.json (1G manual tasks) as tasks rows. Idempotent. Returns rows present."""
+    """Backfill out/tasks/*.json (1G manual tasks) as tasks rows. Idempotent. Returns rows present.
+    A provider ticket that a job import already owns (same external id, any provider) is not inserted twice."""
     from .. import tasks as _t
     n = 0
     for f in sorted(_t.tasks_dir(Path(out)).glob("*.json")):
@@ -270,16 +280,163 @@ def import_tasks(conn, out: Path) -> int:
             t = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
+        ext = str(t.get("external_task_id") or t.get("id"))
         with conn.cursor() as cur:
-            cur.execute(
-                """INSERT INTO tasks (provider, external_task_id, kind, name_key, status, request)
-                   VALUES (%s,%s,'sheet',%s,%s,%s)
-                   ON CONFLICT (provider, external_task_id) DO NOTHING""",
-                (str(t.get("provider") or "higgsfield-manual"), str(t.get("external_task_id") or t.get("id")),
-                 str(t.get("name_key") or ""), str(t.get("status") or "REQUESTED").upper(),
-                 json.dumps(t.get("request") or {})))
+            cur.execute("SELECT 1 FROM tasks WHERE external_task_id = %s", (ext,))
+            if not cur.fetchone():
+                cur.execute(
+                    """INSERT INTO tasks (provider, external_task_id, kind, name_key, status, request)
+                       VALUES (%s,%s,'sheet',%s,%s,%s)
+                       ON CONFLICT (provider, external_task_id) DO NOTHING""",
+                    (str(t.get("provider") or "higgsfield-manual"), ext,
+                     str(t.get("name_key") or ""), str(t.get("status") or "REQUESTED").upper(),
+                     json.dumps(t.get("request") or {})))
         n += 1
     conn.commit()
+    return n
+
+
+JOB_STATUS = {"CLAIMED": "RUNNING", "DONE": "DONE", "FAILED": "FAILED", "TIMEOUT": "TIMEOUT"}
+
+
+def _gen_exists(cur, gid: str | None) -> str | None:
+    if not gid:
+        return None
+    cur.execute("SELECT 1 FROM generations WHERE id = %s", (gid,))
+    return gid if cur.fetchone() else None
+
+
+def save_job(conn, job: dict, out: Path | None = None) -> bool:
+    """One out/jobs/J###.json as a `tasks` row, from CLAIMED on (a REQUESTED job has no provider ticket yet and
+    external_task_id is NOT NULL). A claim already mirrors its ticket into out/tasks/NNN.json, so the row usually
+    exists: it is UPDATED with the job's status, result, cost and links, never duplicated. Idempotent."""
+    ext = str(job.get("external_task_id") or "").strip()
+    status = JOB_STATUS.get(str(job.get("status") or ""))
+    if not ext or not status:
+        return False
+    provider = str(job.get("provider") or "higgsfield-cli")
+    kind = job.get("kind") if job.get("kind") in ("sheet", "video", "single") else "sheet"
+    req = job.get("request") or {}
+    with conn.cursor() as cur:
+        gid = _gen_exists(cur, _parent_id(job.get("generation")))
+        vsid = None
+        if gid and kind == "video" and req.get("sheet"):
+            vsid = _vsid(gid, req.get("sheet"))
+            cur.execute("SELECT 1 FROM video_sheets WHERE id = %s", (vsid,))
+            vsid = vsid if cur.fetchone() else None
+        name_key = ""
+        if job.get("task") and out is not None:
+            try:
+                from .. import tasks as _t
+                name_key = str(_t.read_task(Path(out), str(job["task"])).get("name_key") or "")
+            except Exception:
+                name_key = ""
+        if not name_key and gid:
+            cur.execute("SELECT task_slug FROM generations WHERE id = %s", (gid,))
+            r = cur.fetchone()
+            name_key = (r[0] if r else "") or ""
+        name_key = name_key or str(job.get("id") or ext)
+        done_at = _ts(job["completed_at"]) if job.get("completed_at") else None
+        cost = job.get("cost")
+        cur.execute("SELECT id FROM tasks WHERE provider = %s AND external_task_id = %s", (provider, ext))
+        row = cur.fetchone()
+        if row is None:
+            cur.execute("SELECT id FROM tasks WHERE external_task_id = %s ORDER BY id LIMIT 1", (ext,))
+            row = cur.fetchone()
+        if row:
+            cur.execute(
+                """UPDATE tasks SET provider = CASE WHEN EXISTS (SELECT 1 FROM tasks t2 WHERE t2.provider = %s
+                                         AND t2.external_task_id = %s AND t2.id <> tasks.id) THEN provider ELSE %s END,
+                          kind = %s, status = %s, request = %s, result_ref = %s, completed_at = %s,
+                          generation_id = COALESCE(%s, generation_id), video_sheet_id = COALESCE(%s, video_sheet_id),
+                          name_key = CASE WHEN name_key = '' THEN %s ELSE name_key END,
+                          job_id = %s, model = %s, cost_credits = %s
+                   WHERE id = %s""",
+                (provider, ext, provider, kind, status, json.dumps(req),
+                 json.dumps(job.get("result")) if job.get("result") is not None else None, done_at,
+                 gid, vsid, name_key, job.get("id"), job.get("model"), cost, row[0]))
+        else:
+            cur.execute(
+                """INSERT INTO tasks (provider, external_task_id, kind, name_key, generation_id, video_sheet_id, status,
+                                      request, result_ref, created_at, completed_at, job_id, model, cost_credits)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (provider, ext, kind, name_key, gid, vsid, status, json.dumps(req),
+                 json.dumps(job.get("result")) if job.get("result") is not None else None,
+                 _ts(job.get("claimed_at") or job.get("created_at")), done_at, job.get("id"), job.get("model"), cost))
+    conn.commit()
+    return True
+
+
+def import_jobs(conn, out: Path) -> int:
+    """Every claimed job under out/jobs/ as a tasks row (see save_job). Idempotent. Returns the jobs applied."""
+    from .. import jobs as _j
+    n = 0
+    for job in _j.list(Path(out)):
+        try:
+            n += 1 if save_job(conn, job, out) else 0
+        except Exception:
+            conn.rollback()      # one bad job file must not poison the rest
+    return n
+
+
+_CALL_COLS = ("ts", "kind", "provider", "model", "status", "attempt", "latency_ms", "tokens_in", "tokens_out",
+              "cost", "seed", "prompt_version", "generation_id", "sticker_id", "error", "job")
+
+
+def save_model_call(conn, line: str) -> bool:
+    """One line of out/model_calls.jsonl -> one model_calls row, keyed by the sha256 of the line (re-import adds
+    nothing). Returns True when a row was added."""
+    line = line.strip()
+    try:
+        row = json.loads(line)
+    except ValueError:
+        return False
+    if not isinstance(row, dict) or not row.get("kind"):
+        return False
+
+    def _i(v):
+        try:
+            return int(v) if v is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    def _f(v):
+        try:
+            return float(v) if v is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    extra = {k: v for k, v in row.items() if k not in _CALL_COLS}
+    with conn.cursor() as cur:
+        cur.execute(
+            """INSERT INTO model_calls (line_sha, ts, kind, provider, model, status, attempt, latency_ms, tokens_in,
+                                        tokens_out, cost_credits, seed, prompt_version, generation_id, sticker_id,
+                                        job_id, error, extra)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (line_sha) DO NOTHING""",
+            (hashlib.sha256(line.encode("utf-8")).hexdigest(), _ts(row.get("ts")), str(row["kind"]),
+             str(row.get("provider") or ""), str(row.get("model") or ""), str(row.get("status") or "OK"),
+             _i(row.get("attempt")) or 1, _i(row.get("latency_ms")), _i(row.get("tokens_in")), _i(row.get("tokens_out")),
+             _f(row.get("cost")), None if row.get("seed") is None else str(row["seed"]),
+             row.get("prompt_version"), row.get("generation_id"), row.get("sticker_id"), row.get("job"),
+             row.get("error"), json.dumps(extra, ensure_ascii=False, default=str)))
+        added = cur.rowcount > 0
+    conn.commit()
+    return added
+
+
+def import_model_calls(conn, out: Path) -> int:
+    """out/model_calls.jsonl -> model_calls. Idempotent. Returns the rows added now."""
+    f = Path(out) / "model_calls.jsonl"
+    if not f.is_file():
+        return 0
+    n = 0
+    for line in f.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            try:
+                n += 1 if save_model_call(conn, line) else 0
+            except Exception:
+                conn.rollback()
     return n
 
 
@@ -391,3 +548,39 @@ def find_task(conn, external_id: str | None = None, key_prefix: str | None = Non
             cur.execute("SELECT * FROM tasks WHERE name_key LIKE %s", (f"{key_prefix}%",))
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, r)) for r in cur.fetchall()]
+
+
+def save_session(conn, s: dict) -> str:
+    """One chat session (out/sessions/S###.json) into sessions + interactions + feedback. Idempotent; the file stays the primary store."""
+    with conn.cursor() as cur:
+        cur.execute(
+            """INSERT INTO sessions (id, title, settings, focus, subjects, preferences, summary, created_at, updated_at)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, settings = EXCLUDED.settings, focus = EXCLUDED.focus,
+                 subjects = EXCLUDED.subjects, preferences = EXCLUDED.preferences, summary = EXCLUDED.summary,
+                 updated_at = EXCLUDED.updated_at""",
+            (s["id"], s.get("title") or "", json.dumps(s.get("settings") or {}), json.dumps(s.get("focus") or {}),
+             json.dumps(s.get("subjects") or [], ensure_ascii=False), json.dumps(s.get("preferences") or {}, ensure_ascii=False),
+             json.dumps(s.get("summary") or {}, ensure_ascii=False), _ts(s.get("created")), _ts(s.get("updated"))))
+        for it in s.get("interactions") or []:
+            cur.execute(
+                """INSERT INTO interactions (session_id, seq, user_message, assistant_message, intents, resolved,
+                                             result_generation_id, created_at)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (session_id, seq) DO NOTHING""",
+                (s["id"], it["seq"], it.get("user") or "", it.get("assistant") or "", json.dumps(it.get("intents") or []),
+                 json.dumps(it.get("resolved") or {}, ensure_ascii=False, default=str), it.get("generation_id"), _ts(it.get("ts"))))
+        for it in s.get("interactions") or []:          # "make 5 like 2" / "the style from 2 and the pose from 7": which sticker was used, in which role
+            for ref in ((it.get("resolved") or {}).get("references") or []):
+                cur.execute("SELECT 1 FROM generation_references WHERE session_id = %s AND source_id = %s AND COALESCE(target_id, '') = %s AND role = %s",
+                            (s["id"], ref.get("source"), ref.get("target") or "", ref.get("role")))
+                if not cur.fetchone():
+                    cur.execute("INSERT INTO generation_references (session_id, source_id, target_id, role, created_at) VALUES (%s,%s,%s,%s,%s)",
+                                (s["id"], ref.get("source"), ref.get("target"), ref.get("role"), _ts(it.get("ts"))))
+        for fb in s.get("feedback") or []:
+            for sid in fb.get("sticker_ids") or [None]:
+                cur.execute(
+                    """INSERT INTO feedback (session_id, ts, generation_id, sticker_id, polarity, scope, text)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (session_id, ts, sticker_id, polarity) DO NOTHING""",
+                    (s["id"], _ts(fb.get("ts")), sid.split("/")[0] if sid else None, sid, fb["polarity"], fb["scope"], fb.get("text") or ""))
+    conn.commit()
+    return s["id"]

@@ -132,6 +132,102 @@ class StoreTests(unittest.TestCase):
             self.assertEqual(repo.search(c, "penguin skiing"), [])                          # nothing -> nothing
             self.assertEqual(repo.search(c, "tedy", approved=True)[0]["id"], "G002/S1")
 
+    def _phase2_out(self):
+        """An out/ with a manual task whose ticket a Higgsfield job claimed, a not-yet-claimed job, and a ledger."""
+        td = Path(tempfile.mkdtemp())
+        (td / "tasks").mkdir()
+        (td / "jobs").mkdir()
+        (td / "tasks" / "007.json").write_text(json.dumps(
+            {"id": "007", "number": 7, "provider": "higgsfield-manual", "external_task_id": "hf-job-777",
+             "name_key": "zzz_trip", "status": "running", "request": {"grid": [3, 3]}}), encoding="utf-8")
+        job = {"id": "J001", "kind": "sheet", "task": "7", "generation": "G002", "provider": "higgsfield-cli",
+               "model": "nano_banana_2", "request": {"prompt": "a teddy", "model": "nano_banana_2"},
+               "status": "DONE", "external_task_id": "hf-job-777", "result": {"file": "jobs/J001/result.png"},
+               "cost": 12.5, "error": None, "created_at": 1700000000.0, "claimed_at": 1700000010.0,
+               "completed_at": 1700000090.0}
+        (td / "jobs" / "J001.json").write_text(json.dumps(job), encoding="utf-8")
+        waiting = dict(job, id="J002", status="REQUESTED", external_task_id=None, result=None, cost=None)
+        (td / "jobs" / "J002.json").write_text(json.dumps(waiting), encoding="utf-8")
+        calls = [{"ts": 1700000090.0, "kind": "IMAGE_SHEET", "provider": "higgsfield-cli", "model": "nano_banana_2",
+                  "status": "OK", "attempt": 1, "latency_ms": 80000, "cost": 12.5, "seed": None,
+                  "generation_id": None, "job": "J001", "output": "jobs/J001/result.png"},
+                 {"ts": 1700000100.0, "kind": "LLM_PLAN", "provider": "openai", "model": "gpt-4.1-mini",
+                  "status": "OK", "attempt": 1, "latency_ms": 900, "tokens_in": 300, "tokens_out": 200, "task": "teddy"}]
+        (td / "model_calls.jsonl").write_text("\n".join(json.dumps(c) for c in calls) + "\n", encoding="utf-8")
+        return td
+
+    def test_phase2_jobs_update_their_task_row_and_never_duplicate(self):
+        from mirsal.store import repo
+        td = self._phase2_out()
+        with self._conn() as c:
+            repo.import_tasks(c, td)
+            self.assertEqual(repo.import_jobs(c, td), 1)          # the REQUESTED job has no ticket: not a task yet
+            self.assertEqual(repo.import_jobs(c, td), 1)
+            repo.import_tasks(c, td)                              # re-import of the task file after the job took it
+            rows = repo.find_task(c, external_id="hf-job-777")
+        self.assertEqual(len(rows), 1)
+        t = rows[0]
+        self.assertEqual((t["status"], t["job_id"], t["model"], float(t["cost_credits"]), t["generation_id"], t["kind"]),
+                         ("DONE", "J001", "nano_banana_2", 12.5, "G002", "sheet"))
+        self.assertEqual(t["name_key"], "zzz_trip")
+        self.assertEqual(t["result_ref"], {"file": "jobs/J001/result.png"})
+
+    def test_model_calls_import_once_by_line(self):
+        from mirsal.store import repo
+        td = self._phase2_out()
+        with self._conn() as c:
+            c.execute("delete from model_calls")
+            c.commit()
+            self.assertEqual(repo.import_model_calls(c, td), 2)
+            self.assertEqual(repo.import_model_calls(c, td), 0)
+            rows = c.execute("select kind, model, cost_credits, tokens_in, job_id, extra from model_calls order by ts").fetchall()
+        self.assertEqual([r[0] for r in rows], ["IMAGE_SHEET", "LLM_PLAN"])
+        self.assertEqual((float(rows[0][2]), rows[0][4], rows[0][5]["output"]), (12.5, "J001", "jobs/J001/result.png"))
+        self.assertEqual((rows[1][3], rows[1][5]["task"]), (300, "teddy"))
+
+    def test_trace_backfill_replays_once(self):
+        from mirsal.obs import trace
+        from tests.test_trace import FakeLangSmith
+        fake = FakeLangSmith()
+        env = {k: os.environ.get(k) for k in ("MIRSAL_TRACE", "LANGSMITH_ENDPOINT", "LANGSMITH_API_KEY")}
+        os.environ.update(MIRSAL_TRACE="langsmith", LANGSMITH_ENDPOINT=f"http://127.0.0.1:{fake.srv.server_port}",
+                          LANGSMITH_API_KEY="k")
+        trace.reset()
+        try:
+            with self._conn() as c:
+                c.execute("update generation_events set trace_run_id = null")
+                c.execute("update reviews set trace_run_id = null")
+                c.commit()
+                n_ev = c.execute("select count(*) from generation_events").fetchone()[0]
+                n_rv = c.execute("select count(*) from reviews").fetchone()[0]
+                first = trace.backfill(c, self.tmp)
+                second = trace.backfill(c, self.tmp)
+                left = c.execute("select count(*) from generation_events where trace_run_id is null").fetchone()[0]
+            self.assertEqual((first["events"], first["reviews"]), (n_ev, n_rv))
+            self.assertEqual((second["events"], second["reviews"]), (0, 0))
+            self.assertEqual(left, 0)
+            self.assertEqual(len([r for r in fake.runs() if r["parent_run_id"] is None]), 2)   # G001, G002 roots
+            self.assertTrue(fake.feedback())
+        finally:
+            for k, v in env.items():
+                os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
+            trace.reset()
+
+    def test_a_chat_session_mirrors_with_feedback_and_references_once(self):
+        from mirsal.store import repo
+        sess = {"id": "S900", "title": "teddy", "created": 1700000000.0, "updated": 1700000100.0, "settings": {"grid": "3x3"},
+                "focus": {"generation": "G002", "stickers": []}, "subjects": [], "preferences": {"persistent": []}, "summary": {},
+                "interactions": [{"seq": 1, "ts": 1700000050.0, "user": "make 5 like 2", "assistant": "ok", "intents": ["EDIT_STICKERS"],
+                                  "resolved": {"references": [{"source": "G002/S2", "target": "G002/S5", "role": "STYLE"}]}, "generation_id": "G002"}],
+                "feedback": [{"ts": 1700000060.0, "polarity": "POSITIVE", "scope": "TEMPORARY", "sticker_ids": ["G002/S2", "G002/S7"], "text": "I like 2 and 7"}]}
+        with self._conn() as c:
+            repo.save_session(c, sess)
+            repo.save_session(c, sess)                                    # idempotent
+            n = lambda t: c.execute(f"select count(*) from {t} where session_id = 'S900'").fetchone()[0]
+            self.assertEqual((n("interactions"), n("feedback"), n("generation_references")), (1, 2, 1))
+            c.execute("delete from sessions where id = 'S900'")
+            c.commit()
+
     def test_task_prefix(self):
         from mirsal.store import repo
         with self._conn() as c:
@@ -175,6 +271,8 @@ class StoreTests(unittest.TestCase):
                 calls["n"] += 1
                 self.send_response(500 if calls["n"] == 1 else 200)  # first post fails
                 self.end_headers()
+
+            do_PATCH = do_POST      # a span is created with POST /runs and closed with PATCH /runs/{id}
 
             def log_message(self, *a):
                 pass

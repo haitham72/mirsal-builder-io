@@ -64,6 +64,11 @@ def _path(out: Path, jid: str) -> Path:
 
 def _write(p: Path, job: dict) -> dict:
     p.write_text(json.dumps(job, indent=2, ensure_ascii=False), encoding="utf-8")
+    try:  # Phase 3A write-through: a claimed job is a provider task row; best effort, never raises
+        from .store import sync
+        sync.sync_job(p.parent.parent, job)
+    except Exception:
+        pass
     return job
 
 
@@ -120,7 +125,7 @@ def claim(out: Path, jid: str, ticket: str) -> dict:
         raise JobError("a ticket is required (the provider job id)", 400)
     job.update(status="CLAIMED", external_task_id=str(ticket).strip(), claimed_at=_now(), error=None)
     _write(p, job)
-    if job.get("task"):  # the task ticket is stored first too (phase_03.md "hard truth" on the file store)
+    if job.get("task"):  # the task ticket is stored first too (CLAUDE.md rule 10, "Hard truth", on the file store)
         try:
             from . import tasks as _t
             t = _t.read_task(out, str(job["task"]))

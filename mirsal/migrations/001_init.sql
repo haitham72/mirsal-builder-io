@@ -1,6 +1,6 @@
 -- Phase 3A: durable state, identity, lineage, decisions, search.
 -- Plain SQL, applied in order by `mirsal db migrate`. Re-runnable (IF NOT EXISTS everywhere).
--- NOTE vs phase_03.md: trace_run_id columns are included here directly (002 folded in),
+-- NOTE vs the original plan: trace_run_id columns are included here directly (002 folded in),
 -- reviews.decision also allows 'EDIT' (sticker-editor history), assets.kind includes
 -- PLAIN_STICKER (outline-free twin) and tasks.kind covers the 1G manual tasks as 'sheet'.
 

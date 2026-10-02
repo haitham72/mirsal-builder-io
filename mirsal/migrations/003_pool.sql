@@ -1,6 +1,6 @@
 -- Phase 3B: semantic sticker pool. Lexical columns are live now; the two vectors stay NULL
 -- until the embedding pass lands (no bulk model spend unattended), then backfilled by `pool reindex`.
--- NOTE vs phase_03.md: subject_vec/action_vec are NULLABLE here (spec: NOT NULL) for exactly that
+-- NOTE vs the original plan: subject_vec/action_vec are NULLABLE here (spec: NOT NULL) for exactly that
 -- reason; a CHECK added with the embedding pass will enforce them once reindex fills every row.
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;

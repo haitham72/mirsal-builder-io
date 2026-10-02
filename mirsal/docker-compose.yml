@@ -1,5 +1,5 @@
-# Mirsal local services (Phase 3A: Postgres; Phase 4 adds redis).
-# Port 5434: 5433 is temporal_note-db, 5436 is sarab-postgres-db on this PC.
+# Mirsal local services: Postgres (Phase 3A) and Redis (Phase 4, disposable cache / streams / locks).
+# Port 5434: 5433 is temporal_note-db, 5436 is sarab-postgres-db on this PC. Redis 6380: 6379 is another project's cache-redis.
 # Dev-only password default; override with MIRSAL_PG_PASSWORD (never commit a real one).
 services:
   db:
@@ -13,6 +13,13 @@ services:
       - "5434:5432"
     volumes:
       - mirsal_pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: mirsal-redis
+    command: ["redis-server", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "6380:6379"
 
 volumes:
   mirsal_pgdata:
