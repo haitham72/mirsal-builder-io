@@ -90,7 +90,7 @@ instead of ending the polling (a frame that throws must never freeze the chat on
 ## The screen (`#/agent`, the landing page of the Studio shell)
 
 - **Hero**: "What will you create today?" over a cyan aurora that follows the pointer (a dot grid appears under it; reduced motion switches the ambient motion off).
-- **Chats** in the second column (a drawer on phones); a bottom bar replaces the rail on phones.
+- **Chats** in the shared second column; on narrow screens that column is the shell's drawer (`#c2tog`) and the rail is a bottom bar, on every screen, not only here (`docs/design.md` §4).
 - **Cards**: a plan card (subject, grid, style, names, price, Create / Not yet), a generation card with a **carousel** (swipe on touch, drag or arrows with a mouse,
   keyboard arrows, scroll-snap, dots; stickers appear as the engine finishes them; animated stickers play), a stickers card (search results and answers).
   Tap a sticker to select it: the selection travels with the next message ("make these more energetic"). "Open in Studio" opens the batch in the Studio.

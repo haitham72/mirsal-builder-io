@@ -180,5 +180,45 @@ class StudioActionTests(unittest.TestCase):
         self.assertIn(".gleft", (ui / "studio.css").read_text(encoding="utf-8"))
 
 
+class ShellTests(unittest.TestCase):
+    """docs/design.md 4: ONE shell for every screen. The rail is declared in app.js (six items, AI first), the column widths are tokens, and the narrow-screen layout is the
+    shell's, not one screen's: it used to exist only under `body.agent-view` in agent.css, so only AI had a phone layout."""
+
+    @staticmethod
+    def ui():
+        return Path(__file__).resolve().parent.parent / "mirsal" / "console"
+
+    def test_the_rail_declares_six_items_and_ai_is_first(self):
+        import re
+        ui = self.ui()
+        app = (ui / "app.js").read_text(encoding="utf-8")
+        rail = re.search(r"const RAIL=\[(.*?)\],RAILOF", app).group(1)
+        items = re.findall(r"\['(\w+)','(\w+)','([^']+)'\]", rail)
+        self.assertEqual([i[2] for i in items], ["AI", "Studio", "Library", "Chat", "Create", "Settings"])
+        screens = re.search(r"const SCREENS=\[(.*?)\]", app).group(1)
+        html = (ui / "index.html").read_text(encoding="utf-8")
+        for route, icon, _ in items:
+            self.assertIn(f"'{route}'", screens, f"the rail's {route} is a screen")
+            self.assertIn(f"id=s-{route}", html, f"the rail's {route} has a section")
+            self.assertRegex(app, rf"\b{icon}:'<", f"the rail's icon {icon} exists")
+        self.assertNotIn("RAIL.unshift", (ui / "agent.js").read_text(encoding="utf-8"), "a later script must not register itself in the navigation")
+
+    def test_the_narrow_layout_is_the_shells_and_not_one_screens(self):
+        import re
+        ui = self.ui()
+        studio = (ui / "studio.css").read_text(encoding="utf-8")
+        agent = (ui / "agent.css").read_text(encoding="utf-8")
+        self.assertNotIn("agent-view", agent + studio + (ui / "app.js").read_text(encoding="utf-8"), "no screen has its own shell")
+        for token in ("--rail-w:", "--col2-w:"):
+            self.assertIn(token, studio)
+        self.assertNotRegex(agent, r"grid-template-columns:\s*(96px|var\(--rail-w\))", "agent.css does not size the page grid")
+        self.assertNotRegex(agent, r"#rail|#app|#col2\{", "agent.css does not restyle the shell")
+        phone = studio[studio.index("@media (max-width:760px){\n body #app"):]
+        self.assertIn("#rail{order:2;flex-direction:row", phone, "every screen gets the bottom bar on phones")
+        self.assertIn("body.col2 #col2{left:0", phone)
+        self.assertIn("#c2tog", studio)
+        self.assertIn("id=c2tog", (ui / "index.html").read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -30,11 +30,10 @@ const AIU=(()=>{
 if(typeof module!=='undefined')module.exports=AIU;
 
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){(()=>{
-const A={sid:null,sess:null,sessions:[],agent:null,busy:false,sel:new Set(),open:new Set(),els:new Map(),poll:0,setOpen:false,drawer:false,since:0};
+const A={sid:null,sess:null,sessions:[],agent:null,busy:false,sel:new Set(),open:new Set(),els:new Map(),poll:0,setOpen:false,since:0};
 const SUGG=['a teddy bear waving','falcon stickers','my dog as a banana','Eid mubarak greetings'];
-ICONS.ai='<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM5.5 16l.6 1.6 1.6.6-1.6.6L5.5 20l-.6-1.7-1.6-.6 1.6-.6z"/>';
 ICONS.send='<path d="M12 19V5M6 11l6-6 6 6"/>';
-SCREENS.push('agent');RAIL.unshift(['agent','ai','AI']);RAILOF.agent='agent';
+
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
 /* ---------- the living background (ambient motion + the pointer) */
@@ -64,7 +63,7 @@ RENDER.agent=async arg=>{
  const root=$('s-agent');
  if(!root.dataset.ready){root.dataset.ready=1;root.innerHTML=`<div class=ai-bg><i class="ai-blob b1"></i><i class="ai-blob b2"></i><i class="ai-blob b3"></i><i class=ai-dots></i><i class=ai-glow></i></div>
   <div class=ai id=ai><div class=ai-main>
-   <div class=ai-top><button class="ai-ibtn menu" data-act=agdrawer title="Chats" aria-label="Chats">${ic('hist')}</button><span class=ttl id=ai-ttl></span><span class=sp></span><button type=button class=ai-pill id=ai-pill data-act=agset title="AI engine"><i></i><span>…</span></button>
+   <div class=ai-top><span class=ttl id=ai-ttl></span><span class=sp></span><button type=button class=ai-pill id=ai-pill data-act=agset title="AI engine"><i></i><span>…</span></button>
     <button class=ai-ibtn data-act=agnew title="New chat" aria-label="New chat">${ic('plus')}</button></div>
    <div class=ai-scroll id=ai-scroll><div class=ai-col id=ai-col></div></div>
    <div class=ai-dock><div class=ai-dock-in>
@@ -74,8 +73,7 @@ RENDER.agent=async arg=>{
      <textarea id=ai-in rows=1 placeholder="Make or change stickers" aria-label="Message"></textarea>
      <button class=ai-send id=ai-send type=submit aria-label="Send" disabled>${ic('send')}</button></form>
     <div class=ai-sugg id=ai-sugg></div>
-   </div></div></div>
-   <div class=ai-drawer id=ai-drawer><div class=scrim data-act=agdrawer></div><div class=sheet id=ai-sheet></div></div></div>`;
+   </div></div></div></div>`;
   bgInit(root);
   const ta=$('ai-in'),form=$('ai-box');
   const fit=()=>{ta.style.height='auto';ta.style.height=Math.min(132,ta.scrollHeight)+'px';$('ai-send').disabled=A.busy||!ta.value.trim()};
@@ -219,10 +217,9 @@ ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});
 ACT.agtrace=el=>{const k=el.dataset.m;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstep=el=>{const k=el.dataset.k;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstudio=el=>{const n=+String(el.dataset.g).replace(/\D/g,'');if(typeof SES!=='undefined'){SES={prompt:'',gens:[n],off:[],pack:''};if(typeof saveSes==='function')saveSes()}location.hash='#/studio'};
-ACT.agnew=()=>{A.sid=null;A.sess=null;A.sel.clear();A.els.clear();A.drawer=false;store.set('mirsal.ai.sid','');const c=$('ai-col');if(c)c.innerHTML='';history.replaceState(null,'','#/agent');paint();agList();const t=$('ai-in');if(t)t.focus()};
-ACT.agopen=el=>{A.drawer=false;location.hash='#/agent/'+el.dataset.id};
+ACT.agnew=()=>{A.sid=null;A.sess=null;A.sel.clear();A.els.clear();store.set('mirsal.ai.sid','');const c=$('ai-col');if(c)c.innerHTML='';history.replaceState(null,'','#/agent');paint();agList();const t=$('ai-in');if(t)t.focus()};
+ACT.agopen=el=>{location.hash='#/agent/'+el.dataset.id};
 ACT.agdel=el=>{const id=el.dataset.id;confirmDlg('Delete this chat? The stickers it made stay in the Studio.',async()=>{await post(`/api/chat/sessions/${id}/delete`);if(A.sid===id)ACT.agnew();await loadSessions();agList()},'Delete')};
-ACT.agdrawer=()=>{A.drawer=!A.drawer;$('ai-drawer').classList.toggle('on',A.drawer);if(A.drawer)agList()};
 ACT.agset=()=>{A.setOpen=!A.setOpen;setSet()};
 ACT.agsetgrid=async el=>saveSet({grid:el.dataset.v});
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
@@ -271,9 +268,9 @@ function startPoll(){clearTimeout(A.poll);A.since=A.since||Date.now();
   else{A.busy=false;A.since=0;busyUi();await loadSessions();agList()}};
  A.poll=setTimeout(tick,500)}
 
-/* ---------- the second column: chats (and the phone drawer) */
+/* ---------- the second column: chats (the shared column; on narrow screens it is the shell's drawer, app.js) */
 function listHTML(){const rows=A.sessions.map(s=>`<div class="sess-row${s.id===A.sid?' on':''}" data-act=agopen data-id="${s.id}"><div class=t><b>${AIU.esc(s.title||'New chat')}</b><small>${s.subjects.length?AIU.esc(s.subjects.slice(0,3).join(', '))+' · ':''}${AIU.rel(s.updated)}</small></div><button class=x data-act=agdel data-id="${s.id}" aria-label="Delete chat">${ic('trash')}</button></div>`).join('');
  return `<button class=sess-new data-act=agnew>${ic('plus')}New chat</button>${rows||'<div class=mut style="padding:14px 18px">Your chats will be here.</div>'}`}
-window.agList=function agList(){if(route_!=='agent')return;const c2=$('col2');if(c2)c2.innerHTML=`<div class=c2h><h1>Chats</h1></div><div class=c2l>${listHTML()}</div>`;const sh=$('ai-sheet');if(sh)sh.innerHTML=`<div class=c2h><h1>Chats</h1></div>`+listHTML()};
+window.agList=function agList(){if(route_!=='agent')return;const c2=$('col2');if(c2)c2.innerHTML=`<div class=c2h><h1>Chats</h1></div><div class=c2l>${listHTML()}</div>`;};
 const agList=window.agList;
 })()}

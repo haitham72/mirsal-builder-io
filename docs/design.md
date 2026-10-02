@@ -1,6 +1,6 @@
 # docs/design.md — the look of Mirsal: one shell, one palette
 
-**Status: written 2026-10-02 from Haitham's notes after a pass over the running app. Nothing here is built yet.** It is the design half of the app, kept
+**Status: written 2026-10-02 from Haitham's notes after a pass over the running app; built in the order of §8, and §8 says which steps are done.** It is the design half of the app, kept
 in `docs/` because it is architecture, not a log (rule 12): the screens are a sandbox over the API (rule 11), but the *shell* they share is a real, stable
 surface that every screen inherits. When a screen's look changes, this file changes in the same step.
 
@@ -76,6 +76,11 @@ Lift AI's tokens out of `#s-agent` into `:root` in `studio.css`, keep the light 
 Then: **`--pri` is the accent everywhere.** `.cp` loses `#070b1c`/`#050816`/`#2a52ff` and its `.cp-box` `#0b1124d9`. If the composer should feel like the
 AI screen, it gets the glass and glow; if it should feel light like the Studio, it gets `--sf`. **Pick one and hold it** — the current failure is precisely
 that it is neither.
+
+**Decision (2026-10-02, built):** `--pri` stays Mirsal blue `#3B82F6` (the logo's blue, AI's own `--blu`) as the action colour: buttons, selection, focus. AI's cyan
+family (`--ai`, `--ai2`, `--aid`, `--ink*`, `--wash`, `--glass`, `--aline`, `--aglow`, `--viol`) moved from `#s-agent` into `:root` and is the *depth* every screen shares
+(glass columns, the glow, gradient titles, hover washes). Repainting every primary button cyan would have changed all screens' meaning of "primary"; it is one token
+(`--pri`) if Haitham wants it later. `--rail-w` and `--col2-w` are tokens too, so the column has ONE width on every screen (392px, 300px at <=1180px).
 
 *Enhancement:* keep a single dark surface as a deliberate accent rather than an accident — the composer box and the plan card can be the app's one dark
 island if it is *designed* as such (same radius, same border, same glow token) instead of an unrelated navy.
@@ -177,9 +182,9 @@ whether to delete it; do not fold it into this column.
 - Checked in a browser on a **copy** of `out/` (`MIRSAL_OUT=<copy>`, never press Create) — see `HANDOFF.md` §5 for the Playwright recipe and the
   `location.reload()` trap.
 
-## 8. Order of work
+## 8. Order of work (done steps are marked)
 
-1. Tokens (§3.1) and the rail (§4.1-4.2) — everything else inherits from these, and the "AI is not in the nav" fix is in the middle of it.
+1. **Done.** Tokens (§3.1) and the rail (§4.1-4.2) — everything else inherits from these. Also done in this step: one phone layout (bottom bar) and one drawer for the second column on every screen (`#c2tog` below 900px; AI's private drawer is gone), AI declared in `RAIL`, the column's glass background and gradient title are the shell's, `body.agent-view` is gone. Guarded by `tests/test_js.py::ShellTests`.
 2. The second column everywhere (§4.3), then move Earlier batches into it (§6).
 3. Library and Settings alignment to AI (§5).
 4. The composer's dark panel and the style tiles (§5, Studio).
