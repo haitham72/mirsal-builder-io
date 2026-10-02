@@ -154,7 +154,7 @@ def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=No
     base.pop("expand_error", None)
     if complete is llm.complete:  # ledger only for real calls (fakes in tests never log)
         from . import model_calls as _mc
-        _mc.append(None, "LLM_PLAN", "openai", str(meta.get("model") or llm.model()), status="OK",
+        _mc.append(None, "LLM_PLAN", str(meta.get("provider") or "openai"), str(meta.get("model") or llm.model()), status="OK",
                    latency_ms=meta.get("ms"), tokens_in=meta.get("tokens_in"), tokens_out=meta.get("tokens_out"),
                    extra={"task": task, "grid": f"{rows}x{cols}", "reviewed": review_ai,
                           "review_model": (base.get("review") or {}).get("model")})

@@ -126,6 +126,8 @@ class JobsTests(unittest.TestCase):
     def test_slot_reviewer(self):
         from mirsal import expander, llm
         key, loaded = os.environ.pop("OPENAI_API_KEY", None), llm._ENV_LOADED
+        prov = os.environ.get("MIRSAL_LLM_PROVIDER")
+        os.environ["MIRSAL_LLM_PROVIDER"] = "openai"   # no key + openai = no backend, even when LM Studio runs here
         llm._ENV_LOADED = True  # never read the real key here: no live calls in tests
         try:
             good_slots = {"subject_description": "a falcon", "cells": [
@@ -142,6 +144,7 @@ class JobsTests(unittest.TestCase):
         finally:
             if key is not None:
                 os.environ["OPENAI_API_KEY"] = key
+            os.environ.pop("MIRSAL_LLM_PROVIDER", None) if prov is None else os.environ.__setitem__("MIRSAL_LLM_PROVIDER", prov)
             llm._ENV_LOADED = loaded
 
 

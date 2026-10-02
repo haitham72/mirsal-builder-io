@@ -31,11 +31,14 @@ class Fake:
 class ExpanderTests(unittest.TestCase):
     def setUp(self):
         self.key = os.environ.pop(llm.KEY_VAR, None)
+        self.prov = os.environ.get("MIRSAL_LLM_PROVIDER")
+        os.environ["MIRSAL_LLM_PROVIDER"] = "openai"   # no key + openai = no backend, even when LM Studio is running here
         llm._ENV_LOADED = True                       # do not read a real mirsal/.env during the tests
 
     def tearDown(self):
         if self.key is not None:
             os.environ[llm.KEY_VAR] = self.key
+        os.environ.pop("MIRSAL_LLM_PROVIDER", None) if self.prov is None else os.environ.__setitem__("MIRSAL_LLM_PROVIDER", self.prov)
 
     def test_ai_names_every_sticker_and_the_template_builds_the_prompts(self):
         f = Fake(good())

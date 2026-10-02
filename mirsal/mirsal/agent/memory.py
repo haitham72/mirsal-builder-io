@@ -1,0 +1,314 @@
+"""Sessions and memory.
+
+A session is one conversation. It lives in `out/sessions/S###.json` (files are the primary store, like generations, so the chat works
+without Postgres) and is mirrored best-effort into Postgres (`sessions` / `interactions` / `feedback`, migration 004) and kept hot in
+Redis. Nothing here holds image bytes.
+
+Memory is STRUCTURED, never "the whole history":
+- `subjects`: for every subject the user asked for, the metadata of its PASSES (generations) in this chat: ids, prompt, grid, style,
+  parent, counts, what the user liked and disliked. This is the per-subject summary every turn starts from.
+- `feedback`: each statement about a sticker, TEMPORARY (applies to the next generation only) or PERSISTENT (only when the user says
+  so explicitly: "I never want dark outlines"). Nothing is inferred about the user's feelings.
+- `focus`: the generation / stickers "it" and "that one" mean.
+- `interactions`: the raw turns, always kept. Every REDUCER_WINDOW turns a narrative summary is written; the structured part is rebuilt
+  from the data every time, so ids can never be lost by a summariser.
+
+`context(level)` is what a model sees: MINIMAL (summary + request + settings), STANDARD (+ the focused generation's stickers and one
+reference), HIGH (+ prompts and lineage). Never all nine images, never the full history."""
+from __future__ import annotations
+
+import json
+import os
+import re
+import threading
+import time
+from pathlib import Path
+
+REDUCER_WINDOW = 15
+DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True}
+_IO = threading.RLock()
+
+
+class SessionError(Exception):
+    def __init__(self, msg: str, code: int = 400):
+        super().__init__(msg)
+        self.code = code
+
+
+def _now() -> float:
+    return round(time.time(), 3)
+
+
+def slug(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", (s or "").lower()).strip("_") or "subject"
+
+
+def gid_of(g) -> str:
+    """'G012' | 12 | '12' -> 'G012'."""
+    s = str(g).strip().upper().lstrip("G")
+    return f"G{int(s):03d}"
+
+
+class SessionStore:
+    def __init__(self, out: Path, cache=None):
+        self.out = Path(out)
+        self.dir = self.out / "sessions"
+        if cache is None:
+            from .. import cache as _c
+            cache = _c.default()
+        self.cache = cache
+
+    # ---- files ------------------------------------------------------------------------------------------------------
+    def _path(self, sid: str) -> Path:
+        if not re.fullmatch(r"S\d{3,}", str(sid)):
+            raise SessionError(f"bad session id {sid!r}", 400)
+        return self.dir / f"{sid}.json"
+
+    def create(self, title: str | None = None, settings: dict | None = None) -> dict:
+        with _IO:
+            self.dir.mkdir(parents=True, exist_ok=True)
+            n = max([int(f.stem[1:]) for f in self.dir.glob("S*.json") if f.stem[1:].isdigit()] or [0]) + 1
+            s = {"id": f"S{n:03d}", "title": title or "New chat", "created": _now(), "updated": _now(),
+                 "settings": {**DEFAULT_SETTINGS, **(settings or {})}, "focus": {"generation": None, "stickers": []},
+                 "subjects": [], "preferences": {"persistent": []}, "feedback": [], "interactions": [], "messages": [],
+                 "summary": {"narrative": "", "upto": 0}, "pending": None}
+            self.save(s)
+            return s
+
+    def load(self, sid: str) -> dict:
+        f = self._path(sid)
+        with _IO:
+            if not f.is_file():
+                raise SessionError(f"No session {sid}", 404)
+            return json.loads(f.read_text(encoding="utf-8"))
+
+    def save(self, s: dict) -> None:
+        s["updated"] = _now()
+        p = self._path(s["id"])
+        data = json.dumps(s, indent=1, ensure_ascii=False).encode("utf-8")
+        with _IO:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            tmp = p.with_name(p.name + ".tmp")
+            tmp.write_bytes(data)
+            for attempt in range(40):               # Windows: os.replace fails while anything has the target open
+                try:
+                    os.replace(tmp, p)
+                    break
+                except PermissionError:
+                    if attempt == 39:
+                        raise
+                    time.sleep(0.05)
+        try:
+            self.cache.set(self.cache.key("session", s["id"]), {"id": s["id"], "title": s["title"], "focus": s["focus"],
+                                                                 "settings": s["settings"], "updated": s["updated"]}, 3600)
+        except Exception:
+            pass
+        try:  # Postgres mirror: best effort, only for the real out/ (same rule as generations)
+            from ..store import sync
+            sync.sync_session(self.out, s)
+        except Exception:
+            pass
+
+    def list(self) -> list[dict]:
+        rows = []
+        for f in sorted(self.dir.glob("S*.json"), reverse=True) if self.dir.is_dir() else []:
+            try:
+                s = json.loads(f.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            rows.append({"id": s["id"], "title": s.get("title"), "updated": s.get("updated"), "created": s.get("created"),
+                         "subjects": [x["name"] for x in s.get("subjects", [])], "turns": len(s.get("interactions", [])),
+                         "focus": (s.get("focus") or {}).get("generation")})
+        rows.sort(key=lambda r: r.get("updated") or 0, reverse=True)
+        return rows
+
+    def delete(self, sid: str) -> None:
+        f = self._path(sid)
+        with _IO:
+            if f.is_file():
+                f.unlink()
+
+    # ---- the turn log ----------------------------------------------------------------------------------------------------
+    def add_message(self, s: dict, role: str, text: str, cards: list | None = None, steps: list | None = None, **extra) -> dict:
+        m = {"id": f"m{len(s['messages']) + 1}", "role": role, "text": text, "cards": cards or [], "steps": steps or [], "ts": _now(), **extra}
+        s["messages"].append(m)
+        return m
+
+    def add_interaction(self, s: dict, user: str, assistant: str, intents: list, resolved: dict, generation_id: str | None) -> dict:
+        it = {"seq": len(s["interactions"]) + 1, "ts": _now(), "user": user, "assistant": assistant, "intents": intents,
+              "resolved": resolved, "generation_id": generation_id}
+        s["interactions"].append(it)
+        if s.get("title") in (None, "", "New chat") and user.strip():
+            s["title"] = user.strip()[:48]
+        return it
+
+    # ---- subjects and passes -------------------------------------------------------------------------------------------------
+    def subject_of(self, s: dict, name: str, create: bool = True) -> dict | None:
+        k = slug(name)
+        for x in s["subjects"]:
+            if x["slug"] == k:
+                return x
+        if not create:
+            return None
+        x = {"name": name.strip(), "slug": k, "passes": []}
+        s["subjects"].append(x)
+        return x
+
+    def add_pass(self, s: dict, subject: str, generation: str | None = None, job: str | None = None, prompt: str = "",
+                 grid: str = "3x3", style_id: str = "", parent: str | None = None, note: str = "") -> dict:
+        subj = self.subject_of(s, subject)
+        p = next((q for q in subj["passes"] if (generation and q.get("generation") == generation) or (job and q.get("job") == job)), None)
+        if p is None:
+            p = {"generation": generation, "job": job, "prompt": prompt, "grid": grid, "style_id": style_id, "parent": parent,
+                 "created": _now(), "ready": 0, "approved": 0, "rejected": 0, "liked": [], "disliked": [], "note": note}
+            subj["passes"].append(p)
+        if generation:
+            p["generation"] = generation
+        return p
+
+    def refresh(self, s: dict) -> dict:
+        """Re-read each pass's counts from its result file and resolve jobs to generations. Cheap; run before a summary."""
+        from .. import jobs as _jobs, pipeline as pl
+        for subj in s["subjects"]:
+            for p in subj["passes"]:
+                if not p.get("generation") and p.get("job"):
+                    try:
+                        g = _jobs.read(self.out, p["job"]).get("generation")
+                        p["generation"] = gid_of(g) if g else None
+                    except Exception:
+                        pass
+                if p.get("generation"):
+                    try:
+                        res = pl.read_result(self.out, int(p["generation"][1:]))
+                    except Exception:
+                        continue
+                    st = res["stickers"]
+                    p["ready"] = sum(1 for x in st if x["status"] == "READY")
+                    p["approved"] = sum(1 for x in st if x["review"]["still"] == "APPROVED")
+                    p["rejected"] = sum(1 for x in st if x["review"]["still"] == "REJECTED")
+                    p["stage"] = res.get("stage")
+                    p["error"] = res.get("error")
+                    if res.get("parent") and not p.get("parent"):
+                        p["parent"] = gid_of(res["parent"])
+        return s
+
+    def latest_pass(self, s: dict) -> dict | None:
+        best = None
+        for subj in s["subjects"]:
+            for p in subj["passes"]:
+                if best is None or p["created"] >= best["created"]:
+                    best = p
+        return best
+
+    def subject_for_generation(self, s: dict, gid: str) -> dict | None:
+        return next((x for x in s["subjects"] if any(p.get("generation") == gid for p in x["passes"])), None)
+
+    # ---- feedback and preferences ---------------------------------------------------------------------------------------------------
+    def add_feedback(self, s: dict, polarity: str, sticker_ids: list, text: str, scope: str = "TEMPORARY") -> dict:
+        fb = {"ts": _now(), "polarity": polarity, "scope": scope, "sticker_ids": sticker_ids, "text": text}
+        s["feedback"].append(fb)
+        for sid in sticker_ids:
+            g = sid.split("/")[0]
+            subj = self.subject_for_generation(s, g)
+            if not subj:
+                continue
+            p = next(q for q in subj["passes"] if q.get("generation") == g)
+            mine, other = ("liked", "disliked") if polarity == "POSITIVE" else ("disliked", "liked")
+            if sid not in p[mine]:
+                p[mine].append(sid)
+            if sid in p[other]:
+                p[other].remove(sid)
+        if scope == "PERSISTENT" and text.strip() and text.strip() not in s["preferences"]["persistent"]:
+            s["preferences"]["persistent"].append(text.strip())
+        return fb
+
+    def consume_temporary(self, s: dict) -> list:
+        """The temporary feedback that shapes the NEXT generation only; it is marked used and never becomes a lasting preference."""
+        out = [f for f in s["feedback"] if f["scope"] == "TEMPORARY" and not f.get("used")]
+        for f in out:
+            f["used"] = True
+        return out
+
+    def traits(self, s: dict) -> list[str]:
+        """What the user has consistently asked for (>= 2 times, in their own words): shown as a note in the step trace and added to the
+        next plan. Derived from what was SAID, never from feelings."""
+        count: dict[str, int] = {}
+        for it in s["interactions"]:
+            t = it["user"].lower()
+            for trait, pat in TRAIT_PATTERNS.items():
+                if re.search(pat, t):
+                    count[trait] = count.get(trait, 0) + 1
+        return [t for t, n in count.items() if n >= 2]
+
+    # ---- summaries and context -------------------------------------------------------------------------------------------------------
+    def summary_text(self, s: dict) -> str:
+        """The deterministic per-subject summary: ids, counts, likes and dislikes. This is what every turn starts from."""
+        self.refresh(s)
+        lines = []
+        for subj in s["subjects"]:
+            ps = []
+            for p in subj["passes"]:
+                g = p.get("generation") or (p.get("job") and f"job {p['job']}") or "pending"
+                bit = f"{g}" + (f" (from {p['parent']})" if p.get("parent") else "")
+                if p.get("generation"):
+                    bit += f": {p['ready']} ready"
+                    if p["approved"] or p["rejected"]:
+                        bit += f", {p['approved']} approved, {p['rejected']} rejected"
+                if p["liked"]:
+                    bit += f"; liked {', '.join(x.split('/')[1] for x in p['liked'])}"
+                if p["disliked"]:
+                    bit += f"; disliked {', '.join(x.split('/')[1] for x in p['disliked'])}"
+                if p.get("note"):
+                    bit += f"; {p['note']}"
+                ps.append(bit)
+            lines.append(f"Subject '{subj['name']}': " + (" | ".join(ps) if ps else "no pass yet"))
+        pref = s["preferences"]["persistent"]
+        if pref:
+            lines.append("Lasting preferences (said explicitly): " + "; ".join(pref))
+        f = s.get("focus") or {}
+        if f.get("generation"):
+            lines.append(f"Focus: {f['generation']}" + (f" {', '.join(x.split('/')[1] for x in f['stickers'])}" if f.get("stickers") else ""))
+        if s["summary"].get("narrative"):
+            lines.append("Earlier in this chat: " + s["summary"]["narrative"])
+        return "\n".join(lines) or "Nothing has been made in this chat yet."
+
+    def context(self, s: dict, level: str = "STANDARD") -> dict:
+        ctx = {"summary": self.summary_text(s), "settings": s["settings"]}
+        if level in ("STANDARD", "HIGH") and (s.get("focus") or {}).get("generation"):
+            ctx["focus"] = self.generation_card(s["focus"]["generation"], prompts=level == "HIGH")
+        return ctx
+
+    def generation_card(self, gid: str, prompts: bool = False) -> dict:
+        from .. import pipeline as pl
+        try:
+            res = pl.read_result(self.out, int(gid[1:]))
+        except Exception:
+            return {"generation": gid, "stickers": []}
+        return {"generation": gid, "parent": gid_of(res["parent"]) if res.get("parent") else None, "prompt": res.get("prompt"),
+                "stickers": [{"id": f"{gid}/S{x['index']}", "key": x["key"], "emoji": x.get("emoji"), "status": x["status"],
+                              "still": x["review"]["still"], **({"prompt": x.get("prompt")} if prompts else {})} for x in res["stickers"]]}
+
+    def reduce(self, s: dict, summarise=None) -> bool:
+        """Every REDUCER_WINDOW interactions write the narrative of the older ones. `summarise(text) -> str` is a model call; without it
+        (or when it fails) a deterministic digest is used. The structured summary is rebuilt from data each turn, so no id is ever lost."""
+        n, done = len(s["interactions"]), s["summary"].get("upto", 0)
+        if n - done < REDUCER_WINDOW:
+            return False
+        chunk = s["interactions"][done:n]
+        digest = " ".join(f"[{i['seq']}] {i['user'].strip()[:80]}" for i in chunk)
+        text = None
+        if summarise is not None:
+            try:
+                text = summarise(digest, s["summary"].get("narrative", ""))
+            except Exception:
+                text = None
+        text = (text or "").strip() or (s["summary"].get("narrative", "") + " " + digest).strip()
+        s["summary"] = {"narrative": text[-1800:], "upto": n}
+        return True
+
+
+TRAIT_PATTERNS = {
+    "a wider range of emotions": r"(more|wider|different|varied|vary).{0,24}(emotion|feeling|expression|mood)|(emotion|expression).{0,24}(range|variety)",
+    "bolder, more expressive faces": r"(more|bigger|bolder).{0,16}(expressive|expression|dramatic|energetic|energy)",
+    "no dark outlines": r"(no|never|without).{0,12}(dark|black).{0,8}outline",
+}

@@ -1,0 +1,80 @@
+// The pure half of agent.js (the DOM half runs only in a browser). Run: node --test tests/js
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const U = require('../../mirsal/console/agent.js');
+
+test('the model text is never trusted as HTML', () => {
+  assert.equal(U.md('<img src=x onerror=alert(1)> **hi**'), '&lt;img src=x onerror=alert(1)&gt; <b>hi</b>');
+  assert.equal(U.md('a\nb'), 'a<br>b');
+  assert.equal(U.esc('"\'&<>'), '&quot;&#39;&amp;&lt;&gt;');
+  assert.equal(U.esc(null), '');
+});
+
+test('prices read like a person says them', () => {
+  assert.equal(U.credits(null), 'free');
+  assert.equal(U.credits(0), 'free');
+  assert.equal(U.credits(1), 'about 1 credit');
+  assert.equal(U.credits(2), 'about 2 credits');
+  assert.equal(U.credits(8.25), 'about 8.3 credits');
+});
+
+test('the collapsed trace says how many steps and how it ended', () => {
+  const steps = [{ kind: 'task' }, { kind: 'step' }, { kind: 'note' }, { kind: 'final', label: 'plan ready' }];
+  assert.equal(U.stepSummary(steps), '3 steps · plan ready');
+  assert.equal(U.stepSummary([{ kind: 'task' }]), '1 step');
+  assert.equal(U.stepSummary([]), '0 steps');
+});
+
+test('the carousel index follows the scroll and never leaves the list', () => {
+  assert.equal(U.nearest(0, 200, 12, 9), 0);
+  assert.equal(U.nearest(212, 200, 12, 9), 1);
+  assert.equal(U.nearest(230, 200, 12, 9), 1);
+  assert.equal(U.nearest(99999, 200, 12, 9), 8);
+  assert.equal(U.nearest(-50, 200, 12, 9), 0);
+  assert.deepEqual(U.atEnds(0, 600, 1900), { start: true, end: false });
+  assert.deepEqual(U.atEnds(1300, 600, 1900), { start: false, end: true });
+  assert.deepEqual(U.atEnds(0, 600, 600), { start: true, end: true });
+});
+
+test('relative times', () => {
+  assert.equal(U.rel(100, 130), 'just now');
+  assert.equal(U.rel(0, 600), '10 min');
+  assert.equal(U.rel(0, 7300), '2 h');
+  assert.equal(U.rel(0, 3 * 86400), '3 d');
+});
+
+test('a message signature changes with what the page shows, and with nothing else', () => {
+  const m = { id: 'm2', status: 'working', text: '', steps: [{ kind: 'task', label: 'generating teddy', status: 'running' }], cards: [], chips: [] };
+  const a = U.sig(m);
+  assert.equal(U.sig({ ...m }), a);
+  assert.notEqual(U.sig({ ...m, steps: [...m.steps, { kind: 'step', label: 'expand prompt', status: 'done' }] }), a);
+  assert.notEqual(U.sig({ ...m, status: 'done' }), a);
+  const g = { type: 'generation', generation: 'G001', data: { stickers: [{ id: 'G001/S1', status: 'PENDING' }] } };
+  const g2 = { type: 'generation', generation: 'G001', data: { stickers: [{ id: 'G001/S1', status: 'READY', png: '/out/x.png' }] } };
+  assert.notEqual(U.sig({ ...m, cards: [g] }), U.sig({ ...m, cards: [g2] }));
+});
+
+test('the page polls while anything still moves and stops when it does not', () => {
+  const pend = { type: 'generation', job: 'J001', job_status: 'CLAIMED' };
+  const failed = { type: 'generation', job: 'J001', job_status: 'FAILED' };
+  const cut = { type: 'generation', generation: 'G001', data: { stickers: [{ status: 'PENDING' }] } };
+  const done = { type: 'generation', generation: 'G001', data: { stickers: [{ status: 'READY', anim_status: 'NOT_REQUESTED' }] } };
+  const anim = { type: 'generation', generation: 'G001', animating: true, data: { stickers: [{ status: 'READY', anim_status: 'RUNNING' }] } };
+  assert.equal(U.cardLive(pend), true);
+  assert.equal(U.cardLive(failed), false);
+  assert.equal(U.cardLive(cut), true);
+  assert.equal(U.cardLive(done), false);
+  assert.equal(U.cardLive(anim), true);
+  assert.equal(U.cardLive({ type: 'plan' }), false);
+  assert.equal(U.needPoll({ working: true, messages: [] }), true);
+  assert.equal(U.needPoll({ working: false, messages: [{ cards: [done] }] }), false);
+  assert.equal(U.needPoll({ working: false, messages: [{ cards: [done, pend] }] }), true);
+  assert.equal(U.needPoll(null), false);
+});
+
+test('the session id is read from the hash', () => {
+  assert.equal(U.sid('#/agent/S012'), 'S012');
+  assert.equal(U.sid('#/agent'), null);
+  assert.equal(U.sid('#/library'), null);
+  assert.equal(U.sid(''), null);
+});
