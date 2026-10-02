@@ -852,6 +852,19 @@ def doctor() -> int:
     except Exception as e:
         print(f"NOTE    language model: {e}")
     try:
+        from .services import llm as _llm
+        ids = _llm.list_local_models(force=True)
+        rd = _llm.local_ready(force=True)                       # one tiny chat completion: the list answers while no model can
+        wish = _llm.configured_local_model()
+        if rd["ok"]:
+            via = "" if rd["model"] == wish else f" (configured {wish} is not what the server calls it, so {rd['model']} is used)"
+            print(f"OK      local model: {rd['model']} answers; the server lists {len(ids)} chat model(s){via}")
+        else:
+            print(f"NOTE    local model {rd['model']}: {rd['why']}; the server lists: {', '.join(ids) or 'nothing'}; the chat runs on "
+                  + ("the cloud model or its rules" if os.environ.get(_llm.KEY_VAR) else "its rules"))
+    except Exception as e:
+        print(f"NOTE    local model: {e}")
+    try:
         from .obs import trace as _tr
         st = _tr.status()
         print(f"OK      trace backend: {st['backend']}" + (f" (reachable)" if st["reachable"] else " (unreachable)" if st["reachable"] is False else ""))

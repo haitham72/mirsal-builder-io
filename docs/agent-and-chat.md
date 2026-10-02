@@ -94,19 +94,52 @@ instead of ending the polling (a frame that throws must never freeze the chat on
 - **Cards**: a plan card (subject, grid, style, names, price, Create / Not yet), a generation card with a **carousel** (swipe on touch, drag or arrows with a mouse,
   keyboard arrows, scroll-snap, dots; stickers appear as the engine finishes them; animated stickers play), a stickers card (search results and answers).
   Tap a sticker to select it: the selection travels with the next message ("make these more energetic"). "Open in Studio" opens the batch in the Studio.
-- **Settings are two controls**: the grid (3x3 / 2x2) and "Ask before spending". The model pill shows what runs the assistant (local or cloud).
+- **Settings are two controls**: the grid (3x3 / 2x2) and "Ask before spending". The model pill shows what runs the assistant (local, cloud, or "Rules only" with the reason, see Models); the gear's "AI engine" row also holds the local model dropdown.
 - **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet, the grid and "Asks before spending" (the same settings as the gear, one click each), and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`). What is not done: a style typed in a sentence ("in clay 3d style") is still not read by a new request (`HANDOFF.md`, Agent and chat).
 
-## Models (all hardcoded; `services/llm.py`)
+## Models (`services/llm.py`)
 
 | use | model | where |
 |---|---|---|
-| agent, judge, plan expansion | `qwen3.5-4b:2` (LM Studio, local, free, multimodal, a thinking model: calls end with an already CLOSED think block as an assistant message, see below) | `MIRSAL_LOCAL_MODEL` overrides |
-| embeddings (pool search) | `text-embedding-nomic-embed-text-v1.5` (768-d) | `MIRSAL_EMBED_MODEL` overrides |
-| fallback | OpenAI `gpt-4.1-mini` / `text-embedding-3-small` (dimensions 768) when LM Studio is down and `OPENAI_API_KEY` is set | |
+| agent, judge, plan expansion | **whatever the local server lists** (LM Studio, vLLM: both are just `MIRSAL_LOCAL_URL`, default `http://localhost:1234/v1`): the person's pick, else `MIRSAL_LOCAL_MODEL` (the wish, `qwen3.5-4b:2` in the owner's `.env`), else the server's first chat model. Local, free; Qwen is multimodal and a thinking model: its calls end with an already CLOSED think block as an assistant message, see below | the dropdown in the chat's settings, `MIRSAL_LOCAL_MODEL` |
+| embeddings (pool search) | `text-embedding-nomic-embed-text-v1.5` (768-d), **hardcoded**: a different model would change the vector dimension and invalidate every stored vector | `MIRSAL_EMBED_MODEL` overrides; never part of the dropdown |
+| fallback | OpenAI `gpt-4.1-mini` / `text-embedding-3-small` (dimensions 768) when the local model cannot answer and `OPENAI_API_KEY` is set | |
 
-Nothing asks LM Studio which models it has; reachability is a TCP connect cached for 60 s. `MIRSAL_LLM_PROVIDER`, `MIRSAL_AGENT_PROVIDER`, `MIRSAL_VISION_PROVIDER`
-(`local | openai | auto`) pick the backend per use.
+`MIRSAL_LLM_PROVIDER`, `MIRSAL_AGENT_PROVIDER`, `MIRSAL_VISION_PROVIDER` (`local | openai | auto`) pick the backend per use. `MIRSAL_LLM_PROVIDER=none | openai` also means "this process does not use the local model": the
+model list and the probe below are never asked then (the test suite pins `none`, so no test reaches a real LM Studio; `tests/test_llm_local.py` runs against a fake server on an ephemeral port).
+
+**The model is whatever the local server says it has (decided by Haitham, 2026-10-02; built the same day).** The hardcoded `qwen3.5-4b:2` was wrong in practice. `:2` is an LM Studio **instance suffix**: LM Studio names the
+second loaded copy of a model `qwen3.5-4b:2`, and that id exists only while the second copy is loaded. Measured the same day: `GET /v1/models` lists `qwen3.5-4b` (the base id) and never `qwen3.5-4b:2`; a chat request for
+`qwen3.5-4b:2` with nothing loaded is HTTP 400 `No models loaded`, while the same request for `qwen3.5-4b` just works (LM Studio loads a listed model on first use). The old availability only pinged the list, said "ok", and the chat
+fell back to rules without a word. Now:
+
+- `llm.list_local_models(force=False)` reads `GET {MIRSAL_LOCAL_URL}/models`: the chat models in the server's order (an id that contains `embed` is an embedding model and is left out), cached 30 s (10 s after a failed read),
+  2 s timeout, an empty list and no error when the server is down or nothing listens on the port.
+- `llm.resolve_local_model()` is what every local call sends as `model` (`llm.local_model()` is the same thing, so the agent, the plan expander, the vision judge and every `model_calls.jsonl` line carry the resolved id): the
+  person's pick, then `MIRSAL_LOCAL_MODEL`, each taken when the server lists it; else the same id **without a trailing `:<digits>`** when that is listed; else the first listed chat model; else the wish unchanged (server down). `LOCAL_MODEL`
+  (`qwen3.5-4b:2`) stays only as the last-resort default when nothing is configured and the server cannot be asked. The explicit overrides `MIRSAL_AGENT_MODEL` / `MIRSAL_VISION_MODEL` are used as written.
+- **The readiness probe** `llm.local_ready(force=False) -> {ok, model, why}`: the list answers while no model can, so it sends ONE tiny chat completion (`PROBE_TOKENS` = 32 tokens, `reasoning_effort: none`) to the resolved model.
+  Cached 60 s when it answered and 15 s when it did not (a poll never probes again), one probe at a time, never longer than 20 s (the first answer may load the model). A reasoning model that spends the 32 tokens thinking
+  (HTTP 200, empty content) counts as ready: it is loaded and serving. `why` is plain words, for example "LM Studio is running but the model could not answer: No models loaded. Load qwen3.5-4b in LM Studio (or turn on
+  Just-in-Time loading)", or "LM Studio is not answering at http://localhost:1234/v1: start it and load qwen3.5-4b". `llm.availability()['local']` IS this probe, so `GET /api/chat/agent` no longer says `ok: true` for a model that cannot answer. `GET /api/health` never waits for a model: it calls `availability(probe=False)`, the last probe's answer whatever its age, else whether anything listens.
+- **The person's pick.** `POST /api/ai/backend {model}` (owner only; one of the listed ids, else 400 with the list) is saved in `out/ai_backend.json` next to the backend choice (`{"backend", "model"}`; changing one keeps the other) and applies to
+  the whole process, the chat included (not per chat). It wins over `MIRSAL_LOCAL_MODEL` while the server still lists it; if the model disappears from the server the chain above takes over again. `GET /api/llm/models` returns
+  `{models: [{id, loaded}], current, preference, chosen, configured, ok, why}`: `loaded` is `true` for the model the probe just heard from and `null` for the others (the OpenAI-compatible list does not say which are loaded).
+- **The dropdown** (`agent.js`, `modelRow`, part of the gear popover's "AI engine" row): a `<select>` of every listed model (no count limit) with the current one selected, fed by `GET /api/llm/models` when the popover opens, and one line under
+  "Local model": `now: <id>`, or, when the model cannot answer, "Local model not loaded: <the server's last sentence of `why`>" (the whole `why` is its tooltip). A pick posts `{model}`, shows "switching" while the first answer loads, then
+  reads the list and the agent again. The engine pill says "Rules only (local model not loaded)" (with the reason as its tooltip, from `agent_status.reason`) when a local engine is wanted but cannot answer; without a local engine it says "Rules only".
+  `GET /api/chat/agent` does the probe and can take a moment on the first call, so the AI screen does not wait for it before painting.
+
+**Per-model tokens (reasoning models).** One global `LOCAL_MIN_TOKENS` on a 400 retry was not enough. `google/gemma-4-e4b` and `qwen/qwen3.5-9b` think on hidden tokens and return an EMPTY answer on a small `max_tokens`. Now an empty local
+answer is retried once with `max(max_tokens * 4, MIRSAL_LOCAL_MIN_TOKENS)` (2048 by default, at most 8192), and when that first answer carried `reasoning_content` the retry also ends with a closed think block (the no-think form of every
+model whose template thinks in `<think>` tags). A Qwen is prefilled with the closed block from the first request (the family is the name after the vendor prefix, so `qwen/qwen3.5-9b` counts), `MIRSAL_LOCAL_PREFILL=0` turns that off. The
+timeout is the whole wait of the call, retries included. If it is still empty after the retry the call is an error, as before.
+
+**When the chat falls back to rules it says so.** `brain.status()` is `{fallback, reason}`: true when no model is configured, when the local model cannot answer (the probe) or when the last real model call failed (kept 10 minutes,
+cleared by the next success); `GET /api/chat/agent` returns it as `agent_status`. A turn in which the model was asked and failed gets the step "answered by rules: <reason>" (`Trace.rules_note`, before the ending step), and the failed call is a
+`model_calls.jsonl` line with `status: ERROR`, the model id and the error. `Brain.last_error` is reset at the start of every turn.
+
+`python -m mirsal doctor` prints one line for it: `OK local model: <id> answers; the server lists N chat model(s)`, or a NOTE (never a failure) with the reason and the listed ids.
 
 **The person's choice: Auto / Local / Cloud (2026-10-02).** One setting for the plan expansion, the chat's brain and the vision judge: the engine pill in the chat header opens the settings, whose "AI engine" row
 saves it (`POST /api/ai/backend {backend}`, owner only, stored in `out/ai_backend.json`; `MIRSAL_AI_BACKEND` overrides; `GET /api/ai` and `GET /api/chat/agent` return the choice and what is available, with the plain reason when not).
@@ -204,4 +237,5 @@ event or after 10 minutes). The generation continues when the browser goes away.
 ## Tests
 
 `tests/test_agent.py` (plan, confirm, cancel, instant mode, memory, reducer, edits, ask, review, settings, search, errors, lock, follow-up answers, outside batches, bounded sessions, dead turns), `test_agent_resolver.py`, `test_agent_server.py`
-(the whole chat through the real server on prepared sheets), `test_vision.py`, `test_cache.py` (memory and real Redis), `tests/js/agent.test.js` (node: `node --test tests/js/agent.test.js`).
+(the whole chat through the real server on prepared sheets), `test_vision.py`, `test_cache.py` (memory and real Redis), `tests/js/agent.test.js` (node: `node --test tests/js/agent.test.js`), `test_llm_backend.py` (the backend choice, the Qwen prefill) and
+`test_llm_local.py` (the local model against a FAKE OpenAI-compatible server on an ephemeral port: the model list and its cache, the `:N` suffix, the readiness probe, the empty-answer retry, the ledger, "answered by rules", the routes `GET /api/llm/models`, `POST /api/ai/backend {model}`, `GET /api/chat/agent`).

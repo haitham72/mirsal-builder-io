@@ -192,9 +192,17 @@ button.tr-t{cursor:pointer}button.tr-t:hover{color:var(--aid)}
 }
 
 /* the engine pill is a button now (it opens the settings, where Auto / Local / Cloud live); an engine that is not available is dimmed and says why in its tooltip */
-button.ai-pill{cursor:pointer;font-family:inherit}
+button.ai-pill{cursor:pointer;font-family:inherit;min-width:0;max-width:62vw}
 button.ai-pill:hover{border-color:var(--ai)}
+button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ai-seg button.is-off{opacity:.45}
+/* the local model, the second half of the engine row: a note and a dropdown of what the server lists, under the Auto / Local / Cloud switch */
+.ai-set .r.ag-mrow{flex-wrap:wrap;border-top:0;margin-top:0;padding-top:0}
+.ai-set .ag-mrow>div{flex:1 1 100%;min-width:0}
+.ai-set .ag-mrow small{overflow-wrap:anywhere}
+.ag-sel{display:block;width:100%;margin-top:6px;padding:7px 10px;border-radius:var(--r-m);border:1px solid var(--aline);background:#fff;color:var(--ink);font-size:var(--fs-m);cursor:pointer}
+.ag-sel:hover{border-color:var(--ai)}
+.ag-sel:disabled{opacity:.5;cursor:default}
 
 /* a sheet Python blocked: said in words, with the one button that fixes it */
 .ai-problem{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-m);background:rgba(251,146,60,.10);border:1px solid rgba(251,146,60,.35);font-size:var(--fs-m);line-height:1.45}

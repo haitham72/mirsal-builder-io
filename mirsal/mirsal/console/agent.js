@@ -25,12 +25,23 @@ const AIU=(()=>{
  const sid=h=>{const m=/^#?\/?agent\/(S\d+)/.exec(h||'');return m?m[1]:null};
  /* the last assistant message: only its plan card is the live one (a pending Create belongs to the newest plan) */
  const lastBot=ms=>{const a=ms||[];for(let i=a.length-1;i>=0;i--)if(a[i]&&a[i].role!=='user')return a[i];return null};
- return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid,lastBot};
+ /* what the engine pill says (GET /api/chat/agent). A model that answers: "Local · qwen3.5-4b". Rules only, and WHY: a local engine that is set up but cannot answer reads "Rules only (local model not loaded)"
+    and the tooltip carries the server's own reason (`agent_status.reason`), never just "Rules only". */
+ const engine=a=>{
+  if(!a||!a.agent)return {on:false,rules:false,label:'…',title:''};
+  const ag=a.agent,st=a.agent_status||{},loc=(a.availability||{}).local||{},pref=a.preference||'auto',nm=String(ag.model||'').split('/').pop().replace(/:\d+$/,'');
+  if(ag.provider!=='none'&&!st.fallback)return {on:true,rules:false,label:(pref==='auto'?'Auto · ':'')+(ag.provider==='local'?'Local · ':'Cloud · ')+nm,
+   title:`The assistant runs on ${ag.model} (${ag.provider}), your choice: ${pref}. Vision checks: ${(a.vision&&a.vision.model)||'off'}. Click to change.`};
+  const why=String(st.reason||loc.why||'No language model is reachable').replace(/\.+$/,'');
+  return {on:false,rules:true,label:pref!=='cloud'&&loc.ok===false?'Rules only (local model not loaded)':'Rules only',title:`${why}. The assistant still works from its rules. Click for details.`}};
+ /* the one line under the model dropdown (GET /api/llm/models): the model in use, or why the local model cannot answer, in the server's last sentence ("Load qwen3.5-4b in LM Studio ...") */
+ const modelNote=m=>{if(!m)return '';if(m.ok)return `now: ${m.current}`;const why=String(m.why||'');return 'Local model not loaded: '+(why.split(/\.\s+/).pop()||why)};
+ return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid,lastBot,engine,modelNote};
 })();
 if(typeof module!=='undefined')module.exports=AIU;
 
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){(()=>{
-const A={sid:null,sess:null,sessions:[],agent:null,busy:false,sel:new Set(),open:new Set(),els:new Map(),poll:0,setOpen:false,since:0,pre:''};
+const A={sid:null,sess:null,sessions:[],agent:null,llm:null,llmBusy:false,busy:false,sel:new Set(),open:new Set(),els:new Map(),poll:0,setOpen:false,since:0,pre:''};
 const SUGG=['a teddy bear waving','falcon stickers','my dog as a banana','Eid mubarak greetings'];
 ICONS.send='<path d="M12 19V5M6 11l6-6 6 6"/>';
 
@@ -53,6 +64,8 @@ function bgInit(root){if(bgOn)return;bgOn=true;
 /* ---------- data */
 async function loadSessions(){const r=await api('/api/chat/sessions');if(r.ok)A.sessions=r.j.sessions;return A.sessions}
 async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=r.j;pill();drawBar()}
+/* the local server's models for the engine row's dropdown (no count limit); the first call may wait while the server loads its model */
+async function loadModels(){const r=await api('/api/llm/models');A.llm=r.ok?r.j:{models:[],current:'',ok:false,why:'Could not read the model list'};if(A.setOpen)setSet()}
 async function loadSession(id,quiet){const r=await api('/api/chat/sessions/'+id);
  if(!r.ok){if(r.status===404){A.sid=null;A.sess=null;store.set('mirsal.ai.sid','');paint();return null}if(!quiet)toast(r.j.error||'Could not load the chat',1);return null}
  A.sess=r.j;paint();return r.j}
@@ -89,7 +102,8 @@ RENDER.agent=async arg=>{
   root.addEventListener('scroll',e=>{const t=e.target;if(t.classList&&t.classList.contains('car-track'))carSync(t)},true);
   carDrag(root);
  }
- await Promise.all([loadSessions(),loadAgent()]);
+ loadAgent().catch(()=>{});                       /* not awaited: the answer includes the local model's readiness probe, which can take a moment while the server loads it; the pill and the tiles fill in when it arrives */
+ await loadSessions();
  const want=AIU.sid(location.hash)||(arg&&/^S\d+$/.test(arg)?arg:null)||A.sid||(location.hash.replace(/^#\/?/,'')==='agent'?null:null);
  if(want&&want!==A.sid||(want&&!A.sess)){A.sid=want;store.set('mirsal.ai.sid',want);A.els.clear();await loadSession(want,true)}
  else if(!want&&!A.sid){const last=store.get('mirsal.ai.sid');if(last&&A.sessions.some(s=>s.id===last)&&location.hash.replace(/^#\/?/,'')!=='agent/new'){A.sid=last;A.els.clear();await loadSession(last,true)}}
@@ -98,10 +112,8 @@ RENDER.agent=async arg=>{
 };
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&A.sess&&AIU.needPoll(A.sess))startPoll()});
 
-function pill(){const p=$('ai-pill');if(!p)return;const a=A.agent;if(!a){return}
- const on=a.agent.provider!=='none',nm=(a.agent.model||'').split('/').pop().replace(/:\d+$/,'');
- p.className='ai-pill'+(on?' up':'');p.querySelector('span').textContent=on?(a.preference==='auto'?'Auto · ':'')+(a.agent.provider==='local'?'Local · ':'Cloud · ')+nm:'Rules only';
- p.title=on?`The assistant runs on ${a.agent.model} (${a.agent.provider}), your choice: ${a.preference}. Vision checks: ${a.vision.model||'off'}. Click to change.`:'No language model is reachable: the assistant still works from rules. Click for details.'}
+function pill(){const p=$('ai-pill');if(!p||!A.agent)return;const e=AIU.engine(A.agent);
+ p.className='ai-pill'+(e.on?' up':'');p.querySelector('span').textContent=e.label;p.title=e.title}
 
 /* ---------- painting (a keyed diff: only a message whose signature changed is rebuilt) */
 function paint(){
@@ -228,7 +240,7 @@ ACT.agstudio=el=>{const n=+String(el.dataset.g).replace(/\D/g,'');if(typeof SES!
 ACT.agnew=()=>{A.sid=null;A.sess=null;A.sel.clear();A.els.clear();store.set('mirsal.ai.sid','');const c=$('ai-col');if(c)c.innerHTML='';history.replaceState(null,'','#/agent');paint();agList();const t=$('ai-in');if(t)t.focus()};
 ACT.agopen=el=>{location.hash='#/agent/'+el.dataset.id};
 ACT.agdel=el=>{const id=el.dataset.id;confirmDlg('Delete this chat? The stickers it made stay in the Studio.',async()=>{await post(`/api/chat/sessions/${id}/delete`);if(A.sid===id)ACT.agnew();await loadSessions();agList()},'Delete')};
-ACT.agset=()=>{A.setOpen=!A.setOpen;setSet()};
+ACT.agset=()=>{A.setOpen=!A.setOpen;setSet();if(A.setOpen)loadModels()};
 ACT.agsetgrid=async el=>saveSet({grid:el.dataset.v});
 /* ---------- under the box: what the next sheet will be made with, one click from changing it (the same settings as the gear, and the style tiles the Studio has, smaller) */
 const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(A.agent&&A.agent.default_style)||'flat_vector';
@@ -246,9 +258,21 @@ async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r
 function beRow(){const a=A.agent||{},av=a.availability||{},pref=a.preference||'auto';
  const b=(v,label)=>{const ok=v==='auto'||(av[v]&&av[v].ok);const why=v==='auto'?'Use the local model when LM Studio answers, otherwise the cloud; keep what works':(av[v]&&av[v].why)||(av[v]&&av[v].model)||'';
   return `<button data-act=agbe data-v=${v} class="${pref===v?'on':''}${ok?'':' is-off'}" title="${AIU.esc(ok&&v!=='auto'?av[v].model:why)}">${label}</button>`};
- const now=a.agent&&a.agent.provider!=='none'?`now: ${a.agent.provider==='local'?'local':'cloud'} · ${AIU.esc((a.agent.model||'').replace(/:\d+$/,''))}`:'now: rules only';
+ const now=a.agent&&a.agent.provider!=='none'&&!AIU.engine(a).rules?`now: ${a.agent.provider==='local'?'local':'cloud'} · ${AIU.esc((a.agent.model||'').replace(/:\d+$/,''))}`:'now: rules only';
  const warn=pref!=='auto'&&av[pref]&&!av[pref].ok?` · <span class=ai-err>${AIU.esc(av[pref].why||'not available')}</span>`:'';
- return `<div class=r><div><b>AI engine</b><small>${now}${warn}</small></div><div class=ai-seg>${b('auto','Auto')}${b('local','Local')}${b('cloud','Cloud')}</div></div>`}
+ return `<div class=r><div><b>AI engine</b><small>${now}${warn}</small></div><div class=ai-seg>${b('auto','Auto')}${b('local','Local')}${b('cloud','Cloud')}</div></div>${modelRow()}`}
+/* the local model, part of the engine row: a dropdown of every model the local server lists (LM Studio, vLLM: GET /api/llm/models), the one in use selected, and one line saying why when it cannot answer.
+   A pick is POST /api/ai/backend {model}; the first answer after a switch can take a moment while the server loads it. */
+function modelRow(){const m=A.llm,pref=(A.agent&&A.agent.preference)||'auto';
+ if(A.llmBusy||!m)return `<div class="r ag-mrow"><div><small>${A.llmBusy?'Switching the local model: the first answer can take a moment…':'Checking the local model…'}</small></div></div>`;
+ if(!m.models.length&&pref==='cloud')return '';
+ const sel=m.models.length?`<select class=ag-sel data-agmodel aria-label="Local model">${m.models.map(x=>`<option value="${AIU.esc(x.id)}"${x.id===m.current?' selected':''}>${AIU.esc(x.id)}${x.loaded?' · loaded':''}</option>`).join('')}</select>`:'';
+ return `<div class="r ag-mrow"><div><b>Local model</b><small class="${m.ok?'':'ai-err'}" title="${AIU.esc(m.why||'')}">${AIU.esc(AIU.modelNote(m))}</small></div>${sel}</div>`}
+document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset||s.dataset.agmodel===undefined)return;
+ A.llmBusy=true;setSet();
+ const r=await post('/api/ai/backend',{model:s.value});
+ if(!r.ok)toast((r.j&&r.j.error)||'Could not change the local model',1);
+ await Promise.all([loadModels(),loadAgent()]);A.llmBusy=false;setSet()});
 /* the agentic creator: one click from a request to a pack on Telegram. Any rejection still stops it. */
 function crRows(st){const c=Object.assign({on:false,scope:'images',bypass:false},st.creator||{});
  let h=`<div class=r><div><b>Agentic creator</b><small>One go-ahead: request, sheet, approval, pack, Telegram</small></div><button type=button class="ai-sw${c.on?' on':''}" data-act=agcr data-k=on role=switch aria-checked="${c.on}" aria-label="Agentic creator"></button></div>`;

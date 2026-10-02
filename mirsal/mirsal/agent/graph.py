@@ -64,6 +64,13 @@ class Trace:
     def end(self, label: str, ok: bool = True):
         return self._add("final", label, status="done" if ok else "error")
 
+    def rules_note(self, reason: str):
+        """"answered by rules: <why>": the model was asked and could not answer, so the rules decided. Placed before the ending step (the collapsed trace shows the last step's label)."""
+        steps = self.msg["steps"]
+        steps.insert(len(steps) - 1 if steps and steps[-1]["kind"] == "final" else len(steps),
+                     {"kind": "note", "label": "answered by rules: " + " ".join(str(reason).split())[:160], "detail": None, "status": "done", "ts": round(time.time(), 3)})
+        self.store.save(self.sess)
+
     def retitle(self, label: str) -> None:
         for s in self.msg["steps"]:
             if s["kind"] == "task":
@@ -161,6 +168,7 @@ class Agent:
         return t
 
     def execute(self, t: Turn) -> dict:
+        self.brain.last_error = None                                  # per turn: `_finish` says "answered by rules" only for a failure of THIS turn
         try:
             try:
                 self.graph.invoke({"turn": t})
@@ -1030,6 +1038,8 @@ class Agent:
             sess["focus"] = {"generation": t.generation, "stickers": []}
         if ok and self._ask_vision_early(t):
             pass
+        if self.brain.last_error:                                      # the model was asked in this turn and could not answer: the rules answered, and the person is told why
+            t.trace.rules_note(self.brain.last_error)
         msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done" if ok else "error")
         try:
             from ..obs import trace as _trace

@@ -84,7 +84,7 @@ ERR = {"description": "error", "content": {"application/json": {"schema": ref("E
 # (method, path, tag, summary, request schema | None, response schema | None, status)
 ROUTES = [
     # --- chat
-    ("GET", "/api/chat/agent", "Chat", "Which model runs the assistant and the vision judge", None, OBJ, 200),
+    ("GET", "/api/chat/agent", "Chat", "Which model runs the assistant and the vision judge, what is available (the local model by a real probe, with the reason when it cannot answer) and `agent_status` {fallback, reason}: true when the chat is on its rules only", None, OBJ, 200),
     ("GET", "/api/chat/sessions", "Chat", "List chats, newest first", None, obj({"sessions": arr(ref("SessionSummary"))}), 200),
     ("POST", "/api/chat/sessions", "Chat", "Create a chat", obj({"title": STR, "settings": ref("Settings")}), ref("Session"), 200),
     ("GET", "/api/chat/sessions/{id}", "Chat", "A whole chat for display: messages with steps and cards (generation cards carry their live stickers), memory summary", None, ref("Session"), 200),
@@ -149,7 +149,8 @@ ROUTES = [
     ("GET", "/api/usage", "Live generation", "The model-call ledger rolled up", None, OBJ, 200),
     ("GET", "/api/metrics", "Generations", "Quality and timing numbers over every batch (owner only): time to the first sticker, approval rates at the two gates, the regeneration rate, per-batch lines", None, OBJ, 200),
     ("GET", "/api/ai", "Live generation", "Is a language model available (never the key): the active backend, the person's choice and what is available", None, OBJ, 200),
-    ("POST", "/api/ai/backend", "Live generation", "Choose the AI backend: {backend: auto | local | cloud} (owner only; auto keeps a working one and only a failed call switches it)", OBJ, OBJ, 200),
+    ("POST", "/api/ai/backend", "Live generation", "Choose the AI backend {backend: auto | local | cloud} and/or the local model {model: an id GET /api/llm/models lists; any other is a 400 that carries the list} (owner only; auto keeps a working backend and only a failed call switches it)", OBJ, OBJ, 200),
+    ("GET", "/api/llm/models", "Chat", "The local server's chat models ({models: [{id, loaded: null | bool}], current, preference, chosen, configured, ok, why}): the one in use, and whether it can ANSWER (a real probe, cached), with the plain reason when not", None, OBJ, 200),
     ("GET", "/api/vision", "Gates", "The vision judge: model and policy", None, OBJ, 200),
     ("POST", "/api/plan", "Live generation", "Preview a plan; nothing is reserved", OBJ, OBJ, 200),
     ("GET", "/api/tasks", "Live generation", "Reserved tasks", None, OBJ, 200),

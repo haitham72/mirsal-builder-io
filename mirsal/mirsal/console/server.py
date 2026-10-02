@@ -44,7 +44,7 @@ _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)/")
 MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck"}
 MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
-MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/search", "/api/generations", "/api/jobs"}
+MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs"}
 MEMBER_POST = {"/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
 RATE_DEFAULTS = {"r": 3000, "w": 240}                 # requests per minute per token holder (MIRSAL_RATE_READ / MIRSAL_RATE_WRITE; 0 = off)
 
@@ -898,9 +898,11 @@ def make_handler(c: Console):
                 return self._json(200, llm.status())
             if path == "/api/chat/agent":     # which model runs the chat, and whether the vision judge is up
                 from ..agent import brain as _brain
-                return self._json(200, {"agent": _brain.target(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
+                return self._json(200, {"agent": _brain.target(), "agent_status": _brain.status(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
                                         "live": higgsfield.available(), "preference": llm.preference(), "availability": llm.availability(),
                                         "styles": styles.PRESETS, "default_style": styles.DEFAULT})
+            if path == "/api/llm/models":     # the local server's chat models, the one in use, and whether it can answer (the engine row's dropdown); members read it, only an owner picks (POST /api/ai/backend)
+                return self._json(200, llm.models_report())
             if path == "/api/chat/sessions":
                 rows, meta = self._page(c.chat_parts(self.user)[0].list())
                 return self._json(200, {"sessions": rows, **meta})
@@ -1185,11 +1187,17 @@ def make_handler(c: Console):
                 from ..store import sync as _sync
                 _sync.sync_users(c.out)
                 return self._json(200, r)
-            if path == "/api/ai/backend":        # the AI selector: auto | local | cloud (owner only); nothing is restarted, the next call uses it
-                try:
-                    llm.set_preference(str(body.get("backend", "")))
-                except llm.LLMError as e:
-                    raise pl.PipelineError(str(e), 400)
+            if path == "/api/ai/backend":        # the AI selector (owner only): {backend: auto | local | cloud} and/or {model: <an id the local server lists>}; nothing is restarted, the next call uses it
+                if "model" in body:
+                    try:
+                        llm.set_local_model(str(body.get("model") or ""))
+                    except llm.LLMError as e:
+                        return self._json(400, {"error": str(e), "models": llm.list_local_models()})       # a model the server does not list: the answer carries the list
+                if "backend" in body or "model" not in body:
+                    try:
+                        llm.set_preference(str(body.get("backend", "")))
+                    except llm.LLMError as e:
+                        raise pl.PipelineError(str(e), 400)
                 return self._json(200, llm.status())
             if path == "/api/telegram/config":
                 return self._json(200, telegram.save_config(c.out, str(body.get("token", "")), str(body.get("user_id", ""))))

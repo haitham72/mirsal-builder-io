@@ -54,6 +54,34 @@ def target() -> dict:
     return {"provider": want, "model": model}
 
 
+LAST: dict = {"error": None, "at": 0.0, "ok_at": 0.0}     # the process-wide last model failure (any chat, any Brain) and the last success after it
+LAST_ERROR_TTL = 600.0                                      # a failure older than this is no longer "the model is down"
+
+
+def reset_status() -> None:
+    LAST.update(error=None, at=0.0, ok_at=0.0)
+
+
+def status() -> dict:
+    """{fallback, reason}: is the chat on its rules only right now (no model behind it), and in plain words why. A configured model that cannot answer is a fallback just like no model at
+    all: the pill and `GET /api/chat/agent` say so, and a turn that fell back says so in its steps (`graph.Trace.rules_note`)."""
+    t = target()
+    if t["provider"] == "none":
+        from ..runtime import envfile
+        if envfile.choice("MIRSAL_AGENT_PROVIDER") == "none":
+            return {"fallback": True, "reason": "the assistant's language model is switched off (MIRSAL_AGENT_PROVIDER=none)"}
+        av, pref = llm.availability(), llm.preference()
+        why = [av[k]["why"] for k in (("local",) if pref == "local" else ("cloud",) if pref == "cloud" else ("local", "cloud")) if av[k]["why"]]
+        return {"fallback": True, "reason": "; ".join(why) or "no language model is configured"}
+    av = llm.availability()
+    side = "local" if t["provider"] == "local" else "cloud"
+    if t["provider"] in ("local", "openai") and not av[side]["ok"]:
+        return {"fallback": True, "reason": av[side]["why"]}
+    if LAST["error"] and LAST["at"] > LAST["ok_at"] and time.time() - LAST["at"] < LAST_ERROR_TTL:
+        return {"fallback": True, "reason": "the last call to the model failed: " + str(LAST["error"])[:200]}
+    return {"fallback": False, "reason": None}
+
+
 def _first_json(text: str):
     return llm.extract_json(text)
 
@@ -64,7 +92,7 @@ class Brain:
         self._complete = complete
         self.out = out
         self.calls = 0
-        self.last_error = None
+        self.last_error = None                                       # why a model call failed in the current turn (the graph resets it per turn and says so in the steps)
 
     @property
     def available(self) -> bool:
@@ -82,12 +110,16 @@ class Brain:
         except llm.LLMError as e:
             llm.note_failure(t["provider"])
             self.last_error = str(e)
+            if self._complete is None:                                 # a real model call (a test's fake is no news about the model)
+                LAST.update(error=str(e), at=time.time())
             if self.out is not None:
                 from ..generation import model_calls
                 model_calls.append(self.out, kind, t["provider"], t["model"], status="ERROR", latency_ms=int((time.perf_counter() - t0) * 1000),
-                                   prompt_version="agent_v1")
+                                   prompt_version="agent_v1", error=str(e))
             return None
         self.calls += 1
+        if self._complete is None:
+            LAST["ok_at"] = time.time()
         if self.out is not None and self._complete is None:
             from ..generation import model_calls
             model_calls.append(self.out, kind, meta.get("provider", t["provider"]), meta.get("model", t["model"]), status="OK",

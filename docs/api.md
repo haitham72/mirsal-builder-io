@@ -57,7 +57,8 @@ server that the table does not describe, and it calls every documented operation
 
 | route | |
 |---|---|
-| `GET /api/chat/agent` | which model runs the assistant and the vision judge, whether live generation is available, and the style presets (`styles`, `default_style`) the AI screen shows |
+| `GET /api/chat/agent` | which model runs the assistant and the vision judge, whether live generation is available, what is available (`availability.local.ok` is a REAL readiness probe: one tiny chat completion, cached 60 s / 15 s, with `why` in plain words when the model cannot answer), `agent_status: {fallback, reason}` (`fallback: true` = the chat is on its rules only, and why) and the style presets (`styles`, `default_style`) the AI screen shows |
+| `GET /api/llm/models` | the local server's chat models for the model dropdown (member-readable): `{models: [{id, loaded: null \| bool}], current, preference, chosen, configured, ok, why}`. `models` is `GET {MIRSAL_LOCAL_URL}/models` without the embedding models, in the server's order (cached 30 s; `[]` when the server is down); `current` is the id every local call sends (the person's pick, else `MIRSAL_LOCAL_MODEL`, else it without a `:N` instance suffix, else the first listed model); `loaded` is `true` for the model the probe just heard from, else `null`; `ok` / `why` are the probe (`why` is `null` when it answers). `/api/models` is the Higgsfield catalogue, not this |
 | `GET /api/chat/sessions` · `POST /api/chat/sessions {title?, settings?}` | list · create |
 | `GET /api/chat/sessions/{id}` | the whole session for display: messages with steps and cards (each generation card carries its live stickers with file urls, or its job state), subjects with their passes, settings, `working`, `summary_text` |
 | `POST /api/chat/sessions/{id}/messages {text, selected?, action?}` | start a turn in the background (`202`); `action` is `{type: "confirm" | "cancel"}`; `409` while the last turn is still running |
@@ -74,7 +75,7 @@ Live generation (Higgsfield): `POST /api/live/cost | sheet | video`, `POST /api/
 
 ## Events (SSE)
 
-`GET /api/ai` (the active AI backend, the person's choice and what is available) · `POST /api/ai/backend {backend: auto | local | cloud}` (owner only) · `GET /api/generations/{id}/events` (`Last-Event-ID` or `?after=` to replay): `text/event-stream`, one frame per event, `id:` is the stream id.
+`GET /api/ai` (the active AI backend, the person's choice and what is available) · `POST /api/ai/backend {backend?: auto | local | cloud, model?: <id>}` (owner only; `model` must be one of the ids `GET /api/llm/models` lists, else `400 {error, models: [...]}` and nothing is saved; both are kept in `out/ai_backend.json`, a call with neither is a 400; the answer is `GET /api/ai`'s) · `GET /api/generations/{id}/events` (`Last-Event-ID` or `?after=` to replay): `text/event-stream`, one frame per event, `id:` is the stream id.
 Names: `generation_started, sheet_generated, sticker_processing, sticker_ready, sticker_failed, animation_started, animation_ready, video_sheet_ready, review_decided,
 pack_complete, generation_failed`. Payload: `{event, generation_id, stage, status, ts, ms, actor?, decision?, gate?, index?, sticker_id?, asset_url?, trace_run_id?}`.
 
