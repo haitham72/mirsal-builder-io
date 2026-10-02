@@ -80,29 +80,11 @@ request â”€(prompt template v3 + style + stroke [+ AI enhancer] [+ references])â
   x"), not a check name.
 - `video_v2` also asks for "a wide range of emotions" and "highly expressive faces and bodies".
 
-## Files and names (`export.py`)
+## Files and names
 
-The engine keeps its files in `out/G00N/` and `out/jobs/` under its own names (`<media>-<NNN>-<task_slug>-<key>.<ext>`, which the database and the pack use; they never change). For copy
-and paste, every live batch is also **mirrored** into properly named folders **inside the repo** after each step (`sync`, never raising, add and refresh only):
-
-```
-generated/images/img-004-batman_lego/
-    img-004-batman_lego-sheet-nano_banana_flash-2k-20261001.png
-    img-004-batman_lego-s1-ready_to_fight-stroke12px-trim0px-20261001.png      sheet position, action, stroke, trim, date
-    prompts.txt                                                               prompts, models, credits, Higgsfield ids (and "KEY: blue" when it is blue)
-generated/videos/vid-004-batman_lego/
-    vid-004-batman_lego-video-kling3_0-pro-3s-20261001.mp4
-    vid-004-batman_lego-videosheet-gap26-20261001.png                          the sheet that was sent (gap in %)
-    vid-004-batman_lego-s1-ready_to_fight-stroke12px-trim0px-20261001.webm
-```
-
-The root is `<repo>/generated` (git-ignored) for the project's own `out/`, `out/export` for any other data folder (a copy, a test), or the folder named by **`MIRSAL_EXPORT_DIR`**; never a watch
-folder. The server mirrors **every** live batch at start (`sync_all`) and the newest ones after each step. (VS Code greys or hides git-ignored files when `explorer.excludeGitIgnore` is on.)
-
-`sN` sorts the files in sheet order and ties them to S1..S9. **Only an applied edge makes new files**: each Apply (or the video / pack moment) is its own snapshot with new names and the old files are kept;
-dragging a slider writes nothing. The date is the file's own date. The watch folders
+The engine keeps its files in `out/G00N/` and `out/jobs/` under its own names (`<media>-<NNN>-<task_slug>-<key>.<ext>`, which the database and the pack use; they never change). `POST /api/generations/<id>/reveal` opens the batch's folder in the file manager (the Studio's **Open folder**), `GET .../files` returns the paths. The watch folders
 (`inputs/Images_gen`, `videos_gen`) are never written to: a returned Kling video is laid out for the normalised video sheet, so pairing it with the raw sheet there would be wrong (and a
-prepared pair dropped there is picked up as before). `POST /api/generations/<id>/reveal` opens the batch's folder in the file manager (the Studio's **Open folder**), `GET .../files` returns the paths.
+prepared pair dropped there is picked up as before).
 
 ## The screen colour (blue key)
 

@@ -278,20 +278,6 @@ class LiveConsoleTests(Base):
         self.assertEqual(([i["generation_id"] for i in p2["items"]], p2["more"]), (["G002", "G001"], False))
         self.assertEqual((p1["items"][0]["ready"], p1["items"][0]["animated"], len(p1["items"][0]["thumbs"]), p1["items"][0]["prompt"]), (9, 9, 4, "batch 7"))
 
-    def test_the_export_folder_is_a_choice_and_every_live_batch_is_mirrored(self):
-        from mirsal import export
-        elsewhere = self.tmp / "my_stickers"
-        os.environ["MIRSAL_EXPORT_DIR"] = str(elsewhere)
-        try:
-            gid = self._stills_ready("export blob")
-            self.assertEqual(export.sync_all(self.out), 1)                                      # the back-fill at server start
-            imgs = elsewhere / "images" / "img-001-export_blob"
-            self.assertTrue(imgs.is_dir() and any(p.name.startswith("img-001-export_blob-s1-") for p in imgs.iterdir()))
-            self.assertFalse((self.out / "export").exists() and any((self.out / "export" / "images").glob("img-001-export_blob")))
-            self.assertEqual(self.req("GET", f"/api/generations/{gid}/files")[1]["package"], str(imgs))
-        finally:
-            os.environ.pop("MIRSAL_EXPORT_DIR", None)
-
     def test_models_account_usage_and_assets_endpoints(self):
         s, j = self.req("GET", "/api/models")
         self.assertEqual(s, 200)
@@ -453,7 +439,7 @@ class LiveConsoleTests(Base):
         self.assertEqual(len(self.req("GET", f"/api/generations/{gid}")[1]["edge_history"]), 3)
 
     def test_a_blue_screen_sheet_is_keyed_as_blue_and_marked_only_because_it_is_blue(self):
-        from mirsal import export, pipeline as pl
+        from mirsal import pipeline as pl
         from mirsal.engine import chroma
         green = shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)])
         blue = np.ascontiguousarray(green[..., [0, 2, 1]])                                  # the same sheet on a blue screen
@@ -462,47 +448,31 @@ class LiveConsoleTests(Base):
         self.assertEqual(chroma.detect_key(np.full((300, 300, 3), 128, np.uint8), asked="blue")[0], "blue")     # no screen at all: the colour that was asked, and the sheet check blocks it
         self.assertEqual(pl.cfg_for({"key_colour": "blue"}, EngineConfig()).chroma, "blue")
         self.assertEqual(pl.cfg_for({}, EngineConfig()).chroma, "green")
-        os.environ["MIRSAL_EXPORT_DIR"] = str(self.tmp / "exp")
-        try:
-            self.files["png"] = png_bytes(blue)
-            gid = self._stills_ready("blue blob")
-            res = self.req("GET", f"/api/generations/{gid}")[1]
-            self.assertEqual(res["key_colour"], "blue")
-            self.assertGreaterEqual(sum(1 for s in res["stickers"] if s["status"] == "READY"), 7)       # keyed, not refused by the green check
-            self.assertFalse([c for c in res["verify"]["sheet"] if not c["ok"] and c["name"] == "background_is_key"])
-            task = _tasks.read_task(self.out, res["task_id"])
-            self.assertEqual((task["key_colour"], task.get("key_detected")), ("blue", True))           # green was asked, the model returned blue
-            imgs = export.sync(self.out, gid)
-            self.assertIn("KEY: blue (the sheet came back blue although green was asked", (imgs / "prompts.txt").read_text(encoding="utf-8"))
-            for i in range(1, 10):                                                                      # the video sheet follows: a blue screen, and the video prompt says nothing else
-                self.req("POST", f"/api/generations/{gid}/review", {"gate": "still", "decision": "APPROVE", "index": i})
-            self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
-            vs = np.asarray(Image.open(self.out / f"G{gid:03d}" / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
-            self.assertEqual(vs[3, 3].tolist(), [0, 0, 255])
-            self.assertNotIn("green", self.c.video_prompt_for(gid, "A1").lower())
-            # a green sheet leaves no mark at all
-            self.files["png"] = png_bytes(green)
-            gid2 = self._stills_ready("green blob")
-            res2 = self.req("GET", f"/api/generations/{gid2}")[1]
-            self.assertNotIn("key_colour", res2)
-            task2 = _tasks.read_task(self.out, res2["task_id"])
-            self.assertNotIn("key_colour", task2)
-            self.assertNotIn("KEY:", (export.sync(self.out, gid2) / "prompts.txt").read_text(encoding="utf-8"))
-        finally:
-            os.environ.pop("MIRSAL_EXPORT_DIR", None)
+        self.files["png"] = png_bytes(blue)
+        gid = self._stills_ready("blue blob")
+        res = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual(res["key_colour"], "blue")
+        self.assertGreaterEqual(sum(1 for s in res["stickers"] if s["status"] == "READY"), 7)       # keyed, not refused by the green check
+        self.assertFalse([c for c in res["verify"]["sheet"] if not c["ok"] and c["name"] == "background_is_key"])
+        task = _tasks.read_task(self.out, res["task_id"])
+        self.assertEqual((task["key_colour"], task.get("key_detected")), ("blue", True))           # green was asked, the model returned blue
+        for i in range(1, 10):                                                                      # the video sheet follows: a blue screen, and the video prompt says nothing else
+            self.req("POST", f"/api/generations/{gid}/review", {"gate": "still", "decision": "APPROVE", "index": i})
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
+        vs = np.asarray(Image.open(self.out / f"G{gid:03d}" / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
+        self.assertEqual(vs[3, 3].tolist(), [0, 0, 255])
+        self.assertNotIn("green", self.c.video_prompt_for(gid, "A1").lower())
+        # a green sheet leaves no mark at all
+        self.files["png"] = png_bytes(green)
+        gid2 = self._stills_ready("green blob")
+        res2 = self.req("GET", f"/api/generations/{gid2}")[1]
+        self.assertNotIn("key_colour", res2)
+        task2 = _tasks.read_task(self.out, res2["task_id"])
+        self.assertNotIn("key_colour", task2)
 
-    def test_the_export_root_is_inside_the_repo_for_the_project_data_only(self):
-        from mirsal import export
-        from mirsal.paths import PROJECT, REPO
-        os.environ.pop("MIRSAL_EXPORT_DIR", None)
-        self.assertEqual(export.export_root(PROJECT / "out"), REPO / "generated")      # visible in the repo, next to inputs/ and mirsal/
-        self.assertEqual(export.export_root(self.out), self.out / "export")            # a copy of the data or a test never writes into the repo
+    def test_generated_stays_out_of_git(self):
+        from mirsal.paths import REPO
         self.assertIn("generated/", (REPO / ".gitignore").read_text(encoding="utf-8").splitlines())
-        os.environ["MIRSAL_EXPORT_DIR"] = str(self.tmp / "mine")
-        try:
-            self.assertEqual(export.export_root(PROJECT / "out"), self.tmp / "mine")
-        finally:
-            os.environ.pop("MIRSAL_EXPORT_DIR", None)
 
     def test_the_gap_is_a_slider_and_loop_is_a_choice(self):
         gid = self._stills_ready()
@@ -597,20 +567,6 @@ class LiveConsoleTests(Base):
         again2 = self.until(lambda: (lambda x: x if not x["busy"] and not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]) else None)(
             self.req("GET", f"/api/generations/{gid}")[1]), "cached re-apply")
         self.assertTrue(all((t.get("anim_metrics") or {}).get("cache") == "hit" for t in again2["stickers"] if t["anim_status"] == "READY"))
-        # properly named folders for copy and paste: images/img-NNN-subject and videos/vid-NNN-subject, every stroke/trim setting its own snapshot (nothing is deleted)
-        import re
-        imgs, vids = self.out / "export" / "images" / "img-001-blob", self.out / "export" / "videos" / "vid-001-blob"
-        stick = lambda: [p.name for p in imgs.iterdir() if re.fullmatch(r"img-001-blob-s\d-[a-z_0-9]+-stroke\d+px-trim\d+px-\d{8}\.png", p.name)] if imgs.is_dir() else []
-        self.until(lambda: any("stroke6px-trim1px" in n for n in stick()), "the new stroke snapshot is mirrored")
-        names = sorted(p.name for p in imgs.iterdir())
-        self.assertTrue(any(re.fullmatch(r"img-001-blob-sheet-nano_banana_flash-2k-\d{8}\.png", n) for n in names), names)
-        self.assertGreaterEqual(len(stick()), 18)                                                            # the first edge and the second: both kept
-        self.assertTrue(any("stroke6px" not in n for n in stick()))
-        self.assertTrue((imgs / "prompts.txt").is_file())
-        vnames = sorted(p.name for p in vids.iterdir())
-        self.assertTrue(any(re.fullmatch(r"vid-001-blob-video-kling3_0-pro-3s-\d{8}\.mp4", n) for n in vnames), vnames)
-        self.assertTrue(any(re.fullmatch(r"vid-001-blob-videosheet-gap\d+-\d{8}\.png", n) for n in vnames), vnames)
-        self.assertTrue(any(re.fullmatch(r"vid-001-blob-s\d-[a-z_0-9]+-stroke\d+px-trim\d+px-\d{8}\.webm", n) for n in vnames), vnames)
         h = self.req("GET", "/api/history?limit=1")[1]
         self.assertEqual((len(h["items"]), h["items"][0]["generation_id"], h["items"][0]["animated"], h["more"] is False), (1, st["generation_id"], sum(1 for t in again2["stickers"] if t["anim_status"] == "READY"), True))
         u = self.req("GET", "/api/usage")[1]

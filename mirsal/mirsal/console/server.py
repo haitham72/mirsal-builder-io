@@ -12,7 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import export, gates, higgsfield, jobs, llm, model_catalog, prompter, sources, styles, tasks, telegram, usage, watch
+from .. import gates, higgsfield, jobs, llm, model_catalog, prompter, sources, styles, tasks, telegram, usage, watch
 from .. import pipeline as pl
 from ..library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
@@ -100,10 +100,6 @@ class Console:
     # ---------- Higgsfield: live generation (account, models, jobs fulfilled by the CLI) ----------
     def _warm_models(self) -> None:
         try:
-            export.sync_all(self.out)
-        except Exception:
-            pass
-        try:
             model_catalog.set_dump(higgsfield.load_models(self.out))
         except Exception:
             pass
@@ -162,7 +158,6 @@ class Console:
             except Exception:
                 pass
             self._acct = (0.0, None)
-            export.sync_recent(self.out)
 
     def fulfil_async(self, jid: str, after=None) -> None:
         from .. import jobqueue
@@ -187,7 +182,6 @@ class Console:
                     pass
             finally:
                 self._acct = (0.0, None)                 # the balance changed: the next read asks Higgsfield again
-                export.sync_recent(self.out)
         t = threading.Thread(target=run, daemon=True)
         self._jobs = [x for x in self._jobs if x.is_alive()] + [t]
         t.start()
@@ -276,7 +270,6 @@ class Console:
             gates.reslice(self.out, gid, cfg, self.pace)
         elif res["source"].get("has_video") and any(st.get("anim_status") == "STALE" for st in res["stickers"]):
             pl.run_animate(self.out, gid, cfg, "pack", None, self.pace)
-        export.sync_recent(self.out)
         return True
 
     def commit_edge(self, gid: int, outline, erode, via: str) -> bool:
@@ -443,7 +436,6 @@ class Console:
                 fn()
             finally:
                 self.lock.release()
-                export.sync_recent(self.out)
         threading.Thread(target=run, daemon=True).start()
 
 
@@ -761,11 +753,9 @@ def make_handler(c: Console):
                 return self._json(200, {"results": [r for r in gates.search(c.out, q) if see(r["generation"])], "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
-            if path.startswith("/api/generations/") and path.endswith("/files"):         # where this batch's files are (the named folder for copy and paste)
+            if path.startswith("/api/generations/") and path.endswith("/files"):         # where this batch's files are
                 gid = int(path.split("/")[3])
-                res = pl.read_result(c.out, gid)
-                pk = export.package_dir(c.out, res)
-                return self._json(200, {"package": str(pk) if pk and pk.is_dir() else None, "stickers": str(pl.gen_dir(c.out, gid) / "slices"), "batch": str(pl.gen_dir(c.out, gid))})
+                return self._json(200, {"stickers": str(pl.gen_dir(c.out, gid) / "slices"), "batch": str(pl.gen_dir(c.out, gid))})
             if path.startswith("/api/generations/") and path.endswith("/edge_preview"):         # ONE sticker with a stroke/trim, rendered on the fly (a preview, never stored)
                 q = parse_qs(urlparse(self.path).query)
                 png = pl.edge_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), int(q.get("outline", ["0"])[0]), int(q.get("erode", ["0"])[0]), int(q.get("px", ["420"])[0]))
@@ -1116,16 +1106,13 @@ def make_handler(c: Console):
                         c.out, gid, c.cfg,
                         int(body["outline"]) if body.get("outline") is not None else None,
                         int(body["erode"]) if body.get("erode") is not None else None)
-                    export.sync_recent(c.out)
                     if body.get("reslice") and any(v["status"] == "SLICED" and v.get("video") for v in pl.read_result(c.out, gid)["video_sheets"]):
                         c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
                         res_["resliced"] = True
                     return self._json(200, res_)
-                if parts[3] == "reveal":         # open the batch's named folder in the file manager (a path the server computed, never one sent by the page)
+                if parts[3] == "reveal":         # open the batch's folder in the file manager (a path the server computed, never one sent by the page)
                     import os as _os, subprocess as _sp, sys as _sys
-                    res = pl.read_result(c.out, gid)
-                    pk = export.package_dir(c.out, res)
-                    target = pk if pk and pk.is_dir() else pl.gen_dir(c.out, gid) / "slices"
+                    target = pl.gen_dir(c.out, gid) / "slices"
                     if _sys.platform == "win32":
                         _os.startfile(str(target))
                     else:

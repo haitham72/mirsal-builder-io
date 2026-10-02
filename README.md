@@ -18,7 +18,7 @@ python -m mirsal serve                                     # http://127.0.0.1:87
 python -m unittest discover -s tests -t .                  # the tests (python + the node helpers; the database tests skip when mirsal-db is down)
 ```
 
-Everything the app writes goes to `mirsal/out/` (git-ignored; `generated/` mirrors a live batch with readable names). Copy `mirsal/.env.example` to `mirsal/.env` for keys and options.
+Everything the app writes goes to `mirsal/out/` (the engine's own names, which the database uses; they never change). Copy `mirsal/.env.example` to `mirsal/.env` for keys and options.
 Prepared sheets (optional) go in `inputs/Images_gen/img-NNN-<subject>/` and `inputs/videos_gen/vid-NNN-<subject>/` (the folder names are final: never renamed).
 
 ## How a sticker is made (the golden path)

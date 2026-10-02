@@ -1,6 +1,7 @@
 # Private test photos (people, pets): never commit
 inputs/photos/
 # Build outputs
+generated/
 
 mirsal/.venv/
 # Python / offline wheels
