@@ -3,7 +3,7 @@
  "user": "local",
  "title": "hi",
  "created": 1790907668.343,
- "updated": 1790907899.05,
+ "updated": 1790908379.351,
  "settings": {
   "grid": "3x3",
   "style_id": "flat_vector",
@@ -45,19 +45,21 @@
    "slug": "5",
    "passes": [
     {
-     "generation": null,
+     "generation": "G013",
      "job": "J021",
      "prompt": "5",
      "grid": "3x3",
      "style_id": "flat_vector",
      "parent": null,
      "created": 1790907899.019,
-     "ready": 0,
+     "ready": 9,
      "approved": 0,
      "rejected": 0,
      "liked": [],
      "disliked": [],
-     "note": ""
+     "note": "",
+     "stage": "sliced",
+     "error": null
     }
    ]
   }
@@ -200,6 +202,28 @@
     "spent_estimate": 2.0
    },
    "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1790908379.351,
+   "user": "what was the output?",
+   "assistant": "The facts show that both Superman (G012) and Subject 5 (G013) had 9 stickers ready, but they do not state what the actual output was. I cannot invent an answer for you.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G012",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G012"
   }
  ],
  "messages": [
@@ -607,6 +631,53 @@
     }
    ],
    "ts": 1790907889.891,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "what was the output?",
+   "cards": [],
+   "steps": [],
+   "ts": 1790908373.907
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "The facts show that both Superman (G012) and Subject 5 (G013) had 9 stickers ready, but they do not state what the actual output was. I cannot invent an answer for you.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1790908374.088
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1790908374.117
+    },
+    {
+     "kind": "step",
+     "label": "working in G012",
+     "detail": null,
+     "status": "done",
+     "ts": 1790908376.642
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1790908379.338
+    }
+   ],
+   "ts": 1790908373.907,
    "status": "done",
    "chips": []
   }

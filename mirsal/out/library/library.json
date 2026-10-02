@@ -135,118 +135,6 @@
      },
      "created": 1790874105.9481947,
      "file_name": "img-002-batman_lego-batman_lego_calling_for_help"
-    },
-    {
-     "id": "00b2e6dd",
-     "name": "Cat as banana dancing",
-     "file": "vid-009-batman_lego-cat_as_banana_dancing.webm",
-     "type": "animated",
-     "emoji": "💃",
-     "kb": 221,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G010",
-      "index": 1
-     },
-     "created": 1790906438.8593888,
-     "file_name": "img-010-cat_as_banana-cat_as_banana_dancing"
-    },
-    {
-     "id": "f5aabadb",
-     "name": "Cat as banana shocked",
-     "file": "vid-010-batman_lego-cat_as_banana_shocked.webm",
-     "type": "animated",
-     "emoji": "😱",
-     "kb": 222,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G010",
-      "index": 2
-     },
-     "created": 1790906438.871315,
-     "file_name": "img-010-cat_as_banana-cat_as_banana_shocked"
-    },
-    {
-     "id": "ef54a9e5",
-     "name": "Cat as banana squashed",
-     "file": "vid-011-batman_lego-cat_as_banana_squashed.webm",
-     "type": "animated",
-     "emoji": "🥴",
-     "kb": 231,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G010",
-      "index": 3
-     },
-     "created": 1790906438.883278,
-     "file_name": "img-010-cat_as_banana-cat_as_banana_squashed"
-    },
-    {
-     "id": "f39539f7",
-     "name": "Cat as banana waving",
-     "file": "vid-012-batman_lego-cat_as_banana_waving.webm",
-     "type": "animated",
-     "emoji": "👋",
-     "kb": 218,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G010",
-      "index": 4
-     },
-     "created": 1790906438.8961554,
-     "file_name": "img-010-cat_as_banana-cat_as_banana_waving"
-    },
-    {
-     "id": "555450a9",
-     "name": "Cat as banana puppy eyes",
-     "file": "vid-013-batman_lego-cat_as_banana_puppy_eyes.webm",
-     "type": "animated",
-     "emoji": "🥺",
-     "kb": 252,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G010",
-      "index": 5
-     },
-     "created": 1790906438.9085793,
-     "file_name": "img-010-cat_as_banana-cat_as_banana_puppy_eyes"
-    },
-    {
-     "id": "408995c2",
-     "name": "Cat as banana eye roll",
-     "file": "vid-014-batman_lego-cat_as_banana_eye_roll.webm",
-     "type": "animated",
-     "emoji": "🙄",
-     "kb": 156,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G010",
-      "index": 7
-     },
-     "created": 1790906438.9203515,
-     "file_name": "img-010-cat_as_banana-cat_as_banana_eye_roll"
-    },
-    {
-     "id": "8b08a9f7",
-     "name": "Cat as banana sad",
-     "file": "vid-015-batman_lego-cat_as_banana_sad.webm",
-     "type": "animated",
-     "emoji": "😞",
-     "kb": 156,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G010",
-      "index": 8
-     },
-     "created": 1790906438.935641,
-     "file_name": "img-010-cat_as_banana-cat_as_banana_sad"
     }
    ],
    "telegram": {
@@ -895,6 +783,128 @@
      }
     ]
    }
+  },
+  {
+   "id": "52383f36",
+   "name": "Kitten banana",
+   "slug": "kitten_banana",
+   "cover": "00b2e6dd",
+   "next": 8,
+   "created": 1790908444.9666247,
+   "stickers": [
+    {
+     "id": "00b2e6dd",
+     "name": "Cat as banana dancing",
+     "file": "vid-001-kitten_banana-cat_as_banana_dancing.webm",
+     "type": "animated",
+     "emoji": "💃",
+     "kb": 221,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G010",
+      "index": 1
+     },
+     "created": 1790906438.8593888,
+     "file_name": "img-010-cat_as_banana-cat_as_banana_dancing"
+    },
+    {
+     "id": "f5aabadb",
+     "name": "Cat as banana shocked",
+     "file": "vid-002-kitten_banana-cat_as_banana_shocked.webm",
+     "type": "animated",
+     "emoji": "😱",
+     "kb": 222,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G010",
+      "index": 2
+     },
+     "created": 1790906438.871315,
+     "file_name": "img-010-cat_as_banana-cat_as_banana_shocked"
+    },
+    {
+     "id": "ef54a9e5",
+     "name": "Cat as banana squashed",
+     "file": "vid-003-kitten_banana-cat_as_banana_squashed.webm",
+     "type": "animated",
+     "emoji": "🥴",
+     "kb": 231,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G010",
+      "index": 3
+     },
+     "created": 1790906438.883278,
+     "file_name": "img-010-cat_as_banana-cat_as_banana_squashed"
+    },
+    {
+     "id": "f39539f7",
+     "name": "Cat as banana waving",
+     "file": "vid-004-kitten_banana-cat_as_banana_waving.webm",
+     "type": "animated",
+     "emoji": "👋",
+     "kb": 218,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G010",
+      "index": 4
+     },
+     "created": 1790906438.8961554,
+     "file_name": "img-010-cat_as_banana-cat_as_banana_waving"
+    },
+    {
+     "id": "555450a9",
+     "name": "Cat as banana puppy eyes",
+     "file": "vid-005-kitten_banana-cat_as_banana_puppy_eyes.webm",
+     "type": "animated",
+     "emoji": "🥺",
+     "kb": 252,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G010",
+      "index": 5
+     },
+     "created": 1790906438.9085793,
+     "file_name": "img-010-cat_as_banana-cat_as_banana_puppy_eyes"
+    },
+    {
+     "id": "408995c2",
+     "name": "Cat as banana eye roll",
+     "file": "vid-006-kitten_banana-cat_as_banana_eye_roll.webm",
+     "type": "animated",
+     "emoji": "🙄",
+     "kb": 156,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G010",
+      "index": 7
+     },
+     "created": 1790906438.9203515,
+     "file_name": "img-010-cat_as_banana-cat_as_banana_eye_roll"
+    },
+    {
+     "id": "8b08a9f7",
+     "name": "Cat as banana sad",
+     "file": "vid-007-kitten_banana-cat_as_banana_sad.webm",
+     "type": "animated",
+     "emoji": "😞",
+     "kb": 156,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G010",
+      "index": 8
+     },
+     "created": 1790906438.935641,
+     "file_name": "img-010-cat_as_banana-cat_as_banana_sad"
+    }
+   ]
   }
  ]
 }

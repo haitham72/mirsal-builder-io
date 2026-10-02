@@ -798,6 +798,171 @@ def n_answer(self, state: State) -> dict:
 
 ---
 
+## Issue 7: Moving Several Stickers to Another Pack Moves Only One
+
+### Description
+
+Reported by Haitham, 2026-10-02:
+
+- Moving multiple emojis to another pack **only moves them 1 by 1**.
+- Selecting several should offer **delete / create pack** as bulk actions.
+- When several are selected and moved to a **new** pack, only one moves, and the
+  selection **persists on the remaining stickers** — wrong: all of them should move at once.
+
+### Root Cause
+
+**Selection exists, the move handler ignores it.**
+
+`mirsal/mirsal/console/packs.js:44` starts a drag with a single id:
+
+```javascript
+S_PACK.addEventListener('dragstart',e=>{const c=e.target.closest('.cell[data-id]');if(!c)return;DRAG=c.dataset.id;...
+```
+
+and the drop handler (`packs.js:52-55`) posts exactly one move:
+
+```javascript
+const res=await post(`/api/packs/${PACK_ID}/stickers/${sid}/move`,{to:r.dataset.id});
+```
+
+`SEL` (the multi-select) is only read by `selBarHtml(n)` / `mqResult` for bulk
+*reorder* and *delete* (`packs.js:17`), never by the drop handler. The picker path
+has the same shape: `ACT.lcmove` (`packs.js:80-81`) posts one `s.id`.
+
+So with N selected, the drag carries `DRAG` = the id of the cell under the cursor,
+one POST runs, and `SEL` is never cleared — which is exactly the observed
+"one moved, selection still on the rest".
+
+### Required Changes
+
+1. **Bulk move on drop**: on `drop`, if `SEL.size > 1 && SEL.has(DRAG)`, loop the
+   selected ids and POST each `/api/packs/{from}/stickers/{id}/move` (or better, add
+   `POST /api/packs/{id}/stickers/move` taking `{to, ids:[]}` so it is one round trip
+   and one transaction).
+2. **Bulk actions bar**: when `n > 1`, `selBarHtml` should offer **Move to pack…**,
+   **New pack…** (creates a pack and moves the selection into it) and **Delete**,
+   alongside the existing reorder controls.
+3. **Clear the selection after a successful move** (`SEL.clear(); selRefresh();`) and
+   re-render the grid, so nothing "persists on the remaining stickers".
+4. **Server-side**: check that `/api/packs/{id}/stickers/{sid}/move` refuses a move to
+   a pack the caller does not own, and make the multi-move atomic (all or nothing).
+
+### Test That Would Pin It
+
+`tests/test_library.py`: select 3 stickers, POST the bulk move, assert all 3 have the
+new `pack_id`, the source pack lost 3, and the response reports `moved == 3`.
+
+---
+
+## Issue 8: VLM / Vision Follow-ups
+
+### Description
+
+Reported by Haitham, 2026-10-02, four separate items:
+
+1. **Chat does not know what it made.** Asked *"what did you just create"*, it replied
+   that it doesn't know.
+2. **No per-frame vision view.** There should be an option to open the **full sheet**
+   and mark **each frame with its VLM transcription**, whether the sheet was 3×3 or
+   2×2. That logic does not exist — write the function/module for it.
+3. **Consent UX.** Instead of the old per-run *"allow VLM / no"*, ask once:
+   **"Allow AI vision of generated media?"** — a single decision per session.
+4. **The loop artifact is still there.** The first frame still shows a transition used
+   to ease the looping; it looks horrible — report it (it is Issue 1 above, still open).
+
+### Root Cause / Current State
+
+**1. "what did you just create" → "idk" `[INFER]`**
+
+`memory.summary_text()` (`mirsal/mirsal/agent/memory.py:252-281`) rebuilds the turn
+context from `subjects[]`, `passes[]`, likes/dislikes and preferences. It only contains
+a pass if the **chat** created it (`add_pass`, `memory.py:165`). A generation started
+from the Studio/CLI is never recorded in the session, so the deterministic summary has
+nothing to answer with, and `brain.answer(t.text, facts)` (`graph.py:570`) is handed an
+empty fact list. The judge's verdicts are also invisible: `vision/judge.py:398` writes a
+history line with `actor="vlm"` into `result.json`, but no history line is ever folded
+into `summary_text`.
+
+Confirm by: generate in the Studio, then ask the same question in chat — expect the
+same "don't know". If instead the Studio generation *does* appear, the bug is in
+`subject_for_generation` keying (`memory.py:211-212`).
+
+**2. Per-frame transcription does not exist `[READ]`**
+
+`vision/judge.py` already judges per sticker (`judge_generation` → `_structured("VLM_STICKER", …)`,
+`judge.py:308`) and stores a verdict with reasons (`judge.py:398-407`), and it also has a
+sheet-level call (`judge.py:332`, `_flatten(sheet_png, 768)`). What is missing is the
+**frame → text** product: no route returns a caption per cell, and the UI has no view for it.
+
+**3. Consent is per call, not per session `[READ]`**
+
+The vision judge is triggered from the pipeline/`judge` action; there is no session-level
+flag in `settings` (`memory.py:28 DEFAULT_SETTINGS` has `grid`, `ask_before_spending`, `ai`
+only — no `allow_vlm`). So every run re-asks.
+
+**4. Loop artifact `[READ]`** — this is Issue 1 of this report (`close_loop`,
+`engine/video.py:92-101`). The quadratic curve proposed there is not enough; see below.
+
+### Required Changes (the function to write)
+
+New module `mirsal/mirsal/vision/transcribe.py`:
+
+```python
+"""Per-frame vision: one caption per cell of a sheet, cached, session-consent aware."""
+
+@dataclass
+class FrameCaption:
+    generation_id: str
+    index: int            # 0..n-1, works for 3x3, 2x2, any grid
+    grid: tuple[int, int] # (rows, cols) read from result.json, never assumed
+    png: str              # path relative to out/
+    caption: str
+    verdict: str | None   # APPROVE / REJECT from the same judge call, or None
+    reasons: list[str]
+
+def captions_for(out: Path, gid: str, *, force: bool = False) -> list[FrameCaption]:
+    """Every cell of generation `gid` with its VLM caption. Grid-agnostic: reads
+    `result.json`'s grid and stickers[], so 2x2 and 3x3 use the same code path.
+    Cached on the same key scheme as vision/judge.py:289 (sha256(png) + model + version)."""
+
+def sheet_with_captions(out: Path, gid: str, ...) -> dict:
+    """JSON for the UI: {grid, cells: [{index, png, caption, verdict, reasons}]}."""
+```
+
+Wire-up:
+
+- `GET /api/generations/{id}/captions` → `sheet_with_captions` (owner + the batch's owner).
+- Consent: add `allow_vlm: bool` to `DEFAULT_SETTINGS` (`memory.py:28`), written once from
+  `POST /api/chat/sessions/{sid}/settings` (`server.py:1012-1021` already has an
+  allow-list — add the key), surfaced as the single prompt
+  **"Allow AI vision of generated media?"** shown the first time a session would
+  otherwise trigger a judge run. When false, `judge_generation` is skipped and the
+  stickers stay READY and unjudged (`FAIL_CLOSED` behaviour, `judge.py:90-92`).
+- UI: in the sheet view, click a cell → the VLM caption + verdict under it; a toggle
+  "Show AI captions" that is enabled by the same session setting.
+
+### Test That Would Pin It
+
+`tests/test_vision.py`: build a 2×2 fixture (not only 3×3), assert `captions_for`
+returns 4 entries with indices 0-3 and the grid read from `result.json`; assert a
+second call with `force=False` does not hit the model; assert `allow_vlm=False`
+produces 0 model calls and leaves `review.still == "PENDING"`.
+
+### 4. Loop transition — still open
+
+Haitham still sees the first-frame transition used to ease looping. The `close_loop`
+blend in `mirsal/mirsal/engine/video.py:92-101` writes `m` blended frames at the head of
+the clip, so the very first frames *are* a cross-fade — that is what is being seen.
+
+If the quadratic curve already proposed in Issue 1 is not enough, the options are:
+(a) reduce `m` to 1 and only blend the single wrap frame, (b) blend in the **tail** instead
+(fade the last `m` frames toward frame 0, so the head stays pure), or (c) drop blending and
+make the generator return a clip whose first and last frame are already identical. Any of
+these must keep `loop_seam` passing — that check is a technical BLOCK and is not
+overridable (`gates.py:314`, Issue 2).
+
+---
+
 ## Summary
 
 | Issue                                 | Severity | Type        | Action                                                                        |
@@ -808,6 +973,8 @@ def n_answer(self, state: State) -> dict:
 | 4. Missing model selection UI         | Medium   | Feature     | Add cloud/local selector, model list, thinking toggle                         |
 | 5. AI Chat UX failures                | High     | Bug/Feature | Fix metadata passing, add moderation, selective regen, model UI               |
 | 6. Number response treated as new gen | High     | Bug         | Add ANSWER intent or context-aware classification for clarification responses |
+| 7. Bulk move to another pack         | High     | Bug/Feature | Make the drop handler use the selection; add Move/New pack/Delete bulk bar; clear selection after |
+| 8. VLM follow-ups                    | High     | Feature     | Chat memory of Studio generations; per-frame captions module + route; one-time "Allow AI vision of generated media?" setting; loop transition |
 
 **Priority Order:**
 
