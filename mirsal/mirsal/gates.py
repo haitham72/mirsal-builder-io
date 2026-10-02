@@ -449,7 +449,7 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
             for i in todo:
                 st = res["stickers"][i - 1]
                 if st.get("png"):
-                    refs[i] = _read_rgba(d / st["png"])[..., 3]
+                    refs[i] = _read_rgba(d / st["png"])               # RGBA: identity_kept uses its alpha, sharpness its edge detail
                 st["anim_status"], st["anim_reason"] = "PROCESSING", None
 
             def on_cell(r):

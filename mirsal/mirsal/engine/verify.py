@@ -489,6 +489,8 @@ def identity_kept(inp, cfg):
     ref, out = inp.get("ref_alpha"), inp.get("frames_out")
     if ref is None or out is None:
         return None
+    if getattr(ref, "ndim", 2) == 3:                    # the approved still as RGBA (sharpness needs its colours); identity uses its alpha
+        ref = ref[..., 3]
     iou = shape_iou(ref > 127, out[0][..., 3] > 127)
     return _c("anim", "identity_kept", WARN, iou >= cfg.min_identity_iou, round(iou, 3), cfg.min_identity_iou, f"first frame matches the still at IoU {iou:.2f}")
 
@@ -513,9 +515,16 @@ def alpha_stable(inp, cfg):
 
 @check("anim", "sharpness", WARN)
 def sharpness(inp, cfg):
-    k = inp["metrics"].get("sharp_kept")
-    if k is None:
+    """Two things can make an animation softer than it should be: the encode (`sharp_kept`: decoded edge energy over the encoder's input) and everything
+    BEFORE it (`detail_vs_still`: the animation's edge energy over the approved still's, which sees a low-resolution source cell or a cheaper video
+    model). The check fails on the worse of the two; the note says which and how soft it is in pixels of blur (`soft_sigma`)."""
+    m = inp["metrics"]
+    k, d = m.get("sharp_kept"), m.get("detail_vs_still")
+    if k is None and d is None:
         return None
+    if d is not None and (k is None or d < cfg.min_detail_vs_still or d <= k):
+        note = f"{d:.2f}x of the still's edge detail (as soft as the still blurred {m.get('soft_sigma', 0):.1f} px)"
+        return _c("anim", "sharpness", WARN, d >= cfg.min_detail_vs_still and (k is None or k >= cfg.min_sharp_kept), d, cfg.min_detail_vs_still, note)
     return _c("anim", "sharpness", WARN, k >= cfg.min_sharp_kept, k, cfg.min_sharp_kept, f"{k:.2f}x of the edge detail survives the encode")
 
 

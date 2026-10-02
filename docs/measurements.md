@@ -57,3 +57,25 @@ reasoning when it is left on (300 tokens gave an empty answer): the client sends
 
 `python -m mirsal photo ref/upload.jpeg` -> `out/photo/photo-upload.png`: method `chroma_green`, foreground 0.289 of the canvas (91 598 px),
 512x512, 193 KB PNG, all checks ok. Edge quality on a real photo is Haitham's judgement (not looked at by the builder, by rule).
+
+## Sharpness (the reworked `sharpness` check, 2026-10-02)
+
+**Why it was rebuilt.** The old metric compared the decoded clip to its own encoder input, so softness that happened *before* the encode (a 320 px source cell upscaled to 512, the cheaper Kling `std`
+model) read 1.00 on every clip. A down-up "retention" metric was tried and rejected (flat at 0.97-1.0 and not monotonic in blur). The check now also compares the animation's mean edge energy to its
+**own approved still's** (`detail_vs_still`) and says how soft that is in pixels of blur (`soft_sigma`: the Gaussian radius that takes the still down to that level); it fails (WARN) on the worse of the
+encode loss (`sharp_kept` < 0.8) and the detail ratio (`detail_vs_still` < 0.75). `python -m mirsal measure-sharpness` measures every stored animation.
+
+On the 31 real animations of this PC the metric separates the batch the owner called soft from the rest: G002 (Kling `std`, 320 px cells) reads a mean of 0.65 (lowest 0.58, about 1.3 px of blur), all 8 flagged; G001 (mean 0.91, lowest 0.89),
+G003 (mean 1.00, lowest 0.97) and G005 (mean 1.17, lowest 1.02: the animation is sharper than its still) pass. The threshold 0.75 sits in the gap between the two groups: **provisional until Haitham confirms by eye** that the flagged
+cells are the ones he sees as soft (the measurement itself used no media viewing).
+
+## measure-sharpness 2026-10-02 05:12
+
+```
+31 animations, 8 softer than 0.75x of their still's edge detail
+generation  cells  mean_detail  min_detail  mean_blur_px  flagged
+G001            5         0.91        0.89           0.7        0
+G002            8         0.65        0.58           1.3        8
+G003            9         1.00        0.97           0.1        0
+G005            9         1.17        1.02           0.0        0
+```

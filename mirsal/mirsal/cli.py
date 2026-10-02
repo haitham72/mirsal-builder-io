@@ -472,6 +472,8 @@ def main(argv=None) -> int:
     jd.add_argument("--status", action="store_true", help="which model, which policy")
     mc = sub.add_parser("measure-cells", help="S4: the share of video cells that leave their slot, per slot_fill (reads result files only)")
     mc.add_argument("--json", action="store_true", dest="as_json"); mc.add_argument("--record", action="store_true", help="append to docs/measurements.md")
+    ms_ = sub.add_parser("measure-sharpness", help="how soft each stored animation is next to its own still (edge detail ratio and the blur it equals)")
+    ms_.add_argument("--json", action="store_true", dest="as_json"); ms_.add_argument("--record", action="store_true", help="append to docs/measurements.md")
     tr = sub.add_parser("trace", help="tracing: status | backfill [--since DATE] (replay Postgres rows with no trace run to LangSmith)")
     tr.add_argument("action", choices=["status", "backfill"]); tr.add_argument("--since")
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
@@ -546,6 +548,19 @@ def main(argv=None) -> int:
         print(_json.dumps(m, ensure_ascii=False, indent=2) if args.as_json else measure.render(m))
         if args.record and m["cells"]:
             print("recorded in", measure.record(out, m, _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"))
+        return 0
+    if args.cmd == "measure-sharpness":
+        import json as _json
+        from pathlib import Path as _Path
+        from . import measure
+        m = measure.sharpness(out)
+        print(_json.dumps(m, ensure_ascii=False, indent=2) if args.as_json else measure.render_sharpness(m))
+        if args.record and m["cells"]:
+            f = _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"
+            import time as _t
+            with open(f, "a", encoding="utf-8") as fh:
+                fh.write("\n## measure-sharpness " + _t.strftime("%Y-%m-%d %H:%M") + "\n\n```\n" + measure.render_sharpness(m) + "\n```\n")
+            print("recorded in", f)
         return 0
     if args.cmd == "trace":
         return trace_cmd(out, args)

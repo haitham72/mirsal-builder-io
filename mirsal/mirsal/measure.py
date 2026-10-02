@@ -95,3 +95,55 @@ def record(out: Path, m: dict, path: Path) -> Path:
     with open(path, "a", encoding="utf-8") as f:
         f.write(head + block)
     return path
+
+
+# ---- sharpness: how soft is each stored animation next to its own approved still (the reworked `sharpness` check, measured on real cells) -----------------
+def sharpness(out: Path, cfg=None) -> dict:
+    """`detail_vs_still` for every READY animation under out/G###: the animation's edge detail over its still's, and what blur radius that equals.
+    Reads the stored PNG and WEBM only (decoded with ffmpeg); nothing is looked at, nothing is written."""
+    import numpy as np
+    from PIL import Image
+    from .engine import ffmpeg as ff
+    from .engine.config import EngineConfig
+    from .engine.video import detail_vs_ref, soft_sigma
+    cfg = cfg or EngineConfig()
+    out = Path(out)
+    rows: dict = {}
+    for d in sorted(out.glob("G[0-9][0-9][0-9]*")):
+        try:
+            res = json.loads((d / "result.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for st in res.get("stickers", []):
+            if not (st.get("png") and st.get("webm") and st.get("anim_status") == "READY"):
+                continue
+            try:
+                still = np.array(Image.open(d / st["png"]).convert("RGBA"))
+                info = ff.probe(d / st["webm"], vp9_native=True)
+                frames = ff.decode_full(d / st["webm"], int(info["width"]), int(info["height"]), 6, None)
+                if frames.shape[1:3] != still.shape[:2]:
+                    import cv2
+                    still = cv2.resize(still, (frames.shape[2], frames.shape[1]), interpolation=cv2.INTER_AREA)
+                dv = detail_vs_ref(frames, still)
+            except Exception:
+                continue
+            if dv is None:
+                continue
+            rows.setdefault(d.name, []).append((dv, soft_sigma(still, dv)))
+    by = []
+    for g, vals in rows.items():
+        dv = [v[0] for v in vals]
+        by.append({"generation": g, "cells": len(vals), "mean_detail": round(sum(dv) / len(dv), 2), "min_detail": round(min(dv), 2),
+                   "mean_sigma": round(sum(v[1] for v in vals) / len(vals), 1), "flagged": sum(1 for x in dv if x < cfg.min_detail_vs_still)})
+    n = sum(r["cells"] for r in by)
+    return {"threshold": cfg.min_detail_vs_still, "cells": n, "flagged": sum(r["flagged"] for r in by), "by_generation": by}
+
+
+def render_sharpness(m: dict) -> str:
+    if not m["cells"]:
+        return "No animated sticker with a still was found: nothing to measure."
+    lines = [f"{m['cells']} animations, {m['flagged']} softer than {m['threshold']:.2f}x of their still's edge detail",
+             "generation  cells  mean_detail  min_detail  mean_blur_px  flagged"]
+    for r in m["by_generation"]:
+        lines.append(f"{r['generation']:<10} {r['cells']:>6}  {r['mean_detail']:>11.2f}  {r['min_detail']:>10.2f}  {r['mean_sigma']:>12.1f}  {r['flagged']:>7}")
+    return "\n".join(lines)

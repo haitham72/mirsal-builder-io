@@ -13,6 +13,7 @@ area you touch (`docs/`). Where things are built and how they fit is in those do
 | **The AI chat and the Studio look right** (aurora, trace, plan card, carousel, phone swipe) | restart `python -m mirsal serve` (the Studio warns when it runs older code), open `/`; on a phone use the PC's address only through a tunnel (the server binds localhost) |
 | **Vision judge is calibrated** | label **30 stickers** (approve / reject, with a reason when you can); then `python -m mirsal judge G### --force` on the same ones; target agreement >= 80%, else point it at OpenAI (`MIRSAL_VISION_PROVIDER=openai`). First runs: `docs/measurements.md` (the two local models disagree) |
 | **Pool search precision** | write `docs/inputs/search_queries.md`: ~30 queries "{topic} doing {action}" (English, Arabic, Arabizi) with the sticker ids you consider right, plus >= 5 that must return nothing; then `python -m mirsal pool search "..."` is measured against it (first real run in `docs/measurements.md`) |
+| **Softness threshold** | `python -m mirsal measure-sharpness` flags the 8 G002 animations (0.65 of their still's edge detail, about 1.3 px of blur) and none of the other 23; confirm by eye that those are the soft ones, or tell me the batch it should have flagged (threshold `min_detail_vs_still` 0.75, `engine/config.py`) |
 | **Photo cutout edges** | judge `mirsal/out/photo/photo-upload.png` and 10+ real photos in `inputs/photos/` (git-ignored; include a few iPhone Portrait HEIC, which are not read yet) |
 | **Prompt text (S1) and the AI lab (S5)** | `python -m mirsal prompt lab` and `prompt lab --ai` (20 inputs; the AI now runs on the local model), compare with `docs/inputs/prompt_samples.md` |
 | **First live results, jobs, Generate menu, edge** | G001-G008 and `mirsal/out/s0/`; "Generate it" in the Studio; the credits pill, Queue panel, Allow anyway, Stroke / Trim with Apply / Undo |
@@ -21,12 +22,11 @@ area you touch (`docs/`). Where things are built and how they fit is in those do
 | **LangSmith** | open project `mirsal` in the account behind the key; decide cloud vs self-hosted; set `MIRSAL_TRACE=langsmith` in `mirsal/.env` to record real runs (off by default) |
 | **Decisions** | keep or delete the parked React gateway `mirsal/web/`; a daily credit cap (`MIRSAL_DAILY_CREDITS`); a backup command for `out/`; Arabic prompt handling; moderation policy before any public API |
 
-Closed by Haitham on 2026-10-02: Telegram sends work on several accounts; merge of `merge/generate-advanced` into `main`; improving the `sharpness` metric; live-LLM quality checks; Redis; the old token is revoked.
+Closed by Haitham on 2026-10-02: Telegram sends work on several accounts; merge of `merge/generate-advanced` into `main`; live-LLM quality checks; Redis; the old token is revoked.
 
 ## 2. Open work by area (the former phases)
 
 **Engine and Studio (was Phase 1)**
-- `sharpness` (`engine/verify.py`) cannot see softening (reads 1.00-1.05): replace the metric (gradient correlation or SSIM on the first frames, alpha-edge ramp width), calibrate on more than two cells (approved; thresholds need real cells).
 - The Studio's JavaScript has no tests except the chat helpers (node, `tests/js`); add a browser smoke test for issue colours and Include anyway.
 - A second request while a job runs gets 409; a real server-side queue would queue it. `result.json` is read-modify-write under one in-process lock plus the cross-process writer lock: two request threads can still interleave inside the server.
 - No rate limiting on the server (localhost only).
@@ -65,7 +65,7 @@ Closed by Haitham on 2026-10-02: Telegram sends work on several accounts; merge 
 | | |
 |---|---|
 | **Do freely** | Fix real bugs with a failing-then-passing test; add engine functions, CLI commands and API routes with tests; new prompt template **versions** (add `_v4`, never edit one that was used); measurements; docs. |
-| **Ask first** | Spending credits (live generation, bulk embeddings through OpenAI, anything paid); verifier severities or thresholds (the `sharpness` rework is approved); deleting an open item whose gate is unanswered; scrubbing the token from history; deleting `mirsal/web/`; anything that changes what the user sees or decides. |
+| **Ask first** | Spending credits (live generation, bulk embeddings through OpenAI, anything paid); verifier severities or thresholds; deleting an open item whose gate is unanswered; scrubbing the token from history; deleting `mirsal/web/`; anything that changes what the user sees or decides. |
 | **Never** | Rename watch folders or outputs (rule 9). Loosen a verifier BLOCK or change "a human approves, Python's blocks are final". Open sticker media to judge it. Commit a token, `.env`, `opencode.json`, `mirsal/telegram-id.md`. Write inside `inputs/Images_gen|videos_gen`. `git add -A` blind. Force-push. Touch ports 5433 / 5436 / 5437 or the other project's `.env` lines. |
 
 **Locked decisions:** the product is an API / app and the screens are a sandbox (rule 11); the golden path and its gates; issue colours (orange out of bounds, purple bad green screen, yellow bad loop, pink look or motion, blue file / Telegram limit, red dropped or blocked; hatched = not in the set, dashed = kept with a check);

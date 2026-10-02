@@ -50,6 +50,38 @@ def edge_energy(rgba: np.ndarray) -> float:
     return float(g[m].mean()) if m.any() else 0.0
 
 
+def detail_vs_ref(frames: np.ndarray, ref_rgba: np.ndarray, n: int = 3) -> float | None:
+    """How much of the approved STILL's edge detail the animation carries: mean edge energy of the first frames over the still's. The old encode-only
+    ratio (decoded / encoder input) could not see softening that happened BEFORE the encode (a 320 px source cell upscaled to 512, a cheaper video
+    model), because both sides were already soft. Measured on the real G001-G005 animations (2026-10-02): batches that were as sharp as their stills read
+    0.89 and up (above 1.0 where the video is sharper than the still), the soft G002 batch (320 px cells, Kling std) read 0.58-0.72 (mean 0.65). None when there is no still or it has no edges."""
+    if ref_rgba is None or getattr(ref_rgba, "ndim", 0) != 3 or ref_rgba.shape[2] != 4:
+        return None
+    e_ref = edge_energy(ref_rgba)
+    if e_ref <= 0:
+        return None
+    return float(np.mean([edge_energy(f) for f in frames[:n]])) / e_ref
+
+
+def soft_sigma(ref_rgba: np.ndarray, ratio: float) -> float:
+    """The Gaussian blur radius (px) that takes the still down to `ratio` of its own edge detail: 'as soft as the still blurred N px'.
+    0.0 when the animation is as sharp as the still; capped at 4 px."""
+    if ratio is None or ratio >= 1.0:
+        return 0.0
+    e0 = edge_energy(ref_rgba)
+    best, prev_s, prev_r = 4.0, 0.0, 1.0
+    for s in (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0):
+        b = ref_rgba.copy()
+        b[..., :3] = cv2.GaussianBlur(np.ascontiguousarray(ref_rgba[..., :3]), (0, 0), s)
+        r = edge_energy(b) / e0
+        if r <= ratio:
+            span = prev_r - r
+            best = prev_s + (s - prev_s) * ((prev_r - ratio) / span if span > 1e-9 else 1.0)
+            break
+        prev_s, prev_r = s, r
+    return round(best, 1)
+
+
 def support(frames: np.ndarray) -> np.ndarray:
     """The part of the frames where anything is ever opaque. Outside it both frames are transparent and a seam adds exactly 0, so the
     seam maths is the same on this crop and 2-3x cheaper."""
@@ -383,6 +415,11 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
         if len(dec) == len(out[:4]):                                    # the edge detail that survived the encode (first frames, decoded with the alpha-aware decoder)
             e_in = float(np.mean([edge_energy(f) for f in out[:len(dec)]]))
             m["sharp_kept"] = round(float(np.mean([edge_energy(f) for f in dec])) / max(e_in, 1e-6), 2) if e_in > 0 else None
+        if ref_alpha is not None and getattr(ref_alpha, "ndim", 0) == 3:                  # the approved still (RGBA): how soft is the animation next to it?
+            dv = detail_vs_ref(out, ref_alpha)
+            if dv is not None:
+                m["detail_vs_still"] = round(dv, 2)
+                m["soft_sigma"] = soft_sigma(ref_alpha, dv)
         inp = {"data": data, "info": ff.probe(path), "info_native": ff.probe(path, vp9_native=True), "alpha": dec, "metrics": m,
                "frames_out": out, "ref_alpha": ref_alpha}
         ms["probe"] = _ms(t); t = time.perf_counter()
