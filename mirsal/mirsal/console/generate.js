@@ -263,12 +263,36 @@ function stepsHtml(c,gid='',cur=''){const {gs,ready,busyAnim,done,tot,pk,allAdde
 ACT.gopenfolder=async el=>{const r=await post(`/api/generations/${el.dataset.g}/reveal`);if(!r.ok)return toast(r.j.error||'Could not open the folder',1);toast('Opened '+r.j.opened)};
 
 /* ---------- Plan: the prompts the sheet and video were made from, and the 1-5 tags per cell. The ids carry the batch (`pfx`) so two open cards never collide. */
-const copyBox=(title,text,id,rows)=>`<div class=pbox><div class=pbh><b>${title}</b><button class="btn sm" data-act=hcopy data-t=${id}>Copy</button></div><textarea readonly id=${id} rows=${rows}>${esc(text||'')}</textarea></div>`;
-function planView(g,pfx=''){const pl=g.reviews&&g.reviews.plan;
-  return`<section class=gplan><div class=pcols><div>${copyBox('Sheet prompt',g.sheet_prompt,`pp1${pfx}`,11)}${copyBox('Video prompt',g.video_prompt,`pp2${pfx}`,6)}
+const copyBox=(title,text,id,rows,edit)=>`<div class=pbox><div class=pbh><b>${title}</b><button class="btn sm" data-act=hcopy data-t=${id}>Copy</button></div><textarea ${edit?`data-pd=${edit.kind} data-g=${edit.g}`:'readonly'} id=${id} rows=${rows}>${esc(text||'')}</textarea>${edit?edit.foot:''}</div>`;
+/* The Prompt tab writes the prompts too: what is typed here is what is SENT (the server keeps it on the batch: `custom_prompts`, `video_prompt_sent`). Drafts live in PD per batch and kind, so a re-render
+   (the page refreshes while a batch works) never loses what was typed; the tick skips its re-render while one of these boxes has the focus. */
+const PD={};
+const pdKey=(g,kind)=>`${g}:${kind}`;
+const sentVideoPrompt=g=>{const v=(g.video_sheets||[]).slice().reverse().find(x=>x.video_prompt_sent);return v?v.video_prompt_sent:null};
+const pdText=(g,kind)=>{const d=PD[pdKey(g.number,kind)];return d!==undefined?d:kind==='sheet'?g.sheet_prompt:(sentVideoPrompt(g)||g.video_prompt)};
+const pdBase=(g,kind)=>kind==='sheet'?g.sheet_prompt:(sentVideoPrompt(g)||g.video_prompt);
+const pdCustom=(g,kind)=>{const d=PD[pdKey(g.number,kind)];return d!==undefined&&d.trim()!==''&&d!==pdBase(g,kind)};
+function pdFoot(g,kind){const custom=pdCustom(g,kind),live=typeof liveReadyNow==='function'&&liveReadyNow();
+  const kept=typeof keptStills==='function'?keptStills(g).length:0,sent=(g.video_sheets||[]).some(v=>['VIDEO_RETURNED','SLICED'].includes(v.status));
+  const go=kind==='sheet'
+    ?`<button class="btn sm pri" data-act=pgsheet data-g=${g.number} ${live?'':'disabled'} title="${live?'Make a NEW sheet from this batch\'s own cells and tags, with this prompt':'Higgsfield is not connected'}">Generate sheet${custom?' with my prompt':''}<span class=lv-vp data-lvprice=image></span></button>`
+    :`<button class="btn sm pri" data-act=pgvideo data-g=${g.number} ${live&&kept&&!sent?'':'disabled'} title="${!live?'Higgsfield is not connected':sent?'This sheet already has its video; the engine does not animate a sliced sheet twice. Make a new sheet first.':kept?'Animate the kept stickers with this prompt':'Keep at least one sticker first'}">Generate video${custom?' with my prompt':''}<span class=lv-vp data-lvprice=video></span></button>`;
+  return`<div class=pdfoot data-pdfoot=${kind}>${go}<button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=${kind} ${PD[pdKey(g.number,kind)]!==undefined?'':'hidden'}>Reset</button><small class=mut>${custom?'Your text is sent exactly as written.':'This is the template\'s text; edit it to send your own.'} The templates stay as they are.</small></div>`}
+function planView(g,pfx=''){const pl=g.reviews&&g.reviews.plan,sv=sentVideoPrompt(g);
+  return`<section class=gplan><div class=pcols><div>${copyBox('Sheet prompt',pdText(g,'sheet'),`pp1${pfx}`,11,{kind:'sheet',g:g.number,foot:pdFoot(g,'sheet')})}${copyBox(sv&&PD[pdKey(g.number,'video')]===undefined?'Video prompt (the one sent)':'Video prompt',pdText(g,'video'),`pp2${pfx}`,6,{kind:'video',g:g.number,foot:pdFoot(g,'video')})}
    <p class=mut>Template <b>${esc(g.template_id||'hand-written plan')}</b>${g.template_version?' v'+g.template_version:''} · plan from ${esc(g.plan_source||'')}${pl?` · ${esc(pl.decision.toLowerCase())}d by ${esc(pl.by)}`:''}</p></div>
    <ul class=pcells>${g.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=mut>${esc(t.prompt)}</div><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></section>`}
 /* the header's tabs: the session's own, or the one card that was clicked (CT) */
+document.addEventListener('input',e=>{const t=e.target;if(!t.dataset||t.dataset.pd===undefined)return;
+  const g=GM.get(+t.dataset.g);if(!g)return;PD[pdKey(g.number,t.dataset.pd)]=t.value;
+  const foot=t.closest('.pbox').querySelector('[data-pdfoot]');if(foot){const tmp=document.createElement('div');tmp.innerHTML=pdFoot(g,t.dataset.pd);foot.replaceWith(tmp.firstChild);if(typeof fillPrices==='function')fillPrices()}});
+ACT.pgreset=el=>{delete PD[pdKey(+el.dataset.g,el.dataset.kind)];glast='';tick(true)};
+ACT.pgsheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
+  const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,sheet_prompt:pdCustom(g,'sheet')?PD[pdKey(g.number,'sheet')]:undefined});
+  if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};
+ACT.pgvideo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
+  const ok=await liveStart('video',{g:g.number,video_prompt:pdCustom(g,'video')?PD[pdKey(g.number,'video')]:undefined});
+  if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'video')];glast='';tick(true)};
 ACT.gtab=el=>{if(el.dataset.c){CT[+el.dataset.c]=el.dataset.t;if(typeof drawHist==='function')drawHist();return}GS.tab=el.dataset.t;glast='';tick(true)};
 /* the same prompts, live under the request box while typing (nothing is reserved) */
 let PQ=0,PT=null;
@@ -525,7 +549,8 @@ async function tick(force){try{
   let key='';for(const id of SES.gens){const r=await api('/api/generations/'+id);if(r.ok){GM.set(id,r.j);key+=JSON.stringify(r.j);autoRecheck(r.j)}else if(r.status===404){SES.gens=SES.gens.filter(x=>x!==id);saveSes()}}
   for(const id of [...ANIM]){const g=GM.get(id);if(g&&animPhase(g)&&!processing(g))ANIM.delete(id)}
   key+=bg+SES.off.join()+SES.pack+[...ANIM].join()+(LIB.packs||[]).length;
-  if(force||key!==glast){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg();if(typeof applyEdgePreview==='function')applyEdgePreview();if(typeof hxSync==='function')hxSync()}
+  const typing=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.pd!==undefined;
+  if(force||(key!==glast&&!typing)){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg();if(typeof applyEdgePreview==='function')applyEdgePreview();if(typeof hxSync==='function')hxSync()}
 }catch(e){const m=$('msg');if(m)m.textContent='Something went wrong: '+e.message}}
 setInterval(tick,700);loadLib();
 

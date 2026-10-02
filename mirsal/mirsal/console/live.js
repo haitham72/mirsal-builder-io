@@ -78,8 +78,9 @@ const liveReadyNow=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{prompt,ai:typeof aiOn==='function'&&aiOn(),refs:[]});return true}
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
-  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:!!LIVE.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[]}
-    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
+  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:!!LIVE.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
+      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
+    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(ctx.video_prompt?{video_prompt:ctx.video_prompt}:{}),...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…',{'Idempotency-Key':ikey()});
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
@@ -112,7 +113,7 @@ document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset
   GPT=setTimeout(()=>{const g=GM.get(+t.dataset.g),img=t.closest('.gsheet')&&t.closest('.gsheet').querySelector('[data-lvprev]');if(g&&img)img.src=previewUrl(g,LIVE.fill)},120)});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvgap!==undefined)lsave();
   if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw();if(typeof planPreview==='function')planPreview()}});
-function fillPrices(){const c=lcached('video');document.querySelectorAll('[data-lvprice=video]').forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c))}
+function fillPrices(){for(const kind of ['video','image']){const c=lcached(kind);document.querySelectorAll(`[data-lvprice=${kind}]`).forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c));if(c===undefined&&document.querySelector(`[data-lvprice=${kind}]`))lcost(kind,true).then(()=>fillPrices())}}
 ACT.lvgen=async el=>{el.disabled=true;const ok=await liveStart('video',{g:+el.dataset.g});if(!ok)el.disabled=false;glast='';if(typeof tick==='function')tick(true)};
 
 /* ---------- running jobs */

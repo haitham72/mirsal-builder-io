@@ -67,7 +67,8 @@ SCHEMAS = {
     "Health": obj({"ok": BOOL, "database": OBJ, "redis": OBJ, "models": OBJ, "providers": OBJ, "storage": OBJ, "warnings": arr(STR), "ms": INT}, ["ok"], True),
     "Job": obj({"id": STR, "kind": {"type": "string", "enum": ["sheet", "video", "single"]}, "status": {"type": "string", "enum": ["REQUESTED", "CLAIMED", "DONE", "FAILED", "TIMEOUT"]},
                 "external_task_id": nullable(STR), "generation": nullable(STR), "model": nullable(STR), "cost": nullable(NUM), "error": nullable(STR)}, ["id", "kind", "status"], True),
-    "LiveSheet": obj({"prompt": STR, "grid": STR, "style_id": STR, "ai": BOOL, "refs": arr(STR), "model": STR, "options": OBJ, "outline": INT, "parent": STR, "regen_of": STR}, ["prompt"]),
+    "LiveSheet": obj({"prompt": STR, "grid": STR, "style_id": STR, "ai": BOOL, "refs": arr(STR), "model": STR, "options": OBJ, "outline": INT, "parent": STR, "regen_of": STR,
+                          "from_generation": INT, "sheet_prompt": {"type": "string", "maxLength": 6000, "description": "the prompt exactly as written (the Prompt tab); with from_generation the new sheet keeps that batch's cells and tags"}}, ["prompt"]),
     "LiveJob": obj({"job": STR, "task": STR, "estimate": nullable(NUM), "model": STR}, ["job"], True),
     "User": obj({"id": STR, "name": STR, "role": {"type": "string", "enum": ["owner", "member"]}, "can_spend": BOOL, "created": NUM, "disabled": BOOL}, ["id", "name", "role"]),
     "UserCreate": obj({"name": STR, "role": {"type": "string", "enum": ["owner", "member"]}, "can_spend": BOOL}, ["name"]),
@@ -133,7 +134,7 @@ ROUTES = [
     # --- live generation
     ("POST", "/api/live/cost", "Live generation", "Price one call of a model (a quote, free)", OBJ, OBJ, 200),
     ("POST", "/api/live/sheet", "Live generation", "Reserve a task (the G1 approval) and start the sheet job; spends credits. Idempotency-Key supported", ref("LiveSheet"), ref("LiveJob"), 200),
-    ("POST", "/api/live/video", "Live generation", "Start the Kling job for a built video sheet; spends credits. Idempotency-Key supported", OBJ, OBJ, 200),
+    ("POST", "/api/live/video", "Live generation", "Start the Kling job for a built video sheet; spends credits. Idempotency-Key supported. Optional video_prompt (max 6000) is sent verbatim", OBJ, OBJ, 200),
     ("POST", "/api/live/ref", "Live generation", "Store a reference image (raw body, ?name=)", None, OBJ, 200),
     ("GET", "/api/jobs", "Live generation", "Jobs for the operator, newest first", None, obj({"jobs": arr(ref("Job"))}), 200),
     ("POST", "/api/jobs", "Live generation", "Create a job file", OBJ, ref("Job"), 200),
