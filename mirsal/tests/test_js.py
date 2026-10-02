@@ -60,6 +60,64 @@ class StudioActionTests(unittest.TestCase):
                 used.setdefault(m.group(1), name)
         self.assertEqual({k: v for k, v in used.items() if k not in defined}, {}, "a button whose action nothing handles")
 
+    @staticmethod
+    def block(src: str, marker: str) -> str:
+        """The whole of a top-level statement: from `marker` to the next line that starts in column 0 (the Studio's scripts are one statement per line, minified)."""
+        rest = src[src.index(marker):]
+        lines, out = rest.split("\n"), [rest.split("\n")[0]]
+        for ln in lines[1:]:
+            if ln and not ln[0].isspace():
+                break
+            out.append(ln)
+        return "\n".join(out)
+
+    def test_the_earlier_batches_title_is_plain_text_not_a_fold(self):
+        """Haitham asked for a plain title (2026-10-02): the header is not a button, so nothing folds the list away and nothing remembers that in localStorage."""
+        ui, _ = self.scripts()
+        src = (ui / "live.js").read_text(encoding="utf-8")
+        head = self.block(src, "function drawHist()")
+        self.assertNotIn("htoggle", src, "the collapsible Earlier-batches header is gone")
+        self.assertNotIn("mirsal.hopen", src, "the fold-away choice (localStorage mirsal.hopen) is gone")
+        self.assertNotIn("let HO=", src, "the fold state is gone")
+        self.assertNotIn("data-act=", head.split("<div class=lv-hhead>")[0], "nothing in the title folds the list")
+        self.assertIn('<span class=lv-ht>Earlier batches</span>', head, "the title is plain text above the cards")
+        self.assertIn("HB.items.map(histItem)", head, "the cards are always there")
+        css = (ui / "studio.css").read_text(encoding="utf-8")
+        import re
+        self.assertIsNone(re.search(r"\.lv-hh(?!ead)", css), "the styles of the old header button are gone")
+        self.assertNotIn("#ghist.open", css)
+
+    def test_a_history_card_expands_in_place_and_nothing_else_does(self):
+        """A click on the card expands it where it stands: the fold lives inside the card, it does not scroll and it does not load the batch into the main area. Every click
+        expands its own card, so any number of them can be open at once (they stack). The button that opens a batch in the Studio belongs to the credits pill's recent batches."""
+        import re
+        ui, order = self.scripts()
+        src = (ui / "live.js").read_text(encoding="utf-8")
+        card = self.block(src, "const histItem=it=>{")
+        hbx = self.block(src, "ACT.hbx=el=>{")
+        self.assertIn("hxBatch(it)", card, "the expanded card hosts what already exists (stickers, per-sticker history, AI captions)")
+        self.assertNotIn("scrollIntoView", card)
+        self.assertIn("data-act=hbx", card, "the card itself is the fold")
+        self.assertNotIn("data-act=hopen", card, "no 'Open in Studio' on the card: every click only expands it in place")
+        opens = [n for n in order if "data-act=hopen" in (ui / n).read_text(encoding="utf-8")]
+        self.assertEqual(opens, ["composer.js"], "only the credits pill's recent batches opens a batch in the Studio, never a history card")
+        for gone in ("scrollIntoView", "location.hash", "tick(", "SES=", "HX.open.clear"):
+            self.assertNotIn(gone, hbx, "expanding in place must not touch the Studio or close the other cards: " + gone)
+        self.assertIn("HX.open.add(id)", hbx)
+        css = (ui / "studio.css").read_text(encoding="utf-8")
+        self.assertNotIn(".lv-hrow", css, "the row of the old list is gone")
+        self.assertNotIn(".lv-huse", css, "the Open in Studio button's style is gone")
+        self.assertIn(".lv-hcard", css)
+        self.assertIn(".lv-hcard.open", css, "an open card is marked, so a stack of them reads at a glance")
+        self.assertNotIn(".lv-hx", css, "the little fold button of the old row is gone: the whole card header is the fold")
+
+    def test_the_credits_pill_reads_the_history_grid(self):
+        """The drop-down under the credits pill lists the same batches as the history cards: it draws its one thumbnail from `cells`, not from the four-thumbnail shortcut."""
+        ui, _ = self.scripts()
+        src = (ui / "composer.js").read_text(encoding="utf-8")
+        self.assertNotIn("it.thumbs", src, "`thumbs` is gone from GET /api/history: the pill would throw on every open")
+        self.assertIn("it.cells", src)
+
     def test_the_green_screen_panel_stays_when_a_batch_is_a_video(self):
         """The Animation tab shows the Video sheet AND the green screen (its cut lines, chips and the animation box): the second one used to be replaced."""
         import re

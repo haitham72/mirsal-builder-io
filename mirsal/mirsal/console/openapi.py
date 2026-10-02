@@ -128,7 +128,7 @@ ROUTES = [
     ("POST", "/api/generations/{id}/add", "Packs", "Add the approved stickers to a pack", OBJ, OBJ, 200),
     ("POST", "/api/generations/{id}/pack_add", "Packs", "Add chosen stickers to a pack", OBJ, OBJ, 200),
     ("POST", "/api/generations/{id}/reveal", "Generations", "Open the batch's folder in the file manager", None, obj({"opened": STR}), 200),
-    ("GET", "/api/history", "Generations", "Every batch, the most recently edited first, a page at a time", None, OBJ, 200),
+    ("GET", "/api/history", "Generations", "Every batch, the most recently edited first, a page at a time (?offset, ?limit): {items: [{id, generation_id, prompt, created, edited, stage, error, ready, animated, grid: [rows, cols], cells: [{index, row, col, png, status, animated}], outline_px}], more, total}. The grid is the sheet's own (2x2 or 3x3, read from result.json) so a card can draw it as it was cut", None, OBJ, 200),
     ("GET", "/api/inputs", "Generations", "The prepared sheets found in the watch folders", None, OBJ, 200),
     # --- live generation
     ("POST", "/api/live/cost", "Live generation", "Price one call of a model (a quote, free)", OBJ, OBJ, 200),

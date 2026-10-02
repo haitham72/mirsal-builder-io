@@ -809,9 +809,19 @@ def state(out: Path, gid: int) -> dict:
     return res
 
 
+def _grid_of(res: dict) -> tuple:
+    """The sheet's own layout out of result.json (2x2, 3x3, whatever was measured); 3x3 when it was never written."""
+    g = res.get("grid") or [3, 3]
+    try:
+        return (max(1, int(g[0])), max(1, int(g[1])))
+    except (TypeError, ValueError, IndexError):
+        return (3, 3)
+
+
 def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
     """Every batch ever made, the most recently EDITED first (any change to a batch counts: a new stroke, an animation, a decision), a page at a time:
-    title, times, counts and up to four thumbnails."""
+    title, times, counts and the stickers as the sheet's own grid (`grid: [rows, cols]`, `cells: [{index, row, col, png, status, animated}]`), so a card
+    can draw a 3x3 or a 2x2 exactly as it was cut."""
     stamped = []
     for gid in list_ids(out):
         try:
@@ -834,10 +844,18 @@ def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
             created = r.get("created") or round((d / "prompts.json").stat().st_mtime, 3)
         except OSError:
             created = None
+        rows, cols = _grid_of(r)
+        cells = []
+        for s in r["stickers"]:
+            row, col = divmod(int(s["index"]) - 1, cols)
+            png = s.get("png")
+            cells.append({"index": int(s["index"]), "row": row, "col": col,
+                          "png": f"{png}?e={s.get('rendered_at') or s.get('edited_at') or 0}" if png else None,
+                          "status": s.get("status"), "animated": s.get("anim_status") == "READY"})
         items.append({"id": gid, "generation_id": r["generation_id"], "prompt": r.get("prompt") or r["source"].get("subject", ""), "created": created,
                       "edited": round(edited[gid], 3), "stage": r["stage"], "error": r.get("error"), "ready": len(ready),
                       "animated": sum(1 for s in ready if s.get("anim_status") == "READY"),
-                      "thumbs": [f"{s['png']}?e={s.get('rendered_at') or s.get('edited_at') or 0}" for s in ready[:4]],
+                      "grid": [rows, cols], "cells": sorted(cells, key=lambda c: c["index"]),
                       "outline_px": r.get("outline_px")})
     return {"items": items, "more": offset + limit < len(ids), "total": len(ids)}
 

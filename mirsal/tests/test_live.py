@@ -390,7 +390,46 @@ class LiveConsoleTests(Base):
         self.assertEqual(([i["generation_id"] for i in p1["items"]], p1["more"], p1["total"]), (["G007", "G006", "G005", "G004", "G003"], True, 7))
         p2 = self.req("GET", "/api/history?limit=5&offset=5")[1]
         self.assertEqual(([i["generation_id"] for i in p2["items"]], p2["more"]), (["G002", "G001"], False))
-        self.assertEqual((p1["items"][0]["ready"], p1["items"][0]["animated"], len(p1["items"][0]["thumbs"]), p1["items"][0]["prompt"]), (9, 9, 4, "batch 7"))
+        self.assertEqual((p1["items"][0]["ready"], p1["items"][0]["animated"], len(p1["items"][0]["cells"]), p1["items"][0]["prompt"]), (9, 9, 9, "batch 7"))
+
+    def _one_batch_on_disk(self, gid: str, grid, animated=()):
+        d = self.out / gid
+        (d / "slices").mkdir(parents=True)
+        (d / "prompts.json").write_text("{}", encoding="utf-8")
+        n = grid[0] * grid[1]
+        res = {"generation_id": gid, "number": int(gid[1:]), "prompt": "a sad owl", "stage": "sliced", "error": None, "grid": list(grid),
+               "source": {"subject": "owl"},
+               "stickers": [{"index": i, "key": f"k{i}", "status": "READY", "png": f"slices/S{i}.png",
+                             "anim_status": "READY" if i in animated else "NOT_REQUESTED"} for i in range(1, n + 1)]}
+        (d / "result.json").write_text(json.dumps(res), encoding="utf-8")
+
+    def test_every_history_card_carries_its_own_grid(self):
+        """A batch's card shows its stickers as the sheet's own grid (3x3 or 2x2), not four thumbnails: GET /api/history reads the grid out of result.json and names every cell."""
+        self._one_batch_on_disk("G002", (3, 3), animated=(1, 5, 9))
+        self._one_batch_on_disk("G001", (2, 2), animated=(2,))
+        by = {i["generation_id"]: i for i in self.req("GET", "/api/history?limit=5")[1]["items"]}
+        g3, g2 = by["G002"], by["G001"]
+        self.assertEqual(g3["grid"], [3, 3])
+        self.assertEqual([c["index"] for c in g3["cells"]], list(range(1, 10)))
+        self.assertEqual([(c["row"], c["col"]) for c in g3["cells"]], [(r, c) for r in range(3) for c in range(3)])
+        self.assertEqual([c["animated"] for c in g3["cells"]], [True, False, False, False, True, False, False, False, True])
+        self.assertTrue(g3["cells"][0]["png"].startswith("slices/S1.png?e="))                     # the cache-buster the browser needs
+        self.assertEqual((g3["ready"], g3["animated"], g3["stage"]), (9, 3, "sliced"))
+        self.assertEqual(g2["grid"], [2, 2])
+        self.assertEqual([(c["row"], c["col"]) for c in g2["cells"]], [(0, 0), (0, 1), (1, 0), (1, 1)])
+        self.assertNotIn("thumbs", g3, "the four-thumbnail shortcut is gone: a card draws the whole grid")
+
+    def test_a_batch_without_a_grid_or_a_picture_still_has_a_card(self):
+        """An unfinished batch (no grid read yet, one cell with no png) must not break the list: 3x3 is the default and a cell with no picture is still a cell."""
+        d = self.out / "G001"
+        (d / "slices").mkdir(parents=True)
+        (d / "prompts.json").write_text("{}", encoding="utf-8")
+        res = {"generation_id": "G001", "number": 1, "prompt": "", "stage": "requested", "error": None, "source": {"subject": ""},
+               "stickers": [{"index": 1, "key": "waving", "status": "PENDING", "png": None}]}
+        (d / "result.json").write_text(json.dumps(res), encoding="utf-8")
+        it = self.req("GET", "/api/history?limit=5")[1]["items"][0]
+        self.assertEqual((it["grid"], it["ready"], it["animated"]), ([3, 3], 0, 0))
+        self.assertEqual([(c["index"], c["png"], c["status"]) for c in it["cells"]], [(1, None, "PENDING")])
 
     def test_models_account_usage_and_assets_endpoints(self):
         s, j = self.req("GET", "/api/models")

@@ -263,8 +263,10 @@ async function histLoad(more){if(HB.loading)return;HB.loading=true;
   const off=more?HB.items.length:0,lim=more?HB.limit:Math.max(HB.limit,HB.items.length),r=await api(`/api/history?offset=${off}&limit=${lim}`);HB.loading=false;
   if(r.ok){HB.items=more?HB.items.concat(r.j.items):r.j.items;HB.more=r.j.more;HB.total=r.j.total}drawHist();hxSync();if(typeof cpDrawTop==='function')cpDrawTop()}
 const histReload=()=>histLoad(false);
-/* Each batch folds open to its stickers, each sticker to its generation history grouped by stage, each stage to its lines (GET /api/generations/<id>/history). The batch folds are
-   remembered (localStorage mirsal.hbopen); the sticker and stage folds last for the visit. A batch that was edited since it was read is read again. */
+/* Each batch is a CARD: its stickers as the sheet's own grid (3x3 or 2x2, `cells` from GET /api/history) with its title, G###, counts and edited time. A click expands the card where it
+   stands (no scroll, nothing loaded into the main area) and any number of cards can be open at the same time, stacked under each other; inside the fold each sticker opens to its
+   generation history grouped by stage, each stage to its lines (GET /api/generations/<id>/history). Which cards are open is remembered (localStorage mirsal.hbopen); the sticker and
+   stage folds last for the visit. A batch that was edited since it was read is read again, and a card that is open stays open while the list is re-read. */
 const HX={open:new Set(),det:{},so:new Set(),go:new Set(),all:new Set(),cap:{},vlmThen:null};
 try{JSON.parse(localStorage.getItem('mirsal.hbopen')||'[]').forEach(n=>{if(Number.isInteger(n))HX.open.add(n)})}catch(e){}
 const hxSave=()=>{try{localStorage.setItem('mirsal.hbopen',JSON.stringify([...HX.open]))}catch(e){}};
@@ -320,18 +322,17 @@ function hxBatch(it){const d=HX.det[it.id];
   return`<div class=lv-hdet><div class=lv-hbar><button class="btn sm" data-act=hcap data-id=${it.id} ${c&&['loading','working'].includes(c.state)?'disabled':''} title="Write a one-sentence caption of what each sticker shows (AI vision)">${c?'Caption again':'AI captions'}</button>
     <span class=mut>${c?'':'What does each sticker show? Needs your yes to AI vision (asked once).'}</span></div>${hxCaps(it.id)}
    ${d.data.stickers.map(s=>hxSticker(it.id,d.data.generation_id,s)).join('')||'<div class=mut>This batch has no stickers.</div>'}</div>`}
+/* the stickers of a card, in the sheet's own grid (a 2x2 batch draws four cells, a 3x3 nine; a cell with no picture yet is the checkerboard) */
+const histGrid=it=>`<span class=lv-hth style="--c:${Math.max(1,Math.min(6,(it.grid&&it.grid[1])||3))}">${(it.cells||[]).map(c=>c.png?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="S${c.index} · ${esc(String(c.status||'').toLowerCase())}"></span>`).join('')}</span>`;
+/* every click expands its own card where it stands; any number of cards can be open at once and they stack under each other (nothing replaces anything, nothing scrolls
+   away, nothing is loaded into the Studio: this list is the history of every batch, not the working session). The open ids are remembered (mirsal.hbopen). */
 const histItem=it=>{const open=HX.open.has(it.id);
-  return`<div class="lv-hrow ${open?'open':''}"><button class="lv-hitem ${SES.gens.includes(it.id)?'on':''}" data-act=hopen data-id=${it.id}><span class=lv-hth>${it.thumbs.map(u=>`<img src="/out/${esc(it.generation_id)}/${esc(u)}" loading=lazy alt="">`).join('')}</span>
-  <span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' ')))}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}</small></span></button>
-  <button class=lv-hx data-act=hbx data-id=${it.id} aria-expanded=${open} title="${open?'Hide':'Show'} this batch's stickers and their generation history" aria-label="${open?'Hide':'Show'} the stickers and history of ${esc(it.generation_id)}"><i class=lv-caret></i></button></div>${open?hxBatch(it):''}`};
-/* the list folds away like the Queue panel; open by default, the choice is remembered ('0' = folded) */
-let HO=(()=>{try{return localStorage.getItem('mirsal.hopen')!=='0'}catch(e){return true}})();
+  return`<div class="lv-hcard${open?' open':''}${SES.gens.includes(it.id)?' on':''}"><button class=lv-hitem data-act=hbx data-id=${it.id} aria-expanded=${open} title="${open?'Hide':'Show'} the stickers and the generation history of ${esc(it.generation_id)}">${histGrid(it)}<span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' '))||it.generation_id)}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}</small></span><i class=lv-caret></i></button>
+   ${open?hxBatch(it):''}</div>`};
 function drawHist(){const el=document.getElementById('ghist');if(!el)return;
   if(!HB.items.length){el.innerHTML='';return}
-  el.className=HO?'open':'';
-  el.innerHTML=`<button class=lv-hh data-act=htoggle aria-expanded=${HO} aria-controls=ghlist><span class=lv-ht>Earlier batches</span><span class=mut>${HB.total} in total</span><i class=lv-caret></i></button>
-   ${HO?`<div class=lv-hlist id=ghlist>${HB.items.map(histItem).join('')}</div>${HB.more?`<div class=lv-hmore><button class=btn data-act=hmore>Load more</button></div>`:''}`:''}`}
-ACT.htoggle=()=>{HO=!HO;try{localStorage.setItem('mirsal.hopen',HO?'1':'0')}catch(e){}drawHist()};
+  el.innerHTML=`<div class=lv-hhead><span class=lv-ht>Earlier batches</span><span class=mut>${HB.total} in total</span></div>
+   <div class=lv-hlist id=ghlist>${HB.items.map(histItem).join('')}</div>${HB.more?`<div class=lv-hmore><button class=btn data-act=hmore>Load more</button></div>`:''}`}
 ACT.hmore=()=>histLoad(true);
 ACT.hbx=el=>{const id=+el.dataset.id,it=HB.items.find(x=>x.id===id);if(!it)return;
   if(HX.open.has(id)&&!el.dataset.retry)HX.open.delete(id);
@@ -341,6 +342,7 @@ const hxFlip=(set,k)=>{set.has(k)?set.delete(k):set.add(k);drawHist()};
 ACT.hsx=el=>hxFlip(HX.so,el.dataset.k);
 ACT.hgx=el=>hxFlip(HX.go,el.dataset.k);
 ACT.hgall=el=>{HX.all.add(el.dataset.k);drawHist()};
+/* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio (the history cards never do: they only expand in place) */
 ACT.hopen=el=>{const it=HB.items.find(x=>x.id===+el.dataset.id);if(!it)return;
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
