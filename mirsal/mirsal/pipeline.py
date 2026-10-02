@@ -322,7 +322,7 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
                 res["key_colour"] = "blue"          # written only for blue: green is the default
             else:
                 res.pop("key_colour", None)
-            cfg = cfg_for(res, replace(base, chroma="green") if key != "blue" else base)
+            cfg = cfg_for(res, replace(base, chroma="blue") if key == "blue" else replace(base, chroma="green"))
             if res.get("task_id"):
                 tasks.annotate_key(out, res["task_id"], key, asked)
             vin = {"data": dest.read_bytes(), "grid": (rows, cols), "chroma": cfg.chroma}

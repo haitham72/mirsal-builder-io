@@ -1,0 +1,7 @@
+{"ts": 1790907725.715, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "superman in dubai", "task_slug": "superman_dubai"}}
+{"ts": 1790907725.766, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790907726.347, "stage": "sheet_picked", "status": "done", "ms": 580, "detail": {"subject": "superman", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "warnings": []}}
+{"ts": 1790907726.349, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790907726.877, "stage": "keyed", "status": "done", "ms": 528, "detail": {"bg": [5, 251, 2], "threshold": [123.5, 123.0, 123.0, 123.0, 122.5, 122.5, 123.5, 123.0, 123.0], "grid": "3x3", "cut": "gutter", "xs": [0, 682, 1358, 2048], "ys": [0, 687, 1366, 2048]}}
+{"ts": 1790907726.878, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790907728.193, "stage": "sliced", "status": "done", "ms": 1314, "detail": {"ready": 9, "failed": 0}}

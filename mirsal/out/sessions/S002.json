@@ -3,7 +3,7 @@
  "user": "local",
  "title": "hi",
  "created": 1790906453.768,
- "updated": 1790906496.721,
+ "updated": 1790907371.658,
  "settings": {
   "grid": "3x3",
   "style_id": "flat_vector",
@@ -14,7 +14,31 @@
   "generation": null,
   "stickers": []
  },
- "subjects": [],
+ "subjects": [
+  {
+   "name": "i need superman as watermelon",
+   "slug": "i_need_superman_as_watermelon",
+   "passes": [
+    {
+     "generation": "G011",
+     "job": "J019",
+     "prompt": "i need superman as watermelon",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790907260.291,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    }
+   ]
+  }
+ ],
  "preferences": {
   "persistent": []
  },
@@ -85,6 +109,50 @@
     "spent_estimate": 0.0
    },
    "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1790907260.329,
+   "user": "confirm",
+   "assistant": "Creating **i need superman as watermelon** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 5,
+   "ts": 1790907371.658,
+   "user": "is it done?",
+   "assistant": "No, it is not done yet because the sticker with id G011/S3 shows that there are still 0 ready.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G011",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G011"
   }
  ],
  "messages": [
@@ -300,19 +368,114 @@
      "action": "cancel"
     }
    ]
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907259.695
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "Creating **i need superman as watermelon** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J019",
+     "subject": "i need superman as watermelon",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating i need superman as watermelon",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907259.726
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907259.753
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907259.767
+    },
+    {
+     "kind": "final",
+     "label": "started · J019",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907260.291
+    }
+   ],
+   "ts": 1790907259.695,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "is it done?",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907366.699
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "No, it is not done yet because the sticker with id G011/S3 shows that there are still 0 ready.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907366.722
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907366.751
+    },
+    {
+     "kind": "step",
+     "label": "working in G011",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907369.119
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907371.619
+    }
+   ],
+   "ts": 1790907366.699,
+   "status": "done",
+   "chips": []
   }
  ],
  "summary": {
   "narrative": "",
   "upto": 0
  },
- "pending": {
-  "type": "create",
-  "prompt": "i need superman as watermelon",
-  "subject": "i need superman as watermelon",
-  "grid": "3x3",
-  "style_id": "flat_vector",
-  "ai": true,
-  "estimate": 2.0
- }
+ "pending": null
 }

@@ -1,0 +1,25 @@
+G011  i need superman as watermelon
+
+KEY: blue
+
+SHEET PROMPT
+One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.
+Subject: a i need superman transformed into a watermelon: ONE single character, its whole body is a watermelon (the watermelon's own shape, colour and texture), with the i need superman's face, expression and personality on it; it is not a i need superman standing next to a watermelon, not a i need superman holding or wearing a watermelon, and not a i need superman with a watermelon pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.
+Style: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.
+Outline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.
+Reading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:
+Character 1: dancing joyfully, the whole watermelon shape swaying and wiggling side to side, eyes closed, big smile
+Character 2: shocked, eyes huge, mouth wide open, the watermelon body jolting upright
+Character 3: squashed flat like a cartoon, the watermelon shape pressed wide and short, dazed face, stars circling
+Character 4: blowing a kiss with a wink, a small heart floating away
+Character 5: hands pressed together in thanks, eyes closed, grateful smile
+Character 6: holding a golden trophy overhead, triumphant
+Character 7: rolling eyes with a bored deadpan face
+Character 8: sad and drooping, a single tear, slumped shoulders
+Character 9: furious, steaming, fists clenched, deep scowl
+Make every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.
+Consistency: the same character design, proportions and colours for all 9 characters.
+Background: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.
+Spacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.
+
+SHEET: nano_banana_flash  {"aspect_ratio": "1:1", "resolution": "2k"}  credits 2.0  Higgsfield 76dc6758-b471-47d4-b33e-ff03ee477c62

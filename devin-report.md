@@ -1,8 +1,54 @@
-# Devin Report: 4 Issues Investigation
+# Devin Report: 5 Issues Investigation
 
 **Date:** 2026-10-02  
 **Repository:** haitham72/mirsal-builder-io  
 **Branch:** merge/generate-advanced
+
+---
+
+## Blue Screen Fix (Fixed During Debugging)
+
+### Issue
+
+When the AI model returns a blue screen instead of green (can happen with green subjects like watermelon/avocado), the chroma keying would fail silently, producing a "blue screen" result (the background not removed) and the chat would wait indefinitely.
+
+### Root Cause
+
+In `pipeline.py` line 325, the logic for setting the chroma key was inverted:
+
+```python
+cfg = cfg_for(res, replace(base, chroma="green") if key != "blue" else base)
+```
+
+When `key == "blue"`, it used `base` (which has `chroma="green"` by default). This meant blue screens were keyed as green, which failed completely.
+
+### Fix Applied
+
+Changed line 325 in `pipeline.py` to:
+
+```python
+cfg = cfg_for(res, replace(base, chroma="blue") if key == "blue" else replace(base, chroma="green"))
+```
+
+Now:
+
+- When key is blue → set chroma to blue
+- When key is green → set chroma to green
+
+### Additional Safety Gate
+
+Added validation in `chroma.py` `calibrate()` function (line 39):
+
+- New `validate=True` parameter
+- When enabled, raises `ValueError` if key difference is too low (< 30.0)
+- This catches wrong chroma key usage (e.g., green key on a blue screen) before it produces a bad result
+- Applied in `video.py` `_one_cell()` for video processing
+
+### Test Verification
+
+The existing test `test_a_blue_screen_sheet_is_keyed_as_blue_and_marked_only_because_it_is_blue` in `test_live.py` passes, confirming the fix works correctly.
+
+---
 
 ---
 
@@ -310,18 +356,466 @@ This is a significant UI/UX enhancement that should be prioritized based on user
 
 ---
 
-## Summary
+## Issue 5: AI Chat UX Failures - Selection, Moderation, Model Selection
 
-| Issue                         | Severity | Type    | Action                                                 |
-| ----------------------------- | -------- | ------- | ------------------------------------------------------ |
-| 1. Animation ghost silhouette | Medium   | Bug     | Change `close_loop` to use quadratic fade curve        |
-| 2. Loop seam not overridable  | N/A      | Design  | Intentional - keep as-is                               |
-| 3. Chat generation hangs      | High     | Bug     | Add client-side timeout + fix server-side job handling |
-| 4. Missing model selection UI | Medium   | Feature | Add cloud/local selector, model list, thinking toggle  |
+### Description
+
+The user reported multiple UX failures in the AI chat:
+
+1. **Clicking an image doesn't pass metadata**: When clicking on a sticker image and saying "this is bad", the system asks "which one say a number" instead of automatically using the clicked image's metadata (generation ID, sticker index).
+
+2. **No selective regeneration**: Instead of regenerating only the selected stickers (e.g., keep 1-4, regenerate 5-9 as a 2x2 sheet), the system wants to recreate the entire 3x3 sheet.
+
+3. **No content moderation**: The user asked for "superman in dubai" and one result was "superman as UAE woman in burkah" which is extremely racist. There was no content moderation check, and the vision judge (VLM) didn't kick in to flag this.
+
+4. **Model selection UI is hardcoded**: The UI shows only "qwen3.5-4b:2" with no selection between:
+   - Cloud vs local provider
+   - Full list of available LM Studio models (currently hardcoded)
+   - List of registered cloud providers
+   - Thinking on/off toggle for LM Studio
+
+### Root Cause Analysis
+
+#### 1. Image Click Doesn't Pass Metadata
+
+**Current behavior in `agent.js` lines 196-198:**
+
+```javascript
+ACT.agtile = (el) => {
+  if (el.closest(".car-track") && el.closest(".car-track").dataset.dragged)
+    return;
+  const id = el.dataset.id;
+  if (!id || id[0] === "w") return;
+  if (A.sel.has(id)) A.sel.delete(id);
+  else A.sel.add(id);
+  document
+    .querySelectorAll(`.ag-tile[data-id="${CSS.escape(id)}"]`)
+    .forEach((t) => t.classList.toggle("is-sel", A.sel.has(id)));
+  selChips();
+};
+```
+
+The tile click adds the sticker ID to `A.sel` (selection set), which is sent in the message payload. However:
+
+- The resolver (`resolver.py` lines 148-154) only uses the selection when the text contains "these/this/those/selected/them/it"
+- When the user says "this is bad" without those trigger words, the resolver falls back to asking for a number
+- The selection is cleared after sending (`agent.js` line 228), so the context is lost
+
+**Why it asks for a number:**
+In `resolver.py` line 497:
+
+```python
+if not (r.positive or r.negative):
+    t.reply = t.reply or "Tell me which numbers you like or don't, for example \"I like 2 and 7 but not 3\"."
+```
+
+The feedback node only looks at `r.positive` and `r.negative`, which are populated by the polarity rules (lines 126-140). If the user says "this is bad" without "like/hate/dislike" keywords, the polarity rules don't match, so it asks for clarification.
+
+#### 2. No Selective Regeneration
+
+**Current behavior in `graph.py` n_feedback (lines 493-513):**
+
+- When feedback is given, it only records the feedback in memory (`add_feedback`)
+- It does NOT trigger a selective regeneration
+- The chips offered are "Make another set" and "Redo {sticker}" but "Redo" only regenerates that ONE sticker, not a selection
+
+**Why it doesn't do selective regeneration:**
+
+- The `n_feedback` node only adds feedback to memory
+- There is no edge from feedback to a selective create with subset of stickers
+- The agent's graph doesn't have a "regenerate selected as N×N" node
+
+#### 3. No Content Moderation
+
+**CRITICAL FINDING:** The actual prompt used was completely innocent:
+
+```
+Subject: a round blue face with big eyes and a smiling mouth.
+Style: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.
+```
+
+The prompt contains NO references to:
+
+- Superman
+- Dubai/UAE
+- Burkah
+- Woman
+- Cultural or religious references
+
+**The model hallucinated racist content entirely on its own.** Higgsfield's image generation model decided to generate "superman as UAE woman in burkah" from a prompt about a "round blue face with big eyes". This is a severe provider safety failure.
+
+**Current state:**
+
+- The vision judge (`vision/judge.py`) only judges sticker quality (concept, expression, style, artefacts)
+- It does NOT judge content safety (racism, hate speech, offensive content)
+- The judge's system prompt (line 36-44) only mentions quality, not safety
+- There is no separate moderation step before or after generation
+- The provider's content filter FAILED completely
+
+**Why it didn't flag racist content:**
+
+- The judge's `REASONS` list (line 31-33) does not include content safety codes
+- The system prompt doesn't instruct the model to check for offensive/racist content
+- Higgsfield's own safety filters failed to catch this racist output
+- The user only sees the result after it's generated
+
+#### 4. Model Selection UI is Hardcoded
+
+**Current state in `llm.py`:**
+
+- Line 24: `LOCAL_MODEL = "qwen3.5-4b:2"` - hardcoded, never queries LM Studio
+- Line 59-63: `local_model()` returns the hardcoded value or env var override
+- Line 85-95: `provider()` chooses local|openai|auto but never lists available models
+- Line 6: `reasoning_effort: "none"` is hardcoded for local models (no UI toggle)
+
+**Current state in `agent.js`:**
+
+- Line 98-100: The pill shows the model name but has no selector
+- Line 216-219: Settings panel only has grid and "ask before spending" - no model selection
+- No UI for:
+  - Choosing between cloud/local
+  - Listing available LM Studio models
+  - Listing registered cloud providers
+  - Toggling thinking mode
+
+### Required Changes
+
+#### 1. Fix Image Click Metadata Passing
+
+**Option A: Improve resolver rules (minimal change)**
+
+- Add "this is bad" / "this one is offensive" to NEG pattern in `resolver.py` line 19
+- Add "make another one like this" / "redo this" to positive patterns
+- Ensure selection is used when text refers to "this" without explicit trigger words
+
+**Option B: Always use selection when available (better UX)**
+
+- When a sticker is clicked and the user says anything that could refer to it, default to using the selection
+- Only ask for clarification if the selection is ambiguous (multiple stickers selected)
+
+**Option C: Add explicit actions (best UX)**
+
+- Add context menu on sticker tiles: "Regenerate this", "Keep this, regenerate others", "Report offensive"
+- Pass action type with the message so the agent knows the intent without parsing text
+
+#### 2. Add Selective Regeneration
+
+**Add new graph node `n_regenerate_selected`:**
+
+```python
+def n_regenerate_selected(self, state: State) -> dict:
+    t: Turn = state["turn"]
+    selected = t.res.stickers  # ['G012/S3', 'G012/S5', ...]
+    if not selected:
+        return {}
+    # Calculate optimal grid size for the selected count
+    n = len(selected)
+    grid = "1x1" if n == 1 else "2x2" if n <= 4 else "3x3"
+    # Create new generation with only selected stickers as references
+    refs = [{"source": s, "target": None, "role": "STYLE"} for s in selected]
+    r = self.tools.create(t.sess.get("focus", {}).get("generation"), grid=grid, refs=refs)
+    t.trace.retitle(f"regenerating {n} sticker(s) as {grid}")
+    return {"generation": r["generation"]}
+```
+
+**Wire it in the graph:**
+
+- Add edge from `n_feedback` to `n_regenerate_selected` when action type is "regenerate_selected"
+- Add edge from `n_edit` to `n_regenerate_selected` when selected count > 1
+
+#### 3. Add Content Moderation
+
+**Option A: Extend vision judge to include safety (recommended)**
+
+- Add safety reasons to `REASONS`: `"OFFENSIVE_CONTENT"`, `"HATE_SPEECH"`, `"RACIST_CONTENT"`, `"SEXUAL_CONTENT"`, `"VIOLENCE"`
+- Update system prompt to check for content safety
+- Add safety check to sheet generation before cutting
+
+**Option B: Separate moderation layer (better for production)**
+
+- Add a moderation API call (OpenAI moderation API or similar) before generation
+- Check the prompt and generated image for policy violations
+- Block generation before spending credits
+
+**Option C: Provider-side filtering (rely on Higgsfield)**
+
+- Higgsfield may have content filters
+- Expose their filtering status in the job result
+- Show the user why a generation was rejected
+
+#### 4. Add Model Selection UI
+
+**Add model list API in `server.py`:**
+
+```python
+if path == "/api/models/list":
+    """List available models from LM Studio and configured cloud providers."""
+    models = []
+    # Local models from LM Studio
+    try:
+        from mirsal import llm
+        if llm.local_reachable():
+            resp = json.loads(urllib.request.urlopen(f"{llm.local_url()}/models", timeout=5).read())
+            models.extend([{"id": m["id"], "provider": "local", "name": m["id"]} for m in resp.get("data", [])])
+    except Exception:
+        pass
+    # Cloud models (configured)
+    if os.environ.get(llm.KEY_VAR):
+        models.append({"id": llm.DEFAULT_MODEL, "provider": "openai", "name": "OpenAI GPT-4.1-mini"})
+    return self._json(200, {"models": models})
+```
+
+**Add UI selectors in `agent.js`:**
+
+```javascript
+function setSet() {
+  const el = $("ai-set");
+  if (!el) return;
+  el.classList.toggle("on", A.setOpen);
+  if (!A.setOpen) return;
+  const st = A.sess
+    ? A.sess.settings
+    : {
+        grid: "3x3",
+        ask_before_spending: true,
+        provider: "auto",
+        model: null,
+        thinking: false,
+      };
+  const a = A.agent || {};
+  el.innerHTML = `<div class=r><div><b>AI Provider</b><small>Cloud or local model</small></div>
+   <div class=ai-seg>
+    <button data-act=agsetprov data-v=auto class="${st.provider === "auto" ? "on" : ""}">Auto</button>
+    <button data-act=agsetprov data-v=local class="${st.provider === "local" ? "on" : ""}">Local</button>
+    <button data-act=agsetprov data-v=openai class="${st.provider === "openai" ? "on" : ""}">Cloud</button>
+   </div></div>
+  <div class=r><div><b>Model</b><small>${st.provider === "local" ? "Available LM Studio models" : "OpenAI model"}</small></div>
+   <select data-act=agsetmodel>${(a.models || []).map((m) => `<option value="${m.id}" ${st.model === m.id ? "selected" : ""}>${m.name}</option>`).join("")}</select></div>
+  <div class=r><div><b>Thinking</b><small>Show reasoning steps</small></div>
+   <button type=button class="ai-sw${st.thinking ? " on" : ""}" data-act=agsetthink role=switch aria-checked="${!!st.thinking}" aria-label="Thinking"></button></div>
+  <div class=r><div><b>Grid</b><small>How many stickers in one sheet</small></div><div class=ai-seg><button data-act=agsetgrid data-v=3x3 class="${st.grid === "3x3" ? "on" : ""}">3×3</button><button data-act=agsetgrid data-v=2x2 class="${st.grid === "2x2" ? "on" : ""}">2×2</button></div></div>
+  <div class=r><div><b>Ask before spending</b><small>Show the price and wait for your go-ahead</small></div><button type=button class="ai-sw${st.ask_before_spending ? " on" : ""}" data-act=agsetask role=switch aria-checked="${!!st.ask_before_spending}" aria-label="Ask before spending"></button></div>`;
+}
+```
+
+**Add handlers:**
+
+```javascript
+ACT.agsetprov = async (el) => saveSet({ provider: el.dataset.v });
+ACT.agsetmodel = async (el) => saveSet({ model: el.value });
+ACT.agsetthink = async () =>
+  saveSet({ thinking: !(A.sess ? A.sess.settings.thinking : false) });
+```
+
+**Load models on agent load:**
+
+```javascript
+async function loadAgent() {
+  const r = await api("/api/chat/agent");
+  if (r.ok) A.agent = r.j;
+  const mr = await api("/api/models/list");
+  if (mr.ok) A.agent.models = mr.j.models;
+  pill();
+}
+```
+
+**Update LLM client to respect thinking setting:**
+In `llm.py`, update `complete` to use `reasoning_effort` based on setting:
+
+```python
+if prov == "local" and not thinking:
+    optional["reasoning_effort"] = "none"
+```
+
+### Recommendation
 
 **Priority Order:**
 
-1. Fix chat generation hang (Issue 3) - blocks core functionality
-2. Fix animation ghost (Issue 1) - affects visual quality
-3. Add model selection UI (Issue 4) - feature enhancement
-4. Document loop seam design (Issue 2) - no action needed
+1. **Fix image click metadata passing** (HIGH) - Blocks basic chat UX
+2. **Add content moderation** (HIGH) - Safety issue (racist content was generated)
+3. **Fix "which sticker" response routing** (HIGH) - Number replies treated as new generation instead of edit
+4. **Add selective regeneration** (MEDIUM) - Feature enhancement, improves efficiency
+5. **Add model selection UI** (MEDIUM) - Feature enhancement, gives user control
+
+**Quick wins:**
+
+- Improve resolver rules to handle "this is bad" (1 hour)
+- Add "OFFENSIVE_CONTENT" to vision judge reasons (30 minutes)
+- Add thinking toggle to settings UI (30 minutes)
+- Fix intent classification for number-only responses to context (1 hour)
+
+**Larger projects:**
+
+- Add selective regeneration graph node (2-3 hours)
+- Add model list API and full UI (4-6 hours)
+- Implement proper moderation layer (separate from judge) (8+ hours)
+
+---
+
+## Issue 6: Number Response to "Which Sticker" Treated as New Generation
+
+### Description
+
+When the system asks "which sticker has the issue?" and the user replies with a number (e.g., "5"), instead of routing to image edit, the system treats it as a new generation request ("5" as a subject).
+
+### Root Cause
+
+**In `resolver.py` (lines 142-147):**
+When the user says "5", the resolver correctly identifies it as sticker 5:
+
+```python
+# 4. plain numbers ("make number 3 happier", "animate 2 and 5")
+if base and not r.stickers:
+    nums = _numbers(low, base_n)
+    if nums:
+        r.stickers = [f"{base}/S{i}" for i in nums]
+        r.how = "number"
+```
+
+**In `resolver.py` (lines 217-229):**
+The intent classification requires an action verb to classify as EDIT_STICKERS:
+
+```python
+elif has_generation and (refs or concept_edit) and re.search(r"\b(make|redo|regenerate|change|fix|replace|swap|improve|less|more|bigger|smaller|happier|sadder|funnier|cuter|different)\b", t):
+    intents, conf = ["EDIT_STICKERS"], 0.8
+# ... other rules ...
+elif len(t.split()) <= 8 and not t.endswith("?"):
+    intents, conf = ["NEW"], 0.62  # "falcon dancing", "teddy bear with a book": a bare subject is a request
+```
+
+When the user says just "5" (no action verb):
+
+- It's not a CONFIRM/CANCEL (no pending)
+- It's not ANIMATE/SEARCH/SETTINGS (no keywords)
+- It's not EDIT_STICKERS (no action verb like "make", "redo", "change")
+- It's not FEEDBACK (no "like/hate/dislike")
+- It's not SMALLTALK
+- It falls through to line 229: `len(t.split()) <= 8` → classified as NEW (bare subject)
+
+**The problem:** The intent classifier doesn't have context awareness. It doesn't know that the previous message was a clarification question "which sticker has the issue?". It treats every message independently.
+
+### Required Fix
+
+**Option A: Add context-aware intent classification (best UX)**
+
+In `graph.py` `n_understand`, pass the previous message context to `classify`:
+
+```python
+def classify(text: str, has_pending: bool, has_generation: bool, has_selection: bool = False, previous_message: str | None = None) -> tuple[list, float]:
+    # ... existing rules ...
+
+    # NEW: If previous message was a clarification question and current is a number/selection, treat as ANSWER
+    if previous_message and re.search(r"\b(which|what|which one)\b", previous_message.lower()):
+        nums = _numbers(t, 9)  # assume 3x3 max
+        if nums:
+            return ["ANSWER"], 0.9
+
+    # ... rest of rules ...
+```
+
+**Option B: Add special handling in resolver (minimal change)**
+
+In `resolver.py`, add a check for number-only responses:
+
+```python
+def resolve(text: str, ctx: dict) -> Resolution:
+    # ... existing code ...
+
+    # NEW: If text is just a number and there's a generation, assume it's "edit this sticker"
+    if base and not r.stickers and re.match(r"^\d+$", t.strip()):
+        nums = _numbers(t, base_n)
+        if nums:
+            r.stickers = [f"{base}/S{i}" for i in nums]
+            r.how = "number"
+            # Mark it as an edit intent so the graph routes correctly
+            r._implicit_edit = True  # new flag
+
+    # ... rest of code ...
+```
+
+Then in `graph.py` `n_resolve`, check for this flag:
+
+```python
+def n_resolve(self, state: State) -> dict:
+    t: Turn = state["turn"]
+    # ... existing code ...
+
+    # NEW: If resolver marked as implicit edit, add EDIT_STICKERS to queue
+    if getattr(t.res, "_implicit_edit", False) and "EDIT_STICKERS" not in t.queue:
+        t.queue = ["EDIT_STICKERS"] + t.queue
+
+    # ... rest of code ...
+```
+
+**Option C: Add ANSWER intent (most robust)**
+
+Add ANSWER to INTENTS in `brain.py`:
+
+```python
+INTENTS = ("NEW", "ANOTHER", "EDIT_STICKERS", "ANIMATE", "FEEDBACK", "REVIEW", "ASK", "CHANGE_SETTINGS", "SEARCH", "SMALLTALK", "AMBIGUOUS", "ANSWER")
+```
+
+Add classification rule in `resolver.py`:
+
+```python
+def classify(text: str, has_pending: bool, has_generation: bool, has_selection: bool = False) -> tuple[list, float]:
+    # ... existing rules ...
+
+    # NEW: Number-only or selection-only response = ANSWER intent
+    if re.match(r"^\d+$", t.strip()) or (has_selection and re.match(r"^(these|this|those|them|it)$", t)):
+        return ["ANSWER"], 0.9
+
+    # ... rest of rules ...
+```
+
+Add n_answer node in `graph.py`:
+
+```python
+def n_answer(self, state: State) -> dict:
+    t: Turn = state["turn"]
+    if t.res.stickers:
+        t.reply = f"Got it, sticker {', '.join(str(s.split('/')[1][1:]) for s in t.res.stickers)}. What should I do with it?"
+        t.chips = [{"label": "Regenerate it", "text": f"regenerate {t.res.stickers[0].split('/')[1][1:]}"},
+                  {"label": "Edit it", "text": f"edit {t.res.stickers[0].split('/')[1][1:]}"},
+                  {"label": "Keep it", "text": f"keep {t.res.stickers[0].split('/')[1][1:]}"}]
+    else:
+        t.reply = "I couldn't tell which sticker you meant. Click on it or tell me the number."
+    return {}
+```
+
+### Recommendation
+
+**Option C (Add ANSWER intent)** is the most robust because:
+
+- It explicitly handles the "answering a question" case
+- It doesn't assume the user wants to edit (asks what to do)
+- It's consistent with the agent's design (explicit intents)
+- It handles both number-only and selection-only responses
+
+**Quick fix:** Option B (implicit edit flag) is faster to implement (1 hour) but less flexible.
+
+**Priority:** HIGH - This is a major UX frustration. The user can't efficiently give feedback on specific stickers.
+
+---
+
+## Summary
+
+| Issue                                 | Severity | Type        | Action                                                                        |
+| ------------------------------------- | -------- | ----------- | ----------------------------------------------------------------------------- |
+| 1. Animation ghost silhouette         | Medium   | Bug         | Change `close_loop` to use quadratic fade curve                               |
+| 2. Loop seam not overridable          | N/A      | Design      | Intentional - keep as-is                                                      |
+| 3. Chat generation hangs              | High     | Bug         | Add client-side timeout + fix server-side job handling                        |
+| 4. Missing model selection UI         | Medium   | Feature     | Add cloud/local selector, model list, thinking toggle                         |
+| 5. AI Chat UX failures                | High     | Bug/Feature | Fix metadata passing, add moderation, selective regen, model UI               |
+| 6. Number response treated as new gen | High     | Bug         | Add ANSWER intent or context-aware classification for clarification responses |
+
+**Priority Order:**
+
+1. Fix image click metadata passing (Issue 5) - blocks basic chat UX
+2. Add content moderation (Issue 5) - safety issue (racist content was generated)
+3. Fix number response routing (Issue 6) - UX blocker for giving feedback
+4. Fix chat generation hang (Issue 3) - blocks core functionality
+5. Fix animation ghost (Issue 1) - affects visual quality
+6. Add selective regeneration (Issue 5) - feature enhancement
+7. Add model selection UI (Issue 4/5) - feature enhancement
+8. Document loop seam design (Issue 2) - no action needed

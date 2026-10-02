@@ -261,7 +261,11 @@ def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alp
     t0 = time.perf_counter()
     frames = ff.decode_cell(mp4, x, y, cw, ch, max_frames, cap_fps)   # one cell at a time
     t_dec = _ms(t0); t1 = time.perf_counter()
-    calib = calibrate(frames[0], cfg.chroma, cfg.border_px, cfg.threshold)      # sample bg ONCE
+    try:
+        calib = calibrate(frames[0], cfg.chroma, cfg.border_px, cfg.threshold, validate=True)      # sample bg ONCE, validate the key difference
+    except ValueError as e:
+        # Wrong chroma key used (e.g., green key on a blue screen) - fail immediately instead of producing a "blue screen" result
+        return AnimationResult(idx, "FAILED", "wrong_chroma_key", metrics={"error": str(e)[:200], "chroma": cfg.chroma})
     keyed = [key_image(f, cfg, calib).rgba for f in frames]
     return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1), "ms": {"decode": t_dec, "key": _ms(t1)}}, slot, ref_alpha, waive)
 
