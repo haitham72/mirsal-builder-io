@@ -237,8 +237,13 @@ class StoreTests(unittest.TestCase):
     def test_tmp_out_never_touches_the_shared_db(self):
         """The golden-path suite serves temp dirs with the DB up: search and write-through must stay on files."""
         from mirsal.store import sync
-        self.assertFalse(sync.is_default_out(self.tmp))
-        self.assertFalse(sync.enabled(self.tmp))
+        flag = os.environ.pop("MIRSAL_DB_WRITE", None)  # the real .env sets =1; it must not leak into the suite
+        try:
+            self.assertFalse(sync.is_default_out(self.tmp))
+            self.assertFalse(sync.enabled(self.tmp))
+        finally:
+            if flag is not None:
+                os.environ["MIRSAL_DB_WRITE"] = flag
 
     def test_engine_boundary(self):
         code = ("import sys, mirsal.engine.sheet, mirsal.engine.video;"

@@ -15,7 +15,7 @@ The app is in its **dev cycle**: the build phases are retired; what exists is do
 | recorded numbers | `docs/measurements.md` |
 | a prompt to hand to an independent reviewing LLM | `docs/review-prompt.md` |
 
-Work branch: `merge/generate-advanced` (merged into `main`). Restart the server from `mirsal/.venv` before judging anything in the browser (the Studio warns when it runs older code than the files on disk).
+Work branch: `merge/generate-advanced` (merged into `main` on 2026-10-02; `main` is 8 commits behind again — Haitham decides when it fast-forwards). Restart the server from `mirsal/.venv` before judging anything in the browser (the Studio warns when it runs older code than the files on disk).
 Never commit a Telegram token (any token pasted in chat must be revoked), `.env`, `opencode.json` or `mirsal/telegram-id.md`, and never `git add -A` blind.
 
 ## Structure

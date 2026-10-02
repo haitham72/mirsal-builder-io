@@ -66,7 +66,7 @@ mirsal/                                   the app
     store/          Postgres: db, repo, sync (write-through), assets (AssetStore)  (docs/store-and-search.md)      obs/trace.py   LangSmith tracing
     library.py      packs, saved stickers, photo cutout, bulk delete                matte.py   optional AI cutout (onnxruntime)      video_project.py   video / GIF projects
     telegram.py     Send to Telegram (stdlib only)       watch.py   History: the watch folders, Remove -> trash -> Restore       sources.py   the prepared-sheet scanner (never opens media)
-    export.py  measure.py  health.py  writer_lock.py  paths.py  cli.py
+    measure.py  health.py  writer_lock.py  paths.py  cli.py
     console/        server.py (stdlib) + the screens: index.html, studio.css, agent.css, app.js (shell, Library, Settings), agent.js (the AI chat), generate.js, live.js, composer.js,
                     telegram.js, packs.js, editor.js, chat.js, prepare.js, animate.js, history.js
   out/G001/...      results (git-ignored)        out/library/  library.json + files/<img|vid>-NNN-<pack>-<sticker>.<ext>        out/sessions/  chats        out/jobs/  out/tasks/  model_calls.jsonl
