@@ -239,6 +239,11 @@ def is_smalltalk(text: str) -> bool:
     return near(words[0], GREETING_STARTERS) and all(near(w, GREETING_WORDS) for w in words) and "kitty" not in words
 
 
+NAMES_RX = (r"\b(?:rename|re-name|better names?|new names?|nicer names?|suggest (?:some |better )?names?|propose (?:some |better )?names?|check (?:the |their )?names?"
+            r"|name (?:them|these|the stickers|each)|give (?:them|these|the stickers) (?:new |better )?names?)\b")
+"""A request to look at the pictures and propose better names ("suggest better names", "rename them"): it needs AI vision, so it needs the person's yes like a description does."""
+
+
 def classify(text: str, has_pending: bool, has_generation: bool, has_selection: bool = False) -> tuple[list, float]:
     """Intents in order of importance, with a confidence. Below 0.6 the graph asks the model to classify."""
     t = text.strip().lower()
@@ -250,6 +255,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["CANCEL"], 0.95
     if is_smalltalk(t) and not re.search(NEW_VERBS, t):
         return ["SMALLTALK"], 0.95
+    if has_generation and re.search(NAMES_RX, t):
+        return ["NAMES"], 0.9
     intents: list = []
     conf = 0.5
     refs = bool(re.search(r"\b(?:number|no\.?|#)\s*\d|\b\d\b|\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last)\b|\bg\d+\s*/?\s*s\d", t)) \

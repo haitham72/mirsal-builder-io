@@ -110,7 +110,7 @@ class ConsoleTools:
         stickers = []
         for s in res["stickers"]:
             stickers.append({"id": f"{gid}/S{s['index']}", "index": s["index"], "key": s["key"], "name": s.get("name"), "emoji": s.get("emoji"),
-                             "tags": s.get("tags"), "status": s["status"], "reason": s.get("reason"), "still": s["review"]["still"],
+                             "tags": s.get("tags"), "title": s.get("title"), "proposed_title": (s.get("title_proposal") or {}).get("name"), "status": s["status"], "reason": s.get("reason"), "still": s["review"]["still"],
                              "anim": s["review"]["anim"], "anim_status": s.get("anim_status"),
                              "png": f"/out/{gid}/{s['png']}" if s.get("png") else None,
                              "webm": f"/out/{gid}/{s['webm']}" if s.get("webm") else None, "prompt": s.get("prompt")})
@@ -229,6 +229,26 @@ class ConsoleTools:
         res = pl.read_result(self.out, int(gid[1:]))
         return [s["index"] for s in res["stickers"] if s["status"] == "READY"]
 
+    def name_proposals(self, gid: str, ask, allowed=None) -> list:
+        """Look at the pictures of a batch (the person's yes to AI vision, `allowed`) and propose a better name where one does not fit: [{index, current, caption, fits, name}]."""
+        from ..vision import consent, naming
+        self._see(gid)
+        try:
+            return naming.propose(self.out, gid, allowed=allowed, ask=ask)
+        except consent.ConsentRequired as e:
+            raise ToolError(str(e), 409)
+
+    def apply_titles(self, gid: str, indexes: list | None = None) -> dict:
+        """Apply the names that were proposed and are waiting for the person's yes: {index: title}."""
+        from ..vision import naming
+        self._see(gid)
+        return naming.apply(self.out, gid, indexes)
+
+    def pending_titles(self, gid: str) -> dict:
+        from ..vision import naming
+        self._see(gid)
+        return naming.pending(self.out, gid)
+
     def captions(self, gid: str, allowed=None) -> list:
         """The AI caption of every READY sticker of a batch (one vision-model call per cell that has none; a stored caption is read for free). `allowed` must be True: the
         person's yes to AI vision (vision/consent.py); the chat passes it from the session's `allow_vlm`."""
@@ -247,6 +267,7 @@ class FakeTools:
         self.gens = generations or {}
         self._live, self._credits = live, credits
         self.calls: list = []
+        self.proposed: dict = {}
         self.n_jobs = 0
         self.n_gens = max([int(g[1:]) for g in self.gens] or [0])
 
@@ -307,6 +328,35 @@ class FakeTools:
 
     def ready_indexes(self, gid):
         return [s["index"] for s in self.gens[gid]["stickers"] if s["status"] == "READY"]
+
+    def name_proposals(self, gid, ask, allowed=None):
+        self.calls.append(("name_proposals", gid, allowed))
+        if allowed is not True:
+            raise ToolError("AI vision is not allowed", 409)
+        items = [{"index": s["index"], "current": s["key"].replace("_", " "), "caption": f"fake caption {s['index']}"} for s in self.gens[gid]["stickers"] if s["status"] == "READY"]
+        got = ask(items) or {}
+        rows = []
+        for it in items:
+            a = got.get(it["index"]) or {}
+            fits = bool(a.get("fits", True)) or not a.get("name")
+            rows.append({**it, "fits": fits, "name": None if fits else a["name"]})
+            if not fits:
+                self.proposed.setdefault(gid, {})[it["index"]] = a["name"]
+        return rows
+
+    def apply_titles(self, gid, indexes=None):
+        self.calls.append(("apply_titles", gid))
+        mine = self.proposed.get(gid, {})
+        pick = {i: n for i, n in mine.items() if not indexes or i in indexes}
+        for i, n in pick.items():
+            for s in self.gens[gid]["stickers"]:
+                if s["index"] == i:
+                    s["title"] = n
+            mine.pop(i, None)
+        return pick
+
+    def pending_titles(self, gid):
+        return dict(self.proposed.get(gid, {}))
 
     def captions(self, gid, allowed=None):
         self.calls.append(("captions", gid, allowed))

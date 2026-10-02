@@ -467,6 +467,35 @@ class Console:
         t.start()
         return {"id": sid, "message": turn.msg["id"]}
 
+    def kick_naming(self, user: dict | None, sess: dict) -> None:
+        """Start `Agent.auto_name` for every batch of this chat that has finished stickers and was never looked at, when the person allowed AI vision. Cheap to call on every poll: it
+        starts nothing unless there is such a batch, and never twice for one batch at a time."""
+        if sess["settings"].get("allow_vlm") is not True:
+            return
+        user = user or LOCAL
+        busy = self.__dict__.setdefault("_naming", set())
+        named = set(sess.get("named") or [])
+        for subj in sess.get("subjects") or []:
+            for p in subj.get("passes") or []:
+                gid = p.get("generation")
+                if not gid or gid in named or (sess["id"], gid) in busy or not p.get("ready"):
+                    continue
+                busy.add((sess["id"], gid))
+                _, _, agent, _ = self.chat_parts(user)
+                ctx = contextvars.copy_context()
+                ctx.run(pl.OWNER.set, user["id"])
+
+                def run(agent=agent, sid=sess["id"], gid=gid):
+                    try:
+                        agent.auto_name(sid, gid)
+                    except Exception as e:                           # a naming pass must never take the server down
+                        print(f"[mirsal] naming pass {sid}/{gid}: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+                    finally:
+                        busy.discard((sid, gid))
+                t = threading.Thread(target=ctx.run, args=(run,), daemon=True)
+                self._chat_threads = [x for x in getattr(self, "_chat_threads", []) if x.is_alive()] + [t]
+                t.start()
+
     def wait_chat(self, timeout: float = 60.0) -> None:
         end = time.time() + timeout
         for t in list(getattr(self, "_chat_threads", [])):
@@ -842,7 +871,10 @@ def make_handler(c: Console):
                 from ..agent.memory import SessionError as _SE
                 store, tools, _agent, ag = c.chat_parts(self.user)
                 try:
-                    return self._json(200, ag.hydrate(store, tools, store.load(path.rsplit("/", 1)[1])))
+                    sess = store.load(path.rsplit("/", 1)[1])
+                    store.refresh(sess)
+                    c.kick_naming(self.user, sess)                     # AI vision allowed + finished stickers + never looked at: the assistant looks (its own message, its own thread)
+                    return self._json(200, ag.hydrate(store, tools, sess))
                 except _SE as e:
                     raise pl.PipelineError(str(e), e.code)
             if path == "/api/openapi.json":      # the HTTP contract (console/openapi.py; tests/test_openapi.py guards it against drift)

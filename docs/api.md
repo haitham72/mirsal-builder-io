@@ -74,7 +74,7 @@ Live generation (Higgsfield): `POST /api/live/cost | sheet | video`, `POST /api/
 
 ## Events (SSE)
 
-`GET /api/generations/{id}/events` (`Last-Event-ID` or `?after=` to replay): `text/event-stream`, one frame per event, `id:` is the stream id.
+`GET /api/ai` (the active AI backend, the person's choice and what is available) · `POST /api/ai/backend {backend: auto | local | cloud}` (owner only) · `GET /api/generations/{id}/events` (`Last-Event-ID` or `?after=` to replay): `text/event-stream`, one frame per event, `id:` is the stream id.
 Names: `generation_started, sheet_generated, sticker_processing, sticker_ready, sticker_failed, animation_started, animation_ready, video_sheet_ready, review_decided,
 pack_complete, generation_failed`. Payload: `{event, generation_id, stage, status, ts, ms, actor?, decision?, gate?, index?, sticker_id?, asset_url?, trace_run_id?}`.
 

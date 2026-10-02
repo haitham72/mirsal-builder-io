@@ -688,3 +688,63 @@ class BlockedSheet(Base):
         m = self.say("", action={"type": "retry_sheet", "generation": "G012"})
         self.assertFalse([c for c in self.tools.calls if c[0] == "create"])
         self.assertIn("nothing to redo", m["text"])
+
+
+class NamesFromPictures(Base):
+    """2026-10-02: once AI vision is allowed, the model looks at the pictures and proposes a better name only where one does not fit; the person applies it."""
+
+    def _ask(self, items):
+        return {1: {"fits": True}, 3: {"fits": False, "name": "Happy boy holding a red heart"}}
+
+    def setUp(self):
+        super().setUp()
+        self.agent.brain = Brain(complete=lambda s, u: ('{"stickers": [{"index": 1, "fits": true}, {"index": 3, "fits": false, "name": "Happy boy holding a red heart"}]}', {"model": "fake"}))
+        self.seed("G096", subject="eid mubarak greetings", keys=[f"eid_{i}" for i in range(1, 10)])
+
+    def test_asking_for_better_names_asks_for_vision_first_and_then_proposes(self):
+        m = self.say("suggest better names")
+        self.assertEqual([c.get("action") for c in m["chips"]], ["confirm", "cancel"])
+        self.assertEqual(self.sess()["pending"]["type"], "names")
+        self.assertFalse([c for c in self.tools.calls if c[0] == "name_proposals"])           # nothing is looked at before the yes
+        m = self.say("", action={"type": "confirm"})
+        self.assertIs(self.sess()["settings"]["allow_vlm"], True)
+        self.assertIn("S3", m["text"])
+        self.assertIn("Happy boy holding a red heart", m["text"])
+        self.assertNotIn("S1:", m["text"])                                                    # S1 fits: it is not listed
+        self.assertEqual([c.get("action") for c in m["chips"]], ["names_apply", "names_keep"])
+        self.assertEqual(m["chips"][0]["generation"], "G096")
+
+    def test_applying_changes_only_the_proposed_titles(self):
+        s = self.sess(); s["settings"]["allow_vlm"] = True; self.store.save(s)
+        self.say("rename them")
+        m = self.say("", action={"type": "names_apply", "generation": "G096"})
+        self.assertIn("Renamed S3", m["text"])
+        self.assertEqual(self.tools.gens["G096"]["stickers"][2].get("title"), "Happy boy holding a red heart")
+        self.assertIsNone(self.tools.gens["G096"]["stickers"][0].get("title"))
+
+    def test_keeping_the_names_changes_nothing(self):
+        s = self.sess(); s["settings"]["allow_vlm"] = True; self.store.save(s)
+        self.say("rename them")
+        m = self.say("", action={"type": "names_keep", "generation": "G096"})
+        self.assertIn("Kept", m["text"])
+        self.assertFalse([c for c in self.tools.calls if c[0] == "apply_titles"])
+
+    def test_with_vision_off_nothing_is_sent(self):
+        s = self.sess(); s["settings"]["allow_vlm"] = False; self.store.save(s)
+        m = self.say("suggest better names")
+        self.assertIn("off", m["text"])
+        self.assertFalse([c for c in self.tools.calls if c[0] == "name_proposals"])
+
+    def test_the_assistant_looks_by_itself_once_per_batch_when_vision_is_allowed(self):
+        s = self.sess(); s["settings"]["allow_vlm"] = True; self.store.save(s)
+        self.assertTrue(self.agent.auto_name(self.sid, "G096"))
+        msgs = self.sess()["messages"]
+        self.assertEqual(msgs[-1]["role"], "assistant")
+        self.assertIn("Happy boy holding a red heart", msgs[-1]["text"])
+        self.assertEqual(msgs[-1]["status"], "done")
+        self.assertFalse(self.agent.auto_name(self.sid, "G096"), "once per batch")
+        self.assertEqual(len([c for c in self.tools.calls if c[0] == "name_proposals"]), 1)
+
+    def test_the_assistant_never_looks_without_the_yes(self):
+        self.assertFalse(self.agent.auto_name(self.sid, "G096"))
+        self.assertFalse([c for c in self.tools.calls if c[0] == "name_proposals"])

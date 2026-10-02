@@ -36,6 +36,13 @@ want next. Keep every generation and sticker id (G012, G012/S3) exactly. Do not 
 """ + llm.DATA_RULE
 
 
+NAMES_SYSTEM = """You check the names of stickers against what their pictures show. You get numbered stickers, each with its CURRENT name and a one-sentence description of the picture.
+For each sticker say whether the name fits the picture. Keep a name that is roughly right. If it does not fit, give a better one: 2 to 5 plain English words naming the character and the feeling or action,
+no quotes, no emoji, no numbers (for example "Happy boy holding a red heart"). Reply with ONE JSON object only:
+{"stickers": [{"index": 1, "fits": true}, {"index": 3, "fits": false, "name": "Happy boy holding a red heart"}]}
+""" + llm.DATA_RULE
+
+
 def target() -> dict:
     """Which model runs the agent: MIRSAL_AGENT_PROVIDER local|openai|auto. Auto prefers the local model (free) when it answers."""
     llm._load_dotenv()
@@ -116,6 +123,21 @@ class Brain:
         valid = {s["index"] for s in stickers}
         nums = [int(n) for n in (d.get("numbers") or []) if str(n).isdigit() and int(n) in valid]
         return nums or None
+
+    def name_check(self, items: list) -> dict | None:
+        """items = [{index, current, caption}] -> {index: {"fits": bool, "name": str}} for the stickers the model answered about, or None (no model, or an answer that is not usable).
+        A proposal only: nothing is renamed here (vision/naming.py)."""
+        listing = "\n".join(f"{i['index']}: name={i['current']} | picture={i['caption']}" for i in items)
+        d = self._json("LLM_NAMES", NAMES_SYSTEM, llm.fence("STICKERS", listing, 4000))
+        rows = d.get("stickers") if isinstance(d, dict) else d if isinstance(d, list) else None
+        if not isinstance(rows, list):
+            return None
+        valid = {i["index"] for i in items}
+        out = {}
+        for r in rows:
+            if isinstance(r, dict) and str(r.get("index", "")).isdigit() and int(r["index"]) in valid:
+                out[int(r["index"])] = {"fits": r.get("fits") is not False, "name": str(r.get("name") or "").strip()}
+        return out or None
 
     def answer(self, question: str, facts: str) -> str | None:
         text = self._ask("LLM_ANSWER", ANSWER_SYSTEM, f"{llm.fence('FACTS', facts, 4000)}\n\n{llm.fence('QUESTION', question, 600)}", 300)

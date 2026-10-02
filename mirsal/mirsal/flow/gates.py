@@ -100,6 +100,7 @@ def gate_info(res: dict) -> dict:
 
 
 # ---------- reviews ----------
+@pl.serialized
 def review(out: Path, gid: int, gate: str, decision: str, index=None, note=None, by: str = "human") -> dict:
     decision = str(decision).upper()
     if gate not in GATES:
@@ -549,6 +550,7 @@ def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: s
     return {"added": len(added), "already": len(keep) - len(added), "replaced": replaced, "kind": kind, "pack_id": pid, "indices": keep}
 
 
+@pl.serialized
 def drop(out: Path, gid: int, index: int, dropped: bool) -> dict:
     """The x on a tile: drop a sticker from the set (a human reject at the stage it is in), or bring it back. Never deletes."""
     res = pl.read_result(out, gid)

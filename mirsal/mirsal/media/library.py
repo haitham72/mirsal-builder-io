@@ -407,7 +407,7 @@ class Library:
         f = Path(out) / st["generation_id"] / rel
         if not f.is_file():
             raise LibraryError("sticker file is missing", 404)
-        s = self.add_bytes(pid, f.read_bytes(), f.suffix.lstrip("."), (name or "").strip()[:60] or readable_name(t.get("key") or f.stem), kind, (emoji or "").strip()[:20] or t.get("emoji") or "🙂",
+        s = self.add_bytes(pid, f.read_bytes(), f.suffix.lstrip("."), (name or "").strip()[:60] or (t.get("title") or readable_name(t.get("key") or f.stem)), kind, (emoji or "").strip()[:20] or t.get("emoji") or "🙂",
                            {"generation": st["generation_id"], "index": index}, gen_file_name=t.get("name") or f.stem)
         return self.set_file_name(pid, s["id"], t.get("name") or f.stem)
 

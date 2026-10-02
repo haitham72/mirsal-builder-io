@@ -127,7 +127,7 @@ function botHTML(m){
  const tr=steps.length||work?traceHTML(m,work):'';
  const text=m.text?`<div class="ai-text${m.status==='error'?' ai-err':''}">${AIU.md(m.text)}</div>`:'';
  const cards=(m.cards||[]).map((c,i)=>cardHTML(c,m,i)).join('');
- const chips=(m.chips&&m.chips.length&&!work)?`<div class=ai-chips>${m.chips.map(c=>c.action?`<button class="ai-chip${c.action==='confirm'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}">${AIU.esc(c.label)}</button>`
+ const chips=(m.chips&&m.chips.length&&!work)?`<div class=ai-chips>${m.chips.map(c=>c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}>${AIU.esc(c.label)}</button>`
    :`<button class=ai-chip data-act=agchip data-text="${AIU.esc(c.text||c.label)}">${AIU.esc(c.label)}</button>`).join('')}</div>`:'';
  return `<div class=ai-av>${ic('ai')}</div><div class=ai-body>${tr}${text}${cards}${chips}</div>`}
 
@@ -180,7 +180,7 @@ function tileHTML(s){
   :s.png?`<img src="${AIU.esc(s.png)}" alt="${AIU.esc(s.key||'')}" draggable=false loading=lazy>`:'';
  const emo=Array.isArray(s.emoji)?s.emoji.join(''):(s.emoji||'');
  const badge=s.still==='APPROVED'?`<span class=ag-bd title="Approved">${ic('check')}</span>`:s.still==='REJECTED'?`<span class="ag-bd is-no" title="Rejected">${ic('x')}</span>`:'';
- const cap=s.wait?'':`<b>${s.index!=null?s.index:''}</b><span>${AIU.esc(String(s.key||s.name||'').replace(/_/g,' '))} ${AIU.esc(emo)}</span>`;
+ const cap=s.wait?'':`<b>${s.index!=null?s.index:''}</b><span>${AIU.esc(String(s.title||s.key||s.name||'').replace(/_/g,' '))} ${AIU.esc(emo)}</span>`;
  return `<figure class="ag-tile${A.sel.has(id)?' is-sel':''}${bad?' is-bad':''}${wait?' is-wait':''}" data-act=agtile data-id="${AIU.esc(id)}"><div class=ag-ph>${media}</div>${badge}<figcaption class=ag-nm>${cap}</figcaption></figure>`}
 
 /* ---------- carousel: arrows, dots, drag with a mouse, native swipe on touch */
@@ -206,7 +206,7 @@ function selChips(){const el=$('ai-sel');if(!el)return;const n=A.sel.size;
  el.innerHTML=n?`<span class=ai-selchip>${n} selected: say what to change<button data-act=agsel aria-label="Clear selection">${ic('x')}</button></span>`:'';
  const ta=$('ai-in');if(ta)ta.placeholder=n?'e.g. make these more energetic':'Make or change stickers'}
 ACT.agchip=el=>agSend(el.dataset.text);
-ACT.agaction=el=>agSend('',{type:el.dataset.type});
+ACT.agaction=el=>agSend('',el.dataset.g?{type:el.dataset.type,generation:el.dataset.g}:{type:el.dataset.type});
 ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});
 ACT.agtrace=el=>{const k=el.dataset.m;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstep=el=>{const k=el.dataset.k;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};

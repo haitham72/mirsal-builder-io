@@ -60,6 +60,18 @@ def current_owner() -> str:
 _IO_LOCK = threading.RLock()     # one reader or writer of result.json at a time inside this process
 
 
+def serialized(fn):
+    """A read-modify-write of result.json that must not interleave with another one in this process (two reviews of different stickers arriving together used to read the same
+    snapshot, and the second write dropped the first decision): the whole call holds the lock (it is re-entrant, so a serialized function may call another)."""
+    import functools
+
+    @functools.wraps(fn)
+    def run(*a, **k):
+        with _IO_LOCK:
+            return fn(*a, **k)
+    return run
+
+
 def _atomic_write(path: Path, data: bytes) -> None:
     """tmp file + os.replace. On Windows the replace fails with WinError 5 while anything (a polling request, an
     antivirus scan) has the target open, so in-process readers take the same lock and a foreign holder is retried."""
@@ -271,6 +283,30 @@ def new_sticker(gid: int, task_slug: str, s: dict, created: float | None = None)
             "status": "PENDING", "reason": None, "report": [], "metrics": {}, "png": None,
             "anim_status": "NOT_REQUESTED", "anim_reason": None, "anim_metrics": {}, "webm": None,
             "review": {"still": "PENDING", "anim": "NONE"}, "history": []}
+
+
+@serialized
+def set_titles(out: Path, gid: int, titles: dict, actor: str = "human", via: str = "") -> dict:
+    """Give stickers a display TITLE ({index: "Happy boy with a red heart"}): what people read in the chat, the pack and the library. The file name and the key never change (the database,
+    the pool and the pack use them). Every change is a history line of the sticker (`naming`). Returns {index: title} of what changed."""
+    res = read_result(out, gid)
+    changed = {}
+    for k, v in titles.items():
+        i = int(k)
+        title = " ".join(str(v or "").split())[:60]
+        if not title or not 1 <= i <= len(res["stickers"]):
+            continue
+        st = res["stickers"][i - 1]
+        if st.get("title") == title:
+            continue
+        old = st.get("title")
+        st["title"] = title
+        st.pop("title_proposal", None)
+        hist(st, "naming", actor, "TITLE", title, detail={"was": old, "via": via})
+        changed[i] = title
+    if changed:
+        write_result(out, gid, res)
+    return changed
 
 
 def hist(st: dict, stage: str, actor: str, decision: str, reason: str | None = None, ref: str | None = None, detail=None) -> None:

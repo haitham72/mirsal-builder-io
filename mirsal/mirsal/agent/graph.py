@@ -111,7 +111,7 @@ class Agent:
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "another": self.n_another,
                  "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -145,7 +145,7 @@ class Agent:
             for m in sess["messages"]:                           # we hold the lock, so nobody is running a turn: a "working" message is one that died with its server
                 if m.get("status") == "working":
                     m.update(status="error", text=m.get("text") or INTERRUPTED)
-            label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "retry_sheet": "Try the sheet again", "vision_yes": "Allow AI vision", "vision_no": "Keep AI vision off"}.get((action or {}).get("type"), "")
+            label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again", "vision_yes": "Allow AI vision", "vision_no": "Keep AI vision off"}.get((action or {}).get("type"), "")
             self.store.add_message(sess, "user", label)
             msg = self.store.add_message(sess, "assistant", "", status="working")
             self.store.save(sess)
@@ -198,6 +198,8 @@ class Agent:
             t.intents, t.conf = [t.action["type"].upper()], 1.0
         elif t.action and t.action.get("type") == "retry_sheet":
             t.intents, t.conf = ["RETRY"], 1.0
+        elif t.action and t.action.get("type") in ("names_apply", "names_keep"):
+            t.intents, t.conf = ["NAMES_DECIDE"], 1.0
         elif t.action and t.action.get("type") in ("vision_yes", "vision_no"):
             t.intents, t.conf = ["VISION"], 1.0
         elif asked and asked.get("intents") and is_sticker_answer(t.text, bool(t.selected)):
@@ -214,12 +216,12 @@ class Agent:
                     t.intents, t.conf = got, 0.7
         names = {"NEW": "a new set", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
-                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
+                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                  "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "ASK": "ask", "SEARCH": "search",
-                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry"}
+                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
 
@@ -249,7 +251,7 @@ class Agent:
 
     def n_resolve(self, state: State) -> dict:
         t: Turn = state["turn"]
-        needs = [q for q in t.queue if q in ("edit", "feedback", "animate", "ask", "review", "another")]
+        needs = [q for q in t.queue if q in ("edit", "feedback", "animate", "ask", "review", "another", "names")]
         if not needs:
             return {}
         for gid in self._named_batches(t.sess, t.text):                       # "make G012/S3 happier": a batch the Studio made becomes a pass of this chat
@@ -383,6 +385,10 @@ class Agent:
             except ToolError as e:
                 t.reply = f"I couldn't start the animation: {e}"
                 t.trace.end("not started", ok=False)
+        elif p["type"] == "names":                          # the same consent, asked because the person wanted names looked at
+            t.sess["settings"]["allow_vlm"] = True
+            t.trace.retitle(f"looking at {self._nm(t.sess, p['generation'])}")
+            self._run_names(t, p["generation"])
         elif p["type"] == "describe":                       # "Allow AI vision of generated media?" answered yes: asked once, remembered in the session
             t.sess["settings"]["allow_vlm"] = True
             t.trace.retitle(f"looking at {self._nm(t.sess, p['generation'])}")
@@ -736,6 +742,107 @@ class Agent:
                            note=f"a new sheet for {name}: the first could not be cut")
         return {}
 
+    # -- names: the vision model looks at the pictures and proposes a better name where the current one does not fit ----------------------------------------------
+    def n_names(self, state: State) -> dict:
+        t: Turn = state["turn"]
+        gen = t.res.generation or (t.sess.get("focus") or {}).get("generation") or (self.store.latest_pass(t.sess) or {}).get("generation")
+        if not gen:
+            t.reply = "Which batch should I look at? Make some stickers first, or tell me its name."
+            return {}
+        allow = t.sess["settings"].get("allow_vlm")
+        t.trace.retitle(f"looking at {self._nm(t.sess, gen)}")
+        if allow is False:
+            t.reply = "AI vision is off for this chat, so I won't send the pictures to a model. Say \"allow AI vision\" and ask again."
+            t.trace.end("AI vision is off", ok=False)
+            return {}
+        if allow is None:
+            t.sess["pending"] = {"type": "names", "generation": gen}
+            t.reply = (f"To check the names of **{self._nm(t.sess, gen)}** I send its pictures to the vision model (the local one when LM Studio is running, otherwise the cloud one). "
+                       "Allow AI vision of generated media? I only ask once.")
+            t.chips = [{"label": "Allow AI vision", "action": "confirm"}, {"label": "Not now", "action": "cancel"}]
+            t.trace.end("waiting for your yes")
+            return {}
+        self._run_names(t, gen)
+        return {}
+
+    def _run_names(self, t: Turn, gen: str) -> None:
+        try:
+            rows = self.tools.name_proposals(gen, self.brain.name_check if self.brain.available else (lambda items: None), allowed=True)
+        except ToolError as e:
+            t.reply = str(e) if e.code != 404 else "I can't find that batch."
+            t.trace.end("could not look", ok=False)
+            return
+        self._names_reply(t, gen, rows)
+        t.trace.end("checked")
+
+    def _names_reply(self, t: Turn, gen: str, rows: list) -> None:
+        nm = self._nm(t.sess, gen)
+        t.generation = gen
+        t.trace.step(f"looked at {len(rows)} sticker{'s' if len(rows) != 1 else ''}")
+        change = [r for r in rows if not r["fits"]]
+        if not rows:
+            t.reply = f"**{nm}** has no finished stickers to look at yet."
+        elif not change:
+            t.reply = f"I looked at all {len(rows)} stickers of **{nm}**: the names fit the pictures."
+        else:
+            t.reply = f"I looked at **{nm}**. These names do not fit the picture:\n" + "\n".join(f"S{r['index']}: \"{r['current']}\" -> **{r['name']}**" for r in change)
+            t.chips = [{"label": "Apply the new names", "action": "names_apply", "generation": gen}, {"label": "Keep my names", "action": "names_keep", "generation": gen}]
+
+    def n_names_decide(self, state: State) -> dict:
+        t: Turn = state["turn"]
+        gen = str((t.action or {}).get("generation") or "")
+        if (t.action or {}).get("type") == "names_keep":
+            t.reply = "Kept: the names stay as they are."
+            return {}
+        try:
+            done = self.tools.apply_titles(gen)
+        except ToolError as e:
+            t.reply = str(e)
+            return {}
+        t.generation = gen or None
+        t.trace.task("renaming")
+        t.trace.step(f"renamed {len(done)} sticker{'s' if len(done) != 1 else ''}")
+        t.trace.end("recorded in each sticker's history")
+        t.reply = ("Renamed " + ", ".join(f"S{i}" for i in sorted(done)) + ". The files and the search keep their own names; only what you read changed.") if done else "There was nothing waiting to rename."
+        return {}
+
+    def auto_name(self, sid: str, gid: str) -> bool:
+        """Once AI vision is allowed, a batch that has finished stickers gets looked at without being asked: the answer arrives as a message of its own in the chat (a turn the assistant starts
+        itself, so it takes the session's lock like any turn and is skipped, to be tried at the next poll, when the person is mid-turn). Once per batch (`named`). Returns True when it ran."""
+        lock = self.cache.lock(f"session:{sid}")
+        try:
+            lock.__enter__()
+        except cachemod.Busy:
+            return False
+        try:
+            sess = self.store.load(sid)
+            if sess["settings"].get("allow_vlm") is not True or gid in sess.setdefault("named", []):
+                return False
+            try:
+                if not self.tools.ready_indexes(gid):
+                    return False
+            except ToolError:
+                return False
+            sess["named"].append(gid)
+            msg = self.store.add_message(sess, "assistant", "", status="working")
+            self.store.save(sess)
+            t = Turn(sid, "", [], None, sess, msg, Trace(self.store, sess, msg))
+            t.trace.task(f"looking at {self._nm(sess, gid)}")
+            try:
+                rows = self.tools.name_proposals(gid, self.brain.name_check if self.brain.available else (lambda items: None), allowed=True)
+                self._names_reply(t, gid, rows)
+                t.trace.end("checked")
+                ok = True
+            except Exception as e:
+                t.reply, ok = "I could not look at the pictures this time; nothing changed.", False
+                t.trace.end("could not look", ok=False)
+                msg["error"] = f"{type(e).__name__}: {e}"[:300]
+            msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done" if ok else "error")
+            self.store.save(sess)
+            return True
+        finally:
+            lock.__exit__(None, None, None)
+
     def n_vision(self, state: State) -> dict:
         """The answer to the early question: only the setting changes (a pending go-ahead, if any, is untouched)."""
         t: Turn = state["turn"]
@@ -788,7 +895,7 @@ class Agent:
         sess = t.sess
         if sess["settings"].get("allow_vlm") is not None or sess.get("vision_asked") or (t.action or {}).get("type") in ("vision_yes", "vision_no"):
             return False
-        if sess.get("awaiting") or (sess.get("pending") or {}).get("type") == "describe" or any(x in ("CONFIRM", "CANCEL") for x in t.intents) and not sess["interactions"]:
+        if sess.get("awaiting") or (sess.get("pending") or {}).get("type") in ("describe", "names") or any(x in ("CONFIRM", "CANCEL") for x in t.intents) and not sess["interactions"]:
             return False                                  # a question of mine is open (which sticker? the describe consent): one question at a time
         sess["vision_asked"] = True
         t.reply = (t.reply + "\n\n" if t.reply else "") + self.VISION_ASK
