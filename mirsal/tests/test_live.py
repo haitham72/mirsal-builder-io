@@ -109,6 +109,71 @@ class FulfilTests(Base):
         row = json.loads((self.out / "model_calls.jsonl").read_text().splitlines()[-1])
         self.assertEqual((row["kind"], row["model"], row["cost"], row["external_task_id"]), ("IMAGE_SHEET", "nano_banana_flash", 2.0, "fake-job-1"))
 
+    def test_several_paid_jobs_wait_at_the_same_time_but_are_created_one_by_one(self):
+        """Haitham, 2026-10-02: several sheets "all at once". The lock now covers only deciding, the cap check, the creation and storing the ticket; the wait (a minute or two) is outside
+        it, so jobs overlap there, up to MIRSAL_PAID_PARALLEL at once. Creation stays one at a time and every ticket is stored before anything waits (rule 10)."""
+        import os, threading, time
+        os.environ["MIRSAL_PAID_PARALLEL"] = "3"
+        self.addCleanup(os.environ.pop, "MIRSAL_PAID_PARALLEL", None)
+        js = [self.sheet_job()[0] for _ in range(3)]
+        live = {"now": 0, "max": 0}
+        mu = threading.Lock()
+
+        def at_wait(ticket):
+            with mu:
+                live["now"] += 1
+                live["max"] = max(live["max"], live["now"])
+            time.sleep(0.4)
+            with mu:
+                live["now"] -= 1
+        self.cli.wait_hook = at_wait
+        res = []
+        ts = [threading.Thread(target=lambda j=j: res.append(jobs.fulfil(self.out, j["id"]))) for j in js]
+        [t.start() for t in ts]
+        [t.join(30) for t in ts]
+        self.assertEqual(sorted(r["status"] for r in res), ["DONE"] * 3)
+        self.assertGreaterEqual(live["max"], 2, "the waits overlapped")
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 3)
+        self.assertEqual(len({r["external_task_id"] for r in res}), 3, "three provider jobs, each with its own ticket")
+
+    def test_the_parallel_limit_is_honoured_and_the_cap_counts_jobs_in_flight(self):
+        import os, threading, time
+        os.environ["MIRSAL_PAID_PARALLEL"] = "1"
+        self.addCleanup(os.environ.pop, "MIRSAL_PAID_PARALLEL", None)
+        live = {"now": 0, "max": 0}
+        mu = threading.Lock()
+
+        def at_wait(ticket):
+            with mu:
+                live["now"] += 1
+                live["max"] = max(live["max"], live["now"])
+            time.sleep(0.3)
+            with mu:
+                live["now"] -= 1
+        self.cli.wait_hook = at_wait
+        js = [self.sheet_job()[0] for _ in range(2)]
+        ts = [threading.Thread(target=lambda j=j: jobs.fulfil(self.out, j["id"])) for j in js]
+        [t.start() for t in ts]
+        [t.join(30) for t in ts]
+        self.assertEqual(live["max"], 1, "with a limit of 1 the old behaviour holds: one at a time")
+        # the cap: 9 credits a day, 4 already spent above, 2 per call; two are in flight (4 + 2 + 2), the third (would be 10) is refused BEFORE it is created
+        os.environ["MIRSAL_PAID_PARALLEL"] = "3"
+        os.environ["MIRSAL_DAILY_CREDITS"] = "9"
+        self.addCleanup(os.environ.pop, "MIRSAL_DAILY_CREDITS", None)
+        before = len([c for c in self.cli.calls if c[:2] == ["generate", "create"]])
+        a, b, c = (self.sheet_job()[0] for _ in range(3))
+        started = threading.Event()
+        self.cli.wait_hook = lambda t: (started.set(), time.sleep(0.5))
+        outs = {}
+        t1 = threading.Thread(target=lambda: outs.update(a=jobs.fulfil(self.out, a["id"])))
+        t1.start(); started.wait(10)
+        t2 = threading.Thread(target=lambda: outs.update(b=jobs.fulfil(self.out, b["id"])))
+        t2.start(); time.sleep(0.1)
+        outs["c"] = jobs.fulfil(self.out, c["id"])
+        [t.join(30) for t in (t1, t2)]
+        self.assertEqual((outs["c"]["status"], "daily credit cap" in (outs["c"]["error"] or "")), ("FAILED", True), "4 spent + 2 + 2 in flight + 2 would pass 9")
+        self.assertEqual(len([x for x in self.cli.calls if x[:2] == ["generate", "create"]]) - before, 2)
+
     def test_a_text_only_video_job_needs_no_start_image(self):
         """The particle effects ask Kling for a clip that starts and ends on an empty screen: there is no picture to start from (request.t2v). Any other video job still refuses a
         missing start image."""
@@ -194,7 +259,7 @@ class FulfilTests(Base):
         self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)
         self.assertEqual(jobs.read(self.out, j["id"])["status"], "DONE")
         self.assertEqual(results[1]["status"], "DONE")
-        self.assertEqual(results[2]["status"], "DONE")                         # the loser reports what is true, it does not run or fail anything
+        self.assertIn(results[2]["status"], ("CLAIMED", "DONE"))               # the loser reports what is true at that moment (the winner may still be waiting), it does not run, pay or fail anything
 
     def test_the_daily_cap_counts_a_call_until_its_row_is_written(self):
         """`done()` ran after the paid lock was released, so a second call could read the spend before the first was booked."""

@@ -233,12 +233,80 @@ def attach_generation(out: Path, jid: str, gid: int) -> dict:
     return update(out, jid, generation=f"G{int(gid):03d}")
 
 
-_PAID = threading.Lock()      # one paid provider call at a time, whoever asks
+_PAID = threading.Lock()      # CREATING a paid provider job (the cap check, the call, the stored ticket) is one at a time, whoever asks
+_SLOT_GUARD = threading.Lock()
+_SLOTS: dict = {}
+
+
+def paid_parallel() -> int:
+    """How many provider jobs may be in flight (created, being waited for) at once. Haitham, 2026-10-02: "all at once" for several sheets / effects. MIRSAL_PAID_PARALLEL, default 3, 1 = the old one-at-a-time."""
+    try:
+        return max(1, min(8, int(os.environ.get("MIRSAL_PAID_PARALLEL", "3"))))
+    except ValueError:
+        return 3
+
+
+@contextlib.contextmanager
+def _slot():
+    """One of the `paid_parallel()` places for a provider job that is being waited for."""
+    n = paid_parallel()
+    with _SLOT_GUARD:
+        sem = _SLOTS.get(n) or _SLOTS.setdefault(n, threading.BoundedSemaphore(n))
+    with sem:
+        yield
+
+
+_WAITING: set = set()
+
+
+def _pid_alive(pid) -> bool:
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except (OSError, ValueError, TypeError):
+        return False
+
+
+def _begin_wait(out: Path, jid: str) -> None:
+    """One waiter per provider job. A resume of a job whose ticket another thread (or another live process) is already waiting for is refused as busy, the way the old whole-call lock
+    refused it: the waiting is no longer under a lock, so it is marked on the job."""
+    with _SLOT_GUARD:
+        pid = _raw(out, jid).get("waiting_pid")
+        if jid in _WAITING or (pid and int(pid) != os.getpid() and _pid_alive(pid)):
+            raise JobBusy(f"{jid} is already being waited for")
+        _WAITING.add(jid)
+    try:
+        update(out, jid, waiting_pid=os.getpid())
+    except Exception:
+        pass
+
+
+def _end_wait(out: Path, jid: str) -> None:
+    with _SLOT_GUARD:
+        _WAITING.discard(jid)
+    try:
+        update(out, jid, waiting_pid=None)
+    except Exception:
+        pass
+
+
+def _inflight(out: Path) -> float:
+    """Credits of the provider jobs that are created but not finished: the daily cap counts them, or three jobs started together would each see an empty ledger."""
+    total = 0.0
+    for f in jobs_dir(out).glob("J*.json"):
+        try:
+            j = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if j.get("status") == "CLAIMED" and j.get("external_task_id"):
+            total += float(j.get("cost_estimate") or 0)
+    return total
 
 
 @contextlib.contextmanager
 def _paid(out: Path):
-    """The in-process lock covers threads; the file lock under out/ covers worker processes (`mirsal worker`), so two paid calls never overlap on one machine."""
+    """The in-process lock covers threads; the file lock under out/ covers worker processes (`mirsal worker`), so two paid CREATIONS never overlap on one machine. It is held only while
+    a job is decided, priced, created and its ticket stored; the wait for the result happens outside it (`_slot` bounds how many wait at once)."""
     from ..runtime.writer_lock import WriterLock
     with _PAID:
         lock = WriterLock(Path(out), "a paid provider call", ".paid.lock").acquire(wait=True)
@@ -301,30 +369,37 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
             media["start_image"] = str(start)
             if _mcat.find("video", model).get("end_image") and req.get("loop", False):
                 media["end_image"] = str(start)
-        with _paid(out):
-            cur = _raw(out, jid)                                                      # read again: another run may have taken this job while we waited for the lock
-            if resume and not (cur["status"] == "CLAIMED" and cur.get("external_task_id") == raw["external_task_id"]):
-                raise JobBusy(f"{jid} was taken by another run")
-            if not resume and (cur["status"] not in ("REQUESTED", "TIMEOUT") or cur.get("external_task_id")):
-                raise JobBusy(f"{jid} was taken by another run")
-            if resume:
-                ticket, est = job["external_task_id"], job.get("cost_estimate")
-            else:
-                est = hf.cost(model, params, prompt, **media)
-                cap = _daily_cap()
-                if cap is not None and _usage.spent_today(out) + est > cap:
-                    raise JobError(f"the daily credit cap ({cap:g}) would be exceeded by this {est:g}-credit call", 402)
-                ticket = hf.create(model, params, prompt, **media)
-                claim(out, jid, ticket)                      # IMMEDIATELY, before waiting
-                update(out, jid, params=dict(params, **({"references": len(refs)} if refs else {})), cost_estimate=est, model=model, stage="working")
-            if resume:
-                update(out, jid, stage="working")
-            res = hf.wait(ticket, timeout_s=max(120, min(timeout_s(), 3600) - 60))
-            update(out, jid, stage="downloading")
-            ext = (res["result_url"].split("?")[0].rsplit(".", 1)[-1] or "bin")[:5].lower()
-            tmp = jobs_dir(out) / jid.upper() / f"download.{ext}"
-            hf.download(res["result_url"], tmp)
-            job = done(out, jid, str(tmp), model, cost=est)         # still under the paid lock: the next call reads a spend that includes this one
+        with _slot():                                                # at most paid_parallel() provider jobs exist at once: the place is taken BEFORE a job is created
+            with _paid(out):
+                cur = _raw(out, jid)                                                      # read again: another run may have taken this job while we waited for the lock
+                if resume and not (cur["status"] == "CLAIMED" and cur.get("external_task_id") == raw["external_task_id"]):
+                    raise JobBusy(f"{jid} was taken by another run")
+                if not resume and (cur["status"] not in ("REQUESTED", "TIMEOUT") or cur.get("external_task_id")):
+                    raise JobBusy(f"{jid} was taken by another run")
+                if resume:
+                    ticket, est = job["external_task_id"], job.get("cost_estimate")
+                else:
+                    est = hf.cost(model, params, prompt, **media)
+                    cap = _daily_cap()
+                    if cap is not None and _usage.spent_today(out) + _inflight(out) + est > cap:
+                        raise JobError(f"the daily credit cap ({cap:g}) would be exceeded by this {est:g}-credit call (counting the jobs already running)", 402)
+                    ticket = hf.create(model, params, prompt, **media)
+                    claim(out, jid, ticket)                      # IMMEDIATELY, before waiting
+                    update(out, jid, params=dict(params, **({"references": len(refs)} if refs else {})), cost_estimate=est, model=model, stage="working")
+                if resume:
+                    update(out, jid, stage="working")
+            # waiting is outside the creation lock: several jobs wait together, up to paid_parallel()
+            _begin_wait(out, jid)
+            try:
+                res = hf.wait(ticket, timeout_s=max(120, min(timeout_s(), 3600) - 60))
+                update(out, jid, stage="downloading")
+                ext = (res["result_url"].split("?")[0].rsplit(".", 1)[-1] or "bin")[:5].lower()
+                tmp = jobs_dir(out) / jid.upper() / f"download.{ext}"
+                hf.download(res["result_url"], tmp)
+                with _paid(out):
+                    job = done(out, jid, str(tmp), model, cost=est)         # under the lock: the next cap check reads a spend that includes this one
+            finally:
+                _end_wait(out, jid)
         try:
             tmp.unlink()
         except OSError:
