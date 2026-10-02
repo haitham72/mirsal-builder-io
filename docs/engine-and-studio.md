@@ -1,9 +1,9 @@
-# Phase 1 — Mirsal Stickers: the architecture as built
+# The engine, the verifier, the gates, the Studio and Telegram: how it is built
 
 High-quality animated stickers (not emoji). One deterministic engine; interfaces on top.
-**This README is the architecture of what Phase 1 built.** Each phase keeps its own README in its own folder (Phase 2 will add `Phase_02/README.md` when it is built); the root `README.md` is only the index. The `phase_0N.md` files are the hand-off for phases that are not built yet. When a step is done it moves into its phase README and disappears from the plan; this folder's `CLAUDE.md` is gone because Phase 1 is built (its history is in git, its open items are in `CLAUDE.md` in this folder).
+**This is the architecture of the sticker engine and everything on it.** (Built as "Phase 1"; the phase names survive only in code comments and git history. What is still open is in `HANDOFF.md`.) Neighbouring docs: [`generation.md`](generation.md) (live generation), [`store-and-search.md`](store-and-search.md) (Postgres, search, photos, tracing), [`agent-and-chat.md`](agent-and-chat.md) (the chat), [`api.md`](api.md) (the HTTP contract).
 
-**Phase 1 is one phase:** the sticker engine, the prompter, the verifier, the golden path with its review gates (1F), the lifecycle console, the desktop Sticker Builder ("Studio" is its main page) and Send to Telegram (1H). Everything below describes it. Parts that wait for Haitham's hand-run on real material are said so under "Verified".
+**The engine layer** is the sticker engine, the prompter, the verifier, the golden path with its review gates (checkpoint 1F), the lifecycle console, the desktop Sticker Builder ("Studio" is its main page) and Send to Telegram (1H). Everything below describes it. Parts that wait for Haitham's hand-run on real material are said so under "Verified".
 
 ## How to run it
 
@@ -23,7 +23,7 @@ Stop with **Ctrl+C**; to restart, run `python -m mirsal serve` again and hard-re
 
 What you get in the browser (left rail): **Generate** (type a request, see the stickers, Animate, Add), **History** (your `Images_gen` / `videos_gen` folders, with Remove; **removed from the rail on 2026-10-01 at Haitham's request**, the Studio's Earlier batches replaced it, the screen's code is still reachable at `#/history`), **Library** (search, recent, packs; Send to Telegram), **Chat** (a local echo), **Create** (photo or text sticker, then the editor) and **Settings** (paths, ffmpeg health, Telegram). Typical path: Generate -> Animate -> Add -> Library -> open the pack -> Send to Telegram; or Create -> drop a photo -> edit -> Save.
 
-Your prepared sheets and videos are read from `Phase_01\Images_gen` and `Phase_01\videos_gen` (never modified); everything the app writes goes to `mirsal\out\` (`G00N\` per generation, `library\` for packs). If `doctor` says `libvpx-vp9 MISSING`, the page still works but final WEBM/animation exports fail: `pip install imageio-ffmpeg` (or a full ffmpeg build, then set `MIRSAL_FFMPEG` to its path).
+Your prepared sheets and videos are read from `inputs\Images_gen` and `inputs\videos_gen` (an older checkout may still keep them under `Phase_01\`; never modified); everything the app writes goes to `mirsal\out\` (`G00N\` per generation, `library\` for packs). If `doctor` says `libvpx-vp9 MISSING`, the page still works but final WEBM/animation exports fail: `pip install imageio-ffmpeg` (or a full ffmpeg build, then set `MIRSAL_FFMPEG` to its path).
 
 ## Other commands (Windows / macOS / Linux)
 
@@ -35,49 +35,44 @@ python -m unittest discover -s tests -t . -v          # stdlib unittest: no pyte
 
 Python >= 3.10. Everything uses `pathlib`; paths come from `mirsal/paths.py` (`MIRSAL_INPUT`, `MIRSAL_OUT` override; `MIRSAL_FFMPEG` overrides ffmpeg).
 
-## Restricted network / library policy (applies to every phase)
+## Restricted network / library policy
 
 The dev PC has limited internet. So every phase follows these rules:
 - **Stdlib first.** The console is `http.server` + one HTML file: no CDN, no fonts, no npm. Tests use `unittest`.
 - **Minimal wheels:** `numpy`, `opencv-python-headless`, `pillow`; `imageio-ffmpeg` is only a fallback when no system `ffmpeg` is on PATH.
 - **Offline install:** on a connected machine run `pip download -r requirements.txt -d wheels` (same OS + Python version), copy `wheels/` over, then `pip install --no-index --find-links wheels -r requirements.txt`. ffmpeg needs the **libvpx-vp9** encoder (a "full" build).
-- **`python -m mirsal doctor` is the single health check.** Each phase adds its own checks (Postgres, Redis, API keys, model weights). Phase 2+ images and any ML weights (e.g. a matting model) are fetched once on a connected machine and loaded from disk (`docker save/load`, weight files by path).
-- A new dependency needs a reason in its phase plan and a line in `requirements.txt` + `doctor`.
+- **`python -m mirsal doctor` is the single health check.** It checks the engine, Postgres and its write-through counters, Redis, the language and vision models, tracing, Higgsfield, Telegram and the model weights. Images and any ML weights (e.g. a matting model) are fetched once on a connected machine and loaded from disk (`docker save/load`, weight files by path).
+- A new dependency needs a reason in `README.md`'s tables or here, a line in `requirements.txt` and a check in `doctor`.
 
 ## Layout
 
 ```
-Phase_01/                                                   # Haitham's hand-edited watch folders (the app only READS; never renames)
-  Images_gen/img-NNN-<subject>/<sheet>.jpg                  # one folder per variant; NNN = variant folder number
-  videos_gen/vid-NNN-<subject>/<video>.mp4                  # the 3x3 video of the same NNN
-  videos_gen/vid-NNN-<subject>/slices/{quicktime,webm}/<any name> (n).<ext>   # pre-sliced transparent clips, n = grid cell 1..9
-  tracker/tracker.py                                        # optional generation tracker (filenames only)
-mirsal/                                                     # the project (own .gitignore entries: out/, .venv/)
-  mirsal/
-    expander.py     # subject -> the full named set by the AI (lint + one repair round + the built-in sets as fallback); llm.py is its tiny OpenAI client
-    llm.py          # urllib Chat Completions client (OPENAI_API_KEY): key from the environment or mirsal/.env (git-ignored), never logged
-    prompter.py     # the planner stub: task text -> slot JSON -> prompts rebuilt from prompts/templates/*.txt (tags + margin clause)
-    prompts/templates/  # sheet_3x3_v1.txt  sheet_2x2_v1.txt  single_1x1_v1.txt  video_v1.txt  (saved, versioned master prompts)
-    sources.py      # PhaseDirSource: scans the folders above by naming convention; never opens media
-    pipeline.py     # the lifecycle, events, result.json (+ reviews, history, video_sheets); used by CLI and console
-    gates.py        # the golden path's review gates G1-G5, the video sheet build, the returned-video slicing, 1x1 regen, search
-    tasks.py        # the Inbox backend: plan preview, task reserve (out/tasks/NNN.json), watch-folder states, run linked to a task
-    engine/         # PURE: numpy/OpenCV/Pillow/ffmpeg only (config, chroma, grid, render, sheet, video, ffmpeg, verify, video_sheet)
-    watch.py        # History: the watch folders, image + video side by side, Remove -> trash -> Restore
-    telegram.py     # Send to Telegram: Bot API client, plan, send, re-send, the @stickers zip (stdlib only)
-    console/        # server.py (stdlib) + the desktop builder: index.html, studio.css, app.js (shell, Library, Settings), generate.js, history.js, telegram.js, packs.js, editor.js, chat.js ...
-  web/              # PARKED: the React gateway of the first 1G pass. Not served, not maintained; kept in git history for reference
-    library.py      # packs, saved stickers ({subject} {action} names + file_name), photo cutout, bulk delete (desktop builder)
-    matte.py        # optional AI cutout: U2-Net / IS-Net through onnxruntime only (models in mirsal/models/)
-    video_project.py# video / GIF StickerProjects: import, autosave, render (trim, key, layers with timing, WebM/WebP/GIF)
-    cli.py  paths.py
-  tests/            # synthetic fixtures (tests/synth.py), engine + console tests
-  out/G001/...      # results (gitignored)
-  out/library/      # library.json + files/<img|vid>-NNN-<pack>-<sticker>.<ext> (gitignored)
-  out/library/projects/<id>/   # project.json + source.<ext> + frames/ per video / GIF project (gitignored)
+inputs/                                   Haitham's hand-edited watch folders (the app only READS; never renames); formerly Phase_01/
+  Images_gen/img-NNN-<subject>/<sheet>.jpg        one folder per variant; NNN = variant folder number
+  videos_gen/vid-NNN-<subject>/<video>.mp4        the 3x3 video of the same NNN
+  videos_gen/vid-NNN-<subject>/slices/{quicktime,webm}/<any name> (n).<ext>   pre-sliced transparent clips, n = grid cell 1..9
+tools/tracker/tracker.py                  optional generation tracker (filenames only)
+mirsal/                                   the app
+  requirements.txt  docker-compose.yml  .env.example  migrations/*.sql  tests/  out/ (git-ignored)  web/ (a parked React gateway, not served)
+  mirsal/                                 the Python package
+    engine/         PURE: numpy / OpenCV / Pillow / ffmpeg only (config, chroma, grid, render, sheet, video, ffmpeg, verify, video_sheet)
+    pipeline.py     the lifecycle, events, result.json (+ reviews, history, video_sheets)        gates.py   the review gates G1-G5, the video sheet, the returned-video slicing, search
+    prompter.py     task text -> slot JSON -> prompts from prompts/templates/*.txt (versioned)    expander.py  subject -> the full named set by a model (lint, one repair, built-in sets as fallback)
+    emotions.py  styles.py                  the emotion bank and the style presets               tasks.py   the Inbox: plan preview, task reserve (out/tasks/NNN.json)
+    higgsfield.py  model_catalog.py  jobs.py  usage.py  model_calls.py   live generation, jobs as files, credits, the ledger (docs/generation.md)
+    llm.py          chat-completions client for LM Studio (local, hardcoded model) and OpenAI, text and images
+    agent/          the chat: memory, resolver, brain, tools, LangGraph graph (docs/agent-and-chat.md)       vision/   the vision judge and bounded recovery
+    cache.py  events.py                     Redis (disposable) and the per-generation event stream      embed.py   local embeddings       pool.py   the sticker pool
+    store/          Postgres: db, repo, sync (write-through), assets (AssetStore)  (docs/store-and-search.md)      obs/trace.py   LangSmith tracing
+    library.py      packs, saved stickers, photo cutout, bulk delete                matte.py   optional AI cutout (onnxruntime)      video_project.py   video / GIF projects
+    telegram.py     Send to Telegram (stdlib only)       watch.py   History: the watch folders, Remove -> trash -> Restore       sources.py   the prepared-sheet scanner (never opens media)
+    export.py  measure.py  health.py  writer_lock.py  paths.py  cli.py
+    console/        server.py (stdlib) + the screens: index.html, studio.css, agent.css, app.js (shell, Library, Settings), agent.js (the AI chat), generate.js, live.js, composer.js,
+                    telegram.js, packs.js, editor.js, chat.js, prepare.js, animate.js, history.js
+  out/G001/...      results (git-ignored)        out/library/  library.json + files/<img|vid>-NNN-<pack>-<sticker>.<ext>        out/sessions/  chats        out/jobs/  out/tasks/  model_calls.jsonl
 ```
 
-`mirsal/engine/models.py` (a Pydantic contract from an earlier draft) is **not used**: Phase 1 is plain dicts/dataclasses/JSON. Phase 2+ decides whether to revive it.
+The engine is plain dicts, dataclasses and JSON (an unused Pydantic contract file from an earlier draft was deleted on 2026-10-02).
 
 ## Input pairing
 
@@ -178,7 +173,7 @@ The console UI: click any slice (or its name) to open a modal carousel (arrows /
 
 ## Desktop Sticker Builder
 
-One page, eight screens (Chat is a local echo contact: send a sticker or text, it comes back and your message gets a like; messages stay in the browser until Phase 5 adds a real chat backend; from a pack or the Library carousel use **Send to chat**), one stdlib server; routes are hash-based (`#/library`, `#/generate`, `#/create`, `#/editor`, `#/pack/<id>`, `#/animate/<pack>/<sticker>`, `#/export`, `#/chat`, `#/settings`). Look and layout follow `ref/Mirsal-Builder.jpg` (Mirsal blue `#3B82F6`, tokens in one `:root` set at the top of `studio.css`, light surfaces, left rail) and `ref/mirsal_sticker_builder_architecture_design.md`. Look: Inter (bundled `console/fonts/InterVariable.woff2`, SIL OFL, so no CDN), a left rail, and a second column that takes the chat-list position of the mockup and lists the packs (real rows, no fake chats). Editor and animation screens are three white cards (tools/layers, canvas, properties) as in the mockup, plus a History strip (one thumbnail per undo state; click to jump) where the mockup has its bottom strip. Files: `studio.css`, `animate.js` (animated editor), `app.js` (shell, dialogs, Library, Settings, and the Phase 1 Generate/lifecycle console with its carousel and live video preview), `packs.js` (pack manager), `editor.js` (Create, Editor, Export). No inline `onclick` for new code: buttons carry `data-act` and one delegated listener dispatches to `ACT[...]` (inline handlers resolve names on the element first, which once broke `animate`).
+One page, nine screens (**AI** is the landing screen: the agentic chat, see [`agent-and-chat.md`](agent-and-chat.md); **Chat** is still a local echo contact: send a sticker or text, it comes back and your message gets a like; from a pack or the Library carousel use **Send to chat**), one stdlib server; routes are hash-based (`#/agent`, `#/agent/S002`, `#/library`, `#/generate`, `#/create`, `#/editor`, `#/pack/<id>`, `#/animate/<pack>/<sticker>`, `#/export`, `#/chat`, `#/settings`). Look and layout follow `ref/Mirsal-Builder-upscaled.jpg` (Mirsal blue `#3B82F6`, tokens in one `:root` set at the top of `studio.css`, light surfaces, left rail) and `ref/mirsal_sticker_builder_architecture.md`. Look: Inter (bundled `console/fonts/InterVariable.woff2`, SIL OFL, so no CDN), a left rail, and a second column that takes the chat-list position of the mockup and lists the packs (real rows, no fake chats). Editor and animation screens are three white cards (tools/layers, canvas, properties) as in the mockup, plus a History strip (one thumbnail per undo state; click to jump) where the mockup has its bottom strip. Files: `studio.css`, `animate.js` (animated editor), `app.js` (shell, dialogs, Library, Settings, and the Phase 1 Generate/lifecycle console with its carousel and live video preview), `packs.js` (pack manager), `editor.js` (Create, Editor, Export). No inline `onclick` for new code: buttons carry `data-act` and one delegated listener dispatches to `ACT[...]` (inline handlers resolve names on the element first, which once broke `animate`).
 
 **Library backend (`library.py`).** Plain files under `out/library/`: `library.json` (packs -> stickers, atomic write, one lock) and `files/`. Saved names follow the repo convention `<img|vid>-<NNN>-<pack_slug>-<sticker_slug>.<ext>`, NNN counting inside the pack. Adding a generated sticker copies the READY PNG (or WEBM) from `out/G00N/slices/`; saving from the editor posts the 512x512 canvas PNG, which goes through the same validators as engine stickers (dimensions, foreground, size, PNG else lossless WebP). Every pack operation is an API call (`POST /api/packs`, `/api/packs/<id>` for name/cover/order, `.../stickers`, `.../render`, `.../delete`, `GET /api/library`, `POST /api/stickers/delete` (bulk; selected with the square marker, a Ctrl/Shift+click, or an Explorer-style drag box on the pack screen and My Stickers: a plain drag selects what the box touches, Shift adds, Ctrl un-selects what it touches, Ctrl+A selects all, Esc clears; `app.js` `MQ`/`mq*`), `POST /api/cutout`, `GET /lib/<file>`, `GET /ui/<file>` from a whitelist).
 
@@ -301,7 +296,7 @@ The Studio's **Edit** is one concept: the edit is a set of **layers** (text, emo
 
 ## History: the watch folders, with Remove (`watch.py`, `console/history.js`)
 
-History lists what is in `Phase_01/Images_gen` and `Phase_01/videos_gen` **now**: one row per folder number with the sheet folder and its video folder side by side (files, sizes, a small cached thumbnail at `GET /api/watch/thumb/<img folder>`), the generations made from it, **Generate** (that exact folder) and **Remove**. Remove (`POST /api/watch/remove {number, subject}`) never deletes outright: the image and video folder move to `out/trash/<id>/` (the media is not in git, so a mistaken click must be undoable) and appear under "Removed" with **Restore** (back under their own, final names; refused if the name exists again) and **Delete for good** (`/api/watch/restore`, `/api/watch/purge`). Folder names are validated (`img|vid-NNN-<subject>`), so nothing outside the two watch folders can be touched. Generations that used a folder keep their own copies of the sheet; only the prepared-video path reads the watch-folder video, and says so when it is gone.
+History lists what is in `inputs/Images_gen` and `inputs/videos_gen` **now**: one row per folder number with the sheet folder and its video folder side by side (files, sizes, a small cached thumbnail at `GET /api/watch/thumb/<img folder>`), the generations made from it, **Generate** (that exact folder) and **Remove**. Remove (`POST /api/watch/remove {number, subject}`) never deletes outright: the image and video folder move to `out/trash/<id>/` (the media is not in git, so a mistaken click must be undoable) and appear under "Removed" with **Restore** (back under their own, final names; refused if the name exists again) and **Delete for good** (`/api/watch/restore`, `/api/watch/purge`). Folder names are validated (`img|vid-NNN-<subject>`), so nothing outside the two watch folders can be touched. Generations that used a folder keep their own copies of the sheet; only the prepared-video path reads the watch-folder video, and says so when it is gone.
 
 ## Send to Telegram (`telegram.py`, `console/telegram.js`; checkpoint 1H)
 
@@ -332,7 +327,7 @@ Pack screen -> **Send to Telegram**. Bot API over `urllib` (no new dependency); 
 
 | Was planned | As built | Why |
 |---|---|---|
-| Inputs in `mirsal/sets/<subject>/NN/{sheet.png,manifest.json,video.mp4}` + `set.json` (and, later in the build, image/video pairing by take number) | Inputs read in place from `Phase_01/Images_gen/img-NNN-<subject>/` and `Phase_01/videos_gen/vid-NNN-<subject>/`: **one folder per variant, image and video paired by the same folder number NNN**. Pre-sliced clips in `vid-NNN/slices/{quicktime,webm}/<name> (n).<ext>` (n = grid cell) replace slicing the 3x3 mp4 (`.mov` preferred). Names in the watch folders are final and never renamed by the app; a positional guess (`pairing: order`, flagged by `doctor`) exists only as a last resort. `sources.py` (`PhaseDirSource`) replaces `FixtureSource`/`StickerSource` | Matches how Haitham actually generates; no copying, no hand-written JSON |
+| Inputs in `mirsal/sets/<subject>/NN/{sheet.png,manifest.json,video.mp4}` + `set.json` (and, later in the build, image/video pairing by take number) | Inputs read in place from `inputs/Images_gen/img-NNN-<subject>/` and `Phase_01/videos_gen/vid-NNN-<subject>/`: **one folder per variant, image and video paired by the same folder number NNN**. Pre-sliced clips in `vid-NNN/slices/{quicktime,webm}/<name> (n).<ext>` (n = grid cell) replace slicing the 3x3 mp4 (`.mov` preferred). Names in the watch folders are final and never renamed by the app; a positional guess (`pairing: order`, flagged by `doctor`) exists only as a last resort. `sources.py` (`PhaseDirSource`) replaces `FixtureSource`/`StickerSource` | Matches how Haitham actually generates; no copying, no hand-written JSON |
 | `manifest.json` per variant (names, emoji, prompts) | The **prompter stub** (`prompter.py`) expands the task into `prompts.json`: 9 x `{index, id, prompt, key, emoji}` + `sheet_prompt`, `video_prompt`, modular `guidelines`. Plain JSON, no pydantic/LLM | Each sticker gets its own name from the prompter output; same shape a Phase 2 planner must return |
 | `S1.png`..`S9.png` | `<media>-<NNN>-<task_slug>-<key>.<ext>`, e.g. `img-001-teddy_bear_school-teddy_bear_with_a_book.png`, `vid-...webm`, together in `out/G00N/slices/` | Searchable names; Phase 3B pool keys off `key` |
 | Pydantic `models.py`, `ChromaSpec`, `PackManifest` | Dataclasses + dicts (`engine/config.py`, `Report`, `StickerResult`, `AnimationResult`); `mirsal/engine/models.py` left untouched and unused | "No pydantic/langgraph yet" |

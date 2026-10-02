@@ -1,11 +1,13 @@
-"""Phase_01 generation tracker. Run: python tracker.py  ->  http://127.0.0.1:8765
+"""Generation tracker. Run: python tracker.py  ->  http://127.0.0.1:8765
 Scans Images_gen/ and videos_gen/ live on every request (names + sizes only; never opens media).
 Human fields (status, chosen takes, set path, notes) persist in tracker.json beside this file."""
 import json, os, re, sys, tempfile, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)  # Phase_01
+ROOT = next((os.path.join(os.path.dirname(os.path.dirname(HERE)), d) for d in ('inputs', 'Phase_01')
+                 if os.path.isdir(os.path.join(os.path.dirname(os.path.dirname(HERE)), d, 'Images_gen'))),
+                os.path.join(os.path.dirname(os.path.dirname(HERE)), 'inputs'))  # the watch folders (inputs/, or Phase_01/ in an older checkout)
 DB = os.path.join(HERE, "tracker.json")
 LOCK = threading.Lock()
 STATUSES = ["generated", "prepared", "1A_validated", "reviewed", "1B_done", "rejected"]
@@ -57,11 +59,11 @@ def state():
         rows.append(it)
     return {"statuses": STATUSES, "rows": rows}
 
-PAGE = """<!doctype html><meta charset=utf-8><title>Phase_01 tracker</title>
+PAGE = """<!doctype html><meta charset=utf-8><title>Generation tracker</title>
 <style>body{font:14px system-ui;margin:20px;background:#111;color:#eee}table{border-collapse:collapse;width:100%}
 th,td{padding:6px 8px;border-bottom:1px solid #333;text-align:left;vertical-align:top}th{color:#9ab}
 input,select{background:#1c1c1c;color:#eee;border:1px solid #444;padding:3px;font:inherit}small{color:#888}
-.ok{color:#6c6}</style><h3>Phase_01 generation tracker <small id=meta></small></h3>
+.ok{color:#6c6}</style><h3>Generation tracker <small id=meta></small></h3>
 <table><thead><tr><th>ID<th>Subject<th>Image takes<th>Video takes<th>Chosen img<th>Chosen vid<th>Status<th>Set path<th>Notes</thead><tbody id=b></tbody></table>
 <script>
 const sel=(o,v,k,f)=>`<select data-k="${k}" data-f="${f}"><option value="">-</option>${o.map(x=>`<option ${String(x)===String(v)?'selected':''}>${x}</option>`).join('')}</select>`;

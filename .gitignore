@@ -1,5 +1,5 @@
 # Private test photos (people, pets): never commit
-Phase_03/photos/
+inputs/photos/
 # Build outputs
 mirsal/out/
 generated/
@@ -14,7 +14,9 @@ mirsal/mirsal/models/*.onnx
 !mirsal/mirsal/models/u2netp.onnx
 
 # Haitham's input media (478 MB of sheets, 3x3 videos and .mov clips): kept on disk, not in git history.
-# The folder layout and naming rules are documented in README.md and Phase_01/CLAUDE.md.
+# The folder layout and naming rules are documented in README.md ("Inputs"). Older checkouts kept them under Phase_01/.
+inputs/Images_gen/
+inputs/videos_gen/
 Phase_01/Images_gen/
 Phase_01/videos_gen/
 # Old backups pending deletion

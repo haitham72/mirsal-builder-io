@@ -1,8 +1,8 @@
-# Operator loop (Phase 2 S3): fulfilling Mirsal jobs with the Higgsfield CLI
+# Operator loop: fulfilling Mirsal jobs with the Higgsfield CLI
 
 The operator is a Claude Code session (or a script) on a PC where `higgsfield auth login` is done and a
 workspace is selected. Mirsal never holds Higgsfield credentials; it only writes job files. Read
-`Phase_02/higgsfield.md` (S0: the real commands, parameters, costs and the standing model choices:
+`docs/higgsfield.md` (S0: the real commands, parameters, costs and the standing model choices:
 Nano Banana 2 at 2k, Kling v3.0, never `4k`) before running jobs. Never run `higgsfield auth token`.
 
 ## The server does this itself
@@ -34,10 +34,10 @@ mirsal hf models --type video                  # the full Higgsfield list with p
   TIMEOUT; a human re-queues it (`job requeue`), the operator never does.
 - **Never open or judge media.** Judge with Python (`ffprobe`, the verifier, `measure-cells`
   when it exists, file sizes). Haitham looks at the pictures.
-- **Never write inside `Phase_01/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`
+- **Never write inside `inputs/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`
   (gitignored); `job done` copies the file into `out/jobs/<J>/`.
 - **Ledger.** Every claim/done/fail appends to `out/model_calls.jsonl` (what, parameters,
-  latency, cost, output path). Phase 3 imports it as `model_calls`.
+  latency, cost, output path). Postgres mirrors it as `model_calls`.
 
 ## Job kinds
 

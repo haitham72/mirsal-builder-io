@@ -1,80 +1,104 @@
-# HANDOFF: Mirsal Builder (tracker: open items only)
+# HANDOFF: what is open (the only tracker)
 
-This file is a **tracker, not a log**: an entry is deleted the moment it is implemented (the architecture goes into the phase README, the history is in git). If you finish something here, delete its line in the same step (`CLAUDE.md` rules 7 and 12).
+A **tracker, not a log** (`CLAUDE.md` rule 7): an entry is deleted the moment it is built and documented in `docs/`; history lives in git. The old phase plans (`phase_0N.md`) are retired: what
+was still open in them is below, grouped by the area it belonged to, one or a few lines each.
 
-Owner: **Haitham** (they/them; never guess pronouns). GitHub `haitham72/mirsal-builder-io` (PRIVATE). Work branch **`merge/generate-advanced`**. Windows PC (macOS also supported).
+Owner: **Haitham** (they/them; never guess pronouns). GitHub `haitham72/mirsal-builder-io` (private). Windows PC (macOS also supported). Read order: this file, `CLAUDE.md`, `README.md`, then the doc of the
+area you touch (`docs/`). Where things are built and how they fit is in those docs, not here.
 
-Read in this order: this file → `CLAUDE.md` (12 binding rules) → `Phase_01/README.md` (engine, verifier, gates, Studio) → `Phase_02/README.md`, `Phase_03/README.md` (what those phases built) → `phase_02.md` (the live steps still open). What is built is described in those READMEs, not here.
+## 1. Waiting for Haitham (each needs a verdict or an input; delete the line when answered)
 
-## 1. Gates waiting for Haitham
+| What | How |
+|---|---|
+| **The AI chat and the Studio look right** (aurora, trace, plan card, carousel, phone swipe) | restart `python -m mirsal serve` (the Studio warns when it runs older code), open `/`; on a phone use the PC's address only through a tunnel (the server binds localhost) |
+| **Vision judge is calibrated** | label **30 stickers** (approve / reject, with a reason when you can); then `python -m mirsal judge G### --force` on the same ones; target agreement >= 80%, else point it at OpenAI (`MIRSAL_VISION_PROVIDER=openai`). First runs: `docs/measurements.md` (the two local models disagree) |
+| **Pool search precision** | write `docs/inputs/search_queries.md`: ~30 queries "{topic} doing {action}" (English, Arabic, Arabizi) with the sticker ids you consider right, plus >= 5 that must return nothing; then `python -m mirsal pool search "..."` is measured against it (first real run in `docs/measurements.md`) |
+| **Photo cutout edges** | judge `mirsal/out/photo/photo-upload.png` and 10+ real photos in `inputs/photos/` (git-ignored; include a few iPhone Portrait HEIC, which are not read yet) |
+| **Prompt text (S1) and the AI lab (S5)** | `python -m mirsal prompt lab` and `prompt lab --ai` (20 inputs; the AI now runs on the local model), compare with `docs/inputs/prompt_samples.md` |
+| **First live results, jobs, Generate menu, edge** | G001-G008 and `mirsal/out/s0/`; "Generate it" in the Studio; the credits pill, Queue panel, Allow anyway, Stroke / Trim with Apply / Undo |
+| **One real animated pack, and Kling `pro` at the default gap** | a real run (spends credits) to close S4: `python -m mirsal measure-cells` then shows the flagged share (first numbers: 0.74 gap = 5.6%, 0.80 = 88.9%, 0.84 = 44.4%) |
+| **A real chat -> Create run** | with you present: type a request in the AI chat, press Create (spends about 2 credits for a sheet); nothing in the chat has been run against the real Higgsfield yet, only against fakes and prepared sheets |
+| **LangSmith** | open project `mirsal` in the account behind the key; decide cloud vs self-hosted; set `MIRSAL_TRACE=langsmith` in `mirsal/.env` to record real runs (off by default) |
+| **Decisions** | keep or delete the parked React gateway `mirsal/web/`; a daily credit cap (`MIRSAL_DAILY_CREDITS`); a backup command for `out/`; Arabic prompt handling; moderation policy before any public API |
 
-Built unattended on their standing order; each needs their verdict. On approval the line is deleted here and the matching plan items are deleted from `phase_0N.md`.
+Closed by Haitham on 2026-10-02: Telegram sends work on several accounts; merge of `merge/generate-advanced` into `main`; improving the `sharpness` metric; live-LLM quality checks; Redis; the old token is revoked.
 
-| Gate | What to check | How |
-|---|---|---|
-| **S1 prompt text** | The prompts match your golden prompts in English, Arabic and Arabizi. | `python -m mirsal prompt "<request>"`, `prompt lab` (20 inputs), `prompt "<request>" --ai`; compare with `Phase_02/prompt_samples.md`. |
-| **S0/S3 first live results** | The sheets are what you expect: G001 (angel reading a newspaper), G002 (batman lego), the S0 tests. | `mirsal/out/G001`, `G002`, `mirsal/out/s0/` (`compare_kling.html` plays std next to pro); numbers in `Phase_02/higgsfield.md`. |
-| **Generate menu and the edge** | The menu (references, stroke, styles, model, AI enhancer, Loop, instant Generate), the credits pill with history at the top, the fixed Queue panel with Retry, Allow anyway / Allow all, and the edge feel right: Stroke/Trim sliders only **test** on one thumbnail (a floating card; in the open view the big pane) with Apply / Cancel / Undo and a snapshot per Apply, applied automatically at video generation and at the pack; dashed + faded = not exported; a blue-screen sheet is keyed as blue and marked "Blue key"; the named folders are in `generated/images|videos` inside the repo (the old `mirsal/out/export` mirror is untouched: delete it when you have looked, 180 of its files are old slider variants that exist nowhere else). Style and logo images are placeholders until you drop yours into `mirsal/mirsal/console/assets/{styles,vendors}/`. | Restart `python -m mirsal serve`, hard-reload the page, then look in `generated/`. |
-| **S2 jobs** | The "generate it" button works in the browser; a job shows up and completes. | Studio -> Higgsfield dialog -> "No prepared sheet: generate it"; `python -m mirsal jobs`; `mirsal/docs/operator.md` for the operator loop. |
-| **S5 AI lab** | The AI-filled concepts are good. | `prompt lab --ai` (20 prompts), rate them. |
-| **3A Postgres** | History and search survive a restart on your real data. | `python -m mirsal db up`, `db import`, `list`, `show G078`, `search "teddy book"`, then `docker restart mirsal-db` and `show` again. Needs the real `out/` (original PC). |
-| **3B pool** | Search returns the right stickers and nothing for what does not exist. | `python -m mirsal pool search "teddy waving"` and `"falcon dancing"` (must be empty). Precision needs your `Phase_03/search_queries.md` (not written yet). |
-| **3C photo** | The cutout edges are clean on real photos. | `python -m mirsal photo <file>` on 10+ photos in `Phase_03/photos/` (gitignored, not provided yet, include a few iPhone Portrait HEIC). |
-| **Phase 1** | One animated pack from a real run; the server restarted on the new code. | Finish list in `Phase_01/CLAUDE.md` (items 3 and 6). |
+## 2. Open work by area (the former phases)
 
-## 2. Next work
+**Engine and Studio (was Phase 1)**
+- `sharpness` (`engine/verify.py`) cannot see softening (reads 1.00-1.05): replace the metric (gradient correlation or SSIM on the first frames, alpha-edge ramp width), calibrate on more than two cells (approved; thresholds need real cells).
+- The Studio's JavaScript has no tests except the chat helpers (node, `tests/js`); add a browser smoke test for issue colours and Include anyway.
+- A second request while a job runs gets 409; a real server-side queue would queue it. `result.json` is read-modify-write under one in-process lock plus the cross-process writer lock: two request threads can still interleave inside the server.
+- No rate limiting on the server (localhost only).
 
-1. **S4 measurement, then S6, S7.** S0 and S3 are built and ran for real (G001, G002); the Kling path is built. Left: re-run G002 with `pro` and the new gap (the first clip, J004, was `std` and pixelated), write `measure-cells` and record the flagged share, then choose the default gap or 2x2 / one sticker per video. Never simulate a call; Kling is always `pro`, never `4k`; a test can never reach the real CLI (`MIRSAL_NO_REAL_CLI`).
-2. **Backlog** (each small, with a failing-then-passing test, no visible change):
-   - `engine/video.py:293 _CRF_HINT` is a module-level global mutated by parallel workers: make it per-call or lock it (VP9 size is not strictly monotonic in crf).
-   - `console/server.py` has no Origin/Host allow-list: a web page the owner visits can POST to it (trash/restore, the Telegram config, bulk delete).
-   - `result.json` is read-modify-write under an in-process lock only: a second process (`mirsal recheck` while the server runs) can race it.
-   - `sharpness` (`engine/verify.py:514`) is **kept** (Haitham) but its metric cannot see softening (reads 1.00-1.05): improve it (gradient correlation or SSIM on the first frames, alpha-edge ramp width), calibrated on more than two cells.
-   - A server-side job queue (a second request while one runs gets 409); a Playwright smoke test for the issue colours and Include anyway (JS has no tests).
-3. **Questions for Haitham** (`report.md` §9, recommended defaults there): a daily credit cap for Phase 2 (`MIRSAL_DAILY_CREDITS`), a backup command for `out/`, Arabic prompt handling, moderation (Phase 5C), Redis necessity (Phase 4).
-4. **Security:** an old Telegram bot token is in git history (commit `349762b`). Haitham must revoke it in @BotFather; offer a history scrub with a force-push but **never do it unasked**.
+**Live generation (was Phase 2)**
+- S4 re-run with Kling `pro` and the default gap decision (`slot_fill`); S7 decisions: one 3x3 sheet vs single stickers, the engine's outline vs a model-drawn one.
+- The vision judge's recovery is a **recommendation** (`vision/recovery.py`); nothing executes it. Executing means paid regenerations, so it needs your confirmation flow (the chat's edit and another-pass cover the cases by hand).
+- Original planner leftovers, ask before building: UAE content rules as a lint (no flags / emblems / text, no real people or rulers, the falcon is always a young brown saker falcon chick, Emirati dress, Commemoration Day solemn), English + Arabic Telegram search keywords per cell (0-20, 64 characters, English first), 4x4 and 16:9 sheets (`split_grid` handles 2x2 and 3x3), no trademarks in pack titles and tags, whether the animation sheet should default to 2x2 (2.25x the pixels per sticker).
 
-Waiting for Haitham's go: 3B vectors and its eval set, 3C real-photo judgement, 3D, 3E, Phases 4-5.
+**Store and search (was Phase 3)**
+- 3B: the eval set and precision@5 >= 0.8; an Arabic / Arabizi query parser (a small model; deterministic patterns today); a search-result cache keyed by a `pool_version` counter (embeddings and plans are cached, hits are not); the gap flow shows no price.
+- 3C: an `edge_quality` check (a soft alpha gradient, not a binary edge), `--subject N`, a stronger matte (BiRefNet, MIT) and SAM 2 click-to-refine, HEIC input (`pillow-heif`), `SOURCE_PHOTO` asset rows, optional paid AI motion (price first), a composites test (IoU >= 0.92).
+- **3D text template stickers (not started).** A library of flashing template stickers with a text slot, CapCut-style: `mirsal/templates/<id>/template.json` (`id, version, tags {en[], ar[]}, occasion, mood, frames[1-4] {art | null, duration_ms, text_style}, slot {x,y,w,h,rotation,align,max_chars,font_id}`,
+  optional `subject_slot` for a photo cutout), 30+ procedural starters (greetings, reactions, love, birthday, UAE occasions), text rendered by code (Cairo, OFL, covers Latin and Arabic; Pillow with raqm, fallback `arabic-reshaper` + `python-bidi`; never split a word),
+  encoded as WEBM VP9 alpha and animated WebP (not GIF: 1-bit alpha), matched to the last chat message when it is <= 4 words / 24 characters (exact occasion tag, then the embedding, then generic), editing re-renders in under a second as a child generation. Tests: every template passes `template check`, Arabic joins, Telegram validators, "happy eid" ranks Eid templates first.
+- **3E 3D parallax photos (not started).** A photo gets depth and tilts with the phone: embedded Portrait-HEIC depth first, else Depth Anything V2 **Small** (Apache-2.0; the larger ones are non-commercial) through onnxruntime, edge-aware guided filter, focal plane at the subject's median depth (the cutout), a self-contained WebGL viewer
+  (`parallax.html`, gyroscope with the iOS permission tap, mouse fallback, reduced motion = static), optional `--layers 2|3` with inpainting, optional `--bake` loop video. On-device only; private assets.
+- Library packs still live in `out/library/library.json` (the old plan moved them to `packs` / `pack_stickers`; wait for the app's pack curation). `reviews.trace_run_id` exists and nothing writes it. Per-video task rows. An S3-compatible store behind `AssetStore`.
 
-The seam to keep: **jobs as files** (`out/jobs/J###.json`, ticket stored *before* waiting) so a plain HTTP provider can replace the MCP operator later; the engine stays ignorant of who fulfils a job.
+**Agent and chat (was Phase 4)**
+- Transformation templates ("dog as banana": required slots dance / shock / squash of the target, "dog with bananas" is not a transformation, the user can override "no dancing") are not built; the plan comes from the slot filler.
+- Annotation: what is visible on an approved sticker (`stickers.annotation`, cached by image hash), `build_context(HIGH)` with the real images, annotation text added to the pool's `search_text`.
+- Multi-reference: "make 5 like 2" copies sticker 2 into `out/refs/` and sends it as a reference image; the other roles (pose, expression, ...) are recorded (`generation_references`) but not yet worded into prompts.
+- The 40-utterance resolver eval (>= 95% exact ids) needs `docs/inputs/resolver_utterances.md` from you; transformation examples likewise.
+- Several edited stickers are one 1x1 generation each (at most 4); one generation for all of them, and `inherited_from` carry-over rows, are not built.
+- The chat polls; streaming the agent's steps over SSE is not built. There is no terminal `mirsal chat` (the AI screen replaced it). The reducer's model summary has only run against fakes.
 
-**While doing the live steps:** append every paid or model call to `out/model_calls.jsonl`; if a day's total would burn a large share of the credits left, pause and tell Haitham. Never open or judge media yourself (ffprobe, `doctor`, the verifier, metrics, file sizes; test outputs under `mirsal/out/`, never inside `Phase_01/Images_gen|videos_gen`). Do not block on a gate: finish the step, record the evidence, move on. The video is made from the **normalised video sheet** (`build_video_sheet`, `slot_fill` = 0.74 (the user slides it per batch)), never from raw samples; on the old samples 3 of 9 teddy and 8 of 9 emoji animations left their cell, S4 must bring that near zero. Check each change against `phase_03.md` (Phase 3 imports `out/jobs/*.json`, `out/model_calls.jsonl` and the task tickets).
+**API and production (was Phase 5)**
+- An OpenAPI document and generated TypeScript types; user accounts and per-user authorization (`010_users`: `user_id` on sessions, generations, packs; Redis keys switch from `u:local`); rate limiting.
+- A durable `jobs` table with `mirsal worker` processes (`FOR UPDATE SKIP LOCKED`, dead-letter after the maximum); Postgres as the durable idempotency backstop; per-job temp directories and retention policies.
+- JSON logs (`request_id, session_id, generation_id`), timing and quality metrics (time to first sticker, approval and regeneration rates), the regression suites (visual, chroma, transformation, conversation datasets) in one command.
+- The React frontend: decide whether `mirsal/web/` is extended or deleted; the editor's mobile screens.
 
 ## 3. Guardrails
 
 | | |
 |---|---|
-| **Do freely** | Everything in Phase 2: new modules, CLI commands, endpoints, tests, docs, Higgsfield experiments, prompt template **versions** (add `_v2`, never edit `_v1`), measurements. Fix real bugs, each with a test that fails before and passes after. Add verifier checks only with a PASS and a FAIL fixture and a measured threshold. |
-| **Additive only** | The Studio UI (`mirsal/mirsal/console/*`): existing style, each control wired to a working backend (rule 6). |
-| **Do NOT** | Rework or restyle the UI/UX (the rail views Studio, Library, Chat, Create, Settings; Pack wizard, issue colours and hatching, Include anyway, Edge, sticker detail, Library selection, one-click Telegram) or revert previous work. Rename watch folders or outputs (rule 9). Change the golden path, the gates' meaning, or "a human approves, Python's blocks are final" (rule 10). Loosen a verifier BLOCK. Rewrite history or force-push. Start Phase 4. Commit a token, `.env`, `opencode.json`, `Phase_01/telegram.md`. Open sticker media to judge it. Write inside `Phase_01/Images_gen|videos_gen`. `git add -A` blind. |
-| **Ask Haitham first** | Anything that changes what the user sees or decides; verifier severities or measured thresholds; deleting a plan item for a gate that is still unanswered; scrubbing the token; starting 3B vectors, 3D or 3E. |
+| **Do freely** | Fix real bugs with a failing-then-passing test; add engine functions, CLI commands and API routes with tests; new prompt template **versions** (add `_v4`, never edit one that was used); measurements; docs. |
+| **Ask first** | Spending credits (live generation, bulk embeddings through OpenAI, anything paid); verifier severities or thresholds (the `sharpness` rework is approved); deleting an open item whose gate is unanswered; scrubbing the token from history; deleting `mirsal/web/`; anything that changes what the user sees or decides. |
+| **Never** | Rename watch folders or outputs (rule 9). Loosen a verifier BLOCK or change "a human approves, Python's blocks are final". Open sticker media to judge it. Commit a token, `.env`, `opencode.json`, `mirsal/telegram-id.md`. Write inside `inputs/Images_gen|videos_gen`. `git add -A` blind. Force-push. Touch ports 5433 / 5436 / 5437 or the other project's `.env` lines. |
 
-**Locked decisions (do not reopen):** phase order (1 engine, 2 live generation, 3 Postgres, 4 Redis+LangGraph, 5 API); the product is an API / app and this UI is a sandbox (rule 11): engine function + JSON contract first; the Studio's rail views (History was removed on request: the Studio's Earlier batches replaced it); issue colours (orange out of bounds, purple bad green screen, yellow bad loop, pink look or motion, blue file/Telegram limit, red dropped or blocked; hatched = not in the set, dashed = kept with a check); out-of-bounds animations off by default with *Include anyway* (`gates.soft_block`: only when every failed check is WARN); template-locked prompts (the model fills a small JSON, code lints it, the template builds the text).
+**Locked decisions:** the product is an API / app and the screens are a sandbox (rule 11); the golden path and its gates; issue colours (orange out of bounds, purple bad green screen, yellow bad loop, pink look or motion, blue file / Telegram limit, red dropped or blocked; hatched = not in the set, dashed = kept with a check);
+out-of-bounds animations off by default with *Include anyway* (`gates.soft_block`); template-locked prompts (the model fills a small JSON, code lints it, the template builds the text); the local models are hardcoded (`qwen3.5-4b:2`, `nomic-embed-text-v1.5`) and nothing asks LM Studio for its model list;
+the agent never spends without a go-ahead unless "Ask before spending" is off; the vision model never approves.
 
 ## 4. This checkout and how to run
 
-`D:\Vscode\mirsal-builder-io` is a fresh clone: no `mirsal/out/` (no generations, library, jobs or ledger), no `Phase_01/Images_gen|videos_gen` sample media (`doctor` reports "MISSING input" for that, expected). Its `mirsal/.venv` is Python 3.14, numpy 2.5, OpenCV 5.0, Pillow 12.3: thresholds in `engine/config.py` were calibrated on an older stack, so re-check metrics here before trusting them. Haitham's real data and database are on their original PC.
+`D:\Vscode\mirsal-builder-io` (work branch `merge/generate-advanced`, merged into `main` on 2026-10-02). `mirsal/.venv` is Python 3.14 (numpy 2.5, OpenCV 5.0, Pillow 12.3: thresholds in `engine/config.py` were calibrated on an older stack, re-check metrics before trusting them).
+`mirsal/out/` holds the real generations G001-G008, the library, jobs and the ledger of this PC. Docker Desktop must be running for `db up` (Postgres :5434, Redis :6380); both are optional at runtime.
 
-`mirsal/.env` here was copied from another project: it holds `PGHOST/PGPORT/PGDATABASE` (reglens, 5432), `REDIS_URL` and a LangSmith key with project "NeoHealth". Mirsal ignores `PG*` (it uses `MIRSAL_DATABASE_URL`, default `localhost:5434/mirsal`) and tracing is off unless `MIRSAL_TRACE=langsmith`. **Remove the `PG*`, `REDIS_URL` and `LANGSMITH_*` lines**, or set `MIRSAL_TRACE` only after giving Mirsal its own LangSmith project (`mirsal/.env.example`).
+`mirsal/.env` was copied from another project and holds `PG*`, `REDIS_URL` and `LANGSMITH_*` lines for it: Mirsal ignores `PG*` and `REDIS_URL` and always uses its own project name for tracing, but remove those lines. `mirsal/telegram-id.md` (git-ignored) holds a bot token in plain text: delete it once Telegram is configured in Settings.
+**Security:** an old bot token is in git history (commit `349762b`, revoked by Haitham). Offer a history scrub with a force-push but **never do it unasked**.
 
 ```
-cd D:\Vscode\mirsal-builder-io\mirsal
-.venv\Scripts\python -m mirsal db up                        # Postgres on 5434 (needed by 14 tests and by search)
-.venv\Scripts\python -m mirsal doctor                       # health check
-.venv\Scripts\python -m unittest discover -s tests -t .     # 167 tests, ~2 min (14 skip without the database)
-.venv\Scripts\python -m mirsal serve --port 8789            # YOUR server; MIRSAL_OUT=<copy of one out\G### folder> keeps real data untouched
+cd mirsal
+.venv\Scripts\python -m mirsal doctor                       # health check (a missing sample folder is only a NOTE)
+.venv\Scripts\python -m unittest discover -s tests -t .     # all tests (~4 min); the Postgres tests skip as whole classes when mirsal-db is down
+.venv\Scripts\python -m mirsal serve --port 8789            # YOUR server on a spare port; MIRSAL_OUT=<copy of out\G###> keeps real data untouched
 ```
 
-Always use `mirsal/.venv` (the Anaconda base env has a broken numpy). Never touch ports 5433 (`reglens`/temporal_note) or 5436. Never kill Haitham's server on :8770; the Studio shows a banner when it runs older code than the files on disk. Where things live: `README.md` (index), `Phase_0N/README.md` (architecture), `Phase_0N/CLAUDE.md` (inputs and gates), `phase_0N.md` (plans), `report.md` (independent review, triaged).
+Never kill Haitham's server on :8770. The Studio shows a banner when it runs older code than the files on disk.
 
-## 5. Quirks that cost time before
+## 5. Quirks that cost time
 
-- **Most "it still fails" reports were a stale server process** (Python loads code once). Compare process start time with file times first.
-- VP9 (`row-mt`) output is not byte-stable; compare metrics, never WebM hashes.
-- Windows `os.replace` fails with WinError 5 on an open file: keep using `pipeline._atomic_write`.
-- Tool quirks: a Bash heredoc breaks on some quote mixes (write a patch script with the Write tool); PowerShell has no `&&` and mangles non-ASCII when it rewrites files (use Python); Write/Edit fail if the file changed since your last Read; a Playwright click that closes a dialog may report "no match" though it worked; hard-reload a cached tab. JS has no tests: verify UI in a browser (Playwright MCP works; screenshots are gitignored).
-- Any bot token pasted into a chat is compromised and must be revoked after testing. `mirsal/.env` and `out/telegram.json` are gitignored.
+- **Most "it still fails" reports were a stale server process** (Python loads code once). Compare the process start time with the file times first.
+- VP9 (`row-mt`) output is not byte-stable: compare metrics, never WebM hashes. Windows `os.replace` fails with WinError 5 on an open file: keep using `pipeline._atomic_write`.
+- **Never put a regex with `\b` in a Python string written through a shell heredoc**: it becomes a backspace character and silently breaks the pattern (`grep -rlP "\x08"` finds such damage). Write scripts with the Write tool and use `chr(92)` or raw strings; PowerShell has no `&&` and mangles non-ASCII when it rewrites files.
+- Two scripts of the Studio must not declare the same top-level `const` (the second one is not run at all; `history.js` was dead for a while because of `ago`). Class names in `agent.css` are namespaced (`ag-`, `is-`, `k-`) because the Studio's own CSS already uses `.step`, `.tile`, `.sel`, `.done`.
+- LM Studio loads a model on the first request (the first call is slow); `qwen3.5-4b:2` thinks unless `reasoning_effort: "none"` is sent (the client does). A test must never reach the real Higgsfield CLI (`MIRSAL_NO_REAL_CLI` is set by `tests/__init__.py`).
+- For browser checks without a browser tool: `pip install --target <scratch> playwright` and launch the installed Chrome with `executable_path`; run it against a **copy** of `out/` and never press Create.
+- Any bot token pasted into a chat is compromised and must be revoked after testing. `mirsal/.env` and `out/telegram.json` are git-ignored.
 
 ## 6. Prompt for the next LLM
 
-> Read `HANDOFF.md`, `CLAUDE.md`, `Phase_01/README.md`, `Phase_02/README.md`, `Phase_03/README.md`, `phase_02.md`. Work the open items in `HANDOFF.md` §1 and §2 in order: apply Haitham's gate verdicts (delete approved items from the plans and from this file); S0 only in a session where the Higgsfield MCP tools exist (never simulate); then the backlog with tests. Judge media only with Python. Do not rework or restyle the UI/UX or engine, start 3B vectors/3D/3E/Phase 4, rewrite history, or commit a token, `.env` or `opencode.json`. Use `mirsal/.venv`. **HANDOFF and the plans are trackers: delete an entry the moment it is implemented and documented in the phase README.**
+> Read `HANDOFF.md`, `CLAUDE.md`, `README.md` and the doc of the area you touch. Apply Haitham's answers from section 1 (delete the lines they close), then work section 2 in order of the area you were given, with a failing-then-passing test for every fix, docs updated in the same step, and no paid call without Haitham's go. Judge media only with Python. Use `mirsal/.venv`. **HANDOFF is a tracker: delete an entry the moment it is implemented and documented.**

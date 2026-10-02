@@ -1,7 +1,7 @@
-# Phase 2 — live generation: how it is built
+# Live generation: how it is built
 
-A typed request becomes a sheet of 9 stickers made by Higgsfield, and an approved video sheet becomes a Kling animation. Both go through the **unchanged** Phase 1
-engine and review gates; the file store is the only state (no database). What the Higgsfield CLI offers, with measurements: [`higgsfield.md`](higgsfield.md).
+A typed request becomes a sheet of 9 stickers made by Higgsfield, and an approved video sheet becomes a Kling animation. Both go through the **unchanged** engine and review
+gates; the file store is the primary state (Postgres mirrors it, see [`store-and-search.md`](store-and-search.md)). What the Higgsfield CLI offers, with measurements: [`higgsfield.md`](higgsfield.md).
 
 ```
 request ─(prompt template v3 + style + stroke [+ AI enhancer] [+ references])─► task (G1 approval)
@@ -91,7 +91,7 @@ folder. The server mirrors **every** live batch at start (`sync_all`) and the ne
 
 `sN` sorts the files in sheet order and ties them to S1..S9. **Only an applied edge makes new files**: each Apply (or the video / pack moment) is its own snapshot with new names and the old files are kept;
 dragging a slider writes nothing. The date is the file's own date. The watch folders
-(`Phase_01/Images_gen`, `videos_gen`) are never written to: a returned Kling video is laid out for the normalised video sheet, so pairing it with the raw sheet there would be wrong (and a
+(`inputs/Images_gen`, `videos_gen`) are never written to: a returned Kling video is laid out for the normalised video sheet, so pairing it with the raw sheet there would be wrong (and a
 prepared pair dropped there is picked up as before). `POST /api/generations/<id>/reveal` opens the batch's folder in the file manager (the Studio's **Open folder**), `GET .../files` returns the paths.
 
 ## The screen colour (blue key)
@@ -162,10 +162,11 @@ prepared-sheet lookup runs. Everything below the stage (results, gates, packs) i
 Ticket-first and resume, the daily cap, the Kling 4k ban, catalog defaults, usage roll-up, prompt v2 / v3 properties, the AI enhancer (never while typing, off = no call, on = expand then send,
 failure = fallback with a reason), references, a full run through the console (request → sheet job → stills → G2 → video sheet → G3 → Kling job → sliced), history paging, the gap and Loop,
 Retry, the named export folders and their root, allow anyway / allow all, **the edge** (a preview writes nothing; Apply makes one snapshot; the same edge twice adds none; Undo restores; the
-video and the pack commit a pending edge) and **the blue screen** (detect, key, video sheet, and the mark only when it is blue, on a synthetic blue sheet; the real failed batch G006 was re-run on a copy: 0/9 -> 9/9). 194 tests in the whole suite.
+video and the pack commit a pending edge) and **the blue screen** (detect, key, video sheet, and the mark only when it is blue, on a synthetic blue sheet; the real failed batch G006 was re-run on a copy: 0/9 -> 9/9). 194 tests in the whole suite (180 run when Postgres is down: the store and pool classes skip).
 
 ## Not built
 
-The vision judge (S6, with Haitham's 30 labels), `measure-cells` and the `slot_fill` tuning on real Kling runs (S4), the sheet-vs-single and outline decisions (S7), the 20-prompt AI lab rating (S5),
-and the leftovers of the original planner design that wait for Haitham's word (UAE content rules, English + Arabic Telegram keywords, 4x4 sheets): all listed in `../phase_02.md`.
-`out/jobs/*.json` and `out/model_calls.jsonl` keep the shapes `phase_03.md` expects (only fields were added), and 3A already imports them.
+The vision judge is built (`mirsal/vision/`, see [`agent-and-chat.md`](agent-and-chat.md)) but **uncalibrated** until Haitham labels 30 stickers; `python -m mirsal measure-cells` is built and its first
+numbers are in [`measurements.md`](measurements.md) (the target "nothing flagged" needs a re-run with Kling `pro`); the sheet-vs-single and outline decisions, the 20-prompt AI lab rating, and the
+leftovers of the original planner design that wait for Haitham's word (UAE content rules, English + Arabic Telegram keywords, 4x4 sheets) are listed in `HANDOFF.md`.
+`out/jobs/*.json` and `out/model_calls.jsonl` are mirrored into Postgres (write-through and `db import`).
