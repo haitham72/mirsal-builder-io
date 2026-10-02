@@ -1,12 +1,12 @@
 /* Pack manager (DESKTOP_05): metadata, drag-reorder grid, cover, rename, preview, export. */
 'use strict';
 let DRAG=null;
-RENDER.pack=async id=>{await loadLib();PACK_ID=id;drawPack()};
+RENDER.pack=async id=>{await loadLib();PACK_ID=id;drawCol2();drawPack()};
 function drawPack(){
  const p=packById(PACK_ID),el=$('s-pack');
  if(!p){el.innerHTML='<div class=card>Pack not found. <a href="#/library">Back to library</a></div>';return}
  const n=p.stickers.length,anim=p.stickers.filter(s=>s.type==='animated').length;
- el.innerHTML=`<div style="max-width:1100px;margin:0 auto">
+ el.innerHTML=`<div class=page>
   <div class=row style="margin-top:0"><button class="btn sm" data-act=nav data-to=library>${ic('back')} Library</button></div>
   <div class=card><div class=phead><div class=cover style="width:84px;height:84px">${coverMedia(p)}</div>
    <div class=pt><h1 style="margin:0">${esc(p.name)}</h1><span class=mut>${n} stickers${anim?` · ${anim} animated`:''} · a Telegram set takes up to 120</span></div>

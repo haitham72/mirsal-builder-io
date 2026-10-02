@@ -78,7 +78,7 @@ async function importFile(f){
 
 /* ---------- Create (DESKTOP_02) */
 RENDER.create=async()=>{await loadLib();const tp=Ed.targetPack&&packById(Ed.targetPack);
- $('s-create').innerHTML=`<div style="max-width:980px;margin:0 auto"><h1>Create Sticker</h1><div class=mut>${tp?`Adding to pack <b>${esc(tp.name)}</b> · <a href="#" data-act=cleartarget>clear</a>`:'Photo → auto cutout → edit → border → save to a pack.'}</div>
+ $('s-create').innerHTML=`<div class=page><div class=ph><h1>Create Sticker</h1></div><div class=mut>${tp?`Adding to pack <b>${esc(tp.name)}</b> · <a href="#" data-act=cleartarget>clear</a>`:'Photo → auto cutout → edit → border → save to a pack.'}</div>
   <div class=drop id=drop style="margin-top:14px">${ic('photo').replace('<svg','<svg width=56 height=56')}<h2>Drag & drop a photo, video or GIF</h2><div class=mut>Photos: auto cutout, then the sticker editor. Videos and GIFs: trim, add text, save as an animated sticker or GIF.</div>
    <div class=row style="justify-content:center"><button class="btn pri" data-act=pickfile>${ic('photo')} Photo</button><button class=btn data-act=pickfile>${ic('film')} Video / GIF</button><button class=btn data-act=newtext>${ic('text')} Text sticker</button></div><input type=file id=fin accept="image/*,video/*,.gif" hidden>
    <div class=row style="justify-content:center;margin-top:8px"><span class=mut>Photo cutout</span><select id=cutm style="width:auto"><option value=auto>Auto</option><option value=matte>AI matte</option><option value=grabcut>GrabCut (simple)</option></select><span class=mut id=cutn></span></div></div>
@@ -205,7 +205,7 @@ ACT.edsave=async()=>{if(!E.layers.some(l=>l.vis)){return toast('Nothing to save:
 RENDER.export=async()=>{await loadLib();const el=$('s-export');
  if(!E.dataUrl){el.innerHTML=`<div class=card style="margin:40px auto;width:420px;text-align:center;padding:30px"><h2>Nothing to export</h2><button class="btn pri" data-act=nav data-to=create>Create</button></div>`;return}
  const packs=LIB.packs,pid=E.pack&&packById(E.pack)?E.pack:packs.length?packs[packs.length-1].id:'__new',sv=E.saved;
- el.innerHTML=`<div style="max-width:1000px;margin:0 auto"><div class=row style="margin-top:0"><button class="btn sm" data-act=exback>${ic('back')} Back to editor</button></div><h1>Save sticker</h1>
+ el.innerHTML=`<div class=page><div class=row style="margin-top:0"><button class="btn sm" data-act=exback>${ic('back')} Back to editor</button></div><h1>Save sticker</h1>
   <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;margin-top:12px"><div class="pvbox bg-checker"><img src="${E.dataUrl}"></div>
   <div class=card><div class=fld><label>Name</label><input type=text id=xn value="${esc(E.name)}"></div><div class=fld><label>Emoji tag (Telegram requires at least one)</label><input type=text id=xe value="${esc(E.emoji)}"></div>
    <div class=fld><label>Pack</label><select id=xp>${packs.map(p=>`<option value=${p.id} ${p.id===pid?'selected':''}>${esc(p.name)} (${p.stickers.length})</option>`).join('')}<option value=__new ${pid==='__new'?'selected':''}>+ New pack…</option></select></div>

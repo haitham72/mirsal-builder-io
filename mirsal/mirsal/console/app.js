@@ -140,7 +140,7 @@ document.addEventListener('keydown',e=>{if(!['pack','library'].includes(route_)|
   else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'&&document.querySelector('.grid.selgrid')){e.preventDefault();ACT.lselall()}});
 function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn sm" data-act=lselmove title="Move all the selected stickers into one pack (or a new one)">${ic('lib')} Move ${SEL.size} to…</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
 RENDER.library=async()=>{await loadLib();drawCol2();
- $('s-library').innerHTML=`<div style="max-width:1000px;margin:0 auto"><div class=sh>${ic('sticker')} Sticker Library</div>
+ $('s-library').innerHTML=`<div class=page><div class=ph><h1>Sticker Library</h1></div>
   <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
   <div class=tabs><button class="tab ${LIBTAB==='recent'?'on':''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB==='mine'?'on':''}" data-act=libtab data-t=mine>My Stickers</button></div>
   <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
@@ -164,7 +164,7 @@ ACT.newpack=()=>askText('New pack name','My Pack',async n=>{const r=await post('
 
 /* ---------- Settings */
 RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{};
- $('s-settings').innerHTML=`<div style="max-width:760px;margin:0 auto"><h1>Settings & health</h1><div class=card style="margin-top:12px"><div class=kv>
+ $('s-settings').innerHTML=`<div class=page><div class=ph><h1>Settings & health</h1></div><div class=card style="margin-top:12px"><div class=kv>
   <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span><span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
   <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span></div></div>
   <div class=card style="margin-top:16px"><h2>AI expansion</h2>${ai.configured?`<div class=kv><span>model</span><span><b>${esc(ai.model)}</b></span></div><div class=mut>Type a subject and the AI expands it into the full set, with a key name, tags and emoji for every sticker (Studio, Prompt).</div>`:`<div class=mut>Off. Add <code>OPENAI_API_KEY=…</code> to <code>mirsal/.env</code> (git-ignored) and restart the server: the AI then expands a subject and names every sticker. Until then the built-in sets are used.</div>`}</div>

@@ -236,6 +236,29 @@ class ShellTests(unittest.TestCase):
         self.assertIn("#c2tog", studio)
         self.assertIn("id=c2tog", (ui / "index.html").read_text(encoding="utf-8"))
 
+    def test_every_screen_shares_the_glow_the_page_width_and_the_row_states_of_ai(self):
+        """docs/design.md 5: Library takes AI's glow and AI's hover / selection; the plain screens sit in ONE page width with ONE header; a heading's icon is sized (the Settings
+        Telegram icon used to fill the page because nothing sized it)."""
+        import re
+        ui = self.ui()
+        css = (ui / "studio.css").read_text(encoding="utf-8")
+        self.assertIn("--glow-bg:", css)
+        self.assertRegex(css, r"#app\{[^}]*background:var\(--glow-bg\)", "the glow is behind the whole shell, columns included")
+        self.assertRegex(css, r"\.page\{max-width:\d+px;margin:0 auto\}")
+        self.assertRegex(css, r"h1 svg,h2 svg\{width:\d+px")
+        for name in ("app.js", "editor.js", "packs.js"):
+            self.assertNotRegex((ui / name).read_text(encoding="utf-8"), r'<div style="max-width:\d+px;margin:0 auto">', f"{name}: a screen's width is the shared .page, not its own number")
+        self.assertIn("class=page", (ui / "app.js").read_text(encoding="utf-8"))
+        agent = (ui / "agent.css").read_text(encoding="utf-8")
+        for state in ("hover{background:#F0F9FC}", "on{background:#E3F4F9}"):          # AI's chat rows: the pack rows, the chat rows and the batch rows read the same
+            self.assertIn(state, agent.replace(" ", ""))
+            self.assertIn(state, css.replace(" ", ""))
+        self.assertIn("drawCol2()", self.block_of((ui / "packs.js").read_text(encoding="utf-8"), "RENDER.pack="), "a pack opened by its address draws its column after the library is read")
+
+    @staticmethod
+    def block_of(src, marker):
+        return src[src.index(marker):].split("\n", 1)[0]
+
 
 if __name__ == "__main__":
     unittest.main()

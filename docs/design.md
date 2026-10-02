@@ -118,7 +118,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 - Keep: the cyan/glass/glow depth, the gradients, the hover and selection states on the chat list, the new-chat background.
 - **Change:** it stops being a special case. Its tokens move to `:root` (3.1) and its rail becomes the standard rail (4). Its second column stays.
 
-### Library
+### Library (built)
 - **Rail:** identical to AI's, same scaling, same persistent position — this is the explicit ask.
 - **Sticker library gets the same glow background as AI** so the two screens read as one app.
 - Keep the rail's fonts, backgrounds, hovers and selection states **character-identical** to AI's. If a value differs between the two, AI wins.
@@ -137,10 +137,10 @@ island if it is *designed* as such (same radius, same border, same glow token) i
     the tiles room to breathe. Every new preset is one entry in `PRESETS` — the tile list reads from the API (`server.py:980` already sends
     `styles=styles.PRESETS, default_style=styles.DEFAULT`), so a new preset appears in both surfaces with no UI change.
 
-### Chat
+### Chat (built)
 - Rail and second column per §4. The conversation keeps AI's gradients and hover/selection; the header matches every other screen's header.
 
-### Settings
+### Settings (built)
 - Currently a single column with no second column. Give it the standard header and the standard card treatment; it is a section like any other.
 
 ---
@@ -193,6 +193,6 @@ whether to delete it; do not fold it into this column.
 
 1. **Done.** Tokens (§3.1) and the rail (§4.1-4.2) — everything else inherits from these. Also done in this step: one phone layout (bottom bar) and one drawer for the second column on every screen (`#c2tog` below 900px; AI's private drawer is gone), AI declared in `RAIL`, the column's glass background and gradient title are the shell's, `body.agent-view` is gone. Guarded by `tests/test_js.py::ShellTests`.
 2. **Done.** The second column everywhere (§4.3), then Earlier batches moved into it (§6). Guarded by `tests/test_js.py` and `tests/js/history_card.test.js`.
-3. Library and Settings alignment to AI (§5).
+3. **Done.** Library, Chat and Settings alignment to AI (§5): the glow (`--glow-bg`, a static CSS version of AI's aurora, behind the whole shell so the glass columns sit on it), AI's row hover / selection (`#F0F9FC` / `#E3F4F9`) on the pack, chat and batch rows, one page width and one header (`.page`, `.ph`) for Library, Create, Pack, Export and Settings, the Chat conversation as a glass panel, and the heading-icon size (the Settings Telegram icon used to fill the page). A pack opened by its address now draws its column after the library is read. Guarded by `tests/test_js.py::ShellTests`.
 4. The composer's dark panel and the style tiles (§5, Studio).
 5. Type/spacing/motion sweep last, once the structure has stopped moving (§3.2).
