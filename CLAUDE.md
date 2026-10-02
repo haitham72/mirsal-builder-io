@@ -12,6 +12,7 @@ The app is in its **dev cycle**: the build phases are retired; what exists is do
 | Postgres, search, the pool, photos, tracing | `docs/store-and-search.md` — schema, migrations, vector search, photo cutout, LangSmith tracing |
 | the AI chat, the agent, memory, Redis, the vision judge, events | `docs/agent-and-chat.md` — LangGraph agent, per-subject memory, vision pre-review, event feed |
 | the HTTP contract | `docs/api.md` — JSON routes, SSE, idempotency, signed links, accounts, rate limits, OpenAPI |
+| the look of the screens: the shell, the rail, the palette, the tiles | `docs/design.md` — one shell and one token set for every section, the AI screen as the reference, the Earlier-batches column. **Read it before changing any CSS, the Studio's markup, or adding a screen** |
 | recorded numbers | [measurements.md](measurements.md) — never-opinion metrics on slot fill, search precision, vision-judge agreement, sharpness |
 | a prompt to hand to an independent reviewing LLM | `docs/review-prompt.md` — paste-ready prompt that audits the whole repo in one pass |
 | reference inputs | `docs/inputs/` — Haitham's reference material: `prompt_samples.md`, `resolver_utterances.md`, `search_queries.md`, `telegram-plan.md` |
