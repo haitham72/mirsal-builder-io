@@ -5,3 +5,6 @@ os.environ["MIRSAL_NO_REAL_CLI"] = "1"       # no test may reach the real Higgsf
 os.environ["MIRSAL_LLM_PROVIDER"] = "none"
 os.environ["MIRSAL_AGENT_PROVIDER"] = "none"
 os.environ["MIRSAL_VISION_PROVIDER"] = "none"
+# the real mirsal/.env may say MIRSAL_DB_WRITE=1, which would send every test's idempotency keys, tasks and jobs to the developer's real Postgres (and make a key from one
+# run answer the next): off for the suite; a test that needs the write-through turns it on for itself (tests/test_jobqueue.py).
+os.environ["MIRSAL_DB_WRITE"] = "0"

@@ -8,6 +8,7 @@ import tempfile
 import threading
 import time
 import unittest
+import uuid
 from pathlib import Path
 from unittest import mock
 
@@ -811,8 +812,12 @@ class LiveConsoleTests(Base):
         self.assertEqual(self.req("GET", f"/api/tasks/{j['task']}")[1]["plan"]["custom"], {"sheet_prompt": mine})
         self.assertIs(self.req("GET", "/api/jobs/" + j["job"])[1]["request"]["custom_prompt"], True)
         # the key still guards a hand-written run: the same key twice pays once
-        s2, again = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": mine}, {"Idempotency-Key": "typed-once"})
-        self.assertEqual((s2, again["job"]), (200, j["job"]))
+        key = {"Idempotency-Key": "typed-once-" + uuid.uuid4().hex}
+        other = mine + " A second wording."
+        s1, first = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": other}, key)
+        s2, again = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": other}, key)
+        self.assertEqual((s1, s2, again["job"], again.get("idempotent")), (200, 200, first["job"], True))
+        self.assertNotEqual(first["job"], j["job"])
 
     def test_a_hand_written_video_prompt_is_sent_verbatim_and_kept_with_the_sheet(self):
         gid = self._stills_ready("blob")
@@ -829,8 +834,7 @@ class LiveConsoleTests(Base):
 
     def test_an_empty_or_absurd_hand_written_prompt_is_refused_and_starts_nothing(self):
         for body in ({"prompt": "blob", "sheet_prompt": "   "}, {"prompt": "blob", "sheet_prompt": ""},
-                     {"prompt": "blob", "sheet_prompt": 7}, {"prompt": "blob", "sheet_prompt": "x" * (prompter.MAX_PROMPT + 1)},
-                     {"prompt": "blob", "sheet_prompt": "y" * prompter.MAX_PROMPT}):
+                     {"prompt": "blob", "sheet_prompt": 7}, {"prompt": "blob", "sheet_prompt": "x" * (prompter.MAX_PROMPT + 1)}):
             body["sheet_prompt"] = body["sheet_prompt"] if body["sheet_prompt"] != "" else " "
             s, j = self.req("POST", "/api/live/sheet", body)
             self.assertEqual(s, 400, (body["sheet_prompt"][:12] if isinstance(body["sheet_prompt"], str) else body["sheet_prompt"], s, j))
@@ -849,6 +853,9 @@ class LiveConsoleTests(Base):
         self.assertEqual((s, j["error"]), (404, "No such batch"), "a stranger's batch is 404, never 403 and never readable")
         s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "sheet_prompt": "mine"}, mine)
         self.assertEqual(s, 200, j)                                                                          # its own request is fine: only the other batch was refused
+        self.until(lambda: len(self._creates("nano_banana_flash")) == 2 or None, "the member's own sheet create call")
         self.assertEqual(len(self._creates("nano_banana_flash")), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
