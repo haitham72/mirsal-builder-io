@@ -111,7 +111,7 @@ class Agent:
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "another": self.n_another,
                  "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -174,6 +174,14 @@ class Agent:
         return self.execute(self.prepare(sid, text, selected, action))
 
     # ---- nodes ----------------------------------------------------------------------------------------------------------------------------
+    def _nm(self, sess: dict, gid) -> str:
+        """What the person calls a batch: its subject ("Eid mubarak greetings"), never the bare id "G096" (the id stays in the card's small print and the tooltips)."""
+        gid = str(gid or "")
+        subj = self.store.subject_for_generation(sess, gid) if gid else None
+        name = (subj or {}).get("name") or ((self.store.outside_info(gid) or {}).get("prompt") if gid else "") or ""
+        name = " ".join(str(name).split())[:48]
+        return (name[:1].upper() + name[1:]) if name else gid
+
     def _named_batches(self, sess: dict, text: str) -> list[str]:
         """The batches the message names ("G012", "make G12/S3 happier") that exist and that this user may see, whether or not this chat has them yet."""
         gids = dict.fromkeys(f"G{int(m):03d}" for m in re.findall(r"\bg0*(\d{1,4})\b", text, flags=re.I))
@@ -188,6 +196,8 @@ class Agent:
         answered = False
         if t.action and t.action.get("type") in ("confirm", "cancel"):
             t.intents, t.conf = [t.action["type"].upper()], 1.0
+        elif t.action and t.action.get("type") in ("vision_yes", "vision_no"):
+            t.intents, t.conf = ["VISION"], 1.0
         elif asked and asked.get("intents") and is_sticker_answer(t.text, bool(t.selected)):
             t.text = f"{asked['text']} {t.text}".strip()       # the original request plus the missing "which": everything downstream reads it as one sentence
             t.intents, t.conf, answered = list(asked["intents"]), 0.95, True
@@ -202,12 +212,12 @@ class Agent:
                     t.intents, t.conf = got, 0.7
         names = {"NEW": "a new set", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
-                 "CANCEL": "a change of mind", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
+                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                  "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "ASK": "ask", "SEARCH": "search",
-                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify"}
+                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
 
@@ -257,9 +267,9 @@ class Agent:
                 r.positive = list(r.stickers)
         t.res = r
         if r.stickers:
-            t.trace.step(f"found {', '.join(x.split('/')[1] for x in r.stickers)} in {r.generation}" + (f" · {r.how}" if r.how else ""))
+            t.trace.step(f"found {', '.join(x.split('/')[1] for x in r.stickers)} in {self._nm(t.sess, r.generation)}" + (f" · {r.how}" if r.how else ""))
         elif r.generation and needs and needs != ["another"]:
-            t.trace.step(f"working in {r.generation}")
+            t.trace.step(f"working in {self._nm(t.sess, r.generation)}")
         return {}
 
     # -- new -----------------------------------------------------------------------------------------------------------------------------------
@@ -289,6 +299,8 @@ class Agent:
         t.trace.retitle(f"generating {guess}")
         prefs, notes = self._prefs(t, guess)
         prompt = t.text.strip() + (f". {prefs[0].upper() + prefs[1:]}" if prefs else "")
+        eng = self.tools.engine_label(bool(st.get("ai", True)))
+        t.trace.step(f"writing {int(st['grid'][0]) * int(st['grid'][-1])} sticker ideas" + (f" with {eng}" if eng else " from the built-in sets"))   # shown at once: the model can take a few seconds
         try:
             plan = self.tools.plan(prompt, st["grid"], st["style_id"], bool(st.get("ai", True)))
         except ToolError as e:
@@ -298,6 +310,8 @@ class Agent:
             return {}
         names = [s["key"].replace("_", " ") for s in plan["stickers"]]
         t.trace.step("expand prompt", {"title": f"{len(names)} stickers", "lines": names})
+        if plan.get("expand_error"):                # the AI could not write the ideas (not reachable, bad answer): say so, the built-in sets were used instead
+            t.trace.note("the AI could not write the ideas (" + str(plan["expand_error"])[:140] + "): I used the built-in sets")
         if prefs:
             t.trace.step("added your preferences", {"lines": [p.strip() for p in prefs.split(",") if p.strip()]})
         for n in notes:
@@ -318,7 +332,7 @@ class Agent:
             sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"],
                                "ai": bool(st.get("ai", True)), "estimate": est}
             t.cards.append(card)
-            t.reply = f"Here's the plan for **{subject}**: {len(names)} stickers, {STYLE_NAMES.get(st['style_id'], st['style_id'])}. {('It costs ' + _credits(est) + '. ') if est else ''}Shall I create it?"
+            t.reply = f"Here's the plan for **{subject}**: {len(names)} stickers, {STYLE_NAMES.get(st['style_id'], st['style_id'])}. Shall I create it?"
             t.chips = [{"label": "Create it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end(f"plan ready · {_credits(est)}")
             return {}
@@ -357,19 +371,19 @@ class Agent:
             t.trace.retitle(f"generating {p['subject']}")
             self._start_create(t, p, parent=p.get("parent"), regen_of=p.get("regen_of"), refs=p.get("refs"), note=p.get("note", ""))
         elif p["type"] == "animate":
-            t.trace.retitle(f"animating {p['generation']}")
+            t.trace.retitle(f"animating {self._nm(t.sess, p['generation'])}")
             try:
                 r = self.tools.animate(p["generation"], p.get("loop", False))
                 t.generation = p["generation"]
                 t.cards.append({"type": "generation", "generation": p["generation"], "job": r["job"], "subject": p.get("subject", ""), "animating": True})
-                t.reply = f"Animating {p['generation']}" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". I'll show each one as it's ready."
+                t.reply = f"Animating **{self._nm(t.sess, p['generation'])}**" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". I'll show each one as it's ready."
                 t.trace.end("animation started")
             except ToolError as e:
                 t.reply = f"I couldn't start the animation: {e}"
                 t.trace.end("not started", ok=False)
         elif p["type"] == "describe":                       # "Allow AI vision of generated media?" answered yes: asked once, remembered in the session
             t.sess["settings"]["allow_vlm"] = True
-            t.trace.retitle(f"looking at {p['generation']}")
+            t.trace.retitle(f"looking at {self._nm(t.sess, p['generation'])}")
             self._run_describe(t, p["generation"], p.get("only") or [])
         elif p["type"] == "batch":
             t.trace.retitle("regenerating " + ", ".join(i["label"] for i in p["items"]))
@@ -430,7 +444,7 @@ class Agent:
                 t.trace.end("no more variations", ok=False)
             return {}
         est = self.tools.estimate("image")
-        spec.update(type="create", estimate=est, parent=p["generation"], note=f"another pass of {p['generation']}")
+        spec.update(type="create", estimate=est, parent=p["generation"], note=f"another pass of {self._nm(t.sess, p['generation'])}")
         if t.sess["settings"].get("ask_before_spending", True):
             t.sess["pending"] = spec
             t.reply = f"I'll make another pass of **{subj['name']}** with different poses ({_credits(est)}). Go ahead?"
@@ -512,15 +526,15 @@ class Agent:
             return {}
         ready = self.tools.ready_indexes(gen)
         if not ready:
-            t.reply = f"{gen} has no finished stickers yet; I'll animate them once they're ready."
+            t.reply = f"{self._nm(t.sess, gen)} has no finished stickers yet; I'll animate them once they're ready."
             return {}
         subj = self.store.subject_for_generation(t.sess, gen)
-        t.trace.retitle(f"animating {gen}")
+        t.trace.retitle(f"animating {self._nm(t.sess, gen)}")
         t.trace.step(f"{len(ready)} stickers ready to move")
         spec = {"type": "animate", "generation": gen, "subject": subj["name"] if subj else "", "loop": False}
         if self.tools.live() and t.sess["settings"].get("ask_before_spending", True):
             t.sess["pending"] = spec
-            t.reply = f"I'll animate the {len(ready)} stickers of {gen} (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?"
+            t.reply = f"I'll animate the {len(ready)} stickers of **{self._nm(t.sess, gen)}** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?"
             t.chips = [{"label": "Animate", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end("ready")
         else:
@@ -580,7 +594,7 @@ class Agent:
             t.reply = "Which stickers? For example \"approve all but 5 and 6\"."
             t.sess["awaiting"] = {"intents": ["REVIEW"], "text": t.text}
             return {}
-        t.trace.retitle(("approving" if decision == "APPROVE" else "rejecting") + f" in {gen}")
+        t.trace.retitle(("approving" if decision == "APPROVE" else "rejecting") + f" in {self._nm(t.sess, gen)}")
         r = self.tools.review(gen, decision, idx, "from the chat")
         t.trace.step(f"{decision.lower()}d {', '.join('S' + str(i) for i in r['done'])}")
         verb = "Approved" if decision == "APPROVE" else "Rejected"
@@ -626,18 +640,18 @@ class Agent:
         """"Describe the stickers": the person's yes to AI vision comes first, once per chat (`settings.allow_vlm`: None = not asked, True, False)."""
         gen = t.res.generation or (t.sess.get("focus") or {}).get("generation") or (self.store.latest_pass(t.sess) or {}).get("generation")
         if not gen:
-            t.reply = "Which batch should I look at? Tell me a number like G012."
+            t.reply = "Which batch should I look at? Tell me its name or its number (like G012)."
             return {}
         only = [int(x.split("/S")[1]) for x in t.res.stickers if x.startswith(gen + "/S")]
         allow = t.sess["settings"].get("allow_vlm")
-        t.trace.retitle(f"looking at {gen}")
+        t.trace.retitle(f"looking at {self._nm(t.sess, gen)}")
         if allow is False:
             t.reply = "AI vision is off for this chat, so I won't send the pictures to a model. Say \"allow AI vision\" and ask again."
             t.trace.end("AI vision is off", ok=False)
             return {}
         if allow is None:
             t.sess["pending"] = {"type": "describe", "generation": gen, "only": only}
-            t.reply = (f"To describe {gen} I send its pictures to the vision model (the local one when LM Studio is running, otherwise the cloud one). "
+            t.reply = (f"To describe **{self._nm(t.sess, gen)}** I send its pictures to the vision model (the local one when LM Studio is running, otherwise the cloud one). "
                        "Allow AI vision of generated media? I only ask once.")
             t.chips = [{"label": "Allow AI vision", "action": "confirm"}, {"label": "Not now", "action": "cancel"}]
             t.trace.end("waiting for your yes")
@@ -654,7 +668,7 @@ class Agent:
             return
         rows = [c for c in caps if not only or c["index"] in only]
         t.trace.step(f"asked the vision model about {len(rows)} sticker{'s' if len(rows) != 1 else ''}")
-        t.reply = "\n".join(f"S{c['index']}: {c['caption']}" if c.get("caption") else f"S{c['index']}: I couldn't read this one" for c in rows) or f"{gen} has no finished stickers yet."
+        t.reply = f"**{self._nm(t.sess, gen)}**\n" + "\n".join(f"S{c['index']}: {c['caption']}" if c.get("caption") else f"S{c['index']}: I couldn't read this one" for c in rows) or f"{self._nm(t.sess, gen)} has no finished stickers yet."
         t.sess["focus"] = {"generation": gen, "stickers": [f"{gen}/S{c['index']}" for c in rows][:3] if only else []}
         t.generation = gen
         t.trace.end("described")
@@ -696,6 +710,19 @@ class Agent:
         t.reply = f"Done: {said}, from now on."
         return {}
 
+    def n_vision(self, state: State) -> dict:
+        """The answer to the early question: only the setting changes (a pending go-ahead, if any, is untouched)."""
+        t: Turn = state["turn"]
+        yes = (t.action or {}).get("type") == "vision_yes"
+        t.sess["settings"]["allow_vlm"] = bool(yes)
+        t.trace.task("saving your answer")
+        t.trace.step("AI vision allowed" if yes else "AI vision stays off")
+        t.trace.end("saved")
+        t.reply = ("Good: when stickers are ready I will look at them and suggest better names where one does not fit." if yes
+                   else "Understood, no picture leaves your PC for a vision model. Say \"allow AI vision\" any time.")
+        t.chips = [{"label": "Create it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}] if t.sess.get("pending") else []
+        return {}
+
     def n_smalltalk(self, state: State) -> dict:
         t: Turn = state["turn"]
         t.trace.task("saying hello")
@@ -726,12 +753,30 @@ class Agent:
         self._finish(t)
         return {}
 
+    VISION_ASK = ("One more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? "
+                  "I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.")
+
+    def _ask_vision_early(self, t: Turn) -> bool:
+        """The first answer of a chat also asks, once, whether AI vision may be used (`settings.allow_vlm`: None = never asked). It is a pair of buttons that change only that setting,
+        so it never replaces a pending go-ahead (the plan's Create stays what it was) and a person who ignores it is simply not asked again in this chat."""
+        sess = t.sess
+        if sess["settings"].get("allow_vlm") is not None or sess.get("vision_asked") or (t.action or {}).get("type") in ("vision_yes", "vision_no"):
+            return False
+        if sess.get("awaiting") or (sess.get("pending") or {}).get("type") == "describe" or any(x in ("CONFIRM", "CANCEL") for x in t.intents) and not sess["interactions"]:
+            return False                                  # a question of mine is open (which sticker? the describe consent): one question at a time
+        sess["vision_asked"] = True
+        t.reply = (t.reply + "\n\n" if t.reply else "") + self.VISION_ASK
+        t.chips = list(t.chips) + [{"label": "Allow AI vision", "action": "vision_yes"}, {"label": "Keep it off", "action": "vision_no"}]
+        return True
+
     def _finish(self, t: Turn, ok: bool = True) -> None:
         sess, msg = t.sess, t.msg
         if t.res.generation and t.res.stickers:
             sess["focus"] = {"generation": t.res.generation, "stickers": t.res.stickers[:3]}
         elif t.generation:
             sess["focus"] = {"generation": t.generation, "stickers": []}
+        if ok and self._ask_vision_early(t):
+            pass
         msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done" if ok else "error")
         if msg["steps"] and msg["steps"][-1]["kind"] != "final":
             t.trace.end("done" if ok else "stopped", ok=ok)

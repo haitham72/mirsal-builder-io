@@ -57,10 +57,7 @@ def _lint(cells, n: int, subject_slug: str, request: str) -> list[str]:
 
 
 def _parse(text: str):
-    m = re.search(r"\{.*\}", text, re.S)
-    if not m:
-        raise ValueError("the answer has no JSON object")
-    return json.loads(m.group(0))
+    return llm.extract_json(text)
 
 
 REVIEW_SYSTEM = """You review sticker slot JSON. You are given a request and a slot object with subject_description and cells (label, key, tags, emoji). Reply with ONE JSON object and nothing else:

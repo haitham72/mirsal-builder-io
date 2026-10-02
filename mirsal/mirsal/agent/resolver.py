@@ -215,6 +215,30 @@ COMPARATIVE = r"\b(?:\w+er|more|less|bigger|smaller|happier|sadder|funnier|cuter
 NEW_VERBS = r"\b(make|create|generate|give|draw|design|build|i want|i need|i'd like|can you make|stickers? (?:of|for|with)|pack of|set of)\b"
 
 
+GREETING_WORDS = ("hi", "hiya", "hii", "hello", "hallo", "hey", "heya", "hola", "yo", "sup", "howdy", "salam", "salaam", "marhaba", "mrhba", "ahlan", "ahla", "thanks", "thank", "thx", "ty",
+                  "cheers", "bye", "goodbye", "morning", "evening", "afternoon", "night", "good", "there", "again", "everyone", "all", "how", "are", "you", "whats", "what's", "up",
+                  "assistant", "bot", "mirsal", "so", "much", "very", "a", "lot", "many", "morning", "ok", "okay", "cool", "great", "nice", "lovely", "awesome", "perfect", "welcome", "pleased", "meet",
+                  "مرحبا", "اهلا", "أهلا", "السلام", "عليكم", "شكرا", "هلا")
+GREETING_STARTERS = ("hi", "hiya", "hello", "hallo", "hey", "heya", "hola", "yo", "sup", "howdy", "salam", "salaam", "marhaba", "ahlan", "thanks", "thank", "thx", "good", "bye", "goodbye", "cheers",
+                     "how", "whats", "what's", "مرحبا", "اهلا", "أهلا", "السلام", "شكرا", "هلا")
+
+
+def is_smalltalk(text: str) -> bool:
+    """A greeting or a thank-you ("hi", "hellow", "heyy there", "good morning", "thanks!", "salam", "how are you"), typos included. At most 5 words, every one of them a
+    greeting word (or within one slip of one), and the first a greeting starter: "hello kitty" (a subject) and "hi, make me a falcon" (a request) are not small talk."""
+    import difflib
+    words = re.findall(r"[^\W\d_]+(?:'[a-z]+)?", text.lower())
+    if not words or len(words) > 5:
+        return False
+
+    def near(w, pool):
+        short = re.sub(r"(.)\1+", r"\1", w)                      # heyyyy -> hey, hii -> hi, hellooo -> helo
+        if w in pool or short in pool:
+            return True
+        return any(len(c) >= 5 and len(w) >= 5 and difflib.SequenceMatcher(None, c, w).ratio() >= 0.8 for c in pool) or             any(len(c) >= 5 and len(short) >= 4 and difflib.SequenceMatcher(None, re.sub(r"(.)\1+", r"\1", c), short).ratio() >= 0.85 for c in pool)
+    return near(words[0], GREETING_STARTERS) and all(near(w, GREETING_WORDS) for w in words) and "kitty" not in words
+
+
 def classify(text: str, has_pending: bool, has_generation: bool, has_selection: bool = False) -> tuple[list, float]:
     """Intents in order of importance, with a confidence. Below 0.6 the graph asks the model to classify."""
     t = text.strip().lower()
@@ -224,6 +248,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["CONFIRM"], 0.95
     if has_pending and re.match(NO, t):
         return ["CANCEL"], 0.95
+    if is_smalltalk(t) and not re.search(NEW_VERBS, t):
+        return ["SMALLTALK"], 0.95
     intents: list = []
     conf = 0.5
     refs = bool(re.search(r"\b(?:number|no\.?|#)\s*\d|\b\d\b|\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last)\b|\bg\d+\s*/?\s*s\d", t)) \
@@ -259,8 +285,6 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         intents, conf = ["NEW"], 0.85
     elif has_generation and re.search(r"^(?:i )?(?:like|love|hate|dislike|keep)\b", t):
         intents, conf = ["FEEDBACK"], 0.6
-    elif re.search(r"^(?:hi|hello|hey|salam|marhaba|thanks|thank you|good (?:morning|evening))\b", t):
-        intents, conf = ["SMALLTALK"], 0.9
     elif len(t.split()) <= 8 and not t.endswith("?"):
         intents, conf = ["NEW"], 0.62                 # "falcon dancing", "teddy bear with a book": a bare subject is a request
     else:

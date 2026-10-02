@@ -78,6 +78,13 @@ class ConsoleTools:
             c.set(key, plan, 7 * 24 * 3600)
         return plan
 
+    def engine_label(self, ai: bool = True) -> str | None:
+        """Which model writes the sticker ideas right now ("qwen3.5-4b (local)", "gpt-4.1-mini (cloud)"), None when the built-in sets are used. Shown as a step before the model is asked."""
+        from ..services import llm
+        if not ai or not llm.configured():
+            return None
+        return f"{llm.model().split('/')[-1].replace(':2', '')} ({'local' if llm.provider() == 'local' else 'cloud'})"
+
     def estimate(self, kind: str = "image") -> float | None:
         """What one call of the default model costs (a sheet; a video needs a built video sheet and is priced when it is sent)."""
         if not self.live():
@@ -241,6 +248,9 @@ class FakeTools:
         n = 9 if grid == "3x3" else 4 if grid == "2x2" else 1
         return {"subject": subject, "task_slug": subject.replace(" ", "_"), "grid": grid, "expanded_by": "fake",
                 "stickers": [{"index": i, "key": f"{subject.replace(' ', '_')}_{i}", "emoji": ["😀"], "prompt": f"{subject} {i}"} for i in range(1, n + 1)]}
+
+    def engine_label(self, ai=True):
+        return None
 
     def estimate(self, kind="image"):
         return 2.0 if self._live else None

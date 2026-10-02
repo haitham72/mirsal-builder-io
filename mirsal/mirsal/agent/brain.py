@@ -41,14 +41,13 @@ def target() -> dict:
     llm._load_dotenv()
     want = os.environ.get("MIRSAL_AGENT_PROVIDER", "auto").lower()
     if want == "auto":
-        want = "local" if llm.local_reachable() else ("openai" if os.environ.get(llm.KEY_VAR) else "none")
+        want = llm.resolve()                                    # the person's choice (auto / local / cloud) in one place, the same for the plan, the chat and the vision judge
     model = os.environ.get("MIRSAL_AGENT_MODEL") or (llm.local_model() if want == "local" else os.environ.get("MIRSAL_LLM_MODEL", llm.DEFAULT_MODEL))
     return {"provider": want, "model": model}
 
 
 def _first_json(text: str):
-    from ..vision.judge import _first_json as fj
-    return fj(text)
+    return llm.extract_json(text)
 
 
 class Brain:
@@ -57,6 +56,7 @@ class Brain:
         self._complete = complete
         self.out = out
         self.calls = 0
+        self.last_error = None
 
     @property
     def available(self) -> bool:
@@ -71,7 +71,9 @@ class Brain:
             else:
                 text, meta = llm.complete(system, user, temperature=0, max_tokens=max_tokens, timeout=45,
                                           provider_=t["provider"], model_=t["model"])
-        except llm.LLMError:
+        except llm.LLMError as e:
+            llm.note_failure(t["provider"])
+            self.last_error = str(e)
             if self.out is not None:
                 from ..generation import model_calls
                 model_calls.append(self.out, kind, t["provider"], t["model"], status="ERROR", latency_ms=int((time.perf_counter() - t0) * 1000),

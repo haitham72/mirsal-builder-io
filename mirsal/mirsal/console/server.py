@@ -834,7 +834,7 @@ def make_handler(c: Console):
             if path == "/api/chat/agent":     # which model runs the chat, and whether the vision judge is up
                 from ..agent import brain as _brain
                 return self._json(200, {"agent": _brain.target(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
-                                        "live": higgsfield.available()})
+                                        "live": higgsfield.available(), "preference": llm.preference(), "availability": llm.availability()})
             if path == "/api/chat/sessions":
                 rows, meta = self._page(c.chat_parts(self.user)[0].list())
                 return self._json(200, {"sessions": rows, **meta})
@@ -1113,6 +1113,12 @@ def make_handler(c: Console):
                 from ..store import sync as _sync
                 _sync.sync_users(c.out)
                 return self._json(200, r)
+            if path == "/api/ai/backend":        # the AI selector: auto | local | cloud (owner only); nothing is restarted, the next call uses it
+                try:
+                    llm.set_preference(str(body.get("backend", "")))
+                except llm.LLMError as e:
+                    raise pl.PipelineError(str(e), 400)
+                return self._json(200, llm.status())
             if path == "/api/telegram/config":
                 return self._json(200, telegram.save_config(c.out, str(body.get("token", "")), str(body.get("user_id", ""))))
             if path == "/api/telegram/disconnect":

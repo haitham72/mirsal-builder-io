@@ -192,3 +192,8 @@ body.agent-view .c2h h1{background:linear-gradient(100deg,#0E7490,#3B82F6);-webk
  .ai-box{padding:6px 6px 6px 14px}
  .ai-set{width:min(88vw,300px)}
 }
+
+/* the engine pill is a button now (it opens the settings, where Auto / Local / Cloud live); an engine that is not available is dimmed and says why in its tooltip */
+button.ai-pill{cursor:pointer;font-family:inherit}
+button.ai-pill:hover{border-color:var(--ai)}
+.ai-seg button.is-off{opacity:.45}

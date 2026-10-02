@@ -56,7 +56,7 @@ class NewAndConfirm(Base):
         m = self.say("make me falcon stickers")
         self.assertEqual(m["cards"][0]["type"], "plan")
         self.assertEqual((m["cards"][0]["estimate"], len(m["cards"][0]["names"])), (2.0, 9))
-        self.assertEqual([c.get("action") for c in m["chips"]], ["confirm", "cancel"])
+        self.assertEqual([c.get("action") for c in m["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm", "cancel"])
         self.assertFalse([c for c in self.tools.calls if c[0] == "create"])            # no credits until the user says so
         self.assertIsNotNone(self.sess()["pending"])
 
@@ -479,7 +479,7 @@ class AiVision(Base):
         self.seed("G012")
         m = self.say("what do my stickers show?")
         self.assertIn("Allow AI vision", m["text"])
-        self.assertEqual([c.get("action") for c in m["chips"]], ["confirm", "cancel"])
+        self.assertEqual([c.get("action") for c in m["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm", "cancel"])
         self.assertEqual(self.captions(), [])
         self.assertIsNone(self.sess()["settings"]["allow_vlm"])
         self.assertEqual(self.sess()["pending"]["type"], "describe")
@@ -616,3 +616,46 @@ class SessionHealth(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FriendlyChat(Base):
+    """2026-10-02: greetings are greetings, the price is stated once, the early vision question, batches are called by their subject."""
+
+    def test_a_greeting_with_a_typo_is_a_greeting_not_a_new_set(self):
+        for text in ("hellow", "heyyy", "good morning", "thanks!"):
+            sid = self.store.create()["id"]
+            m = self.agent.run_turn(sid, text)
+            self.assertEqual(m["cards"], [], text)
+            self.assertIsNone(self.store.load(sid)["pending"], text)
+            self.assertFalse([c for c in self.tools.calls if c[0] == "plan"], text)
+
+    def test_the_plan_names_its_price_only_in_the_card(self):
+        m = self.say("make me falcon stickers")
+        self.assertNotIn("credit", m["text"])
+        self.assertEqual(m["cards"][0]["estimate"], 2.0)
+
+    def test_the_first_answer_asks_about_ai_vision_once_and_never_blocks_the_plan(self):
+        m = self.say("make me falcon stickers")
+        acts = [c.get("action") for c in m["chips"]]
+        self.assertEqual(acts, ["confirm", "cancel", "vision_yes", "vision_no"])
+        self.assertIsNotNone(self.sess()["pending"])
+        m2 = self.say("", action={"type": "vision_yes"})
+        self.assertIs(self.sess()["settings"]["allow_vlm"], True)
+        self.assertIsNotNone(self.sess()["pending"], "answering about vision must not drop the pending go-ahead")
+        self.assertEqual([c.get("action") for c in m2["chips"]], ["confirm", "cancel"])
+        m3 = self.say("make me teddy stickers")
+        self.assertNotIn("vision_yes", [c.get("action") for c in m3["chips"]])        # asked once
+
+    def test_a_no_to_vision_is_remembered_and_not_asked_again(self):
+        self.say("hello")
+        self.say("", action={"type": "vision_no"})
+        self.assertIs(self.sess()["settings"]["allow_vlm"], False)
+        m = self.say("make me falcon stickers")
+        self.assertNotIn("vision_yes", [c.get("action") for c in m["chips"]])
+
+    def test_a_batch_is_called_by_its_subject_not_by_its_id(self):
+        self.seed("G096", subject="eid mubarak greetings")
+        m = self.say("describe the stickers")
+        self.assertIn("Eid mubarak greetings", m["text"])
+        self.assertNotIn("G096", m["text"])
+        self.assertNotIn("G096", [s["label"] for s in m["steps"] if s["kind"] == "task"][0])

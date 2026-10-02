@@ -100,12 +100,31 @@ instead of ending the polling (a frame that throws must never freeze the chat on
 
 | use | model | where |
 |---|---|---|
-| agent, judge, plan expansion | `qwen3.5-4b:2` (LM Studio, local, free, multimodal, a thinking model: calls send `reasoning_effort: "none"`) | `MIRSAL_LOCAL_MODEL` overrides |
+| agent, judge, plan expansion | `qwen3.5-4b:2` (LM Studio, local, free, multimodal, a thinking model: calls end with an already CLOSED think block as an assistant message, see below) | `MIRSAL_LOCAL_MODEL` overrides |
 | embeddings (pool search) | `text-embedding-nomic-embed-text-v1.5` (768-d) | `MIRSAL_EMBED_MODEL` overrides |
 | fallback | OpenAI `gpt-4.1-mini` / `text-embedding-3-small` (dimensions 768) when LM Studio is down and `OPENAI_API_KEY` is set | |
 
 Nothing asks LM Studio which models it has; reachability is a TCP connect cached for 60 s. `MIRSAL_LLM_PROVIDER`, `MIRSAL_AGENT_PROVIDER`, `MIRSAL_VISION_PROVIDER`
 (`local | openai | auto`) pick the backend per use.
+
+**The person's choice: Auto / Local / Cloud (2026-10-02).** One setting for the plan expansion, the chat's brain and the vision judge: the engine pill in the chat header opens the settings, whose "AI engine" row
+saves it (`POST /api/ai/backend {backend}`, owner only, stored in `out/ai_backend.json`; `MIRSAL_AI_BACKEND` overrides; `GET /api/ai` and `GET /api/chat/agent` return the choice and what is available, with the plain reason when not).
+`local` and `cloud` are used as chosen and never fall back to the other one (a down backend says so). `auto` picks the free local model when LM Studio answers, otherwise the cloud, and then KEEPS that for 10 minutes
+(`llm.resolve`): it used to be decided again on every call from a probe that is wrong while LM Studio is busy, so it alternated; a failed call (`llm.note_failure`) moves it, and `llm.complete` retries that one call on the other backend.
+An explicit `MIRSAL_LLM_PROVIDER` / `MIRSAL_AGENT_PROVIDER` / `MIRSAL_VISION_PROVIDER` other than `auto` still wins (the test suite pins them to `none`). Embeddings are not part of this choice: their vectors only compare with vectors of the same model.
+
+**Why a plan took minutes and ended in a red "not valid JSON" (fixed).** Measured on 2026-10-02: LM Studio no longer honours `reasoning_effort: none`, `/no_think` or `enable_thinking` for `qwen3.5-4b:2`; it spent the whole 2500-token budget
+thinking, returned an EMPTY answer (23 s), the one repair round did the same, and the plan fell back to the built-in sets with the error "the answer has no JSON object". The fix: for a Qwen model the request ends with an assistant message `<think>
+
+</think>
+
+`
+(`llm.CLOSED_THINK`, `MIRSAL_LOCAL_PREFILL=0` turns it off): 12 tokens and 2.4 s for a trivial answer, a 9-cell plan in about 7 s. An empty answer that ran out of budget is now an error (`LLMError`), not an empty string, and one balanced-brace JSON reader
+(`llm.extract_json`, through `<think>` blocks and code fences) is used by the plan, the brain and the judge. The chat shows the step "writing 9 sticker ideas with qwen3.5-4b (local)" before the model is asked, and a note when the built-in sets had to be used.
+
+**Greetings and the first answer.** `resolver.is_smalltalk` reads "hi", "hellow", "heyyy", "good morning", "thanks!", "salam", "how are you" (typos included, at most five words, never "hello kitty" or "hi, make me a falcon") as small talk and answers
+without a plan. The first answer of every chat also asks once whether AI vision may be used (two buttons, `vision_yes` / `vision_no`, that change only `settings.allow_vlm`; a pending go-ahead is never dropped). The plan's price is stated once, in its card;
+the go-ahead is the pair of buttons under the message (Create it / Not yet), like "Allow AI vision / Not now". Batches are called by their subject in every sentence and step title ("Eid mubarak greetings"), never by the bare id "G096".
 
 ## Prompt separation
 

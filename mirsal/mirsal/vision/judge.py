@@ -98,7 +98,7 @@ def target() -> dict:
     base = _env("VISION_BASE_URL", "") or None
     want = str(_env("MIRSAL_VISION_PROVIDER", "auto")).lower()
     if want == "auto":
-        want = "local" if (base or llm.local_reachable()) else ("openai" if os.environ.get(llm.KEY_VAR) else "none")
+        want = "local" if base else llm.resolve()
     model = _env("VISION_MODEL", "") or (llm.local_model() if want == "local" else os.environ.get("MIRSAL_VISION_OPENAI_MODEL", llm.DEFAULT_MODEL))
     return {"provider": want, "model": model, "base_url": base if want == "local" else None}
 

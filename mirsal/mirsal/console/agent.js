@@ -64,7 +64,7 @@ RENDER.agent=async arg=>{
  const root=$('s-agent');
  if(!root.dataset.ready){root.dataset.ready=1;root.innerHTML=`<div class=ai-bg><i class="ai-blob b1"></i><i class="ai-blob b2"></i><i class="ai-blob b3"></i><i class=ai-dots></i><i class=ai-glow></i></div>
   <div class=ai id=ai><div class=ai-main>
-   <div class=ai-top><button class="ai-ibtn menu" data-act=agdrawer title="Chats" aria-label="Chats">${ic('hist')}</button><span class=ttl id=ai-ttl></span><span class=sp></span><span class=ai-pill id=ai-pill><i></i><span>…</span></span>
+   <div class=ai-top><button class="ai-ibtn menu" data-act=agdrawer title="Chats" aria-label="Chats">${ic('hist')}</button><span class=ttl id=ai-ttl></span><span class=sp></span><button type=button class=ai-pill id=ai-pill data-act=agset title="AI engine"><i></i><span>…</span></button>
     <button class=ai-ibtn data-act=agnew title="New chat" aria-label="New chat">${ic('plus')}</button></div>
    <div class=ai-scroll id=ai-scroll><div class=ai-col id=ai-col></div></div>
    <div class=ai-dock><div class=ai-dock-in>
@@ -96,8 +96,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&A.sess&&A
 
 function pill(){const p=$('ai-pill');if(!p)return;const a=A.agent;if(!a){return}
  const on=a.agent.provider!=='none',nm=(a.agent.model||'').split('/').pop().replace(/:\d+$/,'');
- p.className='ai-pill'+(on?' up':'');p.querySelector('span').textContent=on?(a.agent.provider==='local'?'Local · ':'Cloud · ')+nm:'Rules only';
- p.title=on?`The assistant runs on ${a.agent.model} (${a.agent.provider}). Vision checks: ${a.vision.model||'off'}.`:'No language model is reachable: the assistant still works from rules.'}
+ p.className='ai-pill'+(on?' up':'');p.querySelector('span').textContent=on?(a.preference==='auto'?'Auto · ':'')+(a.agent.provider==='local'?'Local · ':'Cloud · ')+nm:'Rules only';
+ p.title=on?`The assistant runs on ${a.agent.model} (${a.agent.provider}), your choice: ${a.preference}. Vision checks: ${a.vision.model||'off'}. Click to change.`:'No language model is reachable: the assistant still works from rules. Click for details.'}
 
 /* ---------- painting (a keyed diff: only a message whose signature changed is rebuilt) */
 function paint(){
@@ -148,7 +148,7 @@ function cardHTML(c,m,i){
   return `<div class="ai-card plan${done?' is-done':''}"><div class=ai-ch><b>${AIU.esc(c.subject)}</b><small>${c.count} stickers · ${AIU.esc(c.grid)} · ${AIU.esc(c.style)}</small></div>
    <div class=plan-tags>${(c.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div>
    <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`Costs <b>${AIU.credits(c.estimate)}</b>${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}</div>
-    <button class=no data-act=agaction data-type=cancel>Not yet</button><button class=go data-act=agaction data-type=confirm>Create</button></div></div>`}
+    </div></div>`}   /* the go-ahead lives in the two chips under the message (Create it / Not yet), the same place as "Allow AI vision / Not now": one pair of buttons, never two */
  if(c.type==='generation'){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
   let note='';
@@ -212,10 +212,19 @@ ACT.agdrawer=()=>{A.drawer=!A.drawer;$('ai-drawer').classList.toggle('on',A.draw
 ACT.agset=()=>{A.setOpen=!A.setOpen;setSet()};
 ACT.agsetgrid=async el=>saveSet({grid:el.dataset.v});
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
+ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await loadAgent();setSet()}else toast(r.j.error||'Could not change the AI engine',1)};
 async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;setSet()}else toast(r.j.error,1)}
+/* the AI engine row: Auto keeps a working backend and only a failed call switches it; Local / Cloud are used as chosen. A backend that is not available says why. */
+function beRow(){const a=A.agent||{},av=a.availability||{},pref=a.preference||'auto';
+ const b=(v,label)=>{const ok=v==='auto'||(av[v]&&av[v].ok);const why=v==='auto'?'Use the local model when LM Studio answers, otherwise the cloud; keep what works':(av[v]&&av[v].why)||(av[v]&&av[v].model)||'';
+  return `<button data-act=agbe data-v=${v} class="${pref===v?'on':''}${ok?'':' is-off'}" title="${AIU.esc(ok&&v!=='auto'?av[v].model:why)}">${label}</button>`};
+ const now=a.agent&&a.agent.provider!=='none'?`now: ${a.agent.provider==='local'?'local':'cloud'} · ${AIU.esc((a.agent.model||'').replace(/:\d+$/,''))}`:'now: rules only';
+ const warn=pref!=='auto'&&av[pref]&&!av[pref].ok?` · <span class=ai-err>${AIU.esc(av[pref].why||'not available')}</span>`:'';
+ return `<div class=r><div><b>AI engine</b><small>${now}${warn}</small></div><div class=ai-seg>${b('auto','Auto')}${b('local','Local')}${b('cloud','Cloud')}</div></div>`}
 function setSet(){const el=$('ai-set');if(!el)return;el.classList.toggle('on',A.setOpen);if(!A.setOpen)return;
  const st=A.sess?A.sess.settings:{grid:'3x3',ask_before_spending:true};
  el.innerHTML=`<div class=r><div><b>Grid</b><small>How many stickers in one sheet</small></div><div class=ai-seg><button data-act=agsetgrid data-v=3x3 class="${st.grid==='3x3'?'on':''}">3×3</button><button data-act=agsetgrid data-v=2x2 class="${st.grid==='2x2'?'on':''}">2×2</button></div></div>
+  ${beRow()}
   <div class=r><div><b>Ask before spending</b><small>Show the price and wait for your go-ahead</small></div><button type=button class="ai-sw${st.ask_before_spending?' on':''}" data-act=agsetask role=switch aria-checked="${!!st.ask_before_spending}" aria-label="Ask before spending"></button></div>`}
 document.addEventListener('click',e=>{if(A.setOpen&&!e.target.closest('.ai-set')&&!e.target.closest('[data-act=agset]')){A.setOpen=false;setSet()}});
 

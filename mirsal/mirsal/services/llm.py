@@ -15,6 +15,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -96,6 +97,80 @@ def local_reachable() -> bool:
     return ok
 
 
+BACKENDS = ("auto", "local", "cloud")
+STICKY_S = 600                                  # in auto mode a working backend is kept this long; only a failed call (or this timeout) can change it
+_sticky: dict = {"prov": None, "until": 0.0}
+
+
+def _pref_file() -> Path:
+    from ..runtime.paths import out_root
+    return out_root() / "ai_backend.json"
+
+
+def preference() -> str:
+    """The person's choice of backend: auto | local | cloud. MIRSAL_AI_BACKEND overrides the saved choice (out/ai_backend.json); default auto."""
+    _load_dotenv()
+    v = str(os.environ.get("MIRSAL_AI_BACKEND") or "").lower()
+    if v not in BACKENDS:
+        try:
+            v = str(json.loads(_pref_file().read_text(encoding="utf-8")).get("backend") or "").lower()
+        except (OSError, ValueError, AttributeError):
+            v = ""
+    return v if v in BACKENDS else "auto"
+
+
+def set_preference(value: str) -> str:
+    """Save the choice (the Studio's AI selector). Takes effect on the next call; nothing is restarted."""
+    v = str(value or "").lower()
+    if v not in BACKENDS:
+        raise LLMError(f"backend must be one of {', '.join(BACKENDS)}")
+    from ..runtime import atomic
+    f = _pref_file()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    atomic.write_text(f, json.dumps({"backend": v}))
+    _sticky.update(prov=None, until=0.0)
+    return v
+
+
+def availability() -> dict:
+    """What can be used right now, with the plain reason when it cannot: {local: {ok, model, why}, cloud: {ok, model, why}}."""
+    _load_dotenv()
+    up = local_reachable()
+    key = bool(os.environ.get(KEY_VAR))
+    return {"local": {"ok": up, "model": local_model(), "why": None if up else f"LM Studio is not answering at {local_url()}: start it and load {local_model()}"},
+            "cloud": {"ok": key, "model": os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL), "why": None if key else f"no {KEY_VAR} in mirsal/.env"}}
+
+
+def _usable(prov: str) -> bool:
+    return local_reachable() if prov == "local" else bool(os.environ.get(KEY_VAR)) if prov == "openai" else False
+
+
+def resolve() -> str:
+    """local | openai | none, from the person's choice. local / cloud are taken as chosen (if it is down the call says so, it never silently uses the
+    other one); auto picks the free local model when it answers, else the cloud, and then KEEPS that choice for STICKY_S seconds (it used to be re-decided on
+    every call from a probe that is wrong while LM Studio is busy, so it alternated); a failed call moves it (`note_failure`)."""
+    _load_dotenv()
+    pref = preference()
+    if pref == "local":
+        return "local"
+    if pref == "cloud":
+        return "openai" if os.environ.get(KEY_VAR) else "none"
+    now = time.time()
+    if _sticky["prov"] and now < _sticky["until"] and _usable(_sticky["prov"]):
+        return _sticky["prov"]
+    prov = "local" if local_reachable() else ("openai" if os.environ.get(KEY_VAR) else "none")
+    _sticky.update(prov=prov, until=now + STICKY_S)
+    return prov
+
+
+def note_failure(prov: str) -> None:
+    """A call to `prov` failed: in auto mode the other backend (when it is usable) becomes the kept choice for STICKY_S seconds."""
+    if preference() != "auto" or _sticky["prov"] != prov:
+        return
+    other = "openai" if prov == "local" else "local"
+    _sticky.update(prov=other if _usable(other) else prov, until=time.time() + STICKY_S)
+
+
 def provider() -> str:
     """The backend `complete` will use: openai | local | none."""
     _load_dotenv()
@@ -106,9 +181,7 @@ def provider() -> str:
         return "local"
     if p == "openai":
         return "openai" if os.environ.get(KEY_VAR) else "none"
-    if local_reachable():                      # auto: the local Ministral first (free, private), OpenAI when it is not running
-        return "local"
-    return "openai" if os.environ.get(KEY_VAR) else "none"
+    return resolve()
 
 
 def configured() -> bool:
@@ -124,7 +197,7 @@ def model() -> str:
 
 def status() -> dict:
     p = provider()
-    return {"configured": p != "none", "provider": p, "model": model() if p != "none" else None,
+    return {"configured": p != "none", "provider": p, "model": model() if p != "none" else None, "preference": preference(), "availability": availability(),
             "local": {"url": local_url(), "reachable": local_reachable(), "model": local_model()}}
 
 
@@ -144,13 +217,73 @@ def data_url(b: bytes) -> str:
     return f"data:{mime};base64," + base64.b64encode(b).decode("ascii")
 
 
-def complete(system: str, user: str, *, max_tokens: int = 2500, timeout: float = 60.0, temperature: float = 0.8,
-             json_mode: bool = False, images: list | None = None, provider_: str | None = None,
-             model_: str | None = None, base_url: str | None = None) -> tuple[str, dict]:
+CLOSED_THINK = "<think>\n\n</think>\n\n"
+
+
+def _prefill(model: str) -> bool:
+    """Qwen 3.x thinks before it answers and, in LM Studio, `reasoning_effort: none` / `/no_think` / `enable_thinking` no longer stop it (measured 2026-10-02: 263 hidden
+    tokens for a 12-token answer, and a 9-cell plan spent its whole 2500-token budget thinking and came back EMPTY, twice, 46 s, then 'not valid JSON'). What does stop it:
+    ending the conversation with an assistant message that is an already CLOSED think block (measured: 12 tokens, 0 reasoning, 2.4 s). MIRSAL_LOCAL_PREFILL=0 turns it off."""
+    return os.environ.get("MIRSAL_LOCAL_PREFILL", "1") not in ("0", "off", "no", "false") and model.lower().startswith("qwen")
+
+
+def extract_json(text: str):
+    """The first balanced {...} (or [...]) of a model answer, tolerant of <think> blocks, code fences and chatter around it. Raises ValueError."""
+    text = re.sub(r"<think>.*?</think>", "", text or "", flags=re.S)
+    text = re.sub(r"</?think>", "", text)
+    for open_, close in (("{", "}"), ("[", "]")):
+        start = text.find(open_)
+        while start != -1:
+            depth, in_str, esc = 0, False, False
+            for i in range(start, len(text)):
+                ch = text[i]
+                if in_str:
+                    if esc:
+                        esc = False
+                    elif ch == "\\":
+                        esc = True
+                    elif ch == '"':
+                        in_str = False
+                elif ch == '"':
+                    in_str = True
+                elif ch == open_:
+                    depth += 1
+                elif ch == close:
+                    depth -= 1
+                    if depth == 0:
+                        try:
+                            return json.loads(text[start:i + 1])
+                        except ValueError:
+                            break
+            start = text.find(open_, start + 1)
+    raise ValueError("the answer has no JSON object" if text.strip() else "the answer is empty")
+
+
+def complete(system: str, user: str, *, provider_: str | None = None, **kw) -> tuple[str, dict]:
+    """`_complete_on` with the person's choice applied: with an explicit `provider_` it is used as given; otherwise the backend is `provider()`, and in AUTO mode a
+    failed call moves the kept choice to the other backend (when it is usable) and the call is made once more there, so one hiccup of LM Studio costs one retry
+    instead of an error. A chosen backend (local / cloud) never falls back to the other one."""
+    if provider_:
+        return _complete_on(provider_, system, user, **kw)
+    prov = provider()
+    try:
+        return _complete_on(prov, system, user, **kw)
+    except LLMError:
+        if prov == "none" or os.environ.get("MIRSAL_LLM_PROVIDER", "auto").lower() != "auto" or preference() != "auto":
+            raise
+        note_failure(prov)
+        other = provider()
+        if other in ("none", prov):
+            raise
+        return _complete_on(other, system, user, **{**kw, "model_": None, "base_url": None})
+
+
+def _complete_on(prov: str, system: str, user: str, *, max_tokens: int = 2500, timeout: float = 60.0, temperature: float = 0.8,
+                 json_mode: bool = False, images: list | None = None,
+                 model_: str | None = None, base_url: str | None = None) -> tuple[str, dict]:
     """-> (text, meta{model, ms, tokens_in, tokens_out, provider}). Raises LLMError with a plain message that never contains the key.
     json_mode asks for a JSON object (the prompt must say JSON). Reasoning models (gpt-5*, o*) take no temperature; a model that
     refuses an optional parameter (HTTP 400) is retried once without temperature and json_mode."""
-    prov = provider_ or provider()
     if prov == "none":
         raise LLMError(f"No AI backend: add {KEY_VAR} to mirsal/.env, or start LM Studio (MIRSAL_LOCAL_URL, default {LOCAL_URL}).")
     key = os.environ.get(KEY_VAR) if prov == "openai" else None
@@ -161,7 +294,10 @@ def complete(system: str, user: str, *, max_tokens: int = 2500, timeout: float =
     content = user
     if images:
         content = [{"type": "text", "text": user}] + [{"type": "image_url", "image_url": {"url": data_url(b)}} for b in images]
-    body = {"model": m, "messages": [{"role": "system", "content": system}, {"role": "user", "content": content}]}
+    msgs = [{"role": "system", "content": system}, {"role": "user", "content": content}]
+    if prov == "local" and _prefill(m):
+        msgs.append({"role": "assistant", "content": CLOSED_THINK})
+    body = {"model": m, "messages": msgs}
     body["max_completion_tokens" if prov == "openai" else "max_tokens"] = max_tokens
     optional = {}
     if prov == "local":
@@ -193,8 +329,11 @@ def complete(system: str, user: str, *, max_tokens: int = 2500, timeout: float =
             raise LLMError("Cannot reach the AI service: " + str(getattr(e, "reason", e)).replace(key or chr(0), "<key>"))
     try:
         text = data["choices"][0]["message"]["content"] or ""
+        finish = data["choices"][0].get("finish_reason")
     except (KeyError, IndexError, TypeError):
         raise LLMError("The AI service answered in an unexpected shape.")
+    if not text.strip() and finish == "length":
+        raise LLMError(f"The {'local' if prov == 'local' else 'cloud'} model used its whole answer budget thinking and returned nothing; try again or switch the AI backend.")
     u = data.get("usage") or {}
     return text, {"model": data.get("model") or m, "ms": int((time.perf_counter() - t0) * 1000), "provider": prov,
                   "tokens_in": u.get("prompt_tokens"), "tokens_out": u.get("completion_tokens")}
