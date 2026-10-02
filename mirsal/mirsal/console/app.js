@@ -73,7 +73,10 @@ window.addEventListener('hashchange',route);
 
 /* ---------- second column: packs (occupies the chat-list position of the Mirsal mockup; every row is a real pack) */
 let C2Q='';
-function drawCol2(){const on=['library','pack','chat','agent'].includes(route_);document.body.classList.toggle('col2',on);if(!on)return;
+/* the second column of a section: the list that belongs to it, in the same place on every screen. Studio and Create list the earlier batches (live.js); Settings and the full-screen tools (editor, export, prepare, animate) have no list */
+const COL2=['agent','generate','library','pack','chat','create'];
+function drawCol2(){const on=COL2.includes(route_);document.body.classList.toggle('col2',on);if(!on)return;
+ if(route_==='generate'||route_==='create')return typeof histCol==='function'?histCol():0;
  if(route_==='chat')return chList();
  if(route_==='agent')return typeof agList==='function'?agList():0;
  const q=C2Q.trim().toLowerCase(),cur=route_==='pack'?PACK_ID:null;

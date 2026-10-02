@@ -45,7 +45,7 @@ function cpDrawTop(){const el=$('cptop');if(!el)return;const h=LIVE.hf;
    ${CP.menu?`<div class=cp-menu role=menu><div class=cp-mh><div><small>Credits left</small><b>${h.error?'?':fcr(h.credits)}</b></div><div><small>Spent today</small><b>${fcr(h.spent_today)}</b></div><button class="btn sm" data-act=lusage>Usage log</button></div>
      ${h.error?`<div class=cp-mw>${esc(h.error)}</div>`:''}
      <div class=cp-ml>${items.length?items.map(it=>`<button data-act=hopen data-id=${it.id}><span class=cp-mt>${(()=>{const c=(it.cells||[]).find(c=>c.png);return c?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" alt="">`:''})()}</span><span><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' ')))}</b><small>${esc(it.generation_id)} · edited ${ago(it.edited||it.created)}</small></span></button>`).join(''):'<div class=cp-mw>No batches yet.</div>'}</div>
-     ${HB.more?'<button class="btn sm cp-mmore" data-act=hmore>Load more</button>':''}</div>`:''}`}
+     </div>`:''}`}
 ACT.cpmenu=e=>{CP.menu=!CP.menu;cpDrawTop();if(e&&e.stopPropagation)e.stopPropagation()};
 document.addEventListener('click',e=>{if(CP.menu&&!inside(e,'cp-top')){CP.menu=false;cpDrawTop()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CP.menu){CP.menu=false;cpDrawTop()}});

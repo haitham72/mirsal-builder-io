@@ -145,7 +145,14 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 ---
 
-## 6. Earlier batches — the redesign
+## 6. Earlier batches — the redesign (built 2026-10-02)
+
+**Built.** `live.js` (`histCol`, `histRow`, `histItem`, `drawHist`, `ACT.hbx`), `app.js` (`COL2`, `drawCol2`), `studio.css` (`.lv-hrow`, `.c2n`). Where it differs from the plan below:
+
+- The column lists the batches on **Studio and Create** (both are list-bearing; the list is the same in the same place). Library, Pack, Chat and AI keep their own lists; Settings and the full-screen tools (editor, export, prepare, animate) have no column, because they have no list.
+- **No button, but still paged underneath.** `GET /api/history` caps a page at 50 because it reads one `result.json` per batch; the column asks for the next page by itself when it is scrolled near the end (and keeps reading pages until every *open* batch is found). Page 1 is read again every 10 s while Studio or Create shows, merged over what is loaded, and the column redraws only when something changed.
+- A row is a **button that opens the batch**; the card is in the Studio's main area under the composer (a 392px column has no room for a Studio view). On Studio a second click closes it; from Create it opens the card and goes to the Studio. A row is marked **on** when its card is open and **cur** when it is the batch the Studio works on.
+- The grid thumbnail is 26px per cell (a 3x3 is 84px wide) so a row stays a row.
 
 **Today** (`live.js:340-343`, styles `studio.css:348-375`): a block *inside the Create/live screen* (`#ghist`), titled "Earlier batches", a
 **vertical stack of horizontal rows** (`.lv-hlist` is already `flex-direction:column`; each `.lv-hitem` is a row: grid on the left, `.lv-hmeta` on the
@@ -185,7 +192,7 @@ whether to delete it; do not fold it into this column.
 ## 8. Order of work (done steps are marked)
 
 1. **Done.** Tokens (§3.1) and the rail (§4.1-4.2) — everything else inherits from these. Also done in this step: one phone layout (bottom bar) and one drawer for the second column on every screen (`#c2tog` below 900px; AI's private drawer is gone), AI declared in `RAIL`, the column's glass background and gradient title are the shell's, `body.agent-view` is gone. Guarded by `tests/test_js.py::ShellTests`.
-2. The second column everywhere (§4.3), then move Earlier batches into it (§6).
+2. **Done.** The second column everywhere (§4.3), then Earlier batches moved into it (§6). Guarded by `tests/test_js.py` and `tests/js/history_card.test.js`.
 3. Library and Settings alignment to AI (§5).
 4. The composer's dark panel and the style tiles (§5, Studio).
 5. Type/spacing/motion sweep last, once the structure has stopped moving (§3.2).

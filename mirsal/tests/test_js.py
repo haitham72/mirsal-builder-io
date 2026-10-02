@@ -71,45 +71,62 @@ class StudioActionTests(unittest.TestCase):
             out.append(ln)
         return "\n".join(out)
 
-    def test_the_earlier_batches_title_is_plain_text_not_a_fold(self):
-        """Haitham asked for a plain title (2026-10-02): the header is not a button, so nothing folds the list away and nothing remembers that in localStorage."""
-        ui, _ = self.scripts()
+    def test_the_earlier_batches_title_is_plain_text_and_the_list_is_not_paged_by_a_button(self):
+        """Haitham asked for a plain title (2026-10-02) and, with the move into the shared column, for no "Load more": the list scrolls and asks for its next page by itself.
+        Nothing folds the list away, nothing remembers that in localStorage."""
+        ui, order = self.scripts()
         src = (ui / "live.js").read_text(encoding="utf-8")
-        head = self.block(src, "function drawHist()")
+        head = self.block(src, "function histColHTML()")
         self.assertNotIn("htoggle", src, "the collapsible Earlier-batches header is gone")
         self.assertNotIn("mirsal.hopen", src, "the fold-away choice (localStorage mirsal.hopen) is gone")
         self.assertNotIn("let HO=", src, "the fold state is gone")
-        self.assertNotIn("data-act=", head.split("<div class=lv-hhead>")[0], "nothing in the title folds the list")
-        self.assertIn('<span class=lv-ht>Earlier batches</span>', head, "the title is plain text above the cards")
-        self.assertIn("HB.items.map(histItem)", head, "the cards are always there")
+        self.assertIn("<h1>Earlier batches</h1>", head, "the title is plain text above the rows")
+        self.assertIn("HB.items.map(histRow)", head, "every batch is a row")
+        for n in order + ["index.html"]:
+            self.assertNotIn("hmore", (ui / n).read_text(encoding="utf-8"), f"no 'Load more' button action left in {n}")
+        self.assertIn("histLoad(true)", self.block(src, "function histCol()"), "the column asks for its next page when it is scrolled near the end")
         css = (ui / "studio.css").read_text(encoding="utf-8")
         import re
         self.assertIsNone(re.search(r"\.lv-hh(?!ead)", css), "the styles of the old header button are gone")
         self.assertNotIn("#ghist.open", css)
+        self.assertNotIn(".lv-hmore", css, "the Load more button's style is gone")
 
-    def test_a_history_card_expands_in_place_and_nothing_else_does(self):
-        """A click on the card expands it where it stands: the fold lives inside the card, it does not scroll and it does not load the batch into the main area. Every click
-        expands its own card, so any number of them can be open at once (they stack). The button that opens a batch in the Studio belongs to the credits pill's recent batches."""
-        import re
+    def test_a_batch_opens_from_the_column_and_nothing_else_does(self):
+        """The list is the column; the batch itself is a card in the Studio's main area. On the Studio a click opens (or closes) the card in place and brings it into view; from any
+        other screen it opens the card and goes to the Studio. Every click acts on its own batch, so any number of cards can be open at once (they stack). The button that makes a
+        batch the Studio's SESSION belongs to the credits pill's recent batches."""
         ui, order = self.scripts()
         src = (ui / "live.js").read_text(encoding="utf-8")
         card = self.block(src, "const histItem=it=>{")
+        row = self.block(src, "const histRow=it=>{")
         hbx = self.block(src, "ACT.hbx=el=>{")
-        self.assertIn("hxBatch(it)", card, "the expanded card hosts what already exists (stickers, per-sticker history, AI captions)")
-        self.assertNotIn("scrollIntoView", card)
-        self.assertIn("data-act=hbx", card, "the card itself is the fold")
-        self.assertNotIn("data-act=hopen", card, "no 'Open in Studio' on the card: every click only expands it in place")
+        self.assertIn("hxBatch(it)", card, "the open card hosts what already exists (stickers, per-sticker history, AI captions)")
+        self.assertIn("data-act=hbx", card, "the card's own header closes it")
+        self.assertIn("data-act=hbx", row, "the row opens it")
+        self.assertNotIn("data-act=hopen", card + row, "no 'Open in Studio' on a card or a row")
         opens = [n for n in order if "data-act=hopen" in (ui / n).read_text(encoding="utf-8")]
-        self.assertEqual(opens, ["composer.js"], "only the credits pill's recent batches opens a batch in the Studio, never a history card")
-        for gone in ("scrollIntoView", "location.hash", "tick(", "SES=", "HX.open.clear"):
-            self.assertNotIn(gone, hbx, "expanding in place must not touch the Studio or close the other cards: " + gone)
+        self.assertEqual(opens, ["composer.js"], "only the credits pill's recent batches makes a batch the Studio's session")
+        self.assertIn("route_==='generate'", hbx, "on the Studio the click works in place")
+        self.assertIn("location.hash='#/studio'", hbx, "from anywhere else it goes to the Studio, where the card is")
+        for gone in ("SES=", "HX.open.clear", "tick("):
+            self.assertNotIn(gone, hbx, "opening a card must not touch the Studio's session or close the other cards: " + gone)
         self.assertIn("HX.open.add(id)", hbx)
         css = (ui / "studio.css").read_text(encoding="utf-8")
-        self.assertNotIn(".lv-hrow", css, "the row of the old list is gone")
-        self.assertNotIn(".lv-huse", css, "the Open in Studio button's style is gone")
-        self.assertIn(".lv-hcard", css)
-        self.assertIn(".lv-hcard.open", css, "an open card is marked, so a stack of them reads at a glance")
-        self.assertNotIn(".lv-hx", css, "the little fold button of the old row is gone: the whole card header is the fold")
+        self.assertIn(".lv-hrow", css)
+        self.assertIn(".lv-hrow.on", css, "an open batch is marked in the column, so a stack of them reads at a glance")
+        self.assertIn(".lv-hcard.open", css)
+
+    def test_every_list_bearing_screen_has_the_second_column(self):
+        """Studio and Create list the earlier batches in the shared column (it used to exist only for Library, Pack, Chat and AI); Settings and the full-screen tools have none."""
+        ui, _ = self.scripts()
+        app = (ui / "app.js").read_text(encoding="utf-8")
+        import re
+        col2 = re.search(r"const COL2=\[(.*?)\]", app).group(1)
+        for route in ("agent", "generate", "library", "pack", "chat", "create"):
+            self.assertIn(f"'{route}'", col2)
+        for route in ("settings", "editor", "export", "prepare", "animate"):
+            self.assertNotIn(f"'{route}'", col2)
+        self.assertIn("histCol()", self.block(app, "function drawCol2()"))
 
     def test_an_expanded_history_card_is_that_batch_s_studio_view(self):
         """Haitham, 2026-10-02: one click on an earlier batch expands the card and you see THAT batch's Studio view — the same working Request > Prompt > Stickers >
