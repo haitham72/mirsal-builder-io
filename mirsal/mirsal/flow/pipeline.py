@@ -132,8 +132,12 @@ def latest_id(out: Path) -> int:
     return ids[-1]
 
 
-def media_name(kind: str, gid: int, task_slug: str, key: str) -> str:
-    return f"{kind}-{gid:03d}-{task_slug}-{key}"      # e.g. img-001-teddy_bear_school-teddy_bear_with_a_book
+def media_name(kind: str, gid: int, task_slug: str, key: str, created: float | None = None) -> str:
+    """The file stem of a sticker: `{media}-{subject}-{action}-{UTC time}-{fingerprint}` (runtime/names.py, 2026-10-02), e.g. img-teddy_bear_school-with_a_book-20261002T133320-a3f9c1.
+    The time is the batch's creation time and the fingerprint carries the batch number, so no two files of any batch ever share a name. Batches made before this kept their
+    `img-001-teddy_bear_school-teddy_bear_with_a_book` names (never renamed); `names.parse` reads both."""
+    from ..runtime import names
+    return names.build(kind, task_slug, names.action_of(task_slug, key), when=created, seed=f"G{gid:03d}|{key}")
 
 
 def load_rgb(path: Path) -> np.ndarray:
@@ -230,8 +234,9 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
     (d / "source").mkdir(parents=True)
     (d / "slices").mkdir()
     (d / "prompts.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
+    created = round(time.time(), 3)
     res = {
-        "generation_id": f"G{gid:03d}", "number": gid, "owner": current_owner(), "created": round(time.time(), 3), "parent": parent, "prompt": prompt, "task": plan["task"], "task_slug": plan["task_slug"],
+        "generation_id": f"G{gid:03d}", "number": gid, "owner": current_owner(), "created": created, "parent": parent, "prompt": prompt, "task": plan["task"], "task_slug": plan["task_slug"],
         "source": {"subject": pick.subject, "subject_id": pick.subject_id, "variant": pick.variant,
                    "n_variants": pick.n_variants, "sheet": pick.sheet.name, "video": pick.video.name if pick.video else None,
                    "has_video": pick.has_video, "pairing": pick.pairing, "clips_dup_of": pick.clips_dup_of,
@@ -245,7 +250,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         "outline_px": int(outline) if outline is not None else EngineConfig().outline_px,    # the white die-cut stroke is a choice, kept with the generation
         "erode_px": int(erode) if erode is not None else EngineConfig().erode_px,          # fringe trim, kept with the generation; 0 = none
         "reviews": {"plan": (task or {}).get("plan_review"), "video_sheet": {}, "pack": None}, "video_sheets": [], "verify": {},
-        "stickers": [new_sticker(gid, plan["task_slug"], s) for s in plan["stickers"]],
+        "stickers": [new_sticker(gid, plan["task_slug"], s, created) for s in plan["stickers"]],
     }
     write_result(out, gid, res)
     emit(out, gid, "requested", "done", 0, {"prompt": prompt, "task_slug": plan["task_slug"]})
@@ -260,9 +265,9 @@ def approve_plan(out: Path, gid: int, note: str) -> None:
         write_result(out, gid, res)
 
 
-def new_sticker(gid: int, task_slug: str, s: dict) -> dict:
+def new_sticker(gid: int, task_slug: str, s: dict, created: float | None = None) -> dict:
     return {"index": s["index"], "key": s["key"], "tags": s.get("tags") or [s["key"]], "emoji": s["emoji"], "prompt": s["prompt"],
-            "name": media_name("img", gid, task_slug, s["key"]),
+            "name": media_name("img", gid, task_slug, s["key"], created),
             "status": "PENDING", "reason": None, "report": [], "metrics": {}, "png": None,
             "anim_status": "NOT_REQUESTED", "anim_reason": None, "anim_metrics": {}, "webm": None,
             "review": {"still": "PENDING", "anim": "NONE"}, "history": []}

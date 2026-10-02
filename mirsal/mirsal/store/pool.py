@@ -69,7 +69,7 @@ def index_row(gen: dict, st: dict) -> dict:
     subject, action = _subject_action(gen, st)
     emoji = "".join(st.get("emoji") or [])
     style = ((gen.get("plan") or {}).get("slots") or {}).get("style_id", "") if isinstance(gen.get("plan"), dict) else ""
-    search_text = f"{subject} \u2014 {action} \u2014 {st.get('name') or ''} \u2014 {emoji} \u2014 {style}"
+    search_text = f"{subject} \u2014 {action} \u2014 {str(st.get('key') or '').replace('_', ' ')} \u2014 {emoji} \u2014 {style}"   # the key's words, never the file name (a name with a date and a fingerprint would only add noise)
     topics = sorted({normalize_topic(t) for t in (st.get("tags") or []) if normalize_topic(t)})
     shared = (gen.get("source") or "") != "photo"  # uploaded-reference stickers never join the shared pool
     return {"sticker_id": st["id"], "subject": subject, "action": action, "search_text": search_text,

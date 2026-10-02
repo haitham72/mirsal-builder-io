@@ -1,7 +1,10 @@
 """Sticker library: packs, imported/edited stickers, photo cutout, pack export (desktop builder).
 
-Storage is plain files under <out>/library/: library.json + files/<name>. Writes are atomic and locked.
-Naming follows the repo convention: <media>-<NNN>-<pack_slug>-<sticker_slug>.<ext> (NNN counts inside the pack)."""
+Storage is plain files under <out>/library/: library.json + files/<group>/<name>. Writes are atomic and locked.
+Naming follows runtime/names.py: `{media}-{subject}-{action}-{pack}-{UTC time}-{fingerprint}.{ext}`, the pack and the time being those of the moment the file was born in the library.
+A sticker that came from a generation lives in `files/G012/` (the batch it came from), anything made in the library (imports, cut-outs, editor renders, trims) in `files/own/`.
+`file` in library.json is that path relative to files/ (forward slashes). A move to another pack renames nothing: the pack of a sticker is library data, not part of its file name.
+Older libraries (one flat folder, `img-001-<pack>-<name>`) are regrouped and renamed once, when the library is opened (`Library.migrate_layout`, flag `layout: 2` in library.json)."""
 from __future__ import annotations
 
 import io
@@ -27,6 +30,7 @@ from ..engine.chroma import calibrate, key_diff, key_image, remove_specks
 from ..engine.config import EngineConfig
 from ..engine.sheet import encode_static
 from ..generation.prompter import slug
+from ..runtime import names
 
 # Animated WebP download limit (the editor's WebP/GIF downloads; Telegram needs none of it).
 WA_ANIM_MAX = 500 * 1024
@@ -41,7 +45,9 @@ def readable_name(key: str) -> str:
     return (t[:1].upper() + t[1:])[:60] or "Sticker"
 
 
-_GEN_NAME = re.compile(r"^(?:img|vid)-\d{3,}-[a-z0-9_]+-(?P<key>.+)$")
+_GEN_NAME = re.compile(r"^(?:img|vid)-\d{3,}-[a-z0-9_]+-(?P<key>.+)$")      # a generation file name of the old convention
+_GENERATION = re.compile(r"^G\d{3,}$")
+LAYOUT = 2
 
 
 def _legacy_names(db: dict) -> dict:
@@ -237,6 +243,61 @@ class Library:
         self.db_path = self.root / "library.json"
         self.lock = threading.RLock()
         self.files.mkdir(parents=True, exist_ok=True)
+        try:
+            self.migrate_layout()
+        except Exception as e:                                       # never keep the app from starting over a tidy-up; the next start tries again
+            print(f"[mirsal] library layout migration skipped: {e}", flush=True)
+
+    # ---- file names and folders
+    @staticmethod
+    def group_of(source: dict | None) -> str:
+        """The folder of a file: the batch it came from (G012), else `own`."""
+        g = str((source or {}).get("generation") or "")
+        return g if _GENERATION.match(g) else "own"
+
+    @staticmethod
+    def new_file_name(media: str, name: str, pack_slug: str, ext: str, created: float, sid: str, gen_file_name: str | None = None) -> str:
+        """`img-falcon_stickers-open_arms-gold_pack-20261002T133320-a3f9c1.png`. Subject and action come from the generator's own file name when there is one, else from the sticker's name."""
+        p = names.parse(gen_file_name or "")
+        subject, action = (p["subject"], names.action_of(p["subject"], p["action"])) if p else (slug(name) or "sticker", "custom")
+        return f"{names.build(media, subject, action, pack=pack_slug, when=created, seed=sid)}.{ext}"
+
+    def migrate_layout(self) -> int:
+        """One time: files from the flat folder go to `files/<group>/` under the new names. All or nothing (a failed move puts back what was moved and the flag stays unset).
+        Returns the number of files moved."""
+        with self.lock:
+            if not self.db_path.exists():
+                return 0
+            raw = json.loads(self.db_path.read_text(encoding="utf-8"))
+            if raw.get("layout", 1) >= LAYOUT:
+                return 0
+            db = _legacy_names(raw)
+            plan = []
+            for p in db.get("packs", []):
+                for s in p.get("stickers", []):
+                    if "/" in s["file"] or not (self.files / s["file"]).is_file():
+                        continue
+                    ext = s["file"].rsplit(".", 1)[-1]
+                    media = "vid" if s["type"] == "animated" else "img"
+                    new = f"{self.group_of(s.get('source'))}/" + self.new_file_name(media, s["name"], p["slug"], ext, float(s.get("created") or time.time()), s["id"], s.get("file_name"))
+                    plan.append((s, s["file"], new))
+            done = []
+            try:
+                for s, old, new in plan:
+                    (self.files / new).parent.mkdir(parents=True, exist_ok=True)
+                    (self.files / old).replace(self.files / new)
+                    done.append((old, new))
+            except OSError:
+                for old, new in reversed(done):
+                    (self.files / new).replace(self.files / old)
+                raise
+            for s, _, new in plan:
+                s["file"] = new
+            for p in db.get("packs", []):
+                p.pop("next", None)                                  # the per-pack counter is gone with the counter names
+            db["layout"] = LAYOUT
+            self._save(db)
+            return len(plan)
 
     # ---- persistence
     def _load(self) -> dict:
@@ -271,7 +332,7 @@ class Library:
         name = (name or "").strip() or "My Pack"
         with self.lock:
             db = self._load()
-            p = {"id": uuid.uuid4().hex[:8], "name": name[:60], "slug": slug(name) or "pack", "cover": None, "next": 1,
+            p = {"id": uuid.uuid4().hex[:8], "name": name[:60], "slug": slug(name) or "pack", "cover": None,
                  "created": time.time(), "stickers": []}
             db["packs"].append(p)
             self._save(db)
@@ -304,20 +365,27 @@ class Library:
 
     def _unlink(self, db, fname, skip=None):
         if not any(s["file"] == fname for q in db["packs"] if q["id"] != skip for s in q["stickers"]):
-            (self.files / fname).unlink(missing_ok=True)
+            f = self.files / fname
+            f.unlink(missing_ok=True)
+            if f.parent != self.files:                                  # a batch folder with nothing left in it goes away
+                try:
+                    f.parent.rmdir()
+                except OSError:
+                    pass
 
     # ---- stickers
     def add_bytes(self, pid: str, data: bytes, ext: str, name: str, kind: str = "static", emoji: str = "🙂",
-                  source: dict | None = None, w: int = 512, h: int = 512) -> dict:
+                  source: dict | None = None, w: int = 512, h: int = 512, gen_file_name: str | None = None) -> dict:
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
-            n = p["next"]; p["next"] = n + 1
             media = "vid" if kind == "animated" else "img"
             base = slug(name) or "sticker"
-            fname = f"{media}-{n:03d}-{p['slug']}-{base}.{ext}"
+            sid, now = uuid.uuid4().hex[:8], time.time()
+            fname = f"{self.group_of(source)}/" + self.new_file_name(media, name or base, p["slug"], ext, now, sid, gen_file_name)
+            (self.files / fname).parent.mkdir(parents=True, exist_ok=True)
             (self.files / fname).write_bytes(data)
-            s = {"id": uuid.uuid4().hex[:8], "name": (name or base)[:60], "file": fname, "type": kind, "emoji": emoji or "🙂",
-                 "kb": max(1, len(data) // 1024), "w": w, "h": h, "source": source or {}, "created": time.time()}
+            s = {"id": sid, "name": (name or base)[:60], "file": fname, "type": kind, "emoji": emoji or "🙂",
+                 "kb": max(1, len(data) // 1024), "w": w, "h": h, "source": source or {}, "created": now}
             p["stickers"].append(s)
             if not p["cover"]:
                 p["cover"] = s["id"]
@@ -340,7 +408,7 @@ class Library:
         if not f.is_file():
             raise LibraryError("sticker file is missing", 404)
         s = self.add_bytes(pid, f.read_bytes(), f.suffix.lstrip("."), (name or "").strip()[:60] or readable_name(t.get("key") or f.stem), kind, (emoji or "").strip()[:20] or t.get("emoji") or "🙂",
-                           {"generation": st["generation_id"], "index": index})
+                           {"generation": st["generation_id"], "index": index}, gen_file_name=t.get("name") or f.stem)
         return self.set_file_name(pid, s["id"], t.get("name") or f.stem)
 
     def replace_file(self, pid: str, sid: str, data: bytes, ext: str) -> dict:
@@ -350,7 +418,7 @@ class Library:
             s = next((s for s in p["stickers"] if s["id"] == sid), None)
             if not s:
                 raise LibraryError("no such sticker", 404)
-            fname = f"{Path(s['file']).stem}.{ext}"
+            fname = Path(s["file"]).with_suffix("." + ext).as_posix()
             (self.files / fname).write_bytes(data)
             if fname != s["file"]:
                 self._unlink(db, s["file"]); s["file"] = fname
@@ -451,7 +519,7 @@ class Library:
         return n
 
     def move_sticker(self, pid: str, sid: str, to: str) -> dict:
-        """Move a sticker to another pack (file is renamed to the target pack's naming convention)."""
+        """Move a sticker to another pack. Nothing on disk changes: the pack is library data, not part of the file's name."""
         with self.lock:
             db = self._load(); src = self._pack(db, pid); dst = self._pack(db, to)
             if src is dst:
@@ -459,12 +527,6 @@ class Library:
             s = next((s for s in src["stickers"] if s["id"] == sid), None)
             if not s:
                 raise LibraryError("no such sticker", 404)
-            n = dst["next"]; dst["next"] = n + 1
-            ext = s["file"].rsplit(".", 1)[-1]
-            media = "vid" if s["type"] == "animated" else "img"
-            fname = f"{media}-{n:03d}-{dst['slug']}-{slug(s['name']) or 'sticker'}.{ext}"
-            (self.files / s["file"]).replace(self.files / fname)
-            s["file"] = fname
             src["stickers"].remove(s)
             if src["cover"] == sid:
                 src["cover"] = src["stickers"][0]["id"] if src["stickers"] else None
@@ -475,9 +537,8 @@ class Library:
             return s
 
     def move_stickers(self, items: list[dict], to: str) -> dict:
-        """Bulk move: items = [{pack_id, id}, ...] (a selection may span packs) into pack `to`, ALL OR NOTHING. Everything is checked first (an unknown pack or
-        sticker refuses the whole batch with nothing changed); stickers already in `to` are skipped; the files are renamed to the target pack's convention
-        and put back if a rename fails halfway. One load, one save."""
+        """Bulk move: items = [{pack_id, id}, ...] (a selection may span packs) into pack `to`, ALL OR NOTHING: everything is checked first (an unknown pack or sticker refuses the
+        whole batch with nothing changed); stickers already in `to` are skipped. Only library.json changes (one load, one save): no file is renamed or moved."""
         with self.lock:
             db = self._load(); dst = self._pack(db, to)
             plan, seen, skipped = [], set(), 0
@@ -493,27 +554,13 @@ class Library:
                 plan.append((src, s))
             if not items:
                 raise LibraryError("nothing selected to move")
-            done, n = [], dst["next"]
-            try:
-                for _, s in plan:
-                    media = "vid" if s["type"] == "animated" else "img"
-                    fname = f"{media}-{n:03d}-{dst['slug']}-{slug(s['name']) or 'sticker'}.{s['file'].rsplit('.', 1)[-1]}"
-                    (self.files / s["file"]).replace(self.files / fname)
-                    done.append((s["file"], fname))
-                    n += 1
-            except OSError as e:
-                for old, new in reversed(done):
-                    (self.files / new).replace(self.files / old)
-                raise LibraryError(f"could not move the files: {e}", 500)
-            for (src, s), (_, fname) in zip(plan, done):
-                s["file"] = fname
+            for src, s in plan:
                 src["stickers"].remove(s)
                 if src["cover"] == s["id"]:
                     src["cover"] = src["stickers"][0]["id"] if src["stickers"] else None
                 dst["stickers"].append(s)
                 if not dst["cover"]:
                     dst["cover"] = s["id"]
-            dst["next"] = n
             if plan:
                 self._save(db)
             return {"moved": len(plan), "skipped": skipped, "to": to}
