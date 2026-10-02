@@ -212,17 +212,48 @@ class ConsoleTools:
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
 
-    def review(self, gid: str, decision: str, indexes: list, note: str = "from the chat") -> dict:
-        """Human decisions at the stills gate for the given stickers. Python's blocks stay final: a refused sticker is reported, not forced."""
+    def review(self, gid: str, decision: str, indexes: list, note: str = "from the chat", gate: str = "still") -> dict:
+        """Human decisions at the stills gate (or `gate="anim"`) for the given stickers. Python's blocks stay final: a refused sticker is reported, not forced."""
         self._see(gid)
         done, refused = [], []
         for i in indexes:
             try:
-                gates.review(self.out, int(gid[1:]), "still", decision, int(i), note)
+                gates.review(self.out, int(gid[1:]), gate, decision, int(i), note)
                 done.append(int(i))
             except pl.PipelineError as e:
                 refused.append({"index": int(i), "why": str(e)})
         return {"done": done, "refused": refused}
+
+    # ---- the agentic creator's steps (agent/creator.py) ------------------------------------------------------------------------------------------
+    def judge(self, gid: str) -> dict:
+        """The vision judge's pre-review of the stills (it only advises). A judge that cannot run is a skipped check, never a failed run."""
+        from ..vision import judge as vj
+        self._see(gid)
+        try:
+            return vj.judge_generation(self.out, int(gid[1:]), "still", allowed=True)
+        except Exception as e:
+            return {"rejected": [], "approved": [], "unjudged": [], "skipped": str(e)[:200]}
+
+    def pack_add(self, gid: str, name: str) -> dict:
+        """Approve what was kept (G2 / G4), approve the final pack (G5) and add it to a new library pack: the Studio's "Add to a pack"."""
+        self._see(gid)
+        try:
+            return gates.quick_add(self.out, int(gid[1:]), self.c.lib, None, name)
+        except pl.PipelineError as e:
+            raise ToolError(str(e), e.code)
+
+    def telegram_ready(self) -> tuple:
+        from ..services import telegram
+        if telegram.status(self.out)["configured"]:
+            return True, ""
+        return False, "Telegram is not connected."
+
+    def telegram_send(self, pid: str) -> dict:
+        from ..services import telegram
+        try:
+            return telegram.send(self.out, self.c.lib, pid)
+        except telegram.TelegramError as e:
+            raise ToolError(str(e), getattr(e, "code", 409) if getattr(e, "code", 409) < 500 else 409)
 
     def ready_indexes(self, gid: str) -> list:
         self._see(gid)
@@ -268,6 +299,12 @@ class FakeTools:
         self._live, self._credits = live, credits
         self.calls: list = []
         self.proposed: dict = {}
+        self.judge_rejects: list = []
+        self.job_generations: dict = {}
+        self.job_status: dict = {}
+        self.job_errors: dict = {}
+        self.video_estimate = 8.0
+        self.telegram = True
         self.n_jobs = 0
         self.n_gens = max([int(g[1:]) for g in self.gens] or [0])
 
@@ -289,13 +326,15 @@ class FakeTools:
         return None
 
     def estimate(self, kind="image"):
-        return 2.0 if self._live else None
+        if not self._live:
+            return None
+        return self.video_estimate if kind == "video" else 2.0
 
     def generation(self, gid):
         return self.gens[gid]
 
     def job(self, jid):
-        return {"id": jid, "status": "DONE", "generation": None}
+        return {"id": jid, "status": self.job_status.get(jid, "DONE"), "generation": self.job_generations.get(jid), "error": self.job_errors.get(jid)}
 
     def search(self, q):
         return [{"id": g["generation"] + "/S1", "key": g["stickers"][0]["key"], "png": None, "emoji": None} for g in self.gens.values()
@@ -322,9 +361,28 @@ class FakeTools:
         self.n_jobs += 1
         return {"job": f"J{self.n_jobs:03d}", "estimate": 9.0}
 
-    def review(self, gid, decision, indexes, note=""):
-        self.calls.append(("review", gid, decision, list(indexes)))
+    def review(self, gid, decision, indexes, note="", gate="still"):
+        self.calls.append(("review", gid, decision, list(indexes)) if gate == "still" else ("review", gid, decision, list(indexes), gate))
+        key = "still" if gate == "still" else "anim"
+        for s in self.gens[gid]["stickers"]:
+            if s["index"] in indexes:
+                s[key] = "APPROVED" if decision == "APPROVE" else "REJECTED"
         return {"done": list(indexes), "refused": []}
+
+    def judge(self, gid):
+        self.calls.append(("judge", gid))
+        return {"rejected": list(self.judge_rejects), "approved": [s["index"] for s in self.gens[gid]["stickers"] if s["index"] not in self.judge_rejects]}
+
+    def pack_add(self, gid, name):
+        self.calls.append(("pack_add", gid, name))
+        return {"pack_id": "P1", "added": len([s for s in self.gens[gid]["stickers"] if s["status"] == "READY"]), "kind": "static"}
+
+    def telegram_ready(self):
+        return (True, "") if self.telegram else (False, "Telegram is not connected.")
+
+    def telegram_send(self, pid):
+        self.calls.append(("telegram_send", pid))
+        return {"sets": [{"kind": "static", "name": "pack_by_bot", "link": "https://t.me/addstickers/pack_by_bot", "added": 9, "total": 9}]}
 
     def ready_indexes(self, gid):
         return [s["index"] for s in self.gens[gid]["stickers"] if s["status"] == "READY"]

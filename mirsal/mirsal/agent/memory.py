@@ -29,7 +29,8 @@ from ..runtime import atomic
 REDUCER_WINDOW = 15
 MAX_MESSAGES, MAX_INTERACTIONS, MAX_FEEDBACK = 400, 300, 200       # what one session file keeps; older turns live on in the narrative, the subjects and the passes
 OUTSIDE_SHOWN = 5                                                  # how many recent batches made outside the chat the summary names
-DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True, "allow_vlm": None}      # allow_vlm: None = not asked yet (vision/consent.py)
+DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True, "allow_vlm": None,
+                    "creator": {"on": False, "scope": "images", "bypass": False}}      # allow_vlm: None = not asked yet (vision/consent.py)
 _IO = threading.RLock()
 
 

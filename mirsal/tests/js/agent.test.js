@@ -87,3 +87,16 @@ test('the session id is read from the hash', () => {
   assert.equal(U.sid('#/library'), null);
   assert.equal(U.sid(''), null);
 });
+
+test('a running creator keeps the page polling, a stopped or finished one does not', () => {
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'running' } }), true);
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'stopped' } }), false);
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'waiting' } }), false);
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'done' } }), false);
+});
+
+test('a creator card is rebuilt when its run moves, a blocked sheet when its check appears', () => {
+  const m = (run) => ({ id: 'm', status: 'done', text: '', steps: [], chips: [], cards: [{ type: 'creator', run }] });
+  assert.notEqual(U.sig(m({ step: 'cut', status: 'running', updated: 1 })), U.sig(m({ step: 'look', status: 'running', updated: 2 })));
+  assert.equal(U.sig(m({ step: 'cut', status: 'running', updated: 1 })), U.sig(m({ step: 'cut', status: 'running', updated: 1 })));
+});

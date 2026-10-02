@@ -201,3 +201,16 @@ button.ai-pill:hover{border-color:var(--ai)}
 /* a sheet Python blocked: said in words, with the one button that fixes it */
 .ai-problem{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:rgba(251,146,60,.10);border:1px solid rgba(251,146,60,.35);font-size:13px;line-height:1.45}
 .ai-problem b{font-size:13.5px}.ai-problem small{opacity:.75}
+
+/* the creator's run card: the list of steps and what it stopped for */
+.ai-run .run-steps{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px}
+.ai-run .run-steps li{display:flex;align-items:center;gap:6px;color:var(--ink2)}
+.ai-run .run-steps i{width:8px;height:8px;border-radius:50%;background:#CBD5E1}
+.ai-run .run-steps li.done i{background:var(--ai)}
+.ai-run .run-steps li.now{color:var(--ink);font-weight:600}
+.ai-run .run-steps li.now i{background:var(--ai);box-shadow:0 0 0 3px var(--aglow)}
+.ai-run.is-running .run-steps li.now i{animation:aipulse 1.2s ease-in-out infinite}
+.ai-run .run-st{font-size:12px;opacity:.8}
+.ai-run .run-why{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(251,146,60,.10);border:1px solid rgba(251,146,60,.35);font-size:13px}
+.ai-run.is-done .run-why{display:none}
+@keyframes aipulse{0%,100%{opacity:1}50%{opacity:.35}}

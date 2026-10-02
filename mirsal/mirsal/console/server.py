@@ -462,10 +462,43 @@ class Console:
         turn = agent.prepare(sid, text, [str(x) for x in (body.get("selected") or [])], action)      # 409 when the last message is still running
         ctx = contextvars.copy_context()                    # the turn runs in a thread: it must act as this user (batches it starts are theirs)
         ctx.run(pl.OWNER.set, user["id"])
-        t = threading.Thread(target=ctx.run, args=(agent.execute, turn), daemon=True)
+        def run_turn():
+            agent.execute(turn)
+            self.drive_creator(user, sid)                 # a turn that started (or answered) a creator run hands it to the driver
+        t = threading.Thread(target=ctx.run, args=(run_turn,), daemon=True)
         self._chat_threads = [x for x in getattr(self, "_chat_threads", []) if x.is_alive()] + [t]
         t.start()
         return {"id": sid, "message": turn.msg["id"]}
+
+    def drive_creator(self, user: dict | None, sid: str, block: bool = False) -> None:
+        """Keep advancing the session's creator run in a thread of its own until it stops, waits, ends or fails (one driver per session; a server restart resumes it on the next poll)."""
+        user = user or LOCAL
+        drivers = self.__dict__.setdefault("_drivers", set())
+        if sid in drivers:
+            return
+        drivers.add(sid)
+        _, _, agent, _ = self.chat_parts(user)
+        ctx = contextvars.copy_context()
+        ctx.run(pl.OWNER.set, user["id"])
+
+        def loop():
+            try:
+                deadline = time.time() + 4 * 3600
+                while time.time() < deadline:
+                    st = agent.creator_tick(sid)
+                    if st not in ("running", "busy"):
+                        break
+                    time.sleep(2.5 if not block else 0.05)
+            except Exception as e:
+                print(f"[mirsal] creator {sid}: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+            finally:
+                drivers.discard(sid)
+        if block:
+            ctx.run(loop)
+            return
+        t = threading.Thread(target=ctx.run, args=(loop,), daemon=True)
+        self._chat_threads = [x for x in getattr(self, "_chat_threads", []) if x.is_alive()] + [t]
+        t.start()
 
     def kick_naming(self, user: dict | None, sess: dict) -> None:
         """Start `Agent.auto_name` for every batch of this chat that has finished stickers and was never looked at, when the person allowed AI vision. Cheap to call on every poll: it
@@ -873,6 +906,8 @@ def make_handler(c: Console):
                 try:
                     sess = store.load(path.rsplit("/", 1)[1])
                     store.refresh(sess)
+                    if (sess.get("creator_run") or {}).get("status") == "running":
+                        c.drive_creator(self.user, sess["id"])           # resumes a run after a restart; a no-op while a driver is alive
                     c.kick_naming(self.user, sess)                     # AI vision allowed + finished stickers + never looked at: the assistant looks (its own message, its own thread)
                     return self._json(200, ag.hydrate(store, tools, sess))
                 except _SE as e:
@@ -1183,7 +1218,15 @@ def make_handler(c: Console):
                         sess = store.load(cp[3])
                         allowed = {"grid": ("2x2", "3x3"), "ask_before_spending": (True, False), "ai": (True, False), "allow_vlm": (True, False)}
                         for k, v in body.items():
-                            if k in allowed and v in allowed[k]:
+                            if k == "creator" and isinstance(v, dict):               # the agentic creator: on / scope (images | video) / bypass
+                                cur = dict(sess["settings"].get("creator") or {"on": False, "scope": "images", "bypass": False})
+                                for ck, cv in v.items():
+                                    if ck in ("on", "bypass") and isinstance(cv, bool):
+                                        cur[ck] = cv
+                                    elif ck == "scope" and cv in ("images", "video"):
+                                        cur[ck] = cv
+                                sess["settings"]["creator"] = cur
+                            elif k in allowed and v in allowed[k]:
                                 sess["settings"][k] = v
                             elif k == "style_id" and isinstance(v, str):
                                 sess["settings"][k] = v

@@ -27,12 +27,14 @@ from dataclasses import dataclass, field
 from typing import Any, TypedDict
 
 from ..runtime import cache as cachemod
+from . import creator
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, polarity_of, resolve, settings_from
 from .tools import ConsoleTools, ToolError
 
 INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
+CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
 STYLE_NAMES = {"flat_vector": "flat vector", "pixar_3d": "Pixar 3D", "toon_cel": "toon cel", "glossy_3d": "glossy 3D"}
 
@@ -111,7 +113,7 @@ class Agent:
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "another": self.n_another,
                  "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -145,7 +147,8 @@ class Agent:
             for m in sess["messages"]:                           # we hold the lock, so nobody is running a turn: a "working" message is one that died with its server
                 if m.get("status") == "working":
                     m.update(status="error", text=m.get("text") or INTERRUPTED)
-            label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again", "vision_yes": "Allow AI vision", "vision_no": "Keep AI vision off"}.get((action or {}).get("type"), "")
+            label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "creator_go": "Approve and continue", "creator_stop": "Stop", "creator_skip": "Continue without those", "creator_force": "Continue with them",
+        "creator_force_video": "Animate at the new price", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again", "vision_yes": "Allow AI vision", "vision_no": "Keep AI vision off"}.get((action or {}).get("type"), "")
             self.store.add_message(sess, "user", label)
             msg = self.store.add_message(sess, "assistant", "", status="working")
             self.store.save(sess)
@@ -198,6 +201,11 @@ class Agent:
             t.intents, t.conf = [t.action["type"].upper()], 1.0
         elif t.action and t.action.get("type") == "retry_sheet":
             t.intents, t.conf = ["RETRY"], 1.0
+        elif t.action and str(t.action.get("type", "")).startswith("creator_"):
+            t.intents, t.conf = ["CREATOR"], 1.0
+        elif (sess.get("creator_run") or {}).get("status") in ("waiting", "stopped") and re.match(CONTINUE_RX, t.text.strip().lower()):
+            t.action = {"type": "creator_go"}
+            t.intents, t.conf = ["CREATOR"], 0.95
         elif t.action and t.action.get("type") in ("names_apply", "names_keep"):
             t.intents, t.conf = ["NAMES_DECIDE"], 1.0
         elif t.action and t.action.get("type") in ("vision_yes", "vision_no"):
@@ -216,12 +224,12 @@ class Agent:
                     t.intents, t.conf = got, 0.7
         names = {"NEW": "a new set", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
-                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
+                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                  "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "ASK": "ask", "SEARCH": "search",
-                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide"}
+                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
 
@@ -332,6 +340,9 @@ class Agent:
                 "count": len(names), "names": names, "estimate": est, "balance": self.tools.credits(), "prompt": prompt,
                 "free": not self.tools.live(), **({"transformation": {k: tr[k] for k in ("id", "subject", "target", "required")}} if tr else {})}
         spend = self.tools.live()
+        cs = creator.settings_of(sess)
+        if cs["on"]:
+            return self._creator_plan(t, subject, prompt, names, est, card, cs)
         if spend and st.get("ask_before_spending", True):
             sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"],
                                "ai": bool(st.get("ai", True)), "estimate": est}
@@ -342,6 +353,100 @@ class Agent:
             return {}
         self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"], "ai": bool(st.get("ai", True))}, card)
         return {}
+
+    # -- the agentic creator: one go-ahead from the request to the pack on Telegram (agent/creator.py) --------------------------------------------------------
+    def _creator_plan(self, t: Turn, subject: str, prompt: str, names: list, est, card: dict, cs: dict) -> dict:
+        sess, st = t.sess, t.sess["settings"]
+        if (sess.get("creator_run") or {}).get("status") in ("running", "waiting"):
+            t.reply = "The creator is still working on your last pack. Wait for it, or press Stop on its card."
+            t.trace.end("busy", ok=False)
+            return {}
+        v_est = self.tools.estimate("video") if cs["scope"] == "video" and self.tools.live() else None
+        total = round((est or 0) + (v_est or 0), 2) or None
+        spec = {"type": "creator", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"], "ai": bool(st.get("ai", True)), "estimate": est,
+                "video_estimate": v_est, "scope": cs["scope"], "bypass": cs["bypass"]}
+        card.update(estimate=total, creator={"scope": cs["scope"], "bypass": cs["bypass"], "sheet": est, "video": v_est})
+        ready, why = self.tools.telegram_ready()
+        what = "the stickers as a static pack" if cs["scope"] == "images" else "the stickers animated"
+        how = "approving everything for you and stopping at the first rejection" if cs["bypass"] else "stopping at each approval for one click from you"
+        t.reply = (f"Creator plan for **{subject}**: {len(names)} stickers, then {what}, then to Telegram, {how}. "
+                   + ("" if ready else "Telegram is not connected yet, so I will stop before sending. ") + "Shall I run it?")
+        t.trace.step("creator: " + " > ".join(label for _, label in creator.STEPS[cs["scope"]]))
+        if self.tools.live() and st.get("ask_before_spending", True):
+            sess["pending"] = spec
+            t.cards.append(card)
+            t.chips = [{"label": "Create and send to Telegram", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end(f"plan ready · {_credits(total)}")
+            return {}
+        self._start_creator(t, spec)
+        return {}
+
+    def _start_creator(self, t: Turn, p: dict) -> None:
+        sess = t.sess
+        self._start_create(t, p)
+        card = next((c for c in reversed(t.cards) if c.get("type") == "generation"), None)
+        if not card:
+            return
+        run = creator.new_run(prompt=p["prompt"], subject=p["subject"], grid=p["grid"], style_id=p["style_id"], scope=p.get("scope", "images"), bypass=p.get("bypass", False),
+                              estimate=p.get("estimate"), video_estimate=p.get("video_estimate"))
+        run["job"], run["generation"] = card.get("job"), card.get("generation")
+        creator._log(run, "started: " + ("the sheet is being drawn" if run["job"] else "the sheet is ready"))
+        sess["creator_run"] = run
+        t.cards.append({"type": "creator", "run_id": run["id"]})
+        t.reply = f"Running the creator for **{p['subject']}**. I will stop and tell you if anything is rejected."
+        t.chips = []
+
+    def n_creator(self, state: State) -> dict:
+        """The person's button on the creator card (continue / skip / force / stop), or "continue" typed while it waits."""
+        t: Turn = state["turn"]
+        run = t.sess.get("creator_run")
+        act = str((t.action or {}).get("type") or "creator_go")
+        if not run:
+            t.reply = "There is no creator run to continue."
+            return {}
+        creator.resume(run, act, (t.action or {}).get("indexes"))
+        t.trace.task("continuing the creator" if act != "creator_stop" else "stopping the creator")
+        t.trace.step({"creator_go": "approved", "creator_skip": "continuing without those stickers", "creator_force": "continuing with them anyway", "creator_force_video": "animation price accepted",
+                      "creator_stop": "stopped"}.get(act, act))
+        t.trace.end("done")
+        t.reply = "Stopped. Nothing more will be made or spent; what exists stays in the Studio." if act == "creator_stop" else "Continuing."
+        t.cards.append({"type": "creator", "run_id": run["id"]})
+        return {}
+
+    def creator_tick(self, sid: str) -> str:
+        """Advance the session's creator run as far as it can go right now and say, as a message of its own, what happened when it stops, waits or finishes. Takes the session's lock like any
+        turn (a person's message in the middle gets its 409 for a moment, never a clash). Returns the run's status ('none' without a run, 'busy' when a turn holds the lock)."""
+        lock = self.cache.lock(f"session:{sid}")
+        try:
+            lock.__enter__()
+        except cachemod.Busy:
+            return "busy"
+        try:
+            sess = self.store.load(sid)
+            run = sess.get("creator_run")
+            if not run:
+                return "none"
+            if run["status"] == "running":
+                creator.advance(self.tools, run, sess["settings"].get("allow_vlm") is True, self.tools.telegram_ready)
+            mark = f"{run['status']}:{run['step']}"
+            if run["status"] in ("stopped", "waiting", "done") and run.get("said") != mark:
+                run["said"] = mark
+                self._creator_say(sess, run)
+            self.store.save(sess)
+            return run["status"]
+        finally:
+            lock.__exit__(None, None, None)
+
+    def _creator_say(self, sess: dict, run: dict) -> None:
+        name = run["subject"]
+        if run["status"] == "done":
+            links = [s["link"] for s in (run.get("telegram") or {}).get("sets", [])]
+            text, chips = f"Done: **{name}** is on Telegram. " + " ".join(links), []
+        elif run["status"] == "waiting":
+            text, chips = f"**{name}**: {run['waiting']['why']}.", run["waiting"]["chips"]
+        else:
+            text, chips = f"**{name}**: stopped, {run['stop']['why']}", run["stop"]["chips"]
+        self.store.add_message(sess, "assistant", text, chips=chips, cards=[{"type": "creator", "run_id": run["id"]}])
 
     def _start_create(self, t: Turn, p: dict, plan_card: dict | None = None, parent: str | None = None, regen_of: str | None = None,
                       refs: list | None = None, note: str = "") -> None:
@@ -374,6 +479,9 @@ class Agent:
         if p["type"] == "create":
             t.trace.retitle(f"generating {p['subject']}")
             self._start_create(t, p, parent=p.get("parent"), regen_of=p.get("regen_of"), refs=p.get("refs"), note=p.get("note", ""))
+        elif p["type"] == "creator":
+            t.trace.retitle(f"creating {p['subject']} for Telegram")
+            self._start_creator(t, p)
         elif p["type"] == "animate":
             t.trace.retitle(f"animating {self._nm(t.sess, p['generation'])}")
             try:
@@ -740,6 +848,12 @@ class Agent:
         self._start_create(t, {"prompt": card.get("prompt") or name, "subject": (subj or {}).get("name") or name, "grid": grid,
                                "style_id": p.get("style_id") or t.sess["settings"]["style_id"], "ai": True},
                            note=f"a new sheet for {name}: the first could not be cut")
+        run = t.sess.get("creator_run")
+        new = next((c for c in reversed(t.cards) if c.get("type") == "generation"), None)
+        if run and new and run.get("generation") == gid and run["status"] in ("stopped", "waiting"):        # the creator follows the new sheet
+            run.update(job=new.get("job"), generation=new.get("generation"), step="sheet", status="running", stop=None, waiting=None, skip=[])
+            creator._log(run, "a new sheet was started")
+            t.cards.append({"type": "creator", "run_id": run["id"]})
         return {}
 
     # -- names: the vision model looks at the pictures and proposes a better name where the current one does not fit ----------------------------------------------
@@ -974,6 +1088,8 @@ def hydrate(store: SessionStore, tools, sess: dict) -> dict:
                         c["data"] = tools.generation(gid)
                     except Exception:
                         pass
+            if c.get("type") == "creator" and (sess.get("creator_run") or {}).get("id") == c.get("run_id"):
+                c["run"] = dict(sess["creator_run"], steps=creator.labels(sess["creator_run"]))        # the card shows the run as it is now
             cards.append(c)
         m["cards"] = cards
         msgs.append(m)

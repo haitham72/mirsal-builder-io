@@ -15,13 +15,13 @@ const AIU=(()=>{
  /* a message's signature: the page only rebuilds a message whose signature changed (so carousels keep their scroll and videos keep playing) */
  const sig=m=>JSON.stringify([m.status,m.text,(m.steps||[]).map(s=>[s.kind,s.label,s.status,s.detail&&s.detail.lines&&s.detail.lines.length]),m.chips,
   (m.cards||[]).map(c=>[c.type,c.generation,c.job,c.job_status,c.job_stage,c.animating,c.estimate,c.names&&c.names.length,
-   ((c.data&&c.data.stickers)||c.stickers||[]).map(s=>[s.id,s.status,s.still,s.anim_status,!!s.png,!!s.webm]),c.data&&c.data.problem&&c.data.problem.check])]);
+   ((c.data&&c.data.stickers)||c.stickers||[]).map(s=>[s.id,s.status,s.still,s.anim_status,!!s.png,!!s.webm]),c.data&&c.data.problem&&c.data.problem.check,c.run&&[c.run.step,c.run.status,c.run.updated]])]);
  /* does anything on this card still move? (then the page keeps polling) */
  const cardLive=c=>{if(c.type!=='generation')return false;
   if(c.job&&!c.generation)return !['FAILED','TIMEOUT'].includes(c.job_status);
   const st=(c.data&&c.data.stickers)||[];if(!st.length)return !!c.generation;
   return st.some(x=>x.status==='PENDING')||(!!c.animating&&st.some(x=>x.status==='READY'&&['PENDING','RUNNING'].includes(x.anim_status)))};
- const needPoll=s=>!!s&&(s.working||(s.messages||[]).some(m=>(m.cards||[]).some(cardLive)));
+ const needPoll=s=>!!s&&(s.working||(s.creator_run&&s.creator_run.status==='running')||(s.messages||[]).some(m=>(m.cards||[]).some(cardLive)));
  const sid=h=>{const m=/^#?\/?agent\/(S\d+)/.exec(h||'');return m?m[1]:null};
  /* the last assistant message: only its plan card is the live one (a pending Create belongs to the newest plan) */
  const lastBot=ms=>{const a=ms||[];for(let i=a.length-1;i>=0;i--)if(a[i]&&a[i].role!=='user')return a[i];return null};
@@ -127,7 +127,7 @@ function botHTML(m){
  const tr=steps.length||work?traceHTML(m,work):'';
  const text=m.text?`<div class="ai-text${m.status==='error'?' ai-err':''}">${AIU.md(m.text)}</div>`:'';
  const cards=(m.cards||[]).map((c,i)=>cardHTML(c,m,i)).join('');
- const chips=(m.chips&&m.chips.length&&!work)?`<div class=ai-chips>${m.chips.map(c=>c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}>${AIU.esc(c.label)}</button>`
+ const chips=(m.chips&&m.chips.length&&!work)?`<div class=ai-chips>${m.chips.map(c=>c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
    :`<button class=ai-chip data-act=agchip data-text="${AIU.esc(c.text||c.label)}">${AIU.esc(c.label)}</button>`).join('')}</div>`:'';
  return `<div class=ai-av>${ic('ai')}</div><div class=ai-body>${tr}${text}${cards}${chips}</div>`}
 
@@ -147,7 +147,7 @@ function cardHTML(c,m,i){
  if(c.type==='plan'){const last=AIU.lastBot((A.sess&&A.sess.messages)||[]),done=!(A.sess&&A.sess.pending)||!last||m.id!==last.id;
   return `<div class="ai-card plan${done?' is-done':''}"><div class=ai-ch><b>${AIU.esc(c.subject)}</b><small>${c.count} stickers · ${AIU.esc(c.grid)} · ${AIU.esc(c.style)}</small></div>
    <div class=plan-tags>${(c.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div>
-   <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`Costs <b>${AIU.credits(c.estimate)}</b>${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}</div>
+   <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`Costs <b>${AIU.credits(c.estimate)}</b>${c.creator&&c.creator.video?` (sheet ${+c.creator.sheet} + animation ${+c.creator.video})`:''}${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}${c.creator?`<br><small>Then straight to Telegram: ${c.creator.scope==='video'?'animated':'static'}, ${c.creator.bypass?'approving for you, stopping at any rejection':'one click from you at each approval'}.</small>`:''}</div>
     </div></div>`}   /* the go-ahead lives in the two chips under the message (Create it / Not yet), the same place as "Allow AI vision / Not now": one pair of buttons, never two */
  if(c.type==='generation'){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
@@ -159,6 +159,7 @@ function cardHTML(c,m,i){
   const meta=gid?`${gid}${c.data&&c.data.parent?' · from '+c.data.parent:''} · ${ready} ready`:'';
   return `<div class="ai-card gen"><div class=ai-ch><b>${AIU.esc(c.subject||'Stickers')}</b><small>${meta}</small><span class=sp></span>${gid?`<button class=ai-link data-act=agstudio data-g="${gid}">Open in Studio</button>`:''}</div>
    ${carHTML(st.length?st:null,gid)}${note?`<div class=car-note>${note}</div>`:''}</div>`}
+ if(c.type==='creator')return runHTML(c.run);
  if(c.type==='stickers'){return `<div class="ai-card"><div class=ai-ch><b>${c.stickers.length===1?'Sticker':'Stickers'}</b><small>${c.stickers.length} found</small></div>${carHTML(c.stickers.map(x=>({...x,status:'READY',name:x.key})),null)}</div>`}
  return ''}
 
@@ -166,6 +167,13 @@ function cardHTML(c,m,i){
 function problemHTML(p,gid){const got=p.received?`The sheet was received${p.received.job?' ('+AIU.esc(p.received.job)+')':''}${p.received.cost?' and paid for ('+AIU.credits(p.received.cost)+')':''}; nothing is lost, this batch just has no stickers.`:'';
  return `<div class=ai-problem><b>${AIU.esc(p.title)}</b><span>${AIU.esc(p.why)}</span><span>${AIU.esc(p.fix)}</span><small>${got}</small>
   <button class="ai-chip pri" data-act=agretry data-g="${AIU.esc(gid)}">Try the sheet again · ${p.retry_estimate?AIU.credits(p.retry_estimate):'price shown by the provider'}</button></div>`}
+/* the creator's run: where it stands, as a short list; what it stopped for is the message under it, with its buttons */
+function runHTML(r){if(!r)return '';
+ const rows=(r.steps||[]).map(s=>`<li class="${s.state}"><i></i>${AIU.esc(s.label)}</li>`).join('');
+ const st=r.status==='running'?'Working…':r.status==='waiting'?'Waiting for you':r.status==='done'?'On Telegram':r.status==='failed'?'Failed':'Stopped';
+ const why=r.stop?`<div class=run-why>${AIU.esc(r.stop.why)}</div>`:r.waiting?`<div class=run-why>${AIU.esc(r.waiting.why)}</div>`:'';
+ return `<div class="ai-card ai-run is-${r.status}"><div class=ai-ch><b>${AIU.esc(r.subject)}</b><small>${r.scope==='video'?'animated':'static'} pack · ${r.bypass?'auto-approve':'you approve'}</small><span class=sp></span><span class=run-st>${st}</span>
+  ${r.status==='running'?`<button class=ai-link data-act=agaction data-type=creator_stop>Stop</button>`:''}</div><ol class=run-steps>${rows}</ol>${why}</div>`}
 function carHTML(st,gid){
  const tiles=st?st:Array.from({length:6},(_,i)=>({id:'w'+i,index:i+1,status:'PENDING',wait:true}));
  const n=tiles.length;
@@ -206,7 +214,7 @@ function selChips(){const el=$('ai-sel');if(!el)return;const n=A.sel.size;
  el.innerHTML=n?`<span class=ai-selchip>${n} selected: say what to change<button data-act=agsel aria-label="Clear selection">${ic('x')}</button></span>`:'';
  const ta=$('ai-in');if(ta)ta.placeholder=n?'e.g. make these more energetic':'Make or change stickers'}
 ACT.agchip=el=>agSend(el.dataset.text);
-ACT.agaction=el=>agSend('',el.dataset.g?{type:el.dataset.type,generation:el.dataset.g}:{type:el.dataset.type});
+ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
 ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});
 ACT.agtrace=el=>{const k=el.dataset.m;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstep=el=>{const k=el.dataset.k;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
@@ -227,10 +235,20 @@ function beRow(){const a=A.agent||{},av=a.availability||{},pref=a.preference||'a
  const now=a.agent&&a.agent.provider!=='none'?`now: ${a.agent.provider==='local'?'local':'cloud'} · ${AIU.esc((a.agent.model||'').replace(/:\d+$/,''))}`:'now: rules only';
  const warn=pref!=='auto'&&av[pref]&&!av[pref].ok?` · <span class=ai-err>${AIU.esc(av[pref].why||'not available')}</span>`:'';
  return `<div class=r><div><b>AI engine</b><small>${now}${warn}</small></div><div class=ai-seg>${b('auto','Auto')}${b('local','Local')}${b('cloud','Cloud')}</div></div>`}
+/* the agentic creator: one click from a request to a pack on Telegram. Any rejection still stops it. */
+function crRows(st){const c=Object.assign({on:false,scope:'images',bypass:false},st.creator||{});
+ let h=`<div class=r><div><b>Agentic creator</b><small>One go-ahead: request, sheet, approval, pack, Telegram</small></div><button type=button class="ai-sw${c.on?' on':''}" data-act=agcr data-k=on role=switch aria-checked="${c.on}" aria-label="Agentic creator"></button></div>`;
+ if(c.on)h+=`<div class=r><div><b>Send to Telegram as</b><small>Images: the stills as a static pack. Full video: animated first (a second paid call)</small></div><div class=ai-seg><button data-act=agcr data-k=scope data-v=images class="${c.scope==='images'?'on':''}">Images</button><button data-act=agcr data-k=scope data-v=video class="${c.scope==='video'?'on':''}">Full video</button></div></div>
+  <div class=r><div><b>Approve everything for me</b><small>${c.bypass?'On: no questions on the way. Any rejection still stops it':'Off: it stops at each approval and waits for one click'}</small></div><button type=button class="ai-sw${c.bypass?' on':''}" data-act=agcr data-k=bypass role=switch aria-checked="${c.bypass}" aria-label="Approve everything automatically"></button></div>`;
+ return h}
+ACT.agcr=async el=>{const cur=Object.assign({on:false,scope:'images',bypass:false},(A.sess&&A.sess.settings.creator)||{}),k=el.dataset.k;
+ const next=k==='scope'?{scope:el.dataset.v}:{[k]:!cur[k]};
+ await saveSet({creator:Object.assign({},cur,next)})};
 function setSet(){const el=$('ai-set');if(!el)return;el.classList.toggle('on',A.setOpen);if(!A.setOpen)return;
  const st=A.sess?A.sess.settings:{grid:'3x3',ask_before_spending:true};
  el.innerHTML=`<div class=r><div><b>Grid</b><small>How many stickers in one sheet</small></div><div class=ai-seg><button data-act=agsetgrid data-v=3x3 class="${st.grid==='3x3'?'on':''}">3×3</button><button data-act=agsetgrid data-v=2x2 class="${st.grid==='2x2'?'on':''}">2×2</button></div></div>
   ${beRow()}
+  ${crRows(st)}
   <div class=r><div><b>Ask before spending</b><small>Show the price and wait for your go-ahead</small></div><button type=button class="ai-sw${st.ask_before_spending?' on':''}" data-act=agsetask role=switch aria-checked="${!!st.ask_before_spending}" aria-label="Ask before spending"></button></div>`}
 document.addEventListener('click',e=>{if(A.setOpen&&!e.target.closest('.ai-set')&&!e.target.closest('[data-act=agset]')){A.setOpen=false;setSet()}});
 
