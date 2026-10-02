@@ -1402,7 +1402,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "REJECTED",
         "anim": "NONE"
       },
       "history": [
@@ -1416,6 +1416,15 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1790924986.793,
+          "stage": "still",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
         }
       ]
     },

@@ -5,3 +5,4 @@
 {"ts": 1790907726.877, "stage": "keyed", "status": "done", "ms": 528, "detail": {"bg": [5, 251, 2], "threshold": [123.5, 123.0, 123.0, 123.0, 122.5, 122.5, 123.5, 123.0, 123.0], "grid": "3x3", "cut": "gutter", "xs": [0, 682, 1358, 2048], "ys": [0, 687, 1366, 2048]}}
 {"ts": 1790907726.878, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
 {"ts": 1790907728.193, "stage": "sliced", "status": "done", "ms": 1314, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1790924986.793, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 5, "note": "dropped from the set"}, "actor": "human", "decision": "REJECT"}

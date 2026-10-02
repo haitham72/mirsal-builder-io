@@ -1,0 +1,19 @@
+{"ts": 1790921414.129, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "barbie in love", "task_slug": "barbie_love"}}
+{"ts": 1790921415.243, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790921415.556, "stage": "sheet_picked", "status": "done", "ms": 313, "detail": {"subject": "barbie", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "warnings": []}}
+{"ts": 1790921415.559, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790921415.862, "stage": "keyed", "status": "done", "ms": 302, "detail": {"bg": [2, 252, 3], "threshold": [125.0, 124.5, 124.0, 124.0, 123.5, 123.5, 123.5, 123.0, 123.0], "grid": "3x3", "cut": "gutter", "xs": [0, 710, 1351, 2048], "ys": [0, 634, 1350, 2048]}}
+{"ts": 1790921415.864, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790921416.34, "stage": "sliced", "status": "done", "ms": 476, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1790924847.523, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 1, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.637, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 2, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.639, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 3, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.641, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 4, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.643, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 5, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.645, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 6, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.647, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 7, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.649, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 8, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.651, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 9, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924848.652, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4, 5, 6, 7, 8, 9]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1790924849.377, "stage": "video_sheet_built", "status": "done", "ms": 508, "detail": {"sheet": "A1", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1790924849.382, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A1", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
