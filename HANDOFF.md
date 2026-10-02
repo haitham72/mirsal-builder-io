@@ -99,7 +99,7 @@ Never kill Haitham's server on :8770. The Studio shows a banner when it runs old
 - For browser checks without a browser tool: `pip install --target <scratch> playwright` and launch the installed Chrome with `executable_path`; run it against a **copy** of `out/` and never press Create.
 - Any bot token pasted into a chat is compromised and must be revoked after testing. `mirsal/.env` and `out/telegram.json` are git-ignored.
 
-## 5b. Requested next (from the 2026-10-02 review; not built yet — take these as the next tasks)
+## 5b. Requested next (from the 2026-10-02 review; full report: `docs/review-2026-10-02.md` — not built yet, take these as the next tasks)
 
 - **BLOCKER security: a member token can read any file under `out/`.** `_authorize` matches only the prefix `^/out/G\d+/` (`console/server.py:32`, `:568-570`) but the file is resolved afterwards (`:826-834`), so `GET /out/G001/../telegram.json` with a member's Bearer token returns 200 (reproduced 2026-10-02: also `../users.json` = every token's SHA-256). Fix: resolve the path first, then require the resolved parent to be exactly the caller's own `G###`; add a test in `tests/test_users.py` for `..`.
 - **The suite is red at HEAD:** `tests/test_live.py:500` asserts `"generated/"` is in `.gitignore`; commit `067dc9b` removed that line and committed ~122 MB / 184+ files of `generated/` (now 208 tracked). `unittest discover` → 393 tests, 1 failure, exit 1. Either restore the ignore + untrack, or change the test and the docs that still say `generated/` is ignored (`CLAUDE.md:37`, `docs/generation.md:99`, `README:21`).
