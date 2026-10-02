@@ -291,7 +291,9 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
             if missing:
                 raise JobError(f"reference image missing: {missing[0]}", 400)
             media["image_references"] = [str(r) for r in refs]
-        if kind == "video":
+        if kind == "video" and req.get("t2v"):             # a text-only video (the particle effects): no start image, the clip begins and ends on an empty screen
+            pass
+        elif kind == "video":
             start = Path(str(req.get("start_image") or ""))
             start = start if start.is_absolute() else out / start
             if not start.is_file():

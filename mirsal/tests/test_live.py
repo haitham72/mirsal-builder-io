@@ -109,6 +109,20 @@ class FulfilTests(Base):
         row = json.loads((self.out / "model_calls.jsonl").read_text().splitlines()[-1])
         self.assertEqual((row["kind"], row["model"], row["cost"], row["external_task_id"]), ("IMAGE_SHEET", "nano_banana_flash", 2.0, "fake-job-1"))
 
+    def test_a_text_only_video_job_needs_no_start_image(self):
+        """The particle effects ask Kling for a clip that starts and ends on an empty screen: there is no picture to start from (request.t2v). Any other video job still refuses a
+        missing start image."""
+        j = jobs.create(self.out, "video", request={"model": "kling3_0", "options": {}, "prompt": "an empty green screen, then a burst, then empty again", "t2v": True, "label": "effect"})
+        done = jobs.fulfil(self.out, j["id"])
+        self.assertEqual((done["status"], done["model"]), ("DONE", "kling3_0"))
+        create = next(c for c in self.cli.calls if c[:2] == ["generate", "create"])
+        self.assertNotIn("--start-image", create)
+        self.assertNotIn("--end-image", create)
+        j2 = jobs.create(self.out, "video", request={"model": "kling3_0", "options": {}, "prompt": "p"})
+        again = jobs.fulfil(self.out, j2["id"])
+        self.assertEqual(again["status"], "FAILED")
+        self.assertIn("start image", again["error"])
+
     def test_a_claimed_job_resumes_by_its_ticket_and_never_creates_a_second_paid_job(self):
         j, _ = self.sheet_job()
         jobs.claim(self.out, j["id"], "fake-job-9")
