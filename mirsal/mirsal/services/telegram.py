@@ -241,7 +241,7 @@ def inspect(path: Path, kind: str, emoji: list[str], cfg: EngineConfig) -> dict:
             "stroke": verify.has_white_stroke(rgba)}
 
 
-def plan(lib, pid: str, bot: str | None, base_name: str | None = None, cfg: EngineConfig | None = None) -> dict:
+def plan(lib, pid: str, bot: str | None, base_name: str | None = None, cfg: EngineConfig | None = None, fresh: bool = False) -> dict:
     """What would be created, and every problem, with no network call. `bot` None = not connected yet (names are shown with a placeholder)."""
     cfg = cfg or EngineConfig()
     pack = next((p for p in lib.snapshot()["packs"] if p["id"] == pid), None)
@@ -268,7 +268,7 @@ def plan(lib, pid: str, bot: str | None, base_name: str | None = None, cfg: Engi
             items.append({"id": s["id"], "name": s["name"], "key": s["id"], "file": s["file"], "emoji": emo, "kb": s["kb"], "problems": probs, "warnings": ws})
             blocked += [f"{s['name']}: {x}" for x in probs]
             warns += [f"{s['name']}: {x}" for x in ws]
-        have = next((t for t in (pack.get("telegram") or {}).get("sets", []) if t["kind"] == kind), None)
+        have = None if fresh else next((t for t in (pack.get("telegram") or {}).get("sets", []) if t["kind"] == kind), None)
         eff = have["name"] if have else name
         sc = verify.run("telegram_set", {"stickers": [{"key": i["key"]} for i in items], "name": eff, "bot": bot, "title": base[:64]}, cfg)[0]
         if not sc.ok:
@@ -277,6 +277,34 @@ def plan(lib, pid: str, bot: str | None, base_name: str | None = None, cfg: Engi
         sets.append({"kind": kind, "name": eff, "title": base[:64], "items": items, "link": f"https://t.me/addstickers/{eff}",
                      "new": [i["id"] for i in items if i["id"] not in known], "exists": bool(have), "have_items": (have or {}).get("items", [])})
     return {"pack": pack["name"], "sets": sets, "blocked": blocked, "warnings": warns, "bot": bot}
+
+
+# ---------- never the same pack twice ----------
+MODES = ("once", "replace", "new_set")
+
+
+def fingerprint(lib, pid: str) -> str:
+    """What a pack IS, for the purpose of not sending it twice: sha256 over its stickers, sorted, each as (the generator's file name, the SHA-256 of the file's bytes, static / animated).
+    Not the pack's name (people retype names) and not its id (an accidentally duplicated pack must be recognised as the same pack)."""
+    import hashlib
+    pack = next((p for p in lib.snapshot()["packs"] if p["id"] == pid), None)
+    if not pack:
+        raise TelegramError("No such pack", 404)
+    rows = []
+    for s in pack["stickers"]:
+        try:
+            digest = hashlib.sha256((lib.files / s["file"]).read_bytes()).hexdigest()
+        except OSError:
+            digest = "missing"
+        rows.append(f"{s.get('file_name') or s['name']}|{digest}|{s['type']}")
+    return hashlib.sha256("\n".join(sorted(rows)).encode("utf-8")).hexdigest()
+
+
+def already_sent(lib, pid: str) -> dict | None:
+    """The export record of this exact pack content, or None. `pack.telegram.exports` keeps the last ten sends."""
+    fp = fingerprint(lib, pid)
+    pack = next(p for p in lib.snapshot()["packs"] if p["id"] == pid)
+    return next((e for e in reversed((pack.get("telegram") or {}).get("exports", [])) if e.get("fingerprint") == fp), None)
 
 
 # ---------- sending ----------
@@ -290,13 +318,24 @@ def _input(lib, item: dict, kind: str):
     return {"sticker": f"attach://{ref}", "format": kind, "emoji_list": item["emoji"]}, {ref: (path.name, path.read_bytes(), _mime(path))}
 
 
-def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConfig | None = None) -> dict:
+def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConfig | None = None, mode: str = "once") -> dict:
+    """Send a pack. `mode`: `once` (the default) answers with the earlier export when this exact content was already sent and calls Telegram NOT AT ALL; `replace` sends on purpose
+    (only what is new is added to the existing set); `new_set` sends the whole pack again as a second set with a numbered name. Both escape hatches are recorded."""
+    if mode not in MODES:
+        raise TelegramError(f"mode must be one of {', '.join(MODES)}", 400)
+    if mode == "once":
+        prev = already_sent(lib, pid)
+        if prev:
+            return {"already": True, "sets": [dict(x, added=0) for x in prev["sets"]], "sent_at": prev["sent_at"], "bot": prev.get("bot"), "warnings": [], "notified": False, "notify_error": None,
+                    "note": "This pack was already sent to Telegram; nothing was sent again. Use Replace or Send as a new set on purpose."}
     c = load_config(out)
     if not (c["token"] and c["user_id"]):
         raise TelegramError("Telegram is not connected. Add your bot token and user id first.", 409)
     token, user = c["token"], c["user_id"]
     bot = c["bot"] or _call(token, "getMe", {})["username"]
-    p = plan(lib, pid, bot, base_name, cfg)
+    if mode == "new_set":
+        base_name = f"{base_name or next(x['name'] for x in lib.snapshot()['packs'] if x['id'] == pid)} {len((next(x for x in lib.snapshot()['packs'] if x['id'] == pid).get('telegram') or {}).get('exports', [])) + 1}"
+    p = plan(lib, pid, bot, base_name, cfg, fresh=(mode == "new_set"))
     if p["blocked"]:
         raise TelegramError("Not sent. Fix this first: " + "; ".join(p["blocked"][:6]) + (" …" if len(p["blocked"]) > 6 else ""), 409)
     report = []
@@ -331,7 +370,9 @@ def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConf
                 notified = True
             except TelegramError as e:           # the pack exists either way; only the message to the owner failed
                 notify_error = str(e)
-    return {"sets": report, "warnings": p["warnings"], "bot": bot, "notified": notified, "notify_error": notify_error}
+    import time as _t
+    lib.record_export(pid, {"fingerprint": fingerprint(lib, pid), "sent_at": round(_t.time(), 3), "mode": mode, "bot": bot, "sets": report})
+    return {"sets": report, "warnings": p["warnings"], "bot": bot, "notified": notified, "notify_error": notify_error, "already": False, "mode": mode}
 
 
 def notify(token: str, user: str, st: dict) -> None:

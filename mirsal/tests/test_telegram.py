@@ -340,3 +340,56 @@ class Api(LibFixture):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NeverTwice(Send):
+    """Deployment branch: the same pack content is never sent twice; Replace and Send as a new set are explicit, recorded and never the default."""
+
+    def test_the_same_content_is_answered_from_the_record_without_calling_telegram(self):
+        self.add_static("One", "😀")
+        self.connect()
+        first = tg.send(self.out, self.lib, self.pid)
+        self.assertFalse(first["already"])
+        calls = len(self.fake.f.calls)
+        again = tg.send(self.out, self.lib, self.pid)
+        self.assertTrue(again["already"])
+        self.assertEqual(len(self.fake.f.calls), calls, "not one call reached Telegram")
+        self.assertEqual([s["added"] for s in again["sets"]], [0])
+        self.assertEqual(again["sets"][0]["link"], first["sets"][0]["link"])
+
+    def test_a_retyped_name_or_a_duplicated_pack_is_still_the_same_pack(self):
+        self.add_static("One", "😀")
+        self.connect()
+        tg.send(self.out, self.lib, self.pid)
+        self.lib.update_pack(self.pid, name="A different name")
+        self.assertTrue(tg.send(self.out, self.lib, self.pid)["already"], "the name is not the identity")
+
+    def test_changed_bytes_change_the_fingerprint_and_the_send_goes_ahead(self):
+        s = self.add_static("One", "😀")
+        self.connect()
+        before = tg.fingerprint(self.lib, self.pid)
+        tg.send(self.out, self.lib, self.pid)
+        self.lib.replace_file(self.pid, s["id"], png(ring=0), "png")
+        self.assertNotEqual(before, tg.fingerprint(self.lib, self.pid))
+        self.assertFalse(tg.send(self.out, self.lib, self.pid)["already"])
+
+    def test_replace_sends_on_purpose_and_new_set_makes_a_second_numbered_set(self):
+        self.add_static("One", "😀")
+        self.connect()
+        tg.send(self.out, self.lib, self.pid)
+        rep = tg.send(self.out, self.lib, self.pid, mode="replace")
+        self.assertFalse(rep["already"])
+        self.assertEqual(rep["mode"], "replace")
+        n = tg.send(self.out, self.lib, self.pid, mode="new_set")
+        self.assertFalse(n["already"])
+        self.assertEqual(len(self.fake.f.sets), 2, "a second set exists")
+        self.assertNotEqual(n["sets"][0]["name"], rep["sets"][0]["name"])
+        pack = next(p for p in self.lib.snapshot()["packs"] if p["id"] == self.pid)
+        self.assertEqual([e["mode"] for e in pack["telegram"]["exports"]], ["once", "replace", "new_set"], "every send is recorded, with how")
+
+    def test_an_unknown_mode_is_refused_and_sends_nothing(self):
+        self.add_static("One", "😀")
+        self.connect()
+        with self.assertRaises(tg.TelegramError):
+            tg.send(self.out, self.lib, self.pid, mode="twice")
+        self.assertEqual(self.fake.f.sets, {})

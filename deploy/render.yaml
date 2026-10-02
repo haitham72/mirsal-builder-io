@@ -1,0 +1,36 @@
+# Render blueprint (point the Blueprint file path at deploy/render.yaml). NOTHING IS CREATED until you connect the repository on render.com.
+# Verify the plan names and prices on Render's page before you press Apply: the free tier suspends an idle web service, and a background worker may not be free (plan.md section 6).
+# Secrets are `sync: false` on purpose: you type them in the dashboard, they are never in git.
+services:
+  - type: web
+    name: mirsal
+    runtime: docker
+    dockerfilePath: deploy/docker/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - {key: MODE, value: web}
+      - {key: MIRSAL_JOB_MODE, value: queue}
+      - {key: MIRSAL_DB_WRITE, value: "1"}
+      - {key: MIRSAL_ALLOWED_HOSTS, sync: false}          # mirsal.onrender.com (your service's host name)
+      - {key: MIRSAL_PUBLIC_ORIGIN, sync: false}          # https://mirsal.onrender.com
+      - {key: MIRSAL_GATEWAY_SECRET, generateValue: true}
+      - {key: SUPABASE_URL, sync: false}
+      - {key: SUPABASE_ANON_KEY, sync: false}
+      - {key: MIRSAL_DATABASE_URL, sync: false}           # the Supabase TRANSACTION pooler URL
+      - {key: MIRSAL_REDIS_URL, sync: false}              # Upstash (rediss://...)
+      - {key: OPENAI_API_KEY, sync: false}
+  - type: worker
+    name: mirsal-worker
+    runtime: docker
+    dockerfilePath: deploy/docker/Dockerfile
+    dockerContext: .
+    plan: starter                                          # workers are usually a paid class: check
+    envVars:
+      - {key: MODE, value: worker}
+      - {key: MIRSAL_JOB_MODE, value: queue}
+      - {key: MIRSAL_DB_WRITE, value: "1"}
+      - {key: MIRSAL_GATEWAY_SECRET, sync: false}         # the same value as the web service
+      - {key: MIRSAL_DATABASE_URL, sync: false}
+      - {key: MIRSAL_REDIS_URL, sync: false}

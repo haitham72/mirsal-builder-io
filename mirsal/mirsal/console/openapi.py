@@ -174,7 +174,7 @@ ROUTES = [
     ("POST", "/api/packs/{id}/stickers/{sid}/delete", "Library", "Remove a sticker", None, OBJ, 200),
     ("POST", "/api/stickers/delete", "Library", "Bulk delete: [{pack_id, id}]", OBJ, OBJ, 200),
     ("POST", "/api/cutout", "Library", "A photo (raw body) becomes a cut-out PNG; X-Cutout header describes the method", None, None, 200),
-    ("POST", "/api/packs/{id}/telegram", "Telegram", "Create the pack on Telegram, or add what is new", OBJ, OBJ, 200),
+    ("POST", "/api/packs/{id}/telegram", "Telegram", "Create the pack on Telegram, or add what is new. Body {name?, mode?}: mode once (default: the same content is never sent twice, the earlier export is returned with already=true and Telegram is not called), replace (send on purpose) or new_set (a second numbered set); every send is recorded", OBJ, OBJ, 200),
     ("GET", "/api/packs/{id}/telegram", "Telegram", "Dry run: what would be created and every problem", None, OBJ, 200),
     ("GET", "/api/packs/{id}/export.zip", "Library", "Download the pack: every sticker file (.webm animated, .png / .webp static, the engine's file names) and a manifest.json (application/zip)", None, None, 200),
     ("GET", "/api/packs/{id}/telegram.zip", "Telegram", "No-credentials fallback: the files for @stickers (application/zip)", None, None, 200),

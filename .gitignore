@@ -52,3 +52,4 @@ opencode.json
 # keys and tokens: never committed
 mirsal/.env
 .env
+deploy/.env

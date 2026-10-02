@@ -10,6 +10,11 @@ Rules the server applies (console/server.py):
 - a `member` sees only what they own (their chats, their generations and the files, jobs and events of those); an `owner` sees everything;
 - members cannot spend: live generation and animation need `can_spend`, because they would spend the owner's Higgsfield credits;
 - library, packs, projects, Telegram, watch folders, usage and the user list are owner-only (per-user packs are not built).
+
+Hosted (branch `deployment`, deploy/gateway): the engine listens on loopback only and a FastAPI gateway in front of it verifies the person (Supabase / Google JWT) and forwards the request with
+`X-Mirsal-Gateway-Secret` (MIRSAL_GATEWAY_SECRET, at least 32 characters, compared in constant time), `X-Mirsal-Subject` (the identity provider's stable id) and `X-Mirsal-Name`. A request that carries the right
+secret AND comes from a loopback address is that person, a `member` created on first sight (`UserStore.ensure_external`) with `external` = the subject; a wrong or missing secret is an ordinary request (it gets
+no identity from these headers). Setting the secret also means authentication is on (`any()`), so the open sandbox can never be reached by accident on a hosted box.
 """
 from __future__ import annotations
 
@@ -17,6 +22,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import threading
 import time
@@ -59,7 +65,7 @@ class UserStore:
     def any(self) -> bool:
         """Is authentication on? (any account exists, disabled or not, or the env token is set). Disabling the only user must never open the server:
         to go back to the open sandbox, delete out/users.json on purpose."""
-        return bool(os.environ.get("MIRSAL_API_TOKEN")) or bool(self._read())
+        return bool(os.environ.get("MIRSAL_API_TOKEN")) or bool(os.environ.get("MIRSAL_GATEWAY_SECRET")) or bool(self._read())
 
     def list(self) -> list:
         return [self.public(u) for u in self._read()]
@@ -134,6 +140,38 @@ class UserStore:
                 u["name"] = str(name).strip()
             self._write(users)
         return self.public(u)
+
+    SUBJECT = re.compile(r"^[A-Za-z0-9_.:@|-]{6,128}$")
+
+    def ensure_external(self, subject: str, name: str = "", can_spend: bool = True) -> dict:
+        """The member that belongs to an identity provider's subject (a Google sub through Supabase): found, or created on first sight. The name follows the provider's profile
+        until a person renames the account here (a profile name is never trusted as anything but text)."""
+        if not self.SUBJECT.match(str(subject or "")):
+            raise UserError("a valid subject is required")
+        name = " ".join(str(name or "").split())[:60] or "New user"
+        with _LOCK:
+            users = self._read()
+            u = next((x for x in users if x.get("external") == subject), None)
+            if u is None:
+                n = max([int(x["id"][1:]) for x in users if str(x.get("id", "")).startswith("U") and x["id"][1:].isdigit()] or [0]) + 1
+                u = {"id": f"U{n:03d}", "name": name, "role": "member", "can_spend": bool(can_spend), "token_sha256": "", "created": round(time.time(), 3),
+                     "disabled": False, "external": subject}
+                users.append(u)
+                self._write(users)
+        return self.public(u)
+
+    def authenticate_gateway(self, secret: str | None, subject: str | None, name: str | None, client_ip: str) -> dict | None:
+        """A person the gateway vouches for (see the module doc), or None. Needs the configured secret, a loopback peer and a well-formed subject; a disabled account is refused."""
+        want = os.environ.get("MIRSAL_GATEWAY_SECRET", "")
+        if len(want) < 32 or not secret or not hmac.compare_digest(_digest(secret), _digest(want)):
+            return None
+        if client_ip not in ("127.0.0.1", "::1", "localhost"):
+            return None
+        try:
+            u = self.ensure_external(subject or "", name or "")
+        except UserError:
+            return None
+        return None if u.get("disabled") else dict(u, via="gateway")
 
     def authenticate(self, header: str | None, same_origin_page: bool) -> dict | None:
         """The caller, with `via` saying how: `token` (a user token, or MIRSAL_API_TOKEN = the owner `local`), `page` (the Studio's own page: a browser

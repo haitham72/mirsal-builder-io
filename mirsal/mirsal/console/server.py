@@ -682,6 +682,9 @@ def make_handler(c: Console):
                 return dict(LOCAL, via="static")
             if self.command == "GET" and path.startswith("/api/assets/") and path.count("/") == 3:
                 return dict(LOCAL, via="signed")
+            gw = c.users.authenticate_gateway(self.headers.get("X-Mirsal-Gateway-Secret"), self.headers.get("X-Mirsal-Subject"), self.headers.get("X-Mirsal-Name"), self.client_address[0])
+            if gw:                                                     # the hosted gateway vouches for this person (runtime/users.py); everything else is unchanged
+                return gw
             return c.users.authenticate(self.headers.get("Authorization"), self.headers.get("Sec-Fetch-Site") == "same-origin")
 
         def _authorize(self, user: dict, path: str):
@@ -1098,7 +1101,8 @@ def make_handler(c: Console):
             elif len(parts) == 4 and parts[3] == "delete":
                 lib.delete_pack(parts[2]); self._json(200, {"ok": True})
             elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)
-                self._json(200, telegram.send(c.out, lib, parts[2], (self._body().get("name") or None), c.cfg))
+                body = self._body()
+                self._json(200, telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once")))
             elif len(parts) == 4 and parts[3] == "stickers":
                 b = self._body()
                 g = b.get("from_generation") or {}

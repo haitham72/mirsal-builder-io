@@ -489,6 +489,15 @@ class Library:
             p["telegram"]["sets"] = sets + [block]
             self._save(db)
 
+    def record_export(self, pid: str, record: dict) -> None:
+        """Remember a send of the whole pack (what it was, when, where) so that sending the same content again is recognised: `telegram.exports`, the last ten."""
+        with self.lock:
+            db = self._load(); p = self._pack(db, pid)
+            ex = p.setdefault("telegram", {}).setdefault("exports", [])
+            ex.append(record)
+            p["telegram"]["exports"] = ex[-10:]
+            self._save(db)
+
     def delete_sticker(self, pid: str, sid: str) -> None:
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
