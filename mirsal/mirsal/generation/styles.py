@@ -1,6 +1,7 @@
 """Style presets: what the user picks next to the subject. `phrase` is the text the saved templates plug into the prompt (the word
 "sticker" is deliberately never used: image models answer it with a white die-cut border). `hint` is the short line under the tile in the UI.
-A tile image is optional: drop <id>.png/.jpg/.webp/.svg into mirsal/console/assets/styles/ and it replaces the placeholder."""
+A tile image is optional: drop <id>.png/.jpg/.webp/.svg into mirsal/console/assets/styles/ and it replaces the placeholder (an abstract swatch, console/placeholders.py:
+any preset added here gets one without further work). The Studio reads this list from the API, so a new preset appears there with no UI change."""
 from __future__ import annotations
 
 PRESETS = [
@@ -22,6 +23,24 @@ PRESETS = [
     {"id": "hand_drawn", "label": "Hand-drawn",
      "phrase": "hand-drawn illustration, marker and pencil texture, wobbly confident lines, warm playful colours",
      "hint": "marker and pencil"},
+    {"id": "minimal", "label": "Minimal",
+     "phrase": "minimal illustration, a few simple shapes, one or two flat colours, generous empty space, thin clean outline, calm and modern",
+     "hint": "few shapes, calm colours"},
+    {"id": "pixel_art", "label": "Pixel art",
+     "phrase": "16-bit pixel art character, crisp square pixels, limited colour palette, clean dark outline, retro game sprite look",
+     "hint": "retro game sprites"},
+    {"id": "watercolor", "label": "Watercolour",
+     "phrase": "soft watercolour illustration, translucent washes of colour, gentle bleeding edges, visible paper grain, delicate ink outline",
+     "hint": "soft washes, paper grain"},
+    {"id": "paper_cut", "label": "Paper cut",
+     "phrase": "layered paper cut-out craft, flat pieces of coloured paper stacked with soft shadows between the layers, slightly rough cut edges",
+     "hint": "layered paper craft"},
+    {"id": "pop_comic", "label": "Pop comic",
+     "phrase": "pop-art comic style, bold black ink outlines, halftone dot shading, saturated primary colours, dynamic expressive poses",
+     "hint": "bold ink, halftone dots"},
+    {"id": "kawaii", "label": "Kawaii",
+     "phrase": "kawaii chibi style, big shiny eyes, tiny body and an oversized head, pastel colours, soft blush cheeks, very cute and rounded",
+     "hint": "cute, round, pastel"},
 ]
 DEFAULT = "flat_vector"
 PHRASE = {p["id"]: p["phrase"] for p in PRESETS}

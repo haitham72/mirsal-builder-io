@@ -9,7 +9,7 @@ const aiOn=()=>CP.ai&&!!(typeof GAI!=='undefined'&&GAI.configured);
 const STROKES=[[0,'None'],[4,'Thin'],[8,'Medium'],[12,'Bold'],[16,'Max']];
 try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&STROKES.some(s=>s[0]===+o))GS.outline=+o}catch(e){}
 const strokeName=px=>(STROKES.find(s=>s[0]===px)||[px,px+' px'])[1];
-const glyph=px=>`<svg class=cp-gl viewBox="0 0 40 40" aria-hidden=true><rect width=40 height=40 rx=11 fill="#0e1633"/><circle cx="20" cy="20" r="${(11.5-px*0.12).toFixed(1)}" fill="#3466ff" stroke="#fff" stroke-width="${(px*0.3).toFixed(1)}"/></svg>`;
+const glyph=px=>`<svg class=cp-gl viewBox="0 0 40 40" aria-hidden=true><rect width=40 height=40 rx=11 fill="#cbd5e1"/><circle cx="20" cy="20" r="${(11.5-px*0.12).toFixed(1)}" fill="#3B82F6" stroke="#fff" stroke-width="${(px*0.3).toFixed(1)}"/></svg>`;
 const liveReady=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 
 function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m||document.getElementById('cpwrap'))return;

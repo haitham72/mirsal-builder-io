@@ -259,6 +259,23 @@ class ShellTests(unittest.TestCase):
     def block_of(src, marker):
         return src[src.index(marker):].split("\n", 1)[0]
 
+    def test_the_composer_has_no_palette_of_its_own_and_the_style_tiles_are_compact(self):
+        """docs/design.md 5, Studio: the composer panel was a near-black navy island in a light app. It takes the shared glass surface, and the style tiles are small wrapping
+        squares chosen by a ring and a check (they were six huge portrait cards in a horizontal scroller). The tiles are read from the API, never listed in the page."""
+        import re
+        ui = self.ui()
+        css = (ui / "studio.css").read_text(encoding="utf-8")
+        for navy in ("#070b1c", "#050816", "#2a52ff", "#0b1124", "#0e1633", "#3466ff", "#eaf0ff"):
+            self.assertNotIn(navy, css, "the composer's navy island is gone: " + navy)
+        self.assertRegex(css, r"\.cp\{[^}]*background:var\(--glass\)")
+        styles = re.search(r"\.cp-styles\{([^}]*)\}", css).group(1)
+        self.assertIn("flex-wrap:wrap", styles)
+        tile = re.search(r"\.cp-style\{([^}]*)\}", css).group(1)
+        self.assertNotIn("aspect-ratio:3/4", tile)
+        self.assertRegex(tile, r"width:\d{2,3}px")
+        self.assertIn(".cp-style.on", css)
+        self.assertIn("LIVE.m.styles.map(", (ui / "composer.js").read_text(encoding="utf-8"), "the tiles come from the API's presets")
+
 
 if __name__ == "__main__":
     unittest.main()

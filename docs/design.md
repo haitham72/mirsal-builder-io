@@ -123,7 +123,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 - **Sticker library gets the same glow background as AI** so the two screens read as one app.
 - Keep the rail's fonts, backgrounds, hovers and selection states **character-identical** to AI's. If a value differs between the two, AI wins.
 
-### Studio — "this is where it becomes dirty"
+### Studio — "this is where it becomes dirty" (built)
 - **The composer panel loses the dark navy** and takes the shared surface (3.1). This is the single biggest visual defect in the app.
 - **Style tiles: fewer sizes, more choices.**
   - Today: `.cp-styles` (`studio.css:324`) is a horizontal scroller and each `.cp-style` (325) is `flex:1 0 150px; max-width:250px`, `aspect-ratio:3/4` —
@@ -194,5 +194,5 @@ whether to delete it; do not fold it into this column.
 1. **Done.** Tokens (§3.1) and the rail (§4.1-4.2) — everything else inherits from these. Also done in this step: one phone layout (bottom bar) and one drawer for the second column on every screen (`#c2tog` below 900px; AI's private drawer is gone), AI declared in `RAIL`, the column's glass background and gradient title are the shell's, `body.agent-view` is gone. Guarded by `tests/test_js.py::ShellTests`.
 2. **Done.** The second column everywhere (§4.3), then Earlier batches moved into it (§6). Guarded by `tests/test_js.py` and `tests/js/history_card.test.js`.
 3. **Done.** Library, Chat and Settings alignment to AI (§5): the glow (`--glow-bg`, a static CSS version of AI's aurora, behind the whole shell so the glass columns sit on it), AI's row hover / selection (`#F0F9FC` / `#E3F4F9`) on the pack, chat and batch rows, one page width and one header (`.page`, `.ph`) for Library, Create, Pack, Export and Settings, the Chat conversation as a glass panel, and the heading-icon size (the Settings Telegram icon used to fill the page). A pack opened by its address now draws its column after the library is read. Guarded by `tests/test_js.py::ShellTests`.
-4. The composer's dark panel and the style tiles (§5, Studio).
+4. **Done.** The composer's dark panel and the style tiles (§5, Studio): the panel is the shared glass surface (`--glass`, the aurora halo, `--aglow` focus ring), no navy hex is left in `studio.css`; the tiles are 104px wrapping squares with a ring and a check, twelve presets (Minimal, Pixel art, Watercolour, Paper cut, Pop comic, Kawaii added; one entry each in `generation/styles.py`), and the swatch (`console/placeholders.py`) is an abstract orb drawn the way the style looks, derived from the id for any preset with no art. Real tile art still wins: drop `<id>.png` into `console/assets/styles/`. Guarded by `tests/test_js.py::ShellTests` and `tests/test_style_tiles.py`.
 5. Type/spacing/motion sweep last, once the structure has stopped moving (§3.2).

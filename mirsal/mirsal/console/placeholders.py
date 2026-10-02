@@ -10,40 +10,65 @@ EXTS = (".png", ".jpg", ".jpeg", ".webp", ".svg")
 SAFE = re.compile(r"^[a-z0-9_]{1,40}$")
 BRAND = re.compile(r"^[a-z0-9_-]{1,40}\.(png|jpg|svg|webp)$")
 
-# a small teddy-style head drawn in the way each style looks, so the tile says something before the real art arrives
+# an abstract swatch for each style: one orb drawn the way the style looks. It claims nothing the style does not do (the first version drew a teddy head, which read as the subject of the
+# style); a preset with no entry here gets a colour of its own derived from its id, so a new preset never shows a broken or identical tile.
 STYLE_ART = {
-    "flat_vector": ("#ffe9c9", "#f4a259", "#f4a259", None),
-    "toon_shade": ("#dff3ff", "#f4a259", "#c9772e", "toon"),
-    "glossy_3d": ("#e8e4ff", "url(#g)", "url(#g)", "gloss"),
-    "clay_3d": ("#fdebd8", "url(#c)", "url(#c)", "clay"),
-    "realistic": ("#e9e2d6", "url(#r)", "url(#r)", "fur"),
-    "hand_drawn": ("#fff7d6", "#f6c177", "#f6c177", "sketch"),
+    "flat_vector": ("#ffe9c9", "#f4a259", None),
+    "toon_shade": ("#dff3ff", "#f4a259", "toon"),
+    "glossy_3d": ("#e8e4ff", "url(#g)", "gloss"),
+    "clay_3d": ("#fdebd8", "url(#c)", "clay"),
+    "realistic": ("#e9e2d6", "url(#r)", "fur"),
+    "hand_drawn": ("#fff7d6", "#f6c177", "sketch"),
+    "minimal": ("#f4f6f8", "none", "ring"),
+    "pixel_art": ("#e3f6e8", "#3fa66b", "pixel"),
+    "watercolor": ("#eef6ff", "#7fb5e8", "wash"),
+    "paper_cut": ("#fdf0e6", "#ef8a6b", "layers"),
+    "pop_comic": ("#fff3c4", "#e8423f", "dots"),
+    "kawaii": ("#ffe8f1", "#ffb3cf", "kawaii"),
 }
 LABELS = {"openai": "O", "xai": "xAI", "kuaishou": "K", "kling": "K"}
 
 
+def _derived(sid: str) -> tuple:
+    hue = sum(ord(c) * (n + 1) for n, c in enumerate(sid)) % 360
+    return (f"hsl({hue} 70% 93%)", f"hsl({hue} 62% 60%)", None)
+
+
 def style_svg(sid: str) -> str:
-    bg, face, ears, fx = STYLE_ART.get(sid, ("#eeeeee", "#bbbbbb", "#bbbbbb", None))
+    bg, orb, fx = STYLE_ART.get(sid) or _derived(sid)
     defs = ('<defs><radialGradient id="g" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffd9a8"/><stop offset=".55" stop-color="#f08a3c"/><stop offset="1" stop-color="#b95a1a"/></radialGradient>'
             '<radialGradient id="c" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#f6c79a"/><stop offset="1" stop-color="#d9965b"/></radialGradient>'
             '<radialGradient id="r" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#c79a63"/><stop offset="1" stop-color="#7d5630"/></radialGradient></defs>')
-    extra = ""
+    cx = cy = 120
+    body = f'<circle cx="{cx}" cy="{cy}" r="62" fill="{orb}"/>'
     if fx == "toon":
-        extra = '<path d="M62 150a58 58 0 0 0 116 0 58 58 0 0 1-116 0z" fill="#00000022"/>'
+        body = f'<circle cx="{cx}" cy="{cy}" r="62" fill="{orb}" stroke="#4a3320" stroke-width="4"/><path d="M70 150a58 58 0 0 0 100 0 62 62 0 0 1-100 0z" fill="#00000026"/>'
     elif fx == "gloss":
-        extra = '<ellipse cx="96" cy="86" rx="26" ry="14" fill="#ffffff" opacity=".65" transform="rotate(-25 96 86)"/>'
+        body += '<ellipse cx="98" cy="88" rx="26" ry="14" fill="#ffffff" opacity=".7" transform="rotate(-25 98 88)"/>'
     elif fx == "clay":
-        extra = '<ellipse cx="120" cy="170" rx="46" ry="10" fill="#00000014"/>'
+        body = '<ellipse cx="120" cy="188" rx="48" ry="9" fill="#00000014"/>' + body
     elif fx == "fur":
-        extra = "".join(f'<path d="M{70 + i * 11} {96 + (i % 3) * 18}l5 9M{74 + i * 11} {150 - (i % 2) * 14}l-4 10" stroke="#5a3b1d" stroke-opacity=".5" stroke-width="2" fill="none"/>' for i in range(10))
+        body += "".join(f'<path d="M{72 + i * 10} {96 + (i % 3) * 18}l5 9M{76 + i * 10} {150 - (i % 2) * 14}l-4 10" stroke="#3b2a15" stroke-opacity=".45" stroke-width="2" fill="none"/>' for i in range(10))
     elif fx == "sketch":
-        extra = "".join(f'<path d="M{78 + i * 9} {158}l12 -14" stroke="#9a6a2e" stroke-opacity=".5" stroke-width="2"/>' for i in range(8))
-    line = ' stroke="#4a3320" stroke-width="3"' if fx in ("toon", "sketch") else ""
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">{defs}<rect width="240" height="240" rx="22" fill="{bg}"/>'
-            f'<circle cx="68" cy="68" r="26" fill="{ears}"{line}/><circle cx="172" cy="68" r="26" fill="{ears}"{line}/>'
-            f'<circle cx="120" cy="128" r="62" fill="{face}"{line}/>{extra}'
-            f'<circle cx="98" cy="118" r="7" fill="#2b1d12"/><circle cx="142" cy="118" r="7" fill="#2b1d12"/>'
-            f'<ellipse cx="120" cy="146" rx="12" ry="9" fill="#2b1d12"/></svg>')
+        body = f'<circle cx="{cx}" cy="{cy}" r="62" fill="{orb}" stroke="#9a6a2e" stroke-width="3" stroke-dasharray="9 5"/>' + "".join(f'<path d="M{82 + i * 9} 160l12 -14" stroke="#9a6a2e" stroke-opacity=".55" stroke-width="2"/>' for i in range(8))
+    elif fx == "ring":
+        body = f'<circle cx="{cx}" cy="{cy}" r="58" fill="none" stroke="#475569" stroke-width="3"/><circle cx="{cx + 58}" cy="{cy - 8}" r="7" fill="#f59e0b"/>'
+    elif fx == "pixel":
+        px = 12
+        body = "".join(f'<rect x="{x}" y="{y}" width="{px}" height="{px}" fill="{orb}"/>' for y in range(60, 180, px) for x in range(60, 180, px)
+                       if (x + px / 2 - cx) ** 2 + (y + px / 2 - cy) ** 2 <= 58 ** 2)
+    elif fx == "wash":
+        body = ('<circle cx="104" cy="112" r="54" fill="#7fb5e8" opacity=".55"/><circle cx="138" cy="124" r="50" fill="#f4a6c0" opacity=".5"/>'
+                '<circle cx="118" cy="146" r="44" fill="#ffd27a" opacity=".5"/>')
+    elif fx == "layers":
+        body = ('<circle cx="132" cy="136" r="58" fill="#00000018"/><circle cx="126" cy="130" r="58" fill="#f7c59f"/><circle cx="122" cy="126" r="48" fill="#00000018"/>'
+                f'<circle cx="118" cy="122" r="48" fill="{orb}"/><circle cx="116" cy="118" r="30" fill="#ffffff55"/>')
+    elif fx == "dots":
+        body = (f'<circle cx="{cx}" cy="{cy}" r="62" fill="{orb}" stroke="#111" stroke-width="6"/>'
+                + "".join(f'<circle cx="{x}" cy="{y}" r="3.4" fill="#00000040"/>' for y in range(118, 176, 12) for x in range(72, 172, 12) if (x - cx) ** 2 + (y - cy) ** 2 < 56 ** 2))
+    elif fx == "kawaii":
+        body += '<circle cx="98" cy="118" r="8" fill="#4a2a3a"/><circle cx="142" cy="118" r="8" fill="#4a2a3a"/><circle cx="90" cy="140" r="9" fill="#ff7aa8" opacity=".55"/><circle cx="150" cy="140" r="9" fill="#ff7aa8" opacity=".55"/>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">{defs}<rect width="240" height="240" rx="22" fill="{bg}"/>{body}</svg>'
 
 
 def vendor_svg(vid: str) -> str:

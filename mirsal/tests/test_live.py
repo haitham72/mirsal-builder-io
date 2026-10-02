@@ -342,7 +342,14 @@ class PromptV2Tests(unittest.TestCase):
         b = prompter.render_plan(dict(prompter.expand("teddy bear", (3, 3))["slots"], style_id="toon_shade"), "sheet_3x3", 2)["sheet_prompt"]
         self.assertIn(styles.PHRASE["glossy_3d"], a)
         self.assertIn(styles.PHRASE["toon_shade"], b)
-        self.assertEqual(len(styles.PRESETS), 6)
+        ids = [s["id"] for s in styles.PRESETS]
+        self.assertGreaterEqual(len(ids), 12, "a choice, not six")
+        self.assertEqual(len(ids), len(set(ids)), "an id is one preset")
+        self.assertIn(styles.DEFAULT, ids)
+        self.assertEqual(len({s["phrase"] for s in styles.PRESETS}), len(ids), "two presets never say the same thing")
+        for s in styles.PRESETS:
+            self.assertNotIn("sticker", s["phrase"].lower(), "the word sticker makes image models draw a white die-cut border: " + s["id"])
+            self.assertTrue(s["label"] and s["hint"], s["id"])
 
 
 class LiveConsoleTests(Base):
