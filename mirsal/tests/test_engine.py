@@ -13,7 +13,7 @@ from mirsal.engine.config import EngineConfig
 from mirsal.engine.sheet import encode_static, process_sheet
 from mirsal.engine.video import close_loop, loop_seam, process_video
 from mirsal.engine.grid import detect_grid, scale_rects, split_grid
-from mirsal import prompter
+from mirsal.generation import prompter
 from tests import synth
 
 CFG = EngineConfig()
@@ -123,6 +123,24 @@ class VideoTests(unittest.TestCase):
         before = loop_seam(f[-1], f[0])
         after = loop_seam(*[close_loop(f, 6)[i] for i in (-1, 0)])
         self.assertLess(after, before / 4)
+
+    def test_the_loop_is_closed_at_the_end_so_the_first_frames_are_never_a_dissolve(self):
+        """the old fade made the clip START on the tail's pose and dissolve into the head, the ghost on the
+        first frames (and on the thumbnail). Now the head is the source untouched and the last frames ease into frame 0."""
+        import cv2
+        n, m = 60, 6
+        f = np.zeros((n, 96, 96, 4), np.uint8)
+        for i in range(n):                                  # a disc on three quarters of a circle: no two frames alike (a dissolve would show as two discs) and it does not loop by itself
+            a = 2 * np.pi * 0.75 * i / n
+            cv2.circle(f[i], (int(48 + 30 * np.cos(a)), int(48 + 30 * np.sin(a))), 9, (240, 40, 40, 255), -1)
+        out = close_loop(f, m)
+        self.assertEqual(len(out), n - m)
+        self.assertTrue(np.array_equal(out[: n - 2 * m], f[: n - 2 * m]))        # everything before the fade is the source, bit for bit
+        self.assertTrue(np.array_equal(out[0], f[0]))                              # frame 0 (the thumbnail, the approved pose) is never blended
+        self.assertEqual(loop_seam(out[-1], out[0]), 0.0)                          # the last frame IS frame 0 ...
+        dist = [float(np.abs(out[n - 2 * m + j].astype(int) - f[0].astype(int)).mean()) for j in range(m)]
+        self.assertEqual(dist, sorted(dist, reverse=True))                         # ... reached by a steady approach, never a jump back
+        self.assertLess(loop_seam(out[-2], out[-1]), loop_seam(f[n - m - 2], f[n - m - 1]))      # and the last step is gentler than the clip's own motion
 
 
 if __name__ == "__main__":

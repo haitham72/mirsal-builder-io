@@ -3,7 +3,9 @@
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api=async(u,o)=>{const r=await fetch(u,o);let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}};
-const post=(u,b)=>api(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});
+const post=(u,b,h)=>api(u,{method:'POST',headers:{'Content-Type':'application/json',...(h||{})},body:JSON.stringify(b||{})});
+/* one key per click: a retry or a second tab with the same key is answered with the first result, never run (and paid) twice */
+const ikey=()=>(self.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
 let toastT=0;function toast(m,bad){const t=$('toast');t.textContent=m||'';t.className=(m?'on ':'')+(bad?'bad':'');clearTimeout(toastT);if(m)toastT=setTimeout(()=>t.className='',bad?6000:3500)}
 const say=t=>{const m=$('msg');if(m)m.innerHTML=t||''};   // callers escape what they pass
 const ICONS={
@@ -85,6 +87,12 @@ const selRefresh=()=>{if(route_==='pack')drawPack();else if(route_==='library')l
 ACT.lsel=el=>{const k=selKey(el.dataset.p,el.dataset.id);if(SEL.has(k))SEL.delete(k);else SEL.set(k,{pack_id:el.dataset.p,id:el.dataset.id});selRefresh()};
 ACT.lselall=()=>{(route_==='pack'?(packById(PACK_ID)||{stickers:[]}).stickers.map(s=>({pack_id:PACK_ID,id:s.id})):LCL.map(s=>({pack_id:s.pack_id,id:s.id}))).forEach(x=>SEL.set(selKey(x.pack_id,x.id),x));selRefresh()};
 ACT.lselnone=()=>{SEL.clear();selRefresh()};
+/* the whole selection into one pack in ONE request (all or nothing); the selection is cleared only when it moved */
+async function moveSelection(to){const items=[...SEL.values()];if(!items.length)return false;
+  const r=await post('/api/stickers/move',{to,items});if(!r.ok){toast(r.j.error||'Could not move',1);return false}
+  SEL.clear();await loadLib();drawCol2();selRefresh();const p=packById(to);
+  toast(`Moved ${r.j.moved} sticker${r.j.moved===1?'':'s'} to ${p?p.name:'the pack'}${r.j.skipped?` (${r.j.skipped} already there)`:''}`);return true}
+ACT.lselmove=()=>{if(SEL.size)pickPack(pid=>moveSelection(pid),`Move ${SEL.size} sticker${SEL.size===1?'':'s'} to`)};
 ACT.lseldel=()=>{const items=[...SEL.values()];if(!items.length)return;
   confirmDlg(`Delete ${items.length} sticker${items.length===1?'':'s'}? This cannot be undone.`,async()=>{const r=await post('/api/stickers/delete',{items});if(!r.ok)return toast(r.j.error,1);
     SEL.clear();await loadLib();drawCol2();selRefresh();toast(`Deleted ${r.j.deleted} sticker${r.j.deleted===1?'':'s'}`)})};
@@ -124,7 +132,7 @@ document.addEventListener('click',e=>{if(Date.now()<MQ.quiet){e.stopPropagation(
 document.addEventListener('keydown',e=>{if(!['pack','library'].includes(route_)||/input|textarea|select/i.test((document.activeElement||{}).tagName||'')||$('dlg').classList.contains('on')||$('modal').classList.contains('on'))return;
   if(e.key==='Escape'&&SEL.size){SEL.clear();selRefresh()}
   else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'&&document.querySelector('.grid.selgrid')){e.preventDefault();ACT.lselall()}});
-function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
+function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn sm" data-act=lselmove title="Move all the selected stickers into one pack (or a new one)">${ic('lib')} Move ${SEL.size} to…</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
 RENDER.library=async()=>{await loadLib();drawCol2();
  $('s-library').innerHTML=`<div style="max-width:1000px;margin:0 auto"><div class=sh>${ic('sticker')} Sticker Library</div>
   <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">

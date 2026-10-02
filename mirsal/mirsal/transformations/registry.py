@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-from .. import prompter
+from ..generation import prompter
 from . import banana
 from .base import Match, Transformation, detect as _detect
 

@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .. import gates, pipeline as pl, tasks
+from ..flow import gates, pipeline as pl
+from ..generation import tasks
 
 
 class ToolError(Exception):
@@ -43,7 +44,7 @@ class ConsoleTools:
 
     # ---- reads -------------------------------------------------------------------------------------------------------------------
     def live(self) -> bool:
-        from .. import higgsfield
+        from ..generation import higgsfield
         return higgsfield.available()
 
     def credits(self) -> float | None:
@@ -58,7 +59,10 @@ class ConsoleTools:
     def plan(self, prompt: str, grid: str, style_id: str, ai: bool) -> dict:
         """The plan for a request, from the Redis planner cache when this exact request (normalised: case, spaces, end punctuation) was planned
         before with the same templates and model: 0 model calls. A plan the AI failed to expand (it fell back to the built-in sets) is never cached."""
-        from .. import cache as cachemod, llm, prompter, transformations
+        from .. import transformations
+        from ..generation import prompter
+        from ..runtime import cache as cachemod
+        from ..services import llm
         c = cachemod.default()
         versions = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt")) + [transformations.signature()]
         key = c.key("plan", cachemod.digest(cachemod.normalize_request(prompt), grid, style_id, bool(ai), ",".join(versions),
@@ -98,7 +102,7 @@ class ConsoleTools:
                 "parent": f"G{int(res['parent']):03d}" if res.get("parent") else None, "grid": res.get("grid"), "stickers": stickers}
 
     def job(self, jid: str) -> dict:
-        from .. import jobs
+        from ..generation import jobs
         try:
             return jobs.read(self.out, jid)
         except jobs.JobError as e:
@@ -112,7 +116,7 @@ class ConsoleTools:
         try:
             from ..store import db, sync
             if sync.is_default_out(self.out) and db.available():
-                from .. import pool
+                from ..store import pool
                 with db.connect() as conn:
                     r = pool.search(conn, q, count=12, per_gen=12, viewer=self.user["id"] if self.member else None)
                 return [{"id": h["sticker_id"], "key": h["key"], "png": url(h["generation_id"], h.get("png")), "emoji": "".join(h.get("emoji") or [])}
@@ -203,6 +207,16 @@ class ConsoleTools:
         res = pl.read_result(self.out, int(gid[1:]))
         return [s["index"] for s in res["stickers"] if s["status"] == "READY"]
 
+    def captions(self, gid: str, allowed=None) -> list:
+        """The AI caption of every READY sticker of a batch (one vision-model call per cell that has none; a stored caption is read for free). `allowed` must be True: the
+        person's yes to AI vision (vision/consent.py); the chat passes it from the session's `allow_vlm`."""
+        from ..vision import consent, transcribe
+        self._see(gid)
+        try:
+            return [c.to_dict() for c in transcribe.captions_for(self.out, gid, allowed=allowed)]
+        except consent.ConsentRequired as e:
+            raise ToolError(str(e), 409)
+
 
 class FakeTools:
     """The same interface without a provider or files: what the agent tests drive. `calls` records every spend-capable call."""
@@ -268,3 +282,9 @@ class FakeTools:
 
     def ready_indexes(self, gid):
         return [s["index"] for s in self.gens[gid]["stickers"] if s["status"] == "READY"]
+
+    def captions(self, gid, allowed=None):
+        self.calls.append(("captions", gid, allowed))
+        if allowed is not True:
+            raise ToolError("AI vision is not allowed", 409)
+        return [{"index": s["index"], "caption": f"fake caption {s['index']}", "error": None} for s in self.gens[gid]["stickers"] if s["status"] == "READY"]

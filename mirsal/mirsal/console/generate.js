@@ -9,7 +9,7 @@ let SES={prompt:'',gens:[],off:[],pack:''},bg='checker',glast='',MD=null,VG=null
 const GS={outline:12,tile:220,tab:'stickers'};
 const ANIM=new Set();                     // batches the user pressed Animate on, until the server reports them animating
 try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.outline=[0,4,8,12,16].includes(+o)?+o:(+o>0?12:0);const t=+localStorage.getItem('mirsal.tile');if(t>=130&&t<=420)GS.tile=t;
-  const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens,off:s.off||[],pack:s.pack||''}}catch(e){}
+  const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens.filter(g=>Number.isInteger(g)&&g>0),off:s.off||[],pack:s.pack||''}}catch(e){}      // a saved [null] / NaN (the old hopen clash) must not fire a 400 at every load
 const gstore=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const saveSes=()=>gstore('mirsal.session',JSON.stringify(SES));
 const wait=ms=>new Promise(f=>setTimeout(f,ms));
@@ -17,8 +17,8 @@ const BGS=[['checker','Transparent'],['light','Light'],['dark','Dark'],['wall','
 const titleCase=s=>s.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 
 /* a step that has to wait for a running job waits quietly; it never scolds the user with "busy" */
-async function postWait(u,b,label){let r=await post(u,b);
-  for(let n=0;n<180&&!r.ok&&r.status===409&&/busy/i.test(r.j.error||'');n++){say(label||'Waiting for the previous step to finish…');await wait(1000);r=await post(u,b)}
+async function postWait(u,b,label,h){let r=await post(u,b,h);
+  for(let n=0;n<180&&!r.ok&&r.status===409&&/busy/i.test(r.j.error||'');n++){say(label||'Waiting for the previous step to finish…');await wait(1000);r=await post(u,b,h)}
   say('');return r}
 
 /* ---------- live preview: the paired 3x3 video is played in the browser and keyed like the stickers, so Animate shows motion at once
@@ -183,7 +183,7 @@ function batchHtml(g,k,total,mode){
   if(making(g))return`<section class=gbatch>${head}<div class=gwork><div class=spin></div><b>Making your stickers…</b><div class=mut>${g.stage==='requested'?'Reading the sheet':g.stage==='sheet_picked'?'Removing the background':'Cutting and checking each sticker'}</div></div></section>`;
   const sheetErr=g.stickers.every(t=>t.status==='FAILED')&&(g.verify.sheet||[]).find(c=>!c.ok&&c.severity!=='WARN');
   if(sheetErr)return`<section class=gbatch>${head}<div class=gwork><b>This sheet cannot be used</b><div class=mut>${esc(sheetErr.detail||sheetErr.name)}</div></div></section>`;
-  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?videoPanel(g):sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
+  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?`<div class=gleft>${videoPanel(g)}${sheetPanel(g)}</div>`:sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
 function gview(){
   const gs=sessionGens();if(!gs.length)return'';
   const inc=included(),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));

@@ -3,7 +3,7 @@ import threading
 import time
 import unittest
 
-from mirsal.cache import Busy, Cache, digest
+from mirsal.runtime.cache import Busy, Cache, digest
 
 
 class Behaviour:
@@ -113,7 +113,7 @@ class PlannerCache(unittest.TestCase):
     """docs/agent-and-chat.md "Redis exit": a repeated request is a cache hit (0 model calls) and the key never merges a semantic difference."""
 
     def test_normalisation_only_touches_case_spaces_and_end_punctuation(self):
-        from mirsal.cache import normalize_request as n
+        from mirsal.runtime.cache import normalize_request as n
         self.assertEqual(n("  Dog   AS banana! "), n("dog as banana"))
         self.assertNotEqual(n("dog as banana"), n("dog with bananas"))
         self.assertNotEqual(n("dog as banana"), n("dog as banana but no dancing"))
@@ -122,7 +122,8 @@ class PlannerCache(unittest.TestCase):
         import tempfile
         from pathlib import Path
         from unittest import mock
-        from mirsal import cache as cachemod, tasks
+        from mirsal.generation import tasks
+        from mirsal.runtime import cache as cachemod
         from mirsal.agent.tools import ConsoleTools
 
         class C:
@@ -158,6 +159,81 @@ class FallbackWhenRedisDies(unittest.TestCase):
             self.assertEqual(Cache(force_memory=True).url, "redis://localhost:6380/0")
         finally:
             os.environ.pop("REDIS_URL", None) if old is None else os.environ.__setitem__("REDIS_URL", old)
+
+
+class FakeRedis:
+    """A Redis client that answers `alive` calls and then behaves like a dropped connection: it covers the calls the cache makes (get, set, incr, expire, delete)."""
+
+    def __init__(self, alive):
+        self.alive, self.calls, self.kv = alive, 0, {}
+
+    def _tick(self):
+        self.calls += 1
+        if self.calls > self.alive:
+            raise ConnectionError("Redis went away")
+
+    def get(self, k):
+        self._tick()
+        return self.kv.get(k)
+
+    def set(self, k, v, ex=None, px=None, nx=False):
+        self._tick()
+        if nx and k in self.kv:
+            return None
+        self.kv[k] = v
+        return True
+
+    def incr(self, k):
+        self._tick()
+        self.kv[k] = str(int(self.kv.get(k, 0)) + 1)
+        return int(self.kv[k])
+
+    def expire(self, k, ttl):
+        self._tick()
+
+    def delete(self, k):
+        self._tick()
+        self.kv.pop(k, None)
+
+
+class RedisDiesMidOperation(unittest.TestCase):
+    """The review's missing test: Redis killed in the middle of a rate-limit window, a held lock and a cached answer. Everything carries on in memory: cache misses and a restarted
+    window, never an exception (the short-lived state is per process from then on: docs/agent-and-chat.md, "Redis")."""
+
+    def cache(self, alive):
+        c = Cache(force_memory=True)
+        c._r = FakeRedis(alive)
+        return c
+
+    def test_a_rate_limit_window_keeps_counting_when_redis_dies_inside_it(self):
+        c = self.cache(alive=3)
+        k = c.key("rate", "u1", "w", 7)
+        counts = [c.window_count(k, 65) for _ in range(6)]
+        self.assertEqual(counts[:2], [1, 2])                                          # while Redis lived
+        self.assertEqual(c.engine, "memory")                                          # it went away inside the window ...
+        self.assertEqual(counts[2:], [1, 2, 3, 4])                                    # ... and a memory counter took over from 1 (a restarted window: it over-allows, it never refuses everyone)
+
+    def test_a_held_lock_and_a_cached_answer_survive_the_death_as_misses_not_errors(self):
+        c = self.cache(alive=2)
+        c.set(c.key("idem", "k1"), {"id": 7}, 60)                                     # stored in Redis
+        self.assertEqual(c.get(c.key("idem", "k1")), {"id": 7})
+        self.assertIsNone(c.get(c.key("idem", "k1")))                                 # Redis died on this call: the answer is a miss now
+        self.assertEqual(c.engine, "memory")
+        with c.lock("session:S001"):
+            with self.assertRaises(Busy):                                              # the lock rules still hold inside this process
+                with c.lock("session:S001"):
+                    pass
+        with c.lock("session:S001"):                                                  # and it was released
+            pass
+
+    def test_a_redis_that_is_already_dead_never_raises_anywhere(self):
+        c = self.cache(alive=0)
+        k = c.key("x")
+        c.set(k, 1)
+        self.assertEqual((c.get(k), c.incr(k + "n"), c.counter(k + "n"), c.window_count(k + "w", 5)), (1, 1, 1, 1))
+        c.delete(k)
+        self.assertIsNone(c.get(k))
+        self.assertEqual(c.cached(k + "c", lambda: 5, 60), 5)
 
 
 if __name__ == "__main__":

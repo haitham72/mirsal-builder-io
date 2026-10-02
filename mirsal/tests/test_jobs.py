@@ -9,7 +9,7 @@ import threading
 import unittest
 from pathlib import Path
 
-from mirsal import jobs
+from mirsal.generation import jobs
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
 
@@ -44,7 +44,7 @@ class JobsTests(unittest.TestCase):
 
     def test_claim_stores_the_ticket_first(self):
         """A crashed operator re-run resumes by ticket instead of paying twice (rule 10)."""
-        from mirsal import tasks as _t
+        from mirsal.generation import tasks as _t
         t = _t.reserve(self.out, self.tmp / "in", "falcon dancing")
         j = jobs.create(self.out, "sheet", task=t["id"], request={"prompt": "falcon"})
         jobs.claim(self.out, j["id"], "higgs-999")
@@ -124,7 +124,8 @@ class JobsTests(unittest.TestCase):
         self.assertEqual(main(["prompt", ""]), 1)
 
     def test_slot_reviewer(self):
-        from mirsal import expander, llm
+        from mirsal.generation import expander
+        from mirsal.services import llm
         key, loaded = os.environ.pop("OPENAI_API_KEY", None), llm._ENV_LOADED
         prov = os.environ.get("MIRSAL_LLM_PROVIDER")
         os.environ["MIRSAL_LLM_PROVIDER"] = "openai"   # no key + openai = no backend, even when LM Studio runs here

@@ -14,12 +14,12 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from mirsal import telegram as tg
+from mirsal.services import telegram as tg
 from mirsal.console.server import serve
 from mirsal.engine import ffmpeg as ff
 from mirsal.engine import verify
 from mirsal.engine.config import EngineConfig
-from mirsal.library import Library
+from mirsal.media.library import Library
 from tests import synth
 from tests.fake_telegram import BOT, TOKEN, USER, FakeServer
 
@@ -330,6 +330,9 @@ class Api(LibFixture):
         self.assertEqual(again["sets"][0]["added"], 0)
         s, z = self.req("GET", f"/api/packs/{self.pid}/telegram.zip")
         self.assertEqual((s, z[:2]), (200, b"PK"))
+        s, z = self.req("GET", f"/api/packs/{self.pid}/export.zip")                                      # the plain download (no Telegram wording)
+        self.assertEqual((s, z[:2]), (200, b"PK"))
+        self.assertEqual(self.req("GET", "/api/packs/nope/export.zip")[0], 404)
         for path in ("/api/telegram", f"/api/packs/{self.pid}/telegram"):
             self.assertNotIn(TOKEN, json.dumps(self.req("GET", path)[1]))
         self.assertEqual(self.req("POST", "/api/telegram/disconnect")[1]["configured"], False)

@@ -64,7 +64,9 @@ Python's blocks are final; a human approves at every gate; the vision model only
 README.md  CLAUDE.md  HANDOFF.md        this file · the rules for LLM sessions · what is still open and what waits for Haitham
 docs/                                    the documentation (one file per area) · docs/inputs/ (Haitham's inputs and reference)
 mirsal/                                  the app: requirements.txt, docker-compose.yml, migrations/, tests/, .env.example
-  mirsal/                                the Python package: engine/ (pure engine) · agent/ · vision/ · store/ · obs/ · console/ (server + Studio + AI screen) · pipeline, gates, jobs, ...
+  mirsal/                                the Python package, one folder per concern: engine/ (pure engine) · flow/ (the golden path: pipeline, gates) · generation/ (Higgsfield, jobs, prompts, planner) ·
+                                         services/ (LLM, embeddings, Telegram) · runtime/ (cache, events, paths, accounts) · media/ (pack library, video projects, cutout) ·
+                                         store/ (Postgres, pool) · agent/ · vision/ · obs/ · console/ (server + Studio + AI screen) · cli.py
   web/                                   a parked React gateway (not served)
 inputs/                                  prepared sheets and videos (git-ignored media)
 tools/tracker/                           a small tracker for hand-made sheets

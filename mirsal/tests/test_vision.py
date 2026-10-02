@@ -7,7 +7,9 @@ from pathlib import Path
 
 from PIL import Image
 
-from mirsal import cache as cachemod, llm, pipeline as pl
+from mirsal.flow import pipeline as pl
+from mirsal.runtime import cache as cachemod
+from mirsal.services import llm
 from mirsal.vision import judge as J
 from mirsal.vision.recovery import Plan, plan_recovery
 

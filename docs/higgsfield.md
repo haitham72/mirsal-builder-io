@@ -1,6 +1,6 @@
 # Higgsfield: what it really offers (S0, measured 2026-10-01)
 
-Everything here was observed on this PC with the Higgsfield **CLI** (`higgsfield`, aliases `higgs`, `hf`; v1.1.26), the way Claude Code is meant to use it (Higgsfield's help center: Claude Code does not use the MCP connector `https://mcp.higgsfield.ai/mcp`, which is for claude.ai / Claude Desktop; Haitham confirmed the CLI). Test outputs are in `mirsal/out/s0/` (gitignored); the three calls are in `out/model_calls.jsonl`.
+Everything here was observed on this PC with the Higgsfield **CLI** (`higgsfield`, aliases `higgs`, `hf`; v1.1.26), the way Claude Code is meant to use it (Higgsfield's help center: Claude Code does not use the MCP connector `https://mcp.higgsfield.ai/mcp`, which is for claude.ai / Claude Desktop; Haitham confirmed the CLI). Test outputs are in `mirsal/out/s0/` ; the three calls are in `out/model_calls.jsonl`.
 
 ## Access
 
@@ -47,7 +47,7 @@ Prices from `generate cost`: Nano Banana 2 1k 1.5 / 2k 2 / 4k 3 credits; Kling v
 - **24 fps, 3.04 s:** Telegram needs <= 30 fps, <= 3 s. The encode step must trim to 3.0 s; resampling to 30 fps is the engine's existing path (S4 verifies).
 - **Loop:** with start image = end image the mean absolute difference between the last and first frame is 3.64, about one ordinary frame step (3.93, max 5.35), so the clip is continuous across the loop point. This was measured on one clip.
 - **The first video was made from the raw sheet, as discovery only.** Production S4 uses the normalised video sheet (`build_video_sheet`, decision 3), never raw art.
-- **Provider seam:** because the CLI is a plain subprocess that prints JSON, it can serve as a real provider behind the jobs interface (the plan assumed an MCP operator could not be called by the server). S3 decides whether `jobs.py` gets a `higgsfield-cli` fulfiller or the operator session keeps running the same commands.
+- **Provider seam:** because the CLI is a plain subprocess that prints JSON, it can serve as a real provider behind the jobs interface (the plan assumed an MCP operator could not be called by the server). S3 decides whether `generation/jobs.py` gets a `higgsfield-cli` fulfiller or the operator session keeps running the same commands.
 
 ## Other models seen, not tested
 

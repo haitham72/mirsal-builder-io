@@ -78,6 +78,90 @@ class DriftGuard(unittest.TestCase):
             self.assertTrue(any(p.startswith(prefix) for p in self.paths), prefix)
 
 
+class EveryDocumentedRouteIsServed(unittest.TestCase):
+    """The other direction (five documented routes used to answer 404). Every operation of the spec is called on a scratch server with dummy ids;
+    the one thing it may not answer is the route-miss message. A missing batch / pack / job answers in its own words, so only an unserved URL fails here."""
+
+    SKIP = {("GET", "/api/generations/{id}/events"),          # a stream
+            ("POST", "/api/generations/{id}/reveal")}         # opens a window on this machine
+
+    def test_no_documented_operation_is_a_route_miss(self):
+        import http.client
+        import shutil
+        import tempfile
+        from unittest import mock
+        from mirsal.generation import higgsfield
+        from mirsal.runtime import cache as cachemod
+        from mirsal.console.server import NO_ROUTE, serve
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / "in").mkdir()
+        mem = cachemod.Cache(force_memory=True)
+        patches = [mock.patch.object(cachemod, "default", lambda: mem), mock.patch.object(higgsfield, "available", lambda: False)]
+        for p in patches:
+            p.start()
+        srv, c = serve(tmp / "out", tmp / "in", 0, block=False)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        port = srv.server_address[1]
+        dummy = {"id": "1", "aid": "A1", "sid": "x", "token": "x.y", "path": "G001/slices/none.png"}
+        misses, probed = [], 0
+        try:
+            for path, ops in openapi.build()["paths"].items():
+                for method, op in ops.items():
+                    if (method.upper(), path) in self.SKIP:
+                        continue
+                    url = re.sub(r"\{(\w+)\}", lambda m: dummy.get(m.group(1), "1"), path)
+                    if path.startswith("/api/jobs/") and "{id}" in path:
+                        url = url.replace("/1", "/J001")
+                    if path.startswith("/api/chat/sessions/") and "{id}" in path:
+                        url = url.replace("/1", "/S001")
+                    if path.startswith("/api/tasks/") and "{id}" in path:
+                        url = url.replace("/1", "/T001")
+                    h = http.client.HTTPConnection("127.0.0.1", port, timeout=20)
+                    body = b"{}" if method.upper() == "POST" else None
+                    h.request(method.upper(), url, body, {"Content-Type": "application/json"})
+                    r = h.getresponse()
+                    raw = r.read()
+                    h.close()
+                    probed += 1
+                    try:
+                        err = json.loads(raw).get("error")
+                    except (ValueError, AttributeError):
+                        err = None
+                    if r.status == 404 and err == NO_ROUTE:
+                        misses.append(f"{method.upper()} {path}")
+            self.assertGreater(probed, 80)
+            self.assertEqual(misses, [], "documented in console/openapi.py but not served by console/server.py")
+        finally:
+            srv.shutdown()
+            c.release_writer()
+            srv.server_close()
+            for p in patches:
+                p.stop()
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_an_unserved_url_answers_the_route_miss_message(self):
+        import http.client
+        import shutil
+        import tempfile
+        from mirsal.console.server import NO_ROUTE, serve
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / "in").mkdir()
+        srv, c = serve(tmp / "out", tmp / "in", 0, block=False)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            for method, url in (("POST", "/api/generations/1/delete"), ("GET", "/api/packs/abc"), ("POST", "/api/generations/1/telegram")):
+                h = http.client.HTTPConnection("127.0.0.1", srv.server_address[1], timeout=10)
+                h.request(method, url, b"{}" if method == "POST" else None, {"Content-Type": "application/json"})
+                r = h.getresponse()
+                self.assertEqual((r.status, json.loads(r.read())["error"]), (404, NO_ROUTE), f"{method} {url}")
+                h.close()
+        finally:
+            srv.shutdown()
+            c.release_writer()
+            srv.server_close()
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 class TypeScript(unittest.TestCase):
     def test_types_are_generated_from_the_schemas(self):
         ts = openapi.typescript()

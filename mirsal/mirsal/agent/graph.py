@@ -5,7 +5,7 @@
 `*`: a message can carry two intents ("I like 2 but make 5 happier"): the nodes run in order, then `finish`.
 
 The graph only ORCHESTRATES. The rules that decide what may be approved, in which order, and that Python's blocks are final live in
-gates.py / pipeline.py and are called through `tools`. The graph never touches pixels and never spends credits without a confirmation
+flow/gates.py / flow/pipeline.py and are called through `tools`. The graph never touches pixels and never spends credits without a confirmation
 (the "Create" button on a plan card, or a typed "yes") unless the user turned "ask before spending" off.
 
 Every node writes to the turn's STEP TRACE, the small queue the chat shows while the agent works:
@@ -26,12 +26,13 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, TypedDict
 
-from .. import cache as cachemod
+from ..runtime import cache as cachemod
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
-from .resolver import Resolution, classify, resolve, settings_from
+from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, polarity_of, resolve, settings_from
 from .tools import ConsoleTools, ToolError
 
+INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
 STYLE_NAMES = {"flat_vector": "flat vector", "pixar_3d": "Pixar 3D", "toon_cel": "toon cel", "glossy_3d": "glossy 3D"}
 
@@ -141,6 +142,9 @@ class Agent:
             raise SessionError("The assistant is still working on your last message.", 409)
         try:
             sess = self.store.load(sid)
+            for m in sess["messages"]:                           # we hold the lock, so nobody is running a turn: a "working" message is one that died with its server
+                if m.get("status") == "working":
+                    m.update(status="error", text=m.get("text") or INTERRUPTED)
             label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No"}.get((action or {}).get("type"), "")
             self.store.add_message(sess, "user", label)
             msg = self.store.add_message(sess, "assistant", "", status="working")
@@ -170,13 +174,23 @@ class Agent:
         return self.execute(self.prepare(sid, text, selected, action))
 
     # ---- nodes ----------------------------------------------------------------------------------------------------------------------------
+    def _named_batches(self, sess: dict, text: str) -> list[str]:
+        """The batches the message names ("G012", "make G12/S3 happier") that exist and that this user may see, whether or not this chat has them yet."""
+        gids = dict.fromkeys(f"G{int(m):03d}" for m in re.findall(r"\bg0*(\d{1,4})\b", text, flags=re.I))
+        return [g for g in gids if self.store.subject_for_generation(sess, g) or self.store.outside_info(g)]
+
     def n_understand(self, state: State) -> dict:
         t: Turn = state["turn"]
         sess = t.sess
         pending = bool(sess.get("pending"))
-        has_gen = bool((sess.get("focus") or {}).get("generation") or self.store.latest_pass(sess))
+        has_gen = bool((sess.get("focus") or {}).get("generation") or self.store.latest_pass(sess) or self._named_batches(sess, t.text))
+        asked = sess.pop("awaiting", None)                     # a question I asked last turn lives for exactly one answer
+        answered = False
         if t.action and t.action.get("type") in ("confirm", "cancel"):
             t.intents, t.conf = [t.action["type"].upper()], 1.0
+        elif asked and asked.get("intents") and is_sticker_answer(t.text, bool(t.selected)):
+            t.text = f"{asked['text']} {t.text}".strip()       # the original request plus the missing "which": everything downstream reads it as one sentence
+            t.intents, t.conf, answered = list(asked["intents"]), 0.95, True
         else:
             t.intents, t.conf = classify(t.text, pending, has_gen, bool(t.selected))
             low = t.text.lower()
@@ -190,7 +204,7 @@ class Agent:
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
                  "CANCEL": "a change of mind", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
-        t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents))
+        t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                  "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "ASK": "ask", "SEARCH": "search",
                  "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify"}
@@ -226,12 +240,21 @@ class Agent:
         needs = [q for q in t.queue if q in ("edit", "feedback", "animate", "ask", "review", "another")]
         if not needs:
             return {}
+        for gid in self._named_batches(t.sess, t.text):                       # "make G012/S3 happier": a batch the Studio made becomes a pass of this chat
+            if not self.store.subject_for_generation(t.sess, gid) and self.store.adopt(t.sess, gid):
+                t.trace.note(f"{gid} was made outside this chat (the Studio): I can work on it now")
         ctx = self._ctx(t)
         r = resolve(t.text, ctx)
         if not r.stickers and not r.needs_clarification and ("edit" in needs or "ask" in needs) and ctx["stickers"] and self.brain.available:
             nums = self.brain.pick_stickers(t.text, ctx["stickers"])
             if nums and ctx["generation"]:
                 r.stickers, r.how = [f"{ctx['generation']}/S{i}" for i in nums], "language model"
+        if "feedback" in needs and r.stickers and not (r.positive or r.negative):
+            pol = polarity_of(t.text)                                     # "this is bad" + a clicked sticker: no number sat beside the opinion
+            if pol == "NEGATIVE":
+                r.negative = list(r.stickers)
+            elif pol == "POSITIVE":
+                r.positive = list(r.stickers)
         t.res = r
         if r.stickers:
             t.trace.step(f"found {', '.join(x.split('/')[1] for x in r.stickers)} in {r.generation}" + (f" · {r.how}" if r.how else ""))
@@ -251,8 +274,12 @@ class Agent:
         avoid = []
         for f in self.store.consume_temporary(sess):
             if f["polarity"] == "NEGATIVE":
-                avoid += [s.split("/")[1] for s in f["sticker_ids"]]
-        return (", ".join(dict.fromkeys(bits)), notes + ([f"you disliked {', '.join(dict.fromkeys(avoid))} last time, so those poses change"] if avoid else []))
+                avoid += f["sticker_ids"]
+        avoid = list(dict.fromkeys(avoid))
+        if avoid:                                                      # the poses themselves go into the plan, not just a note: "avoid the poses of banana squashed, banana flat"
+            bits.append("avoid the poses of " + ", ".join(dict.fromkeys(self._key_of(x.split("/")[0], x) for x in avoid[:4])))
+        labels = [x.split("/")[1] for x in avoid]
+        return (", ".join(dict.fromkeys(bits)), notes + ([f"you disliked {', '.join(labels)} last time, so those poses change"] if avoid else []))
 
     def n_new(self, state: State) -> dict:
         t: Turn = state["turn"]
@@ -340,6 +367,10 @@ class Agent:
             except ToolError as e:
                 t.reply = f"I couldn't start the animation: {e}"
                 t.trace.end("not started", ok=False)
+        elif p["type"] == "describe":                       # "Allow AI vision of generated media?" answered yes: asked once, remembered in the session
+            t.sess["settings"]["allow_vlm"] = True
+            t.trace.retitle(f"looking at {p['generation']}")
+            self._run_describe(t, p["generation"], p.get("only") or [])
         elif p["type"] == "batch":
             t.trace.retitle("regenerating " + ", ".join(i["label"] for i in p["items"]))
             n = 0
@@ -352,7 +383,13 @@ class Agent:
 
     def n_cancel(self, state: State) -> dict:
         t: Turn = state["turn"]
+        p = t.sess.get("pending")
         t.sess["pending"] = None
+        if p and p.get("type") == "describe":
+            t.sess["settings"]["allow_vlm"] = False
+            t.trace.step("AI vision stays off")
+            t.reply = "No problem, I won't send your stickers to a vision model. Say \"allow AI vision\" if you change your mind."
+            return {}
         t.trace.step("cancelled, nothing was spent")
         t.reply = "No problem, nothing was spent. Tell me what to change, or what else to make."
         t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
@@ -408,8 +445,10 @@ class Agent:
         subj, p = self._focus_pass(t)
         targets = t.res.stickers or (t.res.negative if t.res.negative else [])
         if not targets or not p:
-            t.reply = "Which sticker should I change? Say a number, like \"make number 3 happier\"."
+            t.reply = "Which sticker should I change? Say a number, like \"make number 3 happier\", or click one."
             t.chips = []
+            if p:
+                t.sess["awaiting"] = {"intents": ["EDIT_STICKERS"], "text": t.text}
             return {}
         gen = targets[0].split("/")[0]
         edit = re.sub(r"\b(make|redo|regenerate|change|fix|replace|improve|number|no\.?|sticker|#)\s*|\b(g\d+\s*/?\s*s\d|s\d|\d+)\b|\b(it|that|this|these|those|them|one)\b", " ",
@@ -494,7 +533,14 @@ class Agent:
         t: Turn = state["turn"]
         r = t.res
         if not (r.positive or r.negative):
-            t.reply = t.reply or "Tell me which numbers you like or don't, for example \"I like 2 and 7 but not 3\"."
+            if r.stickers:                                                 # we know which, not what the user thinks of it
+                n = r.stickers[0].split("/S")[1]
+                t.reply = t.reply or f"What do you think of {', '.join(x.split('/')[1] for x in r.stickers)}?"
+                t.chips = [{"label": "I like it", "text": f"I like number {n}"}, {"label": "Not for me", "text": f"I don't like number {n}"}]
+                return {}
+            t.reply = t.reply or "Which sticker do you mean? Say its number, or click it. (For example \"I like 2 and 7 but not 3\".)"
+            if t.res.generation:
+                t.sess["awaiting"] = {"intents": ["FEEDBACK"], "text": t.text}
             return {}
         persistent = bool(re.search(r"\b(never|always|from now on|every time|i never want|i always want)\b", t.text.lower()))
         if r.positive:
@@ -532,6 +578,7 @@ class Agent:
             idx = [int(s.split("/")[1][1:]) for s in t.res.stickers]
         if not idx:
             t.reply = "Which stickers? For example \"approve all but 5 and 6\"."
+            t.sess["awaiting"] = {"intents": ["REVIEW"], "text": t.text}
             return {}
         t.trace.retitle(("approving" if decision == "APPROVE" else "rejecting") + f" in {gen}")
         r = self.tools.review(gen, decision, idx, "from the chat")
@@ -550,6 +597,8 @@ class Agent:
         t: Turn = state["turn"]
         r = t.res
         low = t.text.lower()
+        if re.search(DESCRIBE, low):
+            return self._describe(t)
         t.trace.retitle("looking it up")
         if r.stickers and re.search(r"\b(which|what|where|who)\b", low):
             gen = r.generation
@@ -573,6 +622,43 @@ class Agent:
         t.trace.end("answered" if ans else "here is what we have")
         return {}
 
+    def _describe(self, t: Turn) -> dict:
+        """"Describe the stickers": the person's yes to AI vision comes first, once per chat (`settings.allow_vlm`: None = not asked, True, False)."""
+        gen = t.res.generation or (t.sess.get("focus") or {}).get("generation") or (self.store.latest_pass(t.sess) or {}).get("generation")
+        if not gen:
+            t.reply = "Which batch should I look at? Tell me a number like G012."
+            return {}
+        only = [int(x.split("/S")[1]) for x in t.res.stickers if x.startswith(gen + "/S")]
+        allow = t.sess["settings"].get("allow_vlm")
+        t.trace.retitle(f"looking at {gen}")
+        if allow is False:
+            t.reply = "AI vision is off for this chat, so I won't send the pictures to a model. Say \"allow AI vision\" and ask again."
+            t.trace.end("AI vision is off", ok=False)
+            return {}
+        if allow is None:
+            t.sess["pending"] = {"type": "describe", "generation": gen, "only": only}
+            t.reply = (f"To describe {gen} I send its pictures to the vision model (the local one when LM Studio is running, otherwise the cloud one). "
+                       "Allow AI vision of generated media? I only ask once.")
+            t.chips = [{"label": "Allow AI vision", "action": "confirm"}, {"label": "Not now", "action": "cancel"}]
+            t.trace.end("waiting for your yes")
+            return {}
+        self._run_describe(t, gen, only)
+        return {}
+
+    def _run_describe(self, t: Turn, gen: str, only: list) -> None:
+        try:
+            caps = self.tools.captions(gen, True)
+        except ToolError as e:
+            t.reply = str(e) if e.code != 404 else "I can't find that batch."
+            t.trace.end("could not look", ok=False)
+            return
+        rows = [c for c in caps if not only or c["index"] in only]
+        t.trace.step(f"asked the vision model about {len(rows)} sticker{'s' if len(rows) != 1 else ''}")
+        t.reply = "\n".join(f"S{c['index']}: {c['caption']}" if c.get("caption") else f"S{c['index']}: I couldn't read this one" for c in rows) or f"{gen} has no finished stickers yet."
+        t.sess["focus"] = {"generation": gen, "stickers": [f"{gen}/S{c['index']}" for c in rows][:3] if only else []}
+        t.generation = gen
+        t.trace.end("described")
+
     def n_search(self, state: State) -> dict:
         t: Turn = state["turn"]
         q = re.sub(r"\b(find|search|look for|do i have|show me|my|old|from before|sticker|stickers|a|the)\b", " ", t.text, flags=re.I).strip()
@@ -592,7 +678,7 @@ class Agent:
     def n_settings(self, state: State) -> dict:
         t: Turn = state["turn"]
         try:
-            from .. import prompter
+            from ..generation import prompter
             ids = list(prompter.STYLES)
         except Exception:
             ids = None
@@ -601,7 +687,8 @@ class Agent:
             t.reply = "Which setting? I can change the grid (2×2 or 3×3), the style, and whether I ask before spending."
             return {}
         t.sess["settings"].update(new)
-        labels = {"grid": lambda v: f"{v} grid", "style_id": lambda v: STYLE_NAMES.get(v, v) + " style", "ask_before_spending": lambda v: "asking before I spend" if v else "no confirmation before spending"}
+        labels = {"grid": lambda v: f"{v} grid", "style_id": lambda v: STYLE_NAMES.get(v, v) + " style", "ask_before_spending": lambda v: "asking before I spend" if v else "no confirmation before spending",
+                  "allow_vlm": lambda v: "AI vision allowed (I may send your stickers to the vision model)" if v else "AI vision off"}
         said = ", ".join(labels[k](v) for k, v in new.items() if k in labels)
         t.trace.task("changing settings")
         t.trace.step(said)
@@ -621,6 +708,9 @@ class Agent:
         t: Turn = state["turn"]
         r = t.res
         if r.needs_clarification:
+            asked = [i for i in t.intents if i not in ("AMBIGUOUS", "SMALLTALK", "CONFIRM", "CANCEL")]
+            if asked:
+                t.sess["awaiting"] = {"intents": asked, "text": t.text}
             t.reply = r.clarification or "Which one do you mean?"
             t.chips = [{"label": "#" + o.split("/S")[1], "text": f"number {o.split('/S')[1]}"} for o in r.options]
             t.trace.end("one question")
@@ -665,10 +755,25 @@ def run_turn(console, sid: str, text: str, selected: list | None = None, action:
     return agent.run_turn(sid, text, selected, action)
 
 
+def _nobody_is_working(store: SessionStore, sid: str) -> bool:
+    """A running turn holds the session's lock (see `Agent.prepare`); when it is free, a message that still says "working" died with its server."""
+    try:
+        with store.cache.lock(f"session:{sid}", 1000):
+            return True
+    except cachemod.Busy:
+        return False
+
+
 def hydrate(store: SessionStore, tools, sess: dict) -> dict:
     """The session as the page shows it: every generation card carries its live data (stickers with file urls, stage), and a card that is
     still a provider job carries the job's state until the job has produced a generation. Cheap enough to poll every second."""
     store.refresh(sess)
+    if any(m.get("status") == "working" for m in sess["messages"]) and _nobody_is_working(store, sess["id"]):
+        sess = store.load(sess["id"])                          # read again: the turn may have finished between the two reads
+        for m in sess["messages"]:
+            if m.get("status") == "working":
+                m.update(status="error", text=m.get("text") or INTERRUPTED)
+        store.save(sess)
     out = dict(sess)
     msgs = []
     for m in sess["messages"]:

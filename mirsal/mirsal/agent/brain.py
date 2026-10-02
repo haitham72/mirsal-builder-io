@@ -10,7 +10,7 @@ import os
 import re
 import time
 
-from .. import llm
+from ..services import llm
 
 INTENTS = ("NEW", "ANOTHER", "EDIT_STICKERS", "ANIMATE", "FEEDBACK", "REVIEW", "ASK", "CHANGE_SETTINGS", "SEARCH", "SMALLTALK", "AMBIGUOUS")
 
@@ -20,16 +20,20 @@ Intents: {", ".join(INTENTS)}.
 NEW: a request for a new set ("make me falcon stickers", "teddy bear with a book"). ANOTHER: more of the same subject. EDIT_STICKERS: change specific stickers
 ("make number 3 happier"). ANIMATE: make them move. FEEDBACK: likes/dislikes ("I like 2 but not 3"). REVIEW: approve or reject ("approve all but 5").
 ASK: a question about what exists ("which one is the shocked banana?"). CHANGE_SETTINGS: grid, style, animation, asking before spending. SEARCH: find an old
-sticker. SMALLTALK: greetings and thanks. AMBIGUOUS: you cannot tell. A message can carry two intents ("I like 2 but make 5 happier" = FEEDBACK + EDIT_STICKERS)."""
+sticker. SMALLTALK: greetings and thanks. AMBIGUOUS: you cannot tell. A message can carry two intents ("I like 2 but make 5 happier" = FEEDBACK + EDIT_STICKERS).
+{llm.DATA_RULE}"""
 
 PICK_SYSTEM = """You map a phrase to sticker numbers. You get the numbered stickers of one batch and the user's phrase. Reply with ONE JSON object only:
-{"numbers": [..], "confidence": 0.0-1.0}. Use only numbers from the list. If the phrase names none of them, return an empty list."""
+{"numbers": [..], "confidence": 0.0-1.0}. Use only numbers from the list. If the phrase names none of them, return an empty list.
+""" + llm.DATA_RULE
 
 ANSWER_SYSTEM = """You answer a question about the user's sticker batches, using ONLY the facts you are given. Be short and warm (one or two sentences).
-Always quote ids as G012/S3. If the facts do not answer it, say so plainly. Never invent stickers."""
+Always quote ids as G012/S3. If the facts do not answer it, say so plainly. Never invent stickers.
+""" + llm.DATA_RULE
 
 SUMMARY_SYSTEM = """You compress the older turns of a sticker chat into 2-4 short sentences: what the user asked for, what they liked and rejected, what they
-want next. Keep every generation and sticker id (G012, G012/S3) exactly. Do not invent anything."""
+want next. Keep every generation and sticker id (G012, G012/S3) exactly. Do not invent anything.
+""" + llm.DATA_RULE
 
 
 def target() -> dict:
@@ -69,13 +73,13 @@ class Brain:
                                           provider_=t["provider"], model_=t["model"])
         except llm.LLMError:
             if self.out is not None:
-                from .. import model_calls
+                from ..generation import model_calls
                 model_calls.append(self.out, kind, t["provider"], t["model"], status="ERROR", latency_ms=int((time.perf_counter() - t0) * 1000),
                                    prompt_version="agent_v1")
             return None
         self.calls += 1
         if self.out is not None and self._complete is None:
-            from .. import model_calls
+            from ..generation import model_calls
             model_calls.append(self.out, kind, meta.get("provider", t["provider"]), meta.get("model", t["model"]), status="OK",
                                latency_ms=meta.get("ms"), tokens_in=meta.get("tokens_in"), tokens_out=meta.get("tokens_out"), prompt_version="agent_v1")
         return text
@@ -95,7 +99,7 @@ class Brain:
 
     # ---- the four jobs ----------------------------------------------------------------------------------------------------------
     def classify(self, text: str, summary: str) -> list | None:
-        d = self._json("LLM_INTENT", CLASSIFY_SYSTEM, f"What this chat has so far:\n{summary}\n\nMessage: {text}")
+        d = self._json("LLM_INTENT", CLASSIFY_SYSTEM, f"What this chat has so far:\n{llm.fence('CHAT', summary)}\n\n{llm.fence('MESSAGE', text, 600)}")
         if not isinstance(d, dict):
             return None
         got = [str(i).upper() for i in (d.get("intents") or []) if str(i).upper() in INTENTS]
@@ -104,7 +108,7 @@ class Brain:
     def pick_stickers(self, phrase: str, stickers: list) -> list | None:
         listing = "\n".join(f"{s['index']}: {s.get('key', '')} {''.join(s.get('emoji') or []) if isinstance(s.get('emoji'), list) else s.get('emoji') or ''}"
                             for s in stickers)
-        d = self._json("LLM_RESOLVE", PICK_SYSTEM, f"Stickers:\n{listing}\n\nPhrase: {phrase}")
+        d = self._json("LLM_RESOLVE", PICK_SYSTEM, f"{llm.fence('STICKERS', listing)}\n\n{llm.fence('PHRASE', phrase, 400)}")
         if not isinstance(d, dict):
             return None
         valid = {s["index"] for s in stickers}
@@ -112,9 +116,9 @@ class Brain:
         return nums or None
 
     def answer(self, question: str, facts: str) -> str | None:
-        text = self._ask("LLM_ANSWER", ANSWER_SYSTEM, f"Facts:\n{facts}\n\nQuestion: {question}", 300)
+        text = self._ask("LLM_ANSWER", ANSWER_SYSTEM, f"{llm.fence('FACTS', facts, 4000)}\n\n{llm.fence('QUESTION', question, 600)}", 300)
         return re.sub(r"<think>.*?</think>", "", text or "", flags=re.S).strip() or None
 
     def summarise(self, digest: str, previous: str) -> str | None:
-        text = self._ask("LLM_SUMMARY", SUMMARY_SYSTEM, f"Earlier summary: {previous or '(none)'}\n\nNew turns:\n{digest}", 300)
+        text = self._ask("LLM_SUMMARY", SUMMARY_SYSTEM, f"{llm.fence('EARLIER', previous or '(none)')}\n\n{llm.fence('TURNS', digest, 4000)}", 300)
         return re.sub(r"<think>.*?</think>", "", text or "", flags=re.S).strip() or None

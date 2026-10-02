@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from mirsal import higgsfield
+from mirsal.generation import higgsfield
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
 from tests.test_console import build_inputs
@@ -24,7 +24,7 @@ class ChatServerTests(unittest.TestCase):
         os.environ["MIRSAL_AGENT_PROVIDER"] = "openai"          # no key + openai = no model: the rules decide everything
         os.environ["MIRSAL_LLM_PROVIDER"] = "openai"
         os.environ.pop("OPENAI_API_KEY", None)
-        from mirsal import llm
+        from mirsal.services import llm
         cls._loaded = llm._ENV_LOADED
         llm._ENV_LOADED = True
         cls.patch = mock.patch.object(higgsfield, "available", lambda: False)
@@ -40,7 +40,7 @@ class ChatServerTests(unittest.TestCase):
         cls.srv.shutdown()
         cls.c.release_writer()
         cls.patch.stop()
-        from mirsal import llm
+        from mirsal.services import llm
         llm._ENV_LOADED = cls._loaded
         for k, v in cls.env.items():
             os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import cv2
 
-from mirsal import pipeline as pl
+from mirsal.flow import pipeline as pl
 from mirsal.engine.config import EngineConfig
 from mirsal.console.server import serve
 from tests import synth

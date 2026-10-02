@@ -7,7 +7,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from mirsal import measure
+from mirsal.flow import measure
 from mirsal.engine import ffmpeg as ff, verify
 from mirsal.engine.config import EngineConfig
 from mirsal.engine.video import detail_vs_ref, edge_energy, soft_sigma

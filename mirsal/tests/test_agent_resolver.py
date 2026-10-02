@@ -1,7 +1,7 @@
 """The deterministic resolver and intent rules (docs/agent-and-chat.md 4A exit: fully offline, these resolve exactly)."""
 import unittest
 
-from mirsal.agent.resolver import classify, resolve, settings_from
+from mirsal.agent.resolver import classify, is_sticker_answer, polarity_of, resolve, settings_from
 
 STICKERS = [{"index": i, "key": k, "name": k, "tags": [k]} for i, k in enumerate(
     ["banana_dancing", "banana_shocked", "banana_squashed", "dog_banana", "dog_banana_waving", "banana_sleeping", "banana_thinking",
@@ -113,6 +113,29 @@ class IntentTests(unittest.TestCase):
     def test_small_talk_and_nonsense(self):
         self.assertEqual(self.intent("hello"), ["SMALLTALK"])
         self.assertEqual(classify("", False, False)[0], ["AMBIGUOUS"])
+
+    def test_an_opinion_about_this_is_feedback_not_a_new_subject(self):
+        for text in ("this is bad", "I like this one", "that one is ugly", "they are great"):
+            self.assertEqual(self.intent(text), ["FEEDBACK"], text)
+        self.assertEqual(self.intent("this is bad", gen=False), ["NEW"])                  # with nothing on screen there is nothing to have an opinion about
+        self.assertEqual(self.intent("make it not blurry"), ["NEW"])                      # a request keeps being a request
+
+
+class FollowUpHelpers(unittest.TestCase):
+    def test_polarity_of_a_whole_message(self):
+        self.assertEqual(polarity_of("this is bad"), "NEGATIVE")
+        self.assertEqual(polarity_of("I love this one"), "POSITIVE")
+        self.assertEqual(polarity_of("I don't like this"), "NEGATIVE")
+        self.assertIsNone(polarity_of("make it happier"))
+
+    def test_only_a_which_is_an_answer(self):
+        for text in ("5", "number 5", "#5", "the third one", "2 and 7", "number three", "S4", "G12/S3"):
+            self.assertTrue(is_sticker_answer(text), text)
+        for text in ("make me a falcon", "falcon 5", "yes", "hello", "", "I like 5 but not 3 and the sixth is too small to see at all"):
+            self.assertFalse(is_sticker_answer(text), text)
+        self.assertTrue(is_sticker_answer("this one", has_selection=True))
+        self.assertTrue(is_sticker_answer("these", has_selection=True))
+        self.assertFalse(is_sticker_answer("this one", has_selection=False))               # nothing is selected: "this one" points at nothing
 
 
 if __name__ == "__main__":

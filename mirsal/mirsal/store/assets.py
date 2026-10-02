@@ -71,9 +71,8 @@ class LocalAssetStore:
                 raise AssetError(f"{key} already exists with different bytes: assets are never overwritten", 409)
         else:
             p.parent.mkdir(parents=True, exist_ok=True)
-            tmp = p.with_name(p.name + ".tmp")
-            tmp.write_bytes(data)
-            os.replace(tmp, p)
+            from ..runtime import atomic
+            atomic.write_bytes(p, data)
         return {"object_key": _clean(key), "sha256": digest, "bytes": len(data)}
 
     # ---- signed URLs ------------------------------------------------------------------------

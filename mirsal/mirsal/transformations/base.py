@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from .. import prompter
+from ..generation import prompter
 
 # connectors that make a request a transformation ("as" only when the target is a thing, see ROLES)
 SHAPE = re.compile(r"\b(turned into|turn into|turns into|transformed into|transform into|morphed into|morphing into|becomes|become|into|shaped like|in the shape of|"
@@ -124,7 +124,7 @@ class Transformation:
                 f"small cartoon arms and legs are allowed so it can act; identical in every cell")
 
     def build_slots(self, m: Match, rows: int, cols: int, flavour: dict | None = None, seed: str = "") -> dict:
-        from .. import emotions
+        from ..generation import emotions
         n = rows * cols
         subj_slug = prompter.slug(f"{m.subject} as {m.target}") or "sticker"
         forbidden = list(m.forbidden)
@@ -133,7 +133,7 @@ class Transformation:
             blob = " ".join(texts).lower()
             return any(f and f in blob for f in forbidden)
 
-        from .. import expander
+        from ..generation import expander
         key_colour = "blue" if expander.GREEN_WORDS & set(_words(m.target)) else "green"      # a green target (avocado) would vanish on a green screen
         cells_src = self.required_cells(m.subject, m.target, flavour)
         entries, used = [], set()

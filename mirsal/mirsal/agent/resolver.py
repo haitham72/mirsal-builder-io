@@ -178,6 +178,36 @@ def resolve(text: str, ctx: dict) -> Resolution:
     return r
 
 
+def polarity_of(text: str) -> str | None:
+    """'NEGATIVE' / 'POSITIVE' / None for a whole message ("this is bad", "I like this one"), the same words and the same negation rule as the clause
+    reader in `resolve`. Used when the stickers were found by the selection or the focus, so no number sat beside the opinion."""
+    low = text.lower()
+    neg = re.search(rf"\b{NEG}\b", low)
+    pos = re.search(rf"\b{POS}\b", low) and not re.search(r"\b(?:don'?t|do not|dont|not)\s+" + POS, low)
+    return "NEGATIVE" if neg and not pos else "POSITIVE" if pos else None
+
+
+_ANSWER_FILLER = {"number", "no", "nr", "sticker", "stickers", "and", "the", "one", "ones", "please", "just", "only", "also", "plus", "it", "is", "its",
+                  "this", "that", "these", "those", "them", "selected", "mean", "meant", "i", "it's"}
+_ANSWER_PRONOUNS = {"this", "that", "these", "those", "them", "it", "selected"}
+_NUMBERISH = re.compile(r"#?\d+(?:st|nd|rd|th)?|s\d|g\d+|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last|two|three|four|five|six|seven|eight|nine")
+
+
+def is_sticker_answer(text: str, has_selection: bool = False) -> bool:
+    """True when the message is only a "which sticker" answer: numbers, ordinals, `#3`, `number three`, or (with stickers selected) "this one" / "these".
+    Anything with another content word ("make me a falcon") is a request of its own, never an answer."""
+    words = re.findall(r"[a-z0-9#']+", text.lower())
+    if not words or len(words) > 8:
+        return False
+    if not all(w in _ANSWER_FILLER or _NUMBERISH.fullmatch(w) for w in words):
+        return False
+    return any(_NUMBERISH.fullmatch(w) for w in words) or (has_selection and any(w in _ANSWER_PRONOUNS for w in words))
+
+
+DESCRIBE = (r"\b(?:describe|caption|captions|transcribe)\b|\bwhat(?:'s| is| are)?\s+(?:in|on|visible|shown)\b|\bwhat do\b.{0,40}\b(?:show|look like|depict)\b|\blook at\b")
+"""A request to LOOK at the pictures ("describe the stickers", "what do they show", "what is in number 3"): it needs AI vision, so it needs the person's yes (vision/consent.py)."""
+
+
 # ---- intent rules ---------------------------------------------------------------------------------------------------------------
 YES = r"^(?:yes|yep|yeah|yup|ok|okay|sure|go|go ahead|do it|create|generate|confirm|start|let'?s go|make it|looks good|perfect)\b"
 NO = r"^(?:no|nope|cancel|stop|never ?mind|don'?t|not now)\b"
@@ -200,12 +230,14 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         or bool(has_selection and re.search(r"\b(these|this|those|them|it|selected)\b", t))
     concept_edit = bool(has_generation and re.search(r"\b(make|turn)\s+(?:the|that|this|it|them|these|those)\b", t) and re.search(COMPARATIVE, t)
                         and not re.search(r"\b(stickers?|emoji|pack|set)\b", t))
-    if re.search(r"\b(grid|2x2|3x3|style|no animation|without animation|with animation|ask before|don'?t ask|ask me|instant|auto[- ]?create)\b", t) \
-            and re.search(r"\b(use|set|switch|change|make it|go|turn|please|from now|always|stop|no|with|without|don'?t|do not|ask|just)\b", t) \
+    if re.search(r"\b(grid|2x2|3x3|style|no animation|without animation|with animation|ask before|don'?t ask|ask me|instant|auto[- ]?create|ai vision)\b", t) \
+            and re.search(r"\b(use|set|switch|change|make it|go|turn|please|from now|always|stop|no|with|without|don'?t|do not|ask|just|allow|enable|disable)\b", t) \
             and not re.search(NEW_VERBS, t.replace("make it", "")):
         intents, conf = ["CHANGE_SETTINGS"], 0.8
     elif re.search(r"\b(animate|animation of|make (?:it|them|number \d|\d) (?:move|dance|alive)|bring (?:it|them) to life|add motion)\b", t):
         intents, conf = ["ANIMATE"], 0.85
+    elif has_generation and re.search(DESCRIBE, t):
+        intents, conf = ["ASK"], 0.85
     elif re.match(r"^(?:which|what|where|who|how many|how much|do i have|did we|show me which|tell me|is there|are there)\b", t) or t.endswith("?"):
         intents, conf = ["ASK"], 0.8 if re.match(r"^(?:which|what|where|who|how many)\b", t) else 0.65
         if re.search(r"\b(find|search)\b", t):
@@ -220,6 +252,9 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
             intents = ["FEEDBACK", "EDIT_STICKERS"]
     elif has_generation and refs and re.search(rf"\b{POS}\b|\b{NEG}\b", t):
         intents, conf = ["FEEDBACK"], 0.85
+    elif has_generation and not t.endswith("?") and len(t.split()) <= 8 and re.search(r"\b(?:this|it|that|these|those|they|them)\b", t) \
+            and re.search(rf"\b{POS}\b|\b{NEG}\b", t) and not re.search(NEW_VERBS, t):
+        intents, conf = ["FEEDBACK"], 0.75                       # "this is bad", "I like this one": an opinion about what is on screen, not a new subject
     elif re.search(NEW_VERBS, t):
         intents, conf = ["NEW"], 0.85
     elif has_generation and re.search(r"^(?:i )?(?:like|love|hate|dislike|keep)\b", t):
@@ -237,6 +272,8 @@ SETTING_RULES = [
     (r"\b2\s*x\s*2\b", ("grid", "2x2")), (r"\b3\s*x\s*3\b", ("grid", "3x3")),
     (r"\b(don'?t|do not|stop)\s+ask|\binstant|\bauto[- ]?create|\bjust (?:do|make) it", ("ask_before_spending", False)),
     (r"\bask (?:me )?before|\bconfirm before", ("ask_before_spending", True)),
+    (r"\b(?:allow|enable|turn on)\s+(?:the\s+)?(?:ai\s+)?vision\b", ("allow_vlm", True)),
+    (r"\b(?:don'?t|do not|never|stop|disable|turn off)\s+(?:use\s+|using\s+)?(?:the\s+)?(?:ai\s+)?vision\b", ("allow_vlm", False)),
 ]
 STYLE_WORDS = {"flat": "flat_vector", "vector": "flat_vector", "pixar": "pixar_3d", "3d": "pixar_3d", "toon": "toon_cel", "cel": "toon_cel", "glossy": "glossy_3d"}
 

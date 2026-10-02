@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from mirsal import sources
+from mirsal.flow import sources
 
 
 def make(root, imgs, vids):
@@ -55,7 +55,8 @@ class FolderVariantTests(unittest.TestCase):
 class PlanFileTests(unittest.TestCase):
     def test_plan_next_to_sheet_is_used(self):
         import json
-        from mirsal import pipeline as pl, prompter
+        from mirsal.flow import pipeline as pl
+        from mirsal.generation import prompter
         with tempfile.TemporaryDirectory() as td:
             root = Path(td) / "in"; make(root, [1], [1])
             import cv2, numpy as np
@@ -81,7 +82,7 @@ class RotationTests(unittest.TestCase):
     def test_generate_never_advances_to_the_next_folder_by_itself(self):
         """One press is one folder. (It used to rotate 001 -> 002 -> 003 -> 001 on every press, which made a pre-generated test set unusable.)"""
         import cv2
-        from mirsal import pipeline as pl
+        from mirsal.flow import pipeline as pl
         from tests import synth
         with tempfile.TemporaryDirectory() as td:
             root, out = Path(td) / "in", Path(td) / "out"

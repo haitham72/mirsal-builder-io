@@ -1,7 +1,7 @@
 """Phase 3A repository: save_generation() is one transaction (generation + stickers + assets +
 video sheets + reviews + events). Re-saving the same result is idempotent: generations and
 stickers upsert, reviews/events/assets insert ON CONFLICT DO NOTHING. The gate rules stay in
-pipeline.py/gates.py; the repo stores decisions, it never decides (principle 8)."""
+flow/pipeline.py/gates.py; the repo stores decisions, it never decides (principle 8)."""
 from __future__ import annotations
 
 import hashlib
@@ -101,7 +101,7 @@ def _file_asset(gd: Path, rel: str | None) -> tuple | None:
 
 def save_generation(conn, out: Path, gid: int) -> str:
     """Upsert one generation from out/G###/{result.json,prompts.json,events.jsonl}. Returns the generation id."""
-    from .. import pipeline as pl
+    from ..flow import pipeline as pl
     out, gd = Path(out), pl.gen_dir(Path(out), gid)
     res = json.loads((gd / "result.json").read_text(encoding="utf-8"))
     res = pl.normalise(res)
@@ -273,7 +273,7 @@ def _gen_review(cur, gen_id: str, gate: str, v: dict, vsid: str | None) -> None:
 def import_tasks(conn, out: Path) -> int:
     """Backfill out/tasks/*.json (1G manual tasks) as tasks rows. Idempotent. Returns rows present.
     A provider ticket that a job import already owns (same external id, any provider) is not inserted twice."""
-    from .. import tasks as _t
+    from ..generation import tasks as _t
     n = 0
     for f in sorted(_t.tasks_dir(Path(out)).glob("*.json")):
         try:
@@ -327,7 +327,7 @@ def save_job(conn, job: dict, out: Path | None = None) -> bool:
         name_key = ""
         if job.get("task") and out is not None:
             try:
-                from .. import tasks as _t
+                from ..generation import tasks as _t
                 name_key = str(_t.read_task(Path(out), str(job["task"])).get("name_key") or "")
             except Exception:
                 name_key = ""
@@ -369,7 +369,7 @@ def save_job(conn, job: dict, out: Path | None = None) -> bool:
 
 def import_jobs(conn, out: Path) -> int:
     """Every claimed job under out/jobs/ as a tasks row (see save_job). Idempotent. Returns the jobs applied."""
-    from .. import jobs as _j
+    from ..generation import jobs as _j
     n = 0
     for job in _j.list(Path(out)):
         try:
@@ -552,7 +552,7 @@ def find_task(conn, external_id: str | None = None, key_prefix: str | None = Non
 
 def import_users(conn, out: Path) -> int:
     """out/users.json -> users (digests only). Idempotent. Returns the rows present."""
-    from ..users import UserStore
+    from ..runtime.users import UserStore
     n = 0
     path = Path(out) / "users.json"
     try:

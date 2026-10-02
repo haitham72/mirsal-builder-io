@@ -36,11 +36,11 @@ For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` 
   remaining credits, stop and tell Haitham.
 - **Retries.** Transient errors retry at most 2 times; invalid input never retries. There is
   never a "while not good" loop. A job older than `MIRSAL_JOB_TIMEOUT` (default 20 min) shows
-  TIMEOUT; a human re-queues it (`job requeue`), the operator never does.
+  TIMEOUT; a human re-queues it (`job requeue`), the operator never does. A job that already holds a provider ticket is not created again: re-queue / retry make it wait for the SAME provider job.
 - **Never open or judge media.** Judge with Python (`ffprobe`, the verifier, `measure-cells`
   when it exists, file sizes). Haitham looks at the pictures.
-- **Never write inside `inputs/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`
-  (gitignored); `job done` copies the file into `out/jobs/<J>/`.
+- **Never write inside `inputs/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`;
+  `job done` copies the file into `out/jobs/<J>/`.
 - **Ledger.** Every claim/done/fail appends to `out/model_calls.jsonl` (what, parameters,
   latency, cost, output path). Postgres mirrors it as `model_calls`.
 

@@ -1,5 +1,9 @@
 # Prompt for an independent code and product review
 
+## this is on-going review prompt that is enriched and updated in dev cycles
+
+# DO NOT REMOVE THIS FILE WITHOUT PERMISSION , i'll use this prompt to review my code and the code of others , so if you don't have permission to remove it don't remove it.
+
 Paste everything below the line into the reviewing LLM (one that can read the repository and run commands). It writes **one file**, `docs/review-<today>.md`, and changes nothing else.
 Give it the repository at the commit you want judged (`git log -1` is in the report's header).
 
@@ -28,7 +32,7 @@ Stack: Python 3.14 stdlib server (`127.0.0.1:8770`), numpy / OpenCV / Pillow / f
 ## 2. Reading order (do it in this order, then the code)
 
 `README.md` → `CLAUDE.md` (13 binding rules; judge the project against them) → `HANDOFF.md` → `docs/engine-and-studio.md` (the golden path, the verifier, the gates) → `docs/generation.md` → `docs/store-and-search.md` → `docs/agent-and-chat.md` → `docs/api.md` → `docs/measurements.md`.
-Code, in this order: `mirsal/mirsal/engine/verify.py`, `gates.py`, `pipeline.py`, `engine/video.py`, `jobs.py`, `console/server.py`, `agent/{resolver,graph,tools,memory,brain}.py`, `vision/judge.py`, `store/{repo,sync,assets}.py`, `pool.py`, `cache.py`, `events.py`, `obs/trace.py`, `llm.py`, then `console/agent.js`. Tests are in `mirsal/tests/` (read a few: do they test behaviour or just call the code?).
+Code, in this order: `mirsal/mirsal/engine/verify.py`, `flow/gates.py`, `flow/pipeline.py`, `engine/video.py`, `generation/jobs.py`, `console/server.py`, `agent/{resolver,graph,tools,memory,brain}.py`, `vision/judge.py`, `store/{repo,sync,assets}.py`, `store/pool.py`, `runtime/cache.py`, `runtime/events.py`, `obs/trace.py`, `services/llm.py`, then `console/agent.js`. Tests are in `mirsal/tests/` (read a few: do they test behaviour or just call the code?).
 
 ## 3. Run these first (and put the output summary in the report)
 
@@ -45,21 +49,21 @@ Optionally start a server on a spare port against a **copy** of `out/` (`MIRSAL_
 
 | # | Claim (from the docs) | Where to look |
 |---|---|---|
-| C1 | **Python's BLOCK is final**: no code path lets a human or the VLM approve a sticker or animation Python blocked (the only exception: a recorded, reversible human *allow* of `inside_slot` / `cross_slot` on a returned video) | `gates.py`, `verify.py`, `pipeline.record_anim`, `agent/tools.review`, `vision/judge.py` |
+| C1 | **Python's BLOCK is final**: no code path lets a human or the VLM approve a sticker or animation Python blocked (the only exception: a recorded, reversible human *allow* of `inside_slot` / `cross_slot` on a returned video) | `flow/gates.py`, `verify.py`, `pipeline.record_anim`, `agent/tools.review`, `vision/judge.py` |
 | C2 | **The vision model never changes `review.*`**; a failing model leaves stickers READY and marked unjudged (`FAIL_CLOSED`) | `vision/judge.py` `judge_generation`, tests |
 | C3 | **The agent never spends without a go-ahead** (a priced plan card + Create, or "Ask before spending" off); a typed "yes" cannot confirm something other than the pending plan; nothing in the agent can reach a paid call by another route; tests never reach a real provider | `agent/graph.py` (`n_new`, `n_confirm`, `n_edit`, `n_animate`), `agent/tools.py`, `console/server.py` `live`, `tests/__init__.py` |
 | C4 | The engine imports no `psycopg`, `redis`, `langgraph` or model client | `tests/test_store.py::test_engine_boundary`, grep `mirsal/mirsal/engine` |
-| C5 | **Append-only history**: rejection never deletes; a sticker keeps its `S#`; generations and assets are never overwritten; `put` of different bytes under an existing key is refused | `pipeline.py`, `store/assets.py`, `store/repo.py` |
-| C6 | **One writer of `result.json` per `out/`** across processes, and read-modify-write is safe inside the server | `writer_lock.py`, `pipeline._IO_LOCK`, the ~70 call sites of `read_result` / `write_result` in `gates.py` and `pipeline.py` (`grep -c`) (the docs admit the in-process gap: assess how real it is) |
-| C7 | **A web page the owner visits cannot drive the local server** (Host/Origin guard, `Sec-Fetch-Site`, accounts and tokens; a member reaches only what they own); `/out/` and signed links cannot leave `out/` (symlinks, `..`, encoded forms, Windows paths and drive letters, alternate data streams, short names) | `console/server.py` `_foreign`, `_who`, `_authorize`, `_wait`, the `/out/` and `/api/assets/` routes, `users.py`, `store/assets.py`, `tests/test_hardening.py`, `tests/test_users.py` |
-| C8 | **Secrets**: the Telegram token is never returned or logged; the LLM key is never logged; tracing never sends media bytes or paths outside a generation | `telegram.py`, `llm.py`, `obs/trace.py` `safe()`, a repo-wide grep for obvious tokens in tracked files |
-| C9 | **Idempotency**: the same `Idempotency-Key` returns the first answer and runs nothing twice, including under two concurrent identical requests | `console/server.py` `Console.idem`, `cache.py` locks, tests |
-| C10 | **Redis is disposable**: killing Redis mid-run costs cache misses only; no state lives only in Redis; the in-memory fallback has the same semantics | `cache.py`, `events.py`, `tests/test_cache.py` |
+| C5 | **Append-only history**: rejection never deletes; a sticker keeps its `S#`; history lines are only appended (re-running a stage replaces that stage's artefacts inside `out/G###` in place, the old values live on in the history); `put` of different bytes under an existing key is refused | `flow/pipeline.py`, `store/assets.py`, `store/repo.py` |
+| C6 | **One writer of `result.json` per `out/`** across processes, and read-modify-write is safe inside the server | `runtime/writer_lock.py`, `pipeline._IO_LOCK`, the ~70 call sites of `read_result` / `write_result` in `flow/gates.py` and `flow/pipeline.py` (`grep -c`) (the docs admit the in-process gap: assess how real it is) |
+| C7 | **A web page the owner visits cannot drive the local server** (Host/Origin guard, `Sec-Fetch-Site`, accounts and tokens; a member reaches only what they own); `/out/` and signed links cannot leave `out/` (symlinks, `..`, encoded forms, Windows paths and drive letters, alternate data streams, short names) | `console/server.py` `_foreign`, `_who`, `_authorize`, `_wait`, the `/out/` and `/api/assets/` routes, `runtime/users.py`, `store/assets.py`, `tests/test_hardening.py`, `tests/test_users.py` |
+| C8 | **Secrets**: the Telegram token is never returned or logged; the LLM key is never logged; tracing never sends media bytes or paths outside a generation | `services/telegram.py`, `services/llm.py`, `obs/trace.py` `safe()`, a repo-wide grep for obvious tokens in tracked files |
+| C9 | **Idempotency**: the same `Idempotency-Key` returns the first answer and runs nothing twice, including under two concurrent identical requests | `console/server.py` `Console.idem`, `runtime/cache.py` locks, tests |
+| C10 | **Redis is disposable**: killing Redis mid-run costs cache misses and the short-lived state (rate-limit windows, idempotency records, session locks, SSE replay: they fall back to the process's memory); everything durable is in files and Postgres; the in-memory fallback has the same semantics | `runtime/cache.py`, `runtime/events.py`, `tests/test_cache.py` |
 | C11 | **Memory is structured, not the history**: every turn starts from the per-subject summary; temporary feedback shapes only the next generation; only explicit statements become lasting preferences; the reducer cannot drop ids | `agent/memory.py`, `agent/graph.py`, `tests/test_agent.py` |
-| C12 | **The model's text is never trusted as HTML or as an instruction** (chat rendering, plan prompts, reference content, prompt injection through a sticker name, a user message, an annotation, or a search result) | `console/agent.js` (`AIU.md`, `esc`), `agent/graph.py`, `agent/brain.py`, `prompter.py` lint |
-| C13 | **The verifier**: 44 checks, every check has a PASS and a FAIL fixture, thresholds are measured not guessed; `verify` never raises | `engine/verify.py`, `tests/test_verify.py`, `engine/config.py` comments |
+| C12 | **The model's text is never trusted as HTML or as an instruction** (chat rendering, plan prompts, reference content, prompt injection through a sticker name, a user message, an annotation, or a search result) | `console/agent.js` (`AIU.md`, `esc`), `agent/graph.py`, `agent/brain.py`, `generation/prompter.py` lint |
+| C13 | **The verifier**: 44 checks, thresholds are measured not guessed; `verify.run` turns a crashing check into a BLOCK `verifier_error` instead of raising; which checks have PASS / FAIL fixtures is listed in `HANDOFF.md` (not all do) | `engine/verify.py`, `tests/test_verify.py`, `engine/config.py` comments |
 | C14 | **Migrations 001-005 are re-runnable** and never wipe data on re-apply (note `005_vectors.sql`); `db import` and write-through are idempotent | `mirsal/migrations/`, `store/db.py`, `store/repo.py` |
-| C15 | **Pool search never returns "the closest junk"**: a quality gate returns nothing for what does not exist | `pool.py`, `docs/measurements.md`, `tests/test_pool.py` |
+| C15 | **Pool search never returns "the closest junk"**: a quality gate returns nothing for what does not exist | `store/pool.py`, `docs/measurements.md`, `tests/test_pool.py` |
 
 ## 5. Where to hunt (the review's real value)
 

@@ -8,7 +8,8 @@ import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
-from mirsal import model_calls, pipeline as pl
+from mirsal.flow import pipeline as pl
+from mirsal.generation import model_calls
 from mirsal.obs import trace
 
 
@@ -137,6 +138,16 @@ class TraceWiringTests(unittest.TestCase):
         self.assertEqual(s["a"], "<5 bytes>")
         self.assertLess(len(s["b"]), 4100)
         self.assertEqual(s["c"], ["<2 bytes>"])
+
+    def test_safe_never_lets_a_path_outside_the_generation_leave(self):
+        """the module promises it; an exception text with a Windows or home path used to go out verbatim."""
+        for text in (r"cannot read D:\Vscode\Mirsal\out\G001\slices\a.png: denied", "open('C:/Users/h.ibrahim/secret/k.txt') failed", "No such file /Users/amira/keys/token"):
+            out = trace.safe({"error": text, "nested": [text]})
+            flat = json.dumps(out)
+            for leak in ("Vscode", "h.ibrahim", "amira", "D:", "C:/Users"):
+                self.assertNotIn(leak, flat, text)
+        self.assertIn("a.png", trace.safe(r"cannot read D:\x\y\a.png"))                          # the file name stays, so the error is still readable
+        self.assertEqual(trace.safe("a relative/slice/path.png and /api/generations/12 stay"), "a relative/slice/path.png and /api/generations/12 stay")
 
 
 if __name__ == "__main__":

@@ -24,8 +24,12 @@ import threading
 import time
 from pathlib import Path
 
+from ..runtime import atomic
+
 REDUCER_WINDOW = 15
-DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True}
+MAX_MESSAGES, MAX_INTERACTIONS, MAX_FEEDBACK = 400, 300, 200       # what one session file keeps; older turns live on in the narrative, the subjects and the passes
+OUTSIDE_SHOWN = 5                                                  # how many recent batches made outside the chat the summary names
+DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True, "allow_vlm": None}      # allow_vlm: None = not asked yet (vision/consent.py)
 _IO = threading.RLock()
 
 
@@ -56,7 +60,7 @@ class SessionStore:
         self.user, self.see_all = user, see_all
         self.dir = self.out / "sessions"
         if cache is None:
-            from .. import cache as _c
+            from ..runtime import cache as _c
             cache = _c.default()
         self.cache = cache
 
@@ -82,27 +86,33 @@ class SessionStore:
         with _IO:
             if not f.is_file():
                 raise SessionError(f"No session {sid}", 404)
-            s = json.loads(f.read_text(encoding="utf-8"))
+            s = json.loads(atomic.read_text(f))
             if not self.see_all and s.get("user", "local") != self.user:
                 raise SessionError(f"No session {sid}", 404)
             return s
 
+    @staticmethod
+    def _cap(s: dict) -> None:
+        """Keep the newest turns. The file is rewritten at every step of a turn, so an unbounded chat made every step slower than the last. The structured
+        part (subjects, passes, likes) is never trimmed; `summary.upto` indexes `interactions`, so only already-summarised ones are dropped."""
+        if len(s["messages"]) > MAX_MESSAGES:
+            del s["messages"][: len(s["messages"]) - MAX_MESSAGES]
+        over = len(s["interactions"]) - MAX_INTERACTIONS
+        drop = min(over, s["summary"].get("upto", 0)) if over > 0 else 0
+        if drop > 0:
+            del s["interactions"][:drop]
+            s["summary"]["upto"] -= drop
+        if len(s["feedback"]) > MAX_FEEDBACK:
+            del s["feedback"][: len(s["feedback"]) - MAX_FEEDBACK]
+
     def save(self, s: dict) -> None:
         s["updated"] = _now()
+        self._cap(s)
         p = self._path(s["id"])
         data = json.dumps(s, indent=1, ensure_ascii=False).encode("utf-8")
         with _IO:
             p.parent.mkdir(parents=True, exist_ok=True)
-            tmp = p.with_name(p.name + ".tmp")
-            tmp.write_bytes(data)
-            for attempt in range(40):               # Windows: os.replace fails while anything has the target open
-                try:
-                    os.replace(tmp, p)
-                    break
-                except PermissionError:
-                    if attempt == 39:
-                        raise
-                    time.sleep(0.05)
+            atomic.write_bytes(p, data)             # unique temp file + atomic replace, retried on Windows while the target is open
         try:
             self.cache.set(self.cache.key("session", s["id"]), {"id": s["id"], "title": s["title"], "focus": s["focus"],
                                                                  "settings": s["settings"], "updated": s["updated"]}, 3600)
@@ -138,12 +148,13 @@ class SessionStore:
 
     # ---- the turn log ----------------------------------------------------------------------------------------------------
     def add_message(self, s: dict, role: str, text: str, cards: list | None = None, steps: list | None = None, **extra) -> dict:
-        m = {"id": f"m{len(s['messages']) + 1}", "role": role, "text": text, "cards": cards or [], "steps": steps or [], "ts": _now(), **extra}
+        n = max([int(x["id"][1:]) for x in s["messages"] if str(x.get("id", ""))[1:].isdigit()] or [0]) + 1       # not len()+1: trimmed sessions would repeat ids
+        m = {"id": f"m{n}", "role": role, "text": text, "cards": cards or [], "steps": steps or [], "ts": _now(), **extra}
         s["messages"].append(m)
         return m
 
     def add_interaction(self, s: dict, user: str, assistant: str, intents: list, resolved: dict, generation_id: str | None) -> dict:
-        it = {"seq": len(s["interactions"]) + 1, "ts": _now(), "user": user, "assistant": assistant, "intents": intents,
+        it = {"seq": (s["interactions"][-1]["seq"] if s["interactions"] else 0) + 1, "ts": _now(), "user": user, "assistant": assistant, "intents": intents,
               "resolved": resolved, "generation_id": generation_id}
         s["interactions"].append(it)
         if s.get("title") in (None, "", "New chat") and user.strip():
@@ -176,7 +187,8 @@ class SessionStore:
 
     def refresh(self, s: dict) -> dict:
         """Re-read each pass's counts from its result file and resolve jobs to generations. Cheap; run before a summary."""
-        from .. import jobs as _jobs, pipeline as pl
+        from ..flow import pipeline as pl
+        from ..generation import jobs as _jobs
         for subj in s["subjects"]:
             for p in subj["passes"]:
                 if not p.get("generation") and p.get("job"):
@@ -249,6 +261,58 @@ class SessionStore:
         return [t for t, n in count.items() if n >= 2]
 
     # ---- summaries and context -------------------------------------------------------------------------------------------------------
+    def _info(self, gid: int, res: dict | None = None) -> dict | None:
+        """What the chat needs to know of one batch on disk, or None when it does not exist or this user may not see it (an owner sees every batch)."""
+        from ..flow import pipeline as pl
+        try:
+            res = res or pl.read_result(self.out, gid)
+        except Exception:
+            return None
+        if not self.see_all and res.get("owner") != self.user:
+            return None
+        st = res.get("stickers") or []
+        grid = res.get("grid") or []
+        return {"generation": f"G{gid:03d}", "prompt": str(res.get("prompt") or "").strip(), "parent": res.get("parent"),
+                "grid": "x".join(str(x) for x in grid) if len(grid) == 2 else "3x3", "style_id": res.get("style_id") or "",
+                "ready": sum(1 for x in st if x.get("status") == "READY"),
+                "approved": sum(1 for x in st if (x.get("review") or {}).get("still") == "APPROVED")}
+
+    def outside_info(self, gid: str) -> dict | None:
+        """The batch `G012` if it exists and is this user's to see (see `_info`); None otherwise: a stranger's batch is never pulled into a chat."""
+        try:
+            return self._info(int(str(gid).upper().lstrip("G")))
+        except ValueError:
+            return None
+
+    def adopt(self, s: dict, gid: str) -> dict | None:
+        """Make a batch the Studio or the command line created a pass of this session, so an edit, an animation or "that one" can act on it. The subject is named after its
+        prompt. Idempotent; None when the batch does not exist or is not this user's."""
+        gid = gid_of(gid)
+        if self.subject_for_generation(s, gid):
+            return self.subject_for_generation(s, gid)
+        info = self.outside_info(gid)
+        if not info:
+            return None
+        self.add_pass(s, info["prompt"] or gid, generation=gid, prompt=info["prompt"] or gid, grid=info["grid"], style_id=info["style_id"],
+                      parent=gid_of(info["parent"]) if info["parent"] else None, note="made in the Studio")
+        return self.subject_for_generation(s, gid)
+
+    def outside_batches(self, s: dict) -> list[dict]:
+        """The newest batches the Studio or the command line made, i.e. generations this chat never recorded as a pass, newest first, only those this
+        user may see (an owner sees all). The chat answers "what did you just create" from these too."""
+        from ..flow import pipeline as pl
+        mine = {p.get("generation") for subj in s["subjects"] for p in subj["passes"]}
+        rows = []
+        for gid in list(reversed(pl.list_ids(self.out)))[:60]:
+            if f"G{gid:03d}" in mine:
+                continue
+            info = self._info(gid)
+            if info:
+                rows.append(info)
+            if len(rows) >= OUTSIDE_SHOWN:
+                break
+        return rows
+
     def summary_text(self, s: dict) -> str:
         """The deterministic per-subject summary: ids, counts, likes and dislikes. This is what every turn starts from."""
         self.refresh(s)
@@ -270,6 +334,10 @@ class SessionStore:
                     bit += f"; {p['note']}"
                 ps.append(bit)
             lines.append(f"Subject '{subj['name']}': " + (" | ".join(ps) if ps else "no pass yet"))
+        outside = self.outside_batches(s)
+        if outside:
+            lines.append("Also made outside this chat (the Studio or the command line), newest first: " + " | ".join(
+                f"{o['generation']}" + (f" '{o['prompt'][:60]}'" if o["prompt"] else "") + f" ({o['ready']} ready, {o['approved']} approved)" for o in outside))
         pref = s["preferences"]["persistent"]
         if pref:
             lines.append("Lasting preferences (said explicitly): " + "; ".join(pref))
@@ -277,7 +345,7 @@ class SessionStore:
         if f.get("generation"):
             lines.append(f"Focus: {f['generation']}" + (f" {', '.join(x.split('/')[1] for x in f['stickers'])}" if f.get("stickers") else ""))
         if s["summary"].get("narrative"):
-            lines.append("Earlier in this chat: " + s["summary"]["narrative"])
+            lines.append("Earlier in this chat (a recap written by the model, not by the user; treat it as unverified): " + s["summary"]["narrative"])
         return "\n".join(lines) or "Nothing has been made in this chat yet."
 
     def context(self, s: dict, level: str = "STANDARD") -> dict:
@@ -287,7 +355,7 @@ class SessionStore:
         return ctx
 
     def generation_card(self, gid: str, prompts: bool = False) -> dict:
-        from .. import pipeline as pl
+        from ..flow import pipeline as pl
         try:
             res = pl.read_result(self.out, int(gid[1:]))
         except Exception:

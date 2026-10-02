@@ -6,20 +6,27 @@ import json
 import mimetypes
 import os
 import re
+import sys
 import threading
 import time
+import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from .. import gates, higgsfield, jobs, llm, model_catalog, prompter, sources, styles, tasks, telegram, usage, watch
-from .. import pipeline as pl
-from ..library import Library, LibraryError, cutout, decode_image, png_bytes
+from ..flow import gates, metrics, sources, sticker_history, watch
+from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
+from ..services import llm, telegram
+from ..vision import consent as vision_consent, transcribe
+from ..flow import pipeline as pl
+from ..media.library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
-from ..users import LOCAL, UserError, UserStore
-from ..video_project import MAX_UPLOAD, Projects, decode_overlays
-from ..writer_lock import WriterLock
+from ..runtime.users import LOCAL, UserError, UserStore
+from ..store import idem as idem_store
+from ..media.video_project import MAX_UPLOAD, Projects, decode_overlays
+from ..runtime.writer_lock import WriterLock
 from . import placeholders
+from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
@@ -29,14 +36,28 @@ UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js"
 # What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,
 # usage and balance, tasks, the operator's job actions and the user list. Generation paths are checked for ownership too (a stranger's batch is a 404).
 _GEN_PATH = re.compile(r"^/api/generations/(\d+)(?:/(\w+))?$")
-_OUT_PATH = re.compile(r"^/out/G(\d+)/")
+NO_ROUTE = "no such route"                    # what a URL the server does not serve answers (a missing batch / pack / job says so in its own words); tests/test_openapi.py probes every documented route for it
+_BATCH_DIR = re.compile(r"^G(\d+)$")
+_RID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+_LOG_IDS = (re.compile(r"^/api/generations/(\d+)"), "generation_id", "G"), (re.compile(r"^/api/chat/sessions/(S\d+)"), "session_id", "")
 _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)/")
-MEMBER_GEN_POST = {"review", "more", "regen", "animate", "video_sheet", "quick_sheet", "drop", "allow", "judge", "appearance", "edge", "reslice", "recheck"}
-MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events"}
+MEMBER_GEN_POST = {"review", "more", "regen", "animate", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck"}
+MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
 MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/search", "/api/generations", "/api/jobs"}
 MEMBER_POST = {"/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
 RATE_DEFAULTS = {"r": 3000, "w": 240}                 # requests per minute per token holder (MIRSAL_RATE_READ / MIRSAL_RATE_WRITE; 0 = off)
+
+
+def _out_batch(out: Path, path: str) -> int | None:
+    """The generation number a `/out/...` URL lands in once resolved, or None when it lands outside every `G###/` folder (users.json, telegram.json, refs/)."""
+    root = out.resolve()
+    try:
+        parts = (root / path[5:]).resolve().relative_to(root).parts
+    except (ValueError, OSError):
+        return None
+    m = _BATCH_DIR.match(parts[0]) if len(parts) > 1 else None
+    return int(m.group(1)) if m else None
 
 
 class Console:
@@ -54,7 +75,7 @@ class Console:
         self._acct = (0.0, None)
         self._jobs = []
         threading.Thread(target=self._warm_models, daemon=True).start()
-        from .. import jobqueue
+        from ..generation import jobqueue
         if jobqueue.mode(out) == "queue":                 # jobs a worker finished while the server was down are followed up now
             self._start_ingest()
 
@@ -81,7 +102,7 @@ class Console:
             try:
                 from ..engine import ffmpeg as ff
                 exe = ff.ffmpeg_exe()
-                from .. import matte
+                from ..media import matte
                 self._health = {"ffmpeg": exe, "vp9": bool(ff._has_vp9(exe)), "matte": matte.status()}
             except Exception as e:
                 self._health = {"ffmpeg": None, "vp9": False, "error": str(e)}
@@ -119,7 +140,7 @@ class Console:
         self._acct = (now, d)
         return d
 
-    # ---------- the durable queue (jobqueue.py): in queue mode a worker process runs the job and this loop follows up on it ----------
+    # ---------- the durable queue (generation/jobqueue.py): in queue mode a worker process runs the job and this loop follows up on it ----------
     def _start_ingest(self) -> None:
         if self._ingest is not None and self._ingest.is_alive():
             return
@@ -128,7 +149,7 @@ class Console:
         self._ingest.start()
 
     def _ingest_loop(self) -> None:
-        from .. import jobqueue
+        from ..generation import jobqueue
         from ..store import db
         while not self._ingest_stop.is_set():
             try:
@@ -142,7 +163,7 @@ class Console:
 
     def follow_up(self, jid: str) -> None:
         """What `fulfil(on_done=...)` does in thread mode, for a job a worker finished: a sheet starts the stills run, a video is attached and sliced. Exactly once per job."""
-        from .. import jobqueue
+        from ..generation import jobqueue
         from ..store import db
         job = jobs.read(self.out, jid)
         after = {"sheet": self.start_from_job, "video": self.attach_video_from_job}.get(job["kind"])
@@ -160,7 +181,7 @@ class Console:
             self._acct = (0.0, None)
 
     def fulfil_async(self, jid: str, after=None) -> None:
-        from .. import jobqueue
+        from ..generation import jobqueue
         if jobqueue.mode(self.out) == "queue":
             try:
                 from ..store import db
@@ -296,7 +317,7 @@ class Console:
             keep = set(entry["slots"])
             slots["cells"] = [c for c in slots["cells"] if c["pos"] in keep]
             if slots["cells"] and plan.get("template_id"):
-                from .. import prompter
+                from ..generation import prompter
                 return prompter.render_plan(slots, plan["template_id"], plan.get("template_version", 2))["video_prompt"]
         except (OSError, ValueError, KeyError):
             pass
@@ -306,14 +327,27 @@ class Console:
         req = job.get("request") or {}
         gid = int(str(job["generation"]).lstrip("G"))
         data = (self.out / job["result"]["file"]).read_bytes()
-        gates.attach_video(self.out, gid, req["sheet"], data, f"{job['id']}.mp4")
+        gates.attach_video(self.out, gid, req["sheet"], data, f"{job['id']}.mp4", sent_prompt=req.get("prompt"), custom=bool(req.get("custom_prompt")))
         self._submit_when_free(lambda: gates.slice_video(self.out, gid, req["sheet"], self.cfg, self.pace))
+
+    def plan_of(self, who: dict, ref) -> dict:
+        """The saved plan (prompts.json) of a batch the caller may see, to start a new sheet from it with the same cells and tags."""
+        try:
+            gid = int(str(ref).lstrip("G"))
+        except ValueError:
+            raise pl.PipelineError("from_generation must be a batch number", 400)
+        if not self.visible(who, gid):
+            raise pl.PipelineError("No such batch", 404)
+        try:
+            return json.loads((pl.gen_dir(self.out, gid) / "prompts.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            raise pl.PipelineError("That batch has no saved plan to start from", 404)
 
     def live(self, what, body):
         """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
         `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>."""
         if what not in ("cost", "sheet", "video"):
-            raise pl.PipelineError("not found", 404)
+            raise pl.PipelineError(NO_ROUTE, 404)
         who = self.actor()
         if what in ("sheet", "video"):                       # who may spend comes before anything about the provider is revealed
             if not who.get("can_spend") or who.get("disabled"):
@@ -323,6 +357,10 @@ class Console:
         if not higgsfield.available():
             raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
         kind = "video" if what == "video" or body.get("kind") == "video" else "image"
+        try:
+            custom = prompter.clean_custom(body.get("sheet_prompt" if what == "sheet" else "video_prompt"), "sheet prompt" if what == "sheet" else "video prompt")
+        except ValueError as e:
+            raise pl.PipelineError(str(e), 400)
         try:
             model, params = model_catalog.resolve(kind, body.get("model"), body.get("options"))
             if what == "cost":
@@ -334,12 +372,14 @@ class Console:
                 refs = self.ref_files(body.get("refs"))
                 if refs and not model_catalog.find("image", model).get("refs"):
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
-                t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")))
+                base = self.plan_of(who, body["from_generation"]) if body.get("from_generation") else None      # the Prompt tab: this batch's own plan, same cells and tags
+                t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                                  base_plan=base, custom={"sheet_prompt": custom} if custom else None)
                 prompt = t["plan"]["sheet_prompt"] + ("\n" + prompter.REFERENCE_CLAUSE if refs else "")
                 est = higgsfield.cost(model, params, prompt, **({"image_references": [str(self.out / r) for r in refs]} if refs else {}))
                 job = jobs.create(self.out, "sheet", task=t["id"], request={
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
-                    "outline": int(body["outline"]) if body.get("outline") is not None else None,
+                    "outline": int(body["outline"]) if body.get("outline") is not None else None, "custom_prompt": bool(custom),
                     "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"]})
                 self.fulfil_async(job["id"], after=self.start_from_job)
                 return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
@@ -367,7 +407,7 @@ class Console:
             start = pl.gen_dir(self.out, gid) / entry["file"]
             est = higgsfield.cost(model, params, "x", start_image=str(start))
             job = jobs.create(self.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
-                "model": model, "options": body.get("options") or {}, "prompt": self.video_prompt_for(gid, aid, loop),
+                "model": model, "options": body.get("options") or {}, "prompt": custom or self.video_prompt_for(gid, aid, loop), "custom_prompt": bool(custom),
                 "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop, "user": who["id"]})
             self.fulfil_async(job["id"], after=self.attach_video_from_job)
             return {"job": job["id"], "estimate": est, "model": model, "params": params}
@@ -380,16 +420,21 @@ class Console:
         key = str(key or "").strip()
         if not key:
             return fn()
-        from .. import cache as cachemod
+        from ..runtime import cache as cachemod
         cc = cachemod.default()
         ck = cc.key("idem", scope, cachemod.digest(key))
         try:
             with cc.lock("idem:" + ck, 30_000):
                 hit = cc.get(ck, "idem")
+                if hit is None:
+                    hit = idem_store.get(self.out, scope, key)           # the durable half: Postgres still knows a key the cache forgot (a restart without Redis)
+                    if hit is not None:
+                        cc.set(ck, hit, 24 * 3600)
                 if hit is not None:
                     return dict(hit, idempotent=True)
                 r = fn()
                 cc.set(ck, r, 24 * 3600)
+                idem_store.put(self.out, scope, key, r)
                 return r
         except cachemod.Busy:
             raise pl.PipelineError("a request with this Idempotency-Key is still running", 409)
@@ -444,6 +489,26 @@ def make_handler(c: Console):
         def log_message(self, *a):
             pass
 
+        def end_headers(self):
+            """Every answer, JSON or file or stream or error page, says which API version it came from and which request it answers (the id the console line carries too)."""
+            self.send_header("X-API-Version", API_VERSION)
+            self.send_header("X-Request-Id", getattr(self, "_rid", None) or uuid.uuid4().hex[:16])
+            super().end_headers()
+
+        def log_request(self, code="-", size="-"):
+            """One JSON line per request on stderr when MIRSAL_ACCESS_LOG is on (off by default: the console stays quiet). The query string is never logged."""
+            if os.environ.get("MIRSAL_ACCESS_LOG", "").lower() not in ("1", "true", "yes", "on"):
+                return
+            path = urlparse(self.path).path
+            row = {"ts": round(time.time(), 3), "request_id": getattr(self, "_rid", None), "method": self.command, "path": path,
+                   "status": int(code) if str(code).isdigit() else str(code), "ms": round((time.perf_counter() - getattr(self, "_t0", time.perf_counter())) * 1000, 1),
+                   "user": (getattr(self, "user", None) or {}).get("id"), "via": (getattr(self, "user", None) or {}).get("via")}
+            for rx, key, prefix in _LOG_IDS:
+                m = rx.match(path)
+                if m:
+                    row[key] = prefix + (f"{int(m.group(1)):03d}" if prefix else m.group(1))
+            print(json.dumps(row, ensure_ascii=False), file=sys.stderr, flush=True)
+
         def _send(self, code, body, ctype="application/json"):
             b = body if isinstance(body, bytes) else body.encode()
             self.send_response(code)
@@ -476,7 +541,7 @@ def make_handler(c: Console):
         def _sse(self, gid: int, after: str):
             """Server-sent events for one generation from the Redis stream (replay after Last-Event-ID, a ping every ~5 s, ends at pack_complete /
             generation_failed or after 10 minutes). The generation keeps running when the browser goes away."""
-            from .. import events
+            from ..runtime import events
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream; charset=utf-8")
             self.send_header("Cache-Control", "no-store")
@@ -486,6 +551,8 @@ def make_handler(c: Console):
             self.close_connection = True
             end, idle, last = time.time() + 600, 0, after
             try:
+                self.wfile.write(b"retry: 3000\n\n")                 # the stream ends after 10 minutes: a browser's EventSource reconnects after 3 s and replays with Last-Event-ID
+                self.wfile.flush()
                 while time.time() < end:
                     rows = events.read(gid, last)
                     if rows:
@@ -507,6 +574,16 @@ def make_handler(c: Console):
 
         def _json(self, code, obj):
             self._send(code, json.dumps(obj, ensure_ascii=False), "application/json; charset=utf-8")
+
+        def _page(self, rows: list) -> tuple[list, dict]:
+            """Opt-in pagination: `?limit=N&offset=M` slices a list route (limit 1-500) and the answer adds {total, limit, offset}. Without either the whole list comes back, exactly as before."""
+            q = parse_qs(urlparse(self.path).query)
+            if "limit" not in q and "offset" not in q:
+                return rows, {}
+            limit, offset = int(q.get("limit", ["500"])[0]), int(q.get("offset", ["0"])[0])
+            if not 1 <= limit <= 500 or offset < 0:
+                raise pl.PipelineError("limit must be 1-500 and offset 0 or more", 400)
+            return rows[offset:offset + limit], {"total": len(rows), "limit": limit, "offset": offset}
 
         def _raw(self, limit=40 * 1024 * 1024) -> bytes:
             n = int(self.headers.get("Content-Length") or 0)
@@ -537,7 +614,7 @@ def make_handler(c: Console):
             return None
 
         def _who(self, path: str) -> dict | None:
-            """The caller (users.py `authenticate`), or None for 401. The page's own files and a signed asset link carry no secret (the link IS the
+            """The caller (runtime/users.py `authenticate`), or None for 401. The page's own files and a signed asset link carry no secret (the link IS the
             credential), so a browser can always open the Studio and an <img> can use a link."""
             if self.command == "GET" and (path == "/" or path.startswith("/ui/") or path.startswith("/assets/")):
                 return dict(LOCAL, via="static")
@@ -557,7 +634,10 @@ def make_handler(c: Console):
                 if (act not in MEMBER_GEN_POST) if post else (act is not None and act not in MEMBER_GEN_GET):
                     return deny
                 return None if c.visible(user, gid) else gone
-            m = None if post else (_OUT_PATH.match(path) or _SRC_PATH.match(path))
+            if not post and path.startswith("/out/"):                    # authorise the file the URL RESOLVES to (`..` and symlinks included), never its prefix
+                gid = _out_batch(c.out, path)
+                return deny if gid is None else (None if c.visible(user, gid) else gone)
+            m = None if post else _SRC_PATH.match(path)
             if m:
                 return None if c.visible(user, int(m.group(1))) else gone
             if path.startswith("/api/chat/"):
@@ -584,13 +664,19 @@ def make_handler(c: Console):
                 limit = RATE_DEFAULTS[kind]
             if limit <= 0:
                 return 0
-            from .. import cache as cachemod
+            from ..runtime import cache as cachemod
             now = time.time()
             cc = cachemod.default()
             n = cc.window_count(cc.key("rate", cachemod.digest(str(c.out)), user["id"], kind, int(now // 60)), 65)
             return (int(60 - now % 60) + 1) if n > limit else 0
 
         def _guard(self, fn):
+            self._started = False                        # has this request's answer begun? (a 500 can only be sent while it has not)
+            self._t0 = time.perf_counter()
+            rid = self.headers.get("X-Request-Id") or ""
+            self._rid = rid if _RID.match(rid) else uuid.uuid4().hex[:16]
+            if self.path.startswith("/api/v1/"):         # the same API under a versioned prefix: an integrator can pin /api/v1 before anything changes
+                self.path = "/api/" + self.path[len("/api/v1/"):]
             why = self._foreign()
             if why:
                 return self._json(403, {"error": why})
@@ -608,6 +694,7 @@ def make_handler(c: Console):
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.send_header("Content-Length", str(len(b)))
                 self.send_header("Retry-After", str(wait))
+                self.send_header("Cache-Control", "no-store")
                 self.end_headers()
                 self.wfile.write(b)
                 return
@@ -619,8 +706,36 @@ def make_handler(c: Console):
                 self._json(e.code, {"error": str(e)})
             except (ValueError, KeyError, TypeError) as e:
                 self._json(400, {"error": f"bad request: {e}"})
+            except vision_consent.ConsentRequired as e:
+                self._json(409, {"error": str(e), "consent_required": True})
+            except (BrokenPipeError, ConnectionError):
+                pass                                     # the client went away; nothing to answer
+            except Exception as e:                       # anything else is OUR fault: a JSON 500, the detail stays on this console (never in the answer)
+                self._internal(e)
             finally:
                 pl.OWNER.reset(tok)
+
+        def _internal(self, e: Exception):
+            from ..obs import trace
+            print(f"[mirsal] 500 {self.command} {urlparse(self.path).path} [{self._rid}]: {type(e).__name__}: {trace.scrub_paths(str(e))[:300]}", file=sys.stderr, flush=True)
+            if not getattr(self, "_started", False):
+                self._json(500, {"error": "internal error", "request_id": self._rid})
+
+        def send_response(self, code, message=None):
+            self._started = True
+            super().send_response(code, message)
+
+        def send_error(self, code, message=None, explain=None):
+            """The base class answers with an HTML page; every answer of this server is JSON (docs/api.md)."""
+            msg = message or (self.responses.get(code) or ("error",))[0]
+            b = json.dumps({"error": msg}).encode()
+            self.send_response(code, message)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(b)))
+            self.send_header("Connection", "close")
+            self.end_headers()
+            if self.command != "HEAD" and code >= 200 and code not in (204, 304):
+                self.wfile.write(b)
 
         def do_GET(self):
             self._guard(self._get)
@@ -657,6 +772,18 @@ def make_handler(c: Console):
                 st = telegram.status(c.out)
                 name = parse_qs(urlparse(self.path).query).get("name", [None])[0]
                 return self._json(200, dict(telegram.plan(c.lib, path.split("/")[3], st["bot"], name, c.cfg), status=st))
+            if path.startswith("/api/packs/") and path.endswith("/export.zip"):        # the pack's files as a plain download (no Telegram wording)
+                try:
+                    data, stem = c.lib.export_zip(path.split("/")[3])
+                except LibraryError as e:
+                    raise pl.PipelineError(str(e), e.code)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/zip")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Content-Disposition", f'attachment; filename="{stem}.zip"')
+                self.end_headers()
+                self.wfile.write(data)
+                return
             if path.startswith("/api/packs/") and path.endswith("/telegram.zip"):      # no-credentials fallback: files for @stickers
                 data, name = telegram.zip_for_stickers_bot(c.lib, path.split("/")[3])
                 self.send_response(200)
@@ -709,7 +836,8 @@ def make_handler(c: Console):
                 return self._json(200, {"agent": _brain.target(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
                                         "live": higgsfield.available()})
             if path == "/api/chat/sessions":
-                return self._json(200, {"sessions": c.chat_parts(self.user)[0].list()})
+                rows, meta = self._page(c.chat_parts(self.user)[0].list())
+                return self._json(200, {"sessions": rows, **meta})
             if path.startswith("/api/chat/sessions/") and len(path.strip("/").split("/")) == 4:
                 from ..agent.memory import SessionError as _SE
                 store, tools, _agent, ag = c.chat_parts(self.user)
@@ -721,7 +849,7 @@ def make_handler(c: Console):
                 from . import openapi as _oa
                 return self._json(200, _oa.build(f"http://{self.headers.get('Host') or '127.0.0.1'}"))
             if path in ("/api/health", "/api/health/models", "/api/health/storage"):     # what is this app connected to, and is it healthy
-                from .. import health as _h
+                from ..runtime import health as _h
                 if path.endswith("/models"):
                     return self._json(200, _h.models())
                 if path.endswith("/storage"):
@@ -765,6 +893,14 @@ def make_handler(c: Console):
                 fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))
                 png = gates.preview_sheet(c.out, int(path.split("/")[3]), c.cfg, fill, int(q.get("px", ["420"])[0]))
                 return self._send(200, png, "image/png")
+            if path.startswith("/api/generations/") and path.endswith("/history"):            # every sticker's decisions of one batch, grouped by stage (the Studio's folded history)
+                gid = int(path.split("/")[3])
+                idx = parse_qs(urlparse(self.path).query).get("index")
+                return self._json(200, sticker_history.batch_history(pl.read_result(c.out, gid), f"G{gid:03d}", int(idx[0]) if idx else None))
+            if path.startswith("/api/generations/") and path.endswith("/captions"):          # the stored AI caption of every cell of the sheet: read-only, no model, no consent
+                return self._json(200, transcribe.sheet_with_captions(c.out, int(path.split("/")[3])))
+            if path == "/api/metrics":              # quality and timing numbers over every batch (owner only: not in MEMBER_GET)
+                return self._json(200, metrics.collect(c.out))
             if path == "/api/history":              # the Studio's persistent history of batches, a page at a time
                 q = parse_qs(urlparse(self.path).query)
                 return self._json(200, pl.history(c.out, int(q.get("offset", ["0"])[0]), int(q.get("limit", ["5"])[0])))
@@ -784,8 +920,10 @@ def make_handler(c: Console):
                 st = parse_qs(urlparse(self.path).query).get("status", [None])[0]
                 rows = jobs.list(c.out, st)
                 if self.user.get("role") != "owner":
-                    return self._json(200, {"jobs": [j for j in rows if (j.get("request") or {}).get("user") == self.user["id"]]})
-                return self._json(200, {"jobs": rows, "typical": usage.typical(c.out)})
+                    page, meta = self._page([j for j in rows if (j.get("request") or {}).get("user") == self.user["id"]])
+                    return self._json(200, {"jobs": page, **meta})
+                page, meta = self._page(rows)
+                return self._json(200, {"jobs": page, "typical": usage.typical(c.out), **meta})
             if path.startswith("/api/jobs/") and len(path.strip("/").split("/")) == 3:
                 try:
                     return self._json(200, jobs.read(c.out, path.strip("/").split("/")[2]))
@@ -793,8 +931,10 @@ def make_handler(c: Console):
                     raise pl.PipelineError(str(e), e.code)
             if path == "/api/generations":
                 if self.user.get("role") != "owner":
-                    return self._json(200, {"busy": c.lock.locked(), "generations": [g for g in pl.summary(c.out) if g.get("owner") == self.user["id"]]})
-                return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": pl.summary(c.out)})
+                    page, meta = self._page([g for g in pl.summary(c.out) if g.get("owner") == self.user["id"]])
+                    return self._json(200, {"busy": c.lock.locked(), "generations": page, **meta})
+                page, meta = self._page(pl.summary(c.out))
+                return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": page, **meta})
             if path.startswith("/api/generations/"):
                 gid = int(path.rsplit("/", 1)[1])
                 st = pl.state(c.out, gid)
@@ -822,7 +962,7 @@ def make_handler(c: Console):
                     raise pl.PipelineError("not found", 404)
                 ctype = mimetypes.guess_type(f.name)[0] or "application/octet-stream"
                 return self._send(200, f.read_bytes(), ctype)
-            raise pl.PipelineError("not found", 404)
+            raise pl.PipelineError(NO_ROUTE, 404)
 
         def _post_projects(self, path, query):
             pr, lib = c.projects, c.lib
@@ -865,7 +1005,7 @@ def make_handler(c: Console):
                 self.end_headers()
                 self.wfile.write(data)
                 return
-            raise pl.PipelineError("not found", 404)
+            raise pl.PipelineError(NO_ROUTE, 404)
 
         def _post_library(self, path, query):
             lib = c.lib
@@ -946,7 +1086,7 @@ def make_handler(c: Console):
             if path.startswith("/api/cutout") or path.startswith("/api/packs"):
                 if self._post_library(path, parse_qs(u.query)):
                     return
-                raise pl.PipelineError("not found", 404)
+                raise pl.PipelineError(NO_ROUTE, 404)
             if path == "/api/live/ref":          # a reference image for the next sheet (raw body, ?name=file.png)
                 return self._json(200, c.save_ref(self._raw(15 * 1024 * 1024), parse_qs(u.query).get("name", ["ref.png"])[0]))
             parts = path.strip("/").split("/")
@@ -969,7 +1109,7 @@ def make_handler(c: Console):
                 elif act == "update":
                     r = {"user": c.users.update(up[2], body.get("can_spend"), body.get("role"), body.get("name"))}
                 else:
-                    raise pl.PipelineError("not found", 404)
+                    raise pl.PipelineError(NO_ROUTE, 404)
                 from ..store import sync as _sync
                 _sync.sync_users(c.out)
                 return self._json(200, r)
@@ -977,6 +1117,8 @@ def make_handler(c: Console):
                 return self._json(200, telegram.save_config(c.out, str(body.get("token", "")), str(body.get("user_id", ""))))
             if path == "/api/telegram/disconnect":
                 return self._json(200, telegram.disconnect(c.out))
+            if path == "/api/stickers/move":        # bulk move into one pack, all or nothing: {to, items: [{pack_id, id}, ...]}
+                return self._json(200, c.lib.move_stickers([x for x in body.get("items", []) if isinstance(x, dict)], str(body.get("to", ""))))
             if path == "/api/stickers/delete":      # bulk delete from the library: [{pack_id, id}, ...]
                 return self._json(200, {"deleted": c.lib.delete_stickers([x for x in body.get("items", []) if isinstance(x, dict)])})
             if path == "/api/watch/remove":      # to the trash, never straight to nothing
@@ -1001,7 +1143,7 @@ def make_handler(c: Console):
                         return self._json(202, c.idem("chat:" + cp[3], self.headers.get("Idempotency-Key"), lambda: c.chat_send(cp[3], body, self.user)))
                     if len(cp) == 5 and cp[4] == "settings":
                         sess = store.load(cp[3])
-                        allowed = {"grid": ("2x2", "3x3"), "ask_before_spending": (True, False), "ai": (True, False)}
+                        allowed = {"grid": ("2x2", "3x3"), "ask_before_spending": (True, False), "ai": (True, False), "allow_vlm": (True, False)}
                         for k, v in body.items():
                             if k in allowed and v in allowed[k]:
                                 sess["settings"][k] = v
@@ -1014,9 +1156,12 @@ def make_handler(c: Console):
                         return self._json(200, {"deleted": cp[3]})
                 except _SE as e:
                     raise pl.PipelineError(str(e), e.code)
-                raise pl.PipelineError("not found", 404)
+                raise pl.PipelineError(NO_ROUTE, 404)
             if path.startswith("/api/live/"):
-                return self._json(200, self._live(path.rsplit("/", 1)[1], body))
+                what = path.rsplit("/", 1)[1]
+                if what in ("sheet", "video"):          # these spend credits: the same Idempotency-Key answers with the first job instead of starting (and paying for) another
+                    return self._json(200, c.idem(f"live:{what}:{self.user['id']}", self.headers.get("Idempotency-Key"), lambda: self._live(what, body)))
+                return self._json(200, self._live(what, body))
             if path == "/api/jobs":      # S2: the Generate page creates a sheet job ("Generate it"), the operator fulfils it
                 try:
                     return self._json(200, jobs.create(c.out, str(body.get("kind", "sheet")),
@@ -1043,19 +1188,22 @@ def make_handler(c: Console):
                         return self._json(200, job)
                 except jobs.JobError as e:
                     raise pl.PipelineError(str(e), e.code)
-                raise pl.PipelineError("not found", 404)
+                raise pl.PipelineError(NO_ROUTE, 404)
             if path == "/api/generations" and body.get("task"):      # Run: a generation linked to its reserved task
                 if self.user.get("role") != "owner":
                     raise pl.PipelineError("this account cannot do that (owner only)", 403)
-                if c.lock.locked():
-                    raise pl.PipelineError("busy", 409)
-                t = tasks.read_task(c.out, body["task"])
-                gid = pl.start(t["prompt"], c.out, c.inp, pick=tasks.pick_for_task(c.inp, t, int(body.get("take", 0))), task=t,
-                               outline=int(body["outline"]) if body.get("outline") is not None else None,
-                               erode=int(body["erode"]) if body.get("erode") is not None else None)
-                tasks.link_generation(c.out, t["id"], gid)
-                c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
-                return self._json(202, {"id": gid})
+
+                def run_task():
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy", 409)
+                    t = tasks.read_task(c.out, body["task"])
+                    gid = pl.start(t["prompt"], c.out, c.inp, pick=tasks.pick_for_task(c.inp, t, int(body.get("take", 0))), task=t,
+                                   outline=int(body["outline"]) if body.get("outline") is not None else None,
+                                   erode=int(body["erode"]) if body.get("erode") is not None else None)
+                    tasks.link_generation(c.out, t["id"], gid)
+                    c.submit(lambda: pl.run_stills(c.out, gid, c.cfg, c.pace))
+                    return {"id": gid}
+                return self._json(202, c.idem("generation-task:" + self.user["id"], self.headers.get("Idempotency-Key"), run_task))
             if path == "/api/assets/sign":      # {key, ttl?}: a signed, expiring link to one file under out/ (never a path the page invents)
                 from ..store.assets import AssetError, LocalAssetStore
                 store = LocalAssetStore(c.out)
@@ -1141,6 +1289,7 @@ def make_handler(c: Console):
                 if parts[3] == "reslice":        # apply the batch's current edge to the animations again, from the stored video (no credits)
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    pl.read_result(c.out, gid)                    # a batch that does not exist is a 404 now, not a 202 and a dead thread
                     c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
                     return self._json(202, {"id": gid})
                 if parts[3] == "video_sheet":
@@ -1153,13 +1302,23 @@ def make_handler(c: Console):
                     new = pl.regen(c.out, c.inp, gid, int(body["index"]), body.get("subject"))
                     c.submit(lambda: pl.run_stills(c.out, new, c.cfg, c.pace))
                     return self._json(202, {"id": new})
+                if parts[3] == "captions":       # write the AI caption of every cell (a model call per cell): the person must have allowed AI vision, in this very request
+                    vision_consent.require(body.get("allow_vlm"))
+                    pl.read_result(c.out, gid)
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    force = bool(body.get("force"))
+                    c.submit(lambda: transcribe.captions_for(c.out, gid, force=force, allowed=True))
+                    return self._json(202, {"id": gid, "force": force})
                 if parts[3] == "judge":          # the vision model pre-reviews the stickers (S6): history lines only, a human still decides
+                    vision_consent.require(body.get("allow_vlm"))                  # AI vision is the person's call, asked once and sent with the request
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     from ..vision import judge as _vj
                     if _vj.status()["provider"] == "none":
                         raise pl.PipelineError("No vision backend: start LM Studio (MIRSAL_LOCAL_URL) or set OPENAI_API_KEY.", 409)
                     scope = "anim" if body.get("scope") == "anim" else "still"
+                    pl.read_result(c.out, gid)                    # same: unknown batch = 404
                     c.submit(lambda: _vj.judge_generation(c.out, gid, scope, force=bool(body.get("force"))))
                     return self._json(202, {"id": gid, "scope": scope})
                 if parts[3] == "quick_sheet":
@@ -1206,7 +1365,7 @@ def make_handler(c: Console):
                         return self._json(200, {"noop": True, "message": "Already animated."})
                     c.submit(lambda: pl.run_animate(c.out, gid, c.cfg, scope, index, c.pace))
                     return self._json(202, {"id": gid, "noop": False})
-            raise pl.PipelineError("not found", 404)
+            raise pl.PipelineError(NO_ROUTE, 404)
     return H
 
 

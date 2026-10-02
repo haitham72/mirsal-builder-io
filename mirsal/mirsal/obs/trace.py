@@ -11,7 +11,7 @@ per pipeline event (`pipeline.emit` is the single event sink, so every stage and
 0 for REJECT/BLOCK, comment = the reason.
 
 What leaves the machine: ids, slot JSON, prompts, metrics, decisions. Never image or video bytes (bytes values are replaced by
-their length) and never a file path outside the generation. The project is `MIRSAL_LANGSMITH_PROJECT` (default `mirsal`);
+their length) and never a file path outside the generation (`safe()` replaces an absolute path in any text with `<path>/name`). The project is `MIRSAL_LANGSMITH_PROJECT` (default `mirsal`);
 LANGSMITH_PROJECT is deliberately ignored, because mirsal/.env may hold another project's settings.
 Not yet run against a live LangSmith project: the shapes follow its REST documentation and are tested against a fake server."""
 from __future__ import annotations
@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 import queue
+import re
 import threading
 import time
 import urllib.request
@@ -59,9 +60,15 @@ def _endpoint() -> str:
     return os.environ.get("LANGSMITH_ENDPOINT", "https://api.smith.langchain.com").rstrip("/")
 
 
+def _tls():
+    """The tolerant TLS context (a malformed Windows certificate-store entry must not silently drop every trace)."""
+    from ..services.telegram import _ssl_context
+    return _ssl_context()
+
+
 def _reachable() -> bool:
     try:
-        urllib.request.urlopen(urllib.request.Request(_endpoint() + "/info", method="GET"), timeout=3)
+        urllib.request.urlopen(urllib.request.Request(_endpoint() + "/info", method="GET"), timeout=3, context=_tls())
         return True
     except Exception:
         return False
@@ -75,8 +82,18 @@ def _dotted(t: float, run_id: str) -> str:
     return datetime.fromtimestamp(t, tz=timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + run_id
 
 
+_WIN_PATH = re.compile(r"(?<!\w)[A-Za-z]:[\\/](?:[^\\/\s'\"<>|:*?]+[\\/])*([^\\/\s'\"<>|:*?]*)")
+_POSIX_PATH = re.compile(r"(?<![\w.:/])/(?:Users|home|tmp|var|private|mnt|opt|root|Volumes|srv)/(?:[^/\s'\"<>|]+/)*([^/\s'\"<>|]*)")
+
+
+def scrub_paths(text: str) -> str:
+    """An absolute file path in free text (an exception message, a log line) becomes `<path>/name`: where a machine keeps its files never leaves it,
+    the file name stays so the message is still readable. Relative paths and URL paths are left alone."""
+    return _POSIX_PATH.sub(r"<path>/\1", _WIN_PATH.sub(r"<path>/\1", text))
+
+
 def safe(v, depth: int = 0):
-    """JSON-safe copy for a payload: bytes become their length, long strings are cut, depth is bounded."""
+    """JSON-safe copy for a payload: bytes become their length, absolute paths their file name, long strings are cut, depth is bounded."""
     if isinstance(v, (bytes, bytearray)):
         return f"<{len(v)} bytes>"
     if depth > 4:
@@ -86,10 +103,11 @@ def safe(v, depth: int = 0):
     if isinstance(v, (list, tuple)):
         return [safe(x, depth + 1) for x in list(v)[:60]]
     if isinstance(v, str):
+        v = scrub_paths(v)
         return v if len(v) <= 4000 else v[:4000] + "..."
     if isinstance(v, (int, float, bool)) or v is None:
         return v
-    return str(v)[:500]
+    return scrub_paths(str(v))[:500]
 
 
 class Ref(dict):
@@ -119,7 +137,7 @@ class Tracer:
         req = urllib.request.Request(_endpoint() + path, data=json.dumps(payload).encode(), method=method,
                                      headers={"content-type": "application/json", "x-api-key": self.key})
         try:
-            urllib.request.urlopen(req, timeout=10).read()
+            urllib.request.urlopen(req, timeout=10, context=_tls()).read()
             self.sent += 1
         except Exception as e:
             self.dropped += 1

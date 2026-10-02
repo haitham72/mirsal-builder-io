@@ -34,7 +34,7 @@ def status() -> dict:
 
 
 def _default_out() -> Path:
-    from ..paths import out_root
+    from ..runtime.paths import out_root
     try:
         return out_root().resolve()
     except Exception:

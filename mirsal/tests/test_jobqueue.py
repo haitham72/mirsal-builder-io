@@ -1,4 +1,4 @@
-"""The durable job queue (jobqueue.py, migration 007) and its workers, on a throwaway Postgres database (mirsal_test; skipped when mirsal-db is not running).
+"""The durable job queue (generation/jobqueue.py, migration 007) and its workers, on a throwaway Postgres database (mirsal_test; skipped when mirsal-db is not running).
 The provider is the fake CLI of test_live: no credits are ever spent."""
 import os
 import threading
@@ -10,8 +10,8 @@ from unittest import mock
 TEST_URL = "postgresql://mirsal:mirsal_local@localhost:5434/mirsal_test"
 os.environ["MIRSAL_DATABASE_URL"] = TEST_URL
 
-from mirsal import higgsfield, jobqueue, jobs                      # noqa: E402
-from mirsal import tasks as _tasks                                  # noqa: E402
+from mirsal.generation import higgsfield, jobqueue, jobs  # noqa: E402
+from mirsal.generation import tasks as _tasks  # noqa: E402
 from tests.test_live import Base, FakeCLI                           # noqa: E402
 
 
@@ -243,7 +243,7 @@ class WorkerTests(Base):
 
     def test_the_paid_call_lock_spans_processes(self):
         """Another process holding out/.paid.lock makes a worker wait: two paid calls never overlap on one machine."""
-        from mirsal.writer_lock import WriterLock
+        from mirsal.runtime.writer_lock import WriterLock
         j = self.sheet_job()
         other = WriterLock(self.out, "another worker", ".paid.lock").acquire()
         t = threading.Thread(target=jobqueue.run_one, args=(self.out, "w1"))
@@ -309,7 +309,7 @@ class ServerQueueTests(Base):
             self.assertEqual(jobqueue.stats(c)["awaiting_follow_up"], 0)
 
     def test_health_reports_the_queue(self):
-        from mirsal import health
+        from mirsal.runtime import health
         d = health.queue(self.out)
         self.assertEqual((d["mode"], d["queued"], d["dead"]), ("queue", 0, 0))
 

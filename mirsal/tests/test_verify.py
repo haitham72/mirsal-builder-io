@@ -1,4 +1,5 @@
-"""The verifier catalogue: every check has a PASS fixture and a FAIL fixture (docs/engine-and-studio.md, "Rules")."""
+"""The verifier catalogue, with PASS and FAIL fixtures for the checks named here. NOT every one of the 44 has both yet: HANDOFF.md lists the checks no test names, and
+`tests/test_hardening.py` pins the catalogue's size, so a new check cannot be added without this list being looked at."""
 import hashlib
 import tempfile
 import unittest
@@ -278,7 +279,7 @@ class SlotStageTests(unittest.TestCase):
     def test_out_of_bounds_animation_is_made_but_blocked_for_review(self):
         import tempfile
         from pathlib import Path
-        from mirsal import pipeline as pl
+        from mirsal.flow import pipeline as pl
         from mirsal.engine.video import AnimationResult
         drift = frames_of(disc_at(lambda t: 100 - t * 4.5, lambda t: 100))
         rep = verify.Report(verify.run("slot", {"cell_frames": drift}, CFG))

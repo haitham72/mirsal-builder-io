@@ -3,8 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from mirsal import pipeline as pl
-from mirsal import prompter
+from mirsal.flow import pipeline as pl
+from mirsal.generation import prompter
 
 MARGIN = "generous empty margin on every side"
 

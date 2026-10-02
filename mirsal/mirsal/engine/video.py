@@ -90,14 +90,18 @@ def support(frames: np.ndarray) -> np.ndarray:
 
 
 def close_loop(frames: np.ndarray, m: int) -> np.ndarray:
-    """Blend the tail into the head and drop the tail, so the last frame flows into the first."""
+    """Close a clip that does not loop by easing its LAST `m` frames into frame 0 (the last frame becomes frame 0 itself, so the wrap has no jump).
+    The head is never touched: the clip starts on its own first frame, the approved pose and the thumbnail. (It used to start on the tail's pose and
+    dissolve into the head, which showed as a ghost on the first frames.) The last `m` source frames are dropped to make room for the fade."""
     n = len(frames)
     if m < 1 or n < 2 * m + 2:
         return frames
     out = frames[: n - m].astype(np.float32).copy()
-    for k in range(m):
-        w = k / m               # first frame = pure tail (continues the last frame), then fade to the head
-        out[k] = (1 - w) * frames[n - m + k].astype(np.float32) + w * frames[k].astype(np.float32)
+    head = frames[0].astype(np.float32)
+    for j in range(m):
+        t = (j + 1) / m
+        w = t * t * (3 - 2 * t)         # smoothstep: starts gently, ends on frame 0 and slows into it
+        out[n - 2 * m + j] = (1 - w) * out[n - 2 * m + j] + w * head
     return np.clip(out + 0.5, 0, 255).astype(np.uint8)
 
 
@@ -110,7 +114,7 @@ def vp9_missing(cells) -> list[AnimationResult] | None:
             for i in cells]
 
 
-CACHE_VERSION = 2      # bump when an engine change makes old cached animations wrong
+CACHE_VERSION = 3      # bump when an engine change makes old cached animations wrong
 
 
 class AnimCache:

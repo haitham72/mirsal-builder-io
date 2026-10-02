@@ -10,11 +10,11 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from mirsal import matte
+from mirsal.media import matte
 from mirsal.engine import ffmpeg as ff
 from mirsal.engine.config import EngineConfig
-from mirsal.library import Library, LibraryError
-from mirsal.video_project import Projects, decode_overlays
+from mirsal.media.library import Library, LibraryError
+from mirsal.media.video_project import Projects, decode_overlays
 
 W, H, N, FPS = 240, 160, 60, 30            # 2 s, landscape
 

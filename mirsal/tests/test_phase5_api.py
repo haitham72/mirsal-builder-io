@@ -11,7 +11,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from mirsal import cache as cachemod, higgsfield
+from mirsal.generation import higgsfield
+from mirsal.runtime import cache as cachemod
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
 from tests.test_console import build_inputs

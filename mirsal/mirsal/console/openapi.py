@@ -106,10 +106,13 @@ ROUTES = [
     ("GET", "/api/generations/{id}/files", "Generations", "Where the batch's files are", None, OBJ, 200),
     ("GET", "/api/generations/{id}/edge_preview", "Generations", "One sticker with a stroke / trim, rendered on the fly (image/png)", None, None, 200),
     ("GET", "/api/generations/{id}/sheet_preview", "Generations", "The video sheet at a given fill (image/png)", None, None, 200),
+    ("GET", "/api/generations/{id}/history", "Generations", "Every sticker's generation history, folded: {generation_id, stickers: [{id, index, key, name, status, review, lines, shown, last, stages: [{stage, count, last, lines}]}]}, decisions grouped by stage in the order they happened, newest line first; ?index=N for one sticker", None, OBJ, 200),
     ("POST", "/api/generations/{id}/more", "Generations", "The next prepared variation of the same subject", None, obj({"id": INT}), 202),
     ("POST", "/api/generations/{id}/regen", "Generations", "Regenerate one sticker as a 1x1 child batch", obj({"index": INT, "subject": STR}, ["index"]), obj({"id": INT}), 202),
     ("POST", "/api/generations/{id}/review", "Gates", "A human decision at a gate (Python's blocks are final)", ref("Review"), OBJ, 200),
-    ("POST", "/api/generations/{id}/judge", "Gates", "The vision model pre-reviews the stickers (history lines only)", ref("Judge"), obj({"id": INT, "scope": STR}), 202),
+    ("POST", "/api/generations/{id}/judge", "Gates", "The vision model pre-reviews the stickers (history lines only). Needs allow_vlm: true in the body (409 with consent_required otherwise): AI vision is the person's yes, asked once", ref("Judge"), obj({"id": INT, "scope": STR}), 202),
+    ("GET", "/api/generations/{id}/captions", "Gates", "The stored AI caption of every cell of the sheet (grid read from result.json, 2x2 or 3x3): {generation_id, grid, cells: [{index, row, col, png, caption, text_visible, verdict, reasons, model}], missing, ready}. Read-only: no model, no consent", None, OBJ, 200),
+    ("POST", "/api/generations/{id}/captions", "Gates", "Write the missing AI captions in the background (a model call per cell). Needs allow_vlm: true (409 with consent_required otherwise); {force?} captions again", obj({"allow_vlm": BOOL, "force": BOOL}, ["allow_vlm"]), obj({"id": INT, "force": BOOL}), 202),
     ("POST", "/api/generations/{id}/video_sheet", "Gates", "Build the video sheet from the approved stills", None, OBJ, 200),
     ("POST", "/api/generations/{id}/quick_sheet", "Gates", "Approve the kept stills, build and approve the video sheet (one click)", None, OBJ, 200),
     ("POST", "/api/generations/{id}/video_sheet/{aid}/video", "Gates", "Attach a returned video (raw body) to a video sheet and slice it", None, OBJ, 200),
@@ -122,26 +125,28 @@ ROUTES = [
     ("POST", "/api/generations/{id}/recheck", "Generations", "Run the border check on animations made before it existed", None, OBJ, 202),
     ("POST", "/api/generations/{id}/edit", "Generations", "Save an edited still in place", OBJ, OBJ, 200),
     ("POST", "/api/generations/{id}/studio_edit", "Generations", "Layered edit of a sticker and its animation (open / commit)", OBJ, OBJ, 200),
-    ("POST", "/api/generations/{id}/render", "Generations", "Render a sticker with layers", OBJ, None, 200),
-    ("POST", "/api/generations/{id}/stickers", "Generations", "Sticker operations of a batch", OBJ, OBJ, 200),
     ("POST", "/api/generations/{id}/add", "Packs", "Add the approved stickers to a pack", OBJ, OBJ, 200),
     ("POST", "/api/generations/{id}/pack_add", "Packs", "Add chosen stickers to a pack", OBJ, OBJ, 200),
-    ("POST", "/api/generations/{id}/telegram", "Packs", "Send the batch's pack to Telegram", OBJ, OBJ, 200),
     ("POST", "/api/generations/{id}/reveal", "Generations", "Open the batch's folder in the file manager", None, obj({"opened": STR}), 200),
-    ("POST", "/api/generations/{id}/delete", "Generations", "Move a batch to the trash", None, OBJ, 200),
     ("GET", "/api/history", "Generations", "Every batch, the most recently edited first, a page at a time", None, OBJ, 200),
     ("GET", "/api/inputs", "Generations", "The prepared sheets found in the watch folders", None, OBJ, 200),
     # --- live generation
     ("POST", "/api/live/cost", "Live generation", "Price one call of a model (a quote, free)", OBJ, OBJ, 200),
-    ("POST", "/api/live/sheet", "Live generation", "Reserve a task (the G1 approval) and start the sheet job; spends credits", ref("LiveSheet"), ref("LiveJob"), 200),
-    ("POST", "/api/live/video", "Live generation", "Start the Kling job for a built video sheet; spends credits", OBJ, OBJ, 200),
+    ("POST", "/api/live/sheet", "Live generation", "Reserve a task (the G1 approval) and start the sheet job; spends credits. Idempotency-Key supported", ref("LiveSheet"), ref("LiveJob"), 200),
+    ("POST", "/api/live/video", "Live generation", "Start the Kling job for a built video sheet; spends credits. Idempotency-Key supported", OBJ, OBJ, 200),
     ("POST", "/api/live/ref", "Live generation", "Store a reference image (raw body, ?name=)", None, OBJ, 200),
     ("GET", "/api/jobs", "Live generation", "Jobs for the operator, newest first", None, obj({"jobs": arr(ref("Job"))}), 200),
     ("POST", "/api/jobs", "Live generation", "Create a job file", OBJ, ref("Job"), 200),
     ("GET", "/api/jobs/{id}", "Live generation", "One job (the page polls it while waiting)", None, ref("Job"), 200),
+    ("POST", "/api/jobs/{id}/claim", "Live generation", "Operator (owner only): store the provider ticket BEFORE waiting {ticket}", OBJ, ref("Job"), 200),
+    ("POST", "/api/jobs/{id}/done", "Live generation", "Operator (owner only): attach the finished file {file, model, cost?}", OBJ, ref("Job"), 200),
+    ("POST", "/api/jobs/{id}/fail", "Live generation", "Operator (owner only): mark the job failed {reason}", OBJ, ref("Job"), 200),
+    ("POST", "/api/jobs/{id}/requeue", "Live generation", "Operator (owner only): a TIMEOUT / FAILED job asks again; a job that holds a provider ticket waits for the same provider job (no second charge)", None, ref("Job"), 200),
+    ("POST", "/api/jobs/{id}/retry", "Live generation", "A human retry of a FAILED / TIMEOUT job: the same provider job when it has a ticket, else a fresh request (owner only)", None, ref("Job"), 200),
     ("GET", "/api/models", "Live generation", "Curated models, every other Higgsfield model, and the style presets", None, OBJ, 200),
     ("GET", "/api/higgsfield", "Live generation", "Is the CLI there, the balance, today's spend (never a credential)", None, OBJ, 200),
     ("GET", "/api/usage", "Live generation", "The model-call ledger rolled up", None, OBJ, 200),
+    ("GET", "/api/metrics", "Generations", "Quality and timing numbers over every batch (owner only): time to the first sticker, approval rates at the two gates, the regeneration rate, per-batch lines", None, OBJ, 200),
     ("GET", "/api/ai", "Live generation", "Is a language model available (never the key)", None, OBJ, 200),
     ("GET", "/api/vision", "Gates", "The vision judge: model and policy", None, OBJ, 200),
     ("POST", "/api/plan", "Live generation", "Preview a plan; nothing is reserved", OBJ, OBJ, 200),
@@ -156,19 +161,20 @@ ROUTES = [
     # --- library and packs
     ("GET", "/api/library", "Library", "Packs, recent stickers, totals", None, OBJ, 200),
     ("POST", "/api/packs", "Library", "Create a pack", OBJ, OBJ, 200),
-    ("GET", "/api/packs/{id}", "Library", "A pack", None, OBJ, 200),
     ("POST", "/api/packs/{id}", "Library", "Rename, reorder or set the cover of a pack", OBJ, OBJ, 200),
     ("POST", "/api/packs/{id}/delete", "Library", "Delete a pack", None, OBJ, 200),
     ("POST", "/api/packs/{id}/stickers", "Library", "Add a sticker to a pack", OBJ, OBJ, 200),
     ("POST", "/api/packs/{id}/render", "Library", "Save the editor's 512x512 canvas as a sticker (raw PNG body)", None, OBJ, 200),
     ("POST", "/api/packs/{id}/stickers/{sid}", "Library", "Update a sticker", OBJ, OBJ, 200),
     ("POST", "/api/packs/{id}/stickers/{sid}/animate", "Library", "Animate a library sticker", OBJ, OBJ, 200),
-    ("POST", "/api/packs/{id}/stickers/{sid}/move", "Library", "Reorder a sticker", OBJ, OBJ, 200),
+    ("POST", "/api/packs/{id}/stickers/{sid}/move", "Library", "Move one sticker into another pack: {to}", OBJ, OBJ, 200),
+    ("POST", "/api/stickers/move", "Library", "Bulk move into one pack, all or nothing: {to, items: [{pack_id, id}]} -> {moved, skipped, to}", OBJ, OBJ, 200),
     ("POST", "/api/packs/{id}/stickers/{sid}/delete", "Library", "Remove a sticker", None, OBJ, 200),
     ("POST", "/api/stickers/delete", "Library", "Bulk delete: [{pack_id, id}]", OBJ, OBJ, 200),
     ("POST", "/api/cutout", "Library", "A photo (raw body) becomes a cut-out PNG; X-Cutout header describes the method", None, None, 200),
     ("POST", "/api/packs/{id}/telegram", "Telegram", "Create the pack on Telegram, or add what is new", OBJ, OBJ, 200),
     ("GET", "/api/packs/{id}/telegram", "Telegram", "Dry run: what would be created and every problem", None, OBJ, 200),
+    ("GET", "/api/packs/{id}/export.zip", "Library", "Download the pack: every sticker file (.webm animated, .png / .webp static, the engine's file names) and a manifest.json (application/zip)", None, None, 200),
     ("GET", "/api/packs/{id}/telegram.zip", "Telegram", "No-credentials fallback: the files for @stickers (application/zip)", None, None, 200),
     ("GET", "/api/telegram", "Telegram", "Connected or not and which bot (never the token)", None, OBJ, 200),
     ("POST", "/api/telegram/config", "Telegram", "Save the bot token and user id", obj({"token": STR, "user_id": STR}), OBJ, 200),
@@ -204,14 +210,17 @@ def build(server_url: str = "http://127.0.0.1:8770") -> dict:
     paths: dict = {}
     for method, path, tag, summary, req, resp, status in ROUTES:
         op: dict = {"tags": [tag], "summary": summary, "operationId": method.lower() + "_" + path.strip("/").replace("/", "_").replace("{", "").replace("}", "").replace(".", "_").replace("-", "_"),
-                    "responses": {str(status): {"description": "ok"}, "400": ERR, "401": ERR, "403": ERR, "404": ERR, "409": ERR, "429": ERR}}
+                    "responses": {str(status): {"description": "ok"}, "400": ERR, "401": ERR, "403": ERR, "404": ERR, "409": ERR, "429": ERR, "500": ERR}}
         if resp is not None:
             ctype = "text/event-stream" if path.endswith("/events") else "application/json"
             op["responses"][str(status)]["content"] = {ctype: {"schema": resp}}
         if req is not None:
             op["requestBody"] = {"required": True, "content": {"application/json": {"schema": req}}}
         params = _params(path)
-        if method == "POST" and ("messages" in path or path == "/api/generations"):
+        if method == "GET" and path in ("/api/generations", "/api/jobs", "/api/chat/sessions"):
+            params += [{"name": "limit", "in": "query", "required": False, "schema": INT, "description": "1-500: page the list; the answer then adds total, limit, offset"},
+                       {"name": "offset", "in": "query", "required": False, "schema": INT, "description": "how many to skip (0 or more)"}]
+        if method == "POST" and ("messages" in path or path in ("/api/generations", "/api/live/sheet", "/api/live/video")):
             params.append({"name": "Idempotency-Key", "in": "header", "required": False, "schema": STR,
                            "description": "the same key within 24 h returns the first answer and runs nothing again"})
         if path.endswith("/events"):
@@ -222,7 +231,9 @@ def build(server_url: str = "http://127.0.0.1:8770") -> dict:
     return {"openapi": "3.1.0",
             "info": {"title": "Mirsal Builder API", "version": VERSION,
                      "description": "High-quality animated stickers: chats, generations, gates, live generation, library, Telegram. Everything is JSON addressable by id (G012, G012/S3, J004, S002). "
-                                    "See docs/api.md for the safety rules (Host/Origin guard, accounts and Bearer tokens, per-minute limits (429 + Retry-After), idempotency keys, signed links)."},
+                                    "See docs/api.md for the safety rules (Host/Origin guard, accounts and Bearer tokens, per-minute limits (429 + Retry-After), idempotency keys, signed links). "
+                                    "Every route is also served under /api/v1/...; every answer carries X-API-Version and X-Request-Id (send your own X-Request-Id to trace a call); "
+                                    "list routes take ?limit=1-500&offset=N (opt-in) and then report {total, limit, offset}."},
             "servers": [{"url": server_url}],
             "components": {"schemas": SCHEMAS, "securitySchemes": {"bearerAuth": {"type": "http", "scheme": "bearer"}}},
             "security": [{}, {"bearerAuth": []}],

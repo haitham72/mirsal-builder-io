@@ -34,6 +34,14 @@ mirsal/mirsal/console/dist/
 mirsal/web/test-results/
 mirsal/web/playwright-report/
 
+# mirsal/out/ is tracked ON PURPOSE (the real generations are the product's data, docs/engine-and-studio.md), but not these: account token digests,
+# the signed-link key, the lock files that change on every run, and the console logs
+mirsal/out/users.json
+mirsal/out/.asset_secret
+mirsal/out/.writer.lock
+mirsal/out/.paid.lock
+mirsal/out/*.log
+
 # Secrets: never commit tokens (Telegram bot token lives in env or out/telegram.json)
 Phase_01/telegram.md
 mirsal/telegram-id.md

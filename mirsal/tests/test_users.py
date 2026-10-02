@@ -1,4 +1,4 @@
-"""Accounts, ownership and rate limits (users.py + console/server.py): who may call, what a member can reach, and that a stranger's batch,
+"""Accounts, ownership and rate limits (runtime/users.py + console/server.py): who may call, what a member can reach, and that a stranger's batch,
 chat, job or file is a 404 (never a 403 that says it exists). Real server on synthetic prepared sheets; Redis replaced by a private in-memory cache;
 Higgsfield and the language model are never reached."""
 import http.client
@@ -12,10 +12,11 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from mirsal import cache as cachemod, higgsfield, jobs
+from mirsal.generation import higgsfield, jobs
+from mirsal.runtime import cache as cachemod
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
-from mirsal.users import LOCAL, UserError, UserStore
+from mirsal.runtime.users import LOCAL, UserError, UserStore
 from tests.test_console import build_inputs
 
 PAGE = {"Sec-Fetch-Site": "same-origin"}            # what a browser sends for the Studio's own fetches: the owner
@@ -86,7 +87,7 @@ class UsersServerTests(unittest.TestCase):
         os.environ["MIRSAL_LLM_PROVIDER"] = "openai"
         for k in ("OPENAI_API_KEY", "MIRSAL_API_TOKEN", "MIRSAL_RATE_WRITE", "MIRSAL_RATE_READ"):
             os.environ.pop(k, None)
-        from mirsal import llm
+        from mirsal.services import llm
         cls._loaded = llm._ENV_LOADED
         llm._ENV_LOADED = True
         cls.mem = cachemod.Cache(force_memory=True)
@@ -109,7 +110,7 @@ class UsersServerTests(unittest.TestCase):
         cls.c.release_writer()
         for p in cls.patches:
             p.stop()
-        from mirsal import llm
+        from mirsal.services import llm
         llm._ENV_LOADED = cls._loaded
         for k, v in cls.env.items():
             os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
@@ -181,7 +182,7 @@ class UsersServerTests(unittest.TestCase):
                      "/api/models", "/api/inputs", "/api/history", "/api/jobs/J999/x"):
             self.assertIn(self.req("GET", path, headers=self.A)[0], (403, 404), path)
         for path, body in (("/api/telegram/config", {"token": "x"}), ("/api/watch/remove", {"number": "1"}), ("/api/tasks", {"prompt": "x"}),
-                           ("/api/jobs", {"kind": "sheet"}), ("/api/packs", {"name": "p"}), ("/api/stickers/delete", {"items": []}),
+                           ("/api/jobs", {"kind": "sheet"}), ("/api/packs", {"name": "p"}), ("/api/stickers/delete", {"items": []}), ("/api/stickers/move", {"to": "x", "items": []}),
                            ("/api/projects", {}), ("/api/cutout", {})):
             self.assertEqual(self.req("POST", path, body, self.A)[0], 403, path)
         self.assertEqual(self.req("POST", "/api/generations", {"task": "T001", "prompt": "x"}, self.A)[0], 403)       # runs a reserved task: owner only
@@ -218,6 +219,20 @@ class UsersServerTests(unittest.TestCase):
         self.assertNotIn("paths", owned)
         self.assertNotIn("health", owned)
         self.assertEqual({x["owner"] for x in self.req("GET", "/api/generations", headers=PAGE)[1]["generations"] if x["id"] == gid}, {self.alice["id"]})
+
+    def test_a_member_cannot_climb_out_of_their_batch_with_dot_dot(self):
+        """the prefix `/out/G001/` was checked on the raw URL and the file resolved afterwards, so `..` reached users.json (every token digest)."""
+        mine, theirs = self.make_batch(self.A), self.make_batch(self.O)       # (the owner's, so Bob's per-minute write allowance is left to its own test)
+        a, b = f"/out/G{mine:03d}", f"/out/G{theirs:03d}"
+        (self.tmp / "out" / "secret-probe.json").write_text('{"token": "x"}', encoding="utf-8")
+        for url in (f"{a}/../users.json", f"{a}/%2e%2e/users.json", f"{a}/slices/../../users.json", f"{a}/../secret-probe.json", f"{a}/..%2fsecret-probe.json"):
+            s, d = self.req("GET", url, headers=self.A)
+            self.assertIn(s, (400, 403, 404), f"{url} -> {s}")
+            self.assertNotIn("token", json.dumps(d) if isinstance(d, dict) else str(d))
+        self.assertEqual(self.req("GET", f"{a}/../G{theirs:03d}/result.json", headers=self.A)[0], 404)     # hopping into a stranger's batch is that batch's 404
+        self.assertEqual(self.req("GET", f"{a}/../G{mine:03d}/result.json", headers=self.A)[0], 200)       # ...but a path that resolves into their own is theirs
+        self.assertEqual(self.req("GET", f"{b}/result.json", headers=self.A)[0], 404)
+        self.assertEqual(self.req("GET", f"{a}/../users.json", headers=self.O)[0], 200)                    # an owner still reads everything
 
     def test_search_is_scoped_to_what_the_caller_owns(self):
         gid = self.make_batch(self.A)
@@ -306,6 +321,7 @@ class UsersServerTests(unittest.TestCase):
             s, body, hdr = self.raw("POST", "/api/chat/sessions", {"title": "x"}, self.B)
             self.assertEqual(s, 429, body)
             self.assertTrue(1 <= int(hdr["Retry-After"]) <= 61)
+            self.assertEqual(hdr["Cache-Control"], "no-store")                                            # a refusal is never cached
             self.assertIn("too many requests", body["error"])
             self.assertEqual(self.req("GET", "/api/me", headers=self.B)[0], 200)                         # reads have their own (larger) allowance
             self.assertEqual(self.req("POST", "/api/chat/sessions", {"title": "x"}, self.A)[0], 200)      # Alice's allowance is separate from Bob's

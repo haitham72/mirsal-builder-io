@@ -2,7 +2,7 @@
 Deterministic: no model, no network."""
 import unittest
 
-from mirsal import expander, prompter, tasks
+from mirsal.generation import expander, prompter, tasks
 from mirsal import transformations as T
 from mirsal.transformations import base
 
@@ -136,8 +136,10 @@ class PlanTests(unittest.TestCase):
 
 class IntegrationTests(unittest.TestCase):
     def test_expander_uses_the_template_with_or_without_the_ai(self):
+        def never_asked(*a, **k):
+            raise AssertionError("a transformation is built by its template: the model must not be asked")
         for ai in (False, True):
-            p = expander.expand("dog as banana", (3, 3), use_ai=ai)
+            p = expander.expand("dog as banana", (3, 3), use_ai=ai, complete=never_asked)
             self.assertEqual((p["expanded_by"], p["slots"]["transformation"]["target"]), ("transformation", "banana"), ai)
             self.assertNotIn("expand_error", p)
 
