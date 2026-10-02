@@ -1,0 +1,797 @@
+{
+  "generation_id": "G098",
+  "number": 98,
+  "owner": "local",
+  "created": 1790949556.628,
+  "parent": null,
+  "prompt": "make him wear a coat in the winter",
+  "task": "him wear a coat in the winter",
+  "task_slug": "him_wear_coat_winter",
+  "source": {
+    "subject": "him_wear_coat",
+    "subject_id": "027",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J032/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ]
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "task 027",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: him wear a coat.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: waving hello with a big happy grin\nCharacter 2: dancing with joyful moves, eyes closed, big smile\nCharacter 3: hands pressed together in thanks, eyes closed, grateful smile\nCharacter 4: winking and giving a confident thumbs up\nCharacter 5: thinking hard, chin in hand, one eyebrow raised\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: facepalming in disbelief, eyes closed, sighing\nCharacter 8: dizzy with spiral eyes, wobbling on the spot\nCharacter 9: yawning widely, sleepy eyes, stretching the arms up\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. waves the raised hand in wide arcs while bouncing on tiptoes\n2. shimmies the hips, arms swing, spins once\n3. bows slightly, gentle sway, smile widens\n4. thumb jabs forward twice, a wink, proud chest puff\n5. taps the chin, eyes glance up and to the side, a slow nod\n6. sighs, shoulders sag, droops slowly lower\n7. slowly drops the face into the palm, shakes the head\n8. sways in circles, little stars orbit the head\n9. stretches up, big yawn, shudders and settles\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "him wear a coat",
+    "style_id": "flat_vector",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "waving hello with a big happy grin",
+        "tags": [
+          "him_wear_coat_waving",
+          "waving",
+          "hello",
+          "big",
+          "winter"
+        ],
+        "emoji": "👋",
+        "motion": "waves the raised hand in wide arcs while bouncing on tiptoes"
+      },
+      {
+        "pos": 2,
+        "label": "dancing with joyful moves, eyes closed, big smile",
+        "tags": [
+          "him_wear_coat_dancing",
+          "dancing",
+          "joyful",
+          "moves",
+          "winter"
+        ],
+        "emoji": "💃",
+        "motion": "shimmies the hips, arms swing, spins once"
+      },
+      {
+        "pos": 3,
+        "label": "hands pressed together in thanks, eyes closed, grateful smile",
+        "tags": [
+          "him_wear_coat_thank_you",
+          "hands",
+          "pressed",
+          "together",
+          "winter"
+        ],
+        "emoji": "🙏",
+        "motion": "bows slightly, gentle sway, smile widens"
+      },
+      {
+        "pos": 4,
+        "label": "winking and giving a confident thumbs up",
+        "tags": [
+          "him_wear_coat_thumbs_up",
+          "winking",
+          "giving",
+          "confident",
+          "winter"
+        ],
+        "emoji": "👍",
+        "motion": "thumb jabs forward twice, a wink, proud chest puff"
+      },
+      {
+        "pos": 5,
+        "label": "thinking hard, chin in hand, one eyebrow raised",
+        "tags": [
+          "him_wear_coat_thinking",
+          "thinking",
+          "hard",
+          "chin",
+          "winter"
+        ],
+        "emoji": "🤔",
+        "motion": "taps the chin, eyes glance up and to the side, a slow nod"
+      },
+      {
+        "pos": 6,
+        "label": "sad and drooping, a single tear, slumped shoulders",
+        "tags": [
+          "him_wear_coat_sad",
+          "sad",
+          "drooping",
+          "single",
+          "winter"
+        ],
+        "emoji": "😞",
+        "motion": "sighs, shoulders sag, droops slowly lower"
+      },
+      {
+        "pos": 7,
+        "label": "facepalming in disbelief, eyes closed, sighing",
+        "tags": [
+          "him_wear_coat_facepalm",
+          "facepalming",
+          "disbelief",
+          "eyes",
+          "winter"
+        ],
+        "emoji": "🤦",
+        "motion": "slowly drops the face into the palm, shakes the head"
+      },
+      {
+        "pos": 8,
+        "label": "dizzy with spiral eyes, wobbling on the spot",
+        "tags": [
+          "him_wear_coat_dizzy",
+          "dizzy",
+          "spiral",
+          "eyes",
+          "winter"
+        ],
+        "emoji": "😵‍💫",
+        "motion": "sways in circles, little stars orbit the head"
+      },
+      {
+        "pos": 9,
+        "label": "yawning widely, sleepy eyes, stretching the arms up",
+        "tags": [
+          "him_wear_coat_yawning",
+          "yawning",
+          "widely",
+          "sleepy",
+          "winter"
+        ],
+        "emoji": "🥱",
+        "motion": "stretches up, big yawn, shudders and settles"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "027",
+  "name_key": "him_wear_coat_winter",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1790949532.786,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 52.3
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 249 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 249.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 6.2
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": false,
+        "detail": "found 3x4, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x4",
+        "limit": "3x3",
+        "data": {
+          "ms": 22.8
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            559,
+            1066,
+            2048
+          ],
+          "ys": [
+            0,
+            700,
+            1358,
+            2048
+          ],
+          "ms": 22.9
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 1.5 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.54,
+        "limit": 12.0,
+        "data": {
+          "ms": 51.2
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "him_wear_coat_waving",
+      "tags": [
+        "him_wear_coat_waving",
+        "waving",
+        "hello",
+        "big",
+        "winter"
+      ],
+      "emoji": "👋",
+      "prompt": "him wear a coat waving hello with a big happy grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-waving-20261002T135916-0586a3",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "him_wear_coat_dancing",
+      "tags": [
+        "him_wear_coat_dancing",
+        "dancing",
+        "joyful",
+        "moves",
+        "winter"
+      ],
+      "emoji": "💃",
+      "prompt": "him wear a coat dancing with joyful moves, eyes closed, big smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-dancing-20261002T135916-df6a14",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "him_wear_coat_thank_you",
+      "tags": [
+        "him_wear_coat_thank_you",
+        "hands",
+        "pressed",
+        "together",
+        "winter"
+      ],
+      "emoji": "🙏",
+      "prompt": "him wear a coat hands pressed together in thanks, eyes closed, grateful smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-thank_you-20261002T135916-283d78",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "him_wear_coat_thumbs_up",
+      "tags": [
+        "him_wear_coat_thumbs_up",
+        "winking",
+        "giving",
+        "confident",
+        "winter"
+      ],
+      "emoji": "👍",
+      "prompt": "him wear a coat winking and giving a confident thumbs up, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-thumbs_up-20261002T135916-93f383",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "him_wear_coat_thinking",
+      "tags": [
+        "him_wear_coat_thinking",
+        "thinking",
+        "hard",
+        "chin",
+        "winter"
+      ],
+      "emoji": "🤔",
+      "prompt": "him wear a coat thinking hard, chin in hand, one eyebrow raised, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-thinking-20261002T135916-20a179",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "him_wear_coat_sad",
+      "tags": [
+        "him_wear_coat_sad",
+        "sad",
+        "drooping",
+        "single",
+        "winter"
+      ],
+      "emoji": "😞",
+      "prompt": "him wear a coat sad and drooping, a single tear, slumped shoulders, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-sad-20261002T135916-75e9c4",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "him_wear_coat_facepalm",
+      "tags": [
+        "him_wear_coat_facepalm",
+        "facepalming",
+        "disbelief",
+        "eyes",
+        "winter"
+      ],
+      "emoji": "🤦",
+      "prompt": "him wear a coat facepalming in disbelief, eyes closed, sighing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-facepalm-20261002T135916-ccc503",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "him_wear_coat_dizzy",
+      "tags": [
+        "him_wear_coat_dizzy",
+        "dizzy",
+        "spiral",
+        "eyes",
+        "winter"
+      ],
+      "emoji": "😵‍💫",
+      "prompt": "him wear a coat dizzy with spiral eyes, wobbling on the spot, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-dizzy-20261002T135916-6ec68c",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "him_wear_coat_yawning",
+      "tags": [
+        "him_wear_coat_yawning",
+        "yawning",
+        "widely",
+        "sleepy",
+        "winter"
+      ],
+      "emoji": "🥱",
+      "prompt": "him wear a coat yawning widely, sleepy eyes, stretching the arms up, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-him_wear_coat_winter-yawning-20261002T135916-3f31e2",
+      "status": "FAILED",
+      "reason": "grid_detected",
+      "report": [
+        {
+          "name": "grid_detected",
+          "ok": false,
+          "detail": "found 3x4, plan says 3x3",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": "3x4",
+          "limit": "3x3",
+          "data": {
+            "ms": 22.8
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790949556.91,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "3x3",
+            "note": "found 3x4, plan says 3x3"
+          }
+        }
+      ]
+    }
+  ]
+}

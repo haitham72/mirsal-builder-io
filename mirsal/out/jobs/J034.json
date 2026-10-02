@@ -1,0 +1,42 @@
+{
+  "id": "J034",
+  "kind": "video",
+  "task": "falcon stickers",
+  "generation": "G095",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {
+      "mode": "pro",
+      "duration": "3"
+    },
+    "prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. leans in with open arms, rocks side to side, squeezes an invisible hug\n2. doubles over, shoulders shaking, tiny hops, wipes a tear\n3. bows slightly, gentle sway, smile widens\n4. the arm flexes and pulses, chest puffs, nods\n5. eyes circle slowly, head tilts back with a sigh\n6. head tips back, bursts forward with the sneeze, sniffles\n7. stomps in place, steam puffs from the head, body shakes with rage\n8. shivers fast, knees knock, cowers lower\n9. rubs the hands, eyebrows wiggle, sneaky giggle\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "custom_prompt": false,
+    "start_image": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/G095/video_sheet/A1/sheet.png",
+    "sheet": "A1",
+    "label": "falcon stickers",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "30a3b110-93da-4270-bb89-66bdfb262a84",
+  "result": {
+    "file": "jobs/J034/result.mp4",
+    "sha256": "2895b34c514b2c3429ff59ea947dfa9a5a9e51c2b8d14560db4ee369146a5428",
+    "bytes": 7902530
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1790949870.819,
+  "claimed_at": 1790949878.174,
+  "completed_at": 1790950036.244,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "downloading"
+}

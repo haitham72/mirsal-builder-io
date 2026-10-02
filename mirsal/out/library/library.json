@@ -5,13 +5,12 @@
    "name": "Batman Lego",
    "slug": "batman_lego",
    "cover": "1e01c5a6",
-   "next": 16,
    "created": 1790874105.56259,
    "stickers": [
     {
      "id": "1e01c5a6",
      "name": "Batman lego ready to fight",
-     "file": "vid-001-batman_lego-batman_lego_ready_to_fight.webm",
+     "file": "G002/vid-batman_lego-ready_to_fight-batman_lego-20261001T170145-414732.webm",
      "type": "animated",
      "emoji": "🦇👊",
      "kb": 248,
@@ -27,7 +26,7 @@
     {
      "id": "3b2619d9",
      "name": "Batman lego listening carefully",
-     "file": "vid-002-batman_lego-batman_lego_listening_carefully.webm",
+     "file": "G002/vid-batman_lego-listening_carefully-batman_lego-20261001T170145-2d5f0d.webm",
      "type": "animated",
      "emoji": "🦇👂",
      "kb": 243,
@@ -43,7 +42,7 @@
     {
      "id": "3b008026",
      "name": "Batman lego on the move",
-     "file": "vid-003-batman_lego-batman_lego_on_the_move.webm",
+     "file": "G002/vid-batman_lego-on_the_move-batman_lego-20261001T170145-1a28eb.webm",
      "type": "animated",
      "emoji": "🦇🏃",
      "kb": 246,
@@ -59,7 +58,7 @@
     {
      "id": "5eab9cd4",
      "name": "Batman lego victory pose",
-     "file": "vid-004-batman_lego-batman_lego_victory_pose.webm",
+     "file": "G002/vid-batman_lego-victory_pose-batman_lego-20261001T170145-d8bbe1.webm",
      "type": "animated",
      "emoji": "🦇✌️",
      "kb": 234,
@@ -75,7 +74,7 @@
     {
      "id": "cce6b857",
      "name": "Batman lego detective thinking",
-     "file": "vid-005-batman_lego-batman_lego_detective_thinking.webm",
+     "file": "G002/vid-batman_lego-detective_thinking-batman_lego-20261001T170145-c75a16.webm",
      "type": "animated",
      "emoji": "🦇🕵️",
      "kb": 224,
@@ -91,7 +90,7 @@
     {
      "id": "5b331894",
      "name": "Batman lego gliding in air",
-     "file": "vid-006-batman_lego-batman_lego_gliding_in_air.webm",
+     "file": "G002/vid-batman_lego-gliding_in_air-batman_lego-20261001T170145-c9ace2.webm",
      "type": "animated",
      "emoji": "🦇🪁",
      "kb": 248,
@@ -107,7 +106,7 @@
     {
      "id": "d0b30b39",
      "name": "Batman lego surprised reaction",
-     "file": "vid-007-batman_lego-batman_lego_surprised_reaction.webm",
+     "file": "G002/vid-batman_lego-surprised_reaction-batman_lego-20261001T170145-747fad.webm",
      "type": "animated",
      "emoji": "🦇😲",
      "kb": 252,
@@ -123,7 +122,7 @@
     {
      "id": "2270fe74",
      "name": "Batman lego calling for help",
-     "file": "vid-008-batman_lego-batman_lego_calling_for_help.webm",
+     "file": "G002/vid-batman_lego-calling_for_help-batman_lego-20261001T170145-64883e.webm",
      "type": "animated",
      "emoji": "🦇📞",
      "kb": 226,
@@ -186,13 +185,12 @@
    "name": "Angel Reading Newspaper",
    "slug": "angel_reading_newspaper",
    "cover": "031868b4",
-   "next": 10,
    "created": 1790875832.347101,
    "stickers": [
     {
      "id": "031868b4",
      "name": "Angel reading newspaper waving",
-     "file": "img-001-angel_reading_newspaper-angel_reading_newspaper_waving.png",
+     "file": "G001/img-angel_reading_newspaper-waving-angel_reading_newspaper-20261001T173032-25b3fd.png",
      "type": "static",
      "emoji": "👋",
      "kb": 221,
@@ -208,7 +206,7 @@
     {
      "id": "a6be1731",
      "name": "Angel reading newspaper excited",
-     "file": "img-002-angel_reading_newspaper-angel_reading_newspaper_excited.png",
+     "file": "G001/img-angel_reading_newspaper-excited-angel_reading_newspaper-20261001T173032-a1cb30.png",
      "type": "static",
      "emoji": "🤩",
      "kb": 218,
@@ -224,7 +222,7 @@
     {
      "id": "d450042e",
      "name": "Angel reading newspaper in love",
-     "file": "img-003-angel_reading_newspaper-angel_reading_newspaper_in_love.png",
+     "file": "G001/img-angel_reading_newspaper-in_love-angel_reading_newspaper-20261001T173032-2dca58.png",
      "type": "static",
      "emoji": "😍",
      "kb": 198,
@@ -240,7 +238,7 @@
     {
      "id": "2689488e",
      "name": "Angel reading newspaper ok sign",
-     "file": "img-004-angel_reading_newspaper-angel_reading_newspaper_ok_sign.png",
+     "file": "G001/img-angel_reading_newspaper-ok_sign-angel_reading_newspaper-20261001T173032-322573.png",
      "type": "static",
      "emoji": "👌",
      "kb": 210,
@@ -256,7 +254,7 @@
     {
      "id": "5843680c",
      "name": "Angel reading newspaper eye roll",
-     "file": "img-005-angel_reading_newspaper-angel_reading_newspaper_eye_roll.png",
+     "file": "G001/img-angel_reading_newspaper-eye_roll-angel_reading_newspaper-20261001T173032-fbaaa2.png",
      "type": "static",
      "emoji": "🙄",
      "kb": 212,
@@ -272,7 +270,7 @@
     {
      "id": "04e0be52",
      "name": "Angel reading newspaper sad",
-     "file": "img-006-angel_reading_newspaper-angel_reading_newspaper_sad.png",
+     "file": "G001/img-angel_reading_newspaper-sad-angel_reading_newspaper-20261001T173032-44c10c.png",
      "type": "static",
      "emoji": "😞",
      "kb": 174,
@@ -288,7 +286,7 @@
     {
      "id": "bc7bc82d",
      "name": "Angel reading newspaper angry",
-     "file": "img-007-angel_reading_newspaper-angel_reading_newspaper_angry.png",
+     "file": "G001/img-angel_reading_newspaper-angry-angel_reading_newspaper-20261001T173032-a3223e.png",
      "type": "static",
      "emoji": "😡",
      "kb": 230,
@@ -304,7 +302,7 @@
     {
      "id": "05ffb025",
      "name": "Angel reading newspaper scared",
-     "file": "img-008-angel_reading_newspaper-angel_reading_newspaper_scared.png",
+     "file": "G001/img-angel_reading_newspaper-scared-angel_reading_newspaper-20261001T173032-272c99.png",
      "type": "static",
      "emoji": "😨",
      "kb": 199,
@@ -320,7 +318,7 @@
     {
      "id": "3458432b",
      "name": "Angel reading newspaper scheming",
-     "file": "img-009-angel_reading_newspaper-angel_reading_newspaper_scheming.png",
+     "file": "G001/img-angel_reading_newspaper-scheming-angel_reading_newspaper-20261001T173032-36dfaa.png",
      "type": "static",
      "emoji": "😏",
      "kb": 198,
@@ -387,13 +385,12 @@
    "name": "Old Man Pixar Style",
    "slug": "old_man_pixar_style",
    "cover": "91fe7eda",
-   "next": 10,
    "created": 1790875839.1949391,
    "stickers": [
     {
      "id": "91fe7eda",
      "name": "Old man pixar style warm smile",
-     "file": "img-001-old_man_pixar_style-old_man_pixar_style_warm_smile.png",
+     "file": "G004/img-old_man_pixar_style_glasses-warm_smile-old_man_pixar_style-20261001T173039-506578.png",
      "type": "static",
      "emoji": "😊👴",
      "kb": 130,
@@ -409,7 +406,7 @@
     {
      "id": "3cae52d3",
      "name": "Old man pixar style heartfelt laugh",
-     "file": "img-002-old_man_pixar_style-old_man_pixar_style_heartfelt_laugh.png",
+     "file": "G004/img-old_man_pixar_style_glasses-heartfelt_laugh-old_man_pixar_style-20261001T173039-c4c055.png",
      "type": "static",
      "emoji": "😂😄",
      "kb": 161,
@@ -425,7 +422,7 @@
     {
      "id": "56a972f7",
      "name": "Old man pixar style thoughtful",
-     "file": "img-003-old_man_pixar_style-old_man_pixar_style_thoughtful.png",
+     "file": "G004/img-old_man_pixar_style_glasses-thoughtful-old_man_pixar_style-20261001T173039-f74b99.png",
      "type": "static",
      "emoji": "🤔👨‍🦳",
      "kb": 145,
@@ -441,7 +438,7 @@
     {
      "id": "a723e606",
      "name": "Old man pixar style skeptical",
-     "file": "img-004-old_man_pixar_style-old_man_pixar_style_skeptical.png",
+     "file": "G004/img-old_man_pixar_style_glasses-skeptical-old_man_pixar_style-20261001T173039-955097.png",
      "type": "static",
      "emoji": "🤨👓",
      "kb": 156,
@@ -457,7 +454,7 @@
     {
      "id": "0f868ec9",
      "name": "Old man pixar style shock",
-     "file": "img-005-old_man_pixar_style-old_man_pixar_style_shock.png",
+     "file": "G004/img-old_man_pixar_style_glasses-shock-old_man_pixar_style-20261001T173039-e4a3b4.png",
      "type": "static",
      "emoji": "😲😱",
      "kb": 153,
@@ -473,7 +470,7 @@
     {
      "id": "e219ce33",
      "name": "Old man pixar style embarrassed",
-     "file": "img-006-old_man_pixar_style-old_man_pixar_style_embarrassed.png",
+     "file": "G004/img-old_man_pixar_style_glasses-embarrassed-old_man_pixar_style-20261001T173039-3b9a94.png",
      "type": "static",
      "emoji": "😳🙈",
      "kb": 134,
@@ -489,7 +486,7 @@
     {
      "id": "471c7db4",
      "name": "Old man pixar style angry frown",
-     "file": "img-007-old_man_pixar_style-old_man_pixar_style_angry_frown.png",
+     "file": "G004/img-old_man_pixar_style_glasses-angry_frown-old_man_pixar_style-20261001T173039-8f1c10.png",
      "type": "static",
      "emoji": "😠👴",
      "kb": 129,
@@ -505,7 +502,7 @@
     {
      "id": "7fdca871",
      "name": "Old man pixar style sleepy",
-     "file": "img-008-old_man_pixar_style-old_man_pixar_style_sleepy.png",
+     "file": "G004/img-old_man_pixar_style_glasses-sleepy-old_man_pixar_style-20261001T173039-d21245.png",
      "type": "static",
      "emoji": "😴🛌",
      "kb": 153,
@@ -521,7 +518,7 @@
     {
      "id": "99883a59",
      "name": "Old man pixar style mischievous wink",
-     "file": "img-009-old_man_pixar_style-old_man_pixar_style_mischievous_wink.png",
+     "file": "G004/img-old_man_pixar_style_glasses-mischievous_wink-old_man_pixar_style-20261001T173039-abcc6c.png",
      "type": "static",
      "emoji": "😉😏",
      "kb": 143,
@@ -588,13 +585,12 @@
    "name": "Barbie in love",
    "slug": "barbie_in_love",
    "cover": "144848e7",
-   "next": 10,
    "created": 1790877550.2987666,
    "stickers": [
     {
      "id": "144848e7",
      "name": "Barbie sweet smile",
-     "file": "vid-001-barbie_in_love-barbie_sweet_smile.webm",
+     "file": "G005/vid-barbie_love-sweet_smile-barbie_in_love-20261001T175910-d274fa.webm",
      "type": "animated",
      "emoji": "💕😊",
      "kb": 254,
@@ -610,7 +606,7 @@
     {
      "id": "9bd9b0a1",
      "name": "Barbie blow kiss",
-     "file": "vid-002-barbie_in_love-barbie_blow_kiss.webm",
+     "file": "G005/vid-barbie_love-blow_kiss-barbie_in_love-20261001T175910-dd4b89.webm",
      "type": "animated",
      "emoji": "😘💖",
      "kb": 222,
@@ -626,7 +622,7 @@
     {
      "id": "8132afae",
      "name": "Barbie shy blush",
-     "file": "vid-003-barbie_in_love-barbie_shy_blush.webm",
+     "file": "G005/vid-barbie_love-shy_blush-barbie_in_love-20261001T175910-3fd0a4.webm",
      "type": "animated",
      "emoji": "😊🌸",
      "kb": 252,
@@ -642,7 +638,7 @@
     {
      "id": "fbbc03e9",
      "name": "Barbie heartfelt",
-     "file": "vid-004-barbie_in_love-barbie_heartfelt.webm",
+     "file": "G005/vid-barbie_love-heartfelt-barbie_in_love-20261001T175910-76a47a.webm",
      "type": "animated",
      "emoji": "💓😌",
      "kb": 224,
@@ -658,7 +654,7 @@
     {
      "id": "e1849e47",
      "name": "Barbie love shock",
-     "file": "vid-005-barbie_in_love-barbie_love_shock.webm",
+     "file": "G005/vid-barbie_love-shock-barbie_in_love-20261001T175910-a20ce2.webm",
      "type": "animated",
      "emoji": "😲💘",
      "kb": 252,
@@ -674,7 +670,7 @@
     {
      "id": "7e6f4e53",
      "name": "Barbie joyful laugh",
-     "file": "vid-006-barbie_in_love-barbie_joyful_laugh.webm",
+     "file": "G005/vid-barbie_love-joyful_laugh-barbie_in_love-20261001T175910-063b9e.webm",
      "type": "animated",
      "emoji": "😂💞",
      "kb": 253,
@@ -690,7 +686,7 @@
     {
      "id": "29210329",
      "name": "Barbie daydream",
-     "file": "vid-007-barbie_in_love-barbie_daydream.webm",
+     "file": "G005/vid-barbie_love-daydream-barbie_in_love-20261001T175910-13d58a.webm",
      "type": "animated",
      "emoji": "😍💭",
      "kb": 202,
@@ -706,7 +702,7 @@
     {
      "id": "4991725f",
      "name": "Barbie nervous",
-     "file": "vid-008-barbie_in_love-barbie_nervous.webm",
+     "file": "G005/vid-barbie_love-nervous-barbie_in_love-20261001T175910-1fc8c7.webm",
      "type": "animated",
      "emoji": "😟💔",
      "kb": 223,
@@ -722,7 +718,7 @@
     {
      "id": "d7736910",
      "name": "Barbie proud love",
-     "file": "vid-009-barbie_in_love-barbie_proud_love.webm",
+     "file": "G005/vid-barbie_love-proud_love-barbie_in_love-20261001T175910-1a7c40.webm",
      "type": "animated",
      "emoji": "🌹😌",
      "kb": 222,
@@ -789,13 +785,12 @@
    "name": "Kitten banana",
    "slug": "kitten_banana",
    "cover": "00b2e6dd",
-   "next": 8,
    "created": 1790908444.9666247,
    "stickers": [
     {
      "id": "00b2e6dd",
      "name": "Cat as banana dancing",
-     "file": "vid-001-kitten_banana-cat_as_banana_dancing.webm",
+     "file": "G010/vid-cat_as_banana-dancing-kitten_banana-20261002T020038-c6e4d6.webm",
      "type": "animated",
      "emoji": "💃",
      "kb": 221,
@@ -811,7 +806,7 @@
     {
      "id": "f5aabadb",
      "name": "Cat as banana shocked",
-     "file": "vid-002-kitten_banana-cat_as_banana_shocked.webm",
+     "file": "G010/vid-cat_as_banana-shocked-kitten_banana-20261002T020038-d8c9d5.webm",
      "type": "animated",
      "emoji": "😱",
      "kb": 222,
@@ -827,7 +822,7 @@
     {
      "id": "ef54a9e5",
      "name": "Cat as banana squashed",
-     "file": "vid-003-kitten_banana-cat_as_banana_squashed.webm",
+     "file": "G010/vid-cat_as_banana-squashed-kitten_banana-20261002T020038-88e222.webm",
      "type": "animated",
      "emoji": "🥴",
      "kb": 231,
@@ -843,7 +838,7 @@
     {
      "id": "f39539f7",
      "name": "Cat as banana waving",
-     "file": "vid-004-kitten_banana-cat_as_banana_waving.webm",
+     "file": "G010/vid-cat_as_banana-waving-kitten_banana-20261002T020038-f2c135.webm",
      "type": "animated",
      "emoji": "👋",
      "kb": 218,
@@ -859,7 +854,7 @@
     {
      "id": "555450a9",
      "name": "Cat as banana puppy eyes",
-     "file": "vid-005-kitten_banana-cat_as_banana_puppy_eyes.webm",
+     "file": "G010/vid-cat_as_banana-puppy_eyes-kitten_banana-20261002T020038-853bfe.webm",
      "type": "animated",
      "emoji": "🥺",
      "kb": 252,
@@ -875,7 +870,7 @@
     {
      "id": "408995c2",
      "name": "Cat as banana eye roll",
-     "file": "vid-006-kitten_banana-cat_as_banana_eye_roll.webm",
+     "file": "G010/vid-cat_as_banana-eye_roll-kitten_banana-20261002T020038-3351e0.webm",
      "type": "animated",
      "emoji": "🙄",
      "kb": 156,
@@ -891,7 +886,7 @@
     {
      "id": "8b08a9f7",
      "name": "Cat as banana sad",
-     "file": "vid-007-kitten_banana-cat_as_banana_sad.webm",
+     "file": "G010/vid-cat_as_banana-sad-kitten_banana-20261002T020038-2391ec.webm",
      "type": "animated",
      "emoji": "😞",
      "kb": 156,
@@ -911,13 +906,12 @@
    "name": "Superman",
    "slug": "superman",
    "cover": "851dc1bf",
-   "next": 9,
    "created": 1790932161.4658322,
    "stickers": [
     {
      "id": "851dc1bf",
      "name": "Superman diving wing",
-     "file": "img-001-superman-superman_diving_wing.png",
+     "file": "G012/img-superman_dubai-diving_wing-superman-20261002T090921-e12d7c.png",
      "type": "static",
      "emoji": "🏙️🦅",
      "kb": 147,
@@ -933,7 +927,7 @@
     {
      "id": "4eca2371",
      "name": "Superman land hoverboard",
-     "file": "img-002-superman-superman_land_hoverboard.png",
+     "file": "G012/img-superman_dubai-land_hoverboard-superman-20261002T090921-1475f3.png",
      "type": "static",
      "emoji": "🛸⚡",
      "kb": 124,
@@ -949,7 +943,7 @@
     {
      "id": "c095410c",
      "name": "Superman spinning victory",
-     "file": "img-003-superman-superman_spinning_victory.png",
+     "file": "G012/img-superman_dubai-spinning_victory-superman-20261002T090921-da7d71.png",
      "type": "static",
      "emoji": "🎆✌️",
      "kb": 162,
@@ -965,7 +959,7 @@
     {
      "id": "1bcd0446",
      "name": "Superman strutting gold",
-     "file": "img-004-superman-superman_strutting_gold.png",
+     "file": "G012/img-superman_dubai-strutting_gold-superman-20261002T090921-38bd84.png",
      "type": "static",
      "emoji": "💰👍",
      "kb": 144,
@@ -981,7 +975,7 @@
     {
      "id": "5358f616",
      "name": "Superman sliding dune",
-     "file": "img-005-superman-superman_sliding_dune.png",
+     "file": "G012/img-superman_dubai-sliding_dune-superman-20261002T090921-6635ba.png",
      "type": "static",
      "emoji": "🎈🌵",
      "kb": 151,
@@ -997,7 +991,7 @@
     {
      "id": "3a79e2c6",
      "name": "Superman shocked rain",
-     "file": "img-006-superman-superman_shocked_rain.png",
+     "file": "G012/img-superman_dubai-shocked_rain-superman-20261002T090921-6c4c0d.png",
      "type": "static",
      "emoji": "☔😲",
      "kb": 168,
@@ -1013,7 +1007,7 @@
     {
      "id": "3e15ad26",
      "name": "Superman laughing fight",
-     "file": "img-007-superman-superman_laughing_fight.png",
+     "file": "G012/img-superman_dubai-laughing_fight-superman-20261002T090921-e4ae34.png",
      "type": "static",
      "emoji": "🤪☀️",
      "kb": 138,
@@ -1029,7 +1023,7 @@
     {
      "id": "09c29218",
      "name": "Superman sitting freeze",
-     "file": "img-008-superman-superman_sitting_freeze.png",
+     "file": "G012/img-superman_dubai-sitting_freeze-superman-20261002T090921-7c367f.png",
      "type": "static",
      "emoji": "❄️🧘",
      "kb": 172,
@@ -1048,152 +1042,151 @@
    "id": "f65a2bbb",
    "name": "Falcon Stickers",
    "slug": "falcon_stickers",
-   "cover": "17279a22",
-   "next": 10,
+   "cover": "f78edc28",
    "created": 1790935005.3763735,
    "stickers": [
     {
-     "id": "17279a22",
+     "id": "f78edc28",
      "name": "Falcon stickers open arms",
-     "file": "img-001-falcon_stickers-falcon_stickers_open_arms.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-open_arms-falcon_stickers-20261002T140924-c18457.webm",
+     "type": "animated",
      "emoji": "🤗",
-     "kb": 130,
+     "kb": 228,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 1
      },
-     "created": 1790935005.5975337,
+     "created": 1790950164.138027,
      "file_name": "img-095-falcon_stickers-falcon_stickers_open_arms"
     },
     {
-     "id": "9378b622",
+     "id": "9b43524c",
      "name": "Falcon stickers laughing",
-     "file": "img-002-falcon_stickers-falcon_stickers_laughing.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-laughing-falcon_stickers-20261002T140924-158904.webm",
+     "type": "animated",
      "emoji": "😂",
-     "kb": 131,
+     "kb": 197,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 2
      },
-     "created": 1790935005.6266677,
+     "created": 1790950164.1443908,
      "file_name": "img-095-falcon_stickers-falcon_stickers_laughing"
     },
     {
-     "id": "6c262e00",
+     "id": "1073f74d",
      "name": "Falcon stickers thank you",
-     "file": "img-003-falcon_stickers-falcon_stickers_thank_you.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-thank_you-falcon_stickers-20261002T140924-1f4ac0.webm",
+     "type": "animated",
      "emoji": "🙏",
-     "kb": 136,
+     "kb": 230,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 3
      },
-     "created": 1790935005.6464355,
+     "created": 1790950164.151293,
      "file_name": "img-095-falcon_stickers-falcon_stickers_thank_you"
     },
     {
-     "id": "7c578dc7",
+     "id": "058a12f4",
      "name": "Falcon stickers flexing",
-     "file": "img-004-falcon_stickers-falcon_stickers_flexing.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-flexing-falcon_stickers-20261002T140924-bc3a97.webm",
+     "type": "animated",
      "emoji": "💪",
-     "kb": 159,
+     "kb": 222,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 4
      },
-     "created": 1790935005.675377,
+     "created": 1790950164.1547499,
      "file_name": "img-095-falcon_stickers-falcon_stickers_flexing"
     },
     {
-     "id": "3faeb882",
+     "id": "6969e50a",
      "name": "Falcon stickers eye roll",
-     "file": "img-005-falcon_stickers-falcon_stickers_eye_roll.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-eye_roll-falcon_stickers-20261002T140924-5fff7a.webm",
+     "type": "animated",
      "emoji": "🙄",
-     "kb": 135,
+     "kb": 161,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 5
      },
-     "created": 1790935005.7060268,
+     "created": 1790950164.158698,
      "file_name": "img-095-falcon_stickers-falcon_stickers_eye_roll"
     },
     {
-     "id": "5c99ba05",
+     "id": "15be2cfe",
      "name": "Falcon stickers sneezing",
-     "file": "img-006-falcon_stickers-falcon_stickers_sneezing.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-sneezing-falcon_stickers-20261002T140924-e4fb3e.webm",
+     "type": "animated",
      "emoji": "🤧",
-     "kb": 153,
+     "kb": 222,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 6
      },
-     "created": 1790935005.7368429,
+     "created": 1790950164.161394,
      "file_name": "img-095-falcon_stickers-falcon_stickers_sneezing"
     },
     {
-     "id": "f69ed6c3",
+     "id": "485f30d8",
      "name": "Falcon stickers angry",
-     "file": "img-007-falcon_stickers-falcon_stickers_angry.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-angry-falcon_stickers-20261002T140924-d65d78.webm",
+     "type": "animated",
      "emoji": "😡",
-     "kb": 161,
+     "kb": 216,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 7
      },
-     "created": 1790935005.756798,
+     "created": 1790950164.1704051,
      "file_name": "img-095-falcon_stickers-falcon_stickers_angry"
     },
     {
-     "id": "1489385c",
+     "id": "534192c7",
      "name": "Falcon stickers scared",
-     "file": "img-008-falcon_stickers-falcon_stickers_scared.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-scared-falcon_stickers-20261002T140924-425a18.webm",
+     "type": "animated",
      "emoji": "😨",
-     "kb": 151,
+     "kb": 230,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 8
      },
-     "created": 1790935005.7892048,
+     "created": 1790950164.1745112,
      "file_name": "img-095-falcon_stickers-falcon_stickers_scared"
     },
     {
-     "id": "e548f827",
+     "id": "2f81f8bd",
      "name": "Falcon stickers scheming",
-     "file": "img-009-falcon_stickers-falcon_stickers_scheming.png",
-     "type": "static",
+     "file": "G095/vid-falcon_stickers-scheming-falcon_stickers-20261002T140924-8a9fc5.webm",
+     "type": "animated",
      "emoji": "😏",
-     "kb": 140,
+     "kb": 138,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G095",
       "index": 9
      },
-     "created": 1790935005.8263018,
+     "created": 1790950164.182612,
      "file_name": "img-095-falcon_stickers-falcon_stickers_scheming"
     }
    ],
@@ -1245,5 +1238,6 @@
     ]
    }
   }
- ]
+ ],
+ "layout": 2
 }
