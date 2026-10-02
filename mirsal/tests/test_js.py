@@ -276,6 +276,20 @@ class ShellTests(unittest.TestCase):
         self.assertIn(".cp-style.on", css)
         self.assertIn("LIVE.m.styles.map(", (ui / "composer.js").read_text(encoding="utf-8"), "the tiles come from the API's presets")
 
+    def test_sizes_and_radii_come_from_one_scale_and_everything_answers_focus(self):
+        """docs/design.md 3.2: six type steps and one radius scale, so a screen cannot drift; every interactive thing has a keyboard focus ring; motion respects the user's setting."""
+        import re
+        ui = self.ui()
+        css = {n: (ui / n).read_text(encoding="utf-8") for n in ("studio.css", "agent.css")}
+        for name, text in css.items():
+            bare = [m for m in re.findall(r"font-size:\s*([0-9.]+)px", text)]
+            self.assertEqual(bare, [], f"{name}: a font size outside the scale (use var(--fs-xs|s|m|l|xl|2xl)): {bare[:8]}")
+            radii = [m for m in re.findall(r"border-radius:\s*([^;}]+)", text) if re.search(r"(?<![\w-])(?:[5-9]|[1-9]\d)px", m)]
+            self.assertEqual(radii, [], f"{name}: a radius outside the scale (use var(--r-s|r-m|r|r-l|r-pill)): {radii[:8]}")
+        self.assertRegex(css["studio.css"], r"--fs-xs:[\d.]+px;--fs-s:[\d.]+px;--fs-m:[\d.]+px;--fs-l:[\d.]+px;--fs-xl:[\d.]+px;--fs-2xl:[\d.]+px")
+        self.assertIn("button:focus-visible", css["studio.css"])
+        self.assertIn("prefers-reduced-motion:reduce){*,", css["studio.css"].replace(" ", ""))
+
 
 if __name__ == "__main__":
     unittest.main()
