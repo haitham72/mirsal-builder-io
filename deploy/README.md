@@ -7,7 +7,7 @@ so that the next session (on another PC) only has to create the accounts and fil
 deploy/
   gateway/        the FastAPI front door (a strangler in front of the unchanged engine server)       tested: mirsal/tests/test_gateway.py (12 tests)
   supabase/       009_accounts, 010_user_analysis, 011_credit_ledger (+ README)                       applied twice and exercised on a scratch Postgres, then dropped
-  docker/         Dockerfile (ffmpeg + libvpx-vp9 checked at build time), start.py, compose.yml        start.py smoke: see "Verified" below
+  docker/         Dockerfile (ffmpeg + libvpx-vp9 checked at build time), start.py, compose.yml        start.py smoke-run locally (below)
   render.yaml     the Render blueprint (web + worker), secrets as `sync: false`
   env.example     every variable, with no values
 ```
@@ -43,4 +43,5 @@ The gateway strips everything a client could use to impersonate (`Authorization`
 
 - `python -m unittest tests.test_gateway tests.test_gateway_login tests.test_users tests.test_telegram` green (the gateway tests run against the real engine server in-process and a generated RSA key).
 - The three SQL files ran twice in a row on a scratch database (dropped afterwards): `reserve_credits` refuses the second of two 6-credit reservations against 10 credits, `settle_credits` twice for one job is refused, a forbidden key in `user_analysis.detail` is refused, `purge_old_ip(30)` nulls the old address.
+- `deploy/docker/start.py` run for real on the PC (engine + gateway, a fake Supabase URL): `/healthz` 200, the Studio page 200, `/api/me` without a sign-in 401, `/readyz` 503 because the fake issuer's keys cannot be fetched (the right answer). Two bugs found and fixed by that run: the engine answers 401 to an unidentified health poll once the secret is set, and a `*` argument is glob-expanded by the Windows C runtime.
 - NOT verified: the Docker build (Docker was not used here), Render, Supabase Auth with a real project, Google, a real browser.

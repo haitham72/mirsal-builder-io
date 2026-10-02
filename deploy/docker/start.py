@@ -32,7 +32,8 @@ def main() -> int:
             print("the engine did not come up in 60 seconds", file=sys.stderr)
             procs[0].terminate()
             return 1
-        procs.append(subprocess.Popen([py, "-m", "uvicorn", "deploy.gateway.main:app", "--host", "0.0.0.0", "--port", port, "--proxy-headers", "--forwarded-allow-ips", "*"]))
+        # the platform's proxy is the only thing that can reach this port: trust its X-Forwarded-* (an env var, not an argument: a "*" argument is glob-expanded by the Windows C runtime)
+        procs.append(subprocess.Popen([py, "-m", "uvicorn", "deploy.gateway.main:app", "--host", "0.0.0.0", "--port", port, "--proxy-headers"], env=dict(os.environ, FORWARDED_ALLOW_IPS="*")))
 
     def stop(*_):
         for p in procs:
