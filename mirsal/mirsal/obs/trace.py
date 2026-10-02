@@ -30,16 +30,8 @@ from pathlib import Path
 
 
 def _load_dotenv() -> None:
-    f = Path(__file__).resolve().parent.parent.parent / ".env"
-    try:
-        for line in f.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
-    except OSError:
-        pass
-
+    from ..runtime import envfile
+    envfile.load()
 
 def backend() -> str:
     _load_dotenv()
@@ -372,6 +364,82 @@ def model_call(out, row: dict) -> str | None:
                            outputs={"status": row.get("status"), "cost": row.get("cost"), "latency_ms": ms,
                                     "tokens_in": row.get("tokens_in"), "tokens_out": row.get("tokens_out")},
                            error=row.get("error"))
+        return ref.id if ref else None
+    except Exception:
+        return None
+
+
+def check(timeout: float = 30.0) -> dict:
+    """A live check of the LangSmith project (`python -m mirsal trace check`): one synthetic run with a child and a piece of feedback is posted to the configured project, then read back.
+    It works whatever MIRSAL_TRACE says (the person asked for the check), marks everything `synthetic` and sends nothing of the app's data.
+    -> {ok, project, endpoint, sent, dropped, read_back, run_id, error}."""
+    _load_dotenv()
+    key = os.environ.get("LANGSMITH_API_KEY", "")
+    out = {"ok": False, "project": project_name(), "endpoint": _endpoint(), "sent": 0, "dropped": 0, "read_back": False, "run_id": None, "error": None}
+    if not key:
+        out["error"] = "LANGSMITH_API_KEY is not set (mirsal/.env)"
+        return out
+    keep = os.environ.get("MIRSAL_TRACE")
+    os.environ["MIRSAL_TRACE"] = "langsmith"
+    reset()
+    try:
+        t = tracer()
+        now = time.time()
+        root = t.run("mirsal trace check", {"synthetic": True, "note": "posted by `python -m mirsal trace check`"}, None, "chain", start=now - 0.4, end=now,
+                     outputs={"ok": True}, metadata={"synthetic": True})
+        t.run("child", {"synthetic": True}, root, "tool", start=now - 0.3, end=now - 0.1, outputs={"ok": True})
+        t.flush(timeout)
+        time.sleep(1.0)
+        gate_feedback(t, root, "pack", "APPROVE", "synthetic check", False)
+        t.flush(timeout)
+        out.update(sent=t.sent, dropped=t.dropped, run_id=root.id, error=t.last_error or None)
+        deadline = time.time() + timeout
+        while time.time() < deadline and not out["read_back"]:
+            try:
+                req = urllib.request.Request(_endpoint() + f"/runs/{root.id}", headers={"x-api-key": key})
+                with urllib.request.urlopen(req, timeout=10, context=_tls()) as r:
+                    out["read_back"] = json.loads(r.read().decode()).get("id") == root.id
+            except Exception as e:
+                out["error"] = out["error"] or f"read back: {type(e).__name__} {getattr(e, 'code', '')}"
+                time.sleep(1.5)
+        out["ok"] = bool(out["read_back"] and not out["dropped"])
+        if out["ok"]:
+            out["error"] = None
+        return out
+    finally:
+        if keep is None:
+            os.environ.pop("MIRSAL_TRACE", None)
+        else:
+            os.environ["MIRSAL_TRACE"] = keep
+        reset()
+
+
+def chat_turn(session_id: str, text: str, intents: list, reply: str, steps: list, cards: list, generation: str | None = None, spent: float = 0.0,
+              error: str | None = None, started: float | None = None, user: str = "local") -> str | None:
+    """One chat turn = one run: what was asked, which intents the agent read, the steps it showed and what it answered (never a picture). No-op unless MIRSAL_TRACE=langsmith."""
+    try:
+        if backend() != "langsmith":
+            return None
+        now = time.time()
+        ref = tracer().run("chat_turn", {"text": text, "intents": intents}, None, "chain", start=started or now - 0.05, end=now,
+                           outputs={"reply": reply, "steps": [s.get("label") for s in steps or []], "cards": [c.get("type") for c in cards or []], "generation": generation,
+                                    "spent_estimate": spent}, error=error, metadata={"session": session_id, "user": user, "generation": generation})
+        return ref.id if ref else None
+    except Exception:
+        return None
+
+
+def creator_event(session_id: str, run: dict) -> str | None:
+    """The agentic creator, at every stop / wait / finish: one run with where it stands, what the person approved and what it stopped for. No-op unless MIRSAL_TRACE=langsmith."""
+    try:
+        if backend() != "langsmith":
+            return None
+        now = time.time()
+        ref = tracer().run("creator_run", {"prompt": run.get("prompt"), "scope": run.get("scope"), "bypass": run.get("bypass"), "approved_credits": run.get("approved_credits")}, None, "chain",
+                           start=run.get("started") or now - 0.05, end=now,
+                           outputs={"status": run.get("status"), "step": run.get("step"), "generation": run.get("generation"), "stop": (run.get("stop") or {}).get("why"),
+                                    "skipped": run.get("skip"), "telegram": [s.get("link") for s in (run.get("telegram") or {}).get("sets", [])], "log": [x.get("text") for x in run.get("log", [])][-12:]},
+                           error=(run.get("stop") or {}).get("why") if run.get("status") == "failed" else None, metadata={"session": session_id, "run": run.get("id")})
         return ref.id if ref else None
     except Exception:
         return None

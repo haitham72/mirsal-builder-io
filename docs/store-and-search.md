@@ -89,6 +89,12 @@ its run is ingested is retried in the background; tracing never blocks the pipel
 The project is `MIRSAL_LANGSMITH_PROJECT` (default `mirsal`); `LANGSMITH_PROJECT` is deliberately ignored because `mirsal/.env` may hold another project's. `mirsal trace backfill`
 replays rows that have no `trace_run_id`. (`reviews.trace_run_id` exists but nothing writes it yet.)
 
+**Finished 2026-10-02.** `python -m mirsal trace check` posts one synthetic run (a child and a piece of feedback, all marked `synthetic`) to the configured project and reads the run back: on this PC's key it printed
+`OK ... sent 3, dropped 0, read back: True` against LangSmith cloud (`https://api.smith.langchain.com`, project `mirsal`, which exists in the account behind the key; cloud was chosen, self-hosting is a one-line `LANGSMITH_ENDPOINT` change).
+`MIRSAL_TRACE=langsmith` is now set in this PC's `mirsal/.env` (git-ignored; the other PC needs the same line and the key). Two more kinds of run exist: **one run per chat turn** (`trace.chat_turn`: the text, the intents the agent read, the steps it showed, the reply, the cards, the
+estimated spend; no pictures) and **one run per stop / wait / finish of the agentic creator** (`trace.creator_event`: the scope, whether it approved for the person, where it stopped and why, the log). The test suite pins `MIRSAL_TRACE=none` whatever `.env` says.
+`.env` values with a trailing `# comment` are now read correctly (`runtime/envfile.py`): the old loaders kept the comment as part of the value, which turned the chat's provider into a garbage string (see `docs/agent-and-chat.md`).
+
 ## Verified
 
 - 2026-10-01: 92 generations, 828 stickers in Postgres, re-import adds zero rows, `docker restart mirsal-db` keeps everything.

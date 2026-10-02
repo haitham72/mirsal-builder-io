@@ -214,6 +214,11 @@ def trace_cmd(out, args) -> int:
         print(f"trace backend: {st['backend']}" + (f", project {st['project']}, reachable: {st['reachable']}" if st["backend"] == "langsmith" else
               " (set MIRSAL_TRACE=langsmith and LANGSMITH_API_KEY to send runs; the project is MIRSAL_LANGSMITH_PROJECT, default mirsal)"))
         return 0
+    if args.action == "check":
+        r = trace.check()
+        print(("OK      " if r["ok"] else "FAIL    ") + f"LangSmith project {r['project']} at {r['endpoint']}: sent {r['sent']}, dropped {r['dropped']}, read back: {r['read_back']}"
+              + (f" ({r['error']})" if r["error"] else "") + (f"; run {r['run_id']}" if r["run_id"] else ""))
+        return 0 if r["ok"] else 1
     if st["backend"] != "langsmith":
         print("MIRSAL_TRACE is not langsmith: nothing to send (set it and LANGSMITH_API_KEY first)")
         return 1
@@ -592,8 +597,8 @@ def main(argv=None) -> int:
     wk.add_argument("--id", dest="wid"); wk.add_argument("--kinds", help="only these kinds, comma separated (sheet,video,single)")
     qu = sub.add_parser("queue", help="the job queue: status | retry JOB | reap | sync (enqueue unfinished job files)")
     qu.add_argument("action", choices=["status", "retry", "reap", "sync"]); qu.add_argument("job", nargs="?")
-    tr = sub.add_parser("trace", help="tracing: status | backfill [--since DATE] (replay Postgres rows with no trace run to LangSmith)")
-    tr.add_argument("action", choices=["status", "backfill"]); tr.add_argument("--since")
+    tr = sub.add_parser("trace", help="tracing: status | check (post one synthetic run to the project and read it back) | backfill [--since DATE] (replay Postgres rows with no trace run to LangSmith)")
+    tr.add_argument("action", choices=["status", "check", "backfill"]); tr.add_argument("--since")
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
     po.add_argument("action", choices=["search", "reindex", "hide", "status"]); po.add_argument("query", nargs="?")
     po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")

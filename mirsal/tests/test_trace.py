@@ -152,3 +152,39 @@ class TraceWiringTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ChatAndCreatorTraceTests(TraceWiringTests):
+    """2026-10-02: a chat turn and every stop / wait / finish of the creator are runs too; nothing is sent when tracing is off."""
+
+    def test_a_chat_turn_is_one_run_with_the_intents_and_the_answer(self):
+        fake = self._on()
+        trace.chat_turn("S004", "make me a falcon", ["NEW"], "Here's the plan", [{"label": "reading your message"}, {"label": "expand prompt"}], [{"type": "plan"}], None, 2.0)
+        trace.tracer().flush()
+        run = next(r for r in fake.runs() if r["name"] == "chat_turn")
+        self.assertEqual(run["inputs"], {"text": "make me a falcon", "intents": ["NEW"]})
+        self.assertEqual(run["outputs"]["cards"], ["plan"])
+        self.assertEqual(run["outputs"]["steps"], ["reading your message", "expand prompt"])
+        self.assertEqual(run["extra"]["metadata"]["session"], "S004")
+
+    def test_the_creator_run_is_traced_with_where_it_stopped_and_never_a_path(self):
+        fake = self._on()
+        trace.creator_event("S004", {"id": "C1", "status": "stopped", "step": "cut", "scope": "images", "bypass": True, "prompt": "falcon", "generation": "G094",
+                                      "stop": {"why": "Python blocked S4"}, "skip": [], "log": [{"text": "started"}], "started": 1.0, "telegram": None})
+        trace.tracer().flush()
+        run = next(r for r in fake.runs() if r["name"] == "creator_run")
+        self.assertEqual((run["outputs"]["status"], run["outputs"]["step"], run["outputs"]["stop"]), ("stopped", "cut", "Python blocked S4"))
+
+    def test_nothing_is_sent_when_tracing_is_off(self):
+        os.environ["MIRSAL_TRACE"] = "none"
+        trace.reset()
+        self.assertIsNone(trace.chat_turn("S1", "x", [], "y", [], []))
+        self.assertIsNone(trace.creator_event("S1", {"id": "C1"}))
+
+    def test_the_live_check_without_a_key_says_so_and_sends_nothing(self):
+        os.environ.pop("LANGSMITH_API_KEY", None)
+        from unittest import mock
+        with mock.patch.object(trace, "_load_dotenv"):
+            r = trace.check()
+        self.assertFalse(r["ok"])
+        self.assertIn("LANGSMITH_API_KEY", r["error"])

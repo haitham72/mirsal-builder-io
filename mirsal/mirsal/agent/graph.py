@@ -447,6 +447,11 @@ class Agent:
         else:
             text, chips = f"**{name}**: stopped, {run['stop']['why']}", run["stop"]["chips"]
         self.store.add_message(sess, "assistant", text, chips=chips, cards=[{"type": "creator", "run_id": run["id"]}])
+        try:
+            from ..obs import trace as _trace
+            _trace.creator_event(sess.get("id", ""), run)
+        except Exception:
+            pass
 
     def _start_create(self, t: Turn, p: dict, plan_card: dict | None = None, parent: str | None = None, regen_of: str | None = None,
                       refs: list | None = None, note: str = "") -> None:
@@ -1025,6 +1030,12 @@ class Agent:
         if ok and self._ask_vision_early(t):
             pass
         msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done" if ok else "error")
+        try:
+            from ..obs import trace as _trace
+            _trace.chat_turn(sess.get("id", ""), t.text or (t.action or {}).get("type", ""), t.intents, t.reply, msg.get("steps"), t.cards, t.generation or t.res.generation, t.spent,
+                             None if ok else msg.get("error"), user=getattr(self.store, "user", "local"))
+        except Exception:
+            pass
         if msg["steps"] and msg["steps"][-1]["kind"] != "final":
             t.trace.end("done" if ok else "stopped", ok=ok)
         self.store.add_interaction(sess, t.text or (t.action or {}).get("type", ""), t.reply, t.intents,

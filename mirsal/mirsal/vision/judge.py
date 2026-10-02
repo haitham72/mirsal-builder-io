@@ -96,7 +96,8 @@ def target() -> dict:
     """Where the judge calls: {provider, model, base_url}. Local first (free); OpenAI when only a key exists."""
     from ..services import llm
     base = _env("VISION_BASE_URL", "") or None
-    want = str(_env("MIRSAL_VISION_PROVIDER", "auto")).lower()
+    from ..runtime import envfile
+    want = envfile.choice("MIRSAL_VISION_PROVIDER")
     if want == "auto":
         want = "local" if base else llm.resolve()
     model = _env("VISION_MODEL", "") or (llm.local_model() if want == "local" else os.environ.get("MIRSAL_VISION_OPENAI_MODEL", llm.DEFAULT_MODEL))

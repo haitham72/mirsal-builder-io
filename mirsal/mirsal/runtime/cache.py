@@ -26,17 +26,8 @@ class Busy(Exception):
 
 
 def _load_dotenv() -> None:
-    from pathlib import Path
-    f = Path(__file__).resolve().parent.parent.parent / ".env"
-    try:
-        for line in f.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
-    except OSError:
-        pass
-
+    from ..runtime import envfile
+    envfile.load()
 
 def digest(*parts) -> str:
     return hashlib.sha256("\x1f".join(str(p) for p in parts).encode("utf-8")).hexdigest()[:32]

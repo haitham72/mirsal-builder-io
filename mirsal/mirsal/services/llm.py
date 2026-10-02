@@ -50,20 +50,13 @@ def fence(label: str, text, cap: int = 2000) -> str:
 
 
 def _load_dotenv() -> None:
-    """mirsal/.env (git-ignored): KEY=VALUE lines. The real environment wins."""
+    """mirsal/.env (git-ignored): KEY=VALUE lines, a trailing ` # comment` is a comment (runtime/envfile.py). The real environment wins."""
     global _ENV_LOADED
     if _ENV_LOADED:
         return
     _ENV_LOADED = True
-    f = Path(__file__).resolve().parent.parent.parent / ".env"
-    try:
-        for line in f.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
-    except OSError:
-        pass
+    from ..runtime import envfile
+    envfile.load()
 
 
 def local_url() -> str:
@@ -174,7 +167,8 @@ def note_failure(prov: str) -> None:
 def provider() -> str:
     """The backend `complete` will use: openai | local | none."""
     _load_dotenv()
-    p = os.environ.get("MIRSAL_LLM_PROVIDER", "auto").lower()
+    from ..runtime import envfile
+    p = envfile.choice("MIRSAL_LLM_PROVIDER")
     if p == "none":                            # switched off: no model of any kind is asked (the test suite pins this, tests/__init__.py)
         return "none"
     if p == "local":
@@ -269,7 +263,8 @@ def complete(system: str, user: str, *, provider_: str | None = None, **kw) -> t
     try:
         return _complete_on(prov, system, user, **kw)
     except LLMError:
-        if prov == "none" or os.environ.get("MIRSAL_LLM_PROVIDER", "auto").lower() != "auto" or preference() != "auto":
+        from ..runtime import envfile
+        if prov == "none" or envfile.choice("MIRSAL_LLM_PROVIDER") != "auto" or preference() != "auto":
             raise
         note_failure(prov)
         other = provider()

@@ -122,6 +122,10 @@ thinking, returned an EMPTY answer (23 s), the one repair round did the same, an
 (`llm.CLOSED_THINK`, `MIRSAL_LOCAL_PREFILL=0` turns it off): 12 tokens and 2.4 s for a trivial answer, a 9-cell plan in about 7 s. An empty answer that ran out of budget is now an error (`LLMError`), not an empty string, and one balanced-brace JSON reader
 (`llm.extract_json`, through `<think>` blocks and code fences) is used by the plan, the brain and the judge. The chat shows the step "writing 9 sticker ideas with qwen3.5-4b (local)" before the model is asked, and a note when the built-in sets had to be used.
 
+**The real cause of the "alternating" and the red error: `.env` comments (found and fixed 2026-10-02).** `mirsal/.env` had `MIRSAL_AGENT_PROVIDER=auto          # the chat assistant; ...`. Four separate `.env` loaders kept the comment as part of the value, so the chat's provider was the
+string "auto          # the chat assistant; ..." (neither `local` nor `openai`): its calls went to the local server under the cloud model name `gpt-4.1-mini`, failed, and showed up in `out/model_calls.jsonl` as provider "auto # the chat assistant;...". One parser now serves them all
+(`runtime/envfile.py`, tests in `tests/test_envfile.py`), and a provider setting is read as its first word (`envfile.choice`) even if a comment reaches the environment some other way.
+
 **Greetings and the first answer.** `resolver.is_smalltalk` reads "hi", "hellow", "heyyy", "good morning", "thanks!", "salam", "how are you" (typos included, at most five words, never "hello kitty" or "hi, make me a falcon") as small talk and answers
 without a plan. The first answer of every chat also asks once whether AI vision may be used (two buttons, `vision_yes` / `vision_no`, that change only `settings.allow_vlm`; a pending go-ahead is never dropped). The plan's price is stated once, in its card;
 the go-ahead is the pair of buttons under the message (Create it / Not yet), like "Allow AI vision / Not now". Batches are called by their subject in every sentence and step title ("Eid mubarak greetings"), never by the bare id "G096".

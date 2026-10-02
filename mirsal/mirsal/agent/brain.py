@@ -46,7 +46,8 @@ no quotes, no emoji, no numbers (for example "Happy boy holding a red heart"). R
 def target() -> dict:
     """Which model runs the agent: MIRSAL_AGENT_PROVIDER local|openai|auto. Auto prefers the local model (free) when it answers."""
     llm._load_dotenv()
-    want = os.environ.get("MIRSAL_AGENT_PROVIDER", "auto").lower()
+    from ..runtime import envfile
+    want = envfile.choice("MIRSAL_AGENT_PROVIDER")
     if want == "auto":
         want = llm.resolve()                                    # the person's choice (auto / local / cloud) in one place, the same for the plan, the chat and the vision judge
     model = os.environ.get("MIRSAL_AGENT_MODEL") or (llm.local_model() if want == "local" else os.environ.get("MIRSAL_LLM_MODEL", llm.DEFAULT_MODEL))
