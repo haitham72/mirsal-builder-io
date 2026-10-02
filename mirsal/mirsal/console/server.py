@@ -343,7 +343,7 @@ class Console:
         except (OSError, ValueError):
             raise pl.PipelineError("That batch has no saved plan to start from", 404)
 
-    def live(self, what, body):
+    def live(self, what, body, base_plan=None):
         """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
         `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>."""
         if what not in ("cost", "sheet", "video"):
@@ -372,7 +372,7 @@ class Console:
                 refs = self.ref_files(body.get("refs"))
                 if refs and not model_catalog.find("image", model).get("refs"):
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
-                base = self.plan_of(who, body["from_generation"]) if body.get("from_generation") else None      # the Prompt tab: this batch's own plan, same cells and tags
+                base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else None)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
                 t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
                 prompt = t["plan"]["sheet_prompt"] + ("\n" + prompter.REFERENCE_CLAUSE if refs else "")

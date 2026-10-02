@@ -708,6 +708,24 @@ class LiveConsoleTests(Base):
         self.assertEqual([h["via"] for h in res["edge_history"]], ["initial", "apply", "undo"])
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/edge", {})[0], 400)
 
+    def test_a_plan_handed_in_is_the_plan_that_runs_and_is_not_planned_again(self):
+        """The chat shows a plan card and Create used to plan the request AGAIN (a second model call, different cells). The approved plan is now handed to the sheet job in-process and rebuilt
+        from its cells and slots: the task holds exactly those cells."""
+        from mirsal.agent.graph import compact_plan
+        plan = compact_plan(_tasks.preview("owl", "3x3", "flat_vector", False))
+        keys = [f"approved_{i}" for i in range(1, 10)]
+        for st, k in zip(plan["stickers"], keys):
+            st["key"] = k
+        plan["slots"]["cells"] = [dict(c, label=k.replace("_", " ")) for c, k in zip(plan["slots"]["cells"], keys)] if plan["slots"].get("cells") else plan["slots"].get("cells")
+        r = self.c.live("sheet", {"prompt": "owl", "grid": "3x3", "style_id": "flat_vector", "ai": False}, base_plan=plan)
+        task = _tasks.read_task(self.out, r["task"])
+        self.assertEqual(task["request"]["slots"], plan["slots"], "the slots of the card are the slots of the task")
+        self.c.wait_jobs(60)
+        s, via_http = self.req("POST", "/api/live/sheet", {"prompt": "owl", "grid": "3x3", "style_id": "flat_vector", "ai": False, "base_plan": plan})
+        self.assertEqual(s, 200)
+        self.assertNotEqual(_tasks.read_task(self.out, via_http["task"])["request"]["slots"], plan["slots"], "the HTTP layer ignores a plan in the body: only code in this process can hand one in")
+        self.c.wait_jobs(60)
+
     def test_a_pending_edge_becomes_real_exactly_at_video_generation_and_at_the_pack(self):
         gid = self._stills_ready()
         was = self.req("GET", f"/api/generations/{gid}")[1]["outline_px"]

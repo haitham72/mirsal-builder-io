@@ -196,6 +196,8 @@ class SessionStore:
                     try:
                         g = _jobs.read(self.out, p["job"]).get("generation")
                         p["generation"] = gid_of(g) if g else None
+                        if p["generation"] and (s.get("focus") or {}).get("generation") != p["generation"] and p["created"] >= (self.latest_pass(s, with_generation=True) or {"created": 0})["created"]:
+                            s["focus"] = {"generation": p["generation"], "stickers": []}        # a sheet that comes back is what "it" and "number 3" mean from now on
                     except Exception:
                         pass
                 if p.get("generation"):
@@ -213,10 +215,13 @@ class SessionStore:
                         p["parent"] = gid_of(res["parent"])
         return s
 
-    def latest_pass(self, s: dict) -> dict | None:
+    def latest_pass(self, s: dict, with_generation: bool = False) -> dict | None:
+        """The newest pass. `with_generation`: the newest one that has a batch (a job that is still running, or failed, is not something to edit or animate)."""
         best = None
         for subj in s["subjects"]:
             for p in subj["passes"]:
+                if with_generation and not p.get("generation"):
+                    continue
                 if best is None or p["created"] >= best["created"]:
                     best = p
         return best

@@ -45,6 +45,11 @@ def _numbers(clause: str, n: int) -> list:
     """The sticker numbers named in a clause: digits, `#3`, `number three`, ordinals, `last`, ranges. Grid sizes (3x3) are not numbers."""
     c = re.sub(r"\b\d+\s*x\s*\d+\b", " ", clause.lower())
     c = re.sub(r"\bg\d{1,4}\s*/?\s*s(\d)", r" \1 ", c)                 # G12/S3 -> 3
+    c = re.sub(r"\bs(\d)\b", r" \1 ", c)                                # S3 -> 3
+    before_last = bool(re.search(r"\b(?:second to last|2nd to last|next to last|one before (?:the )?last|before (?:the )?last)\b", c))
+    c = re.sub(r"\b(?:second to last|2nd to last|next to last|one before (?:the )?last|before (?:the )?last)\b", " ", c)
+    last_sticker = bool(re.search(r"\blast\s+(?:one|sticker|stickers|image|picture|pic|cell|card|tile)\b|^\s*(?:the\s+)?last\s*$", c))          # "last guy", "the last batch", "the last change" are not sticker 9
+    c = re.sub(r"\blast\b", " ", c)
     found = []
     for m in re.finditer(r"(\d+)\s*(?:-|to|through)\s*(\d+)", c):          # 3-5, 3 to 5
         a, b = int(m[1]), int(m[2])
@@ -63,6 +68,10 @@ def _numbers(clause: str, n: int) -> list:
             v = CARDINALS[tok[4]]
         if 1 <= v <= n:
             found.append(v)
+    if last_sticker and n not in found:
+        found.append(n)
+    if before_last and n > 1 and (n - 1) not in found:
+        found.append(n - 1)
     return list(dict.fromkeys(found))
 
 
@@ -209,8 +218,62 @@ DESCRIBE = (r"\b(?:describe|caption|captions|transcribe)\b|\bwhat(?:'s| is| are)
 
 
 # ---- intent rules ---------------------------------------------------------------------------------------------------------------
-YES = r"^(?:yes|yep|yeah|yup|ok|okay|sure|go|go ahead|do it|create|generate|confirm|start|let'?s go|make it|looks good|perfect)\b"
-NO = r"^(?:no|nope|cancel|stop|never ?mind|don'?t|not now)\b"
+# A go-ahead is a WHOLE message from a short closed list (audit 2026-10-02: the first word alone was enough, so "create a dragon pack", "yes make it red" and "start over" spent the OLD plan).
+YES_PHRASES = ("yes please", "go ahead", "do it", "create it", "generate it", "let's go", "lets go", "make it", "looks good", "sounds good", "yes", "yep", "yeah", "yup", "ya", "y", "ok", "okay", "sure",
+               "go", "create", "generate", "confirm", "start", "perfect", "great", "nice", "please", "yalla", "👍", "✅", "ايوه", "أيوه", "نعم", "تمام", "ماشي", "اوكي", "أوكي", "ايه", "إيه", "tamam", "aywa", "aiwa", "naam")
+NO_PHRASES = ("no thanks", "no thank you", "not now", "never mind", "nevermind", "no", "nope", "nah", "na", "n", "cancel", "stop", "don't", "dont", "لا", "لأ", "مش دلوقتي", "خلاص", "👎", "❌", "la", "laa")
+
+
+def _closed(text: str, phrases) -> bool:
+    """True when the whole message is made only of phrases of the list (at most 4 of them), punctuation aside."""
+    s = re.sub(r"[\s,.!?؟،]+", " ", text.strip().lower()).strip()
+    if not s or len(s.split()) > 6:
+        return False
+    for _ in range(4):
+        for ph in sorted(phrases, key=len, reverse=True):
+            if s == ph:
+                return True
+            if s.startswith(ph + " "):
+                s = s[len(ph) + 1:]
+                break
+        else:
+            return False
+    return not s
+
+
+def is_yes(text: str) -> bool:
+    return _closed(text, YES_PHRASES)
+
+
+def is_no(text: str) -> bool:
+    return _closed(text, NO_PHRASES)
+
+
+ACK_STRONG = {"ok", "okay", "nice", "cool", "great", "thanks", "thank", "thx", "ty", "cheers", "lol", "haha", "wow", "awesome", "amazing", "good", "fine", "alright", "noted", "gotcha", "understood", "k", "kk",
+              "sweet", "brilliant", "neat", "yay", "shukran", "شكرا", "👍", "🙏", "❤️", "😊", "🙌", "👌", "😂", "🔥", "perfect", "lovely"}
+ACK_FILL = {"you", "so", "much", "very", "bro", "mate", "man", "dude", "for", "that", "this", "it", "all", "your", "help", "the", "a", "lot", "many", "is", "was", "really", "got", "appreciate", "thank", "again", "sir", "boss"}
+
+
+def is_ack(text: str) -> bool:
+    """An acknowledgement ("ok", "nice", "thanks bro", "okay cool", "thank you so much for that", "👍"): there is nothing to make or change, and it must never become a plan."""
+    words = re.findall(r"[^\W\d_]+(?:'[a-z]+)?|[^\w\s]", text.lower())
+    words = [w for w in words if w not in ("!", ".", ",", "?", "…")]
+    return bool(words) and len(words) <= 7 and any(w in ACK_STRONG for w in words) and all(w in ACK_STRONG or w in ACK_FILL for w in words)
+
+
+def smalltalk_kind(text: str) -> str:
+    """Which small talk it is, so the answer fits: thanks | bye | ack | hello."""
+    low = text.lower()
+    if re.search(r"\b(thanks|thank|thx|ty|cheers|shukran)\b|شكرا", low):
+        return "thanks"
+    if re.search(r"\b(bye|goodbye|see you|cya)\b", low):
+        return "bye"
+    if is_ack(text) and not re.search(r"\b(hi|hello|hey|hola|salam|marhaba)\b", low):
+        return "ack"
+    return "hello"
+PRON = r"(?:the|that|this|it|them|these|those|him|her|he|she|they|everyone|everything|all of them|all (?:the )?stickers|the (?:guy|man|woman|girl|boy|character|dude|lady|bird|cat|dog))"
+WEARISH = r"\b(?:wear|wearing|wears|put on|hold|holding|carry|carrying|ride|riding|eat|eating|drink|drinking|become|turn into|look like|looks like|have|has|hat|coat|jacket|glasses|sunglasses|cape|crown|scarf|shoes|mask|beard)\b"
+COLOURS = r"\b(?:red|blue|green|yellow|pink|purple|orange|black|white|brown|gold|golden|silver|dark|light|pastel|neon)\b"
 COMPARATIVE = r"\b(?:\w+er|more|less|bigger|smaller|happier|sadder|funnier|cuter|bolder|brighter|softer|rounder|different|livelier)\b"
 NEW_VERBS = r"\b(make|create|generate|give|draw|design|build|i want|i need|i'd like|can you make|stickers? (?:of|for|with)|pack of|set of)\b"
 
@@ -249,21 +312,27 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
     t = text.strip().lower()
     if not t:
         return ["AMBIGUOUS"], 0.0
-    if has_pending and re.match(YES, t):
+    if has_pending and is_yes(t):
         return ["CONFIRM"], 0.95
-    if has_pending and re.match(NO, t):
+    if has_pending and is_no(t):
         return ["CANCEL"], 0.95
-    if is_smalltalk(t) and not re.search(NEW_VERBS, t):
+    polite = re.match(r"^(?:please\s+)?(?:can|could|would|will) you\s+(?:please\s+)?(.*?)\s*\??$", t)
+    if polite and re.match(r"^(?:make|create|generate|give|draw|design|build|redo|regenerate|change|fix|replace|swap|improve|animate|add|remove|turn|put)\b", polite.group(1)):
+        t = polite.group(1)                                          # "can you make me a falcon?" is a request, not a question about me
+    if re.match(r"^(?:how much|how many credits|what(?:'s| is| would) (?:it|that|this) cost|what'?s the (?:price|cost)|price|cost)\b", t):
+        return ["ASK"], 0.85                                         # a price question is never small talk ("how much?" used to answer "Hi!")
+    if (is_smalltalk(t) or is_ack(t)) and not re.search(NEW_VERBS, t):
         return ["SMALLTALK"], 0.95
     if has_generation and re.search(NAMES_RX, t):
         return ["NAMES"], 0.9
     intents: list = []
     conf = 0.5
-    refs = bool(re.search(r"\b(?:number|no\.?|#)\s*\d|\b\d\b|\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last)\b|\bg\d+\s*/?\s*s\d", t)) \
+    counted = re.sub(r"\b(?:make|create|generate|draw|give|design|build)\s+(?:me\s+)?(?:a\s+)?(?:pack of\s+)?\d+\s+(?:\w+\s+){0,2}?(?:stickers?|emoji|packs?|sets?|dogs?|cats?|\w+s)\b|\bpack of \d+\b|\b\d+\s+(?:different\s+)?(?:\w+\s+){0,2}stickers?\b", " ", t)
+    refs = bool(re.search(r"\b(?:number|no\.?|#)\s*\d|\b\d\b|\bs\d\b|\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)\b|\blast\s+(?:one|sticker|image|picture|pic|cell)\b|\bg\d+\s*/?\s*s\d", counted)) \
         or bool(has_selection and re.search(r"\b(these|this|those|them|it|selected)\b", t))
-    concept_edit = bool(has_generation and re.search(r"\b(make|turn)\s+(?:the|that|this|it|them|these|those)\b", t) and re.search(COMPARATIVE, t)
-                        and not re.search(r"\b(stickers?|emoji|pack|set)\b", t))
-    if re.search(r"\b(grid|2x2|3x3|style|no animation|without animation|with animation|ask before|don'?t ask|ask me|instant|auto[- ]?create|ai vision)\b", t) \
+    concept_edit = bool(has_generation and re.search(rf"\b(make|turn|give|put|let|get)\s+{PRON}\b", t) and (re.search(COMPARATIVE, t) or re.search(WEARISH, t) or re.search(COLOURS, t))
+                        and not re.search(r"\b(?:a|an|some|\d+)\s+(?:\w+\s+)?(?:stickers?|emoji|packs?|sets?)\b", t))
+    if len(t.split()) <= 8 and re.search(r"\b(grid|2x2|3x3|style|no animation|without animation|with animation|ask before|don'?t ask|ask me|instant|auto[- ]?create|ai vision)\b", t) \
             and re.search(r"\b(use|set|switch|change|make it|go|turn|please|from now|always|stop|no|with|without|don'?t|do not|ask|just|allow|enable|disable)\b", t) \
             and not re.search(NEW_VERBS, t.replace("make it", "")):
         intents, conf = ["CHANGE_SETTINGS"], 0.8
@@ -279,7 +348,7 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         intents, conf = ["SEARCH"], 0.75
     elif re.search(r"\b(another|more of|again|new batch|different (?:set|batch|ones)|try again)\b", t) and has_generation:
         intents, conf = ["ANOTHER"], 0.8
-    elif has_generation and (refs or concept_edit) and re.search(r"\b(make|redo|regenerate|change|fix|replace|swap|improve|less|more|bigger|smaller|happier|sadder|funnier|cuter|different)\b", t):
+    elif has_generation and (refs or concept_edit) and re.search(r"\b(make|redo|regenerate|change|fix|replace|swap|improve|less|more|bigger|smaller|happier|sadder|funnier|cuter|different|give|put|add|remove|let|get|turn)\b", t):
         intents, conf = ["EDIT_STICKERS"], 0.8
         if re.search(rf"\b{POS}\b|\b{NEG}\b", t) and re.search(r"\b(i|but)\b", t) and re.search(r"\b(like|love|hate|dislike|keep)\b", t):
             intents = ["FEEDBACK", "EDIT_STICKERS"]
@@ -292,8 +361,13 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         intents, conf = ["NEW"], 0.85
     elif has_generation and re.search(r"^(?:i )?(?:like|love|hate|dislike|keep)\b", t):
         intents, conf = ["FEEDBACK"], 0.6
-    elif len(t.split()) <= 8 and not t.endswith("?"):
+    elif has_generation and len(t.split()) <= 5 and (re.search(COMPARATIVE, t) or re.search(COLOURS, t) or re.match(r"^(?:same|again|more|one more|undo|revert|redo)\b", t)) and not re.search(NEW_VERBS, t):
+        intents, conf = ["EDIT_STICKERS"], 0.7        # "bigger", "same but red", "happier": a change to what is open, never a new subject (the next question is which sticker)
+    elif len(t.split()) <= 8 and not t.endswith("?") and not re.match(r"^(?:undo|revert|ok|okay|yes|no)\b", t):
         intents, conf = ["NEW"], 0.62                 # "falcon dancing", "teddy bear with a book": a bare subject is a request
+    elif not t.endswith("?") and re.search(r"\b(?:in|with|on|of|holding|wearing|sitting|standing|style|and|for|a|an|the)\b", t) \
+            and not re.search(r"\b(?:it|them|this|that|these|those|number|sticker|batch|previous|last|same|again)\b|\b(?:like|love|hate|dislike|keep)\b", t):
+        intents, conf = ["NEW"], 0.62                 # a long description with nothing to point back at ("a cute cat in pixar style holding an umbrella...") is a request
     else:
         intents, conf = ["AMBIGUOUS"], 0.3
     return intents, conf

@@ -208,9 +208,11 @@ class MemoryAndSummary(Base):
         self.say("blorp zzz qqq vvv www xxx yyy zzz aaa bbb ccc")                         # the rules are unsure: the model is asked
         self.assertTrue(self.said)
         self.assertIn("Subject 'banana'", self.said[0])
-        for i in range(3):                                                                # earlier turns are summarised, never replayed
+        self.say("hello number 0")
+        seen = len(self.said)                                                             # whatever the model got for turn 0 itself is fine; later turns must not replay it
+        for i in range(1, 4):                                                             # earlier turns are summarised, never replayed
             self.say(f"hello number {i}")
-        self.assertFalse([u for u in self.said[1:] if "hello number 0" in u])
+        self.assertFalse([u for u in self.said[seen:] if "hello number 0" in u])
 
 
 class EditsAskAndReview(Base):
@@ -250,6 +252,9 @@ class EditsAskAndReview(Base):
     def test_approve_all_but_5_and_6_records_a_human_decision_for_the_rest(self):
         self.seed("G012")
         m = self.say("approve all but 5 and 6")
+        self.assertFalse([c for c in self.tools.calls if c[0] == "review"], "a decision on seven stickers is confirmed first (2026-10-02)")
+        self.assertEqual((self.sess()["pending"]["type"], self.sess()["pending"]["indexes"]), ("review", [1, 2, 3, 4, 7, 8, 9]))
+        m = self.say("yes")
         call = [c for c in self.tools.calls if c[0] == "review"][0]
         self.assertEqual((call[2], call[3]), ("APPROVE", [1, 2, 3, 4, 7, 8, 9]))
         self.assertIn("Approved S1", m["text"])

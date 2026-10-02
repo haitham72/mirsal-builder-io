@@ -31,7 +31,7 @@ from ..runtime import cache as cachemod
 from . import creator
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
-from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, polarity_of, resolve, settings_from
+from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, polarity_of, resolve, settings_from, smalltalk_kind
 from .tools import ConsoleTools, ToolError
 
 INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
@@ -96,6 +96,8 @@ class Turn:
     generation: str | None = None
     queue: list = field(default_factory=list)
     spent: float = 0.0
+    prev_pending: dict | None = None             # the plan that was waiting when this message arrived (a new one replaces it, and the reply says so)
+    unsure_review: bool = False                  # an approve / reject sentence with a negation in it: nothing is decided, the person is asked
     _lock: Any = None
 
 
@@ -203,6 +205,7 @@ class Agent:
         t: Turn = state["turn"]
         sess = t.sess
         pending = bool(sess.get("pending"))
+        t.prev_pending = sess.get("pending")
         has_gen = bool((sess.get("focus") or {}).get("generation") or self.store.latest_pass(sess) or self._named_batches(sess, t.text))
         asked = sess.pop("awaiting", None)                     # a question I asked last turn lives for exactly one answer
         answered = False
@@ -226,7 +229,10 @@ class Agent:
             t.intents, t.conf = classify(t.text, pending, has_gen, bool(t.selected))
             low = t.text.lower()
             if re.search(r"\b(approve|accept|reject|decline)\b", low) and has_gen:
-                t.intents, t.conf = ["REVIEW"], 0.9
+                if re.search(r"\b(?:don'?t|do not|dont|can'?t|cannot|won'?t|will not|never|not|no)\b", low):
+                    t.intents, t.conf, t.unsure_review = ["AMBIGUOUS"], 0.5, True          # "don't approve 3" approved S3 before: a decision is never guessed from a negation
+                else:
+                    t.intents, t.conf = ["REVIEW"], 0.9
             if t.conf < 0.6 and self.brain.available:
                 got = self.brain.classify(t.text, self.store.summary_text(sess))
                 if got:
@@ -246,7 +252,7 @@ class Agent:
         sess = t.sess
         self.store.refresh(sess)
         focus = sess.get("focus") or {}
-        gen = focus.get("generation") or (self.store.latest_pass(sess) or {}).get("generation")
+        gen = focus.get("generation") or (self.store.latest_pass(sess, with_generation=True) or {}).get("generation")
         stickers, n, parent, known = [], 9, None, {}
         for subj in sess["subjects"]:
             for p in subj["passes"]:
@@ -262,7 +268,7 @@ class Agent:
                 parent = card.get("parent")
             except Exception:
                 pass
-        latest = (self.store.latest_pass(sess) or {}).get("generation")
+        latest = (self.store.latest_pass(sess, with_generation=True) or {}).get("generation")
         return {"generation": gen, "n": n, "stickers": stickers, "focus_stickers": focus.get("stickers") or [], "selected": t.selected,
                 "parent": parent, "latest": latest, "known": known}
 
@@ -354,13 +360,13 @@ class Agent:
             return self._creator_plan(t, subject, prompt, names, est, card, cs)
         if spend and st.get("ask_before_spending", True):
             sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"],
-                               "ai": bool(st.get("ai", True)), "estimate": est}
+                               "ai": bool(st.get("ai", True)), "estimate": est, "plan": compact_plan(plan)}
             t.cards.append(card)
             t.reply = f"Here's the plan for **{subject}**: {len(names)} stickers, {STYLE_NAMES.get(st['style_id'], st['style_id'])}. Shall I create it?"
             t.chips = [{"label": "Create it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end(f"plan ready · {_credits(est)}")
             return {}
-        self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"], "ai": bool(st.get("ai", True))}, card)
+        self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"], "ai": bool(st.get("ai", True)), "plan": compact_plan(plan)}, card)
         return {}
 
     # -- the agentic creator: one go-ahead from the request to the pack on Telegram (agent/creator.py) --------------------------------------------------------
@@ -463,13 +469,14 @@ class Agent:
             pass
 
     def _start_create(self, t: Turn, p: dict, plan_card: dict | None = None, parent: str | None = None, regen_of: str | None = None,
-                      refs: list | None = None, note: str = "") -> None:
+                      refs: list | None = None, note: str = "") -> bool:
+        """Start a batch from an approved plan (`p["plan"]` is sent as it is: the card and the batch are the same). True when it started; False leaves the reply explaining why."""
         try:
-            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs)
+            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"))
         except ToolError as e:
             t.reply = f"I couldn't start that: {e}"
             t.trace.end("not started", ok=False)
-            return
+            return False
         self.store.add_pass(t.sess, p["subject"], generation=r.get("generation"), job=r.get("job"), prompt=p["prompt"], grid=p["grid"],
                             style_id=p["style_id"], parent=parent, note=note)
         if r.get("generation"):
@@ -480,6 +487,7 @@ class Agent:
                         "parent": parent, "note": note})
         t.reply = (t.reply + " " if t.reply else "") + (f"Creating **{p['subject']}** now" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". The stickers appear below as they are ready.")
         t.trace.end("started · " + (r.get("job") or r.get("generation") or ""))
+        return True
 
     def n_confirm(self, state: State) -> dict:
         t: Turn = state["turn"]
@@ -488,11 +496,18 @@ class Agent:
             t.reply = "There is nothing waiting for a go-ahead. What would you like to make?"
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
             return {}
-        t.sess["pending"] = None
         t.trace.step(f"confirmed: {p['type']}")
         if p["type"] == "create":
             t.trace.retitle(f"generating {p['subject']}")
-            self._start_create(t, p, parent=p.get("parent"), regen_of=p.get("regen_of"), refs=p.get("refs"), note=p.get("note", ""))
+            if self._start_create(t, p, parent=p.get("parent"), regen_of=p.get("regen_of"), refs=p.get("refs"), note=p.get("note", "")):
+                t.sess["pending"] = None
+            else:                                           # a refused start must not cost the plan: the person presses the same button again
+                t.reply += " I kept your plan: press Create it to try again, or Not yet to drop it."
+                t.chips = [{"label": "Create it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            return {}
+        t.sess["pending"] = None
+        if p["type"] == "review":
+            return self._do_review(t, p["generation"], p["decision"], p["indexes"])
         elif p["type"] == "creator":
             t.trace.retitle(f"creating {p['subject']} for Telegram")
             self._start_creator(t, p)
@@ -711,19 +726,30 @@ class Agent:
         low = t.text.lower()
         decision = "REJECT" if re.search(r"\b(reject|decline)\b", low) else "APPROVE"
         ready = self.tools.ready_indexes(gen)
+        bulk = False
         m = re.search(r"\ball\b(?:\s+(?:of them|the stickers))?\s*(?:but|except)\s+(.*)", low)
         if m:
             from .resolver import _numbers
             skip = _numbers(m.group(1), 9)
-            idx = [i for i in ready if i not in skip]
+            idx, bulk = [i for i in ready if i not in skip], True
         elif re.search(r"\b(all|everything|them all)\b", low):
-            idx = ready
+            idx, bulk = ready, True
         else:
             idx = [int(s.split("/")[1][1:]) for s in t.res.stickers]
         if not idx:
             t.reply = "Which stickers? For example \"approve all but 5 and 6\"."
             t.sess["awaiting"] = {"intents": ["REVIEW"], "text": t.text}
             return {}
+        if bulk and len(idx) > 1:                                    # a decision on many stickers at once is confirmed, never read off one sentence
+            names = ", ".join("S" + str(i) for i in idx)
+            t.sess["pending"] = {"type": "review", "generation": gen, "decision": decision, "indexes": idx, "subject": self._nm(t.sess, gen)}
+            t.reply = f"{'Approve' if decision == 'APPROVE' else 'Reject'} {names} in **{self._nm(t.sess, gen)}**? Say yes to record it, or no."
+            t.chips = [{"label": "Yes, " + decision.lower(), "action": "confirm"}, {"label": "No", "action": "cancel"}]
+            t.trace.end("waiting for your yes")
+            return {}
+        return self._do_review(t, gen, decision, idx)
+
+    def _do_review(self, t: Turn, gen: str, decision: str, idx: list) -> dict:
         t.trace.retitle(("approving" if decision == "APPROVE" else "rejecting") + f" in {self._nm(t.sess, gen)}")
         r = self.tools.review(gen, decision, idx, "from the chat")
         t.trace.step(f"{decision.lower()}d {', '.join('S' + str(i) for i in r['done'])}")
@@ -986,8 +1012,10 @@ class Agent:
 
     def n_smalltalk(self, state: State) -> dict:
         t: Turn = state["turn"]
-        t.trace.task("saying hello")
-        t.reply = "Hi! What will you create today?"
+        kind = smalltalk_kind(t.text)
+        t.trace.task({"thanks": "saying you're welcome", "bye": "saying goodbye", "ack": "noting that"}.get(kind, "saying hello"))
+        t.reply = {"thanks": "You're welcome! Tell me what to change, or what to make next.", "bye": "Bye! Your stickers will be here when you come back.",
+                   "ack": "Anytime. Tell me what to change, or what to make next."}.get(kind, "Hi! What will you create today?")
         t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
         t.trace.end("ready")
         return {}
@@ -1002,6 +1030,9 @@ class Agent:
             t.reply = r.clarification or "Which one do you mean?"
             t.chips = [{"label": "#" + o.split("/S")[1], "text": f"number {o.split('/S')[1]}"} for o in r.options]
             t.trace.end("one question")
+        elif t.unsure_review:
+            t.reply = "I did not decide anything: I could not tell whether you want to approve or reject. Say it plainly, for example \"approve 3\" or \"reject 4 and 5\"."
+            t.trace.end("asked what to decide")
         else:
             t.reply = "I'm not sure what to make yet. Tell me a subject, like \"a teddy bear waving\", or pick one:"
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
@@ -1038,6 +1069,11 @@ class Agent:
             sess["focus"] = {"generation": t.generation, "stickers": []}
         if ok and self._ask_vision_early(t):
             pass
+        old, new = t.prev_pending, sess.get("pending")
+        if old and new and new is not old and (old.get("type"), old.get("subject")) != (new.get("type"), new.get("subject")) and not (t.action or {}).get("type") in ("confirm", "cancel") \
+                and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL"):
+            gone = old.get("subject") or old.get("type")
+            t.reply = (t.reply + " " if t.reply else "") + f"(This replaces the plan I was holding for {gone}: nothing was spent on it.)"
         if self.brain.last_error:                                      # the model was asked in this turn and could not answer: the rules answered, and the person is told why
             t.trace.rules_note(self.brain.last_error)
         msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done" if ok else "error")
@@ -1054,6 +1090,14 @@ class Agent:
         if self.store.reduce(sess, summarise=(self.brain.summarise if self.brain.available else None)):
             t.trace.note("summarised the earlier part of this chat")
         self.store.save(sess)
+
+
+def compact_plan(plan: dict) -> dict:
+    """The plan a card shows, as it is stored in `pending`: the template, the slots and the cells; the prompts are rebuilt from them (`tasks.plan_again`), so the stored plan is small and the
+    batch that runs is exactly the one that was approved."""
+    keep = {k: v for k, v in (plan or {}).items() if k not in ("sheet_prompt", "video_prompt")}
+    keep["stickers"] = [{k: v for k, v in s.items() if k != "prompt"} for s in (plan or {}).get("stickers") or []]
+    return keep
 
 
 def _with_pending(t: Turn, spec: dict) -> Turn:

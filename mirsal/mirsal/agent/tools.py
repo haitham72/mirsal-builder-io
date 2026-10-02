@@ -167,8 +167,9 @@ class ConsoleTools:
 
     # ---- writes (these can spend) -----------------------------------------------------------------------------------------------------
     def create(self, prompt: str, grid: str = "3x3", style_id: str = "flat_vector", ai: bool = True, parent: str | None = None,
-               regen_of: str | None = None, refs: list | None = None) -> dict:
-        """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); otherwise the prepared-sheet lookup, exactly as the page does."""
+               regen_of: str | None = None, refs: list | None = None, base_plan: dict | None = None) -> dict:
+        """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); otherwise the prepared-sheet lookup, exactly as the page does. `base_plan` is the plan the person
+        approved on the card: it is what is sent (the cells, tags and slots of the card), never planned a second time."""
         self._may_spend()
         if parent:
             self._see(parent)
@@ -179,7 +180,7 @@ class ConsoleTools:
                     body["parent"] = parent
                 if regen_of:
                     body["regen_of"] = regen_of
-                r = self.c.live("sheet", body)
+                r = self.c.live("sheet", body, base_plan=base_plan)
                 return {"job": r["job"], "task": r["task"], "estimate": r.get("estimate"), "generation": None, "live": True}
             if self.c.lock.locked():
                 raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
@@ -299,6 +300,8 @@ class FakeTools:
         self._live, self._credits = live, credits
         self.calls: list = []
         self.proposed: dict = {}
+        self.sent_plans: list = []
+        self.fail_next_create = False
         self.judge_rejects: list = []
         self.job_generations: dict = {}
         self.job_status: dict = {}
@@ -319,7 +322,7 @@ class FakeTools:
         words = [w for w in prompt.lower().split() if w not in ("make", "me", "a", "an", "some", "stickers", "sticker", "of", "create")]
         subject = " ".join(words[:3]) or "sticker"
         n = 9 if grid == "3x3" else 4 if grid == "2x2" else 1
-        return {"subject": subject, "task_slug": subject.replace(" ", "_"), "grid": grid, "expanded_by": "fake",
+        return {"subject": subject, "task_slug": subject.replace(" ", "_"), "grid": grid, "expanded_by": "fake", "template_id": "fake_t", "template_version": 1, "slots": {"subject_description": subject, "style_id": style_id}, "sheet_prompt": f"sheet of {subject}",
                 "stickers": [{"index": i, "key": f"{subject.replace(' ', '_')}_{i}", "emoji": ["😀"], "prompt": f"{subject} {i}"} for i in range(1, n + 1)]}
 
     def engine_label(self, ai=True):
@@ -340,8 +343,13 @@ class FakeTools:
         return [{"id": g["generation"] + "/S1", "key": g["stickers"][0]["key"], "png": None, "emoji": None} for g in self.gens.values()
                 if q.lower().split()[0] in str(g).lower()]
 
-    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None):
+    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None):
+        if getattr(self, "fail_next_create", False):
+            self.fail_next_create = False
+            raise ToolError("the provider refused it; try again in a minute", 503)
         self.calls.append(("create", prompt, grid, parent, regen_of))
+        if base_plan is not None:
+            self.sent_plans.append(base_plan)
         if self._live:
             self.n_jobs += 1
             return {"job": f"J{self.n_jobs:03d}", "task": f"{self.n_jobs:03d}", "estimate": 2.0, "generation": None, "live": True}
