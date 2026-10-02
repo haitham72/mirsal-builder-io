@@ -104,3 +104,12 @@ With `MIRSAL_GATEWAY_SECRET` set (32+ characters) the engine listens on loopback
 first sight; every other request needs an API token as before (`runtime/users.py`). The gateway verifies the Google sign-in (a Supabase JWT, `Authorization: Bearer` or the `mirsal_session` cookie set by `POST /auth/session`), adds `GET /healthz`, `GET /readyz`, `GET /auth/config`, `GET /auth/me`,
 `POST /auth/session`, `POST /auth/logout`, and passes everything else through unchanged (this contract, SSE included). It answers `401` without a valid sign-in, `429` with `Retry-After` over the rate limit (paid routes have their own, lower one), `403` for a cross-origin POST, `400` for an unknown Host.
 Telegram: `POST /api/packs/{id}/telegram {name?, mode?}`, `mode` = `once` (default), `replace` or `new_set`; a pack whose exact content was already sent answers `already: true` with the earlier sets and never calls Telegram.
+
+## Particle effects (`/api/effects`, `docs/effects.md`)
+
+Owner only for now. `GET /api/effects` (list) · `POST /api/effects {pack_id, sticker_ids | "all", mode: "video" | "sim", grid: "2x2" | "3x3", note?, allow_vlm?}` (202: the analysis runs in the background; poll
+`GET /api/effects/{id}` until `status` is `READY`, `ERROR` carries `error`) · `POST /api/effects/{id}/analyse {allow_vlm?}` · `POST /api/effects/{id}/plan {group, elements?, subject?, style?, sprites?}` (400 with the
+reason when the pieces fail the lint) · `POST /api/effects/{id}/estimate {group, grid?}` (prompt, screen colour, cells, **credits**, model; free) · `POST /api/effects/{id}/video {group, grid?, go: true}` (409 with the
+estimate unless `go`; 202 `{job}`; the finished clip is cut into results by `on_video_done`) · `POST /api/effects/{id}/preview {sticker_id, params, size?}` (a looping WebP at `/out/effects/E###/previews/...`) ·
+`POST /api/effects/{id}/render {sticker_id, params}` (the 512 px WebM, stored with its checks) · `POST /api/effects/{id}/add {results?, pack_id?}` (animated stickers tagged with the source emoji; a result that breaks
+a Telegram limit is a 409). `params` are the `ParticleParams` fields (`gravity`, `magnitude`, `vortex`, `count`, `size_min`, `size_max`, `spin`, `lifetime`, `spread`, `seed`, ...; an unknown key is a 400).

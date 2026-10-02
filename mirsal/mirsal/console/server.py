@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from ..flow import gates, metrics, sources, sticker_history, watch
+from ..flow import effects as fx_flow, gates, metrics, sources, sticker_history, watch
 from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
 from ..services import llm, telegram
 from ..vision import consent as vision_consent, transcribe
@@ -767,7 +767,7 @@ def make_handler(c: Console):
             tok = pl.OWNER.set(user["id"])           # batches this request creates are stamped with this user
             try:
                 fn()
-            except (pl.PipelineError, LibraryError, watch.WatchError, telegram.TelegramError, UserError) as e:
+            except (pl.PipelineError, LibraryError, watch.WatchError, telegram.TelegramError, UserError, fx_flow.EffectError) as e:
                 self._json(e.code, {"error": str(e)})
             except (ValueError, KeyError, TypeError) as e:
                 self._json(400, {"error": f"bad request: {e}"})
@@ -826,6 +826,8 @@ def make_handler(c: Console):
                 if not f.is_file():
                     return self._json(404, {"error": "no such asset"})
                 return self._file(f)
+            if path == "/api/effects" or path.startswith("/api/effects/"):
+                return self._effects("GET", path, {})
             if path == "/api/me":            # who the server thinks you are (and what you may do): for clients that hold a token
                 u = self.user
                 return self._json(200, {"id": u["id"], "name": u.get("name"), "role": u["role"], "can_spend": bool(u.get("can_spend")), "via": u.get("via")})
@@ -1037,6 +1039,84 @@ def make_handler(c: Console):
                 return self._send(200, f.read_bytes(), ctype)
             raise pl.PipelineError(NO_ROUTE, 404)
 
+        def _effects(self, method: str, path: str, body: dict):
+            """Particle effects (docs/effects.md section 7): a pack's stickers get a Telegram-style burst. Owner only for now (members are denied by the route gate). Paid work needs the price
+            shown (`estimate`) and `go: true` (`video`); everything else is free."""
+            parts = path.strip("/").split("/")                     # api, effects[, id[, action]]
+            if len(parts) == 2:
+                if method == "GET":
+                    return self._json(200, {"effects": fx_flow.list_effects(c.out)})
+                grid = body.get("grid") or "2x2"
+                e = fx_flow.create(c.out, c.lib, pack_id=str(body.get("pack_id") or ""), sticker_ids=body.get("sticker_ids", "all"), mode=str(body.get("mode") or "video"),
+                                   grid=grid, user=self.user["id"], note=str(body.get("note") or ""))
+                allowed = body.get("allow_vlm") is True
+                eid, who = e["id"], self.user["id"]
+
+                def run():
+                    tok = pl.OWNER.set(who)
+                    try:
+                        fx_flow.analyse(c.out, eid, allowed=allowed)
+                    except Exception as ex:                          # the page reads the status; a failed analysis is a visible state, never a silent one
+                        try:
+                            rec = fx_flow.read(c.out, eid)
+                            rec.update(status="ERROR", error=str(ex)[:300])
+                            fx_flow._write(c.out, rec)
+                        except Exception:
+                            pass
+                    finally:
+                        pl.OWNER.reset(tok)
+                threading.Thread(target=run, daemon=True).start()
+                return self._json(202, {"id": eid, "status": "NEW"})
+            eid = parts[2]
+            if len(parts) == 3:
+                if method != "GET":
+                    raise pl.PipelineError(NO_ROUTE, 404)
+                return self._json(200, fx_flow.read(c.out, eid))
+            act = parts[3]
+            if method != "POST":
+                raise pl.PipelineError(NO_ROUTE, 404)
+            if act == "analyse":
+                allowed = body.get("allow_vlm") is True
+                threading.Thread(target=lambda: fx_flow.analyse(c.out, eid, allowed=allowed), daemon=True).start()
+                return self._json(202, {"id": eid})
+            if act == "plan":
+                gid = str(body.get("group") or "")
+                if "sprites" in body:
+                    fx_flow.set_sprites(c.out, eid, gid, body["sprites"])
+                if any(k in body for k in ("elements", "subject", "style")):
+                    fx_flow.set_pieces(c.out, eid, gid, elements=body.get("elements"), subject=body.get("subject"), style=body.get("style"), by=self.user["id"])
+                return self._json(200, fx_flow.read(c.out, eid))
+            if act in ("estimate", "video"):
+                gid = str(body.get("group") or "")
+                grid = body.get("grid")
+                plan = fx_flow.video_plan(c.out, eid, gid, tuple(int(x) for x in str(grid).lower().split("x")) if grid else None)
+                if not higgsfield.available():
+                    raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
+                model, params = model_catalog.resolve("video", body.get("model"), body.get("options"))
+                try:
+                    credits = higgsfield.cost(model, params, plan["prompt"])
+                except higgsfield.HiggsError as ex:
+                    credits = None
+                    plan["cost_error"] = str(ex)
+                plan.update(credits=credits, model=model, params=params)
+                if act == "estimate":
+                    return self._json(200, plan)
+                who = c.actor()
+                if not who.get("can_spend") or who.get("disabled"):
+                    raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
+                if body.get("go") is not True:
+                    return self._json(409, {"error": f"This costs {credits} credits. Send go: true to start it.", "estimate": plan})
+                job = fx_flow.new_video_job(c.out, eid, gid, grid=tuple(plan["grid"]), user=who["id"], model=body.get("model"), options=body.get("options"))
+                c.fulfil_async(job["id"], after=lambda j: fx_flow.on_video_done(c.out, eid, gid, j, c.cfg))
+                return self._json(202, {"job": job["id"], "estimate": credits, "id": eid, "group": gid})
+            if act == "preview":
+                return self._json(200, fx_flow.sim_preview(c.out, c.lib, eid, str(body.get("sticker_id") or ""), body.get("params") or {}, int(body.get("size") or 256)))
+            if act == "render":
+                return self._json(200, fx_flow.sim_render(c.out, c.lib, eid, str(body.get("sticker_id") or ""), c.cfg, body.get("params") or {}))
+            if act == "add":
+                return self._json(200, fx_flow.add_to_pack(c.out, c.lib, eid, body.get("results"), body.get("pack_id"), self.user["id"]))
+            raise pl.PipelineError(NO_ROUTE, 404)
+
         def _post_projects(self, path, query):
             pr, lib = c.projects, c.lib
             parts = path.strip("/").split("/")
@@ -1157,6 +1237,8 @@ def make_handler(c: Console):
             path = unquote(u.path)
             if path.startswith("/api/projects"):
                 return self._post_projects(path, parse_qs(u.query))
+            if path == "/api/effects" or path.startswith("/api/effects/"):
+                return self._effects("POST", path, self._body())
             if path.startswith("/api/cutout") or path.startswith("/api/packs"):
                 if self._post_library(path, parse_qs(u.query)):
                     return
