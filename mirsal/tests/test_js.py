@@ -243,6 +243,25 @@ class ShellTests(unittest.TestCase):
         self.assertIn("button:focus-visible", css["studio.css"])
         self.assertIn("prefers-reduced-motion:reduce){*,", css["studio.css"].replace(" ", ""))
 
+    def test_the_ai_screen_shows_the_styles_and_the_settings_under_its_box(self):
+        """Haitham, 2026-10-02: the AI screen shows the styles too, smaller. They are the Studio's presets (from GET /api/chat/agent), picked with one click; picking one before the first
+        message must not create an empty chat (it waits in A.pre and is applied when the chat starts), and the grid and spending chips are the gear's settings, one click away."""
+        import re
+        ui = self.ui()
+        js = (ui / "agent.js").read_text(encoding="utf-8")
+        css = (ui / "agent.css").read_text(encoding="utf-8")
+        self.assertIn("id=ag-styles", js)
+        self.assertIn("(A.agent&&A.agent.styles)", js, "the tiles come from the API's presets, never a list in the page")
+        pick = self.block_of(js, "ACT.agstyle=")
+        self.assertIn("saveSet({style_id:A.pre})", pick, "with a chat, the pick is the chat's setting")
+        self.assertIn("else drawBar()", pick, "without a chat, nothing is created")
+        self.assertIn("applyPre()", self.block_of(js, " A.sid=r.j.id;"), "the pick is applied when the chat is created")
+        self.assertIn("data-act=agsetgrid", js)
+        self.assertIn("data-act=agsetask", js)
+        for sel in (".ag-styles", ".ag-st", ".ag-st.on", ".ag-chip"):
+            self.assertIn(sel, css)
+        self.assertNotIn("#ai-sheet", js)
+
 
 if __name__ == "__main__":
     unittest.main()

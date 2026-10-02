@@ -114,6 +114,26 @@ class ChatServerTests(unittest.TestCase):
         s, again = self.req("GET", f"/api/chat/sessions/{sid}")
         self.assertEqual(len(again["interactions"]), 3)
 
+    def test_the_style_is_a_real_preset_everywhere_the_chat_touches_it(self):
+        """The AI screen shows the same style presets as the Studio (GET /api/chat/agent carries them), a style is picked through the settings route, and an unknown one is refused
+        out loud instead of being stored to fail later; the names on the plan card are the presets' own, not a list of the chat's."""
+        from mirsal.agent import graph
+        from mirsal.generation import styles
+        s, info = self.req("GET", "/api/chat/agent")
+        self.assertEqual([x["id"] for x in info["styles"]], [x["id"] for x in styles.PRESETS])
+        self.assertEqual(info["default_style"], styles.DEFAULT)
+        s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
+        sid = sess["id"]
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"style_id": "clay_3d"})
+        self.assertEqual(s, 200)
+        self.assertEqual(r["settings"]["style_id"], "clay_3d")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"style_id": "pixar_3d"})
+        self.assertEqual(s, 400, "an id that is not a preset is refused")
+        self.assertIn("unknown style", json.dumps(r))
+        s, again = self.req("GET", f"/api/chat/sessions/{sid}")
+        self.assertEqual(again["settings"]["style_id"], "clay_3d", "the refused one changed nothing")
+        self.assertEqual(set(graph.STYLE_NAMES), {x["id"] for x in styles.PRESETS}, "every preset has a name on the card, and nothing else does")
+
     def test_a_second_message_while_one_runs_gets_409(self):
         s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
         sid = sess["id"]

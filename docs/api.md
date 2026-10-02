@@ -57,11 +57,11 @@ server that the table does not describe, and it calls every documented operation
 
 | route | |
 |---|---|
-| `GET /api/chat/agent` | which model runs the assistant and the vision judge, and whether live generation is available |
+| `GET /api/chat/agent` | which model runs the assistant and the vision judge, whether live generation is available, and the style presets (`styles`, `default_style`) the AI screen shows |
 | `GET /api/chat/sessions` · `POST /api/chat/sessions {title?, settings?}` | list · create |
 | `GET /api/chat/sessions/{id}` | the whole session for display: messages with steps and cards (each generation card carries its live stickers with file urls, or its job state), subjects with their passes, settings, `working`, `summary_text` |
 | `POST /api/chat/sessions/{id}/messages {text, selected?, action?}` | start a turn in the background (`202`); `action` is `{type: "confirm" | "cancel"}`; `409` while the last turn is still running |
-| `POST /api/chat/sessions/{id}/settings {grid?, ask_before_spending?, ai?, style_id?}` | the two visible settings (and two quiet ones) |
+| `POST /api/chat/sessions/{id}/settings {grid?, ask_before_spending?, ai?, style_id?}` | the visible settings (grid, ask before spending, style) and two quiet ones; a `style_id` that is not one of the presets is a 400 `unknown style`, nothing is stored |
 | `POST /api/chat/sessions/{id}/delete` | delete the chat (its stickers stay) |
 
 ## Generations, gates and animation (docs/engine-and-studio.md, docs/generation.md)

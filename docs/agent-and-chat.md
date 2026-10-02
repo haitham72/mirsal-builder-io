@@ -95,6 +95,7 @@ instead of ending the polling (a frame that throws must never freeze the chat on
   keyboard arrows, scroll-snap, dots; stickers appear as the engine finishes them; animated stickers play), a stickers card (search results and answers).
   Tap a sticker to select it: the selection travels with the next message ("make these more energetic"). "Open in Studio" opens the batch in the Studio.
 - **Settings are two controls**: the grid (3x3 / 2x2) and "Ask before spending". The model pill shows what runs the assistant (local or cloud).
+- **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet, the grid and "Asks before spending" (the same settings as the gear, one click each), and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`). What is not done: a style typed in a sentence ("in clay 3d style") is still not read by a new request (`HANDOFF.md`, Agent and chat).
 
 ## Models (all hardcoded; `services/llm.py`)
 

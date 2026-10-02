@@ -30,11 +30,12 @@ const AIU=(()=>{
 if(typeof module!=='undefined')module.exports=AIU;
 
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){(()=>{
-const A={sid:null,sess:null,sessions:[],agent:null,busy:false,sel:new Set(),open:new Set(),els:new Map(),poll:0,setOpen:false,since:0};
+const A={sid:null,sess:null,sessions:[],agent:null,busy:false,sel:new Set(),open:new Set(),els:new Map(),poll:0,setOpen:false,since:0,pre:''};
 const SUGG=['a teddy bear waving','falcon stickers','my dog as a banana','Eid mubarak greetings'];
 ICONS.send='<path d="M12 19V5M6 11l6-6 6 6"/>';
 
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+A.pre=store.get('mirsal.ai.style')||'';        // the style picked last: what a chat that has no session yet will start with
 
 /* ---------- the living background (ambient motion + the pointer) */
 let bgOn=false;
@@ -51,12 +52,15 @@ function bgInit(root){if(bgOn)return;bgOn=true;
 
 /* ---------- data */
 async function loadSessions(){const r=await api('/api/chat/sessions');if(r.ok)A.sessions=r.j.sessions;return A.sessions}
-async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=r.j;pill()}
+async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=r.j;pill();drawBar()}
 async function loadSession(id,quiet){const r=await api('/api/chat/sessions/'+id);
  if(!r.ok){if(r.status===404){A.sid=null;A.sess=null;store.set('mirsal.ai.sid','');paint();return null}if(!quiet)toast(r.j.error||'Could not load the chat',1);return null}
  A.sess=r.j;paint();return r.j}
 async function ensureSession(){if(A.sid)return A.sid;const r=await post('/api/chat/sessions',{});if(!r.ok){toast(r.j.error||'Could not start a chat',1);return null}
- A.sid=r.j.id;A.sess=Object.assign({messages:[],subjects:[],interactions:[],working:false},r.j);store.set('mirsal.ai.sid',A.sid);history.replaceState(null,'','#/agent/'+A.sid);return A.sid}
+ A.sid=r.j.id;A.sess=Object.assign({messages:[],subjects:[],interactions:[],working:false},r.j);store.set('mirsal.ai.sid',A.sid);history.replaceState(null,'','#/agent/'+A.sid);await applyPre();return A.sid}
+/* a chat starts with the style picked last (picking one before the first message must not create an empty chat) */
+async function applyPre(){const def=(A.agent&&A.agent.default_style)||'flat_vector';if(!A.pre||A.pre===def||!A.sid)return;
+ const r=await post(`/api/chat/sessions/${A.sid}/settings`,{style_id:A.pre});if(r.ok&&A.sess)A.sess.settings=r.j.settings}
 
 /* ---------- the screen */
 RENDER.agent=async arg=>{
@@ -72,6 +76,8 @@ RENDER.agent=async arg=>{
     <form class=ai-box id=ai-box autocomplete=off><button type=button class=ai-ibtn data-act=agset title="Settings" aria-label="Settings">${ic('settings')}</button>
      <textarea id=ai-in rows=1 placeholder="Make or change stickers" aria-label="Message"></textarea>
      <button class=ai-send id=ai-send type=submit aria-label="Send" disabled>${ic('send')}</button></form>
+    <div class=ag-bar id=ag-bar></div>
+    <div class=ag-styles id=ag-styles role=radiogroup aria-label="Style"></div>
     <div class=ai-sugg id=ai-sugg></div>
    </div></div></div></div>`;
   bgInit(root);
@@ -99,7 +105,7 @@ function pill(){const p=$('ai-pill');if(!p)return;const a=A.agent;if(!a){return}
 
 /* ---------- painting (a keyed diff: only a message whose signature changed is rebuilt) */
 function paint(){
- const root=$('ai');if(!root)return;const s=A.sess,msgs=(s&&s.messages)||[],hero=!msgs.length;
+ const root=$('ai');if(!root)return;drawBar();const s=A.sess,msgs=(s&&s.messages)||[],hero=!msgs.length;
  root.classList.toggle('is-hero',hero);$('ai-ttl').textContent=hero?'':(s.title||'');
  const col=$('ai-col'),sc=$('ai-scroll');
  if(hero){A.els.clear();if(!col.querySelector('.ai-hero'))col.innerHTML=`<div class="ai-hero ai-hero-in"><h1 class=ai-greet>What will you create today?</h1></div>`;
@@ -222,9 +228,18 @@ ACT.agopen=el=>{location.hash='#/agent/'+el.dataset.id};
 ACT.agdel=el=>{const id=el.dataset.id;confirmDlg('Delete this chat? The stickers it made stay in the Studio.',async()=>{await post(`/api/chat/sessions/${id}/delete`);if(A.sid===id)ACT.agnew();await loadSessions();agList()},'Delete')};
 ACT.agset=()=>{A.setOpen=!A.setOpen;setSet()};
 ACT.agsetgrid=async el=>saveSet({grid:el.dataset.v});
+/* ---------- under the box: what the next sheet will be made with, one click from changing it (the same settings as the gear, and the style tiles the Studio has, smaller) */
+const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(A.agent&&A.agent.default_style)||'flat_vector';
+function drawBar(){const bar=$('ag-bar'),box=$('ag-styles');if(!bar||!box)return;
+ const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},list=(A.agent&&A.agent.styles)||[],cur=styleNow(),other=st.grid==='3x3'?'2x2':'3x3';
+ const now=list.find(s=>s.id===cur);
+ bar.innerHTML=`${now?`<span class="ag-chip ag-cur" title="The style of the next sheet"><img src="/assets/styles/${AIU.esc(now.id)}" alt="">${AIU.esc(now.label)} style</span>`:''}<button type=button class=ag-chip data-act=agsetgrid data-v=${other} title="${st.grid==='3x3'?'Nine':'Four'} stickers in one sheet. Click for ${other.replace('x','×')}">${ic('lib')}${st.grid.replace('x','×')} sheet</button>
+  <button type=button class="ag-chip${st.ask_before_spending?'':' warn'}" data-act=agsetask title="${st.ask_before_spending?'The price is shown and you say go before anything is spent':'Sheets start at once, without showing the price first'}">${ic(st.ask_before_spending?'check':'x')}${st.ask_before_spending?'Asks before spending':'Spends without asking'}</button>`;
+ box.innerHTML=list.map(s=>`<button type=button class="ag-st${s.id===cur?' on':''}" role=radio aria-checked=${s.id===cur} data-act=agstyle data-id="${AIU.esc(s.id)}" title="${AIU.esc(s.label)}: ${AIU.esc(s.hint)}"><img src="/assets/styles/${AIU.esc(s.id)}" alt="" loading=lazy><b>${AIU.esc(s.label)}</b></button>`).join('')}
+ACT.agstyle=async el=>{A.pre=el.dataset.id;store.set('mirsal.ai.style',A.pre);if(A.sess)await saveSet({style_id:A.pre});else drawBar()};
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
 ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await loadAgent();setSet()}else toast(r.j.error||'Could not change the AI engine',1)};
-async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;setSet()}else toast(r.j.error,1)}
+async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;setSet();drawBar()}else toast(r.j.error,1)}
 /* the AI engine row: Auto keeps a working backend and only a failed call switches it; Local / Cloud are used as chosen. A backend that is not available says why. */
 function beRow(){const a=A.agent||{},av=a.availability||{},pref=a.preference||'auto';
  const b=(v,label)=>{const ok=v==='auto'||(av[v]&&av[v].ok);const why=v==='auto'?'Use the local model when LM Studio answers, otherwise the cloud; keep what works':(av[v]&&av[v].why)||(av[v]&&av[v].model)||'';

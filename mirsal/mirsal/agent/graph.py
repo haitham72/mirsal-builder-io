@@ -26,6 +26,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, TypedDict
 
+from ..generation import styles
 from ..runtime import cache as cachemod
 from . import creator
 from .brain import Brain
@@ -36,7 +37,7 @@ from .tools import ConsoleTools, ToolError
 INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
 CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
-STYLE_NAMES = {"flat_vector": "flat vector", "pixar_3d": "Pixar 3D", "toon_cel": "toon cel", "glossy_3d": "glossy 3D"}
+STYLE_NAMES = {p["id"]: p["label"].lower() for p in styles.PRESETS}          # the names the cards and replies use: the real presets, never a list of the chat's own
 
 
 class Trace:

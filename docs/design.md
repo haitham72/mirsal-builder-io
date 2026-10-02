@@ -114,8 +114,9 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 ## 5. Per screen
 
-### AI (`agent.js`, `agent.css`) — the reference, keep its character
+### AI (`agent.js`, `agent.css`) — the reference, keep its character (built; styles added under the box)
 - Keep: the cyan/glass/glow depth, the gradients, the hover and selection states on the chat list, the new-chat background.
+- **Added (Haitham, 2026-10-02): the style tiles under the AI box**, smaller than the Studio's (46px swatches, 34px once a chat has messages), with chips for the style, grid and spending of the next sheet. Details in `docs/agent-and-chat.md`.
 - **Change:** it stops being a special case. Its tokens move to `:root` (3.1) and its rail becomes the standard rail (4). Its second column stays.
 
 ### Library (built)

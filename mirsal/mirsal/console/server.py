@@ -899,7 +899,8 @@ def make_handler(c: Console):
             if path == "/api/chat/agent":     # which model runs the chat, and whether the vision judge is up
                 from ..agent import brain as _brain
                 return self._json(200, {"agent": _brain.target(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
-                                        "live": higgsfield.available(), "preference": llm.preference(), "availability": llm.availability()})
+                                        "live": higgsfield.available(), "preference": llm.preference(), "availability": llm.availability(),
+                                        "styles": styles.PRESETS, "default_style": styles.DEFAULT})
             if path == "/api/chat/sessions":
                 rows, meta = self._page(c.chat_parts(self.user)[0].list())
                 return self._json(200, {"sessions": rows, **meta})
@@ -1232,7 +1233,9 @@ def make_handler(c: Console):
                                 sess["settings"]["creator"] = cur
                             elif k in allowed and v in allowed[k]:
                                 sess["settings"][k] = v
-                            elif k == "style_id" and isinstance(v, str):
+                            elif k == "style_id":
+                                if v not in {p["id"] for p in styles.PRESETS}:        # an unknown style is refused out loud, never stored to fail later as "unknown style"
+                                    raise pl.PipelineError(f"unknown style {v!r}: the styles are " + ", ".join(p["id"] for p in styles.PRESETS), 400)
                                 sess["settings"][k] = v
                         store.save(sess)
                         return self._json(200, {"settings": sess["settings"]})
