@@ -5,6 +5,7 @@ import tempfile
 import threading
 import time
 import unittest
+from mirsal.runtime import names
 from pathlib import Path
 
 import cv2
@@ -97,7 +98,8 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(len(ready), 8)
         self.assertEqual(g["grid"], [3, 3]); self.assertEqual(g["source"]["grid"]["method"], "gutter")
         for t in ready:
-            self.assertTrue(t["png"].startswith(f"slices/img-{gid:03d}-blob_school-blob_"), t["png"])
+            self.assertTrue(t["png"].startswith("slices/img-blob_school-"), t["png"])
+            self.assertEqual(names.parse(t["png"].split("/")[1])["subject"], "blob_school")
             self.assertTrue((self.c.out / g["generation_id"] / t["png"]).exists())
         stages = [(e["stage"], e["status"]) for e in g["events"]]
         self.assertEqual(stages, [("requested", "done")] + [(x, y) for x in ("sheet_picked", "keyed", "sliced") for y in ("start", "done")])
@@ -107,7 +109,7 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(s, 202)
         g = self.wait(gid, lambda j: j["stickers"][0]["anim_status"] in ("READY", "FAILED"))
         self.assertEqual(g["stickers"][0]["anim_status"], "READY", g["stickers"][0]["anim_metrics"])
-        self.assertEqual(g["stickers"][0]["webm"], f"slices/vid-{gid:03d}-blob_school-blob_with_a_book.webm")
+        self.assertEqual(g["stickers"][0]["webm"], "slices/" + names.as_media(g["stickers"][0]["name"], "vid") + ".webm")
         self.assertEqual(len(list((self.c.out / g["generation_id"] / "slices").glob("*.webm"))), 1)
         s, j = self.req("POST", f"/api/generations/{gid}/animate", {"scope": "slice", "index": 1})
         self.assertEqual((s, j["noop"]), (200, True))
@@ -209,7 +211,7 @@ class ConsoleTests(unittest.TestCase):
         first = pack["stickers"][0]
         self.assertEqual(first["type"], "animated")                                      # it took the still's position
         self.assertFalse(first["name"].startswith("img-"))                              # readable name ({subject} {action}) ...
-        self.assertRegex(first["file_name"], r"^img-\d{3}-")                             # ... and the generator's file name kept as metadata
+        self.assertTrue(names.parse(first["file_name"]) and names.parse(first["file_name"])["media"] == "img")                             # ... and the generator's file name kept as metadata
 
     def test_add_animated_next_to_the_still(self):
         r, pack, stills = self._still_then_animated_add("add")
@@ -244,7 +246,7 @@ class ConsoleTests(unittest.TestCase):
         pack = next(x for x in self.req("GET", "/api/library")[1]["packs"] if x["id"] == pk["id"])
         first = next(x for x in pack["stickers"] if x["source"]["index"] == 1)
         self.assertEqual((first["name"], first["emoji"]), ("My own name", "🎉"))
-        self.assertRegex(first["file_name"], r"^img-\d{3}-")                                                # the generator's name stays as metadata
+        self.assertTrue(names.parse(first["file_name"]) and names.parse(first["file_name"])["media"] == "img")                                                # the generator's name stays as metadata
         other = next(x for x in pack["stickers"] if x["source"]["index"] != 1)
         self.assertFalse(other["name"].startswith("img-"))                                                  # untouched ones get the readable default
         # bulk delete: the square markers on the library
