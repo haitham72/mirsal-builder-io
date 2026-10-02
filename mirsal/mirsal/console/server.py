@@ -30,7 +30,7 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 # What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,

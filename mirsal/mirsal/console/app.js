@@ -60,8 +60,8 @@ const coverMedia=p=>{const s=p.stickers.find(x=>x.id===p.cover)||p.stickers[0];r
 const packById=id=>LIB.packs.find(p=>p.id===id);
 
 /* ---------- router */
-const SCREENS=['agent','generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
-const RAIL=[['agent','ai','AI'],['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
+const SCREENS=['agent','effects','generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
+const RAIL=[['agent','ai','AI'],['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={effects:'create',pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
 let route_='generate',PACK_ID=null;
 function drawRail(){$('c2tog').innerHTML=ic('panel');$('rail').innerHTML=`<div class=logo><img src=/assets/brand/mirsal-logo.png alt=Mirsal></div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
 /* narrow screens: the second column is a drawer (studio.css, 'the shell on narrow screens') */
