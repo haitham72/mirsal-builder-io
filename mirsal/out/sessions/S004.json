@@ -1,0 +1,228 @@
+{
+ "id": "S004",
+ "user": "local",
+ "title": "hellow",
+ "created": 1790934428.496,
+ "updated": 1790934484.024,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": null
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1790934476.719,
+   "user": "hellow",
+   "assistant": "Here's the plan for **hellow**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1790934484.024,
+   "user": "cancel",
+   "assistant": "No problem, nothing was spent. Tell me what to change, or what else to make.",
+   "intents": [
+    "CANCEL"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "hellow",
+   "cards": [],
+   "steps": [],
+   "ts": 1790934428.546
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **hellow**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "hellow",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "hellow blowing a kiss",
+      "hellow dancing",
+      "hellow thank you",
+      "hellow thumbs up",
+      "hellow eye roll",
+      "hellow crying",
+      "hellow facepalm",
+      "hellow dizzy",
+      "hellow scheming"
+     ],
+     "estimate": 2.0,
+     "balance": 3794.12,
+     "prompt": "hellow",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating hellow",
+     "detail": null,
+     "status": "running",
+     "ts": 1790934428.574
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934428.608
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "hellow blowing a kiss",
+       "hellow dancing",
+       "hellow thank you",
+       "hellow thumbs up",
+       "hellow eye roll",
+       "hellow crying",
+       "hellow facepalm",
+       "hellow dizzy",
+       "hellow scheming"
+      ]
+     },
+     "status": "done",
+     "ts": 1790934475.777
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934476.702
+    }
+   ],
+   "ts": 1790934428.546,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "No",
+   "cards": [],
+   "steps": [],
+   "ts": 1790934483.938
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "No problem, nothing was spent. Tell me what to change, or what else to make.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790934483.956
+    },
+    {
+     "kind": "step",
+     "label": "understood: a change of mind",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934483.976
+    },
+    {
+     "kind": "step",
+     "label": "cancelled, nothing was spent",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934483.992
+    },
+    {
+     "kind": "final",
+     "label": "done",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934484.01
+    }
+   ],
+   "ts": 1790934483.938,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null
+}

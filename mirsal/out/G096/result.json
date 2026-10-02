@@ -1,0 +1,2546 @@
+{
+  "generation_id": "G096",
+  "number": 96,
+  "owner": "local",
+  "created": 1790936145.444,
+  "parent": null,
+  "prompt": "Eid mubarak greetings",
+  "task": "eid mubarak greetings",
+  "task_slug": "eid_mubarak_greetings",
+  "source": {
+    "subject": "eid_mubarak_greetings",
+    "subject_id": "024",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\jobs\\J029\\result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          706,
+          699
+        ],
+        [
+          706,
+          0,
+          688,
+          699
+        ],
+        [
+          1394,
+          0,
+          654,
+          699
+        ],
+        [
+          0,
+          699,
+          706,
+          663
+        ],
+        [
+          706,
+          699,
+          688,
+          663
+        ],
+        [
+          1394,
+          699,
+          654,
+          663
+        ],
+        [
+          0,
+          1362,
+          706,
+          686
+        ],
+        [
+          706,
+          1362,
+          688,
+          686
+        ],
+        [
+          1394,
+          1362,
+          654,
+          686
+        ]
+      ],
+      "xs": [
+        0,
+        706,
+        1394,
+        2048
+      ],
+      "ys": [
+        0,
+        699,
+        1362,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "task 024",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: eid mubarak greetings.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: waving hello with a big happy grin\nCharacter 2: bursting with excitement, star-sparkle eyes, fists shaking\nCharacter 3: hugging a big red heart, eyes sparkling, blushing cheeks\nCharacter 4: flexing a muscle proudly, chest out, huge grin\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: furious, steaming, fists clenched, deep scowl\nCharacter 8: dizzy with spiral eyes, wobbling on the spot\nCharacter 9: scheming grin, rubbing hands together, eyebrows wiggling\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. waves the raised hand in wide arcs while bouncing on tiptoes\n2. vibrates with joy, jumps up and down, claps\n3. the heart pulses, sways side to side, squeezes the heart\n4. the arm flexes and pulses, chest puffs, nods\n5. eyes circle slowly, head tilts back with a sigh\n6. sighs, shoulders sag, droops slowly lower\n7. stomps in place, steam puffs from the head, body shakes with rage\n8. sways in circles, little stars orbit the head\n9. rubs the hands, eyebrows wiggle, sneaky giggle\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "eid mubarak greetings",
+    "style_id": "flat_vector",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "waving hello with a big happy grin",
+        "tags": [
+          "eid_mubarak_greetings_waving",
+          "waving",
+          "hello",
+          "big"
+        ],
+        "emoji": "👋",
+        "motion": "waves the raised hand in wide arcs while bouncing on tiptoes"
+      },
+      {
+        "pos": 2,
+        "label": "bursting with excitement, star-sparkle eyes, fists shaking",
+        "tags": [
+          "eid_mubarak_greetings_excited",
+          "bursting",
+          "excitement",
+          "star"
+        ],
+        "emoji": "🤩",
+        "motion": "vibrates with joy, jumps up and down, claps"
+      },
+      {
+        "pos": 3,
+        "label": "hugging a big red heart, eyes sparkling, blushing cheeks",
+        "tags": [
+          "eid_mubarak_greetings_in_love",
+          "hugging",
+          "big",
+          "red"
+        ],
+        "emoji": "😍",
+        "motion": "the heart pulses, sways side to side, squeezes the heart"
+      },
+      {
+        "pos": 4,
+        "label": "flexing a muscle proudly, chest out, huge grin",
+        "tags": [
+          "eid_mubarak_greetings_flexing",
+          "flexing",
+          "muscle",
+          "proudly"
+        ],
+        "emoji": "💪",
+        "motion": "the arm flexes and pulses, chest puffs, nods"
+      },
+      {
+        "pos": 5,
+        "label": "rolling eyes with a bored deadpan face",
+        "tags": [
+          "eid_mubarak_greetings_eye_roll",
+          "rolling",
+          "eyes",
+          "bored"
+        ],
+        "emoji": "🙄",
+        "motion": "eyes circle slowly, head tilts back with a sigh"
+      },
+      {
+        "pos": 6,
+        "label": "sad and drooping, a single tear, slumped shoulders",
+        "tags": [
+          "eid_mubarak_greetings_sad",
+          "sad",
+          "drooping",
+          "single"
+        ],
+        "emoji": "😞",
+        "motion": "sighs, shoulders sag, droops slowly lower"
+      },
+      {
+        "pos": 7,
+        "label": "furious, steaming, fists clenched, deep scowl",
+        "tags": [
+          "eid_mubarak_greetings_angry",
+          "furious",
+          "steaming",
+          "fists"
+        ],
+        "emoji": "😡",
+        "motion": "stomps in place, steam puffs from the head, body shakes with rage"
+      },
+      {
+        "pos": 8,
+        "label": "dizzy with spiral eyes, wobbling on the spot",
+        "tags": [
+          "eid_mubarak_greetings_dizzy",
+          "dizzy",
+          "spiral",
+          "eyes"
+        ],
+        "emoji": "😵‍💫",
+        "motion": "sways in circles, little stars orbit the head"
+      },
+      {
+        "pos": 9,
+        "label": "scheming grin, rubbing hands together, eyebrows wiggling",
+        "tags": [
+          "eid_mubarak_greetings_scheming",
+          "scheming",
+          "grin",
+          "rubbing"
+        ],
+        "emoji": "😏",
+        "motion": "rubs the hands, eyebrows wiggle, sneaky giggle"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "024",
+  "name_key": "eid_mubarak_greetings",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1790936121.127,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 47.0
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 245 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 245.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 14.5
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 36.6
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            706,
+            1394,
+            2048
+          ],
+          "ys": [
+            0,
+            699,
+            1362,
+            2048
+          ],
+          "ms": 36.9
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 1.6 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.58,
+        "limit": 12.0,
+        "data": {
+          "ms": 79.6
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "eid_mubarak_greetings_waving",
+      "tags": [
+        "eid_mubarak_greetings_waving",
+        "waving",
+        "hello",
+        "big"
+      ],
+      "emoji": "👋",
+      "prompt": "eid mubarak greetings waving hello with a big happy grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_waving",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 128225,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 22.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 85999,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "3px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 3,
+          "limit": 85.999,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0009,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "137.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 137.2,
+          "limit": 512,
+          "data": {
+            "ms": 4.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          706,
+          699
+        ],
+        "bg": [
+          8,
+          252,
+          2
+        ],
+        "threshold": 91.9,
+        "fg_px": 128225,
+        "bbox": [
+          164,
+          92,
+          612,
+          652
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 3,
+        "chroma_risk": 0.0009,
+        "holes": 0.0,
+        "kb": 137.2,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                8,
+                252,
+                2
+              ],
+              "threshold": 122.5,
+              "fg_px": 129313,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_waving.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936146.978,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "eid_mubarak_greetings_excited",
+      "tags": [
+        "eid_mubarak_greetings_excited",
+        "bursting",
+        "excitement",
+        "star"
+      ],
+      "emoji": "🤩",
+      "prompt": "eid mubarak greetings bursting with excitement, star-sparkle eyes, fists shaking, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_excited",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 126735,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 90785,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "4px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 4,
+          "limit": 90.785,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0007,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 24 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 24,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "149.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 149.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          706,
+          0,
+          688,
+          699
+        ],
+        "bg": [
+          8,
+          252,
+          2
+        ],
+        "threshold": 91.5,
+        "fg_px": 126735,
+        "bbox": [
+          96,
+          96,
+          540,
+          652
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 4,
+        "chroma_risk": 0.0007,
+        "holes": 0.0,
+        "kb": 149.4,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                8,
+                252,
+                2
+              ],
+              "threshold": 122.0,
+              "fg_px": 128055,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_excited.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936146.985,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A joyful boy with star eyes celebrates excitedly, surrounded by sparkling stars.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "954dce136a61c1e3",
+        "ts": 1790936282.271
+      }
+    },
+    {
+      "index": 3,
+      "key": "eid_mubarak_greetings_in_love",
+      "tags": [
+        "eid_mubarak_greetings_in_love",
+        "hugging",
+        "big",
+        "red"
+      ],
+      "emoji": "😍",
+      "prompt": "eid mubarak greetings hugging a big red heart, eyes sparkling, blushing cheeks, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_in_love",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 119952,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 79160,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "3px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 3,
+          "limit": 79.16,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0011,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "127.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 127.4,
+          "limit": 512,
+          "data": {
+            "ms": 4.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1394,
+          0,
+          654,
+          699
+        ],
+        "bg": [
+          8,
+          252,
+          2
+        ],
+        "threshold": 91.5,
+        "fg_px": 119952,
+        "bbox": [
+          152,
+          96,
+          484,
+          652
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 3,
+        "chroma_risk": 0.0011,
+        "holes": 0.0,
+        "kb": 127.4,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                8,
+                252,
+                2
+              ],
+              "threshold": 122.0,
+              "fg_px": 120748,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_in_love.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936146.991,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A happy boy with a green hat holds a large red heart surrounded by sparkles.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "8aaab9837738ef4a",
+        "ts": 1790936282.271
+      }
+    },
+    {
+      "index": 4,
+      "key": "eid_mubarak_greetings_flexing",
+      "tags": [
+        "eid_mubarak_greetings_flexing",
+        "flexing",
+        "muscle",
+        "proudly"
+      ],
+      "emoji": "💪",
+      "prompt": "eid mubarak greetings flexing a muscle proudly, chest out, huge grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_flexing",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 135445,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 89167,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "10px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 10,
+          "limit": 89.167,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.6% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0058,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 16 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 16,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "139.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 139.4,
+          "limit": 512,
+          "data": {
+            "ms": 4.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          699,
+          706,
+          663
+        ],
+        "bg": [
+          6,
+          253,
+          2
+        ],
+        "threshold": 92.2,
+        "fg_px": 135445,
+        "bbox": [
+          173,
+          48,
+          608,
+          607
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 10,
+        "chroma_risk": 0.001,
+        "holes": 0.0058,
+        "kb": 139.4,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                6,
+                253,
+                2
+              ],
+              "threshold": 123.0,
+              "fg_px": 136440,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_flexing.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936146.996,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A happy cartoon boy in a yellow shirt flexes his arm confidently while smiling broadly.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "3d73ec132c6aa1b7",
+        "ts": 1790936282.271
+      }
+    },
+    {
+      "index": 5,
+      "key": "eid_mubarak_greetings_eye_roll",
+      "tags": [
+        "eid_mubarak_greetings_eye_roll",
+        "rolling",
+        "eyes",
+        "bored"
+      ],
+      "emoji": "🙄",
+      "prompt": "eid mubarak greetings rolling eyes with a bored deadpan face, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_eye_roll",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 113097,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 73086,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "3px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 3,
+          "limit": 73.086,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0013,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 13 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 13,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "115.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 115.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          706,
+          699,
+          688,
+          663
+        ],
+        "bg": [
+          6,
+          253,
+          2
+        ],
+        "threshold": 92.2,
+        "fg_px": 113097,
+        "bbox": [
+          165,
+          51,
+          471,
+          607
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 3,
+        "chroma_risk": 0.0013,
+        "holes": 0.0,
+        "kb": 115.5,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                6,
+                253,
+                2
+              ],
+              "threshold": 123.0,
+              "fg_px": 113929,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_eye_roll.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936147.001,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A bored boy wearing a green cap and yellow shirt stands still looking forward.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "f107c44c7d349613",
+        "ts": 1790936282.271
+      }
+    },
+    {
+      "index": 6,
+      "key": "eid_mubarak_greetings_sad",
+      "tags": [
+        "eid_mubarak_greetings_sad",
+        "sad",
+        "drooping",
+        "single"
+      ],
+      "emoji": "😞",
+      "prompt": "eid mubarak greetings sad and drooping, a single tear, slumped shoulders, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_sad",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 110923,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 70951,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "7px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 7,
+          "limit": 70.95100000000001,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0014,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 10 to cell 5",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 10,
+          "limit": 4,
+          "data": {
+            "of": 5,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "116.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 116.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1394,
+          699,
+          654,
+          663
+        ],
+        "bg": [
+          6,
+          252,
+          2
+        ],
+        "threshold": 92.2,
+        "fg_px": 110923,
+        "bbox": [
+          158,
+          55,
+          462,
+          607
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 7,
+        "chroma_risk": 0.0014,
+        "holes": 0.0,
+        "kb": 116.5,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                6,
+                252,
+                2
+              ],
+              "threshold": 123.0,
+              "fg_px": 111732,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_sad.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936147.006,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A sad boy wearing a green cap and yellow shirt cries a single tear while looking down.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "a06b060ae27708c9",
+        "ts": 1790936282.271
+      }
+    },
+    {
+      "index": 7,
+      "key": "eid_mubarak_greetings_angry",
+      "tags": [
+        "eid_mubarak_greetings_angry",
+        "furious",
+        "steaming",
+        "fists"
+      ],
+      "emoji": "😡",
+      "prompt": "eid mubarak greetings furious, steaming, fists clenched, deep scowl, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_angry",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 136367,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.2
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 96401,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 96.401,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "2 enclosed hole(s), 0.6% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0064,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "151.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 151.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.9
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1362,
+          706,
+          686
+        ],
+        "bg": [
+          3,
+          252,
+          3
+        ],
+        "threshold": 93.4,
+        "fg_px": 136367,
+        "bbox": [
+          146,
+          62,
+          604,
+          602
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.001,
+        "holes": 0.0064,
+        "kb": 151.7,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                3,
+                252,
+                3
+              ],
+              "threshold": 124.5,
+              "fg_px": 137539,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_angry.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936147.012,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "An angry cartoon boy with a red face stands with his fists raised in frustration.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "5e2fb52a8c648f9b",
+        "ts": 1790936282.271
+      }
+    },
+    {
+      "index": 8,
+      "key": "eid_mubarak_greetings_dizzy",
+      "tags": [
+        "eid_mubarak_greetings_dizzy",
+        "dizzy",
+        "spiral",
+        "eyes"
+      ],
+      "emoji": "😵‍💫",
+      "prompt": "eid mubarak greetings dizzy with spiral eyes, wobbling on the spot, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_dizzy",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 117814,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.7
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 82847,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "5px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 5,
+          "limit": 82.84700000000001,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0009,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.5% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0055,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 13 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 13,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "133.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 133.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          706,
+          1362,
+          688,
+          686
+        ],
+        "bg": [
+          3,
+          252,
+          3
+        ],
+        "threshold": 93.0,
+        "fg_px": 117814,
+        "bbox": [
+          124,
+          57,
+          544,
+          602
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 5,
+        "chroma_risk": 0.0009,
+        "holes": 0.0055,
+        "kb": 133.7,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                3,
+                252,
+                3
+              ],
+              "threshold": 124.0,
+              "fg_px": 118949,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_dizzy.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936147.018,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A dizzy boy with swirling eyes stands in a yellow shirt looking confused and shaken.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "4d99cba2a8cfcebc",
+        "ts": 1790936282.271
+      }
+    },
+    {
+      "index": 9,
+      "key": "eid_mubarak_greetings_scheming",
+      "tags": [
+        "eid_mubarak_greetings_scheming",
+        "scheming",
+        "grin",
+        "rubbing"
+      ],
+      "emoji": "😏",
+      "prompt": "eid mubarak greetings scheming grin, rubbing hands together, eyebrows wiggling, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_scheming",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 109775,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 73610,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "4px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 4,
+          "limit": 73.61,
+          "data": {
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 9 to cell 5",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 9,
+          "limit": 4,
+          "data": {
+            "of": 5,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "125.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 125.1,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1394,
+          1362,
+          654,
+          686
+        ],
+        "bg": [
+          4,
+          251,
+          3
+        ],
+        "threshold": 92.6,
+        "fg_px": 109775,
+        "bbox": [
+          146,
+          59,
+          466,
+          602
+        ],
+        "scale": 0.7124,
+        "scale_mode": "pack",
+        "spill_px": 4,
+        "chroma_risk": 0.001,
+        "holes": 0.0,
+        "kb": 125.1,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                4,
+                251,
+                3
+              ],
+              "threshold": 123.5,
+              "fg_px": 110658,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_scheming.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790936147.023,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A boy wearing a yellow shirt clasps his hands together with an intense, determined smile.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "0b0a8acc501d307d",
+        "ts": 1790936282.271
+      }
+    }
+  ]
+}

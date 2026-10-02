@@ -787,5 +787,68 @@ class LiveConsoleTests(Base):
         self.assertEqual(sorted(m["credits"] for m in u["by_model"]), [2.0, 4.5])
 
 
+    # ---------- the Prompt tab: a hand-written prompt is what is sent (2026-10-02, `prompter.apply_custom`)
+
+    def _creates(self, model):
+        return [c for c in self.cli.calls if c[:3] == ["generate", "create", model]]
+
+    def test_the_prompt_tab_sends_the_sheet_prompt_the_user_typed(self):
+        """`sheet_prompt` + `from_generation`: a new sheet from that batch's own plan (same cells, same tags) with the user's own wording, and the batch says so."""
+        gid = self._stills_ready("blob")
+        st = self.req("GET", f"/api/generations/{gid}")[1]
+        before = len(self._creates("nano_banana_flash"))
+        mine = "3x3 sticker sheet, nine owls in equal cells.\nBackground: flat pure green (#00FF00).\nMy own wording, exactly as typed."
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": mine})
+        self.assertEqual(s, 200, j)
+        call = self.until(lambda: (self._creates("nano_banana_flash") or [None])[before] if len(self._creates("nano_banana_flash")) > before else None, "the sheet create call")
+        self.assertEqual(call[call.index("--prompt") + 1], mine)                                   # the CLI got the user's text, not the template's
+        job = self.until(lambda: (lambda x: x if x.get("generation") and x["status"] == "DONE" else None)(self.req("GET", "/api/jobs/" + j["job"])[1]), "sheet job")
+        new = int(job["generation"][1:])
+        fresh = self.until(lambda: (lambda x: x if x["stage"] == "sliced" and not x["busy"] else None)(self.req("GET", f"/api/generations/{new}")[1]), "stills")
+        self.assertEqual((fresh["sheet_prompt"], fresh["custom_prompts"]), (mine, ["sheet_prompt"]))
+        self.assertEqual([(t["index"], t["key"], t["tags"], t["emoji"]) for t in fresh["stickers"]],
+                         [(t["index"], t["key"], t["tags"], t["emoji"]) for t in st["stickers"]])  # same cells and tags as the batch it came from
+        self.assertEqual(self.req("GET", f"/api/tasks/{j['task']}")[1]["plan"]["custom"], {"sheet_prompt": mine})
+        self.assertIs(self.req("GET", "/api/jobs/" + j["job"])[1]["request"]["custom_prompt"], True)
+        # the key still guards a hand-written run: the same key twice pays once
+        s2, again = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": mine}, {"Idempotency-Key": "typed-once"})
+        self.assertEqual((s2, again["job"]), (200, j["job"]))
+
+    def test_a_hand_written_video_prompt_is_sent_verbatim_and_kept_with_the_sheet(self):
+        gid = self._stills_ready("blob")
+        mine = "animate every owl in place, no camera move, no cut"
+        s, j = self.req("POST", "/api/live/video", {"generation": gid, "video_prompt": mine})
+        self.assertEqual(s, 200, j)
+        create = self.until(lambda: next((c for c in self._creates("kling3_0")), None), "the Kling create call")
+        self.assertEqual(create[create.index("--prompt") + 1], mine)
+        self.assertIs(self.req("GET", "/api/jobs/" + j["job"])[1]["request"]["custom_prompt"], True)
+        st = self.until(lambda: (lambda x: x if next((v for v in x["video_sheets"] if v["id"] == "A1"), {}).get("video_prompt_sent") else None)(
+            self.req("GET", f"/api/generations/{gid}")[1]), "the returned video")
+        sheet = next(v for v in st["video_sheets"] if v["id"] == "A1")
+        self.assertEqual((sheet["video_prompt_sent"], sheet["video_prompt_custom"]), (mine, True))
+
+    def test_an_empty_or_absurd_hand_written_prompt_is_refused_and_starts_nothing(self):
+        for body in ({"prompt": "blob", "sheet_prompt": "   "}, {"prompt": "blob", "sheet_prompt": ""},
+                     {"prompt": "blob", "sheet_prompt": 7}, {"prompt": "blob", "sheet_prompt": "x" * (prompter.MAX_PROMPT + 1)},
+                     {"prompt": "blob", "sheet_prompt": "y" * prompter.MAX_PROMPT}):
+            body["sheet_prompt"] = body["sheet_prompt"] if body["sheet_prompt"] != "" else " "
+            s, j = self.req("POST", "/api/live/sheet", body)
+            self.assertEqual(s, 400, (body["sheet_prompt"][:12] if isinstance(body["sheet_prompt"], str) else body["sheet_prompt"], s, j))
+        gid = self._stills_ready("blob")
+        self.assertEqual(self.req("POST", "/api/live/video", {"generation": gid, "video_prompt": "  "})[0], 400)
+        self.assertEqual(self.req("POST", "/api/live/video", {"generation": gid, "video_prompt": "z" * (prompter.MAX_PROMPT + 1)})[0], 400)
+        self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "from_generation": "nope"})[0], 400)
+        self.assertEqual([c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"]], [])      # nothing was sent
+        self.assertEqual(len(self.req("GET", "/api/tasks")[1]["tasks"]), 1)                                   # only the one real task (the stills of gid)
+
+    def test_a_member_cannot_start_a_new_sheet_from_a_batch_it_cannot_see(self):
+        gid = self._stills_ready("blob")
+        _, tok = self.c.users.create("Amira", "member", True)                                                # accounts on: every other caller now needs a token
+        mine = {"Authorization": f"Bearer {tok}"}
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "from_generation": gid, "sheet_prompt": "mine"}, mine)
+        self.assertEqual((s, j["error"]), (404, "No such batch"), "a stranger's batch is 404, never 403 and never readable")
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "sheet_prompt": "mine"}, mine)
+        self.assertEqual(s, 200, j)                                                                          # its own request is fine: only the other batch was refused
+        self.assertEqual(len(self._creates("nano_banana_flash")), 2)
 if __name__ == "__main__":
     unittest.main()

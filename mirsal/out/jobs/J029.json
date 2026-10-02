@@ -1,0 +1,38 @@
+{
+  "id": "J029",
+  "kind": "sheet",
+  "task": "024",
+  "generation": "G096",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: eid mubarak greetings.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: waving hello with a big happy grin\nCharacter 2: bursting with excitement, star-sparkle eyes, fists shaking\nCharacter 3: hugging a big red heart, eyes sparkling, blushing cheeks\nCharacter 4: flexing a muscle proudly, chest out, huge grin\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: furious, steaming, fists clenched, deep scowl\nCharacter 8: dizzy with spiral eyes, wobbling on the spot\nCharacter 9: scheming grin, rubbing hands together, eyebrows wiggling\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "Eid mubarak greetings",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "fa5bf61a-abe1-4ca5-9f2d-ebb097113ef7",
+  "result": {
+    "file": "jobs/J029/result.png",
+    "sha256": "6c0b011ed3a2e90ec13e35e2a1b4fb1265539caa169c17acc462e20dd683ef19",
+    "bytes": 4004642
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790936121.863,
+  "claimed_at": 1790936123.366,
+  "completed_at": 1790936145.403,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

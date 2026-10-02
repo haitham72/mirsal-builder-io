@@ -1,0 +1,803 @@
+{
+ "id": "S005",
+ "user": "local",
+ "title": "hello",
+ "created": 1790934490.336,
+ "updated": 1790936282.368,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true
+ },
+ "focus": {
+  "generation": "G096",
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "falcon stickers",
+   "slug": "falcon_stickers",
+   "passes": [
+    {
+     "generation": "G094",
+     "job": "J027",
+     "prompt": "falcon stickers",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790934645.406,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    }
+   ]
+  },
+  {
+   "name": "eid mubarak greetings",
+   "slug": "eid_mubarak_greetings",
+   "passes": [
+    {
+     "generation": "G096",
+     "job": "J029",
+     "prompt": "Eid mubarak greetings",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790936121.875,
+     "ready": 9,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1790934490.491,
+   "user": "hello",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1790934588.265,
+   "user": "falcon stickers",
+   "assistant": "Here's the plan for **falcon stickers**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1790934645.436,
+   "user": "confirm",
+   "assistant": "Creating **falcon stickers** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1790936061.085,
+   "user": "Eid mubarak greetings",
+   "assistant": "Here's the plan for **eid mubarak greetings**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 5,
+   "ts": 1790936121.896,
+   "user": "confirm",
+   "assistant": "Creating **eid mubarak greetings** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 6,
+   "ts": 1790936190.657,
+   "user": "what is the 3rd image?",
+   "assistant": "G096/S3: eid mubarak greetings in love 😍",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G096/S3"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G096",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G096"
+  },
+  {
+   "seq": 7,
+   "ts": 1790936200.624,
+   "user": "describe it",
+   "assistant": "To describe G096 I send its pictures to the vision model (the local one when LM Studio is running, otherwise the cloud one). Allow AI vision of generated media? I only ask once.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G096/S3"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G096",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "focus",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G096"
+  },
+  {
+   "seq": 8,
+   "ts": 1790936282.367,
+   "user": "confirm",
+   "assistant": "S3: A happy boy with a green hat holds a large red heart surrounded by sparkles.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G096"
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "hello",
+   "cards": [],
+   "steps": [],
+   "ts": 1790934490.393
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790934490.412
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934490.439
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1790934490.456
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934490.471
+    }
+   ],
+   "ts": 1790934490.393,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "falcon stickers",
+   "cards": [],
+   "steps": [],
+   "ts": 1790934538.401
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Here's the plan for **falcon stickers**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "falcon stickers",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "falcon stickers open arms",
+      "falcon stickers laughing",
+      "falcon stickers thank you",
+      "falcon stickers flexing",
+      "falcon stickers eye roll",
+      "falcon stickers sneezing",
+      "falcon stickers angry",
+      "falcon stickers scared",
+      "falcon stickers scheming"
+     ],
+     "estimate": 2.0,
+     "balance": 3794.12,
+     "prompt": "falcon stickers",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating falcon",
+     "detail": null,
+     "status": "running",
+     "ts": 1790934538.446
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934538.474
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "falcon stickers open arms",
+       "falcon stickers laughing",
+       "falcon stickers thank you",
+       "falcon stickers flexing",
+       "falcon stickers eye roll",
+       "falcon stickers sneezing",
+       "falcon stickers angry",
+       "falcon stickers scared",
+       "falcon stickers scheming"
+      ]
+     },
+     "status": "done",
+     "ts": 1790934587.16
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934588.248
+    }
+   ],
+   "ts": 1790934538.401,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790934596.841
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Creating **falcon stickers** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J027",
+     "subject": "falcon stickers",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating falcon stickers",
+     "detail": null,
+     "status": "running",
+     "ts": 1790934596.861
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934596.89
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934596.908
+    },
+    {
+     "kind": "final",
+     "label": "started · J027",
+     "detail": null,
+     "status": "done",
+     "ts": 1790934645.406
+    }
+   ],
+   "ts": 1790934596.841,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "Eid mubarak greetings",
+   "cards": [],
+   "steps": [],
+   "ts": 1790936014.169
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "Here's the plan for **eid mubarak greetings**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "eid mubarak greetings",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "eid mubarak greetings waving",
+      "eid mubarak greetings excited",
+      "eid mubarak greetings in love",
+      "eid mubarak greetings flexing",
+      "eid mubarak greetings eye roll",
+      "eid mubarak greetings sad",
+      "eid mubarak greetings angry",
+      "eid mubarak greetings dizzy",
+      "eid mubarak greetings scheming"
+     ],
+     "estimate": 2.0,
+     "balance": 3790.12,
+     "prompt": "Eid mubarak greetings",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating Eid mubarak greetings",
+     "detail": null,
+     "status": "running",
+     "ts": 1790936014.192
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936014.224
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "eid mubarak greetings waving",
+       "eid mubarak greetings excited",
+       "eid mubarak greetings in love",
+       "eid mubarak greetings flexing",
+       "eid mubarak greetings eye roll",
+       "eid mubarak greetings sad",
+       "eid mubarak greetings angry",
+       "eid mubarak greetings dizzy",
+       "eid mubarak greetings scheming"
+      ]
+     },
+     "status": "done",
+     "ts": 1790936060.115
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936061.067
+    }
+   ],
+   "ts": 1790936014.169,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790936074.213
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "Creating **eid mubarak greetings** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J029",
+     "subject": "eid mubarak greetings",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating eid mubarak greetings",
+     "detail": null,
+     "status": "running",
+     "ts": 1790936074.232
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936074.26
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936074.278
+    },
+    {
+     "kind": "final",
+     "label": "started · J029",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936121.875
+    }
+   ],
+   "ts": 1790936074.213,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "what is the 3rd image?",
+   "cards": [],
+   "steps": [],
+   "ts": 1790936190.544
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "G096/S3: eid mubarak greetings in love 😍",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G096/S3",
+       "index": 3,
+       "key": "eid_mubarak_greetings_in_love",
+       "name": "img-096-eid_mubarak_greetings-eid_mubarak_greetings_in_love",
+       "emoji": "😍",
+       "tags": [
+        "eid_mubarak_greetings_in_love",
+        "hugging",
+        "big",
+        "red"
+       ],
+       "status": "READY",
+       "reason": null,
+       "still": "PENDING",
+       "anim": "NONE",
+       "anim_status": "NOT_REQUESTED",
+       "png": "/out/G096/slices/img-096-eid_mubarak_greetings-eid_mubarak_greetings_in_love.png",
+       "webm": null,
+       "prompt": "eid mubarak greetings hugging a big red heart, eyes sparkling, blushing cheeks, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1790936190.564
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936190.581
+    },
+    {
+     "kind": "step",
+     "label": "found S3 in G096 · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936190.617
+    },
+    {
+     "kind": "final",
+     "label": "answered from what we made",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936190.638
+    }
+   ],
+   "ts": 1790936190.544,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "describe it",
+   "cards": [],
+   "steps": [],
+   "ts": 1790936200.496
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "To describe G096 I send its pictures to the vision model (the local one when LM Studio is running, otherwise the cloud one). Allow AI vision of generated media? I only ask once.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at G096",
+     "detail": null,
+     "status": "running",
+     "ts": 1790936200.516
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936200.546
+    },
+    {
+     "kind": "step",
+     "label": "found S3 in G096 · focus",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936200.586
+    },
+    {
+     "kind": "final",
+     "label": "waiting for your yes",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936200.605
+    }
+   ],
+   "ts": 1790936200.496,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Allow AI vision",
+     "action": "confirm"
+    },
+    {
+     "label": "Not now",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m15",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790936203.918
+  },
+  {
+   "id": "m16",
+   "role": "assistant",
+   "text": "S3: A happy boy with a green hat holds a large red heart surrounded by sparkles.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at G096",
+     "detail": null,
+     "status": "running",
+     "ts": 1790936203.937
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936203.971
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: describe",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936203.992
+    },
+    {
+     "kind": "step",
+     "label": "asked the vision model about 1 sticker",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936282.327
+    },
+    {
+     "kind": "final",
+     "label": "described",
+     "detail": null,
+     "status": "done",
+     "ts": 1790936282.346
+    }
+   ],
+   "ts": 1790936203.918,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null
+}

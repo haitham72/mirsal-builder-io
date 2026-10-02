@@ -184,73 +184,88 @@ function batchHtml(g,k,total,mode){
   const sheetErr=g.stickers.every(t=>t.status==='FAILED')&&(g.verify.sheet||[]).find(c=>!c.ok&&c.severity!=='WARN');
   if(sheetErr)return`<section class=gbatch>${head}<div class=gwork><b>This sheet cannot be used</b><div class=mut>${esc(sheetErr.detail||sheetErr.name)}</div></div></section>`;
   return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?`<div class=gleft>${videoPanel(g)}${sheetPanel(g)}</div>`:sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
-function gview(){
-  const gs=sessionGens();if(!gs.length)return'';
-  const inc=included(),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
+/* what a set of batches stands at right now: the counts the header and the bottom bar read. One implementation, used by the session and by every history card
+   (`all`: a card's batch is not part of the session, so it counts even when the session has it switched off). */
+function gstats(gs,all=false){const inc=all?gs:gs.filter(g=>!SES.off.includes(g.number)),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
   const todoAnim=inc.filter(g=>g.source.has_video&&(!animPhase(g)||g.stickers.some(t=>t.anim_status==='STALE'))&&!processing(g)&&!ANIM.has(g.number)&&keptStills(g).length);
   const busyAnim=gs.some(g=>processing(g)||(ANIM.has(g.number)&&!animPhase(g)));
   const done=inc.reduce((a,g)=>a+g.stickers.filter(t=>['READY','FAILED'].includes(t.anim_status)).length,0),tot=inc.reduce((a,g)=>a+(hasVid(g)?keptStills(g).length:0),0);
-  const pk=SES.pack&&packById(SES.pack),added=pk?inc.reduce((a,g)=>a+nAdded(g,SES.pack),0):0,allAdded=pk&&n>0&&added>=n;
-  const kind=inc.some(g=>animPhase(g))?'animated ':'';
-  let bar;
-  if(!ready)bar=`<span class=gstat>Making your stickers…</span>`;
-  else if(busyAnim)bar=`<span class=gstat>Animating ${done} of ${tot}…</span><button class="btn pri gbig" disabled>Animating…</button>`;
-  else if(todoAnim.length)bar=`<span class=gstat>${n} sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}</span><button class=link data-act=gadd ${n?'':'disabled'}>or add the stills</button><button class="btn pri gbig" data-act=ganimate>${ic('play')} Animate${inc.length>1?` ${todoAnim.length} batch${todoAnim.length===1?'':'es'}`:''}</button>`;
-  else bar=`<span class=gstat>${n} ${kind}sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}${allAdded?` · added to “${esc(pk.name)}”`:''}</span><button class="btn pri gbig" data-act=gadd ${n&&!allAdded?'':'disabled'}>${allAdded?'Added ✓':`Add ${n} to a pack`}</button>${allAdded?`<button class="btn gbig" data-act=gopenpack>Open pack</button>`:''}`;
+  const pk=SES.pack&&packById(SES.pack),added=pk?inc.reduce((a,g)=>a+nAdded(g,SES.pack),0):0;
+  return {gs,inc,n,ready,busyAnim,todoAnim,done,tot,pk,added,allAdded:!!(pk&&n>0&&added>=n),kind:inc.some(g=>animPhase(g))?'animated ':''}}
+/* the bottom bar (Animate / Add to a pack). `gid` scopes every button to one batch, which is what a card inside Earlier batches needs. */
+function barHtml(s,gid=''){const {n,ready,busyAnim,todoAnim,done,tot,pk,allAdded,kind,inc}=s,dsc=gid?` data-g=${gid}`:'';
+  if(!ready)return`<span class=gstat>Making your stickers…</span>`;
+  if(busyAnim)return`<span class=gstat>Animating ${done} of ${tot}…</span><button class="btn pri gbig" disabled>Animating…</button>`;
+  if(todoAnim.length)return`<span class=gstat>${n} sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}</span><button class=link data-act=gadd${dsc} ${n?'':'disabled'}>or add the stills</button><button class="btn pri gbig" data-act=ganimate${dsc}>${ic('play')} Animate${inc.length>1?` ${todoAnim.length} batch${todoAnim.length===1?'':'es'}`:''}</button>`;
+  return`<span class=gstat>${n} ${kind}sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}${allAdded?` · added to “${esc(pk.name)}”`:''}</span><button class="btn pri gbig" data-act=gadd${dsc} ${n&&!allAdded?'':'disabled'}>${allAdded?'Added ✓':`Add ${n} to a pack`}</button>${allAdded?`<button class="btn gbig" data-act=gopenpack${dsc}>Open pack</button>`:''}`}
+function gview(){
+  const gs=sessionGens();if(!gs.length)return'';
+  const s=gstats(gs),{pk,allAdded,n}=s;
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
-    <button class="btn" data-act=gmore ${ready&&!busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
+    <button class="btn" data-act=gmore ${s.ready&&!s.busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
-   ${stepsHtml({gs,ready,busyAnim,done,tot,pk,allAdded,n})}
-   ${gbodyHtml(gs,{inc,todoAnim,busyAnim,n})}
-   <div class=gbar>${bar}</div>`}
+   ${stepsHtml(s,'',GS.tab)}
+   ${gbodyHtml(s.gs,{inc:s.inc,todoAnim:s.todoAnim,busyAnim:s.busyAnim,n:s.n},'',GS.tab)}
+   <div class=gbar>${barHtml(s)}</div>`}
 
-/* what the page shows under the header: each step is a real view */
-function gbodyHtml(gs,c){const t=GS.tab;
-  if(t==='request')return requestView(gs);
-  if(t==='plan')return planView(gs[0]);
-  if(t==='anim'&&!gs.some(animPhase)&&!c.busyAnim&&!gs.some(g=>PVON.has(g.number)))return animEmpty(gs,c);
+/* ---------- the Studio view of ONE batch, for an expanded card in Earlier batches: the same header, the same views and the same bar as the session above, so an
+   earlier batch is one click away from being worked on again. No new markup: every card renders what the Studio renders, with its own tab (CT) and its own buttons
+   (data-g), so several cards can be open at once and none of them touches another's state. */
+const CT={};                                   // CT[gid] = which step that card is showing
+const cardTab=g=>CT[g.number]||(CT[g.number]=animPhase(g)?'anim':'stickers');
+function studioFor(g){const gid=g.number,tab=cardTab(g),s=gstats([g],true);
+  return`<div class=gcardview>${stepsHtml(s,gid,tab)}${gbodyHtml(s.gs,{inc:s.inc,todoAnim:s.todoAnim,busyAnim:s.busyAnim,n:s.n},gid,tab)}<div class=gbar>${barHtml(s,gid)}</div></div>`}
+
+/* what the page shows under the header: each step is a real view. `gid` is empty for the session and the batch number inside a history card. */
+function gbodyHtml(gs,c,gid='',tab=''){const t=tab||GS.tab;
+  if(t==='request')return requestView(gs,gid);
+  if(t==='plan')return planView(gs[0],gid);
+  if(t==='anim'&&!gs.some(animPhase)&&!c.busyAnim&&!gs.some(g=>PVON.has(g.number)))return animEmpty(gs,c,gid);
   return gs.map((g,k)=>batchHtml(g,k,gs.length,t==='anim'?'anim':'still')).join('')}
-function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);   // a prepared video; a Kling video has already produced the animations
+function animEmpty(gs,c,gid=''){const hasVid=gs.some(g=>g.source.has_video);   // a prepared video; a Kling video has already produced the animations
   return`<section class=gplan style="text-align:center;padding:44px 16px"><h2 style="margin:0 0 6px">${hasVid?'Animate your stickers':'No video prepared for this sheet'}</h2>
    <div class=mut style="max-width:560px;margin:0 auto 18px">${hasVid?`${c.n} sticker${c.n===1?'':'s'} will be animated from the prepared video. Each animation is checked frame by frame (size, loop, and whether the character stays inside its cell) and shows up here as soon as it is ready.`
      :(typeof liveReadyNow==='function'&&liveReadyNow()?'Generate the animation on the Stickers view: the box under the green screen has the model and the price.':'Make a video from the sheet in your own tool, then add it with “Make a video…” on the Stickers view.')}</div>
-   ${hasVid?`<button class="btn pri gbig" data-act=ganimate ${c.todoAnim.length?'':'disabled'}>${ic('play')} Animate</button>`:''}</section>`}
+   ${hasVid?`<button class="btn pri gbig" data-act=ganimate ${c.todoAnim.length?'':'disabled'}${gid?` data-g=${gid}`:''}>${ic('play')} Animate</button>`:''}</section>`}
 
 /* Request: the original request, editable; generating again starts a new session */
-function requestView(gs){const g=gs[0],s=g.source,on=GS.outline>0;
+function requestView(gs,pfx=''){const g=gs[0],s=g.source,on=GS.outline>0;
   return`<section class=gplan><div class=pcols><div><div class=pbh><b>Your request</b></div>
-    <textarea id=greq rows=3 style="width:100%;font:inherit;font-size:15px;background:var(--fill);border:0;border-radius:12px;padding:12px">${esc(SES.prompt||g.prompt||'')}</textarea>
+    <textarea id=greq${pfx} data-req rows=3 style="width:100%;font:inherit;font-size:15px;background:var(--fill);border:0;border-radius:12px;padding:12px">${esc(SES.prompt||g.prompt||'')}</textarea>
     <div class=row><span class=mut>White outline</span><div class=tabs style="margin:0;gap:6px">${[[12,'On'],[0,'Off']].map(([px,l])=>`<button class="tab ${(on?12:0)===px?'on':''}" data-act=goutline data-px=${px} style="padding:6px 16px;font-size:13px">${l}</button>`).join('')}</div></div>
     <div class=row style="margin-top:12px"><button class="btn pri gbig" data-act=greqgo>Generate again with this request</button></div>
     <div class=mut style="margin-top:6px">This starts a new session. The stickers you have now stay in History.</div></div>
    <ul class=pcells><li><b>Subject</b><div class=mut>${esc(titleCase(s.subject))}</div></li><li><b>Prepared sheets used</b><div class=mut>${gs.map(x=>`sheet ${x.source.subject_id} (${x.generation_id})`).join(', ')}</div></li>
     <li><b>Grid</b><div class=mut>${g.grid[0]}×${g.grid[1]}, ${g.stickers.length} stickers per batch</div></li><li><b>Template</b><div class=mut>${esc(g.template_id||'hand-written plan')}${g.template_version?' v'+g.template_version:''}</div></li>
     <li><b>Edge</b><div class=mut>${g.outline_px?g.outline_px+' px white outline':'no outline'}${g.erode_px?`, ${g.erode_px} px trimmed`:''}</div></li></ul></div></section>`}
-ACT.greqgo=()=>{const p=($('greq').value||'').trim();if(!p){say('Write what you want first.');return}$('prompt').value=p;GS.tab='stickers';create(p,0,false)};
+ACT.greqgo=el=>{const box=(el&&el.closest('.gcardview')||document).querySelector('[data-req]'),p=((box&&box.value)||($('greq')||{}).value||'').trim();
+  if(!p){say('Write what you want first.');return}$('prompt').value=p;GS.tab='stickers';create(p,0,false)};
 
-/* ---------- the header: Request > Prompt > Stickers > Animation > Pack (where this request stands, from what the server reports) */
-function stepsHtml(c){const {gs,ready,busyAnim,done,tot,pk,allAdded,n}=c,g0=gs[0],cnt=f=>gs.reduce((a,g)=>a+g.stickers.filter(f).length,0);
+/* ---------- the header: Request > Prompt > Stickers > Animation > Pack (where this request stands, from what the server reports).
+   `gid` + `tab`: inside a history card the header is that card's own (its tab lives in CT and every button carries the batch). */
+function stepsHtml(c,gid='',cur=''){const {gs,ready,busyAnim,done,tot,pk,allAdded,n}=c,g0=gs[0],cnt=f=>gs.reduce((a,g)=>a+g.stickers.filter(f).length,0);
   const good=cnt(t=>t.status==='READY'),kept=cnt(t=>t.status==='READY'&&t.review.still!=='REJECTED'),dropped=cnt(t=>t.review.still==='REJECTED'),blocked=cnt(t=>t.status==='FAILED'),oobN=cnt(isOob),
     animOk=cnt(t=>t.anim_status==='READY'&&!isOob(t)&&t.review.anim!=='REJECTED'&&t.review.still!=='REJECTED'),aDrop=cnt(t=>t.anim_status==='READY'&&t.review.anim==='REJECTED'&&t.review.still!=='REJECTED'),animFail=cnt(t=>t.anim_status==='FAILED');
   const anim=gs.some(animPhase),hasVid_=gs.some(hasVid);
-  const S=[['Request','done',esc(SES.prompt||g0.prompt||''),'request'],
+  const S=[['Request','done',esc(gid?g0.prompt||'':(SES.prompt||g0.prompt||'')),'request'],
    ['Prompt',g0.sheet_prompt?'done':'todo',`${esc(g0.template_id||'plan')}${g0.template_version?' v'+g0.template_version:''} · tags`,'plan'],
    ['Stickers',ready?(good?'done':'warn'):'run',ready?`${kept} kept${dropped?`, ${dropped} dropped`:''}${blocked?`, ${blocked} blocked`:''}`:'Making…','stickers'],
    ['Animation',busyAnim?'run':anim?(oobN||animFail?'warn':'done'):'todo',busyAnim?`Animating ${done} of ${tot}…`:anim?`${animOk} ready${aDrop?`, ${aDrop} dropped`:''}${oobN?`, ${oobN} out of bounds (off)`:''}${animFail?`, ${animFail} failed`:''}`:hasVid_?'Not started':'No video prepared','anim'],
    ['Pack',allAdded?'done':'todo',allAdded?`Added to “${esc(pk.name)}”`:'Not added yet','pack']];
   const mark=(st,i)=>st==='done'?ic('check'):st==='run'?'<span class=spin></span>':st==='warn'?'!':i+1;
-  return`<div class=gsteps>${S.map(([l,st,sub,tab],i)=>`<button class="gst ${st} ${tab===GS.tab?'cur':''}" ${tab==='pack'?`data-act=gadd ${ready&&n?'':'disabled'}`:`data-act=gtab data-t=${tab}`}><span class=gsm>${mark(st,i)}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g,'')}">${sub}</small></span></button>`).join('')}</div>`}
+  return`<div class=gsteps>${S.map(([l,st,sub,tab],i)=>`<button class="gst ${st} ${tab===cur?'cur':''}" ${tab==='pack'?`data-act=gadd ${gid?`data-g=${gid} `:''}${ready&&n?'':'disabled'}`:`data-act=gtab${gid?` data-c=${gid}`:''} data-t=${tab}`}><span class=gsm>${mark(st,i)}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g,'')}">${sub}</small></span></button>`).join('')}</div>`}
 
 ACT.gopenfolder=async el=>{const r=await post(`/api/generations/${el.dataset.g}/reveal`);if(!r.ok)return toast(r.j.error||'Could not open the folder',1);toast('Opened '+r.j.opened)};
 
-/* ---------- Plan: the prompts the sheet and video were made from, and the 1-5 tags per cell */
+/* ---------- Plan: the prompts the sheet and video were made from, and the 1-5 tags per cell. The ids carry the batch (`pfx`) so two open cards never collide. */
 const copyBox=(title,text,id,rows)=>`<div class=pbox><div class=pbh><b>${title}</b><button class="btn sm" data-act=hcopy data-t=${id}>Copy</button></div><textarea readonly id=${id} rows=${rows}>${esc(text||'')}</textarea></div>`;
-function planView(g){const pl=g.reviews&&g.reviews.plan;
-  return`<section class=gplan><div class=pcols><div>${copyBox('Sheet prompt',g.sheet_prompt,'pp1',11)}${copyBox('Video prompt',g.video_prompt,'pp2',6)}
+function planView(g,pfx=''){const pl=g.reviews&&g.reviews.plan;
+  return`<section class=gplan><div class=pcols><div>${copyBox('Sheet prompt',g.sheet_prompt,`pp1${pfx}`,11)}${copyBox('Video prompt',g.video_prompt,`pp2${pfx}`,6)}
    <p class=mut>Template <b>${esc(g.template_id||'hand-written plan')}</b>${g.template_version?' v'+g.template_version:''} · plan from ${esc(g.plan_source||'')}${pl?` · ${esc(pl.decision.toLowerCase())}d by ${esc(pl.by)}`:''}</p></div>
    <ul class=pcells>${g.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=mut>${esc(t.prompt)}</div><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></section>`}
-ACT.gtab=el=>{GS.tab=el.dataset.t;glast='';tick(true)};
+/* the header's tabs: the session's own, or the one card that was clicked (CT) */
+ACT.gtab=el=>{if(el.dataset.c){CT[+el.dataset.c]=el.dataset.t;if(typeof drawHist==='function')drawHist();return}GS.tab=el.dataset.t;glast='';tick(true)};
 /* the same prompts, live under the request box while typing (nothing is reserved) */
 let PQ=0,PT=null;
 function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('gplan'))return;
@@ -263,9 +278,10 @@ function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('
       <div class=pcols><div>${copyBox('Sheet prompt',r.j.sheet_prompt,'pv1',9)}${copyBox('Video prompt',r.j.video_prompt,'pv2',5)}</div>
       <ul class=pcells>${r.j.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></details>`},450)}
 
-/* ---------- Animate, Add */
-ACT.ganimate=async()=>{const todo=included().filter(g=>g.source.has_video&&!animPhase(g)&&!processing(g)&&keptStills(g).length);if(!todo.length)return;
-  todo.forEach(g=>{ANIM.add(g.number);PVON.add(g.number);if(g.source.video_path)pvEnsure(g)});GS.tab='anim';glast='';tick(true);
+/* ---------- Animate, Add. A button with data-g acts on that one batch only (the button inside a history card); without it, on the whole session. */
+const scopeGens=el=>{const gid=el&&el.dataset.g?+el.dataset.g:null,g=gid!=null?GM.get(gid):null;return g?[g]:included()};
+ACT.ganimate=async el=>{const todo=scopeGens(el).filter(g=>g.source.has_video&&!animPhase(g)&&!processing(g)&&keptStills(g).length);if(!todo.length)return;
+  todo.forEach(g=>{ANIM.add(g.number);PVON.add(g.number);if(g.source.video_path)pvEnsure(g)});if(!(el&&el.dataset.g))GS.tab='anim';glast='';tick(true);
   for(const g of todo){const r=await postWait(`/api/generations/${g.number}/animate`,{scope:'pack'},'Waiting for the previous animation…');if(!r.ok){toast(r.j.error,1);ANIM.delete(g.number)}}};
 ACT.gdrop=async el=>{const r=await postWait(`/api/generations/${el.dataset.g}/drop`,{index:+el.dataset.i,dropped:el.dataset.off==='1'});if(!r.ok)toast(r.j.error,1);
   else if(el.dataset.off==='0'&&el.closest('.blk'))toast(`S${el.dataset.i} is included anyway: it will be added with the rest (the marker stays)`);glast='';await tick(true);if(MD)gmodal()};
@@ -274,12 +290,12 @@ ACT.gdrop=async el=>{const r=await postWait(`/api/generations/${el.dataset.g}/dr
 let PW=null;
 const rname=k=>{const t=String(k).replace(/[-_]+/g,' ').trim();return(t.charAt(0).toUpperCase()+t.slice(1)).slice(0,60)};
 const PWBG=[['chat','Chat'],['light','Light'],['dark','Dark'],['checker','Transparent'],['wall','Wallpaper']];
-ACT.gadd=async()=>{await loadLib();const inc=included(),rows=[];
+ACT.gadd=async el=>{await loadLib();const inc=scopeGens(el),rows=[];
   for(const g of inc)for(const t of keptOf(g))rows.push({g:g.number,gen:g.generation_id,i:t.index,anim:animPhase(g),src:`/out/${g.generation_id}/${animPhase(g)?t.webm:t.png}`,name:rname(t.key),emoji:t.emoji,file:t.name});
   if(!rows.length)return;
   const ps=LIB.packs,def=SES.pack&&packById(SES.pack)?SES.pack:'',base=titleCase(inc[0].source.subject);
   let name=base,k=2;while(ps.some(p=>p.name.toLowerCase()===name.toLowerCase()))name=`${base} ${k++}`;
-  PW={rows,anim:rows.some(r=>r.anim)};
+  PW={rows,anim:rows.some(r=>r.anim),card:!!(el&&el.dataset.g)};
   const prev=r=>r.anim?`<video src="${r.src}" autoplay loop muted playsinline></video>`:`<img src="${r.src}">`;
   dlg(`<div class=pw><h2 style="margin:0">Add to a pack</h2><div class=mut>${rows.length} ${PW.anim?'animated stickers':'stickers'} from ${inc.length} batch${inc.length===1?'':'es'}</div>
    <div class=pwgrid><div>
@@ -314,12 +330,15 @@ ACT.pwgo=async()=>{const p=pwPack();let pid;
   if(p.old)pid=p.id;else{if(!p.name){toast('Give the pack a name',1);return}const r=await post('/api/packs',{name:p.name});if(!r.ok)return toast(r.j.error,1);pid=r.j.id}
   const mode=(document.querySelector('input[name=pwmode]:checked')||{}).value==='add'?'add':'replace',names={};
   document.querySelectorAll('.pwrows input').forEach(i=>{const r=PW.rows[+i.dataset.r];(names[r.g]=names[r.g]||{})[r.i]=Object.assign(names[r.g][r.i]||{},{[i.dataset.k]:i.value.trim()})});
-  closeDlg();await gaddrun(pid,mode,names)};
-async function gaddrun(pid,mode,names){let added=0,replaced=0,err='';const edge=typeof egDirty==='function'&&egDirty()?{outline:egVals().o,erode:egVals().e}:{};
-  for(const g of included()){if(!keptOf(g).length)continue;const r=await postWait(`/api/generations/${g.number}/add`,{pack_id:pid,mode,names:(names||{})[g.number]||{}});if(r.ok){added+=r.j.added;replaced+=r.j.replaced||0}else err=r.j.error}
-  await loadLib();SES.pack=pid;saveSes();glast='';tick(true);
+   closeDlg();await gaddrun(pid,mode,names,PW.card)};
+/* the wizard's own rows decide what is added: the session's batches, or the one batch whose card opened the wizard (a card never changes the session's pack) */
+async function gaddrun(pid,mode,names,card){let added=0,replaced=0,err='';const edge=typeof egDirty==='function'&&egDirty()?{outline:egVals().o,erode:egVals().e}:{},
+  gens=[...new Set(PW.rows.map(r=>r.g))].map(n=>GM.get(n)).filter(Boolean);
+  for(const g of gens){if(!keptOf(g).length)continue;const r=await postWait(`/api/generations/${g.number}/add`,{pack_id:pid,mode,names:(names||{})[g.number]||{}});if(r.ok){added+=r.j.added;replaced+=r.j.replaced||0}else err=r.j.error}
+  await loadLib();PW.pid=pid;if(!card){SES.pack=pid;saveSes()}glast='';tick(true);
   if(err)toast(err,1);else toast(replaced?`Replaced ${replaced} still${replaced===1?'':'s'} with animated stickers in “${packById(pid).name}”`:added?`Added ${added} to “${packById(pid).name}”`:'Those are already in that pack')}
-ACT.gopenpack=()=>{if(SES.pack)location.hash='#/pack/'+SES.pack};
+/* Open the pack this view just added to (a card's wizard sets PW.pid; the session's is SES.pack) */
+ACT.gopenpack=()=>{const pid=(PW&&PW.pid)||SES.pack;if(pid)location.hash='#/pack/'+pid};
 
 /* ---------- Make a video...: the one multi-step path, for a batch without a prepared video */
 ACT.gvideo=async el=>{const id=+el.dataset.g,r=await postWait(`/api/generations/${id}/quick_sheet`);if(!r.ok){toast(r.j.error,1);return}glast='';VG=id;await tick(true);drawVdlg()};
@@ -502,7 +521,7 @@ async function tick(force){try{
   let key='';for(const id of SES.gens){const r=await api('/api/generations/'+id);if(r.ok){GM.set(id,r.j);key+=JSON.stringify(r.j);autoRecheck(r.j)}else if(r.status===404){SES.gens=SES.gens.filter(x=>x!==id);saveSes()}}
   for(const id of [...ANIM]){const g=GM.get(id);if(g&&animPhase(g)&&!processing(g))ANIM.delete(id)}
   key+=bg+SES.off.join()+SES.pack+[...ANIM].join()+(LIB.packs||[]).length;
-  if(force||key!==glast){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg();if(typeof applyEdgePreview==='function')applyEdgePreview()}
+  if(force||key!==glast){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg();if(typeof applyEdgePreview==='function')applyEdgePreview();if(typeof hxSync==='function')hxSync()}
 }catch(e){const m=$('msg');if(m)m.textContent='Something went wrong: '+e.message}}
 setInterval(tick,700);loadLib();
 

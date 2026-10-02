@@ -1,0 +1,2324 @@
+{
+  "generation_id": "G095",
+  "number": 95,
+  "owner": "local",
+  "created": 1790934954.295,
+  "parent": null,
+  "prompt": "falcon stickers",
+  "task": "falcon stickers",
+  "task_slug": "falcon_stickers",
+  "source": {
+    "subject": "falcon_stickers",
+    "subject_id": "023",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\jobs\\J028\\result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          789,
+          689
+        ],
+        [
+          789,
+          0,
+          564,
+          689
+        ],
+        [
+          1353,
+          0,
+          695,
+          689
+        ],
+        [
+          0,
+          689,
+          789,
+          681
+        ],
+        [
+          789,
+          689,
+          564,
+          681
+        ],
+        [
+          1353,
+          689,
+          695,
+          681
+        ],
+        [
+          0,
+          1370,
+          789,
+          678
+        ],
+        [
+          789,
+          1370,
+          564,
+          678
+        ],
+        [
+          1353,
+          1370,
+          695,
+          678
+        ]
+      ],
+      "xs": [
+        0,
+        789,
+        1353,
+        2048
+      ],
+      "ys": [
+        0,
+        689,
+        1370,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "stills_reviewed",
+  "error": null,
+  "plan_source": "task 023",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: falcon stickers.\nStyle: cel-shaded toon style, crisp two-tone shading, clean colour blocks, a soft rim light, expressive cartoon features.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: arms wide open, ready for a big hug, warm smile\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open\nCharacter 3: hands pressed together in thanks, eyes closed, grateful smile\nCharacter 4: flexing a muscle proudly, chest out, huge grin\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: mid-sneeze with a tissue, watery eyes\nCharacter 7: furious, steaming, fists clenched, deep scowl\nCharacter 8: terrified, trembling, peeking through hands, wide eyes\nCharacter 9: scheming grin, rubbing hands together, eyebrows wiggling\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. leans in with open arms, rocks side to side, squeezes an invisible hug\n2. doubles over, shoulders shaking, tiny hops, wipes a tear\n3. bows slightly, gentle sway, smile widens\n4. the arm flexes and pulses, chest puffs, nods\n5. eyes circle slowly, head tilts back with a sigh\n6. head tips back, bursts forward with the sneeze, sniffles\n7. stomps in place, steam puffs from the head, body shakes with rage\n8. shivers fast, knees knock, cowers lower\n9. rubs the hands, eyebrows wiggle, sneaky giggle\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "falcon stickers",
+    "style_id": "toon_shade",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "arms wide open, ready for a big hug, warm smile",
+        "tags": [
+          "falcon_stickers_open_arms",
+          "arms",
+          "wide",
+          "open"
+        ],
+        "emoji": "🤗",
+        "motion": "leans in with open arms, rocks side to side, squeezes an invisible hug"
+      },
+      {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, mouth wide open",
+        "tags": [
+          "falcon_stickers_laughing",
+          "laughing",
+          "hard",
+          "tears"
+        ],
+        "emoji": "😂",
+        "motion": "doubles over, shoulders shaking, tiny hops, wipes a tear"
+      },
+      {
+        "pos": 3,
+        "label": "hands pressed together in thanks, eyes closed, grateful smile",
+        "tags": [
+          "falcon_stickers_thank_you",
+          "hands",
+          "pressed",
+          "together"
+        ],
+        "emoji": "🙏",
+        "motion": "bows slightly, gentle sway, smile widens"
+      },
+      {
+        "pos": 4,
+        "label": "flexing a muscle proudly, chest out, huge grin",
+        "tags": [
+          "falcon_stickers_flexing",
+          "flexing",
+          "muscle",
+          "proudly"
+        ],
+        "emoji": "💪",
+        "motion": "the arm flexes and pulses, chest puffs, nods"
+      },
+      {
+        "pos": 5,
+        "label": "rolling eyes with a bored deadpan face",
+        "tags": [
+          "falcon_stickers_eye_roll",
+          "rolling",
+          "eyes",
+          "bored"
+        ],
+        "emoji": "🙄",
+        "motion": "eyes circle slowly, head tilts back with a sigh"
+      },
+      {
+        "pos": 6,
+        "label": "mid-sneeze with a tissue, watery eyes",
+        "tags": [
+          "falcon_stickers_sneezing",
+          "mid",
+          "sneeze",
+          "tissue"
+        ],
+        "emoji": "🤧",
+        "motion": "head tips back, bursts forward with the sneeze, sniffles"
+      },
+      {
+        "pos": 7,
+        "label": "furious, steaming, fists clenched, deep scowl",
+        "tags": [
+          "falcon_stickers_angry",
+          "furious",
+          "steaming",
+          "fists"
+        ],
+        "emoji": "😡",
+        "motion": "stomps in place, steam puffs from the head, body shakes with rage"
+      },
+      {
+        "pos": 8,
+        "label": "terrified, trembling, peeking through hands, wide eyes",
+        "tags": [
+          "falcon_stickers_scared",
+          "terrified",
+          "trembling",
+          "peeking"
+        ],
+        "emoji": "😨",
+        "motion": "shivers fast, knees knock, cowers lower"
+      },
+      {
+        "pos": 9,
+        "label": "scheming grin, rubbing hands together, eyebrows wiggling",
+        "tags": [
+          "falcon_stickers_scheming",
+          "scheming",
+          "grin",
+          "rubbing"
+        ],
+        "emoji": "😏",
+        "motion": "rubs the hands, eyebrows wiggle, sneaky giggle"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "023",
+  "name_key": "falcon_stickers",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 0,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1790934928.472,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 52.6
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 247 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 247.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 11.7
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 34.7
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            789,
+            1353,
+            2048
+          ],
+          "ys": [
+            0,
+            689,
+            1370,
+            2048
+          ],
+          "ms": 34.8
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 2.0 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 2.04,
+        "limit": 12.0,
+        "data": {
+          "ms": 81.4
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "falcon_stickers_open_arms",
+      "tags": [
+        "falcon_stickers_open_arms",
+        "arms",
+        "wide",
+        "open"
+      ],
+      "emoji": "🤗",
+      "prompt": "falcon stickers arms wide open, ready for a big hug, warm smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_open_arms",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 185479,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 21.2
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 65512,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 65.512,
+          "data": {
+            "ms": 2.4
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "130.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 130.2,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          789,
+          689
+        ],
+        "bg": [
+          3,
+          252,
+          2
+        ],
+        "threshold": 124.5,
+        "fg_px": 185479,
+        "bbox": [
+          34,
+          72,
+          766,
+          671
+        ],
+        "scale": 0.5945,
+        "scale_mode": "clamped",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 130.2,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_open_arms.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.514,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.397,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "falcon_stickers_laughing",
+      "tags": [
+        "falcon_stickers_laughing",
+        "laughing",
+        "hard",
+        "tears"
+      ],
+      "emoji": "😂",
+      "prompt": "falcon stickers laughing so hard tears of joy fly out, mouth wide open, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_laughing",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 153118,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 62915,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 62.915,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "131.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 131.8,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          789,
+          0,
+          564,
+          689
+        ],
+        "bg": [
+          4,
+          252,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 153118,
+        "bbox": [
+          41,
+          62,
+          459,
+          672
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 131.8,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_laughing.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.52,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.405,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "falcon_stickers_thank_you",
+      "tags": [
+        "falcon_stickers_thank_you",
+        "hands",
+        "pressed",
+        "together"
+      ],
+      "emoji": "🙏",
+      "prompt": "falcon stickers hands pressed together in thanks, eyes closed, grateful smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_thank_you",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 165161,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 15.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 67930,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 67.93,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 16 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 16,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "136.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 136.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1353,
+          0,
+          695,
+          689
+        ],
+        "bg": [
+          3,
+          252,
+          2
+        ],
+        "threshold": 124.0,
+        "fg_px": 165161,
+        "bbox": [
+          136,
+          52,
+          546,
+          668
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 136.4,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_thank_you.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.526,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.409,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "falcon_stickers_flexing",
+      "tags": [
+        "falcon_stickers_flexing",
+        "flexing",
+        "muscle",
+        "proudly"
+      ],
+      "emoji": "💪",
+      "prompt": "falcon stickers flexing a muscle proudly, chest out, huge grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_flexing",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 204153,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 83935,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 83.935,
+          "data": {
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0019,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 12 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 12,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "159.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 159.0,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          689,
+          789,
+          681
+        ],
+        "bg": [
+          3,
+          252,
+          2
+        ],
+        "threshold": 124.5,
+        "fg_px": 204153,
+        "bbox": [
+          119,
+          27,
+          716,
+          656
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0019,
+        "kb": 159.0,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_flexing.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.531,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.412,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "falcon_stickers_eye_roll",
+      "tags": [
+        "falcon_stickers_eye_roll",
+        "rolling",
+        "eyes",
+        "bored"
+      ],
+      "emoji": "🙄",
+      "prompt": "falcon stickers rolling eyes with a bored deadpan face, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_eye_roll",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 169415,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 69428,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 69.428,
+          "data": {
+            "ms": 2.4
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0015,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 16 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 16,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "135.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 135.3,
+          "limit": 512,
+          "data": {
+            "ms": 4.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          789,
+          689,
+          564,
+          681
+        ],
+        "bg": [
+          3,
+          252,
+          2
+        ],
+        "threshold": 124.5,
+        "fg_px": 169415,
+        "bbox": [
+          33,
+          19,
+          444,
+          656
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0015,
+        "kb": 135.3,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_eye_roll.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.537,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.424,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "falcon_stickers_sneezing",
+      "tags": [
+        "falcon_stickers_sneezing",
+        "mid",
+        "sneeze",
+        "tissue"
+      ],
+      "emoji": "🤧",
+      "prompt": "falcon stickers mid-sneeze with a tissue, watery eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_sneezing",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 177086,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 72832,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 72.83200000000001,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 16 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 16,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "153.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 153.2,
+          "limit": 512,
+          "data": {
+            "ms": 3.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1353,
+          689,
+          695,
+          681
+        ],
+        "bg": [
+          3,
+          252,
+          2
+        ],
+        "threshold": 124.5,
+        "fg_px": 177086,
+        "bbox": [
+          84,
+          35,
+          581,
+          656
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 153.2,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_sneezing.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.544,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.434,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "falcon_stickers_angry",
+      "tags": [
+        "falcon_stickers_angry",
+        "furious",
+        "steaming",
+        "fists"
+      ],
+      "emoji": "😡",
+      "prompt": "falcon stickers furious, steaming, fists clenched, deep scowl, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_angry",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 196659,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 80668,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 80.668,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0018,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 14 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 14,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "161.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 161.9,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1370,
+          789,
+          678
+        ],
+        "bg": [
+          3,
+          252,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 196659,
+        "bbox": [
+          90,
+          45,
+          682,
+          641
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0018,
+        "kb": 161.9,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_angry.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.55,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.442,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "falcon_stickers_scared",
+      "tags": [
+        "falcon_stickers_scared",
+        "terrified",
+        "trembling",
+        "peeking"
+      ],
+      "emoji": "😨",
+      "prompt": "falcon stickers terrified, trembling, peeking through hands, wide eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_scared",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 164529,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.7
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 67692,
+          "limit": 400,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 67.69200000000001,
+          "data": {
+            "ms": 3.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 11 to cell 7",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 11,
+          "limit": 4,
+          "data": {
+            "of": 7,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "151.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 151.9,
+          "limit": 512,
+          "data": {
+            "ms": 4.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          789,
+          1370,
+          564,
+          678
+        ],
+        "bg": [
+          3,
+          252,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 164529,
+        "bbox": [
+          26,
+          24,
+          478,
+          643
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 151.9,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_scared.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.556,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.453,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "falcon_stickers_scheming",
+      "tags": [
+        "falcon_stickers_scheming",
+        "scheming",
+        "grin",
+        "rubbing"
+      ],
+      "emoji": "😏",
+      "prompt": "falcon stickers scheming grin, rubbing hands together, eyebrows wiggling, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-095-falcon_stickers-falcon_stickers_scheming",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 165589,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 68054,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 68.054,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0008,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 9 to cell 6",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 9,
+          "limit": 4,
+          "data": {
+            "of": 6,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "140.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 140.0,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1353,
+          1370,
+          695,
+          678
+        ],
+        "bg": [
+          3,
+          251,
+          3
+        ],
+        "threshold": 123.5,
+        "fg_px": 165589,
+        "bbox": [
+          125,
+          35,
+          577,
+          644
+        ],
+        "scale": 0.641,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0008,
+        "holes": 0.0,
+        "kb": 140.0,
+        "format": "png"
+      },
+      "png": "slices/img-095-falcon_stickers-falcon_stickers_scheming.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790934955.561,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790935005.46,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    }
+  ],
+  "added": {
+    "f65a2bbb": [
+      "static:1",
+      "static:2",
+      "static:3",
+      "static:4",
+      "static:5",
+      "static:6",
+      "static:7",
+      "static:8",
+      "static:9"
+    ]
+  }
+}

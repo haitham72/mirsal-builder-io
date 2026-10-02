@@ -353,6 +353,10 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .lv-hitem:hover{background:var(--pri-l)}.lv-hitem:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 .lv-hitem .lv-caret,.lv-hsh .lv-caret,.lv-hgh .lv-caret{margin:0 0 0 auto;transform:rotate(-45deg)}.lv-hitem[aria-expanded=true]>.lv-caret,.lv-hsh[aria-expanded=true]>.lv-caret,.lv-hgh[aria-expanded=true]>.lv-caret{transform:rotate(45deg);margin-top:-3px}
 .lv-hdet{margin:0 4px 2px 14px;padding:6px 0 6px 12px;border-left:2px solid var(--bd);display:flex;flex-direction:column;gap:6px}
+/* the batch's own Studio view inside the card: the same header, views and bar as the session above, at card width */
+.gcardview{display:flex;flex-direction:column;gap:4px;margin:2px 0 2px 14px;padding:10px 12px;border-left:2px solid var(--bd);min-width:0}
+.gcardview .gsteps{margin:0 0 4px;position:static}.gcardview .gst{padding:9px 12px}.gcardview .gsheet{position:static}
+.gcardview .gbar{position:static;margin:8px -8px 0;padding:10px 8px;background:none}
 .lv-hsh{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:6px 10px;border:1px solid var(--bd);background:var(--sf);border-radius:12px;cursor:pointer}.lv-hsh:hover{border-color:var(--pri)}
 .lv-hsh img,.lv-hnoimg{width:36px;height:36px;flex:none;object-fit:contain;border-radius:8px;background:conic-gradient(#e9edf1 25%,#fbfcfd 0 50%,#e9edf1 0 75%,#fbfcfd 0) 0 0/10px 10px}
 .lv-hsm{display:flex;flex-direction:column;min-width:0;flex:1}.lv-hsm b{font-weight:600;font-size:13px}.lv-hsm small{font-size:12px}

@@ -45,6 +45,7 @@ Python's blocks are final; a human approves at every gate; the vision model only
 | **Vision judge** | a local multimodal model pre-reviews stickers and animations; uncalibrated until 30 labels exist. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
 | **HTTP API** | JSON routes, SSE events per generation, idempotency keys, signed asset links, accounts (owner / member tokens, per-user ownership), per-minute rate limits, an OpenAPI document, health. [docs/api.md](docs/api.md) |
 | **Independent review** | a ready-made prompt for another LLM to audit the whole app: [docs/review-prompt.md](docs/review-prompt.md) |
+| **Measurements** | recorded numbers — slot fill, search precision, vision-judge agreement, sharpness; no opinions: [docs/measurements.md](docs/measurements.md) |
 | **Telegram** | send a pack (images and video are split into two sets), a no-token fallback for @stickers. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
 
 ## Services, ports and models

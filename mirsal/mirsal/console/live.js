@@ -271,10 +271,14 @@ const HX={open:new Set(),det:{},so:new Set(),go:new Set(),all:new Set(),cap:{},v
 try{JSON.parse(localStorage.getItem('mirsal.hbopen')||'[]').forEach(n=>{if(Number.isInteger(n))HX.open.add(n)})}catch(e){}
 const hxSave=()=>{try{localStorage.setItem('mirsal.hbopen',JSON.stringify([...HX.open]))}catch(e){}};
 async function hxLoad(id,edited){const d=HX.det[id]=HX.det[id]||{};d.state='loading';drawHist();
-  const r=await api(`/api/generations/${id}/history`);
+  const r=await api(`/api/generations/${id}/history`),g=await api('/api/generations/'+id);
   if(r.ok){d.state='ok';d.data=r.j;d.edited=edited}else{d.state='err';d.err=(r.j&&r.j.error)||'Could not read the history'}
+  if(g.ok&&typeof GM!=='undefined')GM.set(id,g.j);              // the Studio view of the card reads the batch from the same map as the session
   drawHist()}
-function hxSync(){for(const id of HX.open){const it=HB.items.find(x=>x.id===id);if(!it)continue;const d=HX.det[id];if(!d||(d.state==='ok'&&d.edited!==it.edited))hxLoad(id,it.edited)}}
+/* an open card is read again when its batch was edited since, or while it is still working (an animation finishing, a sheet being cut) */
+function hxSync(){for(const id of HX.open){const it=HB.items.find(x=>x.id===id);if(!it)continue;const d=HX.det[id],
+    g=typeof GM!=='undefined'?GM.get(id):null,busy=!!(g&&((typeof making==='function'&&making(g))||(typeof processing==='function'&&processing(g))||(typeof ANIM!=='undefined'&&ANIM.has(g.number))));
+    if(!d||(d.state==='ok'&&(d.edited!==it.edited||busy)))hxLoad(id,it.edited)}}
 const hxTime=ts=>ts?new Date(ts*1000).toLocaleString([],{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
 const hxCls=d=>/APPROVE|PASS/.test(d||'')?'ok':/REJECT|BLOCK|FAIL/.test(d||'')?'bad':'';
 const hxFacts=d=>Object.entries(d).map(([k,v])=>esc(k.replace(/_/g,' '))+' '+esc(Array.isArray(v)?v.join(', '):String(v))).join(' · ');
@@ -324,11 +328,14 @@ function hxBatch(it){const d=HX.det[it.id];
    ${d.data.stickers.map(s=>hxSticker(it.id,d.data.generation_id,s)).join('')||'<div class=mut>This batch has no stickers.</div>'}</div>`}
 /* the stickers of a card, in the sheet's own grid (a 2x2 batch draws four cells, a 3x3 nine; a cell with no picture yet is the checkerboard) */
 const histGrid=it=>`<span class=lv-hth style="--c:${Math.max(1,Math.min(6,(it.grid&&it.grid[1])||3))}">${(it.cells||[]).map(c=>c.png?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="S${c.index} · ${esc(String(c.status||'').toLowerCase())}"></span>`).join('')}</span>`;
-/* every click expands its own card where it stands; any number of cards can be open at once and they stack under each other (nothing replaces anything, nothing scrolls
-   away, nothing is loaded into the Studio: this list is the history of every batch, not the working session). The open ids are remembered (mirsal.hbopen). */
-const histItem=it=>{const open=HX.open.has(it.id);
-  return`<div class="lv-hcard${open?' open':''}${SES.gens.includes(it.id)?' on':''}"><button class=lv-hitem data-act=hbx data-id=${it.id} aria-expanded=${open} title="${open?'Hide':'Show'} the stickers and the generation history of ${esc(it.generation_id)}">${histGrid(it)}<span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' '))||it.generation_id)}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}</small></span><i class=lv-caret></i></button>
-   ${open?hxBatch(it):''}</div>`};
+/* Each batch is a CARD: its stickers as the sheet's own grid (3x3 or 2x2, `cells` from GET /api/history) with its title, G###, counts and edited time. A click expands the card where it
+   stands (no scroll, nothing loaded into the main area) and any number of cards can be open at the same time, stacked under each other. **What an expanded card shows is that batch's
+   Studio view** (`studioFor` in generate.js: the same working Request > Prompt > Stickers > Animation > Pack header, its own tab in CT, its own buttons) so an earlier batch is one click
+   away from being worked on again; below it the per-sticker history and the AI captions stay (GET /api/generations/<id>/history and /captions). Which cards are open is remembered
+   (localStorage mirsal.hbopen); a batch that was edited, or that is still working, is read again while it is open. */
+const histItem=it=>{const open=HX.open.has(it.id),g=typeof GM!=='undefined'?GM.get(it.id):null;
+  return`<div class="lv-hcard${open?' open':''}${SES.gens.includes(it.id)?' on':''}"><button class=lv-hitem data-act=hbx data-id=${it.id} aria-expanded=${open} title="${open?'Hide':'Show'} ${esc(it.generation_id)} in the Studio">${histGrid(it)}<span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' '))||it.generation_id)}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}</small></span><i class=lv-caret></i></button>
+   ${open?(g&&typeof studioFor==='function'?studioFor(g):'<div class="mut lv-hempty lv-hdet">Reading the batch…</div>'):''}${open?hxBatch(it):''}</div>`};
 function drawHist(){const el=document.getElementById('ghist');if(!el)return;
   if(!HB.items.length){el.innerHTML='';return}
   el.innerHTML=`<div class=lv-hhead><span class=lv-ht>Earlier batches</span><span class=mut>${HB.total} in total</span></div>

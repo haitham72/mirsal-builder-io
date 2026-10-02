@@ -111,6 +111,56 @@ class StudioActionTests(unittest.TestCase):
         self.assertIn(".lv-hcard.open", css, "an open card is marked, so a stack of them reads at a glance")
         self.assertNotIn(".lv-hx", css, "the little fold button of the old row is gone: the whole card header is the fold")
 
+    def test_an_expanded_history_card_is_that_batch_s_studio_view(self):
+        """Haitham, 2026-10-02: one click on an earlier batch expands the card and you see THAT batch's Studio view — the same working Request > Prompt > Stickers >
+        Animation > Pack header, repeated for every open card. It reuses the Studio's own markup (no second view written for it), and the history lines and AI captions stay below."""
+        ui, _ = self.scripts()
+        live = (ui / "live.js").read_text(encoding="utf-8")
+        gen = (ui / "generate.js").read_text(encoding="utf-8")
+        card = self.block(live, "const histItem=it=>{")
+        self.assertIn("studioFor(g)", card, "the expanded card renders that batch's Studio view")
+        self.assertIn("hxBatch(it)", card, "the per-sticker history and the AI captions stay, below it")
+        view = self.block(gen, "function studioFor(g)")
+        for reused in ("stepsHtml(", "gbodyHtml(", "barHtml("):
+            self.assertIn(reused, view, "the card's view is the Studio's own header, views and bar: " + reused)
+        self.assertNotIn("class=gsteps", view, "no second header written for the card")
+        self.assertIn("CT[g.number]", gen, "each card has its own step (CT)")
+        self.assertIn(".gcardview", (ui / "studio.css").read_text(encoding="utf-8"))
+
+    def test_the_step_header_and_the_actions_work_per_card(self):
+        """Two open cards must not share a tab or an action: the header's tabs carry the batch (data-c -> CT), and Animate / Add to a pack act on the batch the button names."""
+        ui, _ = self.scripts()
+        gen = (ui / "generate.js").read_text(encoding="utf-8")
+        steps = self.block(gen, "function stepsHtml(c")
+        self.assertIn("tab===cur", steps, "the current step is the one passed in, not the session's global tab")
+        self.assertIn("data-c=${gid}", steps, "every tab button says which card it belongs to")
+        self.assertIn("data-g=${gid}", steps, "the Pack step is that card's pack")
+        gtab = self.block(gen, "ACT.gtab=el=>{")
+        self.assertIn("el.dataset.c", gtab, "a card's tab is remembered in CT and only that card is re-drawn")
+        self.assertIn("drawHist()", gtab)
+        for act in ("ACT.ganimate=async el=>", "ACT.gadd=async el=>"):
+            self.assertIn(act, gen, act + " takes the button it was clicked on")
+        self.assertIn("scopeGens(el)", gen, "both actions are scoped to that batch when the button carries data-g")
+        scope = self.block(gen, "const scopeGens=el=>")
+        self.assertIn("el.dataset.g", scope)
+        self.assertIn("included()", scope, "without data-g they still act on the whole session")
+        run = self.block(gen, "async function gaddrun(")
+        self.assertIn("PW.rows.map(r=>r.g)", run, "the wizard adds exactly the batches it listed (a card's one batch), not the session's")
+        self.assertIn("if(!card)", run, "a card never changes the session's pack")
+
+    def test_two_cards_never_share_an_element_id(self):
+        """The Prompt and Request views use element ids (copy boxes, the request textarea): inside two open cards they must be suffixed with the batch."""
+        ui, _ = self.scripts()
+        gen = (ui / "generate.js").read_text(encoding="utf-8")
+        self.assertIn("function planView(g,pfx='')", gen)
+        self.assertIn("`pp1${pfx}`", gen, "the sheet prompt box id carries the batch")
+        self.assertIn("`pp2${pfx}`", gen)
+        self.assertIn("function requestView(gs,pfx='')", gen)
+        self.assertIn("id=greq${pfx}", gen)
+        body = self.block(gen, "function gbodyHtml(gs,c")
+        self.assertIn("requestView(gs,gid)", body)
+        self.assertIn("planView(gs[0],gid)", body)
+
     def test_the_credits_pill_reads_the_history_grid(self):
         """The drop-down under the credits pill lists the same batches as the history cards: it draws its one thumbnail from `cells`, not from the four-thumbnail shortcut."""
         ui, _ = self.scripts()

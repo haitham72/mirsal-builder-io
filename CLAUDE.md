@@ -7,13 +7,14 @@ The app is in its **dev cycle**: the build phases are retired; what exists is do
 
 | area | doc |
 |---|---|
-| engine, verifier, gates, Studio, Telegram | `docs/engine-and-studio.md` |
-| live generation (prompts, Higgsfield, jobs, credits) | `docs/generation.md`, `docs/higgsfield.md`, `docs/operator.md` |
-| Postgres, search, the pool, photos, tracing | `docs/store-and-search.md` |
-| the AI chat, the agent, memory, Redis, the vision judge, events | `docs/agent-and-chat.md` |
-| the HTTP contract | `docs/api.md` |
-| recorded numbers | `docs/measurements.md` |
-| a prompt to hand to an independent reviewing LLM | `docs/review-prompt.md` |
+| engine, verifier, gates, Studio, Telegram | `docs/engine-and-studio.md` — the golden path, the 5 review gates (G1–G5), the 44-check verifier, Studio screens and Telegram send |
+| live generation (prompts, Higgsfield, jobs, credits) | `docs/generation.md` — the pipeline from request through Higgsfield/Kling, `docs/higgsfield.md` — what the CLI really offers with measurements, `docs/operator.md` — how the operator loop fulfils jobs |
+| Postgres, search, the pool, photos, tracing | `docs/store-and-search.md` — schema, migrations, vector search, photo cutout, LangSmith tracing |
+| the AI chat, the agent, memory, Redis, the vision judge, events | `docs/agent-and-chat.md` — LangGraph agent, per-subject memory, vision pre-review, event feed |
+| the HTTP contract | `docs/api.md` — JSON routes, SSE, idempotency, signed links, accounts, rate limits, OpenAPI |
+| recorded numbers | [measurements.md](measurements.md) — never-opinion metrics on slot fill, search precision, vision-judge agreement, sharpness |
+| a prompt to hand to an independent reviewing LLM | `docs/review-prompt.md` — paste-ready prompt that audits the whole repo in one pass |
+| reference inputs | `docs/inputs/` — Haitham's reference material: `prompt_samples.md`, `resolver_utterances.md`, `search_queries.md`, `telegram-plan.md` |
 
 Work branch: `merge/generate-advanced` (merged into `main` on 2026-10-02; `main` is 8 commits behind again — Haitham decides when it fast-forwards). Restart the server from `mirsal/.venv` before judging anything in the browser (the Studio warns when it runs older code than the files on disk).
 Never commit a Telegram token (any token pasted in chat must be revoked), `.env`, `opencode.json` or `mirsal/telegram-id.md`, and never `git add -A` blind.

@@ -905,6 +905,345 @@
      "file_name": "img-010-cat_as_banana-cat_as_banana_sad"
     }
    ]
+  },
+  {
+   "id": "0b7bedde",
+   "name": "Superman",
+   "slug": "superman",
+   "cover": "851dc1bf",
+   "next": 9,
+   "created": 1790932161.4658322,
+   "stickers": [
+    {
+     "id": "851dc1bf",
+     "name": "Superman diving wing",
+     "file": "img-001-superman-superman_diving_wing.png",
+     "type": "static",
+     "emoji": "🏙️🦅",
+     "kb": 147,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 1
+     },
+     "created": 1790932161.6422606,
+     "file_name": "img-012-superman_dubai-superman_diving_wing"
+    },
+    {
+     "id": "4eca2371",
+     "name": "Superman land hoverboard",
+     "file": "img-002-superman-superman_land_hoverboard.png",
+     "type": "static",
+     "emoji": "🛸⚡",
+     "kb": 124,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 2
+     },
+     "created": 1790932161.6552649,
+     "file_name": "img-012-superman_dubai-superman_land_hoverboard"
+    },
+    {
+     "id": "c095410c",
+     "name": "Superman spinning victory",
+     "file": "img-003-superman-superman_spinning_victory.png",
+     "type": "static",
+     "emoji": "🎆✌️",
+     "kb": 162,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 3
+     },
+     "created": 1790932161.6762698,
+     "file_name": "img-012-superman_dubai-superman_spinning_victory"
+    },
+    {
+     "id": "1bcd0446",
+     "name": "Superman strutting gold",
+     "file": "img-004-superman-superman_strutting_gold.png",
+     "type": "static",
+     "emoji": "💰👍",
+     "kb": 144,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 4
+     },
+     "created": 1790932161.6990447,
+     "file_name": "img-012-superman_dubai-superman_strutting_gold"
+    },
+    {
+     "id": "5358f616",
+     "name": "Superman sliding dune",
+     "file": "img-005-superman-superman_sliding_dune.png",
+     "type": "static",
+     "emoji": "🎈🌵",
+     "kb": 151,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 6
+     },
+     "created": 1790932161.7286305,
+     "file_name": "img-012-superman_dubai-superman_sliding_dune"
+    },
+    {
+     "id": "3a79e2c6",
+     "name": "Superman shocked rain",
+     "file": "img-006-superman-superman_shocked_rain.png",
+     "type": "static",
+     "emoji": "☔😲",
+     "kb": 168,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 7
+     },
+     "created": 1790932161.7532063,
+     "file_name": "img-012-superman_dubai-superman_shocked_rain"
+    },
+    {
+     "id": "3e15ad26",
+     "name": "Superman laughing fight",
+     "file": "img-007-superman-superman_laughing_fight.png",
+     "type": "static",
+     "emoji": "🤪☀️",
+     "kb": 138,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 8
+     },
+     "created": 1790932161.7807193,
+     "file_name": "img-012-superman_dubai-superman_laughing_fight"
+    },
+    {
+     "id": "09c29218",
+     "name": "Superman sitting freeze",
+     "file": "img-008-superman-superman_sitting_freeze.png",
+     "type": "static",
+     "emoji": "❄️🧘",
+     "kb": 172,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G012",
+      "index": 9
+     },
+     "created": 1790932161.8049943,
+     "file_name": "img-012-superman_dubai-superman_sitting_freeze"
+    }
+   ]
+  },
+  {
+   "id": "f65a2bbb",
+   "name": "Falcon Stickers",
+   "slug": "falcon_stickers",
+   "cover": "17279a22",
+   "next": 10,
+   "created": 1790935005.3763735,
+   "stickers": [
+    {
+     "id": "17279a22",
+     "name": "Falcon stickers open arms",
+     "file": "img-001-falcon_stickers-falcon_stickers_open_arms.png",
+     "type": "static",
+     "emoji": "🤗",
+     "kb": 130,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 1
+     },
+     "created": 1790935005.5975337,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_open_arms"
+    },
+    {
+     "id": "9378b622",
+     "name": "Falcon stickers laughing",
+     "file": "img-002-falcon_stickers-falcon_stickers_laughing.png",
+     "type": "static",
+     "emoji": "😂",
+     "kb": 131,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 2
+     },
+     "created": 1790935005.6266677,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_laughing"
+    },
+    {
+     "id": "6c262e00",
+     "name": "Falcon stickers thank you",
+     "file": "img-003-falcon_stickers-falcon_stickers_thank_you.png",
+     "type": "static",
+     "emoji": "🙏",
+     "kb": 136,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 3
+     },
+     "created": 1790935005.6464355,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_thank_you"
+    },
+    {
+     "id": "7c578dc7",
+     "name": "Falcon stickers flexing",
+     "file": "img-004-falcon_stickers-falcon_stickers_flexing.png",
+     "type": "static",
+     "emoji": "💪",
+     "kb": 159,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 4
+     },
+     "created": 1790935005.675377,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_flexing"
+    },
+    {
+     "id": "3faeb882",
+     "name": "Falcon stickers eye roll",
+     "file": "img-005-falcon_stickers-falcon_stickers_eye_roll.png",
+     "type": "static",
+     "emoji": "🙄",
+     "kb": 135,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 5
+     },
+     "created": 1790935005.7060268,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_eye_roll"
+    },
+    {
+     "id": "5c99ba05",
+     "name": "Falcon stickers sneezing",
+     "file": "img-006-falcon_stickers-falcon_stickers_sneezing.png",
+     "type": "static",
+     "emoji": "🤧",
+     "kb": 153,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 6
+     },
+     "created": 1790935005.7368429,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_sneezing"
+    },
+    {
+     "id": "f69ed6c3",
+     "name": "Falcon stickers angry",
+     "file": "img-007-falcon_stickers-falcon_stickers_angry.png",
+     "type": "static",
+     "emoji": "😡",
+     "kb": 161,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 7
+     },
+     "created": 1790935005.756798,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_angry"
+    },
+    {
+     "id": "1489385c",
+     "name": "Falcon stickers scared",
+     "file": "img-008-falcon_stickers-falcon_stickers_scared.png",
+     "type": "static",
+     "emoji": "😨",
+     "kb": 151,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 8
+     },
+     "created": 1790935005.7892048,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_scared"
+    },
+    {
+     "id": "e548f827",
+     "name": "Falcon stickers scheming",
+     "file": "img-009-falcon_stickers-falcon_stickers_scheming.png",
+     "type": "static",
+     "emoji": "😏",
+     "kb": 140,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G095",
+      "index": 9
+     },
+     "created": 1790935005.8263018,
+     "file_name": "img-095-falcon_stickers-falcon_stickers_scheming"
+    }
+   ],
+   "telegram": {
+    "sets": [
+     {
+      "kind": "static",
+      "name": "falcon_stickers_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/falcon_stickers_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "17279a22",
+        "file_unique_id": "AgADYyYAAi4hAAFS"
+       },
+       {
+        "sticker_id": "9378b622",
+        "file_unique_id": "AgAD5iwAAreI-FE"
+       },
+       {
+        "sticker_id": "6c262e00",
+        "file_unique_id": "AgADfh8AAv4P-FE"
+       },
+       {
+        "sticker_id": "7c578dc7",
+        "file_unique_id": "AgADBB8AAlWaAAFS"
+       },
+       {
+        "sticker_id": "3faeb882",
+        "file_unique_id": "AgADhB4AAqkR-VE"
+       },
+       {
+        "sticker_id": "5c99ba05",
+        "file_unique_id": "AgADiB8AAuwW-VE"
+       },
+       {
+        "sticker_id": "f69ed6c3",
+        "file_unique_id": "AgADqyEAAnit-VE"
+       },
+       {
+        "sticker_id": "1489385c",
+        "file_unique_id": "AgADbx0AAsAW-VE"
+       },
+       {
+        "sticker_id": "e548f827",
+        "file_unique_id": "AgADFBwAAg82-VE"
+       }
+      ]
+     }
+    ]
+   }
   }
  ]
 }
