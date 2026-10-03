@@ -234,6 +234,34 @@ class ConsoleTools:
                 refused.append({"index": int(i), "why": str(e)})
         return {"done": done, "refused": refused}
 
+    # ---- "Use it anyway" (CLAUDE.md rule 10): a judgement-call block a person may allow, and take back ----
+    def allowable(self, gid: str, kind: str = "still", allow: bool = True) -> list[int]:
+        """The stickers whose block is a judgement call and may therefore be allowed right now (or whose permission may be taken back).
+        A technical block (Telegram's own limits) and a cell with no picture are never in this list: those are final."""
+        self._see(gid)
+        try:
+            return gates.allowable(pl.read_result(self.out, int(gid[1:])), allow, kind)
+        except pl.PipelineError:
+            return []
+
+    def allow(self, gid: str, indexes: list, kind: str = "still", allow: bool = True) -> dict:
+        """A person's recorded, reversible permission for what Python blocked as a judgement call: the sticker is cut again with that
+        check kept as a warning ("allowed by you"), free and in the background. The same call the Studio's tile and sheet make."""
+        self._see(gid)
+        g = int(gid[1:])
+        done, refused = [], []
+        for i in indexes:
+            try:
+                gates.check_allow(self.out, g, int(i), allow, kind)
+                done.append(int(i))
+            except pl.PipelineError as e:
+                refused.append({"index": int(i), "why": str(e)})
+        if not done:
+            why = refused[0]["why"] if refused else "there is nothing to allow here"
+            raise ToolError(why, 409)
+        self.c.submit(lambda: gates.allow_cells(self.out, g, kind, done, allow, pl.cfg_for(pl.read_result(self.out, g), self.c.cfg), self.c.pace))
+        return {"done": done, "refused": refused, "kind": kind, "allow": allow}
+
     # ---- the agentic creator's steps (agent/creator.py) ------------------------------------------------------------------------------------------
     def judge(self, gid: str) -> dict:
         """The vision judge's pre-review of the stills (it only advises). A judge that cannot run is a skipped check, never a failed run."""
@@ -427,6 +455,36 @@ class FakeTools:
             if s["index"] in indexes:
                 s[key] = "APPROVED" if decision == "APPROVE" else "REJECTED"
         return {"done": list(indexes), "refused": []}
+
+    def allowable(self, gid, kind="still", allow=True):
+        """The blocked stickers a person may allow (or take back): in the fake, every FAILED one of that kind carries no override flag."""
+        if kind == "animation":
+            return [s["index"] for s in self.gens[gid]["stickers"] if s.get("anim_status") == "FAILED" and not s.get("anim_override") == ()]
+        return [s["index"] for s in self.gens[gid]["stickers"] if s.get("status") == "FAILED"]
+
+    def allow(self, gid, indexes, kind="still", allow=True):
+        self.calls.append(("allow", gid, list(indexes), kind, allow))
+        key = "anim_override" if kind == "animation" else "still_override"
+        done = []
+        for s in self.gens[gid]["stickers"]:
+            if s["index"] not in indexes:
+                continue
+            if allow:
+                s[key] = [s.get("anim_reason" if kind == "animation" else "reason") or "blocked"]
+                if kind == "animation":
+                    s["anim_status"] = "READY"
+                else:
+                    s["status"], s["reason"] = "READY", None
+                    s["still"] = "PENDING"
+            else:
+                s[key] = []
+                if kind == "animation":
+                    s["anim_status"] = "FAILED"
+                else:
+                    s["status"], s["reason"] = "FAILED", "inside_cell"
+                    s["still"] = "BLOCKED"
+            done.append(s["index"])
+        return {"done": done, "refused": [], "kind": kind, "allow": allow}
 
     def judge(self, gid):
         self.calls.append(("judge", gid))

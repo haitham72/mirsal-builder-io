@@ -73,11 +73,47 @@ def _go(run: dict, step: str, text: str = "") -> None:
         _log(run, text)
 
 
+def _stop_blocked(tools, run: dict, gid: str, kind: str, bad: list, why_of) -> dict:
+    """A Python block stopped the run. **A judgement call is never a dead end (CLAUDE.md rule 10):** every blocked sticker Python may allow
+    gets `Use it anyway`; a technical block (Telegram's own limits) or a cell with no picture cannot be allowed and says so in words. Either way the
+    picture is in the card the stop message carries, and dropping the sticker stays one click away."""
+    idx = [s["index"] for s in bad]
+    nums = ", ".join(f"S{i}" for i in idx)
+    can = [i for i in (tools.allowable(gid, kind, True) or []) if i in idx]
+    final = [i for i in idx if i not in can]
+    reason = why_of(bad[0]) if len(bad) == 1 else "; ".join(why_of(s) for s in bad[:4])
+    what = "a judgement call, so you can use it anyway" if can else ("final: Telegram's own limits or nothing was cut, so it cannot be allowed" if final else "final")
+    chips = []
+    if can:
+        chips.append({"label": f"Use it anyway ({', '.join('S%d' % i for i in can)})", "action": "creator_allow", "indexes": can, "kind": kind})
+    chips.append({"label": f"Continue without {nums}", "action": "creator_skip", "indexes": idx})
+    chips.append({"label": "Stop", "action": "creator_stop"})
+    return _stop(run, f"Python blocked {nums} ({reason}). {what}.", chips)
+
+
+def _run_allows(tools, run: dict) -> dict:
+    """Do the permission the person just gave: `tools.allow` cuts the allowed stickers again in the background (free). Returns what happened."""
+    p = run.pop("pending_allow", None)
+    if not p:
+        return {}
+    try:
+        r = tools.allow(run["generation"], p["indexes"], p.get("kind", "still"), bool(p.get("allow", True)))
+    except Exception as e:                                    # the engine refused with its own words: the run stops and says them, never a crash
+        return _stop(run, str(e), [{"label": "Stop", "action": "creator_stop"}], "error")
+    run["allow"] = {**(run.get("allow") or {}), p.get("kind", "still"): {"indexes": p["indexes"], "allow": bool(p.get("allow", True)), "done": r.get("done", [])}}
+    _log(run, f"you allowed {', '.join('S%d' % i for i in p['indexes'])} ({p.get('kind', 'still')}): cutting them again")
+    return run
+
+
 def advance(tools, run: dict, vision_allowed: bool, telegram_ready) -> dict:
     """Do every step that is possible right now. `telegram_ready() -> (bool, reason)`. Never raises for a normal problem: it stops the run and says why."""
     for _ in range(40):                                            # a bound: one call never loops for ever
         if run["status"] in ("done", "stopped", "failed") or run["status"] == "waiting":
             return run
+        if run.get("pending_allow"):                              # a permission the person gave: do it, then judge what came back
+            _run_allows(tools, run)
+            if run["status"] != "running":
+                return run
         before = (run["step"], run["status"])
         try:
             _step(tools, run, vision_allowed, telegram_ready)
@@ -117,11 +153,7 @@ def _step(tools, run, vision_allowed, telegram_ready):
             return
         failed = [s for s in card["stickers"] if s["status"] == "FAILED" and s["index"] not in run["skip"]]
         if failed:
-            run["failed_hint"] = [s["index"] for s in failed]
-            nums = ", ".join(f"S{s['index']}" for s in failed)
-            why = "; ".join(f"S{s['index']}: {s.get('reason') or 'blocked by Python'}" for s in failed[:4])
-            return _stop(run, f"Python blocked {nums} ({why}) and a block is final.",
-                         [{"label": f"Continue without {nums}", "action": "creator_skip"}, {"label": "Stop", "action": "creator_stop"}])
+            return _stop_blocked(tools, run, gid, "still", failed, lambda n: f"S{n['index']}: {n.get('reason') or 'blocked by Python'}")
         if not _ready(card):
             return _stop(run, "no sticker came out of this sheet", [{"label": "Stop", "action": "creator_stop"}], "error")
         return _go(run, "look", f"{len(_ready(card))} stickers cut and checked")
@@ -165,9 +197,7 @@ def _step(tools, run, vision_allowed, telegram_ready):
             return
         bad = [s for s in sts if s.get("anim_status") != "READY"]
         if bad:
-            nums = ", ".join(f"S{s['index']}" for s in bad)
-            return _stop(run, f"Python blocked the animation of {nums} (a block is final).",
-                         [{"label": f"Continue without {nums}", "action": "creator_skip", "indexes": [s["index"] for s in bad]}, {"label": "Stop", "action": "creator_stop"}])
+            return _stop_blocked(tools, run, gid, "animation", bad, lambda n: f"S{n['index']}: {n.get('anim_reason') or 'blocked by Python'}")
         return _go(run, "approve_anim", "the animations arrived and passed Python's checks")
     if step == "approve_anim":
         if not run["bypass"] and not run.get("g4_ok"):
@@ -210,6 +240,11 @@ def resume(run: dict, action: str, indexes: list | None = None) -> dict:
     if action == "creator_force":
         run["skip"] = sorted(set(run["skip"]))
         run["step_forced"] = "look"
+    if action in ("creator_allow", "creator_unallow"):
+        kind = "animation" if run.get("step") == "video" else "still"
+        run["pending_allow"] = {"indexes": sorted({int(i) for i in (indexes or run.get("failed_hint") or [])}), "kind": kind, "allow": action == "creator_allow"}
+        run["failed_hint"] = []                      # allowing is not skipping: those stickers must come back into the set, so the hint is spent
+        run["step"] = "cut" if kind == "still" and run.get("step") != "approve" else run.get("step", "cut")
     if action == "creator_force_video":
         run["video_estimate"] = None                            # the person saw the new price on the button and accepted it
     run.update(status="running", stop=None, waiting=None, updated=round(time.time(), 3))

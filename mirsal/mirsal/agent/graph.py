@@ -429,8 +429,9 @@ class Agent:
             return {}
         creator.resume(run, act, (t.action or {}).get("indexes"))
         t.trace.task("continuing the creator" if act != "creator_stop" else "stopping the creator")
-        t.trace.step({"creator_go": "approved", "creator_skip": "continuing without those stickers", "creator_force": "continuing with them anyway", "creator_force_video": "animation price accepted",
-                      "creator_stop": "stopped"}.get(act, act))
+        t.trace.step({"creator_go": "approved", "creator_skip": "continuing without those stickers", "creator_force": "continuing with them anyway",
+                      "creator_allow": "you allowed a block Python flagged: cutting it again", "creator_unallow": "the permission is taken back",
+                      "creator_force_video": "animation price accepted", "creator_stop": "stopped"}.get(act, act))
         t.trace.end("done")
         t.reply = "Stopped. Nothing more will be made or spent; what exists stays in the Studio." if act == "creator_stop" else "Continuing."
         t.cards.append({"type": "creator", "run_id": run["id"]})

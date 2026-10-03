@@ -93,12 +93,57 @@ class CreatorRuns(Base):
         self.assertEqual(self.run_until("stopped"), "stopped")
         run = self.sess()["creator_run"]
         self.assertIn("S4", run["stop"]["why"])
-        self.assertIn("a block is final", run["stop"]["why"])
         self.assertFalse(self.calls("review") or self.calls("pack_add") or self.calls("telegram_send"))
-        self.assertEqual([c["action"] for c in run["stop"]["chips"]], ["creator_skip", "creator_stop"])
-        self.say("", action={"type": "creator_skip"})
+        self.assertEqual([c["action"] for c in run["stop"]["chips"]], ["creator_allow", "creator_skip", "creator_stop"])
+        self.say("", action={"type": "creator_skip", "indexes": [4]})
         self.assertEqual(self.run_until("done"), "done")
         self.assertEqual(self.calls("review")[0][3], [1, 2, 3, 5, 6, 7, 8, 9])
+
+    def test_a_judgement_block_offers_use_it_anyway_and_the_run_finishes(self):
+        """CLAUDE.md rule 10 (2026-10-03): a judgement-call block is never a dead end. The owner hit exactly this: the run stopped and the only
+        choices were drop or abandon. `inside_cell` is in `verify.OVERRIDABLE['still']`, so it may be allowed."""
+        self.start()
+        self.sheet_arrives(failed=(4,))
+        self.assertEqual(self.run_until("stopped"), "stopped")
+        run = self.sess()["creator_run"]
+        chip = run["stop"]["chips"][0]
+        self.assertEqual((chip["action"], chip["indexes"], chip["kind"]), ("creator_allow", [4], "still"))
+        self.assertIn("use it anyway", run["stop"]["why"].lower())
+        self.say("", action={"type": "creator_allow", "indexes": [4]})
+        self.assertEqual(self.run_until("done"), "done")
+        self.assertEqual(self.calls("allow")[0][2:], ([4], "still", True), "the permission goes through the engine, recorded")
+        self.assertIn(4, self.calls("review")[0][3], "the allowed sticker is back in the set, not dropped")
+
+    def test_a_technical_block_offers_no_allow_and_says_why(self):
+        """Telegram's own limits (or an empty cell) are final: no allow chip, and the sentence says so rather than reading as a dead end."""
+        s = self.sess()
+        s["settings"]["creator"] = {**s["settings"]["creator"], "bypass": True}
+        self.store.save(s)
+        self.start()
+        g = self.sheet_arrives()
+        g["stickers"][3]["status"], g["stickers"][3]["reason"] = "FAILED", "dimensions"
+        self.tools.allowable = lambda gid, kind="still", allow=True: []      # the engine reports nothing allow-able
+        self.assertEqual(self.run_until("stopped"), "stopped")
+        run = self.sess()["creator_run"]
+        self.assertNotIn("creator_allow", [c["action"] for c in run["stop"]["chips"]])
+        self.assertIn("final", run["stop"]["why"])
+        self.assertEqual([c["action"] for c in run["stop"]["chips"]], ["creator_skip", "creator_stop"])
+
+    def test_a_blocked_animation_offers_use_it_anyway_too(self):
+        self.settings(scope="video")
+        self.start()
+        g = self.sheet_arrives()
+        for _ in range(4):
+            self.agent.creator_tick(self.sid)
+        for s in g["stickers"]:
+            s["anim_status"] = "READY"
+        g["stickers"][2]["anim_status"] = "FAILED"
+        self.assertEqual(self.run_until("stopped"), "stopped")
+        chip = self.sess()["creator_run"]["stop"]["chips"][0]
+        self.assertEqual((chip["action"], chip["indexes"], chip["kind"]), ("creator_allow", [3], "animation"))
+        self.say("", action={"type": "creator_allow", "indexes": [3]})
+        self.assertEqual(self.run_until("done"), "done")
+        self.assertEqual(self.calls("allow")[0][2:], ([3], "animation", True))
 
     def test_a_sticker_the_vision_model_would_reject_stops_the_run_and_the_person_decides(self):
         self.tools.judge_rejects = [2]
