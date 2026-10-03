@@ -55,3 +55,41 @@ def sheet_problem(res: dict, job: dict | None = None) -> dict | None:
         received = {"job": (job or {}).get("id") or (m.group(1) if m else None), "cost": (job or {}).get("cost")}
     return {**c, "title": h["title"], "why": _fill(h["why"], c), "fix": h["fix"], "received": received, "retry": True,
             "cut_anyway": check != "sheet_decodes"}
+
+
+# What a blocked sticker (a cell that was cut, or an animation) says in plain words, one line each: the reason Python stopped it, for the tile. `final` ones are Telegram's own limits (or nothing
+# usable came out of the cell): they cannot be allowed (flow/gates.py `allow_info`); the others are judgement calls a person may "use anyway".
+BLOCK_WORDS = {
+    "blank_cell": "almost nothing was found in this cell",
+    "empty_subject": "almost nothing was found in this cell",
+    "foreground": "almost nothing is left of the picture",
+    "inside_cell": "the character touches the edge of its cell, so it may be cut off",
+    "no_spill": "green-screen colour is left on the edge of the character",
+    "holes": "a big part of the character was cut away (a hole inside it)",
+    "inside_slot": "the character leaves its own slot on the sheet",
+    "cross_slot": "the character reaches into a neighbour's slot",
+    "loop_seam": "the loop does not close: it jumps when it starts again",
+    "dimensions": "the picture is not the size Telegram needs",
+    "transparent_corners": "the corners are not transparent",
+    "static_file": "the file is over Telegram's size limit for a still",
+    "size_budget": "the file is over Telegram's size limit for an animation",
+    "codec_vp9": "the video is not VP9, which Telegram requires",
+    "fps": "the frame rate is above Telegram's limit",
+    "duration": "the animation is longer than Telegram allows",
+    "no_audio": "the animation has a sound track, which Telegram refuses",
+    "alpha_mode_tag": "the transparency tag is missing from the video file",
+    "alpha_decoded": "the video has no real transparency",
+    "wrong_chroma_key": "the green screen of this cell is not the colour expected",
+    "no_vp9_encoder": "this computer's ffmpeg cannot encode VP9",
+    "probe_failed": "the video could not be read",
+    "no_video_source": "there is no video for this cell",
+    "exception": "something went wrong while cutting it",
+    "verifier_error": "the check itself crashed",
+}
+
+
+def block_words(check: str | None) -> str:
+    """One plain line for a check id or a reason (the id itself when it is unknown)."""
+    c = str(check or "")
+    return BLOCK_WORDS.get(c) or (c.replace("_", " ") if c else "blocked")
+

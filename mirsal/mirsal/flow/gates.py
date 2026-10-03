@@ -3,9 +3,10 @@
   G1 plan -> sheet -> Python blocks bad cells -> G2 stills -> video sheet (built from the approved stills only) -> G3 video sheet
   -> returned video attached to A<n> -> Python blocks bad slots -> G4 animations -> G5 pack (stickers approved at G2 AND G4)
 
-Python judges what is *correct* and its BLOCK is final: nobody can approve a FAILED sticker. A human (from Phase 3 the VLM
-pre-reviews) judges what is *good*. Rejection never deletes. A sticker keeps its original S# through every stage. Every decision is an
-event line and a history entry. The UI only displays what is enforced here (a 409 carries the reason)."""
+Python judges what is *correct* and nobody can approve a FAILED sticker as it stands. Telegram's own limits (format, size, codec) and a cell with no picture are final; every other BLOCK is a
+judgement call that a human may "use anyway" with a recorded click that can be taken back (`allow_stills`, `allow_animations`, further down), after which the sticker is READY with the check kept
+as a warning and the gate lets the person approve it. A human (from Phase 3 the VLM pre-reviews) judges what is *good*. Rejection never deletes. A sticker keeps its original S# through every
+stage. Every decision is an event line and a history entry. The UI only displays what is enforced here (a 409 carries the reason)."""
 from __future__ import annotations
 
 import json
@@ -139,7 +140,9 @@ def _targets(res: dict, index, decision: str, which: str, ready_field: str, read
     if s[ready_field] != ready_value or s["review"][which] == "BLOCKED":
         if not (which == "anim" and s[ready_field] == ready_value and soft_block(s)):
             why = s["reason"] if which == "still" else s.get("anim_reason")
-            raise refuse(f"S{i} is blocked by Python ({why or s[ready_field].lower()}): nobody can approve or reject it.")
+            may = (still_problem(s) if which == "still" else anim_problem(res, s)) is None
+            raise refuse(f"S{i} is blocked by Python ({why or s[ready_field].lower()}): nobody can approve or reject it as it stands."
+                         + (" It is a judgement call: \u201cUse it anyway\u201d allows it (POST /allow)." if may else ""))
     return [s]
 
 
@@ -312,56 +315,187 @@ def preview_sheet(out: Path, gid: int, cfg: EngineConfig, fill: float, px: int =
     return buf.tobytes()
 
 
-OVERRIDABLE = ("inside_slot", "cross_slot")      # the two slot-geometry checks of a returned video are judgement calls; every technical block stays final
+# ---------- "Use it anyway": a human allows what Python blocked as a judgement call ----------
+# Haitham, 2026-10-03: any rejected image or video must give the person an option to allow it. Every BLOCK is either TECHNICAL (Telegram itself would reject the file: format, size, codec,
+# dimensions, fps, duration, audio, alpha; or the check crashed) and final, or a JUDGEMENT (how the picture looks) and a recorded click may allow it (engine/verify.py `OVERRIDABLE`). A cell with NO
+# picture (nothing was cut) can never be allowed. The click is stored on the sticker (`still_override` / `anim_override`: the check ids), in its history (actor human), and the verifier honours it
+# on every later cut (verify.run `waive`: the block stays in the report as a warning "allowed by you"). Taking it back restores the block. Sheet-level problems have "Cut it anyway" (pipeline.recut).
+KINDS = ("still", "animation")
+OVERRIDABLE = verify.OVERRIDABLE["animation"]            # slot geometry of a returned video (inside_slot, cross_slot) and a loop that does not close
+OVERRIDABLE_STILL = verify.OVERRIDABLE["still"]
 
 
-def check_allow(out: Path, gid: int, index: int, allow: bool = True) -> tuple[dict, str]:
-    """Validate a human override on one animation and return (the sticker, the video sheet id). Raises with the reason when it cannot be allowed."""
+def _blocks(report) -> list[str]:
+    return [c["name"] for c in report or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
+
+
+def _crashed(report) -> bool:
+    return any(not c.get("ok") and c.get("severity") == "BLOCK" and (c.get("data") or {}).get("error") for c in report or [])
+
+
+def _technical(bad: list) -> str:
+    return f"This one failed a technical check ({', '.join(bad)}: format, size or codec) and cannot be allowed."
+
+
+def still_problem(st: dict) -> str | None:
+    """None when a human may allow this blocked still; else, in plain words, why not."""
+    if st.get("status") != "FAILED":
+        return "This sticker was not blocked, so there is nothing to allow."
+    m = st.get("metrics") or {}
+    if m.get("sheet_blocked"):
+        return "The whole sheet was stopped, not this one sticker: use \u201cCut it anyway\u201d on the sheet."
+    rep = st.get("report") or []
+    failed = _blocks(rep)
+    bad = [f for f in failed if f not in OVERRIDABLE_STILL] + (["verifier_error"] if _crashed(rep) else [])
+    if bad:
+        return _technical(sorted(set(bad)))
+    if not failed:
+        return "Python recorded no check for this block, so there is nothing to allow."
+    if not m.get("bbox") or not m.get("fg_px"):
+        return "Nothing was cut from this cell (it is empty), so there is no picture to use."
+    return None
+
+
+def anim_source(res: dict, index: int):
+    """Where an animation was cut from: ('sheet', video sheet id) for a returned video, ('prepared', None) for a prepared 3x3 video or pre-sliced clips, None when it has no source."""
+    st = res["stickers"][int(index) - 1]
+    how = str((st.get("anim_metrics") or {}).get("source") or "")
+    v = next((x for x in reversed(res["video_sheets"]) if x["status"] == "SLICED" and x.get("video") and int(index) in x["slots"]), None)
+    if v and how in ("", "video sheet"):
+        return "sheet", v["id"]
+    src = res.get("source") or {}
+    if how in ("3x3 mp4", "") or how.startswith("clip:"):
+        if src.get("video_path") or str(int(index)) in (src.get("clips") or {}):
+            return "prepared", None
+    return None
+
+
+def anim_problem(res: dict, st: dict) -> str | None:
+    """None when a human may allow this blocked animation; else, in plain words, why not."""
+    if st.get("anim_status") != "FAILED":
+        return "This animation was not blocked, so there is nothing to allow."
+    if not anim_source(res, st["index"]):
+        return "Only an animation cut from a returned or a prepared video can be allowed."
+    rep = st.get("anim_report") or []
+    failed = _blocks(rep)
+    if not failed:
+        return f"Nothing usable was cut for this sticker ({st.get('anim_reason') or 'no reason recorded'}), so there is nothing to allow."
+    bad = [f for f in failed if f not in OVERRIDABLE] + (["verifier_error"] if _crashed(rep) else [])
+    if bad:
+        return _technical(sorted(set(bad)))
+    return None
+
+
+def allow_problem(res: dict, st: dict, kind: str = "animation", allow: bool = True) -> str | None:
+    """Why this sticker cannot be allowed (allow=True) or have its permission taken back (allow=False) right now, in plain words; None when it can."""
+    if kind == "still":
+        sh = active_sheet(res)
+        if sh:
+            return f"Locked: video sheet {sh['id']} was built from these decisions. Reject {sh['id']} to change them."
+        if allow:
+            return still_problem(st)
+        if not st.get("still_override"):
+            return "Nothing was allowed for this sticker."
+        if st.get("edited"):
+            return "This sticker was edited after it was allowed: taking the permission back would lose the edit."
+        return None
+    if allow:
+        return anim_problem(res, st)
+    if not st.get("anim_override"):
+        return "Nothing was allowed for this sticker."
+    if not anim_source(res, st["index"]):
+        return "Only an animation cut from a returned or a prepared video can be changed."
+    return None
+
+
+def check_allow(out: Path, gid: int, index: int, allow: bool = True, kind: str = "animation") -> tuple[dict, str | None]:
+    """Validate a human override on one sticker and return (the sticker, the video sheet id of its animation or None). Raises 409 with the reason when it cannot be allowed."""
+    if kind not in KINDS:
+        raise pl.PipelineError("kind must be 'still' or 'animation'")
     res = pl.read_result(out, gid)
     if not 1 <= int(index) <= len(res["stickers"]):
         raise pl.PipelineError(f"index 1..{len(res['stickers'])} required")
     st = res["stickers"][int(index) - 1]
-    v = next((x for x in reversed(res["video_sheets"]) if x["status"] == "SLICED" and x.get("video") and int(index) in x["slots"]), None)
-    if not v:
-        raise refuse("Only an animation cut from a returned video can be allowed.")
-    if not allow:
-        if not st.get("anim_override"):
-            raise refuse("Nothing was allowed for this sticker.")
-        return st, v["id"]
-    failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
-    if st.get("anim_status") != "FAILED" or not failed:
-        raise refuse("This animation was not blocked, so there is nothing to allow.")
-    bad = [f for f in failed if f not in OVERRIDABLE]
-    if bad:
-        raise refuse(f"This one failed a technical check ({', '.join(bad)}: format, size or codec) and cannot be allowed. Only a character that leaves or crosses its slot can.")
-    return st, v["id"]
+    why = allow_problem(res, st, kind, allow)
+    if why:
+        raise refuse(why)
+    src = anim_source(res, index) if kind == "animation" else None
+    return st, (src[1] if src else None)
 
 
-def allowable(res: dict, allow: bool = True) -> list[int]:
-    """The stickers a human can allow right now (blocked only by the slot-geometry checks), or, for allow=False, the ones that carry a permission to take back."""
-    out = []
-    for st in res["stickers"]:
-        if allow:
-            failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
-            if st.get("anim_status") == "FAILED" and failed and all(f in OVERRIDABLE for f in failed):
-                out.append(st["index"])
-        elif st.get("anim_override"):
-            out.append(st["index"])
+def allowable(res: dict, allow: bool = True, kind: str = "animation") -> list[int]:
+    """The stickers a human can allow right now (allow=True) or take the permission back from (allow=False)."""
+    return [st["index"] for st in res["stickers"] if allow_problem(res, st, kind, allow) is None]
+
+
+def allow_info(res: dict) -> dict:
+    """What the page needs to draw 'Use it anyway' (computed, never stored; `state()['allow']`): per kind ('still', 'animation'), `can` = indexes a person may allow now, `allowed` = indexes that carry
+    a permission, `undo` = the allowed ones whose permission can be taken back now, `why` = {index: the plain-words reason of every blocked sticker}, `final` = {index: why it cannot be allowed}."""
+    from . import explain
+    out = {}
+    for kind in KINDS:
+        key = "still_override" if kind == "still" else "anim_override"
+        stat = "status" if kind == "still" else "anim_status"
+        rep = "report" if kind == "still" else "anim_report"
+        info = {"can": [], "allowed": [], "undo": [], "why": {}, "final": {}}
+        for st in res["stickers"]:
+            i = st["index"]
+            if st.get(key):
+                info["allowed"].append(i)
+                if allow_problem(res, st, kind, False) is None:
+                    info["undo"].append(i)
+            if st.get(stat) != "FAILED":
+                continue
+            first = (_blocks(st.get(rep)) or [None])[0] or st.get("reason" if kind == "still" else "anim_reason")
+            info["why"][str(i)] = explain.block_words(first)
+            problem = allow_problem(res, st, kind, True)
+            if problem is None:
+                info["can"].append(i)
+            else:
+                info["final"][str(i)] = problem
+        out[kind] = info
     return out
 
 
-def allow_animations(out: Path, gid: int, indexes: list, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
-    """The human override: allow animations that Python blocked for leaving or crossing their slot (or take the permission back), several at once and cut again in ONE pass.
-    Each decision is stored on its sticker and in its history (actor human); the check is downgraded to a warning on the next cut, and every later re-slice keeps it."""
+@pl.serialized
+def allow_stills(out: Path, gid: int, indexes: list, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:  # pace: unused, the same call shape as allow_animations
+    """The human override on stills: allow cells that Python blocked as a judgement call (or take the permission back), several at once and cut again in ONE pass from the stored sheet.
+    Each decision is stored on its sticker (`still_override`: the check ids) and in its history (actor human); the cell is cut again with those checks as warnings and enters G2 like any other
+    (READY, pending), and every later cut of the sheet keeps the permission. Taking it back restores the block. Free: nothing is sent to a provider."""
     indexes = sorted({int(i) for i in indexes})
-    aid = None
     for i in indexes:
-        aid = check_allow(out, gid, i, allow)[1]
+        check_allow(out, gid, i, allow, "still")
     res = pl.read_result(out, gid)
     for i in indexes:
         st = res["stickers"][i - 1]
         if allow:
-            failed = [c["name"] for c in st.get("anim_report") or [] if not c.get("ok") and c.get("severity") == "BLOCK"]
+            failed = _blocks(st.get("report"))
+            st["still_override"] = sorted(set(st.get("still_override") or []) | set(failed))
+            pl.hist(st, "still", "human", "APPROVE", "allowed anyway: " + ", ".join(failed), detail={"override": failed})
+        else:
+            was = st.get("still_override") or []
+            st["still_override"] = []
+            pl.hist(st, "still", "human", "REJECT", "allowance withdrawn: " + ", ".join(was), detail={"override": was})
+    pl.write_result(out, gid, res)
+    pl.recut_cells(out, gid, indexes, cfg)
+    pl.emit(out, gid, "still_allowed" if allow else "still_allow_withdrawn", "done", 0, {"indexes": indexes}, "human", "APPROVE" if allow else "REJECT")
+
+
+def allow_animations(out: Path, gid: int, indexes: list, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
+    """The human override on animations: allow animations that Python blocked as a judgement call (leaving or crossing their slot, a loop that does not close) or take the permission back, several
+    at once and cut again in ONE pass. Each decision is stored on its sticker (`anim_override`) and in its history (actor human); the check is downgraded to a warning on the next cut, and every
+    later cut keeps it: a re-slice of the returned video, or Animate again on a prepared video."""
+    indexes = sorted({int(i) for i in indexes})
+    by_sheet: dict = {}
+    for i in indexes:
+        aid = check_allow(out, gid, i, allow, "animation")[1]
+        by_sheet.setdefault(aid, []).append(i)
+    res = pl.read_result(out, gid)
+    for i in indexes:
+        st = res["stickers"][i - 1]
+        aid = anim_source(res, i)[1]
+        if allow:
+            failed = _blocks(st.get("anim_report"))
             st["anim_override"] = sorted(set(st.get("anim_override") or []) | set(failed))
             pl.hist(st, "video", "human", "APPROVE", "allowed anyway: " + ", ".join(failed), aid, {"override": failed})
         else:
@@ -369,11 +503,49 @@ def allow_animations(out: Path, gid: int, indexes: list, allow: bool, cfg: Engin
             st["anim_override"] = []
             pl.hist(st, "video", "human", "REJECT", "allowance withdrawn: " + ", ".join(was), aid, {"override": was})
     pl.write_result(out, gid, res)
-    slice_video(out, gid, aid, cfg, pace, only=indexes)
+    for aid, idx in by_sheet.items():
+        if aid:
+            slice_video(out, gid, aid, cfg, pace, only=idx)
+        else:
+            reanimate_prepared(out, gid, idx, cfg, pace)
 
 
 def allow_animation(out: Path, gid: int, index: int, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
     allow_animations(out, gid, [index], allow, cfg, pace)
+
+
+def allow_cells(out: Path, gid: int, kind: str, indexes: list, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
+    """One entry for the route: `kind` 'still' or 'animation'."""
+    (allow_stills if kind == "still" else allow_animations)(out, gid, indexes, allow, cfg, pace)
+
+
+def reanimate_prepared(out: Path, gid: int, indexes: list, cfg: EngineConfig, pace: float = 0.0) -> None:
+    """Animate these cells again from the batch's prepared video (or its pre-sliced clips) with the blocks a human allowed (`anim_override`) kept as warnings. No new video, no credits;
+    the same cells come back from the animation cache when nothing changed."""
+    res = pl.read_result(out, gid)
+    cfg = pl.cfg_for(res, cfg)
+    d = pl.gen_dir(out, gid)
+    todo = sorted({int(i) for i in indexes})
+    try:
+        with pl.Stage(out, gid, "video_sliced", pace) as s:
+            def on_cell(r):
+                pl.record_anim(d, res["stickers"][r.index - 1], r, "prepared video")
+                pl.write_result(out, gid, res)
+                pl.emit(out, gid, "video_cell", "done", 0, {"index": r.index, "status": r.status, "reason": r.reason})
+            for i in todo:
+                res["stickers"][i - 1]["anim_status"] = "PROCESSING"
+            pl.write_result(out, gid, res)
+            waive = {i: set(res["stickers"][i - 1].get("anim_override") or []) for i in todo}
+            results = pl.animate_cells(res, cfg, todo, on_cell, AnimCache(out / "cache" / "anim"), waive=waive)
+            s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
+            res["stage"] = "video_sliced"
+            pl.write_result(out, gid, res)
+    except Exception as e:
+        res["error"] = str(e)[:300]
+        for i in todo:
+            if res["stickers"][i - 1]["anim_status"] == "PROCESSING":
+                res["stickers"][i - 1]["anim_status"] = "FAILED"
+        pl.write_result(out, gid, res)
 
 
 def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:

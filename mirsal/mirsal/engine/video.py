@@ -1,7 +1,6 @@
 """Part B: prepared grid MP4 (3x3 / 2x2 / 1x1) -> transparent looping WEBM per cell. Same keyer as stills, same settings."""
 from __future__ import annotations
 
-import dataclasses
 import hashlib
 import json
 import math
@@ -223,7 +222,7 @@ def _run_cells(cells, fn, cfg, on_cell=None) -> list[AnimationResult]:
 def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_cell=None,
                   rects: list | None = None, sheet_wh: tuple | None = None, layout: dict | None = None, refs: dict | None = None,
                   cache: AnimCache | None = None, waive: dict | None = None) -> list[AnimationResult]:
-    """waive = {slot: {check ids}}: slot-geometry blocks (inside_slot, cross_slot) that a human has allowed for that cell; they become warnings.
+    """waive = {cell: {check ids}}: judgement blocks (inside_slot, cross_slot, loop_seam: verify.OVERRIDABLE["animation"]) that a human has allowed for that cell; they become warnings.
     rects/sheet_wh: the still's measured cell rects on the sheet; mapped onto the video (same layout, any size).
     Without them: equal thirds. layout (a video sheet's layout.json): its exact slot rectangles, plus the slot checks
     (inside_slot, cross_slot) on every frame; refs = {slot: approved still's alpha} for identity_kept."""
@@ -313,8 +312,8 @@ def pick_clip(formats: dict, cfg):
     return f, Path(formats[f])
 
 
-def process_clips(clips: dict, cfg, on_cell=None, cache: AnimCache | None = None) -> list[AnimationResult]:
-    """clips = {cell: {"mov": path, "webm": path}} of pre-sliced transparent clips."""
+def process_clips(clips: dict, cfg, on_cell=None, cache: AnimCache | None = None, waive: dict | None = None) -> list[AnimationResult]:
+    """clips = {cell: {"mov": path, "webm": path}} of pre-sliced transparent clips. waive = {cell: {check ids}} a human allowed (see process_video)."""
     failed = vp9_missing(list(clips))
     if failed:
         for r in failed:
@@ -331,8 +330,11 @@ def process_clips(clips: dict, cfg, on_cell=None, cache: AnimCache | None = None
         frames = ff.decode_full(path, w, h, int(math.floor(cfg.video_max_seconds * fps)), cap_fps)
         t_dec = _ms(t0); t1 = time.perf_counter()
         keyed = [_clean_clip(f, cfg) for f in frames]
-        return _finish(idx, keyed, fps, cfg, {"source": f"clip:{fmt}", "clip": path.name, "clip_size": f"{w}x{h}", "ms": {"decode": t_dec, "key": _ms(t1)}})
-    return _run_cells(clips, lambda idx: _cached(cache, cache and cache.key(cfg, "clip", _stat_id(pick_clip(clips[idx], cfg)[1])), idx, lambda: one(idx)), cfg, on_cell)
+        return _finish(idx, keyed, fps, cfg, {"source": f"clip:{fmt}", "clip": path.name, "clip_size": f"{w}x{h}", "ms": {"decode": t_dec, "key": _ms(t1)}}, waive=(waive or {}).get(idx, ()))
+    def ckey(idx):                  # what a human allowed is part of what made the clip; no permission = the key every earlier cache entry already has
+        w = sorted((waive or {}).get(idx, ()))
+        return cache.key(cfg, "clip", _stat_id(pick_clip(clips[idx], cfg)[1]), *([w] if w else []))
+    return _run_cells(clips, lambda idx: _cached(cache, cache and ckey(idx), idx, lambda: one(idx)), cfg, on_cell)
 
 
 CRF_START = 3         # ladder index every fit starts at (3 = crf 42): most clips land within a rung or two of it
@@ -382,15 +384,11 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     # A returned video sheet gets inside_slot + cross_slot; a cell of a prepared 3x3 video or a pre-sliced clip gets inside_frame (the still's inside_cell, per frame).
     if slot:
         m["subject_px_in_video"] = int(max(union[2] - union[0], union[3] - union[1]))     # metric only: no warning, no gate
-    pre = verify.run("slot", {"slot_frames" if slot else "cell_frames": keyed, "metrics": m}, cfg)
+    pre = verify.run("slot", {"slot_frames" if slot else "cell_frames": keyed, "metrics": m, "waive": waive}, cfg)      # a block a human allowed (stored on the sticker) comes back as a warning, still listed
     ms["bounds"] = _ms(t)
-    blocks = [c for c in pre if not c.ok and c.severity == verify.BLOCK]
-    if any(c.id not in waive for c in blocks):
+    if any(not c.ok and c.severity == verify.BLOCK for c in pre):
         rep = Report(pre)
         return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
-    if blocks:                       # every block was allowed by a human click (stored on the sticker): kept as a warning, still listed
-        m["waived"] = [c.id for c in blocks]
-        pre = [dataclasses.replace(c, severity=verify.WARN, note=(c.note + " (allowed by you)").strip()) if c in blocks else c for c in pre]
     scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1]))
     m["scale"] = round(scale, 4)
     t = time.perf_counter()
@@ -429,7 +427,7 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
                 m["detail_vs_still"] = round(dv, 2)
                 m["soft_sigma"] = soft_sigma(ref_alpha, dv)
         inp = {"data": data, "info": ff.probe(path), "info_native": ff.probe(path, vp9_native=True), "alpha": dec, "metrics": m,
-               "frames_out": out, "ref_alpha": ref_alpha}
+               "frames_out": out, "ref_alpha": ref_alpha, "waive": waive}
         ms["probe"] = _ms(t); t = time.perf_counter()
         rep = Report(pre + verify.run("anim", inp, cfg))
         ms["verify"] = _ms(t)
