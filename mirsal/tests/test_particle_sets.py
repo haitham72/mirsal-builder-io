@@ -229,3 +229,54 @@ class SetUnitTests(unittest.TestCase):
     def test_a_path_that_looks_like_an_id_cannot_escape_the_folder(self):
         with self.assertRaises(ps.SetError):
             ps.read(self.out, "P001/../../etc")
+
+class ChatAllowPayloadTests(unittest.TestCase):
+    """Rule 10 on the chat surface needs the SERVER to say what may be allowed: a tile that cannot know cannot offer the override (no stubs, rule 6).
+    No server and no provider: `ConsoleTools.generation` reads one result.json, so this is the payload contract alone."""
+
+    def setUp(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+        from mirsal.engine.config import EngineConfig
+        from mirsal.flow import pipeline as pl
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.out = self.tmp / "out"
+        pl.gen_dir(self.out, 1).mkdir(parents=True)
+        res = {"generation_id": "G001", "prompt": "p", "grid": [2, 2], "stage": "sliced", "owner": "local", "source": {}, "reviews": {},
+               "stickers": [{"index": i, "key": f"k{i}", "name": f"S{i}", "emoji": "X", "tags": [], "status": "READY", "review": {"still": "PENDING", "anim": "NONE"},
+                             "report": [], "metrics": {"bbox": [0, 0, 40, 40], "fg_px": 900}, "anim_status": "NOT_REQUESTED", "anim_report": [], "history": [], "png": None, "webm": None} for i in (1, 2)]}
+        res["stickers"][0].update(status="FAILED", reason="holes", review={"still": "BLOCKED", "anim": "NONE"},
+                                  report=[{"name": "holes", "ok": False, "severity": "BLOCK", "value": 1, "limit": 0}])
+        # a cell with nothing cut may never be allowed, and a cell with one may: the metrics say so (gates.still_problem)
+        res["stickers"][1].update(still_override=["inside_cell"])          # a person already allowed this one
+        pl.write_result(self.out, 1, res)
+
+    def tools(self):
+        from mirsal.agent.tools import ConsoleTools
+        return ConsoleTools(type("C", (), {"out": self.out, "lib": None})(), {"id": "local", "role": "owner", "can_spend": True})
+
+    def test_every_sticker_carries_what_a_person_may_do_with_it(self):
+        cells = self.tools().generation("G001")["stickers"]
+        self.assertEqual([c["index"] for c in cells], [1, 2])
+        for c in cells:
+            self.assertEqual(sorted(c["allow"]), ["animation", "still"])
+            for kind in ("still", "animation"):
+                self.assertEqual(sorted(c["allow"][kind]), ["allowed", "can", "final", "undo", "why"], "the tile needs all five to draw the override")
+
+    def test_a_judgement_call_is_allowable_and_an_allowed_one_can_be_taken_back(self):
+        cells = {c["index"]: c for c in self.tools().generation("G001")["stickers"]}
+        self.assertTrue(cells[1]["allow"]["still"]["can"], "holes is a judgement call: the chat tile may offer 'use it anyway'")
+        self.assertIn("holes", (cells[1]["allow"]["still"]["why"] or "") + (cells[1]["reason"] or ""))
+        self.assertEqual(cells[2]["allow"]["still"]["allowed"], True, "the permission is visible, so the tile can say 'allowed by you'")
+        self.assertEqual(cells[2]["waived"], ["inside_cell"])
+        self.assertFalse(cells[2]["allow"]["still"]["can"], "what was allowed is not offered twice")
+
+    def test_the_fake_says_the_same_shape(self):
+        from mirsal.agent.tools import FakeTools
+        f = FakeTools({"G001": {"generation": "G001", "stickers": [{"id": "G001/S1", "index": 1, "status": "FAILED", "reason": "holes", "still": "BLOCKED"}]}})
+        cell = f.generation("G001")["stickers"][0]
+        self.assertTrue(cell["allow"]["still"]["can"])
+        self.assertEqual(cell["waived"], [])
+        self.assertEqual(f.gens["G001"]["stickers"][0].get("allow"), None, "the fixture is never mutated")

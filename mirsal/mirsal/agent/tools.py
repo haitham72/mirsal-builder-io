@@ -105,14 +105,24 @@ class ConsoleTools:
         return v
 
     def generation(self, gid: str) -> dict:
-        """The sticker list of one batch for the chat (ids, keys, emoji, status, reviews, file urls)."""
+        """The sticker list of one batch for the chat (ids, keys, emoji, status, reviews, file urls).
+
+        Each sticker also carries what a person may DO with it that Python blocked (`allow`): `can` (use it anyway now), `allowed` (it carries a permission), `undo` (take it back now),
+        `why` (the plain-words reason) and `final` (why it cannot be allowed). Without this the chat tile can show a blocked sticker but cannot offer the override that
+        rule 10 requires on every surface (`gates.allow_info`, computed, never stored)."""
         self._see(gid)
         res = pl.read_result(self.out, int(gid[1:]))
+        info = gates.allow_info(res)
         stickers = []
         for s in res["stickers"]:
-            stickers.append({"id": f"{gid}/S{s['index']}", "index": s["index"], "key": s["key"], "name": s.get("name"), "emoji": s.get("emoji"),
+            i = s["index"]
+            allow = {kind: {"can": info[kind]["can"].count(i) > 0, "allowed": i in info[kind]["allowed"],
+                            "undo": i in info[kind]["undo"], "why": info[kind]["why"].get(str(i)), "final": info[kind]["final"].get(str(i))}
+                     for kind in gates.KINDS}
+            stickers.append({"id": f"{gid}/S{i}", "index": i, "key": s["key"], "name": s.get("name"), "emoji": s.get("emoji"),
                              "tags": s.get("tags"), "title": s.get("title"), "proposed_title": (s.get("title_proposal") or {}).get("name"), "status": s["status"], "reason": s.get("reason"), "still": s["review"]["still"],
-                             "anim": s["review"]["anim"], "anim_status": s.get("anim_status"),
+                             "anim": s["review"]["anim"], "anim_status": s.get("anim_status"), "allow": allow,
+                             "waived": list(s.get("still_override") or []) + list(s.get("anim_override") or []),
                              "png": f"/out/{gid}/{s['png']}" if s.get("png") else None,
                              "webm": f"/out/{gid}/{s['webm']}" if s.get("webm") else None, "prompt": s.get("prompt")})
         return {"generation": gid, "stage": res.get("stage"), "error": res.get("error"), "prompt": res.get("prompt"), "problem": self._problem(res),
@@ -406,6 +416,20 @@ class FakeTools:
         return self.video_estimate if kind == "video" else 2.0
 
     def generation(self, gid):
+        card = self.generation_card(gid)
+        out = {k: v for k, v in card.items() if k != "stickers"}      # a copy: the fixture is never mutated (a test asserts on its own stickers)
+        out["stickers"] = []
+        for s in card["stickers"]:                                    # FakeTools: what the chat tile needs to offer an override (the real tools compute it from gates.allow_info)
+            st = {k: v for k, v in s.items() if k not in ("allow", "waived")}
+            st["allow"] = {"still": {"can": s.get("status") == "FAILED", "allowed": bool(s.get("still_override")), "undo": False,
+                                      "why": s.get("reason") if s.get("status") == "FAILED" else None, "final": None},
+                          "animation": {"can": s.get("anim_status") == "FAILED", "allowed": bool(s.get("anim_override")), "undo": False,
+                                        "why": s.get("anim_reason") if s.get("anim_status") == "FAILED" else None, "final": None}}
+            st["waived"] = list(s.get("still_override") or []) + list(s.get("anim_override") or [])
+            out["stickers"].append(st)
+        return out
+
+    def generation_card(self, gid):
         return self.gens[gid]
 
     def job(self, jid):
