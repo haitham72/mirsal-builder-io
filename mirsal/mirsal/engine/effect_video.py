@@ -4,7 +4,10 @@ sticker per cell. Pure engine code (no database, no model client): `cut_cells` r
 What is enforced and what is only said (the owner's standing rule, 2026-10-02: never a block a person cannot get past): the Telegram limits (format, size, codec, dimensions, fps,
 duration, no audio, alpha) are the only hard failures, because Telegram itself would reject the file. Everything about the effect (it starts empty, it ends empty, it is a burst,
 it stays in its cell) is a WARN with the reason, and `settle` repairs the two most common faults by construction (a clip that has not quite emptied by its last frame is faded out;
-one that starts with something already on screen is faded in), so the file always ends the way a Telegram effect does."""
+one that starts with something already on screen is faded in), so the file always ends the way a Telegram effect does.
+
+The screen behind the burst is measured too, on the returned clip BEFORE keying (`screen_of`, `effect_checks.screen_flatness` / `seam_line`): Kling sometimes draws panels, walls or
+patterns instead of one flat colour. The numbers go into every cell's metrics (`screen_*`) and a bad screen is the WARN `key_is_seamless` (never a block)."""
 from __future__ import annotations
 
 import dataclasses
@@ -73,21 +76,57 @@ def settle(frames: np.ndarray, fps: int = FPS, ramp_seconds: float = 0.4) -> tup
     return out, info
 
 
+def _thumbs(rgb: np.ndarray, size: int = effect_checks.SCREEN_CELL, k: int = effect_checks.SCREEN_SAMPLES) -> np.ndarray:
+    """`k` frames spread evenly over a decoded cell, each shrunk to size x size (the cell's share of the screen-analysis mosaic)."""
+    idx = np.unique(np.linspace(0, len(rgb) - 1, k).round().astype(int))
+    return np.stack([cv2.resize(rgb[i], (size, size), interpolation=cv2.INTER_AREA) for i in idx])
+
+
+def screen_of(thumbs: list, mp4, rows: int, cols: int, key: str, size: tuple[int, int]) -> dict | None:
+    """The flatness numbers of the whole clip's key-colour screen: `thumbs` are the cells' `_thumbs` in reading order, `mp4` the clip (its first two frames are read again at full size
+    for the lines between cells). Returns `effect_checks.screen_flatness` + `seam_line` as {panel_step, quarter_step, bg_std, key_diff, frames, seam_line}, or None when it cannot
+    be measured (it never raises: a measurement is a help, not a gate; `seam_line` alone is None when the first frames cannot be read again)."""
+    try:
+        n = min(len(t) for t in thumbs)
+        sz = effect_checks.SCREEN_CELL
+        mosaic = np.zeros((n, rows * sz, cols * sz, 3), np.uint8)
+        for i, t in enumerate(thumbs):
+            r, c = divmod(i, cols)
+            mosaic[:, r * sz:(r + 1) * sz, c * sz:(c + 1) * sz] = t[:n]
+        out = effect_checks.screen_flatness(mosaic, rows, cols, key)
+    except Exception:
+        return None
+    try:
+        out["seam_line"] = effect_checks.seam_line(ff.decode_cell(mp4, 0, 0, size[0], size[1], 2, None), rows, cols)
+    except Exception:
+        out["seam_line"] = None                                  # the other numbers still stand
+    return out
+
+
 def cut_cells(mp4, rows: int, cols: int, cfg, asked_key: str = "green") -> list[dict]:
-    """Every cell of the returned clip as keyed RGBA frames at the source size: [{index, frames, src_fps, key, error?}]. The screen colour that is REALLY there wins over the one that
-    was asked for (as for sheets). A cell that cannot be keyed is returned with `error` and no frames, never raised: the others are still cut."""
+    """Every cell of the returned clip as keyed RGBA frames at the source size: [{index, frames, src_fps, key, screen, error?}]. The screen colour that is REALLY there wins over the one
+    that was asked for (as for sheets). A cell that cannot be keyed is returned with `error` and no frames, never raised: the others are still cut.
+
+    `screen` is the flatness of the clip's screen (the same dict on every cell, `screen_of`, measured before keying) or None."""
     info = ff.probe(mp4)
     w, h, fps = int(info["width"]), int(info["height"]), float(info.get("fps") or 24.0)
-    cells = []
+    cells, thumbs = [], []
     for i, (x, y, cw, ch) in enumerate(cell_rects(w, h, rows, cols), 1):
         try:
             rgb = ff.decode_cell(mp4, x, y, cw, ch, MAX_FRAMES, None)
             key, _ = detect_key(rgb[0], cfg.border_px, asked_key, cfg.min_key_diff)
             c = dataclasses.replace(cfg, chroma=key)
             calib = calibrate(rgb[0], key, cfg.border_px, cfg.threshold)
+            th = _thumbs(rgb)
             cells.append({"index": i, "frames": np.stack([key_image(f, c, calib).rgba for f in rgb]), "src_fps": fps, "key": key})
+            thumbs.append(th)
         except Exception as e:
+            thumbs.append(None)
             cells.append({"index": i, "frames": None, "src_fps": fps, "key": asked_key, "error": str(e)[:200]})
+    keys = [c["key"] for c in cells if c.get("frames") is not None]
+    screen = screen_of(thumbs, mp4, rows, cols, max(set(keys), key=keys.count), (w, h)) if keys and all(t is not None for t in thumbs) else None
+    for c in cells:
+        c["screen"] = dict(screen) if screen else None
     return cells
 
 
@@ -131,6 +170,13 @@ def finish_cell(cell: dict, cfg, *, size: int | None = None) -> dict:
     r = encode_and_check(fr, cfg, label=f"cell {cell['index']}")
     r["index"] = cell["index"]
     r["metrics"].update({"key": cell.get("key"), "src_fps": round(cell["src_fps"], 2), "raw_end_coverage": round(max(raw_cov[-3:]), 4), "raw_start_coverage": round(max(raw_cov[:3]), 4), **settled})
+    scr = cell.get("screen")
+    if scr:                                                      # the clip's screen was measured before keying: the numbers travel with every cell, a bad screen is a WARN
+        r["metrics"].update({f"screen_{k}": v for k, v in scr.items()})
+        chk = effect_checks.screen_check(scr, cell.get("key") or "green")
+        if not chk.ok:
+            r["checks"].append({"id": chk.id, "verdict": chk.verdict, "detail": chk.detail, "value": chk.value, "limit": chk.limit})
+            r["warnings"].append(chk.id)
     if settled["tail_faded"]:
         r["checks"].append({"id": "effect_tail_faded", "verdict": "WARN", "detail": "the last frames still had pieces on screen, so they were faded out to end empty like a Telegram effect", "value": r["metrics"]["raw_end_coverage"], "limit": effect_checks.EMPTY_MAX})
         r["warnings"].append("effect_tail_faded")

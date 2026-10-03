@@ -1,4 +1,5 @@
-"""Checks for a particle-effect clip (`engine/particles.py`): is it empty at both ends, does it show a burst, does it stay in its cell, does it move.
+"""Checks for a particle-effect clip (`engine/particles.py`): is it empty at both ends, does it show a burst, does it stay in its cell, does it move; and, for a video drawn from
+text, is the key-colour screen behind it ONE flat colour (`screen_flatness`, `seam_line`, `screen_check`: the id `key_is_seamless`).
 
 The verdict is ONLY "PASS" or "WARN", never "BLOCK". This is the owner's standing rule: Python must not hard-block a result he can look at;
 he must always be able to use it anyway. A WARN is a line shown next to the preview, not a gate.
@@ -23,6 +24,22 @@ OUTSIDE_MAX = 0.002      # at most 0.2% of a frame's opaque pixels may lie outsi
 MOTION_COVERAGE = 0.0005 # motion: the coverage changes by at least 0.05% of the canvas per frame on average (between frames that show something) ...
 MOTION_PATH = 0.01       # ... or the alpha centroid travels at least 1% of the canvas side in total
 PASS, WARN = "PASS", "WARN"
+
+# ---- the screen of a video from text (measured on the returned clip BEFORE keying; every number is in 0..255 colour levels) ----
+# Calibrated 2026-10-03 on the three real Kling clips (docs/effects.md section 3), numbers as (panel_step, quarter_step, bg_std, seam_line):
+#   J037 2x2, rated great:                       (2.8, 3.0, 1.6, 27.2)     J038 3x3, poor, patches of darker blue: (4.2, 5.8, 8.5, 0.8)
+#   J039 2x2 from the app, drew walls and panels: (20.0, 9.0, 11.0, 2.0)
+# A limit sits well above the clean clip and below the clip that drew walls; the screen text in the console reads `key_is_seamless`.
+SCREEN_CELL = 96           # the analysis mosaic holds every cell at 96 x 96 px ...
+SCREEN_BLOCK = 12          # ... cut into blocks of 12 px (8 x 8 blocks per cell)
+SCREEN_SAMPLES = 16        # frames spread evenly over the clip
+SCREEN_KEY_RATIO = 0.6     # a pixel is screen when its key difference (the keyer's own measure) is at least 60% of the frame's median
+SCREEN_BG_SHARE = 0.9      # a block is read as screen when at least 90% of its pixels are screen (a piece and its fringe are left out)
+SCREEN_MIN_KEY = 20.0      # median key difference below this: there is no key-colour screen to measure
+SCREEN_PANEL_MAX = 10.0    # the outer ring of every cell differs from its inside by more than this: walls, a box, a vignette
+SCREEN_QUARTER_MAX = 10.0  # the cells' own screen colours differ from each other by more than this: panels of different shades (no real clip is above it yet)
+SCREEN_STD_MAX = 6.0       # the screen colour varies by more than this from block to block: a pattern, a texture, patches of shade
+SCREEN_LINE_MAX = 40.0     # a straight line on a cell boundary differs from the screen by more than this (a faint 27-level line was in the clip rated great, and keys cleanly)
 
 
 @dataclass(frozen=True)
@@ -52,6 +69,94 @@ def coverage_curve(frames: np.ndarray, alpha_min: int = ALPHA_ON) -> list:
     """Per frame, the share of the canvas whose alpha is at least `alpha_min` (0..1)."""
     a = _alpha(frames)
     return [float(x) for x in (a >= alpha_min).mean(axis=(1, 2))]
+
+
+def _p90(values) -> float | None:
+    v = [x for x in values if x is not None and not np.isnan(x)]
+    return float(np.percentile(v, 90)) if v else None
+
+
+def _key_diff(rgb: np.ndarray, key: str) -> np.ndarray:
+    a = rgb.astype(np.int16)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    return (g - np.maximum(r, b)) if key == "green" else (b - np.maximum(r, g))
+
+
+def screen_flatness(mosaic: np.ndarray, rows: int, cols: int, key: str = "green", cell: int = SCREEN_CELL, block: int = SCREEN_BLOCK) -> dict:
+    """How flat the key-colour screen is, on sampled frames of the clip BEFORE keying (particle pixels are left out, so only the screen is measured).
+
+    `mosaic` is (N, rows*cell, cols*cell, 3) uint8: N frames, every cell of the clip resized to `cell` px and put back in place. Per frame the screen pixels are the ones whose key
+    difference is at least 60% of the frame's median (the keyer's own scale); they are averaged per block of `block` px, and only blocks that are nearly all screen are read:
+      panel_step    the outer ring of every cell against its inside (walls, a box, a vignette): the largest channel difference of the two medians
+      quarter_step  the largest difference between the screen colours of two cells (panels of different shades)
+      bg_std        the standard deviation of the screen colour over the blocks that have no particle next to them (a pattern, a texture), largest channel
+    Each is the 90th percentile over the frames, so one odd frame does not decide and a wall that shows for a third of the clip does. A number is None when it cannot be measured.
+    Returns {"panel_step", "quarter_step", "bg_std", "key_diff", "frames"}."""
+    if mosaic.ndim != 4 or mosaic.shape[3] != 3 or mosaic.shape[1] != rows * cell or mosaic.shape[2] != cols * cell or cell % block:
+        raise ValueError("mosaic must be (N, rows*cell, cols*cell, 3) with the cell a multiple of the block")
+    per = cell // block
+    nby, nbx = rows * per, cols * per
+    iy, ix = np.divmod(np.arange(nby), per)[1][:, None], np.divmod(np.arange(nbx), per)[1][None, :]
+    dist = np.minimum(np.minimum(iy, per - 1 - iy), np.minimum(ix, per - 1 - ix))
+    ring, inner = dist == 0, dist >= 2
+    panel, quarter, std, kd_med = [], [], [], []
+    for fr in mosaic:
+        kd = _key_diff(fr, key)
+        med = float(np.median(kd))
+        if med < SCREEN_MIN_KEY:
+            continue
+        kd_med.append(med)
+        m = (kd >= SCREEN_KEY_RATIO * med).astype(np.float32).reshape(nby, block, nbx, block)
+        f = fr.astype(np.float32).reshape(nby, block, nbx, block, 3)
+        share = m.mean(axis=(1, 3))
+        colour = (f * m[..., None]).sum(axis=(1, 3)) / np.maximum(m.sum(axis=(1, 3)), 1.0)[..., None]
+        valid = share >= SCREEN_BG_SHARE
+        a, b = valid & ring, valid & inner
+        panel.append(float(np.abs(np.median(colour[a], axis=0) - np.median(colour[b], axis=0)).max()) if a.sum() >= 6 and b.sum() >= 6 else None)
+        meds = []
+        for r in range(rows):
+            for c in range(cols):
+                v = valid[r * per:(r + 1) * per, c * per:(c + 1) * per]
+                if v.sum() >= 6:
+                    meds.append(np.median(colour[r * per:(r + 1) * per, c * per:(c + 1) * per][v], axis=0))
+        quarter.append(float(max(np.abs(x - y).max() for x in meds for y in meds)) if len(meds) >= 2 else None)
+        pad = np.pad(valid, 1)
+        core = np.logical_and.reduce([pad[dy:dy + nby, dx:dx + nbx] for dy in range(3) for dx in range(3)])      # blocks whose eight neighbours are screen too: no particle fringe
+        std.append(float(colour[core].std(axis=0).max()) if core.sum() >= 10 else None)
+    out = {"panel_step": _p90(panel), "quarter_step": _p90(quarter), "bg_std": _p90(std)}
+    return {**{k: (round(v, 1) if v is not None else None) for k, v in out.items()}, "key_diff": round(float(np.median(kd_med)), 1) if kd_med else None, "frames": len(kd_med)}
+
+
+def seam_line(frames: np.ndarray, rows: int, cols: int) -> float:
+    """The strongest straight line drawn on a boundary between two cells, from the first frames of the clip (where the screen is empty): `frames` is (k, H, W, 3) at full size.
+    The colour of every column (row) is the median down the column (along the row); at each boundary the profile within a few pixels of it is compared with the profile a little
+    further away on both sides. Returns the largest channel difference in colour levels (0.0 when the clip is one cell)."""
+    f = np.asarray(frames, np.float32).mean(axis=0)
+    worst = 0.0
+    for prof, n in ((np.median(f, axis=0), cols), (np.median(f, axis=1), rows)):
+        size = len(prof)
+        near = max(3, size // 120)
+        for s in range(1, n):
+            pos = s * (size // n)
+            ref = [prof[max(0, pos - 5 * near):max(0, pos - 2 * near)], prof[pos + 2 * near:pos + 5 * near]]
+            ref = np.concatenate([x for x in ref if len(x)])
+            if not len(ref):
+                continue
+            worst = max(worst, float(np.abs(prof[max(0, pos - near):pos + near] - np.median(ref, axis=0)).max()))
+    return round(worst, 1)
+
+
+def screen_check(m: dict, key: str = "green") -> Check:
+    """`key_is_seamless`: PASS, or a WARN (never a block: the person can use the clip anyway) naming the worst of the measured faults of `screen_flatness` and `seam_line`."""
+    tests = [("panel_step", SCREEN_PANEL_MAX, "the edges of each area differ from its middle by {v:.1f} levels (limit {l:.0f})"),
+             ("quarter_step", SCREEN_QUARTER_MAX, "the areas of the screen differ in colour by {v:.1f} levels (limit {l:.0f})"),
+             ("bg_std", SCREEN_STD_MAX, "the screen colour varies by {v:.1f} levels from place to place (limit {l:.0f})"),
+             ("seam_line", SCREEN_LINE_MAX, "a straight line of {v:.1f} levels runs between the areas (limit {l:.0f})")]
+    bad = [(m[k] / lim, k, lim, text) for k, lim, text in tests if m.get(k) is not None and m[k] > lim]
+    if not bad:
+        return Check("key_is_seamless", PASS, f"the {key} screen is one flat colour", m.get("panel_step"), SCREEN_PANEL_MAX)
+    _, k, lim, text = max(bad)
+    return Check("key_is_seamless", WARN, f"the {key} screen has panels or patterns: {text.format(v=m[k], l=lim)}; keying may eat the pieces. Use it anyway or make another take", m[k], lim, {"metric": k})
 
 
 def _pct(x: float) -> str:
