@@ -242,6 +242,19 @@ class _Sprite:
     content: list            # longest side of the drawn content at each level (the border excluded)
 
 
+def trim_sprite(img, pad: int = 2):
+    """A particle is a TIGHT sprite (the UI/UX spec P6): the RGBA picture cropped to its alpha bounding box (alpha at or below ALPHA_TRIM is haze, not subject) plus `pad` px of air that never runs
+    off the picture. Never a 512 px sticker canvas. None when nothing is drawn. Pure."""
+    if not isinstance(img, np.ndarray) or img.dtype != np.uint8 or img.ndim != 3 or img.shape[2] != 4:
+        raise ValueError("a sprite must be an RGBA uint8 array of shape (H, W, 4)")
+    ys, xs = np.where(img[..., 3] > ALPHA_TRIM)
+    if len(ys) == 0:
+        return None
+    y0, y1 = max(0, int(ys.min()) - pad), min(img.shape[0], int(ys.max()) + 1 + pad)
+    x0, x1 = max(0, int(xs.min()) - pad), min(img.shape[1], int(xs.max()) + 1 + pad)
+    return img[y0:y1, x0:x1].copy()
+
+
 def _prepare(img, max_long: int) -> _Sprite | None:
     """Trim to the alpha bbox (+1 px transparent padding), premultiply, shrink to the largest size it will ever be drawn at, and
     build a half-size pyramid so a small particle is never sampled from a big image (no aliasing). None when fully transparent."""

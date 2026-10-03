@@ -1,5 +1,6 @@
 # docs/effects.md — particle effects: the burst that Telegram plays when you press an emoji
 
+> **2026-10-03 (later): the wizard's Motion and Finish steps are the SET's now: ONE preview for the pack (`particles.js` `spBurstHtml`, `POST /api/particles/{id}/preview | render | add`), no row per sticker; a run is saved as a set first (`effect.sets[]`). The `/api/effects/{id}/preview | render | add` routes below still work (the working session, old results).**
 > **2026-10-03: the per-sticker model below (an effect and a gallery per sticker) is being replaced by [particles_plan.md](particles_plan.md): a durable Particle set belongs to pack(s) or stands alone. Read that plan first.**
 
 **Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). The AI-chat entry is built (§8). Built 2026-10-03: the AI-drawn pieces sheet and the per-sticker particles gallery (§8). NOT built: real tile art / examples (§8).**
@@ -96,3 +97,11 @@ Open:
 1. **The AI chat entry (built 2026-10-03)**: intent `EFFECTS` (`resolver.classify`: particle / burst / explosion / confetti + effect / pack / sticker / emoji), node `graph.n_effects`: finds the library pack the words name (or the only pack; else asks which, with chips), calls `tools.effects_start` (the same `fx.create` + background `analyse` as `POST /api/effects`, owner only), and answers with an `effects` card linking `#/effects/E###`. Nothing is spent in chat; the video's price is shown on the screen's button. Open: refining the pieces from chat ("only bat signals").
 2. Real tile art / examples, a browser look at the pieces panel and the gallery (built from tests and node checks only), how a real Nano Banana pieces sheet cuts (the tests use a synthetic sheet), 3x3-specific prompt, the green-frame start/end variant only if 2x2 ever fails.
 3. A real end-to-end paid run from the screen (the price and the job path are tested on a fake CLI; the real Kling path was exercised by the two experiment clips through `jobs.fulfil`).
+
+
+## Particles are particles, not stickers (2026-10-03, UI/UX spec P6)
+
+A set built from a drawn sheet stores its cells as **tight sprites** (`engine/particles.trim_sprite`: the alpha bounding box plus 2 px of air, cropped out of the batch's keyed sheet at native resolution by `pipeline.particle_sprites`), never the 512 px sticker
+that the still stage makes of the same cell (a sticker canvas is the deliverable of a sticker, with the sticker size checks). The slice file is the fallback only for a batch with no keyed sheet (`cells[].sprite: false`). The same holds for the cells *Generate more*
+appends. A batch cut as particles cannot be added to a pack as stickers (409); it becomes a set (`POST /api/particles {from_generation}` or *Use as particle set*). The cause of the original "Batman Lego pieces" trouble (separator lines drawn by the image model)
+is recorded in `docs/engine-and-studio.md`: the cut is not weakened.

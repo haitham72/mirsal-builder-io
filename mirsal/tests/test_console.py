@@ -237,6 +237,12 @@ class ConsoleTests(unittest.TestCase):
         g2 = self.req("GET", f"/api/generations/{gid}")[1]
         self.assertEqual((g2["stickers"][0]["png"], g2["stickers"][0]["edited"]), (st["png"], True))
         self.assertEqual(g2["stickers"][0]["history"][-1]["decision"], "EDIT")
+        # P8: the edited slice is merged back into one sheet, same layout, so the same S# by position
+        self.assertEqual((g2["source"]["sheet_fixed"], g2["source"]["sheet_fixed_cells"]), ("source/sheet_fixed.png", [1]))
+        fixed = self.tmp / "out" / g["generation_id"] / "source" / "sheet_fixed.png"
+        raw = self.tmp / "out" / g["generation_id"] / g2["source"]["sheet_copy"]
+        self.assertEqual(Image.open(fixed).size, Image.open(raw).size, "the same sheet, not a new layout")
+        self.assertEqual([x["index"] for x in g2["stickers"]], [x["index"] for x in g["stickers"]], "every sticker keeps its S#")
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/edit", {"index": 1, "png": "data:image/png;base64,AAAA"})[0], 409)   # not a valid sticker
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 6})[1]["rerendered"], len(g["stickers"]) - sum(x["status"] != "READY" for x in g["stickers"]) - 1)   # the edited one keeps its pixels
         # Add with the names the user typed in the wizard
@@ -354,6 +360,7 @@ class ConsoleTests(unittest.TestCase):
         self.assertNotEqual((base / st["webm"]).read_bytes(), webm0)                    # ... and so did the animation, from the one edit
         red = np.array(Image.open(base / st["png"]).convert("RGBA"))[440:500, 20:200]
         self.assertTrue(((red[..., 0] > 200) & (red[..., 3] > 200)).mean() > 0.5)      # the layer is in the image (all layers, timing ignored)
+        self.assertEqual(r["sheet_fixed"]["cells"], [1], "the image of the edit is merged back into the sheet as well (the chat sends that sheet as its picture)")
         self.assertEqual((base / "source" / "orig" / "S1.png").read_bytes(), png0)      # originals kept: a re-edit starts from them
         g2 = self.req("GET", f"/api/generations/{gid}")[1]["stickers"][0]
         self.assertEqual((g2["edited"], g2["edit"]["project"], g2["history"][-1]["decision"]), (True, pid, "EDIT"))

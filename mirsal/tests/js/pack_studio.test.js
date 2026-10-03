@@ -1,5 +1,5 @@
-// The pack's particle studio and the sticker's one line (2026-10-03, plan.md 16.1): one set belongs to the pack, so the pack page carries the
-// particle studio (its sets as shared cards, its bursts read-only, Make particles for this pack / Use an existing set) and a sticker shows one line
+// The pack's particle studio and the sticker's one line (2026-10-03, docs/particles_plan.md section 5): one set belongs to the pack, so the pack page carries the
+// particle studio (its sets as shared cards, its bursts with Add, Make particles for this pack / Use an existing set) and a sticker shows one line
 // linking to it. The statements are read out of packs.js and run with the few globals they use stubbed. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -38,7 +38,7 @@ function load(pkpt) {
 }
 
 const SETS = [{ id: 'P001', name: 'Barbie <hearts>' }, { id: 'P002', name: 'Bats' }];
-const BURSTS = [{ set: 'P001', set_name: 'Barbie hearts', preset: 'burst', status: 'READY', url: '/out/particles/P001/renders/R001.webm', warnings: ['effect_tail_faded'], added_to: null }];
+const BURSTS = [{ set: 'P001', id: 'R001', set_name: 'Barbie hearts', preset: 'burst', status: 'READY', url: '/out/particles/P001/renders/R001.webm', warnings: ['effect_tail_faded'], blocks: [], added_to: null }];
 
 test('while the pack’s sets are not read yet the studio says so and asks for nothing', () => {
   const h = load({ sets: {}, bursts: {} });
@@ -61,14 +61,22 @@ test('the studio shows the pack’s sets as shared cards and both ways to get on
   assert.match(empty, /data-act=psmakepack/);
 });
 
-test('bursts are read-only: looping thumbnails with their words, no Add and no Delete', () => {
-  const h = load({ sets: { p1: [] }, bursts: { p1: BURSTS } });
+test('bursts are wired to the set’s routes: a ready one is added with a click, an added one says so, a failed one says why and cannot be added', () => {
+  const ok = { ...BURSTS[0], id: 'R002', warnings: [] };
+  const done = { ...BURSTS[0], id: 'R003', warnings: [], added_to: 'p1' };
+  const bad = { ...BURSTS[0], id: 'R004', status: 'FAILED', blocks: ['size_budget'], warnings: [], url: null };
+  const h = load({ sets: { p1: [] }, bursts: { p1: [BURSTS[0], ok, done, bad] } });
   const s = h.pkPsHtml({ id: 'p1', name: 'Barbie' });
   assert.match(s, /Bursts rendered for this pack/);
   assert.match(s, /<video src="\/out\/particles\/P001\/renders\/R001\.webm" autoplay loop muted/);
   assert.match(s, /Barbie hearts/);
   assert.match(s, /burst · ready/);
-  assert.doesNotMatch(s, /data-act=ptadd|data-act=psdel|Add to pack/, 'rendering and adding from a set has no route yet: the studio shows what exists');
+  assert.match(s, /data-act=psbadd data-id=P001 data-r=R002 data-p=p1>Add to this pack</, 'the same handler as the set card’s burst maker');
+  assert.match(s, /data-act=psbadd data-id=P001 data-r=R001 data-p=p1>Add anyway</, 'a warning is a warning: the person decides');
+  assert.doesNotMatch(s, /data-r=R003/, 'already in the pack: no second Add');
+  assert.doesNotMatch(s, /data-r=R004/, 'a file Telegram would reject cannot be added');
+  assert.match(s, /size_budget|size budget/, 'and it says why');
+  assert.doesNotMatch(s, /data-act=ptadd|data-act=psdel/, 'no per-sticker Add and no delete of a burst');
 });
 
 test('a burst’s warnings are sentences, a missing file says so', () => {

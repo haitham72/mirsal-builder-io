@@ -1,6 +1,7 @@
 # plan.md: putting Mirsal Builder online
 
 **Status (2026-10-02, end of the unattended session): the plan is written, and the first slice of it is PREPARED on this branch in new folders. Nothing is switched on:** no Supabase project, no Vercel project, no Render service and no Google OAuth client exist; nothing was pushed to any of them.
+**2026-10-03:** this file is also the list of work that has NOT started (section 16). Sections 1-15 stay paused except section 3 (FastAPI), which Haitham un-paused for the next session, with pydantic added (16.1).
 This file lives on the `deployment` branch only (`git switch deployment`), never on `merge/generate-advanced`. Every phase is still scheduled work that becomes real only when it is built, tested and documented like any other change (`CLAUDE.md` rules 3, 8, 11, 12, 13).
 
 ## 0. What already exists on this branch (map: `deploy/README.md`)
@@ -62,6 +63,8 @@ on a machine with a disk and real CPU**; only thin stateless things may be serve
 ---
 
 ## 3. Phase 0 — FastAPI and "hostable" (the enabler; everything else depends on it)
+
+> **Un-paused for execution (Haitham, 2026-10-03), with pydantic added: the executable spec is 16.1.** The rest of the deployment plan stays paused.
 
 Nothing else in this plan is safe before this phase: a local-disk `out/`, an in-process session list and an optional Redis all break the moment there are two machines.
 
@@ -362,77 +365,75 @@ Dependencies: 0 before everything; 1 before 2, 3, 5; 2 before any public user; 4
 
 ---
 
-## 16. The screens redesign (Haitham, 2026-10-03; what the next sessions build)
+## 16. Next up: what the next sessions build (Haitham, 2026-10-03)
 
-Sections 1-15 are the **deployment** plan and it is **paused by Haitham** (see `HANDOFF.md` §1). This section is the **product** plan: what the app looks like and how it behaves, in the order it must be built. Every item is an engine function + JSON first, a screen second (`CLAUDE.md` rule 11); the design half is `docs/design.md`.
+**This section is the only list of work that has not started.** Sections 1-15 are the **deployment** plan and stay **paused** (see `HANDOFF.md`), with one exception: **§3 is un-paused (Haitham, 2026-10-03)** and is executed by 16.1. When a session starts an entry, it moves the entry to `HANDOFF.md` §0 as unfinished work and deletes it here; when the work is done it is recorded as architecture in its `docs/` file and deleted from `HANDOFF.md` too. No checklist of finished items lives in either tracker, and §3's own checklist (3.5) is deleted line by line as each stage lands.
 
-### 16.0 Why (the three complaints, in his words)
+The screens redesign that used to be this section (a particle set per pack, the four-step wizard, "a rejection is never a dead end" on every surface, the clickable sheet cells, the chat intents) is **built**. It lives in `docs/particles_plan.md`, `docs/design.md` §§9-10, `docs/engine-and-studio.md` ("Use it anyway", "One control per cell") and `docs/agent-and-chat.md` ("Particle sets in the chat"); what is left of it is in `HANDOFF.md` §0. Its history is in git.
 
-1. "I still did not see the particles history anywhere." The particles screens exist in three places with three vocabularies and none of them is where a person looks.
-2. "The output does not live in its own history in studio, they live embedded to the emoji sticker." Wrong direction: the unit is the **pack**, not the sticker.
-3. "'Pieces that burst' is an awful name by the way." The word "pieces" survives in places a person reads it.
+### 16.1 FastAPI + pydantic HTTP layer: execute §3, plus pydantic
 
-### 16.1 The model change (one set belongs to pack(s))
+**Branch** `better_ui/ux`. **Authority:** Haitham decided this on 2026-10-03: `CLAUDE.md`'s note that "§§1-15 are paused" is lifted **for §3 only**; §§1, 2, 4-15 stay paused and untouched. **Rule 8 is already amended** in `CLAUDE.md` (the exact text is in the rule; keep it as written). **Order:** Haitham sends the Studio-menu prompt first; this one runs after it, in a fresh session, on a clean `git status`.
 
-`docs/particles_plan.md` is the full plan; this is the shape. A Telegram **particle burst** is the effect played when someone reacts to a message with an emoji. A **sticker pack is only the group it is attached to**, never one effect per sticker.
+**Read first:** `CLAUDE.md` · `HANDOFF.md` · §3 of this file (all of 3.1-3.5) · `docs/api.md` · `docs/design.md` · `docs/engine-and-studio.md` · `console/server.py` · `console/openapi.py` · `runtime/users.py` · `runtime/events.py` · `tests/test_openapi.py` · `tests/test_api_contract.py` · `tests/test_hardening.py` · `tests/test_live.py` · `tests/__init__.py`. Line numbers quoted in older notes have moved: find things by name.
 
-| | today | correct |
-|---|---|---|
-| the unit | an effect per sticker, a gallery per sticker | a **Particle set** `P###`, assigned to **one pack, several packs, or stand-alone** |
-| the gallery | the sticker view, the Studio section | the **pack's particle studio**; a sticker shows one line linking to it |
-| "use it" | none: the drawn sheet just sits there | **Use as particle set** saves `P###`, names it, asks where it lives |
-| lifecycle | no more, no rename, no delete | **Generate more** (appends cells, deletes nothing), Rename, Duplicate, Assign / Unassign, Delete to trash + Restore |
-| the words | effect / pieces / sprites / burst / set | **particle set**, **particles**, **burst** — "pieces" never appears where a person reads it |
+**THE ONE LOCK: the JSON contract must not change by one byte.** Rule 11: the deliverable is the engine plus a stable contract; the server is replaceable. The migration is invisible to every client: any diff in a request body, response body, status code or error wording is a regression, not an improvement. Ship it in stages, each independently revertable.
 
-**Where it lives:** `Library > Particles` (every set as a card: cells strip, name, `used in: Barbie, Princess` or `stand-alone`, cost) and `Pack page > Particle studio` (the sets of this pack, its bursts, *Make particles for this pack* / *Use an existing set* / *Generate more*). One wizard, four steps, used by the Studio tab and by `Create > Particle effects`.
+**§3 is already the design: execute it, do not rewrite it.** `Console` stays exactly as it is (its methods return plain dicts and raise `PipelineError(msg, code)`; that is the seam) and routes become thin functions over it. No engine or service code changes. These six points of §3 are MANDATORY; do not "simplify" any of them:
 
-### 16.2 The wizard, in four steps (self-explanatory, one decision per step)
+- **a. Middleware order (§3 step 4), unchanged:** `TrustedHostMiddleware` (the Host check of `_foreign`) → `CORSMiddleware` with **no origins** (same-origin only; never "temporarily" allow any) → the `Origin` / `Sec-Fetch-Site` check for unsafe methods → rate limit (per `u_id`, then per hashed IP) → request id + access log. The guard runs before anything reads a body. A dropped or reordered guard is a security regression.
+- **b. Auth (§3 step 5) stays in `runtime/users.py`** (it is tested there). FastAPI gets a dependency that reads the `Authorization` header or the cookie, calls the same `users.authenticate(...)` and sets `request.state.user`. `_authorize()`'s role map (`MEMBER_GET`, owner-only writes) becomes one table, reused verbatim.
+- **c. Idempotency (§3 step 6):** `Console.idem(scope, key, fn)` is already transport-free; call it from a dependency / helper with the same scope strings so `tests/test_live.py`'s idempotency tests pass unchanged.
+- **d. SSE (§3 step 7):** `StreamingResponse(media_type="text/event-stream")` with an async generator polling `events.list()` (Redis-backed with an in-memory fallback), one keep-alive comment every 15 s and a hard cap per connection. The agent's LangGraph stream uses the same shape.
+- **e. Static (§3 step 8):** `StaticFiles` for `/ui`, `/assets`, `/out`; keep the `/out/` containment check as a dependency that rejects `..`, symlinks and absolute paths. `tests/test_hardening.py` must still pass.
+- **f. A/B (§3 step 10):** `python -m mirsal serve` starts uvicorn; **`--stdlib` keeps the old server** so both run on one PC. `tests/__init__.py::serve()` gets a switch, the default becomes FastAPI, and `tests/test_api_contract.py` runs against **both for one release**. Do not drop this.
 
-| step | what the person does | what the screen shows |
-|---|---|---|
-| **1 · Source** | picks a pack (locked when started from a pack) and a source: **the pack's own stickers** (free, no generation) / **draw new** (price shown, click = go) / **use an existing set** | three cards, each with its cost in words ("Free", "about 2 credits"); nothing spent |
-| **2 · Particles** | picks how many (4 for 2x2, 9 for 3x3); the vision model reads the **batch's own sheet** (no per-sticker check, no "check all") and offers 8-12 short names; the person picks N; the sheet is drawn; **a few seconds later pre-cut cells** come back and the person ticks which to keep | chips, a price line, then a cell grid; every cell with a picture is usable |
-| **3 · Motion** | live simulation with presets and sliders | **one** preview for the pack (not one row per sticker), preset cards, and the sliders renamed for a person: **Energy / Float / Swirl**, with count / spin / size under *Advanced* |
-| **4 · Finish** | renders a burst, adds it | the burst with a badge, its warnings in words, one **Add to pack** |
+**Stage 0: the inventory, written down first, as a file in the repo.** From the inline dispatch in `console/server.py` (`do_GET`, `do_POST`, the `startswith()` branches), enumerate every route: method, path, request body shape, response shape, auth, SSE or not. **This list is the acceptance criterion for every later stage: diff against it.** Record explicitly what must survive verbatim:
 
-Two rules that shape it: **the price is on its own line, never inside the button** (the button says what it does; the line says what it costs), and **a rejection is never a dead end** (section 16.3).
+- the `/api/v1/` prefix alias;
+- the short-lived signed asset links and `POST /api/assets/sign`;
+- the `NO_ROUTE` wording: a URL the server does not serve answers in its own words, never a bare 404 (`server.py`, guarded by `tests/test_openapi.py`);
+- accounts, rate limits, multipart uploads, every streaming response;
+- every "Use it anyway" endpoint, `POST /api/generations/{id}/allow` (`kind` still|animation), with its exact payload, including `waived` and the per-sticker `allow.{still,animation}.{can,allowed,undo,why,final}`;
+- the particle routes, including `POST /api/particles {from_generation}`, `POST /api/generations/{id}/recut_particles`, `more | preview | render | add` and `GET /api/particles/deleted`.
 
-### 16.3 A rejection is never a dead end (`CLAUDE.md` rule 10, everywhere)
+**The delta: pydantic (the only addition to §3).** §3 step 11 lists `fastapi`, `uvicorn[standard]`, `httpx`; add **`pydantic>=2`**.
 
-The engine half is built and tested: `POST /api/generations/{id}/allow {kind: still|animation}`, free, recorded, reversible (`engine/verify.py` `OVERRIDABLE` vs `TECHNICAL`). Missing are the **surfaces**:
+- **a.** Every request and response body of `docs/api.md` becomes a `BaseModel` in `console/app_models.py`: one source of truth for the shapes.
+- **b.** `Console` keeps returning plain dicts. A thin `model_validate` at the route edge is the ONLY place validation happens. **A body that does not match raises today's error shape, never a new FastAPI 422.**
+- **c.** Type the agent's LangGraph state (`agent/graph.py` `State`, a plain dict today) and the payloads in `agent/tools.py` the same way.
+- **d.** Extend the engine-purity test: `engine/` must not import `fastapi`, `starlette`, `uvicorn` **or `pydantic`** (add all four to the existing banned-import assertion beside `psycopg` / `redis` / `langgraph`), and say so in rule 3. This upholds §3 step 11's "no new wheels in `engine/`".
+- **e.** `console/openapi.py` is deleted and the spec is generated. **Keep `tests/test_openapi.py`'s no-route probe**, repointed at the generated spec: that test is the guard (§3 step 9). `docs/api.md` keeps the narrative (auth, idempotency, signed links, accounts, rate limits) and links the generated reference.
 
-- **The left image sheet must be clickable per slice.** Today `generate.js issueSvg` draws every cell but only the *animation* marks carry a click; a still cannot be allowed from the sheet at all. Full-cell hit area, same hover / tooltip / aria as the tile, same route.
-- **One universal allow-all.** `allowAllRow` covers animations only. It must cover stills too, per kind, and the number must count what is allow-able **now** ("Use all anyway (3)"), never everything.
-- **The AI / vision section is always retrievable and always marked.** The chat tile has no allow button, and the creator's stop card shows no picture at all. The stop message must carry the generation card, the rejected cells wear the locked red marks (hatched = not in the set, solid + check = allowed by you), and the judge's per-sticker reasons stay readable whatever the run does next.
-- **The agentic creator may not stop on a Python block without offering to allow it** (`agent/creator.py:118-124`, `:166-170`): only *Continue without S#* / *Stop* today. It needs `tools.allow` + `creator_allow` / `creator_unallow`; a **technical** block says why and offers nothing.
+**Gate: the real commands, real counts, never numbers from an older run** (run the suite ALONE: parallel runs cause 409 busy):
 
-Design: `docs/design.md` §9. Engine: `docs/engine-and-studio.md` "Use it anyway". Creator: `docs/agent-and-chat.md`. Open work: `HANDOFF.md` §0c.
+```
+python -m unittest                 # the whole suite (1025 tests at the 2026-10-03 checkpoint: a floor, not a quote)
+node --test tests/js/*.test.js     # 151 at the checkpoint
+python -m tests.test_js            # the shared-ACT / data-act guards
+python -m mirsal doctor            # must now also report the web stack
+```
 
-### 16.4 What the Studio should feel like
+`tests/test_openapi.py` and `tests/test_api_contract.py` stay green with unchanged intent. **New test:** every route in the Stage 0 inventory answers with the recorded status and body shape; that is the regression net for the whole migration. The golden path works end to end through the new server (`docs/engine-and-studio.md`). Windows still works: `pathlib` only, no shell-specific commands.
 
-One shell, one palette, one header, one second column (`docs/design.md` §§3-4). Then:
+**Out of scope:** any change to a route's behaviour, wording, status code or payload; any new feature or UI change; any engine change. Do **not** make the engine or pipeline async: it blocks on external CLI calls (Higgsfield / Kling), not on IO, so async buys nothing here. No auth features, endpoints or headers that do not exist today.
 
-- **The batch is the unit of attention.** A click on a batch presents that batch and only that batch. The tabs are *Stickers / Animation / Particles / Pack* and nothing else competes.
-- **"History of G###" is gone.** It was decisions and captions nobody reads. Its place is the batch's own Particles section, which reads from the pack.
-- **The Particles tab is a small wizard, not a studio.** Three cards (free / price / existing set) and a `Create particles for pack` button; the professional surface is `Create > Particle effects`, which is the same wizard with every control.
+**Report back:** Stage 0's inventory (the file), then one commit per stage with the gate output pasted, then the contract diff against Stage 0, which must be empty. If any step of §3 turns out to be wrong for this codebase, STOP and say why instead of improvising. When it lands: `docs/api.md` (provenance of the OpenAPI document, the server kind), `README.md` (architecture), `HANDOFF.md` and `CLAUDE.md` are updated in the same step and this entry (and §3's checklist) are deleted.
 
-### 16.5 Build order (each step ends green and documented)
+### 16.2 Telegram delivery of a burst (S)
 
-| # | step | size |
-|---|---|---|
-| 1 | `flow/particle_sets.py` + `POST /api/particles {from_effect}` + assign / unassign / more / delete / restore + tests (the bridge; the screens are written once against it) | M |
-| 2 | `Library > Particles` + `Pack page > Particle studio` + the **Use as particle set** step in both wizards | L |
-| 3 | re-point the sticker view, the pack-grid badge and the Studio section to the pack; delete the per-sticker framing and the word "pieces" | M |
-| 4 | the surfaces of 17.3: clickable sheet cells, allow-all for stills, the chat tile + creator card | M |
-| 5 | AI chat intents (make, assign, more, delete) | M |
-| 6 | Telegram: how a burst is delivered (open question 3 of `docs/particles_plan.md`) | S |
+Today a burst reaches the pack as an ordinary animated sticker tagged with the pack's emoji (`POST /api/particles/{id}/add`). Whether that is the delivery (it works today), or a downloadable file, or a Telegram *effect*, is Haitham's verdict (16.4, question 3; `docs/particles_plan.md` open question 3). Build nothing until it is answered.
 
-### 16.6 Still open for Haitham (do not build on a guess)
+### 16.3 Burst creation: many packs from one liked sheet (P14)
+
+Reuse the liked sheet's image, prepare a list of actions, one priced card, one async queue lane per action. **Nothing is built.** The model (a Burst `B###` of lanes `Q###`, the file-name question against rule 9), the risks and its four questions are in `docs/burst_plan.md`; it waits for Haitham's go. Until then the chat says "many packs of the same character is not supported yet" (`agent/editroute.unsupported`) and points there.
+
+### 16.4 Verdicts that gate the above (Haitham; do not build on a guess; delete a question when answered)
 
 1. One burst per **pack** (every emoji of the pack plays the same burst) or one per **emoji** (same particles, different motion)? The plan assumes per pack.
 2. Is a stand-alone set a real library pack (sendable to Telegram on its own) or only an asset?
 3. Does a burst reach Telegram as ordinary animated stickers in the pack (works today) or as a downloadable file / a Telegram *effect*?
-4. Show the credits a set cost on its card? (the plan says yes)
+4. The four questions of `docs/burst_plan.md` §6 (lane cap, one pack per lane or a batch, vision for the suggestions, the lane id).
 
 ---
 

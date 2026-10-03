@@ -274,7 +274,7 @@ async function histLoad(more,quiet){if(HB.loading)return;HB.loading=true;
 const histReload=()=>histLoad(false);
 /* while the Studio or Create is showing, the column is read again every 10 s (a batch that was edited or finished moves to the top); it redraws only when something changed */
 setInterval(()=>{if(!document.hidden&&['generate','create'].includes(route_))histLoad(false,true)},10000);
-/* A batch is one entry of the column (histRow: its stickers as the sheet's own grid, 3x3 or 2x2, `cells` from GET /api/history, with its title, G###, counts and edited time). A click on it
+/* A batch is one entry of the column (histRow: ONE picture, the first sticker, from `cells` of GET /api/history, with its title, G###, counts and edited time). A click on it
    makes it THE batch the Studio presents (ACT.hopen: the Studio's own view of it, nothing else beside it). Under that view sits the batch's Particles section (particles.js, spSecDraw): what was
    made for each of its stickers that is in a pack. The decisions on a batch's stickers are not shown here: they stay in its result.json and in GET /api/generations/<id>/history. */
 /* "Allow AI vision of generated media?": asked once, the answer is remembered in this browser (localStorage mirsal.allow_vlm = 1 / 0). The server enforces it too: the request itself carries allow_vlm.
@@ -285,11 +285,11 @@ const vlmSet=v=>{try{localStorage.setItem('mirsal.allow_vlm',v)}catch(e){}};
 ACT.vlmyes=()=>{vlmSet('1');closeDlg();const f=VLM.then;VLM.then=null;if(f)f()};
 const histTitle=it=>esc(titleCase(String(it.prompt||'').replace(/_/g,' '))||it.generation_id);
 const histInfo=it=>`${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}`;
-/* the stickers of a batch, in the sheet's own grid (a 2x2 batch draws four cells, a 3x3 nine; a cell with no picture yet is the checkerboard) */
-const histGrid=it=>`<span class=lv-hth style="--c:${Math.max(1,Math.min(6,(it.grid&&it.grid[1])||3))}">${(it.cells||[]).map(c=>c.png?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="S${c.index} · ${esc(String(c.status||'').toLowerCase())}"></span>`).join('')}</span>`;
+/* a batch is ONE picture: the first of its stickers that has one (P4 of the UI/UX spec: not the sheet's 4 or 9 cells); a batch with no picture yet is the checkerboard */
+const histThumb=it=>{const c=(it.cells||[]).find(x=>x.png);return`<span class=lv-hth>${c?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="${esc(String(((it.cells||[])[0]||{}).status||it.stage||'').toLowerCase())}"></span>`}</span>`};
 /* one entry of the column: a click presents the batch in the Studio. `on` = it is the batch the Studio presents now. */
 const histRow=it=>{const on=SES.gens.includes(it.id);
-  return`<button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${it.id} aria-pressed=${on} title="Show ${esc(it.generation_id)} in the Studio">${histGrid(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(it)}</small></span></button>`};
+  return`<button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${it.id} aria-pressed=${on} title="Show ${esc(it.generation_id)} in the Studio">${histThumb(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(it)}</small></span></button>`};
 /* the column: a title and the whole list, newest edit first; the next page is asked for when the list is scrolled near its end (no "Load more") */
 function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
   <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histRow).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div>`}

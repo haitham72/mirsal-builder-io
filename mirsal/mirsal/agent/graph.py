@@ -31,9 +31,9 @@ from ..runtime import cache as cachemod
 from . import creator
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
-from . import refine, subjects
+from . import editroute, refine, subjects
 from .profile import Profile
-from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, polarity_of, resolve, settings_from, smalltalk_kind
+from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind
 from .tools import ConsoleTools, ToolError
 
 INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
@@ -99,6 +99,7 @@ class Turn:
     queue: list = field(default_factory=list)
     spent: float = 0.0
     prev_pending: dict | None = None             # the plan that was waiting when this message arrived (a new one replaces it, and the reply says so)
+    er: dict | None = None                       # what an edit request means (agent/editroute.classify_edit): the editor, or a tweak / an action / a redesign
     unsure_review: bool = False                  # an approve / reject sentence with a negation in it: nothing is decided, the person is asked
     _lock: Any = None
 
@@ -122,10 +123,10 @@ class Agent:
     def _build(self):
         from langgraph.graph import END, StateGraph
         g = StateGraph(State)
-        nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "refine": self.n_refine, "another": self.n_another,
+        nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "particles": self.n_particles, "editroute": self.n_editroute, "unsupported": self.n_unsupported, "refine": self.n_refine, "another": self.n_another,
                  "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -160,7 +161,7 @@ class Agent:
                 if m.get("status") == "working":
                     m.update(status="error", text=m.get("text") or INTERRUPTED)
             label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "creator_go": "Approve and continue", "creator_stop": "Stop", "creator_skip": "Continue without those", "creator_force": "Continue with them",
-        "creator_force_video": "Animate at the new price", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again", "vision_yes": "Allow AI vision", "vision_no": "Keep AI vision off"}.get((action or {}).get("type"), "")
+        "creator_force_video": "Animate at the new price", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again"}.get((action or {}).get("type"), "")
             self.store.add_message(sess, "user", label)
             msg = self.store.add_message(sess, "assistant", "", status="working")
             self.store.save(sess)
@@ -222,11 +223,11 @@ class Agent:
             t.intents, t.conf = ["CREATOR"], 0.95
         elif t.action and t.action.get("type") in ("names_apply", "names_keep"):
             t.intents, t.conf = ["NAMES_DECIDE"], 1.0
-        elif t.action and t.action.get("type") in ("vision_yes", "vision_no"):
-            t.intents, t.conf = ["VISION"], 1.0
         elif asked and asked.get("intents") and is_sticker_answer(t.text, bool(t.selected)):
             t.text = f"{asked['text']} {t.text}".strip()       # the original request plus the missing "which": everything downstream reads it as one sentence
             t.intents, t.conf, answered = list(asked["intents"]), 0.95, True
+            if "EDIT_ROUTE" in t.intents:
+                t.er = editroute.classify_edit(asked["text"])
         else:
             t.intents, t.conf = classify(t.text, pending, has_gen, bool(t.selected))
             low = t.text.lower()
@@ -239,18 +240,27 @@ class Agent:
                 got = self.brain.classify(t.text, self.store.summary_text(sess))
                 if got:
                     t.intents, t.conf = got, 0.7
+            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES"):         # a question ("can you rotate him?") is an ASK until the rules read it
+                if editroute.unsupported(t.text):
+                    t.intents, t.conf = ["UNSUPPORTED"], 0.9
+                else:
+                    er = editroute.classify_edit(t.text)
+                    if er:                                              # the UI/UX spec P11-P13: every edit of what is open is one of: the editor, a tweak, a new action, a redesign
+                        t.intents, t.conf, t.er = ["EDIT_ROUTE"], 0.9, er
+            if t.intents and t.intents[0] != "PARTICLES" and particles_intent(t.text, bool(sess.get("particles"))):
+                t.intents, t.conf = ["PARTICLES"], 0.9                  # "generate more", "also use them for the Princess pack": about the particle set this chat has in focus
             if t.intents and t.intents[0] in ("EDIT_STICKERS", "NEW", "FEEDBACK", "AMBIGUOUS"):
                 refine_it = self._wants_refine(t, has_gen)
                 if refine_it:
                     t.intents, t.conf = ["REFINE"], 0.9
-        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
+        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "PARTICLES": "particles", "EDIT_ROUTE": "an edit", "UNSUPPORTED": "something I cannot do yet", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
-                 "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
+                 "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
-                 "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
-                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
+                 "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
+                 "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
 
@@ -280,7 +290,7 @@ class Agent:
 
     def n_resolve(self, state: State) -> dict:
         t: Turn = state["turn"]
-        needs = [q for q in t.queue if q in ("edit", "feedback", "animate", "ask", "review", "another", "names")]
+        needs = [q for q in t.queue if q in ("edit", "editroute", "feedback", "animate", "ask", "review", "another", "names")]
         if not needs:
             return {}
         for gid in self._named_batches(t.sess, t.text):                       # "make G012/S3 happier": a batch the Studio made becomes a pass of this chat
@@ -486,7 +496,7 @@ class Agent:
                       refs: list | None = None, note: str = "") -> bool:
         """Start a batch from an approved plan (`p["plan"]` is sent as it is: the card and the batch are the same). True when it started; False leaves the reply explaining why."""
         try:
-            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"))
+            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"), ref_clause=p.get("ref_clause"))
         except ToolError as e:
             t.reply = f"I couldn't start that: {e}"
             t.trace.end("not started", ok=False)
@@ -553,6 +563,8 @@ class Agent:
             t.sess["settings"]["allow_vlm"] = True
             t.trace.retitle(f"looking at {self._nm(t.sess, p['generation'])}")
             self._run_describe(t, p["generation"], p.get("only") or [])
+        elif p["type"] == "particles":
+            self._do_particles(t, p)
         elif p["type"] == "batch":
             t.trace.retitle("regenerating " + ", ".join(i["label"] for i in p["items"]))
             n = 0
@@ -646,7 +658,7 @@ class Agent:
         done, failed = [], []
         for it in items:
             try:
-                r = self.tools.create(it["prompt"], it["grid"], it["style_id"], it.get("ai", True), parent=it.get("parent"), base_plan=it.get("plan"))
+                r = self.tools.create(it["prompt"], it["grid"], it["style_id"], it.get("ai", True), parent=it.get("parent"), base_plan=it.get("plan"), refs=it.get("refs"), ref_clause=it.get("ref_clause"))
             except ToolError as e:
                 failed.append((it, str(e)))
                 continue
@@ -744,6 +756,166 @@ class Agent:
         t.trace.end(f"opened {r['id']}")
         return {}
 
+    # -- particle sets (docs/agent-and-chat.md, particle sets in the chat) -------------------------------------------------------------------------------------------------
+    _PSTOP = {"pack", "packs", "set", "sets", "stickers", "sticker", "the", "a", "an", "my", "particle", "particles", "them", "it", "also", "more", "generate", "make", "draw", "delete", "remove",
+              "restore", "use", "for", "on", "in", "to", "some", "few", "create", "add", "bring", "back", "get", "me", "of", "with", "and", "please", "i", "want", "need"}
+
+    def _words(self, s: str) -> set:
+        return {refine.stem(w) for w in re.findall(r"[a-z\u0600-\u06ff]+", s.lower()) if w not in self._PSTOP}
+
+    def _named(self, text: str, rows: list) -> list:
+        """The rows (packs or sets, by their name) that the message names: all the words of a name, else any word of it."""
+        said = self._words(text)
+        full = [r for r in rows if self._words(r["name"]) and self._words(r["name"]) <= said]
+        return full or [r for r in rows if self._words(r["name"]) & said]
+
+    def n_particles(self, state: State) -> dict:
+        """"make particles for my Barbie pack" / "generate more" / "delete the bat particles" / "restore ..." / "also use them for the Princess pack". Reads and free list edits happen at once; a sheet
+        (credits) is a plan with its price that waits for the go-ahead, like every other paid thing in the chat."""
+        t: Turn = state["turn"]
+        t.trace.retitle("particles")
+        kind = particles_intent(t.text, bool(t.sess.get("particles"))) or "make"
+        try:
+            return getattr(self, "_particles_" + kind)(t)
+        except ToolError as e:
+            t.reply = f"I could not do that: {e}"
+            t.trace.end("could not", ok=False)
+            return {}
+
+    def _focus_set(self, t: Turn, sets: list) -> tuple[dict | None, str]:
+        """The set the message means: named, else the one in focus, else the only one. (None, the words it used) when there is none to take."""
+        hit = self._named(t.text, sets)
+        if len(hit) == 1:
+            return hit[0], ""
+        if len(hit) > 1:
+            return None, "several"
+        fid = (t.sess.get("particles") or {}).get("set")
+        pick = next((s for s in sets if s["id"] == fid), None) or (sets[0] if len(sets) == 1 and not self._words(t.text) else None)
+        return pick, " ".join(sorted(self._words(t.text)))
+
+    def _no_set(self, t: Turn, sets: list, why: str, verb: str) -> dict:
+        if why == "several":
+            t.reply = "Several particle sets match. Which one? " + ", ".join(f"**{s['name']}**" for s in self._named(t.text, sets)[:4])
+        elif why:
+            t.reply = f"I could not find a particle set called \"{why}\" to {verb}." + (" You have " + ", ".join(f"**{s['name']}**" for s in sets[:4]) + "." if sets else " There are none yet: say \"make particles for my <pack> pack\".")
+        else:
+            t.reply = f"Which particle set should I {verb}? " + (", ".join(f"**{s['name']}**" for s in sets[:4]) if sets else "There are none yet.")
+        t.trace.end("asked which set")
+        return {}
+
+    def _particles_make(self, t: Turn) -> dict:
+        packs = [p for p in self.tools.packs() if p["count"]]
+        if not packs:
+            t.reply = "Particles are made for a pack in your library, and there is none with stickers yet. Make a pack first (approve stickers, then add them to a pack)."
+            t.trace.end("no pack", ok=False)
+            return {}
+        hit = self._named(t.text, packs)
+        pick = hit[0] if len(hit) == 1 else packs[0] if len(packs) == 1 else None
+        if not pick:
+            t.reply = ("Which pack? " if not hit else "Several packs match. Which one? ") + "Say its name, for example \"make particles for my " + (hit or packs)[0]["name"] + " pack\"."
+            t.chips = [{"label": p["name"], "text": f"make particles for my {p['name']} pack"} for p in (hit or packs)[:4]]
+            t.trace.end("asked which pack")
+            return {}
+        if not self.tools.live():
+            t.reply = "Drawing particles needs the Higgsfield CLI, and it is not available here. Nothing was started."
+            t.trace.end("no provider", ok=False)
+            return {}
+        els = self.tools.particle_options(pick["id"], 4)
+        spec = {"type": "particles", "op": "make", "pack": pick["id"], "pack_name": pick["name"], "set": None, "grid": "2x2", "elements": els, "estimate": self.tools.estimate("image")}
+        return self._offer_particles(t, spec, f"I'll draw {len(els)} particles for the **{pick['name']}** pack: {', '.join(els)}. When the sheet is back they become a particle set on the pack")
+
+    def _particles_more(self, t: Turn) -> dict:
+        sets = self.tools.particle_sets()
+        s, why = self._focus_set(t, sets)
+        if not s:
+            return self._no_set(t, sets, why, "add particles to")
+        if not self.tools.live():
+            t.reply = "Drawing particles needs the Higgsfield CLI, and it is not available here. Nothing was started."
+            return {}
+        els = (s.get("elements") or [])[:4]
+        if not els:
+            t.reply = f"**{s['name']}** has no particle names to draw yet. Tell me which, for example \"generate more hearts and stars for {s['name']}\"."
+            return {}
+        spec = {"type": "particles", "op": "more", "set": s["id"], "set_name": s["name"], "pack": None, "grid": "2x2", "elements": els, "estimate": self.tools.estimate("image")}
+        return self._offer_particles(t, spec, f"I'll draw {len(els)} more particles for **{s['name']}** ({', '.join(els)}). The cells it has stay as they are; the new ones are added")
+
+    def _offer_particles(self, t: Turn, spec: dict, what: str) -> dict:
+        card = {"type": "particles_plan", "op": spec["op"], "pack": spec.get("pack_name"), "pack_id": spec.get("pack"), "set": spec.get("set"), "name": spec.get("set_name"),
+                "grid": spec["grid"], "elements": spec["elements"], "estimate": spec["estimate"]}
+        t.sess["pending"] = spec
+        if self.tools.live() and t.sess["settings"].get("ask_before_spending", True):
+            t.cards.append(card)
+            t.reply = f"{what} ({_credits(spec['estimate'])}). Go ahead?"
+            t.chips = [{"label": "Draw them", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end("ready")
+        else:
+            self.n_confirm({"turn": _with_pending(t, spec)})
+        return {}
+
+    def _do_particles(self, t: Turn, p: dict) -> None:
+        if p["op"] == "delete":
+            try:
+                self.tools.particles_delete(p["set"], True)
+            except ToolError as e:
+                t.reply = f"I couldn't delete it: {e}"
+                return
+            t.reply = f"**{p['set_name']}** is in the trash; nothing is destroyed. Say \"restore the {p['set_name']}\" or press Restore under Library > Particles > Deleted."
+            return
+        t.trace.retitle("drawing particles")
+        try:
+            r = self.tools.particles_start(p.get("set"), p.get("pack"), p["grid"], p["elements"])
+        except ToolError as e:
+            t.sess["pending"] = p                                    # a refused start must not cost the plan
+            t.reply = f"I couldn't start the sheet: {e}. I kept the plan: press Draw them to try again, or Not yet to drop it."
+            t.chips = [{"label": "Draw them", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end("not started", ok=False)
+            return
+        t.sess["particles"] = {"set": r["set"], "pack": p.get("pack")}
+        t.cards.append({"type": "particles", "set": r["set"], "name": p.get("set_name") or f"{p.get('pack_name')} particles", "pack_id": p.get("pack"), "job": r["job"], "estimate": r.get("estimate"), "drawing": True})
+        t.reply = f"Drawing {len(p['elements'])} particles" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". When the sheet is cut they join the set by themselves; open the pack's particle studio to move them."
+        t.trace.end("sheet started")
+
+    def _particles_delete(self, t: Turn) -> dict:
+        sets = self.tools.particle_sets()
+        s, why = self._focus_set(t, sets)
+        if not s or (not self._named(t.text, sets) and why == ""):
+            return self._no_set(t, sets, why, "delete")
+        used = [u["name"] for u in s.get("used_in") or []]
+        if used:                                                     # in use: say which packs and wait (the API refuses without confirm, too)
+            t.sess["pending"] = {"type": "particles", "op": "delete", "set": s["id"], "set_name": s["name"]}
+            t.reply = f"**{s['name']}** is used by {', '.join(used)}. Deleting it takes it off those packs (it goes to the trash and can be restored). Delete it?"
+            t.chips = [{"label": "Delete it", "action": "confirm"}, {"label": "Keep it", "action": "cancel"}]
+            return {}
+        self.tools.particles_delete(s["id"], False)
+        t.reply = f"**{s['name']}** is in the trash; nothing is destroyed. Say \"restore the {s['name']}\" or press Restore under Library > Particles > Deleted."
+        return {}
+
+    def _particles_restore(self, t: Turn) -> dict:
+        gone = self.tools.particle_deleted()
+        hit = self._named(t.text, gone) or (gone if len(gone) == 1 else [])
+        if len(hit) != 1:
+            t.reply = ("Which deleted set? " + ", ".join(f"**{s['name']}**" for s in (hit or gone)[:4])) if gone else "Nothing is in the trash."
+            return {}
+        self.tools.particles_restore(hit[0]["id"])
+        t.sess["particles"] = {"set": hit[0]["id"], "pack": None}
+        t.reply = f"**{hit[0]['name']}** is back, with its cells and its packs."
+        return {}
+
+    def _particles_assign(self, t: Turn) -> dict:
+        sets = self.tools.particle_sets()
+        s, why = self._focus_set(t, [x for x in sets] if self._named(t.text, sets) else sets)
+        packs = self.tools.packs()
+        hit = [p for p in self._named(t.text, packs) if p["id"] not in (s or {}).get("packs", [])] if s else []
+        if not s:
+            return self._no_set(t, sets, why, "put on a pack")
+        if not hit:
+            t.reply = f"Which pack should **{s['name']}** also be used for? " + (", ".join(f"**{p['name']}**" for p in packs[:4]) if packs else "There are no packs yet.")
+            return {}
+        self.tools.particles_assign(s["id"], [p["id"] for p in hit])
+        t.sess["particles"] = {"set": s["id"], "pack": hit[0]["id"]}
+        t.reply = f"**{s['name']}** is now also used for {', '.join('**' + p['name'] + '**' for p in hit)}. Nothing was spent: it is the same set, not a copy."
+        return {}
+
     def n_refine(self, state: State) -> dict:
         """"The cherries were so realistic, make them more cartoonish; the banana was so small, make it bigger": each subject's stored plan gets its change written in, and a new sheet is made as a
         child of the old batch (the old one stays). One card, one total price, one go-ahead."""
@@ -832,6 +1004,122 @@ class Agent:
             t.trace.end(f"ready · {_credits(est)}")
         else:
             self._start_create(t, spec, parent=p["generation"], note=spec["note"])
+        return {}
+
+    # -- an edit of what is open, by what it means (UI/UX spec P11-P13) -------------------------------------------------------------------------------
+    def n_unsupported(self, state: State) -> dict:
+        t: Turn = state["turn"]
+        t.reply = editroute.unsupported(t.text) or "I can't do that yet."
+        t.trace.end("not supported yet")
+        return {}
+
+    def _explicit_targets(self, t: Turn) -> list:
+        """The stickers the person POINTED at in this message (a number, an id, a selection, "the shocked one"): a slice. A pronoun ("him", "it") is the character, so the whole sheet."""
+        return list(t.res.stickers) if t.res.how in ("number", "explicit id", "selection", "concept", "make A like B", "feedback clauses") else []
+
+    def n_editroute(self, state: State) -> dict:
+        """"can you rotate him?" -> the EDITOR (a transformation or a cleaning of one slice, free); "make him cry" / "now make him play football" / "make it as a lemon" -> drawn again, and what is sent
+        depends on the case (agent/editroute.py): the sheet as the picture for a tweak and a new action, no picture for a redesign; the parent's own saved prompt is what changes, never a sentence
+        rebuilt from the words. The batch is the one in focus, the sheet the person picked in this chat."""
+        t: Turn = state["turn"]
+        er = t.er or editroute.classify_edit(t.text) or {}
+        gen = t.res.generation or (t.sess.get("focus") or {}).get("generation") or (self.store.latest_pass(t.sess, with_generation=True) or {}).get("generation")
+        if not gen or not er:
+            t.reply = "There is nothing to change yet. Let's make some stickers first."
+            return {}
+        if er["route"] == "editor":
+            return self._editor_offer(t, gen, er)
+        return self._regen_offer(t, gen, er)
+
+    def _editor_offer(self, t: Turn, gen: str, er: dict) -> dict:
+        t.trace.retitle("opening the editor")
+        pointed = self._explicit_targets(t)
+        focus = (t.sess.get("focus") or {}).get("stickers") or []
+        sid = (pointed or [s for s in focus if s.startswith(gen + "/")] or [None])[0]
+        if not sid:
+            t.reply = "Which sticker should I open in the editor? Say a number, like \"flip number 3\", or click one."
+            t.sess["awaiting"] = {"intents": ["EDIT_ROUTE"], "text": t.text}
+            t.trace.end("asked which sticker")
+            return {}
+        index = int(sid.split("/S")[1])
+        what = {"rotate": "rotating", "flip": "flipping", "crop": "cropping", "clean": "cleaning", "text": "adding text"}.get((er.get("ops") or ["rotate"])[0], "that")
+        t.sess["focus"] = {"generation": gen, "stickers": [sid]}
+        t.reply = (f"Sure — {what} {self._key_of(gen, sid)} ({sid.split('/')[1]}) is a job for the editor, not a new picture, so nothing is spent. "
+                   "Want me to boot up the editor for you? When you save, you come straight back here with the slice updated.")
+        t.chips = [{"label": "Open the editor", "editor": {"generation": gen, "index": index}}]
+        t.trace.end("editor offered")
+        return {}
+
+    def _regen_offer(self, t: Turn, gen: str, er: dict) -> dict:
+        case = er["case"]
+        what = {"tweak": er.get("delta"), "action": er.get("action"), "redesign": er.get("subject")}[case]
+        try:
+            base = self.tools.generation_plan(gen)
+        except ToolError as e:
+            t.reply = f"I can't read the prompt of {self._nm(t.sess, gen)} to change it: {e}"
+            return {}
+        subj = self.store.subject_for_generation(t.sess, gen)
+        old = (subj or {}).get("name") or base.get("subject") or "the stickers"
+        name = what if case == "redesign" else old
+        st = t.sess["settings"]
+        t.trace.retitle({"tweak": "changing a detail", "action": "a new action", "redesign": f"redesigning as {what}"}[case])
+        pointed = self._explicit_targets(t)[:4]
+        est = self.tools.estimate("image") if self.tools.live() else None
+        if pointed:
+            return self._regen_slices(t, gen, base, pointed, case, what, name, est)
+        plan = editroute.plan_for(base, case, subject=er.get("subject"), action=er.get("action"), delta=er.get("delta"), said=t.text)
+        refs, clause, sheet_px = [], None, None
+        if editroute.sends_image(case):
+            try:
+                ref = self.tools.sheet_reference(gen)
+            except ToolError as e:
+                t.reply = f"I can't send the sheet of {self._nm(t.sess, gen)} as the picture: {e}"
+                return {}
+            refs, clause, sheet_px = [ref["ref"]], editroute.reference_clause(case, what), ref.get("px")
+        rows, cols = (plan.get("grid") or [3, 3])[:2] if isinstance(plan.get("grid"), (list, tuple)) else (3, 3)
+        sid = plan["slots"].get("style_id") or st["style_id"]
+        change = {"tweak": f"change only: {what}", "action": f"new action: {what}", "redesign": f"new design: {what}"}[case]
+        item = {"prompt": name, "subject": name, "grid": f"{rows}x{cols}", "style_id": sid, "ai": True, "plan": compact_plan(plan), "parent": gen, "refs": refs, "ref_clause": clause,
+                "note": f"{case}: {what}", "changes": [change]}
+        t.trace.step(f"{case}: {what}", {"title": f"from {self._nm(t.sess, gen)}", "lines": [f"the picture: {'this sheet (' + str(sheet_px) + ' px)' if refs else 'none: the actions are approved, the design is new'}"]})
+        card = self._items_card(f"{name}: {change}", [item], st, est, {"edit": case, "image": bool(refs)})
+        how = {"tweak": f"I'll send **this sheet** as the picture with the same prompt and change only: {what}.",
+               "action": f"The shape stays: I'll send **this sheet** as the picture with the same prompt, and every character does “{what}” instead.",
+               "redesign": f"Same actions, new design: I'll make **{what}** from the same prompt as {old}, and **no picture is sent** (the actions are approved, only the design changes)."}[case]
+        return self._offer_items(t, f"{name} ({case})", [item], est, card, f"Got it. {how} A new sheet; the original stays.")
+
+    def _regen_slices(self, t: Turn, gen: str, base: dict, pointed: list, case: str, what: str, name: str, est) -> dict:
+        """One or a few slices drawn again as 1x1: only THAT slice goes to the provider, as the picture where the case sends one, with its own cell of the parent's prompt."""
+        st = t.sess["settings"]
+        items, notes = [], []
+        for sid in pointed:
+            try:
+                sp = editroute.plan_for(self.tools.slice_plan(sid), case, subject=what if case == "redesign" else None, action=what if case == "action" else None, delta=what if case == "tweak" else None, said=t.text)
+            except ToolError as e:
+                t.reply = f"I can't read the prompt of {sid.split('/')[1]}: {e}"
+                return {}
+            refs, clause = [], None
+            if editroute.sends_image(case):
+                r = self.tools.slice_reference(sid)
+                refs, clause = [r["ref"]], editroute.reference_clause(case, what, slice_=True)
+                notes.append(f"{sid.split('/')[1]} is {r['from_px']} px" + (f", under the {r['min_px']} px minimum, so it was scaled up to {r['px']} px" if r.get("scaled") else f", over the {r['min_px']} px minimum, so it is sent as it is"))
+            label = sid.split("/")[1]
+            items.append({"prompt": f"{name}: {self._key_of(gen, sid)}, {what}", "subject": name, "parent": gen, "regen_of": sid, "refs": refs, "ref_clause": clause, "plan": compact_plan(sp), "label": label,
+                          "style_id": sp["slots"].get("style_id") or st["style_id"], "note": f"{label} redone ({case}): {what}"})
+        total = (est or 0) * len(items)
+        spec = {"type": "batch", "items": items, "style_id": st["style_id"], "ai": True, "estimate": total}
+        labels = ", ".join(i["label"] for i in items)
+        t.trace.step(f"{case}: {what}", {"title": "only the slice goes to the provider", "lines": notes or ["no picture is sent"]})
+        say = f"I'll redo {labels} ({case}: {what}); the rest of the batch stays." + (" " + "; ".join(notes) + "." if notes else "") + (f" That costs {_credits(total)}." if total else "")
+        if self.tools.live() and st.get("ask_before_spending", True):
+            t.sess["pending"] = spec
+            t.reply = say + " Go ahead?"
+            t.chips = [{"label": "Do it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end(f"ready · {_credits(total)}")
+        else:
+            t.sess["pending"] = spec
+            t.reply = say
+            self.n_confirm({"turn": _with_pending(t, spec)})
         return {}
 
     def n_edit(self, state: State) -> dict:
@@ -1232,19 +1520,6 @@ class Agent:
         finally:
             lock.__exit__(None, None, None)
 
-    def n_vision(self, state: State) -> dict:
-        """The answer to the early question: only the setting changes (a pending go-ahead, if any, is untouched)."""
-        t: Turn = state["turn"]
-        yes = (t.action or {}).get("type") == "vision_yes"
-        t.sess["settings"]["allow_vlm"] = bool(yes)
-        t.trace.task("saving your answer")
-        t.trace.step("AI vision allowed" if yes else "AI vision stays off")
-        t.trace.end("saved")
-        t.reply = ("Good: when stickers are ready I will look at them and suggest better names where one does not fit." if yes
-                   else "Understood, no picture leaves your PC for a vision model. Say \"allow AI vision\" any time.")
-        t.chips = [{"label": "Create it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}] if t.sess.get("pending") else []
-        return {}
-
     def n_smalltalk(self, state: State) -> dict:
         t: Turn = state["turn"]
         kind = smalltalk_kind(t.text)
@@ -1283,17 +1558,26 @@ class Agent:
     VISION_ASK = ("One more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? "
                   "I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.")
 
+    def _vision_ack(self, t: Turn) -> None:
+        """The person flipped the AI vision switch since the last turn (`SessionStore.set_vision`: state only, no turn of its own). This turn goes on as usual and says so once, in its own words."""
+        ack = t.sess.pop("vision_ack", None)
+        if ack:
+            t.reply = (t.reply + "\n\n" if t.reply else "") + ("AI vision is on, as you allowed: I can look at your stickers now (names, captions)." if ack == "allowed"
+                                                                 else "AI vision is off, as you chose: no picture goes to a vision model. Say \"allow AI vision\" or use the switch any time.")
+
     def _ask_vision_early(self, t: Turn) -> bool:
         """The first answer of a chat also asks, once, whether AI vision may be used (`settings.allow_vlm`: None = never asked). It is a pair of buttons that change only that setting,
         so it never replaces a pending go-ahead (the plan's Create stays what it was) and a person who ignores it is simply not asked again in this chat."""
         sess = t.sess
-        if sess["settings"].get("allow_vlm") is not None or sess.get("vision_asked") or (t.action or {}).get("type") in ("vision_yes", "vision_no"):
+        if sess["settings"].get("allow_vlm") is not None or sess.get("vision_asked"):
             return False
         if sess.get("awaiting") or (sess.get("pending") or {}).get("type") in ("describe", "names") or any(x in ("CONFIRM", "CANCEL") for x in t.intents) and not sess["interactions"]:
             return False                                  # a question of mine is open (which sticker? the describe consent): one question at a time
         sess["vision_asked"] = True
         t.reply = (t.reply + "\n\n" if t.reply else "") + self.VISION_ASK
-        t.chips = list(t.chips) + [{"label": "Allow AI vision", "action": "vision_yes"}, {"label": "Keep it off", "action": "vision_no"}]
+        # a one-time decision is not a creation control (UI/UX spec P9): the plan keeps only Create it (a typed "no" still cancels), and the question is ONE switch on the right with a glow. Pressing it
+        # writes the setting through the settings route and makes no chat turn (P10); leaving it alone is "not now" and is not asked again in this chat.
+        t.chips = [c for c in t.chips if c.get("action") != "cancel"] + [{"label": "Allow AI vision", "on": "AI vision on", "off": "AI vision off", "setting": {"allow_vlm": True}, "side": "right", "glow": True}]
         return True
 
     def _finish(self, t: Turn, ok: bool = True) -> None:
@@ -1302,6 +1586,8 @@ class Agent:
             sess["focus"] = {"generation": t.res.generation, "stickers": t.res.stickers[:3]}
         elif t.generation:
             sess["focus"] = {"generation": t.generation, "stickers": []}
+        if ok:
+            self._vision_ack(t)
         if ok and self._ask_vision_early(t):
             pass
         old, new = t.prev_pending, sess.get("pending")

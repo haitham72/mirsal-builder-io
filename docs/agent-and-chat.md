@@ -37,7 +37,7 @@ Paths are relative to the Python package `mirsal/mirsal/`.
    ASK, CHANGE_SETTINGS, SEARCH, CONFIRM, CANCEL, SMALLTALK, AMBIGUOUS`. A message can carry two ("I like 2 but make 5 happier" = feedback, then edit).
 2. `resolve`: sticker ids from the text, the UI selection or the focus. Two equally plausible candidates ask **one short question** with chips; a clear
    mapping ("make number 3 happier") never asks.
-3. an intent node: `new` (plan with the user's memory added, a priced plan card), `another`, `edit` (one 1x1 child generation per sticker, the rest stay),
+3. an intent node: `particles` (see below), `new` (plan with the user's memory added, a priced plan card), `another`, `edit` (one 1x1 child generation per sticker, the rest stay),
    `animate`, `feedback`, `review` ("approve all but 5 and 6" = human decisions through `gates.review`), `ask` (answered from metadata, no generation),
    `search` (the pool), `settings`, `confirm` / `cancel`.
 4. `finish`: focus, the interaction log, the reducer, the final step, the saved session.
@@ -202,8 +202,9 @@ Reproduced with the real server: a creator run stopped on a Python-blocked cell 
 2. The `cut` stop carries `Use it anyway` for every blocked sticker whose block is **overridable** (`gates.allowable(res, True, "still")`) and `Take it back` for the allowed ones; the same for `approve_anim` on animations (`gates.allowable(res, True, "animation")`). A **technical** block (Telegram's own limits) or a cell with no picture offers no allow and says why in words — never a dead word like "a block is final".
 3. The creator's chips become `creator_allow` / `creator_unallow` with the indexes, handled in `resume` like `creator_skip` (so the override is a recorded human decision in the sticker's history, `actor human`, and reversible).
 4. **The picture travels with the message.** `_creator_say` attaches the generation card next to the creator card, so `runHTML` is followed by the real carousel: the rejected cells are visible, marked with the locked issue colours (red = dropped or blocked, `docs/design.md` §2), with the override on each tile.
-5. **The AI section is always retrievable.** The vision verdict is stored, not thrown away: the stop message lists the judge's reasons per sticker (`judge.reasons[]` in plain words) whatever the run does next, and the chat keeps a way to read the full verdict later. A judge that failed to run says so instead of leaving the run as if all were approved.
-6. **One bulk control on the creator's card**: `Use all anyway (N)` / `Take all back (N)` over whatever is allow-able now, mirroring the Studio's `allowAllRow` (which today covers animations only — stills are open there too, `docs/engine-and-studio.md`).
+5. **One allow block, on the card.** `ConsoleTools.generation` returns the batch's `allow` = exactly `gates.allow_info` (per kind `still` / `animation`: `can[]`, `allowed[]`, `undo[]`, `why{}`, `final{}`, index lists), the block the Studio's route sends; stickers carry only `waived`. The chat tile and the creator's bulk pair read it from the card's own data (`agent.js` `tileHTML` / `runHTML(run, allow)`): no extra request, no cache.
+6. **The AI section is always retrievable.** The vision verdict is stored, not thrown away: the stop message lists the judge's reasons per sticker (`judge.reasons[]` in plain words) whatever the run does next, and the chat keeps a way to read the full verdict later. A judge that failed to run says so instead of leaving the run as if all were approved.
+7. **One bulk control on the creator's card**: `Use all anyway (N)` / `Take all back (N)` over whatever is allow-able now, mirroring the Studio's `allowAllRow` (which today covers animations only — stills are open there too, `docs/engine-and-studio.md`).
 
 Tests: `tests/test_creator.py` gains the case that drove this — a Python-blocked cell offers allow, allowing it (`creator_allow`) puts the sticker back in the set and the run finishes to Telegram, and a *technical* block offers no allow.
 
@@ -298,3 +299,41 @@ Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi
 - **Taste memory, per user** (`out/profile/<user>.json`, plain counters, `agent/profile.py`): the style / size / colour of a change the person asked for is counted when that batch really starts. A taste is applied to a later request
   only after TWO consistent signals and only when it is strictly ahead (a split taste is no taste); a style in the sentence always wins; the card says what it assumed ("I used cartoonish because you asked for it 2 times").
 - **Particle effects from the chat** (`n_effects`, intent `EFFECTS`, card `effects`): see `docs/effects.md` §8. Free; opens the effects screen for a library pack.
+
+
+## Particle sets in the chat (2026-10-03)
+
+`resolver.particles_intent(text, has_set)` -> `make | more | delete | restore | assign | None`; `classify` returns `PARTICLES`, and a message that names no particles ("generate more", "also use them for the Princess pack") is about **the set the chat has in focus** (`session.particles = {set, pack}`). "particle effects" (the working-session card), a singular "particle burst" and a sticker request are not it. The node is `Agent.n_particles`; the tools are `particle_sets`, `particle_deleted`, `particle_options`, `particles_start`, `particles_delete`, `particles_restore`, `particles_assign` (owner only; `FakeTools` mirrors them).
+
+| says | does |
+|---|---|
+| "make particles for my Barbie pack" | finds the pack (asks when unclear), suggests 4 particles from the free table, shows a **`particles_plan` card with the price** and waits for the go-ahead (or goes at once when *Ask before spending* is off); on the go: a new set on the pack + the sheet job. Without the Higgsfield CLI it says so and starts nothing |
+| "generate more [bat particles]" | the same for the set named or in focus: the cells it has stay, the new ones are added |
+| "delete the bat particles" | free: to the trash (restorable); a set **in use asks first**, naming the packs |
+| "restore the bat particles" | from the trash, same id and packs |
+| "also use them for the Princess pack" | `assign`: a list edit, no credits |
+
+A refused start keeps the plan (press the same button again). The cards are `particles_plan` (op, pack or set, grid, the particles, the price) and `particles` (the set, `drawing`, a link to the pack's particle studio).
+
+
+## Edits by what they mean (2026-10-03, UI/UX spec P11-P13)
+
+`agent/editroute.py` (pure, rules only) reads every request about what is open into exactly one of: **the editor**, or a regeneration of one of three kinds. The intent is `EDIT_ROUTE` (`Agent.n_editroute`); "many packs of the same character" is `UNSUPPORTED` and says so (the next feature is `docs/burst_plan.md`).
+
+| the person means | examples | what is sent |
+|---|---|---|
+| **editor**: a transformation or a cleaning of one slice | rotate, flip, crop, remove the lines, add a text | nothing is generated or spent: *"Sure — want me to boot up the editor for you?"* and a chip that opens the editor on that slice at once. Save returns **to the AI** (`E.back.to`), the tile shows the new picture |
+| **(a) tweak**: I like the image, change a detail | move its hand, make him cry, her blonde, a hijab on cell 4, remove the skyline, make it cartoonish, cuter | the **sheet** as the picture + the parent's own saved prompt + only that change (`ref_clause`) |
+| **(b) action**: same image, new action | "now make him play football" | the **sheet** as the picture; every cell's action becomes the new one, the poses stay; the shape stays |
+| **(c) redesign**: same subject and actions, new design | "make him iron man", "now make it as a lemon" | **no picture**; the parent's prompt with the subject replaced everywhere (description, keys, first tags); the actions are kept |
+
+A pronoun ("him", "it") is the character, so the whole sheet; a number, an id or a clicked sticker is one **slice**, drawn alone as a 1x1 from its own cell of the parent's plan (`tools.slice_plan`), with only that slice as the picture (`tools.slice_reference`: its cell cut out
+of the sheet at the sheet's resolution; scaled up only under the 400 px minimum, and the reply says which: *"S3 is 682 px, over the 400 px minimum, so it is sent as it is"*). The sheet is the batch in focus, and after an edit from the Studio or the AI it is the **fixed sheet** (`tools.sheet_reference`).
+The new batch is saved under the turn's subject (`iron man`), so the next turn's "make him cry" is about it, never about a subject made of the sentence's words. Ambiguous sentences ask nothing they can answer from the plan; sentences naming a subject of the chat ("make the cherries more cartoonish") stay with the
+older refine flow. The classifier's table of examples is `tests/test_agent.py::EditRouteClassifier`.
+
+## The AI vision switch (2026-10-03, UI/UX spec P9-P10)
+
+A one-time decision is not a creation control. The first answer of a chat shows **Create it** and, on the right, ONE switch **Allow AI vision** with a subtle rotating glow while it is undecided (no "Not yet", no "Keep it off"; a typed "no" still cancels the plan). Pressing it calls the settings route, which writes
+state only (`SessionStore.set_vision`): no message, no card, no turn. The next turn proceeds normally and acknowledges the permission once ("AI vision is on, as you allowed…" / "AI vision is off, as you chose…"); a refusal is respected by describe and names. The switch then reads the live setting
+and flips on a press; the glow rests under `prefers-reduced-motion`.

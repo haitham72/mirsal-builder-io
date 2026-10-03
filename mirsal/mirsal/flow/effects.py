@@ -528,11 +528,16 @@ def particles_plan(out: Path, eid: str, grid=None, elements=None, truncate: bool
 def particles_base_plan(out: Path, eid: str, grid, elements) -> dict:
     """The plan the normal sheet path accepts (`tasks.reserve(base_plan=...)`) for the set's sheet: template `sheet_2x2|sheet_3x3` v3 for the cell layout, the particles prompt kept as
     `custom.sheet_prompt` so it is exactly what is sent, one cell per particle (key = the particle name, emoji = the pack's most common one)."""
-    from ..generation import prompter
     e = read(out, eid)
     rows, cols = _grid_of(grid)
     d = _describe({"subject": _subject_of(e), "elements": _picks(e, elements, rows * cols), "style": _style_of(e)}, rows, cols)
-    emoji = _emoji_of(e)
+    return sheet_base_plan(d, rows, cols, _emoji_of(e), "effect", e["id"])
+
+
+def sheet_base_plan(d: dict, rows: int, cols: int, emoji: str, link_key: str, link_id: str) -> dict:
+    """The plan the normal sheet path accepts for a sheet of particles, from the prompt template's own description `d` (`_describe`): shared by an effect's sheet (`link_key` "effect")
+    and a particle set's *Generate more* (`link_key` "set"), so both are cut and priced exactly the same way."""
+    from ..generation import prompter
     cells, stickers = [], []
     for c in d["cells"]:
         key = prompter.slug(c["label"]) or f"particle_{c['pos']}"
@@ -545,7 +550,7 @@ def particles_base_plan(out: Path, eid: str, grid, elements) -> dict:
              "action_guidance": "default", "key_colour": d["key"], "loop": False}
     return {"task": subj, "task_slug": prompter.slug(subj) or "particles", "subject": subj, "context": "", "kind": "default", "grid": [rows, cols], "template_id": tid,
             "template_version": prompter.TEMPLATE_VERSION, "slots": slots, "guidelines": {}, "sheet_prompt": d["prompt"], "video_prompt": "", "stickers": stickers,
-            "custom": {"sheet_prompt": d["prompt"]}, "effect": {"id": e["id"], "template": d["template"], "version": d["version"]}}
+            "custom": {"sheet_prompt": d["prompt"]}, link_key: {"id": link_id, "template": d["template"], "version": d["version"]}}
 
 
 def request_particles(out: Path, eid: str, job: str, grid, elements, user: str = "local") -> dict:

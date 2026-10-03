@@ -25,7 +25,7 @@ function statement(marker) {
 }
 
 function load(extra = '') {
-  const A = { sel: new Set(), allowCache: {} };
+  const A = { sel: new Set() };
   const sandbox = {
     AIU: { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) },
     ic: n => `<svg data-i=${n}></svg>`,
@@ -93,9 +93,8 @@ test('the carousel threads the allow block into every tile', () => {
 
 test('the creator’s card carries the bulk pair per kind, counting what is allow-able now', () => {
   const h = load();
-  h.A.allowCache = { G012: { allow: ALLOW, at: 0 } };
   const run = { subject: 'Barbie', scope: 'video', bypass: false, status: 'stopped', generation: 'G012', steps: [], stop: { why: 'Python blocked S1.' } };
-  const r = h.runHTML(run);
+  const r = h.runHTML(run, ALLOW);
   assert.match(r, /Python blocked S1\./, 'what it stopped for stays');
   assert.match(r, /data-act=agallowall data-g="G012" data-kind=still data-allow=1/);
   assert.match(r, /Use all anyway \(1\)/);
@@ -104,7 +103,8 @@ test('the creator’s card carries the bulk pair per kind, counting what is allo
   assert.match(r, /data-kind=animation data-allow=1/);
   assert.match(r, /or allow one sticker below/);
   const bare = load().runHTML({ ...run });
-  assert.doesNotMatch(bare, /agallowall/, 'nothing hydrated yet: no pair, and the stop still says why');
+  assert.doesNotMatch(bare, /agallowall/, 'no allow block on the card: no pair, and the stop still says why');
+  assert.match(bare, /Python blocked S1\./);
 });
 
 test('a verdict never dims a picture, and the red marks are the locked ones', () => {  assert.doesNotMatch(css, /\.ag-tile\.is-bad \.ag-ph\{opacity/, 'no dimming rule for a rejected tile');
@@ -119,9 +119,15 @@ test('every new chat action has a handler', () => {
 
 test('no bulk pair when nothing is allow-able, and none on a finished run', () => {
   const h = load();
-  h.A.allowCache = { G012: { allow: { still: { can: [], allowed: [], undo: [], why: {}, final: {} }, animation: { can: [], allowed: [], undo: [], why: {}, final: {} } }, at: 0 } };
+  const none = { still: { can: [], allowed: [], undo: [], why: {}, final: {} }, animation: { can: [], allowed: [], undo: [], why: {}, final: {} } };
   const run = { subject: 'Barbie', scope: 'video', bypass: false, status: 'stopped', generation: 'G012', steps: [], stop: { why: 'Python blocked S1.' } };
-  assert.doesNotMatch(h.runHTML(run), /run-bulk/);
-  h.A.allowCache = { G012: { allow: ALLOW, at: 0 } };
-  assert.doesNotMatch(h.runHTML({ ...run, status: 'done' }), /run-bulk/);
+  assert.doesNotMatch(h.runHTML(run, none), /run-bulk/);
+  assert.doesNotMatch(h.runHTML({ ...run, status: 'done' }, ALLOW), /run-bulk/);
+});
+
+test('the chat reads the allow block from the card’s own data: no second request, no cache, no polling of the batch', () => {
+  assert.doesNotMatch(src, /allowCache|syncCardAllow|agAllowRev/, 'the hydration fetch is gone');
+  assert.match(src, /\(c\.data&&c\.data\.allow\)\|\|null/, 'the tile gets the block from the card data');
+  assert.match(src, /c\.data&&c\.data\.allow,c\.run&&/, 'a change of the block repaints the message');
+  assert.doesNotMatch(src, /api\('\/api\/generations\/'/, 'the chat does not fetch the batch itself');
 });

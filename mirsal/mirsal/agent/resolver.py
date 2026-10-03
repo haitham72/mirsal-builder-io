@@ -309,6 +309,26 @@ NAMES_RX = (r"\b(?:rename|re-name|better names?|new names?|nicer names?|suggest 
 """A request to look at the pictures and propose better names ("suggest better names", "rename them"): it needs AI vision, so it needs the person's yes like a description does."""
 
 
+def particles_intent(text: str, has_set: bool) -> str | None:
+    """Which request about PARTICLE SETS this is (docs/agent-and-chat.md, particle sets in the chat): make | more | delete | restore | assign, or None. "particle effects" (the working-session card), a singular "particle burst"
+    and a sticker request are not it. A request that names no particles ("generate more", "also use them for the Princess pack") is about the set the chat has in focus, so it needs one."""
+    t = text.lower()
+    if re.search(r"\beffects?\b", t):
+        return None
+    word = bool(re.search(r"\bparticles\b", t))
+    if word and re.search(r"\b(?:delete|remove|trash|get rid of)\b", t):
+        return "delete"
+    if word and re.search(r"\b(?:restore|undelete|bring back|get back)\b", t):
+        return "restore"
+    if (word or has_set) and re.search(r"\buse\b.*\b(?:for|on|in|with)\b.*\bpacks?\b", t):
+        return "assign"
+    if (word or has_set) and re.search(r"\b(?:generate|make|draw|create|add|give me)\b\s+(?:me\s+)?(?:some\s+|a few\s+|\d+\s+)?more\b", t):
+        return "more"
+    if word and re.search(r"\b(?:make|create|draw|generate|give|build|i want|i need|i'd like)\b", t):
+        return "make"
+    return None
+
+
 def classify(text: str, has_pending: bool, has_generation: bool, has_selection: bool = False) -> tuple[list, float]:
     """Intents in order of importance, with a confidence. Below 0.6 the graph asks the model to classify."""
     t = text.strip().lower()
@@ -327,6 +347,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["SMALLTALK"], 0.95
     if _parse_multi(t):
         return ["NEW_MULTI"], 0.9                                    # "create three sticker packs of fruits": several subjects, one plan, one price
+    if particles_intent(t, False):
+        return ["PARTICLES"], 0.9                                    # "make particles for my Barbie pack": a particle SET of the pack, priced and waiting for the go
     if re.search(r"\b(?:particles?|bursts?|explosions?|confetti)\b", t) and re.search(r"\b(?:effects?|animations?|stickers?|packs?|emoji)\b", t):
         return ["EFFECTS"], 0.9                                      # "make particle effects for my Superman pack": the effects screen, never a new sheet
     if has_generation and re.search(NAMES_RX, t):

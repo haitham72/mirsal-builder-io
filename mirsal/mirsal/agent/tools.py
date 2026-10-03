@@ -107,25 +107,22 @@ class ConsoleTools:
     def generation(self, gid: str) -> dict:
         """The sticker list of one batch for the chat (ids, keys, emoji, status, reviews, file urls).
 
-        Each sticker also carries what a person may DO with it that Python blocked (`allow`): `can` (use it anyway now), `allowed` (it carries a permission), `undo` (take it back now),
-        `why` (the plain-words reason) and `final` (why it cannot be allowed). Without this the chat tile can show a blocked sticker but cannot offer the override that
-        rule 10 requires on every surface (`gates.allow_info`, computed, never stored)."""
+        The batch carries what a person may DO with what Python blocked (`allow`): exactly `gates.allow_info`, the block the Studio's route sends too, per kind (`still`, `animation`):
+        `can` (indexes that may be allowed now), `allowed` (carry a permission), `undo` (may be taken back now), `why` ({index: plain words}) and `final` ({index: why it cannot be
+        allowed}). Without it the chat tile can show a blocked sticker but cannot offer the override that rule 10 requires on every surface. Computed, never stored; a sticker carries only
+        `waived` (the checks it was allowed past), no second copy of the block."""
         self._see(gid)
         res = pl.read_result(self.out, int(gid[1:]))
-        info = gates.allow_info(res)
         stickers = []
         for s in res["stickers"]:
             i = s["index"]
-            allow = {kind: {"can": info[kind]["can"].count(i) > 0, "allowed": i in info[kind]["allowed"],
-                            "undo": i in info[kind]["undo"], "why": info[kind]["why"].get(str(i)), "final": info[kind]["final"].get(str(i))}
-                     for kind in gates.KINDS}
             stickers.append({"id": f"{gid}/S{i}", "index": i, "key": s["key"], "name": s.get("name"), "emoji": s.get("emoji"),
                              "tags": s.get("tags"), "title": s.get("title"), "proposed_title": (s.get("title_proposal") or {}).get("name"), "status": s["status"], "reason": s.get("reason"), "still": s["review"]["still"],
-                             "anim": s["review"]["anim"], "anim_status": s.get("anim_status"), "allow": allow,
+                             "anim": s["review"]["anim"], "anim_status": s.get("anim_status"),
                              "waived": list(s.get("still_override") or []) + list(s.get("anim_override") or []),
-                             "png": f"/out/{gid}/{s['png']}" if s.get("png") else None,
+                             "png": f"/out/{gid}/{s['png']}?e={s.get('rendered_at') or s.get('edited_at') or 0}" if s.get("png") else None,          # the edit time: an edited slice is a new url, never the cached picture
                              "webm": f"/out/{gid}/{s['webm']}" if s.get("webm") else None, "prompt": s.get("prompt")})
-        return {"generation": gid, "stage": res.get("stage"), "error": res.get("error"), "prompt": res.get("prompt"), "problem": self._problem(res),
+        return {"generation": gid, "stage": res.get("stage"), "error": res.get("error"), "prompt": res.get("prompt"), "problem": self._problem(res), "allow": gates.allow_info(res),
                 "parent": f"G{int(res['parent']):03d}" if res.get("parent") else None, "grid": res.get("grid"), "stickers": stickers}
 
     def _problem(self, res: dict) -> dict | None:
@@ -178,7 +175,7 @@ class ConsoleTools:
 
     # ---- writes (these can spend) -----------------------------------------------------------------------------------------------------
     def create(self, prompt: str, grid: str = "3x3", style_id: str = "flat_vector", ai: bool = True, parent: str | None = None,
-               regen_of: str | None = None, refs: list | None = None, base_plan: dict | None = None) -> dict:
+               regen_of: str | None = None, refs: list | None = None, base_plan: dict | None = None, ref_clause: str | None = None) -> dict:
         """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); otherwise the prepared-sheet lookup, exactly as the page does. `base_plan` is the plan the person
         approved on the card: it is what is sent (the cells, tags and slots of the card), never planned a second time."""
         self._may_spend()
@@ -187,6 +184,8 @@ class ConsoleTools:
         try:
             if self.live():
                 body = {"prompt": prompt, "grid": grid, "style_id": style_id, "ai": ai, "refs": refs or []}
+                if ref_clause and refs:
+                    body["ref_clause"] = ref_clause                 # what the attached picture is for (editroute.REF_CLAUSES), instead of the default "change only the expression and the pose"
                 if parent:
                     body["parent"] = parent
                 if regen_of:
@@ -201,6 +200,68 @@ class ConsoleTools:
             return {"job": None, "task": None, "estimate": None, "generation": f"G{gid:03d}", "live": False}
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
+
+    def _png_ref(self, data: bytes, name: str) -> str:
+        return self.c.save_ref(data, name)["id"]
+
+    def sheet_reference(self, gid: str) -> dict:
+        """The picture a tweak or a new action is made from (UI/UX spec P12): the batch's SHEET, the one the person picked in the chat, and after a slice was edited and saved (the editor, the Studio, the
+        chat) the sheet rebuilt with those slices fixed (`source/sheet_fixed.png`). Copied into out/refs/ as R###, the Studio's own reference store. {ref, px (its short side), file}."""
+        import io
+        from PIL import Image
+        self._see(gid)
+        res = pl.read_result(self.out, int(gid[1:]))
+        d = pl.gen_dir(self.out, int(gid[1:]))
+        rel = next((r for r in (res["source"].get("sheet_fixed"), res["source"].get("sheet_copy")) if r and (d / r).is_file()), None)
+        if not rel:
+            raise ToolError("That batch has no sheet to send as a picture.", 409)
+        data = (d / rel).read_bytes()
+        im = Image.open(io.BytesIO(data))
+        px, ext = min(im.size), "png"
+        if len(data) > 14 * 1024 * 1024:                              # the reference store takes 15 MB: a big sheet goes as a high-quality JPEG
+            buf = io.BytesIO()
+            im.convert("RGB").save(buf, "JPEG", quality=92)
+            data, ext = buf.getvalue(), "jpg"
+        return {"ref": self._png_ref(data, f"{gid}_sheet.{ext}"), "px": px, "file": rel}
+
+    def slice_reference(self, sid: str, min_px: int = 400) -> dict:
+        """ONE slice as the picture (UI/UX spec P11b): its cell cut out of the batch's sheet (the fixed sheet when a slice was edited) at the sheet's own resolution, with the green screen the new picture
+        should have. Scaled up only when its short side is under `min_px` (the provider's minimum); {ref, px (what was sent), from_px (what the cell is), scaled, min_px}."""
+        import io
+        import numpy as np
+        from PIL import Image
+        gid, idx = sid.split("/")
+        self._see(gid)
+        n, i = int(gid[1:]), int(idx[1:])
+        res = pl.read_result(self.out, n)
+        d = pl.gen_dir(self.out, n)
+        st = next(x for x in res["stickers"] if x["index"] == i)
+        rel = next((r for r in (res["source"].get("sheet_fixed"), res["source"].get("sheet_copy")) if r and (d / r).is_file()), None)
+        cell = (st.get("metrics") or {}).get("cell")
+        if rel and cell:
+            x, y, w, h = (int(v) for v in cell)
+            im = Image.open(d / rel).convert("RGB").crop((x, y, x + w, y + h))
+        elif st.get("png") and (d / st["png"]).is_file():
+            im = Image.open(d / st["png"]).convert("RGBA")
+        else:
+            raise ToolError("That slice has no picture to send.", 409)
+        from_px = min(im.size)
+        scaled = from_px < min_px
+        if scaled:
+            k = min_px / from_px
+            im = im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS)
+        buf = io.BytesIO()
+        im.save(buf, "PNG")
+        return {"ref": self._png_ref(buf.getvalue(), f"{gid}_S{i}.png"), "px": min(im.size), "from_px": from_px, "scaled": scaled, "min_px": min_px}
+
+    def slice_plan(self, sid: str) -> dict:
+        """The plan of ONE sticker, made from its parent's own saved slots (same style, same cell label, same tags), as a 1x1: `gates.regen_plan`."""
+        gid, idx = sid.split("/")
+        self._see(gid)
+        try:
+            return gates.regen_plan(pl.read_result(self.out, int(gid[1:])), int(idx[1:]))
+        except Exception as e:
+            raise ToolError(f"I could not read the plan of {sid}: {e}", 409)
 
     def generation_plan(self, gid: str) -> dict:
         """The saved plan (prompts.json) of a batch: the cells, tags, slots and template it was made from, to start a changed copy of it (a refinement keeps everything but the change)."""
@@ -296,6 +357,80 @@ class ConsoleTools:
             return []
         return [{"id": p["id"], "name": p["name"], "count": len(p.get("stickers") or [])} for p in self.c.lib.snapshot()["packs"]]
 
+    # ---- particle sets (docs/particles_plan.md): the chat's reads and free edits, and the one call that spends (a sheet) ----
+    def _owner(self) -> None:
+        if self.member:
+            raise ToolError("Particle sets are for the owner's account for now.", 403)
+
+    def particle_sets(self) -> list:
+        """The particle sets that are not in the trash, compact: what the chat needs to name one and to say where it is used."""
+        if self.member:
+            return []
+        from ..flow import particle_sets as ps
+        return [{k: r.get(k) for k in ("id", "name", "packs", "used_in", "n_cells", "n_picked", "elements", "drawing")} for r in ps.list_sets(self.out, self.c.lib)]
+
+    def particle_deleted(self) -> list:
+        if self.member:
+            return []
+        from ..flow import particle_sets as ps
+        return [{k: r.get(k) for k in ("id", "name", "packs", "used_in")} for r in ps.list_deleted(self.out, self.c.lib)]
+
+    def particle_options(self, pack_id: str, n: int = 4) -> list:
+        """Candidate particles for a pack, free: the built-in table reads the pack's stickers (no picture leaves the machine here)."""
+        self._owner()
+        from ..vision import effect_plan
+        pk = next((p for p in self.c.lib.snapshot()["packs"] if p["id"] == pack_id), None)
+        if not pk:
+            raise ToolError("No such pack", 404)
+        r = effect_plan.suggest_options(None, kind="contact", stickers=[{"name": s.get("name"), "emoji": s.get("emoji")} for s in pk.get("stickers") or []], pack_name=pk["name"],
+                                        grid=(2, 2) if n <= 4 else (3, 3), allowed=False, out=self.out)
+        return list(r["options"])[:n]
+
+    def particles_start(self, set_id=None, pack_id=None, grid: str = "2x2", elements=None, name=None) -> dict:
+        """SPENDS: draw a sheet of particles for a set (`set_id`), or for a new set on a pack (`pack_id`), through the same call as POST /api/particles/{id}/more. The caller has shown the price
+        and has the person's go-ahead; the cells join the set when the sheet is cut."""
+        self._owner()
+        self._may_spend()
+        from ..flow import particle_sets as ps
+        if not self.live():
+            raise ToolError("Drawing particles needs the Higgsfield CLI (it is not installed or not logged in).", 503)
+        try:
+            if set_id is None:
+                pk = next((p for p in self.c.lib.snapshot()["packs"] if p["id"] == pack_id), None)
+                if not pk:
+                    raise ToolError("No such pack", 404)
+                set_id = ps.create(self.out, self.c.lib, name=name or f"{pk['name']} particles", elements=elements, packs=[pack_id], user=self.user["id"])["id"]
+            plan = ps.more_plan(self.out, self.c.lib, set_id, grid, elements)
+            base = ps.more_base_plan(self.out, self.c.lib, plan["id"], plan["grid"], plan["picks"])
+            r = self.c.live("sheet", {"prompt": base["task"], "grid": f"{plan['grid'][0]}x{plan['grid'][1]}", "outline": 0}, base_plan=base, particles={"set": plan["id"], "elements": plan["picks"]})
+        except (ps.SetError, pl.PipelineError) as e:
+            raise ToolError(str(e), e.code)
+        return {"set": plan["id"], "job": r["job"], "estimate": r.get("estimate"), "grid": plan["grid"]}
+
+    def particles_delete(self, set_id: str, confirm: bool = False) -> dict:
+        self._owner()
+        from ..flow import particle_sets as ps
+        try:
+            return ps.delete(self.out, self.c.lib, set_id, confirm_packs=confirm is True, user=self.user["id"])
+        except ps.SetError as e:
+            raise ToolError(str(e), e.code)
+
+    def particles_restore(self, set_id: str) -> dict:
+        self._owner()
+        from ..flow import particle_sets as ps
+        try:
+            return ps.restore(self.out, self.c.lib, set_id, self.user["id"])
+        except ps.SetError as e:
+            raise ToolError(str(e), e.code)
+
+    def particles_assign(self, set_id: str, packs: list) -> dict:
+        self._owner()
+        from ..flow import particle_sets as ps
+        try:
+            return ps.assign(self.out, self.c.lib, set_id, packs, self.user["id"])
+        except ps.SetError as e:
+            raise ToolError(str(e), e.code)
+
     def effects_start(self, pack_id: str, allowed: bool = False) -> dict:
         """The same call as POST /api/effects: a new E### for every sticker of the pack, analysed in the background (free; `allowed` is the person's yes to AI vision)."""
         import threading
@@ -382,6 +517,7 @@ class FakeTools:
         self.calls: list = []
         self.proposed: dict = {}
         self.sent_plans: list = []
+        self.sent: list = []                                  # every create(): prompt, grid, parent, regen_of, refs, ref_clause, plan (what the provider would get)
         self.plans: dict = {}
         self.fail_next_create = False
         self.judge_rejects: list = []
@@ -417,16 +553,20 @@ class FakeTools:
 
     def generation(self, gid):
         card = self.generation_card(gid)
-        out = {k: v for k, v in card.items() if k != "stickers"}      # a copy: the fixture is never mutated (a test asserts on its own stickers)
+        out = {k: v for k, v in card.items() if k not in ("stickers", "allow")}      # a copy: the fixture is never mutated (a test asserts on its own stickers)
         out["stickers"] = []
-        for s in card["stickers"]:                                    # FakeTools: what the chat tile needs to offer an override (the real tools compute it from gates.allow_info)
+        allow = {kind: {"can": [], "allowed": [], "undo": [], "why": {}, "final": {}} for kind in ("still", "animation")}
+        for s in card["stickers"]:                                    # FakeTools: the same block the real tools take from gates.allow_info (index lists per kind)
             st = {k: v for k, v in s.items() if k not in ("allow", "waived")}
-            st["allow"] = {"still": {"can": s.get("status") == "FAILED", "allowed": bool(s.get("still_override")), "undo": False,
-                                      "why": s.get("reason") if s.get("status") == "FAILED" else None, "final": None},
-                          "animation": {"can": s.get("anim_status") == "FAILED", "allowed": bool(s.get("anim_override")), "undo": False,
-                                        "why": s.get("anim_reason") if s.get("anim_status") == "FAILED" else None, "final": None}}
+            for kind, status, why, over in (("still", "status", "reason", "still_override"), ("animation", "anim_status", "anim_reason", "anim_override")):
+                if s.get(status) == "FAILED":
+                    allow[kind]["can"].append(s["index"])
+                    allow[kind]["why"][str(s["index"])] = s.get(why)
+                if s.get(over):
+                    allow[kind]["allowed"].append(s["index"])
             st["waived"] = list(s.get("still_override") or []) + list(s.get("anim_override") or [])
             out["stickers"].append(st)
+        out["allow"] = card.get("allow") or allow
         return out
 
     def generation_card(self, gid):
@@ -439,10 +579,30 @@ class FakeTools:
         return [{"id": g["generation"] + "/S1", "key": g["stickers"][0]["key"], "png": None, "emoji": None} for g in self.gens.values()
                 if q.lower().split()[0] in str(g).lower()]
 
-    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None):
+    def sheet_reference(self, gid):
+        self.calls.append(("sheet_reference", gid))
+        self.n_refs = getattr(self, "n_refs", 0) + 1
+        return {"ref": f"R{100 + self.n_refs}", "px": 2048, "file": "source/sheet.png"}
+
+    def slice_reference(self, sid, min_px=400):
+        self.calls.append(("slice_reference", sid, min_px))
+        self.n_slice_refs = getattr(self, "n_slice_refs", 0) + 1
+        return {"ref": f"R{200 + self.n_slice_refs}", "px": 682, "from_px": 682, "scaled": False, "min_px": min_px}
+
+    def slice_plan(self, sid):
+        gid, idx = sid.split("/")
+        base = self.generation_plan(gid)
+        cell = next(c for c in base["slots"]["cells"] if c["pos"] == int(idx[1:]))
+        st = next(s for s in base["stickers"] if s["index"] == int(idx[1:]))
+        return {"template_id": "single_1x1", "template_version": base.get("template_version", 3), "task": base.get("task"), "task_slug": base.get("task_slug"), "subject": base.get("subject"), "grid": [1, 1],
+                "slots": {**{k: v for k, v in base["slots"].items() if k != "cells"}, "mode": "single_1x1", "cells": [{**cell, "pos": 1}]},
+                "stickers": [{**st, "index": 1, "id": "prompt01"}]}
+
+    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None):
         if getattr(self, "fail_next_create", False):
             self.fail_next_create = False
             raise ToolError("the provider refused it; try again in a minute", 503)
+        self.sent.append({"prompt": prompt, "grid": grid, "style_id": style_id, "parent": parent, "regen_of": regen_of, "refs": list(refs or []), "ref_clause": ref_clause, "plan": base_plan})
         self.calls.append(("create", prompt, grid, parent, regen_of))
         if base_plan is not None:
             self.sent_plans.append(base_plan)
@@ -453,14 +613,17 @@ class FakeTools:
         gid = f"G{self.n_gens:03d}"
         self.gens[gid] = {"generation": gid, "stickers": [{"id": f"{gid}/S{i}", "index": i, "key": f"s{i}", "status": "READY", "still": "PENDING"}
                                                           for i in range(1, 10)]}
+        if base_plan is not None:
+            self.plans[gid] = json.loads(json.dumps(base_plan))       # the new batch's saved plan is the plan that was sent, like prompts.json
         return {"job": None, "task": None, "estimate": None, "generation": gid, "live": False}
 
     def generation_plan(self, gid):
         if gid in self.plans:
             return json.loads(json.dumps(self.plans[gid]))
         subj = (self.gens.get(gid) or {}).get("subject") or "subject"
-        return {"template_id": "fake_t", "template_version": 1, "subject": subj, "slots": {"subject_description": subj, "style_id": "realistic", "cells": [{"pos": 1, "label": "pose"}]},
-                "stickers": [{"index": i, "key": f"{subj}_{i}", "emoji": ["😀"]} for i in range(1, 10)]}
+        return {"template_id": "fake_t", "template_version": 1, "subject": subj, "task": subj, "task_slug": subj.replace(" ", "_"), "grid": [3, 3],
+                "slots": {"subject_description": subj, "style_id": "realistic", "cells": [{"pos": i, "label": f"pose {i}", "tags": [f"{subj}_{i}"], "emoji": "😀"} for i in range(1, 10)]},
+                "stickers": [{"index": i, "key": f"{subj}_{i}", "tags": [f"{subj}_{i}"], "emoji": ["😀"]} for i in range(1, 10)]}
 
     def more(self, gid):
         self.calls.append(("more", gid))
@@ -520,6 +683,32 @@ class FakeTools:
 
     def packs(self):
         return list(getattr(self, "pack_list", []))
+
+    def particle_sets(self):
+        return [dict(x) for x in getattr(self, "sets", [])]
+
+    def particle_deleted(self):
+        return [dict(x) for x in getattr(self, "deleted", [])]
+
+    def particle_options(self, pack_id, n=4):
+        return ["pink hearts", "gold stars", "tiny sparkles", "flower petals", "soft bubbles"][:n]
+
+    def particles_start(self, set_id=None, pack_id=None, grid="2x2", elements=None, name=None):
+        self.calls.append(("particles_start", set_id, pack_id, grid, list(elements or [])))
+        self.n_jobs += 1
+        return {"set": set_id or "S9", "job": f"J{self.n_jobs:03d}", "estimate": 2.0, "grid": [2, 2]}
+
+    def particles_delete(self, set_id, confirm=False):
+        self.calls.append(("particles_delete", set_id, confirm))
+        return {"ok": True, "id": set_id, "trashed": True}
+
+    def particles_restore(self, set_id):
+        self.calls.append(("particles_restore", set_id))
+        return {"id": set_id}
+
+    def particles_assign(self, set_id, packs):
+        self.calls.append(("particles_assign", set_id, list(packs)))
+        return {"id": set_id, "packs": list(packs)}
 
     def effects_start(self, pack_id, allowed=False):
         self.calls.append(("effects_start", pack_id, allowed))

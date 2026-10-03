@@ -71,6 +71,32 @@ def stitch_keyed(cells: list[CellKey], shape) -> np.ndarray:
     return canvas
 
 
+def merge_cells(sheet_rgb: np.ndarray, rects: list, fixes: dict, bgs: dict | None = None) -> np.ndarray:
+    """The sheet with some cells replaced by a finished (edited) sticker, as ONE sheet again (the UI/UX spec P8). `fixes` = {cell index (1 = the first cell): RGBA sticker}; the layout is the
+    sheet's own, so every cell keeps its S# by position, and every pixel outside a fixed cell is byte for byte what it was. A fixed cell is cleared to its flat key background (`bgs[index]`, else
+    the sheet's border colour at that cell's corner) and the sticker is fitted into it, centred, on that background: the lines the image model drew into a cell are gone with the old picture.
+    Pure: no I/O. Raises ValueError for a cell that is not on the sheet."""
+    out = sheet_rgb.copy()
+    for idx, rgba in fixes.items():
+        if not 1 <= int(idx) <= len(rects):
+            raise ValueError(f"cell {idx} is not on this sheet ({len(rects)} cells)")
+        x, y, w, h = (int(v) for v in rects[int(idx) - 1])
+        bg = np.array((bgs or {}).get(idx) or out[min(y + 2, out.shape[0] - 1), min(x + 2, out.shape[1] - 1)], np.float32)[:3]
+        cell = np.empty((h, w, 3), np.float32)
+        cell[:] = bg
+        k = min(w / rgba.shape[1], h / rgba.shape[0]) * 0.96
+        nw, nh = max(1, round(rgba.shape[1] * k)), max(1, round(rgba.shape[0] * k))
+        pm = rgba.astype(np.float32)
+        a = pm[..., 3:4] / 255.0
+        pm = np.concatenate([pm[..., :3] * a, pm[..., 3:4]], -1)                      # premultiplied: no dark fringe when it is resized
+        pm = cv2.resize(pm, (nw, nh), interpolation=cv2.INTER_AREA if k < 1 else cv2.INTER_CUBIC)
+        al = np.clip(pm[..., 3:4], 0, 255) / 255.0
+        ox, oy = (w - nw) // 2, (h - nh) // 2
+        cell[oy:oy + nh, ox:ox + nw] = pm[..., :3] + cell[oy:oy + nh, ox:ox + nw] * (1.0 - al)
+        out[y:y + h, x:x + w] = np.clip(cell + 0.5, 0, 255).astype(np.uint8)
+    return out
+
+
 def encode_static(rgba: np.ndarray, cfg):
     ok, buf = cv2.imencode(".png", cv2.cvtColor(rgba, cv2.COLOR_RGBA2BGRA))
     data = buf.tobytes()

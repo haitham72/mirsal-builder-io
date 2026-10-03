@@ -297,7 +297,7 @@ The Studio's **Edit** is one concept: the edit is a set of **layers** (text, emo
 - **A sticker with an animation** opens a video project made from its ORIGINAL animation (`POST /api/generations/<id>/studio_edit {index, action: "open"}` -> `{project}`; reopening returns the same project, so the layers are still there). The video editor shows `Save to sticker`; `action: "commit"` with the baked layer overlays (`overlays: {layerId: PNG data URL}`) **re-renders the animation with the layers at their timing AND composites the same layers onto the original image** (all visible layers, timing ignored), replaces both files in place (same names, same `S#`), keeps the originals once in `source/orig/`, writes `edited`, `edited_at`, `edit {project, layers}` and a human `EDIT` history line, and refreshes every pack copy of that sticker (`Library.refresh_from_generation`: the static copy takes the new image, the animated copy the new animation; names, emoji and order stay). The edited animation must still fit Telegram's 256 KB; otherwise the save is refused with the size.
 - **A sticker without an animation** opens the image editor (`POST /api/generations/<id>/edit {index, png}` -> `edit_still`): the same replace-in-place with the original kept; a PNG over the size limit is stored as the equivalent lossless WebP (the file keeps its stem, the extension follows), and a refusal is shown in a dialog while the editor stays open. A later `Appearance` re-render skips an edited sticker.
 - **From a pack or the library:** a sticker that came from a Studio batch (`source.generation`) offers **Edit in Studio** (the edit above) and **Open in Studio** (the batch, on the right view). A pack sticker without a source (a photo or video made in Create) edits as before: a static one as a copy in the image editor, an animated one in the video editor (`POST /api/projects/from_sticker`) with **Save to sticker** (replaces it in its pack: `render` with `save: {replace: {pack_id, sticker_id}}`) or Save as a new sticker.
-- Save always ends in the Studio (or the pack): the editor closes and the result shows ("edited" on the tile).
+- Save ends where the person was: the Studio (or the pack), or the AI when the editor was opened from the chat (`E.back.to === 'agent'`). The edited slice is then **merged back into one sheet** (`pipeline.rebuild_sheet`, `engine/sheet.merge_cells`): `source/sheet_fixed.png` is the batch's own sheet with every edited cell replaced by its current picture, same layout, so each keeps its S# by position; the raw sheet, the keyed sheet and every slice stay as they are. The Studio's sheet panel shows it as a third view, **Fixed (S2, S5)**, and it is the sheet the chat sends as the picture of a tweak or a new action.
 
 ## Animation: speed, the result cache, diagnostics (`engine/video.py`, `cli.py profile`)
 
@@ -379,9 +379,9 @@ Haitham: "Python blocking the imported images is stupid, it does not let me bypa
 | surface | what it must show | state |
 |---|---|---|
 | the Studio tile (`generate.js` `tileHtml` / `blockedBox`) | the picture (or the still's plain cell), the reason, `Use it anyway` / `Take it back` | built |
-| **a slice of the left image sheet** — the sheet SVG itself, not only the cut tiles | the cell's rect is clickable; hovering shows the same sentence; a click allows / takes back | **open** (the anim path has `data-act` on the rects in `issueSvg`; the still path does not, and neither path opens the tile) |
-| the chat's card (`agent.js` `tileHTML`, `runHTML`) | the picture, the reason, the override | **open** (the tile shows the picture but has no allow button; the creator's stop card shows no picture at all) |
-| the batch's bulk control | **one** `Use all anyway (N)` / `Take all back (N)` over whatever is allow-able now | animation only; **stills open** |
+| **a slice of the left image sheet** — the sheet SVG itself, not only the cut tiles | the cell's rect is a full-cell hit area; hovering shows the reason and what the click does; the click is the ONE cell control (below) | built; it never opens a tile |
+| the chat's card (`agent.js` `tileHTML`, `runHTML`) | the picture, the reason, the override, read from the card's own `allow` block (`gates.allow_info`) | built |
+| the batch's bulk control | **one** `Use all anyway (N)` / `Take all back (N)` over whatever is allow-able now | built, per kind (stills and animations) |
 
 **The sheet is a first-class surface.** The left sheet (`cutSvg`) already draws the cell rectangles, the cut lines, the index numbers and the issue marks, so it can be the cheapest place to allow: a rejected cell must be clickable exactly like its tile, with the same hover, tooltip and `aria` treatment. Not a new panel — the same control on the picture that is already there. `pointer-events` on the mark, a hit area the size of the cell, and the click routed to the same `POST /api/generations/{id}/allow` the tile uses.
 
@@ -397,3 +397,30 @@ Haitham: "any rejected image/video must give me an option to allow it". `engine/
 
 Still open there: the G3 video-sheet blocks `no_outline_on_sheet`, `video_specs`, `layout_match` have no "Use it anyway" (a design is in `HANDOFF.md`); a bulk "Use all anyway" for stills; the chat agent's tools.
 
+
+
+## One control per cell, one decision (2026-10-03, UI/UX spec P1-P4)
+
+Every control on a cell is the SAME control: the sheet's cell (image sheet and video sheet), the tile's x / +, `Use it anyway`, `Include anyway`, `Take it back`, `Bring back`, `Drop from the set`, and a blocked index chip. They all press `ACT.gcell`
+(`generate.js`), which asks `cellOp(g, t, stage)` what to do from the server's word (`g.allow`, `flow/gates.allow_info`) and the review state, so the same click sends the same request and leaves the same decision row:
+
+| state of the cell | op | request |
+|---|---|---|
+| a Python block that is a judgement call | `allow` | `POST /api/generations/{id}/allow {kind, index, allow: true}` |
+| carries a permission that may be taken back now | `unallow` | the same with `allow: false` |
+| made and kept | `drop` | `POST .../drop {index, dropped: true}` (a human reject at the stage it is in; never deletes) |
+| dropped, or out of bounds (OFF by default, HANDOFF §3 stays) | `include` | `POST .../drop {index, dropped: false}` ("Include anyway" / "Bring back") |
+| final (Telegram's own limit, no picture, already animated) | `none` | nothing is sent; the click says why |
+
+**The sheet does only that: no click on a cell opens a tile.** Opening belongs to the thumbnail on the right. *The open question* (does `+` override the locked "Include anyway"?) is answered by the table: they stay two engine mechanisms
+(a default-off state for out-of-bounds animations versus a recorded override of a BLOCK) and ONE control for the person, which never changes the default. **Thumbnails** are one picture: the Earlier-batches row shows the first sticker that has a
+picture (`live.js` `histThumb`), not the 4 or 9 cells of the sheet. **Delete pack** is a labelled button on the pack screen; its confirmation says how many stickers came from batches (they stay there and can be added again) and how many exist only in the pack
+(they go with it); the pool and the batch originals are never touched (`tests/test_library.py::PackDeleteKeepsOriginals`). **A sticker's id** (`G103/S2`) is never part of its name: the header shows the title and the emoji, and the id is its own hoverable,
+copyable control (`ACT.copyid`).
+
+## Separator lines in a generated sheet are a generator artefact, not a cut bug (known cause, 2026-10-03)
+
+The "Batman Lego pieces" sheet (G100) came back from the image model with random separator lines drawn through it (white divider crosses). The cut did nothing wrong: a sticker batch cuts by the layout it detects and blocks a cell whose subject crosses a cell border
+(`inside_cell`, an overridable judgement call), which is the right verdict for a line that really crosses a cell. **The cut is not weakened** and the test that pins it stays (`tests/test_particle_set.py::test_the_white_divider_cross_of_the_real_g100_no_longer_kills_cells`:
+a sticker batch still blocks, a particle batch cuts exact equal cells with a 2% inset that wipes the divider). The ways out are: cut it again as particles (`POST /api/generations/{id}/recut_particles`, free), allow the cell (`Use it anyway`), or open the slice
+in the editor, erase the lines and save: the batch's sheet is rebuilt with that slice fixed and keeps its S#.

@@ -310,3 +310,33 @@ class GroupingAndMigrationTests(unittest.TestCase):
         self.assertEqual(snap["s2"]["file"], "vid-002-gold-diving.webm")                                                        # left as it was
         self.assertTrue(snap["s1"]["file"].startswith("G012/"))
 
+
+
+class PackDeleteKeepsOriginals(unittest.TestCase):
+    """P3 of the UI/UX spec: deleting a pack removes only the library's copies. The batch a sticker came from (out/G###) and the pool are untouched, so the sticker stays reusable; a file two
+    packs share stays for the other pack."""
+
+    def test_the_batch_original_survives_a_pack_delete_and_a_shared_file_stays(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+        from mirsal.engine.config import EngineConfig
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        lib = Library(tmp / "out")
+        gdir = tmp / "out" / "G012" / "slices"
+        gdir.mkdir(parents=True)
+        (gdir / "S1.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"0" * 64)
+        a, b = lib.create_pack("A")["id"], lib.create_pack("B")["id"]
+        s = lib.add_bytes(a, (gdir / "S1.png").read_bytes(), "png", "Cape", "static", "🦸", source={"generation": "G012", "index": 1})
+        only = lib.add_bytes(a, b"\x89PNG\r\n\x1a\n" + b"1" * 64, "png", "Editor", "static", "🙂")
+        shared = lib.snapshot()["packs"][0]["stickers"][0]["file"]
+        with lib.lock:                                                       # the same file also sits in pack B
+            db = lib._load()
+            db["packs"][1]["stickers"].append({**s, "id": "dup"})
+            lib._save(db)
+        lib.delete_pack(a)
+        self.assertTrue((gdir / "S1.png").is_file(), "the batch original is never touched")
+        self.assertTrue((lib.files / shared).is_file(), "a file another pack still uses stays")
+        self.assertFalse((lib.files / only["file"]).exists(), "a sticker that existed only in the deleted pack goes with it (the confirmation says so)")
+        self.assertEqual([p["id"] for p in lib.snapshot()["packs"]], [b])

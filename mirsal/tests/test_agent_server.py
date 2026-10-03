@@ -66,6 +66,20 @@ class ChatServerTests(unittest.TestCase):
             time.sleep(0.2)
         self.fail("timeout: " + json.dumps(j)[:600])
 
+    def test_the_ai_vision_switch_is_the_settings_route_and_makes_no_turn(self):
+        """P10 of the UI/UX spec through the real server: allowing or refusing AI vision writes state only (no message, no card), asked-once is remembered, and a repeat press with the same value changes nothing."""
+        s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
+        sid = sess["id"]
+        n = len(self.req("GET", f"/api/chat/sessions/{sid}")[1]["messages"])
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"allow_vlm": True})
+        self.assertEqual((s, r["settings"]["allow_vlm"]), (200, True))
+        got = self.req("GET", f"/api/chat/sessions/{sid}")[1]
+        self.assertEqual(len(got["messages"]), n, "no user message and no assistant turn")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"allow_vlm": "maybe"})
+        self.assertIs(self.req("GET", f"/api/chat/sessions/{sid}")[1]["settings"]["allow_vlm"], True, "a value that is not true or false changes nothing")
+        self.req("POST", f"/api/chat/sessions/{sid}/settings", {"allow_vlm": False})
+        self.assertIs(self.req("GET", f"/api/chat/sessions/{sid}")[1]["settings"]["allow_vlm"], False)
+
     def test_a_full_conversation(self):
         s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
         self.assertEqual(s, 200)

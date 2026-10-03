@@ -117,10 +117,10 @@ async function spSecSync(force){if(SPS.busy||!$('gpart'))return;SPS.busy=true;
 setInterval(()=>{if(route_==='generate'&&!document.hidden)spSecSync()},2500);
 
 /* ---------- Library > Particles: every durable set as a card (docs/particles_plan.md 5). Reads GET /api/particles; writes rename/assign/unassign/duplicate/delete/restore.
-   The trash has no listing route, so Restore is offered on the notice right after a delete (the id is known). One set belongs to pack(s): the card says
+   The trash is listed (GET /api/particles/deleted): Restore is offered on the notice right after a delete AND from the "Deleted" list under the sets, long after. One set belongs to pack(s): the card says
    "used in: A, B" or "stand-alone", never per sticker. */
-const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null};
-const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null};
+const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:null,poll:0};
+const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null};
 const spCredits=n=>n==null||+n===0?'nothing spent yet':`about ${+n} credit${+n===1?'':'s'} spent`;
 function spSetCard(s){const cells=s.cells||[],picked=cells.filter(c=>c.picked),strip=picked.slice(0,8),used=s.used_in||[],open=SPL.open===s.id;
  return `<div class=ps-card data-ps=${esc(s.id)}>
@@ -139,19 +139,31 @@ function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=f
   ${cells.length?`<div class=ps-cells>${cells.map(c=>{const on=pick?pick.has(c.n):!!c.picked;
    return `<button class="ps-pick${on?' on':''}" data-act=pspickcell data-id=${esc(s.id)} data-n=${c.n} aria-pressed=${on} title="cell ${c.n}${on?' (kept)':' (not kept)'}">${c.url?`<img src="${esc(c.url)}" alt="" loading=lazy>`:`<span class=mut>${c.missing?'missing':'no file'}</span>`}<span class=ps-tick>${on?'✓':''}</span></button>`}).join('')}</div>
   ${pick?`<div class=row><button class="btn pri sm" data-act=pspicksave data-id=${esc(s.id)}>Keep ${pick.size} picked</button><button class=link data-act=pspickcancel data-id=${esc(s.id)}>cancel</button></div>`:`<div class=mut>Tick the cells to keep.</div>`}`:''}
+  ${spMoreHtml(full)}
+  ${spBurstHtml(full)}
  </div>`}
 function spLibHtml(){const sets=SPL.sets;
  if(!sets)return `<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>`;
- const del=SPL.deleted?`<div class=ps-del><span>Deleted ${esc(SPL.deleted.name)}: it is in the trash, nothing is destroyed.</span><button class="btn sm" data-act=psrestore data-id=${esc(SPL.deleted.id)}>Restore</button></div>`:'';
- if(!sets.length)return `${del}<div class="card" style="text-align:center;padding:40px"><h2>No particle sets yet</h2><p class=mut>A particle set belongs to a pack: make particles for a pack, then keep them with “Use as particle set”.</p><button class="btn pri" data-act=spopen>${ic('fx')} Make particles</button></div>`;
- return `${del}<div class=ps-lib>${sets.map(spSetCard).join('')}</div><div class=row><button class="btn pri" data-act=spopen>${ic('fx')} Make particles</button></div>`}
+ const del=SPL.deleted?`<div class=ps-del><span>Deleted ${esc(SPL.deleted.name)}: it is in the trash, nothing is destroyed.</span><button class="btn sm" data-act=psrestore data-id=${esc(SPL.deleted.id)}>Restore</button></div>`:'',trash=spTrashHtml(SPL.trash);
+ if(!sets.length)return `${del}<div class="card" style="text-align:center;padding:40px"><h2>No particle sets yet</h2><p class=mut>A particle set belongs to a pack: make particles for a pack, then keep them with “Use as particle set”.</p><button class="btn pri" data-act=spopen>${ic('fx')} Make particles</button></div>${trash}`;
+ return `${del}<div class=ps-lib>${sets.map(spSetCard).join('')}</div><div class=row><button class="btn pri" data-act=spopen>${ic('fx')} Make particles</button></div>${trash}`}
 function spLibRefresh(){if(typeof route_!=='undefined'&&route_==='library'&&typeof LIBTAB!=='undefined'&&LIBTAB==='particles'&&typeof RENDER!=='undefined'&&RENDER.library)RENDER.library();
  if(typeof route_!=='undefined'&&route_==='pack'&&typeof drawPack==='function')drawPack()}
 async function spLibSync(force){if(SPL.busy||(SPL.sets&&!force))return;SPL.busy=true;
- try{const r=await api('/api/particles');if(r.ok){SPL.sets=r.j.sets||[];spLibRefresh()}}finally{SPL.busy=false}}
+ try{const r=await api('/api/particles');if(r.ok){SPL.sets=r.j.sets||[];
+   for(const s of SPL.sets){const d=SPL.detail[s.id];if(d&&d.n_cells!==s.n_cells)delete SPL.detail[s.id]}          // cells arrived since the card was opened: it is read again
+   const t=await api('/api/particles/deleted');if(t.ok)SPL.trash=t.j.sets||[];spLibRefresh();spPoll()}}finally{SPL.busy=false}}
+/* a sheet being drawn for a set (Generate more) arrives on its own: while any set is drawing, the list (or the pack's sets) is read again every few seconds */
+function spPoll(){clearTimeout(SPL.poll);
+ const busy=(SPL.sets||[]).some(s=>s.drawing)||(typeof PKPT!=='undefined'&&Object.values(PKPT.sets||{}).some(l=>(l||[]).some(s=>s&&s.drawing)));
+ if(!busy)return;
+ SPL.poll=setTimeout(async()=>{if(typeof route_==='undefined')return;
+  if(route_==='library'&&typeof LIBTAB!=='undefined'&&LIBTAB==='particles')await spLibSync(true);
+  else if(route_==='pack'&&typeof ptCounts==='function'&&typeof PACK_ID!=='undefined'){await ptCounts(PACK_ID);if(PKPT.sets[PACK_ID]&&PKPT.sets[PACK_ID].length)spLibSync(true)}
+  spPoll()},2500)}
 ACT.psopen=async el=>{const id=el&&el.dataset.id;if(!id){spShowTab();return}SPL.open=SPL.open===id?'':id;
  if(SPL.open&&!SPL.detail[id]){const r=await api('/api/particles/'+id);if(r.ok)SPL.detail[id]=r.j}
- spLibRefresh()};
+ spLibRefresh();if(SPL.open===id){spMoreEstimate(id);spBurstPreview(id)}};
 ACT.psassign=el=>{const s=(SPL.sets||[]).find(x=>x.id===el.dataset.id);if(!s)return;const packs=(typeof LIB!=='undefined'&&LIB.packs)||[],have=new Set(s.packs||[]);
  dlg(`<h2>Assign “${esc(s.name||s.id)}”</h2><div class=mut style="margin-bottom:10px">Every sticker of a ticked pack bursts with these particles. Unticking takes the set off the pack: the set stays.</div>
   ${packs.map(p=>`<label class=ps-pack><input type=checkbox data-psapack=${esc(p.id)} ${have.has(p.id)?'checked':''}> ${esc(p.name)} <small class=mut>${p.stickers.length} stickers</small></label>`).join('')||'<div class=mut>No packs yet.</div>'}
@@ -180,6 +192,112 @@ ACT.pspickcancel=el=>{delete SPL.pick[el.dataset.id];spLibRefresh()};
 ACT.pspicksave=async el=>{const id=el.dataset.id,pick=[...((SPL.pick[id])||[])];
  const r=await post(`/api/particles/${id}`,{picked});if(!r.ok)return toast(r.j.error||'Could not keep them',1);
  delete SPL.pick[id];SPL.detail[id]=r.j;toast(`Keeping ${pick.length} cells`);spLibSync(true)};
+/* ---------- the trash: every deleted set with Restore, long after the delete (nothing is destroyed on a click) */
+function spTrashHtml(list){if(!list||!list.length)return '';
+ return `<details class=ps-trash><summary>Deleted (${list.length}) · nothing is destroyed: Restore brings a set back</summary>${list.map(s=>{
+  const strip=(s.cells||[]).filter(c=>c.picked).slice(0,4),was=(s.used_in||[]).filter(p=>!p.missing);
+  return `<div class=ps-trow data-pst=${esc(s.id)}><span class=ps-strip>${strip.map(c=>`<span class=ps-cell>${c.url?`<img src="${esc(c.url)}" alt="" loading=lazy>`:''}</span>`).join('')}</span>
+   <b>${esc(s.name||s.id)}</b><small class=mut>${esc(s.id)} · ${s.n_cells} cell${s.n_cells===1?'':'s'} · ${was.length?`was on ${was.map(p=>esc(p.name||p.id)).join(', ')}`:'was stand-alone'}</small>
+   <button class="btn sm" data-act=psrestore data-id=${esc(s.id)}>Restore</button></div>`}).join('')}</details>`}
+
+/* ---------- Generate more (docs/particles_plan.md 4.8): draw another sheet for the set; its cut cells are ADDED, nothing it has is changed.
+   POST /api/particles/{id}/more {grid, elements, estimate:true} is the free quote, {grid, elements, go:true} the click. The price is on its own line, never inside the button. */
+const SPM={};                                   // set id -> {grid, chosen[], extra[], est{key: {credits, error}}, busy: the key being priced}
+const spMoreN=m=>m.grid==='3x3'?9:4;
+const spMoreKey=m=>m.grid+'|'+m.chosen.join('|');
+function spMoreState(s){let m=SPM[s.id];if(!m)m=SPM[s.id]={grid:'2x2',chosen:null,extra:[],est:{},busy:0};if(m.chosen===null)m.chosen=(s.elements||[]).slice(0,spMoreN(m));return m}
+const spMoreNames=(s,m)=>[...new Set([...(s.elements||[]),...m.extra,...m.chosen])];
+function spFind(id){const hit=(SPL.detail||{})[id]||(SPL.sets||[]).find(x=>x.id===id);if(hit)return hit;
+ if(typeof PKPT!=='undefined')for(const l of Object.values(PKPT.sets||{}))for(const x of l||[])if(x&&x.id===id)return x;return null}
+const spSheetWords=sh=>{const n=(sh.appended||[]).length,e=(sh.skipped||[]).length;
+ return sh.status==='REQUESTED'?`Waiting for the sheet (${sh.job})…`:sh.status==='DRAWN'?`Cutting the particles (${sh.generation})…`
+  :sh.status==='DONE'?`Sheet ${sh.n}: ${n} particle${n===1?'':'s'} added${e?` (${e} cell${e===1?'':'s'} came out empty)`:''}`
+  :sh.status==='FAILED'?`Sheet ${sh.n} failed: ${sh.error||'the job failed'}. Draw it again below.`
+  :sh.status==='NO_CELLS'?`Sheet ${sh.n} came back with no usable cell. ${sh.error||''}`:`Sheet ${sh.n}: ${String(sh.status||'').toLowerCase()}`};
+function spMoreHtml(s){const m=spMoreState(s),N=spMoreN(m),est=m.est[spMoreKey(m)],names=spMoreNames(s,m),busy=!!s.drawing,sheets=(s.sheets||[]).slice().reverse().slice(0,5),ok=!busy&&m.chosen.length&&est&&est.credits!=null;
+ return `<div class=ps-gen data-psgen=${esc(s.id)}>
+  <div class=ps-genh><b>Generate more</b><span class=mut>Draw another sheet of particles and add its cells to this set. The cells you have stay exactly as they are.</span></div>
+  ${sheets.map(sh=>`<div class="ps-sheet ${esc(String(sh.status||'').toLowerCase())}">${['REQUESTED','DRAWN'].includes(sh.status)?'<span class=spin></span> ':''}<span>${esc(spSheetWords(sh))}</span>${sh.status==='NO_CELLS'&&sh.generation?`<button class="btn sm" data-act=openstudio data-gen=${esc(sh.generation)} data-i=1 title="Open the batch in the Studio: a sheet without a green screen has one free “Cut it anyway”">Open ${esc(sh.generation)}</button>`:''}</div>`).join('')}
+  <div class=row><span class=mut>Particles on the sheet</span><div class=tabs style="margin:0;gap:6px"><button class="tab${m.grid==='2x2'?' on':''}" data-act=psmoregrid data-id=${esc(s.id)} data-v=2x2>2 x 2 · 4</button><button class="tab${m.grid==='3x3'?' on':''}" data-act=psmoregrid data-id=${esc(s.id)} data-v=3x3>3 x 3 · 9</button></div></div>
+  <div class=fx-opts>${names.map(n=>`<button class="fx-opt${m.chosen.includes(n)?' on':''}" data-act=psmorechip data-id=${esc(s.id)} data-v="${esc(n)}" aria-pressed=${m.chosen.includes(n)}>${esc(n)}</button>`).join('')}</div>
+  <div class=row><input type=text class=fx-add data-psmoreown=${esc(s.id)} placeholder="add your own" maxlength=40 aria-label="Add your own particle"><button class="btn sm" data-act=psmoreadd data-id=${esc(s.id)}>Add</button><small class=mut>${m.chosen.length} of ${N} chosen${m.chosen.length&&m.chosen.length<N?' · fewer is fine, the sheet repeats them in other sizes and angles':''}</small></div>
+  <div class=fx-price data-psmoreprice>${!m.chosen.length?'':est?(est.credits!=null?`about ${est.credits} credit${est.credits===1?'':'s'}`:esc(est.error||'The price is not available.')):'about to be priced…'}</div>
+  <div class=row><button class="btn pri" data-act=psmoredraw data-id=${esc(s.id)} ${ok?'':'disabled'}>${ic('fx')} Draw ${N} more particles</button><span class=mut>${busy?'A sheet is being drawn for this set.':'Nothing is spent until you press the button.'}</span></div></div>`}
+async function spMoreEstimate(id){const s=spFind(id);if(!s)return;const m=spMoreState(s),k=spMoreKey(m);if(!m.chosen.length||m.est[k]||m.busy===k)return;m.busy=k;
+ const r=await post(`/api/particles/${id}/more`,{grid:m.grid,elements:m.chosen,estimate:true});m.busy=0;
+ m.est[k]=r.ok?{credits:r.j.credits!=null?r.j.credits:null,error:r.j.cost_error||(r.j.credits==null?'The price is not available.':null)}:{credits:null,error:r.j.error||'The price is not available.'};spLibRefresh()}
+ACT.psmoregrid=el=>{const s=spFind(el.dataset.id);if(!s)return;const m=spMoreState(s);m.grid=el.dataset.v==='3x3'?'3x3':'2x2';m.chosen=m.chosen.slice(0,spMoreN(m));spLibRefresh();spMoreEstimate(s.id)};
+ACT.psmorechip=el=>{const s=spFind(el.dataset.id);if(!s)return;const m=spMoreState(s),v=el.dataset.v,i=m.chosen.indexOf(v);
+ if(i>=0)m.chosen.splice(i,1);else if(m.chosen.length>=spMoreN(m))return toast(`A ${m.grid==='3x3'?'3 x 3':'2 x 2'} sheet holds ${spMoreN(m)}: take one off first`,1);else m.chosen.push(v);
+ spLibRefresh();spMoreEstimate(s.id)};
+function spMoreAdd(id,v){const s=spFind(id);v=String(v||'').trim().slice(0,40);if(!s||!v)return;const m=spMoreState(s);
+ if(!spMoreNames(s,m).includes(v))m.extra.push(v);if(!m.chosen.includes(v)&&m.chosen.length<spMoreN(m))m.chosen.push(v);spLibRefresh();spMoreEstimate(id)}
+ACT.psmoreadd=el=>{const i=document.querySelector(`[data-psmoreown="${el.dataset.id}"]`);spMoreAdd(el.dataset.id,i?i.value:'')};
+document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.psmoreown){e.preventDefault();spMoreAdd(t.dataset.psmoreown,t.value)}});
+ACT.psmoredraw=async el=>{const id=el.dataset.id,s=spFind(id);if(!s)return;const m=spMoreState(s),est=m.est[spMoreKey(m)];if(!est||est.credits==null||!m.chosen.length)return;el.disabled=true;
+ const r=await post(`/api/particles/${id}/more`,{grid:m.grid,elements:m.chosen,go:true});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not start',1)}
+ toast(`Drawing ${spMoreN(m)} more particles: ${r.j.estimate!=null?r.j.estimate+' credits':'the price is in your ledger'}`);delete SPL.detail[id];m.est={};spLibSync(true);
+ if(typeof route_!=='undefined'&&route_==='pack'&&typeof ptCounts==='function'&&typeof PACK_ID!=='undefined')ptCounts(PACK_ID)};
+/* ---------- the burst maker: Motion and Finish of the wizard, for a SET and a PACK (docs/particles_plan.md section 4, docs/particles_plan.md 4.6-4.7).
+   ONE preview for the whole pack (not a row per sticker): the five presets, Energy / Float / Swirl (count and spin under Advanced), the particle size, then Render (the final 512 px WebM, checked) and
+   Add (an animated sticker of the pack). Everything calls POST /api/particles/{id}/preview | render | add; the same panel sits in the open set card (Library and the pack's studio) and in the wizard
+   once the run has been saved as a set. It redraws only itself ([data-psb]), so a slider never moves the rest of the page. A burst is free: there is no price anywhere. */
+const SPB={};                                   // set id -> {pack, hint, preset, par{touched sliders only}, shown{what the server used}, pv, size{px,scale}, pvT, busy, again}
+const SPBS={};                                  // set id -> the set last drawn, so a partial redraw has it
+const spHint=()=>typeof route_!=='undefined'&&route_==='pack'&&typeof PACK_ID!=='undefined'?PACK_ID:'';
+function spBurstState(s,hint){let b=SPB[s.id];if(!b)b=SPB[s.id]={pack:'',hint:'',preset:'',par:{},shown:{},pv:'',pvT:0,busy:0,again:0,size:{px:100,scale:1}};
+ if(hint&&b.hint!==hint){b.pack=hint;b.hint=hint}else if(!b.pack)b.pack=(s.packs||[])[0]||'';return b}
+const spBurstSize=b=>({sprite_px:b.size.px,scale:b.size.scale});
+const spPackName=(s,id)=>{const p=typeof packById==='function'?packById(id):null;return p?p.name:((s.used_in||[]).find(x=>x.id===id)||{}).name||id};
+function spBSlider(id,b,k){const f=FXSL.find(x=>x[0]===k),v=b.par[k]!==undefined?b.par[k]:b.shown[k];
+ return `<label class=fx-sl><span>${f[1]}</span><input type=range min=${f[2]} max=${f[3]} step=${f[4]} value="${v??''}" data-psbp=${k} data-id=${esc(id)} aria-label="${f[1]}"><output>${v??''}</output></label>`}
+function spBurstCard(s,b,r){const ok=r.status==='READY'&&!!r.url,ws=(r.warnings||[]).map(fxWords),bl=(r.blocks||[]).map(fxWords),pk=spPackName(s,b.pack);
+ return `<div class="ps-br${ok?'':' bad'}" data-psr=${esc(r.id)}><div class=pk-pt-m>${r.url?`<video src="${esc(r.url)}" autoplay loop muted playsinline preload=metadata></video>`:'<span class=mut>no file</span>'}</div>
+  <div class=pk-pt-id><b>${esc(r.id)} · ${esc(r.preset||'')}</b><small>${Math.round((r.bytes||0)/1024)} KB · ${esc(String(r.status||'').toLowerCase())}</small></div>
+  ${bl.map(w=>`<span class="fx-w bad">${esc(w)}</span>`).join('')}${ws.map(w=>`<span class=fx-w>${esc(w)}</span>`).join('')}
+  ${r.added_to?`<small class=mut>in ${esc(spPackName(s,r.added_to))}</small>`:ok?`${ws.length?'<small class=mut>Warnings are only warnings: you decide.</small>':''}<button class="btn sm pri" data-act=psbadd data-id=${esc(s.id)} data-r=${esc(r.id)} data-p=${esc(b.pack)}>${ws.length?'Add anyway':'Add to '+esc(pk)}</button>`:''}</div>`}
+function spBurstHtml(s){SPBS[s.id]=s;const b=spBurstState(s,spHint()),own=s.packs||[],kind=(s.source||{}).kind,has=(s.n_picked||0)>0||kind==='stickers',id=esc(s.id);
+ const head=`<div class=ps-genh><b>Make a burst</b><span class=mut>What Telegram plays when someone reacts with an emoji of the pack. One preview, for the whole pack.</span></div>`;
+ if(!has)return `<div class=ps-burst data-psb=${id}>${head}<div class=mut>This set has no particles yet. Draw some with Generate more above, then give them motion here.</div></div>`;
+ const choose=own.length===1?`<b>for ${esc(spPackName(s,own[0]))}</b>`:`<label class=row><span class=mut>for</span><select data-psbpack=${id} aria-label="The pack this burst is for">${b.pack?'':'<option value="" selected>Choose a pack…</option>'}${(own.length?own:((typeof LIB!=='undefined'&&LIB.packs)||[]).map(p=>p.id)).map(pid=>`<option value="${esc(pid)}"${pid===b.pack?' selected':''}>${esc(spPackName(s,pid))}</option>`).join('')}</select></label>`;
+ const rs=(Array.isArray(s.renders)?s.renders:[]).filter(r=>r.pack_id===b.pack).slice().reverse();
+ return `<div class=ps-burst data-psb=${id}>${head}
+  <div class=row>${choose}${kind==='stickers'&&!(s.n_cells>0)?'<span class=mut>the pack’s own stickers fly out as the particles</span>':''}</div>
+  <div class=ps-sim><div class=fx-pvbox><img id=psbpv-${id} ${b.pv?`src="${esc(b.pv)}"`:''} alt="">${b.pv?'':'<span class=spin></span>'}<small>${esc(s.name||s.id)}</small></div>
+   <div class=fx-ctl><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${b.preset===n?' on':''}" data-act=psbpreset data-id=${id} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=psbshuffle data-id=${id}>shuffle</button></div>
+    ${FXMAIN.map(k=>spBSlider(s.id,b,k)).join('')}
+    <details class=fx-adv><summary>Advanced: particles, spin</summary>${['count','spin'].map(k=>spBSlider(s.id,b,k)).join('')}</details>
+    <details class=fx-adv><summary>Advanced: particle size</summary><div class=fx-size><span class=mut>Particle size</span><label class=fx-px><input type=number min=32 max=512 step=4 value="${b.size.px}" data-psbpx data-id=${id} aria-label="Particle size in pixels"> px</label>
+     <div class=tabs style="margin:0;gap:6px">${[1,2,3,4].map(k=>`<button class="tab${b.size.scale===k?' on':''}" data-act=psbscale data-id=${id} data-v=${k} title="${k} times as big">x${k}</button>`).join('')}</div><small class=mut>The particles are fitted to this size before they fly out.</small></div></details>
+    <div class=row><button class="btn pri sm" data-act=psbrender data-id=${id}>Render</button><small class=mut>the final 512 px sticker, checked</small></div></div></div>
+  ${rs.length?`<div class=ps-brs>${rs.map(r=>spBurstCard(s,b,r)).join('')}</div>`:''}</div>`}
+function spBurstRedraw(id){const s=SPBS[id],el=typeof document!=='undefined'&&document.querySelector?document.querySelector(`[data-psb="${id}"]`):null;if(s&&el)el.outerHTML=spBurstHtml(s)}
+async function spBurstPreview(id){const s=SPBS[id]||spFind(id);if(!s)return;const b=spBurstState(s,spHint());if(b.busy){b.again=1;return}
+ if((s.n_picked||0)<1&&(s.source||{}).kind!=='stickers')return;b.busy=1;
+ const r=await post(`/api/particles/${id}/preview`,{...(b.pack?{pack_id:b.pack}:{}),...(b.preset?{preset:b.preset}:{}),params:{...fxClean(b.par),...spBurstSize(b)},size:256});b.busy=0;
+ if(r.ok){b.pv=r.j.url;b.shown=fxPick(r.j.params);const img=typeof document!=='undefined'&&document.getElementById?document.getElementById('psbpv-'+id):null;
+  if(img){img.src=r.j.url;const sp=img.parentElement&&img.parentElement.querySelector('.spin');if(sp)sp.remove()}
+  const root=typeof document!=='undefined'&&document.querySelector?document.querySelector(`[data-psb="${id}"]`):null;
+  if(root)for(const [k] of FXSL){const inp=root.querySelector(`[data-psbp=${k}]`);if(inp&&r.j.params[k]!==undefined&&document.activeElement!==inp){inp.value=r.j.params[k];if(inp.nextElementSibling)inp.nextElementSibling.textContent=r.j.params[k]}}}
+ else toast(r.j.error||'No preview',1);
+ if(b.again){b.again=0;spBurstPreview(id)}}
+async function spBurstReload(id){const r=await api('/api/particles/'+id);if(r.ok){SPBS[id]=r.j;if(SPL.detail)SPL.detail[id]=r.j;spBurstRedraw(id)}}
+const spBurstSet=el=>{const s=SPBS[el.dataset.id]||spFind(el.dataset.id);return s?[s,spBurstState(s,spHint())]:[null,null]};
+ACT.psbpreset=el=>{const [s,b]=spBurstSet(el);if(!s)return;b.preset=el.dataset.n;b.par={};spBurstRedraw(s.id);spBurstPreview(s.id)};
+ACT.psbshuffle=el=>{const [s,b]=spBurstSet(el);if(!s)return;b.par.seed=1+Math.floor(Math.random()*9999);b.par.touched=1;spBurstPreview(s.id)};
+ACT.psbscale=el=>{const [s,b]=spBurstSet(el);if(!s)return;b.size.scale=Math.max(1,Math.min(4,+el.dataset.v||1));spBurstRedraw(s.id);spBurstPreview(s.id)};
+document.addEventListener('input',ev=>{const t=ev.target;if(!t||!t.dataset)return;
+ if(t.dataset.psbp){const [s,b]=spBurstSet({dataset:{id:t.dataset.id}});if(!s)return;b.par[t.dataset.psbp]=+t.value;b.par.touched=1;if(t.nextElementSibling)t.nextElementSibling.textContent=t.value;clearTimeout(b.pvT);b.pvT=setTimeout(()=>spBurstPreview(s.id),220)}
+ else if(t.dataset.psbpx!==undefined){const [s,b]=spBurstSet({dataset:{id:t.dataset.id}});if(!s)return;b.size.px=Math.max(32,Math.min(512,Math.round(+t.value)||100));clearTimeout(b.pvT);b.pvT=setTimeout(()=>spBurstPreview(s.id),350)}});
+document.addEventListener('change',ev=>{const t=ev.target;if(!t||!t.dataset||t.dataset.psbpack===undefined)return;const [s,b]=spBurstSet({dataset:{id:t.dataset.psbpack}});if(!s)return;b.pack=t.value;spBurstRedraw(s.id);spBurstPreview(s.id)});
+ACT.psbrender=async el=>{const [s,b]=spBurstSet(el);if(!s)return;if(!b.pack)return toast('Choose the pack this burst is for',1);
+ el.disabled=true;const r=await post(`/api/particles/${s.id}/render`,{pack_id:b.pack,...(b.preset?{preset:b.preset}:{}),params:{...fxClean(b.par),...spBurstSize(b)}});el.disabled=false;
+ if(!r.ok)return toast(r.j.error||'Could not render',1);
+ await spBurstReload(s.id);if(typeof ptCounts==='function'&&b.pack)ptCounts(b.pack);toast(r.j.status==='READY'?'Rendered: the burst is below':'Rendered, but a Telegram limit is broken: see its checks',r.j.status!=='READY')};
+ACT.psbadd=async el=>{const id=el.dataset.id,pk=el.dataset.p,s=SPBS[id]||spFind(id);el.disabled=true;
+ const r=await post(`/api/particles/${id}/add`,{renders:[el.dataset.r],pack_id:pk});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not add it',1)}
+ toast(`Added to ${s?spPackName(s,pk):'the pack'}: the burst is a sticker of the pack now`);
+ if(typeof loadLib==='function')await loadLib();await spBurstReload(id);if(typeof ptCounts==='function')ptCounts(pk);if(typeof ptForget==='function')ptForget()};
 /* the wizard's third card: pick a set already saved and put it on this pack (nothing is drawn, nothing is spent) */
 function spExistingHtml(S){const sets=SPL.sets;
  if(!sets){spLibSync();return '<div class=fx-job><span class=spin></span> <span class=mut>Reading the particle sets…</span></div>'}

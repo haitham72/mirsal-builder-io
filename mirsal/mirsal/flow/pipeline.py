@@ -659,7 +659,8 @@ def studio_edit_commit(out: Path, gid: int, index: int, projects, overlays: dict
     write_result(out, gid, res)
     emit(out, gid, "still_edited", "done", 0, {"index": index, "studio": True, "layers": len(drawn)}, "human", "EDIT")
     refreshed = lib.refresh_from_generation(out, res["generation_id"], index, d / st["png"], d / st["webm"]) if lib else 0
-    return {"index": index, "edited_at": now, "layers": len(drawn), "kb_video": round(len(data) / 1024, 1), "kb_image": st["metrics"]["kb"], "pack_copies": refreshed}
+    merged = rebuild_sheet(out, gid)                                    # the image of this edit goes back into the sheet too (same layout, same S#)
+    return {"index": index, "edited_at": now, "layers": len(drawn), "kb_video": round(len(data) / 1024, 1), "kb_image": st["metrics"]["kb"], "pack_copies": refreshed, "sheet_fixed": merged}
 
 
 # ---------- judge animations that were made before the border check existed ----------
@@ -731,6 +732,67 @@ def recheck_bounds(out: Path, gid: int, cfg: EngineConfig) -> dict:
     return {"checked": sum(c is not None for _, c in checks), "flagged": flagged}
 
 
+def particle_sprites(out: Path, gid: int, res: dict | None = None) -> dict:
+    """{cell index: PNG bytes} of the TIGHT sprites of a batch's cells (the UI/UX spec P6): each READY cell cropped out of the keyed sheet (`source/keyed.png`, native resolution) and trimmed to what is
+    drawn. A particle set stores these, never the 512 px sticker of the cell (a sticker canvas is the deliverable of a sticker). {} when the keyed sheet is not there (the caller then keeps the
+    slice file). Pure read."""
+    from ..engine.particles import trim_sprite
+    res = res or read_result(out, gid)
+    d = gen_dir(out, gid)
+    f = d / (res["source"].get("keyed") or "-")
+    if not f.is_file():
+        return {}
+    im = cv2.imdecode(np.fromfile(str(f), np.uint8), cv2.IMREAD_UNCHANGED)
+    if im is None or im.ndim != 3 or im.shape[2] != 4:
+        return {}
+    sheet = cv2.cvtColor(im, cv2.COLOR_BGRA2RGBA)
+    out_ = {}
+    for st in res["stickers"]:
+        c = (st.get("metrics") or {}).get("cell")
+        if st.get("status") != "READY" or not c:
+            continue
+        x, y, w, h = (int(v) for v in c)
+        sprite = trim_sprite(sheet[y:y + h, x:x + w])
+        if sprite is not None:
+            ok, buf = cv2.imencode(".png", cv2.cvtColor(sprite, cv2.COLOR_RGBA2BGRA))
+            out_[int(st["index"])] = buf.tobytes()
+    return out_
+
+
+def rebuild_sheet(out: Path, gid: int) -> dict | None:
+    """Merge the stickers a person edited back into ONE sheet (the UI/UX spec P8): `source/sheet_fixed.png` is the batch's own sheet with every edited cell replaced by its current picture, same
+    layout, so each keeps its S# by position (a re-cut of it gives the same cells). The generator's raw sheet, the keyed sheet and every slice stay exactly as they are. Returns
+    {"file", "cells"}, or None when nothing was edited or the sheet is not there (older batches). Never raises: the edit it follows is already saved."""
+    from ..engine.sheet import merge_cells
+    try:
+        res = read_result(out, gid)
+        src = res["source"]
+        d = gen_dir(out, gid)
+        rects = (src.get("grid") or {}).get("rects")
+        raw = d / (src.get("sheet_copy") or "-")
+        fixes, bgs = {}, {}
+        for st in res["stickers"]:
+            f = d / (st.get("png") or "-")
+            if st.get("edited") and st["status"] == "READY" and f.is_file():
+                im = cv2.imdecode(np.fromfile(str(f), np.uint8), cv2.IMREAD_UNCHANGED)
+                if im is not None and im.ndim == 3 and im.shape[2] == 4:
+                    fixes[st["index"]] = cv2.cvtColor(im, cv2.COLOR_BGRA2RGBA)
+                    if (st.get("metrics") or {}).get("bg"):
+                        bgs[st["index"]] = tuple(st["metrics"]["bg"])
+        if not fixes or not rects or not raw.is_file():
+            return None
+        merged = merge_cells(load_rgb(raw), rects, fixes, bgs)
+        ok, buf = cv2.imencode(".png", cv2.cvtColor(merged, cv2.COLOR_RGB2BGR))
+        (d / "source" / "sheet_fixed.png").write_bytes(buf.tobytes())
+        res = read_result(out, gid)
+        res["source"]["sheet_fixed"], res["source"]["sheet_fixed_cells"] = "source/sheet_fixed.png", sorted(fixes)
+        write_result(out, gid, res)
+        emit(out, gid, "sheet_merged", "done", 0, {"cells": sorted(fixes)}, "python", "MERGE")
+        return {"file": "source/sheet_fixed.png", "cells": sorted(fixes)}
+    except Exception:
+        return None
+
+
 # ---------- edit a still in place (the sticker editor's Save, opened from Generate) ----------
 def edit_still(out: Path, gid: int, index: int, png: bytes, cfg: EngineConfig, lib=None) -> dict:
     """Replace one still with the editor's 512x512 result, in place: same file name, same S#. The original is kept once in source/orig/ so
@@ -762,7 +824,8 @@ def edit_still(out: Path, gid: int, index: int, png: bytes, cfg: EngineConfig, l
     write_result(out, gid, res)
     emit(out, gid, "still_edited", "done", 0, {"index": index}, "human", "EDIT")
     refreshed = lib.refresh_from_generation(out, res["generation_id"], index, d / st["png"], None) if lib else 0
-    return {"index": index, "edited_at": st["edited_at"], "kb": st["metrics"]["kb"], "has_animation": st.get("anim_status") == "READY", "pack_copies": refreshed}
+    merged = rebuild_sheet(out, gid)                                    # the edited slices go back into one sheet (same layout, same S#)
+    return {"index": index, "edited_at": st["edited_at"], "kb": st["metrics"]["kb"], "has_animation": st.get("anim_status") == "READY", "pack_copies": refreshed, "sheet_fixed": merged}
 
 
 # ---------- appearance (re-finish the edge of an existing generation) ----------

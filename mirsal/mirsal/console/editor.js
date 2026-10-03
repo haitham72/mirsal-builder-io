@@ -144,7 +144,7 @@ const S_ED=$('s-editor');
 S_ED.addEventListener('input',e=>{const n=e.target.dataset&&e.target.dataset.inp;if(!n||!INP[n])return;INP[n](e.target);redraw();if(e.target.type==='range'||e.target.type==='number')S_ED.querySelectorAll('[data-inp="'+n+'"]').forEach(x=>{if(x!==e.target&&(x.type==='range'||x.type==='number'))x.value=e.target.value});if(n==='text'||n==='tsize')ui2()});
 S_ED.addEventListener('change',e=>{const n=e.target.dataset&&e.target.dataset.inp;if(!n||!INP[n])return;INP[n](e.target);redraw();commit();ui()});
 function ui2(){const L=cur_();if(L&&$('edl')){const rows=$('edl').querySelectorAll('.lay');rows.forEach(r=>{if(+r.dataset.id===L.id)r.querySelector('.nm').textContent=label(L)})}}
-ACT.edback=()=>{if(E.back){E.back=null;E.active=false;location.hash='#/studio'}else location.hash='#/create'};ACT.edundo=undo;ACT.edredo=redo;
+ACT.edback=()=>{if(E.back){const to=E.back.to;E.back=null;E.active=false;location.hash=to==='agent'?'#/agent':'#/studio'}else location.hash='#/create'};ACT.edundo=undo;ACT.edredo=redo;
 
 ACT.edtool=el=>{E.tool=el.dataset.t;if((E.tool==='erase'||E.tool==='restore')&&!(cur_()&&cur_().type==='subject')){const s=E.layers.find(l=>l.type==='subject');if(s)E.sel=s.id}ui();redraw();$('edc')&&($('edc').style.cursor=E.tool==='erase'||E.tool==='restore'?'crosshair':E.tool==='select'?'default':'default')};
 ACT.laysel=el=>{E.sel=+el.dataset.id;ui();redraw()};
@@ -200,7 +200,7 @@ ACT.edsave=async()=>{if(!E.layers.some(l=>l.vis)){return toast('Nothing to save:
  const c=finalCanvas();E.dataUrl=c.toDataURL('image/png');
  if(E.back){/* opened from Generate: the edit is saved in place and we go back, we never left that screen */
   const b=E.back,r=await post(`/api/generations/${b.gen}/edit`,{index:b.index,png:E.dataUrl});if(!r.ok)return dlg(`<h2>Could not save</h2><div class=warn>${esc(r.j.error||'The server did not answer. Restart it and try again.')}</div><div class=mut>Your edit is still open in the editor.</div><div class=row style="justify-content:flex-end"><button class="btn pri" data-act=dlgx>OK</button></div>`);
-  E.back=null;E.active=false;E.dataUrl='';toast('Sticker saved');location.hash='#/studio';return}
+  E.back=null;E.active=false;E.dataUrl='';toast('Sticker saved');location.hash=b.to==='agent'?'#/agent':'#/studio';return}           /* back to where the person was: the AI, or the Studio */
  E.blob=await new Promise(r=>c.toBlob(r,'image/png'));E.saved=null;location.hash='#/export'};
 RENDER.export=async()=>{await loadLib();const el=$('s-export');
  if(!E.dataUrl){el.innerHTML=`<div class=card style="margin:40px auto;width:420px;text-align:center;padding:30px"><h2>Nothing to export</h2><button class="btn pri" data-act=nav data-to=create>Create</button></div>`;return}

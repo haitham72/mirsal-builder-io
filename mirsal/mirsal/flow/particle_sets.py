@@ -8,7 +8,8 @@ analysis, ideas, drawing, picking, previews); this module owns the thing that su
     out/particles/P001/set.json      {id, name, created, user, elements[], source{kind, effect, generation, job}, cells[{n, file, status, warnings[], picked}],
                                      motion{preset, params}, packs[pack ids], credits, history[]}
     out/particles/P001/cells/c01.png the cut particle images (KEPT even when unpicked, so generate-more never loses a variant)
-    out/particles/P001/renders/      bursts rendered from this set
+    out/particles/P001/renders/      bursts rendered from this set for a pack (R001.webm ...; the record in set.json carries its checks)
+    out/particles/P001/previews/     the looping WebP previews (cached by what they were made from)
     out/trash/particles/P001/        delete moves the folder here; Restore puts it back (rule 9's spirit: nothing is destroyed on a click)
 
 Nothing is approved for a person here: this is a library of particle images and their default motion. **Only Telegram's own limits can make a rendered
@@ -161,13 +162,15 @@ def view(out: Path, lib, pid: str) -> dict:
     d = _dir(out, pid)
     cells = [cell_view(out, d, c) for c in s.get("cells") or []]
     picked = [c["n"] for c in cells if c.get("picked")]
-    return {**s, "cells": cells, "n_cells": len(cells), "n_picked": len(picked), "picked": picked,
-            "used_in": pack_names(lib, s.get("packs") or []), "trashed": False}
+    return {**s, "cells": cells, "n_cells": len(cells), "n_picked": len(picked), "picked": picked, "renders": [render_view(out, s["id"], r) for r in s.get("renders") or []],
+            "used_in": pack_names(lib, s.get("packs") or []), "drawing": drawing(s), "trashed": False}
 
 
-def cell_view(out: Path, d: Path, c: dict) -> dict:
+def cell_view(out: Path, d: Path, c: dict, base: str = "particles") -> dict:
+    """A cell with its file resolved to an `/out/` url (`base` is the folder the set lives in: `particles`, or `trash/particles` for a deleted one), and `missing` when the file is gone."""
     f = d / (c.get("file") or "")
-    return {**c, "url": f"/out/particles/{d.name}/{c['file']}" if (c.get("file") and f.is_file()) else None, "missing": not (c.get("file") and f.is_file())}
+    ok = bool(c.get("file") and f.is_file())
+    return {**c, "url": f"/out/{base}/{d.name}/{c['file']}" if ok else None, "missing": not ok}
 
 
 def pack_names(lib, ids) -> list[dict]:
@@ -197,17 +200,18 @@ def list_sets(out: Path, lib) -> list[dict]:
                      "kind": (s.get("source") or {}).get("kind"), "elements": list(s.get("elements") or []), "packs": list(s.get("packs") or []),
                      "used_in": pack_names(lib, s.get("packs") or []), "cells": cells, "picked": [c["n"] for c in picked],
                      "n_cells": len(cells), "n_picked": len(picked), "renders": len(s.get("renders") or []),
-                     "credits": s.get("credits"), "trashed": False})
+                     "credits": s.get("credits"), "drawing": drawing(s), "sheets": list(s.get("sheets") or []), "motion": s.get("motion") or {}, "source": s.get("source") or {}, "trashed": False})
     rows.sort(key=lambda r: (r.get("created") or 0, r["id"]), reverse=True)
     return rows
 
 
 def for_pack(out: Path, lib, pack_id: str) -> dict:
-    """The pack's particle studio in one read: every set assigned to it and every burst rendered for it. One source of truth: `set.packs`."""
+    """The pack's particle studio in one read: every set assigned to it (`set.packs` is the one source of truth) and every burst rendered FOR it. A burst belongs to the pack it was rendered for,
+    whether or not its set is assigned there (a stand-alone set can burst for a pack)."""
     all_ = list_sets(out, lib)
     mine = [r for r in all_ if pack_id in (r.get("packs") or [])]
     bursts = []
-    for r in mine:
+    for r in all_:
         try:
             s = read(out, r["id"])
         except SetError:
@@ -215,43 +219,60 @@ def for_pack(out: Path, lib, pack_id: str) -> dict:
         for b in s.get("renders") or []:
             if b.get("pack_id") != pack_id:
                 continue
-            f = sets_dir(out) / r["id"] / (b.get("file") or "")
-            bursts.append({"set": r["id"], "set_name": r["name"], **{k: b.get(k) for k in ("id", "preset", "status", "bytes", "warnings", "blocks", "added_to", "created")},
-                           "url": f"/out/particles/{r['id']}/{b['file']}" if (b.get("file") and f.is_file()) else None, "missing": not (b.get("file") and f.is_file())})
+            v = render_view(out, r["id"], b)
+            bursts.append({"set": r["id"], "set_name": r["name"], **{k: v.get(k) for k in ("id", "preset", "status", "bytes", "warnings", "blocks", "checks", "params", "added_to", "created", "url", "missing")}})
     bursts.sort(key=lambda b: (b.get("created") or 0, b["set"], b.get("id") or ""), reverse=True)
     return {"pack_id": pack_id, "sets": mine, "bursts": bursts}
 
 
 # ---------- make one: the working session becomes a durable asset ----------
+def _png_size(data: bytes) -> tuple[int, int]:
+    import io
+    from PIL import Image
+    with Image.open(io.BytesIO(data)) as im:
+        return im.size
+
+
+def _batch_rows(out: Path, gn: int, picked=None) -> tuple[list, dict, dict | None]:
+    """(cell index, slice file, sticker) of the cells of batch G{gn} that have a picture, the TIGHT sprites of those cells (`pipeline.particle_sprites`: cropped out of the keyed sheet, never the 512 px
+    sticker), and the batch's result (None when it cannot be read). With `picked` only those cells."""
+    from . import pipeline as pl
+    try:
+        res = pl.read_result(out, gn)
+    except Exception:
+        return [], {}, None
+    d = pl.gen_dir(out, gn)
+    chosen = {int(i) for i in picked} if picked else None
+    rows = []
+    for st in res.get("stickers") or []:
+        f = d / (st.get("png") or "")
+        if not st.get("png") or not f.is_file() or (chosen is not None and int(st["index"]) not in chosen):
+            continue
+        rows.append((int(st["index"]), f, st))
+    return sorted(rows, key=lambda r: r[0]), (pl.particle_sprites(out, gn, res) if rows else {}), res
+
+
+def _cell_record(n: int, idx: int, data: bytes, sprite: bool, st: dict, extra: dict | None = None) -> dict:
+    """The record of a stored cell: where it came from (`cell`), whether it is a tight sprite (the only thing a particle should be; the slice file is the fallback of a batch with no keyed
+    sheet), its size, and what Python noticed."""
+    w, h = _png_size(data)
+    return {"n": n, "cell": idx, "file": f"cells/c{n:02d}.png", "status": st.get("status"), "warnings": list(((st.get("metrics") or {}).get("warnings")) or []), "key": st.get("key"),
+            "sprite": sprite, "w": w, "h": h, "picked": True, "created": round(time.time(), 3), **(extra or {})}
+
+
 def set_from_effect(out: Path, lib, eid: str, *, name=None, packs=None, picked=None, user: str = "local") -> dict:
     """**Use as particle set** (`POST /api/particles {from_effect: E###}`): save what this run drew as a durable `P###`.
 
-    The drawn sheet's cells become the set's cells (copied into `out/particles/P###/cells/`, so the set survives the `E###` and the batch); a set made
-    of the pack's own stickers has no cells file yet (its particles are the stickers, recorded in `source.kind: stickers`); a video set's cells are the
+    The drawn sheet's cells become the set's cells as TIGHT SPRITES (copied into `out/particles/P###/cells/`, so the set survives the `E###` and the batch; a particle is never a 512 px sticker
+    canvas); a set made of the pack's own stickers has no cells file yet (its particles are the stickers, recorded in `source.kind: stickers`); a video set's cells are the
     keyed cell clips and its render is the clip itself. `packs` defaults to the effect's own pack. Nothing is deleted: the effect and its batch stay."""
     from . import effects as fx
     e = fx.view(out, eid)
     s0 = fx.set_of(e) or {}
     gen = s0.get("generation")
     kind = "video" if e.get("mode") == "video" else "drawn"
-    rows, notes = [], []
-    cells: list[dict] = []
-    if gen is not None:
-        from . import pipeline as pl
-        try:
-            res = pl.read_result(out, int(gen))
-        except Exception:
-            res = None
-        if res is not None:
-            d = pl.gen_dir(out, int(gen))
-            chosen = {int(i) for i in picked} if picked else None
-            for st in res.get("stickers") or []:
-                f = d / (st.get("png") or "")
-                if not st.get("png") or not f.is_file():
-                    continue
-                if chosen is not None and int(st["index"]) not in chosen:
-                    continue
-                rows.append((int(st["index"]), f, st))
+    notes: list[str] = []
+    rows, sprites = ([], {}) if gen is None else _batch_rows(out, int(gen), picked)[:2]
     if not rows:
         kind = "stickers" if kind != "video" else kind
         notes.append("This set has no drawn cells yet: the burst uses the pack's own stickers (generate more to add drawn particles).")
@@ -260,20 +281,73 @@ def set_from_effect(out: Path, lib, eid: str, *, name=None, packs=None, picked=N
         pid = _next_id(out)
         d = sets_dir(out) / pid
         (d / "cells").mkdir(parents=True)
-        for n, (idx, f, st) in enumerate(sorted(rows), 1):
-            name_rel = f"cells/c{n:02d}.png"
-            atomic.write_bytes(d / name_rel, f.read_bytes())
-            cells.append({"n": n, "cell": idx, "file": name_rel, "status": st.get("status"), "warnings": list(((st.get("metrics") or {}).get("warnings")) or []),
-                          "key": st.get("key"), "picked": True, "created": round(time.time(), 3)})
+        cells: list[dict] = []
+        for n, (idx, f, st) in enumerate(rows, 1):
+            data = sprites.get(idx) or f.read_bytes()
+            atomic.write_bytes(d / f"cells/c{n:02d}.png", data)
+            cells.append(_cell_record(n, idx, data, idx in sprites, st))
         pack_ids = _clean_packs(e.get("pack_id") and [e["pack_id"]] if packs is None else packs, lib)
         s = {"id": pid, "name": _clean_name(name, default_name), "created": round(time.time(), 3), "user": user,
              "elements": _clean_elements(s0.get("elements") or [x for g in e.get("groups") or [] for x in g.get("elements") or []]),
-             "source": {"kind": kind, "effect": eid, "generation": f"G{int(gen):03d}" if gen is not None else None,
+             "source": {"kind": kind, "effect": eid, "generation": f"G{int(gen):03d}" if gen is not None else None, "particles": bool(cells) and all(c["sprite"] for c in cells),
                         "job": s0.get("job"), "grid": s0.get("grid"), "by": s0.get("by"), "options": list(s0.get("options") or [])},
-             "cells": cells, "motion": {}, "packs": pack_ids, "renders": [], "credits": 0.0, "notes": notes, "history": []}
+             "plan": {"subject": fx._subject_of(e), "style": fx._style_of(e)},          # what *Generate more* draws about, kept here so the set outlives its run
+             "cells": cells, "motion": {}, "packs": pack_ids, "renders": [], "credits": _job_cost(out, s0.get("job")) if cells else 0.0, "notes": notes, "history": []}
+        if not cells and kind == "stickers":                 # the particles ARE the stickers the run was made with: remember which (a burst needs them long after the run)
+            s["source"]["sticker_ids"] = [x["sticker_id"] for x in e.get("stickers") or []]
         hist(s, user, "CREATE", f"from {eid}: {len(cells)} cell(s), {len(pack_ids)} pack(s)", {"effect": eid, "generation": s["source"]["generation"]})
         atomic.write_text(d / "set.json", json.dumps(s, indent=2, ensure_ascii=False))
+    with fx._LOCK:                                           # the run points at the set saved from it (the wizard goes on with the set: its motion and finish steps are the set's)
+        rec = fx.read(out, eid)
+        rec.setdefault("sets", []).append(pid)
+        fx.hist(rec, user, "SAVE", f"saved as particle set {pid}", {"set": pid})
+        fx._write(out, rec)
     return view(out, lib, pid)
+
+
+def set_from_generation(out: Path, lib, gid, *, name=None, packs=None, picked=None, user: str = "local") -> dict:
+    """The import path for a sheet of particles that is already a batch (`POST /api/particles {from_generation: G###}`): its cells become a set, as tight sprites, with no effect behind it. Only a
+    batch that was CUT AS PARTICLES (exact equal cells, no sticker rule) qualifies: a sheet cut as stickers (gutter detection, Python's sticker blocks, the 512 px canvas) is refused with the
+    reason and the free way out (cut it again as particles), never guessed at. Nothing is changed or deleted in the batch."""
+    from . import pipeline as pl
+    try:
+        gn = int(str(gid).upper().lstrip("G"))
+    except ValueError:
+        raise SetError("from_generation must be a batch id like G101")
+    rows, sprites, res = _batch_rows(out, gn, picked)
+    if res is None:
+        raise SetError(f"no batch G{gn:03d}", 404)
+    if res.get("kind") != "particles":
+        raise SetError(f"G{gn:03d} was cut as stickers (its layout was detected and Python's sticker rules ran on every cell), so its cells are not particles yet. Cut it again as particles, free: "
+                       f"POST /api/generations/{gn}/recut_particles. The batch is not changed.", 409)
+    if not rows:
+        raise SetError(f"no cell of G{gn:03d} has a picture" + (" among the ones you picked" if picked else "") + ": a cell with nothing in it cannot be a particle.", 409)
+    with _LOCK:
+        pid = _next_id(out)
+        d = sets_dir(out) / pid
+        (d / "cells").mkdir(parents=True)
+        cells = []
+        for n, (idx, f, st) in enumerate(rows, 1):
+            data = sprites.get(idx) or f.read_bytes()
+            atomic.write_bytes(d / f"cells/c{n:02d}.png", data)
+            cells.append(_cell_record(n, idx, data, idx in sprites, st))
+        s = {"id": pid, "name": _clean_name(name, f"{res.get('prompt') or 'particles'}"), "created": round(time.time(), 3), "user": user, "elements": [],
+             "source": {"kind": "drawn", "effect": None, "generation": f"G{gn:03d}", "particles": all(c["sprite"] for c in cells), "job": None, "grid": res.get("grid")},
+             "cells": cells, "motion": {}, "packs": _clean_packs(packs, lib), "renders": [], "credits": 0.0, "notes": [], "history": []}
+        hist(s, user, "CREATE", f"from G{gn:03d}: {len(cells)} cell(s)", {"generation": f"G{gn:03d}"})
+        atomic.write_text(d / "set.json", json.dumps(s, indent=2, ensure_ascii=False))
+    return view(out, lib, pid)
+
+
+def _job_cost(out: Path, job) -> float:
+    """What the sheet job behind a drawn set cost (the Library card says "about N credits spent"); 0.0 when there is no job or no cost was recorded."""
+    if not job:
+        return 0.0
+    from ..generation import jobs
+    try:
+        return float(jobs.read(out, str(job)).get("cost") or 0.0)
+    except Exception:
+        return 0.0
 
 
 def create(out: Path, lib, *, name=None, elements=None, packs=None, kind: str = "drawn", user: str = "local") -> dict:
@@ -289,6 +363,370 @@ def create(out: Path, lib, *, name=None, elements=None, packs=None, kind: str = 
         hist(s, user, "CREATE", f"a new set ({kind})")
         atomic.write_text(d / "set.json", json.dumps(s, indent=2, ensure_ascii=False))
     return view(out, lib, pid)
+
+
+# ---------- Generate more: another sheet, whose cut cells are APPENDED ----------
+# `set.sheets[]` is the list of sheets drawn FOR this set after it was saved: {n, job, generation, grid, elements, status, estimate, cost, by, created, appended[], skipped[], error}.
+# REQUESTED (the job exists) -> DRAWN (it became a batch, being cut) -> DONE (the cells are in the set). NO_CELLS (cut, but no cell has a picture: the free "Cut it anyway" of the batch may
+# still change that) and FAILED (the job failed) are looked at again on every read, so the set always reflects the stored batch and job (rule 11: reproducible from stored data).
+OPEN_SHEETS = ("REQUESTED", "DRAWN")
+
+
+def drawing(s: dict) -> bool:
+    return any(sh.get("status") in OPEN_SHEETS for sh in s.get("sheets") or [])
+
+
+def _subject_style(out: Path, lib, s: dict) -> tuple[str, str | None]:
+    """What a new sheet for this set is drawn about: what the set was saved with, else its run's, else its first pack's name, else its own name (without the word particles)."""
+    p = s.get("plan") or {}
+    if p.get("subject"):
+        return p["subject"], p.get("style")
+    eid = (s.get("source") or {}).get("effect")
+    if eid:
+        from . import effects as fx
+        try:
+            e = fx.read(out, eid)
+            return fx._subject_of(e), fx._style_of(e)
+        except fx.EffectError:
+            pass
+    if lib is not None:
+        names = [n["name"] for n in pack_names(lib, s.get("packs") or []) if not n.get("missing")]
+        if names:
+            return names[0], None
+    return " ".join(w for w in str(s.get("name") or "").split() if w.lower() not in ("particles", "particle")) or "the emoji", None
+
+
+def _emoji_for(lib, s: dict) -> str:
+    """The emoji tag of the cells of a particle sheet (a cell of a plan needs one): the commonest emoji of the packs the set is in, else 🙂 (the same fallback an effect's sheet has)."""
+    from collections import Counter
+    c: Counter = Counter()
+    for pid in s.get("packs") or []:
+        try:
+            pk = _lib_pack(lib, pid) if lib is not None else {}
+        except SetError:
+            continue
+        c.update(st.get("emoji") for st in pk.get("stickers") or [] if st.get("emoji"))
+    return c.most_common(1)[0][0] if c else "🙂"
+
+
+def more_plan(out: Path, lib, pid: str, grid=None, elements=None) -> dict:
+    """What the page shows before anything is spent: the prompt that will be sent, the cells, the screen colour, the grid, `outline: 0`, `picks` (the particles the sheet is drawn from).
+    Without `elements` it draws the set's own (the first ones when it has more than the sheet has cells); the person's own pick must fit the sheet (400). The price is asked by the caller."""
+    from . import effects as fx
+    from ..generation import effect_prompts as ep
+    s = read(out, pid)
+    last = (s.get("sheets") or [{}])[-1].get("grid") or (s.get("source") or {}).get("grid")
+    try:
+        rows, cols = fx._grid_of(grid if grid else last)
+    except fx.EffectError as ex:
+        raise SetError(str(ex))
+    subject, style = _subject_style(out, lib, s)
+    fresh = elements is not None
+    names = elements if fresh else list(s.get("elements") or [])
+    if not isinstance(names, list) or any(not isinstance(x, str) for x in names):
+        raise SetError("elements must be a list of particle names")
+    try:
+        picks = ep.lint_plan({"subject": subject, "elements": names, "style": style})["elements"]
+    except ValueError as ex:
+        raise SetError(str(ex))
+    if len(picks) > rows * cols:
+        if fresh:
+            raise SetError(f"pick at most {rows * cols} particles for a sheet of {rows * cols} cells (fewer are repeated in other sizes and angles)")
+        picks = picks[:rows * cols]
+    try:
+        d = fx._describe({"subject": subject, "elements": picks, "style": style}, rows, cols)
+    except fx.EffectError as ex:
+        raise SetError(str(ex))
+    return {**d, "id": str(pid).upper(), "n": rows * cols, "outline": 0, "kind": "particles", "picks": picks}
+
+
+def more_base_plan(out: Path, lib, pid: str, grid, elements) -> dict:
+    """The plan the normal sheet path accepts for the set's new sheet (the same builder as an effect's: `effects.sheet_base_plan`), the cells' emoji being the set's packs' commonest."""
+    from . import effects as fx
+    plan = more_plan(out, lib, pid, grid, elements)
+    rows, cols = plan["grid"]
+    return fx.sheet_base_plan(plan, rows, cols, _emoji_for(lib, read(out, pid)), "set", plan["id"])
+
+
+def request_more(out: Path, pid: str, job: str, grid, elements, estimate=None, user: str = "local") -> dict:
+    """The sheet job exists: the set says so (REQUESTED), before the job runs, so the page sees it at once and the later link is never overwritten. Nothing else of the set changes."""
+    with _LOCK:
+        s = read(out, pid)
+        sheets = s.setdefault("sheets", [])
+        sh = {"n": len(sheets) + 1, "job": job, "generation": None, "grid": [int(grid[0]), int(grid[1])], "elements": list(elements), "status": "REQUESTED", "estimate": estimate,
+              "cost": None, "by": user, "created": round(time.time(), 3), "appended": [], "skipped": [], "error": None}
+        sheets.append(sh)
+        hist(s, user, "MORE", f"particle sheet job {job} ({sh['grid'][0]}x{sh['grid'][1]}): {', '.join(sh['elements'])}"[:300], {"job": job, "sheet": sh["n"]})
+        _write(out, s)
+    return sh
+
+
+def link_more(out: Path, pid: str, job: str, generation) -> None:
+    """The sheet job is DONE and became a batch (`Console.start_from_job`): the sheet is DRAWN and names its batch. The cells arrive with `settle`, once they are cut."""
+    gn = int(str(generation).upper().lstrip("G"))
+    with _LOCK:
+        s = read(out, pid)
+        for sh in s.get("sheets") or []:
+            if sh.get("job") == job and sh.get("status") != "DONE":
+                sh.update(status="DRAWN", generation=f"G{gn:03d}", error=None)
+                hist(s, "python", "LINK", f"sheet {sh['n']} is G{gn:03d}", {"generation": f"G{gn:03d}", "job": job})
+                _write(out, s)
+                return
+
+
+def settle(out: Path, pid: str) -> dict:
+    """Bring the set up to date with the batches and jobs it is waiting for: every sheet that is not DONE is looked at, and the cells of a sheet that is cut are APPENDED (numbered after the
+    last cell, picked; a cell with no picture is skipped and listed). Idempotent: a DONE sheet is never read again, so calling it twice adds nothing twice. Nothing existing is touched.
+    Returns the stored set."""
+    with _LOCK:
+        s = read(out, pid)
+        changed = False
+        for sh in s.get("sheets") or []:
+            if sh.get("status") != "DONE":
+                changed = _settle_sheet(out, s, sh) or changed
+        if changed:
+            _write(out, s)
+        return s
+
+
+def settle_open(out: Path) -> int:
+    """`settle` for every set that has a sheet it is still waiting for (the catch-up before the list is read). Returns how many were looked at."""
+    n = 0
+    for p in sorted(sets_dir(out).glob("P[0-9]*")):
+        try:
+            s = json.loads(atomic.read_text(p / "set.json"))
+        except (OSError, ValueError):
+            continue
+        if any(sh.get("status") != "DONE" for sh in s.get("sheets") or []):
+            try:
+                settle(out, p.name)
+                n += 1
+            except SetError:
+                pass
+    return n
+
+
+def _settle_sheet(out: Path, s: dict, sh: dict) -> bool:
+    from . import pipeline as pl
+    from ..generation import jobs
+    was = (sh.get("status"), sh.get("error"), list(sh.get("skipped") or []))
+    gen = sh.get("generation")
+    if gen is None:                                              # the sheet job has not become a batch (yet)
+        try:
+            job = jobs.read(out, sh["job"])
+        except Exception:
+            return False
+        if job.get("status") in ("FAILED", "TIMEOUT"):
+            sh.update(status="FAILED", error=str(job.get("error") or "the sheet job timed out")[:300])
+        elif sh.get("status") == "FAILED":                       # it was requeued
+            sh.update(status="REQUESTED", error=None)
+        return (sh.get("status"), sh.get("error"), list(sh.get("skipped") or [])) != was
+    gn = int(str(gen).upper().lstrip("G"))
+    try:
+        res = pl.read_result(out, gn)
+    except pl.PipelineError:
+        return False
+    if res.get("stage") != "sliced":
+        if res.get("error"):
+            sh.update(status="FAILED", error=str(res["error"])[:300])
+        return (sh.get("status"), sh.get("error"), list(sh.get("skipped") or [])) != was
+    d = pl.gen_dir(out, gn)
+    have = [(int(st["index"]), d / st["png"], st) for st in res.get("stickers") or [] if st.get("png") and (d / st["png"]).is_file()]
+    skipped = sorted(int(st["index"]) for st in res.get("stickers") or [] if not (st.get("png") and (d / st["png"]).is_file()))
+    if not have:
+        sh.update(status="NO_CELLS", skipped=skipped, error="No cell of this sheet came out. If its background was not a green screen, open the batch and cut it anyway; otherwise draw it again.")
+        return (sh.get("status"), sh.get("error"), list(sh.get("skipped") or [])) != was
+    base = max([int(c["n"]) for c in s.get("cells") or []] + [0])
+    (sets_dir(out) / s["id"] / "cells").mkdir(parents=True, exist_ok=True)
+    sprites = pl.particle_sprites(out, gn, res)                  # tight sprites cut out of the keyed sheet, never the 512 px sticker of the cell
+    added = []
+    for k, (idx, f, st) in enumerate(sorted(have, key=lambda r: r[0]), 1):
+        n = base + k
+        data = sprites.get(idx) or f.read_bytes()
+        atomic.write_bytes(sets_dir(out) / s["id"] / f"cells/c{n:02d}.png", data)
+        s.setdefault("cells", []).append(_cell_record(n, idx, data, idx in sprites, st, {"sheet": sh["n"], "generation": f"G{gn:03d}"}))
+        added.append(n)
+    try:
+        cost = jobs.read(out, sh["job"]).get("cost")
+    except Exception:
+        cost = None
+    cost = float(cost if cost is not None else (sh.get("estimate") or 0))
+    s["credits"] = round(float(s.get("credits") or 0) + cost, 3)
+    s["elements"] = _clean_elements(list(s.get("elements") or []) + list(sh.get("elements") or []))
+    sh.update(status="DONE", appended=added, skipped=skipped, error=None, cost=cost)
+    hist(s, "python", "APPEND", f"{len(added)} new cell(s) from G{gn:03d} (sheet {sh['n']})", {"generation": f"G{gn:03d}", "cells": added, "skipped": skipped})
+    return True
+
+
+# ---------- bursts: the engine's simulation, pointed at a set's cells, for a pack ----------
+MAX_EMOJI = 20                                                  # Telegram's emoji_list holds 1-20 emoji per sticker
+
+
+def render_view(out: Path, pid: str, r: dict) -> dict:
+    """A rendered burst as the API shows it: the stored record with `set` and the file as an `/out/` url (`missing` when the file is gone)."""
+    f = sets_dir(out) / str(pid).upper() / (r.get("file") or "-")
+    ok = bool(r.get("file") and f.is_file())
+    return {**r, "set": str(pid).upper(), "url": f"/out/particles/{str(pid).upper()}/{r['file']}" if ok else None, "missing": not ok}
+
+
+def _pick_pack(s: dict, lib, pack_id, required: bool) -> str | None:
+    """The pack a burst is for: the one asked for (404 when it does not exist), else the set's only pack. A burst is always FOR a pack, so `required` ones without either are a 400."""
+    if pack_id:
+        _lib_pack(lib, str(pack_id))
+        return str(pack_id)
+    packs = s.get("packs") or []
+    if len(packs) == 1:
+        return packs[0]
+    if required:
+        raise SetError("Which pack is the burst for? Send pack_id" + (f" (this set is in {', '.join(n['name'] for n in pack_names(lib, packs))})" if packs else " (this set is in no pack yet)"))
+    return None
+
+
+def sprites_of(out: Path, lib, s: dict, pack_id: str | None) -> tuple[list, str]:
+    """The particles that fly: the set's PICKED cells (an unpicked cell stays on disk and does not fly). A set of kind "stickers" has no cells: the pack's own stickers are its particles, the ones its run
+    was made with (`source.sticker_ids`), else every sticker of `pack_id`. A drawn set with no cell yet has none (409). Returns (RGBA arrays, "cells" | "stickers"); 409/400 with the reason when there is nothing to burst."""
+    import numpy as np
+    from PIL import Image
+    d = sets_dir(out) / s["id"]
+    if s.get("cells"):
+        pcs = [np.asarray(Image.open(d / c["file"]).convert("RGBA"), np.uint8) for c in s["cells"] if c.get("picked") and c.get("file") and (d / c["file"]).is_file()]
+        if not pcs:
+            raise SetError("none of the picked cells has a picture: pick others", 409)
+        return pcs, "cells"
+    if (s.get("source") or {}).get("kind") != "stickers":              # a drawn (or video) set with no cell yet has no particles: its stickers must not fly in their place
+        raise SetError("this set has no particles yet: draw some with Generate more", 409)
+    from . import effects as fx
+    with lib.lock:
+        db = lib._load()
+    every = {x["id"]: x for p in db.get("packs", []) for x in p.get("stickers", [])}
+    ids = (s.get("source") or {}).get("sticker_ids")
+    if ids:
+        picked = [every[i] for i in ids if i in every]
+    elif pack_id:
+        picked = next((p["stickers"] for p in db.get("packs", []) if p["id"] == pack_id), [])
+    else:
+        raise SetError("this set's particles are the pack's own stickers: say which pack (pack_id)")
+    pcs = [a for a in (fx.sticker_rgba(lib, x) for x in picked[:fx.MAX_STICKERS]) if a is not None]
+    if not pcs:
+        raise SetError("there are no particles to burst: this set uses the pack's own stickers and none of them has a picture. Draw some with Generate more", 409)
+    return pcs, "stickers"
+
+
+def _burst(s: dict, preset, params) -> tuple[str, int, float, object]:
+    """(preset name, sprite_px, scale, ParticleParams): the preset asked for, else the set's default motion, else burst; the set's default params under the person's. Strict, like every other
+    contract of the engine: an unknown preset or parameter is a 400 with the reason."""
+    from . import effects as fx
+    from ..engine import particles
+    try:
+        px, sc, rest = fx.split_fit(params)
+    except fx.EffectError as ex:
+        raise SetError(str(ex))
+    mo = s.get("motion") or {}
+    name = str(preset or mo.get("preset") or "burst")
+    base = {k: v for k, v in (mo.get("params") or {}).items() if k != "preset"}
+    try:
+        return name, px, sc, particles.preset(name, **{**base, **rest})
+    except ValueError as ex:
+        raise SetError(str(ex))
+
+
+def preview(out: Path, lib, pid: str, *, pack_id=None, preset=None, params=None, size=256) -> dict:
+    """The burst as a small looping WebP, rendered by the same engine as the final file (the sliders are live). Cached by what it was made from (the cells, the params, `sprite_px`, `scale`,
+    the size), so the same sliders are the same file. Free."""
+    from . import effects as fx
+    from ..engine import particles
+    if isinstance(size, bool) or not isinstance(size, (int, float)) or not 64 <= size <= 512:
+        raise SetError("size must be a whole number from 64 to 512")
+    s = read(out, pid)
+    pack = _pick_pack(s, lib, pack_id, required=False)
+    pcs, source = sprites_of(out, lib, s, pack)
+    name, px, sc, p = _burst(s, preset, params)
+    key = fx._digest(pcs, p, (px, sc)) + f"-{int(size)}"
+    f = _dir(out, pid) / "previews" / f"{key}.webp"
+    if not f.is_file():
+        small = particles.ParticleParams.from_dict({**p.to_dict(), "size": int(size)})
+        frames = particles.simulate(fx._fit(pcs, px, sc), small)
+        f.parent.mkdir(exist_ok=True)
+        atomic.write_bytes(f, particles.preview_webp(frames, size=int(size)))
+    return {"url": f"/out/particles/{s['id']}/previews/{f.name}", "file": f"previews/{f.name}", "params": {**p.to_dict(), "sprite_px": px, "scale": sc}, "preset": name,
+            "sprites": len(pcs), "source": source, "pack_id": pack}
+
+
+def render(out: Path, lib, pid: str, cfg, *, pack_id=None, preset=None, params=None, user: str = "local") -> dict:
+    """The final 512 px WebM of the burst for a pack, judged and stored under `renders/` (R001.webm ...) with its checks. A render is stored whatever the checks say: **only Telegram's own limits
+    make it FAILED** (`engine/effect_video.TECHNICAL`), every other check is a warning the person sees and decides on (rule 10); a failed one is kept too (rejection never deletes)."""
+    from . import effects as fx
+    from ..engine import effect_video as ev, particles
+    s = read(out, pid)
+    pack = _pick_pack(s, lib, pack_id, required=True)
+    pcs, source = sprites_of(out, lib, s, pack)
+    name, px, sc, p = _burst(s, preset, params)
+    r = ev.encode_and_check(particles.simulate(fx._fit(pcs, px, sc), p), cfg, label=f"{s['id']} burst")
+    d = _dir(out, pid)
+    with _LOCK:
+        s = read(out, pid)
+        nums = [int(x["id"][1:]) for x in s.get("renders") or [] if str(x.get("id", "")).startswith("R") and str(x["id"][1:]).isdigit()]
+        rid = f"R{max(nums + [0]) + 1:03d}"
+        fname = None
+        if r.get("data"):
+            fname = f"renders/{rid}.webm"
+            (d / "renders").mkdir(exist_ok=True)
+            atomic.write_bytes(d / fname, r["data"])
+        rec = {"id": rid, "pack_id": pack, "preset": name, "params": {**p.to_dict(), "sprite_px": px, "scale": sc}, "source": source, "sprites": len(pcs), "file": fname,
+               "bytes": len(r["data"]) if r.get("data") else 0, "status": r["status"], "checks": r["checks"], "warnings": r["warnings"], "blocks": r["blocks"], "metrics": r["metrics"],
+               "created": round(time.time(), 3), "added_to": None, "added": []}
+        s.setdefault("renders", []).append(rec)
+        hist(s, "python", "RENDER", f"{rid} for {pack}: {r['status']} {rec['bytes'] // 1024} KB ({name})", {"render": rid, "pack": pack, "warnings": r["warnings"]})
+        _write(out, s)
+    return render_view(out, pid, rec)
+
+
+def _pack_emoji(lib, pack_id: str) -> str:
+    """The emoji tag of a burst: the pack's own emoji, commonest first (Telegram needs at least one, and takes at most 20)."""
+    from collections import Counter
+    from ..services import telegram
+    c: Counter = Counter()
+    for st in _lib_pack(lib, pack_id).get("stickers") or []:
+        c.update(telegram.split_emoji(st.get("emoji")))
+    return "".join(e for e, _ in c.most_common(MAX_EMOJI)) or "🙂"
+
+
+def add(out: Path, lib, pid: str, renders=None, pack_id=None, user: str = "local") -> dict:
+    """Put rendered bursts into a pack as animated stickers tagged with the pack's emoji. This click is the person's approval of the burst (history `APPROVE`). Without `renders` it takes every READY
+    burst rendered for that pack that is not in a pack yet. A FAILED render (a Telegram limit is broken) cannot be added; a warning never stops it. The same burst is not put in the same pack
+    twice by accident (409): render another to have a second."""
+    with _LOCK:
+        s = read(out, pid)
+        by_id = {r["id"]: r for r in s.get("renders") or []}
+        if renders is not None and (not isinstance(renders, list) or any(not isinstance(x, str) for x in renders)):
+            raise SetError("renders must be a list of burst ids")
+        first = by_id.get(renders[0]) if renders else None
+        pack = _pick_pack(s, lib, pack_id or (first or {}).get("pack_id"), required=True)
+        if renders:
+            missing = [x for x in renders if x not in by_id]
+            if missing:
+                raise SetError(f"no burst {', '.join(missing)} in {s['id']}", 404)
+            chosen = [by_id[x] for x in dict.fromkeys(renders)]
+        else:
+            chosen = [r for r in s.get("renders") or [] if r.get("pack_id") == pack and r.get("status") == "READY" and not r.get("added_to")]
+        if not chosen:
+            raise SetError("there is nothing to add yet: render a burst first", 409)
+        bad = [r["id"] for r in chosen if r.get("status") != "READY" or not r.get("file")]
+        if bad:
+            raise SetError(f"{', '.join(bad)} breaks a Telegram limit (see its checks) and cannot be added", 409)
+        twice = [r["id"] for r in chosen if any(a.get("pack") == pack for a in r.get("added") or [])]
+        if twice:
+            raise SetError(f"{', '.join(twice)} is already in that pack: render another to add a second", 409)
+        emoji, d, added = _pack_emoji(lib, pack), _dir(out, pid), []
+        for r in chosen:
+            st = lib.add_bytes(pack, (d / r["file"]).read_bytes(), "webm", f"{s.get('name') or s['id']} · {r['preset']}"[:60], "animated", emoji,
+                               source={"particle_set": s["id"], "render": r["id"], "preset": r["preset"], "source_pack": r.get("pack_id")})
+            r["added_to"] = pack
+            r.setdefault("added", []).append({"sticker": st["id"], "pack": pack, "ts": round(time.time(), 3)})
+            added.append({"sticker": st["id"], "name": st["name"], "render": r["id"]})
+        hist(s, user, "APPROVE", f"{len(added)} burst(s) added to the pack", {"pack": pack, "added": added})
+        _write(out, s)
+    return {"added": added, "pack_id": pack}
 
 
 # ---------- edit ----------
@@ -332,7 +770,8 @@ def assign(out: Path, lib, pid: str, packs, user: str = "local") -> dict:
     with _LOCK:
         s = read(out, pid)
         add = _clean_packs(packs, lib)
-        s["packs"] = sorted(set(s.get("packs") or []) | set(add))
+        have = list(s.get("packs") or [])
+        s["packs"] = have + [p for p in add if p not in have]         # the person's order (pack ids are random, so sorting them shuffled the "used in" line)
         hist(s, user, "ASSIGN", f"now in {', '.join(s['packs']) or 'nothing'}", {"packs": add})
         _write(out, s)
     return view(out, lib, pid)
@@ -405,13 +844,20 @@ def restore(out: Path, lib, pid: str, user: str = "local") -> dict:
 
 
 def list_deleted(out: Path, lib) -> list[dict]:
+    """The trash, newest deleted first (`GET /api/particles/deleted`): the card of every set that was deleted, enough to recognise it (name, cells strip with urls into the trash folder, where
+    it was used) and to restore it later with `restore`. A pure read: nothing is moved."""
     rows = []
     for p in sorted(trash_dir(out).glob("P[0-9]*")):
         try:
             s = json.loads(atomic.read_text(p / "set.json"))
         except (OSError, ValueError):
             continue
-        rows.append({"id": s.get("id", p.name), "name": s.get("name") or p.name, "packs": list(s.get("packs") or []), "deleted": True,
-                     "deleted_at": (s.get("history") or [{}])[-1].get("ts")})
+        cells = [cell_view(out, p, c, "trash/particles") for c in s.get("cells") or []]
+        picked = [c["n"] for c in cells if c.get("picked")]
+        gone = [h for h in s.get("history") or [] if h.get("decision") == "DELETE"]
+        rows.append({"id": s.get("id", p.name), "name": s.get("name") or p.name, "created": s.get("created"), "kind": (s.get("source") or {}).get("kind"),
+                     "elements": list(s.get("elements") or []), "packs": list(s.get("packs") or []), "used_in": pack_names(lib, s.get("packs") or []), "cells": cells, "picked": picked,
+                     "n_cells": len(cells), "n_picked": len(picked), "credits": s.get("credits"), "deleted": True, "trashed": True,
+                     "deleted_at": (gone[-1] if gone else (s.get("history") or [{}])[-1]).get("ts") or s.get("updated")})
     rows.sort(key=lambda r: (r.get("deleted_at") or 0, r["id"]), reverse=True)
     return rows

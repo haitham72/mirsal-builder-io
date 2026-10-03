@@ -56,9 +56,12 @@ class NewAndConfirm(Base):
         m = self.say("make me falcon stickers")
         self.assertEqual(m["cards"][0]["type"], "plan")
         self.assertEqual((m["cards"][0]["estimate"], len(m["cards"][0]["names"])), (2.0, 9))
-        self.assertEqual([c.get("action") for c in m["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm", "cancel"])
+        self.assertEqual([c.get("action") for c in m["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm"],
+                         "the first answer of a chat carries the one-time AI vision switch beside Create it, and no Not yet (UI/UX spec P9)")
         self.assertFalse([c for c in self.tools.calls if c[0] == "create"])            # no credits until the user says so
         self.assertIsNotNone(self.sess()["pending"])
+        m2 = self.say("make me owl stickers")                                        # a LATER plan of the same chat keeps both buttons
+        self.assertEqual([c.get("action") for c in m2["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm", "cancel"])
 
     def test_confirm_by_button_or_by_word_starts_the_job_and_records_the_pass(self):
         self.say("falcon dancing")
@@ -381,12 +384,15 @@ class FollowUps(Base):
         self.assertEqual((p["type"], [i["regen_of"] for i in p["items"]]), ("batch", ["G012/S2"]))
         self.assertIn("happier", p["items"][0]["prompt"])                                  # the original request is kept, only the "which" is answered
 
-    def test_a_selection_answers_which_one(self):
+    def test_a_clicked_sticker_is_the_slice_and_a_bare_pronoun_is_the_whole_sheet(self):
+        """"make it happier" names no sticker: the character is the same on every cell, so it is a tweak of the whole sheet (UI/UX spec P12); a clicked sticker makes it that one slice."""
         self.seed("G012")
-        m = self.say("make it happier")
-        self.assertIn("which sticker", m["text"].lower())
-        self.say("this one", selected=["G012/S3"])
-        self.assertEqual([i["regen_of"] for i in self.sess()["pending"]["items"]], ["G012/S3"])
+        self.say("make it happier")
+        self.assertEqual(self.sess()["pending"]["type"], "multi", "no sticker pointed at: the sheet")
+        self.assertEqual(self.sess()["pending"]["items"][0]["refs"], ["R101"], "and the sheet goes as the picture")
+        self.say("no")
+        self.say("make it happier", selected=["G012/S3"])
+        self.assertEqual((self.sess()["pending"]["type"], [i["regen_of"] for i in self.sess()["pending"]["items"]]), ("batch", ["G012/S3"]))
 
     def test_the_question_is_forgotten_when_the_user_says_something_else(self):
         self.seed("G012")
@@ -639,24 +645,63 @@ class FriendlyChat(Base):
         self.assertNotIn("credit", m["text"])
         self.assertEqual(m["cards"][0]["estimate"], 2.0)
 
-    def test_the_first_answer_asks_about_ai_vision_once_and_never_blocks_the_plan(self):
+    def test_the_first_answer_offers_create_it_and_a_vision_switch_on_the_right_and_nothing_else(self):
+        """P9 of the UI/UX spec: a one-time decision is not a creation control. Create it + a right-hand AI vision switch with a glow; no "Not yet", no "Keep it off"."""
         m = self.say("make me falcon stickers")
-        acts = [c.get("action") for c in m["chips"]]
-        self.assertEqual(acts, ["confirm", "cancel", "vision_yes", "vision_no"])
-        self.assertIsNotNone(self.sess()["pending"])
-        m2 = self.say("", action={"type": "vision_yes"})
-        self.assertIs(self.sess()["settings"]["allow_vlm"], True)
-        self.assertIsNotNone(self.sess()["pending"], "answering about vision must not drop the pending go-ahead")
-        self.assertEqual([c.get("action") for c in m2["chips"]], ["confirm", "cancel"])
-        m3 = self.say("make me teddy stickers")
-        self.assertNotIn("vision_yes", [c.get("action") for c in m3["chips"]])        # asked once
+        chips = m["chips"]
+        self.assertEqual([c.get("action") for c in chips if c.get("action")], ["confirm"], "only Create it is an action: no Not yet")
+        sw = [c for c in chips if c.get("setting")]
+        self.assertEqual(len(sw), 1)
+        self.assertEqual((sw[0]["label"], sw[0]["setting"], sw[0]["side"], sw[0]["glow"]), ("Allow AI vision", {"allow_vlm": True}, "right", True))
+        self.assertEqual(chips[-1], sw[0], "the switch is the last chip: it sits on the right")
+        self.assertFalse({"Not yet", "Keep it off", "Not now"} & {c["label"] for c in chips})
+        self.assertIsNotNone(self.sess()["pending"], "the plan still waits for its go-ahead")
+        self.say("no")                                                                  # a typed no still cancels: only the button went away
+        self.assertIsNone(self.sess()["pending"])
 
-    def test_a_no_to_vision_is_remembered_and_not_asked_again(self):
+    def test_the_vision_question_is_asked_once(self):
+        self.say("make me falcon stickers")
+        m = self.say("make me teddy stickers")
+        self.assertFalse([c for c in m["chips"] if c.get("setting")], "asked once per chat")
+
+    def test_granting_vision_is_state_only_no_message_no_card_no_turn(self):
+        """P10: allowing or refusing vision writes state and nothing else. The store's call is what the settings route makes."""
+        self.say("make me falcon stickers")
+        before = self.sess()
+        s = self.sess()
+        self.store.set_vision(s, True)
+        self.store.save(s)
+        after = self.sess()
+        self.assertIs(after["settings"]["allow_vlm"], True)
+        self.assertEqual(len(after["messages"]), len(before["messages"]), "no user message, no assistant turn")
+        self.assertEqual(after["messages"][-1].get("cards"), before["messages"][-1].get("cards"), "no card")
+        self.assertIsNotNone(after["pending"], "the pending go-ahead is untouched")
+        self.assertEqual(after["vision_ack"], "allowed")
+
+    def test_the_next_turn_carries_the_permission_and_says_so_once(self):
+        self.say("make me falcon stickers")
+        s = self.sess(); self.store.set_vision(s, True); self.store.save(s)
+        m = self.say("make me teddy stickers")
+        self.assertEqual(m["cards"][0]["type"], "plan", "it proceeds normally")
+        self.assertIn("AI vision is on", m["text"], "and acknowledges the permission inside this turn")
+        self.assertNotIn("vision_ack", self.sess(), "said once")
+        self.assertNotIn("AI vision is on", self.say("make me owl stickers")["text"])
+
+    def test_a_refusal_is_remembered_acknowledged_and_respected(self):
         self.say("hello")
-        self.say("", action={"type": "vision_no"})
-        self.assertIs(self.sess()["settings"]["allow_vlm"], False)
+        s = self.sess(); self.store.set_vision(s, False); self.store.save(s)
         m = self.say("make me falcon stickers")
-        self.assertNotIn("vision_yes", [c.get("action") for c in m["chips"]])
+        self.assertIs(self.sess()["settings"]["allow_vlm"], False)
+        self.assertIn("AI vision is off", m["text"])
+        self.assertFalse([c for c in m["chips"] if c.get("setting")], "never asked again")
+        self.seed("G012")
+        m = self.say("describe the stickers")
+        self.assertIn("off", m["text"].lower())
+        self.assertFalse([c for c in self.tools.calls if c[0] == "captions"], "nothing was sent to a model")
+
+    def test_the_vision_actions_that_used_to_make_a_turn_are_gone(self):
+        from mirsal.agent import graph
+        self.assertFalse(hasattr(graph.Agent, "n_vision"), "answering the question is the settings route, not a chat turn")
 
     def test_a_batch_is_called_by_its_subject_not_by_its_id(self):
         self.seed("G096", subject="eid mubarak greetings")
@@ -753,3 +798,282 @@ class NamesFromPictures(Base):
     def test_the_assistant_never_looks_without_the_yes(self):
         self.assertFalse(self.agent.auto_name(self.sid, "G096"))
         self.assertFalse([c for c in self.tools.calls if c[0] == "name_proposals"])
+
+
+class ParticleIntents(Base):
+    """Chat intents for particle sets (docs/agent-and-chat.md, particle sets in the chat): make particles for a pack, generate more, delete, restore, also use them for another pack. Reading and the free list edits happen at once;
+    anything that SPENDS (a sheet) shows its price on a plan and waits for the go-ahead. FakeTools: no provider."""
+
+    def setUp(self):
+        super().setUp()
+        self.tools.pack_list = [{"id": "P1", "name": "Barbie", "count": 8}, {"id": "P2", "name": "Princess", "count": 5}]
+        self.tools.sets = [{"id": "S1", "name": "Bat signals", "packs": ["P1"], "used_in": [{"id": "P1", "name": "Barbie"}], "n_cells": 4, "n_picked": 4, "elements": ["bats", "stars"]}]
+
+    def calls(self, name):
+        return [c for c in self.tools.calls if c[0] == name]
+
+    def test_the_intent_words(self):
+        from mirsal.agent import resolver as R
+        for text, want in (("make particles for my Barbie pack", "make"), ("generate more", None), ("delete the bat particles", "delete"), ("restore the bat particles", "restore"),
+                           ("draw 4 more particles", "more"), ("make particle effects for my Superman pack", None), ("I want a particle burst for my emoji", None),
+                           ("make me a pack of party hats", None), ("use the bat particles for the Princess pack", "assign")):
+            self.assertEqual(R.particles_intent(text, False), want, text)
+        self.assertEqual(R.particles_intent("generate more", True), "more", "with a set in focus, plain 'generate more' is about it")
+        self.assertEqual(R.particles_intent("also use them for the Princess pack", True), "assign")
+        self.assertIsNone(R.particles_intent("also use them for the Princess pack", False), "no set in focus and none named: not about particles")
+
+    def test_make_particles_for_a_pack_shows_a_plan_with_the_price_and_spends_nothing(self):
+        m = self.say("make particles for my Barbie pack")
+        card = m["cards"][0]
+        self.assertEqual((card["type"], card["pack"], card["grid"]), ("particles_plan", "Barbie", "2x2"))
+        self.assertEqual(card["estimate"], 2.0)
+        self.assertTrue(card["elements"] and len(card["elements"]) <= 4)
+        self.assertEqual(self.calls("particles_start"), [], "no sheet before the go-ahead")
+        self.assertEqual(self.sess()["pending"]["type"], "particles")
+        self.assertEqual([c.get("action") for c in m["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm"], "first answer of the chat: Create it + the vision switch")
+        self.assertIn("2", m["text"])
+
+    def test_the_go_ahead_starts_the_sheet_and_the_set_is_remembered(self):
+        self.say("make particles for my Barbie pack")
+        m = self.say("yes")
+        (c,) = self.calls("particles_start")
+        self.assertEqual((c[1], c[2], c[3]), (None, "P1", "2x2"), "a new set for the Barbie pack")
+        self.assertEqual(m["cards"][0]["type"], "particles")
+        self.assertIsNone(self.sess()["pending"])
+        self.assertEqual(self.sess()["particles"]["set"], "S9")
+
+    def test_no_go_no_spend(self):
+        self.say("make particles for my Barbie pack")
+        self.say("", action={"type": "cancel"})
+        self.assertEqual(self.calls("particles_start"), [])
+        self.assertIsNone(self.sess()["pending"])
+
+    def test_an_unclear_pack_is_asked_and_no_pack_says_what_to_do(self):
+        m = self.say("make particles")
+        self.assertIn("Which pack", m["text"])
+        self.assertEqual(self.calls("particles_start"), [])
+        self.setUp(); self.tools.pack_list = []
+        self.assertIn("pack", self.say("make particles for my cats").get("text", "").lower())
+
+    def test_generate_more_names_the_set_prices_it_and_waits(self):
+        m = self.say("generate more bat particles")
+        self.assertEqual(m["cards"][0]["type"], "particles_plan")
+        self.assertEqual((m["cards"][0]["set"], m["cards"][0]["estimate"]), ("S1", 2.0))
+        self.assertEqual(self.calls("particles_start"), [])
+        self.say("yes")
+        (c,) = self.calls("particles_start")
+        self.assertEqual((c[1], c[2]), ("S1", None), "more for the existing set")
+
+    def test_generate_more_after_making_uses_the_set_in_focus(self):
+        s = self.sess(); s["particles"] = {"set": "S1"}; self.store.save(s)
+        m = self.say("generate more")
+        self.assertEqual(m["cards"][0]["set"], "S1")
+
+    def test_delete_is_free_and_says_how_to_get_it_back_but_a_set_in_use_asks_first(self):
+        m = self.say("delete the bat particles")
+        self.assertEqual(self.calls("particles_delete"), [], "it is on the Barbie pack: ask first")
+        self.assertIn("Barbie", m["text"])
+        self.assertEqual(self.sess()["pending"]["type"], "particles")
+        m = self.say("yes")
+        self.assertEqual(self.calls("particles_delete")[0][1:], ("S1", True))
+        self.assertIn("Restore", m["text"])
+        self.setUp()
+        self.tools.sets = [{"id": "S2", "name": "Loose hearts", "packs": [], "used_in": [], "n_cells": 4, "n_picked": 4, "elements": []}]
+        m = self.say("delete the hearts particles")
+        self.assertEqual(self.calls("particles_delete")[0][1:], ("S2", False), "stand-alone: nothing is using it, so it goes to the trash at once")
+        self.assertIn("trash", m["text"])
+
+    def test_restore_brings_it_back(self):
+        self.tools.deleted = [{"id": "S7", "name": "Old bats", "packs": []}]
+        m = self.say("restore the bats particles")
+        self.assertEqual(self.calls("particles_restore")[0][1], "S7")
+        self.assertIn("Old bats", m["text"])
+
+    def test_also_use_them_for_another_pack_is_a_free_list_edit(self):
+        s = self.sess(); s["particles"] = {"set": "S1"}; self.store.save(s)
+        m = self.say("also use them for the Princess pack")
+        self.assertEqual(self.calls("particles_assign")[0][1:], ("S1", ["P2"]))
+        self.assertEqual(self.calls("particles_start"), [], "no credits")
+        self.assertIn("Princess", m["text"])
+
+    def test_a_set_that_does_not_exist_is_said_not_guessed(self):
+        m = self.say("delete the dragon particles")
+        self.assertEqual(self.calls("particles_delete"), [])
+        self.assertIn("dragon", m["text"])
+
+
+class EditRouteClassifier(unittest.TestCase):
+    """P11-P13 of the UI/UX spec: every edit request is classified, by rules, into exactly one of: the EDITOR (a transformation or a cleaning of one slice) or a regeneration of one of three kinds:
+    (a) tweak = I like the image, change a detail; (b) action = same image, new action, the shape stays; (c) redesign = same subject and actions, the design replaced. The examples are the spec's own."""
+
+    def c(self, text):
+        from mirsal.agent import editroute
+        return editroute.classify_edit(text)
+
+    def test_a_transformation_or_a_cleaning_goes_to_the_editor(self):
+        for text, op in (("can you rotate him?", "rotate"), ("flip it", "flip"), ("mirror number 3", "flip"), ("crop number 2", "crop"), ("remove the lines", "clean"),
+                         ("erase the line on S2", "clean"), ("clean it up", "clean"), ("get rid of the border", "clean"), ("add a text to it", "text"), ("tilt him a bit", "rotate")):
+            got = self.c(text)
+            self.assertEqual((got["route"], op in got["ops"]), ("editor", True), text)
+            self.assertIsNone(got["case"])
+
+    def test_case_a_a_detail_changes_and_the_image_is_liked(self):
+        for text, delta in (("move its hand", "move its hand"), ("make him cry", "cry"), ("change his clothes colour", "clothes colour"), ("make her blonde", "blonde"),
+                            ("put hijab on cell 4", "hijab"), ("remove the dubai skyline", "the dubai skyline"), ("add burj khalifa", "burj khalifa"), ("make it cartoonish", "cartoonish"),
+                            ("cool now make it cuter", "cuter"), ("make him happier", "happier")):
+            got = self.c(text)
+            self.assertEqual((got["route"], got["case"]), ("regen", "tweak"), text)
+            self.assertIn(delta, got["delta"], text)
+
+    def test_case_b_the_action_changes_and_the_shape_stays(self):
+        for text, act in (("now make him play football", "play football"), ("make him sleep", "sleep"), ("now he should run", "run"), ("let her dance", "dance"),
+                          ("make him jump over a wall", "jump over a wall"), ("have him ride a horse", "ride a horse")):
+            got = self.c(text)
+            self.assertEqual((got["route"], got["case"]), ("regen", "action"), text)
+            self.assertIn(act, got["action"], text)
+
+    def test_case_c_the_design_is_replaced_and_the_actions_are_kept(self):
+        for text, subj in (("can you make him iron man?", "iron man"), ("nice now make it as a lemon", "lemon"), ("now make it a lemon", "lemon"), ("turn him into a robot", "robot"),
+                           ("make her a princess", "princess"), ("redo it as a banana", "banana"), ("make them as pirates", "pirates")):
+            got = self.c(text)
+            self.assertEqual((got["route"], got["case"]), ("regen", "redesign"), text)
+            self.assertEqual(got["subject"], subj, text)
+
+    def test_a_new_request_is_not_an_edit(self):
+        for text in ("make me a falcon", "create three sticker packs of fruits", "falcon dancing", "i want 9 stickers of a cat", "give me a teddy bear", "hello", "what does this cost?"):
+            self.assertIsNone(self.c(text), text)
+
+    def test_the_bare_subject_is_never_taken_for_a_detail(self):
+        self.assertEqual(self.c("make him iron man")["case"], "redesign")
+        self.assertEqual(self.c("make him angry")["case"], "tweak", "an emotion is a detail, not a subject")
+        self.assertEqual(self.c("make him red")["case"], "tweak")
+        self.assertEqual(self.c("make him wear a hat")["case"], "tweak")
+
+    def test_many_packs_of_the_same_character_is_said_to_be_unsupported_and_points_at_the_next_feature(self):
+        from mirsal.agent import editroute
+        for text in ("i need multiple packs of same character", "make 5 packs of the same character", "many packs with the same guy"):
+            self.assertTrue(editroute.unsupported(text), text)
+        self.assertIn("burst", editroute.unsupported("i need multiple packs of same character").lower())
+        self.assertIsNone(editroute.unsupported("make a pack of fruits"))
+
+
+def banana_plan(subject="banana"):
+    """A saved plan (prompts.json) of a 3x3 batch, as `generation_plan` returns it."""
+    cells = [{"pos": i, "label": f"pose {i}", "tags": [f"{subject}_pose_{i}"], "emoji": "🍌"} for i in range(1, 10)]
+    return {"template_id": "sheet_3x3", "template_version": 3, "task": subject, "task_slug": subject, "subject": subject, "grid": [3, 3],
+            "slots": {"subject_description": f"a cheerful {subject} mascot", "style_id": "flat_vector", "mode": "sheet_3x3", "cells": cells, "key_colour": "green"},
+            "stickers": [{"index": i, "id": f"prompt{i:02d}", "key": f"{subject}_pose_{i}", "tags": [f"{subject}_pose_{i}"], "emoji": "🍌", "prompt": f"pose {i}"} for i in range(1, 10)]}
+
+
+class EditRouting(Base):
+    """P11-P13 of the UI/UX spec, through the graph with FakeTools: an edit is classified, and what is SENT depends on the case: (a) tweak and (b) action send the SHEET as the picture with the parent's prompt;
+    (c) redesign sends NO picture and reuses the prompt with the new subject; a transformation or a cleaning goes to the EDITOR and spends nothing."""
+
+    def setUp(self):
+        super().setUp()
+        self.seed("G012", subject="banana")
+        self.tools.plans["G012"] = banana_plan()
+        s = self.sess(); s["settings"]["allow_vlm"] = False; self.store.save(s)          # keep the vision question out of these turns
+
+    def pending(self):
+        return self.sess()["pending"]
+
+    def test_a_redesign_sends_no_picture_and_reuses_the_prompt_with_the_new_subject(self):
+        """The real transcript: "can you make him iron man?" became a NEW plan for the subject "can you him iron man"."""
+        m = self.say("can you make him iron man?")
+        p = self.pending()
+        self.assertEqual(p["type"], "multi")
+        it = p["items"][0]
+        self.assertEqual((it["subject"], it["parent"], it.get("refs") or [], it.get("ref_clause")), ("iron man", "G012", [], None), "no picture is sent")
+        self.assertEqual(it["plan"]["slots"]["subject_description"], "iron man")
+        self.assertEqual([c["label"] for c in it["plan"]["slots"]["cells"]], [f"pose {i}" for i in range(1, 10)], "the actions are approved: unchanged")
+        self.assertTrue(all(s["key"].startswith("iron_man_pose_") for s in it["plan"]["stickers"]), "the keys follow the subject")
+        self.assertFalse([c for c in self.tools.calls if c[0] in ("sheet_reference", "create")], "nothing is sent or spent before the go-ahead")
+        self.assertIn("iron man", m["text"])
+        self.assertNotIn("can you", m["text"].lower())
+        self.say("yes")
+        sent = self.tools.sent[-1]
+        self.assertEqual((sent["parent"], sent["refs"], sent["ref_clause"]), ("G012", [], None))
+        names = [s["name"] for s in self.sess()["subjects"]]
+        self.assertIn("iron man", names)
+        self.assertFalse([n for n in names if "can you" in n or "him" in n.split()], names)
+
+    def test_a_new_action_keeps_the_shape_so_the_sheet_goes_as_the_picture(self):
+        self.say("now make him play football")
+        it = self.pending()["items"][0]
+        self.assertEqual(it["refs"], ["R101"])
+        self.assertEqual(self.tools.calls[-1][:2] if False else [c for c in self.tools.calls if c[0] == "sheet_reference"], [("sheet_reference", "G012")])
+        self.assertIn("football", it["ref_clause"])
+        self.assertIn("shape", it["ref_clause"])
+        self.assertTrue(all(c["label"].startswith("play football, pose") for c in it["plan"]["slots"]["cells"]), "every cell's action changes, its pose variety stays")
+        self.assertEqual(it["plan"]["slots"]["subject_description"], "a cheerful banana mascot", "the subject is unchanged")
+        self.say("yes")
+        self.assertEqual((self.tools.sent[-1]["refs"], self.tools.sent[-1]["parent"]), (["R101"], "G012"))
+
+    def test_a_tweak_sends_the_sheet_and_the_prompt_and_only_the_change(self):
+        """The real transcript: "cool now make it cuter" became "sure here is prompt for 'now make it cuter driving a truck'"."""
+        m = self.say("cool now make it cuter")
+        it = self.pending()["items"][0]
+        self.assertEqual(it["refs"], ["R101"])
+        self.assertIn("cuter", it["ref_clause"])
+        self.assertIn("Keep every character exactly", it["ref_clause"])
+        self.assertEqual([c["label"] for c in it["plan"]["slots"]["cells"]], [f"pose {i}" for i in range(1, 10)], "the parent's prompt is reused as it is")
+        self.assertNotIn("truck", repr(it) + m["text"])
+        self.assertEqual(it["subject"], "banana", "the subject of the turn is the chat's, not the words of the sentence")
+
+    def test_the_subject_of_the_turn_is_carried_to_the_next_edit(self):
+        self.say("can you make him iron man?")
+        self.say("yes")
+        new = "G013"                                                      # the sheet job finished and became this batch (live mode: the job id resolves to it later)
+        s = self.sess()
+        next(x for x in s["subjects"] if x["name"] == "iron man")["passes"][-1]["generation"] = new
+        s["focus"] = {"generation": new, "stickers": []}
+        self.store.save(s)
+        self.tools.gens[new] = gen(new)
+        self.tools.plans[new] = self.tools.sent[-1]["plan"]               # prompts.json of the new batch is the plan that was sent
+        self.say("make him cry")
+        it = self.pending()["items"][0]
+        self.assertEqual((it["subject"], it["parent"]), ("iron man", new), "the next edit is about the new sheet and its subject")
+        self.assertEqual(it["plan"]["slots"]["subject_description"], "iron man")
+
+    def test_rotating_goes_to_the_editor_and_nothing_is_generated(self):
+        s = self.sess(); s["focus"] = {"generation": "G012", "stickers": ["G012/S2"]}; self.store.save(s)
+        m = self.say("can you rotate him?")
+        self.assertIn("boot up the editor", m["text"])
+        self.assertEqual([c for c in m["chips"] if c.get("editor")], [{"label": "Open the editor", "editor": {"generation": "G012", "index": 2}}])
+        self.assertIsNone(self.pending())
+        self.assertFalse([c for c in self.tools.calls if c[0] in ("create", "sheet_reference", "slice_reference")], "no provider call, no spend")
+
+    def test_the_editor_asks_which_slice_when_it_does_not_know(self):
+        m = self.say("flip it")
+        self.assertIn("Which sticker", m["text"])
+        self.assertFalse([c for c in m["chips"] if c.get("editor")])
+        m = self.say("3")
+        self.assertEqual([c["editor"]["index"] for c in m["chips"] if c.get("editor")], [3])
+
+    def test_one_slice_that_needs_drawing_again_sends_only_that_slice_and_says_its_size(self):
+        m = self.say("make number 3 happier")
+        p = self.pending()
+        self.assertEqual(p["type"], "batch")
+        it = p["items"][0]
+        self.assertEqual((it["regen_of"], it["parent"], it["refs"]), ("G012/S3", "G012", ["R201"]))
+        self.assertEqual([c for c in self.tools.calls if c[0] == "slice_reference"], [("slice_reference", "G012/S3", 400)])
+        self.assertIn("happier", it["ref_clause"])
+        self.assertIn("682 px", m["text"])
+        self.assertIn("400", m["text"])
+        self.assertEqual(it["plan"]["grid"], [1, 1], "the parent's own cell as a 1x1, not a string made from the words")
+        self.assertEqual(it["plan"]["slots"]["cells"][0]["label"], "pose 3")
+        self.say("yes")
+        self.assertEqual((self.tools.sent[-1]["grid"], self.tools.sent[-1]["regen_of"], self.tools.sent[-1]["refs"]), ("1x1", "G012/S3", ["R201"]))
+
+    def test_many_packs_of_the_same_character_is_not_improvised(self):
+        m = self.say("i need multiple packs of same character")
+        self.assertIn("not supported", m["text"])
+        self.assertIn("burst", m["text"].lower())
+        self.assertIsNone(self.pending())
+        self.assertFalse([c for c in self.tools.calls if c[0] in ("plan", "create")])
+
+    def test_a_new_request_is_still_a_new_request(self):
+        m = self.say("make me a falcon in pixel style")
+        self.assertEqual(m["cards"][0]["type"], "plan")
+        self.assertFalse([c for c in self.tools.calls if c[0] == "sheet_reference"])

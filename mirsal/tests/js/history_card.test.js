@@ -1,5 +1,5 @@
 // The markup of the Earlier-batches column in live.js (the DOM half runs only in a browser). The statements are read out of the file and run with the few
-// globals they use stubbed, so the markup is checked for real: the sheet's own grid, the plain title, one row per batch, and what drawHist redraws (the column; under the batch the Particles section).
+// globals they use stubbed, so the markup is checked for real: ONE picture per batch (the first sticker, P4 of the UI/UX spec), the plain title, one row per batch, and what drawHist redraws (the column; under the batch the Particles section).
 // Run: node --test tests/js     (MIRSAL_LIVE_JS points the test at another copy of live.js)
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -44,32 +44,35 @@ function load(route = 'library') {
     histCol: () => { sandbox.calls.col++; },
     spSecDraw: () => { sandbox.calls.sec++; },
   };
-  const body = ['const histTitle=', 'const histInfo=', 'const histGrid=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
-  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histGrid,histRow,histColHTML,drawHist};')(...Object.values(sandbox));
+  const body = ['const histTitle=', 'const histInfo=', 'const histThumb=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
+  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histThumb,histRow,histColHTML,drawHist};')(...Object.values(sandbox));
   return { ...sandbox, ...api, env: sandbox };          // env: the globals the statements closed over (mutate them, not the copy)
 }
 
-test('a 3x3 batch is nine cells in three columns, a 2x2 four in two', () => {
+test('a batch is ONE picture, the first sticker that has one, whatever its grid (a 3x3 is not nine thumbnails, a 2x2 not four)', () => {
   const hx = load();
-  const three = hx.histRow(BATCH([3, 3], [1, 5]));
-  assert.match(three, /class=lv-hth style="--c:3"/);
-  assert.equal((three.match(/<img /g) || []).length, 9);
-  assert.match(three, /title="S1 · animated"/);
-  assert.match(three, /title="S5 · animated"/);
-  assert.ok(!/title="S2 · animated"/.test(three), 'S2 is not animated');
-  const two = hx.histRow(BATCH([2, 2], [4]));
-  assert.match(two, /class=lv-hth style="--c:2"/);
-  assert.equal((two.match(/<img /g) || []).length, 4);
+  for (const grid of [[3, 3], [2, 2]]) {
+    const h = hx.histRow(BATCH(grid, [1, 5]));
+    assert.match(h, /class=lv-hth/);
+    assert.equal((h.match(/<img /g) || []).length, 1, `${grid.join('x')}: one image`);
+    assert.match(h, /src="\/out\/G005\/slices\/S1\.png\?e=7"/, 'the first sticker');
+    assert.doesNotMatch(h, /--c:/, 'no column count: there is no grid');
+  }
+  assert.match(hx.histRow(BATCH([3, 3], [1])), /title="S1 · animated"/);
+  assert.doesNotMatch(hx.histRow(BATCH([3, 3], [5])), /· animated"/, 'S1 is not the animated one');
 });
 
-test('the row says which batch it is and a cell with no picture is a cell, not a broken picture', () => {
+test('the row says which batch it is; when the first cell has no picture the next one with a picture is shown, and a batch with none is a checkerboard, not a broken picture', () => {
   const hx = load();
-  const html = hx.histRow(BATCH([3, 3], [1, 5, 9], [2]));
+  const html = hx.histRow(BATCH([3, 3], [1, 5, 9], [1]));
   assert.match(html, /A Sad Owl/);
   assert.match(html, /G005 · 9 stickers · 3 animated · edited 2 d ago/);
-  assert.equal((html.match(/<img /g) || []).length, 8);
-  assert.match(html, /<span class=lv-hnoimg title="S2 · pending">/);
-  assert.ok(!/src="[^"]*null/.test(html), 'no src built from a missing png');
+  assert.equal((html.match(/<img /g) || []).length, 1);
+  assert.match(html, /slices\/S2\.png/, 'S1 has no picture yet: the first one that has is shown');
+  const none = hx.histRow(BATCH([2, 2], [], [1, 2, 3, 4]));
+  assert.equal((none.match(/<img /g) || []).length, 0);
+  assert.match(none, /<span class=lv-hnoimg title="pending"/);
+  assert.ok(!/src="[^"]*null/.test(html + none), 'no src built from a missing png');
 });
 
 test('a row is one button that presents the batch; the batch the Studio presents is marked', () => {

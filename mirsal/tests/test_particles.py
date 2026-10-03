@@ -471,3 +471,26 @@ class BoundaryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TrimSpriteTests(unittest.TestCase):
+    """P6 of the UI/UX spec: a particle is stored as a TIGHT sprite (its alpha bounding box plus a little air), never as a 512 px sticker canvas."""
+
+    def test_the_sprite_is_cropped_to_what_is_drawn_plus_a_little_air(self):
+        from mirsal.engine.particles import trim_sprite
+        cell = np.zeros((600, 600, 4), np.uint8)
+        cell[200:320, 100:260] = (250, 40, 40, 255)                      # 120 high, 160 wide
+        cell[5, 5] = (255, 255, 255, 3)                                  # haze at or under ALPHA_TRIM is not subject
+        out = trim_sprite(cell, pad=2)
+        self.assertEqual(out.shape, (124, 164, 4))
+        self.assertEqual(tuple(out[2, 2]), (250, 40, 40, 255))
+        self.assertEqual(int(out[0, 0, 3]), 0, "the air is transparent")
+
+    def test_a_pad_never_runs_off_the_picture_and_an_empty_cell_is_none(self):
+        from mirsal.engine.particles import trim_sprite
+        edge = np.zeros((50, 50, 4), np.uint8)
+        edge[0:10, 0:10] = (1, 2, 3, 255)
+        self.assertEqual(trim_sprite(edge, pad=4).shape, (14, 14, 4))
+        self.assertIsNone(trim_sprite(np.zeros((20, 20, 4), np.uint8)))
+        with self.assertRaises(ValueError):
+            trim_sprite(np.zeros((20, 20, 3), np.uint8))

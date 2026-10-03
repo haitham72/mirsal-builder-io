@@ -216,3 +216,34 @@ class SpillTests(unittest.TestCase):
         self.assertLessEqual(r.metrics["spill_px"], 20)
         self.assertGreater(r.metrics["chroma_risk"], CFG.chroma_risk_warn)
         self.assertEqual(r.metrics["warnings"], ["chroma_risk"])
+
+
+class MergeCellsTests(unittest.TestCase):
+    """P8 of the UI/UX spec: an edited slice is merged back into ONE sheet. Same layout, so the same S# by position; only the fixed cells change; the generator's separator lines inside a fixed
+    cell are gone (they were a drawing artefact of the generated image, the cut itself did nothing wrong)."""
+
+    def test_only_the_fixed_cell_changes_and_the_separator_line_in_it_is_gone(self):
+        from mirsal.engine.sheet import merge_cells
+        sheet = synth.bg(1200, 3).copy()
+        sheet[:, 596:604] = 255                                              # a white separator line the image model drew down the middle
+        sheet[596:604, :] = 255
+        rects = [(c * 600, r * 600, 600, 600) for r in range(2) for c in range(2)]
+        fix = np.zeros((512, 512, 4), np.uint8)
+        fix[156:356, 156:356] = (220, 40, 40, 255)
+        bg = tuple(int(v) for v in np.median(sheet[10:60, 10:60].reshape(-1, 3), axis=0))
+        out = merge_cells(sheet, rects, {2: fix}, {2: bg})
+        self.assertEqual((out.shape, out.dtype), (sheet.shape, np.uint8))
+        keep = np.ones(sheet.shape[:2], bool)
+        keep[0:600, 600:1200] = False
+        self.assertTrue(np.array_equal(out[keep], sheet[keep]), "every pixel outside the fixed cell is byte for byte what it was")
+        self.assertTrue((out[0:600, 600:604] != 255).any(axis=-1).all(), "the separator column that fell inside the fixed cell is gone")
+        self.assertEqual(tuple(out[300, 900]), (220, 40, 40), "the edited sticker sits in the middle of its cell")
+        self.assertEqual(tuple(out[5, 1195]), bg, "the rest of the cell is the sheet's own key background")
+
+    def test_nothing_to_merge_is_the_sheet_untouched_and_a_bad_index_is_refused(self):
+        from mirsal.engine.sheet import merge_cells
+        sheet = synth.bg(600, 1)
+        rects = [(0, 0, 300, 300), (300, 0, 300, 300)]
+        self.assertTrue(np.array_equal(merge_cells(sheet, rects, {}, {}), sheet))
+        with self.assertRaises(ValueError):
+            merge_cells(sheet, rects, {3: np.zeros((8, 8, 4), np.uint8)}, {})

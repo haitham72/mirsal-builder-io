@@ -15,7 +15,7 @@ const AIU=(()=>{
  /* a message's signature: the page only rebuilds a message whose signature changed (so carousels keep their scroll and videos keep playing) */
  const sig=m=>JSON.stringify([m.status,m.text,(m.steps||[]).map(s=>[s.kind,s.label,s.status,s.detail&&s.detail.lines&&s.detail.lines.length]),m.chips,
   (m.cards||[]).map(c=>[c.type,c.generation,c.job,c.job_status,c.job_stage,c.animating,c.estimate,c.names&&c.names.length,
-   ((c.data&&c.data.stickers)||c.stickers||[]).map(s=>[s.id,s.status,s.still,s.anim_status,!!s.png,!!s.webm]),c.data&&c.data.problem&&c.data.problem.check,c.run&&[c.run.step,c.run.status,c.run.updated]])]);
+   ((c.data&&c.data.stickers)||c.stickers||[]).map(s=>[s.id,s.status,s.still,s.anim_status,!!s.png,!!s.webm]),c.data&&c.data.problem&&c.data.problem.check,c.data&&c.data.allow,c.run&&[c.run.step,c.run.status,c.run.updated]])]);
  /* does anything on this card still move? (then the page keeps polling) */
  const cardLive=c=>{if(c.type!=='generation')return false;
   if(c.job&&!c.generation)return !['FAILED','TIMEOUT'].includes(c.job_status);
@@ -132,7 +132,7 @@ function paint(){
   const switched=A.shown!==A.sid;                          // a different chat than the one on screen: start clean, land at its bottom at once, no swipe
   if(switched){list.innerHTML='';A.els.clear();list.classList.remove('is-switched');void list.offsetWidth;list.classList.add('is-switched')}
   const near=switched||sc.scrollHeight-sc.scrollTop-sc.clientHeight<160;let changed=false;
-  msgs.forEach((m,i)=>{const k=AIU.sig(m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',')+agAllowRev(m);let el=A.els.get(m.id);
+  msgs.forEach((m,i)=>{const k=AIU.sig(m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',')+((m.chips||[]).some(c=>c.setting)?String(A.sess&&A.sess.settings&&A.sess.settings.allow_vlm):'');let el=A.els.get(m.id);
    if(!el){el=document.createElement('div');A.els.set(m.id,el);list.appendChild(el);changed=true}
    if(el._k!==k){const keep=[...el.querySelectorAll('.car-track')].map(t=>t.scrollLeft);el._k=k;el.className='ai-m '+(m.role==='user'?'user':'bot'+(m.status==='working'?' working':''));
     el.innerHTML=m.role==='user'?`<div class=b>${AIU.esc(m.text)}</div>`:botHTML(m);
@@ -142,7 +142,6 @@ function paint(){
   else if(changed&&(near||msgs[msgs.length-1].role==='user'))requestAnimationFrame(()=>sc.scrollTo({top:sc.scrollHeight,behavior:'smooth'}));
  }
   selChips();setSet();busyUi();
-  if(typeof route_==='undefined'||route_==='agent')syncCardAllow();
 }
 function busyUi(){const w=!!(A.sess&&A.sess.working)||A.busy;const b=$('ai-send');if(!b)return;b.classList.toggle('busy',w);b.disabled=w||!$('ai-in').value.trim()}
 
@@ -151,8 +150,7 @@ function botHTML(m){
  const tr=steps.length||work?traceHTML(m,work):'';
  const text=m.text?`<div class="ai-text${m.status==='error'?' ai-err':''}">${AIU.md(m.text)}</div>`:'';
  const cards=(m.cards||[]).map((c,i)=>cardHTML(c,m,i)).join('');
- const chips=(m.chips&&m.chips.length&&!work)?`<div class=ai-chips>${m.chips.map(c=>c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
-   :`<button class=ai-chip data-act=agchip data-text="${AIU.esc(c.text||c.label)}">${AIU.esc(c.label)}</button>`).join('')}</div>`:'';
+ const chips=(m.chips&&m.chips.length&&!work)?`<div class=ai-chips>${m.chips.map(chipHTML).join('')}</div>`:'';
  return `<div class=ai-av>${ic('ai')}</div><div class=ai-body>${tr}${text}${cards}${chips}</div>`}
 
 function traceHTML(m,work){
@@ -167,6 +165,14 @@ function traceHTML(m,work){
    :`<span class=tr-t><span>${AIU.esc(s.label)}${s.kind==='think'?'<span class=dots></span>':''}</span></span>`;
   return `<div class="${cls}"><i class=tr-mk></i>${t}${d&&isOpen?`<div class=tr-d>${s.detail.lines.map(l=>`<div>${AIU.esc(l)}</div>`).join('')}</div>`:''}</div>`}).join('')+`</div>`}
 
+/* a chip under a message: a go-ahead / action button, a suggestion, or (c.setting) a ONE-TIME switch that writes a setting through the settings route and makes no chat turn (UI/UX spec P9, P10).
+   The switch reads the live setting: undecided it glows (subtle, rotating, at rest under reduced motion) on the right; decided it says "AI vision on" / "AI vision off" and flips on a press. */
+function chipHTML(c){
+ if(c.setting){const k=Object.keys(c.setting)[0],cur=A.sess&&A.sess.settings?A.sess.settings[k]:null,on=cur===true,off=cur===false,next={[k]:!on};
+  return `<button class="ai-chip ai-sw${cur==null&&c.glow?' glow':''}${on?' is-on':''}" data-act=agsetting data-set="${AIU.esc(JSON.stringify(next))}" aria-pressed=${on} title="${on?'Click to switch it off':'Click to switch it on'}">${AIU.esc(on?(c.on||c.label):off?(c.off||c.label):c.label)}</button>`}
+ if(c.editor)return `<button class="ai-chip pri" data-act=agedit data-g="${AIU.esc(c.editor.generation)}" data-i=${+c.editor.index}>${AIU.esc(c.label)}</button>`;
+ return c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
+  :`<button class=ai-chip data-act=agchip data-text="${AIU.esc(c.text||c.label)}">${AIU.esc(c.label)}</button>`}
 function cardHTML(c,m,i){
  if(c.type==='plan'){const last=AIU.lastBot((A.sess&&A.sess.messages)||[]),done=!(A.sess&&A.sess.pending)||!last||m.id!==last.id;
   return `<div class="ai-card plan${done?' is-done':''}"><div class=ai-ch><b>${AIU.esc(c.subject)}</b><small>${c.count} stickers · ${AIU.esc(c.grid)} · ${AIU.esc(c.style)}</small></div>
@@ -180,6 +186,10 @@ function cardHTML(c,m,i){
    ${(c.assumed||[]).map(x=>`<div class=multi-assume>${AIU.esc(x)}</div>`).join('')}
    <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`All together <b>${AIU.credits(c.estimate)}</b>${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}</div></div></div>`}
  if(c.type==='effects')return `<div class="ai-card plan"><div class=ai-ch><b>Particle effects · ${AIU.esc(c.id)}</b><small>${AIU.esc(c.pack)} · ${c.count} stickers</small><span class=sp></span><a class=ai-link href="#/effects/${AIU.esc(c.id)}">Open effects</a></div></div>`
+ if(c.type==='particles_plan')return `<div class="ai-card plan"><div class=ai-ch><b>${c.op==='more'?'More particles':'Particles'} · ${AIU.esc(c.op==='more'?(c.name||c.set):c.pack)}</b><small>${AIU.esc(c.grid)} · ${(c.elements||[]).length} particles</small></div>
+   <div class=plan-tags>${(c.elements||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div>
+   <div class=plan-foot><div class=price>${c.estimate==null?'The price is shown before anything is spent.':`<b>${AIU.credits(c.estimate)}</b>`}</div></div></div>`
+ if(c.type==='particles')return `<div class="ai-card plan"><div class=ai-ch><b>Particles · ${AIU.esc(c.name||c.set)}</b><small>${AIU.esc(c.set)}${c.drawing?' · drawing':''}</small><span class=sp></span>${c.pack_id?`<a class=ai-link href="#/pack/${AIU.esc(c.pack_id)}">Open the pack's particle studio</a>`:`<a class=ai-link href="#/library">Open the Library</a>`}</div></div>`
  if(c.type==='generation'){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
   let note='';
@@ -189,8 +199,8 @@ function cardHTML(c,m,i){
   else if(c.animating&&st.some(x=>['PENDING','RUNNING'].includes(x.anim_status)))note='Animating…';
   const meta=gid?`${gid}${c.data&&c.data.parent?' · from '+c.data.parent:''} · ${ready} ready`:'';
   return `<div class="ai-card gen"><div class=ai-ch><b>${AIU.esc(c.subject||'Stickers')}</b><small>${meta}</small><span class=sp></span>${gid?`<button class=ai-link data-act=agstudio data-g="${gid}">Open in Studio</button>`:''}</div>
-   ${carHTML(st.length?st:null,gid,agAllow(gid))}${note?`<div class=car-note>${note}</div>`:''}</div>`}
- if(c.type==='creator')return runHTML(c.run);
+   ${carHTML(st.length?st:null,gid,(c.data&&c.data.allow)||null)}${note?`<div class=car-note>${note}</div>`:''}</div>`}
+ if(c.type==='creator'){const g=c.run&&(m.cards||[]).find(x=>x.type==='generation'&&x.generation===c.run.generation);return runHTML(c.run,(g&&g.data&&g.data.allow)||null)}
  if(c.type==='stickers'){return `<div class="ai-card"><div class=ai-ch><b>${c.stickers.length===1?'Sticker':'Stickers'}</b><small>${c.stickers.length} found</small></div>${carHTML(c.stickers.map(x=>({...x,status:'READY',name:x.key})),null)}</div>`}
  return ''}
 
@@ -202,14 +212,14 @@ function problemHTML(p,gid){const got=p.received?`The sheet was received${p.rece
 /* the creator's run: where it stands, as a short list; what it stopped for is the message under it, with its buttons.
    The stop message carries the batch's own carousel (the backend attaches the generation card next to the run card), so the rejected stickers are visible
    where the buttons that decide about them are. The bulk pair below allows or takes back every allow-able sticker or animation of the run's batch. */
-function runHTML(r){if(!r)return '';
+function runHTML(r,allow){if(!r)return '';
  const rows=(r.steps||[]).map(s=>`<li class="${s.state}"><i></i>${AIU.esc(s.label)}</li>`).join('');
  const st=r.status==='running'?'Working…':r.status==='waiting'?'Waiting for you':r.status==='done'?'On Telegram':r.status==='failed'?'Failed':'Stopped';
  const why=r.stop?`<div class=run-why>${AIU.esc(r.stop.why)}</div>`:r.waiting?`<div class=run-why>${AIU.esc(r.waiting.why)}</div>`:'';
  return `<div class="ai-card ai-run is-${r.status}"><div class=ai-ch><b>${AIU.esc(r.subject)}</b><small>${r.scope==='video'?'animated':'static'} pack · ${r.bypass?'auto-approve':'you approve'}</small><span class=sp></span><span class=run-st>${st}</span>
-  ${r.status==='running'?`<button class=ai-link data-act=agaction data-type=creator_stop>Stop</button>`:''}</div><ol class=run-steps>${rows}</ol>${why}${runAllowRow(r)}</div>`}
-/* the same pair the Studio has, on the creator's card, per kind: N counts what is allow-able NOW. It reads the batch's allow block the page hydrated. */
-function runAllowRow(r){const gid=r.generation,al=gid&&(A.allowCache[gid]||{}).allow;if(!al||r.status==='done')return '';
+  ${r.status==='running'?`<button class=ai-link data-act=agaction data-type=creator_stop>Stop</button>`:''}</div><ol class=run-steps>${rows}</ol>${why}${runAllowRow(r,allow)}</div>`}
+/* the same pair the Studio has, on the creator's card, per kind: N counts what is allow-able NOW. It reads the batch's allow block (gates.allow_info) that rides on the generation card next to the run. */
+function runAllowRow(r,al){const gid=r.generation;if(!al||!gid||r.status==='done')return '';
  const rows=[['still','sticker'],['animation','animation']].map(([kind,what])=>{const a=al[kind]||{can:[],undo:[]},n=a.can.length,b=a.undo.length;if(!n&&!b)return '';
   return `<span class=run-alw>${n?`<button class="ai-chip pri" data-act=agallowall data-g="${AIU.esc(gid)}" data-kind=${kind} data-allow=1 title="Use every ${what} anyway that Python blocked as a judgement call">Use all anyway (${n})</button>`:''}
    ${b?`<button class=ai-chip data-act=agallowall data-g="${AIU.esc(gid)}" data-kind=${kind} data-allow=0 title="Block the ${what}s you allowed again">Take all back (${b})</button>`:''}</span>`}).join('');
@@ -224,7 +234,7 @@ function carHTML(st,gid,allow){
 
 /* one tile of the chat's carousel. A blocked sticker is never dimmed and never hidden: it wears the locked red marks (hatched while it is not in the set,
    solid with a check once it was allowed by the person), its reason stays readable under it, and the allow button sits on the tile itself, per kind.
-   `allow` is the batch's allow block the page hydrated (flow/gates.py allow_info); without it a blocked tile says its reason and offers nothing yet. */
+   `allow` is the batch's allow block (flow/gates.py allow_info) that the card's own data carries; without it a blocked tile says its reason and offers nothing. */
 function tileHTML(s,gid,allow){
  const wait=s.wait||(s.status==='PENDING'),id=s.id||'';
  const stB=s.status==='FAILED'||s.still==='REJECTED',anB=s.anim_status==='FAILED'||s.anim==='REJECTED',bad=stB||anB;
@@ -247,7 +257,7 @@ function tileHTML(s,gid,allow){
  const btns=[rS&&rS.btn,rA&&rA.btn].filter(Boolean).join('');
  const stateWord=!bad?'':allowed?' (allowed by you)':' (rejected)';
  const albl=`S${s.index!=null?s.index:''} ${String(s.title||s.key||s.name||'').replace(/_/g,' ')}${stateWord}`;
- return `<figure class="ag-tile${A.sel.has(id)?' is-sel':''}${bad?' is-bad':''}${allowed?' is-allowed':''}${wait?' is-wait':''}" data-act=agtile data-id="${AIU.esc(id)}" tabindex="0" role="button" aria-label="${AIU.esc(albl)}"><div class=ag-ph>${media}${bad?`<span class="ag-hatch${allowed?' is-on':''}" aria-hidden=true></span>`:''}</div>${badge}<figcaption class=ag-nm>${cap}</figcaption>
+ return `<figure class="ag-tile${A.sel.has(id)?' is-sel':''}${bad?' is-bad':''}${allowed?' is-allowed':''}${wait?' is-wait':''}" data-act=agtile data-id="${AIU.esc(id)}" tabindex="0" role="button" aria-label="${AIU.esc(albl)}"><div class=ag-ph>${media}${bad?`<span class="ag-hatch${allowed?' is-on':''}" aria-hidden=true></span>`:''}</div>${badge}<figcaption class=ag-nm>${cap}</figcaption>${id?`<button class=ag-id data-act=copyid data-v="${AIU.esc(id)}" title="${AIU.esc(id)} · click to copy the id" aria-label="Copy the id ${AIU.esc(id)}">${AIU.esc(id)}</button>`:''}
   ${whys.length?`<div class=ag-why>${whys.map(w=>AIU.esc(w)).join('<br>')}</div>`:''}${btns?`<div class=ag-alw>${btns}</div>`:''}</figure>`}
 const humanWhy=r=>String(r||'failed').replace(/_/g,' ');
 
@@ -274,39 +284,23 @@ function selChips(){const el=$('ai-sel');if(!el)return;const n=A.sel.size;
  el.innerHTML=n?`<span class=ai-selchip>${n} selected: say what to change<button data-act=agsel aria-label="Clear selection">${ic('x')}</button></span>`:'';
  const ta=$('ai-in');if(ta)ta.placeholder=n?'e.g. make these more energetic':'Make or change stickers'}
 ACT.agchip=el=>agSend(el.dataset.text);
+ACT.agedit=el=>{if(typeof studioEditSticker==='function')studioEditSticker(+String(el.dataset.g).replace(/\D/g,''),+el.dataset.i,'agent')};          /* the editor opens at once on that slice (no chat turn); its Save lands back here */
+ACT.agsetting=async el=>{try{await saveSet(JSON.parse(el.dataset.set))}catch(e){return}paint()};          /* a one-time switch: the setting is saved and nothing is sent to the chat */
 ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
 ACT.agcut=async el=>{const r=await post(`/api/generations/${el.dataset.g}/recut`);if(!r.ok)return toast(r.j.error||'Could not cut the sheet',1);toast('Cutting the sheet…');if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});
 ACT.agtrace=el=>{const k=el.dataset.m;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstep=el=>{const k=el.dataset.k;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstudio=el=>{const n=+String(el.dataset.g).replace(/\D/g,'');if(typeof SES!=='undefined'){SES={prompt:'',gens:[n],off:[],pack:''};if(typeof saveSes==='function')saveSes()}location.hash='#/studio'};
-/* "Use it anyway" on the chat's own tiles: the chat's card data carries no allow block, so the page reads the batch itself (GET /api/generations, which
-   answers flow/gates.py allow_info), only for batches with blocked stickers, at most every 15 s each. The same route the Studio reads: no new contract. */
-A.allowCache={};
-const agAllow=gid=>gid&&A.allowCache[gid]?A.allowCache[gid].allow:null;
-function agAllowRev(m){let r='';for(const c of m.cards||[])if(c.type==='generation'&&c.generation&&A.allowCache[c.generation])r+=c.generation+':'+JSON.stringify(A.allowCache[c.generation].allow)+';';return r}
-const agBlocked=st=>(st||[]).some(s=>s.status==='FAILED'||s.still==='REJECTED'||s.anim_status==='FAILED'||s.anim==='REJECTED');
-let agAllowBusy=false;
-async function syncCardAllow(){if(typeof route_!=='undefined'&&route_!=='agent'||!A.sess||agAllowBusy)return;agAllowBusy=true;
- try{const gids=new Set();
-  for(const m of A.sess.messages||[])for(const c of m.cards||[])if(c.type==='generation'&&c.generation&&agBlocked((c.data&&c.data.stickers)||[]))gids.add(c.generation);
-  for(const m of A.sess.messages||[])for(const c of m.cards||[])if(c.type==='creator'&&c.run&&c.run.generation&&c.run.status!=='done')gids.add(c.run.generation);
-  let changed=false;
-  for(const gid of gids){const n=+String(gid).replace(/\D/g,'');if(!n)continue;const cur=A.allowCache[gid];
-   if(cur&&Date.now()-cur.at<15000)continue;
-   try{const r=await api('/api/generations/'+n),al=r.ok&&r.j&&r.j.allow?r.j.allow:null;
-    if(JSON.stringify(al)!==JSON.stringify(cur&&cur.allow)){A.allowCache[gid]={allow:al,at:Date.now()};changed=true}
-    else if(cur)cur.at=Date.now();else A.allowCache[gid]={allow:al,at:Date.now()}}catch(e){}}
-  if(changed)paint()}finally{agAllowBusy=false}}
 ACT.agallow=async el=>{const gid=el.dataset.g,n=+String(gid||'').replace(/\D/g,'');if(!n)return;
  const r=await post(`/api/generations/${n}/allow`,{kind:el.dataset.kind==='still'?'still':'animation',index:+el.dataset.i,allow:el.dataset.allow!=='0'});
  if(!r.ok)return toast(r.j.error||'Could not change it',1);
- delete A.allowCache[gid];toast(el.dataset.allow==='0'?'The permission is taken back':'Used anyway: cutting it again…');
+ toast(el.dataset.allow==='0'?'The permission is taken back':'Used anyway: cutting it again…');
  if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.agallowall=async el=>{const gid=el.dataset.g,n=+String(gid||'').replace(/\D/g,'');if(!n)return;const allow=el.dataset.allow==='1',kind=el.dataset.kind==='still'?'still':'animation';
  const r=await post(`/api/generations/${n}/allow`,{all:true,allow,kind});
  if(!r.ok)return toast(r.j.error||'Could not change it',1);
- delete A.allowCache[gid];toast(allow?`Allowed ${r.j.indexes.length}: cutting their ${kind==='still'?'pictures':'animations'}…`:`Took back ${r.j.indexes.length}`);
+ toast(allow?`Allowed ${r.j.indexes.length}: cutting their ${kind==='still'?'pictures':'animations'}…`:`Took back ${r.j.indexes.length}`);
  if(A.sid)await loadSession(A.sid,true);startPoll()};
 /* the carousel's tiles are figures: Enter or Space on a focused one selects it like a click (a figure answers neither key by itself) */
 document.addEventListener('keydown',e=>{const t=e.target;if((e.key==='Enter'||e.key===' ')&&t&&t.dataset&&t.dataset.act==='agtile'&&String(t.tagName||'').toLowerCase()==='figure'){e.preventDefault();ACT.agtile(t,e)}});

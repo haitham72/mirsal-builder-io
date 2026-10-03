@@ -134,3 +134,14 @@ test('a creator card is rebuilt when its run moves, a blocked sheet when its che
   assert.notEqual(U.sig(m({ step: 'cut', status: 'running', updated: 1 })), U.sig(m({ step: 'look', status: 'running', updated: 2 })));
   assert.equal(U.sig(m({ step: 'cut', status: 'running', updated: 1 })), U.sig(m({ step: 'cut', status: 'running', updated: 1 })));
 });
+
+test('the chat draws the two particle cards: the plan with its price, and the started set with a way to the pack’s studio; names are escaped', () => {
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'agent.js'), 'utf8');
+  const plan = src.match(/c\.type==='particles_plan'\)return `[\s\S]*?`\n/)[0];
+  assert.match(plan, /AIU\.credits\(c\.estimate\)/, 'the price is on the plan');
+  assert.match(plan, /AIU\.esc\(n\)/);
+  assert.match(plan, /The price is shown before anything is spent/);
+  const set = src.match(/c\.type==='particles'\)return `[\s\S]*?`\n/)[0];
+  assert.match(set, /#\/pack\/\$\{AIU\.esc\(c\.pack_id\)\}/);
+  assert.match(set, /AIU\.esc\(c\.name\|\|c\.set\)/);
+});

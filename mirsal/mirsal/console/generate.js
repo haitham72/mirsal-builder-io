@@ -84,9 +84,26 @@ const whyOf=(g,t,kind)=>ALW(g,kind).why[t.index];
 const canAllow=(g,t,kind='animation')=>ALW(g,kind).can.includes(t.index);
 const hasAllowed=(g,t,kind='animation')=>ALW(g,kind).allowed.includes(t.index);
 const clickAllow=(g,t,kind='animation')=>canAllow(g,t,kind)||hasAllowed(g,t,kind);
+/* ONE decision per cell (the UI/UX spec P1, P2). Every control on a cell is the same control: the sheet's cell, the tile's x / +, Use it anyway, Include anyway, Take it back, Bring back, Drop from the
+   set. They all press ACT.gcell, which asks cellOp what to do from the server's word (`g.allow`, flow/gates.py allow_info) and the review state, so the same click sends the same request and leaves
+   the same decision row. op: 'allow' | 'unallow' (a Python block that is a judgement call: POST .../allow), 'include' | 'drop' (a human decision on a sticker or animation that is made: POST .../drop;
+   out of bounds is OFF by default and 'include' is its "Include anyway", HANDOFF 3 stays), 'none' (final: it says why, it never opens anything). `stage` is 'still' | 'anim'. */
+function cellOp(g,t,stage){const kind=stage==='anim'?'animation':'still',A=ALW(g,kind);
+  if(canAllow(g,t,kind))return{op:'allow',kind};
+  if(hasAllowed(g,t,kind)&&A.undo.includes(t.index))return{op:'unallow',kind};
+  if(stage==='still'&&animPhase(g)&&t.anim_status==='READY')return{op:'none',why:'This sticker is animated: decide on its animation.'};
+  if(t.status!=='READY')return{op:'none',why:A.final[t.index]||A.why[t.index]||(t.reason?'Blocked: '+String(t.reason).replace(/_/g,' '):'Nothing to change here.')};
+  if(stage==='anim'){if(t.anim_status!=='READY')return{op:'none',why:A.final[t.index]||A.why[t.index]||'There is no animation to decide on yet.'};
+    return{op:t.review.still==='REJECTED'||['REJECTED','BLOCKED'].includes(t.review.anim)?'include':'drop'}}
+  return{op:t.review.still==='REJECTED'?'include':'drop'}}
+const cellVerb=(o,t)=>({allow:'Use it anyway',unallow:'Take it back',include:isOob(t)?'Include anyway':'Bring back',drop:'Drop from the set'})[o.op]||'';
+const cellTitle=(o,t)=>({allow:'Use it anyway',unallow:'Take it back',include:isOob(t)?'Include this animation anyway':'Bring this one back',drop:'Drop this one from the set'})[o.op]||'';
+/* what hovering a cell says it will do, in plain words */
+const cellLabel=(o,t)=>({allow:'click to use it anyway',unallow:'click to take the permission back',include:isOob(t)?'click to include it anyway':'click to bring it back',drop:'click to drop it from the set'})[o.op]||o.why||'';
+const cellAct=(g,t,stage)=>`data-act=gcell data-g=${g.number} data-i=${t.index} data-stage=${stage}`;
 /* the box of a sticker (or an animation) that Python blocked: why in plain words, then 'Use it anyway' when it may be allowed, else why it cannot be */
 function blockedBox(g,t,kind){const A=ALW(g,kind),still=kind==='still',why=A.why[t.index]||(still?t.reason||t.status:ANIMWHY[t.anim_reason]||t.anim_reason||'failed');
-  return`<div class=gbadmsg><b>${still?'Blocked':'No animation'}</b><div class=mut style="margin:4px 0 8px">${esc(why)}</div>${A.can.includes(t.index)?`<button class="btn sm pri" data-act=${still?'gsallow':'gallow'} data-g=${g.number} data-i=${t.index} title="Python's check is a judgement call: you decide. It is recorded, and you can take it back">Use it anyway</button>`:A.final[t.index]?`<div class=mut>${esc(A.final[t.index])}</div>`:''}</div>`}
+  return`<div class=gbadmsg><b>${still?'Blocked':'No animation'}</b><div class=mut style="margin:4px 0 8px">${esc(why)}</div>${A.can.includes(t.index)?`<button class="btn sm pri" ${cellAct(g,t,still?'still':'anim')} title="Python's check is a judgement call: you decide. It is recorded, and you can take it back">Use it anyway</button>`:A.final[t.index]?`<div class=mut>${esc(A.final[t.index])}</div>`:''}</div>`}
 /* what is wrong with a sticker at a stage ('still' | 'anim'): hard ones first, then by kind */
 function issuesOf(t,stage,g){const out=[],add=(id,text,soft)=>out.push({cat:CATOF[id]||'bad',id,text,soft:!!soft});
   if(stage==='anim'){
@@ -108,27 +125,24 @@ function chip(g,t,stage){const m=mark(t,stage,g),kind=stage==='anim'?'animation'
   if(m){cls='iss'+(m.accepted?' soft':'');st=` style="--cc:${CAT[m.cat][0]}"`;title=`S${t.index}: ${m.issues.map(i=>CAT[i.cat][1]+' - '+i.text).join('; ')}${m.accepted?'':' (not in the set)'}`}
   else if(stage==='anim'){const c=cellState(t);cls=c;title=`S${t.index}: ${CELLTXT[c]}`}
   else{cls='ok';title=`S${t.index}: accepted`}
-  return`<button class="vchip ${cls}"${st} data-act=${allow?(stage==='anim'?'gallow':'gsallow'):'gopen'} data-g=${g.number} data-i=${t.index} title="${esc(title+(allow?(canAllow(g,t,kind)?' · click to use it anyway':' · click to take the permission back'):''))}">${t.index}</button>`}
+  return`<button class="vchip ${cls}"${st} ${allow?cellAct(g,t,stage):`data-act=gopen data-g=${g.number} data-i=${t.index}`} title="${esc(title+(allow?(canAllow(g,t,kind)?' · click to use it anyway':' · click to take the permission back'):''))}">${t.index}</button>`}
 function legend(g,stage){const cs=new Set();g.stickers.forEach(t=>{const m=mark(t,stage,g);if(m)m.issues.forEach(i=>cs.add(i.cat))});
   return cs.size?`<div class=lgrow>${CATORDER.filter(c=>cs.has(c)).map(c=>`<span class=lgd style="--cc:${CAT[c][0]}"><i></i>${CAT[c][1]}</span>`).join('')}</div><div class="mut lgnote">dashed and faded = will NOT be exported (click it to allow it when it can be); solid = exported, with a check</div>`:''}
 /* the in-place marks on a sheet of size sheet_size: a dashed faded box over every cell that is not in the set, a solid thin outline over one kept with a check.
-   Every cell is a full-cell hit area: a blocked cell that may be allowed (or taken back) carries that click, any other cell opens the tile. The hover and the
+   Every cell is a full-cell hit area and does exactly one thing (cellOp): allow / take back / include / drop. It never opens a tile (opening belongs to the thumbnail on the right). The hover and the
    label say the reason in plain words, never a raw check id; keyboard: Tab to a cell, Enter to press it (the same actions the tile offers). */
-function issueSvg(g,stage,k=1){const W=g.source.sheet_size?g.source.sheet_size[0]:((sheetOf(g)||{}).canvas||[2048])[0],sw=Math.max(2,W/450)*k,
-  kind=stage==='anim'?'animation':'still',act=stage==='anim'?'gallow':'gsallow';let body='';
-  g.stickers.forEach(t=>{const c=(stage==='anim'&&layoutOfCell(g,t.index))||(t.metrics||{}).cell;if(!c)return;const m=mark(t,stage,g),
-    r=`x="${c[0]}" y="${c[1]}" width="${c[2]}" height="${c[3]}"`;
-    const can=canAllow(g,t,kind),back=!can&&hasAllowed(g,t,kind)&&ALW(g,kind).undo.includes(t.index),hit=(can||back)?act:'gopen',
-      fin=!(can||back)?(ALW(g,kind).final||{})[t.index]:null;
-    let label,click=` data-act=${hit} data-g=${g.number} data-i=${t.index} style="pointer-events:all;cursor:pointer"`;
-    if(m){const col=CAT[m.cat][0];label=`S${t.index}: ${m.issues.map(i=>CAT[i.cat][1]+' - '+i.text).join('; ')}${m.accepted?'':' (not in the set)'}`;
-      label+=can?' · click to use it anyway':back?' · click to take the permission back':' · click to open';
-      if(fin)label+=`. ${fin}`;
+function issueSvg(g,stage,k=1){const W=g.source.sheet_size?g.source.sheet_size[0]:((sheetOf(g)||{}).canvas||[2048])[0],sw=Math.max(2,W/450)*k,kind=stage==='anim'?'animation':'still';let body='';
+  g.stickers.forEach(t=>{const c=(stage==='anim'&&layoutOfCell(g,t.index))||(t.metrics||{}).cell;if(!c)return;const m=mark(t,stage,g),o=cellOp(g,t,stage),
+    r=`x="${c[0]}" y="${c[1]}" width="${c[2]}" height="${c[3]}"`,act=` ${cellAct(g,t,stage)} style="pointer-events:all;cursor:pointer"`,act2=o.op==='allow'||o.op==='unallow',
+    fin=o.op==='none'?(ALW(g,kind).final||{})[t.index]:null;
+    let label;
+    if(m){const col=CAT[m.cat][0];label=`S${t.index}: ${m.issues.map(i=>CAT[i.cat][1]+' - '+i.text).join('; ')}${m.accepted?'':' (not in the set)'} · ${cellLabel(o,t)}`;
+      if(fin&&!label.includes(fin))label+=`. ${fin}`;
       const tip=`<title>${esc(label)}</title>`;
-      body+=m.accepted?`<rect ${r} fill="${(can||back)?col:'none'}" fill-opacity="${(can||back)?.06:0}" stroke="${col}" stroke-width="${sw*1.1}"${click} tabindex="0" role="button" aria-label="${esc(label)}">${tip}</rect>`
-        :`<rect ${r} fill="#fff" fill-opacity=".34" stroke="${col}" stroke-width="${sw*2}" stroke-dasharray="${W/55} ${W/110}"${click} tabindex="0" role="button" aria-label="${esc(label)}">${tip}</rect>`}
-    else{label=`S${t.index}: ${stage==='anim'?CELLTXT[cellState(t)]:'accepted'} · click to open`;
-      body+=`<rect ${r} class=sh-hit data-act=gopen data-g=${g.number} data-i=${t.index} tabindex="0" role="button" aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`}});
+      body+=m.accepted?`<rect ${r} fill="${act2?col:'none'}" fill-opacity="${act2?.06:0}" stroke="${col}" stroke-width="${sw*1.1}"${act} tabindex="0" role="button" aria-label="${esc(label)}">${tip}</rect>`
+        :`<rect ${r} fill="#fff" fill-opacity=".34" stroke="${col}" stroke-width="${sw*2}" stroke-dasharray="${W/55} ${W/110}"${act} tabindex="0" role="button" aria-label="${esc(label)}">${tip}</rect>`}
+    else{label=`S${t.index}: ${stage==='anim'?CELLTXT[cellState(t)]:'accepted'} · ${cellLabel(o,t)}`;
+      body+=`<rect ${r} class=sh-hit${act} tabindex="0" role="button" aria-label="${esc(label)}"><title>${esc(label)}</title></rect>`}});
   return body}
 const keptAnim=g=>g.stickers.filter(t=>t.anim_status==='READY'&&t.review.still!=='REJECTED'&&!['REJECTED','BLOCKED'].includes(t.review.anim));
 const keptOf=g=>animPhase(g)?keptAnim(g):keptStills(g);
@@ -185,11 +199,11 @@ function tileHtml(g,t,mode){const base=`/out/${g.generation_id}/`,anim=mode==='a
   if(!anim)m=t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" loading=lazy>`:t.status==='FAILED'?blockedBox(g,t,'still'):`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
   else m=hasV?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:live?`<canvas data-g=${g.number} data-pv=${t.index} width=288 height=288></canvas><span class=livebadge>live preview</span>`
     :t.anim_status==='FAILED'?blockedBox(g,t,'animation'):t.anim_status==='STALE'?`<div class="gbadmsg mut">${esc(t.anim_reason||'Animate again')}</div>`:t.status==='READY'?`<div class="gbadmsg mut">Not animated yet</div>`:t.status==='FAILED'?blockedBox(g,t,'still'):`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
-  const canX=t.status==='READY'&&(anim?ap&&t.anim_status!=='FAILED':!ap);
+  const stg=anim?'anim':'still',op=cellOp(g,t,stg),canX=op.op!=='none'&&(anim?ap:!ap||op.op==='allow'||op.op==='unallow');
   const lines=mk?mk.issues.slice(0,2).map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join(''):'';
-  return`<div class="gt ${off?'off':''} ${off||hard||blk?'nx':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${hard&&!off?`<span class="isstag${can?' clk':''}" ${can?`data-act=${anim?'gallow':'gsallow'} data-g=${g.number} data-i=${t.index} title="Click to use it anyway"`:''}>${esc(CAT[mk.cat][1])}${can?' · click to use it anyway':''}</span>`:''}${off?'<span class="isstag offtag">Not in the set</span>':''}</div><span class=gem>${esc(t.emoji)}</span>
-    ${canX?`<button class=gx data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=${off||blk?0:1} title="${blk?'Include this animation anyway':off?'Bring this one back':'Drop this one from the set'}">${off||blk?ic('plus'):ic('x')}</button>`:''}
-    <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=0>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${allowedNow?`<div class=gwarn style="color:var(--pri-d)">allowed by you${ALW(g,kind).undo.includes(t.index)?` · <button class=link data-act=${anim?'gunallow':'gsunallow'} data-g=${g.number} data-i=${t.index}>Take it back</button>`:''}</div>`:''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
+  return`<div class="gt ${off?'off':''} ${off||hard||blk?'nx':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${hard&&!off?`<span class="isstag${can?' clk':''}" ${can?`${cellAct(g,t,stg)} title="Click to use it anyway"`:''}>${esc(CAT[mk.cat][1])}${can?' · click to use it anyway':''}</span>`:''}${off?'<span class="isstag offtag">Not in the set</span>':''}</div><span class=gem>${esc(t.emoji)}</span>
+    ${canX?`<button class=gx ${cellAct(g,t,stg)} title="${cellTitle(op,t)}">${['allow','include'].includes(op.op)?ic('plus'):ic('x')}</button>`:''}
+    <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" ${cellAct(g,t,stg)}>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${allowedNow?`<div class=gwarn style="color:var(--pri-d)">allowed by you${ALW(g,kind).undo.includes(t.index)?` · <button class=link ${cellAct(g,t,stg)}>Take it back</button>`:''}</div>`:''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
 function batchHtml(g,k,total,mode){
   const inc=!SES.off.includes(g.number),s=g.source;
   const head=`<div class=gbhead>${total>1?`<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc?'checked':''}> <b>Batch ${k+1}</b></label>`:`<b>Batch ${k+1}</b>`}
@@ -322,8 +336,6 @@ function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('
 ACT.ganimate=async el=>{const todo=included().filter(g=>g.source.has_video&&!animPhase(g)&&!processing(g)&&keptStills(g).length);if(!todo.length)return;
   todo.forEach(g=>{ANIM.add(g.number);PVON.add(g.number);if(g.source.video_path)pvEnsure(g)});GS.tab='anim';glast='';tick(true);
   for(const g of todo){const r=await postWait(`/api/generations/${g.number}/animate`,{scope:'pack'},'Waiting for the previous animation…');if(!r.ok){toast(r.j.error,1);ANIM.delete(g.number)}}};
-ACT.gdrop=async el=>{const r=await postWait(`/api/generations/${el.dataset.g}/drop`,{index:+el.dataset.i,dropped:el.dataset.off==='1'});if(!r.ok)toast(r.j.error,1);
-  else if(el.dataset.off==='0'&&el.closest('.blk'))toast(`S${el.dataset.i} is included anyway: it will be added with the rest (the marker stays)`);glast='';await tick(true);if(MD)gmodal()};
 /* Pack: a three-step modal. 1 the pack (and replace-or-add when stills of the same stickers are already in it), 2 how it looks on each
    background, 3 the names the library will show (name, emoji, and the generator's file name, which never changes) */
 let PW=null;
@@ -448,17 +460,21 @@ function animDlg(){const g=GM.get(AV.g);if(!g)return;const s=g.source,vi=s.video
      <h3>Every animation</h3><table class=stbl><tr><th>#</th><th>result</th><th>frames</th><th>fps</th><th>KB</th><th>crf</th><th>loop seam / limit</th><th>on the border</th><th>time</th></tr>${rows}</table>
      <h3 style="margin-top:12px">Checks that did not pass</h3>${bad||'<div class=mut>Every check passed.</div>'}</div></div></div>`)}
 /* the same sheet, always on the Generate page beside the stickers (Raw / Keyed per batch) */
-const SHK=new Set();
+const SHK=new Map();      // batch number -> the sheet view the person chose: 'keyed' | 'fixed' (raw is the default)
+/* the views of a batch's sheet: the generator's raw sheet, the keyed one, and (after a slice was edited and saved) the sheet rebuilt with that slice fixed, same layout so the same S# */
+const sheetViews=g=>{const s=g.source,v=[{id:'raw',file:s.sheet_copy,label:'Raw'}];if(s.keyed)v.push({id:'keyed',file:s.keyed,label:'Keyed'});
+  if(s.sheet_fixed)v.push({id:'fixed',file:s.sheet_fixed,label:`Fixed (${(s.sheet_fixed_cells||[]).map(i=>'S'+i).join(', ')})`});return v};
+const sheetView=g=>{const vs=sheetViews(g);return vs.find(v=>v.id===SHK.get(g.number))||vs[0]};
 function sheetPanel(g){const s=g.source,size=s.sheet_size;if(!size||!s.sheet_copy)return'';
-  const keyed=SHK.has(g.number)&&s.keyed,base=`/out/${g.generation_id}/`,G=s.grid,[W,H]=size;
+  const cur=sheetView(g),keyed=cur.id==='keyed',base=`/out/${g.generation_id}/`,G=s.grid,[W,H]=size;
   const cut=G?`<span class="gcut ${G.method==='gutter'||G.method==='single'?'ok':'warn'}">${G.method==='gutter'?'cut at gutters':'cut: '+esc(G.method)}</span>`:'';
   return`<aside class=gsheet><div class=gshead><b>Green screen</b><span class=gspace></span><div class=tabs>
-    <button class="tab ${keyed?'':'on'}" data-act=gshk data-g=${g.number} data-k=0>Raw</button><button class="tab ${keyed?'on':''}" data-act=gshk data-g=${g.number} data-k=1 ${s.keyed?'':'disabled'}>Keyed</button></div></div>
-   <div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+(keyed?s.keyed:s.sheet_copy)}" alt="${keyed?'Background removed':'Raw sheet'}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
+    ${sheetViews(g).map(v=>`<button class="tab ${v.id===cur.id?'on':''}" data-act=gshk data-g=${g.number} data-k=${v.id}>${esc(v.label)}</button>`).join('')}</div></div>
+   <div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+cur.file}" alt="${esc(cur.label)}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'still')).join('')}</div>
     ${allowAllRow(g,'still')}
    <div class=gsfoot>${cut}<span class=mut>blue = cuts, yellow = sticker edge</span><button class="link" data-act=gsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'still')}${typeof vgenBox==='function'?vgenBox(g):''}</aside>`}
-ACT.gshk=el=>{const n=+el.dataset.g;if(el.dataset.k==='1')SHK.add(n);else SHK.delete(n);glast='';tick(true)};
+ACT.gshk=el=>{const n=+el.dataset.g;if(el.dataset.k==='raw')SHK.delete(n);else SHK.set(n,el.dataset.k);glast='';tick(true)};
 ACT.gsheet=el=>{SV.g=+el.dataset.g;SV.view='raw';SV.lines=true;SV.boxes=true;sheetDlg()};
 function sheetDlg(){const g=GM.get(SV.g);if(!g)return;const s=g.source,base=`/out/${g.generation_id}/`,size=s.sheet_size,G=s.grid;if(!size||!s.sheet_copy)return toast('This sheet has not been read yet',1);
   const [W,H]=size,keyedEv=[...g.events].reverse().find(e=>e.stage==='keyed'&&e.status==='done'),kd=(keyedEv&&keyedEv.detail)||{},th=(kd.threshold||[]).slice().sort((a,b)=>a-b);
@@ -505,15 +521,14 @@ function gmodal(){if(!MD)return;const g=GM.get(MD.g);if(!g){MD=null;return}const
   const mk=mark(t,ap?'anim':'still',g),m=t.metrics||{},am=t.anim_metrics||{},
     meas=[['scale',m.scale],['scale mode',m.scale_mode],['key threshold',m.threshold],['still KB',m.kb],['holes',m.holes],['frames',am.frames_out],['fps',am.fps],['animation KB',am.kb],['crf',am.crf],['loop seam',am.loop_seam!==undefined?am.loop_seam+' / '+am.loop_limit:undefined]].filter(x=>x[1]!==undefined&&x[1]!==null&&x[1]!==''),
     off=ap&&t.anim_status==='READY'?['REJECTED','BLOCKED'].includes(t.review.anim):t.review.still==='REJECTED',
-    act=t.status==='READY'&&(!ap||t.anim_status==='READY')?`<button class="btn ${off?'pri':''}" data-act=gdrop data-g=${g.number} data-i=${t.index} data-off=${off?0:1}>${off?(ap&&t.review.anim==='BLOCKED'?'Include anyway':'Bring back'):'Drop from the set'}</button>`:'',
-    kd=t.status==='FAILED'?'still':ap&&t.anim_status==='FAILED'?'animation':'',al=kd&&ALW(g,kd),
-    tk=ALW(g,'still').undo.includes(t.index)?'still':ALW(g,'animation').undo.includes(t.index)?'animation':'',
-    allowAct=(kd?(al.can.includes(t.index)?`<button class="btn pri" data-act=${kd==='still'?'gsallow':'gallow'} data-g=${g.number} data-i=${t.index}>Use it anyway</button>`:al.final[t.index]?`<span class=mut>${esc(al.final[t.index])}</span>`:''):'')
-      +(tk?`<button class=btn data-act=${tk==='still'?'gsunallow':'gunallow'} data-g=${g.number} data-i=${t.index}>Take it back</button>`:''),
+    stg=ap?'anim':'still',op=cellOp(g,t,stg),
+    act=op.op==='none'?'':`<button class="btn ${['allow','include'].includes(op.op)?'pri':''}" ${cellAct(g,t,stg)}>${cellVerb(op,t)}</button>`,
+    allowAct=op.op==='none'&&op.why?`<span class=mut>${esc(op.why)}</span>`:'',
     path=(t.history||[]).slice().reverse().map(h=>`<div class=hrow><span class=mut>${new Date(h.ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span> <b>${esc(h.stage)}</b> ${esc(h.actor)} ${esc(h.decision)}${h.reason?` <span class=mut>· ${esc(h.reason)}</span>`:''}</div>`).join('');
   const bad=(t.report||[]).concat(t.anim_report||[]).some(r=>!r.ok);
   $('modal').innerHTML=`<div class=mbox style="width:min(900px,96vw)"><div class=mrow><button class="btn nav" data-act=gstep data-d=-1>‹</button>
    <div style="flex:1"><b>${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=mut>${esc(t.tags.join(' · '))}</div></div>
+   <button class=idtag data-act=copyid data-v="${g.generation_id}/S${t.index}" title="${g.generation_id}/S${t.index} · click to copy the id">${g.generation_id}/S${t.index}</button>
    ${t.status==='READY'?`<button class=btn data-act=gedit title="${t.anim_status==='READY'?'Text, emoji and trim over the animation; one Save updates the image and the animation':'Add text or emoji'}">${ic('edit')} Edit${t.anim_status==='READY'?' (image + animation)':''}</button>`:''}<button class="btn nav" data-act=gstep data-d=1>›</button><button class=btn data-act=gmclose>✕</button></div>
    ${mk?`<div style="margin:6px 0 2px">${mk.issues.map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join('')}</div>`:''}
    <div class=mpanes><div class=pane><div class=mut>Sticker</div><div class="box bg-${bg}">${still}</div></div><div class=pane><div class=mut>Animation</div><div class="box bg-${bg}">${vid}</div></div></div>
@@ -549,10 +564,10 @@ function autoRecheck(g){if(RECHK.has(g.number)||processing(g)||making(g))return;
    The edit lives in the Studio (a project); the generator's files stay in source/orig. */
 async function studioEditAnim(gnum,index){const r=await postWait(`/api/generations/${gnum}/studio_edit`,{index,action:'open'},'Waiting for the previous step…');if(!r.ok)return toast(r.j.error,1);
   P.studio={gen:gnum,index,project:r.j.project};P.packEdit=null;location.hash='#/prepare/'+r.j.project}
-async function studioEditSticker(gnum,index){const r=await api('/api/generations/'+gnum);if(!r.ok)return toast('That batch is not available any more',1);const g=r.j,t=g.stickers[index-1],anim=t.anim_status==='READY'&&t.webm;
-  if(!SES.gens.includes(g.number)){SES={prompt:g.prompt||'',gens:[g.number],off:[],pack:''};saveSes()}GS.tab=anim?'anim':'stickers';
+async function studioEditSticker(gnum,index,to){const r=await api('/api/generations/'+gnum);if(!r.ok)return toast('That batch is not available any more',1);const g=r.j,t=g.stickers[index-1],anim=t.anim_status==='READY'&&t.webm;
+  if(to!=='agent'&&!SES.gens.includes(g.number)){SES={prompt:g.prompt||'',gens:[g.number],off:[],pack:''};saveSes()}GS.tab=anim?'anim':'stickers';          /* opened from the AI: the Studio's session is left alone */
   if(anim)return studioEditAnim(g.number,index);
-  Ed.openImage(`/out/${g.generation_id}/${t.png}?e=${t.edited_at||0}`,{back:{gen:g.number,index},outlined:g.outline_px>0,name:t.name,emoji:t.emoji})}
+  Ed.openImage(`/out/${g.generation_id}/${t.png}?e=${t.edited_at||0}`,{back:{gen:g.number,index,to},outlined:g.outline_px>0,name:t.name,emoji:t.emoji})}
 /* send a created sticker back to the Studio: its batch, on the right view */
 ACT.openstudio=async el=>{const gid=+String(el.dataset.gen||'').replace(/\D/g,'');const r=await api('/api/generations/'+gid);if(!r.ok)return toast('That batch is not available any more',1);
   const t=r.j.stickers[+el.dataset.i-1];SES={prompt:r.j.prompt||'',gens:[gid],off:[],pack:''};saveSes();GS.tab=el.dataset.view||(t&&t.anim_status==='READY'?'anim':'stickers');glast='';location.hash='#/studio'};
@@ -577,13 +592,15 @@ const layoutOfCell=(g,i)=>{const v=sheetOf(g),lay=v&&LAY.get(g.number+v.id);cons
 async function allowCall(g,t,kind,allow){const r=await postWait(`/api/generations/${g.number}/allow`,{kind,index:t.index,allow},'Finishing the previous step…');
   if(!r.ok)return toast(r.j.error||'Could not change it',1);
   toast(allow?`S${t.index} is used anyway: cutting its ${kind==='still'?'picture':'animation'} again…`:`S${t.index}: the permission is taken back`);glast='';if(typeof tick==='function')tick(true)}
-ACT.gallow=async el=>{const g=GM.get(+el.dataset.g),t=g&&g.stickers[+el.dataset.i-1];if(!t)return;
-  if(clickAllow(g,t))return allowCall(g,t,'animation',canAllow(g,t));
-  if(isOob(t))return ACT.gdrop({dataset:{g:el.dataset.g,i:el.dataset.i,off:0}});
-  glast='';if(typeof tick==='function')tick(true)};
-ACT.gunallow=async el=>{const g=GM.get(+el.dataset.g),t=g&&g.stickers[+el.dataset.i-1];if(g&&t)return allowCall(g,t,'animation',false)};
-ACT.gsallow=async el=>{const g=GM.get(+el.dataset.g),t=g&&g.stickers[+el.dataset.i-1];if(g&&t)return allowCall(g,t,'still',true)};
-ACT.gsunallow=async el=>{const g=GM.get(+el.dataset.g),t=g&&g.stickers[+el.dataset.i-1];if(g&&t)return allowCall(g,t,'still',false)};
+/* a human decision on a sticker or animation that is made: drop it from the set, or include it / bring it back. Never deletes. POST .../drop {index, dropped} */
+async function dropCall(g,t,drop){const r=await postWait(`/api/generations/${g.number}/drop`,{index:t.index,dropped:drop});if(!r.ok)toast(r.j.error,1);
+  else if(!drop&&isOob(t))toast(`S${t.index} is included anyway: it will be added with the rest (the marker stays)`);glast='';await tick(true);if(MD)gmodal()}
+/* the one handler of every control on a cell */
+function cellRun(g,t,stage){const o=cellOp(g,t,stage);
+  if(o.op==='allow'||o.op==='unallow')return allowCall(g,t,o.kind,o.op==='allow');
+  if(o.op==='include'||o.op==='drop')return dropCall(g,t,o.op==='drop');
+  toast(o.why||'Nothing to change here.')}
+ACT.gcell=el=>{const g=GM.get(+el.dataset.g),t=g&&g.stickers[+el.dataset.i-1];if(g&&t)return cellRun(g,t,el.dataset.stage==='anim'?'anim':'still')};
 
 /* one bulk control per batch, per kind, above the grid: "Use all anyway (N)" / "Take all back (N)", where N counts what is allow-able NOW, never everything.
    Stills live under the green-screen panel, animations under the video sheet. */

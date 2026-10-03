@@ -43,6 +43,8 @@ ACT.dlgx=closeDlg;
 let ASK=null;
 function askText(title,value,cb,ok='Save'){ASK=cb;dlg(`<h2>${esc(title)}</h2><input type=text id=askv value="${esc(value)}"><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=askok>${ok}</button></div>`);const i=$('askv');i.focus();i.select();i.onkeydown=e=>{if(e.key==='Enter')ACT.askok()}}
 ACT.askok=()=>{const v=$('askv').value.trim();closeDlg();if(v&&ASK)ASK(v)};
+/* a sticker's id (G103/S2) is its own control, never part of its name: hover shows it, one click copies it (P5 of the UI/UX spec) */
+ACT.copyid=async el=>{const v=el.dataset.v||'';if(!v)return;try{await navigator.clipboard.writeText(v);toast('Copied '+v)}catch(e){toast(v+' (copy it from here)')}};
 function confirmDlg(msg,cb,ok='Delete'){ASK=cb;dlg(`<h2>${esc(msg)}</h2><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=cfok>${ok}</button></div>`)}
 ACT.cfok=()=>{closeDlg();if(ASK)ASK()};
 let PK=null;

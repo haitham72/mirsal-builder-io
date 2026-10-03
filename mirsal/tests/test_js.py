@@ -171,7 +171,7 @@ class StudioActionTests(unittest.TestCase):
         fx = (ui / "effects.js").read_text(encoding="utf-8")
         for route in ("/suggest", "/particles_estimate", "/particles`", "/particles_pick"):
             self.assertIn(route, fx)
-        self.assertIn("sprite_px", fx)
+        self.assertIn("sprite_px", (ui / "particles.js").read_text(encoding="utf-8"), "the size of the particles travels as sprite_px / scale, with the burst maker's preview and render")
         self.assertIn("key_is_seamless:'The green screen has panels or patterns, so the keying may eat parts of the particles. Use it anyway, or make another take.'", fx)
         self.assertIn("Draw ${fxCols(d.grid)} particles with AI", fx)
         self.assertIn("Use it anyway", fx)
@@ -326,7 +326,7 @@ class ShellTests(unittest.TestCase):
         self.assertNotIn("#ai-sheet", js)
 
     def test_the_particle_effects_screen_is_wired_into_create_and_calls_the_api(self):
-        """docs/effects.md: Create has a Particle effects tool that opens #/effects; the screen reads and writes only /api/effects (nothing is decided in the browser), a paid video needs
+        """docs/effects.md: Create has a Particle effects tool that opens #/effects; the screen reads and writes only /api/effects and, for the burst, /api/particles (nothing is decided in the browser), a paid video needs
         `go`, and the fixed Queue pill must not be able to cover its last buttons."""
         import re
         ui = self.ui()
@@ -339,8 +339,14 @@ class ShellTests(unittest.TestCase):
         self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("effects:'create'", app, "the rail keeps Create lit on the effects screen")
         self.assertIn("data-act=fxopen", (ui / "editor.js").read_text(encoding="utf-8"), "a tool of Create")
-        for route in ("/api/effects", "/estimate", "/video", "/preview", "/render", "/add", "/plan"):
+        for route in ("/api/effects", "/estimate", "/video", "/add", "/plan"):
             self.assertIn(route, fx)
+        # docs/particles_plan.md section 4: the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes
+        pt = (ui / "particles.js").read_text(encoding="utf-8")
+        for route in ("/api/particles/${id}/preview", "/api/particles/${s.id}/render", "/api/particles/${id}/add"):
+            self.assertIn(route, pt)
+        for gone in ("/preview`", "/render`", "sticker_id:sid"):
+            self.assertNotIn(gone, fx, "effects.js has no per-sticker preview or render any more")
         self.assertIn("go:true", fx.replace(" ", ""), "the click on 'Make the video' is the go-ahead, and it shows the price")
         self.assertIn(".page.fx{padding-bottom", (ui / "studio.css").read_text(encoding="utf-8"))
 

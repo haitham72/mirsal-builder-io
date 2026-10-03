@@ -12,7 +12,8 @@ const ICONS={},RENDER={},ACT={};
 let route_='generate';
 const DOMSTUB={},$=id=>DOMSTUB[id]||null;
 let APICALLS=0;
-const api=async()=>{APICALLS++;return{ok:false,status:404,j:{}}},post=async()=>({ok:false,status:404,j:{}});
+const POSTS=[];                                    // every post a handler sends: [url, body]
+const api=async()=>{APICALLS++;return{ok:false,status:404,j:{}}},post=async(u,b)=>{POSTS.push([u,b]);return{ok:false,status:404,j:{}}};
 const toast=()=>{},dlg=()=>{},closeDlg=()=>{};
 const media=s=>'<img data-m='+s.id+'>',coverMedia=p=>'<img data-c='+p.id+'>';
 let LIB={packs:[]};

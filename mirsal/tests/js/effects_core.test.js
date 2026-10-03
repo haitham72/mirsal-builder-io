@@ -19,8 +19,7 @@ test('every state is its own: two screens never share previews, ticks or ideas',
   assert.notStrictEqual(a.pick, b.pick);
   assert.notStrictEqual(a.dr, b.dr);
   assert.equal(run("fxNew('sp').who"), 'sp');
-  assert.equal(run("fxNew('fx').size.px"), 100, 'the particles are 100 px by default');
-  assert.equal(run("fxNew('fx').size.scale"), 1);
+  assert.equal(run("fxNew('fx').set"), null, 'the saved set of the run is read from the server, not remembered per screen');
   assert.equal(run("FXS.fx===FX"), true);
 });
 
@@ -147,7 +146,7 @@ test('pick: with nothing ticked the button says 0 and is off; the Studio’s dra
   assert.match(one, /Use 1 particle</);
 });
 
-test('done: the picked particles as thumbnails, change or draw again; the rows wait for the pick in the Studio’s drawn flow', () => {
+test('done: the picked particles as thumbnails, change or draw again', () => {
   const rec = REC({ set: { status: 'DRAWN', generation: 100, picked: [2] }, history: [{ decision: 'PICK' }] });
   const gen = { 100: BATCH([cell(1), cell(2)]) };
   const h = html('fxDrawn(X,e)', { rec, gen });
@@ -156,23 +155,6 @@ test('done: the picked particles as thumbnails, change or draw again; the rows w
   assert.equal((h.match(/class=fx-pc-th /g) || []).length, 1);
   assert.match(h, /data-act=fxdchange>Change which ones/);
   assert.match(h, /data-act=fxdredo>Draw again/);
-  const picked = REC({ set: { status: 'DRAWN', generation: 100, picked: [1] }, groups: [{ ...REC().groups[0], sprites: { generation: 100, picked: [1] } }] });
-  const rows = (rec, pre) => html('fxRows(X,e,e.groups[0])', { rec, gen, pre });
-  assert.equal(rows(picked, "X.src='drawn'"), false, 'drawn flow: no rows before the person picks');
-  assert.equal(rows({ ...picked, history: [{ decision: 'PICK' }] }, "X.src='drawn'"), true, 'after the pick');
-  assert.equal(rows(picked, ''), true, 'the pro screen uses every cell until told otherwise');
-  assert.equal(rows(REC(), "X.src='own'"), true, 'the pack stickers need nothing');
-});
-
-test('the size of the particles: 100 px by default, x1 to x4, and it travels with every preview and render', () => {
-  const bar = html('fxSizeBar(X)');
-  assert.match(bar, /value="100" data-fxpx/);
-  assert.match(bar, /class="tab on" data-act=fxscale data-v=1/);
-  for (const k of [2, 3, 4]) assert.match(bar, new RegExp(`data-act=fxscale data-v=${k}`));
-  assert.doesNotMatch(bar, /data-v=5/);
-  assert.deepEqual(html('fxSizeParams(X)'), { sprite_px: 100, scale: 1 });
-  assert.deepEqual(html('fxSizeParams(X)', { pre: 'X.size.px=150;X.size.scale=3' }), { sprite_px: 150, scale: 3 });
-  assert.match(html('fxSizeBar(X)', { pre: 'X.size.scale=3' }), /class="tab on" data-act=fxscale data-v=3/);
 });
 
 test('results: a warning is "Use it anyway", never a block; only a failed file cannot be used; saved under the sticker is said', () => {
@@ -194,19 +176,22 @@ test('results: a warning is "Use it anyway", never a block; only a failed file c
   assert.equal(html('fxResults(X,e)', { rec: REC() }), '');
 });
 
-test('the body of a simulated effect: the drawn panel, the size bar and one row per sticker, with no editable chips; a video keeps its chips', () => {
-  const h = html('fxBody(X,e)', { rec: REC(), pre: "LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]" });
+test('the body of a simulated effect: the drawn panel, the way to save it, and ONE motion section for the pack (no row, no preview per sticker); a video keeps its chips', () => {
+  const pre = "LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]";
+  const h = html('fxBody(X,e)', { rec: REC(), pre });
   assert.match(h, /data-fxdr=make/);
-  assert.match(h, /class=fx-size/);
-  assert.match(h, /class=fx-sim data-sid=a1/);
-  assert.match(h, /id=fxpv-a1/, 'the preview id carries the state’s name');
+  assert.doesNotMatch(h, /fx-sim|class=fx-size|data-sid=|fxpv-|data-fxp=/, 'docs/particles_plan.md section 4: one preview for the pack, not a row per sticker');
   assert.doesNotMatch(h, /fx-chip/, 'a simulation has no per-group chips: the particles are chosen in the drawn panel');
-  assert.match(h, /Particles from/, 'the pro screen may choose where a group’s particles come from');
-  assert.match(html('fxBody(X,e)', { rec: REC(), pre: "X.src='own'" }), /^(?!.*fx-dr).*class=fx-sim/s, 'the pack-stickers flow has no drawn panel');
+  assert.equal((h.match(/class="fx-g fx-mo"/g) || []).length, 1, 'one motion section for the whole run, whatever the number of stickers or groups');
+  assert.match(h, /Save the particles as a set first/, 'the burst is made from the SET, so the motion waits for it');
+  assert.doesNotMatch(h, /Particles from/, 'where the particles come from is the wizard’s first steps and “Use an existing set”');
+  const own = html('fxBody(X,e)', { rec: REC(), pre: "X.src='own';" + pre });
+  assert.doesNotMatch(own, /fx-dr/, 'the pack-stickers flow has no drawn panel');
+  assert.match(own, /data-act=fxuseset data-v=stickers>/, 'it goes straight to a set of the pack’s own stickers');
   const v = html('fxBody(X,e)', { rec: REC({ mode: 'video' }) });
   assert.match(v, /fx-chip/);
   assert.match(v, /Make the video/);
-  assert.doesNotMatch(v, /fx-dr|fx-sim/);
+  assert.doesNotMatch(v, /fx-dr|fx-mo|fxuseset/);
 });
 
 test('"Draw again" can be taken back: the particles you have stay', () => {
@@ -225,27 +210,31 @@ test('a name you chose stays among the chips when the ideas of another grid arri
   assert.equal((h.match(/class="fx-opt/g) || []).length, 4);
 });
 
-test('the motion sliders speak like a person: Energy, Float, Swirl; count and spin sit under Advanced', () => {
-  const h = html('fxBody(X,e)', { rec: REC(), pre: "LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]" });
-  for (const l of ['Energy', 'Float', 'Swirl']) assert.match(h, new RegExp(`<span>${l}<\\/span>`));
-  assert.doesNotMatch(h, /Explosion|Gravity/);
-  assert.match(h, /<details class=fx-adv><summary>Advanced: particles, spin<\/summary>/);
-  assert.match(h, /data-fxp=count/);
-  assert.match(h, /data-fxp=spin/);
-  assert.match(h, /data-fxp=magnitude/, 'the engine’s keys travel unchanged: only the labels were renamed');
-  assert.match(h, /Advanced: particle size/);
-});
-
-test('a drawn sheet ends in "Use as particle set", and nothing else does', () => {
-  assert.equal(html('fxSaveBlock(e)', { rec: REC() }), '', 'no drawn sheet: no button');
+test('the way to a set: a drawn sheet is kept with Use as particle set, the pack’s own stickers with their own button, and a saved run shows its motion instead', () => {
+  const none = html('fxSaveBlock(X,e)', { rec: REC() });
+  assert.match(none, /data-act=fxuseset data-v=stickers>Use the pack’s stickers/, 'no drawn sheet: the pack’s own stickers can be the set (free, nothing is drawn)');
+  assert.match(none, /Free/);
   const drawn = REC({ set: { status: 'DRAWN', generation: 100, picked: [1, 2] } });
-  const h = html('fxSaveBlock(e)', { rec: drawn });
-  assert.match(h, /data-act=fxuseset>Use as particle set</);
+  const h = html('fxSaveBlock(X,e)', { rec: drawn });
+  assert.match(h, /data-act=fxuseset data-v=drawn>Use as particle set</);
   assert.match(h, /Save the 2 drawn particles as a particle set/);
   assert.match(h, /it lives in the Library/);
-  assert.equal(html('fxSaveBlock(e)', { rec: REC({ set: { status: 'DRAWN', generation: 100, picked: [] } }) }), '', 'no picked cells: nothing durable to save');
+  assert.match(html('fxSaveBlock(X,e)', { rec: REC({ set: { status: 'DRAWN', generation: 100, picked: [] } }) }), /data-v=stickers/, 'no picked cell: nothing durable to save, the stickers are still an option');
+  const saved = "X.set={id:'P001',name:'Fruits particles',source:{kind:'drawn',generation:'G100'}}";
+  assert.equal(html('fxSaveBlock(X,e)', { rec: REC({ ...drawn, sets: ['P001'] }), pre: saved }), '', 'saved already: the motion is next, not another save');
+  assert.match(html('fxSaveBlock(X,e)', { rec: REC({ set: { status: 'DRAWN', generation: 101, picked: [1] }, sets: ['P001'] }), pre: saved }), /data-v=drawn>Use as particle set</, 'a newer sheet is a new set to keep');
   const body = html('fxBody(X,e)', { rec: drawn, gen: { 100: BATCH([cell(1)]) }, pre: "X.src='drawn';X.dr.picked='E001:100';LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]" });
-  assert.match(body, /data-act=fxuseset>Use as particle set</, 'the finish sits in the shared body, so both wizards have it');
+  assert.match(body, /data-act=fxuseset data-v=drawn>Use as particle set</, 'the finish sits in the shared body, so both wizards have it');
+});
+
+test('Motion: locked until the run is a set, then the set’s own section (the burst maker is particles.js’s)', () => {
+  const locked = html('fxMotion(X,e)', { rec: REC() });
+  assert.match(locked, /class="fx-g fx-mo"/);
+  assert.match(locked, /Save the particles as a set first/);
+  const open = html('fxMotion(X,e)', { rec: REC({ sets: ['P001'] }), pre: "X.set={id:'P001',name:'Fruits <b> particles',n_picked:3,used_in:[{id:'p1',name:'Fruits <b>'}]}" });
+  assert.match(open, /Fruits &lt;b&gt; particles/, 'names are escaped');
+  assert.match(open, /P001 · 3 picked · used in Fruits &lt;b&gt;/);
+  assert.doesNotMatch(open, /Save the particles as a set first/);
 });
 
 test('the video price is on its own line too, and the estimator fills that line', () => {

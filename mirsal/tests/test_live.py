@@ -629,6 +629,20 @@ class LiveConsoleTests(Base):
         self.assertIn(prompter.REFERENCE_CLAUSE, create[create.index("--prompt") + 1])
         job = self.req("GET", "/api/jobs/" + j["job"])[1]
         self.assertEqual((job["request"]["refs"], job["params"]["references"]), (["refs/R001.png"], 1))   # reproducible from the stored job
+        # P12 of the UI/UX spec: a tweak or a new action says what the picture is FOR, instead of the default "change only the expression and the pose"
+        clause = "Reference: the attached image is the sheet to keep. Apply only this change: cuter."
+        s, k = self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R001"], "model": "nano_banana_pro", "ref_clause": clause})
+        self.assertEqual(s, 200, k)
+        self.until(lambda: self.req("GET", "/api/jobs/" + k["job"])[1]["status"] == "DONE", "job with its own clause")
+        text = [c for c in self.cli.calls if c[:3] == ["generate", "create", "nano_banana_pro"]][-1]
+        text = text[text.index("--prompt") + 1]
+        self.assertIn(clause, text)
+        self.assertNotIn(prompter.REFERENCE_CLAUSE, text, "the default clause would contradict a detail change")
+        s, k = self.req("POST", "/api/live/sheet", {"prompt": "blob", "model": "nano_banana_pro", "ref_clause": clause})
+        self.until(lambda: self.req("GET", "/api/jobs/" + k["job"])[1]["status"] == "DONE", "job without a picture")
+        text = [c for c in self.cli.calls if c[:3] == ["generate", "create", "nano_banana_pro"]][-1]
+        self.assertNotIn(clause, text[text.index("--prompt") + 1], "no picture attached: no sentence about it")
+        self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R001"], "ref_clause": "x" * 7000})[0], 400)
         self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R999"]})[0], 400)
         self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R001"] * 5})[0], 400)
         model_catalog.set_dump({"image": [{"job_type": "no_refs", "display_name": "No Refs", "params": [{"name": "prompt", "type": "string"}]}], "video": [], "counts": {}})

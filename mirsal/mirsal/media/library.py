@@ -400,6 +400,9 @@ class Library:
 
     def add_from_generation(self, out: Path, pid: str, gid: int, index: int, kind: str = "static", name: str | None = None, emoji: str | None = None) -> dict:
         st = pl.state(out, gid)
+        if st.get("kind") == "particles":
+            raise LibraryError(f"{st['generation_id']} is a sheet of particles, not of stickers: a particle is not a 512 px deliverable. Use its cells as a particle set "
+                               f"(POST /api/particles {{from_generation}}, or Use as particle set) and they burst for a pack.", 409)
         t = st["stickers"][index - 1]
         rel = t.get("webm") if kind == "animated" else t.get("png")
         if not rel or (kind == "animated" and t.get("anim_status") != "READY") or (kind != "animated" and t.get("status") != "READY"):

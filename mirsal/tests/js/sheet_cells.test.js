@@ -1,6 +1,5 @@
-// The left sheet is clickable per slice (2026-10-03): every cell of the still sheet and of the video sheet is a full-cell hit area. A blocked cell that
-// the server says may be allowed carries the allow click (gsallow for a still, gallow for an animation); any other cell opens the tile. The hover and the
-// label say the reason in plain words, never a raw check id. The statements are read out of generate.js and run with the few globals they use stubbed.
+// The left sheet is clickable per slice (2026-10-03): every cell of the still sheet and of the video sheet is a full-cell hit area that does exactly ONE thing (the UI/UX spec P1, P2): the
+// same `gcell` control as the tile (allow / take back / include / drop, tests/js/cell_op.test.js), never opening a tile. The hover and the label say the reason in plain words, never a raw check id. The statements are read out of generate.js and run with the few globals they use stubbed.
 // Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -24,8 +23,8 @@ function statement(marker) {
 
 function load() {
   const sandbox = { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) };
-  const body = ['const CAT=', 'const CATORDER=', 'const CATOF=', 'const WARNWHY=', 'const plainWarn=', 'const ANIMWHY=', 'const ALW=', 'const whyOf=',
-    'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'const isOob=', 'const oobNote=', 'const cellState=', 'const CELLTXT=',
+  const body = ['const animPhase=', 'const CAT=', 'const CATORDER=', 'const CATOF=', 'const WARNWHY=', 'const plainWarn=', 'const ANIMWHY=', 'const ALW=', 'const whyOf=',
+    'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'function cellOp(', 'const cellVerb=', 'const cellTitle=', 'const cellLabel=', 'const cellAct=', 'const isOob=', 'const oobNote=', 'const cellState=', 'const CELLTXT=',
     'function issuesOf(', 'function mark(', 'function chip(', 'const sheetOf=', 'const LAY=', 'const layoutOfCell=', 'function issueSvg(', 'function allowAllRow('].map(statement).join('\n');
   return new Function(...Object.keys(sandbox), body + '\nreturn {issueSvg,allowAllRow,chip,ALW,LAY};')(...Object.values(sandbox));
 }
@@ -41,34 +40,35 @@ const G = (stickers, allow = ALLOW) => ({ number: 7, source: { sheet_size: [900,
 test('a blocked still that may be allowed is a full-cell allow button with the reason in plain words', () => {
   const h = load();
   const svg = h.issueSvg(G([T(1, { status: 'FAILED' })]), 'still');
-  assert.match(svg, /data-act=gsallow data-g=7 data-i=1/);
+  assert.match(svg, /data-act=gcell data-g=7 data-i=1 data-stage=still/);
   assert.match(svg, /role="button"/);
   assert.match(svg, /the character touches the edge of its cell/);
   assert.match(svg, /click to use it anyway/);
   assert.doesNotMatch(svg, /inside_cell/, 'never a raw check id on hover');
 });
 
-test('a still that cannot be allowed opens the tile and says why, with no allow click', () => {
+test('a still that cannot be allowed still carries the one cell control, says why on hover, and never opens a tile', () => {
   const h = load();
   const svg = h.issueSvg(G([T(2, { status: 'FAILED', reason: 'empty_subject' })]), 'still');
-  assert.match(svg, /data-act=gopen data-g=7 data-i=2/);
+  assert.match(svg, /data-act=gcell data-g=7 data-i=2 data-stage=still/);
   assert.match(svg, /almost nothing was found/);
   assert.match(svg, /no picture to use/);
-  assert.doesNotMatch(svg, /gsallow|gallow/);
+  assert.doesNotMatch(svg, /gopen|click to use it anyway/);
 });
 
 test('an allowed still offers taking the permission back from the sheet', () => {
   const h = load();
   const svg = h.issueSvg(G([T(3, { status: 'FAILED' })]), 'still');
-  assert.match(svg, /data-act=gsallow data-g=7 data-i=3/);
+  assert.match(svg, /data-act=gcell data-g=7 data-i=3 data-stage=still/);
   assert.match(svg, /click to take the permission back/);
 });
 
-test('a cell with no mark is an invisible hit area that opens the tile', () => {
+test('a cell with no mark is an invisible hit area that drops the sticker from the set, not one that opens the tile', () => {
   const h = load();
   const svg = h.issueSvg(G([T(1)], {}), 'still');
-  assert.match(svg, /class=sh-hit data-act=gopen data-g=7 data-i=1/);
-  assert.match(svg, /aria-label="S1: accepted · click to open"/);
+  assert.match(svg, /class=sh-hit data-act=gcell data-g=7 data-i=1 data-stage=still/);
+  assert.match(svg, /aria-label="S1: accepted · click to drop it from the set"/);
+  assert.doesNotMatch(svg, /gopen/);
 });
 
 test('an animation that may be allowed carries the animation click; the kind never leaks across stages', () => {
@@ -77,11 +77,11 @@ test('an animation that may be allowed carries the animation click; the kind nev
   const g = G([T(4, { anim_status: 'FAILED', anim_reason: 'loop_seam' })]);
   g.video_sheets = [{ id: 0, status: 'READY' }];
   const svg = h.issueSvg(g, 'anim');
-  assert.match(svg, /data-act=gallow data-g=7 data-i=4/);
+  assert.match(svg, /data-act=gcell data-g=7 data-i=4 data-stage=anim/);
   assert.match(svg, /the loop does not close/);
-  assert.doesNotMatch(svg, /gsallow/, 'a still click never appears on the video sheet');
+  assert.doesNotMatch(svg, /data-stage=still/, 'a still decision never appears on the video sheet');
   const still = h.issueSvg(G([T(1, { status: 'FAILED' })]), 'still');
-  assert.doesNotMatch(still, /gallow/, 'an animation click never appears on the still sheet');
+  assert.doesNotMatch(still, /data-stage=anim/, 'an animation decision never appears on the still sheet');
 });
 
 test('the bulk control counts per kind what is allow-able now', () => {
@@ -103,9 +103,9 @@ test('the bulk control counts per kind what is allow-able now', () => {
 test('a still chip allows on click exactly when the tile does', () => {
   const h = load();
   const g = G([T(1, { status: 'FAILED' })]);
-  assert.match(h.chip(g, g.stickers[0], 'still'), /data-act=gsallow/);
+  assert.match(h.chip(g, g.stickers[0], 'still'), /data-act=gcell data-g=7 data-i=1 data-stage=still/);
   assert.match(h.chip(g, g.stickers[0], 'still'), /click to use it anyway/);
   const plain = h.chip(G([T(9)], {}), T(9), 'still');
-  assert.match(plain, /data-act=gopen/);
-  assert.doesNotMatch(plain, /gsallow/);
+  assert.match(plain, /data-act=gopen/, 'an index chip with nothing to decide stays navigation');
+  assert.doesNotMatch(plain, /gcell/);
 });

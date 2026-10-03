@@ -319,6 +319,15 @@ class SessionStore:
                 break
         return rows
 
+    def set_vision(self, s: dict, value) -> None:
+        """The person's answer about AI vision is STATE (UI/UX spec P10): the setting, the fact that it was asked (so it is never asked again in this chat) and an acknowledgement the next turn says once.
+        It makes no message, no card and no turn; the settings route and the tests call exactly this."""
+        was = s["settings"].get("allow_vlm")
+        s["settings"]["allow_vlm"] = bool(value)
+        s["vision_asked"] = True
+        if was is not bool(value):
+            s["vision_ack"] = "allowed" if value else "refused"
+
     def summary_text(self, s: dict) -> str:
         """The deterministic per-subject summary: ids, counts, likes and dislikes. This is what every turn starts from."""
         self.refresh(s)

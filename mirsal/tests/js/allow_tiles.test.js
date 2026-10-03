@@ -22,7 +22,7 @@ function statement(marker) {
 
 function load() {
   const sandbox = { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) };
-  const body = ['const ANIMWHY=', 'const ALW=', 'const whyOf=', 'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'function blockedBox(g,t,kind)'].map(statement).join('\n');
+  const body = ['const ANIMWHY=', 'const ALW=', 'const whyOf=', 'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'const cellAct=', 'function blockedBox(g,t,kind)'].map(statement).join('\n');
   return new Function(...Object.keys(sandbox), body + '\nreturn {ALW,whyOf,canAllow,hasAllowed,clickAllow,blockedBox};')(...Object.values(sandbox));
 }
 
@@ -36,7 +36,7 @@ test('a blocked still that may be allowed says why in plain words and offers the
   const h = load();
   const html = h.blockedBox(batch(), { index: 1, reason: 'inside_cell', status: 'FAILED' }, 'still');
   assert.match(html, /the character touches the edge of its cell/);
-  assert.match(html, /data-act=gsallow data-g=7 data-i=1/);
+  assert.match(html, /data-act=gcell data-g=7 data-i=1 data-stage=still/);
   assert.match(html, />Use it anyway</);
 });
 
@@ -52,7 +52,7 @@ test('an animation uses the animation action and a technical block stays final',
   const h = load();
   const can = h.blockedBox(batch(), { index: 4, anim_reason: 'loop_seam', anim_status: 'FAILED' }, 'animation');
   assert.match(can, /No animation/);
-  assert.match(can, /data-act=gallow data-g=7 data-i=4/);
+  assert.match(can, /data-act=gcell data-g=7 data-i=4 data-stage=anim/);
   const final = h.blockedBox(batch(), { index: 5, anim_reason: 'size_budget', anim_status: 'FAILED' }, 'animation');
   assert.doesNotMatch(final, /data-act=/);
   assert.match(final, /cannot be allowed/);
@@ -82,7 +82,8 @@ test('allowed, can-allow and take-back are read from the server per kind', () =>
 test('the tiles use the box and the handlers exist', () => {
   assert.match(src, /blockedBox\(g,t,'still'\)/, 'a blocked still tile explains itself and offers the click');
   assert.match(src, /blockedBox\(g,t,'animation'\)/);
-  for (const act of ['gsallow', 'gsunallow', 'gallow', 'gunallow']) assert.match(src, new RegExp(`ACT\\.${act}=`), `${act} has a handler`);
+  assert.match(src, /ACT\.gcell=/, 'the one handler of every control on a cell');
+  for (const act of ['gsallow', 'gsunallow', 'gallow', 'gunallow', 'gdrop']) assert.doesNotMatch(src, new RegExp(`ACT\\.${act}=`), `${act} was a parallel handler of the same control`);
   assert.match(src, /Take it back/);
   assert.doesNotMatch(src, /OVERRIDABLE/, 'the list of what may be allowed lives on the server only');
 });

@@ -231,8 +231,8 @@ class Console:
         outline = (job.get("request") or {}).get("outline")
         req = job.get("request") or {}
         parent = req.get("parent")                         # a chat edit: the new batch is a child of the one it improves (lineage, never a copy)
-        parts = req.get("particles") or req.get("pieces")  # the sheet is the particle set of an effect (`pieces` is what older jobs called it): a particle batch, its cells are every group's sprites
-        parts = parts if isinstance(parts, dict) and parts.get("effect") else None
+        parts = req.get("particles") or req.get("pieces")  # the sheet is the particle set of an effect (`pieces` is what older jobs called it) or *Generate more* of a saved set: a particle batch
+        parts = parts if isinstance(parts, dict) and (parts.get("effect") or parts.get("set")) else None
         tok = pl.OWNER.set(req.get("user") or "local")     # the batch belongs to whoever asked for the sheet
         try:
             gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None,
@@ -241,12 +241,26 @@ class Console:
             pl.OWNER.reset(tok)
         tasks.link_generation(self.out, t["id"], gid)
         jobs.attach_generation(self.out, job["id"], gid)
-        if parts:                                          # thread mode and queue mode both run this
+        set_id = str(parts["set"]) if parts and parts.get("set") else None
+        if parts and parts.get("effect"):                  # thread mode and queue mode both run this
             try:
                 fx_flow.link_particles(self.out, str(parts["effect"]), gid, job=job["id"], grid=t["plan"].get("grid"))
             except fx_flow.EffectError:                    # the effect was removed meanwhile: the batch is still a (particle) batch
                 pass
-        self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
+        if set_id:
+            try:
+                fx_sets.link_more(self.out, set_id, job["id"], gid)
+            except fx_sets.SetError:                       # the set went to the trash meanwhile: the batch is still a (particle) batch, the cells wait for a Restore
+                set_id = None
+
+        def cut():
+            pl.run_stills(self.out, gid, self.cfg, self.pace)
+            if set_id:                                     # the cells are cut: they join the set. A failure here is only a delay: every read of the set settles it again
+                try:
+                    fx_sets.settle(self.out, set_id)
+                except Exception:
+                    pass
+        self._submit_when_free(cut)
 
     def save_ref(self, data: bytes, name: str) -> dict:
         """Store an uploaded reference image as out/refs/R###.<ext> (a real image, at most 15 MB); the sheet job then lists it, so the run is reproducible."""
@@ -384,15 +398,22 @@ class Console:
                 base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else None)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
                 t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
-                prompt = t["plan"]["sheet_prompt"] + ("\n" + prompter.REFERENCE_CLAUSE if refs else "")
+                try:
+                    clause = prompter.clean_custom(body.get("ref_clause"), "reference clause") if refs else None     # what the attached picture is for (a tweak keeps the design, a new action keeps the shape)
+                except ValueError as e:
+                    raise pl.PipelineError(str(e), 400)
+                prompt = t["plan"]["sheet_prompt"] + ("\n" + (clause or prompter.REFERENCE_CLAUSE) if refs else "")
                 est = higgsfield.cost(model, params, prompt, **({"image_references": [str(self.out / r) for r in refs]} if refs else {}))
                 job = jobs.create(self.out, "sheet", task=t["id"], request={
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
                     "outline": int(body["outline"]) if body.get("outline") is not None else None, "custom_prompt": bool(custom),
                     "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"],
-                    **({"particles": {"effect": str(particles["effect"])}} if particles else {})})
+                    **({"particles": {k: str(particles[k]) for k in ("effect", "set") if particles.get(k)}} if particles else {})})
                 if particles:                                      # before the job runs, so the page sees REQUESTED and the later link is never overwritten
-                    fx_flow.request_particles(self.out, str(particles["effect"]), job["id"], t["plan"]["grid"], particles.get("elements") or [], who["id"])
+                    if particles.get("effect"):
+                        fx_flow.request_particles(self.out, str(particles["effect"]), job["id"], t["plan"]["grid"], particles.get("elements") or [], who["id"])
+                    if particles.get("set"):
+                        fx_sets.request_more(self.out, str(particles["set"]), job["id"], t["plan"]["grid"], particles.get("elements") or [], est, who["id"])
                 self.fulfil_async(job["id"], after=self.start_from_job)
                 return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
                         "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
@@ -1083,7 +1104,11 @@ def make_handler(c: Console):
             try:
                 if len(parts) == 2:
                     if method == "GET":
+                        ps.settle_open(c.out)                      # the cells of a sheet that was cut since the last read join their set first
                         return self._json(200, {"sets": ps.list_sets(c.out, c.lib)})
+                    if body.get("from_generation"):                # a sheet of particles that is already a batch: its cells as tight sprites, no effect behind it
+                        return self._json(201, ps.set_from_generation(c.out, c.lib, str(body["from_generation"]), name=body.get("name"), packs=body.get("packs"),
+                                                                         picked=body.get("picked"), user=self.user["id"]))
                     if body.get("from_effect"):
                         return self._json(201, ps.set_from_effect(c.out, c.lib, str(body["from_effect"]), name=body.get("name"), packs=body.get("packs"),
                                                                        picked=body.get("picked"), user=self.user["id"]))
@@ -1091,7 +1116,10 @@ def make_handler(c: Console):
                                                       kind=str(body.get("kind") or "drawn"), user=self.user["id"]))
                 pid = parts[2]
                 if len(parts) == 3:
+                    if method == "GET" and pid == "deleted":       # the trash (owner only like the rest): Restore is reachable long after the delete
+                        return self._json(200, {"sets": ps.list_deleted(c.out, c.lib)})
                     if method == "GET":
+                        ps.settle(c.out, pid)                      # (a 404 for a missing set comes from here)
                         return self._json(200, ps.view(c.out, c.lib, pid))
                     return self._json(200, ps.update(c.out, c.lib, pid, name=body.get("name"), elements=body.get("elements"), packs=body.get("packs"),
                                                      picked=body.get("picked"), motion=body.get("motion"), user=self.user["id"]))
@@ -1108,9 +1136,46 @@ def make_handler(c: Console):
                     return self._json(200, ps.delete(c.out, c.lib, pid, confirm_packs=body.get("confirm") is True, user=self.user["id"]))
                 if act == "restore":
                     return self._json(200, ps.restore(c.out, c.lib, pid, self.user["id"]))
+                if act == "preview":                               # the burst of the set's picked cells for a pack, as a small looping WebP (free)
+                    return self._json(200, ps.preview(c.out, c.lib, pid, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, size=body.get("size", 256)))
+                if act == "render":                                # the final 512 px WebM for a pack, judged and stored under renders/ (only Telegram's own limits make it FAILED)
+                    return self._json(200, ps.render(c.out, c.lib, pid, c.cfg, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, user=self.user["id"]))
+                if act == "add":                                   # rendered bursts into the pack as animated stickers tagged with the pack's emoji
+                    return self._json(200, ps.add(c.out, c.lib, pid, body.get("renders"), body.get("pack_id"), self.user["id"]))
+                if act == "more":                                  # Generate more: the price first (409 until go), then an ordinary sheet job whose cut cells are APPENDED to the set
+                    plan = ps.more_plan(c.out, c.lib, pid, body.get("grid"), body.get("elements"))
+                    if self._price_sheet(plan, body, False):
+                        return
+                    base = ps.more_base_plan(c.out, c.lib, plan["id"], plan["grid"], plan["picks"])
+                    j = c.live("sheet", {"prompt": base["task"], "grid": f"{plan['grid'][0]}x{plan['grid'][1]}", "outline": 0, "model": body.get("model"), "options": body.get("options")},
+                               base_plan=base, particles={"set": plan["id"], "elements": plan["picks"]})
+                    return self._json(202, {"job": j["job"], "task": j["task"], "estimate": j["estimate"], "id": plan["id"], "grid": plan["grid"]})
                 raise pl.PipelineError(NO_ROUTE, 404)
-            except ps.SetError as e:
+            except (ps.SetError, fx_flow.EffectError) as e:
                 raise pl.PipelineError(str(e), e.code)
+
+        def _price_sheet(self, plan: dict, body: dict, quote_only: bool) -> bool:
+            """The price of a sheet of particles comes before anything is spent (rule 13), for an effect's sheet and for *Generate more* of a set alike: it adds `credits`, `model` and `params` to
+            the plan. True when the answer has been sent (a quote, or the 409 that shows the price and waits for `go: true`); False when the caller may start the job."""
+            if not higgsfield.available():
+                raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
+            model, params = model_catalog.resolve("image", body.get("model"), body.get("options"))
+            try:
+                credits = higgsfield.cost(model, params, plan["prompt"])
+            except higgsfield.HiggsError as ex:
+                credits = None
+                plan["cost_error"] = str(ex)
+            plan.update(credits=credits, model=model, params=params)
+            if quote_only or body.get("estimate") is True:
+                self._json(200, plan)
+                return True
+            who = c.actor()
+            if not who.get("can_spend") or who.get("disabled"):
+                raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
+            if body.get("go") is not True:
+                self._json(409, {"error": f"This costs {credits} credits. Send go: true to start it.", "estimate": plan})
+                return True
+            return False
 
         def _effects(self, method: str, path: str, body: dict):
             """Particle effects (docs/effects.md section 7): a pack's stickers get a Telegram-style burst. Owner only for now (members are denied by the route gate). Paid work needs the price
@@ -1189,22 +1254,8 @@ def make_handler(c: Console):
                 if elements is None and body.get("group"):          # the old routes (`pieces`) named a group: its pieces are the picks (the first ones when it has more than the sheet has cells)
                     elements = fx_flow.group_elements(c.out, eid, str(body["group"]))
                 plan = fx_flow.particles_plan(c.out, eid, body.get("grid"), elements, truncate=body.get("elements") is None)
-                if not higgsfield.available():
-                    raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
-                model, params = model_catalog.resolve("image", body.get("model"), body.get("options"))
-                try:
-                    credits = higgsfield.cost(model, params, plan["prompt"])
-                except higgsfield.HiggsError as ex:
-                    credits = None
-                    plan["cost_error"] = str(ex)
-                plan.update(credits=credits, model=model, params=params)
-                if act.endswith("_estimate") or body.get("estimate") is True:
-                    return self._json(200, plan)
-                who = c.actor()
-                if not who.get("can_spend") or who.get("disabled"):
-                    raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
-                if body.get("go") is not True:
-                    return self._json(409, {"error": f"This costs {credits} credits. Send go: true to start it.", "estimate": plan})
+                if self._price_sheet(plan, body, act.endswith("_estimate")):
+                    return
                 picks = plan["picks"]
                 base = fx_flow.particles_base_plan(c.out, eid, plan["grid"], picks)
                 j = c.live("sheet", {"prompt": base["task"], "grid": f"{plan['grid'][0]}x{plan['grid'][1]}", "outline": 0, "model": body.get("model"), "options": body.get("options")},
@@ -1430,6 +1481,8 @@ def make_handler(c: Console):
                                     elif ck == "scope" and cv in ("images", "video"):
                                         cur[ck] = cv
                                 sess["settings"]["creator"] = cur
+                            elif k == "allow_vlm" and v in (True, False):
+                                store.set_vision(sess, v)                            # state only: no chat turn; the next turn says it once
                             elif k in allowed and v in allowed[k]:
                                 sess["settings"][k] = v
                             elif k == "style_id":
@@ -1548,6 +1601,12 @@ def make_handler(c: Console):
                 if parts[3] == "recut":          # "Cut it anyway": cut a batch whose sheet was stopped, from the stored sheet, free (pipeline.recut)
                     pl.recut_check(c.out, gid)
                     c.submit(lambda: pl.recut(c.out, gid, c.cfg, c.pace, by=self.user.get("id") or "human"))
+                    return self._json(202, {"id": gid})
+                if parts[3] == "recut_particles":   # a sheet of particles that was cut as stickers: cut again as particles (exact equal cells, no sticker rule), from the stored sheet, free
+                    pl.recut_check(c.out, gid)
+                    if pl.read_result(c.out, gid).get("kind") == "particles":
+                        raise pl.PipelineError("This batch was already cut as particles.", 409)
+                    c.submit(lambda: pl.recut_as_particles(c.out, gid, c.cfg, c.pace, by=self.user.get("id") or "human"))
                     return self._json(202, {"id": gid})
                 if parts[3] == "reveal":         # open the batch's folder in the file manager (a path the server computed, never one sent by the page)
                     import os as _os, subprocess as _sp, sys as _sys

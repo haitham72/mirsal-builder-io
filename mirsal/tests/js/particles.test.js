@@ -272,3 +272,237 @@ test('the sets are read once: redrawing the list never refetches', async () => {
   assert.equal(run("APICALLS"), before + 1, 'a known list is never read again without a write (redrawing must not refetch)');
   run("SPL.sets=null");
 });
+
+// ---------- the trash: Restore is reachable later, not only on the notice right after a delete ----------
+const GONE = (o = {}) => ({ id: 'P007', name: 'Old <bats>', n_cells: 4, n_picked: 3, deleted: true, trashed: true, deleted_at: 1,
+  used_in: [{ id: 'p1', name: 'Fruits <b>' }, { id: 'zz', name: 'zz', missing: true }],
+  cells: [{ n: 1, picked: true, url: '/out/trash/particles/P007/cells/c01.png' }, { n: 2, picked: false, url: '/out/trash/particles/P007/cells/c02.png' }, { n: 3, picked: true, url: null, missing: true }], ...o });
+
+test('the trash section: nothing when empty, else every deleted set with a Restore button and where it was', () => {
+  assert.equal(run("spTrashHtml(null)"), '');
+  assert.equal(run("spTrashHtml([])"), '');
+  const h = run(`spTrashHtml([${JSON.stringify(GONE())},${JSON.stringify(GONE({ id: 'P008', name: 'Lone', used_in: [] }))}])`);
+  assert.match(h, /Deleted \(2\)/);
+  assert.match(h, /Old &lt;bats&gt;/, 'names are escaped');
+  assert.match(h, /data-act=psrestore data-id=P007>Restore</);
+  assert.match(h, /data-act=psrestore data-id=P008>Restore</);
+  assert.match(h, /was on Fruits &lt;b&gt;/);
+  assert.doesNotMatch(h, /was on Fruits &lt;b&gt;, zz/, 'a pack that no longer exists is not named');
+  assert.match(h, /was stand-alone/);
+  assert.match(h, /\/out\/trash\/particles\/P007\/cells\/c01\.png/, 'the picture comes from the trash folder');
+  assert.equal((h.match(/class=ps-cell/g) || []).length, 4, 'two sets, two picked cells each: the unpicked cell is not in the strip, and a missing file is a blank square, not a broken image');
+  assert.equal((h.match(/<img /g) || []).length, 2, 'only the cell with a file has a picture');
+});
+
+test('the library shows the trash under the sets, and also when there are no live sets', () => {
+  run(`SPL.sets=[${JSON.stringify(SET())}];SPL.trash=[${JSON.stringify(GONE())}]`);
+  assert.match(run("spLibHtml()"), /data-ps=P001[\s\S]*Deleted \(1\)[\s\S]*data-act=psrestore data-id=P007/);
+  run("SPL.sets=[]");
+  assert.match(run("spLibHtml()"), /No particle sets yet[\s\S]*data-act=psrestore data-id=P007/, 'a person who deleted their last set can still get it back');
+  run("SPL.trash=null");
+  assert.doesNotMatch(run("spLibHtml()"), /Deleted \(/);
+  run("SPL.sets=null");
+});
+
+test('forgetting the sets forgets the trash too, and a restore re-reads both', () => {
+  run(`SPL.sets=[];SPL.trash=[${JSON.stringify(GONE())}];spSetsForget()`);
+  assert.equal(run("SPL.trash"), null);
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
+  assert.match(src, /api\('\/api\/particles\/deleted'\)/, 'the list is read from the route that serves the trash');
+});
+
+// ---------- Generate more ----------
+const SHEET = (o = {}) => ({ n: 1, job: 'J043', generation: 'G104', grid: [2, 2], elements: ['hearts'], status: 'DONE', appended: [5, 6, 7, 8], skipped: [], error: null, ...o });
+const moreOf = (o = {}) => run(`(delete SPM.P001, spMoreHtml(${JSON.stringify(SET(o))}))`);
+
+test('the open set offers Generate more: the grid, the particles to draw, the price on its own line, a button that says what it does', () => {
+  const h = moreOf();
+  assert.match(h, /Generate more/);
+  assert.match(h, /The cells you have stay exactly as they are/, 'the person is told nothing is replaced');
+  assert.match(h, /data-act=psmoregrid data-id=P001 data-v=2x2/);
+  assert.match(h, /data-act=psmoregrid data-id=P001 data-v=3x3/);
+  assert.match(h, /data-act=psmorechip data-id=P001 data-v="hearts"[^>]*aria-pressed=true/, 'the set’s own particles start chosen');
+  assert.match(h, /data-act=psmorechip data-id=P001 data-v="flowers"/);
+  assert.match(h, /data-psmoreown=P001/);
+  assert.match(h, /2 of 4 chosen/);
+  assert.match(h, /<div class=fx-price data-psmoreprice[^>]*>[^<]*<\/div>/, 'the price has its own line');
+  const btn = h.match(/<button[^>]*data-act=psmoredraw[^>]*>[\s\S]*?<\/button>/)[0];
+  assert.match(btn, /Draw 4 more particles/);
+  assert.doesNotMatch(btn, /credit/, 'the price is never inside the button');
+  assert.match(btn, /disabled/, 'nothing can be pressed before the price is known');
+  assert.match(h, /Nothing is spent until you press the button/);
+});
+
+test('once the price is known the button works; a price that is not available is said, never hidden', () => {
+  run("SPL.sets=[" + JSON.stringify(SET()) + "]");
+  run("SPM.P001={grid:'2x2',chosen:['hearts','flowers'],extra:[],est:{'2x2|hearts|flowers':{credits:2}},busy:0}");
+  const h = run(`spMoreHtml(${JSON.stringify(SET())})`);
+  assert.match(h, /data-psmoreprice[^>]*>about 2 credits</);
+  assert.doesNotMatch(h.match(/<button[^>]*data-act=psmoredraw[^>]*>/)[0], /disabled/);
+  run("SPM.P001.est['2x2|hearts|flowers']={credits:null,error:'The price is not available.'}");
+  const bad = run(`spMoreHtml(${JSON.stringify(SET())})`);
+  assert.match(bad, /The price is not available/);
+  assert.match(bad.match(/<button[^>]*data-act=psmoredraw[^>]*>/)[0], /disabled/);
+  run("delete SPM.P001;SPL.sets=null");
+});
+
+test('while a sheet is being drawn the set says so and cannot be sent twice', () => {
+  const h = moreOf({ drawing: true, sheets: [SHEET({ status: 'REQUESTED', generation: null, appended: [] })] });
+  assert.match(h, /Waiting for the sheet \(J043\)/);
+  assert.match(h.match(/<button[^>]*data-act=psmoredraw[^>]*>/)[0], /disabled/);
+  assert.match(moreOf({ drawing: true, sheets: [SHEET({ status: 'DRAWN', appended: [] })] }), /Cutting the particles \(G104\)/);
+});
+
+test('every kind of sheet is told in plain words, newest first, and a dead end always has a next step', () => {
+  const h = moreOf({ sheets: [SHEET(), SHEET({ n: 2, status: 'DONE', appended: [9, 10], skipped: [3, 4], generation: 'G105' }),
+    SHEET({ n: 3, status: 'FAILED', generation: null, appended: [], error: 'the provider said no' }),
+    SHEET({ n: 4, status: 'NO_CELLS', generation: 'G106', appended: [], skipped: [1, 2, 3, 4], error: 'No cell of this sheet came out.' })] });
+  assert.match(h, /Sheet 1: 4 particles added/);
+  assert.match(h, /Sheet 2: 2 particles added \(2 cells came out empty\)/);
+  assert.match(h, /Sheet 3 failed: the provider said no\. Draw it again below/);
+  assert.match(h, /Sheet 4 came back with no usable cell/);
+  assert.match(h, /data-act=openstudio data-gen=G106 data-i=1[^>]*>Open G106/, 'a sheet with no key screen has one free “Cut it anyway” on its batch: the set links to it');
+  assert.ok(h.indexOf('Sheet 4') < h.indexOf('Sheet 1'), 'newest first');
+});
+
+test('names the person types are escaped, and the third grid is nine', () => {
+  run("SPM.P001={grid:'3x3',chosen:[],extra:['<img src=x>'],est:{},busy:0}");
+  const h = run(`spMoreHtml(${JSON.stringify(SET())})`);
+  assert.doesNotMatch(h, /<img src=x>/);
+  assert.match(h, /&lt;img src=x&gt;/);
+  assert.match(h, /Draw 9 more particles/);
+  assert.match(h, /0 of 9 chosen/);
+  run("delete SPM.P001");
+});
+
+test('Generate more never posts without a known price, and posts the person’s picks with go only on the click', async () => {
+  run(`SPL.sets=[${JSON.stringify(SET())}];SPL.detail={};POSTS.length=0;delete SPM.P001`);
+  await run0("ACT.psmoredraw({dataset:{id:'P001'},disabled:false})");
+  assert.deepEqual(run("POSTS.length"), 0, 'no price, no request');
+  run("SPM.P001={grid:'2x2',chosen:['hearts','flowers'],extra:[],est:{'2x2|hearts|flowers':{credits:2}},busy:0}");
+  await run0("ACT.psmoredraw({dataset:{id:'P001'},disabled:false})");
+  assert.deepEqual(run("POSTS"), [['/api/particles/P001/more', { grid: '2x2', elements: ['hearts', 'flowers'], go: true }]]);
+  run("POSTS.length=0;SPM.P001.est={}");
+  await run0("spMoreEstimate('P001')");
+  assert.deepEqual(run("POSTS"), [['/api/particles/P001/more', { grid: '2x2', elements: ['hearts', 'flowers'], estimate: true }]], 'the quote is a free request, not a go');
+  run("delete SPM.P001;SPL.sets=null;POSTS.length=0");
+});
+
+test('choosing particles keeps within the sheet and can add the person’s own', () => {
+  run(`SPL.sets=[${JSON.stringify(SET({ elements: ['a', 'b', 'c', 'd', 'e'] }))}];delete SPM.P001`);
+  assert.deepEqual(run("spMoreState(SPL.sets[0]).chosen"), ['a', 'b', 'c', 'd'], 'a 2x2 sheet starts with the first four');
+  run("ACT.psmorechip({dataset:{id:'P001',v:'e'}})");
+  assert.deepEqual(run("SPM.P001.chosen"), ['a', 'b', 'c', 'd'], 'a fifth is refused: the sheet holds four');
+  run("ACT.psmorechip({dataset:{id:'P001',v:'a'}});ACT.psmorechip({dataset:{id:'P001',v:'e'}})");
+  assert.deepEqual(run("SPM.P001.chosen"), ['b', 'c', 'd', 'e']);
+  run("ACT.psmoregrid({dataset:{id:'P001',v:'3x3'}})");
+  assert.equal(run("SPM.P001.grid"), '3x3');
+  run("delete SPM.P001;SPL.sets=null");
+});
+
+// ---------- the burst maker: Motion and Finish for a SET, one preview for the whole pack (docs/particles_plan.md section 4) ----------
+const BURSTPACKS = "LIB.packs=[{id:'p1',name:'Fruits <b>',stickers:[]},{id:'p2',name:'Princess',stickers:[]}]";
+const REND = (o = {}) => ({ id: 'R001', set: 'P001', pack_id: 'p1', preset: 'fountain', status: 'READY', bytes: 120 * 1024, url: '/out/particles/P001/renders/R001.webm', warnings: [], blocks: [], added_to: null, added: [], ...o });
+const burst = (o = {}, pre = '') => run(`(()=>{${BURSTPACKS};delete SPB.P001;${pre};return spBurstHtml(${JSON.stringify(SET(o))})})()`);
+
+test('Motion: ONE preview for the pack, the five presets, Energy / Float / Swirl, count and spin under Advanced', () => {
+  const h = burst();
+  assert.equal((h.match(/<img id=psbpv-/g) || []).length, 1, 'one preview, not one row per sticker');
+  assert.match(h, /id=psbpv-P001/);
+  assert.doesNotMatch(h, /fx-sim|data-sid=/, 'no per-sticker row');
+  for (const n of ['burst', 'fountain', 'vortex', 'rain', 'confetti']) assert.match(h, new RegExp(`data-act=psbpreset data-id=P001 data-n=${n}`));
+  for (const l of ['Energy', 'Float', 'Swirl']) assert.match(h, new RegExp(`<span>${l}<\\/span>`));
+  assert.doesNotMatch(h, /Explosion|Gravity/);
+  assert.match(h, /data-psbp=magnitude data-id=P001/, 'the engine’s keys travel unchanged: only the labels were renamed');
+  assert.match(h, /<details class=fx-adv><summary>Advanced: particles, spin<\/summary>/);
+  assert.match(h, /data-psbp=count/);
+  assert.match(h, /data-psbp=spin/);
+  assert.match(h, /Advanced: particle size/);
+  assert.match(h, /value="100" data-psbpx/, 'the particles are 100 px by default');
+  for (const k of [1, 2, 3, 4]) assert.match(h, new RegExp(`data-act=psbscale data-id=P001 data-v=${k}`));
+  assert.match(h, /for Fruits &lt;b&gt;/, 'a set in one pack is a burst for that pack');
+});
+
+test('Finish: Render says what it does and the checked file is the next thing you see', () => {
+  const h = burst();
+  assert.match(h, /data-act=psbrender data-id=P001>[^<]*Render</);
+  assert.match(h, /the final 512 px sticker, checked/);
+  assert.doesNotMatch(h, /<button[^>]*psbrender[^>]*>[^<]*credit/, 'a burst is free: no price anywhere');
+});
+
+test('a drawn set with nothing picked has no particles to move, and says how to get some', () => {
+  const h = burst({ n_picked: 0, n_cells: 0, cells: [], picked: [] });
+  assert.match(h, /no particles yet/i);
+  assert.match(h, /Generate more/);
+  assert.doesNotMatch(h, /psbrender|psbpreset/, 'no control that cannot work');
+  const st = burst({ n_picked: 0, n_cells: 0, cells: [], picked: [], source: { kind: 'stickers' } });
+  assert.match(st, /psbrender/, 'a set of the pack’s own stickers bursts them');
+  assert.match(st, /the pack’s own stickers fly/);
+});
+
+test('which pack: fixed when the set is in one, a choice when it is in several, any pack when it is in none', () => {
+  assert.doesNotMatch(burst(), /<select/);
+  const two = burst({ packs: ['p1', 'p2'], used_in: [{ id: 'p1', name: 'Fruits <b>' }, { id: 'p2', name: 'Princess' }] });
+  assert.match(two, /<select[^>]*data-psbpack=P001/);
+  assert.match(two, /<option value="p1" selected>Fruits &lt;b&gt;<\/option><option value="p2">Princess<\/option>/);
+  const none = burst({ packs: [], used_in: [] });
+  assert.match(none, /<select[^>]*data-psbpack=P001/);
+  assert.match(none, /<option value="p1"/);
+  assert.match(none, /<option value="p2"/);
+  const hint = run(`(()=>{${BURSTPACKS};delete SPB.P001;spBurstState(${JSON.stringify(SET({ packs: ['p1', 'p2'] }))},'p2');return SPB.P001.pack})()`);
+  assert.equal(hint, 'p2', 'the pack studio opens the burst for ITS pack');
+});
+
+test('the bursts of this pack: a clean one is added with one click, a warning is a sentence and the click is “Add anyway”, a Telegram limit cannot be added', () => {
+  const rs = [REND(), REND({ id: 'R002', warnings: ['effect_tail_faded'], checks: [{ id: 'effect_tail_faded', verdict: 'WARN' }] }),
+    REND({ id: 'R003', status: 'FAILED', blocks: ['size_budget'], checks: [{ id: 'size_budget', verdict: 'BLOCK' }], url: null }), REND({ id: 'R004', added_to: 'p1', added: [{ sticker: 'x', pack: 'p1' }] }),
+    REND({ id: 'R005', pack_id: 'p2' })];
+  const h = burst({ renders: rs });
+  assert.match(h, /data-act=psbadd data-id=P001 data-r=R001 data-p=p1>Add to Fruits &lt;b&gt;</);
+  assert.match(h, /data-act=psbadd data-id=P001 data-r=R002 data-p=p1>Add anyway</);
+  assert.match(h, /last frames were faded out/, 'the warning is in words');
+  assert.match(h, /Warnings are only warnings: you decide/);
+  assert.doesNotMatch(h, /data-r=R003/, 'a file Telegram would reject cannot be added');
+  assert.match(h, /Over Telegram’s size limit\./);
+  assert.match(h, /in Fruits &lt;b&gt;/, 'an added burst says where it is');
+  assert.doesNotMatch(h, /data-r=R004/);
+  assert.doesNotMatch(h, /R005/, 'a burst made for another pack is listed under that pack');
+  assert.equal((h.match(/<video /g) || []).length, 3, 'a looping thumbnail for each burst that has a file');
+});
+
+test('the preview is asked of the set, with the pack, the preset, the person’s sliders and the size; the sliders then show what the server used', async () => {
+  run(`${BURSTPACKS};SPL.sets=[${JSON.stringify(SET())}];SPL.detail={};delete SPB.P001;delete SPBS.P001;POSTS.length=0`);
+  run("spBurstState(SPL.sets[0],'').preset='vortex';SPB.P001.par={gravity:.4,touched:1};SPB.P001.size={px:150,scale:2}");
+  await run0("spBurstPreview('P001')");
+  assert.deepEqual(run("POSTS"), [['/api/particles/P001/preview', { pack_id: 'p1', preset: 'vortex', params: { gravity: 0.4, sprite_px: 150, scale: 2 }, size: 256 }]]);
+  run("POSTS.length=0;SPL.sets=null;delete SPB.P001");
+});
+
+test('Render posts the pack, preset and sliders to the set; Add posts the burst and the pack; neither runs without a pack', async () => {
+  run(`${BURSTPACKS};SPL.sets=[${JSON.stringify(SET())}];SPL.detail={};delete SPB.P001;delete SPBS.P001;POSTS.length=0`);
+  run("spBurstState(SPL.sets[0],'').preset='rain'");
+  await run0("ACT.psbrender({dataset:{id:'P001'},disabled:false})");
+  assert.deepEqual(run("POSTS"), [['/api/particles/P001/render', { pack_id: 'p1', preset: 'rain', params: { sprite_px: 100, scale: 1 } }]]);
+  run("POSTS.length=0");
+  await run0("ACT.psbadd({dataset:{id:'P001',r:'R001',p:'p1'},disabled:false})");
+  assert.deepEqual(run("POSTS"), [['/api/particles/P001/add', { renders: ['R001'], pack_id: 'p1' }]]);
+  run("POSTS.length=0;SPL.sets=[" + JSON.stringify(SET({ packs: [], used_in: [] })) + "];delete SPB.P001;delete SPBS.P001;spBurstState(SPL.sets[0],'')");
+  await run0("ACT.psbrender({dataset:{id:'P001'},disabled:false})");
+  assert.deepEqual(run("POSTS"), [], 'with no pack chosen nothing is sent');
+  run("SPL.sets=null;delete SPB.P001");
+});
+
+test('the set card opens with Generate more AND the burst maker', () => {
+  run(`${BURSTPACKS};SPL.open='P001';delete SPB.P001;delete SPM.P001`);
+  const h = run(`spSetDetail(${JSON.stringify(SET())})`);
+  assert.match(h, /data-psgen=P001/);
+  assert.match(h, /data-psb=P001/);
+  run("SPL.open=''");
+});
+
+test('every new burst action has a handler, and the burst listeners are the file’s own', () => {
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
+  for (const a of ['psbpreset', 'psbshuffle', 'psbscale', 'psbrender', 'psbadd']) assert.match(src, new RegExp(`ACT\\.${a}=`), `${a} has a handler`);
+  assert.match(src, /addEventListener\('input'/);
+  assert.match(src, /addEventListener\('change'/);
+});

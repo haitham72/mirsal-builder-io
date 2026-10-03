@@ -13,7 +13,7 @@ function drawPack(){
    <div class=pa>
     <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button><button class=btn data-act=pkrename>${ic('edit')} Rename</button>
     <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>${n?`<a class=btn href="/api/packs/${p.id}/export.zip" download title="Every sticker file of this pack in one zip: .webm for the animated ones, .png / .webp for the static ones, and a manifest.json">${ic('download')} Download .zip</a>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>
-    <button class="btn dng" data-act=pkdel>${ic('trash')}</button></div></div></div>
+    <button class="btn dng" data-act=pkdel title="Delete this pack. The stickers that came from a batch stay in their batch.">${ic('trash')} Delete pack</button></div></div></div>
   <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
    ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${p.stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stedit data-id=${s.id} title="${(s.source&&s.source.generation)?'Edit in the Studio (text, emoji; image and animation together)':s.type==='static'?'Edit a copy in the editor':'Edit: add text or emoji, trim'}">${ic('edit')}</button>${s.type==='animated'?`<button data-act=stanim data-id=${s.id} title="Timeline (trim, frame rate, export)">${ic('play')}</button>`:''}<button data-act=stcover data-id=${s.id} title="Set as cover">${ic('star')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
@@ -25,7 +25,11 @@ const sOf=id=>packById(PACK_ID).stickers.find(s=>s.id===id);
 async function pkUpdate(body,msg){const r=await post('/api/packs/'+PACK_ID,body);if(!r.ok)return toast(r.j.error,1);await loadLib();drawPack();if(msg)toast(msg)}
 ACT.pkadd=()=>{Ed.targetPack=PACK_ID;location.hash='#/create'};
 ACT.pkrename=()=>askText('Rename pack',packById(PACK_ID).name,n=>pkUpdate({name:n},'Renamed'));
-ACT.pkdel=()=>confirmDlg(`Delete pack "${packById(PACK_ID).name}" and its stickers?`,async()=>{const r=await post(`/api/packs/${PACK_ID}/delete`);if(r.ok){await loadLib();location.hash='#/library'}else toast(r.j.error,1)});
+/* what Delete pack will do, said before it is done (plain text: confirmDlg escapes it; nothing is destroyed silently): the stickers that came from a batch stay in that batch, the ones that exist only here go with the pack */
+function pkDelText(p){const sts=p.stickers||[],gens=[...new Set(sts.map(s=>(s.source||{}).generation).filter(Boolean))].sort(),back=sts.filter(s=>(s.source||{}).generation).length,only=sts.length-back;
+ if(!sts.length)return `Delete the pack “${p.name}”? It has no stickers. Its particle sets stay in the Library.`;
+ return `Delete the pack “${p.name}”? ${back?`${back} of its ${sts.length} stickers came from batches (${gens.join(', ')}) and stay there: you can add them to a pack again. `:''}${only?`${only} exist only in this pack and go with it. `:''}Its particle sets stay in the Library.`}
+ACT.pkdel=()=>confirmDlg(pkDelText(packById(PACK_ID)),async()=>{const r=await post(`/api/packs/${PACK_ID}/delete`);if(r.ok){await loadLib();location.hash='#/library'}else toast(r.j.error,1)});
 ACT.stanim=el=>{location.hash=`#/animate/${PACK_ID}/${el.dataset.id}`};
 ACT.stcover=el=>pkUpdate({cover:el.dataset.id},'Cover changed');
 ACT.stdel=el=>{const s=sOf(el.dataset.id);confirmDlg(`Delete "${s.name}"?`,async()=>{const r=await post(`/api/packs/${PACK_ID}/stickers/${s.id}/delete`);if(r.ok){await loadLib();drawPack()}else toast(r.j.error,1)})};
@@ -130,18 +134,19 @@ ACT.ptadd=async el=>{const pid=el.dataset.p,sid=el.dataset.s;el.disabled=true;
 
 /* ---------- the pack's particle studio (docs/particles_plan.md 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
    the pack: a sticker shows one line linking here (pkStickerLine), never a gallery of its own. The set cards are shared with the Library (particles.js).
-   Bursts are read-only here: rendering and adding a burst from a set has no route yet, so the studio shows what exists and says so. */
+   The bursts rendered FOR this pack are listed with Add (POST /api/particles/{id}/add, the same handler as the set card's burst maker: particles.js psbadd); making one is in the set's card. */
 function pkPsHtml(p){const sets=PKPT.sets[p.id];
  if(sets===undefined||sets===null)return `<section class=pk-ps><div class=pk-ps-h><h2>${ic('fx')} Particle studio</h2></div><div class=pk-pt-load><div class=spin></div><span class=mut>Reading the pack's particle sets…</span></div></section>`;
  const bursts=PKPT.bursts[p.id]||[];
  return `<section class=pk-ps><div class=pk-ps-h><h2>${ic('fx')} Particle studio</h2><span class=mut>one set of particles for the whole pack</span><span class=gspace></span>
   <button class="btn sm pri" data-act=psmakepack data-p=${p.id}>Make particles for this pack</button><button class="btn sm" data-act=pspickpack data-p=${p.id}>Use an existing set</button></div>
   ${sets.length?sets.map(s=>typeof spSetCard==='function'?spSetCard(s):'').join(''):`<div class=mut>No particle set on this pack yet. Make one, or use a set you already saved.</div>`}
-  ${bursts.length?`<div class=pk-ps-sh>Bursts rendered for this pack</div><div class=pk-ps-bursts>${bursts.map(pkBurst).join('')}</div>`:''}</section>`}
-function pkBurst(b){const ws=b.warnings||[];
+  ${bursts.length?`<div class=pk-ps-sh>Bursts rendered for this pack</div><div class=pk-ps-bursts>${bursts.map(b=>pkBurst(b,p.id)).join('')}</div>`:''}</section>`}
+function pkBurst(b,pid){const ws=b.warnings||[],bl=b.blocks||[],ok=b.status==='READY'&&b.url&&!b.missing;
  return `<div class=pk-ps-b><div class=pk-pt-m>${b.url&&!b.missing?`<video src="${esc(b.url)}" autoplay loop muted playsinline preload=metadata></video>`:'<span class=mut>file missing</span>'}</div>
   <div class=pk-pt-id><b>${esc(b.set_name||b.set||'')}</b><small>${esc(b.preset||'')} · ${esc(String(b.status||'').toLowerCase())}${b.added_to?` · in ${esc(ptPackName(b.added_to))}`:''}</small></div>
-  ${ws.length?`<ul class=pk-pt-w>${ws.map(w=>`<li>${esc(ptWhy(w))}</li>`).join('')}</ul>`:''}</div>`}
+  ${ws.length||bl.length?`<ul class=pk-pt-w>${[...bl,...ws].map(w=>`<li>${esc(ptWhy(w))}</li>`).join('')}</ul>`:''}
+  ${!b.added_to&&ok?`<button class="btn sm pri" data-act=psbadd data-id=${esc(b.set)} data-r=${esc(b.id)} data-p=${esc(pid||'')}>${ws.length?'Add anyway':'Add to this pack'}</button>`:''}</div>`}
 /* one line on the sticker, linking to the pack's particle studio (the gallery lives there now) */
 function pkStickerLine(s){if(!s.pack_id)return '<span class=mut>No pack.</span>';
  const sets=PKPT.sets[s.pack_id];

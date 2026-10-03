@@ -1,6 +1,6 @@
 # Particles: the plan (Haitham, 2026-10-03, written at the end of a session)
 
-**Status: phase 1 is BUILT (2026-10-03, branch `better_ui/ux`).** `flow/particle_sets.py` and every route of section 6 are in, with tests (`tests/test_particle_sets.py`, 22, over the real server on the fake CLI). **Still to build:** the screens of section 5 (phase 2), re-pointing the per-sticker gallery (phase 3), the chat intents (phase 4), Telegram delivery (phase 5). This file corrects the model the particles feature was built on; what exists today is in `docs/effects.md`; what is open is in `HANDOFF.md` sections 0a-0c.
+**Status: phases 1-4 are BUILT (2026-10-03, branch `better_ui/ux`).** `flow/particle_sets.py` and every route of section 6 are in (including `more`, `preview`, `render`, `add` and the trash listing `GET /api/particles/deleted`), the screens of section 5 are re-pointed to the set and the pack, and the chat has the intents (make, more, delete, restore, assign: `agent/graph.py` `n_particles`). **Still to build:** Telegram delivery of a burst (phase 5, open question 3). This file corrects the model the particles feature was built on; what exists today is in `docs/effects.md`; what is open is in `HANDOFF.md` sections 0a-0c.
 
 ## 1. What the task really is (the correction)
 
@@ -77,8 +77,8 @@ The existing `/api/effects/*` routes stay (the working session) and `POST /api/p
 
 | planned | built (`flow/particle_sets.py`) |
 |---|---|
-| `POST /api/particles/{id}/more {grid, elements?, go?}` | **not built.** It needs a sheet job like `POST /api/effects/{id}/particles` (price first, `go: true`) that APPENDS to the set's cells. The screen cannot offer *Generate more* without it; nothing else in the model depends on it. |
-| `POST /api/particles/{id}/preview` / `/render` / `/add` | **not built.** They need a burst record per (set, pack, preset) under `renders/`; `for_pack` already reads `renders[]`, so only the writers are missing. The simulation itself is `flow/effects.py sim_preview` / `sim_render` and needs re-pointing at a set's picked cells instead of an effect's group. |
+| `POST /api/particles/{id}/more {grid, elements?, go?}` | **built.** Price first (409 until `go`, or `estimate: true` for the free quote), an ordinary sheet job (`particles={"set": P###}` in the job request, so `Console.start_from_job` links it and Resume / Retry work), and `particle_sets.settle` APPENDS the cut cells (idempotent; also run before every read of the set, so a restart loses nothing). `set.sheets[]` records each sheet (REQUESTED / DRAWN / DONE / FAILED / NO_CELLS); `set.plan {subject, style}` keeps what a new sheet is drawn about; `credits` sums the sheets. |
+| `POST /api/particles/{id}/preview` / `/render` / `/add` | **built.** The same engine (`engine/particles`, `engine/effect_video.encode_and_check`) pointed at the set's PICKED cells (a set of kind `stickers` bursts the pack's stickers, `source.sticker_ids` or the pack's own); a render is a record in `set.renders[]` + `renders/R###.webm` with its checks, FAILED only for Telegram's own limits; `add` puts it in the pack as an animated sticker tagged with the pack's emoji. A burst belongs to the pack it was rendered for (`for_pack` lists it even when the set is not assigned there). The working-session routes `/api/effects/{id}/preview | render | add` stay as they were. |
 | `GET /api/particles` cards | built: `id, name, created, user, kind, elements, packs, used_in[{id, name}], cells[], picked[], n_cells, n_picked, renders, credits` |
 | delete → trash + restore | built, with the refusal that matters: a set assigned to packs answers **409 with the pack names** unless `{confirm: true}` (so a set in use cannot vanish under a pack). Ids are shared with the trash, so a restore can never collide with a new set. |
 | motion | `motion{preset, params}` is linted against the engine itself: the preset must be in `engine/particles.PRESETS` and the params must pass `ParticleParams.from_dict`, so a set's motion can never mean something the renderer does not read (400 otherwise). |
@@ -96,8 +96,8 @@ The existing `/api/effects/*` routes stay (the working session) and `POST /api/p
 
 1. **DONE (2026-10-03, `e56146a`)** `flow/particle_sets.py` + routes + tests (set from effect, rename/elements/motion/picked, assign/unassign, duplicate, delete/restore with the in-use refusal, the pack listing). *Left out on purpose: `more`, `preview`, `render`, `add` — see section 6; `more` is the next backend step because the wizard's *Generate more* needs it.*
 2. Library > Particles section + Pack page particle studio + the "Use as particle set" step in both wizards. The backend answers both reads (`GET /api/particles`, `GET /api/packs/{id}/particles`), so this phase is screens only.
-3. Re-point the sticker view / pack grid / Studio section to the pack; remove per-sticker framing from copy.
-4. AI chat intents (make, assign, more, delete).
+3. **DONE** Re-point the sticker view / pack grid / Studio section to the pack; remove per-sticker framing from copy. The wizard's Motion step is ONE section for the pack (`effects.js` `fxMotion`, the set's `spBurstHtml` in `particles.js`): one preview, the five presets, Energy / Float / Swirl, Render, Add; it needs the run saved as a set (the run points at its sets: `effect.sets[]`).
+4. **DONE** AI chat intents: "make particles for my Barbie pack" (a plan card with the price, waits for the go, then a new set on the pack), "generate more" (same, for the set named or in focus), "delete the bat particles" (free; a set in use asks first), "restore ...", "also use them for the Princess pack" (a free list edit). `docs/agent-and-chat.md`.
 5. Telegram: how the burst is delivered (open question 3).
 
 ## 9. Acceptance (what Haitham should be able to do)
