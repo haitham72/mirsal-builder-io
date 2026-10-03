@@ -1,5 +1,7 @@
 # docs/effects.md — particle effects: the burst that Telegram plays when you press an emoji
 
+> **2026-10-03: the per-sticker model below (an effect and a gallery per sticker) is being replaced by [particles_plan.md](particles_plan.md): a durable Particle set belongs to pack(s) or stands alone. Read that plan first.**
+
 **Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). The AI-chat entry is built (§8). Built 2026-10-03: the AI-drawn pieces sheet and the per-sticker particles gallery (§8). NOT built: real tile art / examples (§8).**
 Haitham asked for this on 2026-10-02: when someone presses an emoji in Telegram a burst of small pieces explodes from it (a strawberry bursts strawberries, a heart hearts). The product
 is the same thing as **animated stickers**: one 3-second WEBM per effect, starting from nothing and ending with nothing, tagged with the source emoji.
@@ -42,6 +44,8 @@ Text only: no start image (Kling's `start_image` is optional; `jobs.fulfil` take
 
 **Conclusion: 2x2 is the default and holds up; 3x3 is offered but is poor (pieces cross cells, nothing ends empty) and says so.** The "green frame as start and end image" variant was not tried
 (2x2 already works, so it was not worth 4.5 credits).
+
+**Video prompt v2 (2026-10-03, `effect_video` VERSION 2; v1 is kept byte for byte for stored jobs).** Haitham's real Kling run showed boxes / posters / walls behind every emoji. Cause, in the v1 text: "cell" ten times, "invisible grid of 2 by 2 equal square cells", "square frame". Rule now: the layout appears ONCE and only as quadrant names (top-left, top-right, bottom-left, bottom-right; nine names for 3x3), the background is ONE seamless flat uniform pure #00FF00 (blue when a piece is green), described positively once, static camera, and none of these words is ever in a template text (`effect_prompts.BANNED_WORDS`, a test checks it): square, frame, poster, screen, box, cell, grid, panel, section, tile, border, divider, split, layout, invisible; the aspect ratio is a request parameter and is never written. The 2x2 text is about 900 characters (v1 about 1,480). New WARN-only check **`key_is_seamless`** (`effect_checks.screen_flatness` / `seam_line`, measured on the whole clip before keying: `panel_step`, `quarter_step`, `bg_std`, `seam_line`, limits 10 / 10 / 6 / 40). Measured on the real clips: J037 2x2 (rated great) 2.8 / 3.0 / 1.6 / 27 passes; J038 3x3 (poor) 4.2 / 5.8 / 8.5 warns on bg_std; J039 2x2 (the walls) 20.0 / 9.0 / 11.0 warns on panel_step. The particle image-sheet prompt (`effect_pieces` v2) follows the same rule and says "particles". Not yet measured: a real clip made with the v2 prompt (approved 4.5 credits, see HANDOFF section 0).
 
 ## 4. What is enforced and what is only said
 
