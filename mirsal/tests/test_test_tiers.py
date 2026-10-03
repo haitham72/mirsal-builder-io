@@ -1,0 +1,47 @@
+import json
+import importlib
+import tempfile
+import unittest
+from pathlib import Path
+from unittest import mock
+
+from mirsal import cli, test_tiers
+
+
+class TierContractTests(unittest.TestCase):
+    def test_slow_tier_is_exactly_the_six_media_modules(self):
+        self.assertEqual(test_tiers.SLOW_MODULES, (
+            "tests.test_golden", "tests.test_effect_video", "tests.test_allow_still",
+            "tests.test_anim_speed", "tests.test_engine", "tests.test_verify",
+        ))
+
+    def test_area_uses_the_one_explicit_map_and_never_guesses(self):
+        self.assertGreater(test_tiers.suite_for("area", "mirsal/engine/video.py").countTestCases(), 0)
+        for names in test_tiers.MODULE_TESTS.values():
+            for name in names:
+                module, cls = name.rsplit(".", 1)
+                self.assertTrue(hasattr(importlib.import_module(module), cls), name)
+        with self.assertRaisesRegex(ValueError, "No area map"):
+            test_tiers.suite_for("area", "engine/not_real")
+
+    def test_doctor_status_distinguishes_current_stale_and_skipped(self):
+        with tempfile.TemporaryDirectory() as td:
+            result = Path(td) / "slow.json"
+            result.write_text(json.dumps({"success": True, "ran": 30, "skipped": 0}), encoding="utf-8")
+            with mock.patch.object(test_tiers, "SLOW_RESULT", result), mock.patch.object(test_tiers, "newest_engine_mtime", return_value=result.stat().st_mtime - 1):
+                self.assertEqual(test_tiers.slow_status()["state"], "verified")
+            with mock.patch.object(test_tiers, "SLOW_RESULT", result), mock.patch.object(test_tiers, "newest_engine_mtime", return_value=result.stat().st_mtime + 1):
+                self.assertEqual(test_tiers.slow_status()["state"], "stale")
+            result.write_text(json.dumps({"success": False, "ran": 29, "skipped": 1}), encoding="utf-8")
+            with mock.patch.object(test_tiers, "SLOW_RESULT", result), mock.patch.object(test_tiers, "newest_engine_mtime", return_value=result.stat().st_mtime - 1):
+                status = test_tiers.slow_status()
+                self.assertEqual((status["state"], status["ran"], status["skipped"]), ("failed", 29, 1))
+
+    def test_cli_has_no_implicit_tier(self):
+        with mock.patch.object(test_tiers, "run", return_value=0) as run:
+            self.assertEqual(cli.main(["test", "fast"]), 0)
+            run.assert_called_once_with("fast", None)
+
+
+if __name__ == "__main__":
+    unittest.main()

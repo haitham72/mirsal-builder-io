@@ -6,6 +6,21 @@ The map from a changed file to the tests that could be affected is **code**, not
 prints the keys it does know. This file is the **policy** — which tier a change earns, and
 what makes a tier mandatory rather than optional.
 
+## The map has two layers, and the difference matters
+
+1. **Hand-picked areas** (`MODULE_TESTS`) — the six where judgement was applied: which specific
+   *classes* matter, not merely which files mention it. These win.
+2. **A derived floor** (`derived_map()`) — every other module, mapped to the test files that
+   **import it directly**, parsed from the tests' own ASTs, so it is true as tests are added.
+   157 areas today: `engine/config` reaches 32 test modules, `generation/higgsfield` 9,
+   `agent/tools` 6, `store/pool` 1.
+
+**The derived layer is a floor, never a ceiling.** It sees direct imports only, so a test that
+reaches production code over HTTP without importing it is **invisible to it** — that is exactly
+why layer 1 exists. Read a derived area as *"these tests certainly touch this file"*, never as
+*"nothing else does"*. A module no test imports maps to nothing, and the correct answer there
+is to ask, not to run the suite.
+
 ## The rule
 
 > **Run what `mirsal test` says a changed file earns. If it maps to nothing, run nothing.**
