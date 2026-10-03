@@ -108,7 +108,7 @@ class IntentTests(unittest.TestCase):
     def test_settings(self):
         self.assertEqual(self.intent("use 2x2 from now on"), ["CHANGE_SETTINGS"])
         self.assertEqual(settings_from("use 2x2 and don't ask me"), {"grid": "2x2", "ask_before_spending": False})
-        self.assertEqual(settings_from("go pixar"), {"style_id": "pixar_3d"})
+        self.assertEqual(settings_from("go pixar"), {"style_id": "glossy_3d"})
 
     def test_small_talk_and_nonsense(self):
         self.assertEqual(self.intent("hello"), ["SMALLTALK"])

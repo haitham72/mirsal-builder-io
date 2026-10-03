@@ -31,6 +31,8 @@ from ..runtime import cache as cachemod
 from . import creator
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
+from . import refine, subjects
+from .profile import Profile
 from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, polarity_of, resolve, settings_from, smalltalk_kind
 from .tools import ConsoleTools, ToolError
 
@@ -120,7 +122,7 @@ class Agent:
     def _build(self):
         from langgraph.graph import END, StateGraph
         g = StateGraph(State)
-        nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "another": self.n_another,
+        nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "refine": self.n_refine, "another": self.n_another,
                  "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
                  "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
@@ -237,13 +239,17 @@ class Agent:
                 got = self.brain.classify(t.text, self.store.summary_text(sess))
                 if got:
                     t.intents, t.conf = got, 0.7
-        names = {"NEW": "a new set", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
+            if t.intents and t.intents[0] in ("EDIT_STICKERS", "NEW", "FEEDBACK", "AMBIGUOUS"):
+                refine_it = self._wants_refine(t, has_gen)
+                if refine_it:
+                    t.intents, t.conf = ["REFINE"], 0.9
+        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
                  "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
-                 "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "ASK": "ask", "SEARCH": "search",
+                 "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
                  "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
@@ -324,12 +330,14 @@ class Agent:
         guess = re.sub(r"^(?:please\s+)?(?:can you\s+)?(?:make|create|generate|give|draw|design|build)\s+(?:me\s+)?(?:some\s+|a\s+|an\s+)?|\bstickers?\b|\bpack of\b|\bset of\b",
                        " ", t.text, flags=re.I).strip(" .,!?") or t.text
         t.trace.retitle(f"generating {guess}")
+        sid, said_text, assumed = self._style_for(t, t.text)
         prefs, notes = self._prefs(t, guess)
-        prompt = t.text.strip() + (f". {prefs[0].upper() + prefs[1:]}" if prefs else "")
+        notes = list(notes) + assumed
+        prompt = said_text.strip() + (f". {prefs[0].upper() + prefs[1:]}" if prefs else "")
         eng = self.tools.engine_label(bool(st.get("ai", True)))
         t.trace.step(f"writing {int(st['grid'][0]) * int(st['grid'][-1])} sticker ideas" + (f" with {eng}" if eng else " from the built-in sets"))   # shown at once: the model can take a few seconds
         try:
-            plan = self.tools.plan(prompt, st["grid"], st["style_id"], bool(st.get("ai", True)))
+            plan = self.tools.plan(prompt, st["grid"], sid, bool(st.get("ai", True)))
         except ToolError as e:
             t.reply = f"I couldn't turn that into a plan: {e}"
             t.trace.end("could not plan", ok=False)
@@ -351,7 +359,7 @@ class Agent:
         subject = plan.get("subject") or guess
         t.res.generation = None
         est = self.tools.estimate("image") if self.tools.live() else None
-        card = {"type": "plan", "subject": subject, "grid": st["grid"], "style": STYLE_NAMES.get(st["style_id"], st["style_id"]),
+        card = {"type": "plan", "subject": subject, "grid": st["grid"], "style": STYLE_NAMES.get(sid, sid),
                 "count": len(names), "names": names, "estimate": est, "balance": self.tools.credits(), "prompt": prompt,
                 "free": not self.tools.live(), **({"transformation": {k: tr[k] for k in ("id", "subject", "target", "required")}} if tr else {})}
         spend = self.tools.live()
@@ -359,14 +367,14 @@ class Agent:
         if cs["on"]:
             return self._creator_plan(t, subject, prompt, names, est, card, cs)
         if spend and st.get("ask_before_spending", True):
-            sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"],
+            sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid,
                                "ai": bool(st.get("ai", True)), "estimate": est, "plan": compact_plan(plan)}
             t.cards.append(card)
             t.reply = f"Here's the plan for **{subject}**: {len(names)} stickers, {STYLE_NAMES.get(st['style_id'], st['style_id'])}. Shall I create it?"
             t.chips = [{"label": "Create it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end(f"plan ready · {_credits(est)}")
             return {}
-        self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"], "ai": bool(st.get("ai", True)), "plan": compact_plan(plan)}, card)
+        self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "plan": compact_plan(plan)}, card)
         return {}
 
     # -- the agentic creator: one go-ahead from the request to the pack on Telegram (agent/creator.py) --------------------------------------------------------
@@ -497,6 +505,15 @@ class Agent:
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
             return {}
         t.trace.step(f"confirmed: {p['type']}")
+        if p["type"] == "multi":
+            t.trace.retitle(f"generating {p.get('label') or 'several packs'}")
+            done, failed = self._start_items(t, p["items"])
+            if failed:                                       # what could not start stays waiting; what started is not asked again
+                t.sess["pending"] = {**p, "items": [i for i, _ in failed], "estimate": None}
+                t.chips = [{"label": "Try the rest", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            else:
+                t.sess["pending"] = None
+            return {}
         if p["type"] == "create":
             t.trace.retitle(f"generating {p['subject']}")
             if self._start_create(t, p, parent=p.get("parent"), regen_of=p.get("regen_of"), refs=p.get("refs"), note=p.get("note", "")):
@@ -560,6 +577,185 @@ class Agent:
         subj = self.store.subject_for_generation(t.sess, gen) if gen else None
         p = next((q for q in subj["passes"] if q.get("generation") == gen), None) if subj else None
         return subj, p
+
+    # ---- feedback about a whole subject, several subjects at once, and what the chat learned about the person ----------------------------------------------
+    def _profile(self) -> Profile:
+        return Profile(self.store.out, getattr(self.store, "user", "local"))
+
+    def _subject_names(self, sess: dict) -> list[str]:
+        return [s["name"] for s in sess["subjects"] if any(p.get("generation") for p in s["passes"])]
+
+    def _has_sticker_ref(self, t: Turn) -> bool:
+        from .resolver import _numbers
+        if t.selected or _numbers(t.text, 9) or re.search(r"\bg\d+\s*/?\s*s\d", t.text.lower()):
+            return True
+        return bool((t.sess.get("focus") or {}).get("stickers") and re.search(r"\b(it|that|this)\b", t.text.lower()))
+
+    def _wants_refine(self, t: Turn, has_gen: bool) -> bool:
+        """A change to a whole subject, not to numbered stickers: it names a subject of this chat and says what to change ("the cherries were so realistic, make them cartoonish"), or it is an
+        edit with no sticker pointed at ("make him bigger", "same but red"). "make me a banana in clay style" is a new request and stays one."""
+        if not has_gen or t.selected or re.search(r"\b(?:make|create|generate|give|draw|design)\s+me\b|\b(?:a|an|some|\d+)\s+(?:\w+\s+)?(?:stickers?|packs?|sets?)\b", t.text.lower()):
+            return False
+        segs = refine.mentions(t.text, self._subject_names(t.sess))
+        if segs and any(refine.extract(c)["matched"] for _, c in segs):
+            return True
+        return t.intents[0] == "EDIT_STICKERS" and not self._has_sticker_ref(t) and refine.extract(t.text)["matched"]
+
+    def _style_for(self, t: Turn, text: str) -> tuple[str, str, list]:
+        """(style id, the text without style words, what was assumed): the style named in the sentence wins; else what this person has asked for twice or more (said on the card, one click to
+        undo); else the chat's setting."""
+        from ..generation import styles as _styles
+        st = t.sess["settings"]
+        sid, rest = refine.style_of_request(text)
+        if sid:
+            return sid, rest, []
+        if st.get("style_id") != _styles.DEFAULT:
+            return st["style_id"], text, []
+        d = self._profile().defaults().get("style_id")
+        if d:
+            return d[0], text, [f"I used {refine.LABEL.get(d[0], d[0])} because you asked for it {d[1]} times (say \"flat\" or another style to change it)"]
+        return st["style_id"], text, []
+
+    def _items_card(self, title: str, items: list, st: dict, est_each, extra: dict | None = None) -> dict:
+        total = round(est_each * len(items), 2) if est_each else None
+        return {"type": "multi", "title": title, "grid": st["grid"], "estimate": total, "balance": self.tools.credits(), "free": not self.tools.live(),
+                "items": [{"subject": i["subject"], "count": len(i["plan"].get("stickers") or []), "names": [s["key"].replace("_", " ") for s in (i["plan"].get("stickers") or [])][:9],
+                           "style": STYLE_NAMES.get(i["style_id"], i["style_id"]), "changes": i.get("changes") or []} for i in items], **(extra or {})}
+
+    def _offer_items(self, t: Turn, label: str, items: list, est_each, card: dict, reply: str) -> dict:
+        """The plan card of several batches: ONE total price and one go-ahead (or, with 'Ask before spending' off or without a provider, they start at once)."""
+        sess, st = t.sess, t.sess["settings"]
+        t.cards.append(card)
+        if self.tools.live() and st.get("ask_before_spending", True):
+            sess["pending"] = {"type": "multi", "items": items, "estimate": card["estimate"], "subject": label, "label": label}
+            t.reply = reply + " Shall I create them?"
+            t.chips = [{"label": "Create them", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end(f"plan ready · {_credits(card['estimate'])}")
+            return {}
+        self._start_items(t, items)
+        return {}
+
+    def _start_items(self, t: Turn, items: list) -> tuple[list, list]:
+        """Start every batch of the plan together (the provider jobs run side by side, `jobs.paid_parallel`). Returns (started, [(item, why)] that could not start)."""
+        done, failed = [], []
+        for it in items:
+            try:
+                r = self.tools.create(it["prompt"], it["grid"], it["style_id"], it.get("ai", True), parent=it.get("parent"), base_plan=it.get("plan"))
+            except ToolError as e:
+                failed.append((it, str(e)))
+                continue
+            self.store.add_pass(t.sess, it["subject"], generation=r.get("generation"), job=r.get("job"), prompt=it["prompt"], grid=it["grid"], style_id=it["style_id"],
+                                parent=it.get("parent"), note=it.get("note", ""))
+            if r.get("generation"):
+                t.sess["focus"] = {"generation": r["generation"], "stickers": []}
+            t.spent += r.get("estimate") or 0
+            t.cards.append({"type": "generation", "generation": r.get("generation"), "job": r.get("job"), "subject": it["subject"], "parent": it.get("parent"), "note": it.get("note", "")})
+            if it.get("delta"):                                          # what the person asked for, counted as a taste only now that it is really made
+                try:
+                    self._profile().vote_delta(it["delta"], it.get("note", ""))
+                except Exception:
+                    pass
+            done.append(it)
+        names = ", ".join(f"**{i['subject']}**" for i in done)
+        if done:
+            t.reply = (t.reply + " " if t.reply else "") + f"Creating {names}" + (f" ({_credits(t.spent)})" if t.spent else "") + ". Each one appears below as it is ready."
+        if failed:
+            t.reply = (t.reply + " " if t.reply else "") + "I could not start " + ", ".join(f"**{i['subject']}**" for i, _ in failed) + f": {failed[0][1]}."
+        t.trace.end(f"started {len(done)}" + (f", {len(failed)} refused" if failed else ""), ok=bool(done))
+        return done, failed
+
+    def n_multi(self, state: State) -> dict:
+        """"Create three sticker packs of fruits": the chat picks three different subjects of the category, plans each, and asks once for the total."""
+        t: Turn = state["turn"]
+        sess, st = t.sess, t.sess["settings"]
+        got = subjects.parse_multi(t.text)
+        if not got:
+            t.reply = "How many packs, and of what? For example \"three sticker packs of fruits\"."
+            return {}
+        n, cat = got
+        t.trace.retitle(f"planning {n} packs of {cat}")
+        avoid = [s["name"] for s in sess["subjects"]]
+        names, how = subjects.pick(cat, n, avoid, ask=self.brain.pick_subjects if self.brain.available else None, seed=int(time.time() * 1000) % 1000000007)
+        if not names:
+            t.reply = f"I have no list for \"{cat}\" yet. Tell me the {n} subjects, for example \"strawberry, cherries, banana\"."
+            t.trace.end("asked for the subjects")
+            return {}
+        t.trace.step(f"chose {len(names)} {cat}" + (" with the language model" if how.startswith("model") else " from my built-in list"), {"title": ", ".join(names), "lines": names})
+        if len(names) < n:
+            t.trace.note(f"I could only find {len(names)} different ones")
+        sid, _, assumed = self._style_for(t, t.text)
+        for a in assumed:
+            t.trace.note(a)
+        items = []
+        for name in names:
+            try:
+                plan = self.tools.plan(name, st["grid"], sid, bool(st.get("ai", True)))
+            except ToolError as e:
+                t.trace.note(f"I could not plan {name}: {e}")
+                continue
+            items.append({"prompt": name, "subject": plan.get("subject") or name, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "plan": compact_plan(plan),
+                          "note": f"one of {len(names)} packs of {cat}"})
+        if not items:
+            t.reply = "I couldn't plan any of them."
+            t.trace.end("could not plan", ok=False)
+            return {}
+        est = self.tools.estimate("image") if self.tools.live() else None
+        title = f"{len(items)} packs of {cat}"
+        card = self._items_card(title, items, st, est, {"assumed": assumed})
+        reply = f"Here's the plan for {title}: " + ", ".join(f"**{i['subject']}**" for i in items) + f", {len(items) * (len(items[0]['plan'].get('stickers') or []))} stickers in all, {STYLE_NAMES.get(sid, sid)}."
+        return self._offer_items(t, title, items, est, card, reply)
+
+    def n_refine(self, state: State) -> dict:
+        """"The cherries were so realistic, make them more cartoonish; the banana was so small, make it bigger": each subject's stored plan gets its change written in, and a new sheet is made as a
+        child of the old batch (the old one stays). One card, one total price, one go-ahead."""
+        t: Turn = state["turn"]
+        sess, st = t.sess, t.sess["settings"]
+        names = self._subject_names(sess)
+        segs = refine.mentions(t.text, names)
+        if not segs:
+            subj, p = self._focus_pass(t)
+            segs = [(subj["name"], t.text)] if subj and p else []
+        if not segs:
+            t.reply = "Which pack should I change? Name it, for example \"make the cherries more cartoonish\"."
+            return {}
+        t.trace.retitle("changing " + ", ".join(n for n, _ in segs))
+        items, skipped = [], []
+        for name, clause in segs:
+            delta = refine.extract(clause)
+            if not delta["matched"] and self.brain.available:
+                m = self.brain.refine_delta(clause, name) or {}
+                from ..generation import styles as _styles
+                sid = m.get("style_id") if m.get("style_id") in {p["id"] for p in _styles.PRESETS} else None
+                size = m.get("size") if m.get("size") in ("larger", "smaller") else None
+                colour = re.sub(r"[^a-z ]", "", str(m.get("colour") or "").lower())[:20] or None
+                delta.update(style_id=sid, size=size, colour=colour, matched=bool(sid or size or colour))
+            subj = next((s for s in sess["subjects"] if s["name"] == name), None)
+            p = next((q for q in reversed(subj["passes"]) if q.get("generation")), None) if subj else None
+            if not delta["matched"] or not p:
+                skipped.append(name)
+                continue
+            try:
+                base = self.tools.generation_plan(p["generation"])
+            except ToolError:
+                skipped.append(name)
+                continue
+            new_plan = refine.apply(base, delta, clause, name)
+            changes = refine.describe(delta)
+            sid = new_plan["slots"].get("style_id") or st["style_id"]
+            t.trace.step(f"{name}: " + ", ".join(changes), {"title": f"from {self._nm(sess, p['generation'])}", "lines": [clause]})
+            items.append({"prompt": p["prompt"], "subject": name, "grid": p.get("grid") or st["grid"], "style_id": sid, "ai": True, "plan": compact_plan(new_plan), "parent": p["generation"],
+                          "note": "changed: " + ", ".join(changes), "changes": changes, "delta": {k: delta.get(k) for k in ("style_id", "size", "colour")}})
+        if not items:
+            t.reply = "I could not tell what to change" + (f" about {', '.join(skipped)}" if skipped else "") + ". Tell me the style (\"more cartoonish\"), the size (\"bigger\") or a colour (\"more red\")."
+            t.trace.end("asked what to change")
+            return {}
+        est = self.tools.estimate("image") if self.tools.live() else None
+        title = "changes to " + " and ".join(i["subject"] for i in items)
+        card = self._items_card(title, items, st, est, {"refine": True})
+        reply = "Here's what I will change: " + "; ".join(f"**{i['subject']}**: {', '.join(i['changes'])}" for i in items) + ". Each is a new sheet from the same prompt with just that change; the originals stay."
+        if skipped:
+            reply += f" (I did not understand what to change about {', '.join(skipped)}.)"
+        return self._offer_items(t, title, items, est, card, reply)
 
     def n_another(self, state: State) -> dict:
         t: Turn = state["turn"]

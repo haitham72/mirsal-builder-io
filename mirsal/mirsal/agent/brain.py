@@ -12,12 +12,21 @@ import time
 
 from ..services import llm
 
-INTENTS = ("NEW", "ANOTHER", "EDIT_STICKERS", "ANIMATE", "FEEDBACK", "REVIEW", "ASK", "CHANGE_SETTINGS", "SEARCH", "SMALLTALK", "AMBIGUOUS")
+INTENTS = ("NEW", "NEW_MULTI", "REFINE", "ANOTHER", "EDIT_STICKERS", "ANIMATE", "FEEDBACK", "REVIEW", "ASK", "CHANGE_SETTINGS", "SEARCH", "SMALLTALK", "AMBIGUOUS")
+
+SUBJECTS_SYSTEM = f"""You choose subjects for sticker packs. Given a category and a number N, answer with N DIFFERENT concrete subjects of that category: varied (not just the most obvious N),
+each one to three words, something a pack of stickers can be about; never a brand, a real person or the word "sticker". Reply with ONE JSON object only: {{"subjects": ["...", "..."]}}
+{llm.DATA_RULE}"""
+
+REFINE_SYSTEM = f"""A person gives feedback about the look of one sticker subject. Say what they want changed. Reply with ONE JSON object only:
+{{"style_id": one of flat_vector, toon_shade, glossy_3d, clay_3d, realistic, hand_drawn, minimal, pixel_art, watercolor, paper_cut, pop_comic, kawaii, or null, "size": "larger" or "smaller" or null, "colour": a colour word or null}}
+"too realistic, make it cartoonish" = toon_shade. "too small" = larger. "too big" = smaller. Use null for anything they did not ask to change.
+{llm.DATA_RULE}"""
 
 CLASSIFY_SYSTEM = f"""You route one chat message in a sticker studio to intents. Reply with ONE JSON object only:
 {{"intents": [..], "confidence": 0.0-1.0}}
 Intents: {", ".join(INTENTS)}.
-NEW: a request for a new set ("make me falcon stickers", "teddy bear with a book"). ANOTHER: more of the same subject. EDIT_STICKERS: change specific stickers
+NEW: a request for a new set ("make me falcon stickers", "teddy bear with a book"). NEW_MULTI: a request for SEVERAL sets from a category ("three sticker packs of fruits"). REFINE: a change to a whole batch or subject ("the cherries were too realistic, make them cartoonish", "the banana was too small"). ANOTHER: more of the same subject. EDIT_STICKERS: change specific stickers
 ("make number 3 happier"). ANIMATE: make them move. FEEDBACK: likes/dislikes ("I like 2 but not 3"). REVIEW: approve or reject ("approve all but 5").
 ASK: a question about what exists ("which one is the shocked banana?"). CHANGE_SETTINGS: grid, style, animation, asking before spending. SEARCH: find an old
 sticker. SMALLTALK: greetings and thanks. AMBIGUOUS: you cannot tell. A message can carry two intents ("I like 2 but make 5 happier" = FEEDBACK + EDIT_STICKERS).
@@ -156,6 +165,17 @@ class Brain:
         valid = {s["index"] for s in stickers}
         nums = [int(n) for n in (d.get("numbers") or []) if str(n).isdigit() and int(n) in valid]
         return nums or None
+
+    def pick_subjects(self, category: str, n: int, avoid: list) -> list | None:
+        """N different, concrete subjects of a category for sticker packs (varied, not the N most obvious): a list of names, or None (no model, or an answer that is not usable)."""
+        d = self._json("LLM_SUBJECTS", SUBJECTS_SYSTEM, f"{llm.fence('CATEGORY', category, 80)}\nN = {n}\nAlready made, do not repeat: {', '.join(avoid) or 'none'}")
+        rows = d.get("subjects") if isinstance(d, dict) else d if isinstance(d, list) else None
+        return [str(x) for x in rows] if isinstance(rows, list) else None
+
+    def refine_delta(self, clause: str, subject: str) -> dict | None:
+        """What a person wants changed about one subject when the rules could not tell: {"style_id", "size", "colour"} (any may be None), checked against the real presets by the caller."""
+        d = self._json("LLM_REFINE", REFINE_SYSTEM, f"{llm.fence('SUBJECT', subject, 80)}\n{llm.fence('FEEDBACK', clause, 400)}")
+        return d if isinstance(d, dict) else None
 
     def name_check(self, items: list) -> dict | None:
         """items = [{index, current, caption}] -> {index: {"fits": bool, "name": str}} for the stickers the model answered about, or None (no model, or an answer that is not usable).

@@ -5,6 +5,7 @@ re-implements generation, gating or search. `FakeTools` (tests) implements the s
 unless the user said so: every method that costs credits is called only after a confirmation (or the user's "don't ask me" setting)."""
 from __future__ import annotations
 
+import json
 import time
 from pathlib import Path
 
@@ -191,6 +192,14 @@ class ConsoleTools:
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
 
+    def generation_plan(self, gid: str) -> dict:
+        """The saved plan (prompts.json) of a batch: the cells, tags, slots and template it was made from, to start a changed copy of it (a refinement keeps everything but the change)."""
+        self._see(gid)
+        try:
+            return json.loads((pl.gen_dir(self.out, int(gid[1:])) / "prompts.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            raise ToolError("That batch has no saved plan to change", 404)
+
     def more(self, gid: str) -> dict:
         """The next prepared variation of the same subject (no provider): the Studio's 'Create more' on a prepared set."""
         self._see(gid)
@@ -301,6 +310,7 @@ class FakeTools:
         self.calls: list = []
         self.proposed: dict = {}
         self.sent_plans: list = []
+        self.plans: dict = {}
         self.fail_next_create = False
         self.judge_rejects: list = []
         self.job_generations: dict = {}
@@ -358,6 +368,13 @@ class FakeTools:
         self.gens[gid] = {"generation": gid, "stickers": [{"id": f"{gid}/S{i}", "index": i, "key": f"s{i}", "status": "READY", "still": "PENDING"}
                                                           for i in range(1, 10)]}
         return {"job": None, "task": None, "estimate": None, "generation": gid, "live": False}
+
+    def generation_plan(self, gid):
+        if gid in self.plans:
+            return json.loads(json.dumps(self.plans[gid]))
+        subj = (self.gens.get(gid) or {}).get("subject") or "subject"
+        return {"template_id": "fake_t", "template_version": 1, "subject": subj, "slots": {"subject_description": subj, "style_id": "realistic", "cells": [{"pos": 1, "label": "pose"}]},
+                "stickers": [{"index": i, "key": f"{subj}_{i}", "emoji": ["😀"]} for i in range(1, 10)]}
 
     def more(self, gid):
         self.calls.append(("more", gid))

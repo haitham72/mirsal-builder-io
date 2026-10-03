@@ -279,7 +279,7 @@ class SessionStore:
         st = res.get("stickers") or []
         grid = res.get("grid") or []
         return {"generation": f"G{gid:03d}", "prompt": str(res.get("prompt") or "").strip(), "parent": res.get("parent"),
-                "grid": "x".join(str(x) for x in grid) if len(grid) == 2 else "3x3", "style_id": res.get("style_id") or "",
+                "grid": "x".join(str(x) for x in grid) if len(grid) == 2 else "3x3", "style_id": res.get("style_id") or (res.get("slots") or {}).get("style_id") or "",
                 "ready": sum(1 for x in st if x.get("status") == "READY"),
                 "approved": sum(1 for x in st if (x.get("review") or {}).get("still") == "APPROVED")}
 

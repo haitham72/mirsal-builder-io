@@ -7,6 +7,8 @@ Priority: explicit id > the UI selection > a number > a semantic concept > the c
 Ambiguity: when two candidates are equally plausible, ask ONE short question; when the mapping is clear, never ask."""
 from __future__ import annotations
 
+from .subjects import parse_multi as _parse_multi
+
 import re
 from dataclasses import dataclass, field
 
@@ -323,6 +325,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["ASK"], 0.85                                         # a price question is never small talk ("how much?" used to answer "Hi!")
     if (is_smalltalk(t) or is_ack(t)) and not re.search(NEW_VERBS, t):
         return ["SMALLTALK"], 0.95
+    if _parse_multi(t):
+        return ["NEW_MULTI"], 0.9                                    # "create three sticker packs of fruits": several subjects, one plan, one price
     if has_generation and re.search(NAMES_RX, t):
         return ["NAMES"], 0.9
     intents: list = []
@@ -380,7 +384,10 @@ SETTING_RULES = [
     (r"\b(?:allow|enable|turn on)\s+(?:the\s+)?(?:ai\s+)?vision\b", ("allow_vlm", True)),
     (r"\b(?:don'?t|do not|never|stop|disable|turn off)\s+(?:use\s+|using\s+)?(?:the\s+)?(?:ai\s+)?vision\b", ("allow_vlm", False)),
 ]
-STYLE_WORDS = {"flat": "flat_vector", "vector": "flat_vector", "pixar": "pixar_3d", "3d": "pixar_3d", "toon": "toon_cel", "cel": "toon_cel", "glossy": "glossy_3d"}
+STYLE_WORDS = {"flat": "flat_vector", "vector": "flat_vector", "toon": "toon_shade", "cartoon": "toon_shade", "cartoonish": "toon_shade", "cel": "toon_shade", "glossy": "glossy_3d",
+               "3d": "glossy_3d", "pixar": "glossy_3d", "clay": "clay_3d", "realistic": "realistic", "photorealistic": "realistic", "sketch": "hand_drawn", "minimal": "minimal",
+               "minimalist": "minimal", "pixel": "pixel_art", "watercolor": "watercolor", "watercolour": "watercolor", "paper": "paper_cut", "comic": "pop_comic", "kawaii": "kawaii",
+               "chibi": "kawaii"}           # every id is a real preset of generation/styles.py (a test says so): the chat used to name two that do not exist, and the plan silently became Flat
 
 
 def settings_from(text: str, style_ids: list | None = None) -> dict:

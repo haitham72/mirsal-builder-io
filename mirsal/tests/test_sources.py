@@ -71,7 +71,7 @@ class PlanFileTests(unittest.TestCase):
             r = pl.read_result(out, gid)
             self.assertEqual(r["plan_source"], "img-001-blob (1).json")
             self.assertEqual(r["task_slug"], "blob_pack")
-            self.assertEqual(r["stickers"][0]["name"], "img-001-blob_pack-blob_pose_1")
+            self.assertRegex(r["stickers"][0]["name"], r"^img-blob_pack-pose_1-\d{8}T\d{6}-[0-9a-f]{6}$")      # runtime/names.py: {media}-{subject}-{action}-{UTC time}-{hash}
             plan["stickers"].pop()
             sheet.with_suffix(".json").write_text(json.dumps(plan), encoding="utf-8")
             with self.assertRaises(pl.PipelineError):

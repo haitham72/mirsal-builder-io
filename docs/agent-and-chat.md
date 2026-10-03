@@ -256,3 +256,21 @@ Rules, in `agent/resolver.py` and `agent/graph.py`; guarded by `tests/test_chat_
 - **A decision is never guessed**: an approve / reject sentence with a negation ("don't approve 3") decides nothing and asks; a decision on several stickers ("approve all but 5 and 6", "reject everything") is a pending
   `review` the person confirms; one explicit sticker still acts at once.
 - **Focus follows the newest batch that has stickers**: when a job resolves to a generation (`memory.refresh`) it becomes the focus; `latest_pass(with_generation=True)` skips jobs that are running or failed.
+
+## Several subjects, per-subject feedback, taste (2026-10-03)
+
+Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi` / `n_refine` in `agent/graph.py`; guarded by `tests/test_chat_multi.py` and `tests/test_refine_subjects.py`.
+
+- **One request, several subjects.** "create three sticker packs of fruits" (`subjects.parse_multi`: a count 2..6, pack / set words, a category) is intent `NEW_MULTI`. `subjects.pick` chooses that many different, concrete subjects: the local model first
+  (`brain.pick_subjects`, told what this chat already made), else a seeded random draw from the built-in category lists; an unknown category with no model asks the person for the subjects. Each subject is planned (`tools.plan`) and
+  stored compact; ONE `multi` card lists them with the style and ONE total price; on the go-ahead `_start_items` starts all jobs together (`jobs.paid_parallel`), each with its own plan (`base_plan`) and its own generation card. A
+  start the provider refuses stays pending alone ("Try the rest"); what started is never asked again.
+- **Per-subject feedback rewrites the prompt.** "the cherries were so realistic, make them more cartoonish, the banana was so small, make it bigger" is intent `REFINE` (a subject of this chat is named with a change, or an edit with no
+  sticker pointed at). `refine.mentions` cuts the message into one clause per subject, `refine.extract` reads each into a delta (style: "more cartoonish" -> `toon_shade`, a complaint "so realistic" moves away from it; size:
+  larger / smaller; colour; the local model is asked only when the rules found nothing), `refine.apply` writes it into a COPY of the batch's stored plan (`gates`-style slots: `style_id`, `subject_description`, an earlier size
+  or colour clause is replaced, never stacked; `plan["refinements"]` keeps the lineage). The new sheet is a child of the old batch (`parent`); the old one stays. One card with both changes, one price, one go-ahead.
+- **Styles are the real presets.** `resolver.STYLE_WORDS` and `refine.STYLE_WORDS` only name ids of `generation/styles.PRESETS` (a test says so; the chat used to name two that did not exist and the plan silently became Flat).
+  `n_new` reads a style from the sentence ("a teddy bear in clay style"), takes the words out of the subject and passes the id. Adopted Studio batches read their style from `slots.style_id` (`memory._info`).
+- **Taste memory, per user** (`out/profile/<user>.json`, plain counters, `agent/profile.py`): the style / size / colour of a change the person asked for is counted when that batch really starts. A taste is applied to a later request
+  only after TWO consistent signals and only when it is strictly ahead (a split taste is no taste); a style in the sentence always wins; the card says what it assumed ("I used cartoonish because you asked for it 2 times").
+

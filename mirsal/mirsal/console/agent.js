@@ -165,6 +165,12 @@ function cardHTML(c,m,i){
    <div class=plan-tags>${(c.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div>
    <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`Costs <b>${AIU.credits(c.estimate)}</b>${c.creator&&c.creator.video?` (sheet ${+c.creator.sheet} + animation ${+c.creator.video})`:''}${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}${c.creator?`<br><small>Then straight to Telegram: ${c.creator.scope==='video'?'animated':'static'}, ${c.creator.bypass?'approving for you, stopping at any rejection':'one click from you at each approval'}.</small>`:''}</div>
     </div></div>`}   /* the go-ahead lives in the two chips under the message (Create it / Not yet), the same place as "Allow AI vision / Not now": one pair of buttons, never two */
+ if(c.type==='multi'){const last=AIU.lastBot((A.sess&&A.sess.messages)||[]),done=!(A.sess&&A.sess.pending)||!last||m.id!==last.id;
+  return `<div class="ai-card plan multi${done?' is-done':''}"><div class=ai-ch><b>${AIU.esc(c.title)}</b><small>${c.items.length} sheets · ${AIU.esc(c.grid)}</small></div>
+   ${c.items.map(it=>`<div class=multi-item><div class=multi-h><b>${AIU.esc(it.subject)}</b><small>${it.count} stickers · ${AIU.esc(it.style)}</small></div>${it.changes&&it.changes.length?`<div class=multi-ch>${it.changes.map(x=>`<span>${AIU.esc(x)}</span>`).join('')}</div>`:''}
+    <div class=plan-tags>${(it.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div></div>`).join('')}
+   ${(c.assumed||[]).map(x=>`<div class=multi-assume>${AIU.esc(x)}</div>`).join('')}
+   <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`All together <b>${AIU.credits(c.estimate)}</b>${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}</div></div></div>`}
  if(c.type==='generation'){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
   let note='';

@@ -576,8 +576,9 @@ def regen_plan(res: dict, index: int) -> dict:
     new = {"subject_description": desc, "style_id": slots.get("style_id", "flat_vector"), "mode": "single_1x1",
            "cells": [{"pos": 1, "label": label, "tags": st["tags"], "emoji": st["emoji"]}], "action_guidance": slots.get("action_guidance", "default"),
            "key_colour": slots.get("key_colour", "green")}
-    built = prompter.render_plan(new, "single_1x1", 1)
-    return prompter.validate_plan({"task": res["task"], "task_slug": res["task_slug"], "grid": [1, 1], "template_id": "single_1x1", "template_version": 1,
+    ver = prompter.TEMPLATE_VERSION                       # not v1: its style line says "flat vector sticker illustration" whatever the batch was (a clay batch regenerated as flat)
+    built = prompter.render_plan(new, "single_1x1", ver)
+    return prompter.validate_plan({"task": res["task"], "task_slug": res["task_slug"], "grid": [1, 1], "template_id": "single_1x1", "template_version": ver,
                                    "slots": new, "sheet_prompt": built["sheet_prompt"], "video_prompt": built["video_prompt"],
                                    "stickers": [{"index": 1, "id": "prompt01", "prompt": built["prompts"][1], "key": st["key"], "tags": st["tags"], "emoji": st["emoji"]}]})
 
