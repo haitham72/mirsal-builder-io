@@ -78,7 +78,7 @@ test('the drawn panel is a small state machine over the effect’s set', () => {
   assert.equal(st(drawn, { redo: true }, { 100: BATCH([cell(1)]) }), 'make', '"Draw again"');
 });
 
-test('make: the grid, the ideas as chips, your own, and the price on the button', () => {
+test('make: the grid, the ideas as chips, your own, and the price on its own line', () => {
   const rec = REC();
   const dr = { grid: '2x2', opts: { '2x2': { state: 'ok', list: ['gold bars', 'diamonds <i>', 'coins', 'sparks', 'stars'], by: 'vlm', notes: ['a note'] } }, chosen: ['gold bars', 'coins'], est: { '2x2|gold bars|coins': { credits: 1.4 } } };
   const h = html('fxDrawn(X,e)', { rec, dr });
@@ -92,7 +92,8 @@ test('make: the grid, the ideas as chips, your own, and the price on the button'
   assert.match(h, /class="fx-opt" data-act=fxdchip data-v="sparks" aria-pressed=false/);
   assert.match(h, /data-v="diamonds &lt;i&gt;"/, 'names are escaped');
   assert.match(h, /2 of 4 chosen · fewer is fine/);
-  assert.match(h, /<button class="btn pri" data-act=fxddraw >.*Draw 4 particles with AI · 1\.4 credits<\/button>/s);
+  assert.match(h, /<button class="btn pri" data-act=fxddraw >.*Draw 4 particles with AI<\/button>/s, 'the button says what it does, not what it costs');
+  assert.match(h, /data-fxdprice>about 1\.4 credits<\//, 'the price is on its own line above the button');
   assert.match(h, /data-fxdown/);
   assert.match(h, /Nothing is spent until you press the button/);
 });
@@ -100,7 +101,8 @@ test('make: the grid, the ideas as chips, your own, and the price on the button'
 test('make: no price, no spending: the button waits for the estimate, and says why when there is none', () => {
   const base = { grid: '2x2', opts: { '2x2': { state: 'ok', list: ['a'] } }, chosen: ['a'] };
   const wait = html('fxDrawn(X,e)', { dr: base });
-  assert.match(wait, /data-act=fxddraw disabled>.*Draw 4 particles with AI · …/s);
+  assert.match(wait, /data-act=fxddraw disabled>.*Draw 4 particles with AI<\/button>/s);
+  assert.match(wait, /data-fxdprice>about to be priced…<\//);
   const none = html('fxDrawn(X,e)', { dr: { ...base, est: { '2x2|a': { credits: null, error: 'The Higgsfield CLI is not installed' } } } });
   assert.match(none, /data-act=fxddraw disabled>/);
   assert.match(none, /class=fx-warn data-fxdwhy>The Higgsfield CLI is not installed/);
@@ -221,4 +223,34 @@ test('a name you chose stays among the chips when the ideas of another grid arri
   const h = html('fxDrawn(X,e)', { dr: { grid: '3x3', opts: { '3x3': { state: 'ok', list: ['x', 'y'] } }, chosen: ['gold bars'], extra: ['tiny crown'] } });
   for (const n of ['x', 'y', 'gold bars', 'tiny crown']) assert.match(h, new RegExp(`data-v="${n}"`));
   assert.equal((h.match(/class="fx-opt/g) || []).length, 4);
+});
+
+test('the motion sliders speak like a person: Energy, Float, Swirl; count and spin sit under Advanced', () => {
+  const h = html('fxBody(X,e)', { rec: REC(), pre: "LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]" });
+  for (const l of ['Energy', 'Float', 'Swirl']) assert.match(h, new RegExp(`<span>${l}<\\/span>`));
+  assert.doesNotMatch(h, /Explosion|Gravity/);
+  assert.match(h, /<details class=fx-adv><summary>Advanced: particles, spin<\/summary>/);
+  assert.match(h, /data-fxp=count/);
+  assert.match(h, /data-fxp=spin/);
+  assert.match(h, /data-fxp=magnitude/, 'the engine’s keys travel unchanged: only the labels were renamed');
+  assert.match(h, /Advanced: particle size/);
+});
+
+test('a drawn sheet ends in "Use as particle set", and nothing else does', () => {
+  assert.equal(html('fxSaveBlock(e)', { rec: REC() }), '', 'no drawn sheet: no button');
+  const drawn = REC({ set: { status: 'DRAWN', generation: 100, picked: [1, 2] } });
+  const h = html('fxSaveBlock(e)', { rec: drawn });
+  assert.match(h, /data-act=fxuseset>Use as particle set</);
+  assert.match(h, /Save the 2 drawn particles as a particle set/);
+  assert.match(h, /it lives in the Library/);
+  assert.equal(html('fxSaveBlock(e)', { rec: REC({ set: { status: 'DRAWN', generation: 100, picked: [] } }) }), '', 'no picked cells: nothing durable to save');
+  const body = html('fxBody(X,e)', { rec: drawn, gen: { 100: BATCH([cell(1)]) }, pre: "X.src='drawn';X.dr.picked='E001:100';LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]" });
+  assert.match(body, /data-act=fxuseset>Use as particle set</, 'the finish sits in the shared body, so both wizards have it');
+});
+
+test('the video price is on its own line too, and the estimator fills that line', () => {
+  const h = html('fxVideoPanel(X,e,e.groups[0])', { rec: REC({ mode: 'video' }) });
+  assert.match(h, /Make the video<\/button>/);
+  assert.doesNotMatch(h, /Make the video ·/, 'no price inside the button');
+  assert.match(h, /data-fxest=g1/);
 });

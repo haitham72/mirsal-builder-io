@@ -16,7 +16,7 @@ const WL_SLIDES=[
  {id:'motion',kind:'image',src:'/assets/welcome/s2.webp',kicker:'Animation',title:'Stickers that move',
   body:'Each sticker becomes a 3-second animation, 512 px at 30 fps and under 256 KB, checked frame by frame.',cta:['Open your library','library']},
  {id:'burst',kind:'image',src:'/assets/welcome/s3.webp',kicker:'Particle effects',title:'Emoji that burst',
-  body:'Press an emoji and related pieces fly out and fall: bat signals from Batman, gold bars from jewelry. Simulate it free, or have Kling draw it.',cta:['Make particles','effects']},
+  body:'Press an emoji and related particles fly out and fall: bat signals from Batman, gold bars from jewelry. Simulate it free, or have Kling draw it.',cta:['Make particles','effects']},
  {id:'chat',kind:'image',src:'/assets/welcome/s4.webp',kicker:'AI chat',title:'Just tell the AI',
   body:'Say "three sticker packs of fruits": it plans them, shows one price, and runs them together. Say "the cherries were too realistic" and it remembers.',cta:['Open the AI chat','agent']},
 ];

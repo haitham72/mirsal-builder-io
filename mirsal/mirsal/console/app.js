@@ -140,17 +140,18 @@ document.addEventListener('keydown',e=>{if(!['pack','library'].includes(route_)|
   else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'&&document.querySelector('.grid.selgrid')){e.preventDefault();ACT.lselall()}});
 function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn sm" data-act=lselmove title="Move all the selected stickers into one pack (or a new one)">${ic('lib')} Move ${SEL.size} to…</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
 RENDER.library=async()=>{await loadLib();drawCol2();
- $('s-library').innerHTML=`<div class=page><div class=ph><h1>Sticker Library</h1></div>
-  <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
-  <div class=tabs><button class="tab ${LIBTAB==='recent'?'on':''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB==='mine'?'on':''}" data-act=libtab data-t=mine>My Stickers</button></div>
-  <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
- $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
+  $('s-library').innerHTML=`<div class=page><div class=ph><h1>Sticker Library</h1></div>
+   <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
+   <div class=tabs><button class="tab ${LIBTAB==='recent'?'on':''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB==='mine'?'on':''}" data-act=libtab data-t=mine>My Stickers</button><button class="tab ${LIBTAB==='particles'?'on':''}" data-act=libtab data-t=particles>Particles</button></div>
+   <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
+  $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
 ACT.libtab=el=>{LIBTAB=el.dataset.t;RENDER.library()};
 ACT.seeall=el=>{if(el.dataset.k==='st'){LIBTAB='mine'}else PACKS_ALL=!PACKS_ALL;RENDER.library()};
 function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.emoji+' '+(s.pack||'')).toLowerCase().includes(q);
  const stTile=(s,i)=>`<div class=st data-act=lcopen data-i=${i} title="${esc(s.name)}">${media(s)}<span class=em>${esc(s.emoji)}</span></div>`;
- let h='';
- if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Make a pack in the Studio, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Open Studio</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
+  let h='';
+  if(LIBTAB==='particles'){h=typeof spLibHtml==='function'?spLibHtml():'';if(typeof spLibSync==='function')spLibSync()}
+  else if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Make a pack in the Studio, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Open Studio</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
  else if(LIBTAB==='recent'){const rs=LIB.recent.filter(hit),ps=LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q)||p.stickers.some(hit)),shown=PACKS_ALL?ps:ps.slice(0,4);
   LCL=rs;
   h=`<div class=row style="justify-content:space-between;margin:6px 0"><h2>Recent</h2><button class=seeall data-act=seeall data-k=st>See all ${ic('chev')}</button></div><div class=strip>${rs.map(stTile).join('')||'<span class=mut>No matches.</span>'}</div>

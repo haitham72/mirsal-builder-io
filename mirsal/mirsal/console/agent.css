@@ -155,7 +155,14 @@ button.tr-t{cursor:pointer}button.tr-t:hover{color:var(--aid)}
 .ag-tile:hover .ag-ph{transform:translateY(-2px)}
 .ag-tile .ag-ph img,.ag-tile .ag-ph video{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none}
 .ag-tile.is-sel .ag-ph{box-shadow:inset 0 0 0 3px var(--ai),0 8px 24px var(--aglow)}
-.ag-tile.is-bad .ag-ph{opacity:.45}
+/* a rejection never dims or hides the picture: a blocked tile wears the locked red (a ring and a hatch while it is not in the set, a solid wash with a
+   check once it was allowed by the person). "Allowed by you" reads as a record, not as "ok". */
+.ag-tile.is-bad .ag-ph{box-shadow:inset 0 0 0 2px #ef4444}
+.ag-tile .ag-hatch{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(45deg,rgba(239,68,68,.14) 0 6px,transparent 6px 12px)}
+.ag-tile.is-allowed .ag-hatch{background:rgba(239,68,68,.16)}
+.ag-tile .ag-why{padding:6px 4px 0;font-size:var(--fs-s);color:var(--ink2);line-height:1.4}
+.ag-tile .ag-alw{display:flex;gap:6px;flex-wrap:wrap;padding:6px 4px 0}
+.ag-tile .ag-alw .ai-chip{padding:6px 12px;font-size:var(--fs-s)}
 .ag-tile.is-wait .ag-ph{background:linear-gradient(100deg,#E6F6FA 30%,#F6FCFE 50%,#E6F6FA 70%) 0 0/220% 100%;animation:aishim 1.5s linear infinite}
 @keyframes aishim{to{background-position:-120% 0}}
 @media (prefers-reduced-motion:reduce){.ag-tile.is-wait .ag-ph{animation:none}}
@@ -163,7 +170,7 @@ button.tr-t{cursor:pointer}button.tr-t:hover{color:var(--aid)}
 .ag-tile .ag-nm b{flex:none}
 .ag-tile .ag-nm b{color:var(--ink);font-weight:650}.ag-tile .ag-nm span{overflow:hidden;text-overflow:ellipsis}
 .ag-tile .ag-bd{position:absolute;right:8px;top:8px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;box-shadow:0 2px 8px #0002;color:var(--aid)}
-.ag-tile .ag-bd svg{width:13px;height:13px}.ag-tile .ag-bd.is-no{color:#DC2626}
+.ag-tile .ag-bd svg{width:13px;height:13px}.ag-tile .ag-bd.is-no{color:#DC2626}.ag-tile .ag-bd.is-ok{color:#DC2626}
 .car-nav{position:absolute;top:calc(50% - 30px);width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.92);box-shadow:0 6px 20px rgba(8,100,130,.22);color:var(--aid);display:flex;align-items:center;justify-content:center;z-index:2;opacity:0;transition:opacity .18s,transform .18s}
 .car-vp:hover .car-nav{opacity:1}.car-nav:hover{transform:scale(1.07)}.car-nav[disabled]{opacity:0!important;pointer-events:none}
 .car-nav.prev{left:8px}.car-nav.next{right:8px}.car-nav svg{width:20px;height:20px}
@@ -220,6 +227,10 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ai-run .run-st{font-size:var(--fs-s);opacity:.8}
 .ai-run .run-why{margin:-4px 18px 16px;padding:8px 10px;border-radius:var(--r-m);background:rgba(251,146,60,.10);border:1px solid rgba(251,146,60,.35);font-size:var(--fs-m)}
 .ai-run.is-done .run-why{display:none}
+/* the bulk pair on the creator's card, per kind: the same control the Studio has, above the carousel */
+.ai-run .run-bulk{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-4px 18px 16px}
+.ai-run .run-bulk .run-alw{display:flex;gap:6px;flex-wrap:wrap}
+.ai-run .run-bulk .mut{font-size:var(--fs-s)}
 @keyframes aipulse{0%,100%{opacity:1}50%{opacity:.35}}
 .ai-card.multi .multi-item{padding:10px 0 6px;border-top:1px solid var(--aline)}
 .ai-card.multi .multi-h{display:flex;gap:8px;align-items:baseline;padding:0 18px 6px}

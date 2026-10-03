@@ -15,10 +15,11 @@ function drawPack(){
     <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>${n?`<a class=btn href="/api/packs/${p.id}/export.zip" download title="Every sticker file of this pack in one zip: .webm for the animated ones, .png / .webp for the static ones, and a manifest.json">${ic('download')} Download .zip</a>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>
     <button class="btn dng" data-act=pkdel>${ic('trash')}</button></div></div></div>
   <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
-  ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${p.stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
+   ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${p.stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stedit data-id=${s.id} title="${(s.source&&s.source.generation)?'Edit in the Studio (text, emoji; image and animation together)':s.type==='static'?'Edit a copy in the editor':'Edit: add text or emoji, trim'}">${ic('edit')}</button>${s.type==='animated'?`<button data-act=stanim data-id=${s.id} title="Timeline (trim, frame rate, export)">${ic('play')}</button>`:''}<button data-act=stcover data-id=${s.id} title="Set as cover">${ic('star')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
     <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div>`
-   :`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}</div>`;
+   :`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}
+  ${pkPsHtml(p)}</div>`;
  ptCounts(p.id)}
 const sOf=id=>packById(PACK_ID).stickers.find(s=>s.id===id);
 async function pkUpdate(body,msg){const r=await post('/api/packs/'+PACK_ID,body);if(!r.ok)return toast(r.j.error,1);await loadLib();drawPack();if(msg)toast(msg)}
@@ -69,9 +70,9 @@ function lcDraw(){const s=LCL[LCI];if(!s)return lcClose();
   <div class=toggles>${bgs}</div><button class="btn nav" data-act=lcnext>›</button><button class=btn data-act=lcclose>✕</button></div>
   <div class="pvbox bg-${LCBG}" style="margin-top:10px;min-height:0">${media(s)}</div>
   <div class=row style="justify-content:center">${s.source&&s.source.generation?`<button class="btn pri" data-act=lcstudioedit>${ic('edit')} Edit in Studio</button><button class=btn data-act=lcopenstudio>${ic('gen')} Open in Studio</button>`:s.type==='static'?`<button class=btn data-act=lcedit>${ic('edit')} Edit a copy</button>`:`<button class=btn data-act=lcedit>${ic('edit')} Edit (text, trim…)</button><button class=btn data-act=lctimeline>${ic('play')} Timeline</button>`}<button class=btn data-act=lcmove>${ic('plus')} Move to pack…</button><button class=btn data-act=lcpack data-id=${s.pack_id}>Open pack</button><button class="btn pri" data-act=lcsend>${ic('chat')} Send to chat</button></div>
-  <div id=pk-pt class=pk-pt>${ptHtml(PKPT.d[s.id]||null,s)}</div>
+  <div id=pk-psline class=pk-psline>${pkStickerLine(s)}</div>
   <div class=thumbs style="justify-content:center;max-height:130px;overflow:auto">${th}</div><div class=mut style="text-align:center">← → to browse, Esc to close</div></div>`;
- $('modal').classList.add('on');ptLoad(s);$('modal').onclick=e=>{if(e.target.id==='modal')lcClose()};
+ $('modal').classList.add('on');$('modal').onclick=e=>{if(e.target.id==='modal')lcClose()};
  const on=$('modal').querySelector('.thumb.on');if(on)on.scrollIntoView({block:'nearest',inline:'center'})}
 ACT.lcsend=()=>{const s=LCL[LCI];lcClose();CH.pending=s;location.hash='#/chat'};
 ACT.lcopen=el=>lcOpen(+el.dataset.i);ACT.lcclose=lcClose;ACT.lcprev=()=>lcStep(-1);ACT.lcnext=()=>lcStep(1);
@@ -87,7 +88,7 @@ document.addEventListener('keydown',e=>{if(LCI===null||$('dlg').classList.contai
 /* ---------- Particles of a sticker (docs/effects.md): what was created for it and what was saved, under the big preview and, for the stickers of the open batch, in the Studio (particles.js).
    The data is GET /api/packs/{id}/stickers/{sid}/particles (an engine function, flow/effects.for_sticker); the pack grid's little counter is ONE request for the whole pack,
    GET /api/packs/{id}/particles. ptHtml/ptBody/ptCard are pure (tests/js); every button carries its pack and sticker (data-p, data-s), so it works wherever the gallery is drawn. */
-const PKPT={d:{},c:{}};          // d: sticker id -> the route's answer; c: pack id -> {sticker id: {created, saved}}
+const PKPT={d:{},c:{},sets:{},bursts:{}};          // d: sticker id -> the route's answer; c: pack id -> {sticker id: {created, saved}}; sets/bursts: the pack's particle studio
 const ptWhy=w=>(typeof FXWHY!=='undefined'&&FXWHY[w])||String(w).replace(/_/g,' ');
 const ptKb=b=>b>=1024?Math.round(b/1024)+' KB':(b||0)+' B';
 const ptPackName=id=>{const p=typeof packById==='function'?packById(id):null;return p?p.name:'a pack'};
@@ -114,7 +115,8 @@ const ptForget=()=>{PKPT.c={};PKPT.d={}};
 async function ptLoad(s){const r=await api(`/api/packs/${s.pack_id}/stickers/${s.id}/particles`);PKPT.d[s.id]=r.ok?r.j:{error:r.j.error||'Could not read the particles'};
  const cur=LCI===null?null:LCL[LCI],el=$('pk-pt');if(el&&cur&&cur.id===s.id)el.innerHTML=ptHtml(PKPT.d[s.id],cur)}
 async function ptCounts(pid){const r=await api(`/api/packs/${pid}/particles`);if(!r.ok)return;
- if(JSON.stringify(r.j)!==JSON.stringify(PKPT.c[pid]||{})){PKPT.c[pid]=r.j;if(route_==='pack'&&PACK_ID===pid)drawPack()}}
+ const j={counts:r.j.counts||{},sets:r.j.sets||[],bursts:r.j.bursts||[]},old={counts:PKPT.c[pid]||{},sets:PKPT.sets[pid]||[],bursts:PKPT.bursts[pid]||[]};
+ if(JSON.stringify(j)!==JSON.stringify(old)){PKPT.c[pid]=j.counts;PKPT.sets[pid]=j.sets;PKPT.bursts[pid]=j.bursts;if(route_==='pack'&&PACK_ID===pid)drawPack()}}
 /* "Make particles": in the Studio it opens the Particles tab with this sticker chosen; anywhere else the particle studio (#/effects) */
 window.ptMakeFor=(pack,sid)=>{if(route_==='generate'&&typeof spOpenFor==='function')return spOpenFor(pack,sid);if(typeof FX!=='undefined'){FX.pack=pack;FX.sel=new Set([sid]);FX.eid='';FX.rec=null}location.hash='#/effects'};
 ACT.ptmake=el=>{lcClose();window.ptMakeFor(el.dataset.p,el.dataset.s)};
@@ -124,4 +126,25 @@ ACT.ptadd=async el=>{const pid=el.dataset.p,sid=el.dataset.s;el.disabled=true;
  const r=await post(`/api/effects/${el.dataset.e}/add`,{results:[el.dataset.r],pack_id:pid,sticker_ids:[sid]});
  if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not add it',1)}
  ptForget();await loadLib();toast('Added to '+ptPackName(pid)+', saved under the sticker');if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();else if(route_==='generate'&&typeof spSecSync==='function')spSecSync(true);
- const cur=LCI===null?null:LCL[LCI];if(cur&&cur.id===sid)ptLoad(cur)};
+   const cur=LCI===null?null:LCL[LCI];if(cur&&cur.id===sid)ptLoad(cur)};
+
+/* ---------- the pack's particle studio (docs/particles_plan.md 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
+   the pack: a sticker shows one line linking here (pkStickerLine), never a gallery of its own. The set cards are shared with the Library (particles.js).
+   Bursts are read-only here: rendering and adding a burst from a set has no route yet, so the studio shows what exists and says so. */
+function pkPsHtml(p){const sets=PKPT.sets[p.id];
+ if(sets===undefined||sets===null)return `<section class=pk-ps><div class=pk-ps-h><h2>${ic('fx')} Particle studio</h2></div><div class=pk-pt-load><div class=spin></div><span class=mut>Reading the pack's particle sets…</span></div></section>`;
+ const bursts=PKPT.bursts[p.id]||[];
+ return `<section class=pk-ps><div class=pk-ps-h><h2>${ic('fx')} Particle studio</h2><span class=mut>one set of particles for the whole pack</span><span class=gspace></span>
+  <button class="btn sm pri" data-act=psmakepack data-p=${p.id}>Make particles for this pack</button><button class="btn sm" data-act=pspickpack data-p=${p.id}>Use an existing set</button></div>
+  ${sets.length?sets.map(s=>typeof spSetCard==='function'?spSetCard(s):'').join(''):`<div class=mut>No particle set on this pack yet. Make one, or use a set you already saved.</div>`}
+  ${bursts.length?`<div class=pk-ps-sh>Bursts rendered for this pack</div><div class=pk-ps-bursts>${bursts.map(pkBurst).join('')}</div>`:''}</section>`}
+function pkBurst(b){const ws=b.warnings||[];
+ return `<div class=pk-ps-b><div class=pk-pt-m>${b.url&&!b.missing?`<video src="${esc(b.url)}" autoplay loop muted playsinline preload=metadata></video>`:'<span class=mut>file missing</span>'}</div>
+  <div class=pk-pt-id><b>${esc(b.set_name||b.set||'')}</b><small>${esc(b.preset||'')} · ${esc(String(b.status||'').toLowerCase())}${b.added_to?` · in ${esc(ptPackName(b.added_to))}`:''}</small></div>
+  ${ws.length?`<ul class=pk-pt-w>${ws.map(w=>`<li>${esc(ptWhy(w))}</li>`).join('')}</ul>`:''}</div>`}
+/* one line on the sticker, linking to the pack's particle studio (the gallery lives there now) */
+function pkStickerLine(s){if(!s.pack_id)return '<span class=mut>No pack.</span>';
+ const sets=PKPT.sets[s.pack_id];
+ if(sets===undefined||sets===null){ptCounts(s.pack_id);return `<span class=mut>Reading the pack's particles…</span>`}
+ if(!sets.length)return `<span class=mut>No particles on this pack yet.</span> <a href="#/pack/${esc(s.pack_id)}">Open the particle studio</a>`;
+ return `<span>Particles of this pack: ${sets.map(x=>`<b>${esc(x.name||x.id)}</b>`).join(', ')}</span> <a href="#/pack/${esc(s.pack_id)}">open the particle studio</a>`};

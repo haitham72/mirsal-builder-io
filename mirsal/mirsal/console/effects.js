@@ -13,7 +13,8 @@ const fxNew=who=>({who,pack:'',sel:new Set(),mode:'video',grid:'2x2',note:'',eid
   dr:{grid:'2x2',opts:{},extra:[],chosen:[],est:{},busy:{},use:null,useN:0,redo:false,change:false,picked:''},size:{px:100,scale:1}});
 const FX=FXS.fx=fxNew('fx');
 const fxX=el=>{const r=el&&el.closest?el.closest('[data-fxx]'):null;return FXS[r?r.dataset.fxx:'fx']||FX};
-const FXSL=[['magnitude','Explosion',0,3,.05],['gravity','Gravity',-2,3,.05],['vortex','Vortex',-2,2,.05],['count','Particles',4,80,1],['spin','Spin',0,3,.05]];
+const FXSL=[['magnitude','Energy',0,3,.05],['gravity','Float',-2,3,.05],['vortex','Swirl',-2,2,.05],['count','Particles',4,80,1],['spin','Spin',0,3,.05]];
+const FXMAIN=['magnitude','gravity','vortex'];
 const FXPRESETS=['burst','fountain','vortex','rain','confetti'];
 const FXWHY={effect_tail_faded:'Particles were still on screen at the end, so the last frames were faded out to end empty, like a Telegram effect.',effect_empty_start:'Something is on screen in the first frames.',
  effect_empty_end:'Something is still on screen in the last frames.',effect_has_burst:'Hardly anything bursts: the effect is nearly empty.',effect_not_a_still:'Nothing moves.',effect_inside_cell:'Particles leave their cell.',
@@ -100,11 +101,14 @@ function fxPieces(X,g){return `<div class=fx-pieces>${g.elements.map((x,i)=>`<sp
 function fxVideoPanel(X,e,g){const v=(e.video||{})[g.id]||{},est=X.est[g.id+e.grid.join('x')];
  if(v.status==='REQUESTED'){const j=v.live||{};return `<div class=fx-job>${fxJobBad(j)?`<b class=bad>The video failed</b><div class=mut>${esc(j.error||'')}</div><button class="btn" data-act=fxvideo data-g=${g.id}>Try again</button>`:`<span class=spin></span> <b>Making the video</b> <span class=mut>${esc(v.job||'')} · ${esc(j.stage||j.status||'waiting')}</span>`}</div>`}
  return `<div class=fx-job><span class=mut>${e.grid[0]} x ${e.grid[1]} cells, screen ${esc(g.key)}, Kling pro 3 s, no start image.</span>
-  <button class="btn pri" data-act=fxvideo data-g=${g.id}>${ic('film')} Make the video${est&&est.credits!=null?` · ${est.credits} credits`:''}</button>${v.status==='DONE'?`<small class=mut>Made (${v.cells} cells, ${v.cost!=null?v.cost+' credits':''}). Make another to get more takes.</small>`:''}</div>`}
+  <div class=fx-price data-fxest=${g.id}>${est&&est.credits!=null?`about ${est.credits} credits`:''}</div>
+  <button class="btn pri" data-act=fxvideo data-g=${g.id}>${ic('film')} Make the video</button>${v.status==='DONE'?`<small class=mut>Made (${v.cells} cells, ${v.cost!=null?v.cost+' credits':''}). Make another to get more takes.</small>`:''}</div>`}
 function fxSimRow(X,e,g,sid){const s=fxSticker(e,sid),p=X.par[sid]||{},u=X.pv[sid];
+ const sl=k=>{const f=FXSL.find(x=>x[0]===k);return `<label class=fx-sl><span>${f[1]}</span><input type=range min=${f[2]} max=${f[3]} step=${f[4]} value="${p[k]??''}" data-fxp=${k} data-sid=${sid} aria-label="${f[1]}"><output>${p[k]??''}</output></label>`};
  return `<div class=fx-sim data-sid=${sid}><div class=fx-pvbox><img id=${X.who}pv-${sid} ${u?`src="${esc(u)}"`:''} alt="">${!u?'<span class="spin"></span>':''}<small>${esc(s?s.name:sid)} ${esc(fxEmoji(e,sid))}</small></div>
   <div class=fx-ctl><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${(g.preset||{})[sid]===n&&!(X.par[sid]||{}).touched?' on':''}" data-act=fxpreset data-sid=${sid} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=fxshuffle data-sid=${sid}>shuffle</button></div>
-   ${FXSL.map(([k,l,a,b,st])=>`<label class=fx-sl><span>${l}</span><input type=range min=${a} max=${b} step=${st} value="${p[k]??''}" data-fxp=${k} data-sid=${sid}><output>${p[k]??''}</output></label>`).join('')}
+   ${FXMAIN.map(sl).join('')}
+   <details class=fx-adv><summary>Advanced: particles, spin</summary>${['count','spin'].map(sl).join('')}</details>
    <div class=row><button class="btn pri sm" data-act=fxrender data-sid=${sid}>Render</button><small class=mut>the final 512 px sticker, checked</small></div></div></div>`}
 /* the particles' size before they fly (the engine fits every sprite into this many px first, so the preview is quick), then a multiplier: params.sprite_px and params.scale of every preview and render */
 function fxSizeBar(X){const s=X.size;
@@ -136,8 +140,13 @@ function fxDrState(X,e){const s=fxSet(e),d=X.dr;
  if(fxCutting(X.gen[n]))return'cut';
  return fxPicked(X,e)&&!d.change?'done':'pick'}
 const fxDrBusy=(X,e)=>{if(e.mode!=='sim'||X.src==='own')return false;const st=fxDrState(X,e);return st==='wait'||st==='cut'};
-function fxDrBtnHtml(X){const d=X.dr,k=fxDrKey(d),est=d.est[k],price=!d.chosen.length?'':!est?' · …':est.credits!=null?` · ${est.credits} credits`:'';
- return `${ic('fx')} Draw ${fxCols(d.grid)} particles with AI${price}`}
+function fxDrBtnHtml(X){const d=X.dr;return `${ic('fx')} Draw ${fxCols(d.grid)} particles with AI`}
+/* the price lives on its own line above the button, never inside it: the button says what it does, the line says what it costs */
+function fxDrPriceHtml(X){const d=X.dr,est=d.est[fxDrKey(d)];
+ if(!d.chosen.length)return'';
+ if(!est)return'about to be priced…';
+ if(est.credits!=null)return`about ${est.credits} credit${est.credits===1?'':'s'}`;
+ return''}
 function fxDrMake(X,e){const d=X.dr,N=fxCols(d.grid),o=d.opts[d.grid]||{},names=fxDrNames(d),ch=d.chosen,est=d.est[fxDrKey(d)],ok=ch.length&&est&&est.credits!=null,prev=fxSet(e);
  return `<div class=fx-pc-draw><span class=mut>Particles on the sheet</span><div class=tabs style="margin:0;gap:6px"><button class="tab${d.grid==='2x2'?' on':''}" data-act=fxdgrid data-v=2x2>2 x 2 · 4</button><button class="tab${d.grid==='3x3'?' on':''}" data-act=fxdgrid data-v=3x3>3 x 3 · 9</button></div></div>
   <div class=fx-dr-ideas>${!o.state||o.state==='loading'?'<span class=fx-pc-st><span class=spin></span> <span class=mut>The vision model is looking at the stickers for ideas…</span></span>'
@@ -145,7 +154,7 @@ function fxDrMake(X,e){const d=X.dr,N=fxCols(d.grid),o=d.opts[d.grid]||{},names=
    :`<span class=mut>Ideas${o.by?' from '+(o.by==='vlm'?'the vision model':'the built-in table'):''}: pick up to ${N}. Click a name to take it or leave it.</span>${(o.notes||[]).map(n=>`<small class=mut>${esc(n)}</small>`).join('')}`}
    <div class=fx-opts>${names.map(n=>`<button class="fx-opt${ch.includes(n)?' on':''}" data-act=fxdchip data-v="${esc(n)}" aria-pressed=${ch.includes(n)}>${esc(n)}</button>`).join('')}</div>
    <div class=row><input type=text class=fx-add data-fxdown placeholder="add your own" maxlength=40 aria-label="Add your own particle"><button class="btn sm" data-act=fxdadd>Add</button><small class=mut data-fxdcount>${ch.length} of ${N} chosen${ch.length&&ch.length<N?' · fewer is fine, the sheet repeats them in other sizes and angles':''}</small></div></div>
-  <div class=fx-pc-draw><button class="btn pri" data-act=fxddraw ${ok?'':'disabled'}>${fxDrBtnHtml(X)}</button>${est&&est.credits==null&&est.error?`<span class=fx-warn data-fxdwhy>${esc(est.error)}</span>`:'<span class=mut data-fxdwhy>Nothing is spent until you press the button.</span>'}</div>
+  <div class=fx-pc-draw><div class=fx-price data-fxdprice>${esc(fxDrPriceHtml(X))}</div><button class="btn pri" data-act=fxddraw ${ok?'':'disabled'}>${fxDrBtnHtml(X)}</button>${est&&est.credits==null&&est.error?`<span class=fx-warn data-fxdwhy>${esc(est.error)}</span>`:'<span class=mut data-fxdwhy>Nothing is spent until you press the button.</span>'}</div>
   ${prev&&prev.status==='DRAWN'?`<div class=row><small class=mut>Drawing again replaces the particles you picked.</small>${X.dr.redo&&fxSetGen(e)?'<button class=link data-act=fxdcancel>Keep the ones I have</button>':''}</div>`:''}`}
 function fxDrCells(X,e,pick){const n=fxSetGen(e),r=X.gen[n],cells=(r&&r.stickers)||[],d=X.dr;
  if(d.use==null||d.useN!==n){const pk=(fxSet(e)||{}).picked;d.use=new Set(Array.isArray(pk)&&pk.length?pk.map(fxNum):cells.map(c=>c.index));d.useN=n}
@@ -177,6 +186,7 @@ function fxDrNeeds(X){const e=X.rec;if(!e||e.mode!=='sim'||X.src==='own'||e.stat
  fxSuggest(X);fxDrEstimate(X)}
 function fxDrBtn(X){const r=X.root(),b=r&&r.querySelector('[data-act=fxddraw]');if(!b)return;const d=X.dr,est=d.est[fxDrKey(d)];
  b.innerHTML=fxDrBtnHtml(X);b.disabled=!(d.chosen.length&&est&&est.credits!=null);
+ const pr=r.querySelector('[data-fxdprice]');if(pr)pr.textContent=fxDrPriceHtml(X);
  const w=r.querySelector('[data-fxdwhy]');if(w){w.className=est&&est.credits==null&&est.error?'fx-warn':'mut';w.textContent=est&&est.credits==null&&est.error?est.error:'Nothing is spent until you press the button.'}
  const c=r.querySelector('[data-fxdcount]'),N=fxCols(d.grid);if(c)c.textContent=`${d.chosen.length} of ${N} chosen${d.chosen.length&&d.chosen.length<N?' · fewer is fine, the sheet repeats them in other sizes and angles':''}`}
 async function fxSuggest(X,force){const d=X.dr,g=d.grid,o=d.opts[g]=d.opts[g]||{},eid=X.eid;if(!eid||o.state==='loading'||(o.state&&!force))return;
@@ -208,7 +218,7 @@ ACT.fxduse=async el=>{const X=fxX(el),d=X.dr,idx=fxTicked(X,X.rec);if(!idx.lengt
  const r=await post(`/api/effects/${X.eid}/particles_pick`,{indexes:idx});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not use them',1)}
  d.picked=X.rec.id+':'+fxSetGen(X.rec);d.change=false;X.pv={};await fxLoad(X);X.draw();toast(`Using ${idx.length} particle${idx.length===1?'':'s'}: the stickers burst with them`)};
 
-/* ---------- the body of an effect: the drawn particles, then per group its pieces (video) or its simulation rows, then the results */
+/* ---------- the body of an effect: the drawn particles, then per group its elements (video) or its simulation rows, then the results */
 function fxGroupHtml(X,e,g){const sim=e.mode==='sim';
  return `<section class=fx-g><header><b>${esc(g.subject)}</b>${sim?'':`<span class="fx-key ${esc(g.key)}">screen ${esc(g.key)}</span><small class=mut>particles chosen by ${g.by==='vlm'?'the vision model':g.by==='you'?'you':'the built-in table'}</small>`}</header>
   ${sim?'':fxPieces(X,g)}<div class=fx-gst>${g.stickers.map(sid=>{const s=fxSticker(e,sid);return s?`<span class=fx-th title="${esc(s.name)}">${media(s)}</span>`:''}).join('')}</div>${sim?fxSimPanel(X,e,g):fxVideoPanel(X,e,g)}</section>`}
@@ -220,8 +230,8 @@ function fxResults(X,e){const rs=e.results||[];if(!rs.length)return '';const n=X
    ${bl.map(c=>`<span class="fx-w bad" title="${esc(c.detail||'')}">${esc(fxWords(c.id))}</span>`).join('')}${ws.map(c=>`<span class=fx-w title="${esc(c.detail||'')}">${esc(fxWords(c.id))}</span>`).join('')}
    ${r.added_to?'<small class=mut>added to the pack</small>':''}${ok?`<button class="btn sm${on?' pri':''}" data-act=fxpick data-id=${r.id}>${on?'Selected':ws.length?'Use it anyway':'Use'}</button>`:''}</div></div>`}).join('')}</div>
   <div class=row><button class="btn pri gbig" data-act=fxadd ${n?'':'disabled'}>Add ${n||''} to ${esc(e.pack_name||'the pack')}</button><span class=mut>Warnings are only warnings: you decide. A particle sticker keeps the emoji of its source and is saved under that sticker.</span></div>`}
-function fxBody(X,e){const sim=e.mode==='sim',bar=sim&&(e.groups||[]).some(g=>fxRows(X,e,g))?fxSizeBar(X):'';
- return (e.notes||[]).map(n=>`<div class=mut style="margin-top:6px">${esc(n)}</div>`).join('')+(sim&&X.src!=='own'?fxDrawn(X,e):'')+bar+(e.groups||[]).map(g=>fxGroupHtml(X,e,g)).join('')+fxResults(X,e)}
+function fxBody(X,e){const sim=e.mode==='sim',bar=sim&&(e.groups||[]).some(g=>fxRows(X,e,g))?`<details class=fx-adv><summary>Advanced: particle size</summary>${fxSizeBar(X)}</details>`:'';
+ return (e.notes||[]).map(n=>`<div class=mut style="margin-top:6px">${esc(n)}</div>`).join('')+(sim&&X.src!=='own'?fxDrawn(X,e):'')+bar+(e.groups||[]).map(g=>fxGroupHtml(X,e,g)).join('')+fxResults(X,e)+fxSaveBlock(e)}
 function fxRecord(){const e=FX.rec;if(!e)return '';
  const head=`<div class=ph><h1>${esc(e.title||e.id)}</h1><small class=mut>${esc(e.id)} · ${e.mode==='sim'?'simulated':'video from scratch'}</small></div><button class=link data-act=fxback>${ic('back')} all effects</button>`;
  if(e.status==='NEW')return head+`<div class=fx-job style="margin-top:16px"><span class=spin></span> <b>Looking at your stickers…</b> <span class=mut>choosing what bursts out of each</span></div>`;
@@ -234,9 +244,9 @@ function fxAfterDraw(X){const e=X.rec;if(!e||!['READY','RESULTS','VIDEO_REQUESTE
  if(e.mode==='video')for(const g of e.groups)fxEstimate(X,g.id)}
 async function fxEstimate(X,gid){const e=X.rec,k=gid+e.grid.join('x');if(X.est[k]||X.busy[k])return;X.busy[k]=1;
  const r=await post(`/api/effects/${e.id}/estimate`,{group:gid});X.busy[k]=0;
- X.est[k]=r.ok?r.j:{credits:null};if(X.alive()&&X.rec&&X.rec.id===e.id){const b=X.root().querySelector(`[data-act=fxvideo][data-g=${gid}]`);if(b&&r.ok&&r.j.credits!=null)b.innerHTML=`${ic('film')} Make the video · ${r.j.credits} credits`}}
+ X.est[k]=r.ok?r.j:{credits:null};if(X.alive()&&X.rec&&X.rec.id===e.id){const b=X.root().querySelector(`[data-fxest=${gid}]`);if(b&&r.ok&&r.j.credits!=null)b.textContent=`about ${r.j.credits} credits`}}
 
-/* ---------- editing the pieces of a video and the sources of a simulation */
+/* ---------- editing the elements of a video and the sources of a simulation */
 async function fxPlan(X,body){const r=await post(`/api/effects/${X.eid}/plan`,body);if(!r.ok)return toast(r.j.error||'Not possible',1);X.rec=r.j;X.est={};X.pv={};await fxLoad(X);X.draw()}
 ACT.fxdelpiece=el=>{const X=fxX(el),g=X.rec.groups.find(x=>x.id===el.dataset.g);if(!g)return;const els=g.elements.filter((_,i)=>i!==+el.dataset.i);if(!els.length)return toast('Keep at least one particle',1);fxPlan(X,{group:g.id,elements:els})};
 function fxAddPiece(X,gid,value){const g=X.rec.groups.find(x=>x.id===gid),v=String(value||'').trim();if(!g||!v)return;fxPlan(X,{group:g.id,elements:g.elements.concat(v)})}
@@ -277,3 +287,28 @@ ACT.fxpick=el=>{const X=fxX(el),i=el.dataset.id;X.pick.has(i)?X.pick.delete(i):X
 ACT.fxpickall=el=>{const X=fxX(el);(X.rec.results||[]).filter(r=>r.status==='READY'&&!r.added_to).forEach(r=>X.pick.add(r.id));X.draw()};
 ACT.fxadd=async el=>{const X=fxX(el),r=await post(`/api/effects/${X.eid}/add`,{results:[...X.pick]});if(!r.ok)return toast(r.j.error||'Could not add',1);
  toast(`Added ${r.j.added.length} particle sticker${r.j.added.length===1?'':'s'} to the pack: saved under the sticker${r.j.added.length===1?'':'s'}`);X.pick.clear();await loadLib();if(typeof ptForget==='function')ptForget();await fxLoad(X);X.draw();if(typeof spSecSync==='function')spSecSync(true)};
+
+/* ---------- Use as particle set: the working session ends in a durable set P### (docs/particles_plan.md 4.5). POST /api/particles {from_effect, name, packs}.
+   One implementation for the pro screen and the Studio tab (the button sits in fxBody, the state comes from the root). Only a drawn sheet can be saved:
+   a set is its picked cells, and the pack's own stickers have no cells file to keep. Nothing is moved or deleted: the run stays as it is. */
+function fxSaveBlock(e){const s=fxSet(e);if(!s||s.status!=='DRAWN')return '';
+ const n=Array.isArray(s.picked)&&s.picked.length?s.picked:[];
+ if(!n.length)return '';
+ return `<div class=fx-save><b>Keep these particles</b><span class=mut>Save the ${n.length} drawn particles as a particle set${e.pack_name?` for ${esc(e.pack_name)}`:''}: it lives in the Library, outlives this run, and other packs can use it.</span><button class="btn pri" data-act=fxuseset>Use as particle set</button></div>`}
+const fxPendingSet={eid:'',picked:[]};
+function fxUseSetDlg(X){const e=X.rec,s=fxSet(e);if(!s||s.status!=='DRAWN')return;
+ const packs=(typeof LIB!=='undefined'&&LIB.packs)||[];
+ fxPendingSet.eid=e.id;fxPendingSet.picked=Array.isArray(s.picked)?s.picked.map(fxNum):[];
+ dlg(`<h2>Use as particle set</h2><div class=mut style="margin-bottom:10px">${fxPendingSet.picked.length} drawn cells travel with it. The run stays as it is: nothing is moved or deleted.</div>
+  <div class=fld><label>Name</label><input type=text id=psname value="${esc(`${e.pack_name||'Particles'} particles`)}"></div>
+  <div class=fld><label>Where does it live</label>${packs.map(p=>`<label class=ps-pack><input type=checkbox data-pspack=${esc(p.id)} ${p.id===e.pack_id?'checked':''}> ${esc(p.name)}</label>`).join('')||'<div class=mut>No packs yet.</div>'}
+  <div class=mut>Tick packs, or nothing for a stand-alone set.</div></div>
+  <div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=psusesave>Save particle set</button></div>`);
+ const i=$('psname');if(i){i.focus();i.select()}}
+ACT.fxuseset=el=>fxUseSetDlg(fxX(el));
+ACT.psusesave=async()=>{const i=$('psname'),packs=[...document.querySelectorAll('[data-pspack]')].filter(c=>c.checked&&c.dataset.pspack).map(c=>c.dataset.pspack);
+ const r=await post('/api/particles',{from_effect:fxPendingSet.eid,name:((i&&i.value)||'').trim()||undefined,packs,picked:fxPendingSet.picked});
+ if(!r.ok)return toast(r.j.error||'Could not save it',1);
+ closeDlg();if(typeof spSetsForget==='function')spSetsForget();
+ toast(`Saved ${r.j.id||'the set'}: ${r.j.n_cells!=null?r.j.n_cells:fxPendingSet.picked.length} particles`);
+ if(typeof LIBTAB!=='undefined')LIBTAB='particles';location.hash='#/library'};

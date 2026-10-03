@@ -70,9 +70,9 @@ test('setup: the pack, three plain choices, the stickers; nothing starts without
   assert.match(h, /Fruits &lt;b&gt;/, 'pack names are escaped');
   assert.doesNotMatch(h, /Empty/, 'a pack with no stickers is not offered');
   assert.match(h, /3 stickers · 2 from this batch/);
-  for (const l of ['Pack stickers', 'Drawn particles', 'Video particles']) assert.match(h, new RegExp(`<b>${l}</b>`));
-  assert.match(h, /<em>Free<\/em>/);
-  assert.equal((h.match(/<em>Costs credits<\/em>/g) || []).length, 2);
+  for (const l of ['Pack stickers', 'Drawn particles', 'Use an existing set']) assert.match(h, new RegExp(`<b>${l}</b>`));
+  assert.equal((h.match(/<em>Free<\/em>/g) || []).length, 2, 'the pack’s stickers and an existing set cost nothing');
+  assert.equal((h.match(/<em>Costs credits<\/em>/g) || []).length, 1, 'only drawing costs');
   assert.match(h, /class="sp-mode on" data-act=spkind data-v=pack aria-pressed=true/);
   assert.match(h, /The price is on the button before anything is spent/);
   assert.match(h, /Which stickers fly out \(they are the particles and they burst\)/);
@@ -84,11 +84,10 @@ test('setup: the pack, three plain choices, the stickers; nothing starts without
   const drawn = html({ kind: 'drawn' });
   assert.match(drawn, /class="sp-mode on" data-act=spkind data-v=drawn/);
   assert.match(drawn, /Which stickers get particles/);
-  const video = html({ kind: 'video', grid: '3x3' });
-  assert.match(video, /data-act=spgrid data-v=2x2/);
-  assert.match(video, /class="tab on" data-act=spgrid data-v=3x3/);
-  assert.match(video, /3 x 3 was measured poor/, 'the measured warning, as a warning');
-  assert.doesNotMatch(html({ kind: 'video' }), /measured poor/);
+  const existing = html({ kind: 'existing' });
+  assert.match(existing, /class="sp-mode on" data-act=spkind data-v=existing/);
+  assert.match(existing, /Reading the particle sets/, 'an existing set is picked, not drawn');
+  assert.doesNotMatch(existing, /data-act=spstart/, 'no run starts from a set that already exists');
   const none = html({ sel: [] });
   assert.match(none, /data-act=spstart disabled>.*Continue with 0 stickers/s);
   const many = html({ sel: Array.from({ length: 25 }, (_, i) => 's' + i) });
@@ -194,4 +193,82 @@ test('the section is drawn into its container, once, and again when the containe
   run("spSecDraw()");
   assert.equal(run("DOMSTUB.gpart.writes"), 1, 'the Studio was left and opened again: the new container is filled');
   run("(GM.clear(),SES.gens=[],delete DOMSTUB.gpart)");
+});
+
+const SET = (o = {}) => ({ id: 'P001', name: 'Barbie <hearts>', n_cells: 4, n_picked: 3, kind: 'drawn', credits: 2.5,
+  packs: ['p1'], used_in: [{ id: 'p1', name: 'Fruits <b>' }],
+  cells: [{ n: 1, key: 'heart', picked: true, url: '/out/particles/P001/cells/c01.png' }, { n: 2, key: 'flower', picked: true, url: '/out/particles/P001/cells/c02.png' },
+    { n: 3, key: 'spark', picked: false, url: '/out/particles/P001/cells/c03.png' }, { n: 4, key: 'dot', picked: true, url: null, missing: true }],
+  picked: [1, 2, 4], elements: ['hearts', 'flowers'], motion: { preset: 'burst' }, source: { kind: 'drawn', effect: 'E002', generation: 'G100' }, ...o });
+
+test('a set card: the picked cells as a strip, the name, where it is used, what it cost', () => {
+  const h = run(`spSetCard(${JSON.stringify(SET())})`);
+  assert.match(h, /data-ps=P001/);
+  assert.match(h, /Barbie &lt;hearts&gt;/, 'names are escaped');
+  assert.match(h, /P001 · 4 cells · 3 picked · drawn/);
+  assert.match(h, /used in: Fruits &lt;b&gt;/);
+  assert.match(h, /about 2\.5 credits spent/);
+  assert.equal((h.match(/class=ps-cell/g) || []).length, 3, 'the strip is the picked cells only');
+  assert.match(h, /\/out\/particles\/P001\/cells\/c01\.png/);
+  for (const a of ['psopen', 'psassign', 'psdup', 'psrename', 'psdel']) assert.match(h, new RegExp(`data-act=${a} data-id=P001`), `${a} is on the card`);
+  const lone = run(`spSetCard(${JSON.stringify(SET({ id: 'P002', name: 'Lone', packs: [], used_in: [], credits: 0 }))})`);
+  assert.match(lone, /stand-alone/);
+  assert.match(lone, /nothing spent yet/);
+});
+
+test('the open card: elements, source, motion, every cell with what is kept, and the packs it can leave', () => {
+  run("SPL.open='P001'");
+  const h = run(`spSetDetail(${JSON.stringify(SET())})`);
+  assert.match(h, /hearts/);
+  assert.match(h, /from drawn · E002 · G100/);
+  assert.match(h, /motion: burst/);
+  assert.equal((h.match(/data-act=pspickcell/g) || []).length, 4, 'every cell is ticked, unpicked ones kept');
+  assert.match(h, /aria-pressed=true/);
+  assert.match(h, /Tick the cells to keep/);
+  assert.match(h, /data-act=psunassign data-id=P001 data-p=p1>take off</, 'unassigning keeps the set: it only leaves the pack');
+  run("SPL.open=''");
+});
+
+test('the library list: loading, empty, and the sets with a way to make more', () => {
+  run("SPL.sets=null");
+  assert.match(run("spLibHtml()"), /Reading the particle sets/);
+  run("SPL.sets=[]");
+  assert.match(run("spLibHtml()"), /No particle sets yet/);
+  assert.match(run("spLibHtml()"), /data-act=spopen>.*Make particles/s);
+  run(`SPL.sets=[${JSON.stringify(SET())}]`);
+  const h = run("spLibHtml()");
+  assert.match(h, /data-ps=P001/);
+  assert.match(h, /Make particles/);
+  run("SPL.sets=null");
+});
+
+test('the wizard’s existing-set card lists the sets with what they cost and where they are', () => {
+  run("SPL.sets=null");
+  assert.match(run("spExistingHtml({pack:'p1'})"), /Reading the particle sets/);
+  run("SPL.sets=[]");
+  assert.match(run("spExistingHtml({pack:'p1'})"), /No particle sets yet/);
+  run(`SPL.sets=[${JSON.stringify(SET())},${JSON.stringify(SET({ id: 'P002', name: 'Bats', packs: [], used_in: [], n_picked: 2 }))}]`);
+  const h = run("spExistingHtml({pack:'p1'})");
+  assert.match(h, /Barbie &lt;hearts&gt;/);
+  assert.match(h, /3 picked · used in: Fruits &lt;b&gt;/);
+  assert.match(h, /on this pack/);
+  assert.match(h, /data-act=pspickset data-id=P002>Use this set</);
+  run("SPL.sets=null");
+});
+
+test('every new set action has a handler', () => {
+  const fx = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'effects.js'), 'utf8');
+  for (const act of ['fxuseset', 'psusesave']) assert.match(fx, new RegExp(`ACT\\.${act}=`), `${act} has a handler`);
+});
+
+test('the sets are read once: redrawing the list never refetches', async () => {
+  run("SPL.sets=null");
+  const before = run("APICALLS");
+  await run0("spLibSync()");
+  assert.equal(run("APICALLS"), before + 1, 'unknown sets are read');
+  run("SPL.sets=[]");
+  await run0("spLibSync()");
+  await run0("spLibSync()");
+  assert.equal(run("APICALLS"), before + 1, 'a known list is never read again without a write (redrawing must not refetch)');
+  run("SPL.sets=null");
 });
