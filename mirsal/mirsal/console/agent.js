@@ -41,7 +41,7 @@ const AIU=(()=>{
 if(typeof module!=='undefined')module.exports=AIU;
 
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){(()=>{
-const A={sid:null,sess:null,sessions:[],agent:null,llm:null,llmBusy:false,busy:false,sel:new Set(),open:new Set(),els:new Map(),poll:0,setOpen:false,since:0,pre:''};
+const A={sid:null,sess:null,sessions:[],agent:null,llm:null,llmBusy:false,busy:false,sel:new Set(),open:new Set(),els:new Map(),shown:undefined,poll:0,setOpen:false,since:0,pre:''};
 const SUGG=['a teddy bear waving','falcon stickers','my dog as a banana','Eid mubarak greetings'];
 ICONS.send='<path d="M12 19V5M6 11l6-6 6 6"/>';
 
@@ -115,24 +115,31 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&A.sess&&A
 function pill(){const p=$('ai-pill');if(!p||!A.agent)return;const e=AIU.engine(A.agent);
  p.className='ai-pill'+(e.on?' up':'');p.querySelector('span').textContent=e.label;p.title=e.title}
 
+/* keep the bottom of a chat in view for a moment after it was opened: pictures and cards load and grow, and the page must not drift up and down while they do (stops at once when the person scrolls) */
+function pinBottom(sc,list){if(typeof ResizeObserver==='undefined')return;let stop=false;const off=()=>{stop=true;ro.disconnect()};
+ const ro=new ResizeObserver(()=>{if(!stop)sc.scrollTop=sc.scrollHeight});ro.observe(list);
+ ['wheel','touchstart','keydown','mousedown'].forEach(e=>sc.addEventListener(e,off,{once:true,passive:true}));setTimeout(off,1200)}
 /* ---------- painting (a keyed diff: only a message whose signature changed is rebuilt) */
 function paint(){
  const root=$('ai');if(!root)return;drawBar();const s=A.sess,msgs=(s&&s.messages)||[],hero=!msgs.length;
  root.classList.toggle('is-hero',hero);$('ai-ttl').textContent=hero?'':(s.title||'');
  const col=$('ai-col'),sc=$('ai-scroll');
- if(hero){A.els.clear();if(!col.querySelector('.ai-hero'))col.innerHTML=`<div class="ai-hero ai-hero-in"><h1 class=ai-greet>What will you create today?</h1></div>`;
+ if(hero){A.shown=A.sid;A.els.clear();if(!col.querySelector('.ai-hero'))col.innerHTML=`<div class="ai-hero ai-hero-in"><h1 class=ai-greet>What will you create today?</h1></div>`;
   $('ai-sugg').innerHTML=SUGG.map(t=>`<button class=ai-chip data-act=agchip data-text="${AIU.esc(t)}">${AIU.esc(t)}</button>`).join('')}
  else{
   $('ai-sugg').innerHTML='';
   let list=col.querySelector('.ai-msgs');if(!list){col.innerHTML='<div class=ai-msgs id=ai-msgs role=log aria-live=polite></div>';list=col.querySelector('.ai-msgs');A.els.clear()}
-  const near=sc.scrollHeight-sc.scrollTop-sc.clientHeight<160;let changed=false;
+  const switched=A.shown!==A.sid;                          // a different chat than the one on screen: start clean, land at its bottom at once, no swipe
+  if(switched){list.innerHTML='';A.els.clear();list.classList.remove('is-switched');void list.offsetWidth;list.classList.add('is-switched')}
+  const near=switched||sc.scrollHeight-sc.scrollTop-sc.clientHeight<160;let changed=false;
   msgs.forEach((m,i)=>{const k=AIU.sig(m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',');let el=A.els.get(m.id);
    if(!el){el=document.createElement('div');A.els.set(m.id,el);list.appendChild(el);changed=true}
    if(el._k!==k){const keep=[...el.querySelectorAll('.car-track')].map(t=>t.scrollLeft);el._k=k;el.className='ai-m '+(m.role==='user'?'user':'bot'+(m.status==='working'?' working':''));
     el.innerHTML=m.role==='user'?`<div class=b>${AIU.esc(m.text)}</div>`:botHTML(m);
     el.querySelectorAll('.car-track').forEach((t,j)=>{if(keep[j])t.scrollLeft=keep[j];carSync(t)});changed=true}});
   for(const [id,el] of [...A.els])if(!msgs.some(m=>m.id===id)){el.remove();A.els.delete(id)}
-  if(changed&&(near||msgs[msgs.length-1].role==='user'))requestAnimationFrame(()=>sc.scrollTo({top:sc.scrollHeight,behavior:'smooth'}));
+  if(switched){A.shown=A.sid;sc.scrollTop=sc.scrollHeight;pinBottom(sc,list)}
+  else if(changed&&(near||msgs[msgs.length-1].role==='user'))requestAnimationFrame(()=>sc.scrollTo({top:sc.scrollHeight,behavior:'smooth'}));
  }
  selChips();setSet();busyUi();
 }
