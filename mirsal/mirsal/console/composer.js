@@ -6,6 +6,16 @@
 const CP={refs:[],pop:null,ai:false,go:false,menu:false};
 try{CP.ai=localStorage.getItem('mirsal.ai')==='1'}catch(e){}
 const aiOn=()=>CP.ai&&!!(typeof GAI!=='undefined'&&GAI.configured);
+/* GAI is GET /api/ai: `configured` is true when ANY backend the person's engine choice allows can answer (auto: the local model when LM Studio listens, else the cloud key; local; cloud with a key), so LM Studio alone enables the chip. When it is off, the tooltip says which of the two is missing */
+function aiWhy(){const g=typeof GAI!=='undefined'?GAI:{},av=g.availability||{},pref=g.preference||'auto',lw=(av.local&&av.local.why)||'',cw=(av.cloud&&av.cloud.why)||'';
+  if(pref==='local')return `Local is chosen and it is not available${lw?' ('+lw+')':''}. Start LM Studio, or pick Auto or Cloud below.`;
+  if(pref==='cloud')return `Cloud is chosen and ${cw||'OPENAI_API_KEY is missing from mirsal/.env'}. Add it, or pick Auto or Local below.`;
+  return 'No AI model is reachable: start LM Studio (free) or add OPENAI_API_KEY to mirsal/.env.'}
+function aiChipTitle(){const g=typeof GAI!=='undefined'?GAI:{};
+  if(!g.configured)return aiWhy();
+  const cloud=g.provider==='openai';
+  return `Writes nine different, expressive concepts from your text before the sheet is sent, with the engine chosen below (${gdEngineName()||'no model'}). ${cloud?'Cloud: one small OpenAI call.':'Local: free.'} Off = your text goes straight into the prompt template.`}
+
 const STROKES=[[0,'None'],[4,'Thin'],[8,'Medium'],[12,'Bold'],[16,'Max']];
 try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&STROKES.some(s=>s[0]===+o))GS.outline=+o}catch(e){}
 const strokeName=px=>(STROKES.find(s=>s[0]===px)||[px,px+' px'])[1];
@@ -22,10 +32,11 @@ function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m|
     <div class=cp-refs id=cprefs></div>
     <textarea id=prompt rows=2 placeholder="Describe your stickers, for example: an angel reading a newspaper" autocomplete=off spellcheck=false></textarea>
     <div class=cp-bar id=cpbar></div>
+    <div class=cp-engwrap id=cpeng hidden></div>
     <div class=cp-drop>Drop images to use them as references</div>
    </div>
    <div class=cp-styles id=cpstyles></div>`;
-  const p=$('prompt');p.value=SES.prompt||prev||'';
+  const p=$('prompt');p.value=gdOn()?GD.prompt:SES.prompt||prev||'';
   p.oninput=()=>grow();
   p.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ACT.ggo()}};
   const grow=()=>{p.style.height='auto';p.style.height=Math.min(p.scrollHeight,190)+'px'};grow();
@@ -73,12 +84,21 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    <div class=cp-pw><button class="cp-chip ${CP.pop==='stroke'?'open':''}" data-act=cpstroke aria-haspopup=true aria-expanded=${CP.pop==='stroke'}>${glyph(st)}<span><b>Stroke</b><em>${strokeName(st)}</em></span></button>
     ${CP.pop==='stroke'?`<div class=cp-pop role=menu>${STROKES.map(([px,n])=>`<button role=menuitemradio aria-checked=${px===st} class="${px===st?'on':''}" data-act=cpstrokeset data-px=${px}>${glyph(px)}<span><b>${n}</b><em>${px?px+' px':'no border'}</em></span></button>`).join('')}</div>`:''}</div>
    <button class="cp-chip cp-ai ${LIVE.loop?'on':''}" data-act=cploop aria-pressed=${!!LIVE.loop} title="Off: the animation plays once through and Mirsal closes the loop itself. On: the video prompt asks for a loop and Kling ends on its first pose. A loop wording makes the stickers bounce several times in the 3 seconds."><span class=cp-sw><i></i></span><span><b>Loop</b><em>${LIVE.loop?'On':'Off'}</em></span></button>
-   <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${GAI&&GAI.configured?'Writes nine different, expressive concepts from your text before the sheet is sent. One small OpenAI call; off = your text goes straight into the prompt template.':'Add OPENAI_API_KEY to mirsal/.env to use the AI enhancer.'}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
+   <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${esc(aiChipTitle())}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
    <span class=cp-gap></span>
-   <button id=go class=cp-go data-act=ggo title="Starts at once with the model, style and stroke shown here. The number is the price in Higgsfield credits.">Generate${liveReady()?'<span class=cp-bp id=cpprice>…</span>':''}</button>`;
-  if(liveReady())lcost('image',true).then(c=>{const e=$('cpprice');if(e)e.textContent=c==null?'':'◈ '+fcr(c)})}
+   ${GD&&!gdOn()?'<button class="btn sm" data-act=gdtab data-t=plan title="Return to the prompt you were editing">Prompt draft</button>':''}
+   <button id=go class=cp-go data-act=gprompt title="${aiOn()&&GAI.provider==='openai'?'Shows the prompt you can edit before any sheet is paid for; the AI enhancer makes one small OpenAI call to write it. No batch is created and no Higgsfield credits are spent.':'Free. Shows the prompt you can edit before any sheet is paid for; no batch is created.'} Pressing Enter in the box still starts a paid sheet at once.">Generate prompt <span class=cp-bp>${aiOn()&&GAI.provider==='openai'?'1 AI call':'free'}</span></button>`;
+  cpDrawEngine()}
+/* the AI enhancer's engine: the AI screen's own control (Auto / Local / Cloud, the local model drop-down, the one line saying which model answers or why it cannot; agent.js, AIENG.rows) shown under the bar while the enhancer is On,
+   and also while it cannot run, so the person can pick an engine that can. One implementation, the same endpoints (an owner picks; a member sees the server's refusal as a toast). */
+const cpEngSrc=()=>{const g=typeof GAI!=='undefined'?GAI:{};return{agent:{provider:g.provider||'none',model:g.model||''},agent_status:{},availability:g.availability||{},preference:g.preference||'auto',noModel:'no model, the built-in prompt is used'}};
+function cpDrawEngine(){const el=$('cpeng');if(!el)return;const show=typeof AIENG!=='undefined'&&(CP.ai||!(GAI&&GAI.configured));
+  el.hidden=!show;if(!show){el.innerHTML='';return}
+  AIENG.ensure();
+  const html=`<div class="ai-set on cp-eng" aria-label="AI enhancer engine">${AIENG.rows(cpEngSrc())}<div class=cp-engnote><small>Local: free. Cloud: one small OpenAI call.</small></div></div>`;
+  if(el._h!==html){el._h=html;el.innerHTML=html}}          // only when it changed: the bar is redrawn often, and a redraw would close an open drop-down
 ACT.cploop=()=>{LIVE.loop=!LIVE.loop;lsave();cpDrawBar();document.querySelectorAll('[data-lvloop]').forEach(c=>c.checked=LIVE.loop)};
-ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar()};
+ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar();if(CP.ai){if(typeof AIENG!=='undefined')AIENG.load();if(typeof aiRefresh==='function')aiRefresh()}};      // turning it On reads the engine and the models again (LM Studio may have started since the page opened)
 ACT.cpstroke=e=>{CP.pop=CP.pop==='stroke'?null:'stroke';cpDrawBar();if(e&&e.stopPropagation)e.stopPropagation()};
 ACT.cpstrokeset=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);CP.pop=null;cpDrawBar()};
 const inside=(e,cls)=>e.composedPath().some(n=>n.classList&&n.classList.contains(cls));      // the path at the time of the click: the clicked node may already be replaced by a redraw
@@ -97,7 +117,7 @@ ACT.ggo=()=>{const p=(($('prompt')||{}).value||'').trim();
   if(liveReady()){say('');
     if(CP.refs.some(r=>r.busy)){toast('Wait for the reference images to finish uploading',1);return}
     if(CP.go)return;CP.go=true;const b=$('go');if(b)b.disabled=true;
-    liveStart('sheet',{prompt:p,ai:aiOn(),refs:CP.refs.filter(r=>r.id).map(r=>r.id)}).finally(()=>{CP.go=false;cpDrawBar()});return}
+    gdHide();liveStart('sheet',{prompt:p,ai:aiOn(),refs:CP.refs.filter(r=>r.id).map(r=>r.id)}).finally(()=>{CP.go=false;cpDrawBar()});return}
   if(CP.refs.length){say('Reference images need Higgsfield, which is not available right now.');return}
   return _ggo()};
 ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');_ggo()};      // a prepared-sheet chip uses the prepared sheet, never a new generation

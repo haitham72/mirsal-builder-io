@@ -444,7 +444,7 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     m["kb"] = round(len(data) / 1024, 1)
     if rep.ok:
         return AnimationResult(idx, "READY", None, rep, m, data)
-    return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
+    return AnimationResult(idx, "FAILED", rep.first_failure, rep, m, data)
 
 
 def check_returned_video(mp4, layout: dict, sheet_rgb: np.ndarray, cfg, on_probe=None) -> list:

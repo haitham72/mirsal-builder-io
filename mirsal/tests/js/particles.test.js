@@ -405,6 +405,14 @@ const BURSTPACKS = "LIB.packs=[{id:'p1',name:'Fruits <b>',stickers:[]},{id:'p2',
 const REND = (o = {}) => ({ id: 'R001', set: 'P001', pack_id: 'p1', preset: 'fountain', status: 'READY', bytes: 120 * 1024, url: '/out/particles/P001/renders/R001.webm', warnings: [], blocks: [], added_to: null, added: [], ...o });
 const burst = (o = {}, pre = '') => run(`(()=>{${BURSTPACKS};delete SPB.P001;${pre};return spBurstHtml(${JSON.stringify(SET(o))})})()`);
 
+test('Motion: a preset is lit before anyone picks one: the set\'s own motion, else burst', () => {
+  const on = h => [...h.matchAll(/<button class="tab on" data-act=psbpreset data-id=P001 data-n=(\w+)/g)].map(m => m[1]);
+  assert.deepEqual(on(burst()), ['burst']);
+  assert.deepEqual(on(burst({ motion: { preset: 'vortex' } })), ['vortex']);
+  assert.deepEqual(on(burst({ motion: null })), ['burst']);
+  assert.deepEqual(on(burst({ motion: { preset: 'vortex' } }, "SPB.P001={pack:'p1',hint:'',preset:'rain',par:{},shown:{},pv:'',pvT:0,busy:0,again:0,size:{px:100,scale:1}}")), ['rain'], 'a pick still wins');
+});
+
 test('Motion: ONE preview for the pack, the five presets, Energy / Float / Swirl, count and spin under Advanced', () => {
   const h = burst();
   assert.equal((h.match(/<img id=psbpv-/g) || []).length, 1, 'one preview, not one row per sticker');

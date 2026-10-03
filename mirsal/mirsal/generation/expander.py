@@ -56,6 +56,23 @@ def _lint(cells, n: int, subject_slug: str, request: str) -> list[str]:
     return problems
 
 
+def lint_slots(slots: dict, n: int, subject_slug: str, request: str) -> list[str]:
+    """`_lint` for a finished plan's slots (cells as `prompter` stores them: tags[0] is `<subject>_<key>`, emoji is one string): the same rules the enhancer's answer passed,
+    so a plan handed back by a client is judged exactly like one the model just wrote. No model is asked."""
+    cells = []
+    for c in slots.get("cells") or []:
+        if not isinstance(c, dict):
+            cells.append(c)
+            continue
+        tags = [t for t in (c.get("tags") or []) if isinstance(t, str)]
+        key = tags[0] if tags else ""
+        if key.startswith(subject_slug + "_"):
+            key = key[len(subject_slug) + 1:]
+        cells.append({"label": c.get("label", ""), "key": key, "tags": tags[1:], "motion": c.get("motion", ""),
+                      "emoji": [c["emoji"]] if isinstance(c.get("emoji"), str) else c.get("emoji")})
+    return _lint(cells, n, subject_slug, request)
+
+
 def _parse(text: str):
     return llm.extract_json(text)
 

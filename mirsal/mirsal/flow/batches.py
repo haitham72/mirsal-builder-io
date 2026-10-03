@@ -1,6 +1,9 @@
-"""Remove a batch (Haitham, 2026-10-03, "like remove pack"): `out/G###` moves to `out/trash/batches/G###` and Restore moves it back. Nothing is deleted (a batch is paid work; rule 9's
+"""Remove a batch (Haitham, 2026-10-03, "like remove pack"): `out/G###` moves to `out/trash/batches/G###` and Restore moves it back. Nothing is deleted by a Remove (a batch is paid work; rule 9's
 spirit: the folder keeps its name and its files keep theirs). Stickers already added to a pack are copies in the library and stay in their packs. A removed number is never given to a
-new batch while it is in the trash (`pipeline.next_gid`), so a Restore can never collide. Plain functions over the files: no HTTP, no database (CLAUDE.md rules 3 and 11)."""
+new batch while it is in the trash (`pipeline.next_gid`), so a Restore can never collide. Plain functions over the files: no HTTP, no database (CLAUDE.md rules 3 and 11).
+
+The only real delete is the purge of a batch that is ALREADY in the trash (`describe` shows what it would remove, `purge_files` removes the trash entry; flow/purge.py orchestrates it with the
+database rows, the ledger and the confirmations). It is idempotent: every step tolerates a half-done earlier run."""
 from __future__ import annotations
 
 import json
@@ -73,3 +76,66 @@ def list_removed(out: Path) -> list[dict]:
             meta["subject"] = None
         rows.append(meta)
     return sorted(rows, key=lambda m: m.get("removed") or 0, reverse=True)
+
+
+# ---- purge: the real delete of a batch that is already in the trash (flow/purge.py is the caller; the database rows are store/purge_rows.py's)
+def trash_entry(out: Path, gid: int) -> Path:
+    return pl.trash_batches_dir(Path(out)) / f"G{gid:03d}"
+
+
+def _meta_file(out: Path, gid: int) -> Path:
+    return pl.trash_batches_dir(Path(out)) / f"G{gid:03d}.meta.json"
+
+
+def tree(root: Path) -> list[tuple[str, int]]:
+    """Every file under `root` as (path relative to it with forward slashes, bytes), sorted. A symlink is counted as the link, never followed."""
+    rows = []
+    if root.is_dir():
+        for f in sorted(root.rglob("*")):
+            try:
+                if f.is_file() or f.is_symlink():
+                    rows.append((f.relative_to(root).as_posix(), 0 if f.is_symlink() else f.stat().st_size))
+            except OSError:
+                continue
+    return rows
+
+
+def open_jobs(out: Path, gid: int) -> list[str]:
+    return [j["id"] for j in jobs.list(Path(out)) if j.get("status") in OPEN_JOBS and _gid(j) == gid]
+
+
+def describe(out: Path, gid: int, limit: int = 40) -> dict:
+    """What a purge of the removed batch `gid` would remove, from the files: its `list_removed` row plus `stickers` (cells in result.json), `content` (stickers | particles), `files_total`, `bytes`, the first `limit`
+    files as [{path, bytes}] (`files_truncated` says there are more) and `in_flight` (open jobs that still write into it, which refuse the purge)."""
+    out = Path(out)
+    row = next((m for m in list_removed(out) if m["number"] == gid), None)
+    if row is None:
+        raise pl.PipelineError(f"G{gid:03d} is not in the trash.", 404)
+    d = trash_entry(out, gid)
+    try:
+        res = json.loads((d / "result.json").read_text(encoding="utf-8"))
+        row["stickers"] = len(res.get("stickers") or [])
+        row["content"] = res.get("kind") or "stickers"
+    except (OSError, ValueError):
+        row["stickers"], row["content"] = 0, "stickers"
+    files = tree(d)
+    row.update(files_total=len(files), bytes=sum(b for _, b in files), files=[{"path": p, "bytes": b} for p, b in files[:limit]], files_truncated=len(files) > limit,
+               in_flight=open_jobs(out, gid))
+    return row
+
+
+def purge_files(out: Path, gid: int) -> dict:
+    """Delete the trash entry of batch `gid` (its whole folder and its meta file). Idempotent: nothing there is `{already: True}`. Refused 409 while a live `out/G###` of the same number
+    exists (it would be a different batch: nothing here ever touches a live batch) or while a job is in flight for it. Returns what went: {files, bytes}."""
+    out = Path(out)
+    if pl.gen_dir(out, gid).exists():
+        raise pl.PipelineError(f"G{gid:03d} exists as a live batch as well as in the trash; nothing was deleted. Remove or restore one of them first.", 409)
+    busy = open_jobs(out, gid)
+    if busy:
+        raise pl.PipelineError(f"G{gid:03d} cannot be deleted for good while {', '.join(busy)} is still working on it. Wait for it to finish.", 409)
+    d, meta = trash_entry(out, gid), _meta_file(out, gid)
+    files = tree(d)
+    if d.is_dir():
+        shutil.rmtree(d)
+    meta.unlink(missing_ok=True)
+    return {"files": len(files), "bytes": sum(b for _, b in files), "already": not files and not d.exists()}

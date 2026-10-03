@@ -123,6 +123,7 @@ class ConsoleTools:
                              "png": f"/out/{gid}/{s['png']}?e={s.get('rendered_at') or s.get('edited_at') or 0}" if s.get("png") else None,          # the edit time: an edited slice is a new url, never the cached picture
                              "webm": f"/out/{gid}/{s['webm']}" if s.get("webm") else None, "prompt": s.get("prompt")})
         return {"generation": gid, "stage": res.get("stage"), "error": res.get("error"), "prompt": res.get("prompt"), "problem": self._problem(res), "allow": gates.allow_info(res),
+                "video_sheets": [{**v, "picture": f"/out/{gid}/{v['file']}"} for v in res["video_sheets"]],
                 "parent": f"G{int(res['parent']):03d}" if res.get("parent") else None, "grid": res.get("grid"), "stickers": stickers}
 
     def _problem(self, res: dict) -> dict | None:
@@ -175,7 +176,8 @@ class ConsoleTools:
 
     # ---- writes (these can spend) -----------------------------------------------------------------------------------------------------
     def create(self, prompt: str, grid: str = "3x3", style_id: str = "flat_vector", ai: bool = True, parent: str | None = None,
-               regen_of: str | None = None, refs: list | None = None, base_plan: dict | None = None, ref_clause: str | None = None) -> dict:
+               regen_of: str | None = None, refs: list | None = None, base_plan: dict | None = None, ref_clause: str | None = None,
+               outline: int | None = None, erode: int | None = None) -> dict:
         """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); otherwise the prepared-sheet lookup, exactly as the page does. `base_plan` is the plan the person
         approved on the card: it is what is sent (the cells, tags and slots of the card), never planned a second time."""
         self._may_spend()
@@ -186,6 +188,10 @@ class ConsoleTools:
                 body = {"prompt": prompt, "grid": grid, "style_id": style_id, "ai": ai, "refs": refs or []}
                 if ref_clause and refs:
                     body["ref_clause"] = ref_clause                 # what the attached picture is for (editroute.REF_CLAUSES), instead of the default "change only the expression and the pose"
+                if outline is not None:
+                    body["outline"] = int(outline)                  # an edit keeps its parent's edge finish (white stroke / fringe trim), not the default
+                if erode is not None:
+                    body["erode"] = int(erode)
                 if parent:
                     body["parent"] = parent
                 if regen_of:
@@ -263,6 +269,15 @@ class ConsoleTools:
         except Exception as e:
             raise ToolError(f"I could not read the plan of {sid}: {e}", 409)
 
+    def edge_of(self, gid: str) -> dict:
+        """The edge finish a batch was made with, `{outline, erode}` in px (result.json `outline_px` / `erode_px`): an edit of it is made with the same finish. {} when it cannot be read."""
+        self._see(gid)
+        try:
+            res = pl.read_result(self.out, int(gid[1:]))
+        except Exception:
+            return {}
+        return {k: int(res[f"{k}_px"]) for k in ("outline", "erode") if res.get(f"{k}_px") is not None}
+
     def generation_plan(self, gid: str) -> dict:
         """The saved plan (prompts.json) of a batch: the cells, tags, slots and template it was made from, to start a changed copy of it (a refinement keeps everything but the change)."""
         self._see(gid)
@@ -306,6 +321,10 @@ class ConsoleTools:
         return {"done": done, "refused": refused}
 
     # ---- "Use it anyway" (CLAUDE.md rule 10): a judgement-call block a person may allow, and take back ----
+    def processing(self) -> bool:
+        """Whether the shared local writer is still applying a free edit/override."""
+        return self.c.lock.locked()
+
     def allowable(self, gid: str, kind: str = "still", allow: bool = True) -> list[int]:
         """The stickers whose block is a judgement call and may therefore be allowed right now (or whose permission may be taken back).
         A technical block (Telegram's own limits) and a cell with no picture are never in this list: those are final."""
@@ -323,10 +342,17 @@ class ConsoleTools:
         done, refused = [], []
         for i in indexes:
             try:
-                gates.check_allow(self.out, g, int(i), allow, kind)
-                done.append(int(i))
+                if kind == "video_sheet":
+                    res = pl.read_result(self.out, g)
+                    why = gates.sheet_problem(res, gates.sheet_of(res, str(i)), allow)
+                    if why:
+                        raise pl.PipelineError(why, 409)
+                    done.append(str(i))
+                else:
+                    gates.check_allow(self.out, g, int(i), allow, kind)
+                    done.append(int(i))
             except pl.PipelineError as e:
-                refused.append({"index": int(i), "why": str(e)})
+                refused.append({"index": i, "why": str(e)})
         if not done:
             why = refused[0]["why"] if refused else "there is nothing to allow here"
             raise ToolError(why, 409)
@@ -589,6 +615,11 @@ class FakeTools:
         self.n_slice_refs = getattr(self, "n_slice_refs", 0) + 1
         return {"ref": f"R{200 + self.n_slice_refs}", "px": 682, "from_px": 682, "scaled": False, "min_px": min_px}
 
+    def reference_from_sticker(self, sid):
+        self.calls.append(("reference_from_sticker", sid))
+        self.n_sticker_refs = getattr(self, "n_sticker_refs", 0) + 1
+        return f"R{300 + self.n_sticker_refs}"
+
     def slice_plan(self, sid):
         gid, idx = sid.split("/")
         base = self.generation_plan(gid)
@@ -598,11 +629,14 @@ class FakeTools:
                 "slots": {**{k: v for k, v in base["slots"].items() if k != "cells"}, "mode": "single_1x1", "cells": [{**cell, "pos": 1}]},
                 "stickers": [{**st, "index": 1, "id": "prompt01"}]}
 
-    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None):
+    def edge_of(self, gid):
+        return dict(getattr(self, "edges", {}).get(gid) or {})
+
+    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None, outline=None, erode=None):
         if getattr(self, "fail_next_create", False):
             self.fail_next_create = False
             raise ToolError("the provider refused it; try again in a minute", 503)
-        self.sent.append({"prompt": prompt, "grid": grid, "style_id": style_id, "parent": parent, "regen_of": regen_of, "refs": list(refs or []), "ref_clause": ref_clause, "plan": base_plan})
+        self.sent.append({"prompt": prompt, "grid": grid, "style_id": style_id, "parent": parent, "regen_of": regen_of, "refs": list(refs or []), "ref_clause": ref_clause, "plan": base_plan, "outline": outline, "erode": erode})
         self.calls.append(("create", prompt, grid, parent, regen_of))
         if base_plan is not None:
             self.sent_plans.append(base_plan)

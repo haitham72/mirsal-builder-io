@@ -85,7 +85,9 @@ class LibraryTests(unittest.TestCase):
         self.lib.delete_sticker(p["id"], ids[2])                       # deleting the cover promotes another sticker
         self.assertNotEqual(self.lib.snapshot()["packs"][0]["cover"], ids[2])
         self.lib.delete_sticker(p["id"], ids[0])
-        self.lib.delete_pack(p["id"]); self.assertEqual(self.lib.snapshot()["packs"], []); self.assertEqual(list(self.lib.files.rglob("*.*")), [])
+        self.lib.delete_pack(p["id"]); self.assertEqual(self.lib.snapshot()["packs"], [])
+        self.assertEqual(len(list(self.lib.files.rglob("*.*"))), 2, "Delete pack is SOFT: the trashed pack keeps its two remaining files until it is purged (tests/test_purge.py)")
+        self.lib.purge_pack(p["id"]); self.assertEqual(list(self.lib.files.rglob("*.*")), [])
 
     def test_move_sticker_between_packs(self):
         a = self.lib.create_pack("Old Pack")["id"]; b = self.lib.create_pack("New Pack")["id"]
@@ -336,7 +338,12 @@ class PackDeleteKeepsOriginals(unittest.TestCase):
             db["packs"][1]["stickers"].append({**s, "id": "dup"})
             lib._save(db)
         lib.delete_pack(a)
+        self.assertTrue((lib.files / only["file"]).is_file(), "Delete pack is SOFT: the pack's own files wait in the trash")
+        with self.assertRaises(LibraryError) as ctx:
+            lib.purge_pack(a)                                                # the shared file is refused in words until confirmed
+        self.assertEqual(ctx.exception.code, 409)
+        lib.purge_pack(a, confirm_shared=True)
         self.assertTrue((gdir / "S1.png").is_file(), "the batch original is never touched")
         self.assertTrue((lib.files / shared).is_file(), "a file another pack still uses stays")
-        self.assertFalse((lib.files / only["file"]).exists(), "a sticker that existed only in the deleted pack goes with it (the confirmation says so)")
+        self.assertFalse((lib.files / only["file"]).exists(), "a sticker that existed only in the purged pack goes with it")
         self.assertEqual([p["id"] for p in lib.snapshot()["packs"]], [b])

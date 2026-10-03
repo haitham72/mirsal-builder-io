@@ -23,7 +23,7 @@ test('the Prompt preview block and everything that fed it are gone', () => {
     assert.doesNotMatch(src, /planPreview/, `${name}: nothing may still call the removed preview`);
     assert.doesNotMatch(src, /id=gplan>/, name);
   }
-  assert.doesNotMatch(gen, /expanded_by|template \$\{esc\(r\.j\.template_id\)\}/, 'the template internals are not printed on the Studio screen');
+  assert.doesNotMatch(gen, /template \$\{esc\(r\.j\.template_id\)\}/, 'the template internals are not printed on the Studio screen');
   assert.doesNotMatch(css, /\.gpv\b/, 'the preview’s CSS went with it');
 });
 

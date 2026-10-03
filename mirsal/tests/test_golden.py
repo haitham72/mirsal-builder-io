@@ -76,14 +76,25 @@ class Api(unittest.TestCase):
         except ValueError:
             return r.status, data
 
-    def wait(self, gid, pred, timeout=180):
-        end = time.time() + timeout
+    def wait(self, gid, pred, timeout=180, stuck=12):
+        """Poll until pred holds. A failure here used to cost 180 s of silence: an injected
+        AssertionError was swallowed by the broad `except Exception` in the cut path, the cell
+        stayed PROCESSING, and the timeout was the only symptom. Fail on NO PROGRESS rather than
+        on elapsed time, and always say why."""
+        end, last, since = time.time() + timeout, None, time.time()
         while time.time() < end:
             s, j = self.req("GET", f"/api/generations/{gid}")
             if pred(j) and not j["busy"]:
                 return j
+            snap = (j.get("stage"), j.get("error"),
+                    tuple(sorted((t["index"], t.get("anim_status"), t.get("anim_reason")) for t in j.get("stickers", []))))
+            if snap != last:
+                last, since = snap, time.time()
+            elif not j.get("busy") and time.time() - since > stuck:
+                self.fail(f"stuck at stage={snap[0]!r} for {stuck}s on {gid}: error={snap[1]!r}\n"
+                          + "\n".join(f"   S{i[0]} {i[1]} {i[2] or ''}" for i in snap[2]))
             time.sleep(0.25)
-        self.fail("timeout waiting for " + str(gid))
+        self.fail(f"timeout after {timeout}s on {gid}: stage={last[0]!r} error={last[1]!r}")
 
     def new(self, prompt, **kw):
         s, j = self.req("POST", "/api/generations", {"prompt": prompt, **kw})

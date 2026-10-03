@@ -96,6 +96,94 @@ def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat
     return plan
 
 
+MAX_PLAN_BYTES = 64_000
+PLAN_SOURCES = {"ai", "deterministic", "transformation"}
+_CTRL = re.compile(r"[\x00-\x1f\x7f\u2028\u2029]")
+
+
+def _text(value, what: str, limit: int, *, allow_empty: bool = False) -> str:
+    if not isinstance(value, str):
+        raise sources_error(f"The plan is not valid: {what} must be text")
+    if _CTRL.search(value):
+        raise sources_error(f"The plan is not valid: {what} has a line break or a control character")
+    value = value.strip()
+    if not value and not allow_empty:
+        raise sources_error(f"The plan is not valid: {what} is empty")
+    if len(value) > limit:
+        raise sources_error(f"The plan is not valid: {what} is {len(value)} characters long; the limit is {limit}")
+    return value
+
+
+def plan_from_preview(raw, prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", loop: bool = False) -> dict:
+    """The plan the person previewed (`preview`'s answer, sent back by the browser) as a plan this server can trust. The browser is untrusted: only the CELLS (label, tags, emoji, motion),
+    the subject sentence and the key colour are taken from it, each checked for type, size and characters, then linted by the enhancer's own rules (`expander.lint_slots`); everything else
+    (task, template, grid, style, loop, the prompts) is rebuilt here from the request and the saved template (`prompter.render_plan`), so a forged plan cannot carry its own instructions.
+    A request that is a transformation is rebuilt without the cells (the built-in template writes the same plan every time). A plan that fails raises PipelineError 400 in words; no model is asked."""
+    if not isinstance(raw, dict):
+        raise sources_error("The plan is not valid: it must be the object that Generate prompt returned")
+    if len(json.dumps(raw, ensure_ascii=False, default=str)) > MAX_PLAN_BYTES:
+        raise sources_error(f"The plan is too large (the limit is {MAX_PLAN_BYTES // 1000} KB)")
+    g = GRID_NAMES.get(grid) if isinstance(grid, str) else tuple(grid)
+    if g not in prompter.GRIDS:
+        raise sources_error("grid must be 3x3, 2x2 or 1x1")
+    if style_id not in prompter.STYLES:
+        raise sources_error(f"unknown style '{style_id}'")
+    if not str(prompt).strip():
+        raise sources_error("describe the subject first")
+    base = expander.expand(str(prompt).strip(), g, use_ai=False)           # trusted: the request alone, no model
+    slots_in = raw.get("slots")
+    if not isinstance(slots_in, dict):
+        raise sources_error("The plan is not valid: it has no slots (the cells of the stickers)")
+    n = g[0] * g[1]
+    cells_in = slots_in.get("cells")
+    if not isinstance(cells_in, list) or len(cells_in) != n:
+        raise sources_error(f"The plan is not valid: it needs exactly {n} cells, got {len(cells_in) if isinstance(cells_in, list) else 'none'}")
+    tid = raw.get("template_id")
+    if tid is not None and tid != base["template_id"]:
+        raise sources_error(f"The plan is not valid: it is for the template {str(tid)[:40]!r}, this request uses {base['template_id']}")
+    src = raw.get("expanded_by")
+    if src is not None and src not in PLAN_SOURCES:
+        raise sources_error("The plan is not valid: expanded_by must be ai, deterministic or transformation")
+    desc = _text(slots_in.get("subject_description"), "the subject description", 800)
+    key = slots_in.get("key_colour", "green")
+    if key not in prompter.KEYS:
+        raise sources_error("The plan is not valid: key_colour must be green or blue")
+    cells = []
+    for i, c in enumerate(cells_in, 1):
+        if not isinstance(c, dict):
+            raise sources_error(f"The plan is not valid: cell {i} is not an object")
+        if c.get("pos") != i:
+            raise sources_error(f"The plan is not valid: cell {i} must have pos {i}")
+        tags_in = c.get("tags")
+        if not isinstance(tags_in, list) or not 1 <= len(tags_in) <= 5 or not all(isinstance(t, str) for t in tags_in):
+            raise sources_error(f"The plan is not valid: cell {i} needs 1 to 5 tags")
+        tags = prompter.clean_tags(prompter.tag(_text(tags_in[0], f"cell {i}'s first tag", 80)), [_text(t, f"cell {i}'s tags", 60) for t in tags_in[1:]])
+        if not tags[0]:
+            raise sources_error(f"The plan is not valid: cell {i} has an empty first tag")
+        if isinstance(c.get("emoji"), str) and re.search(r"[A-Za-z]", c["emoji"]):
+            raise sources_error(f"The plan is not valid: cell {i}'s emoji must be emoji, not words")
+        emoji = _text(c.get("emoji"), f"cell {i}'s emoji", 16)
+        cell = {"pos": i, "label": _text(c.get("label"), f"cell {i}'s label", 200), "tags": tags, "emoji": emoji}
+        if c.get("motion") not in (None, ""):
+            cell["motion"] = _text(c["motion"], f"cell {i}'s motion", 220)
+        cells.append(cell)
+    subject_slug = prompter.slug(" ".join(w for w in base["subject"].split() if w not in prompter.COLORS | prompter.STOP)) or "sticker"
+    problems = expander.lint_slots({"cells": cells}, n, subject_slug, str(prompt))
+    if problems:
+        raise sources_error("The plan did not pass the checks: " + "; ".join(problems)[:300])
+    if base.get("expanded_by") != "transformation":      # a transformation is the built-in template's, rebuilt whole; any other plan keeps the cells that were shown
+        base["slots"] = {**base["slots"], "subject_description": desc, "cells": cells, "key_colour": key}
+        base["expanded_by"] = src or "deterministic"
+        model = raw.get("expand_model")
+        if base["expanded_by"] == "ai" and isinstance(model, str) and model.strip() and not _CTRL.search(model):
+            base["expand_model"] = model.strip()[:80]
+        base["stickers"] = [{"index": c["pos"], "id": f"prompt{c['pos']:02d}", "prompt": "", "key": c["tags"][0], "tags": c["tags"], "emoji": c["emoji"]} for c in cells]
+    base["slots"]["style_id"] = style_id
+    base["slots"]["loop"] = bool(loop)
+    base["previewed"] = True              # the cells came from a plan the person saw (kept on the task, so a batch can say where its cells came from)
+    return plan_again(base, loop)
+
+
 def subject_of(plan: dict) -> str:
     """The folder subject: the plan's subject words as snake_case (teddy yellow bear for school -> teddy_bear)."""
     return prompter.slug(" ".join(w for w in plan["subject"].split() if w not in prompter.COLORS | prompter.STOP)) or "sticker"

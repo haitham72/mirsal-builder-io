@@ -39,6 +39,14 @@ class Resolution:
         return dict(self.__dict__)
 
 
+PERSON_NOUN = r"(?:guy|man|woman|girl|boy|dude|lady|character|person)"
+PERSON_REF = rf"\b(?:him|her|he|she|they|(?:(?:the|that|this)\s+)?(?:(?:last|same)\s+)?{PERSON_NOUN})\b"
+"""A reference to the character of the chat rather than to a numbered sticker: "make him wear a coat", "the guy", "last guy"."""
+LAST_PERSON = rf"\blast\s+{PERSON_NOUN}\b"
+UNDO_RX = (r"^(?:(?:ok|okay|please|pls|hey|oh|wait|actually)[,\s]+)*(?:undo|revert|roll ?back|go back|take (?:it|that|this) back|put (?:it|that) back)"
+           r"(?:\s+(?:that|it|this|the (?:last |latest )?(?:change|edit|refinement|step|pass|version|one)|my (?:last |latest )?(?:change|edit|request)|the last one|please|pls|now))*[\s.!]*$")
+
+
 def _gid(n) -> str:
     return f"G{int(n):03d}"
 
@@ -75,6 +83,17 @@ def _numbers(clause: str, n: int) -> list:
     if before_last and n > 1 and (n - 1) not in found:
         found.append(n - 1)
     return list(dict.fromkeys(found))
+
+
+def beyond(text: str, n: int, answer: str = "") -> list:
+    """The sticker numbers a message NAMES that do not exist in a batch of `n` ("number 12", "make 12 happier", "#10", "S11"), so the chat can say "this batch has 9" instead of asking again.
+    Only a number that is clearly a sticker counts: after number / no. / # / sticker / cell / S, after an edit verb, or alone as the answer to "which one?" (`answer`). "3x3", "G012", "4 stickers", "make me 12 falcon stickers" do not."""
+    c = re.sub(r"\b\d+\s*x\s*\d+\b", " ", text.lower())
+    c = re.sub(r"\bg\d{1,4}(?:\s*/?\s*s\d+)?\b", " ", c)
+    found = [int(m[1]) for m in re.finditer(r"(?:\b(?:number|no\.?|nr|stickers?|cell|slice|redo|regenerate|animate|approve|reject|fix|improve|swap|replace|change|make|keep|drop|remove|like|love|hate|dislike|except)\s+#?|#|(?<![\w.])s)(\d{1,3})(?![\d.]|\s*(?:stickers?|packs?|sets?|credits?|px|seconds?|x)\b)", c)]
+    if answer and is_sticker_answer(answer):
+        found += [int(m) for m in re.findall(r"(?<![\w.])#?(\d{1,3})(?:st|nd|rd|th)?\b", answer.lower())]
+    return [v for v in dict.fromkeys(found) if v < 1 or v > n]
 
 
 def _semantic(text: str, stickers: list) -> list:
@@ -157,7 +176,7 @@ def resolve(text: str, ctx: dict) -> Resolution:
             r.stickers = [f"{base}/S{i}" for i in nums]
             r.how = "number"
     # 5. the UI selection
-    if not r.stickers and ctx.get("selected") and re.search(r"\b(these|this|those|selected|them|it)\b", low):
+    if not r.stickers and ctx.get("selected") and re.search(r"\b(these|this|those|selected|them|it|him|her|he|she|they)\b", low):
         r.stickers = list(ctx["selected"])
         r.how = "selection"
     if not r.stickers and ctx.get("selected") and not _numbers(low, base_n):
@@ -174,9 +193,15 @@ def resolve(text: str, ctx: dict) -> Resolution:
             r.options = [f"{base}/S{i}" for i in hit]
             r.clarification = "Which one: " + ", ".join(f"#{i}" for i in hit) + "?"
     # 7. "it / that one" -> the focus
-    if not r.stickers and not r.needs_clarification and re.search(r"\b(it|that|this)(?:\s+one)?\b", low) and ctx.get("focus_stickers"):
+    if not r.stickers and not r.needs_clarification and re.search(r"\b(it|that|this|him|her|he|she|they)(?:\s+one)?\b", low) and ctx.get("focus_stickers"):
         r.stickers = list(ctx["focus_stickers"])[:1]
         r.how = "focus"
+    # 7b. a bare person reference ("him", "the guy", "last guy") with nothing else to point at is the last subject of the conversation (the focus batch; "last" = the newest batch of the chat): assume it, never ask
+    if not r.stickers and not r.needs_clarification and re.search(PERSON_REF, low) and (gen or ctx.get("latest")):
+        if re.search(LAST_PERSON, low) and ctx.get("latest") and not r.generation:
+            r.generation = ctx["latest"]
+        r.generation = r.generation or gen or ctx.get("latest")
+        r.how = r.how or "person reference"
     # 8. "the previous one" = the parent generation in this branch
     if re.search(r"\b(previous|prior|before|earlier|original|old(?:er)?)\s+(?:one|version|batch|generation|set|pass)\b|\bgo back\b", low) \
             and ctx.get("parent") and not r.generation:
@@ -343,6 +368,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         t = polite.group(1)                                          # "can you make me a falcon?" is a request, not a question about me
     if re.match(r"^(?:how much|how many credits|what(?:'s| is| would) (?:it|that|this) cost|what'?s the (?:price|cost)|price|cost)\b", t):
         return ["ASK"], 0.85                                         # a price question is never small talk ("how much?" used to answer "Hi!")
+    if re.match(UNDO_RX, t):
+        return ["UNDO"], 0.9                                         # "undo" / "revert": the last refinement of this chat, never "which sticker?"
     if (is_smalltalk(t) or is_ack(t)) and not re.search(NEW_VERBS, t):
         return ["SMALLTALK"], 0.95
     if _parse_multi(t):
@@ -356,7 +383,7 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
     intents: list = []
     conf = 0.5
     counted = re.sub(r"\b(?:make|create|generate|draw|give|design|build)\s+(?:me\s+)?(?:a\s+)?(?:pack of\s+)?\d+\s+(?:\w+\s+){0,2}?(?:stickers?|emoji|packs?|sets?|dogs?|cats?|\w+s)\b|\bpack of \d+\b|\b\d+\s+(?:different\s+)?(?:\w+\s+){0,2}stickers?\b", " ", t)
-    refs = bool(re.search(r"\b(?:number|no\.?|#)\s*\d|\b\d\b|\bs\d\b|\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)\b|\blast\s+(?:one|sticker|image|picture|pic|cell)\b|\bg\d+\s*/?\s*s\d", counted)) \
+    refs = bool(re.search(r"\b(?:number|no\.?|#)\s*\d|\b\d{1,2}\b|\bs\d\b|\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)\b|\blast\s+(?:one|sticker|image|picture|pic|cell)\b|\bg\d+\s*/?\s*s\d", counted)) \
         or bool(has_selection and re.search(r"\b(these|this|those|them|it|selected)\b", t))
     concept_edit = bool(has_generation and re.search(rf"\b(make|turn|give|put|let|get)\s+{PRON}\b", t) and (re.search(COMPARATIVE, t) or re.search(WEARISH, t) or re.search(COLOURS, t))
                         and not re.search(r"\b(?:a|an|some|\d+)\s+(?:\w+\s+)?(?:stickers?|emoji|packs?|sets?)\b", t))
@@ -389,6 +416,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         intents, conf = ["NEW"], 0.85
     elif has_generation and re.search(r"^(?:i )?(?:like|love|hate|dislike|keep)\b", t):
         intents, conf = ["FEEDBACK"], 0.6
+    elif has_generation and len(t.split()) <= 8 and not t.endswith("?") and re.search(PERSON_REF, t) and not re.search(NEW_VERBS, t) and not re.search(rf"\b{POS}\b|\b{NEG}\b", t):
+        intents, conf = ["EDIT_STICKERS"], 0.7        # "him", "the guy", "last guy": the character of the chat. A change to what is open, never a new subject called "last guy"
     elif has_generation and len(t.split()) <= 5 and (re.search(COMPARATIVE, t) or re.search(COLOURS, t) or re.match(r"^(?:same|again|more|one more|undo|revert|redo)\b", t)) and not re.search(NEW_VERBS, t):
         intents, conf = ["EDIT_STICKERS"], 0.7        # "bigger", "same but red", "happier": a change to what is open, never a new subject (the next question is which sticker)
     elif len(t.split()) <= 8 and not t.endswith("?") and not re.match(r"^(?:undo|revert|ok|okay|yes|no)\b", t):
@@ -403,7 +432,7 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
 
 SETTING_RULES = [
     (r"\b2\s*x\s*2\b", ("grid", "2x2")), (r"\b3\s*x\s*3\b", ("grid", "3x3")),
-    (r"\b(don'?t|do not|stop)\s+ask|\binstant|\bauto[- ]?create|\bjust (?:do|make) it", ("ask_before_spending", False)),
+    (r"\b(don'?t|do not|stop)\s+ask(?:ing)?\b(?!\s+(?:me\s+)?(?:about|regarding|whether|if|for)\b)|\binstant|\bauto[- ]?create|\bjust (?:do|make) it", ("ask_before_spending", False)),
     (r"\bask (?:me )?before|\bconfirm before", ("ask_before_spending", True)),
     (r"\b(?:allow|enable|turn on)\s+(?:the\s+)?(?:ai\s+)?vision\b", ("allow_vlm", True)),
     (r"\b(?:don'?t|do not|never|stop|disable|turn off)\s+(?:use\s+|using\s+)?(?:the\s+)?(?:ai\s+)?vision\b", ("allow_vlm", False)),

@@ -41,6 +41,7 @@ mirsal/out/.asset_secret
 mirsal/out/.writer.lock
 mirsal/out/.paid.lock
 mirsal/out/*.log
+mirsal/.test-results/
 
 # Secrets: never commit tokens (Telegram bot token lives in env or out/telegram.json)
 Phase_01/telegram.md

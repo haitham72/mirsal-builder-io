@@ -33,7 +33,7 @@ from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from . import editroute, refine, subjects
 from .profile import Profile
-from .resolver import DESCRIBE, Resolution, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind
+from .resolver import DESCRIBE, Resolution, beyond, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind
 from .tools import ConsoleTools, ToolError
 
 INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
@@ -100,6 +100,7 @@ class Turn:
     spent: float = 0.0
     prev_pending: dict | None = None             # the plan that was waiting when this message arrived (a new one replaces it, and the reply says so)
     er: dict | None = None                       # what an edit request means (agent/editroute.classify_edit): the editor, or a tweak / an action / a redesign
+    answer: str = ""                             # the typed answer to my "which sticker?" (t.text then holds the original request + the answer): "12" is checked against the batch's size
     unsure_review: bool = False                  # an approve / reject sentence with a negation in it: nothing is decided, the person is asked
     _lock: Any = None
 
@@ -124,7 +125,7 @@ class Agent:
         from langgraph.graph import END, StateGraph
         g = StateGraph(State)
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "particles": self.n_particles, "editroute": self.n_editroute, "unsupported": self.n_unsupported, "refine": self.n_refine, "another": self.n_another,
-                 "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
+                 "edit": self.n_edit, "undo": self.n_undo, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
                  "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
         for k, fn in nodes.items():
@@ -224,6 +225,7 @@ class Agent:
         elif t.action and t.action.get("type") in ("names_apply", "names_keep"):
             t.intents, t.conf = ["NAMES_DECIDE"], 1.0
         elif asked and asked.get("intents") and is_sticker_answer(t.text, bool(t.selected)):
+            t.answer = t.text
             t.text = f"{asked['text']} {t.text}".strip()       # the original request plus the missing "which": everything downstream reads it as one sentence
             t.intents, t.conf, answered = list(asked["intents"]), 0.95, True
             if "EDIT_ROUTE" in t.intents:
@@ -240,7 +242,7 @@ class Agent:
                 got = self.brain.classify(t.text, self.store.summary_text(sess))
                 if got:
                     t.intents, t.conf = got, 0.7
-            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES"):         # a question ("can you rotate him?") is an ASK until the rules read it
+            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO"):         # a question ("can you rotate him?") is an ASK until the rules read it
                 if editroute.unsupported(t.text):
                     t.intents, t.conf = ["UNSUPPORTED"], 0.9
                 else:
@@ -253,13 +255,13 @@ class Agent:
                 refine_it = self._wants_refine(t, has_gen)
                 if refine_it:
                     t.intents, t.conf = ["REFINE"], 0.9
-        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "PARTICLES": "particles", "EDIT_ROUTE": "an edit", "UNSUPPORTED": "something I cannot do yet", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
+        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "PARTICLES": "particles", "EDIT_ROUTE": "an edit", "UNSUPPORTED": "something I cannot do yet", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "UNDO": "an undo", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
                  "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
-                 "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
+                 "EDIT_STICKERS": "edit", "UNDO": "undo", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
                  "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
@@ -298,6 +300,13 @@ class Agent:
                 t.trace.note(f"{gid} was made outside this chat (the Studio): I can work on it now")
         ctx = self._ctx(t)
         r = resolve(t.text, ctx)
+        gone = beyond(t.text, int(ctx["known"].get(r.generation or ctx["generation"], ctx["n"]) or 9), t.answer) if (r.generation or ctx["generation"]) else []
+        if gone and not r.stickers and not r.needs_clarification:       # "number 12" in a batch of 9: say what the batch has, never ask again in the same words
+            size = int(ctx["known"].get(r.generation or ctx["generation"], ctx["n"]) or 9)
+            r.needs_clarification, r.options = True, []
+            r.clarification = f"{self._nm(t.sess, r.generation or ctx['generation'])} has {size} stickers, so there is no number {', '.join(str(g) for g in gone)}. Which one do you mean, 1 to {size}?"
+        elif gone:
+            t.trace.note(f"there is no number {', '.join(str(g) for g in gone)}: that batch has {ctx['n']} stickers")
         if not r.stickers and not r.needs_clarification and ("edit" in needs or "ask" in needs) and ctx["stickers"] and self.brain.available:
             nums = self.brain.pick_stickers(t.text, ctx["stickers"])
             if nums and ctx["generation"]:
@@ -496,7 +505,7 @@ class Agent:
                       refs: list | None = None, note: str = "") -> bool:
         """Start a batch from an approved plan (`p["plan"]` is sent as it is: the card and the batch are the same). True when it started; False leaves the reply explaining why."""
         try:
-            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"), ref_clause=p.get("ref_clause"))
+            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"), ref_clause=p.get("ref_clause"), **_edge_kw(p))
         except ToolError as e:
             t.reply = f"I couldn't start that: {e}"
             t.trace.end("not started", ok=False)
@@ -569,7 +578,7 @@ class Agent:
             t.trace.retitle("regenerating " + ", ".join(i["label"] for i in p["items"]))
             n = 0
             for it in p["items"]:
-                self._start_create(t, {**it, "grid": "1x1", "style_id": p["style_id"], "ai": p.get("ai", True)}, parent=it["parent"],
+                self._start_create(t, {**it, "grid": "1x1", "style_id": it.get("style_id") or p["style_id"], "ai": p.get("ai", True)}, parent=it["parent"],
                                    regen_of=it["regen_of"], refs=it.get("refs"), note=it["note"])
                 n += 1
             t.reply = f"Regenerating {n} sticker{'s' if n != 1 else ''}; the other stickers stay as they are."
@@ -658,7 +667,7 @@ class Agent:
         done, failed = [], []
         for it in items:
             try:
-                r = self.tools.create(it["prompt"], it["grid"], it["style_id"], it.get("ai", True), parent=it.get("parent"), base_plan=it.get("plan"), refs=it.get("refs"), ref_clause=it.get("ref_clause"))
+                r = self.tools.create(it["prompt"], it["grid"], it["style_id"], it.get("ai", True), parent=it.get("parent"), base_plan=it.get("plan"), refs=it.get("refs"), ref_clause=it.get("ref_clause"), **_edge_kw(it))
             except ToolError as e:
                 failed.append((it, str(e)))
                 continue
@@ -1080,7 +1089,7 @@ class Agent:
         sid = plan["slots"].get("style_id") or st["style_id"]
         change = {"tweak": f"change only: {what}", "action": f"new action: {what}", "redesign": f"new design: {what}"}[case]
         item = {"prompt": name, "subject": name, "grid": f"{rows}x{cols}", "style_id": sid, "ai": True, "plan": compact_plan(plan), "parent": gen, "refs": refs, "ref_clause": clause,
-                "note": f"{case}: {what}", "changes": [change]}
+                "note": f"{case}: {what}", "changes": [change], **self._edge(gen)}
         t.trace.step(f"{case}: {what}", {"title": f"from {self._nm(t.sess, gen)}", "lines": [f"the picture: {'this sheet (' + str(sheet_px) + ' px)' if refs else 'none: the actions are approved, the design is new'}"]})
         card = self._items_card(f"{name}: {change}", [item], st, est, {"edit": case, "image": bool(refs)})
         how = {"tweak": f"I'll send **this sheet** as the picture with the same prompt and change only: {what}.",
@@ -1105,7 +1114,7 @@ class Agent:
                 notes.append(f"{sid.split('/')[1]} is {r['from_px']} px" + (f", under the {r['min_px']} px minimum, so it was scaled up to {r['px']} px" if r.get("scaled") else f", over the {r['min_px']} px minimum, so it is sent as it is"))
             label = sid.split("/")[1]
             items.append({"prompt": f"{name}: {self._key_of(gen, sid)}, {what}", "subject": name, "parent": gen, "regen_of": sid, "refs": refs, "ref_clause": clause, "plan": compact_plan(sp), "label": label,
-                          "style_id": sp["slots"].get("style_id") or st["style_id"], "note": f"{label} redone ({case}): {what}"})
+                          "style_id": sp["slots"].get("style_id") or st["style_id"], "note": f"{label} redone ({case}): {what}", **self._edge(gen)})
         total = (est or 0) * len(items)
         spec = {"type": "batch", "items": items, "style_id": st["style_id"], "ai": True, "estimate": total}
         labels = ", ".join(i["label"] for i in items)
@@ -1122,10 +1131,38 @@ class Agent:
             self.n_confirm({"turn": _with_pending(t, spec)})
         return {}
 
+    def _edge(self, gen: str) -> dict:
+        """The edge finish of the batch an edit is made from (white stroke px, fringe trim px), so the child looks like its parent and not like the defaults. {} when it cannot be read."""
+        try:
+            e = self.tools.edge_of(gen) or {}
+        except Exception:
+            e = {}
+        return {k: e[k] for k in ("outline", "erode") if e.get(k) is not None}
+
+    def _person_edit(self, t: Turn) -> dict:
+        """"him", "the guy", "last guy" with nothing said about what to change: the person means the character of the chat, so the batch is assumed (the focus; "last" = the newest of the chat) and the
+        one thing asked is WHAT to change, never "which sticker?" and never a new sheet called "last guy"."""
+        gen = t.res.generation or (t.sess.get("focus") or {}).get("generation") or (self.store.latest_pass(t.sess, with_generation=True) or {}).get("generation")
+        if not gen:
+            t.reply = "There is nothing to change yet. Let's make some stickers first."
+            return {}
+        t.sess["focus"] = {"generation": gen, "stickers": []}
+        t.generation = gen
+        t.reply = f"I'll work on **{self._nm(t.sess, gen)}**, the batch we have open. What should I change about him? For example \"make him wear a hat\" or \"make him happier\"."
+        t.chips = [{"label": "Make him happier", "text": "make him happier"}, {"label": "Give him a hat", "text": "give him a hat"}]
+        t.trace.step("assumed the character of " + self._nm(t.sess, gen))
+        t.trace.end("asked what to change")
+        return {}
+
     def n_edit(self, state: State) -> dict:
+        """Numbered stickers (and a clicked selection) drawn again as 1x1. AN EDIT REUSES THE PARENT'S PROMPT (Haitham, 2026-10-02): the 1x1 is the parent's own plan for that cell (`tools.slice_plan` ->
+        `gates.regen_plan`: its style, key colour, template version and cell label) with the change appended to the cell's label, the parent's own picture of that sticker goes as the reference
+        with a clause that allows the change, and the batch keeps the parent's edge finish. Nothing is rebuilt from the words of the sentence."""
         t: Turn = state["turn"]
         subj, p = self._focus_pass(t)
         targets = t.res.stickers or (t.res.negative if t.res.negative else [])
+        if t.res.how == "person reference" and not targets:
+            return self._person_edit(t)
         if not targets or not p:
             t.reply = "Which sticker should I change? Say a number, like \"make number 3 happier\", or click one."
             t.chips = []
@@ -1133,48 +1170,102 @@ class Agent:
                 t.sess["awaiting"] = {"intents": ["EDIT_STICKERS"], "text": t.text}
             return {}
         gen = targets[0].split("/")[0]
-        edit = re.sub(r"\b(make|redo|regenerate|change|fix|replace|improve|number|no\.?|sticker|#)\s*|\b(g\d+\s*/?\s*s\d|s\d|\d+)\b|\b(it|that|this|these|those|them|one)\b", " ",
-                      t.text, flags=re.I)
-        edit = re.sub(r"\b(like|but|and|i|the|a)\b", " ", edit, flags=re.I)
-        edit = re.sub(r"\s+", " ", edit).strip(" .,!?") or "a fresh take"
-        if t.res.references:
-            edit = "same look as " + ", ".join(self._key_of(gen, r["source"]) for r in t.res.references) + (f" ({edit})" if edit != "a fresh take" else "")
+        edit = editroute.delta_of(t.text)
+        fresh = editroute.fresh_take(edit)
+        if fresh:
+            edit = ""
+        like = ", ".join(self._key_of(gen, r["source"]) for r in t.res.references)
+        said = (("same look as " + like) if like else "") + (f" ({edit})" if like and edit else edit if edit else "") or "a fresh take"
         card = self.tools.generation(gen)
-        items = []
+        st = t.sess["settings"]
+        items, notes = [], []
         for sid in targets[:4]:
             s = next((x for x in card["stickers"] if x["id"] == sid), None)
             if not s:
                 continue
+            try:
+                sp = self.tools.slice_plan(sid)
+            except ToolError as e:
+                t.reply = f"I can't read the prompt of {sid.split('/')[1]} to change it: {e}"
+                return {}
+            if edit:
+                sp = editroute.add_to_label(sp, edit)
+            elif like:
+                sp = editroute.add_to_label(sp, "same look as " + like)
             base = (subj["name"] if subj else "sticker")
-            prompt = f"{base}: {s['key'].replace('_', ' ')}, {edit}"
-            refs = []
+            refs, clause = [], None
             for r in t.res.references:
                 if r["target"] == sid and hasattr(self.tools, "reference_from_sticker"):
                     try:
                         refs.append(self.tools.reference_from_sticker(r["source"]))
+                        clause = editroute.reference_clause("like", "") + (f" Also apply this change: {edit}." if edit else "")
                     except Exception:
                         pass
-            items.append({"prompt": prompt, "subject": subj["name"] if subj else base, "parent": gen, "regen_of": sid, "refs": refs,
-                          "note": f"{sid.split('/')[1]} redone: {edit}", "label": sid.split("/")[1]})
+            if not refs and not fresh:                                      # the sticker as it is, to be changed (a fresh take is drawn from the prompt alone)
+                try:
+                    r = self.tools.slice_reference(sid)
+                    refs, clause = [r["ref"]], editroute.reference_clause("tweak", edit, slice_=True)
+                    notes.append(f"{sid.split('/')[1]} is {r['from_px']} px" + (f", under the {r['min_px']} px minimum, so it was scaled up to {r['px']} px" if r.get("scaled") else f", over the {r['min_px']} px minimum, so it is sent as it is"))
+                except Exception:
+                    refs, clause = [], None
+            items.append({"prompt": f"{base}: {s['key'].replace('_', ' ')}, {said}", "subject": subj["name"] if subj else base, "parent": gen, "regen_of": sid, "refs": refs, "ref_clause": clause,
+                          "plan": compact_plan(sp), "style_id": sp["slots"].get("style_id") or st["style_id"], "note": f"{sid.split('/')[1]} redone: {said}", "label": sid.split("/")[1], **self._edge(gen)})
         if not items:
             t.reply = "I couldn't find those stickers in this batch."
             return {}
         t.trace.retitle("editing " + ", ".join(i["label"] for i in items))
-        t.trace.step("expand prompt", {"lines": [i["prompt"] for i in items]})
+        t.trace.step("same prompt, one change", {"title": f"from {self._nm(t.sess, gen)}", "lines": [i["prompt"] for i in items] + notes})
         if t.res.references:
             t.trace.note("using " + ", ".join(r["source"].split("/")[1] for r in t.res.references) + " as the reference")
         est = self.tools.estimate("image")
         total = (est or 0) * len(items)
-        spec = {"type": "batch", "items": items, "style_id": t.sess["settings"]["style_id"], "ai": True, "estimate": total}
-        if self.tools.live() and t.sess["settings"].get("ask_before_spending", True):
+        spec = {"type": "batch", "items": items, "style_id": st["style_id"], "ai": True, "estimate": total}
+        more = f" I did the first 4 of {len(targets)}; ask again for the rest." if len(targets) > 4 else ""
+        say = f"I'll redo {', '.join(i['label'] for i in items)} ({said}) from the same prompt; the rest of the batch stays." + (" " + "; ".join(notes) + "." if notes else "") + more
+        if self.tools.live() and st.get("ask_before_spending", True):
             t.sess["pending"] = spec
-            t.reply = f"I'll redo {', '.join(i['label'] for i in items)} ({edit}); the rest of the batch stays. {('That costs ' + _credits(total) + '. ') if total else ''}Go ahead?"
+            t.reply = say + (f" That costs {_credits(total)}." if total else "") + " Go ahead?"
             t.chips = [{"label": "Do it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end(f"ready · {_credits(total)}")
         else:
             t.sess["pending"] = spec
+            t.reply = say
             t.trace.step("confirmed: edit")
             self.n_confirm({"turn": _with_pending(t, spec)})
+        return {}
+
+    def n_undo(self, state: State) -> dict:
+        """"undo" / "revert": the last REFINEMENT of this chat is taken back, the simple way. A plan still waiting for the go-ahead is dropped (nothing was spent); otherwise the newest batch the chat made FROM
+        another one (an edit, a refinement, a redesign, another pass) is marked undone and the focus returns to the batch it came from, so "it" / "him" / "number 3" mean the earlier version again.
+        Nothing is deleted or un-paid: the newer batch stays in History, and a job still drawing is not stopped. Feedback ("I hate 4") and approvals are not refinements and are not undone here."""
+        t: Turn = state["turn"]
+        sess = t.sess
+        if sess.get("pending"):
+            what = t.prev_pending or sess["pending"]
+            sess["pending"] = None
+            names = ", ".join(i.get("label") or i.get("subject") or "" for i in (what or {}).get("items") or []) if (what or {}).get("type") == "batch" else str((what or {}).get("subject") or (what or {}).get("label") or "")
+            t.reply = f"Undone: I dropped the plan{(' for **' + names + '**') if names.strip(', ') else ''}. Nothing was spent."
+            t.trace.end("plan dropped, nothing spent")
+            return {}
+        last = None
+        for subj in sess["subjects"]:
+            for p in subj["passes"]:
+                if p.get("parent") and not p.get("undone") and (last is None or p["created"] >= last[1]["created"]):
+                    last = (subj, p)
+        if not last:
+            t.reply = "There is nothing to undo yet: I have not changed anything in this chat. Tell me what to change, and I can take it back."
+            t.trace.end("nothing to undo")
+            return {}
+        subj, p = last
+        parent = p["parent"]
+        p["undone"] = True
+        sess["focus"] = {"generation": parent, "stickers": []}
+        t.generation = parent
+        again = (f"the new batch ({p['generation']}) stays in History" if p.get("generation") else "the new batch is still being drawn and cannot be stopped; it will stay in History")
+        t.reply = f"Undone. We are back on **{self._nm(sess, parent)}**, the version before your last change ({parent}); {again}, nothing is deleted. Say what you want changed on this one."
+        t.cards.append({"type": "generation", "generation": parent, "job": None, "subject": subj["name"], "note": "back to this version"})
+        t.trace.step(f"back to {parent}")
+        t.trace.end("done")
         return {}
 
     def _key_of(self, gen: str, sid: str) -> str:
@@ -1377,6 +1468,11 @@ class Agent:
             ids = None
         new = settings_from(t.text, ids)
         if not new:
+            if re.search(r"\bvision\b|\bvlm\b", t.text.lower()):
+                t.sess["vision_asked"] = True                              # the one-time question is not asked again in this chat; the vision setting itself is untouched
+                t.reply = ("Understood, I will not ask about AI vision again in this chat, and \"ask before spending\" is unchanged. AI vision stays as it is: say \"allow AI vision\" or \"don't use AI vision\" "
+                           "when you decide. If you ask me to describe or rename stickers, I still need your yes first.")
+                return {}
             t.reply = "Which setting? I can change the grid (2×2 or 3×3), the style, and whether I ask before spending."
             return {}
         t.sess["settings"].update(new)
@@ -1613,6 +1709,11 @@ class Agent:
         self.store.save(sess)
 
 
+def _edge_kw(item: dict) -> dict:
+    """The edge finish (white stroke, fringe trim) an edit carries from its parent batch, as keyword arguments for `tools.create`; nothing for a new request, so every other caller is unchanged."""
+    return {k: int(item[k]) for k in ("outline", "erode") if item.get(k) is not None}
+
+
 def compact_plan(plan: dict) -> dict:
     """The plan a card shows, as it is stored in `pending`: the template, the slots and the cells; the prompts are rebuilt from them (`tasks.plan_again`), so the stored plan is small and the
     batch that runs is exactly the one that was approved."""
@@ -1662,11 +1763,12 @@ def hydrate(store: SessionStore, tools, sess: dict) -> dict:
             c = dict(c)
             if c.get("type") == "generation":
                 gid = c.get("generation")
-                if not gid and c.get("job"):
+                if c.get("job"):
                     try:
                         j = tools.job(c["job"])
-                        c.update(job_status=j.get("status"), job_stage=j.get("stage"), job_error=j.get("error"), cost=j.get("cost"))
-                        gid = j.get("generation")
+                        c.update(job_status=j.get("status"), job_stage=j.get("stage"), job_error=j.get("error"), cost=j.get("cost"),
+                                 job_info={k: j.get(k) for k in ("id", "status", "error", "external_task_id", "provider_check")})
+                        gid = gid or j.get("generation")
                     except Exception:
                         pass
                 if gid:

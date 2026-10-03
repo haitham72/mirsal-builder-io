@@ -14,7 +14,7 @@ const AIU=(()=>{
  const rel=(ts,now)=>{const d=Math.max(0,(now??Date.now()/1000)-ts);return d<60?'just now':d<3600?Math.floor(d/60)+' min':d<86400?Math.floor(d/3600)+' h':Math.floor(d/86400)+' d'};
  /* a message's signature: the page only rebuilds a message whose signature changed (so carousels keep their scroll and videos keep playing) */
  const sig=m=>JSON.stringify([m.status,m.text,(m.steps||[]).map(s=>[s.kind,s.label,s.status,s.detail&&s.detail.lines&&s.detail.lines.length]),m.chips,
-  (m.cards||[]).map(c=>[c.type,c.generation,c.job,c.job_status,c.job_stage,c.animating,c.estimate,c.names&&c.names.length,
+  (m.cards||[]).map(c=>[c.type,c.generation,c.job,c.job_status,c.job_stage,c.job_info,c.animating,c.estimate,c.names&&c.names.length,
    ((c.data&&c.data.stickers)||c.stickers||[]).map(s=>[s.id,s.status,s.still,s.anim_status,!!s.png,!!s.webm]),c.data&&c.data.problem&&c.data.problem.check,c.data&&c.data.allow,c.run&&[c.run.step,c.run.status,c.run.updated]])]);
  /* does anything on this card still move? (then the page keeps polling) */
  const cardLive=c=>{if(c.type!=='generation')return false;
@@ -65,7 +65,12 @@ function bgInit(root){if(bgOn)return;bgOn=true;
 async function loadSessions(){const r=await api('/api/chat/sessions');if(r.ok)A.sessions=r.j.sessions;return A.sessions}
 async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=r.j;pill();drawBar()}
 /* the local server's models for the engine row's dropdown (no count limit); the first call may wait while the server loads its model */
-async function loadModels(){const r=await api('/api/llm/models');A.llm=r.ok?r.j:{models:[],current:'',ok:false,why:'Could not read the model list'};if(A.setOpen)setSet()}
+async function loadModels(){const r=await api('/api/llm/models');A.llm=r.ok?r.j:{models:[],current:'',ok:false,why:'Could not read the model list'};engRedraw()}
+/* the engine control (Auto / Local / Cloud + the local model) is ONE implementation for two screens: the AI screen's gear panel and the Studio's AI enhancer (composer.js, cpDrawEngine).
+   Both draw it with beRow() and both end up in engRedraw(); the Studio hands in its own source (GET /api/ai, shaped like GET /api/chat/agent) through AIENG.rows. */
+function engRedraw(){if(A.setOpen)setSet();if(typeof cpDrawEngine==='function')cpDrawEngine()}
+const engSync=()=>typeof aiRefresh==='function'?aiRefresh():null;        // the Studio's copy of the same facts (generate.js)
+let ENGSRC=null;
 async function loadSession(id,quiet){const r=await api('/api/chat/sessions/'+id);
  if(!r.ok){if(r.status===404){A.sid=null;A.sess=null;store.set('mirsal.ai.sid','');paint();return null}if(!quiet)toast(r.j.error||'Could not load the chat',1);return null}
  A.sess=r.j;paint();return r.j}
@@ -193,13 +198,14 @@ function cardHTML(c,m,i){
  if(c.type==='generation'){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
   let note='';
-  if(!gid){note=c.job_status==='FAILED'||c.job_status==='TIMEOUT'?`<span class=ai-err>The model could not make this sheet${c.job_error?': '+AIU.esc(c.job_error):''}. Nothing more was spent.</span>`:`Drawing the sheet${c.job_stage?' · '+AIU.esc(c.job_stage):''}…`}
+  if(['FAILED','TIMEOUT'].includes(c.job_status))note=JR.controls(c.job_info||{id:c.job,status:c.job_status,error:c.job_error});
+  else if(!gid){note=`Drawing the sheet${c.job_stage?' · '+AIU.esc(c.job_stage):''}…`}
   else if(c.data&&c.data.problem)note=problemHTML(c.data.problem,gid);
   else if(!st.length)note='Cutting the stickers…';else if(st.some(x=>x.status==='PENDING'))note='Cutting the stickers…';
   else if(c.animating&&st.some(x=>['PENDING','RUNNING'].includes(x.anim_status)))note='Animating…';
   const meta=gid?`${gid}${c.data&&c.data.parent?' · from '+c.data.parent:''} · ${ready} ready`:'';
   return `<div class="ai-card gen"><div class=ai-ch><b>${AIU.esc(c.subject||'Stickers')}</b><small>${meta}</small><span class=sp></span>${gid?`<button class=ai-link data-act=agstudio data-g="${gid}">Open in Studio</button>`:''}</div>
-   ${carHTML(st.length?st:null,gid,(c.data&&c.data.allow)||null)}${note?`<div class=car-note>${note}</div>`:''}</div>`}
+   ${(c.data&&c.data.video_sheets||[]).filter(v=>v.status!=='REJECTED').map(v=>SR.picture(c.data,v)).join('')}${c.data?SR.bulk(c.data):''}${carHTML(st.length?st:null,gid,(c.data&&c.data.allow)||null)}${note?`<div class=car-note>${note}</div>`:''}</div>`}
  if(c.type==='creator'){const g=c.run&&(m.cards||[]).find(x=>x.type==='generation'&&x.generation===c.run.generation);return runHTML(c.run,(g&&g.data&&g.data.allow)||null)}
  if(c.type==='stickers'){return `<div class="ai-card"><div class=ai-ch><b>${c.stickers.length===1?'Sticker':'Stickers'}</b><small>${c.stickers.length} found</small></div>${carHTML(c.stickers.map(x=>({...x,status:'READY',name:x.key})),null)}</div>`}
  return ''}
@@ -220,7 +226,7 @@ function runHTML(r,allow){if(!r)return '';
   ${r.status==='running'?`<button class=ai-link data-act=agaction data-type=creator_stop>Stop</button>`:''}</div><ol class=run-steps>${rows}</ol>${why}${runAllowRow(r,allow)}</div>`}
 /* the same pair the Studio has, on the creator's card, per kind: N counts what is allow-able NOW. It reads the batch's allow block (gates.allow_info) that rides on the generation card next to the run. */
 function runAllowRow(r,al){const gid=r.generation;if(!al||!gid||r.status==='done')return '';
- const rows=[['still','sticker'],['animation','animation']].map(([kind,what])=>{const a=al[kind]||{can:[],undo:[]},n=a.can.length,b=a.undo.length;if(!n&&!b)return '';
+ const rows=[['still','sticker'],['animation','animation'],['video_sheet','video sheet']].map(([kind,what])=>{const a=al[kind]||{can:[],undo:[]},n=a.can.length,b=a.undo.length;if(!n&&!b)return '';
   return `<span class=run-alw>${n?`<button class="ai-chip pri" data-act=agallowall data-g="${AIU.esc(gid)}" data-kind=${kind} data-allow=1 title="Use every ${what} anyway that Python blocked as a judgement call">Use all anyway (${n})</button>`:''}
    ${b?`<button class=ai-chip data-act=agallowall data-g="${AIU.esc(gid)}" data-kind=${kind} data-allow=0 title="Block the ${what}s you allowed again">Take all back (${b})</button>`:''}</span>`}).join('');
  return rows?`<div class=run-bulk>${rows}<span class=mut>or allow one sticker below</span></div>`:''}
@@ -297,11 +303,14 @@ ACT.agallow=async el=>{const gid=el.dataset.g,n=+String(gid||'').replace(/\D/g,'
  if(!r.ok)return toast(r.j.error||'Could not change it',1);
  toast(el.dataset.allow==='0'?'The permission is taken back':'Used anyway: cutting it again…');
  if(A.sid)await loadSession(A.sid,true);startPoll()};
-ACT.agallowall=async el=>{const gid=el.dataset.g,n=+String(gid||'').replace(/\D/g,'');if(!n)return;const allow=el.dataset.allow==='1',kind=el.dataset.kind==='still'?'still':'animation';
- const r=await post(`/api/generations/${n}/allow`,{all:true,allow,kind});
+ACT.agallowall=async el=>{const gid=el.dataset.g,n=+String(gid||'').replace(/\D/g,'');if(!n)return;const allow=el.dataset.allow==='1',kind=['still','video_sheet'].includes(el.dataset.kind)?el.dataset.kind:'animation';
+ if(el.disabled)return;const row=el.closest('.run-alw'),btns=row?[...row.querySelectorAll('button[data-act=agallowall]')]:[el];
+ btns.forEach(b=>{b.disabled=true;b.setAttribute('aria-busy','true')});el.textContent='Cutting again…';
+ try{const r=await post(`/api/generations/${n}/allow`,{all:true,allow,kind});
  if(!r.ok)return toast(r.j.error||'Could not change it',1);
  toast(allow?`Allowed ${r.j.indexes.length}: cutting their ${kind==='still'?'pictures':'animations'}…`:`Took back ${r.j.indexes.length}`);
- if(A.sid)await loadSession(A.sid,true);startPoll()};
+ if(A.sid)await loadSession(A.sid,true);startPoll()}
+ finally{btns.forEach(b=>{if(b.isConnected){b.disabled=false;b.removeAttribute('aria-busy')}})}};
 /* the carousel's tiles are figures: Enter or Space on a focused one selects it like a click (a figure answers neither key by itself) */
 document.addEventListener('keydown',e=>{const t=e.target;if((e.key==='Enter'||e.key===' ')&&t&&t.dataset&&t.dataset.act==='agtile'&&String(t.tagName||'').toLowerCase()==='figure'){e.preventDefault();ACT.agtile(t,e)}});
 ACT.agnew=()=>{A.sid=null;A.sess=null;A.sel.clear();A.els.clear();store.set('mirsal.ai.sid','');const c=$('ai-col');if(c)c.innerHTML='';history.replaceState(null,'','#/agent');paint();agList();const t=$('ai-in');if(t)t.focus()};
@@ -322,27 +331,29 @@ function drawBar(){const bar=$('ag-bar'),box=$('ag-styles');if(!bar||!box)return
  box.innerHTML=list.map(s=>`<button type=button class="ag-st${s.id===cur?' on':''}" role=radio aria-checked=${s.id===cur} data-act=agstyle data-id="${AIU.esc(s.id)}" title="${AIU.esc(s.label)}: ${AIU.esc(s.hint)}"><img src="/assets/styles/${AIU.esc(s.id)}" alt="" loading=lazy><b>${AIU.esc(s.label)}</b></button>`).join('')}
 ACT.agstyle=async el=>{A.pre=el.dataset.id;store.set('mirsal.ai.style',A.pre);if(A.sess)await saveSet({style_id:A.pre});else drawBar()};
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
-ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await loadAgent();setSet()}else toast(r.j.error||'Could not change the AI engine',1)};
+ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await Promise.all([loadAgent(),engSync()]);engRedraw()}else toast(r.j.error||'Could not change the AI engine',1)};
 async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;setSet();drawBar()}else toast(r.j.error,1)}
 /* the AI engine row: Auto keeps a working backend and only a failed call switches it; Local / Cloud are used as chosen. A backend that is not available says why. */
-function beRow(){const a=A.agent||{},av=a.availability||{},pref=a.preference||'auto';
+function beRow(){const a=ENGSRC||A.agent||{},av=a.availability||{},pref=a.preference||'auto';
  const b=(v,label)=>{const ok=v==='auto'||(av[v]&&av[v].ok);const why=v==='auto'?'Use the local model when LM Studio answers, otherwise the cloud; keep what works':(av[v]&&av[v].why)||(av[v]&&av[v].model)||'';
   return `<button data-act=agbe data-v=${v} class="${pref===v?'on':''}${ok?'':' is-off'}" title="${AIU.esc(ok&&v!=='auto'?av[v].model:why)}">${label}</button>`};
- const now=a.agent&&a.agent.provider!=='none'&&!AIU.engine(a).rules?`now: ${a.agent.provider==='local'?'local':'cloud'} · ${AIU.esc((a.agent.model||'').replace(/:\d+$/,''))}`:'now: rules only';
+ const now=a.agent&&a.agent.provider!=='none'&&!AIU.engine(a).rules?`now: ${a.agent.provider==='local'?'local':'cloud'} · ${AIU.esc((a.agent.model||'').replace(/:\d+$/,''))}`:`now: ${AIU.esc(a.noModel||'rules only')}`;
  const warn=pref!=='auto'&&av[pref]&&!av[pref].ok?` · <span class=ai-err>${AIU.esc(av[pref].why||'not available')}</span>`:'';
  return `<div class=r><div><b>AI engine</b><small>${now}${warn}</small></div><div class=ai-seg>${b('auto','Auto')}${b('local','Local')}${b('cloud','Cloud')}</div></div>${modelRow()}`}
 /* the local model, part of the engine row: a dropdown of every model the local server lists (LM Studio, vLLM: GET /api/llm/models), the one in use selected, and one line saying why when it cannot answer.
    A pick is POST /api/ai/backend {model}; the first answer after a switch can take a moment while the server loads it. */
-function modelRow(){const m=A.llm,pref=(A.agent&&A.agent.preference)||'auto';
+function modelRow(){const m=A.llm,pref=((ENGSRC||A.agent)||{}).preference||'auto';
  if(A.llmBusy||!m)return `<div class="r ag-mrow"><div><small>${A.llmBusy?'Switching the local model: the first answer can take a moment…':'Checking the local model…'}</small></div></div>`;
  if(!m.models.length&&pref==='cloud')return '';
  const sel=m.models.length?`<select class=ag-sel data-agmodel aria-label="Local model">${m.models.map(x=>`<option value="${AIU.esc(x.id)}"${x.id===m.current?' selected':''}>${AIU.esc(x.id)}${x.loaded?' · loaded':''}</option>`).join('')}</select>`:'';
  return `<div class="r ag-mrow"><div><b>Local model</b><small class="${m.ok?'':'ai-err'}" title="${AIU.esc(m.why||'')}">${AIU.esc(AIU.modelNote(m))}</small></div>${sel}</div>`}
 document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset||s.dataset.agmodel===undefined)return;
- A.llmBusy=true;setSet();
+ A.llmBusy=true;engRedraw();
  const r=await post('/api/ai/backend',{model:s.value});
  if(!r.ok)toast((r.j&&r.j.error)||'Could not change the local model',1);
- await Promise.all([loadModels(),loadAgent()]);A.llmBusy=false;setSet()});
+ await Promise.all([loadModels(),loadAgent(),engSync()]);A.llmBusy=false;engRedraw()});
+/* what the Studio calls: rows(source) draws the same engine row and model row from its own source; ensure() reads the local server's models once; load() reads them again */
+globalThis.AIENG={rows:src=>{ENGSRC=src||null;try{return beRow()}finally{ENGSRC=null}},ensure:()=>{if(!A.llm&&!A.llmLoading){A.llmLoading=true;loadModels().finally(()=>{A.llmLoading=false})}},load:loadModels};
 /* the agentic creator: one click from a request to a pack on Telegram. Any rejection still stops it. */
 function crRows(st){const c=Object.assign({on:false,scope:'images',bypass:false},st.creator||{});
  let h=`<div class=r><div><b>Agentic creator</b><small>One go-ahead: request, sheet, approval, pack, Telegram</small></div><button type=button class="ai-sw${c.on?' on':''}" data-act=agcr data-k=on role=switch aria-checked="${c.on}" aria-label="Agentic creator"></button></div>`;

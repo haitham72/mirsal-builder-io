@@ -9,6 +9,7 @@ as a warning and the gate lets the person approve it. A human (from Phase 3 the 
 stage. Every decision is an event line and a history entry. The UI only displays what is enforced here (a 409 carries the reason)."""
 from __future__ import annotations
 
+import copy
 import json
 import re
 import time
@@ -173,6 +174,9 @@ def _g_still(out, gid, res, decision, index, note, by):
 
 
 def _g_anim(out, gid, res, decision, index, note, by):
+    sh = active_sheet(res)
+    if decision == "APPROVE" and sh and (sh.get("blocked") or sh.get("block")):
+        raise refuse(f"Video sheet {sh['id']} is blocked. Use it anyway or correct it before approving animations.")
     if not any(s["anim_status"] in ("READY", "FAILED") for s in res["stickers"]):
         raise refuse("The video has not been sliced yet.")
     if res["reviews"].get("pack") and res["reviews"]["pack"]["decision"] == "APPROVE":
@@ -206,6 +210,9 @@ def _g_sheet(out, gid, res, decision, index, note, by):
 
 
 def _g_pack(out, gid, res, decision, index, note, by):
+    sh = active_sheet(res)
+    if decision == "APPROVE" and sh and (sh.get("blocked") or sh.get("block")):
+        raise refuse(f"Video sheet {sh['id']} is blocked. Use it anyway or correct it before approving the pack.")
     if not any(s["anim_status"] in ("READY", "FAILED") for s in res["stickers"]):
         raise refuse("The video has not been sliced yet.")
     undecided = [s["index"] for s in res["stickers"] if s["anim_status"] == "READY" and s["review"]["anim"] == "PENDING"]
@@ -429,7 +436,76 @@ def check_allow(out: Path, gid: int, index: int, allow: bool = True, kind: str =
 
 def allowable(res: dict, allow: bool = True, kind: str = "animation") -> list[int]:
     """The stickers a human can allow right now (allow=True) or take the permission back from (allow=False)."""
+    if kind == "video_sheet":
+        return [v["id"] for v in res["video_sheets"] if sheet_problem(res, v, allow) is None]
     return [st["index"] for st in res["stickers"] if allow_problem(res, st, kind, allow) is None]
+
+
+def sheet_problem(res: dict, v: dict, allow: bool = True) -> str | None:
+    if v["status"] == "REJECTED":
+        return "This video sheet was rejected. Build or select a current sheet first."
+    if (res["reviews"].get("pack") or {}).get("decision") == "APPROVE":
+        return "The pack is final. Reject G5 before changing its video sheet."
+    if not allow:
+        return None if v.get("sheet_override") else "Nothing was allowed on this video sheet."
+    checks = (v.get("verify") or []) + (v.get("video_checks") or [])
+    failed = _blocks(checks)
+    if _crashed(checks):
+        return "The verifier crashed; this is not a judgement call."
+    hard = [k for k in failed if k not in verify.OVERRIDABLE["video_sheet"]]
+    if hard:
+        return f"This sheet cannot be allowed ({', '.join(hard)}). The file must decode and the approved slots must match."
+    return None if failed else "This video sheet has no blocked judgement call to allow."
+
+
+def _waive_sheet_checks(checks: list, names) -> list:
+    """Use the verifier's existing waiver, retaining failed measurements as WARNs."""
+    allowed = verify.waived(names) & set(verify.OVERRIDABLE["video_sheet"])
+    out = []
+    for c in checks:
+        item = verify.Check(c["name"], c["stage"], c["severity"], c["ok"], c.get("value"), c.get("limit"),
+                            c.get("data") or {}, c.get("detail") or "",
+                            "verifier_error" if (c.get("data") or {}).get("error") else None)
+        if not item.ok and item.id in verify.OVERRIDABLE["video_sheet"]:
+            from dataclasses import replace
+            item = replace(item, severity=verify.BLOCK, note=item.note.removesuffix(" (allowed by you)"))
+        out.append(verify._apply_waiver(item, allowed, {}).to_dict())
+    return out
+
+
+@pl.serialized
+def allow_sheet(out: Path, gid: int, indexes: list, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
+    """Recorded human permission on G3 and returned-video judgement calls; never requests a new video."""
+    res = pl.read_result(out, gid)
+    todo = [sheet_of(res, str(aid)) for aid in sorted(set(indexes))]
+    for v in todo:
+        why = sheet_problem(res, v, allow)
+        if why:
+            raise refuse(why)
+    reslice = []
+    for v in todo:
+        names = sorted(set(_blocks((v.get("verify") or []) + (v.get("video_checks") or [])))) if allow else v["sheet_override"]
+        v["sheet_override"] = sorted(set(v.get("sheet_override") or []) | set(names)) if allow else []
+        for field in ("verify", "video_checks"):
+            v[field] = _waive_sheet_checks(v.get(field) or [], v["sheet_override"])
+        v["blocked"] = next(iter(_blocks(v["verify"])), None)
+        v["block"] = next(iter(_blocks(v["video_checks"])), None)
+        v.setdefault("history", []).append({"ts": round(time.time(), 3), "actor": "human", "action": "ALLOW" if allow else "UNALLOW", "checks": names})
+        for i in v["slots"]:
+            pl.hist(res["stickers"][i - 1], "video_sheet", "human", "APPROVE" if allow else "REJECT",
+                    ("allowed anyway: " if allow else "allowance withdrawn: ") + ", ".join(names), v["id"], {"override": names})
+        if v["block"] or v["blocked"]:
+            if v.get("video"):
+                v["status"] = "VIDEO_BLOCKED"
+            elif v["status"] == "APPROVED":
+                v["status"] = "BUILT"
+        elif allow and v.get("video") and v["status"] == "VIDEO_BLOCKED":
+            reslice.append(v["id"])
+        pl.emit(out, gid, "video_sheet_allowed" if allow else "video_sheet_allow_withdrawn", "done", 0,
+                {"sheet": v["id"], "checks": names}, "human", "APPROVE" if allow else "REJECT")
+    pl.write_result(out, gid, res)
+    for aid in reslice:
+        slice_video(out, gid, aid, cfg, pace)
 
 
 def allow_info(res: dict) -> dict:
@@ -458,7 +534,101 @@ def allow_info(res: dict) -> dict:
             else:
                 info["final"][str(i)] = problem
         out[kind] = info
+    info = {"can": [], "allowed": [], "undo": [], "why": {}, "final": {}}
+    from . import explain
+    for v in res["video_sheets"]:
+        if v["status"] == "REJECTED":
+            continue
+        aid = v["id"]
+        if v.get("sheet_override"):
+            info["allowed"].append(aid)
+            if sheet_problem(res, v, False) is None:
+                info["undo"].append(aid)
+        bad = _blocks((v.get("verify") or []) + (v.get("video_checks") or []))
+        if bad:
+            info["why"][aid] = explain.block_words(bad[0])
+            problem = sheet_problem(res, v)
+            if problem is None:
+                info["can"].append(aid)
+            else:
+                info["final"][aid] = problem
+    out["video_sheet"] = info
     return out
+
+
+_ANIM_FINISHED_FIELDS = ("anim_status", "anim_reason", "anim_metrics", "anim_report", "webm")
+
+
+def _anim_verdict_key(names) -> str:
+    """Stable key for one finished verifier state; the same overrides always mean the same verdict for this cut."""
+    return ",".join(sorted(names or ())) or "plain"
+
+
+def _remember_anim_verdict(st: dict) -> bool:
+    """Keep the finished state record_anim wrote, without history (a later click must remain in history)."""
+    if st.get("anim_status") not in ("READY", "FAILED") or not st.get("webm") or not st.get("anim_report"):
+        return False
+    state = {k: copy.deepcopy(st.get(k)) for k in _ANIM_FINISHED_FIELDS}
+    state["review"] = st.get("review", {}).get("anim")
+    st.setdefault("anim_finished", {})[_anim_verdict_key(st.get("anim_override"))] = state
+    return True
+
+
+def _restore_anim_verdict(st: dict) -> bool:
+    """Swap to an already-finished verdict of this exact cut. No decoder, verifier or encoder runs."""
+    state = (st.get("anim_finished") or {}).get(_anim_verdict_key(st.get("anim_override")))
+    if not state:
+        return False
+    for k in _ANIM_FINISHED_FIELDS:
+        st[k] = copy.deepcopy(state.get(k))
+    st.setdefault("review", {})["anim"] = state.get("review")
+    return True
+
+
+def _materialize_anim_verdict(st: dict, overrides) -> bool:
+    """Build the requested verdict from the finished clip's stored checks, using the verifier's one waiver catalogue.
+
+    Some slot failures happen before encoding, so the first allow still has to render. Once either verdict has a
+    finished clip, changing only the override can materialise its opposite without decoding or encoding again.
+    """
+    if not st.get("webm") or not st.get("anim_report"):
+        return False
+    key = _anim_verdict_key(overrides)
+    if key in (st.get("anim_finished") or {}):
+        return True
+    checks = st["anim_report"]
+    if not any(c.get("stage") == "anim" for c in checks):
+        # A slot pre-check can stop before encoding. Its short report cannot
+        # waive away an unseen later failure on the clip we still hold.
+        checks = next((s["anim_report"] for s in (st.get("anim_finished") or {}).values()
+                       if s.get("webm") == st["webm"] and
+                       any(c.get("stage") == "anim" for c in s.get("anim_report") or [])), None)
+        if checks is None:
+            return False
+    metrics = copy.deepcopy(st.get("anim_metrics") or {})
+    report = verify.animation_verdict(copy.deepcopy(checks), overrides, metrics)
+    oob = report.get("inside_frame")
+    state = {
+        "anim_status": "READY" if report.ok else "FAILED",
+        "anim_reason": report.first_failure,
+        "anim_metrics": metrics,
+        "anim_report": report.checks,
+        "webm": st["webm"],
+        "review": "BLOCKED" if not report.ok or (oob and not oob.ok) else "PENDING",
+    }
+    st.setdefault("anim_finished", {})[key] = state
+    return True
+
+
+def _remember_anim_pair(st: dict) -> None:
+    """After a verdict-switch render, keep it and materialise its opposite from the same report and clip."""
+    st.pop("anim_verdict_stale", None)
+    _remember_anim_verdict(st)
+    current = set(st.get("anim_override") or ())
+    other = () if current else sorted({c.get("name") for c in st.get("anim_report") or []
+                                       if not c.get("ok") and c.get("name") in verify.OVERRIDABLE["animation"]})
+    if current or other:
+        _materialize_anim_verdict(st, other)
 
 
 @pl.serialized
@@ -495,23 +665,37 @@ def allow_animations(out: Path, gid: int, indexes: list, allow: bool, cfg: Engin
         aid = check_allow(out, gid, i, allow, "animation")[1]
         by_sheet.setdefault(aid, []).append(i)
     res = pl.read_result(out, gid)
+    restored = set()
     for i in indexes:
         st = res["stickers"][i - 1]
         aid = anim_source(res, i)[1]
+        remembered = bool(st.get("anim_finished"))
+        _remember_anim_verdict(st)              # the state being left is the one the next switch can restore
         if allow:
             failed = _blocks(st.get("anim_report"))
             st["anim_override"] = sorted(set(st.get("anim_override") or []) | set(failed))
+            if remembered or not st.get("anim_verdict_stale"):
+                _materialize_anim_verdict(st, st["anim_override"])
+            if _restore_anim_verdict(st):
+                restored.add(i)
             pl.hist(st, "video", "human", "APPROVE", "allowed anyway: " + ", ".join(failed), aid, {"override": failed})
         else:
             was = st.get("anim_override") or []
             st["anim_override"] = []
+            if remembered or not st.get("anim_verdict_stale"):
+                _materialize_anim_verdict(st, ())
+            if _restore_anim_verdict(st):
+                restored.add(i)
             pl.hist(st, "video", "human", "REJECT", "allowance withdrawn: " + ", ".join(was), aid, {"override": was})
     pl.write_result(out, gid, res)
     for aid, idx in by_sheet.items():
+        idx = [i for i in idx if i not in restored]
+        if not idx:
+            continue
         if aid:
-            slice_video(out, gid, aid, cfg, pace, only=idx)
+            slice_video(out, gid, aid, cfg, pace, only=idx, remember_verdicts=True)
         else:
-            reanimate_prepared(out, gid, idx, cfg, pace)
+            reanimate_prepared(out, gid, idx, cfg, pace, remember_verdicts=True)
 
 
 def allow_animation(out: Path, gid: int, index: int, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
@@ -520,10 +704,10 @@ def allow_animation(out: Path, gid: int, index: int, allow: bool, cfg: EngineCon
 
 def allow_cells(out: Path, gid: int, kind: str, indexes: list, allow: bool, cfg: EngineConfig, pace: float = 0.0) -> None:
     """One entry for the route: `kind` 'still' or 'animation'."""
-    (allow_stills if kind == "still" else allow_animations)(out, gid, indexes, allow, cfg, pace)
+    {"still": allow_stills, "animation": allow_animations, "video_sheet": allow_sheet}[kind](out, gid, indexes, allow, cfg, pace)
 
 
-def reanimate_prepared(out: Path, gid: int, indexes: list, cfg: EngineConfig, pace: float = 0.0) -> None:
+def reanimate_prepared(out: Path, gid: int, indexes: list, cfg: EngineConfig, pace: float = 0.0, remember_verdicts: bool = False) -> None:
     """Animate these cells again from the batch's prepared video (or its pre-sliced clips) with the blocks a human allowed (`anim_override`) kept as warnings. No new video, no credits;
     the same cells come back from the animation cache when nothing changed."""
     res = pl.read_result(out, gid)
@@ -533,11 +717,19 @@ def reanimate_prepared(out: Path, gid: int, indexes: list, cfg: EngineConfig, pa
     try:
         with pl.Stage(out, gid, "video_sliced", pace) as s:
             def on_cell(r):
-                pl.record_anim(d, res["stickers"][r.index - 1], r, "prepared video")
+                st = res["stickers"][r.index - 1]
+                pl.record_anim(d, st, r, "prepared video", preserve_finished=remember_verdicts)
+                if remember_verdicts:
+                    _remember_anim_pair(st)
                 pl.write_result(out, gid, res)
                 pl.emit(out, gid, "video_cell", "done", 0, {"index": r.index, "status": r.status, "reason": r.reason})
             for i in todo:
-                res["stickers"][i - 1]["anim_status"] = "PROCESSING"
+                st = res["stickers"][i - 1]
+                if not remember_verdicts:
+                    if st.get("webm") or st.get("anim_finished"):
+                        st["anim_verdict_stale"] = True
+                    st.pop("anim_finished", None)
+                st["anim_status"] = "PROCESSING"
             pl.write_result(out, gid, res)
             waive = {i: set(res["stickers"][i - 1].get("anim_override") or []) for i in todo}
             results = pl.animate_cells(res, cfg, todo, on_cell, AnimCache(out / "cache" / "anim"), waive=waive)
@@ -594,7 +786,8 @@ def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "vi
     return {"sheet": aid, "bytes": len(data)}
 
 
-def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 0.0, only: list | None = None) -> None:
+def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 0.0, only: list | None = None,
+                remember_verdicts: bool = False) -> None:
     """Background job: video-stage checks on the returned video, then each approved slot is decoded from the layout's exact
     rectangles, re-keyed on every frame, boundary-checked and encoded. Python's blocks are recorded on the sticker's history."""
     res = pl.read_result(out, gid)
@@ -602,15 +795,21 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
     v = sheet_of(res, aid)
     d = pl.gen_dir(out, gid)
     try:
+        if v.get("blocked"):
+            v["status"] = "VIDEO_BLOCKED"
+            pl.write_result(out, gid, res)
+            return
         layout = json.loads((d / v["layout"]).read_text(encoding="utf-8"))
         sheet = np.array(Image.open(d / v["file"]).convert("RGB"))
         mp4 = d / v["video"]
         with pl.Stage(out, gid, "video_returned", pace) as s:
             info = {}
             checks = check_returned_video(mp4, layout, sheet, cfg, on_probe=lambda i: info.update(i))
+            allowed = verify.waived(v.get("sheet_override")) & set(verify.OVERRIDABLE["video_sheet"])
+            checks = [verify._apply_waiver(c, allowed, {}) for c in checks]
             v["video_checks"] = [c.to_dict() for c in checks]
             v["video_info"] = {k: info.get(k) for k in ("codec", "width", "height", "fps", "duration")}
-            block = next((c for c in checks if not c.ok and c.id in VIDEO_BLOCKS), None)
+            block = next((c for c in checks if not c.ok and c.severity == verify.BLOCK and c.id in VIDEO_BLOCKS), None)
             flag = next((c for c in checks if not c.ok and c.id == "blank_slots_stay_empty"), None)
             v["video_flags"] = [flag.id] if flag else []
             s.result = {"sheet": aid, "blocked": block.id if block else None, "flags": v["video_flags"], **v["video_info"]}
@@ -628,13 +827,19 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
             todo = [i for i in v["slots"] if only is None or i in only]
             for i in todo:
                 st = res["stickers"][i - 1]
+                if not remember_verdicts:                         # a real re-cut invalidates both old verdict snapshots
+                    if st.get("webm") or st.get("anim_finished"):
+                        st["anim_verdict_stale"] = True
+                    st.pop("anim_finished", None)
                 if st.get("png"):
                     refs[i] = _read_rgba(d / st["png"])               # RGBA: identity_kept uses its alpha, sharpness its edge detail
                 st["anim_status"], st["anim_reason"] = "PROCESSING", None
 
             def on_cell(r):
                 st = res["stickers"][r.index - 1]
-                pl.record_anim(d, st, r, aid)
+                pl.record_anim(d, st, r, aid, preserve_finished=remember_verdicts)
+                if remember_verdicts:
+                    _remember_anim_pair(st)
                 pl.write_result(out, gid, res)
                 pl.emit(out, gid, "video_cell", "done", 0, {"index": r.index, "status": r.status, "reason": r.reason}, "python", "PASS" if r.status == "READY" else "BLOCK")
             pl.write_result(out, gid, res)
@@ -750,9 +955,10 @@ def regen_plan(res: dict, index: int) -> dict:
     desc = slots.get("subject_description") or res["task"]
     label = cell["label"] if cell else st["prompt"]
     new = {"subject_description": desc, "style_id": slots.get("style_id", "flat_vector"), "mode": "single_1x1",
-           "cells": [{"pos": 1, "label": label, "tags": st["tags"], "emoji": st["emoji"]}], "action_guidance": slots.get("action_guidance", "default"),
+           "cells": [{"pos": 1, "label": label, "tags": st["tags"], "emoji": st["emoji"], **({"motion": cell["motion"]} if cell and cell.get("motion") else {})}], "action_guidance": slots.get("action_guidance", "default"),
            "key_colour": slots.get("key_colour", "green")}
-    ver = prompter.TEMPLATE_VERSION                       # not v1: its style line says "flat vector sticker illustration" whatever the batch was (a clay batch regenerated as flat)
+    parent_ver = int(res.get("template_version") or 0)    # the parent's own template version when it is >= 2 and the 1x1 file exists (a saved plan keeps its wording); never v1: its style line says "flat vector sticker illustration" whatever the batch was (a clay batch regenerated as flat)
+    ver = parent_ver if parent_ver >= 2 and (prompter.TEMPLATES / f"single_1x1_v{parent_ver}.txt").is_file() else prompter.TEMPLATE_VERSION
     built = prompter.render_plan(new, "single_1x1", ver)
     return prompter.validate_plan({"task": res["task"], "task_slug": res["task_slug"], "grid": [1, 1], "template_id": "single_1x1", "template_version": ver,
                                    "slots": new, "sheet_prompt": built["sheet_prompt"], "video_prompt": built["video_prompt"],

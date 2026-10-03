@@ -25,8 +25,8 @@ function load() {
   const sandbox = { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) };
   const body = ['const animPhase=', 'const CAT=', 'const CATORDER=', 'const CATOF=', 'const WARNWHY=', 'const plainWarn=', 'const ANIMWHY=', 'const ALW=', 'const whyOf=',
     'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'function cellOp(', 'const cellVerb=', 'const cellTitle=', 'const cellLabel=', 'const cellAct=', 'const isOob=', 'const oobNote=', 'const cellState=', 'const CELLTXT=',
-    'function issuesOf(', 'function mark(', 'function chip(', 'const sheetOf=', 'const LAY=', 'const layoutOfCell=', 'function issueSvg(', 'function allowAllRow('].map(statement).join('\n');
-  return new Function(...Object.keys(sandbox), body + '\nreturn {issueSvg,allowAllRow,chip,ALW,LAY};')(...Object.values(sandbox));
+    'function issuesOf(', 'function mark(', 'function chip(', 'const sheetOf=', 'const LAY=', 'const layoutOfCell=', 'function issueSvg(', 'const processing=', 'const ALWBUSY=', 'const alwBusy=', 'function allowAllRow('].map(statement).join('\n');
+  return new Function(...Object.keys(sandbox), body + '\nreturn {issueSvg,allowAllRow,chip,ALW,LAY,ALWBUSY};')(...Object.values(sandbox));
 }
 
 const CELL = [0, 0, 100, 100];
@@ -98,6 +98,28 @@ test('the bulk control counts per kind what is allow-able now', () => {
   assert.match(anim, /Use all anyway \(1\)/);
   assert.doesNotMatch(anim, /Take all back/);
   assert.equal(h.allowAllRow(G([], { still: { can: [], allowed: [], undo: [], why: {}, final: {} }, animation: { can: [], allowed: [], undo: [], why: {}, final: {} } }), 'still'), '');
+});
+
+test('the bulk control waits while its request is on the way and while the batch is re-cutting: no second click, no \"busy\" 409', () => {
+  const h = load();
+  const g = G([T(1)]);
+  h.ALWBUSY.add('7:still');
+  const busy = h.allowAllRow(g, 'still');
+  assert.equal((busy.match(/data-act=gallowall[^>]* disabled aria-busy=true/g) || []).length, 2, 'both buttons are locked');
+  assert.match(busy, /Cutting again…/);
+  assert.doesNotMatch(busy, /Use all anyway|Take all back/, 'the old label is gone while it works');
+  assert.doesNotMatch(h.allowAllRow(g, 'animation'), /disabled/, 'another kind of the same batch is not held up');
+  h.ALWBUSY.clear();
+  assert.doesNotMatch(h.allowAllRow(g, 'still'), /disabled/);
+  const cutting = G([T(1, { anim_status: 'PROCESSING' })]);
+  assert.match(h.allowAllRow(cutting, 'animation'), /disabled aria-busy=true/, 'an animation re-cut in progress locks the animation row');
+  assert.doesNotMatch(h.allowAllRow(cutting, 'still'), /disabled/);
+});
+
+test('ACT.gallowall guards a second click while the first is in flight', () => {
+  const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
+  assert.match(src, /if\(ALWBUSY\.has\(key\)\|\|el\.disabled\)return;ALWBUSY\.add\(key\)/);
+  assert.match(src, /finally\{ALWBUSY\.delete\(key\)/);
 });
 
 test('a still chip allows on click exactly when the tile does', () => {

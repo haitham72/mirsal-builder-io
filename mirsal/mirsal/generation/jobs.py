@@ -71,7 +71,8 @@ def _path(out: Path, jid: str) -> Path:
 
 
 def _write(p: Path, job: dict) -> dict:
-    p.write_text(json.dumps(job, indent=2, ensure_ascii=False), encoding="utf-8")
+    from ..runtime import atomic
+    atomic.write_text(p, json.dumps(job, indent=2, ensure_ascii=False))
     try:  # Phase 3A write-through: a claimed job is a provider task row; best effort, never raises
         from ..store import sync
         sync.sync_job(p.parent.parent, job)
@@ -399,6 +400,8 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
                     ticket, est = job["external_task_id"], job.get("cost_estimate")
                 else:
                     est = hf.cost(model, params, prompt, **media)
+                    if req.get("approved_cost") is not None and est != req["approved_cost"]:
+                        raise JobError("The Retry price changed. No request was created; refresh the price and confirm again.", 409)
                     cap = _daily_cap()
                     if cap is not None and _usage.spent_today(out) + _inflight(out) + est > cap:
                         raise JobError(f"the daily credit cap ({cap:g}) would be exceeded by this {est:g}-credit call (counting the jobs already running)", 402)

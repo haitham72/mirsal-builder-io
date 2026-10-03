@@ -355,16 +355,112 @@ class Library:
             self._save(db)
             return p
 
-    def delete_pack(self, pid: str) -> None:
+    # ---- the pack trash: Delete pack is SOFT (Haitham, 2026-10-03: "Delete pack is soft too"). The pack leaves `packs` for `trash.packs` in library.json with its stickers and its files exactly
+    # where they were; Restore puts it back with the same id (so its particle sets still point at it). Only `purge_pack` (flow/purge.py asks for it, after a typed or plain confirmation) deletes for good.
+    def delete_pack(self, pid: str, by: str = "human") -> dict:
+        """Move the pack to the trash. Nothing on disk changes."""
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
-            for s in p["stickers"]:
-                self._unlink(db, s["file"], skip=pid)
             db["packs"].remove(p)
+            db.setdefault("trash", {}).setdefault("packs", []).append(dict(p, deleted=round(time.time(), 3), deleted_by=by))
             self._save(db)
+        return {"ok": True, "id": pid, "trashed": True, "name": p["name"], "stickers": len(p["stickers"])}
+
+    def restore_pack(self, pid: str) -> dict:
+        """Back from the trash under the same id and name, stickers and cover untouched. Never overwrites."""
+        with self.lock:
+            db = self._load()
+            t = next((q for q in self._trashed(db) if q["id"] == pid), None)
+            if t is None:
+                raise LibraryError("that pack is not in the trash", 404)
+            if any(q["id"] == pid for q in db["packs"]):
+                raise LibraryError("a pack with that id exists now; the trashed one stays safe", 409)
+            db["trash"]["packs"].remove(t)
+            p = {k: v for k, v in t.items() if k not in ("deleted", "deleted_by")}
+            db["packs"].append(p)
+            self._save(db)
+        return {"ok": True, "id": pid, "restored": True, "name": p["name"], "stickers": len(p["stickers"])}
+
+    @staticmethod
+    def _trashed(db: dict) -> list:
+        return (db.get("trash") or {}).get("packs") or []
+
+    def trashed_packs(self) -> list[dict]:
+        """The packs in the trash, newest deleted first (full records: stickers, files, when and by whom)."""
+        with self.lock:
+            rows = [dict(p) for p in self._trashed(self._load())]
+        return sorted(rows, key=lambda p: p.get("deleted") or 0, reverse=True)
+
+    def _holders(self, db: dict, fname: str, skip_pid: str | None = None) -> list[dict]:
+        """Every pack, live or in the trash, that holds a sticker on file `fname` (except `skip_pid`): [{id, name, trashed}]."""
+        rows = []
+        for trashed, packs in ((False, db["packs"]), (True, self._trashed(db))):
+            for q in packs:
+                if q["id"] != skip_pid and any(s["file"] == fname for s in q["stickers"]):
+                    rows.append({"id": q["id"], "name": q["name"], "trashed": trashed})
+        return rows
+
+    def trash_report(self, pid: str) -> dict:
+        """What purging the trashed pack `pid` would remove: its stickers with their files and bytes (`missing` when the file is already gone), and `shared`: the stickers whose file another pack
+        (live or trashed) also holds, with those packs. A shared file is never deleted by this purge: it stays for the other packs."""
+        with self.lock:
+            db = self._load()
+            p = next((q for q in self._trashed(db) if q["id"] == pid), None)
+            if p is None:
+                raise LibraryError("that pack is not in the trash", 404)
+            files, shared = [], []
+            for s in p["stickers"]:
+                f = self.files / s["file"]
+                try:
+                    size = f.stat().st_size
+                except OSError:
+                    size = None
+                other = self._holders(db, s["file"], skip_pid=pid)
+                files.append({"sticker": s["id"], "name": s["name"], "file": s["file"], "bytes": size, "missing": size is None, "shared": bool(other)})
+                if other:
+                    shared.append({"sticker": s["id"], "name": s["name"], "file": s["file"], "also_in": other})
+        return {"id": pid, "name": p["name"], "deleted": p.get("deleted"), "by": p.get("deleted_by"), "stickers": len(p["stickers"]), "files": files, "shared": shared,
+                "bytes": sum(f["bytes"] or 0 for f in files if not f["shared"]), "from_batches": sorted({str((s.get("source") or {}).get("generation")) for s in p["stickers"] if (s.get("source") or {}).get("generation")})}
+
+    def purge_pack(self, pid: str, confirm_shared: bool = False) -> dict:
+        """Delete the trashed pack for good: its files, then its record. A sticker whose file another pack also holds is REFUSED (409, in words, naming the packs) until `confirm_shared`; confirmed,
+        the pack's record goes and that file stays for the other pack(s) (deleting it would leave a pack pointing at nothing). Files first, record last: a run that stops half-way leaves the pack
+        in the trash and running it again finishes (a file already gone is fine). Returns {id, name, stickers, files_removed, bytes, kept_shared[]}."""
+        with self.lock:
+            db = self._load()
+            p = next((q for q in self._trashed(db) if q["id"] == pid), None)
+            if p is None:
+                if any(q["id"] == pid for q in db["packs"]):
+                    raise LibraryError("that pack is not in the trash: delete it first, then it can be deleted for good", 409)
+                raise LibraryError("that pack is not in the trash", 404)
+            shared = {s["file"]: self._holders(db, s["file"], skip_pid=pid) for s in p["stickers"]}
+            shared = {f: h for f, h in shared.items() if h}
+            if shared and not confirm_shared:
+                lines = "; ".join(f"“{s['name']}” is also in {', '.join(h['name'] + (' (in the trash)' if h['trashed'] else '') for h in shared[s['file']])}" for s in p["stickers"] if s["file"] in shared)
+                raise LibraryError(f"“{p['name']}” has stickers that other packs use too: {lines}. Deleting this pack for good keeps those files for the other packs. Confirm to go on.", 409)
+            gone = nbytes = 0
+            for s in p["stickers"]:
+                if s["file"] in shared:
+                    continue
+                f = self.files / s["file"]
+                try:
+                    size = f.stat().st_size
+                except OSError:
+                    size = None
+                f.unlink(missing_ok=True)
+                if size is not None:
+                    gone, nbytes = gone + 1, nbytes + size
+                if f.parent != self.files:                                  # a batch folder with nothing left in it goes away
+                    try:
+                        f.parent.rmdir()
+                    except OSError:
+                        pass
+            db["trash"]["packs"].remove(p)
+            self._save(db)
+        return {"id": pid, "name": p["name"], "stickers": len(p["stickers"]), "files_removed": gone, "bytes": nbytes, "kept_shared": sorted(shared)}
 
     def _unlink(self, db, fname, skip=None):
-        if not any(s["file"] == fname for q in db["packs"] if q["id"] != skip for s in q["stickers"]):
+        if not self._holders(db, fname, skip_pid=skip):                  # a file a pack in the trash still holds stays too
             f = self.files / fname
             f.unlink(missing_ok=True)
             if f.parent != self.files:                                  # a batch folder with nothing left in it goes away

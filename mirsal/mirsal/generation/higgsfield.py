@@ -163,6 +163,15 @@ def create(model: str, params: dict | None = None, prompt: str = "", **media) ->
     return jid.strip()
 
 
+def get(job_id: str) -> dict:
+    """One free, read-only provider lookup; never starts or waits for a job."""
+    d = _json(["generate", "get", job_id])
+    job = d[0] if isinstance(d, list) and d else d
+    if not isinstance(job, dict):
+        raise HiggsError(f"unexpected provider result: {str(d)[:200]}")
+    return job
+
+
 def wait(job_id: str, timeout_s: int = 1200, interval_s: int = 3) -> dict:
     d = _json(["generate", "wait", job_id, "--timeout", f"{int(timeout_s)}s", "--interval", f"{int(interval_s)}s", "--quiet"], timeout=timeout_s + 60)
     job = d[0] if isinstance(d, list) and d else d

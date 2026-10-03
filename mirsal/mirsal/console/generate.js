@@ -7,6 +7,8 @@ let GSTALE=false,GAI={configured:false};
 const GM=new Map();                       // generation id -> its latest state
 let SES={prompt:'',gens:[],off:[],pack:''},bg='checker',glast='',MD=null,VG=null,GINP=[],GHEALTH=null;
 const GS={outline:12,tile:220,tab:'stickers'};
+let GD=null,GDWORK=false,GDP=null;        // GD: the browser-only pre-batch plan (never a G### nor a member of SES/GM); GDP: the Higgsfield sheet price last read for it {key,c}
+try{const d=JSON.parse(localStorage.getItem('mirsal.prompt-draft')||'null');if(d&&d.number==='draft'&&Array.isArray(d.stickers))GD=d}catch(e){}
 const ANIM=new Set();                     // batches the user pressed Animate on, until the server reports them animating
 try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.outline=[0,4,8,12,16].includes(+o)?+o:(+o>0?12:0);const t=+localStorage.getItem('mirsal.tile');if(t>=130&&t<=420)GS.tile=t;
   const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens.filter(g=>Number.isInteger(g)&&g>0),off:s.off||[],pack:s.pack||''}}catch(e){}      // a saved [null] / NaN (the old hopen clash) must not fire a 400 at every load
@@ -104,6 +106,9 @@ const cellAct=(g,t,stage)=>`data-act=gcell data-g=${g.number} data-i=${t.index} 
 /* the box of a sticker (or an animation) that Python blocked: why in plain words, then 'Use it anyway' when it may be allowed, else why it cannot be */
 function blockedBox(g,t,kind){const A=ALW(g,kind),still=kind==='still',why=A.why[t.index]||(still?t.reason||t.status:ANIMWHY[t.anim_reason]||t.anim_reason||'failed');
   return`<div class=gbadmsg><b>${still?'Blocked':'No animation'}</b><div class=mut style="margin:4px 0 8px">${esc(why)}</div>${A.can.includes(t.index)?`<button class="btn sm pri" ${cellAct(g,t,still?'still':'anim')} title="Python's check is a judgement call: you decide. It is recorded, and you can take it back">Use it anyway</button>`:A.final[t.index]?`<div class=mut>${esc(A.final[t.index])}</div>`:''}</div>`}
+/* A blocked animation still has a finished clip on disk. Keep that picture in place, dimmed by .gt.nx, and put the reason/action over it. */
+function blockedAnimOverlay(g,t){const A=ALW(g,'animation'),why=A.why[t.index]||ANIMWHY[t.anim_reason]||t.anim_reason||'failed';
+  return`<div class=gblockover><b>Blocked</b><span>${esc(why)}</span>${A.can.includes(t.index)?`<button class="btn sm pri" ${cellAct(g,t,'anim')} title="Python's check is a judgement call: you decide. It is recorded, and you can take it back">Use it anyway</button>`:A.final[t.index]?`<span>${esc(A.final[t.index])}</span>`:''}</div>`}
 /* what is wrong with a sticker at a stage ('still' | 'anim'): hard ones first, then by kind */
 function issuesOf(t,stage,g){const out=[],add=(id,text,soft)=>out.push({cat:CATOF[id]||'bad',id,text,soft:!!soft});
   if(stage==='anim'){
@@ -156,16 +161,18 @@ const nAdded=(g,pid)=>keptOf(g).filter(t=>((g.added||{})[pid]||[]).includes(`${a
 RENDER.generate=async()=>{
   $('s-generate').innerHTML=`<div class=gen2>
    <div class=sh>${ic('gen')} Studio</div>
-   <div class=gform>${ic('search')}<input id=prompt type=text placeholder="Describe the stickers, for example: teddy bear for school" autocomplete=off><button id=go class="btn pri gbig" data-act=ggo>Generate</button></div>
+   <div class=gform>${ic('search')}<input id=prompt type=text placeholder="Describe the stickers, for example: teddy bear for school" autocomplete=off><button id=go class="btn pri gbig" data-act=gprompt>Generate prompt</button></div>
    <div class=gopts><span class=mut>White outline</span><div class=tabs id=opills></div><span class=mut id=ohint></span></div>
    <div id=gsug class=gsug></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
-  $('prompt').value=SES.prompt||'';$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
+  $('prompt').value=gdOn()?GD.prompt:SES.prompt||'';$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
   document.documentElement.style.setProperty('--tile',GS.tile+'px');
   drawOutline();glast='';await loadInputs();drawSug();tick(true)};
 function drawOutline(){const on=GS.outline>0;$('opills').innerHTML=[[12,'On'],[0,'Off']].map(([px,l])=>`<button class="tab ${(on?12:0)===px?'on':''}" data-act=goutline data-px=${px}>${l}</button>`).join('');
   $('ohint').textContent=on?'white border around each sticker, also on the animation':'stickers are cut out with no border'}
 ACT.goutline=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);drawOutline();glast='';tick(true)};
-async function loadInputs(){const r=await api('/api/inputs');if(r.ok)GINP=r.j.inputs;const a=await api('/api/ai');if(a.ok)GAI=a.j;const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health}
+/* /api/ai: which engine the AI enhancer would use and what is available (never the key); asked again after the person changes the engine (AIENG, agent.js) */
+async function aiRefresh(){const a=await api('/api/ai');if(a.ok){GAI=a.j;if(typeof cpDrawBar==='function')cpDrawBar()}return GAI}          // the chip and the engine control read GAI: redraw when it arrives (the composer can be drawn first)
+async function loadInputs(){const r=await api('/api/inputs');if(r.ok)GINP=r.j.inputs;await aiRefresh();const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health}
 function drawSug(){const el=$('gsug');if(!el)return;
   el.innerHTML=GINP.length?`<span class=mut>Prepared sheets:</span>`+GINP.map(s=>`<button class=chip2 data-act=gsug data-s="${esc(s.subject)}">${esc(s.subject.replace(/_/g,' '))} <small>${s.variants.length} ${s.variants.length>1?'sheets':'sheet'}</small></button>`).join(''):''}
 ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');ACT.ggo()};
@@ -176,10 +183,10 @@ async function create(prompt,variant,more){
   const r=await postWait('/api/generations',body,'Finishing the previous sheet…');
   if(!r.ok){if(r.status===404&&typeof liveOffer==='function'&&liveOffer(prompt)){say('');return false}
   say(`${esc(r.j.error||'Could not start')} ${r.status===404?`<button class="btn sm" data-act=ghiggs>Get the Higgsfield prompt for this</button>`:''}`);return false}
-  if(more){SES.gens.push(r.j.id)}else{SES={prompt,gens:[r.j.id],off:[],pack:''};for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear()}
+  gdHide();if(more){SES.gens.push(r.j.id)}else{SES={prompt,gens:[r.j.id],off:[],pack:''};for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear()}
   saveSes();glast='';MD=null;tick(true);return true}
 ACT.ggo=()=>{const p=$('prompt').value.trim();if(!p){say('Write what you want first, for example <b>teddy bear for school</b>.');return}create(p,0,false)};
-function openGen(id){SES={prompt:'',gens:[id],off:[],pack:''};saveSes();glast='';MD=null;tick(true)}
+function openGen(id){gdHide();SES={prompt:'',gens:[id],off:[],pack:''};saveSes();glast='';MD=null;tick(true)}
 ACT.gmore=async()=>{const gs=sessionGens();if(!gs.length)return;const s=gs[0].source.subject,used=new Set(gs.map(g=>String(g.source.subject_id)));
   await loadInputs();const inp=GINP.find(x=>x.subject===s),next=inp&&inp.variants.find(v=>!used.has(String(v.folder)));
   if(!next){toast(`That is every prepared sheet of “${s.replace(/_/g,' ')}”. Put another in Images_gen, or get the Higgsfield prompt to make a new one.`,1);return}
@@ -194,14 +201,14 @@ document.addEventListener('input',e=>{if(e.target.id==='gsize'){GS.tile=+e.targe
 function tileHtml(g,t,mode){const base=`/out/${g.generation_id}/`,anim=mode==='anim',ap=animPhase(g),
     off=anim?(t.review.anim==='REJECTED'||t.review.still==='REJECTED'):t.review.still==='REJECTED',blk=anim&&isOob(t),
     mk=mark(t,anim?'anim':'still',g),hard=mk&&!mk.accepted,kind=anim?'animation':'still',can=canAllow(g,t,kind),allowedNow=hasAllowed(g,t,kind),
-    live=anim&&!off&&PVON.has(g.number)&&t.status==='READY'&&g.source.video_path&&!t.webm,hasV=t.webm&&t.anim_status==='READY';
+    live=anim&&!off&&PVON.has(g.number)&&t.status==='READY'&&g.source.video_path&&!t.webm,blockedClip=anim&&t.webm&&t.anim_status==='FAILED',hasV=t.webm&&(t.anim_status==='READY'||blockedClip);
   let m;
   if(!anim)m=t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" loading=lazy>`:t.status==='FAILED'?blockedBox(g,t,'still'):`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
   else m=hasV?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:live?`<canvas data-g=${g.number} data-pv=${t.index} width=288 height=288></canvas><span class=livebadge>live preview</span>`
     :t.anim_status==='FAILED'?blockedBox(g,t,'animation'):t.anim_status==='STALE'?`<div class="gbadmsg mut">${esc(t.anim_reason||'Animate again')}</div>`:t.status==='READY'?`<div class="gbadmsg mut">Not animated yet</div>`:t.status==='FAILED'?blockedBox(g,t,'still'):`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
   const stg=anim?'anim':'still',op=cellOp(g,t,stg),canX=op.op!=='none'&&(anim?ap:!ap||op.op==='allow'||op.op==='unallow');
   const lines=mk?mk.issues.slice(0,2).map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join(''):'';
-  return`<div class="gt ${off?'off':''} ${off||hard||blk?'nx':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${hard&&!off?`<span class="isstag${can?' clk':''}" ${can?`${cellAct(g,t,stg)} title="Click to use it anyway"`:''}>${esc(CAT[mk.cat][1])}${can?' · click to use it anyway':''}</span>`:''}${off?'<span class="isstag offtag">Not in the set</span>':''}</div><span class=gem>${esc(t.emoji)}</span>
+  return`<div class="gt ${off?'off':''} ${off||hard||blk?'nx':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${blockedClip?blockedAnimOverlay(g,t):hard&&!off?`<span class="isstag${can?' clk':''}" ${can?`${cellAct(g,t,stg)} title="Click to use it anyway"`:''}>${esc(CAT[mk.cat][1])}${can?' · click to use it anyway':''}</span>`:''}${off?'<span class="isstag offtag">Not in the set</span>':''}</div><span class=gem>${esc(t.emoji)}</span>
     ${canX?`<button class=gx ${cellAct(g,t,stg)} title="${cellTitle(op,t)}">${['allow','include'].includes(op.op)?ic('plus'):ic('x')}</button>`:''}
     <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" ${cellAct(g,t,stg)}>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${allowedNow?`<div class=gwarn style="color:var(--pri-d)">allowed by you${ALW(g,kind).undo.includes(t.index)?` · <button class=link ${cellAct(g,t,stg)}>Take it back</button>`:''}</div>`:''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
 function batchHtml(g,k,total,mode){
@@ -234,6 +241,7 @@ function barHtml(s){const {n,ready,busyAnim,todoAnim,done,tot,pk,allAdded,kind,i
   if(todoAnim.length)return`<span class=gstat>${n} sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}</span><button class=link data-act=gadd ${n?'':'disabled'}>or add the stills</button><button class="btn pri gbig" data-act=ganimate>${ic('play')} Animate${inc.length>1?` ${todoAnim.length} batch${todoAnim.length===1?'':'es'}`:''}</button>`;
   return`<span class=gstat>${n} ${kind}sticker${n===1?'':'s'} in ${inc.length} batch${inc.length===1?'':'es'}${allAdded?` · added to “${esc(pk.name)}”`:''}</span><button class="btn pri gbig" data-act=gadd ${n&&!allAdded?'':'disabled'}>${allAdded?'Added ✓':`Add ${n} to a pack`}</button>${allAdded?`<button class="btn gbig" data-act=gopenpack>Open pack</button>`:''}`}
 function gview(){
+  if(gdOn())return gdView();
   const gs=sessionGens();if(!gs.length)return'';
   const s=gstats(gs),{pk,allAdded,n}=s;
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
@@ -294,12 +302,14 @@ const copyBox=(title,text,id,rows,edit)=>`<div class=pbox><div class=pbh><b>${ti
 /* The Prompt tab writes the prompts too: what is typed here is what is SENT (the server keeps it on the batch: `custom_prompts`, `video_prompt_sent`). Drafts live in PD per batch and kind, so a re-render
    (the page refreshes while a batch works) never loses what was typed; the tick skips its re-render while one of these boxes has the focus. */
 const PD={};
+if(GD&&GD.edits)Object.assign(PD,GD.edits);
 const pdKey=(g,kind)=>`${g}:${kind}`;
 const sentVideoPrompt=g=>{const v=(g.video_sheets||[]).slice().reverse().find(x=>x.video_prompt_sent);return v?v.video_prompt_sent:null};
 const pdText=(g,kind)=>{const d=PD[pdKey(g.number,kind)];return d!==undefined?d:kind==='sheet'?g.sheet_prompt:(sentVideoPrompt(g)||g.video_prompt)};
 const pdBase=(g,kind)=>kind==='sheet'?g.sheet_prompt:(sentVideoPrompt(g)||g.video_prompt);
 const pdCustom=(g,kind)=>{const d=PD[pdKey(g.number,kind)];return d!==undefined&&d.trim()!==''&&d!==pdBase(g,kind)};
 function pdFoot(g,kind){const custom=pdCustom(g,kind),live=typeof liveReadyNow==='function'&&liveReadyNow();
+  if(g.number==='draft')return gdFoot(g,kind);
   const kept=typeof keptStills==='function'?keptStills(g).length:0,sent=(g.video_sheets||[]).some(v=>['VIDEO_RETURNED','SLICED'].includes(v.status));
   const go=kind==='sheet'
     ?`<button class="btn sm pri" data-act=pgsheet data-g=${g.number} ${live?'':'disabled'} title="${live?'Make a NEW sheet from this batch\'s own cells and tags, with this prompt':'Higgsfield is not connected'}">Generate sheet${custom?' with my prompt':''}<span class=lv-vp data-lvprice=image></span></button>`
@@ -310,9 +320,64 @@ function planView(g){const pl=g.reviews&&g.reviews.plan,sv=sentVideoPrompt(g);
    <p class=mut>Template <b>${esc(g.template_id||'hand-written plan')}</b>${g.template_version?' v'+g.template_version:''} · plan from ${esc(g.plan_source||'')}${pl?` · ${esc(pl.decision.toLowerCase())}d by ${esc(pl.by)}`:''}</p></div>
    <ul class=pcells>${g.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=mut>${esc(t.prompt)}</div><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></section>`}
 document.addEventListener('input',e=>{const t=e.target;if(!t.dataset||t.dataset.pd===undefined)return;
-  const g=GM.get(+t.dataset.g);if(!g)return;PD[pdKey(g.number,t.dataset.pd)]=t.value;
-  const foot=t.closest('.pbox').querySelector('[data-pdfoot]');if(foot){const tmp=document.createElement('div');tmp.innerHTML=pdFoot(g,t.dataset.pd);foot.replaceWith(tmp.firstChild);if(typeof fillPrices==='function')fillPrices()}});
-ACT.pgreset=el=>{delete PD[pdKey(+el.dataset.g,el.dataset.kind)];glast='';tick(true)};
+  const g=t.dataset.g==='draft'?GD:GM.get(+t.dataset.g);if(!g)return;PD[pdKey(g.number,t.dataset.pd)]=t.value;if(g===GD)gdSave();
+  const foot=t.closest('.pbox').querySelector('[data-pdfoot]');if(foot){const tmp=document.createElement('div');tmp.innerHTML=pdFoot(g,t.dataset.pd);foot.replaceWith(tmp.firstChild);if(typeof fillPrices==='function')fillPrices();if(g===GD)gdPrice()}});
+ACT.pgreset=el=>{const n=el.dataset.g==='draft'?'draft':+el.dataset.g;delete PD[pdKey(n,el.dataset.kind)];if(n==='draft')gdSave();glast='';tick(true)};
+/* The same Prompt editor, before a sheet exists (plan.md 16.4). "Generate prompt" is POST /api/plan: no G### is allocated, nothing enters SES or GM, no Higgsfield credit is spent.
+   With the AI enhancer On the plan is written through the engine the person chose (ai:true; Local is free, Cloud is one small OpenAI call); a model that fails never blocks, the server answers the built-in plan with expand_error and the step says why.
+   "Generate sheet" is the one click that spends: the Higgsfield price sits on its own line above it, the edited text goes to the live sheet route as `sheet_prompt` and the previewed plan (its cells, tags and emoji) as `plan`, which the server re-validates (rule 13). */
+const gdOn=()=>!!(GD&&GD.active&&GD.gens===SES.gens.join());      // another batch taking the Studio (an opened batch, a finished sheet) ends this screen; the composer's "Prompt draft" brings it back
+function gdSave(){if(GD){GD.edits=Object.fromEntries(Object.entries(PD).filter(([k])=>k.startsWith('draft:')));gstore('mirsal.prompt-draft',JSON.stringify(GD))}}
+function gdHide(){if(GD){GD.active=false;gdSave()}}
+function gdDrop(){GD=null;GDP=null;delete PD['draft:sheet'];delete PD['draft:video'];try{localStorage.removeItem('mirsal.prompt-draft')}catch(e){}}
+const gdKey=()=>{const {model,sel}=lsel('image');return model?model.id+JSON.stringify(sel.options):''};
+function gdPriceLine(){if(typeof liveReadyNow!=='function'||!liveReadyNow())return{t:'Higgsfield sheet price: unavailable, Higgsfield is not connected',ok:false};
+  if(!GDP||GDP.key!==gdKey())return{t:'Higgsfield sheet price: checking…',ok:false};
+  return GDP.c==null?{t:'Higgsfield sheet price: unavailable',ok:false,retry:true}:{t:`Higgsfield sheet price: ◈ ${fcr(GDP.c)} credits`,ok:true}}
+function gdFoot(g,kind){const reset=`<button class="btn sm" data-act=pgreset data-g=draft data-kind=${kind} ${PD[pdKey('draft',kind)]!==undefined?'':'hidden'}>Reset</button>`;
+  if(kind==='video')return`<div class=pdfoot data-pdfoot=video>${reset}<small class=mut>This video prompt is for later: the animation is made after the sheet and its stickers exist.</small></div>`;
+  const P=gdPriceLine(),custom=pdCustom(g,'sheet');
+  return`<div class=pdfoot data-pdfoot=sheet><div class=mut id=gdprice>${P.t}</div>${P.retry?'<button class="btn sm" data-act=gdpriceretry>Retry the price</button>':''}<button class="btn sm pri" data-act=gdsheet ${P.ok&&!GDWORK?'':'disabled'} title="Spends the Higgsfield credits shown above">Generate sheet${custom?' with my prompt':''}</button>${reset}<small class=mut>${custom?'Your text is sent exactly as written.':g.expanded_by==='ai'?'The AI enhancer\'s text is sent exactly as shown.':'This is the template\'s text; edit it to send your own.'} Generating the prompt spent no Higgsfield credits; this click is what spends.</small></div>`}
+function gdPaint(){const foot=document.querySelector('[data-pdfoot=sheet]');if(!gdOn()||!foot||!foot.querySelector('[data-act=gdsheet]'))return;const tmp=document.createElement('div');tmp.innerHTML=gdFoot(GD,'sheet');foot.replaceWith(tmp.firstChild)}
+async function gdPrice(){if(!gdOn()||typeof liveReadyNow!=='function'||!liveReadyNow())return;const key=gdKey();if(GDP&&GDP.key===key)return;
+  const c=await lcost('image',true);GDP={key,c};gdPaint()}
+function gdView(){const tab=GD.tab==='request'?'request':'plan';
+  return`<div class=ghead><div><h2 style="margin:0">Prompt, before the sheet</h2><div class=mut>No batch exists yet · written by ${esc(GD.plan_source||'the free built-in planner')} · ${GD.expanded_by==='ai'?'no Higgsfield credits spent':'nothing spent'}</div></div><button class="btn sm" data-act=gddiscard title="Forget this prompt and its edits. Nothing was created, so nothing is removed">Discard prompt</button></div>
+   <div class=gsteps>${[['Request','done',esc(GD.prompt),'request'],['Prompt','todo','editable, nothing spent','plan'],['Stickers','todo','after the sheet'],['Animation','todo','after the stickers'],['Pack','todo','after the stickers']].map(([l,st,sub,t],i)=>`<button class="gst ${st} ${t===tab?'cur':''}" ${t?`data-act=gdtab data-t=${t}`:'disabled'}><span class=gsm>${st==='done'?ic('check'):i+1}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g,'')}">${sub}</small></span></button>`).join('')}</div>
+   ${gdNote(GD)}${tab==='request'?`<section class=gplan><p>${esc(GD.prompt)}</p><button class=btn data-act=gdtab data-t=plan>Back to the prompt</button> <small class=mut>To change the request, edit the box above and press Generate prompt again; your edits stay until the new prompt is ready.</small></section>`:planView(GD)}`}
+ACT.gdtab=el=>{if(!GD)return;GD.active=true;GD.gens=SES.gens.join();GD.tab=el.dataset.t==='request'?'request':'plan';gdSave();glast='';if(typeof cpDrawBar==='function')cpDrawBar();tick(true)};
+ACT.gddiscard=()=>{gdDrop();glast='';if(typeof cpDrawBar==='function')cpDrawBar();tick(true)};
+ACT.gdpriceretry=()=>{const {model,sel}=lsel('image');if(model)delete LIVE.est['image'+model.id+JSON.stringify(sel.options)];GDP=null;gdPaint();gdPrice()};
+/* Generate prompt: with the AI enhancer On the plan is written by the model the person chose (the same engine control as the AI screen: Auto / Local / Cloud, composer.js); a model that fails never blocks, the server answers the built-in plan with `expand_error` and the step says why */
+const gdEngineName=()=>{const g=typeof GAI!=='undefined'?GAI:null;return g&&g.provider&&g.provider!=='none'?`${g.provider==='openai'?'cloud':'local'} · ${String(g.model||'').replace(/:\d+$/,'')}`:''};
+ACT.gprompt=()=>gdPlan(typeof aiOn==='function'&&aiOn());
+ACT.gpromptfree=()=>gdPlan(false);          // "Use the built-in prompt instead": plans again without the model; the saved enhancer setting is not changed
+async function gdPlan(ai){const p=(($('prompt')||{}).value||'').trim();if(!p){say('Write what you want first, for example <b>teddy bear for school</b>.');return}if(GDWORK)return;
+  if(typeof CP!=='undefined'&&CP.refs.some(r=>r.busy)){toast('Wait for the reference images to finish uploading',1);return}
+  GDWORK=true;const b=$('go');if(b)b.disabled=true;
+  if(ai)say(`Asking the AI enhancer${gdEngineName()?` (${esc(gdEngineName())})`:''}… a local model can take a moment.`);
+  try{const style=typeof LIVE!=='undefined'?LIVE.style:'flat_vector',loop=!!(typeof LIVE!=='undefined'&&LIVE.loop);
+    const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:style,loop,ai:!!ai});if(!r.ok){say('');toast(r.j.error||'Could not generate the prompt',1);return}
+    delete PD['draft:sheet'];delete PD['draft:video'];
+    const byAi=r.j.expanded_by==='ai';
+    GD={...r.j,number:'draft',prompt:p,ai_asked:!!ai,plan_source:byAi?`the AI enhancer${r.j.expand_model?` (${r.j.expand_model})`:''}`:'the free built-in planner',video_sheets:[],reviews:{},active:true,tab:'plan',gens:SES.gens.join(),style,loop,refs:typeof CP!=='undefined'?CP.refs.filter(x=>x.id).map(x=>x.id):[]};
+    say('');gdSave();glast='';await tick(true);
+    const gr=$('gres');if(gr&&gr.scrollIntoView)gr.scrollIntoView({behavior:'smooth',block:'start'})          // the step sits below the style tiles: bring it into view so the click visibly does something
+  }catch(e){say('');toast(e.message||'Could not generate the prompt',1)}finally{GDWORK=false;if(b)b.disabled=false;if(typeof cpDrawBar==='function')cpDrawBar();gdPrice()}}
+/* the one line under the step's title about the enhancer: why the built-in prompt is shown (the model failed or has no key: the server's own reason), or that the model wrote it and how to leave it */
+function gdNote(g){if(!g.ai_asked)return'';
+  if(g.expand_error)return`<div class="gdnote bad" role=status><span>The AI enhancer did not answer: ${esc(g.expand_error)} This is the built-in prompt instead.</span></div>`;
+  if(g.expanded_by==='transformation')return`<div class=gdnote role=status><span>This request changes one character, so the built-in template wrote the cells and the AI enhancer was not asked.</span></div>`;
+  if(g.expanded_by==='ai')return`<div class=gdnote role=status><span>Written by the AI enhancer${g.expand_model?` (${esc(g.expand_model)})`:''}.</span><button class="btn sm" data-act=gpromptfree>Use the built-in prompt instead</button></div>`;
+  return''}
+ACT.gdsheet=async el=>{if(!gdOn()||GDWORK)return;const g=GD,text=(pdText(g,'sheet')||'').trim();if(!text){toast('Write a sheet prompt first',1);return}
+  if(typeof liveReadyNow!=='function'||!liveReadyNow()){toast('Connect Higgsfield first',1);return}
+  if(!gdPriceLine().ok){toast('The Higgsfield price is not known yet: wait for it or retry it, then generate',1);return}       // never spend against a price the person has not been shown
+  GDWORK=true;el.disabled=true;
+  try{const ok=await liveStart('sheet',{prompt:g.prompt,ai:false,refs:g.refs||[],style_id:g.style,loop:g.loop,sheet_prompt:(pdCustom(g,'sheet')||g.expanded_by==='ai')?pdText(g,'sheet'):undefined,
+    plan:g.slots?{template_id:g.template_id,expanded_by:g.expanded_by,expand_model:g.expand_model,slots:{subject_description:g.slots.subject_description,key_colour:g.slots.key_colour,cells:g.slots.cells}}:undefined});     // the previewed plan goes with the click: the server validates it and builds the batch from the cells the person saw (ai:false: the enhancer is never asked a second time)
+    if(ok){gdDrop();glast='';await tick(true)}}
+  finally{GDWORK=false;if(GD){gdSave();gdPaint()}if(typeof cpDrawBar==='function')cpDrawBar()}};
 ACT.pgsheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
   const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,sheet_prompt:pdCustom(g,'sheet')?PD[pdKey(g.number,'sheet')]:undefined});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};
@@ -388,20 +453,21 @@ async function gaddrun(pid,mode,names){let added=0,replaced=0,err='';const edge=
 ACT.gopenpack=()=>{const pid=(PW&&PW.pid)||SES.pack;if(pid)location.hash='#/pack/'+pid};
 
 /* ---------- Make a video...: the one multi-step path, for a batch without a prepared video */
-ACT.gvideo=async el=>{const id=+el.dataset.g,r=await postWait(`/api/generations/${id}/quick_sheet`);if(!r.ok){toast(r.j.error,1);return}glast='';VG=id;await tick(true);drawVdlg()};
+ACT.gvideo=async el=>{const id=+el.dataset.g,r=await postWait(`/api/generations/${id}/quick_sheet`);glast='';await tick(true);if(!r.ok&&!sheetOf(GM.get(id)||{video_sheets:[]})){toast(r.j.error,1);return}VG=id;drawVdlg()};
 function drawVdlg(){if(VG===null)return;const g=GM.get(VG);if(!g){VG=null;return}const v=sheetOf(g);if(!v){VG=null;closeDlg();return}
   if(v.status==='SLICED'){VG=null;closeDlg();toast('Animations are ready');glast='';return}
   const base=`/out/${g.generation_id}/`,st=v.status,work=st==='VIDEO_RETURNED';
   const row=(n,done,h)=>`<div class=vstep><span class="vn ${done?'ok':''}">${done?ic('check'):n}</span><div style="flex:1">${h}</div></div>`;
-  dlg(`<div class=vdlg><h2>Make a video from this sheet</h2><div class=vgrid><img src="${base+v.file}" alt="Video sheet" class=vsheet>
+  dlg(`<div class=vdlg><h2>Make a video from this sheet</h2>${SR.bulk(g)}<div class=vgrid>${SR.picture(g,v)}
    <div>${row(1,false,`<b>Download the sheet</b><div class=mut>${v.slots.length} of ${g.stickers.length} stickers on a flat green background, no outline.</div><a class="btn sm" href="${base+v.file}" download="${g.generation_id}-${v.id}-sheet.png">${ic('download')} Download sheet</a>`)}
    ${row(2,false,`<b>Animate it in your tool</b><div class=mut>Image to video, sheet as the first frame.</div><button class="btn sm" data-act=gcopyprompt>Copy video prompt</button>`)}
    ${row(3,st==='SLICED',`<b>Upload the video</b><div class=mut>${work?'Python is slicing the video…':st==='VIDEO_BLOCKED'?`<span style="color:var(--bad)">This video was not accepted (${esc(v.block||'')}). Upload a corrected one.</span>`:'It is cut into one animation per sticker.'}</div>
-     <input type=file id=gvfile accept="video/*,.mp4,.mov,.webm,.mkv" hidden><button class="btn pri sm" data-act=gpickvideo ${work?'disabled':''}>${ic('plus')} ${st==='VIDEO_BLOCKED'?'Upload another video':'Upload video'}</button>`)}</div></div>
+     <input type=file id=gvfile accept="video/*,.mp4,.mov,.webm,.mkv" hidden><button class="btn pri sm" data-act=gpickvideo ${work||v.blocked?'disabled':''}>${ic('plus')} ${st==='VIDEO_BLOCKED'?'Upload another video':'Upload video'}</button>${st==='BUILT'&&!v.blocked?`<button class="btn sm" data-act=gsheetapprove data-g=${g.number}>Approve sheet</button>`:''}`)}</div></div>
    <div class=row style="justify-content:flex-end"><button class=btn data-act=gvclose>Close</button></div></div>`);
   const f=$('gvfile');if(f)f.onchange=async()=>{const file=f.files[0];if(!file)return;const r=await fetch(`/api/generations/${g.number}/video_sheet/${v.id}/video?name=${encodeURIComponent(file.name)}`,{method:'POST',body:file});
     if(!r.ok){let j={};try{j=await r.json()}catch(e){}toast(j.error||'Upload failed',1)}glast='';tick(true)}}
 ACT.gpickvideo=()=>{const f=$('gvfile');if(f)f.click()};
+ACT.gsheetapprove=async el=>{const r=await postWait(`/api/generations/${+el.dataset.g}/quick_sheet`);if(!r.ok)toast(r.j.error,1);glast='';await tick(true);drawVdlg()};
 ACT.gvclose=()=>{VG=null;closeDlg()};
 ACT.gcopyprompt=async()=>{const g=GM.get(VG),v=g&&sheetOf(g);try{await navigator.clipboard.writeText((v&&v.video_prompt)||(g&&g.video_prompt)||'');toast('Video prompt copied')}catch(e){toast('Copy failed',1)}};
 
@@ -430,11 +496,13 @@ function videoBox(g,k){const sz=g.source.sheet_size,v=sheetOf(g);
   if(g.source.video_path&&sz)return`<div class=sbox style="background:#111"><video src="/src/${g.number}/video" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${sz[0]}/${sz[1]};object-fit:fill"></video><svg viewBox="0 0 ${sz[0]} ${sz[1]}" preserveAspectRatio="none">${vcutSvg(g,k)}</svg></div>`;
   if(v&&v.video){const [W,H]=v.canvas||[1,1],lay=layoutOf(g,v),sw=Math.max(2,W/450)*k;
     const rects=lay?lay.slots.map(sl=>`<rect x="${sl.rect[0]}" y="${sl.rect[1]}" width="${sl.rect[2]}" height="${sl.rect[3]}" fill="none" stroke="#2563eb" stroke-width="${sw}" stroke-dasharray="${W/50} ${W/90}" opacity="${sl.sticker?1:.35}"/>`).join(''):'';
-    return`<div class=sbox style="background:#111"><video src="/out/${g.generation_id}/${v.preview||v.video}" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${W}/${H};object-fit:fill"></video><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${rects}${issueSvg(g,'anim',k)}</svg></div>`}
+    return`<div class=sbox style="background:#111"><video src="/out/${g.generation_id}/${v.preview||v.video}" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${W}/${H};object-fit:fill"></video><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${rects}${issueSvg(g,'anim',k)}</svg>${SR.controls(g,v)}</div>`}
+  if(v)return SR.picture(g,v);
   return`<div class="gbadmsg mut" style="padding:26px 10px">These animations come from pre-sliced clips, so there is no single video sheet for this batch.</div>`}
 function videoPanel(g){const s=g.source,vs=sheetOf(g),vi=Object.assign({},vs&&vs.video_info||{},s.video_info||{}),a=animStats(g),bad=a.oob.length+a.fail.length;
   return`<aside class=gsheet><div class=gshead><b>Video sheet</b><span class=gspace></span><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?`, ${a.oob.length} out`:''}</span></div>
    ${videoBox(g,2)}
+   ${SR.bulk(g)}
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'anim')).join('')}</div>
     ${allowAllRow(g,'animation')}
    <div class="kv vkv"><span>source</span><span>${esc(vi.mode||(s.video_path?'3x3 mp4':vs&&vs.video?'video sheet':'clips'))}${vi.size?' · '+esc(vi.size):vi.width?' · '+vi.width+'×'+vi.height:''}${vi.fps?' · '+vi.fps+' fps':''}</span>
@@ -450,7 +518,7 @@ function animDlg(){const g=GM.get(AV.g);if(!g)return;const s=g.source,vi=s.video
       <td>${m.loop_seam!==undefined?m.loop_seam+' / '+m.loop_limit:''}</td><td>${ins?ins.value+' px'+(ins.data&&ins.data.frames_over?`, ${ins.data.frames_over} frames`:''):''}</td><td>${m.cache==='hit'?'from the cache':ms.finish!==undefined?(ms.finish/1000).toFixed(1)+' s':''}</td></tr>`}).join('');
   const bad=g.stickers.flatMap(t=>(t.anim_report||[]).filter(c=>!c.ok).map(c=>`<div class=chk><i class=cdot style="--cc:${CAT[CATOF[c.name]||'bad'][0]}"></i><span class="${c.severity==='WARN'?'w':'f'}">S${t.index} ${esc(c.name)}</span> <span class=mut>${esc(c.detail||'')}</span></div>`)).join('');
   dlg(`<div class="sheetdlg animdlg"><div class=mrow><h2 style="margin:0">Video sheet & analysis <span class=mut style="font-weight:500">${g.generation_id} · sheet ${s.subject_id}</span></h2><button class=btn data-act=gaclose>✕</button></div>
-   <div class=sgrid><div>${videoBox(g,1.4)}<div class=mut style="margin-top:8px">Blue dashed lines: where the video is cut into one animation per sticker.</div>${legend(g,'anim')}</div>
+   <div class=sgrid><div>${videoBox(g,1.4)}${SR.bulk(g)}<div class=mut style="margin-top:8px">Blue dashed lines: where the video is cut into one animation per sticker.</div>${legend(g,'anim')}</div>
     <div class=sside><h3>Source</h3><div class=kv style="margin:6px 0 12px"><span>mode</span><span>${esc(vi.mode||'')}</span>${vi.file?`<span>file</span><span>${esc(vi.file)}</span><span>video</span><span>${esc(vi.size||'')} · ${vi.fps||''} fps · ${vi.duration||''} s · ${esc(vi.codec||'')}</span>`:`<span>clips</span><span>${esc(vi.clip_format||'')} (one transparent clip per sticker)</span>`}
      <span>animated</span><span>${a.done} of ${a.total}</span><span>work this time</span><span>${(a.ms/1000).toFixed(1)} s${a.cached?` · ${a.cached} read back from the cache`:''}</span></div>
      <h3>Every animation</h3><table class=stbl><tr><th>#</th><th>result</th><th>frames</th><th>fps</th><th>KB</th><th>crf</th><th>loop seam / limit</th><th>on the border</th><th>time</th></tr>${rows}</table>
@@ -464,7 +532,7 @@ const sheetView=g=>{const vs=sheetViews(g);return vs.find(v=>v.id===SHK.get(g.nu
 function sheetPanel(g){const s=g.source,size=s.sheet_size;if(!size||!s.sheet_copy)return'';
   const cur=sheetView(g),keyed=cur.id==='keyed',base=`/out/${g.generation_id}/`,G=s.grid,[W,H]=size;
   const cut=G?`<span class="gcut ${G.method==='gutter'||G.method==='single'?'ok':'warn'}">${G.method==='gutter'?'cut at gutters':'cut: '+esc(G.method)}</span>`:'';
-  return`<aside class=gsheet><div class=gshead><b>Green screen</b><span class=gspace></span><div class=tabs>
+  return`<aside class=gsheet><div class=gshead><b>${g.key_colour==='blue'?'Blue':'Green'} screen</b><span class=gspace></span><div class=tabs>
     ${sheetViews(g).map(v=>`<button class="tab ${v.id===cur.id?'on':''}" data-act=gshk data-g=${g.number} data-k=${v.id}>${esc(v.label)}</button>`).join('')}</div></div>
    <div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+cur.file}" alt="${esc(cur.label)}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'still')).join('')}</div>
@@ -478,7 +546,7 @@ function sheetDlg(){const g=GM.get(SV.g);if(!g)return;const s=g.source,base=`/ou
   const svg=cutSvg(g,SV.lines,SV.boxes);
   const checks=(g.verify.sheet||[]).map(c=>`<div class=chk><span class="${c.ok?'p':(c.severity==='WARN'?'w':'f')}">${c.ok?'✓':c.severity==='WARN'?'!':'✗'} ${esc(c.name)}</span> <span class=mut>${esc(c.detail||'')}</span></div>`).join('');
   const rows=g.stickers.map(t=>{const m=t.metrics||{};return`<tr><td>${t.index}</td><td>${t.status==='READY'?'<span style="color:var(--ok)">ready</span>':`<span style="color:var(--bad)">${esc(t.reason||t.status)}</span>`}</td><td>${m.fg_px!==undefined?m.fg_px:''}</td><td>${m.threshold!==undefined?m.threshold:''}</td><td>${m.scale||''}</td><td>${esc((m.warnings||[]).join(', '))}</td></tr>`}).join('');
-  dlg(`<div class=sheetdlg><div class=mrow><h2 style="margin:0">Green screen & cuts <span class=mut style="font-weight:500">${g.generation_id} · sheet ${s.subject_id} · ${W}×${H}</span></h2><button class=btn data-act=gsclose>✕</button></div>
+  dlg(`<div class=sheetdlg><div class=mrow><h2 style="margin:0">${g.key_colour==='blue'?'Blue':'Green'} screen & cuts <span class=mut style="font-weight:500">${g.generation_id} · sheet ${s.subject_id} · ${W}×${H}</span></h2><button class=btn data-act=gsclose>✕</button></div>
    <div class=gtoolbar><div class=tabs><button class="tab ${SV.view==='raw'?'on':''}" data-act=gsview data-v=raw>Raw sheet</button><button class="tab ${SV.view==='keyed'?'on':''}" data-act=gsview data-v=keyed ${s.keyed?'':'disabled'}>Background removed</button></div>
     <label class=mut><input type=checkbox data-act=gstog data-k=lines ${SV.lines?'checked':''}> Cut lines</label><label class=mut><input type=checkbox data-act=gstog data-k=boxes ${SV.boxes?'checked':''}> Sticker boundaries</label></div>
    <div class=sgrid><div class="sbox ${SV.view==='keyed'?'bg-'+bg:''}"><img src="${img}" alt="Sheet"><svg viewBox="0 0 ${W} ${H}">${svg}</svg></div>
@@ -504,8 +572,8 @@ ACT.hgenop=async()=>{const p=$('prompt').value.trim();if(!p)return;
   $('hres').innerHTML=`<div class=card style="margin:10px 0">Job <b>${esc(id)}</b> requested — waiting for the generator (<span id=hjela>0s</span>). The operator claims it, calls Higgsfield, and completes it; the sheet then runs through the stills like a prepared one.</div>`;
   const iv=setInterval(async()=>{const g=await api('/api/jobs/'+id),el=$('hjela');if(!g.ok||!el){clearInterval(iv);return}
     el.textContent=Math.round((Date.now()-t0)/1000)+'s · '+g.j.status;
-    if(g.j.status==='DONE'||g.j.status==='FAILED'){clearInterval(iv);
-      if(el&&el.parentElement)el.parentElement.innerHTML+=g.j.status==='DONE'?`<div class=mut>Sheet arrived: <code>${esc(g.j.result.file)}</code> (${Math.round(g.j.result.bytes/1024)} KB).</div>`:`<div class=mut>Failed: ${esc(g.j.error||'unknown')}</div>`}},5000)};
+    if(['DONE','FAILED','TIMEOUT'].includes(g.j.status)){clearInterval(iv);
+      if(el&&el.parentElement)el.parentElement.innerHTML+=g.j.status==='DONE'?`<div class=mut>Sheet arrived: <code>${esc(g.j.result.file)}</code> (${Math.round(g.j.result.bytes/1024)} KB).</div>`:JR.controls(g.j)}},5000)};
 ACT.hreserve=async()=>{const r=await post('/api/tasks',{prompt:$('prompt').value.trim(),grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
   $('hres').innerHTML=`<div class=card style="margin:10px 0"><b>Create these two folders and name the downloads into them</b><br><code>${esc(r.j.paths.img)}</code><br><code>${esc(r.j.paths.vid)}</code><div class=mut>The sheet goes in <b>${esc(r.j.folders.img)}</b>, the video in <b>${esc(r.j.folders.vid)}</b>. Then press Generate again.</div></div>`};
 
@@ -577,9 +645,9 @@ async function tick(force){try{
   const hh=$('ghealth');if(hh)hh.innerHTML=(GSTALE?'<div class=warn><b>This server is running older code than the files on disk.</b> New buttons may say “not found” and fixes will not apply until you restart it: press Ctrl+C in its terminal, then run <code>python -m mirsal serve</code> from the <code>mirsal</code> folder.</div>':'')+(GHEALTH&&GHEALTH.vp9===false?'<div class=warn>This ffmpeg cannot encode VP9, so animations will fail. Run <code>python -m mirsal doctor</code>.</div>':'');
   let key='';for(const id of SES.gens){const r=await api('/api/generations/'+id);if(r.ok){GM.set(id,r.j);key+=JSON.stringify(r.j);autoRecheck(r.j)}else if(r.status===404){SES.gens=SES.gens.filter(x=>x!==id);saveSes()}}
   for(const id of [...ANIM]){const g=GM.get(id);if(g&&animPhase(g)&&!processing(g))ANIM.delete(id)}
-  key+=bg+SES.off.join()+SES.pack+[...ANIM].join()+(LIB.packs||[]).length;
+  key+=bg+SES.off.join()+SES.pack+[...ANIM].join()+(LIB.packs||[]).length+JSON.stringify(GD);
   const typing=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.pd!==undefined;
-  if(force||(key!==glast&&!typing)){glast=key;const el=$('gres');if(el)el.innerHTML=gview();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg();if(typeof applyEdgePreview==='function')applyEdgePreview();if(typeof hxSync==='function')hxSync()}
+  if(force||(key!==glast&&!typing)){glast=key;const el=$('gres');if(el)el.innerHTML=gview();gdPrice();if(MD)gmodal();drawVdlg();if(SV.g!==null&&document.querySelector('.sheetdlg'))sheetDlg();if(typeof applyEdgePreview==='function')applyEdgePreview();if(typeof hxSync==='function')hxSync()}
 }catch(e){const m=$('msg');if(m)m.textContent='Something went wrong: '+e.message}}
 setInterval(tick,700);loadLib();
 
@@ -600,10 +668,16 @@ ACT.gcell=el=>{const g=GM.get(+el.dataset.g),t=g&&g.stickers[+el.dataset.i-1];if
 
 /* one bulk control per batch, per kind, above the grid: "Use all anyway (N)" / "Take all back (N)", where N counts what is allow-able NOW, never everything.
    Stills live under the green-screen panel, animations under the video sheet. */
+const ALWBUSY=new Set();     // "<batch number>:<kind>" while a bulk allow / take-back is on its way: the buttons wait instead of answering a second click with a "busy" 409
+const alwBusy=(g,kind)=>ALWBUSY.has(g.number+':'+kind)||(kind!=='still'&&processing(g));
 function allowAllRow(g,kind){const A=ALW(g,kind),a=A.can.length,b=A.undo.length,what=kind==='still'?'sticker':'animation';if(!a&&!b)return'';
-  return`<div class=lv-allow>${a?`<button class="btn sm pri" data-act=gallowall data-g=${g.number} data-kind=${kind} data-allow=1 title="Use every ${what} anyway that Python blocked as a judgement call">Use all anyway (${a})</button>`:''}
-   ${b?`<button class="btn sm" data-act=gallowall data-g=${g.number} data-kind=${kind} data-allow=0 title="Block the ${what}s you allowed again">Take all back (${b})</button>`:''}<span class=mut>or click a cell on the sheet</span></div>`}
-ACT.gallowall=async el=>{const g=GM.get(+el.dataset.g);if(!g)return;const allow=el.dataset.allow==='1',kind=el.dataset.kind==='still'?'still':'animation',
-  r=await postWait(`/api/generations/${g.number}/allow`,{all:true,allow,kind},'Finishing the previous step…');
-  if(!r.ok)return toast(r.j.error||'Could not change it',1);
-  toast(allow?`Allowed ${r.j.indexes.length}: cutting their ${kind==='still'?'pictures':'animations'}…`:`Took back ${r.j.indexes.length}`);glast='';if(typeof tick==='function')tick(true)};
+  const bz=alwBusy(g,kind),lock=bz?' disabled aria-busy=true':'';
+  return`<div class=lv-allow>${a?`<button class="btn sm pri" data-act=gallowall data-g=${g.number} data-kind=${kind} data-allow=1${lock} title="Use every ${what} anyway that Python blocked as a judgement call">${bz?'Cutting again…':`Use all anyway (${a})`}</button>`:''}
+   ${b?`<button class="btn sm" data-act=gallowall data-g=${g.number} data-kind=${kind} data-allow=0${lock} title="Block the ${what}s you allowed again">${bz?'Cutting again…':`Take all back (${b})`}</button>`:''}<span class=mut>or click a cell on the sheet</span></div>`}
+ACT.gallowall=async el=>{const g=GM.get(+el.dataset.g);if(!g)return;const allow=el.dataset.allow==='1',kind=el.dataset.kind==='still'?'still':'animation',key=g.number+':'+kind;
+  if(ALWBUSY.has(key)||el.disabled)return;ALWBUSY.add(key);
+  const row=el.closest('.lv-allow');if(row)row.querySelectorAll('button[data-act=gallowall]').forEach(b=>{b.disabled=true;b.setAttribute('aria-busy','true');b.textContent='Cutting again…'});
+  try{const r=await postWait(`/api/generations/${g.number}/allow`,{all:true,allow,kind},'Finishing the previous step…');
+    if(!r.ok)return toast(r.j.error||'Could not change it',1);
+    toast(allow?`Allowed ${r.j.indexes.length}: cutting their ${kind==='still'?'pictures':'animations'}…`:`Took back ${r.j.indexes.length}`);}
+  finally{ALWBUSY.delete(key);glast='';if(typeof tick==='function')tick(true)}};

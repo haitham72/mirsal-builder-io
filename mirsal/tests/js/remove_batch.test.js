@@ -84,3 +84,7 @@ test('an empty trash draws nothing (and a member, who cannot read it, sees nothi
   await h.remLoad();
   assert.equal(el.innerHTML, '');
 });
+
+test('with no batch left the Edge strip is emptied AND loses its box styling, so no blank bar stays under the Studio', () => {
+  assert.match(live, /if\(!gs\.length\)\{bar\.innerHTML='';bar\.className='';bar\.removeAttribute\('data-built'\)\}/);
+});

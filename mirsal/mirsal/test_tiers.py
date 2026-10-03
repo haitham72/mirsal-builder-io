@@ -38,6 +38,21 @@ FAST_TESTS = (
     "tests.test_batches.RemoveABatch",
 )
 
+# Reviewed regression profiles, not a random sample or a cap that drops tests.
+# The exact item-0 gate runs FIRST in every focused profile. Media implementations
+# still earn the full slow tier; catalogue/UI/recovery work can use this smaller gate.
+GOLDEN_GATE = "tests.test_golden.GoldenPathTests.test_switching_a_verdict_back_swaps_the_finished_clip_and_renders_nothing"
+FOCUSED_BASE = (GOLDEN_GATE, "tests.test_verify.RunnerTests", "tests.test_js.JavaScriptTests")
+FOCUSED_PROFILES = {
+    "animation": FOCUSED_BASE,
+    "recovery": FOCUSED_BASE + ("tests.test_job_recovery.RecoveryTests",),
+    "video-sheet": FOCUSED_BASE + ("tests.test_sheet_allow.SheetAllows", "tests.test_sheet_allow.SheetAllowRoutes", "tests.test_allow_still.ContractTests"),
+}
+FOCUSED_TESTS = FOCUSED_BASE + (
+    "tests.test_job_recovery.RecoveryTests", "tests.test_sheet_allow.SheetAllows",
+    "tests.test_sheet_allow.SheetAllowRoutes", "tests.test_allow_still.ContractTests",
+)
+
 # One reviewable map from a changed production module to the test classes that import/exercise it.
 # Unknown areas fail with the known keys; the runner never guesses from filenames or silently runs nothing.
 MODULE_TESTS = {
@@ -56,6 +71,7 @@ MODULE_TESTS = {
         "tests.test_verify.PackTests", "tests.test_verify.RunnerTests",
         "tests.test_verify.LayoutSlicingTests", "tests.test_allow_still.StillsTests",
         "tests.test_allow_still.TechnicalBlocksTests", "tests.test_allow_still.GatingTests",
+        "tests.test_verify_fixtures",
     ),
     "flow/gates": (
         "tests.test_golden.GoldenPathTests", "tests.test_allow_still.StillsTests",
@@ -152,6 +168,10 @@ def suite_for(tier: str, area: str | None = None) -> unittest.TestSuite:
     loader = unittest.defaultTestLoader
     if tier == "fast":
         names = FAST_TESTS
+    elif tier == "focused":
+        if area and area not in FOCUSED_PROFILES:
+            raise ValueError(f"No focused profile for {area}. Choose: {', '.join(FOCUSED_PROFILES)}")
+        names = FOCUSED_PROFILES[area] if area else FOCUSED_TESTS
     elif tier == "slow":
         names = SLOW_MODULES
     elif tier == "area":
@@ -166,7 +186,7 @@ def suite_for(tier: str, area: str | None = None) -> unittest.TestSuite:
                              f"{len(derived_map())} more are derived from the tests' own imports; "
                              f"a module with no test importing it maps to nothing, which means run nothing.")
     else:
-        raise ValueError("tier must be fast, area or slow")
+        raise ValueError("tier must be fast, focused, area or slow")
     return loader.loadTestsFromNames(names)
 
 
@@ -201,9 +221,14 @@ def run(tier: str, area: str | None = None) -> int:
         print(f"ERROR   {e}")
         return 2
     selected = suite.countTestCases()
-    print(f"TIER {tier.upper()}  selected {selected} test(s)" + (f" for {normalise_area(area or '')}" if tier == "area" else ""), flush=True)
+    if not selected:
+        print(f"ERROR   {tier} selected no tests; this is not a passing verification.")
+        return 2
+    print(f"TIER {tier.upper()}  selected {selected} test(s)" + (f" for {normalise_area(area or '')}" if area else ""), flush=True)
+    if tier == "focused":
+        print("FOCUSED REGRESSIONS ONLY — not full-suite or media verification; the exact golden gate runs first.", flush=True)
     started = time.time()
-    result = unittest.TextTestRunner(verbosity=1).run(suite)
+    result = unittest.TextTestRunner(verbosity=1, failfast=tier == "focused").run(suite)
     skipped = len(result.skipped)
     ran = result.testsRun - skipped
     print(f"TIER {tier.upper()}  RAN {ran} test(s)")

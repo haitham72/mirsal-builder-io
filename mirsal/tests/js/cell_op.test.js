@@ -33,7 +33,7 @@ function load() {
   const body = ['let glast="",MD=null;', 'const animPhase=', 'const CAT=', 'const CATORDER=', 'const CATOF=', 'const WARNWHY=', 'const plainWarn=', 'const ANIMWHY=', 'const ALW=', 'const whyOf=',
     'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'function cellOp(', 'const cellVerb=', 'const cellTitle=', 'const cellLabel=', 'const cellAct=', 'const isOob=', 'const oobNote=', 'const cellState=', 'const CELLTXT=', 'function issuesOf(', 'function mark(', 'function chip(',
     'const sheetOf=', 'const LAY=', 'const layoutOfCell=', 'async function allowCall(', 'async function dropCall(', 'function cellRun(', 'ACT.gcell=',
-    'function blockedBox(', 'function issueSvg(', 'function tileHtml('].map(s => s.startsWith('let ') ? s : statement(s)).join('\n');
+    'function blockedBox(', 'function blockedAnimOverlay(', 'function issueSvg(', 'function tileHtml('].map(s => s.startsWith('let ') ? s : statement(s)).join('\n');
   const f = new Function(...Object.keys(sandbox), body + '\nreturn {cellOp,cellLabel,cellRun,issueSvg,tileHtml,blockedBox,chip,ACT,LAY,mark};')(...Object.values(sandbox));
   return { ...f, posts, toasts, GM };
 }
@@ -105,6 +105,18 @@ test('the tile’s x / + and its Use it anyway are the same action with the same
   assert.match(kept, /data-act=gopen data-g=7 data-i=8/, 'the thumbnail itself opens the tile');
   const dropped = h.tileHtml(g, T(8, { review: { still: 'REJECTED', anim: 'NONE' } }), 'still');
   assert.match(dropped, /class=gx data-act=gcell[^>]*title="Bring this one back"/);
+});
+
+test('taking an animation permission back keeps its finished clip dimmed with the reason over it', () => {
+  const h = load();
+  const g = G([]);
+  const html = h.tileHtml(g, T(4, { anim_status: 'FAILED', anim_reason: 'loop_seam', webm: 'slices/S4.webm', review: { still: 'APPROVED', anim: 'BLOCKED' } }), 'anim');
+  assert.match(html, /class="gt [^"]*nx[^"]*"/, 'the existing .gt.nx rule dims the clip');
+  assert.match(html, /<video src="\/out\/G007\/slices\/S4\.webm"/, 'the picture never disappears while the clip is still on disk');
+  assert.match(html, /class=gblockover>[\s\S]*the loop does not close/, 'the reason is laid over the clip');
+  assert.match(html, /Use it anyway/);
+  assert.match(html, /data-act=gcell data-g=7 data-i=4 data-stage=anim/, 'the overlay uses the one cell decision handler');
+  assert.doesNotMatch(html, /<b>No animation<\/b>/);
 });
 
 test('every entry point sends the same request and the same decision is recorded', async () => {

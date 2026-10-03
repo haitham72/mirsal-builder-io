@@ -60,6 +60,11 @@ def sheet_problem(res: dict, job: dict | None = None) -> dict | None:
 # What a blocked sticker (a cell that was cut, or an animation) says in plain words, one line each: the reason Python stopped it, for the tile. `final` ones are Telegram's own limits (or nothing
 # usable came out of the cell): they cannot be allowed (flow/gates.py `allow_info`); the others are judgement calls a person may "use anyway".
 BLOCK_WORDS = {
+    "no_outline_on_sheet": "a white outline was found around a subject on the video sheet",
+    "video_specs": "the returned video is shorter than the expected minimum",
+    "layout_match": "the first video frame does not match the sheet's slot layout",
+    "video_decodes": "the returned video file cannot be decoded",
+    "slots_match_approved": "the video sheet's filled slots do not match the approved stickers",
     "blank_cell": "almost nothing was found in this cell",
     "empty_subject": "almost nothing was found in this cell",
     "foreground": "almost nothing is left of the picture",
@@ -92,4 +97,3 @@ def block_words(check: str | None) -> str:
     """One plain line for a check id or a reason (the id itself when it is unknown)."""
     c = str(check or "")
     return BLOCK_WORDS.get(c) or (c.replace("_", " ") if c else "blocked")
-

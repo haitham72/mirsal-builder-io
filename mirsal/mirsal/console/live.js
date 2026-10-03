@@ -59,7 +59,7 @@ function modelSection(kind,title){const {model,sel}=lsel(kind),more=(LIVE.m.more
    ${more.length?`<details ${isMore?'open':''}><summary class=mut>All Higgsfield ${kind} models (${more.length} more${LIVE.m.counts&&LIVE.m.counts[kind]?` of ${LIVE.m.counts[kind]}`:''})</summary>
      <select data-lvmore="${kind}"><option value="">Choose another model…</option>${more.map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)} (${esc(m.id)})</option>`).join('')}</select></details>`:''}`}
 function drawModels(){if(!LIVE.m)return;
-  dlg(`<div class="vdlg lv-md"><h2>Models</h2><div class=mut>What makes the sheet and what animates it. The price in credits is on the Generate button.</div>
+  dlg(`<div class="vdlg lv-md"><h2>Models</h2><div class=mut>What makes the sheet and what animates it. The sheet's price is on its own line in the Prompt step, above Generate sheet.</div>
    ${modelSection('image','Images')}${modelSection('video','Animation')}
    <div class=row style="justify-content:flex-end"><button class="btn pri" data-act=lmdone>Done</button></div></div>`);
   for(const k of ['image','video'])lcost(k)}
@@ -73,13 +73,13 @@ async function lcost(kind,quiet){const {model,sel}=lsel(kind);if(!model)return n
   const e=document.getElementById('lvest-'+kind);if(e&&!quiet)e.textContent=LIVE.est[key]==null?'price not available':`≈ ${fcr(LIVE.est[key])} credits per ${kind==='image'?'sheet':'clip'}`;
   return LIVE.est[key]}
 
-/* ---------- run: no questions. The price is on the button, the selection is the one made before; Generate just starts */
+/* ---------- run: no questions. The sheet's price is shown on its own line in the Prompt step (Generate prompt is free); the selection is the one made before; Generate sheet just starts */
 const liveReadyNow=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{prompt,ai:typeof aiOn==='function'&&aiOn(),refs:[]});return true}
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
-  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:!!LIVE.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
-      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
+  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:ctx.style_id||LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:ctx.loop===undefined?!!LIVE.loop:!!ctx.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
+      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{}),...(ctx.plan?{plan:ctx.plan}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
     :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(ctx.video_prompt?{video_prompt:ctx.video_prompt}:{}),...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…',{'Idempotency-Key':ikey()});
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
@@ -96,6 +96,8 @@ const fillNow=()=>LIVE.fill!=null?LIVE.fill:(LIVE.m&&LIVE.m.slot_fill)||0.74;
 const gapPct=f=>Math.round((1-f)*100);
 const previewUrl=(g,f)=>`/api/generations/${g.number}/sheet_preview?fill=${f.toFixed(3)}&px=520&k=${typeof keptStills==='function'?keptStills(g).map(t=>t.index).join(''):''}`;
 function vgenBox(g){const vs=typeof sheetOf==='function'?sheetOf(g):null;
+  const stalled=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&JR.stalled(j));
+  if(stalled)return JR.controls(stalled);
   if(vs&&['VIDEO_RETURNED','SLICED'].includes(vs.status))return`<div class="lv-vgen done"><span>${vs.status==='SLICED'?'Animated':'Video received'}${vs.video_info&&vs.video_info.width?` · ${vs.video_info.width}×${vs.video_info.height}`:''}</span></div>`;
   if(!liveReadyNow()||g.source.has_video||making(g))return'';
   const qj=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&QACTIVE.includes(j.status)),
@@ -122,13 +124,14 @@ const QACTIVE=['REQUESTED','CLAIMED'];
 const mmss=sec=>{sec=Math.max(0,Math.round(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')};
 const hhmm=ts=>new Date(ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 function qRows(){const now=Date.now()/1000;
-  return(LIVE.q||[]).filter(j=>!LIVE.dis.includes(j.id)&&(QACTIVE.includes(j.status)&&now-(j.created_at||0)<86400||(j.completed_at||0)>now-900||(['FAILED','TIMEOUT'].includes(j.status)&&now-(j.created_at||0)<86400)))
-    .sort((a,b)=>(b.created_at||0)-(a.created_at||0)).slice(0,8)}
+  return(LIVE.q||[]).filter(j=>!LIVE.dis.includes(j.id)&&(QACTIVE.includes(j.status)||(j.completed_at||0)>now-900||['FAILED','TIMEOUT'].includes(j.status)))
+    .sort((a,b)=>(b.created_at||0)-(a.created_at||0))}
 function qState(j){const now=Date.now()/1000,typ=(LIVE.typ||{})[(j.kind==='video'?'video:':'image:')+j.model],started=j.claimed_at||j.created_at,el=(j.completed_at||now)-started,
     num=j.generation?+String(j.generation).replace(/\D/g,''):null,g=num?GM.get(num):null;
   if(j.status==='REQUESTED')return{t:'Waiting to start',pct:3,cls:'run',el};
   if(j.status==='CLAIMED'){const dl=j.stage==='downloading',pct=dl?96:typ?Math.min(94,5+el/typ*89):null;
     return{t:dl?'Downloading the result':'Higgsfield is working',pct,cls:'run',el,typ}}
+  if(j.provider_check&&j.provider_check.classification==='DIVERGENCE')return{t:j.provider_check.message+(j.status==='DONE'?' Result recovered on the same ticket.':''),pct:100,cls:j.status==='DONE'?'done':'bad',el};
   if(j.status==='DONE'){
     if(j.kind==='video'&&g){const n=g.stickers.filter(t=>t.status==='READY').length,doneN=g.stickers.filter(t=>['READY','FAILED'].includes(t.anim_status)).length,work=g.stickers.some(t=>['PROCESSING','STALE'].includes(t.anim_status));
       if(work)return{t:`Cutting the animations: ${doneN} of ${n}`,pct:96+4*doneN/Math.max(1,n),cls:'run',el};
@@ -146,17 +149,18 @@ function qRow(j){const st=qState(j),m=lfind(j.kind==='video'?'video':'image',j.m
     <div class=lv-qbar>${st.pct==null?'<i class=ind></i>':`<i style="width:${st.pct.toFixed(0)}%"></i>`}</div>
     <small><span class=lv-qs>${esc(st.t)}</span>${st.cls==='run'||st.cls==='done'?` · ${mmss(st.el)}${st.typ&&j.status==='CLAIMED'?` of about ${mmss(st.typ)}`:''}`:''}</small>
     <small class=mut>${esc(j.id)} · ${esc(m?m.label:(j.model||''))}${opts?' · '+esc(opts):''}${j.cost||j.cost_estimate?` · ◈ ${fcr(j.cost||j.cost_estimate)}`:''} · ${hhmm(j.claimed_at||j.created_at)}${j.generation?` · ${esc(j.generation)}`:''}${j.external_task_id?` · <code>${esc(String(j.external_task_id).slice(0,8))}</code> <button class=link data-act=qcopy data-t="${esc(j.external_task_id)}">copy id</button>`:''}</small>
-    </div>${st.retry?`<button class="btn sm" data-act=qretry data-id="${esc(j.id)}" title="${st.ticket?'Wait for the same Higgsfield job again: no second charge':'Send it again'}">Retry</button>`:''}${QACTIVE.includes(j.status)?'':`<button class="iconbtn" data-act=ljdismiss data-id="${esc(j.id)}" title="Remove from the list">${ic('x')}</button>`}</div>`}
+    ${JR.stalled(j)?JR.controls(j):''}</div>${QACTIVE.includes(j.status)?'':`<button class="iconbtn" data-act=ljdismiss data-id="${esc(j.id)}" title="Remove from the list">${ic('x')}</button>`}</div>`}
 function drawLive(){const el=ensureQueue(),rows=qRows();
+  document.body.classList.toggle('hasq',rows.length>0);      // the fixed pill reserves room at the foot of every screen (studio.css body.hasq)
   if(!rows.length){el.innerHTML='';el.className='';return}
   const run=rows.filter(j=>QACTIVE.includes(j.status)),bad=rows.filter(j=>qState(j).cls==='bad').length,first=run[0],fs=first&&qState(first);
   const head=run.length?`<span class=spin></span><span><b>${run.length} running</b><small>${first.kind==='video'?'Animation':'Sheet'} · ${esc(fs.t)} · ${mmss(fs.el)}${fs.typ&&first.status==='CLAIMED'?` of ~${mmss(fs.typ)}`:''}</small></span>`
-    :`<span class="lv-dot ${bad?'bad':'ok'}"></span><span><b>Queue</b><small>${bad?`${bad} failed`:'all done'}</small></span>`;
+    :`<span class="lv-dot ${bad?'bad':'ok'}"></span><span><b>Queue</b><small>${bad?`${bad} need attention`:'all done'}</small></span>`;
   el.className='on'+(QO?' open':'');
   el.innerHTML=`<button class=lv-qhead data-act=qtoggle aria-expanded=${QO}>${head}<i class=lv-caret></i></button>${QO?`<div class=lv-qlist>${rows.map(qRow).join('')}</div>`:''}`}
 ACT.qtoggle=()=>{QO=!QO;try{localStorage.setItem('mirsal.qopen',QO?'1':'0')}catch(e){}drawLive()};
 async function qRefresh(){const r=await api('/api/jobs');if(r.ok){LIVE.q=r.j.jobs;LIVE.typ=r.j.typical||{}}drawLive();if(typeof cpDrawTop==='function')cpDrawTop()}
-ACT.qretry=async el=>{const r=await post(`/api/jobs/${el.dataset.id}/retry`);if(!r.ok)return toast(r.j.error||'Could not retry',1);toast('Retrying '+el.dataset.id);LIVE.dis=LIVE.dis.filter(x=>x!==el.dataset.id);qRefresh()};
+ACT.qretry=el=>ACT.jrcontinue(el); // old saved markup uses the same-ticket action
 ACT.qcopy=async el=>{try{await navigator.clipboard.writeText(el.dataset.t);toast('Higgsfield job id copied')}catch(e){toast('Copy failed',1)}};
 ACT.ljdismiss=el=>{LIVE.dis.push(el.dataset.id);LIVE.jobs=LIVE.jobs.filter(j=>j.id!==el.dataset.id);lsave();drawLive()};
 let LTB=false;
@@ -213,7 +217,7 @@ function edgeControlsHtml(){return`<label>Stroke <input type=range min=0 max=24 
   <span class=lv-eact><button class="btn sm pri" data-act=egapply>Apply</button><button class="btn sm" data-act=egundo>Undo</button></span><span class=lv-est data-eghint></span>`}
 /* bring every edge control (the bar and the open thumbnail's) in line with the state; never rebuild or move the slider that is being dragged */
 function egSync(){const bar=document.getElementById('gedge'),gs=edgeBatches();
-  if(bar){if(!gs.length){bar.innerHTML='';bar.removeAttribute('data-built')}
+  if(bar){if(!gs.length){bar.innerHTML='';bar.className='';bar.removeAttribute('data-built')}      // no batch, no bar: the empty strip (a bordered white box) must not stay behind after Remove batch
     else if(!bar.dataset.built){bar.dataset.built='1';bar.className='lv-edge';bar.innerHTML='<b>Edge</b>'+edgeControlsHtml()}}
   const c=egCommitted(),v=egVals(),dirty=egDirty(),prev=c.prev,t=egTarget(),
     working=gs.some(x=>x.stickers.some(s=>['PROCESSING','STALE'].includes(s.anim_status)));
@@ -310,6 +314,7 @@ function histCol(){const c2=document.getElementById('col2');if(!c2)return;
 function drawHist(){if(['generate','create'].includes(route_))histCol();if(typeof spSecDraw==='function')spSecDraw()}
 /* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio, as does a row of the Earlier-batches column */
 ACT.hopen=el=>{const it=HB.items.find(x=>x.id===+el.dataset.id);if(!it)return;
+  gdHide();
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
   if(typeof CP!=='undefined')CP.menu=false;if(location.hash!=='#/studio')location.hash='#/studio';

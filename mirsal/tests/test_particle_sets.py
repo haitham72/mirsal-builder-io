@@ -757,8 +757,8 @@ class ChatAllowPayloadTests(unittest.TestCase):
         from mirsal.flow import gates, pipeline as pl
         card = self.tools().generation("G001")
         self.assertEqual(card["allow"], gates.allow_info(pl.read_result(self.out, 1)))
-        self.assertEqual(sorted(card["allow"]), ["animation", "still"])
-        for kind in ("still", "animation"):
+        self.assertEqual(sorted(card["allow"]), ["animation", "still", "video_sheet"], "item 2 added the G3 video-sheet block to the same allow_info")
+        for kind in ("still", "animation", "video_sheet"):
             self.assertEqual(sorted(card["allow"][kind]), ["allowed", "can", "final", "undo", "why"], "the tile needs all five to draw the override")
         for c in card["stickers"]:
             self.assertNotIn("allow", c, "no second copy on the sticker")

@@ -203,11 +203,11 @@ class FulfilTests(Base):
 
         def flaky(ticket):
             boom["n"] += 1
-            if boom["n"] == 1:
+            if boom["n"] <= jobs.WAIT_RETRIES:
                 raise higgsfield.HiggsError("Higgsfield API error (HTTP 503) request failed with status 503 Service Unavailable")
         self.cli.wait_hook = flaky
         failed = jobs.fulfil(self.out, j["id"])
-        self.assertEqual((failed["status"], failed["external_task_id"]), ("FAILED", "fake-job-1"))          # the job exists at Higgsfield; only the waiting broke
+        self.assertEqual((failed["status"], failed["external_task_id"]), ("TIMEOUT", "fake-job-1"))         # retries exhausted; the paid provider ticket still exists
         again = jobs.resume(self.out, j["id"])
         self.assertEqual((again["status"], again["external_task_id"], again["error"]), ("CLAIMED", "fake-job-1", None))
         done = jobs.fulfil(self.out, j["id"])
@@ -224,7 +224,7 @@ class FulfilTests(Base):
         j, _ = self.sheet_job()
         self.cli.wait_hook = lambda t: (_ for _ in ()).throw(higgsfield.HiggsError("HTTP 503 while waiting"))
         failed = jobs.fulfil(self.out, j["id"])
-        self.assertEqual((failed["status"], failed["external_task_id"]), ("FAILED", "fake-job-1"))
+        self.assertEqual((failed["status"], failed["external_task_id"]), ("TIMEOUT", "fake-job-1"))
         again = jobs.requeue(self.out, j["id"])
         self.assertEqual((again["status"], again["external_task_id"]), ("CLAIMED", "fake-job-1"))        # the ticket is waited for, not replaced
         self.cli.wait_hook = None

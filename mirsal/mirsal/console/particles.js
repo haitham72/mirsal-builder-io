@@ -87,7 +87,8 @@ stepsHtml=function(c){return spSteps(spWasSteps(c),c.gs)};
 /* "Make particles" for one sticker (the section below, the library's sticker view in the Studio) and "Create particles for pack" */
 const spShowTab=()=>{GS.tab='particles';glast='';if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'})};
 function spOpenFor(pack,sid){fxReset(SP);SP.eid='';const p=packById(pack);SP.pack=pack;SP.selFor=pack;SP.sel=sid?new Set([sid]):p?spPickSel(p,spGids(sessionGens())):new Set();spSave();spShowTab()}
-ACT.spopen=()=>spShowTab();
+/* from the Studio: its Particles tab. From the Library (no Studio under it): the open batch's tab, or Create > Particle effects when no batch is open (the Studio's tab belongs to a batch) */
+ACT.spopen=()=>{if(route_==='generate')return spShowTab();if(typeof SES!=='undefined'&&(SES.gens||[]).length){GS.tab='particles';glast='';location.hash='#/generate';return}location.hash='#/effects'};
 ACT.spmake=el=>spOpenFor(el.dataset.p,el.dataset.s);
 
 /* ---------- the section under the batch: the particles of each of its stickers that is in a pack (pure builder + a loader) */
@@ -247,6 +248,8 @@ const SPBS={};                                  // set id -> the set last drawn,
 const spHint=()=>typeof route_!=='undefined'&&route_==='pack'&&typeof PACK_ID!=='undefined'?PACK_ID:'';
 function spBurstState(s,hint){let b=SPB[s.id];if(!b)b=SPB[s.id]={pack:'',hint:'',preset:'',par:{},shown:{},pv:'',pvT:0,busy:0,again:0,size:{px:100,scale:1}};
  if(hint&&b.hint!==hint){b.pack=hint;b.hint=hint}else if(!b.pack)b.pack=(s.packs||[])[0]||'';return b}
+/* the preset the server will use when none was picked: the set's own default motion, else burst (particle_sets._burst), so a preset is always lit */
+const spPresetOf=(s,b)=>b.preset||(s.motion&&s.motion.preset)||'burst';
 const spBurstSize=b=>({sprite_px:b.size.px,scale:b.size.scale});
 const spPackName=(s,id)=>{const p=typeof packById==='function'?packById(id):null;return p?p.name:((s.used_in||[]).find(x=>x.id===id)||{}).name||id};
 function spBSlider(id,b,k){const f=FXSL.find(x=>x[0]===k),v=b.par[k]!==undefined?b.par[k]:b.shown[k];
@@ -264,7 +267,7 @@ function spBurstHtml(s){SPBS[s.id]=s;const b=spBurstState(s,spHint()),own=s.pack
  return `<div class=ps-burst data-psb=${id}>${head}
   <div class=row>${choose}${kind==='stickers'&&!(s.n_cells>0)?'<span class=mut>the pack’s own stickers fly out as the particles</span>':''}</div>
   <div class=ps-sim><div class=fx-pvbox><img id=psbpv-${id} ${b.pv?`src="${esc(b.pv)}"`:''} alt="">${b.pv?'':'<span class=spin></span>'}<small>${esc(s.name||s.id)}</small></div>
-   <div class=fx-ctl><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${b.preset===n?' on':''}" data-act=psbpreset data-id=${id} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=psbshuffle data-id=${id}>shuffle</button></div>
+   <div class=fx-ctl><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${spPresetOf(s,b)===n?' on':''}" data-act=psbpreset data-id=${id} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=psbshuffle data-id=${id}>shuffle</button></div>
     ${FXMAIN.map(k=>spBSlider(s.id,b,k)).join('')}
     <details class=fx-adv><summary>Advanced: particles, spin</summary>${['count','spin'].map(k=>spBSlider(s.id,b,k)).join('')}</details>
     <details class=fx-adv><summary>Advanced: particle size</summary><div class=fx-size><span class=mut>Particle size</span><label class=fx-px><input type=number min=32 max=512 step=4 value="${b.size.px}" data-psbpx data-id=${id} aria-label="Particle size in pixels"> px</label>
@@ -310,7 +313,10 @@ ACT.pspickset=async el=>{const id=el.dataset.id;if(!SP.pack)return toast('Choose
  const r=await post(`/api/particles/${id}/assign`,{packs:[SP.pack]});if(!r.ok)return toast(r.j.error||'Could not use it',1);
  toast(`“${r.j.name||id}” is now on this pack`);spLibSync(true);spDraw()};
 /* from the pack's particle studio: start the wizard with this pack, or put a saved set on it */
-ACT.psmakepack=el=>{SP.pack=el.dataset.p;SP.selFor='';SP.eid='';spSave();if(typeof GS!=='undefined')GS.tab='particles';location.hash='#/generate'};
+ACT.psmakepack=el=>{SP.pack=el.dataset.p;SP.selFor='';SP.eid='';spSave();
+ /* the Studio's Particles tab belongs to an OPEN batch: with none open it would be an empty page, so the same wizard opens on Create > Particle effects with this pack chosen */
+ if(typeof SES!=='undefined'&&!(SES.gens||[]).length&&typeof FX!=='undefined'&&typeof packById==='function'){FX.pack=el.dataset.p;FX.sel=new Set(((packById(FX.pack)||{stickers:[]}).stickers).map(x=>x.id));location.hash='#/effects';return}
+ if(typeof GS!=='undefined')GS.tab='particles';location.hash='#/generate'};
 ACT.pspickpack=el=>{const pid=el.dataset.p,sets=SPL.sets;
  const list=sets===null?'<div class=pk-pt-load><div class=spin></div></div>':sets.length?sets.map(s=>{const on=(s.packs||[]).includes(pid);
   return `<div class=ps-pickrow><b>${esc(s.name||s.id)}</b><small class=mut>${s.n_picked} picked</small>${on?'<span class=mut>on this pack</span>':`<button class="btn sm pri" data-act=pspackassign data-id=${esc(s.id)} data-p=${pid}>Use this set</button>`}</div>`}).join(''):'<div class=mut>No particle sets yet.</div>';

@@ -427,7 +427,8 @@ class ContractTests(unittest.TestCase):
         from mirsal.console import openapi
         op = openapi.build()["paths"]["/api/generations/{id}/allow"]["post"]
         body = op["requestBody"]["content"]["application/json"]["schema"]["properties"]
-        self.assertEqual(body["kind"]["enum"], ["still", "animation"])
+        self.assertEqual(body["kind"]["enum"], ["still", "animation", "video_sheet"])
+        self.assertEqual(body["sheet"]["type"], "string")
         self.assertIn("indexes", body)
         self.assertIn("kind", op["responses"]["202"]["content"]["application/json"]["schema"]["properties"])
 

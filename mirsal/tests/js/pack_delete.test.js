@@ -1,5 +1,6 @@
-// P3 of the UI/UX spec: the pack screen offers Delete as a labelled button, and its confirmation says exactly what leaves and what stays (nothing is destroyed silently): the stickers
-// that came from a batch stay in their batch and can be added again, the ones that exist only in this pack (editor renders, bursts) go with it, the particle sets stay in the Library.
+// P3 of the UI/UX spec: the pack screen offers Delete as a labelled button, and its confirmation says exactly what happens (nothing is destroyed silently). Delete pack is SOFT since
+// 2026-10-03: the pack goes to the trash with its stickers and files, restorable and deletable for good from Settings > Trash; the stickers that came from a batch also stay in their batch,
+// the ones that exist only in this pack (editor renders, bursts) are counted, the particle sets stay in the Library.
 // The statements are read out of packs.js. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -23,19 +24,24 @@ const { pkDelText } = new Function(...Object.keys(sandbox), statement('function 
 
 const st = (id, src = {}) => ({ id, name: id, source: src });
 
-test('the confirmation counts what stays in its batch and what exists only here', () => {
+test('the confirmation says the pack goes to the trash and counts what came from batches and what exists only here', () => {
   const t = pkDelText({ name: 'Barbie', stickers: [st('a', { generation: 'G012', index: 1 }), st('b', { generation: 'G012', index: 2 }), st('c', { generation: 'G013', index: 4 }), st('d'), st('e', { effect: 'E001' })] });
   assert.match(t, /Delete the pack “Barbie”\?/);
-  assert.match(t, /3 of its 5 stickers came from batches \(G012, G013\) and stay there: you can add them to a pack again/);
+  assert.match(t, /goes to the trash with its 5 stickers: nothing is deleted yet/);
+  assert.match(t, /restore it, or delete it for good, from Settings, Trash/);
+  assert.match(t, /3 of its stickers came from batches \(G012, G013\), which keep their own copies/);
   assert.match(t, /2 exist only in this pack/);
   assert.match(t, /particle sets stay in the Library/);
 });
 
-test('a pack of batch stickers only says nothing is lost; an empty pack is short', () => {
+test('a pack of batch stickers does not claim anything is lost; an empty pack is short and still goes to the trash', () => {
   const t = pkDelText({ name: 'Cats', stickers: [st('a', { generation: 'G001', index: 1 })] });
-  assert.match(t, /1 of its 1 stickers came from batches/);
+  assert.match(t, /1 of its stickers came from batches/);
+  assert.match(t, /its 1 sticker:/);
   assert.doesNotMatch(t, /exist only in this pack/);
-  assert.match(pkDelText({ name: 'Empty', stickers: [] }), /has no stickers/);
+  const e = pkDelText({ name: 'Empty', stickers: [] });
+  assert.match(e, /has no stickers/);
+  assert.match(e, /goes to the trash/);
 });
 
 test('the text is plain (confirmDlg escapes it once) and the pack screen shows a labelled Delete button', () => {

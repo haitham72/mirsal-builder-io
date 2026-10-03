@@ -549,6 +549,8 @@ def main(argv=None) -> int:
         m = sub.add_parser(n); m.add_argument("gid", nargs="?")
     a = sub.add_parser("animate"); a.add_argument("gid", nargs="?"); a.add_argument("--slice", type=int)
     sub.add_parser("doctor")
+    tt = sub.add_parser("test", help="explicit test gates: fast smoke, focused regressions, mapped area; `slow` is retired and runs only when Haitham asks for it by name")
+    tt.add_argument("tier", choices=["fast", "focused", "area", "slow"]); tt.add_argument("area", nargs="?")
     rc = sub.add_parser("recheck", help="run the border check on animations made before it existed"); rc.add_argument("gid", nargs="?", default="all")
     pr = sub.add_parser("profile", help="time the animation of a generation stage by stage (nothing is saved)")
     pr.add_argument("gid", nargs="?"); pr.add_argument("--sweep", default="", help="worker counts to compare, e.g. 1,4,9")
@@ -607,6 +609,13 @@ def main(argv=None) -> int:
     ph.add_argument("file"); ph.add_argument("--method", default="auto", choices=["auto", "matte", "grabcut"])
     ph.add_argument("--outline", type=int, default=12); ph.add_argument("--erode", type=int, default=0)
     args = ap.parse_args(argv)
+    if args.cmd == "test":
+        if args.tier == "area" and not args.area:
+            ap.error("test area requires a module path, for example engine/video")
+        if args.tier not in ("area", "focused") and args.area:
+            ap.error(f"test {args.tier} takes no module path")
+        from . import test_tiers
+        return test_tiers.run(args.tier, args.area)
     out, inp, cfg, t0 = out_root(), input_root(), EngineConfig(), time.perf_counter()
     if getattr(args, "workers", None):
         from dataclasses import replace
@@ -798,6 +807,7 @@ def doctor() -> int:
     from .engine import verify
     tpl = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
     print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
+    print("OK      slow test tier: retired (Haitham, 2026-10-03): never run or required; `mirsal test slow` exists only for an explicit request")
     from .services import llm
     print("OK      AI expansion: " + (f"on, model {llm.model()}" if llm.configured() else f"off: add {llm.KEY_VAR} to mirsal/.env to let the AI expand a subject and name every sticker (the built-in sets are used meanwhile)"))
     from .generation import higgsfield as _hf

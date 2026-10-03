@@ -196,7 +196,7 @@ class SessionStore:
                     try:
                         g = _jobs.read(self.out, p["job"]).get("generation")
                         p["generation"] = gid_of(g) if g else None
-                        if p["generation"] and (s.get("focus") or {}).get("generation") != p["generation"] and p["created"] >= (self.latest_pass(s, with_generation=True) or {"created": 0})["created"]:
+                        if p["generation"] and not p.get("undone") and (s.get("focus") or {}).get("generation") != p["generation"] and p["created"] >= (self.latest_pass(s, with_generation=True) or {"created": 0})["created"]:
                             s["focus"] = {"generation": p["generation"], "stickers": []}        # a sheet that comes back is what "it" and "number 3" mean from now on
                     except Exception:
                         pass
@@ -220,7 +220,7 @@ class SessionStore:
         best = None
         for subj in s["subjects"]:
             for p in subj["passes"]:
-                if with_generation and not p.get("generation"):
+                if (with_generation and not p.get("generation")) or p.get("undone"):         # an undone refinement is no longer what "the last batch" means
                     continue
                 if best is None or p["created"] >= best["created"]:
                     best = p

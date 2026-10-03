@@ -55,7 +55,7 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 .packrow{display:flex;align-items:center;gap:16px;padding:12px 18px;border-top:1px solid var(--bd);cursor:pointer}.packrow:first-child{border-top:0}.packrow:hover{background:#f8fbfd}
 .packrow b{font-weight:600;font-size:var(--fs-m)}.packrow small{color:var(--mut2)}.packrow>svg{width:18px;height:18px;color:#7b8a9a}
 .cover{width:54px;height:54px;border-radius:var(--r-m);background:var(--pri-l);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;border:1px solid var(--bd)}.cover img,.cover video{width:100%;height:100%;object-fit:contain}
-.fab{position:sticky;bottom:0;display:flex;justify-content:flex-end;padding-top:14px}.fab .btn{padding:12px 44px;font-size:var(--fs-l);border-radius:var(--r-m);min-width:230px;justify-content:center}
+.fab{display:flex;justify-content:flex-end;padding:14px 0 6px}.fab .btn{padding:12px 44px;font-size:var(--fs-l);border-radius:var(--r-m);min-width:230px;justify-content:center}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
 .cell{aspect-ratio:1;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:var(--sh)}
 .cell img,.cell video{width:86%;height:86%;object-fit:contain;pointer-events:none}.cell.cov{border:2px solid var(--pri)}.cell.over{outline:2px dashed var(--pri)}
@@ -188,6 +188,9 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 .gx:hover{background:var(--bad);color:#fff}.gt.off .gx{background:var(--pri);color:#fff}.gx svg{width:16px;height:16px}
 .gcap{padding:8px 14px 12px;font-size:var(--fs-s)}.gcap b{font-weight:600;display:block}.gprob{color:var(--bad);margin-top:2px}.gwarn{color:var(--run);margin-top:2px}
 .gbadmsg{padding:30px 14px;text-align:center;color:var(--bad);font-size:var(--fs-m)}
+.gblockover{position:absolute;z-index:3;left:10px;right:10px;bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 10px;border-radius:var(--r-m);background:#fffef0e8;box-shadow:0 5px 18px #0f172a30;color:var(--bad);font-size:var(--fs-s);backdrop-filter:blur(5px)}
+.gblockover span{flex:1;min-width:110px;color:var(--ink2)}.gblockover .btn{flex:none}
+.job-recovery{padding:10px;border:1px solid var(--bd);border-radius:var(--r-m);font-size:var(--fs-s)}.job-recovery>span{display:block;margin-bottom:8px}.job-recovery>div{display:flex;gap:6px;flex-wrap:wrap}
 .gbar{position:sticky;bottom:0;display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:18px -8px 0;padding:14px 8px;background:linear-gradient(to top,var(--bg) 70%,#F7F9FB00);flex-wrap:wrap}
 .gstat{margin-right:auto;color:var(--mut);font-size:var(--fs-m)}.gpack{display:flex;align-items:center;gap:8px}.gpack select{width:auto;max-width:240px}
 .gmore{margin:14px 4px 30px}.gmore textarea{margin-top:8px}
@@ -349,6 +352,13 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .cp-sw{position:relative;width:34px;height:20px;border-radius:var(--r-pill);background:#cbd5e1;flex:none;transition:background .15s}.cp-sw i{position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px #0003}
 .cp-ai.on .cp-sw{background:var(--pri)}.cp-ai.on .cp-sw i{transform:translateX(14px)}.cp-ai.on{box-shadow:inset 0 0 0 1px var(--ai)}
 
+/* the AI enhancer's engine control: the AI screen's own rows (.ai-set .r, .ai-seg, .ag-sel in agent.css), laid flat under the bar instead of floating as a pop-over */
+.cp-engwrap{margin-top:10px}.cp-engwrap[hidden]{display:none}
+.ai-set.cp-eng{position:static;width:auto;max-width:420px;padding:10px 14px;background:#ffffffb3;backdrop-filter:none;box-shadow:inset 0 0 0 1px var(--aline);animation:none}
+.cp-eng .cp-engnote{border-top:1px solid var(--aline);margin-top:8px;padding-top:6px}
+/* the line under the Prompt step's title about the AI enhancer (the model wrote it / why the built-in prompt is shown) */
+.gdnote{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0;padding:8px 12px;border-radius:var(--r-m);background:var(--wash);box-shadow:inset 0 0 0 1px var(--aline);font-size:var(--fs-s);color:var(--ink2)}
+.gdnote.bad{background:#FFFBEB;box-shadow:inset 0 0 0 1px var(--run);color:var(--tx)}
 .cp-bp{margin-left:12px;padding:2px 9px;border-radius:var(--r-pill);background:#ffffff38;font-size:var(--fs-m);font-weight:600;font-variant-numeric:tabular-nums}
 .cp-go:disabled{opacity:.7;cursor:progress}
 .lv-vgen{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}.lv-vgen.run{gap:10px;font-size:var(--fs-m)}.lv-vgen.run .spin{width:18px;height:18px;border-width:2px;flex:none}.lv-vgen.run small{margin-left:8px;color:var(--mut)}
@@ -403,7 +413,9 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .lv-caret{width:8px;height:8px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(-135deg);flex:none;margin-top:3px}#lvqueue.open .lv-caret{transform:rotate(45deg);margin-top:-3px}
 .lv-qlist{margin-top:8px;max-height:min(58vh,520px);overflow:auto;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:0 18px 44px -14px #0f172a55;padding:4px 12px}
 #lvqueue.open{display:flex;flex-direction:column-reverse}
-@media (max-width:760px){#lvqueue{left:12px;bottom:84px}}
+/* the pill is fixed over the stage, so every screen keeps room under its last content while a job is listed */
+body.hasq .screen{padding-bottom:96px}
+@media (max-width:760px){#lvqueue{left:12px;bottom:84px}body.hasq .screen{padding-bottom:172px}}
 
 .lv-allow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}.lv-allow .mut{font-size:var(--fs-xs)}
 
@@ -595,3 +607,10 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .pk-ps-b{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:var(--r-m);background:var(--sf);box-shadow:inset 0 0 0 1px var(--aline)}
 .pk-psline{margin-top:14px;padding:10px 14px;border-top:1px solid var(--bd);text-align:left;font-size:var(--fs-s)}
 @media (max-width:760px){.ps-card{grid-template-columns:1fr}}
+.sheet-picture{position:relative;min-width:0;overflow:hidden;border-radius:var(--r-m)}
+.sheet-picture img{display:block;width:100%;height:auto}
+.sheet-picture.blocked img{opacity:.45}
+.sheet-picture .sheet-recovery{margin-top:8px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-m);padding:10px}       /* under the picture, never over it: the sheet stays fully visible (rule 10) */
+.sbox>.sheet-recovery{position:absolute;left:8px;right:8px;bottom:8px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-m);padding:10px;z-index:2}
+.sheet-recovery{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:var(--fs-s)}
+.sheet-recovery span,.sheet-recovery small{flex-basis:100%}

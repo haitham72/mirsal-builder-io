@@ -101,8 +101,23 @@ def _run_allows(tools, run: dict) -> dict:
     except Exception as e:                                    # the engine refused with its own words: the run stops and says them, never a crash
         return _stop(run, str(e), [{"label": "Stop", "action": "creator_stop"}], "error")
     run["allow"] = {**(run.get("allow") or {}), p.get("kind", "still"): {"indexes": p["indexes"], "allow": bool(p.get("allow", True)), "done": r.get("done", [])}}
-    _log(run, f"you allowed {', '.join('S%d' % i for i in p['indexes'])} ({p.get('kind', 'still')}): cutting them again")
+    if p.get("kind") == "video_sheet":
+        run["awaiting_sheet_allow"] = True
+    _log(run, f"you allowed {', '.join(str(i) if p.get('kind') == 'video_sheet' else 'S%d' % i for i in p['indexes'])} ({p.get('kind', 'still')}): applying the permission")
     return run
+
+
+def _stop_sheet(tools, run, card):
+    info = (card.get("allow") or {}).get("video_sheet") or {}
+    can = info.get("can") or []
+    why = info.get("why") or {}
+    if not why:
+        return False
+    chips = ([{"label": "Use it anyway · free", "action": "creator_allow_sheet", "indexes": can, "kind": "video_sheet"}] if can else [])
+    chips.append({"label": "Stop", "action": "creator_stop"})
+    _stop(run, "Python blocked the video sheet (" + "; ".join(f"{aid}: {reason}" for aid, reason in why.items()) + "). " +
+          ("It is a judgement call: use it anyway without buying another video." if can else "; ".join(info.get("final", {}).values())), chips, "video_sheet")
+    return True
 
 
 def advance(tools, run: dict, vision_allowed: bool, telegram_ready) -> dict:
@@ -110,15 +125,25 @@ def advance(tools, run: dict, vision_allowed: bool, telegram_ready) -> dict:
     for _ in range(40):                                            # a bound: one call never loops for ever
         if run["status"] in ("done", "stopped", "failed") or run["status"] == "waiting":
             return run
+        if run.get("awaiting_sheet_allow"):
+            if getattr(tools, "processing", lambda: False)():
+                return run
+            run.pop("awaiting_sheet_allow", None)
         if run.get("pending_allow"):                              # a permission the person gave: do it, then judge what came back
             _run_allows(tools, run)
-            if run["status"] != "running":
+            if run["status"] != "running" or run.get("awaiting_sheet_allow"):
                 return run
         before = (run["step"], run["status"])
         try:
             _step(tools, run, vision_allowed, telegram_ready)
         except Exception as e:                                     # an engine error is a stop with its words, not a crash of the server
             code = getattr(e, "code", 500)
+            if code < 500 and run.get("generation"):
+                try:
+                    if _stop_sheet(tools, run, tools.generation(run["generation"])):
+                        return run
+                except Exception:
+                    pass
             _stop(run, f"{e}" if code < 500 else f"something went wrong ({type(e).__name__}); nothing more was spent", [{"label": "Stop", "action": "creator_stop"}], "error")
             run["status"] = "failed" if code >= 500 else "stopped"
             return run
@@ -179,6 +204,8 @@ def _step(tools, run, vision_allowed, telegram_ready):
             tools.review(gid, "APPROVE", ready, NOTE)
         return _go(run, "video" if run["scope"] == "video" else "pack", f"approved {len(ready)} stickers")
     if step == "video":
+        if _stop_sheet(tools, run, card):
+            return
         if not run["video_job"]:
             est = tools.estimate("video")
             budget = run.get("video_estimate")
@@ -240,6 +267,8 @@ def resume(run: dict, action: str, indexes: list | None = None) -> dict:
     if action == "creator_force":
         run["skip"] = sorted(set(run["skip"]))
         run["step_forced"] = "look"
+    if action == "creator_allow_sheet":
+        run["pending_allow"] = {"indexes": sorted(set(indexes or [])), "kind": "video_sheet", "allow": True}
     if action in ("creator_allow", "creator_unallow"):
         kind = "animation" if run.get("step") == "video" else "still"
         run["pending_allow"] = {"indexes": sorted({int(i) for i in (indexes or run.get("failed_hint") or [])}), "kind": kind, "allow": action == "creator_allow"}

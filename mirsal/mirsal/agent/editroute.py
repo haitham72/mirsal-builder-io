@@ -38,13 +38,54 @@ WEAR = r"(?:wear\w*|put on|hold\w*|carry\w*|have|has|hat|cap|coat|jacket|glasses
 ACTVERB = (r"(?:play\w*|run\w*|jump\w*|sleep\w*|sit\w*|stand\w*|danc\w*|fly\w*|flying|walk\w*|swim\w*|eat\w*|drink\w*|driv\w*|rid(?:e|ing)|fight\w*|kick\w*|throw\w*|catch\w*|read\w*|writ\w*|sing\w*|"
            r"cook\w*|wav\w*|hug\w*|kneel\w*|climb\w*|pos(?:e|ing)|spin\w*|lie|lying|sprint\w*|skat\w*|surf\w*|shoot\w*|box\w*|clap\w*|salut\w*|bow\w*|stretch\w*|exercis\w*|study\w*|paint\w*|div(?:e|ing)|"
            r"crawl\w*|hop\w*|march\w*|rac(?:e|ing)|bounc\w*|float\w*|hid(?:e|ing)|sneak\w*|work\w*|train\w*|meditat\w*)")
-PRON = r"(?:him|her|it|them)"
+PERSON = r"(?:(?:the|that|this)\s+)?(?:(?:last|same)\s+)?(?:guy|man|woman|girl|boy|dude|lady|character|person)"      # "make the last guy happier": the character of the chat, like "him"
+PRON = rf"(?:him|her|it|them|{PERSON})"
 MAKEVERB = r"(?:make|turn|change|transform|convert|redo|remake|redesign|draw|do)"
 EDITVERB = (r"(?:make|turn|change|put|give|add|remove|take off|take away|delete|replace|swap|move|raise|lower|open|close|shrink|enlarge|fix|redo|improve|adjust|tweak|set|let|get|dress|"
             r"lift|bend|point|show|hide|cover|colou?r|paint)")
 POSSESSIVE = r"(?:his|her|its|their)"
 NOT_AN_EDIT = re.compile(r"\b(?:make|create|give|draw|design|build|generate)\s+(?:me|us)\b|\b(?:i want|i need|i'd like)\b.{0,12}\b(?:\d+|a|an|some)\b|\b(?:\d+|three|four|five|six|several|many)\s+(?:\w+\s+){0,2}(?:stickers?|packs?|sets?)\b|"
                          r"\b(?:to|in|into)\s+(?:a|my|the)\s+(?:\w+\s+)?(?:pack|library|telegram)\b|\bpacks?\b|\btelegram\b|\bsend\b|\blike\s+(?:number\s+|no\.?\s*|#|s)?\d+\b|\bsame (?:as|look)\b")
+
+
+# ---- what is left of a sentence once the thing it points at is taken out -----------------------------------------------------------------------------------------------
+_ORD = r"(?:last|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|\d{1,2}(?:st|nd|rd|th))"
+_POINT = (rf"(?:(?:on|in|for|of|to)\s+)?(?:(?:the\s+)?{_ORD}\s+(?:one|sticker|image|picture|pic|cell|card|tile)\b"
+          r"|(?:number|no\.?|cell|slice|sticker|#)\s*(?:\d{1,3}|one|two|three|four|five|six|seven|eight|nine)\b|\bg\d{1,4}\s*/?\s*s\d\b|\bs\d\b)")
+LEAD = rf"^(?:{MAKEVERB}|let|get|have)\s+"
+
+
+def delta_of(text: str) -> str:
+    """The change a sentence asks for, with what it points at taken out and nothing else touched: "make number 3 wear a hat" -> "wear a hat", "make him wear a hat" -> "wear a hat", "make the last one happier" ->
+    "happier", "make 3 wear a hat and a scarf" -> "wear a hat and a scarf". Words such as a, the, and, it are the person's own and stay ("wear a hat" is never "wear hat")."""
+    t = _norm(text)
+    if not re.match(rf"(?:{EDITVERB}|redo|regenerate)\b", t):                  # "I like 2 but make 5 happier": the clause that asks for the change
+        clauses = [c.strip(" ,") for c in re.split(r"\bbut\b|;|\.\s", t) if re.match(rf"\s*(?:{EDITVERB}|redo|regenerate)\b", c.strip())]
+        t = clauses[-1] if clauses else t
+    t = re.sub(_POINT, "§", t)
+    t = re.sub(rf"{LEAD}(?:{PRON}|these|those|§|\d{{1,2}}(?:\s*(?:,|and|&)\s*\d{{1,2}})*)\s+", "", t, count=1)
+    t = re.sub(r"\b(?:like|match|the same as|similar to)\s+(?:number\s+|no\.?\s*|#|s)?\d{1,2}\b", " ", t)               # "make 5 like 2": the reference is not part of the change
+    t = re.sub(r"^\d{1,2}(?:\s*(?:,|and|&)\s*\d{1,2})*\s+", "", t.replace("§", " ").strip())
+    return " ".join(t.split()).strip(" ,.;:")
+
+
+def fresh_take(delta: str) -> bool:
+    """True when the "change" is only a verb and the numbers it points at ("redo 3", "regenerate 2 and 5"): a new drawing of the same prompt, nothing added to it."""
+    return not delta.strip() or bool(re.fullmatch(r"(?:redo|regenerate|remake|retry|change|fix|improve|replace|swap|do)(?:\s+(?:#?\d{1,2}|and|,|&|it|them|these|those|number|no\.?|sticker|stickers|again))*", delta.strip().lower()))
+
+
+def add_to_label(plan: dict, delta: str) -> dict:
+    """A COPY of a (1x1) plan with the change appended to the cell's label ("pose 3" -> "pose 3, wear a hat"): the prompt the template builds carries it, next to the parent's own wording. The rendered prompts are dropped (rebuilt from the slots)."""
+    p = copy.deepcopy(plan)
+    for c in (p.get("slots") or {}).get("cells") or []:
+        old = str(c.get("label") or "").strip()
+        c["label"] = f"{old}, {delta}" if old and delta.lower() not in old.lower() else (old or delta)
+    p.setdefault("edits", []).append({"case": "tweak", "delta": delta})
+    for k in ("sheet_prompt", "video_prompt"):
+        p.pop(k, None)
+    for st in p.get("stickers") or []:
+        st.pop("prompt", None)
+    return p
 
 
 def _norm(text: str) -> str:
@@ -101,10 +142,11 @@ def classify_edit(text: str) -> dict | None:
         or re.match(rf"^(?:show|draw|put)\s+{PRON}\s+(?P<a>{ACTVERB}\b.*)$", t)
     if a:
         return {"route": "regen", "case": "action", "ops": [], "subject": None, "action": a.group("a").strip(), "delta": None}
-    if re.match(rf"^{EDITVERB}\b", t) and (re.search(rf"\b{PRON}\b|\b{POSSESSIVE}\b|\b(?:number|no\.?|cell|slice|sticker|#)\s*\d+|\bs\d\b", t) or re.match(r"^(?:add|remove|put|take off|take away|delete|replace|swap)\b", t)):
-        d = re.sub(rf"^{MAKEVERB}\s+{PRON}\s+", "", t)
-        d = re.sub(r"\b(?:on|in|for|of|to)?\s*(?:number|no\.?|cell|slice|sticker|#)\s*\d+\b|\bs\d\b", " ", d)
-        d = " ".join(d.split()).strip(" ,.")
+    if re.match(rf"^{EDITVERB}\b", t) and (re.search(rf"\b{PRON}\b|\b{POSSESSIVE}\b|\b(?:number|no\.?|cell|slice|sticker|#)\s*\d+|\bs\d\b", t) or re.search(_POINT, t)
+                                          or re.match(rf"{LEAD}\d{{1,2}}\s+\S", t) or re.match(r"^(?:add|remove|put|take off|take away|delete|replace|swap)\b", t)):
+        d = delta_of(t)
+        if re.fullmatch(r"(?:redo|regenerate|remake|redesign|retry|fix|improve|change|do|make)(?:\s+(?:it|them|this|that))?", d or "redo") and (re.search(_POINT, t) or re.search(r"\b\d{1,2}\b", t)):
+            return None                                                # a sticker pointed at and no change named ("redo 3"): the sticker edit says "a fresh take"
         return {"route": "regen", "case": "tweak", "ops": [], "subject": None, "action": None, "delta": d or t}
     return None
 
@@ -113,6 +155,7 @@ def classify_edit(text: str) -> dict | None:
 REF_CLAUSES = {
     "tweak": ("Reference: the attached image is the sheet to keep. Keep every character exactly as drawn: the same design, colours, proportions and the same pose in every cell. "
               "Apply only this change: {what}."),
+    "like": ("Reference: the attached image is the look to match. Draw the character of this prompt in exactly that design, colours, proportions and style; the pose and the expression come from the prompt."),
     "action": ("Reference: the attached image is the sheet to keep. Keep every character's shape, design, colours and proportions exactly; the shape absolutely stays. "
                "Change only what each character is doing, to: {what}."),
 }
@@ -120,7 +163,7 @@ REF_CLAUSES = {
 
 def reference_clause(case: str, what: str, slice_: bool = False) -> str | None:
     """The sentence that tells the image model what the attached picture is for (the sheet, or one slice of it). None for a redesign: nothing is attached."""
-    if case not in REF_CLAUSES or not what:
+    if case not in REF_CLAUSES or (not what and case != "like"):
         return None
     text = REF_CLAUSES[case].format(what=what.strip(" ."))
     return text.replace("the attached image is the sheet to keep", "the attached image is the character to keep").replace("every character", "the character") if slice_ else text

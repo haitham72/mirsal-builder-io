@@ -60,8 +60,30 @@ def removed_ids(out: Path) -> list[int]:
     return sorted(int(m[1]) for x in d.iterdir() if x.is_dir() and (m := re.fullmatch(r"G(\d{3,})", x.name)))
 
 
+def purge_ledger(out: Path) -> Path:
+    """`out/trash/purged.jsonl`: one line per purge of a batch or a pack (flow/purge.py), append-only. It is also the memory that keeps a purged number taken."""
+    return Path(out) / "trash" / "purged.jsonl"
+
+
+def purged_ids(out: Path) -> list[int]:
+    """The batch numbers that were purged for good (flow/purge.py): the folder is gone, the number stays taken (a new batch must never reuse it: the database keeps its history)."""
+    f, ids = purge_ledger(out), set()
+    try:
+        lines = f.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    for ln in lines:
+        try:
+            r = json.loads(ln)
+        except ValueError:
+            continue
+        if isinstance(r, dict) and r.get("kind") == "batch" and str(r.get("number") or "").isdigit():
+            ids.add(int(r["number"]))
+    return sorted(ids)
+
+
 def next_gid(out: Path) -> int:
-    return max([0, *list_ids(out), *removed_ids(out)]) + 1
+    return max([0, *list_ids(out), *removed_ids(out), *purged_ids(out)]) + 1
 
 
 import contextvars
@@ -565,8 +587,12 @@ def recut_cells(out: Path, gid: int, indexes: list, cfg: EngineConfig) -> None:
     write_result(out, gid, res)
 
 
-def record_anim(d: Path, st: dict, r, ref: str) -> None:
+def record_anim(d: Path, st: dict, r, ref: str, preserve_finished: bool = False) -> None:
     """Store one animation result on its sticker: status, metrics, file, review state and the verifier's history line."""
+    if not preserve_finished:                         # any genuine new cut makes remembered verdicts of the old pixels stale
+        if st.get("anim_finished") or st.get("webm"):
+            st["anim_verdict_stale"] = True
+        st.pop("anim_finished", None)
     st.update(anim_status=r.status, anim_reason=r.reason, anim_metrics=r.metrics, anim_report=r.report.checks)
     if r.data:
         st["webm"] = f"slices/{st['name'].replace('img-', 'vid-', 1)}.webm"

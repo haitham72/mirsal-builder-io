@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from ..flow import batches, effects as fx_flow, gates, metrics, particle_sets as fx_sets, sources, sticker_history, watch
+from ..flow import batches, effects as fx_flow, gates, metrics, particle_sets as fx_sets, purge, sources, sticker_history, watch
 from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
 from ..services import llm, telegram
 from ..vision import consent as vision_consent, transcribe
@@ -30,7 +30,7 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "trash.js": "text/javascript", "sheet-recovery.js": "text/javascript", "job-recovery.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 # What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,
@@ -207,6 +207,13 @@ class Console:
         self._jobs = [x for x in self._jobs if x.is_alive()] + [t]
         t.start()
 
+    def job_followup(self, job):
+        req = job.get("request") or {}
+        effect = req.get("effect")
+        if isinstance(effect, dict) and effect.get("id") and effect.get("group"):
+            return lambda j: fx_flow.on_video_done(self.out, effect["id"], effect["group"], j, self.cfg)
+        return self.start_from_job if job["kind"] == "sheet" else self.attach_video_from_job if job["kind"] == "video" and job.get("generation") else None
+
     def wait_jobs(self, timeout: float = 60.0) -> None:
         """Wait for the background provider jobs (tests call this before they unplug their fake CLI)."""
         end = time.time() + timeout
@@ -235,7 +242,7 @@ class Console:
         parts = parts if isinstance(parts, dict) and (parts.get("effect") or parts.get("set")) else None
         tok = pl.OWNER.set(req.get("user") or "local")     # the batch belongs to whoever asked for the sheet
         try:
-            gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None,
+            gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None, erode=int(req["erode"]) if req.get("erode") is not None else None,
                            parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None, kind="particles" if parts else None)
         finally:
             pl.OWNER.reset(tok)
@@ -384,6 +391,12 @@ class Console:
             custom = prompter.clean_custom(body.get("sheet_prompt" if what == "sheet" else "video_prompt"), "sheet prompt" if what == "sheet" else "video prompt")
         except ValueError as e:
             raise pl.PipelineError(str(e), 400)
+        previewed = None
+        if what == "sheet" and body.get("plan") is not None:      # the plan the person previewed on Generate prompt: untrusted, validated and rebuilt here, no model is asked
+            if body.get("from_generation"):
+                raise pl.PipelineError("Send either plan (the previewed one) or from_generation (a batch's own plan), not both", 400)
+            style_id = body.get("style_id", "flat_vector")
+            previewed = tasks.plan_from_preview(body["plan"], body.get("prompt", ""), body.get("grid", "3x3"), style_id if isinstance(style_id, str) else "", bool(body.get("loop")))
         try:
             model, params = model_catalog.resolve(kind, body.get("model"), body.get("options"))
             if what == "cost":
@@ -395,7 +408,7 @@ class Console:
                 refs = self.ref_files(body.get("refs"))
                 if refs and not model_catalog.find("image", model).get("refs"):
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
-                base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else None)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
+                base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else previewed)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
                 t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
                 try:
@@ -406,7 +419,7 @@ class Console:
                 est = higgsfield.cost(model, params, prompt, **({"image_references": [str(self.out / r) for r in refs]} if refs else {}))
                 job = jobs.create(self.out, "sheet", task=t["id"], request={
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
-                    "outline": int(body["outline"]) if body.get("outline") is not None else None, "custom_prompt": bool(custom),
+                    "outline": int(body["outline"]) if body.get("outline") is not None else None, "erode": int(body["erode"]) if body.get("erode") is not None else None, "custom_prompt": bool(custom),
                     "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"],
                     **({"particles": {k: str(particles[k]) for k in ("effect", "set") if particles.get(k)}} if particles else {})})
                 if particles:                                      # before the job runs, so the page sees REQUESTED and the later link is never overwritten
@@ -743,6 +756,11 @@ def make_handler(c: Console):
             if (path in MEMBER_POST) if post else (path in MEMBER_GET):
                 return None
             parts = path.strip("/").split("/")
+            if post and len(parts) == 4 and parts[:2] == ["api", "jobs"] and parts[3] in ("check", "continue", "retry_estimate", "retry"):
+                try:
+                    return None if (jobs.read(c.out, parts[2]).get("request") or {}).get("user") == user["id"] else gone
+                except jobs.JobError:
+                    return gone
             if not post and parts[:2] == ["api", "packs"] and parts[-1] == "particles" and len(parts) in (4, 6):      # a member's particles answer is empty, not an error (the handler says so)
                 return None
             if not post and len(parts) == 3 and parts[:2] == ["api", "jobs"]:          # one job: only the one this user asked for
@@ -1068,6 +1086,10 @@ def make_handler(c: Console):
                 return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": page, **meta})
             if path == "/api/generations/removed":      # the trash of batches (owner only like the rest): Restore is reachable long after the remove
                 return self._json(200, {"batches": batches.list_removed(c.out)})
+            if path == "/api/trash":                    # the whole trash (removed batches + deleted packs) with exactly what a purge would remove (owner only; flow/purge.py)
+                return self._json(200, purge.listing(c.out, c.lib))
+            if path.startswith("/api/trash/purges/"):   # the progress of a purge that did not finish within the request (a long purge runs in its own thread)
+                return self._json(200, purge.status(c.out, path.rsplit("/", 1)[1]))
             if path.startswith("/api/generations/"):
                 gid = int(path.rsplit("/", 1)[1])
                 st = pl.state(c.out, gid)
@@ -1341,8 +1363,10 @@ def make_handler(c: Console):
             elif len(parts) == 3:
                 b = self._body()
                 self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order")))
-            elif len(parts) == 4 and parts[3] == "delete":
-                lib.delete_pack(parts[2]); self._json(200, {"ok": True})
+            elif len(parts) == 4 and parts[3] == "delete":      # SOFT: to the trash, restorable (GET /api/trash lists it; POST /api/trash/purge deletes for good)
+                self._json(200, lib.delete_pack(parts[2], by=self.user.get("id") or "human"))
+            elif len(parts) == 4 and parts[3] == "restore":     # back from the trash under the same id
+                self._json(200, lib.restore_pack(parts[2]))
             elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)
                 body = self._body()
                 self._json(200, telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once")))
@@ -1457,6 +1481,13 @@ def make_handler(c: Console):
                 return self._json(200, watch.restore(c.inp, c.out, str(body.get("id", ""))))
             if path == "/api/watch/purge":
                 return self._json(200, watch.purge(c.out, str(body.get("id", ""))))
+            if path in ("/api/trash/purge", "/api/trash/purge_all"):      # the one real delete (owner only): 200 when it finished within the request, 202 + a task to poll when it is still running
+                who = self.user.get("id") or "human"
+                if path == "/api/trash/purge":
+                    t = purge.purge_one(c.out, c.lib, str(body.get("type") or body.get("kind") or ""), str(body.get("id", "")), by=who, confirm_shared=body.get("confirm_shared") is True, busy=c.lock.locked())
+                else:
+                    t = purge.purge_all(c.out, c.lib, str(body.get("confirm", "")), by=who, busy=c.lock.locked())
+                return self._json(200 if t["status"] != "running" else 202, t)
             if path == "/api/plan":      # preview only: nothing is reserved
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
@@ -1524,11 +1555,22 @@ def make_handler(c: Console):
                         return self._json(200, jobs.fail(c.out, jp[2], str(body.get("reason", ""))))
                     if act == "requeue":
                         return self._json(200, jobs.requeue(c.out, jp[2]))
-                    if act == "retry":           # a human retry: same Higgsfield job when it has a ticket (no second charge), else a fresh request
-                        job = jobs.resume(c.out, jp[2])
-                        c.fulfil_async(job["id"], after=c.start_from_job if job["kind"] == "sheet" else c.attach_video_from_job if job["kind"] == "video" else None)
+                    if act in ("check", "continue", "retry_estimate", "retry"):
+                        from ..generation import recovery
+                        job = jobs.read(c.out, jp[2])
+                        if act == "check":
+                            return self._json(200, recovery.check(c.out, jp[2], on_done=c.job_followup(job), by=self.user["id"]))
+                        if act == "retry_estimate":
+                            return self._json(200, recovery.quote(c.out, jp[2]))
+                        if act == "continue":
+                            job = recovery.continue_job(c.out, jp[2], by=self.user["id"])
+                        else:
+                            if not self.user.get("can_spend"):
+                                raise pl.PipelineError("This account cannot start a paid Retry.", 403)
+                            job = recovery.retry(c.out, jp[2], body.get("go"), body.get("estimate"), by=self.user["id"])
+                        c.fulfil_async(job["id"], after=c.job_followup(job))
                         return self._json(200, job)
-                except jobs.JobError as e:
+                except (jobs.JobError, higgsfield.HiggsError, model_catalog.CatalogError) as e:
                     raise pl.PipelineError(str(e), e.code)
                 raise pl.PipelineError(NO_ROUTE, 404)
             if path == "/api/generations" and body.get("task"):      # Run: a generation linked to its reserved task
@@ -1629,6 +1671,17 @@ def make_handler(c: Console):
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     allow = bool(body.get("allow", True))
                     kind = str(body.get("kind") or "animation")           # no `kind` = what this route always did: animations
+                    if kind == "video_sheet":
+                        res = pl.read_result(c.out, gid)
+                        idx = gates.allowable(res, allow, kind) if body.get("all") else (body.get("indexes") or [body.get("sheet") or body.get("index")])
+                        if not isinstance(idx, list) or not idx or any(not isinstance(a, str) for a in idx):
+                            raise pl.PipelineError("sheet (A#), indexes (a list of A#) or all is required")
+                        for aid in idx:
+                            why = gates.sheet_problem(res, gates.sheet_of(res, aid), allow)
+                            if why:
+                                raise pl.PipelineError(why, 409)
+                        c.submit(lambda: gates.allow_sheet(c.out, gid, idx, allow, c.cfg, c.pace))
+                        return self._json(202, {"id": gid, "kind": kind, "indexes": idx, "index": idx[0], "allow": allow})
                     if kind not in gates.KINDS:
                         raise pl.PipelineError("kind must be 'still' or 'animation'")
                     if body.get("all"):

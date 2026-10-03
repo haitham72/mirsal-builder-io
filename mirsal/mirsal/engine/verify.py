@@ -30,6 +30,7 @@ BLOCK, WARN = "BLOCK", "WARN"
 OVERRIDABLE = {
     "still": ("blank_cell", "foreground", "inside_cell", "no_spill", "holes"),
     "animation": ("inside_slot", "cross_slot", "loop_seam"),
+    "video_sheet": ("no_outline_on_sheet", "video_specs", "layout_match"),
 }
 TECHNICAL = {
     "still": ("dimensions", "transparent_corners", "static_file"),
@@ -123,6 +124,38 @@ def waived(names) -> set:
     return out
 
 
+def _apply_waiver(res: Check, allowed: set, metrics: dict) -> Check:
+    """One waiver rule for freshly measured and stored checks alike."""
+    if not res.ok and res.severity == BLOCK and res.id in allowed and res.reason != "verifier_error":
+        res = replace(res, severity=WARN, note=(res.note + " (allowed by you)").strip())
+        metrics.setdefault("waived", []).append(res.id)
+    elif not res.ok and res.severity == WARN:
+        metrics.setdefault("warnings", []).append(res.id)
+    return res
+
+
+def animation_verdict(checks: list, overrides, metrics: dict) -> Report:
+    """Rejudge the same finished pixels from their stored checks, without running check functions.
+
+    Only the catalogue's animation judgement calls may change severity. Measurements,
+    technical failures and verifier crashes retain their original verdict.
+    """
+    allowed = waived(overrides) & set(OVERRIDABLE["animation"])
+    metrics.pop("waived", None)
+    metrics.pop("warnings", None)
+    items = []
+    suffix = " (allowed by you)"
+    for raw in checks:
+        c = Check(raw["name"], raw["stage"], raw["severity"], raw["ok"],
+                  raw.get("value"), raw.get("limit"), raw.get("data") or {}, raw.get("detail") or "")
+        if "error" in c.detail:
+            c.reason = "verifier_error"
+        if not c.ok and c.id in OVERRIDABLE["animation"] and c.reason != "verifier_error":
+            c = replace(c, severity=BLOCK, note=c.note.removesuffix(suffix))
+        items.append(_apply_waiver(c, allowed, metrics))
+    return Report(items)
+
+
 def run(stage: str, inp: dict, cfg, only: tuple | None = None) -> list[Check]:
     """Run every check of `stage` in catalogue order (or only the ids in `only`, which also skips their gate).
     Never raises: a crashing check is a BLOCK `verifier_error`.
@@ -145,11 +178,7 @@ def run(stage: str, inp: dict, cfg, only: tuple | None = None) -> list[Check]:
         res.detail.setdefault("ms", round((time.perf_counter() - t0) * 1000, 1))
         if inp.get("particles") and not res.ok and res.severity == BLOCK and res.id not in PARTICLE_KEEP.get(stage, ()) and res.reason != "verifier_error":
             res = replace(res, severity=WARN, reason=None, note=f"{res.note} (a particle is not a sticker: a warning, not a block)".strip())
-        if not res.ok and res.severity == BLOCK and res.id in allowed and res.reason != "verifier_error":
-            res = replace(res, severity=WARN, note=(res.note + " (allowed by you)").strip())
-            m.setdefault("waived", []).append(res.id)
-        elif not res.ok and res.severity == WARN:
-            m.setdefault("warnings", []).append(res.id)
+        res = _apply_waiver(res, allowed, m)
         out.append(res)
         if gate and not res.ok and res.severity == BLOCK:
             break

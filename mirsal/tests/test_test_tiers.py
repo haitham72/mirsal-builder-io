@@ -9,6 +9,39 @@ from mirsal import cli, test_tiers
 
 
 class TierContractTests(unittest.TestCase):
+    def test_focused_is_small_explicit_and_starts_with_the_exact_gate(self):
+        def ids(suite):
+            for case in suite:
+                if isinstance(case, unittest.TestSuite):
+                    yield from ids(case)
+                else:
+                    yield case.id()
+        names = list(ids(test_tiers.suite_for("focused")))
+        self.assertEqual(names[0], test_tiers.GOLDEN_GATE)
+        self.assertGreaterEqual(len(names), 20)
+        self.assertLessEqual(len(names), 25)
+        self.assertEqual(len(names), len(set(names)))
+        for profile in test_tiers.FOCUSED_PROFILES:
+            selected = list(ids(test_tiers.suite_for("focused", profile)))
+            self.assertEqual(selected[0], test_tiers.GOLDEN_GATE)
+            self.assertTrue(set(selected) <= set(names))
+        with self.assertRaisesRegex(ValueError, "No focused profile"):
+            test_tiers.suite_for("focused", "not-real")
+
+    def test_focused_cli_accepts_an_explicit_profile(self):
+        with mock.patch.object(test_tiers, "run", return_value=0) as run:
+            self.assertEqual(cli.main(["test", "focused", "video-sheet"]), 0)
+            run.assert_called_once_with("focused", "video-sheet")
+
+    def test_focused_never_stamps_full_media_verification(self):
+        with mock.patch.object(test_tiers, "suite_for", return_value=unittest.TestSuite([unittest.FunctionTestCase(lambda: None)])), mock.patch.object(test_tiers, "_write_slow_result") as stamp:
+            self.assertEqual(test_tiers.run("focused"), 0)
+            stamp.assert_not_called()
+
+    def test_empty_selection_is_not_a_pass(self):
+        with mock.patch.object(test_tiers, "suite_for", return_value=unittest.TestSuite()):
+            self.assertEqual(test_tiers.run("focused"), 2)
+
     def test_slow_tier_is_exactly_the_six_media_modules(self):
         self.assertEqual(test_tiers.SLOW_MODULES, (
             "tests.test_golden", "tests.test_effect_video", "tests.test_allow_still",
