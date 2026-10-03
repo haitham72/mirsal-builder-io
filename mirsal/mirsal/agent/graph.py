@@ -470,7 +470,12 @@ class Agent:
             text, chips = f"**{name}**: {run['waiting']['why']}.", run["waiting"]["chips"]
         else:
             text, chips = f"**{name}**: stopped, {run['stop']['why']}", run["stop"]["chips"]
-        self.store.add_message(sess, "assistant", text, chips=chips, cards=[{"type": "creator", "run_id": run["id"]}])
+        cards = [{"type": "creator", "run_id": run["id"]}]
+        # The picture travels with the message (CLAUDE.md rule 10: a rejection is never a bare word). A run that stopped on a block shows
+        # the batch's own carousel, so the rejected stickers are visible where the buttons that decide about them are.
+        if run["status"] == "stopped" and run.get("generation") and run["stop"].get("kind") != "error":
+            cards.append({"type": "generation", "generation": run["generation"], "subject": name})
+        self.store.add_message(sess, "assistant", text, chips=chips, cards=cards)
         try:
             from ..obs import trace as _trace
             _trace.creator_event(sess.get("id", ""), run)

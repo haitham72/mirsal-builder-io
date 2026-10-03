@@ -129,6 +129,30 @@ class CreatorRuns(Base):
         self.assertIn("final", run["stop"]["why"])
         self.assertEqual([c["action"] for c in run["stop"]["chips"]], ["creator_skip", "creator_stop"])
 
+    def test_the_stop_message_carries_the_picture_of_what_was_rejected(self):
+        """A person cannot judge what they cannot see: the stop message attaches the batch's carousel, not only the run card."""
+        self.start()
+        self.sheet_arrives(failed=(4,))
+        self.run_until("stopped")
+        msg = [m for m in self.sess()["messages"] if m["role"] == "assistant"][-1]
+        self.assertEqual([c["type"] for c in msg["cards"]], ["creator", "generation"])
+        self.assertEqual(msg["cards"][1]["generation"], "G050")
+
+    def test_a_stopped_run_still_shows_the_carousel_when_telegram_is_missing(self):
+        self.tools.telegram = False
+        self.start()
+        self.sheet_arrives()
+        self.assertEqual(self.run_until("stopped"), "stopped")
+        msg = [m for m in self.sess()["messages"] if m["role"] == "assistant"][-1]
+        self.assertIn("generation", [c["type"] for c in msg["cards"]])
+
+    def test_an_engine_error_is_not_pictured(self):
+        self.start()
+        self.tools.job_status["J001"], self.tools.job_errors["J001"] = "FAILED", "provider said no"
+        self.assertEqual(self.run_until("stopped"), "stopped")
+        msg = [m for m in self.sess()["messages"] if m["role"] == "assistant"][-1]
+        self.assertEqual([c["type"] for c in msg["cards"]], ["creator"], "nothing was drawn, so nothing to show")
+
     def test_a_blocked_animation_offers_use_it_anyway_too(self):
         self.settings(scope="video")
         self.start()
