@@ -20,7 +20,7 @@ const WL_SLIDES=[
  {id:'chat',kind:'image',src:'/assets/welcome/s4.webp',kicker:'AI chat',title:'Just tell the AI',
   body:'Say "three sticker packs of fruits": it plans them, shows one price, and runs them together. Say "the cherries were too realistic" and it remembers.',cta:['Open the AI chat','agent']},
 ];
-const WL={i:0,open:false,muted:true,auto:true,timer:0,tick:0};
+const WL={i:0,open:false,muted:false,needTap:false,auto:true,timer:0,tick:0};      // sound is ON by default; a browser that refuses sound without a gesture gets the film muted until the first tap (wlSync)
 const WL_SEEN='mirsal.welcome.seen',WL_OFF='mirsal.welcome.off',WL_STEP=6500;
 const wlGet=(s,k)=>{try{return s.getItem(k)}catch(e){return null}},wlSet=(s,k,v)=>{try{s.setItem(k,v)}catch(e){}};
 const wlReduced=()=>!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -28,7 +28,7 @@ const wlReduced=()=>!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: r
 function wlSlideHTML(s,i){
  const media=s.kind==='video'
   ?`<video class=wl-v id=wl-v muted playsinline preload=auto poster="${esc(s.poster)}" aria-label="A short fast-cut film about Mirsal"><source src="${esc(s.src)}" type="video/mp4"></video>
-    <div class=wl-vc><button class=wl-ib data-act=wlplay id=wl-pp aria-label="Play or pause">${ic('wlplay')}</button><button class=wl-ib data-act=wlsound id=wl-snd aria-label="Sound on or off">${ic('wlmute')}</button></div>`
+    <div class=wl-vc><button class=wl-ib data-act=wlplay id=wl-pp aria-label="Play or pause">${ic('wlplay')}</button><span class=wl-hint id=wl-hint hidden>Tap for sound</span><button class=wl-ib data-act=wlsound id=wl-snd aria-label="Sound on or off">${ic('wlsound')}</button></div>`
   :`<img class=wl-i src="${esc(s.src)}" alt="" loading=${i<2?'eager':'lazy'} onerror="this.style.display='none'">`;
  return `<section class="wl-s ${s.kind}" data-i=${i} aria-roledescription=slide aria-label="${esc(s.title)}">
   <div class=wl-m>${media}</div>
@@ -48,12 +48,12 @@ function wlSync(){
  tr.querySelectorAll('.wl-s').forEach((el,k)=>{el.toggleAttribute('inert',k!==WL.i);el.setAttribute('aria-hidden',k===WL.i?'false':'true')});
  document.querySelectorAll('#wl-dots .wl-d').forEach((d,k)=>{d.classList.toggle('on',k===WL.i);d.classList.toggle('done',k<WL.i);d.setAttribute('aria-selected',k===WL.i?'true':'false')});
  const p=document.querySelector('.wl-nav.prev'),n=document.querySelector('.wl-nav.next');if(p)p.hidden=WL.i===0;if(n)n.hidden=WL.i===WL_SLIDES.length-1;
- const v=$('wl-v');if(v){if(WL.i===0){v.muted=WL.muted;if(!wlReduced()){const pr=v.play();if(pr&&pr.catch)pr.catch(()=>wlPP())}}else v.pause();wlPP()}
+ const v=$('wl-v');if(v){if(WL.i===0){v.muted=WL.muted;if(!wlReduced()){const pr=v.play();if(pr&&pr.catch)pr.catch(()=>{if(!WL.muted){WL.muted=true;WL.needTap=true;v.muted=true;const p2=v.play();if(p2&&p2.catch)p2.catch(()=>0)}wlPP()})}}else v.pause();wlPP()}
  clearTimeout(WL.timer);cancelAnimationFrame(WL.tick);const bar=document.querySelector('#wl-dots .wl-d.on i');document.querySelectorAll('#wl-dots .wl-d i').forEach(i=>i.style.transform='');
  if(WL.open&&WL.auto&&!wlReduced()&&WL.i>0&&WL.i<WL_SLIDES.length-1){if(bar)bar.style.transform='scaleX(0)';const t0=performance.now(),step=t=>{if(!WL.open||!WL.auto)return;const f=Math.min(1,(t-t0)/WL_STEP);if(bar)bar.style.transform=`scaleX(${f})`;if(f>=1)return wlStep(1,true);WL.tick=requestAnimationFrame(step)};WL.tick=requestAnimationFrame(step)}}
-function wlPP(){const v=$('wl-v'),b=$('wl-pp'),s=$('wl-snd');if(b&&v)b.innerHTML=ic(v.paused?'wlplay':'wlpause');if(s)s.innerHTML=ic(WL.muted?'wlmute':'wlsound')}
+function wlPP(){const v=$('wl-v'),b=$('wl-pp'),s=$('wl-snd'),h=$('wl-hint');if(b&&v)b.innerHTML=ic(v.paused?'wlplay':'wlpause');if(s)s.innerHTML=ic(WL.muted?'wlmute':'wlsound');if(h)h.hidden=!(WL.needTap&&WL.muted)}
 function wlStep(d,byTimer){if(!byTimer)WL.auto=false;WL.i=Math.max(0,Math.min(WL_SLIDES.length-1,WL.i+d));wlSync()}
-function wlOpen(){if(WL.open)return;WL.open=true;WL.i=0;WL.auto=true;wlSet(sessionStorage,WL_SEEN,'1');
+function wlOpen(){if(WL.open)return;WL.open=true;WL.i=0;WL.auto=true;WL.muted=false;WL.needTap=false;wlSet(sessionStorage,WL_SEEN,'1');
  const el=$('welcome');el.innerHTML=wlHTML(WL_SLIDES);el.classList.add('on');document.body.classList.add('wl-on');
  const v=$('wl-v');if(v){v.addEventListener('ended',()=>{if(WL.open&&WL.i===0&&WL.auto)wlStep(1,true)});v.addEventListener('play',wlPP);v.addEventListener('pause',wlPP)}
  wlSync();const x=el.querySelector('.wl-x');if(x)x.focus()}
@@ -63,7 +63,7 @@ ACT.wlclose=wlClose;ACT.wlnext=()=>wlStep(1);ACT.wlprev=()=>wlStep(-1);
 ACT.wlgoto=el=>{WL.auto=false;WL.i=+el.dataset.i;wlSync()};
 ACT.wlgo=el=>{const to=el.dataset.to;wlClose();location.hash='#/'+to};
 ACT.wlplay=()=>{const v=$('wl-v');if(!v)return;WL.auto=false;v.paused?v.play().catch(()=>0):v.pause();wlPP()};
-ACT.wlsound=()=>{const v=$('wl-v');WL.muted=!WL.muted;if(v){v.muted=WL.muted;if(!WL.muted&&v.paused)v.play().catch(()=>0)}wlPP()};
+ACT.wlsound=()=>{const v=$('wl-v');WL.needTap=false;WL.muted=!WL.muted;if(v){v.muted=WL.muted;if(!WL.muted&&v.paused)v.play().catch(()=>0)}wlPP()};
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='wl-off')wlSet(localStorage,WL_OFF,e.target.checked?'1':'0')});     // not a data-act: the click handler's preventDefault would undo the tick
 /* the home button: the Mirsal logo goes to a clean AI screen and opens the welcome again */
 ACT.home=()=>{const there=route_==='agent'&&$('s-agent').dataset.ready;if(there&&typeof ACT.agnew==='function')ACT.agnew();
@@ -71,5 +71,9 @@ ACT.home=()=>{const there=route_==='agent'&&$('s-agent').dataset.ready;if(there&
 document.addEventListener('keydown',e=>{if(!WL.open)return;if(e.key==='Escape'){e.stopPropagation();wlClose()}else if(e.key==='ArrowRight')wlStep(1);else if(e.key==='ArrowLeft')wlStep(-1);
  else if(e.key===' '&&WL.i===0&&!/button|input/i.test((document.activeElement||{}).tagName||'')){e.preventDefault();ACT.wlplay()}},true);
 document.addEventListener('click',e=>{if(WL.open&&e.target.id==='welcome')wlClose()});
+/* a browser that would not play with sound (no gesture yet) played the film muted: the first tap or key inside the modal (not on the sound button, which decides for itself) turns the sound on */
+const wlUnlock=e=>{if(!WL.open||!WL.needTap||!WL.muted||WL.i!==0)return;if(e.target&&e.target.closest&&e.target.closest('[data-act=wlsound],[data-act=wlclose],.wl-x'))return;
+ const v=$('wl-v');if(!v)return;WL.muted=false;WL.needTap=false;v.muted=false;if(v.paused)v.play().catch(()=>0);wlPP()};
+document.addEventListener('pointerdown',wlUnlock,true);document.addEventListener('keydown',wlUnlock,true);
 /* the first open of a browser session (not when the person asked not to see it at start) */
 window.addEventListener('load',()=>{if(wlGet(sessionStorage,WL_SEEN)!=='1'&&wlGet(localStorage,WL_OFF)!=='1')setTimeout(wlOpen,450)});
