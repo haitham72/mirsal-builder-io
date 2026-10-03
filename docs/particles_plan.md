@@ -1,6 +1,6 @@
 # Particles: the plan (Haitham, 2026-10-03, written at the end of a session)
 
-**Status: phases 1-4 are BUILT (2026-10-03, branch `better_ui/ux`).** `flow/particle_sets.py` and every route of section 6 are in (including `more`, `preview`, `render`, `add` and the trash listing `GET /api/particles/deleted`), the screens of section 5 are re-pointed to the set and the pack, and the chat has the intents (make, more, delete, restore, assign: `agent/graph.py` `n_particles`). **Still to build:** Telegram delivery of a burst (phase 5, open question 3). This file corrects the model the particles feature was built on; what exists today is in `docs/effects.md`; what is open is in `HANDOFF.md` sections 0a-0c.
+**Status: phases 1-4 are BUILT (2026-10-03, branch `better_ui/ux`).** `flow/particle_sets.py` and every route of section 6 are in (including `more`, `preview`, `render`, `add` and the trash listing `GET /api/particles/deleted`), the screens of section 5 are re-pointed to the set and the pack, and the chat has the intents (make, more, delete, restore, assign: `agent/graph.py` `n_particles`). **Still to build:** Telegram delivery of a burst (phase 5, open question 3). This file corrects the model the particles feature was built on; what exists today is in `docs/effects.md`; what is open is in section 11 below, `docs/backlog.md` (particles) and `docs/waiting-for-haitham.md`.
 
 ## 1. What the task really is (the correction)
 
@@ -51,7 +51,7 @@ A pack's list of sets is derived from `set.packs` (one source of truth); the lib
 
 - **Library > Particles** (new section/tab of the Library): every set as a card (the picked cells as a strip, name, "used in: Barbie, Princess" or "stand-alone", cost spent, created). Actions on the card: Open, Assign, Duplicate, Delete. A big "New particle set".
 - **Pack page > Particle studio** (new panel on `#/pack/<id>`, the place the person expects): the sets assigned to this pack, the bursts rendered for it (looping thumbnails with Add to pack / Delete), and buttons: *Make particles for this pack* (starts the wizard with the pack chosen), *Use an existing set* (picker), *Generate more*.
-- **Studio > Particles tab** (small wizard; built by agent C, see HANDOFF): steps 1-7 of section 4; ends on "Use as particle set".
+- **Studio > Particles tab** (small wizard): steps 1-7 of section 4; ends on "Use as particle set".
 - **Create > Particle effects** (pro studio): the same steps with every control; reads/writes the same sets.
 - **Sticker view / pack grid**: no per-sticker gallery as the main thing. A sticker shows one line: "Particles of this pack: Barbie hearts and flowers" (a link to the pack's particle studio), and the pack grid badge counts bursts per pack, not per sticker.
 - **AI chat**: "make particles for my Barbie pack" -> plan card (elements suggested, price, grid) -> go-ahead -> the set is saved and assigned; "also use them for the Princess pack"; "make more"; "delete the bat particles".
@@ -110,3 +110,9 @@ Open a Barbie pack -> Particle studio -> *Make particles* -> choose 2x2 -> see "
 2. Should a stand-alone set be a **real library pack** of animated stickers (so it can be sent to Telegram on its own) or only a library asset?
 3. How should the burst reach Telegram: as ordinary animated stickers in the pack (works today), or only as a file to download / use as a Telegram *effect*? (Telegram's own effect stickers are tied to Premium; today's plan is "animated stickers tagged with the emoji".)
 4. Cost visibility: show the credits a set cost (sum of its sheets) on the card? (The plan says yes.)
+
+## 11. Open: Telegram delivery of a burst (phase 5; size S; former `plan.md` 16.2)
+
+Today a burst reaches the pack as an ordinary animated sticker tagged with the pack's emoji (`POST /api/particles/{id}/add`). Whether that is the delivery (it works today), or a downloadable file, or a Telegram *effect*, is Haitham's verdict (question 3 of section 10, question 24 of `docs/waiting-for-haitham.md`). **Build nothing until it is answered.** The same verdict list gates the burst creation proposal (`docs/burst_plan.md`): questions 1-3 of section 10 above are the "burst verdicts" there (one burst per pack or per emoji, is a stand-alone set a real library pack, how a burst reaches Telegram); question 4 of `docs/burst_plan.md` section 6 is its lane id.
+
+Also open from the browser look of 2026-10-03: the legacy per-sticker burst badge (`ptBadge`, the `for_sticker` counts kept so nothing that reads them breaks) still exists beside the pack-level particle set; whether to retire it is question 28 of `docs/waiting-for-haitham.md`.

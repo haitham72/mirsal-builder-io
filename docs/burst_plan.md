@@ -62,3 +62,7 @@ A "better scheme" was looked for and not found: putting `Q###` in the file name 
 2. Should each lane become **its own pack** automatically, or only a batch the person adds to a pack (today's gate)? (Proposal: a batch; adding stays the person's click.)
 3. May the suggestions use the **vision model** on the sheet (with the one-time AI vision yes), or only the built-in table?
 4. Is `B###/Q###` acceptable as the lane id, or should a lane be addressed by its batch (`G###`) only?
+
+## 7. Open: what happens next (former `plan.md` 16.3, P14)
+
+**Nothing is built.** The idea: reuse the liked sheet's image, prepare a list of actions, one priced card, one async queue lane per action. The model (a Burst `B###` of lanes `Q###`), the file-name question against rule 9, the risks and the four questions are above. It waits for Haitham's go (`docs/waiting-for-haitham.md`, item 27 for the go and its four questions, items 24-26 for the burst verdicts) and for the burst verdicts that also gate Telegram delivery (`docs/particles_plan.md` sections 10-11: one burst per pack or per emoji, is a stand-alone set a real library pack, how a burst reaches Telegram). Until then the chat answers "many packs of the same character is not supported yet" (`agent/editroute.unsupported`) and points here.

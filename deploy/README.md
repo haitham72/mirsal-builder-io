@@ -1,7 +1,7 @@
 # deploy/: the hosted Mirsal, prepared (branch `deployment`)
 
 **Nothing here is switched on.** No Supabase project, no Vercel project, no Render service and no Google OAuth client exist yet; nothing was pushed to any of them. Everything below was written and tested on a PC against fakes,
-so that the next session (on another PC) only has to create the accounts and fill in `deploy/env.example`. `plan.md` (repo root of this branch) is the reasoning, the phases and the open questions; this file is the map of what exists.
+so that the next session (on another PC) only has to create the accounts and fill in `deploy/env.example`. `docs/deployment_plan.md` is the reasoning, the phases and the open questions; this file is the map of what exists.
 
 ```
 deploy/
@@ -31,13 +31,13 @@ The gateway strips everything a client could use to impersonate (`Authorization`
 
 ## What the next session does, in order
 
-1. Read `plan.md` sections 6, 7 and 16 and answer its eight questions with Haitham (which host, whose Higgsfield account, one bot or one per person, the IP retention days...).
+1. Read `docs/deployment_plan.md` sections 6, 7 and 17 and answer its nine questions (numbered W40-W48 in `docs/waiting-for-haitham.md`) with Haitham (which host, whose Higgsfield account, one bot or one per person, the IP retention days...).
 2. Create the Supabase project, enable the Google provider, apply `deploy/supabase/migrations/009..011` (see `deploy/supabase/README.md`), create the Google OAuth client.
 3. Fill `deploy/env.example` into the host's environment (Render dashboard, or `deploy/.env` for `docker compose -f deploy/docker/compose.yml --env-file deploy/.env up -d --build`).
 4. Run the engine's `python -m mirsal db migrate` against the Supabase pooler, then `python -m mirsal doctor`.
 5. Build what is still only designed: the code that writes `accounts` / `user_analysis` / `credit_ledger`, the front end's sign-in button (it needs `GET /auth/config`, then `supabase-js` `signInWithOAuth({provider: 'google', options: {redirectTo: <origin>/auth/callback}})`),
-   `AssetStore` on S3 / Supabase Storage (a worker on another machine cannot see a local `out/`), per-person memory in Postgres, `GET /api/me/export`, `DELETE /api/me`, the retention job. These are plan.md phases 1, 2, 3 and 5.
-6. The scrub runbook (`plan.md` section 8) before anything is public: rotate first, rewrite second, never the other way round, and only with Haitham's explicit go.
+   `AssetStore` on S3 / Supabase Storage (a worker on another machine cannot see a local `out/`), per-person memory in Postgres, `GET /api/me/export`, `DELETE /api/me`, the retention job. These are deployment_plan.md phases 1, 2, 3 and 5.
+6. The scrub runbook (`docs/deployment_plan.md` section 8) before anything is public: rotate first, rewrite second, never the other way round, and only with Haitham's explicit go.
 
 ## Verified on the PC that prepared it
 

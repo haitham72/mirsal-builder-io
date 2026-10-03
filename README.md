@@ -1,5 +1,29 @@
 # Mirsal Builder
 
+## Overview and glossary
+
+Mirsal creates **Telegram stickers** from text, images or prepared sheets: request → plan → sheet → still stickers → video sheet → animations → pack → Telegram. One deterministic Python engine serves the **AI chat**, **Studio** and **JSON API**; the screens are a sandbox over that API. Higgsfield generates media through its CLI, local models assist with chat and vision, and `out/` is the source of truth with optional Postgres mirrors and Redis caching. Humans approve review gates and paid calls; tests use fake providers. Read `CLAUDE.md` for rules, `docs/backlog.md` and `docs/waiting-for-haitham.md` for open work, and `docs/` for each area's contract and design.
+
+Mirsal Builder is a local, private app. The words below mean the same in
+`README.md`, `CLAUDE.md` and `docs/dev-notes.md`:
+
+- **Batch (`G###`)** — one generation run. Holds a sheet, stickers, a video
+  sheet, animations, and a pack.
+- **Sticker (`S#`)** — one cell of a batch. Its number never changes.
+- **Job (`J###`)** — one paid provider call. Its ticket is stored before
+  waiting, so a crash never pays twice.
+- **Gates (G1–G5)** — the five human approvals along the path. The vision
+  model pre-reviews only and never approves.
+- **"Use it anyway" (allow)** — a recorded, reversible human click that lets a
+  judgement-call block through. Only Telegram's own limits stay final.
+- **Particle set / burst** — effect sprites belonging to pack(s), and the
+  animation rendered from them.
+
+- **Plan** — saved character, cell, tag and prompt instructions before generation.
+- **Sheet / video sheet** — a 3×3 or 2×2 character image; the video sheet is rebuilt from approved stickers for animation.
+- **Pack / pool** — a named Telegram sticker collection, and the shared searchable sticker store.
+- **Test tiers** — `focused`: about 22 reviewed regressions with the exact golden gate first; `fast`: smoke; `area`: mapped checks. The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Python runs alone; focused success is not full verification.
+
 High-quality **animated stickers** (not emoji) for Telegram. You say what you want, in a chat or a prompt; the app makes the sheet, cuts and keys it into stickers, checks every one with a
 deterministic verifier, lets a human approve, animates the approved ones, and puts them in a pack that goes to a Telegram set. One engine; a chat and a Studio on top.
 
@@ -15,7 +39,7 @@ pip install -r requirements.txt                            # once
 python -m mirsal db up                                     # Postgres :5434 and Redis :6380 in Docker (both optional: the app falls back to files and memory)
 python -m mirsal doctor                                    # one health check for everything
 python -m mirsal serve                                     # http://127.0.0.1:8770 : opens on the AI chat, "Studio" is the detailed workspace
-python -m unittest discover -s tests -t .                  # the tests (python + the node helpers; the database tests skip when mirsal-db is down)
+python -m mirsal test fast                                 # the routine tests (then focused / area <module>, node --test, tests.test_js); a full `unittest discover` only if Haitham asks
 ```
 
 Everything the app writes goes to `mirsal/out/` (the engine's own names, which the database uses; they never change). Copy `mirsal/.env.example` to `mirsal/.env` for keys and options.
@@ -76,13 +100,15 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Store and search** | Postgres mirror (generations, decisions, tasks, jobs, ledger, chats), the sticker pool with local vector search, photo cutouts, optional LangSmith tracing (off on this PC: tracking stays in Postgres). [docs/store-and-search.md](docs/store-and-search.md) |
 | **Vision judge** | a local multimodal model pre-reviews stickers and animations; uncalibrated until 30 labels exist. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
 | **HTTP API** | JSON routes, SSE events per generation, idempotency keys, signed asset links, accounts (owner / member tokens, per-user ownership), per-minute rate limits, an OpenAPI document, health. [docs/api.md](docs/api.md) |
-| **Testing** | three tiers, chosen by what a change can actually break: `mirsal test fast` (9s), `area <module>` (what that file maps to), `slow` (the encoder, mandatory before the browser look, before a pack reaches Telegram, and before anything is called verified). Nothing maps, nothing runs. [docs/testing.md](docs/testing.md) |
+| **Testing** | tiers chosen by what a change can actually break: `mirsal test fast` (9s), `focused`, `area <module>` (what that file maps to). The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Nothing maps, nothing runs. [docs/testing.md](docs/testing.md) |
 | **Particle effects** | Telegram-style bursts for a pack's emoji: a text-only Kling clip (2x2 cells that start and end empty) or a simulated burst with gravity / explosion / vortex sliders, output 3 s WEBM stickers tagged with the emoji. Engine, flow, routes and the Create > Particle effects screen built; the chat entry is open. [docs/effects.md](docs/effects.md) |
 | **Particle sets** | the corrected model, built: a set of particles belongs to pack(s) or stands alone; use as a set, generate more (appends cells, price first), save, delete + a trash listing with restore, assign; ONE burst maker per set and pack (preview / render / add); chat intents; screens and API. Telegram delivery of a burst is open | [docs/particles_plan.md](docs/particles_plan.md) |
+| **Open work** | what to build, by area: [docs/backlog.md](docs/backlog.md) · what only Haitham can settle (verdicts, eyes, money): [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md) · guardrails, how to run, quirks: [docs/dev-notes.md](docs/dev-notes.md) |
+| **Paused plans** | the FastAPI + pydantic spec: [docs/fastapi_plan.md](docs/fastapi_plan.md) · hosting, OAuth, credits, the scrub runbook: [docs/deployment_plan.md](docs/deployment_plan.md) |
 | **Burst creation (proposal)** | many packs from one liked sheet: reuse the image, pick actions, one queue each, async; nothing built, four questions for Haitham | [docs/burst_plan.md](docs/burst_plan.md) |
 | **Design** | one shell and one palette for every screen: the rail, the second column, the token set, the style tiles, and the Earlier-batches column. [docs/design.md](docs/design.md) |
 | **Welcome / onboarding** | the modal that opens once per browser session and on the logo: a fast-cut Seedance ad film and four sliding feature images; the prompts, the credits spent and the checks | [docs/onboarding.md](docs/onboarding.md) |
-| **Independent review** | a ready-made prompt for another LLM to audit the whole app: [review-prompt.md](review-prompt.md) (repo root). The standing rules above are the outcome of the 2026-10-02 audit, now architecture here rather than a report. |
+| **Independent review** | a ready-made prompt for another LLM to audit the whole app: [review-prompt.md](review-prompt.md) (repo root), updating the single seeded baseline [docs/review.md](docs/review.md). The standing rules above are the outcome of those audits, now architecture here rather than reports. |
 | **Measurements** | recorded numbers — slot fill, search precision, vision-judge agreement, sharpness; no opinions: [docs/measurements.md](docs/measurements.md) |
 | **Telegram** | send a pack (images and video are split into two sets), a no-token fallback for @stickers. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
 
@@ -100,7 +126,7 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 ## Folders
 
 ```
-README.md  CLAUDE.md  HANDOFF.md        this file · the rules for LLM sessions · what is still open and what waits for Haitham
+README.md  CLAUDE.md  HANDOFF.md        this file · the rules for LLM sessions · a pointer to the trackers in docs/ plus the session state
 docs/                                    the documentation (one file per area) · docs/inputs/ (Haitham's inputs and reference)
 mirsal/                                  the app: requirements.txt, docker-compose.yml, migrations/, tests/, .env.example
   mirsal/                                the Python package, one folder per concern: engine/ (pure engine) · flow/ (the golden path: pipeline, gates) · generation/ (Higgsfield, jobs, prompts, planner) ·
@@ -115,4 +141,4 @@ ref/                                     the UI design reference and mockup
 ## Rules in one breath
 
 Build only what is asked; the engine is deterministic and independently testable; never open media to judge it (validators and metrics do); no dead controls; docs are part of every
-change; never commit a token, `.env` or `opencode.json`. The full list is in [CLAUDE.md](CLAUDE.md); the open work is in [HANDOFF.md](HANDOFF.md).
+change; never commit a token, `.env` or `opencode.json`. The full list is in [CLAUDE.md](CLAUDE.md); the open work is in [docs/backlog.md](docs/backlog.md) and [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md).

@@ -4,7 +4,7 @@
 in `docs/` because it is architecture, not a log (rule 12): the screens are a sandbox over the API (rule 11), but the *shell* they share is a real, stable
 surface that every screen inherits. When a screen's look changes, this file changes in the same step.
 
-`HANDOFF.md` §2 "Visual design" carries the work items; this file says what they add up to.
+`docs/backlog.md` "Visual design" carries the work items; this file says what they add up to.
 
 ---
 
@@ -42,7 +42,7 @@ AI is the good one and is the reference. `.cp` (the Studio's composer panel) is 
 **Target: one token set, AI's character, available to every screen.**
 
 Smaller defects found while measuring (fixed with the screen they sit on): the Settings Telegram icon renders unsized and fills the page; the fixed Queue pill covers the
-bottom-left of the stage (the first Earlier-batches card on Studio).
+bottom-left of the stage (the first Earlier-batches card on Studio). *(Fixed 2026-10-03: while a job is listed `live.js drawLive` sets `body.hasq` and `studio.css` reserves room under every screen's last content, 96px, 172px on a phone; the Library's Create button is no longer sticky, so it never floats over the list.)*
 
 ---
 
@@ -54,7 +54,7 @@ bottom-left of the stage (the first Earlier-batches card on Studio).
   `hopen`, so "Earlier batches" opened batch NaN). `tests/test_js.py` fails on any clash not listed as intentional.
 - **No duplicate top-level `const` across scripts.** The second declaration is not run at all (`history.js` was dead for a while because of `ago`).
 - **`agent.css` selectors stay namespaced** (`ag-`, `is-`, `k-`): the Studio's own CSS already uses `.step`, `.tile`, `.sel`, `.done`.
-- **Issue colours are locked** (`HANDOFF.md` §3): orange out of bounds, purple bad green screen, yellow bad loop, pink look or motion, blue file / Telegram
+- **Issue colours are locked** (`docs/dev-notes.md`, "Locked decisions"): orange out of bounds, purple bad green screen, yellow bad loop, pink look or motion, blue file / Telegram
   limit, red dropped or blocked; hatched = not in the set, dashed = kept with a check. A redesign must not repaint these — they carry meaning.
 - **Never open media to judge it** — a design change is judged on the code and in the browser, stickers are judged by the verifier and by Haitham.
 
@@ -175,7 +175,7 @@ columns**, listed vertically, each entry showing its **3×3 grid, its name and i
 5. A batch that is currently working, or that was just edited, keeps re-reading while it is visible.
 
 **Do not confuse this with `history.js`.** That file is the **watch-folder** screen (`#/history`: `inputs/Images_gen` + `videos_gen`, Remove/Restore). It is a
-different thing, it is already a vertical list, `HANDOFF.md` §1 notes nothing in the rail opens it and it once shadowed this very handler. Decide separately
+different thing, it is already a vertical list, `docs/waiting-for-haitham.md` (W34) notes nothing in the rail opens it and it once shadowed this very handler. Decide separately
 whether to delete it; do not fold it into this column.
 
 ---
@@ -189,7 +189,7 @@ whether to delete it; do not fold it into this column.
 - Earlier batches: one vertical column, no "Load more", reachable from anywhere.
 - `tests/test_js.py` green (it guards the shared `ACT` names and that every `data-act` button has a handler) — **a redesign that trips it has broken the
   app.** `tests/js/*.test.js` must still pass. No duplicate top-level `const`, no new top-level `ACT.*`.
-- Checked in a browser on a **copy** of `out/` (`MIRSAL_OUT=<copy>`, never press Create) — see `HANDOFF.md` §5 for the Playwright recipe and the
+- Checked in a browser on a **copy** of `out/` (`MIRSAL_OUT=<copy>`, never press Create) — see `docs/dev-notes.md` for the Playwright recipe and the
   `location.reload()` trap.
 
 ## 8. Order of work (done steps are marked)
@@ -228,7 +228,9 @@ whether to delete it; do not fold it into this column.
 ## UI/UX pass of 2026-10-03 (what a click means)
 
 * **The AI vision switch is a chamfered box with a glowing outline** (`agent.css` `.ai-vis` around a plain `.ai-chip`: cut corners by `clip-path`, a conic-gradient outline that rotates while the choice is undecided and rests under reduced motion, a soft drop-shadow on the wrapper because a clip-path would cut a shadow on the button itself). It once looked squashed because it reused `.ai-sw`, the 44x26 px settings toggle with its knob; a chip never takes a toggle's class. Decided, it keeps the box and says "AI vision on" / "AI vision off".
-* **A choice with two values is a drop-down, not a chip that flips** (the chat bar's sheet size: `<select data-aggrid>` inside `.ag-chip.ag-sel`, 3x3 / 2x2; one click never changes it by surprise).
+* **A choice with two values in the chat bar is one click-toggle chip** (the sheet size: `<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle">`, labelled "3×3 sheet" / "2×2 sheet", its title says both choices and "Click to change"). It is a native button, so it is keyboard-reachable; a press writes the setting only (no generation, no chat turn), is reversible, and repaints from the saved setting, the gear's pair included. It once was a `<select data-aggrid>` inside `.ag-sel`; that class is the settings panel's full-width drop-down and stretched the chip over its own row, so the chip has its own class `.ag-grid` (`agent.css`). `docs/agent-and-chat.md`, "The bar under the chat box".
+* **Generate prompt is free and says so.** The Studio's primary button reads "Generate prompt" with a "free" chip. The paid step is a second, separate button, "Generate sheet", in the pre-batch Prompt step, and the Higgsfield price is its own line above it, never inside the button. It reuses the Prompt tab's editor and the five-step strip (Request done, Prompt current, the rest "after the sheet"); no new type size, radius or CSS. A person who cannot get a price sees "price unavailable" plus a Retry, never a silently disabled button.
+* **The AI enhancer shows the AI screen's engine control** (2026-10-03). Under the composer bar, while the enhancer is On (or cannot run), the Auto / Local / Cloud segment, the local-model drop-down and the one status line are the AI screen's own rows (`.ai-set.cp-eng` reuses `.ai-set .r`, `.ai-seg`, `.ag-sel` flat instead of floating), with the honest note "Local: free. Cloud: one small OpenAI call." The line under the Prompt step's title about the enhancer is `.gdnote` (a quiet note; `.gdnote.bad` in the warning colour when the model failed and the built-in prompt is shown). No new type size or radius.
 
 * **Remove batch** sits in the batch header beside *Create more* (`btn dng`, trash glyph, like *Delete pack*); its confirm names the batch and says it moves to the trash. **Removed batches (N)** is a folded list under the Earlier-batches column, each row with a **Restore** button (`.c2rem`).
 
@@ -239,3 +241,21 @@ whether to delete it; do not fold it into this column.
 * **The id is its own control**: `G103/S2` is a small hoverable, copyable chip beside the name, never inside it. Title, key and id are three fields.
 * **A one-time decision is a switch, not a button of the plan**: the AI vision switch sits on the right with a conic glow (`@property --ag-ang`, at rest under reduced motion).
 * **Delete pack** is a labelled button with an honest confirmation. **Fixed** is a third view of the sheet.
+
+## Browser look of 2026-10-03 (what Claude fixed, and what is still Haitham's eyes)
+
+P1-P13 and the particle screens were walked in a headless Chromium (Playwright from `mirsal/venv`) on a scratch copy of `out/` (recipe: `docs/dev-notes.md`); Haitham has not looked (`docs/waiting-for-haitham.md` W1). What the walk found and fixed, as rules:
+
+* **A console script must be in `UI_FILES` (`console/server.py`) and in `index.html` in load order.** `sheet-recovery.js` and `job-recovery.js` were missing from `UI_FILES` (the page got a 404 it swallowed, so the recovery controls never drew); `trash.js` loads before the Settings card needs it, so the Trash card draws on first open.
+* **Make particles never opens an empty page.** The Studio's Particles tab belongs to an OPEN batch, so *Make particles* from the Library (`ACT.spopen`) opens the open batch's tab, or Create > Particle effects when no batch is open, and *Make particles for this pack* (`ACT.psmakepack`) opens the same wizard on Create > Particle effects with the pack chosen when no batch is open. The burst maker always lights a preset: the one picked, else the set's own default motion, else `burst` (`spPresetOf`, the server's own default).
+* **A blocked animation keeps its finished clip**, dimmed (`.gt.nx`), with the reason and the *Use it anyway* button laid over it (`gblockover`).
+* **The key-colour header says the truth**: "Blue screen" / "Green screen" (and "Blue screen & cuts") follows `key_colour`, never a fixed word.
+* **Generate prompt gives visible feedback**: the pre-batch Prompt step scrolls into view when it opens, and the button is disabled while the free planner runs.
+* **The editor's Save tooltip names where it returns** (the AI or the Studio) when opened from the chat.
+* **The Trash card lists a batch by its subject** as well as its number.
+* **The bulk "Use all anyway (N)" / "Take all back (N)" buttons are guarded while the re-cut runs**: they disable, read "Cutting again...", and a second click is ignored instead of answering `409 busy`.
+* **Remove batch leaves no empty edge strip** (the bordered bar is emptied and loses its class when no batch is open).
+* **The Queue pill reserves room at the foot of every screen** (`body.hasq`), so it no longer overlaps the Create button.
+
+Still open from the walk (not fixed, all in `docs/waiting-for-haitham.md`): the legacy per-sticker burst badge (W28), an empty "New chat" made by a setting click (W22), a chat edit of an animated sticker opening Prepare, "undo" with no "redo", and a bare "the last one" with no person planning a new batch (W23).
+

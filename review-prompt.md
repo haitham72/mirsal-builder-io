@@ -5,13 +5,14 @@
 # DO NOT REMOVE THIS FILE WITHOUT PERMISSION , i'll use this prompt to review my code and the code of others , so if you don't have permission to remove it don't remove it.
 
 Paste everything below the line into the reviewing LLM (one that can read the
-repository and run commands). It writes **one file**, `docs/review-<today>.md`, and
-changes nothing else. Give it the repository at the commit you want judged;
-`git log -1` goes in the report's header.
+repository and run commands). It updates **one file**, `docs/review.md` (the
+seeded baseline; see §7), and changes nothing else. Give it the repository at
+the commit you want judged; `git log -1` goes in the new §9 log entry.
 
-A previous report may exist at `docs/review-<earlier date>.md`. **Read it first**
-and label every finding `NEW` or `PRE-EXISTING` (§2). Re-confirm a `PRE-EXISTING`
-finding still holds before repeating it — a stale finding is worse than none.
+The seeded baseline `docs/review.md` holds every prior audit. **Read it first**,
+re-verify each claim and finding against the code (a stale finding is worse
+than none), update its tables in place, and append the dated entry to §9.
+Never create a dated `review-<date>.md` file.
 
 ---
 
@@ -25,9 +26,11 @@ short report full of reproduced facts beats a long one of opinions.
 
 ## 0. Ground rules (read twice)
 
-1. **Read-only except your report.** Write only `docs/review-<YYYY-MM-DD>.md`. Do
-   not edit code, commit, push, install anything into the project venv, delete
-   files or "fix" things. Propose fixes in the report, never apply them.
+1. **Read-only except your report.** Update only `docs/review.md`: refresh its
+   verdict, claims and findings tables in place and append the dated entry to
+   its §9 log. Do not create dated copies, edit code, commit, push, install
+   anything into the project venv, delete files or "fix" things. Propose fixes
+   in the report, never apply them.
 2. **Never spend money and never reach a provider.** Do not run the Higgsfield
    CLI, do not call OpenAI, do not press any "Create" / "Generate" control that is
    not backed by a fake. Set `MIRSAL_NO_REAL_CLI=1` and `MIRSAL_LLM_PROVIDER=openai`
@@ -50,12 +53,12 @@ short report full of reproduced facts beats a long one of opinions.
    checks by hand and got 36; the catalogue says 44. Run
    `python -c "from mirsal.engine import verify; print(sum(len(v) for v in verify.CATALOGUE.values()))"`.
    Do the same for every count you repeat (routes, nodes, tests, checks, chips).
-7. **Do not re-report what is already known.** `HANDOFF.md` lists the open work;
+7. **Do not re-report what is already known.** `docs/backlog.md` and `docs/waiting-for-haitham.md` list the open work;
    those items are not findings (you may say a listed item is mis-prioritised or
    mis-described). Equally: do not report as a finding something that was open in
-   `HANDOFF.md` but is now built — check the code first.
+   those trackers but is now built — check the code first.
 8. **The docs are the contract, and a doc that disagrees with the code is itself a
-   finding.** Where `README.md`, `CLAUDE.md`, `HANDOFF.md`, `plan.md` or `docs/`
+   finding.** Where `README.md`, `CLAUDE.md`, `HANDOFF.md`, `plan.md` (both only pointers now) or `docs/`
    says something the code does not do, that is a finding with **both sides
    cited**. Do not silently believe either one, and do not assume the code is the
    side that is right.
@@ -67,9 +70,18 @@ short report full of reproduced facts beats a long one of opinions.
     server on :8770 (the owner's). This project's own: Postgres `:5434`, Redis
     `:6380`, LM Studio/vLLM `:1234`, app `:8770`. Use a spare app port (e.g. 8799)
     for anything you start.
-11. **Run the Python suite ALONE.** Parallel runs cause `409 busy`. ~10 minutes.
-12. **Never judge a decision you were told is paused.** `plan.md` §§1, 2, 4-15
-    (deployment) are **paused by decision**: groundwork only, nothing switched on.
+11. **The long suites are gated behind the owner.** Default is a code audit only
+    (read code + `python -c` / `grep` / `git` probes). The long runs in §4
+    (`mirsal test fast`, `node --test`, `tests.test_js`,
+    a spare-port server) run ONLY if the owner answers "do it" to the explicit
+    question "run the long tests? (do it or no)". "No" or silence means audit
+    without them and every unrun count is CANNOT TELL. If the answer is "do
+    it": run the Python tiers ALONE (parallel runs cause `409 busy`). The slow
+    tier (`mirsal test slow`) is retired (Haitham, 2026-10-03): never run it.
+    The full `unittest discover` is not a routine gate: only if the owner asks
+    for it by name.
+12. **Never judge a decision you were told is paused.** `docs/deployment_plan.md` (the former `plan.md` §§1-15, 17)
+    (deployment) is **paused by decision**: groundwork only, nothing switched on.
     Do not raise their open questions as findings and do not propose deleting them.
     §3 (the HTTP-layer migration) was briefly un-paused and **re-paused on
     2026-10-03** until the app is verified.
@@ -117,7 +129,7 @@ say which in the report.
 
 **Deliberately not finished, so you do not mistake it for rot:**
 - The HTTP layer is still stdlib. The move to **FastAPI + pydantic** is **decided
-  but paused until the app is verified** (`plan.md` §16.1 is the spec), which
+  but paused until the app is verified** (`docs/fastapi_plan.md` is the spec), which
   amends rule 8 for the HTTP layer only. "Not FastAPI yet" is **not** a finding.
 - The **particle-set model** (a set belongs to pack(s), not to stickers) is built:
   `flow/particle_sets.py`, the Library > Particles screens, the pack particle
@@ -125,14 +137,14 @@ say which in the report.
 - **Burst creation** (many packs from one liked sheet) is a **proposal only**,
   `docs/burst_plan.md`, and waits for the owner's go. Judge the proposal, do not
   report its absence as a bug.
-- `plan.md` §§1, 2, 4-15 are paused (rule 12 of the ground rules).
+- `docs/deployment_plan.md` is paused (rule 12 of the ground rules).
 
 ## 2. What changed since the last review — read this before you start
 
-On **2026-10-03** four phases of a UI/AI spec were built and **left uncommitted**;
-a design pass was committed as `05c4423`; the creator override reached
-`10549d7` / `84fc46e`. Confirm the state yourself (`git status --short`,
-`git log --oneline -15`) rather than trusting this paragraph.
+Do not trust commit hashes or "uncommitted" claims written here — they go stale
+in one session. Trust `git status --short`, `git log --oneline -15`, and
+`docs/waiting-for-haitham.md` and `docs/dev-notes.md` instead. What follows is direction only (what to verify hard),
+not branch state.
 
 Built and to be verified in detail:
 - **One click, one meaning.** A single `gcell` handler serves the sheet cell, the
@@ -166,8 +178,8 @@ docs record it.
 ## 3. Reading order (do it in this order, then the code)
 
 `README.md` (architecture + invariants) -> `CLAUDE.md` (**13 binding rules**; judge
-the project against them) -> `HANDOFF.md` (**§0 first**: what is open) ->
-`plan.md` **§3** (the HTTP migration, next) and **§16** (the screens redesign) ->
+the project against them) -> `docs/waiting-for-haitham.md` and `docs/backlog.md` (what is open; `HANDOFF.md` is a pointer) ->
+`docs/fastapi_plan.md` (the HTTP migration, paused) and `docs/dev-notes.md` ->
 `docs/engine-and-studio.md` (the golden path, the verifier, the gates, "Use it
 anyway") -> `docs/agent-and-chat.md` -> `docs/generation.md` +
 `docs/higgsfield.md` + `docs/operator.md` -> `docs/store-and-search.md` ->
@@ -186,19 +198,89 @@ and `studio.css` / `agent.css`. Tests are in `mirsal/tests/` (Python) and
 `mirsal/tests/js/` (node) — **read a few and judge whether they test behaviour or
 merely call the code.**
 
+## 3.5 Split the audit across subagents (do this; it is faster and more thorough)
+
+One reviewer reading everything serially is slow and drops context — the
+2026-10-03 audit proved parallel read-only subagents are smarter. Launch them
+in parallel, each READ-ONLY (same ground rules: no edits, no spending, no
+secrets, no media opened, small `python -c` / `grep` / `git` probes only, never
+the gated long suites unless the owner said "do it"). Each returns per-claim
+verdicts (VERIFIED / PARTLY / REFUTED / CANNOT TELL + `path:line`) plus at most
+8 findings (severity, [RAN]/[READ]/[INFER], where, what, fix, pinning test).
+You synthesise into the single report; overlapping hunts (e.g. `sheet_fixed`
+readers, `review` gates) are intentional — keep the sharper instance, demote the
+other to a one-liner in §6.
+
+- **A — engine + gates + pipeline:** `engine/verify.py` (CATALOGUE,
+  OVERRIDABLE, TECHNICAL, `run` + `waive`, `verifier_error`), `flow/gates.py`
+  (allow_stills/animations/info, G1-G5, `regen_plan`), `flow/pipeline.py`
+  (recut, recut_cells, sheet_fixed, hist, `_IO_LOCK`), `runtime/writer_lock.py`,
+  `engine/config.py`, `engine/grid.py`, `engine/video.py`, `engine/sheet.py`.
+  Claims C0, C1, C2, C6, C7, C8, C15. Hunts: gate bypass, stale-read races,
+  sheet_fixed drift, sharpness blindness, any BLOCK no person can pass.
+- **B — agent + chat + vision + edit router:** `vision/judge.py`,
+  `agent/graph.py` (all n_* nodes, locks, pending, focus), `agent/tools.py`,
+  `agent/resolver.py`, `agent/memory.py`, `agent/brain.py`, `agent/creator.py`,
+  `agent/editroute.py`, `console/agent.js`. Claims C3, C4, C13, C14, C18, C21,
+  C22. Hunts: misrouting cost, router misclassification, lock/TTL/two-tab
+  edges, cross-subject contamination, unbounded growth, "make it happier"
+  no-target behaviour + docs record.
+- **C — money + jobs + particles + effects:** `flow/effects.py`,
+  `flow/particle_sets.py`, `generation/jobs.py`, `generation/recovery.py`,
+  particle/burst server routes. Claims C5, C19, C20. Hunts: every double-spend
+  path (double-click, retry, timeout, two tabs, crash create→claim, queue-mode
+  drift), cap blind spots, FAILED-only-on-Telegram-limit, generate-more never
+  deletes, sprite alpha + S#.
+- **D — API + security + idempotency + tracing:** `console/server.py`
+  (`_foreign`, `_who`, `_authorize`, `idem`, `/out/` + `/lib/` guards,
+  particles/recut/allow routes), `console/openapi.py`, `runtime/cache.py`,
+  `runtime/events.py`, `runtime/users.py`, `services/telegram.py`,
+  `services/llm.py`, `obs/trace.py`. Claims C9, C10, C11, C12, C26. Hunts:
+  traversal (symlink, `..`, encoded, Windows ADS/short-name/drive),
+  Host/Origin/`Sec-Fetch-Site` gaps, member isolation, concurrent-idem 409 vs
+  same-answer, trace `safe()` bypasses.
+- **E — store + search + pool + health (data side):** `store/pool.py`,
+  `store/repo.py`, `store/db.py`, `store/assets.py`, `store/sync.py`,
+  `migrations/*.sql`, `runtime/doctor.py`, `runtime/health.py`, `cli.py`
+  doctor. Claims C16, C17, C25. Hunts: schema/FK/index/JSONB shape, tasks join,
+  dedupe, vector dims/gates, mirror failure modes, frozen-constraint drift,
+  every area reporting in doctor/health.
+- **F — frontend + design + docs-contract (UI side):** `console/generate.js`
+  (`gcell`, `blockedBox`, `issueSvg`, `allowAllRow`), `console/particles.js`,
+  `packs.js`, `editor.js`, `studio.js`, `live.js`, `studio.css` / `agent.css`,
+  `console/index.html` vs `UI_FILES` servability, `tests/test_js.py` guard,
+  `docs/api.md` vs `openapi.py` vs `server.py` drift, `docs/design.md` §9,
+  `docs/engine-and-studio.md`, `docs/particles_plan.md` §6,
+  `docs/burst_plan.md`, README/CLAUDE/tracker contradictions, `out/`-in-git
+  counts. Claims C23, C24. Hunts: dead stubs, disabled/ignored controls,
+  servability (every script in `index.html` ⊆ `UI_FILES`), polling/memory
+  leaks, XSS `innerHTML`, a11y, design-token drift, tracker hygiene.
+  (Split deliberately: E and F were one track and it was the slowest; keep them
+  separate.)
+
 ## 4. Run these first (put the output summary in the report)
 
-From `mirsal/`, using the venv for your OS (`venv/bin/python` on macOS,
-`.venv\Scripts\python` on Windows):
+**Always (code audit, no gate):** from `mirsal/`, using the venv for your OS
+(`venv/bin/python` on macOS, `.venv\Scripts\python` on Windows):
+
+```
+git status --short ; git log --oneline -15 ; git rev-parse HEAD
+python -c "from mirsal.engine import verify; print(sum(len(v) for v in verify.CATALOGUE.values()))"
+grep -c "read_result\|write_result" flow/pipeline.py flow/gates.py console/server.py (or equivalent counts by running code, not by eye)
+```
+
+**Gated (long tests — ONLY if the owner answered "do it"):** ask first
+"run the long tests? (do it or no)". On "no" or silence, skip all of this
+and mark unrun counts CANNOT TELL. On "do it", run alone and in this order:
 
 ```
 python -m mirsal doctor
-python -m unittest discover -s tests -t .     # ~10 min, RUN IT ALONE; Postgres
-                                              # tests skip whole classes if
-                                              # mirsal-db is down - say which ran
+python -m mirsal test fast                    # RUN IT ALONE; the slow tier is retired, and a full
+                                               # `unittest discover` only if the owner asks. Postgres
+                                               # tests skip whole classes if
+                                               # mirsal-db is down - say which ran
 node --test tests/js/*.test.js
 python -m tests.test_js
-git status --short ; git log --oneline -15 ; git rev-parse HEAD
 ```
 
 Reference counts as of 2026-10-03 — **verify them, do not quote them**: ~1025
@@ -219,7 +301,7 @@ exercise the API with curl. Never press Create.
 | C3 | **The vision model never changes `review.*`**; a failing model leaves stickers READY and marked unjudged (`FAIL_CLOSED`) | `vision/judge.py` `judge_generation`, tests |
 | C4 | **The agent never spends without a go-ahead** (a priced plan card + Create, or "Ask before spending" off); a typed "yes" cannot confirm something other than the pending plan; nothing in the agent can reach a paid call by another route; tests never reach a real provider | `agent/graph.py` (`n_new`, `n_confirm`, `n_edit`, `n_animate`), `agent/tools.py`, `console/server.py` `live`, `tests/__init__.py` |
 | C5 | **Nothing is spent without a shown price in the particle flows either**: a particle sheet and a Kling burst are priced before the click, the daily cap counts jobs **in flight** (`MIRSAL_PAID_PARALLEL`, default 3), and one ticket is written before the wait | `flow/effects.py`, `generation/jobs.py`, `flow/particle_sets.py` |
-| C6 | The engine imports no `psycopg`, `redis`, `langgraph` or model client. **When the FastAPI migration lands, `pydantic`/`fastapi`/`starlette`/`uvicorn` must join that banned list** (`plan.md` §3 step 11: "no new wheels in `engine/`"). Check whether the test would actually catch it. | `tests/test_store.py::test_engine_boundary`, grep `mirsal/mirsal/engine` |
+| C6 | The engine imports no `psycopg`, `redis`, `langgraph` or model client. **When the FastAPI migration lands, `pydantic`/`fastapi`/`starlette`/`uvicorn` must join that banned list** (`docs/deployment_plan.md` §3 step 11: "no new wheels in `engine/`"). Check whether the test would actually catch it. | `tests/test_store.py::test_engine_boundary`, grep `mirsal/mirsal/engine` |
 | C7 | **Append-only history**: rejection never deletes; a sticker keeps its original `S#` through every stage, **including after a slice is edited and the sheet is rebuilt as `sheet_fixed`**; history lines are only appended; `put` of different bytes under an existing key is refused | `flow/pipeline.py`, `store/assets.py`, `store/repo.py` |
 | C8 | **One writer of `result.json` per `out/`** across processes, and read-modify-write is safe inside the server | `runtime/writer_lock.py`, `pipeline._IO_LOCK`, the ~70 call sites of `read_result` / `write_result` (grep -c) — the docs admit the in-process gap: assess how real it is |
 | C9 | **A web page the owner visits cannot drive the local server** (Host/Origin guard, `Sec-Fetch-Site`, accounts and tokens; a member reaches only what they own); `/out/` and signed links cannot leave `out/` (symlinks, `..`, encoded forms, Windows paths and drive letters, alternate data streams, short names) | `console/server.py` `_foreign`, `_who`, `_authorize`, `_wait`, `runtime/users.py`, `store/assets.py`, `tests/test_hardening.py`, `tests/test_users.py` |
@@ -228,7 +310,7 @@ exercise the API with curl. Never press Create.
 | C12 | **Redis is disposable**: killing Redis mid-run costs cache misses and short-lived state (rate-limit windows, idempotency records, session locks, SSE replay) and falls back to process memory; everything durable is in files and Postgres; the fallback has the same semantics | `runtime/cache.py`, `runtime/events.py`, `tests/test_cache.py` |
 | C13 | **Memory is structured, not the history**: every turn starts from the per-subject summary; temporary feedback shapes only the next generation; only explicit statements become lasting preferences; the reducer cannot drop ids | `agent/memory.py`, `agent/graph.py`, `tests/test_agent.py` |
 | C14 | **The model's text is never trusted as HTML or as an instruction** (chat rendering, plan prompts, reference content, prompt injection through a sticker name, a user message, an annotation, a search result) | `console/agent.js` (`AIU.md`, `esc`), `agent/graph.py`, `agent/brain.py`, `generation/prompter.py` lint |
-| C15 | **The verifier**: 44 checks, thresholds are measured not guessed; `verify.run` turns a crashing check into a BLOCK `verifier_error` instead of raising; which checks have PASS/FAIL fixtures is listed in `HANDOFF.md` (not all do) | `engine/verify.py`, `tests/test_verify.py`, `engine/config.py` comments |
+| C15 | **The verifier**: 44 checks, thresholds are measured not guessed; `verify.run` turns a crashing check into a BLOCK `verifier_error` instead of raising; which checks have PASS/FAIL fixtures is the table in `tests/test_verify_fixtures.py` (`docs/engine-and-studio.md`) | `engine/verify.py`, `tests/test_verify.py`, `engine/config.py` comments |
 | C16 | **Migrations 001-005 are re-runnable** and never wipe data on re-apply (note `005_vectors.sql`); `db import` and write-through are idempotent | `mirsal/migrations/`, `store/db.py`, `store/repo.py` |
 | C17 | **Pool search never returns "the closest junk"**: a quality gate returns nothing for what does not exist. `search_text` embeds `subject — action — key — emoji — style` and **never the file name** (a name with a date and a fingerprint would only add noise); `subject` and `action` are separate vector columns with weights. | `store/pool.py` (`index_row`, `_subject_action`, `search`), `docs/measurements.md`, `tests/test_pool.py` |
 | C18 | **The agentic creator can always get past a block**: a run that stops on a Python block asks `tools.allowable` and offers `creator_allow` for exactly the overridable ones; a technical block offers nothing and says why; the pictures are attached to the message. Judge whether any other surface is a dead end. | `agent/creator.py` (`_stop_blocked`, `resume`), `agent/graph.py` (`n_creator`, `_creator_say`) |
@@ -263,7 +345,7 @@ generic advice. Name the file and the line.
   (messages, steps, streams, caches).
 - **API design**: stable JSON contracts, error shapes, status codes, ids
   everywhere, pagination, versioning, what an integrator would trip over. Is
-  `docs/api.md` true today? Would it survive the FastAPI migration in `plan.md` §3
+  `docs/api.md` true today? Would it survive the FastAPI migration in `docs/fastapi_plan.md`
   without a byte changing — and is the hand-written spec drift-tested well enough
   to be replaced by a generated one?
 - **Data model**: the Postgres schema (keys, FKs, indexes, JSONB vs columns),
@@ -294,30 +376,32 @@ generic advice. Name the file and the line.
   rather than a relaxed test.**
 - **Docs**: statements that are false today (cite both sides), missing docs,
   contradictions between `README.md`, `CLAUDE.md`, `HANDOFF.md` and `docs/`;
-  tracker hygiene — `HANDOFF.md` should hold only this session's unfinished work,
-  `plan.md` only work not yet started, and a finished item should have been
+  tracker hygiene — `docs/waiting-for-haitham.md` should hold only what needs a person,
+  `docs/backlog.md` only work not yet built, and a finished item should have been
   deleted from both after being recorded in `docs/`.
 - **Product**: is the golden path too heavy for the user it serves? What would you
   cut, merge or reorder? What is the riskiest assumption in the whole design? Is
   the burst proposal (`docs/burst_plan.md`) worth building, and what is the queue
   model it needs?
 
-## 7. Report format (`docs/review-<date>.md`)
+## 7. Report format (update `docs/review.md` in place; append to its §9 log)
 
 ```
-# Review of Mirsal Builder  <date>  <commit sha>  <branch>
+# Seeded review of Mirsal Builder (single baseline; latest audit <date> <commit sha> <branch>)
 ## 1. Verdict (5-8 sentences: ship / ship with changes / do not ship, for which purpose, and the three things that decide it)
-## 2. What I ran (commands + result in one line each; what I could not run and why)
-## 3. Claims C0-C26 (table: verdict, NEW/PRE-EXISTING if relevant, one-line evidence with path:line)
+## 2. What was run (commands + result in one line each; what was not run and why; keep prior audits' run records)
+## 3. Claims C0-C26 (table: verdict, standing, one-line evidence with path:line)
 ## 4. Findings (most severe first). For each:
    ID, title, severity (BLOCKER / HIGH / MEDIUM / LOW), label [RAN]/[READ]/[INFER],
-   NEW or PRE-EXISTING, where (path:line), what is wrong,
-   how to reproduce it in <=5 lines (or why you could not), the fix you recommend
-   (concrete), the test that would pin it.
+   standing (NEW / confirmed / fixed / refuted since the last audit), where (path:line),
+   what is wrong, how to reproduce it in <=5 lines (or why you could not),
+   the fix you recommend (concrete), the test that would pin it.
+   Fix a finding by marking it fixed with the commit, never by deleting it silently.
 ## 5. What is solid (so it is protected from "cleanups")
 ## 6. Missing: tests, docs, features a v1 needs that nobody listed
-## 7. Decisions I would challenge (the owner's choices, with the alternative and the cost of switching)
-## 8. The ten changes I would make first, in order, with an effort guess (S/M/L)
+## 7. Decisions challenged (standing; do not re-raise what the owner parked)
+## 8. The ten changes first, in order, with an effort guess (S/M/L)
+## 9. Audit log (one dated entry per audit: date, commit, branch, verdict delta, what changed)
 ```
 
 Severity: **BLOCKER** = money loss, data loss, a bypassed gate, a

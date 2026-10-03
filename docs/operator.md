@@ -19,6 +19,12 @@ mirsal hf models --type video                  # the full Higgsfield list with p
 # or the individual steps: mirsal job claim J005 --ticket <id> ... mirsal job done J005 --file <path> --model <name> --cost <n>
 ```
 
+## Recovering a stalled job
+
+The Queue, Studio job panels and chat cards offer four actions, cheapest first: **Refresh** reads local state and reconnects generation SSE without calling Higgsfield; **Check · free** runs one `generate get`, downloads a completed result when no file is held, and attaches it by its existing ticket; **Continue · same ticket** calls `jobs.resume` and waits again without another creation; **Retry · SPENDS** shows a new price and asks for explicit confirmation before creating a replacement request. Retry is never the default. A FAILED/TIMEOUT local ticket whose provider reports completed is labelled **“Divergence, not a failure”** and its reconciliation is recorded in human history. Repeating Check does not download or log the same completed attachment twice.
+
+The API actions are `/api/jobs/{id}/check`, `/continue`, `/retry_estimate` and `/retry` (the last requires `{go: true, estimate}`). The old same-ticket meaning of the HTTP `/retry` route is now `/continue`; CLI `job requeue` and queue retry still resume tickets. A Continue without a ticket is refused in words. Both free actions retain the original external task id.
+
 ## Workers and the durable queue
 
 For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` for `mirsal serve` and run `python -m mirsal worker` (any number; `--once` drains and exits, `--kinds sheet`, `--poll 2`).
@@ -36,7 +42,7 @@ For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` 
   remaining credits, stop and tell Haitham.
 - **Retries.** Transient errors retry at most 2 times; invalid input never retries. There is
   never a "while not good" loop. A job older than `MIRSAL_JOB_TIMEOUT` (default 20 min) shows
-  TIMEOUT; a human re-queues it (`job requeue`), the operator never does. A job that already holds a provider ticket is not created again: re-queue / retry make it wait for the SAME provider job.
+  TIMEOUT; a human re-queues it (`job requeue`), the operator never does. Re-queue, CLI queue retry and the UI's **Continue** wait for the SAME provider job. The UI's separate **Retry · SPENDS** explicitly buys a new request.
 - **A 5xx while waiting is not a failure (J048, 2026-10-03).** `HiggsError` carries the HTTP
   status the CLI reported. While WAITING, a `408/425/429/5xx` is retried inside the wait
   (`WAIT_RETRIES`, 3 tries, backoff) on the **same ticket** — it can never create a second paid

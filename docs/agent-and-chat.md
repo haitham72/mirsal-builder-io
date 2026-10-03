@@ -33,11 +33,11 @@ Paths are relative to the Python package `mirsal/mirsal/`.
 
 ## One turn
 
-1. `understand`: rules first (`classify`); a model only when confidence is under 0.6. Intents: `NEW, ANOTHER, EDIT_STICKERS, ANIMATE, FEEDBACK, REVIEW,
+1. `understand`: rules first (`classify`); a model only when confidence is under 0.6. Intents: `NEW, ANOTHER, EDIT_STICKERS, UNDO, ANIMATE, FEEDBACK, REVIEW,
    ASK, CHANGE_SETTINGS, SEARCH, CONFIRM, CANCEL, SMALLTALK, AMBIGUOUS`. A message can carry two ("I like 2 but make 5 happier" = feedback, then edit).
 2. `resolve`: sticker ids from the text, the UI selection or the focus. Two equally plausible candidates ask **one short question** with chips; a clear
    mapping ("make number 3 happier") never asks.
-3. an intent node: `particles` (see below), `new` (plan with the user's memory added, a priced plan card), `another`, `edit` (one 1x1 child generation per sticker, the rest stay),
+3. an intent node: `particles` (see below), `new` (plan with the user's memory added, a priced plan card), `another`, `edit` (one 1x1 child generation per sticker made from the parent's own prompt, the rest stay), `undo` (the last refinement, below),
    `animate`, `feedback`, `review` ("approve all but 5 and 6" = human decisions through `gates.review`), `ask` (answered from metadata, no generation),
    `search` (the pool), `settings`, `confirm` / `cancel`.
 4. `finish`: focus, the interaction log, the reducer, the final step, the saved session.
@@ -62,7 +62,7 @@ A session is `{id, title, settings, focus, subjects[], preferences, feedback[], 
 - **traits**: something asked for twice in the user's own words ("a wider range of emotions") becomes a note in the step trace and part of the next plan.
 - **reducer**: every 15 interactions the older ones become a short narrative (a model call, or a deterministic digest); the structured summary is rebuilt from
   data each turn, so no id can be lost by a summariser.
-- **outside batches**: `summary_text()` also names the five newest batches the Studio or the command line made (generations this chat never recorded as a pass, only those the caller may see), so "what did you just create" has an answer. The chat can talk about them; it cannot edit them yet (no pass is adopted: `HANDOFF.md`).
+- **outside batches**: `summary_text()` also names the five newest batches the Studio or the command line made (generations this chat never recorded as a pass, only those the caller may see), so "what did you just create" has an answer. The chat can talk about them, and naming one adopts it ("Studio batches" above).
 - **bounded**: a session keeps its newest 400 messages, 300 interactions (only already-summarised ones are dropped, `summary.upto` follows) and 200 feedback entries (`memory.MAX_*`); subjects, passes and likes are never trimmed. Message and interaction ids come from the last id, not from the length, so they stay unique.
 - **a turn that died with its server** (a daemon thread has no other witness) leaves a message with `status: working` and no lock holder: `hydrate` (every poll) and the next `prepare` mark it `error` ("interrupted, nothing was spent"), so the page stops waiting and the next message goes through.
 - Postgres mirror (`migrations/004_sessions.sql`): `sessions`, `interactions`, `feedback` (one row per sticker), `generation_references` ("make 5 like 2").
@@ -95,7 +95,7 @@ instead of ending the polling (a frame that throws must never freeze the chat on
   keyboard arrows, scroll-snap, dots; stickers appear as the engine finishes them; animated stickers play), a stickers card (search results and answers).
   Tap a sticker to select it: the selection travels with the next message ("make these more energetic"). "Open in Studio" opens the batch in the Studio.
 - **Settings are two controls**: the grid (3x3 / 2x2) and "Ask before spending". The model pill shows what runs the assistant (local, cloud, or "Rules only" with the reason, see Models); the gear's "AI engine" row also holds the local model dropdown.
-- **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet, the grid and "Asks before spending" (the same settings as the gear, one click each), and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`). What is not done: a style typed in a sentence ("in clay 3d style") is still not read by a new request (`HANDOFF.md`, Agent and chat).
+- **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet, the grid and "Asks before spending" (the same settings as the gear, one click each), and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`).
 
 ## Models (`services/llm.py`)
 
@@ -129,6 +129,7 @@ fell back to rules without a word. Now:
   "Local model": `now: <id>`, or, when the model cannot answer, "Local model not loaded: <the server's last sentence of `why`>" (the whole `why` is its tooltip). A pick posts `{model}`, shows "switching" while the first answer loads, then
   reads the list and the agent again. The engine pill says "Rules only (local model not loaded)" (with the reason as its tooltip, from `agent_status.reason`) when a local engine is wanted but cannot answer; without a local engine it says "Rules only".
   `GET /api/chat/agent` does the probe and can take a moment on the first call, so the AI screen does not wait for it before painting.
+- **One control, two screens** (2026-10-03). The engine row and the model drop-down are drawn by one function, `beRow()` / `modelRow()` in `agent.js`; the AI screen's gear panel and the Studio's **AI enhancer** (`composer.js` `cpDrawEngine`) both call it (the Studio through `AIENG.rows(source)`, with `GET /api/ai` shaped like `GET /api/chat/agent`; the "now" line says "no model, the built-in prompt is used" there instead of "rules only"). Both use the same handlers (`ACT.agbe`, the `change` listener on `[data-agmodel]`), which post to `POST /api/ai/backend` (an owner picks; a member's refusal shows as the server's sentence in a toast) and then re-read the AI screen's agent state and the Studio's `GAI` (`aiRefresh` in `generate.js`) and redraw whichever screen is open (`engRedraw`). Tests: `tests/js/enhancer_engine.test.js`.
 
 **Per-model tokens (reasoning models).** One global `LOCAL_MIN_TOKENS` on a 400 retry was not enough. `google/gemma-4-e4b` and `qwen/qwen3.5-9b` think on hidden tokens and return an EMPTY answer on a small `max_tokens`. Now an empty local
 answer is retried once with `max(max_tokens * 4, MIRSAL_LOCAL_MIN_TOKENS)` (2048 by default, at most 8192), and when that first answer carried `reasoning_content` the retry also ends with a closed think block (the no-think form of every
@@ -161,8 +162,8 @@ string "auto          # the chat assistant; ..." (neither `local` nor `openai`):
 (`runtime/envfile.py`, tests in `tests/test_envfile.py`), and a provider setting is read as its first word (`envfile.choice`) even if a comment reaches the environment some other way.
 
 **Greetings and the first answer.** `resolver.is_smalltalk` reads "hi", "hellow", "heyyy", "good morning", "thanks!", "salam", "how are you" (typos included, at most five words, never "hello kitty" or "hi, make me a falcon") as small talk and answers
-without a plan. The first answer of every chat also asks once whether AI vision may be used (two buttons, `vision_yes` / `vision_no`, that change only `settings.allow_vlm`; a pending go-ahead is never dropped). The plan's price is stated once, in its card;
-the go-ahead is the pair of buttons under the message (Create it / Not yet), like "Allow AI vision / Not now". Batches are called by their subject in every sentence and step title ("Eid mubarak greetings"), never by the bare id "G096".
+without a plan. The first answer of every chat also offers once, on the right, ONE AI vision switch (`chipHTML`, `setting: {allow_vlm: true}`; see "The AI vision switch" below) that changes only `settings.allow_vlm`: no message, no turn, and a pending go-ahead is never dropped. The plan's price is stated once, in its card;
+the go-ahead is the pair of buttons under the message (Create it / Not yet). (A describe or names request that finds vision undecided still asks with its own pending pair, "Allow AI vision / Not now"; that is an answer to a request, not the first-answer switch.) Batches are called by their subject in every sentence and step title ("Eid mubarak greetings"), never by the bare id "G096".
 
 **Names from the pictures (`vision/naming.py`, 2026-10-02).** Once the person has said yes to AI vision (asked in the first answer of every chat, or on the first request to describe / rename), the assistant looks at a batch's finished
 stickers by itself (`Agent.auto_name`, started by the poll of `GET /api/chat/sessions/{id}` through `Console.kick_naming`, once per batch, as a message of its own that takes the session's lock) and says, in one text call after the captions
@@ -212,7 +213,7 @@ Tests: `tests/test_creator.py` gains the case that drove this — a Python-block
 - **Money**: nothing is spent before the click; the run makes exactly one sheet call and, for `Full video`, one animation call. If the animation's price is more than 25% above the one shown, the run stops BEFORE sending it ("Animate for about N" is the person's new go-ahead). The server-side
   rules are unchanged: `can_spend`, the daily cap, one paid call at a time, every call in `out/model_calls.jsonl`.
 - **Tests**: `tests/test_creator.py` (the state machine on `FakeTools`: the happy path, waiting without bypass, a blocked cell, a vision rejection, a blocked sheet and its retry, a failed job, Telegram down, a price rise, a blocked animation, stop, a second request) and
-  `tests/test_creator_live.py` (the real server, the fake Higgsfield CLI and the fake Bot API: a request, one click, nine stickers in a pack on "Telegram"). Not yet run against the real Higgsfield or a real bot: it needs Haitham's go and a spare bot (HANDOFF).
+  `tests/test_creator_live.py` (the real server, the fake Higgsfield CLI and the fake Bot API: a request, one click, nine stickers in a pack on "Telegram"). Not yet run against the real Higgsfield or a real bot: it needs Haitham's go and a spare bot (`docs/waiting-for-haitham.md` W6).
 
 ## Prompt separation
 
@@ -230,7 +231,7 @@ Redis by image hash + model + judge version + context; calls are limited by `VIS
 **recommendation** (regenerate 1-2 cells as 1x1, or a new sheet after more than 2 rejected, at most 3 sheets and 2 attempts per cell; one sheet with the other key colour
 on a colour problem) and spends nothing. **Uncalibrated** until Haitham labels 30 stickers (`docs/measurements.md`).
 
-**Consent.** Sending a picture to a vision model is the one thing that moves image content to a model (LM Studio locally, OpenAI when the vision provider is the cloud), so it needs the person's yes, asked **once** ("Allow AI vision of generated media?"), never per run. The rule lives where the model would be called (`vision/consent.py`: `require(allowed)`, `allowed` must be exactly `True`), not in a screen: `judge_generation` and `transcribe.captions_for` raise `ConsentRequired` before any image is read for a model, and the HTTP routes turn it into `409 {error, consent_required: true}` (`POST /api/generations/{id}/judge` and `.../captions` need `allow_vlm: true` in the body). The operator's CLI (`mirsal judge`) is an explicit command and passes it. In the chat the answer is `settings.allow_vlm` (`None` = not asked, `True`, `False`), changed by the question's two chips or by "allow AI vision" / "don't use AI vision"; the Studio keeps it in `localStorage` `mirsal.allow_vlm`.
+**Consent.** Sending a picture to a vision model is the one thing that moves image content to a model (LM Studio locally, OpenAI when the vision provider is the cloud), so it needs the person's yes, asked **once** ("Allow AI vision of generated media?"), never per run. The rule lives where the model would be called (`vision/consent.py`: `require(allowed)`, `allowed` must be exactly `True`), not in a screen: `judge_generation` and `transcribe.captions_for` raise `ConsentRequired` before any image is read for a model, and the HTTP routes turn it into `409 {error, consent_required: true}` (`POST /api/generations/{id}/judge` and `.../captions` need `allow_vlm: true` in the body). The operator's CLI (`mirsal judge`) is an explicit command and passes it. In the chat the answer is `settings.allow_vlm` (`None` = not asked, `True`, `False`), changed by the single AI vision switch under the first answer (a settings-only press, which flips on a second press), by the pending "Allow AI vision / Not now" pair of a describe or names request, or by typing "allow AI vision" / "don't use AI vision"; the Studio keeps it in `localStorage` `mirsal.allow_vlm`.
 
 **Per-frame captions** (`vision/transcribe.py`). `captions_for(out, gid, force=False, allowed=None)` returns one `FrameCaption {generation_id, index, row, col, grid, png, caption, text_visible, verdict, reasons, model, cached, error}` per READY sticker, the grid read from `result.json` (2x2 and 3x3 share one path); the verdict is the judge's, already on the sticker, so a caption costs one model call per cell and none for the verdict. It goes through the judge's own logged, parsed, once-repaired, cached call (`VLM_CAPTION` in `out/model_calls.jsonl`), is stored on the sticker as `caption {text, text_visible, model, version, png_sha, ts}` (an edited picture is captioned again), and never touches `review.*`. `GET /api/generations/{id}/captions` reads what is stored (no model, no consent; `missing` counts the cells still without one), `POST` writes the missing ones in the background (consent required, `{force}` captions again). The Studio shows them in the batch's fold in the sheet's own grid (**AI captions** in *Earlier batches*); in the chat, "describe the stickers" / "what do they show" / "what is in number 3" asks the consent question first (a plan-card style pending with **Allow AI vision / Not now**), then lists `S#: caption`.
 
@@ -276,11 +277,41 @@ Rules, in `agent/resolver.py` and `agent/graph.py`; guarded by `tests/test_chat_
   are new requests; a new plan says it replaced the one it was holding ("nothing was spent on it").
 - **Acknowledgements are small talk** (`is_ack`: "ok", "nice", "thanks bro", "👍"), answered by kind (`smalltalk_kind`: thanks, bye, ack, hello). A bare attribute with a batch open ("bigger", "same but red", "happier") is an edit of
   what is open (it asks which sticker), never a new subject. "how much?" is a price question. "can you make me a falcon?" is a request. A long description with nothing to point back at is a request; nonsense still goes to the model.
-- **References**: "S3" is sticker 3; `last` is sticker 9 only as "last one / sticker / image" ("the one before last" is 8; "last guy", "the last batch", "undo the last change" are not a sticker); a count in a request
+- **References**: "S3" is sticker 3; `last` is sticker 9 (the batch's last: 4 in a 2x2) only as "last one / sticker / image" ("the one before last" is 8; "last guy", "the last batch", "undo the last change" are not a sticker, and `tests/test_chat_resolver_fixes.py` pins each); a count in a request
   ("make me 4 falcon stickers") is not a sticker number; "make him / her / the guy / all of them / everything + a change or an item to wear" is an edit of what is open.
 - **A decision is never guessed**: an approve / reject sentence with a negation ("don't approve 3") decides nothing and asks; a decision on several stickers ("approve all but 5 and 6", "reject everything") is a pending
   `review` the person confirms; one explicit sticker still acts at once.
 - **Focus follows the newest batch that has stickers**: when a job resolves to a generation (`memory.refresh`) it becomes the focus; `latest_pass(with_generation=True)` skips jobs that are running or failed.
+
+## Person references, edits that reuse the parent prompt, undo (2026-10-03)
+
+Code: `agent/resolver.py` (`PERSON_REF`, `LAST_PERSON`, `beyond`, `UNDO_RX`), `agent/editroute.py` (`delta_of`, `add_to_label`, `fresh_take`, the `like` clause), `Agent.n_edit` / `_person_edit` / `n_undo` / `_edge` in `agent/graph.py`, `flow/gates.regen_plan`;
+guarded by `tests/test_chat_resolver_fixes.py` (every test is a sentence from the chat audit of 2026-10-02).
+
+- **A person is the last subject, never a question.** `him / her / he / she / they` and `the guy / the man / the girl / the character / last guy` are the *character of the chat*. With a batch open, "make him wear winter coat", "make the guy wear a
+  coat", "make the last guy happier" are edits of the sheet on screen (`editroute` case tweak: the parent's own prompt, the sheet as the picture, only that change), never a new plan. The batch is the focus; **"last guy" is the newest batch of the
+  chat** (`ctx.latest`, which skips an undone one), not sticker 9 (`how = "person reference"`, no sticker). A bare reference ("him", "the guy", "last guy", "he looks sad") asks only WHAT to change, naming the batch it assumed
+  ("I'll work on **Banana**, the batch we have open. What should I change about him?", with two chips), and moves the focus there. `him / her / he / she / they` also resolve to the clicked sticker where `it` did. With no batch open it
+  is still a request ("make a coat for him").
+- **`last` is an ordinal only as an ordinal**: "the last one", "last sticker", "last picture" (and "the one before last"). "last guy" / "the last batch" / "undo the last change" are not a sticker.
+- **An edit reuses the parent's prompt and adds the change.** One slice drawn again as a 1x1 (`Agent.n_edit` for a selection, a bare number, "redo 3" and "make 5 like 2"; `_regen_slices` for "make number 3 happier") is `tools.slice_plan` = `gates.regen_plan(parent, index)`:
+  the parent's style, key colour, cell label, motion and tags, in the `single_1x1` template **of the parent's own version** when it is 2 or later and the file exists (a v1 parent, or none recorded, gets the current version: v1's style line says
+  "flat vector sticker illustration" whatever the batch was; a saved plan keeps its wording). `n_edit` appends the change to the cell's label (`pose 3, wear a hat`: the prompt is the parent's wording plus the one change), sends the parent's own picture
+  of that sticker (`tools.slice_reference`: its cell of the sheet at the sheet's resolution; "make 5 like 2" sends sticker 2 through `reference_from_sticker`), with a clause that allows the change (`editroute.REF_CLAUSES`: `tweak`, and a new
+  `like` clause; the default `prompter.REFERENCE_CLAUSE` "change only the expression and the pose" is untouched and no longer used by the chat, because it contradicts "add a hat"). The batch is made in the PARENT's style, not the chat's
+  setting, and **with the parent's edge finish**: `outline_px` / `erode_px` are read from the parent (`tools.edge_of`), carried on the item, handed to `tools.create(outline=, erode=)`, to the job's request (`erode` is new there) and to
+  `pipeline.start`, so the child looks like its parent and not like the defaults. A "redo 3" with no change named is a fresh take: the parent's prompt exactly, no picture. More than four stickers are cut to four **and the reply says so**.
+- **The edit text keeps the person's words.** `editroute.delta_of` takes out only what the sentence points at (a number, an ordinal, `number 3`, `S3`, `G012/S3`, him / her / the guy, the verb in front of them, "like 2"): "make number 3 wear a hat" ->
+  "wear a hat" (the old stripper removed a, the, like, and, but, i, it, one: "wear hat"), "I like 2 but make 5 happier" -> "happier".
+- **Undo** (`UNDO`, `n_undo`): "undo", "revert", "roll back", "go back", "take it back" (whole message, a few filler words allowed; "go back to the previous one" and "undo 3" are not it). Scope, deliberately simple: **a plan still waiting for the go-ahead is
+  dropped** (nothing was spent); otherwise **the newest refinement of this chat** (the newest pass that was made from another batch: an edit, a refinement, a redesign, another pass) is marked `undone` and the focus returns to the batch it came
+  from, with that batch's card, so "it", "him" and "number 3" mean the earlier version again. Saying it twice walks back one refinement at a time; at the first version it says there is nothing to undo. Nothing is deleted and nothing is
+  un-paid: the newer batch stays in History, and a sheet still being drawn is not stopped (the reply says so; when it arrives it does not take the focus, and `latest_pass` skips it). Feedback ("I hate 4"), approvals and settings are not refinements
+  and are not undone by this. There is no "redo".
+- **A number the batch does not have is said.** `resolver.beyond` finds "number 12", "make 12 happier", "#10", "S11" (and a bare "12" as the answer to "which one?") when the batch is smaller: "Banana has 9 stickers, so there is no number 12. Which one do you mean, 1 to 9?"
+  (4 in a 2x2), with the question kept open for the next answer. "3x3", "G012", "make me 12 falcon stickers" are not sticker numbers.
+- **"Don't ask me about vision again" is not about spending.** The "ask before spending" rule needs "don't ask" / "stop asking" NOT followed by about / regarding / whether / if / for. With "vision" in the sentence the chat stops asking the one-time vision
+  question in this chat (`vision_asked`), leaves the vision choice itself undecided, leaves "ask before spending" on, and says all three.
 
 ## Several subjects, per-subject feedback, taste (2026-10-03)
 
@@ -303,7 +334,16 @@ Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi
 
 ## The bar under the chat box (2026-10-03)
 
-The sheet size is a drop-down (`drawBar`, `<select data-aggrid>`; a `change` handler sends `saveSet({grid})`, the same settings route as the gear's 3x3 / 2x2 buttons). The one-time AI vision switch under a message is `chipHTML` -> `<span class="ai-vis"><button class="ai-chip" data-act=agsetting>` (look: `docs/design.md`).
+`drawBar` (`agent.js`) paints the bar into `#ag-bar` (the style chip `.ag-cur`, the sheet size, "Asks before spending") and the style tiles into `#ag-styles`.
+
+* **The sheet size is one native click-toggle**: `<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle">`, labelled "3×3 sheet" (nine stickers, the default) or "2×2 sheet" (four), its title explaining both ("nine (3×3) or four (2×2). Click to change."). `ACT.aggridtoggle` flips the saved grid and calls `saveSet({grid})`; there is no `<select>`, no `data-aggrid`, no `.ag-sel` (that class is the settings panel's full-width model drop-down and stretched the chip over its own row). The class is `.ag-grid` (`agent.css`), never shared with a panel control.
+* **It changes a setting, nothing else**: `saveSet` posts `POST /api/chat/sessions/{id}/settings` with `{grid}` (never a message, never a generation, never a turn), then repaints from the **saved** settings: `A.sess.settings = r.j.settings`, `setSet()` (the gear) and `drawBar()`. The press is reversible (3×3 and 2×2 swap), and the gear's 3×3 / 2×2 pair (`ACT.agsetgrid`) uses the very same route and the same repaint, so the two controls never disagree.
+* **Before the first message** a press calls `ensureSession()`, which creates one empty chat (`POST /api/chat/sessions`, `messages: []`, hash `#/agent/<id>`) and saves the size into it; no turn is sent. Rendering the bar never creates a session.
+* **A refused update** (the settings route answers an error) leaves the old size on the chip, repaints nothing, and shows the server's sentence as a toast.
+* The style metadata beside the chip is escaped (`AIU.esc`), never interpreted as markup.
+* Covered by `tests/js/sheet_size_chip.test.js` (the renderer and handlers executed with local stubs, no browser or server).
+
+The one-time AI vision switch under a message is `chipHTML` -> `<span class="ai-vis"><button class="ai-chip" data-act=agsetting>` (look: `docs/design.md`; behaviour: "The AI vision switch" below).
 
 ## Particle sets in the chat (2026-10-03)
 
