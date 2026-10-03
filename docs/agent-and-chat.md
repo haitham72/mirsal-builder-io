@@ -273,4 +273,4 @@ Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi
   `n_new` reads a style from the sentence ("a teddy bear in clay style"), takes the words out of the subject and passes the id. Adopted Studio batches read their style from `slots.style_id` (`memory._info`).
 - **Taste memory, per user** (`out/profile/<user>.json`, plain counters, `agent/profile.py`): the style / size / colour of a change the person asked for is counted when that batch really starts. A taste is applied to a later request
   only after TWO consistent signals and only when it is strictly ahead (a split taste is no taste); a style in the sentence always wins; the card says what it assumed ("I used cartoonish because you asked for it 2 times").
-
+- **Particle effects from the chat** (`n_effects`, intent `EFFECTS`, card `effects`): see `docs/effects.md` §8. Free; opens the effects screen for a library pack.

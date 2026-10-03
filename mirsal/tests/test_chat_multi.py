@@ -117,6 +117,35 @@ class Taste(Base):
         self.assertIsNone(p.defaults()["style_id"])
 
 
+class Effects(Base):
+    def test_particle_effects_for_a_named_pack_opens_an_effect_and_spends_nothing(self):
+        self.tools.pack_list = [{"id": "P1", "name": "Superman", "count": 8}, {"id": "P2", "name": "Cats", "count": 5}]
+        m = self.say("make particle effects for my Superman pack")
+        card = m["cards"][0]
+        self.assertEqual((card["type"], card["id"], card["pack"], card["count"]), ("effects", "E001", "Superman", 8))
+        self.assertEqual([c[:2] for c in self.tools.calls if c[0] == "effects_start"], [("effects_start", "P1")])
+        self.assertEqual([c for c in self.tools.calls if c[0] == "create"], [], "no sheet, no spend")
+        self.assertIsNone(self.sess()["pending"])
+
+    def test_the_only_pack_is_used_and_an_unclear_one_is_asked(self):
+        self.tools.pack_list = [{"id": "P1", "name": "Superman", "count": 8}]
+        self.assertEqual(self.say("add a burst effect to my stickers")["cards"][0]["pack"], "Superman")
+        self.setUp()
+        self.tools.pack_list = [{"id": "P1", "name": "Superman", "count": 8}, {"id": "P2", "name": "Cats", "count": 5}]
+        m = self.say("I want a particle burst for my emoji")
+        self.assertFalse(m.get("cards"))
+        self.assertIn("Which pack", m["text"])
+        self.assertEqual([c for c in self.tools.calls if c[0] == "effects_start"], [])
+
+    def test_no_pack_says_what_to_do_first(self):
+        m = self.say("make particle effects")
+        self.assertIn("pack", m["text"].lower())
+
+    def test_a_confetti_pack_request_is_still_a_normal_request(self):
+        m = self.say("make me a pack of party hats")
+        self.assertEqual(m["cards"][0]["type"], "plan")
+
+
 class StyleWords(unittest.TestCase):
     def test_every_style_the_chat_can_emit_is_a_real_preset(self):
         from mirsal.agent import resolver

@@ -327,6 +327,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["SMALLTALK"], 0.95
     if _parse_multi(t):
         return ["NEW_MULTI"], 0.9                                    # "create three sticker packs of fruits": several subjects, one plan, one price
+    if re.search(r"\b(?:particles?|bursts?|explosions?|confetti)\b", t) and re.search(r"\b(?:effects?|animations?|stickers?|packs?|emoji)\b", t):
+        return ["EFFECTS"], 0.9                                      # "make particle effects for my Superman pack": the effects screen, never a new sheet
     if has_generation and re.search(NAMES_RX, t):
         return ["NAMES"], 0.9
     intents: list = []

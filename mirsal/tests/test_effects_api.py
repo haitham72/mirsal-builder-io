@@ -109,6 +109,23 @@ class EffectsApiTests(unittest.TestCase):
         self.assertEqual(self.req("POST", "/api/effects", {"pack_id": "nope"})[0], 404)
         self.assertEqual(self.req("POST", "/api/effects", {"pack_id": self.pack["id"], "mode": "x"})[0], 400)
 
+    def test_the_chat_tools_open_the_same_effect_as_the_route(self):
+        from mirsal.agent.tools import ConsoleTools, ToolError
+        tools = ConsoleTools(self.c)
+        self.assertIn(self.pack["id"], [p["id"] for p in tools.packs()])
+        r = tools.effects_start(self.pack["id"], allowed=False)
+        self.assertEqual((r["pack_name"], r["count"]), ("Fruits", 2))
+        for _ in range(100):
+            code, rec = self.req("GET", f"/api/effects/{r['id']}")
+            if rec.get("status") in ("READY", "ERROR"):
+                break
+            time.sleep(0.1)
+        self.assertEqual(rec["status"], "READY")
+        member = ConsoleTools(self.c, {"id": "u2", "role": "member"})
+        self.assertEqual(member.packs(), [])
+        with self.assertRaises(ToolError):
+            member.effects_start(self.pack["id"])
+
 
 if __name__ == "__main__":
     unittest.main()

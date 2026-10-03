@@ -122,7 +122,7 @@ class Agent:
     def _build(self):
         from langgraph.graph import END, StateGraph
         g = StateGraph(State)
-        nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "refine": self.n_refine, "another": self.n_another,
+        nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "refine": self.n_refine, "another": self.n_another,
                  "edit": self.n_edit, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
                  "smalltalk": self.n_smalltalk, "clarify": self.n_clarify, "vision": self.n_vision, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
@@ -243,13 +243,13 @@ class Agent:
                 refine_it = self._wants_refine(t, has_gen)
                 if refine_it:
                     t.intents, t.conf = ["REFINE"], 0.9
-        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
+        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
                  "CANCEL": "a change of mind", "VISION": "your answer about AI vision", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
-                 "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
+                 "EDIT_STICKERS": "edit", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
                  "SMALLTALK": "smalltalk", "AMBIGUOUS": "clarify", "VISION": "vision", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
@@ -704,6 +704,39 @@ class Agent:
         card = self._items_card(title, items, st, est, {"assumed": assumed})
         reply = f"Here's the plan for {title}: " + ", ".join(f"**{i['subject']}**" for i in items) + f", {len(items) * (len(items[0]['plan'].get('stickers') or []))} stickers in all, {STYLE_NAMES.get(sid, sid)}."
         return self._offer_items(t, title, items, est, card, reply)
+
+    def n_effects(self, state: State) -> dict:
+        """"Make particle effects for my Superman pack": the effect is made per library pack (docs/effects.md), so the chat finds the pack the words name (or the only one there is), opens an E###
+        (free: the pieces are planned in the background) and answers with a card that opens the effects screen, where the price of a video is shown before anything is spent."""
+        t: Turn = state["turn"]
+        t.trace.retitle("particle effects")
+        packs = [p for p in self.tools.packs() if p["count"]]
+        if not packs:
+            t.reply = "Effects are made for a pack in your library, and there is none with stickers yet. Make a pack first (approve stickers, then add them to a pack)."
+            t.trace.end("no pack", ok=False)
+            return {}
+        low = t.text.lower()
+        words = lambda s: {refine.stem(w) for w in re.findall(r"[a-z\u0600-\u06ff]+", s.lower()) if w not in ("pack", "set", "stickers", "sticker", "the", "a", "an", "my")}
+        said = {refine.stem(w) for w in re.findall(r"[a-z\u0600-\u06ff]+", low)}
+        hit = [p for p in packs if words(p["name"]) and words(p["name"]) <= said] or [p for p in packs if words(p["name"]) & said]
+        pick = hit[0] if len(hit) == 1 else packs[0] if len(packs) == 1 else None
+        if not pick:
+            t.reply = ("Which pack? " if not hit else "Several packs match. Which one? ") + "Say its name, for example \"particle effects for the " + (hit or packs)[0]["name"] + " pack\"."
+            t.chips = [{"label": p["name"], "text": f"make particle effects for the {p['name']} pack"} for p in (hit or packs)[:4]]
+            t.trace.end("asked which pack")
+            return {}
+        try:
+            r = self.tools.effects_start(pick["id"], allowed=t.sess["settings"].get("allow_vlm") is True)
+        except ToolError as e:
+            t.reply = f"I could not start the effects: {e}"
+            t.trace.end("could not start", ok=False)
+            return {}
+        t.trace.step(f"{r['id']}: {r['count']} sticker(s) of {r['pack_name']}")
+        t.cards.append({"type": "effects", "id": r["id"], "pack": r["pack_name"], "count": r["count"]})
+        t.reply = (f"I opened particle effects **{r['id']}** for **{r['pack_name']}** ({r['count']} stickers) and I am working out what bursts out of each one. Nothing is spent: "
+                   "open it to choose the pieces, play with gravity, explosion and vortex, or make a video (its price is shown on the button first).")
+        t.trace.end(f"opened {r['id']}")
+        return {}
 
     def n_refine(self, state: State) -> dict:
         """"The cherries were so realistic, make them more cartoonish; the banana was so small, make it bigger": each subject's stored plan gets its change written in, and a new sheet is made as a

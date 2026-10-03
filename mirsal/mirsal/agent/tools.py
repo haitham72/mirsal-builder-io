@@ -252,6 +252,40 @@ class ConsoleTools:
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
 
+    def packs(self) -> list:
+        """The library's packs the person may use for effects (owner only: the effects routes are owner only)."""
+        if self.member:
+            return []
+        return [{"id": p["id"], "name": p["name"], "count": len(p.get("stickers") or [])} for p in self.c.lib.snapshot()["packs"]]
+
+    def effects_start(self, pack_id: str, allowed: bool = False) -> dict:
+        """The same call as POST /api/effects: a new E### for every sticker of the pack, analysed in the background (free; `allowed` is the person's yes to AI vision)."""
+        import threading
+        from ..flow import effects as fx
+        if self.member:
+            raise ToolError("Particle effects are for the owner's account for now.", 403)
+        try:
+            e = fx.create(self.out, self.c.lib, pack_id=pack_id, sticker_ids="all", mode="video", grid="2x2", user=self.user["id"])
+        except fx.EffectError as ex:
+            raise ToolError(str(ex), getattr(ex, "code", 400))
+        eid, who = e["id"], self.user["id"]
+
+        def run():
+            tok = pl.OWNER.set(who)
+            try:
+                fx.analyse(self.out, eid, allowed=allowed is True)
+            except Exception as ex:
+                try:
+                    rec = fx.read(self.out, eid)
+                    rec.update(status="ERROR", error=str(ex)[:300])
+                    fx._write(self.out, rec)
+                except Exception:
+                    pass
+            finally:
+                pl.OWNER.reset(tok)
+        threading.Thread(target=run, daemon=True).start()
+        return {"id": eid, "pack_name": e["pack_name"], "count": len(e["stickers"])}
+
     def telegram_ready(self) -> tuple:
         from ..services import telegram
         if telegram.status(self.out)["configured"]:
@@ -401,6 +435,14 @@ class FakeTools:
     def pack_add(self, gid, name):
         self.calls.append(("pack_add", gid, name))
         return {"pack_id": "P1", "added": len([s for s in self.gens[gid]["stickers"] if s["status"] == "READY"]), "kind": "static"}
+
+    def packs(self):
+        return list(getattr(self, "pack_list", []))
+
+    def effects_start(self, pack_id, allowed=False):
+        self.calls.append(("effects_start", pack_id, allowed))
+        p = next(x for x in self.packs() if x["id"] == pack_id)
+        return {"id": "E001", "pack_name": p["name"], "count": p["count"]}
 
     def telegram_ready(self):
         return (True, "") if self.telegram else (False, "Telegram is not connected.")

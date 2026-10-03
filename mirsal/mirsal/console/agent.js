@@ -171,6 +171,7 @@ function cardHTML(c,m,i){
     <div class=plan-tags>${(it.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div></div>`).join('')}
    ${(c.assumed||[]).map(x=>`<div class=multi-assume>${AIU.esc(x)}</div>`).join('')}
    <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`All together <b>${AIU.credits(c.estimate)}</b>${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}</div></div></div>`}
+ if(c.type==='effects')return `<div class="ai-card plan"><div class=ai-ch><b>Particle effects · ${AIU.esc(c.id)}</b><small>${AIU.esc(c.pack)} · ${c.count} stickers</small><span class=sp></span><a class=ai-link href="#/effects/${AIU.esc(c.id)}">Open effects</a></div></div>`
  if(c.type==='generation'){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
   let note='';

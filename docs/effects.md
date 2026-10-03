@@ -1,6 +1,6 @@
 # docs/effects.md — particle effects: the burst that Telegram plays when you press an emoji
 
-**Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). NOT built: the AI-chat intent, an AI-drawn sprite sheet for the simulated mode, real tile art / examples (§8).**
+**Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). The AI-chat entry is built (§8). NOT built: an AI-drawn sprite sheet for the simulated mode, real tile art / examples (§8).**
 Haitham asked for this on 2026-10-02: when someone presses an emoji in Telegram a burst of small pieces explodes from it (a strawberry bursts strawberries, a heart hearts). The product
 is the same thing as **animated stickers**: one 3-second WEBM per effect, starting from nothing and ending with nothing, tagged with the source emoji.
 
@@ -83,7 +83,7 @@ The screen (`console/effects.js`, `studio.css` `.fx-*`): 1 choose the pack, 2 wh
 price in the button (`estimate`, free) and the job's state; the results with their warnings in words and "Add N to the pack". The Queue pill cannot cover the last buttons (`.page.fx` bottom padding).
 
 Open:
-1. **The AI chat entry** ("make particle effects for my Superman pack"): an intent that creates the effect, shows a plan card (subjects, count, price) and answers with a card that opens `#/effects/E###`.
+1. **The AI chat entry (built 2026-10-03)**: intent `EFFECTS` (`resolver.classify`: particle / burst / explosion / confetti + effect / pack / sticker / emoji), node `graph.n_effects`: finds the library pack the words name (or the only pack; else asks which, with chips), calls `tools.effects_start` (the same `fx.create` + background `analyse` as `POST /api/effects`, owner only), and answers with an `effects` card linking `#/effects/E###`. Nothing is spent in chat; the video's price is shown on the screen's button. Open: refining the pieces from chat ("only bat signals").
 2. **An AI-drawn sprite sheet for the simulated mode** (a button that makes a 2x2 sheet of the pieces through the normal batch pipeline with outline 0; today a person makes it in the Studio and types the batch number).
 3. Real tile art / examples, mobile layout check, 3x3-specific prompt, the green-frame start/end variant only if 2x2 ever fails.
 4. A real end-to-end paid run from the screen (the price and the job path are tested on a fake CLI; the real Kling path was exercised by the two experiment clips through `jobs.fulfil`).
