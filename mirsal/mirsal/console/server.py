@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from ..flow import effects as fx_flow, gates, metrics, sources, sticker_history, watch
+from ..flow import effects as fx_flow, gates, metrics, particle_sets as fx_sets, sources, sticker_history, watch
 from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
 from ..services import llm, telegram
 from ..vision import consent as vision_consent, transcribe
@@ -842,6 +842,8 @@ def make_handler(c: Console):
                 return self._file(f)
             if path == "/api/effects" or path.startswith("/api/effects/"):
                 return self._effects("GET", path, {})
+            if path == "/api/particles" or path.startswith("/api/particles/"):
+                return self._particles("GET", path, {})
             if path == "/api/me":            # who the server thinks you are (and what you may do): for clients that hold a token
                 u = self.user
                 return self._json(200, {"id": u["id"], "name": u.get("name"), "role": u["role"], "can_spend": bool(u.get("can_spend")), "via": u.get("via")})
@@ -855,7 +857,13 @@ def make_handler(c: Console):
                 # a member's answer is simply empty (docs/effects.md)
                 if self.user.get("role") != "owner":
                     return self._json(200, {"sticker": pp[4], "created": [], "saved": [], "effects": [], "can_make": False} if len(pp) == 6 else {})
-                return self._json(200, fx_flow.for_sticker(c.out, c.lib, pp[2], pp[4]) if len(pp) == 6 else fx_flow.counts_for_pack(c.out, c.lib, pp[2]))
+                if len(pp) == 6:
+                    return self._json(200, fx_flow.for_sticker(c.out, c.lib, pp[2], pp[4]))
+                # the pack's particle studio (docs/particles_plan.md 5): its sets and its bursts, plus the per-sticker counts the old answer carried
+                try:
+                    return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_flow.counts_for_pack(c.out, c.lib, pp[2])})
+                except fx_sets.SetError as e:
+                    raise pl.PipelineError(str(e), e.code)
             if path.startswith("/api/packs/") and path.endswith("/telegram"):          # dry run: what would be created, every problem
                 st = telegram.status(c.out)
                 name = parse_qs(urlparse(self.path).query).get("name", [None])[0]
@@ -1065,6 +1073,44 @@ def make_handler(c: Console):
                 ctype = mimetypes.guess_type(f.name)[0] or "application/octet-stream"
                 return self._send(200, f.read_bytes(), ctype)
             raise pl.PipelineError(NO_ROUTE, 404)
+
+        def _particles(self, method: str, path: str, body: dict):
+            """Particle sets `P###` (docs/particles_plan.md section 6): the DURABLE particle asset, assigned to pack(s) or stand-alone. The working
+            session stays `/api/effects`; `POST /api/particles {from_effect}` is the bridge that saves one. Free: nothing here spends. A delete moves the
+            folder to the trash and a set in use says which packs before it goes (rule 9's spirit: nothing is destroyed on a click)."""
+            ps = fx_sets
+            parts = path.strip("/").split("/")                     # api, particles[, id[, action]]
+            try:
+                if len(parts) == 2:
+                    if method == "GET":
+                        return self._json(200, {"sets": ps.list_sets(c.out, c.lib)})
+                    if body.get("from_effect"):
+                        return self._json(201, ps.set_from_effect(c.out, c.lib, str(body["from_effect"]), name=body.get("name"), packs=body.get("packs"),
+                                                                       picked=body.get("picked"), user=self.user["id"]))
+                    return self._json(201, ps.create(c.out, c.lib, name=body.get("name"), elements=body.get("elements"), packs=body.get("packs"),
+                                                      kind=str(body.get("kind") or "drawn"), user=self.user["id"]))
+                pid = parts[2]
+                if len(parts) == 3:
+                    if method == "GET":
+                        return self._json(200, ps.view(c.out, c.lib, pid))
+                    return self._json(200, ps.update(c.out, c.lib, pid, name=body.get("name"), elements=body.get("elements"), packs=body.get("packs"),
+                                                     picked=body.get("picked"), motion=body.get("motion"), user=self.user["id"]))
+                act = parts[3]
+                if method != "POST":
+                    raise pl.PipelineError(NO_ROUTE, 404)
+                if act == "assign":
+                    return self._json(200, ps.assign(c.out, c.lib, pid, body.get("packs"), self.user["id"]))
+                if act == "unassign":
+                    return self._json(200, ps.unassign(c.out, c.lib, pid, body.get("packs"), self.user["id"]))
+                if act == "duplicate":
+                    return self._json(201, ps.duplicate(c.out, c.lib, pid, name=body.get("name"), user=self.user["id"]))
+                if act == "delete":
+                    return self._json(200, ps.delete(c.out, c.lib, pid, confirm_packs=body.get("confirm") is True, user=self.user["id"]))
+                if act == "restore":
+                    return self._json(200, ps.restore(c.out, c.lib, pid, self.user["id"]))
+                raise pl.PipelineError(NO_ROUTE, 404)
+            except ps.SetError as e:
+                raise pl.PipelineError(str(e), e.code)
 
         def _effects(self, method: str, path: str, body: dict):
             """Particle effects (docs/effects.md section 7): a pack's stickers get a Telegram-style burst. Owner only for now (members are denied by the route gate). Paid work needs the price
@@ -1300,6 +1346,8 @@ def make_handler(c: Console):
                 return self._post_projects(path, parse_qs(u.query))
             if path == "/api/effects" or path.startswith("/api/effects/"):
                 return self._effects("POST", path, self._body())
+            if path == "/api/particles" or path.startswith("/api/particles/"):
+                return self._particles("POST", path, self._body())
             if path.startswith("/api/cutout") or path.startswith("/api/packs"):
                 if self._post_library(path, parse_qs(u.query)):
                     return
