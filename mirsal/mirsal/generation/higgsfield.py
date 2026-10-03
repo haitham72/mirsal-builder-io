@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import time
@@ -20,8 +21,26 @@ NEVER = {("kling3_0", "mode", "4k")}          # Haitham: Kling 4k is never used 
 SHIM_UNSAFE = set('&|<>^%"\n\r')
 
 
+TRANSIENT_CODES = (408, 425, 429, 500, 502, 503, 504)   # a timeout, a rate limit or a provider hiccup: the job may still be rendering there
+
+
 class HiggsError(Exception):
-    pass
+    """A failure of the Higgsfield CLI. `code` is the HTTP status when the CLI reported one (it answers "Higgsfield API error (HTTP 503). request failed with status 503 Service Unavailable"), else 502 for a failure we cannot classify.
+
+    `transient` is what generation/jobs.py branches on: a 5xx, a timeout or a rate limit while WAITING must not finish a paid job as FAILED (the provider may still be rendering it), so the job goes to TIMEOUT and stays resumable on the same ticket. A prompt the provider refused is a 4xx and stays final."""
+
+    def __init__(self, message: str, code: int | None = None, transient: bool | None = None):
+        super().__init__(message)
+        parsed = code if code is not None else _http_code(message)
+        self.code = parsed or 502
+        # Only a status we actually recognised may be retried: a CLI failure we cannot classify is FINAL by default, so a refused prompt is never parked as a retryable timeout.
+        self.transient = transient if transient is not None else bool(parsed) and parsed in TRANSIENT_CODES
+
+
+def _http_code(message: str) -> int | None:
+    """The HTTP status out of the CLI's own message, or None. Deliberately strict: a loose match would read a duration or a port as a status and turn a final failure into a retry."""
+    m = re.search(r"(?:HTTP|status|error)\s+(\d{3})\b", str(message), re.I)
+    return int(m.group(1)) if m else None
 
 
 def _exe_near(shim: Path) -> Path | None:
@@ -67,7 +86,7 @@ def _subprocess_run(args: list[str], timeout: float):
     try:
         r = subprocess.run([exe] + args, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired:
-        raise HiggsError(f"The Higgsfield CLI did not answer within {int(timeout)} s.")
+        raise HiggsError(f"The Higgsfield CLI did not answer within {int(timeout)} s.", code=504)   # a timeout is transient: the provider may still be working
     except OSError as e:
         raise HiggsError(f"Could not run the Higgsfield CLI: {e}")
     return r.returncode, r.stdout, r.stderr

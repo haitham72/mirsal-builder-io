@@ -206,6 +206,24 @@ def requeue(out: Path, jid: str) -> dict:
     return _write(p, job)
 
 
+WAIT_RETRIES = 3           # a 503 while WAITING is usually one poll: retry it here before declaring anything, so a paid video is not lost to a single hiccup (J048)
+
+
+def _wait_with_retry(hf, ticket: str, timeout_s: int, tries: int = WAIT_RETRIES) -> dict:
+    """`generate wait`, retried while the provider answers with a transient failure (5xx, timeout, rate limit). The ticket never changes, so this can never create a second paid job. A final failure is re-raised for the caller to classify."""
+    from . import higgsfield as _hf          # a local import, as in fulfil(): nothing here is needed unless a wait really fails
+    last: Exception | None = None
+    for attempt in range(1, max(1, tries) + 1):
+        try:
+            return hf.wait(ticket, timeout_s=timeout_s)
+        except _hf.HiggsError as e:
+            if not getattr(e, "transient", False) or attempt >= max(1, tries):
+                raise
+            last = e
+            time.sleep(min(30, 2 ** attempt))
+    raise last  # unreachable in practice: the loop either returns or raises above
+
+
 def resume(out: Path, jid: str) -> dict:
     """A human retry of a FAILED or TIMEOUT job. With a Higgsfield ticket the job goes back to CLAIMED, so `fulfil` waits for the SAME Higgsfield job again (a transient
     503 while waiting must not lose a paid video, and must not pay twice). Without a ticket nothing was created yet: it is simply requested again."""
@@ -298,7 +316,8 @@ def _inflight(out: Path) -> float:
             j = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        if j.get("status") == "CLAIMED" and j.get("external_task_id"):
+        # CLAIMED and TIMEOUT both mean "created at the provider, not finished": a job parked as TIMEOUT by a 5xx is still rendering there and will still be charged, so it must keep counting (J048, 2026-10-03). A FAILED job with a ticket is deliberately NOT counted: resume() puts it back on the same ticket, so charging the cap for it again would double-count.
+        if j.get("status") in ("CLAIMED", "TIMEOUT") and j.get("external_task_id"):
             total += float(j.get("cost_estimate") or 0)
     return total
 
@@ -391,7 +410,7 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
             # waiting is outside the creation lock: several jobs wait together, up to paid_parallel()
             _begin_wait(out, jid)
             try:
-                res = hf.wait(ticket, timeout_s=max(120, min(timeout_s(), 3600) - 60))
+                res = _wait_with_retry(hf, ticket, timeout_s=max(120, min(timeout_s(), 3600) - 60))
                 update(out, jid, stage="downloading")
                 ext = (res["result_url"].split("?")[0].rsplit(".", 1)[-1] or "bin")[:5].lower()
                 tmp = jobs_dir(out) / jid.upper() / f"download.{ext}"
@@ -408,6 +427,14 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
         return read(out, jid)                                         # the other run owns it: report what is true, pay nothing, fail nothing
     except (JobError, _mcat.CatalogError, _hf.HiggsError) as e:
         code = getattr(e, "code", 500)
+        # A 5xx / timeout / rate limit while WAITING is not a failure: the provider may still be rendering the job we already paid for (J048,2026-10-03: a 503 wrote FAILED over a video that completed). Such a job goes to TIMEOUT, which resume() puts back on the SAME ticket, and which _inflight keeps counting so the daily cap still sees it. A 4xx, a crash in a check, or a failure with no ticket stays final.
+        if getattr(e, "transient", False) and read(out, jid).get("external_task_id"):
+            from . import model_calls as _mc
+            cur = update(out, jid, status="TIMEOUT", stage="waiting", error=str(e)[:500])
+            _mc.append(out, KIND_CALL[cur.get("kind") or "video"], cur.get("provider") or "higgsfield-cli",
+                       cur.get("model") or "unknown", status="ERROR", error=str(e),
+                       extra={"job": jid, "transient": True})
+            return read(out, jid)
         if job["status"] in ("REQUESTED", "CLAIMED", "TIMEOUT") or read(out, jid)["status"] in ("REQUESTED", "CLAIMED", "TIMEOUT"):
             fail(out, jid, str(e))
         return read(out, jid)

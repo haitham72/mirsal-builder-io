@@ -37,6 +37,19 @@ For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` 
 - **Retries.** Transient errors retry at most 2 times; invalid input never retries. There is
   never a "while not good" loop. A job older than `MIRSAL_JOB_TIMEOUT` (default 20 min) shows
   TIMEOUT; a human re-queues it (`job requeue`), the operator never does. A job that already holds a provider ticket is not created again: re-queue / retry make it wait for the SAME provider job.
+- **A 5xx while waiting is not a failure (J048, 2026-10-03).** `HiggsError` carries the HTTP
+  status the CLI reported. While WAITING, a `408/425/429/5xx` is retried inside the wait
+  (`WAIT_RETRIES`, 3 tries, backoff) on the **same ticket** — it can never create a second paid
+  job. If it still fails, a job that holds a ticket goes to **TIMEOUT**, not `FAILED`: the
+  provider may still be rendering it, and `queue retry J048` / `jobs.resume` waits for the same
+  job again. Only a `4xx` (the provider refused the prompt), a crash in a check, or a failure
+  with **no ticket at all** is final `FAILED` — with no ticket nothing was created, so there is
+  nothing to resume. A failure the CLI gave no status for is **final by default**: an
+  unclassifiable error must never park forever as a retryable timeout. `TIMEOUT` counts against
+  the daily cap (`_inflight`) because the job really is still being charged for.
+  **Recovering one by hand:** `higgsfield generate get <external_task_id> --json` is read-only
+  and free; if it says `completed` while we hold no file, download `result_url` (a plain HTTPS
+  GET, no auth header) and attach it by ticket — `mirsal job done J048 --file <path> --model kling3_0 --cost 4.5`.
 - **Never open or judge media.** Judge with Python (`ffprobe`, the verifier, `measure-cells`
   when it exists, file sizes). Haitham looks at the pictures.
 - **Never write inside `inputs/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`;

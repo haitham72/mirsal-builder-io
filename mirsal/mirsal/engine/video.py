@@ -97,10 +97,19 @@ def close_loop(frames: np.ndarray, m: int) -> np.ndarray:
         return frames
     out = frames[: n - m].astype(np.float32).copy()
     head = frames[0].astype(np.float32)
+    a_head = head[..., 3:4] / 255.0
     for j in range(m):
         t = (j + 1) / m
         w = t * t * (3 - 2 * t)         # smoothstep: starts gently, ends on frame 0 and slows into it
-        out[n - 2 * m + j] = (1 - w) * out[n - 2 * m + j] + w * head
+        cur = out[n - 2 * m + j]        # a view into out
+        a_tail = cur[..., 3:4] / 255.0
+        a_out = (1 - w) * a_tail + w * a_head
+        # Blend the colour PREMULTIPLIED and undo it afterwards. A straight per-channel blend drags a transparent
+        # tail frame's black towards the head's colour, so the fade passes through a semi-transparent dark frame
+        # that shows as a GREY FRAME at the wrap, once per loop (Haitham, 2026-10-03). Coverage must not colour the fade.
+        pm = (1 - w) * cur[..., :3] * a_tail + w * head[..., :3] * a_head
+        cur[..., :3] = np.where(a_out > 1e-6, pm / np.maximum(a_out, 1e-6), 0.0)
+        cur[..., 3:4] = a_out * 255.0
     return np.clip(out + 0.5, 0, 255).astype(np.uint8)
 
 
@@ -113,7 +122,7 @@ def vp9_missing(cells) -> list[AnimationResult] | None:
             for i in cells]
 
 
-CACHE_VERSION = 3      # bump when an engine change makes old cached animations wrong
+CACHE_VERSION = 4      # bump when an engine change makes old cached animations wrong (4: close_loop blends premultiplied, so a grey frame no longer appears at the wrap)
 
 
 class AnimCache:

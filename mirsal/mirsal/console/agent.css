@@ -222,6 +222,9 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ag-sel{display:block;width:100%;margin-top:6px;padding:7px 10px;border-radius:var(--r-m);border:1px solid var(--aline);background:#fff;color:var(--ink);font-size:var(--fs-m);cursor:pointer}
 .ag-sel:hover{border-color:var(--ai)}
 .ag-sel:disabled{opacity:.5;cursor:default}
+/* the sheet-size chip in the composer bar. Its OWN class on purpose: .ag-sel belongs to the settings panel's full-width model drop-down (display:block;width:100%), and reusing it here stretched the chip over its own row. Keep every bar chip on .ag-chip alone, never .ag-sel. */
+.ag-grid{cursor:pointer;font-variant-numeric:tabular-nums}
+.ag-grid:active{transform:translateY(1px)}
 
 /* a sheet Python blocked: said in words, with the one button that fixes it */
 .ai-problem{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-m);background:rgba(251,146,60,.10);border:1px solid rgba(251,146,60,.35);font-size:var(--fs-m);line-height:1.45}
