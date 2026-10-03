@@ -1,0 +1,227 @@
+{
+  "id": "E010",
+  "created": 1790993251.286,
+  "user": "local",
+  "pack_id": "20b742ee",
+  "pack_name": "Batman Lego",
+  "mode": "sim",
+  "grid": [
+    2,
+    2
+  ],
+  "note": "",
+  "title": "Batman Lego · effects",
+  "status": "READY",
+  "stickers": [
+    {
+      "sticker_id": "1e01c5a6",
+      "name": "Batman lego ready to fight",
+      "emoji": "🦇👊",
+      "file": "G002/vid-batman_lego-ready_to_fight-batman_lego-20261001T170145-414732.webm",
+      "type": "animated",
+      "src": "src/1e01c5a6.png"
+    },
+    {
+      "sticker_id": "3b2619d9",
+      "name": "Batman lego listening carefully",
+      "emoji": "🦇👂",
+      "file": "G002/vid-batman_lego-listening_carefully-batman_lego-20261001T170145-2d5f0d.webm",
+      "type": "animated",
+      "src": "src/3b2619d9.png"
+    },
+    {
+      "sticker_id": "3b008026",
+      "name": "Batman lego on the move",
+      "emoji": "🦇🏃",
+      "file": "G002/vid-batman_lego-on_the_move-batman_lego-20261001T170145-1a28eb.webm",
+      "type": "animated",
+      "src": "src/3b008026.png"
+    },
+    {
+      "sticker_id": "5eab9cd4",
+      "name": "Batman lego victory pose",
+      "emoji": "🦇✌️",
+      "file": "G002/vid-batman_lego-victory_pose-batman_lego-20261001T170145-d8bbe1.webm",
+      "type": "animated",
+      "src": "src/5eab9cd4.png"
+    },
+    {
+      "sticker_id": "d0b30b39",
+      "name": "Batman lego surprised reaction",
+      "emoji": "🦇😲",
+      "file": "G002/vid-batman_lego-surprised_reaction-batman_lego-20261001T170145-747fad.webm",
+      "type": "animated",
+      "src": "src/d0b30b39.png"
+    },
+    {
+      "sticker_id": "2270fe74",
+      "name": "Batman lego calling for help",
+      "emoji": "🦇📞",
+      "file": "G002/vid-batman_lego-calling_for_help-batman_lego-20261001T170145-64883e.webm",
+      "type": "animated",
+      "src": "src/2270fe74.png"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece",
+        "megaphone"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "1e01c5a6",
+        "3b2619d9",
+        "3b008026",
+        "d0b30b39",
+        "2270fe74"
+      ],
+      "moods": {
+        "1e01c5a6": "excited",
+        "3b2619d9": "neutral",
+        "3b008026": "excited",
+        "d0b30b39": "excited",
+        "2270fe74": "excited"
+      },
+      "preset": {
+        "1e01c5a6": "burst",
+        "3b2619d9": "burst",
+        "3b008026": "burst",
+        "d0b30b39": "burst",
+        "2270fe74": "burst"
+      },
+      "by": "vlm",
+      "sprites": "own"
+    },
+    {
+      "id": "g2",
+      "subject": "Batman lego victory pose",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "yellow belt buckle"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "5eab9cd4"
+      ],
+      "moods": {
+        "5eab9cd4": "happy"
+      },
+      "preset": {
+        "5eab9cd4": "burst"
+      },
+      "by": "vlm",
+      "sprites": "own"
+    }
+  ],
+  "results": [],
+  "video": {},
+  "history": [
+    {
+      "ts": 1790993251.286,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "6 sticker(s), sim",
+      "detail": null
+    },
+    {
+      "ts": 1790993251.312,
+      "actor": "python",
+      "decision": "ANALYSE",
+      "reason": "Batman Lego: bat signal, lego brick, cape piece, megaphone, Batman lego victory pose: bat signal, lego brick, yellow belt buckle",
+      "detail": {
+        "model": null
+      }
+    }
+  ],
+  "updated": 1790993251.312,
+  "per_sticker": {
+    "1e01c5a6": {
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "3b2619d9": {
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "neutral",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "3b008026": {
+      "subject": "Batman lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "5eab9cd4": {
+      "subject": "Batman lego victory pose",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "yellow belt buckle"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "d0b30b39": {
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "2270fe74": {
+      "subject": "Batman lego",
+      "elements": [
+        "bat signal",
+        "megaphone",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    }
+  },
+  "notes": [],
+  "analysed_by": "table"
+}

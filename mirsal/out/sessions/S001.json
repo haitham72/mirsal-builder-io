@@ -2,13 +2,18 @@
  "id": "S001",
  "title": "Eid mubarak greetings",
  "created": 1790945185.426,
- "updated": 1790949533.379,
+ "updated": 1790954080.522,
  "settings": {
   "grid": "3x3",
   "style_id": "flat_vector",
   "ask_before_spending": true,
   "ai": true,
-  "allow_vlm": true
+  "allow_vlm": true,
+  "creator": {
+   "on": true,
+   "scope": "video",
+   "bypass": false
+  }
  },
  "focus": {
   "generation": null,
@@ -69,6 +74,27 @@
      "style_id": "flat_vector",
      "parent": null,
      "created": 1790949533.349,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "name": "anime kitten",
+   "slug": "anime_kitten",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J035",
+     "prompt": "anime kitten",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790953932.508,
      "ready": 0,
      "approved": 0,
      "rejected": 0,
@@ -323,6 +349,72 @@
     "options": [],
     "how": "",
     "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 12,
+   "ts": 1790953720.885,
+   "user": "anime kitten",
+   "assistant": "Creator plan for **anime kitten**: 9 stickers, then the stickers animated, then to Telegram, stopping at each approval for one click from you. Telegram is not connected yet, so I will stop before sending. Shall I run it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 13,
+   "ts": 1790953932.548,
+   "user": "confirm",
+   "assistant": "Running the creator for **anime kitten**. I will stop and tell you if anything is rejected.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 14,
+   "ts": 1790953972.104,
+   "user": "creator_go",
+   "assistant": "Continuing.",
+   "intents": [
+    "CREATOR"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
    },
    "generation_id": null
   }
@@ -1135,6 +1227,333 @@
    "ts": 1790949532.684,
    "status": "done",
    "chips": []
+  },
+  {
+   "id": "m24",
+   "role": "user",
+   "text": "anime kitten",
+   "cards": [],
+   "steps": [],
+   "ts": 1790953719.696
+  },
+  {
+   "id": "m25",
+   "role": "assistant",
+   "text": "Creator plan for **anime kitten**: 9 stickers, then the stickers animated, then to Telegram, stopping at each approval for one click from you. Telegram is not connected yet, so I will stop before sending. Shall I run it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "anime kitten",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "anime kitten blowing a kiss",
+      "anime kitten laughing",
+      "anime kitten in love",
+      "anime kitten winner",
+      "anime kitten eye roll",
+      "anime kitten sad",
+      "anime kitten angry",
+      "anime kitten mind blown",
+      "anime kitten cool"
+     ],
+     "estimate": 6.5,
+     "balance": 3779.62,
+     "prompt": "anime kitten",
+     "free": false,
+     "creator": {
+      "scope": "video",
+      "bypass": false,
+      "sheet": 2.0,
+      "video": 4.5
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating anime kitten",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953719.805
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953719.822
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953719.836
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "anime kitten blowing a kiss",
+       "anime kitten laughing",
+       "anime kitten in love",
+       "anime kitten winner",
+       "anime kitten eye roll",
+       "anime kitten sad",
+       "anime kitten angry",
+       "anime kitten mind blown",
+       "anime kitten cool"
+      ]
+     },
+     "status": "done",
+     "ts": 1790953719.865
+    },
+    {
+     "kind": "note",
+     "label": "the AI could not write the ideas (The AI service refused the request (HTTP 400): No models loaded. Please load a model in the developer page or use the 'lms load' command.): I used the built-in sets",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953719.876
+    },
+    {
+     "kind": "step",
+     "label": "creator: Draw the sheet > Cut and check > Look at the pictures > Approve the stickers > Animate > Approve the animations > Make the pack > Send to Telegram",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953720.852
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 6.5 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953720.872
+    }
+   ],
+   "ts": 1790953719.696,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create and send to Telegram",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m26",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790953931.877
+  },
+  {
+   "id": "m27",
+   "role": "assistant",
+   "text": "Running the creator for **anime kitten**. I will stop and tell you if anything is rejected.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J035",
+     "subject": "anime kitten",
+     "parent": null,
+     "note": ""
+    },
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "creating anime kitten for Telegram",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953931.905
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953931.954
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: creator",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953931.969
+    },
+    {
+     "kind": "final",
+     "label": "started · J035",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953932.509
+    }
+   ],
+   "ts": 1790953931.877,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m28",
+   "role": "assistant",
+   "text": "**Anime kitten** has no finished stickers to look at yet.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Anime kitten",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953959.361
+    },
+    {
+     "kind": "step",
+     "label": "looked at 0 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953959.527
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953959.537
+    }
+   ],
+   "ts": 1790953959.334,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m29",
+   "role": "assistant",
+   "text": "**anime kitten**: the stickers are ready for your approval.",
+   "cards": [
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [],
+   "ts": 1790953960.646,
+   "chips": [
+    {
+     "label": "Approve and continue",
+     "action": "creator_go"
+    },
+    {
+     "label": "Stop",
+     "action": "creator_stop"
+    }
+   ]
+  },
+  {
+   "id": "m30",
+   "role": "user",
+   "text": "Approve and continue",
+   "cards": [],
+   "steps": [],
+   "ts": 1790953971.984
+  },
+  {
+   "id": "m31",
+   "role": "assistant",
+   "text": "Continuing.",
+   "cards": [
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953972.01
+    },
+    {
+     "kind": "step",
+     "label": "understood: the creator",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953972.051
+    },
+    {
+     "kind": "task",
+     "label": "continuing the creator",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953972.066
+    },
+    {
+     "kind": "step",
+     "label": "approved",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953972.078
+    },
+    {
+     "kind": "final",
+     "label": "done",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953972.09
+    }
+   ],
+   "ts": 1790953971.984,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m32",
+   "role": "assistant",
+   "text": "**anime kitten**: stopped, Python blocked the animation of S1, S2, S3, S4, S5, S6, S7, S8, S9 (a block is final).",
+   "cards": [
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [],
+   "ts": 1790954080.522,
+   "chips": [
+    {
+     "label": "Continue without S1, S2, S3, S4, S5, S6, S7, S8, S9",
+     "action": "creator_skip",
+     "indexes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    },
+    {
+     "label": "Stop",
+     "action": "creator_stop"
+    }
+   ]
   }
  ],
  "summary": {
@@ -1144,6 +1563,95 @@
  "pending": null,
  "vision_asked": true,
  "named": [
-  "G097"
- ]
+  "G097",
+  "G099"
+ ],
+ "creator_run": {
+  "id": "C953932544",
+  "prompt": "anime kitten",
+  "subject": "anime kitten",
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "scope": "video",
+  "bypass": false,
+  "estimate": 2.0,
+  "video_estimate": 4.5,
+  "approved_credits": 6.5,
+  "step": "video",
+  "status": "stopped",
+  "generation": "G099",
+  "job": "J035",
+  "video_job": "J036",
+  "pack_id": null,
+  "skip": [],
+  "waiting": null,
+  "stop": {
+   "why": "Python blocked the animation of S1, S2, S3, S4, S5, S6, S7, S8, S9 (a block is final).",
+   "kind": "rejection",
+   "chips": [
+    {
+     "label": "Continue without S1, S2, S3, S4, S5, S6, S7, S8, S9",
+     "action": "creator_skip",
+     "indexes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    },
+    {
+     "label": "Stop",
+     "action": "creator_stop"
+    }
+   ]
+  },
+  "telegram": null,
+  "log": [
+   {
+    "ts": 1790953932.545,
+    "text": "started: the sheet is being drawn"
+   },
+   {
+    "ts": 1790953957.914,
+    "text": "the sheet arrived as G099"
+   },
+   {
+    "ts": 1790953960.442,
+    "text": "9 stickers cut and checked"
+   },
+   {
+    "ts": 1790953960.645,
+    "text": "the vision model found nothing to reject (0 looked at)"
+   },
+   {
+    "ts": 1790953960.646,
+    "text": "waiting: the stickers are ready for your approval"
+   },
+   {
+    "ts": 1790953972.066,
+    "text": "you chose: creator_go"
+   },
+   {
+    "ts": 1790953972.234,
+    "text": "approved 9 stickers"
+   },
+   {
+    "ts": 1790953976.472,
+    "text": "animation started (about 4.5 credits)"
+   },
+   {
+    "ts": 1790954080.522,
+    "text": "stopped: Python blocked the animation of S1, S2, S3, S4, S5, S6, S7, S8, S9 (a block is final)."
+   }
+  ],
+  "started": 1790953932.545,
+  "updated": 1790954080.522,
+  "said": "stopped:video",
+  "g2_ok": true
+ }
 }

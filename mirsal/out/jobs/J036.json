@@ -1,0 +1,39 @@
+{
+  "id": "J036",
+  "kind": "video",
+  "task": "anime kitten",
+  "generation": "G099",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {},
+    "prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. kisses the air, the heart floats off, a playful wink\n2. doubles over, shoulders shaking, tiny hops, wipes a tear\n3. the heart pulses, sways side to side, squeezes the heart\n4. lifts the trophy, it shines, jumps with joy\n5. eyes circle slowly, head tilts back with a sigh\n6. sighs, shoulders sag, droops slowly lower\n7. stomps in place, steam puffs from the head, body shakes with rage\n8. hands fly off the head as it bursts into sparks\n9. slow confident head nod, the sunglasses glint\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "custom_prompt": false,
+    "start_image": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/G099/video_sheet/A1/sheet.png",
+    "sheet": "A1",
+    "label": "anime kitten",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "5701867b-22d0-4ef8-8815-3b83783c858e",
+  "result": {
+    "file": "jobs/J036/result.mp4",
+    "sha256": "d278b1fd87f4a64f61ba0191a8231ae427a06a32f0ae7f18e756d5a50cff8b14",
+    "bytes": 6495536
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1790953976.458,
+  "claimed_at": 1790953981.656,
+  "completed_at": 1790954079.701,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "downloading"
+}

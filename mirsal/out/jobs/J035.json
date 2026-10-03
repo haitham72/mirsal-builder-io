@@ -1,0 +1,38 @@
+{
+  "id": "J035",
+  "kind": "sheet",
+  "task": "028",
+  "generation": "G099",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: anime kitten.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: blowing a kiss with a wink, a small heart floating away\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open\nCharacter 3: hugging a big red heart, eyes sparkling, blushing cheeks\nCharacter 4: holding a golden trophy overhead, triumphant\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: furious, steaming, fists clenched, deep scowl\nCharacter 8: mind blown, hands on the head, eyes spiralling wide\nCharacter 9: wearing sunglasses, smirking, arms crossed, ultra cool\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "anime kitten",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "6fcac39f-0d34-4c8f-bf40-839ae2a811d7",
+  "result": {
+    "file": "jobs/J035/result.png",
+    "sha256": "74d9842b4a19cabc0f917c7ea58d6648679548398ea00d00bf9f9f1c45f8dadc",
+    "bytes": 4405409
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790953932.493,
+  "claimed_at": 1790953934.655,
+  "completed_at": 1790953957.677,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

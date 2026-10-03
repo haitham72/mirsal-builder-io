@@ -1,0 +1,43 @@
+{
+  "id": "J040",
+  "kind": "sheet",
+  "task": "029",
+  "generation": "G100",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate small objects arranged in 2 rows of 2, evenly spaced across a single seamless background.\nTheme: pieces that burst out of Batman Lego. Draw only the pieces listed, never Batman Lego itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every piece directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nEach cell holds exactly ONE piece, isolated and centred in its own cell, a different piece or a different size and angle from every other cell:\nPiece 1 (top row, left): bat signal\nPiece 2 (top row, right): lego brick\nPiece 3 (bottom row, left): cape piece\nPiece 4 (bottom row, right): megaphone\nConsistency: the same drawing style, lighting and colour quality for all 4 pieces.\nBackground: a single, seamless, solid pure #00FF00 green background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise, and no objects other than the pieces.\nSpacing: every piece has a generous empty margin on every side (at least 20% of its own size), nothing touches the edge of its cell, and no piece touches or crosses another.",
+    "label": "Batman Lego pieces",
+    "refs": [],
+    "outline": 0,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local",
+    "pieces": {
+      "effect": "E008",
+      "group": "g1"
+    }
+  },
+  "status": "DONE",
+  "external_task_id": "138c71e7-071f-440e-a152-dbca59d946dc",
+  "result": {
+    "file": "jobs/J040/result.png",
+    "sha256": "12cfb659b6bc4e3273918dc3178aec5ac32c987cb6735c707eeaf470feddfba8",
+    "bytes": 3701954
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790991902.545,
+  "claimed_at": 1790991903.601,
+  "completed_at": 1790991929.614,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

@@ -1,8 +1,8 @@
 {
- "fetched_at": 1790872708.568,
+ "fetched_at": 1790983814.796,
  "counts": {
-  "image": 34,
-  "video": 38,
+  "image": 35,
+  "video": 39,
   "audio": 8,
   "text": 1
  },
@@ -41,6 +41,74 @@
      "message": "exactly one image_references entry is required"
     }
    ]
+  },
+  {
+   "job_type": "flux_3_image",
+   "display_name": "FLUX 3 Image",
+   "type": "image",
+   "params": [
+    {
+     "name": "aspect_ratio",
+     "type": "string",
+     "default": "auto",
+     "required": false,
+     "enum": [
+      "auto",
+      "21:9",
+      "2:1",
+      "16:9",
+      "3:2",
+      "7:5",
+      "4:3",
+      "5:4",
+      "1:1",
+      "4:5",
+      "3:4",
+      "5:7",
+      "2:3",
+      "9:16",
+      "1:2"
+     ]
+    },
+    {
+     "name": "batch_size",
+     "type": "integer",
+     "default": 1,
+     "required": false
+    },
+    {
+     "name": "folder_id",
+     "type": "string|null",
+     "default": null,
+     "required": false
+    },
+    {
+     "name": "image_references",
+     "type": "array",
+     "default": null,
+     "required": false
+    },
+    {
+     "name": "prompt",
+     "type": "string",
+     "default": null,
+     "required": true
+    },
+    {
+     "name": "resolution",
+     "type": "string",
+     "default": "1k",
+     "required": false,
+     "enum": [
+      "768sq",
+      "1k",
+      "1.5k",
+      "2k",
+      "4k"
+     ]
+    }
+   ],
+   "rules": []
   },
   {
    "job_type": "flux_2",
@@ -2878,6 +2946,59 @@
      "message": "duration must be 8 when both start_image and end_image are set"
     }
    ]
+  },
+  {
+   "job_type": "grok_video_v15_lite",
+   "display_name": "Grok Imagine Video 1.5 Lite",
+   "type": "video",
+   "params": [
+    {
+     "name": "aspect_ratio",
+     "type": "string",
+     "default": "16:9",
+     "required": false,
+     "enum": [
+      "auto",
+      "16:9",
+      "9:16",
+      "4:3",
+      "3:4",
+      "1:1",
+      "3:2",
+      "2:3"
+     ]
+    },
+    {
+     "name": "duration",
+     "type": "integer",
+     "default": 5,
+     "required": false
+    },
+    {
+     "name": "prompt",
+     "type": "string",
+     "default": null,
+     "required": true
+    },
+    {
+     "name": "resolution",
+     "type": "string",
+     "default": "720p",
+     "required": false,
+     "enum": [
+      "480p",
+      "720p",
+      "1080p"
+     ]
+    },
+    {
+     "name": "start_image",
+     "type": "object|null",
+     "default": null,
+     "required": false
+    }
+   ],
+   "rules": []
   },
   {
    "job_type": "grok_video",

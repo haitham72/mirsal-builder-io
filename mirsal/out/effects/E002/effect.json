@@ -1,0 +1,246 @@
+{
+  "id": "E002",
+  "created": 1790984038.447,
+  "user": "local",
+  "pack_id": "20b742ee",
+  "pack_name": "Batman Lego",
+  "mode": "video",
+  "grid": [
+    2,
+    2
+  ],
+  "note": "",
+  "title": "Batman Lego · effects",
+  "status": "RESULTS",
+  "stickers": [
+    {
+      "sticker_id": "1e01c5a6",
+      "name": "Batman lego ready to fight",
+      "emoji": "🦇👊",
+      "file": "G002/vid-batman_lego-ready_to_fight-batman_lego-20261001T170145-414732.webm",
+      "type": "animated",
+      "src": "src/1e01c5a6.png"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "1e01c5a6"
+      ],
+      "moods": {
+        "1e01c5a6": "excited"
+      },
+      "preset": {
+        "1e01c5a6": "burst"
+      },
+      "by": "vlm",
+      "sprites": "own"
+    }
+  ],
+  "results": [
+    {
+      "id": "R001",
+      "mode": "video",
+      "group": "g1",
+      "cell": 1,
+      "file": "results/R001.webm",
+      "bytes": 203542,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 30,
+        "kb": 198.8,
+        "label": "cell 1",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.1004,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0,
+        "raw_start_coverage": 0.0,
+        "tail_faded": false,
+        "head_faded": false
+      },
+      "job": "J039"
+    },
+    {
+      "id": "R002",
+      "mode": "video",
+      "group": "g1",
+      "cell": 2,
+      "file": "results/R002.webm",
+      "bytes": 227037,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 30,
+        "kb": 221.7,
+        "label": "cell 2",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.1077,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0,
+        "raw_start_coverage": 0.0,
+        "tail_faded": false,
+        "head_faded": false
+      },
+      "job": "J039"
+    },
+    {
+      "id": "R003",
+      "mode": "video",
+      "group": "g1",
+      "cell": 3,
+      "file": "results/R003.webm",
+      "bytes": 230703,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 30,
+        "kb": 225.3,
+        "label": "cell 3",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.091,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0,
+        "raw_start_coverage": 0.0,
+        "tail_faded": false,
+        "head_faded": false
+      },
+      "job": "J039"
+    },
+    {
+      "id": "R004",
+      "mode": "video",
+      "group": "g1",
+      "cell": 4,
+      "file": "results/R004.webm",
+      "bytes": 245291,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 30,
+        "kb": 239.5,
+        "label": "cell 4",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.0713,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0,
+        "raw_start_coverage": 0.0,
+        "tail_faded": false,
+        "head_faded": false
+      },
+      "job": "J039"
+    }
+  ],
+  "video": {
+    "g1": {
+      "job": "J039",
+      "grid": [
+        2,
+        2
+      ],
+      "key": "green",
+      "status": "DONE",
+      "cells": 4,
+      "cost": 4.5
+    }
+  },
+  "history": [
+    {
+      "ts": 1790984038.447,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "1 sticker(s), video",
+      "detail": null
+    },
+    {
+      "ts": 1790984038.454,
+      "actor": "python",
+      "decision": "ANALYSE",
+      "reason": "Batman Lego: bat signal, lego brick, cape piece",
+      "detail": {
+        "model": null
+      }
+    },
+    {
+      "ts": 1790984041.346,
+      "actor": "local",
+      "decision": "REQUEST",
+      "reason": "g1: video job J039 (2x2)",
+      "detail": {
+        "job": "J039"
+      }
+    },
+    {
+      "ts": 1790984210.09,
+      "actor": "python",
+      "decision": "CUT",
+      "reason": "g1: 4 of 4 cells are stickers",
+      "detail": {
+        "job": "J039"
+      }
+    }
+  ],
+  "updated": 1790984210.09,
+  "per_sticker": {
+    "1e01c5a6": {
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    }
+  },
+  "notes": [],
+  "analysed_by": "table"
+}

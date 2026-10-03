@@ -572,7 +572,15 @@
             "warnings": []
           }
         }
-      ]
+      ],
+      "caption": {
+        "text": "A happy boy in traditional clothing waves cheerfully.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "48e966221119ddf1",
+        "ts": 1790992439.318
+      }
     },
     {
       "index": 2,
@@ -1064,6 +1072,11 @@
         "version": "caption_v1",
         "png_sha": "8aaab9837738ef4a",
         "ts": 1790936282.271
+      },
+      "title_proposal": {
+        "name": "Happy boy holding a red heart",
+        "caption": "A happy boy with a green hat holds a large red heart surrounded by sparkles.",
+        "ts": 1790992444.135
       }
     },
     {
@@ -1556,6 +1569,11 @@
         "version": "caption_v1",
         "png_sha": "f107c44c7d349613",
         "ts": 1790936282.271
+      },
+      "title_proposal": {
+        "name": "Bored boy looking forward",
+        "caption": "A bored boy wearing a green cap and yellow shirt stands still looking forward.",
+        "ts": 1790992444.135
       }
     },
     {
@@ -2540,6 +2558,11 @@
         "version": "caption_v1",
         "png_sha": "0b0a8acc501d307d",
         "ts": 1790936282.271
+      },
+      "title_proposal": {
+        "name": "Boy clasping hands with determined smile",
+        "caption": "A boy wearing a yellow shirt clasps his hands together with an intense, determined smile.",
+        "ts": 1790992444.135
       }
     }
   ]

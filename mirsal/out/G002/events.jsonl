@@ -65,3 +65,4 @@
 {"ts": 1790913786.417, "stage": "video_sliced", "status": "done", "ms": 4572, "detail": {"ready": 1, "failed": 0}}
 {"ts": 1790913796.017, "stage": "pack_final", "status": "done", "ms": 0, "detail": {"note": "reopened: a sticker was changed"}, "actor": "human", "decision": "REJECT"}
 {"ts": 1790913796.048, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "anim", "index": 2, "note": "dropped from the set"}, "actor": "human", "decision": "REJECT"}
+{"ts": 1790989212.057, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "anim", "index": 2, "note": "brought back"}, "actor": "human", "decision": "APPROVE"}

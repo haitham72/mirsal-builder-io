@@ -1296,7 +1296,7 @@
       "webm": "slices/vid-002-batman_lego-batman_lego_throwing_batarang.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "REJECTED"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1453,6 +1453,15 @@
           "actor": "human",
           "decision": "REJECT",
           "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790989212.057,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "brought back",
           "ref": null,
           "detail": null
         }
