@@ -80,7 +80,7 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Particle sets (plan)** | the corrected model: a set of particles belongs to pack(s) or stands alone; use, generate more, save, delete; screens and API | [docs/particles_plan.md](docs/particles_plan.md) |
 | **Design** | one shell and one palette for every screen: the rail, the second column, the token set, the style tiles, and the Earlier-batches column. [docs/design.md](docs/design.md) |
 | **Welcome / onboarding** | the modal that opens once per browser session and on the logo: a fast-cut Seedance ad film and four sliding feature images; the prompts, the credits spent and the checks | [docs/onboarding.md](docs/onboarding.md) |
-| **Independent review** | a ready-made prompt for another LLM to audit the whole app: [docs/review-prompt.md](docs/review-prompt.md). The standing rules above are the outcome of the 2026-10-02 audit, now architecture here rather than a report. |
+| **Independent review** | a ready-made prompt for another LLM to audit the whole app: [review-prompt.md](review-prompt.md) (repo root). The standing rules above are the outcome of the 2026-10-02 audit, now architecture here rather than a report. |
 | **Measurements** | recorded numbers — slot fill, search precision, vision-judge agreement, sharpness; no opinions: [docs/measurements.md](docs/measurements.md) |
 | **Telegram** | send a pack (images and video are split into two sets), a no-token fallback for @stickers. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
 

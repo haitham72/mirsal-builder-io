@@ -17,7 +17,7 @@ The app is in its **dev cycle**: the build phases are retired; what exists is do
 | the particle-set redesign (a set belongs to pack(s), not to stickers; use / generate more / delete) | `docs/particles_plan.md` — the plan, data model, API, screens, phases (not built yet; read before touching effects) |
 | what the next sessions build (the screens redesign: set per pack, the four-step wizard, no dead-end rejection) | `plan.md` §16 — the model change, the wizard, the rejection rule, the build order |
 | recorded numbers | [measurements.md](measurements.md) — never-opinion metrics on slot fill, search precision, vision-judge agreement, sharpness |
-| a prompt to hand to an independent reviewing LLM | `docs/review-prompt.md` — paste-ready prompt that audits the whole repo in one pass |
+| a prompt to hand to an independent reviewing LLM | `review-prompt.md` (repo root) — paste-ready prompt that audits the whole repo in one pass |
 | the welcome modal (film + feature slides, logo = home) | `docs/onboarding.md` — what it shows, how the media were made and paid, the prompts; `docs/design.md` §10 |
 | reference inputs | `docs/inputs/` — Haitham's reference material: `prompt_samples.md`, `resolver_utterances.md`, `search_queries.md`, `telegram-plan.md` |
 
