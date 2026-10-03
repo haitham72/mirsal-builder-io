@@ -20,6 +20,16 @@ Haitham's correction: particles are the **burst Telegram plays when you react to
 
 ## 0c. OPEN, from Haitham's own use on 2026-10-03: "reject and end of story" is wrong
 
+**The design pass landed 2026-10-03 (uncommitted at the time of writing):** clickable sheet cells, the bulk allow-all per kind, the chat tile + creator-card overrides, and the set-per-pack screens (*Library > Particles*, the pack's particle studio, *Use as particle set* in both wizards). Node tests 106 (was 74), `tests.test_js` 18. It reported five **backend gaps** it designed around instead of stubbing, which are now the backend's open work:
+
+- `POST /api/particles/{id}/more` — **no *Generate more* on a set** (the button is simply absent; an empty set cannot gain cells).
+- `POST /api/particles/{id}/preview | render | add` — **bursts are read-only** in the pack studio; there is no set-level simulate / render / Add.
+- **A trash listing route** — `particle_sets.list_deleted` exists but no route serves it, so *Restore* is only offered in the moment after a delete.
+- **One preview per pack** needs the set-level preview above; it also breaks the per-row tests that pin one preview per sticker.
+- **Chat particle intents** (`make particles for my Barbie pack`, *generate more*, *delete*) — not built.
+
+It also noted the chat card had no batch-level `allow` and worked around it with a `GET /api/generations/{id}` hydration fetch; that data now ships per sticker on the card (`ea27d54`), so adopting `sticker.allow` would remove one fetch per blocked batch — **its call, not a blocker.**
+
 **Where the session reached:** the sign-off is committed and pushed (`deployment` up to `1eed2bf`, `better_ui/ux` branched from it and pushed; `merge/generate-advanced`'s remote branch deleted). Everything in section 0 (agents A-D, the docs, the `out/` snapshot) is committed. **In section 0c, the backend is now built:** item 4 (the creator may allow a block) and the message payload of item 3 (the stop message carries the pictures). **The surfaces of items 1-3 are not:** a clickable cell on the left sheet, an allow-all that covers stills, and an allow button on the chat tile / creator card. The particle-set backend of `plan.md` 16.6 phase 1 is also built (`e56146a`); its `more` / `preview` / `render` / `add` are not.
 
 Found by using the app, not by reading it. All of it is rule 10 (`CLAUDE.md`): a judgement-call block must be allow-able **in place**, and a rejection must never hide the picture. The engine half is **built and tested** (agent D: `POST /api/generations/{id}/allow {kind: still|animation}`, free re-cut, recorded, reversible, `engine/verify.py` `OVERRIDABLE`). What is missing is the **surfaces**.
