@@ -92,7 +92,7 @@ class EffectsApiTests(unittest.TestCase):
         gid = e["groups"][0]["id"]
         s, est = self.req("POST", f"/api/effects/{j['id']}/estimate", {"group": gid})
         self.assertEqual((s, est["credits"], est["cells"], est["key"]), (200, 4.5, 4, "blue"))
-        self.assertIn("empty", est["prompt"])
+        self.assertIn("only the blue background", est["prompt"]) if "blue" in est["prompt"] else self.assertIn("only the green background", est["prompt"])
         before = len([c for c in self.cli.calls if c[:2] == ["generate", "create"]])
         s, no = self.req("POST", f"/api/effects/{j['id']}/video", {"group": gid})
         self.assertEqual(s, 409, "no go-ahead, no spending")

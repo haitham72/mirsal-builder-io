@@ -108,16 +108,79 @@ class StudioActionTests(unittest.TestCase):
         for needs in (".lv-hrow", ".lv-hrow.on"):
             self.assertIn(needs, (ui / "studio.css").read_text(encoding="utf-8"), "the presented batch is marked in the column")
 
-    def test_under_the_presented_batch_its_own_history_stays(self):
-        """The per-sticker history and the AI captions belong to the batch the Studio presents: one block per batch of the session (one unless Create more was used)."""
+    def test_the_history_block_is_gone_and_the_batch_has_a_particles_section(self):
+        """Haitham, 2026-10-03: the "History of G###" block under the open batch (every decision on its stickers, the AI captions) was useless and is removed completely: markup, state, actions,
+        styles. The decisions stay in result.json and in GET /api/generations/<id>/history. What sits under the presented batch now is its Particles section (particles.js, drawn into #gpart):
+        what was made for each of its stickers that is in a pack, one line for the ones that are not."""
+        import re
+        ui, order = self.scripts()
+        live = (ui / "live.js").read_text(encoding="utf-8")
+        css = (ui / "studio.css").read_text(encoding="utf-8")
+        everything = "".join((ui / n).read_text(encoding="utf-8") for n in order)
+        for gone in ("History of ", "AI captions", "const HX=", "hxLoad", "hxSync", "hxBatch", "hxSticker", "hcapRun", "ACT.hcap", "ACT.hsx", "ACT.hgx", "ACT.hgall", "ACT.hretry", "ACT.vlmoff", "ACT.vlmno", "ghist", "lv-hdet"):
+            self.assertNotIn(gone, live.replace("typeof hxSync", ""), "the history block is gone: " + gone)
+        for gone in ("#ghist", ".lv-hhead", ".lv-ht{", ".lv-hsh", ".lv-hsm", ".lv-hgh", ".lv-hgs", ".lv-hcap", ".lv-hcell", ".lv-hline", ".lv-hbar", ".lv-hcb", ".lv-hdet", ".lv-hempty"):
+            self.assertNotIn(gone, css, "its styles are gone: " + gone)
+        self.assertIsNone(re.search(r"data-act=(hcap|hsx|hgx|hgall|hretry|vlmoff|vlmno)\b", everything), "no button of the old block is left")
+        draw = self.block(live, "function drawHist(){")
+        self.assertIn("histCol()", draw, "the Earlier-batches column is still drawn here")
+        self.assertIn("spSecDraw()", draw, "under the batch: its Particles section")
+        self.assertIn("'gpart'", self.block(live, "function ensureBars(){"), "the section's container replaces #ghist")
+        self.assertIn("#gpart", css)
+        for keep in ("const vlmState=", "const vlmSet=", "ACT.vlmyes=", "const VLM="):
+            self.assertIn(keep, live, "the consent for AI vision is still asked once and remembered: " + keep)
+        sp = (ui / "particles.js").read_text(encoding="utf-8")
+        for needs in ("function spSecBatchHtml(", "Add to a pack to give", "/api/packs/${pid}/particles", "ptBody(", "spLinkIndex(", "data-act=spopen", "Create particles for pack"):
+            self.assertIn(needs, sp)
+
+    def test_the_particles_tab_is_a_studio_step_in_its_own_file(self):
+        """Haitham, 2026-10-03: a new Studio tab 'Particles' next to Stickers and Animation, in its own file (particles.js, names prefixed SP / sp). It is registered in index.html (after effects.js, whose
+        functions it shares) and in the server's UI_FILES; generate.js owns the Studio's header and body, so the tab is wrapped in, the way live.js wraps drawRail."""
+        import re
+        ui, order = self.scripts()
+        html = (ui / "index.html").read_text(encoding="utf-8")
+        self.assertIn("particles.js", order, "index.html loads it")
+        self.assertLess(order.index("effects.js"), order.index("particles.js"), "it uses effects.js's functions: loaded after it")
+        self.assertIn('"particles.js": "text/javascript"', (ui / "server.py").read_text(encoding="utf-8"), "the server serves it")
+        sp = (ui / "particles.js").read_text(encoding="utf-8")
+        mine = re.findall(r"^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)", sp, re.M)
+        self.assertTrue(mine)
+        self.assertEqual([n for n in mine if not n.startswith(("SP", "sp"))], [], "every top-level name of particles.js starts with SP / sp (the scripts share one global scope)")
+        others = {}
+        for n in order:
+            if n != "particles.js":
+                for name in re.findall(r"^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)", (ui / n).read_text(encoding="utf-8"), re.M):
+                    others.setdefault(name, n)
+        self.assertEqual({n: others[n] for n in mine if n in others}, {}, "a top-level name declared by two scripts kills the second one")
+        self.assertIn("GS.tab==='particles'", sp)
+        self.assertIn("gbodyHtml=function", sp)
+        self.assertIn("stepsHtml=function", sp)
+        self.assertIn("data-act=gtab data-t=particles", sp, "the step is a tab like the others (generate.js's ACT.gtab)")
+        for route in ("/api/effects", "data-fxx=sp"):
+            self.assertIn(route, sp)
+        css = (ui / "studio.css").read_text(encoding="utf-8")
+        self.assertIn("repeat(6,minmax(0,1fr))", css, "the header has six steps now")
+        self.assertIn(".sp-modes", css)
+
+    def test_the_effect_functions_serve_both_screens_and_say_particles(self):
+        """effects.js holds ONE implementation of an effect for the pro screen (state FX) and the Studio tab (state SP): every handler finds its state from its root (fxX, data-fxx). The drawn
+        particles are suggest -> chips -> price -> draw -> tick the cells -> particles_pick; a warning is a sentence and never a block; the size of the particles travels as sprite_px / scale;
+        what the person reads says 'particles' (the chrome has no 'pieces')."""
+        import re
         ui, _ = self.scripts()
-        src = (ui / "live.js").read_text(encoding="utf-8")
-        draw = self.block(src, "function drawHist(){")
-        self.assertIn("SES.gens.map", draw)
-        self.assertIn("hxBatch(it)", draw)
-        self.assertIn("HX.det", draw)
-        sync = self.block(src, "function hxSync(){")
-        self.assertIn("SES.gens", sync, "the presented batch is read again when it was edited or is still working")
+        fx = (ui / "effects.js").read_text(encoding="utf-8")
+        for route in ("/suggest", "/particles_estimate", "/particles`", "/particles_pick"):
+            self.assertIn(route, fx)
+        self.assertIn("sprite_px", fx)
+        self.assertIn("key_is_seamless:'The green screen has panels or patterns, so the keying may eat parts of the particles. Use it anyway, or make another take.'", fx)
+        self.assertIn("Draw ${fxCols(d.grid)} particles with AI", fx)
+        self.assertIn("Use it anyway", fx)
+        self.assertNotIn("document.getElementById('fxpv", fx, "ids carry the state's name: two screens, two sets of previews")
+        code = re.sub(r"/\*.*?\*/", "", fx, flags=re.S)
+        code = re.sub(r"fx-pieces|\w*[Pp]iece\w*", "", code)
+        self.assertIsNone(re.search(r"\bpieces?\b", code, re.I), "the chrome says particles, not pieces")
+        for name in ("const fxNew=", "const fxX=", "FXS.fx=", "function fxDrawn("):
+            self.assertIn(name, fx)
 
     def test_every_list_bearing_screen_has_the_second_column(self):
         """Studio and Create list the earlier batches in the shared column (it used to exist only for Library, Pack, Chat and AI); Settings and the full-screen tools have none."""

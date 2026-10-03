@@ -194,7 +194,7 @@ const EG={outline:null,erode:null,pick:null,busy:false,drag:false};
 const edgeBatches=()=>typeof included==='function'?included().filter(g=>g.stickers.some(t=>t.status==='READY')):[];
 function ensureBars(){const g=document.querySelector('.gen2');if(!g)return;
   if(!document.getElementById('gedge')){const e=document.createElement('div');e.id='gedge';const ref=document.getElementById('gres');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
-  if(!document.getElementById('ghist')){const h=document.createElement('section');h.id='ghist';g.appendChild(h)}}
+  if(!document.getElementById('gpart')){const h=document.createElement('section');h.id='gpart';g.appendChild(h)}}
 /* Undo replays the log as a stack: an applied edge is pushed, an undo entry pops it, so Undo always steps back one real snapshot (and never flips between two) */
 function egCommitted(){const g=edgeBatches()[0];if(!g)return{o:0,e:0,hist:[],prev:null};
   const st=[];(g.edge_history||[]).forEach(h=>{if(h.via==='undo')st.length>1&&st.pop();else st.push(h)});
@@ -270,71 +270,19 @@ async function histLoad(more,quiet){if(HB.loading)return;HB.loading=true;
     else{const fresh=new Set(r.j.items.map(x=>x.id));HB.items=r.j.items.concat(HB.items.filter(x=>!fresh.has(x.id)))}
     HB.total=r.j.total;HB.more=HB.items.length<HB.total;HB.loaded=true}
   const sig=hbSig(),same=sig===HB.sig;HB.sig=sig;
-  if(!(quiet&&same)){drawHist();hxSync();if(typeof cpDrawTop==='function')cpDrawTop()}}
+  if(!(quiet&&same)){drawHist();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()}}
 const histReload=()=>histLoad(false);
 /* while the Studio or Create is showing, the column is read again every 10 s (a batch that was edited or finished moves to the top); it redraws only when something changed */
 setInterval(()=>{if(!document.hidden&&['generate','create'].includes(route_))histLoad(false,true)},10000);
 /* A batch is one entry of the column (histRow: its stickers as the sheet's own grid, 3x3 or 2x2, `cells` from GET /api/history, with its title, G###, counts and edited time). A click on it
-   makes it THE batch the Studio presents (ACT.hopen: the Studio's own view of it, nothing else beside it). Under that view the batch's own history stays: each sticker opens to its generation
-   history grouped by stage, each stage to its lines (GET /api/generations/<id>/history), and the AI captions; the sticker and stage folds last for the visit. A batch that was edited since it
-   was read is read again. */
-const HX={det:{},so:new Set(),go:new Set(),all:new Set(),cap:{},vlmThen:null};
-async function hxLoad(id,edited){const d=HX.det[id]=HX.det[id]||{};d.state='loading';drawHist();
-  const r=await api(`/api/generations/${id}/history`),g=await api('/api/generations/'+id);
-  if(r.ok){d.state='ok';d.data=r.j;d.edited=edited}else{d.state='err';d.err=(r.j&&r.j.error)||'Could not read the history'}
-  if(g.ok&&typeof GM!=='undefined')GM.set(id,g.j);              // the Studio view of the card reads the batch from the same map as the session
-  drawHist()}
-/* the presented batch is read again when it was edited since, or while it is still working (an animation finishing, a sheet being cut) */
-function hxSync(){for(const id of SES.gens){const it=HB.items.find(x=>x.id===id),d=HX.det[id],
-    g=typeof GM!=='undefined'?GM.get(id):null,busy=!!(g&&((typeof making==='function'&&making(g))||(typeof processing==='function'&&processing(g))||(typeof ANIM!=='undefined'&&ANIM.has(g.number)))),edited=it?it.edited:0;
-    if(!d||(d.state==='ok'&&(d.edited!==edited||busy)))hxLoad(id,edited)}}
-const hxTime=ts=>ts?new Date(ts*1000).toLocaleString([],{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
-const hxCls=d=>/APPROVE|PASS/.test(d||'')?'ok':/REJECT|BLOCK|FAIL/.test(d||'')?'bad':'';
-const hxFacts=d=>Object.entries(d).map(([k,v])=>esc(k.replace(/_/g,' '))+' '+esc(Array.isArray(v)?v.join(', '):String(v))).join(' · ');
-const hxDec=h=>`${esc(h.actor||'')} ${esc(h.decision||'')}${h.reason?` <span class=mut>· ${esc(h.reason)}</span>`:''}`;
-function hxStages(id,s){return s.stages.map(st=>{const k=`${id}:${s.index}:${st.stage}`,op=HX.go.has(k),all=HX.all.has(k),ls=op?(all?st.lines:st.lines.slice(0,8)):[];
-  return`<div class=lv-hg><button class=lv-hgh data-act=hgx data-k="${esc(k)}" aria-expanded=${op}><i class=lv-caret></i><b>${esc(st.stage)}</b><span class=mut>×${st.count}</span><span class="lv-hd ${hxCls(st.last.decision)}" title="the latest decision of this stage">${hxDec(st.last)}</span><small class=mut>${hxTime(st.last.ts)}</small></button>
-   ${op?`<div class=lv-hl>${ls.map(l=>`<div class=lv-hline><span class=mut>${hxTime(l.ts)}</span> ${hxDec(l)}${l.ref?` <span class=mut>· ${esc(l.ref)}</span>`:''}${l.detail?` <span class=mut>· ${hxFacts(l.detail)}</span>`:''}</div>`).join('')||'<div class="mut lv-hempty">The older lines of this stage are not shown.</div>'}
-     ${!all&&st.lines.length>8?`<button class=link data-act=hgall data-k="${esc(k)}">Show all ${st.lines.length}</button>`:''}${all&&st.count>st.lines.length?`<div class="mut lv-hempty">${st.count-st.lines.length} older line${st.count-st.lines.length===1?'':'s'} are not shown.</div>`:''}</div>`:''}</div>`}).join('')}
-function hxSticker(id,gid,s){const k=`${id}:${s.index}`,op=HX.so.has(k),r=s.review||{};
-  return`<div class=lv-hs><button class=lv-hsh data-act=hsx data-k="${esc(k)}" aria-expanded=${op}><i class=lv-caret></i>${s.png?`<img src="/out/${esc(gid)}/${esc(s.png)}" loading=lazy alt="">`:'<span class=lv-hnoimg></span>'}
-    <span class=lv-hsm><b>S${s.index} · ${esc(String(s.key||'').replace(/_/g,' '))}</b><small class=mut>${esc(String(s.status||'').toLowerCase())}${r.still&&r.still!=='PENDING'?` · still ${esc(r.still.toLowerCase())}`:''}${s.anim_status&&s.anim_status!=='NOT_REQUESTED'?` · animation ${esc(String(r.anim&&r.anim!=='PENDING'?r.anim:s.anim_status).toLowerCase())}`:''} · ${s.lines} line${s.lines===1?'':'s'}</small></span>
-    ${s.last?`<span class="lv-hd ${hxCls(s.last.decision)}" title="the latest decision">${esc(s.last.stage)}: ${hxDec(s.last)}</span>`:'<span class=mut>no decisions yet</span>'}</button>
-   ${op?(s.stages.length?`<div class=lv-hgs>${hxStages(id,s)}</div>`:'<div class="mut lv-hempty">Nothing has happened to this sticker yet.</div>'):''}</div>`}
-function hxCaps(id){const c=HX.cap[id];if(!c)return'';
-  const off=`<button class=link data-act=vlmoff data-id=${id}>Turn AI vision off</button>`;
-  if(c.state==='loading')return'<div class="lv-hcb mut">Reading the stored captions…</div>';
-  if(c.state==='err')return`<div class=lv-hcb><span class="lv-hd bad">${esc(c.err||'Could not caption')}</span></div>`;
-  const d=c.data||{cells:[],grid:[3,3],ready:0,missing:0},done=d.ready-d.missing;
-  return`<div class=lv-hcb><b>AI captions</b><span class=mut>${c.state==='working'?`writing them… ${done} of ${d.ready}`:`${done} of ${d.ready} captioned${d.missing?' · the rest could not be read':''}`}</span>${off}</div>
-   <div class=lv-hcap style="grid-template-columns:repeat(${Math.max(1,d.grid[1])},minmax(0,1fr))">${d.cells.map(x=>`<figure class=lv-hcell><img src="/out/${esc(d.generation_id)}/${esc(x.png)}" loading=lazy alt=""><figcaption><b>S${x.index}</b> ${x.caption?esc(x.caption):'<span class=mut>no caption yet</span>'}${x.text_visible?` <span class=mut>· text in the picture: “${esc(x.text_visible)}”</span>`:''}${x.verdict?` <span class="lv-hd ${hxCls(x.verdict)}">${esc(x.verdict.toLowerCase())}${x.reasons&&x.reasons.length?': '+esc(x.reasons.join(', ').toLowerCase()):''}</span>`:''}</figcaption></figure>`).join('')}</div>`}
-/* "Allow AI vision of generated media?": asked once, the answer is remembered in this browser (localStorage mirsal.allow_vlm = 1 / 0). The server enforces it too: the request itself carries allow_vlm. */
+   makes it THE batch the Studio presents (ACT.hopen: the Studio's own view of it, nothing else beside it). Under that view sits the batch's Particles section (particles.js, spSecDraw): what was
+   made for each of its stickers that is in a pack. The decisions on a batch's stickers are not shown here: they stay in its result.json and in GET /api/generations/<id>/history. */
+/* "Allow AI vision of generated media?": asked once, the answer is remembered in this browser (localStorage mirsal.allow_vlm = 1 / 0). The server enforces it too: the request itself carries allow_vlm.
+   VLM.then is what runs once the person has said yes (the particle effects screen asks before the vision model looks at stickers). */
+const VLM={then:null};
 const vlmState=()=>{try{return localStorage.getItem('mirsal.allow_vlm')}catch(e){return null}};
 const vlmSet=v=>{try{localStorage.setItem('mirsal.allow_vlm',v)}catch(e){}};
-ACT.vlmyes=()=>{vlmSet('1');closeDlg();const f=HX.vlmThen;HX.vlmThen=null;if(f)f()};
-ACT.vlmno=()=>{vlmSet('0');closeDlg();HX.vlmThen=null;toast('AI vision stays off. Nothing was sent.')};
-ACT.vlmoff=el=>{vlmSet('0');delete HX.cap[+el.dataset.id];drawHist();toast('AI vision is off. The captions already written stay with their stickers.')};
-ACT.hcap=el=>{const id=+el.dataset.id;if(vlmState()==='1')return hcapRun(id);
-  HX.vlmThen=()=>hcapRun(id);
-  dlg(`<h2>Allow AI vision of generated media?</h2><p class=mut>To write captions, the pictures of a batch are sent to the vision model: the local one (LM Studio) when it is running, otherwise the cloud one if you set it up. You are asked once; you can turn it off again from the captions panel.</p>
-   <div class=row style="justify-content:flex-end"><button class=btn data-act=vlmno>Not now</button><button class="btn pri" data-act=vlmyes>Allow</button></div>`)};
-async function hcapRun(id){if(HX.cap[id]&&['loading','working'].includes(HX.cap[id].state))return;
-  const c=HX.cap[id]={state:'loading'};drawHist();
-  let r=await api(`/api/generations/${id}/captions`);
-  if(!r.ok){c.state='err';c.err=(r.j&&r.j.error)||'Could not read the captions';return drawHist()}
-  c.data=r.j;
-  if(r.j.missing>0){const p=await post(`/api/generations/${id}/captions`,{allow_vlm:true});
-    if(!p.ok){c.state='err';c.err=(p.j&&p.j.error)||'Could not start';return drawHist()}
-    c.state='working';drawHist();let still=0,last=r.j.missing;
-    for(let n=0;n<120&&still<15;n++){await wait(2000);r=await api(`/api/generations/${id}/captions`);if(!r.ok)break;c.data=r.j;drawHist();if(r.j.missing===0)break;still=r.j.missing===last?still+1:0;last=r.j.missing}}
-  c.state='ok';drawHist()}
-function hxBatch(it){const d=HX.det[it.id];
-  if(!d||d.state==='loading')return'<div class="mut lv-hempty lv-hdet">Reading the stickers…</div>';
-  if(d.state==='err')return`<div class="mut lv-hempty lv-hdet">${esc(d.err)} <button class=link data-act=hretry data-id=${it.id}>Try again</button></div>`;
-  const c=HX.cap[it.id];
-  return`<div class=lv-hdet><div class=lv-hbar><button class="btn sm" data-act=hcap data-id=${it.id} ${c&&['loading','working'].includes(c.state)?'disabled':''} title="Write a one-sentence caption of what each sticker shows (AI vision)">${c?'Caption again':'AI captions'}</button>
-    <span class=mut>${c?'':'What does each sticker show? Needs your yes to AI vision (asked once).'}</span></div>${hxCaps(it.id)}
-   ${d.data.stickers.map(s=>hxSticker(it.id,d.data.generation_id,s)).join('')||'<div class=mut>This batch has no stickers.</div>'}</div>`}
+ACT.vlmyes=()=>{vlmSet('1');closeDlg();const f=VLM.then;VLM.then=null;if(f)f()};
 const histTitle=it=>esc(titleCase(String(it.prompt||'').replace(/_/g,' '))||it.generation_id);
 const histInfo=it=>`${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}`;
 /* the stickers of a batch, in the sheet's own grid (a 2x2 batch draws four cells, a 3x3 nine; a cell with no picture yet is the checkerboard) */
@@ -351,18 +299,11 @@ function histCol(){const c2=document.getElementById('col2');if(!c2)return;
   else{const l=document.getElementById('c2hist'),top=l.scrollTop;c2.querySelector('.c2n').textContent=HB.loaded?`${HB.total} in total`:'';l.innerHTML=HB.items.map(histRow).join('')||l.innerHTML;l.scrollTop=top}
   if(!HB.loaded){if(!HB.tried){HB.tried=true;histLoad(false)}}
   else{const l=document.getElementById('c2hist');if(HB.more&&!HB.loading&&l.scrollHeight<=l.clientHeight+320)histLoad(true)}}
-/* under the Studio's view of the presented batch: that batch's own history and AI captions (one block per batch of the session; a session has one batch unless Create more was used) */
-function drawHist(){if(['generate','create'].includes(route_))histCol();const el=document.getElementById('ghist');if(!el)return;
-  el.innerHTML=SES.gens.map(id=>{const d=HX.det[id];if(!d)hxLoad(id,0);const it={id},gid=d&&d.data?d.data.generation_id:'G'+String(id).padStart(3,'0');
-    return`<div class=lv-hhead><span class=lv-ht>History of ${esc(gid)}</span><span class=mut>every decision on its stickers, and the AI captions</span></div>${hxBatch(it)}`}).join('')}
-ACT.hretry=el=>hxLoad(+el.dataset.id,0);
-const hxFlip=(set,k)=>{set.has(k)?set.delete(k):set.add(k);drawHist()};
-ACT.hsx=el=>hxFlip(HX.so,el.dataset.k);
-ACT.hgx=el=>hxFlip(HX.go,el.dataset.k);
-ACT.hgall=el=>{HX.all.add(el.dataset.k);drawHist()};
-/* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio (the history cards never do: they only expand in place) */
+/* the column is redrawn here; under the Studio's view the batch's Particles section is drawn by particles.js (spSecDraw) */
+function drawHist(){if(['generate','create'].includes(route_))histCol();if(typeof spSecDraw==='function')spSecDraw()}
+/* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio, as does a row of the Earlier-batches column */
 ACT.hopen=el=>{const it=HB.items.find(x=>x.id===+el.dataset.id);if(!it)return;
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
   if(typeof CP!=='undefined')CP.menu=false;if(location.hash!=='#/studio')location.hash='#/studio';
-  if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});drawHist();if(typeof cpDrawTop==='function')cpDrawTop()};
+  if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});drawHist();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()};

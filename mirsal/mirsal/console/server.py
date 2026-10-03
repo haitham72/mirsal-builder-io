@@ -30,7 +30,7 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 # What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,
@@ -231,19 +231,20 @@ class Console:
         outline = (job.get("request") or {}).get("outline")
         req = job.get("request") or {}
         parent = req.get("parent")                         # a chat edit: the new batch is a child of the one it improves (lineage, never a copy)
+        parts = req.get("particles") or req.get("pieces")  # the sheet is the particle set of an effect (`pieces` is what older jobs called it): a particle batch, its cells are every group's sprites
+        parts = parts if isinstance(parts, dict) and parts.get("effect") else None
         tok = pl.OWNER.set(req.get("user") or "local")     # the batch belongs to whoever asked for the sheet
         try:
             gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None,
-                           parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None)
+                           parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None, kind="particles" if parts else None)
         finally:
             pl.OWNER.reset(tok)
         tasks.link_generation(self.out, t["id"], gid)
         jobs.attach_generation(self.out, job["id"], gid)
-        pieces = req.get("pieces")                         # the sheet is the pieces of a particle effect: its cells become that group's sprites (thread mode and queue mode both run this)
-        if isinstance(pieces, dict) and pieces.get("effect") and pieces.get("group"):
+        if parts:                                          # thread mode and queue mode both run this
             try:
-                fx_flow.link_pieces(self.out, str(pieces["effect"]), str(pieces["group"]), gid, job=job["id"], grid=t["plan"].get("grid"))
-            except fx_flow.EffectError:                    # the effect was removed meanwhile: the batch is still a normal batch
+                fx_flow.link_particles(self.out, str(parts["effect"]), gid, job=job["id"], grid=t["plan"].get("grid"))
+            except fx_flow.EffectError:                    # the effect was removed meanwhile: the batch is still a (particle) batch
                 pass
         self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
 
@@ -349,10 +350,11 @@ class Console:
         except (OSError, ValueError):
             raise pl.PipelineError("That batch has no saved plan to start from", 404)
 
-    def live(self, what, body, base_plan=None, pieces=None):
+    def live(self, what, body, base_plan=None, particles=None):
         """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
         `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>.
-        `pieces` ({effect, group}, in-process only, never from HTTP) marks a sheet as the pieces of a particle effect: `start_from_job` links its cells to that group."""
+        `particles` ({effect, elements}, in-process only, never from HTTP) marks a sheet as the particle set of an effect: the batch is a particle batch (exact equal cells, no sticker rule blocks a
+        cell) and `start_from_job` links its cells to every group of the effect."""
         if what not in ("cost", "sheet", "video"):
             raise pl.PipelineError(NO_ROUTE, 404)
         who = self.actor()
@@ -388,9 +390,9 @@ class Console:
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
                     "outline": int(body["outline"]) if body.get("outline") is not None else None, "custom_prompt": bool(custom),
                     "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"],
-                    **({"pieces": {"effect": str(pieces["effect"]), "group": str(pieces["group"])}} if pieces else {})})
-                if pieces:                                         # before the job runs, so the page sees REQUESTED and the later link is never overwritten
-                    fx_flow.request_pieces(self.out, str(pieces["effect"]), str(pieces["group"]), job["id"], t["plan"]["grid"], who["id"])
+                    **({"particles": {"effect": str(particles["effect"])}} if particles else {})})
+                if particles:                                      # before the job runs, so the page sees REQUESTED and the later link is never overwritten
+                    fx_flow.request_particles(self.out, str(particles["effect"]), job["id"], t["plan"]["grid"], particles.get("elements") or [], who["id"])
                 self.fulfil_async(job["id"], after=self.start_from_job)
                 return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
                         "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
@@ -1096,7 +1098,7 @@ def make_handler(c: Console):
             if len(parts) == 3:
                 if method != "GET":
                     raise pl.PipelineError(NO_ROUTE, 404)
-                return self._json(200, fx_flow.read(c.out, eid))
+                return self._json(200, fx_flow.view(c.out, eid))
             act = parts[3]
             if method != "POST":
                 raise pl.PipelineError(NO_ROUTE, 404)
@@ -1110,7 +1112,7 @@ def make_handler(c: Console):
                     fx_flow.set_sprites(c.out, eid, gid, body["sprites"])
                 if any(k in body for k in ("elements", "subject", "style")):
                     fx_flow.set_pieces(c.out, eid, gid, elements=body.get("elements"), subject=body.get("subject"), style=body.get("style"), by=self.user["id"])
-                return self._json(200, fx_flow.read(c.out, eid))
+                return self._json(200, fx_flow.view(c.out, eid))
             if act in ("estimate", "video"):
                 gid = str(body.get("group") or "")
                 grid = body.get("grid")
@@ -1134,9 +1136,13 @@ def make_handler(c: Console):
                 job = fx_flow.new_video_job(c.out, eid, gid, grid=tuple(plan["grid"]), user=who["id"], model=body.get("model"), options=body.get("options"))
                 c.fulfil_async(job["id"], after=lambda j: fx_flow.on_video_done(c.out, eid, gid, j, c.cfg))
                 return self._json(202, {"job": job["id"], "estimate": credits, "id": eid, "group": gid})
-            if act in ("pieces_estimate", "pieces"):               # the AI-drawn sheet of the burst's own pieces: an ordinary sheet job (Nano Banana 2), outline 0, linked to the group by start_from_job
-                gid = str(body.get("group") or "")
-                plan = fx_flow.pieces_plan(c.out, eid, gid, body.get("grid"))
+            if act == "suggest":                                   # candidate particles for the ONE set of the whole effect: the model looks at one picture (with consent), else the table answers
+                return self._json(200, fx_flow.suggest(c.out, c.lib, eid, body.get("grid"), allowed=body.get("allow_vlm") is True))
+            if act in ("particles_estimate", "particles", "pieces_estimate", "pieces"):    # the ONE sheet of particles for the whole effect: an ordinary sheet job (Nano Banana 2), outline 0, a particle batch linked by start_from_job
+                elements = body.get("elements")
+                if elements is None and body.get("group"):          # the old routes (`pieces`) named a group: its pieces are the picks (the first ones when it has more than the sheet has cells)
+                    elements = fx_flow.group_elements(c.out, eid, str(body["group"]))
+                plan = fx_flow.particles_plan(c.out, eid, body.get("grid"), elements, truncate=body.get("elements") is None)
                 if not higgsfield.available():
                     raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
                 model, params = model_catalog.resolve("image", body.get("model"), body.get("options"))
@@ -1146,17 +1152,24 @@ def make_handler(c: Console):
                     credits = None
                     plan["cost_error"] = str(ex)
                 plan.update(credits=credits, model=model, params=params)
-                if act == "pieces_estimate" or body.get("estimate") is True:
+                if act.endswith("_estimate") or body.get("estimate") is True:
                     return self._json(200, plan)
                 who = c.actor()
                 if not who.get("can_spend") or who.get("disabled"):
                     raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
                 if body.get("go") is not True:
                     return self._json(409, {"error": f"This costs {credits} credits. Send go: true to start it.", "estimate": plan})
-                base = fx_flow.pieces_base_plan(c.out, eid, gid, plan["grid"])
+                picks = plan["picks"]
+                base = fx_flow.particles_base_plan(c.out, eid, plan["grid"], picks)
                 j = c.live("sheet", {"prompt": base["task"], "grid": f"{plan['grid'][0]}x{plan['grid'][1]}", "outline": 0, "model": body.get("model"), "options": body.get("options")},
-                           base_plan=base, pieces={"effect": eid, "group": gid})
-                return self._json(202, {"job": j["job"], "task": j["task"], "estimate": j["estimate"], "id": eid, "group": gid, "grid": plan["grid"]})
+                           base_plan=base, particles={"effect": eid, "elements": picks})
+                return self._json(202, {"job": j["job"], "task": j["task"], "estimate": j["estimate"], "id": eid, "grid": plan["grid"]})
+            if act == "particles_recut":                           # a sheet drawn before batches knew they were particles (G100) is cut again as one: exact equal cells, warnings only, free
+                gn = fx_flow.recut_check(c.out, eid)
+                c.submit(lambda: pl.recut_as_particles(c.out, gn, c.cfg, c.pace, by=self.user.get("id") or "human"))
+                return self._json(202, {"id": eid, "generation": f"G{gn:03d}"})
+            if act == "particles_pick":                            # which cells of the drawn sheet are the particles (the person's decision; a cell with only warnings can be picked)
+                return self._json(200, fx_flow.pick_particles(c.out, eid, body.get("indexes"), "you"))
             if act == "preview":
                 return self._json(200, fx_flow.sim_preview(c.out, c.lib, eid, str(body.get("sticker_id") or ""), body.get("params") or {}, int(body.get("size") or 256)))
             if act == "render":
@@ -1496,17 +1509,26 @@ def make_handler(c: Console):
                     else:
                         _sp.Popen(["open" if _sys.platform == "darwin" else "xdg-open", str(target)])
                     return self._json(200, {"opened": str(target)})
-                if parts[3] == "allow":          # a human allows (or takes back) an animation Python blocked for leaving or crossing its slot
+                if parts[3] == "allow":          # "Use it anyway": a human allows (or takes back) a sticker or an animation that Python blocked as a judgement call (flow/gates.py)
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     allow = bool(body.get("allow", True))
-                    idx = gates.allowable(pl.read_result(c.out, gid), allow) if body.get("all") else [int(body["index"])]
+                    kind = str(body.get("kind") or "animation")           # no `kind` = what this route always did: animations
+                    if kind not in gates.KINDS:
+                        raise pl.PipelineError("kind must be 'still' or 'animation'")
+                    if body.get("all"):
+                        idx = gates.allowable(pl.read_result(c.out, gid), allow, kind)
+                    else:
+                        try:
+                            idx = [int(i) for i in (body["indexes"] if isinstance(body.get("indexes"), list) else [body["index"]])]
+                        except (KeyError, TypeError, ValueError):
+                            raise pl.PipelineError("index (a sticker number), indexes (a list) or all is required")
                     if not idx:
                         raise pl.PipelineError("There is nothing to allow." if allow else "Nothing was allowed in this batch.", 409)
                     for i in idx:
-                        gates.check_allow(c.out, gid, i, allow)
-                    c.submit(lambda: gates.allow_animations(c.out, gid, idx, allow, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
-                    return self._json(202, {"id": gid, "indexes": idx, "index": idx[0], "allow": allow})
+                        gates.check_allow(c.out, gid, i, allow, kind)
+                    c.submit(lambda: gates.allow_cells(c.out, gid, kind, idx, allow, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
+                    return self._json(202, {"id": gid, "kind": kind, "indexes": idx, "index": idx[0], "allow": allow})
                 if parts[3] == "edge":           # Apply / Undo: save a snapshot of the edge and apply it to the whole batch (in the background)
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)

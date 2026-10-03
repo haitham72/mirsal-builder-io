@@ -84,36 +84,44 @@ ACT.lcmove=()=>{const s=LCL[LCI];pickPack(async pid=>{if(pid===s.pack_id)return 
  const to=packById(pid)?.name||'pack';await loadLib();lcClose();if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();drawCol2();toast(`Moved to ${to}`)},'Move to pack')};
 document.addEventListener('keydown',e=>{if(LCI===null||$('dlg').classList.contains('on'))return;if(e.key==='Escape')lcClose();if(e.key==='ArrowRight')lcStep(1);if(e.key==='ArrowLeft')lcStep(-1)});
 
-/* ---------- Particles of a sticker (docs/effects.md): what was created for it and what was saved, under the big preview. The data is GET /api/packs/{id}/stickers/{sid}/particles
-   (an engine function, flow/effects.for_sticker); the pack grid's little counter is ONE request for the whole pack, GET /api/packs/{id}/particles. ptHtml/ptCard are pure (tests/js). */
+/* ---------- Particles of a sticker (docs/effects.md): what was created for it and what was saved, under the big preview and, for the stickers of the open batch, in the Studio (particles.js).
+   The data is GET /api/packs/{id}/stickers/{sid}/particles (an engine function, flow/effects.for_sticker); the pack grid's little counter is ONE request for the whole pack,
+   GET /api/packs/{id}/particles. ptHtml/ptBody/ptCard are pure (tests/js); every button carries its pack and sticker (data-p, data-s), so it works wherever the gallery is drawn. */
 const PKPT={d:{},c:{}};          // d: sticker id -> the route's answer; c: pack id -> {sticker id: {created, saved}}
 const ptWhy=w=>(typeof FXWHY!=='undefined'&&FXWHY[w])||String(w).replace(/_/g,' ');
 const ptKb=b=>b>=1024?Math.round(b/1024)+' KB':(b||0)+' B';
 const ptPackName=id=>{const p=typeof packById==='function'?packById(id):null;return p?p.name:'a pack'};
-function ptCard(i){const ok=i.url&&!i.missing,why=[...(i.warnings||[]),...(i.status==='FAILED'?(i.blocks||[]):[])].map(ptWhy),
+function ptCard(i,s){const ok=i.url&&!i.missing,why=[...(i.warnings||[]),...(i.status==='FAILED'?(i.blocks||[]):[])].map(ptWhy),
   kind=i.mode==='video'?`video, cell ${i.cell}${i.assigned?' (the one this sticker gets)':''} · shared by its group`:'simulated';
  return `<div class="pk-pt-card${i.usable?'':' bad'}"><div class=pk-pt-m>${ok?`<video src="${esc(i.url)}" autoplay loop muted playsinline preload=metadata></video>`:`<span class=mut>${i.status==='FAILED'?'Failed':'File missing'}</span>`}${i.added_to?`<span class=pk-pt-sv>Saved in ${esc(ptPackName(i.added_to))}</span>`:''}</div>
   <div class=pk-pt-id><b>${esc(i.effect)} · ${esc(i.result)}</b><small>${esc(kind)} · ${ptKb(i.bytes)}</small></div>
   ${why.length?`<ul class=pk-pt-w>${why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`:''}
-  <div class=pk-pt-a>${i.usable&&!i.added_to?`<button class="btn sm pri" data-act=ptadd data-e=${esc(i.effect)} data-r=${esc(i.result)}>Add to pack</button>`:''}<button class="btn sm" data-act=ptopen data-e=${esc(i.effect)}>Open effect</button></div></div>`}
+  <div class=pk-pt-a>${i.usable&&!i.added_to?`<button class="btn sm pri" data-act=ptadd data-e=${esc(i.effect)} data-r=${esc(i.result)}${s?` data-p=${esc(s.pack_id)} data-s=${esc(s.id)}`:''}>Add to pack</button>`:''}<button class="btn sm" data-act=ptopen data-e=${esc(i.effect)}>Open effect</button></div></div>`}
 function ptHtml(j,s){const head=extra=>`<div class=pk-pt-h><b>Particles</b>${extra||''}</div>`;
  if(!j)return head()+`<div class=pk-pt-load><div class=spin></div><span class=mut>Looking for particles…</span></div>`;
  if(j.error)return head()+`<div class=mut>${esc(j.error)}</div>`;
  const made=j.created||[],saved=j.saved||[];
- if(!made.length&&!saved.length)return head()+`<div class=pk-pt-empty><b>No particles yet</b><span class=mut>Make a burst of pieces for this sticker, like the effect Telegram plays when you press its emoji.</span>${j.can_make===false?'':`<button class="btn pri" data-act=ptmake>${ic('fx')} Make particles</button>`}</div>`;
- return head(`<span class=mut>${made.length} made · ${saved.length} saved</span>${j.can_make===false?'':`<button class="btn sm" data-act=ptmake>${ic('fx')} Make more</button>`}`)
-  +(made.length?`<div class=pk-pt-grid>${made.map(ptCard).join('')}</div>`:'')
+ if(!made.length&&!saved.length)return head()+`<div class=pk-pt-empty><b>No particles yet</b><span class=mut>Make a burst of particles for this sticker, like the effect Telegram plays when you press its emoji.</span>${j.can_make===false?'':`<button class="btn pri" data-act=ptmake data-p=${esc(s.pack_id)} data-s=${esc(s.id)}>${ic('fx')} Make particles</button>`}</div>`;
+ return head(`<span class=mut>${made.length} made · ${saved.length} saved</span>${j.can_make===false?'':`<button class="btn sm" data-act=ptmake data-p=${esc(s.pack_id)} data-s=${esc(s.id)}>${ic('fx')} Make more</button>`}`)+ptBody(j,s)}
+/* the takes of a sticker and the library stickers saved from them (without the heading and without the empty state: the Studio's section draws its own) */
+function ptBody(j,s){if(!j)return`<div class=pk-pt-load><div class=spin></div><span class=mut>Looking for particles…</span></div>`;if(j.error)return`<div class=mut>${esc(j.error)}</div>`;
+ const made=j.created||[],saved=j.saved||[];
+ return(made.length?`<div class=pk-pt-grid>${made.map(x=>ptCard(x,s)).join('')}</div>`:'')
   +(saved.length?`<div class=pk-pt-sh>Saved in the library</div><div class=pk-pt-saved>${saved.map(x=>`<button class=pk-pt-s data-act=ptsaved data-id=${esc(x.pack_id)} title="${esc(x.name)} in ${esc(x.pack)}">${x.missing?'<span class=mut>missing</span>':`<video src="${esc(x.url)}" autoplay loop muted playsinline preload=metadata></video>`}<small>${esc(x.pack)}</small></button>`).join('')}</div>`:'')}
 function ptBadge(pid,sid){const c=(PKPT.c[pid]||{})[sid];return c&&c.created+c.saved?`<span class=pk-pt-n title="${c.created} particle${c.created===1?'':'s'} made, ${c.saved} saved">${ic('fx')}${c.created}</span>`:''}
+/* a person's change (a take added, particles made) makes what was read stale */
+const ptForget=()=>{PKPT.c={};PKPT.d={}};
 async function ptLoad(s){const r=await api(`/api/packs/${s.pack_id}/stickers/${s.id}/particles`);PKPT.d[s.id]=r.ok?r.j:{error:r.j.error||'Could not read the particles'};
  const cur=LCI===null?null:LCL[LCI],el=$('pk-pt');if(el&&cur&&cur.id===s.id)el.innerHTML=ptHtml(PKPT.d[s.id],cur)}
 async function ptCounts(pid){const r=await api(`/api/packs/${pid}/particles`);if(!r.ok)return;
  if(JSON.stringify(r.j)!==JSON.stringify(PKPT.c[pid]||{})){PKPT.c[pid]=r.j;if(route_==='pack'&&PACK_ID===pid)drawPack()}}
-window.ptMakeFor=(pack,sid)=>{if(typeof FX!=='undefined'){FX.pack=pack;FX.sel=new Set([sid]);FX.eid='';FX.rec=null}location.hash='#/effects'};
-ACT.ptmake=()=>{const s=LCL[LCI];lcClose();window.ptMakeFor(s.pack_id,s.id)};
+/* "Make particles": in the Studio it opens the Particles tab with this sticker chosen; anywhere else the particle studio (#/effects) */
+window.ptMakeFor=(pack,sid)=>{if(route_==='generate'&&typeof spOpenFor==='function')return spOpenFor(pack,sid);if(typeof FX!=='undefined'){FX.pack=pack;FX.sel=new Set([sid]);FX.eid='';FX.rec=null}location.hash='#/effects'};
+ACT.ptmake=el=>{lcClose();window.ptMakeFor(el.dataset.p,el.dataset.s)};
 ACT.ptopen=el=>{lcClose();location.hash='#/effects/'+el.dataset.e};
 ACT.ptsaved=el=>{lcClose();location.hash='#/pack/'+el.dataset.id};
-ACT.ptadd=async el=>{const s=LCL[LCI];el.disabled=true;
- const r=await post(`/api/effects/${el.dataset.e}/add`,{results:[el.dataset.r],pack_id:s.pack_id,sticker_ids:[s.id]});
+ACT.ptadd=async el=>{const pid=el.dataset.p,sid=el.dataset.s;el.disabled=true;
+ const r=await post(`/api/effects/${el.dataset.e}/add`,{results:[el.dataset.r],pack_id:pid,sticker_ids:[sid]});
  if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not add it',1)}
- PKPT.c={};await loadLib();toast('Added to '+ptPackName(s.pack_id));if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();ptLoad(s)};
+ ptForget();await loadLib();toast('Added to '+ptPackName(pid)+', saved under the sticker');if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();else if(route_==='generate'&&typeof spSecSync==='function')spSecSync(true);
+ const cur=LCI===null?null:LCL[LCI];if(cur&&cur.id===sid)ptLoad(cur)};

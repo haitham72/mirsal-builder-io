@@ -1,5 +1,5 @@
-// The markup of the Earlier-batches column and of the history under the presented batch in live.js (the DOM half runs only in a browser). The statements are read out of the file and run with the few
-// globals they use stubbed, so the markup is checked for real: the sheet's own grid, the plain title, one row per batch, and the history block of the batch the Studio presents.
+// The markup of the Earlier-batches column in live.js (the DOM half runs only in a browser). The statements are read out of the file and run with the few
+// globals they use stubbed, so the markup is checked for real: the sheet's own grid, the plain title, one row per batch, and what drawHist redraws (the column; under the batch the Particles section).
 // Run: node --test tests/js     (MIRSAL_LIVE_JS points the test at another copy of live.js)
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -32,19 +32,17 @@ const BATCH = (grid, animated = [], noPng = []) => ({
   })),
 });
 
-function load() {
+function load(route = 'library') {
   const sandbox = {
     esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
     titleCase: s => s.replace(/(^|\s)([a-z])/g, (_, a, b) => a + b.toUpperCase()),
     ago: () => '2 d ago',
     SES: { gens: [] },
-    HX: { det: {} },
-    hxBatch: it => `<div class=lv-hdet>detail of ${it.id}</div>`,
-    hxLoad: () => {},
     HB: { items: [], more: false, total: 0, loaded: true },
-    route_: 'library',
-    histCol: () => {},
-    document: { getElementById: () => null },
+    route_: route,
+    calls: { col: 0, sec: 0 },
+    histCol: () => { sandbox.calls.col++; },
+    spSecDraw: () => { sandbox.calls.sec++; },
   };
   const body = ['const histTitle=', 'const histInfo=', 'const histGrid=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
   const api = new Function(...Object.keys(sandbox), body + '\nreturn {histGrid,histRow,histColHTML,drawHist};')(...Object.values(sandbox));
@@ -100,16 +98,14 @@ test('the column title is plain text, every batch is a row and nothing says Load
   assert.match(hx.histColHTML(), /No batches yet/);
 });
 
-test('under the Studio view only the presented batch has its history, and nothing when none is', () => {
-  const hx = load();
-  const el = { innerHTML: '' };
-  hx.env.document.getElementById = id => (id === 'ghist' ? el : null);
-  hx.env.HX.det = { 5: { state: 'ok', data: { generation_id: 'G005' } } };
-  hx.drawHist();
-  assert.equal(el.innerHTML, '', 'no batch presented: nothing under the view');
-  hx.env.SES.gens = [5];
-  hx.drawHist();
-  assert.match(el.innerHTML, /History of G005/);
-  assert.equal((el.innerHTML.match(/detail of/g) || []).length, 1, 'one batch, one history');
-  assert.ok(el.innerHTML.includes('detail of 5'));
+test('drawHist redraws the column on the Studio and Create, and always the batch\u2019s Particles section; the old history block is gone', () => {
+  const lib = load('library');
+  lib.drawHist();                                  // the library has its own column: only the Particles section is redrawn
+  assert.deepEqual(lib.env.calls, { col: 0, sec: 1 });
+  for (const r of ['generate', 'create']) {
+    const hx = load(r);
+    hx.drawHist();
+    assert.deepEqual(hx.env.calls, { col: 1, sec: 1 }, r);
+  }
+  assert.ok(!/ghist|hxBatch|History of/.test(statement('function drawHist')), 'nothing about the old per-sticker history');
 });

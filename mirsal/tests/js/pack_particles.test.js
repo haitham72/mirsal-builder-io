@@ -21,8 +21,8 @@ function statement(marker) {
 }
 
 const PACKS = { p1: { id: 'p1', name: 'Fruits' }, p2: { id: 'p2', name: 'Elsewhere <b>' } };
-const code = ['const ptWhy=', 'const ptKb=', 'const ptPackName=', 'function ptCard(', 'function ptHtml(', 'function ptBadge('].map(statement).join('\n');
-const make = (extra = '') => new Function('esc', 'ic', 'packById', `${extra}\n${code}\nreturn {ptHtml, ptCard, ptBadge, ptKb, ptWhy};`)(
+const code = ['const ptWhy=', 'const ptKb=', 'const ptPackName=', 'function ptCard(', 'function ptHtml(', 'function ptBody(', 'function ptBadge('].map(statement).join('\n');
+const make = (extra = '') => new Function('esc', 'ic', 'packById', `${extra}\n${code}\nreturn {ptHtml, ptBody, ptCard, ptBadge, ptKb, ptWhy};`)(
   s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
   n => `<svg data-i=${n}></svg>`,
   id => PACKS[id]);
@@ -40,7 +40,7 @@ test('while loading it shows a spinner, and an error shows its words', () => {
 test('no particles: the empty state with one primary "Make particles" button', () => {
   const h = P.ptHtml({ created: [], saved: [], can_make: true }, S);
   assert.match(h, /No particles yet/);
-  assert.match(h, /class="btn pri" data-act=ptmake/);
+  assert.match(h, /class="btn pri" data-act=ptmake data-p=p1 data-s=a1>/, 'the button carries its pack and sticker, so it works outside the library carousel too');
   assert.doesNotMatch(h, /<video/);
   assert.doesNotMatch(P.ptHtml({ created: [], saved: [], can_make: false }, S), /data-act=ptmake/);
 });
@@ -50,7 +50,7 @@ test('a ready take is a looping muted video with its id, size and an Add to pack
   assert.match(h, /<video src="\/out\/effects\/E001\/results\/R001\.webm" autoplay loop muted/);
   assert.match(h, /E001 · R001/);
   assert.match(h, /52 KB/);
-  assert.match(h, /data-act=ptadd data-e=E001 data-r=R001>Add to pack/);
+  assert.match(h, /data-act=ptadd data-e=E001 data-r=R001 data-p=p1 data-s=a1>Add to pack/);
   assert.match(h, /data-act=ptopen data-e=E001>Open effect/);
   assert.match(h, /1 made · 0 saved/);
 });
@@ -100,4 +100,15 @@ test('the grid counter shows only when the sticker has particles', () => {
 test('sizes read like a person says them', () => {
   assert.equal(P.ptKb(200), '200 B');
   assert.equal(P.ptKb(2048), '2 KB');
+});
+
+test('ptBody is the takes and the saved stickers without a heading or an empty state (the Studio section draws its own)', () => {
+  const h = P.ptBody({ created: [item()], saved: [{ sticker_id: 'x1', name: 'Heart', pack_id: 'p2', pack: 'Elsewhere', url: '/lib/a.webm', missing: false }] }, S);
+  assert.match(h, /pk-pt-grid/);
+  assert.match(h, /data-act=ptadd data-e=E001 data-r=R001 data-p=p1 data-s=a1>/);
+  assert.match(h, /Saved in the library/);
+  assert.doesNotMatch(h, /pk-pt-h|No particles yet/);
+  assert.equal(P.ptBody({ created: [], saved: [] }, S), '');
+  assert.match(P.ptBody(null, S), /class=spin/);
+  assert.match(P.ptBody({ error: 'no such pack' }, S), /no such pack/);
 });
