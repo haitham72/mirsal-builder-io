@@ -46,7 +46,7 @@ function drawPanel(){const el=document.getElementById('lvpanel');if(!el||!LIVE.m
    <div class=lv-row><span class=mut>Models</span><button class="lv-model" data-act=lmodels>${logoHtml(im.model)}<span><small>Image</small><b>${esc(im.model?im.model.label:'?')}</b><em>${esc(optSummary(im.model,im.sel))}</em></span></button>
     <button class="lv-model" data-act=lmodels>${logoHtml(vi.model)}<span><small>Animation</small><b>${esc(vi.model?vi.model.label:'?')}</b><em>${esc(optSummary(vi.model,vi.sel))}</em></span></button>
     <span class=mut id=lvhint>${LIVE.hf&&LIVE.hf.available===false?'Higgsfield is not installed: only prepared sheets can be used.':'Used when no prepared sheet matches the request.'}</span></div>`}
-ACT.lstyle=el=>{LIVE.style=el.dataset.id;lsave();drawPanel();if(typeof composerDraw==='function')composerDraw();if(typeof planPreview==='function')planPreview()};
+ACT.lstyle=el=>{LIVE.style=el.dataset.id;lsave();drawPanel();if(typeof composerDraw==='function')composerDraw()};
 
 /* ---------- the model dialog */
 let LMD=null;
@@ -112,7 +112,7 @@ document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset
   LIVE.fill=1-(+t.value)/100;t.nextElementSibling.textContent=t.value+'%';clearTimeout(GPT);
   GPT=setTimeout(()=>{const g=GM.get(+t.dataset.g),img=t.closest('.gsheet')&&t.closest('.gsheet').querySelector('[data-lvprev]');if(g&&img)img.src=previewUrl(g,LIVE.fill)},120)});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvgap!==undefined)lsave();
-  if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw();if(typeof planPreview==='function')planPreview()}});
+  if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw()}});
 function fillPrices(){for(const kind of ['video','image']){const c=lcached(kind);document.querySelectorAll(`[data-lvprice=${kind}]`).forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c));if(c===undefined&&document.querySelector(`[data-lvprice=${kind}]`))lcost(kind,true).then(()=>fillPrices())}}
 ACT.lvgen=async el=>{el.disabled=true;const ok=await liveStart('video',{g:+el.dataset.g});if(!ok)el.disabled=false;glast='';if(typeof tick==='function')tick(true)};
 
@@ -292,11 +292,18 @@ const histRow=it=>{const on=SES.gens.includes(it.id);
   return`<button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${it.id} aria-pressed=${on} title="Show ${esc(it.generation_id)} in the Studio">${histThumb(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(it)}</small></span></button>`};
 /* the column: a title and the whole list, newest edit first; the next page is asked for when the list is scrolled near its end (no "Load more") */
 function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
-  <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histRow).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div>`}
+  <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histRow).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div><div class=c2rem id=c2rem></div>`}
+/* the trash of batches (GET /api/generations/removed, owner only): Restore puts a batch back under its own number; the list is empty (and hidden) for anyone else */
+const REM={items:[],tried:false};
+async function remLoad(){const r=await api('/api/generations/removed');REM.items=r.ok?r.j.batches:[];REM.tried=true;remDraw()}
+function remDraw(){const el=document.getElementById('c2rem');if(!el)return;const was=el.querySelector('details')&&el.querySelector('details').open;
+  el.innerHTML=REM.items.length?`<details ${was?'open':''}><summary>Removed batches (${REM.items.length})</summary>${REM.items.map(b=>`<div class=rrow><span><b>${esc(b.id)}</b> ${b.subject?esc(String(b.subject).replace(/_/g,' ')):''} <span class=mut>${ago(b.removed)}</span></span><button class="btn sm" data-act=grestore data-n=${b.number}>Restore</button></div>`).join('')}</details>`:''}
+ACT.grestore=async el=>{const r=await post(`/api/generations/${el.dataset.n}/restore`,{});if(!r.ok){toast(r.j.error,1);return}toast(`${r.j.id} is back`);await remLoad();histLoad(false)};
 function histCol(){const c2=document.getElementById('col2');if(!c2)return;
   if(!c2.querySelector('#c2hist')||c2.dataset.k!=='batches'){c2.dataset.k='batches';c2.innerHTML=histColHTML();const l=document.getElementById('c2hist');
     l.addEventListener('scroll',()=>{if(HB.more&&!HB.loading&&l.scrollTop+l.clientHeight>l.scrollHeight-320)histLoad(true)})}
   else{const l=document.getElementById('c2hist'),top=l.scrollTop;c2.querySelector('.c2n').textContent=HB.loaded?`${HB.total} in total`:'';l.innerHTML=HB.items.map(histRow).join('')||l.innerHTML;l.scrollTop=top}
+  if(!REM.tried){REM.tried=true;remLoad()}else remDraw();
   if(!HB.loaded){if(!HB.tried){HB.tried=true;histLoad(false)}}
   else{const l=document.getElementById('c2hist');if(HB.more&&!HB.loading&&l.scrollHeight<=l.clientHeight+320)histLoad(true)}}
 /* the column is redrawn here; under the Studio's view the batch's Particles section is drawn by particles.js (spSecDraw) */

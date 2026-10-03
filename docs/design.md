@@ -227,6 +227,13 @@ whether to delete it; do not fold it into this column.
 
 ## UI/UX pass of 2026-10-03 (what a click means)
 
+* **The AI vision switch is a chamfered box with a glowing outline** (`agent.css` `.ai-vis` around a plain `.ai-chip`: cut corners by `clip-path`, a conic-gradient outline that rotates while the choice is undecided and rests under reduced motion, a soft drop-shadow on the wrapper because a clip-path would cut a shadow on the button itself). It once looked squashed because it reused `.ai-sw`, the 44x26 px settings toggle with its knob; a chip never takes a toggle's class. Decided, it keeps the box and says "AI vision on" / "AI vision off".
+* **A choice with two values is a drop-down, not a chip that flips** (the chat bar's sheet size: `<select data-aggrid>` inside `.ag-chip.ag-sel`, 3x3 / 2x2; one click never changes it by surprise).
+
+* **Remove batch** sits in the batch header beside *Create more* (`btn dng`, trash glyph, like *Delete pack*); its confirm names the batch and says it moves to the trash. **Removed batches (N)** is a folded list under the Earlier-batches column, each row with a **Restore** button (`.c2rem`).
+
+* **The Studio menu says nothing it cannot back** (2026-10-03). The empty prepared-sheets row prints nothing: it never names a folder (`inputs/Images_gen` is a watch-folder name, rule 9), and the other doors into a sheet are already on screen as real controls (the prompt box, the Earlier-batches column, the rail's *Create > Particle effects*). No *Prompt preview* sits under the box (internals such as template ids and `expanded_by` are not for a person). The settings under the box are the composer's own chips (`composer.js` `cpDrawBar`: model, Stroke, Loop, AI enhancer; `composerMount` removes the old *White outline* pills whenever the composer mounts), so the Studio screen has one settings block, not a lookalike.
+
 * **A cell of the sheet does one thing** (allow / take back / include / drop) and never opens a tile; the thumbnail on the right opens it. `Use it anyway`, the tile's x / + and the sheet cell are one control (`docs/engine-and-studio.md`, "One control per cell").
 * **One picture per batch** in the Earlier-batches column (the first sticker with a picture), never the sheet's 4 or 9 cells.
 * **The id is its own control**: `G103/S2` is a small hoverable, copyable chip beside the name, never inside it. Title, key and id are three fields.

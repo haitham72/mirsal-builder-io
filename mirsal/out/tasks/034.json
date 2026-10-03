@@ -1,0 +1,232 @@
+{
+  "id": "034",
+  "number": 34,
+  "provider": "higgsfield-manual",
+  "external_task_id": "6977b2f7-b172-4cb7-953d-5d5a86d2a6c7",
+  "name_key": "spiderman_dubai",
+  "status": "running",
+  "created": 1791023449.507,
+  "prompt": "spiderman in dubai",
+  "grid": [
+    2,
+    2
+  ],
+  "style_id": "clay_3d",
+  "folders": {
+    "img": "img-034-spiderman",
+    "vid": "vid-034-spiderman"
+  },
+  "paths": {
+    "img": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/Images_gen/img-034-spiderman",
+    "vid": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/videos_gen/vid-034-spiderman"
+  },
+  "request": {
+    "template_id": "sheet_2x2",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "<spiderman in Dubai>",
+      "style_id": "clay_3d",
+      "mode": "sheet_2x2",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "spiderman standing tall with arms wide open laughing joyfully at the sun",
+          "tags": [
+            "spiderman_celebration",
+            "superhero",
+            "dubai",
+            "sky"
+          ],
+          "emoji": "🕷️🌞",
+          "motion": "swinging his arms back and forth while pumping up slowly"
+        },
+        {
+          "pos": 2,
+          "label": "spiderman leaning forward pointing down at the city with a serious look",
+          "tags": [
+            "spiderman_commanding",
+            "patriarch",
+            "dubai",
+            "watch"
+          ],
+          "emoji": "🦸‍♂️🏙️",
+          "motion": "tapping his finger on his hip while swaying slightly"
+        },
+        {
+          "pos": 3,
+          "label": "spiderman crouching low with fists clenched looking scared and worried",
+          "tags": [
+            "spiderman_terrified",
+            "threat",
+            "dubai",
+            "shadow"
+          ],
+          "emoji": "🕷️😨",
+          "motion": "hopping in place while shrinking his body down fast"
+        },
+        {
+          "pos": 4,
+          "label": "spiderman lying on the ground with eyes closed feeling sleepy and tired",
+          "tags": [
+            "spiderman_exhausted",
+            "rest",
+            "dubai",
+            "heat"
+          ],
+          "emoji": "💤🛌",
+          "motion": "rolling over slowly while yawning his mouth wide open"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "loop": false
+    },
+    "grid": [
+      2,
+      2
+    ]
+  },
+  "plan": {
+    "task": "spiderman in dubai",
+    "task_slug": "spiderman_dubai",
+    "subject": "spiderman",
+    "context": "dubai",
+    "kind": "default",
+    "grid": [
+      2,
+      2
+    ],
+    "template_id": "sheet_2x2",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "<spiderman in Dubai>",
+      "style_id": "clay_3d",
+      "mode": "sheet_2x2",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "spiderman standing tall with arms wide open laughing joyfully at the sun",
+          "tags": [
+            "spiderman_celebration",
+            "superhero",
+            "dubai",
+            "sky"
+          ],
+          "emoji": "🕷️🌞",
+          "motion": "swinging his arms back and forth while pumping up slowly"
+        },
+        {
+          "pos": 2,
+          "label": "spiderman leaning forward pointing down at the city with a serious look",
+          "tags": [
+            "spiderman_commanding",
+            "patriarch",
+            "dubai",
+            "watch"
+          ],
+          "emoji": "🦸‍♂️🏙️",
+          "motion": "tapping his finger on his hip while swaying slightly"
+        },
+        {
+          "pos": 3,
+          "label": "spiderman crouching low with fists clenched looking scared and worried",
+          "tags": [
+            "spiderman_terrified",
+            "threat",
+            "dubai",
+            "shadow"
+          ],
+          "emoji": "🕷️😨",
+          "motion": "hopping in place while shrinking his body down fast"
+        },
+        {
+          "pos": 4,
+          "label": "spiderman lying on the ground with eyes closed feeling sleepy and tired",
+          "tags": [
+            "spiderman_exhausted",
+            "rest",
+            "dubai",
+            "heat"
+          ],
+          "emoji": "💤🛌",
+          "motion": "rolling over slowly while yawning his mouth wide open"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 4 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "key": "spiderman_celebration",
+        "tags": [
+          "spiderman_celebration",
+          "superhero",
+          "dubai",
+          "sky"
+        ],
+        "emoji": "🕷️🌞",
+        "prompt": "<spiderman in Dubai> spiderman standing tall with arms wide open laughing joyfully at the sun, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "key": "spiderman_commanding",
+        "tags": [
+          "spiderman_commanding",
+          "patriarch",
+          "dubai",
+          "watch"
+        ],
+        "emoji": "🦸‍♂️🏙️",
+        "prompt": "<spiderman in Dubai> spiderman leaning forward pointing down at the city with a serious look, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "key": "spiderman_terrified",
+        "tags": [
+          "spiderman_terrified",
+          "threat",
+          "dubai",
+          "shadow"
+        ],
+        "emoji": "🕷️😨",
+        "prompt": "<spiderman in Dubai> spiderman crouching low with fists clenched looking scared and worried, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "key": "spiderman_exhausted",
+        "tags": [
+          "spiderman_exhausted",
+          "rest",
+          "dubai",
+          "heat"
+        ],
+        "emoji": "💤🛌",
+        "prompt": "<spiderman in Dubai> spiderman lying on the ground with eyes closed feeling sleepy and tired, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+    ],
+    "expanded_by": "ai",
+    "expand_model": "qwen3.5-4b",
+    "sheet_prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: <spiderman in Dubai>.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: spiderman standing tall with arms wide open laughing joyfully at the sun\nCharacter 2: spiderman leaning forward pointing down at the city with a serious look\nCharacter 3: spiderman crouching low with fists clenched looking scared and worried\nCharacter 4: spiderman lying on the ground with eyes closed feeling sleepy and tired\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. swinging his arms back and forth while pumping up slowly\n2. tapping his finger on his hip while swaying slightly\n3. hopping in place while shrinking his body down fast\n4. rolling over slowly while yawning his mouth wide open\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders."
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791023449.507,
+    "note": "approved when the task was reserved"
+  },
+  "generations": []
+}

@@ -1,0 +1,2341 @@
+{
+  "generation_id": "G103",
+  "number": 103,
+  "owner": "local",
+  "created": 1791013929.387,
+  "parent": null,
+  "prompt": "superhero in dubai",
+  "task": "superhero in dubai",
+  "task_slug": "superhero_dubai",
+  "source": {
+    "subject": "superhero",
+    "subject_id": "032",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J043/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          686,
+          700
+        ],
+        [
+          686,
+          0,
+          672,
+          700
+        ],
+        [
+          1358,
+          0,
+          690,
+          700
+        ],
+        [
+          0,
+          700,
+          686,
+          660
+        ],
+        [
+          686,
+          700,
+          672,
+          660
+        ],
+        [
+          1358,
+          700,
+          690,
+          660
+        ],
+        [
+          0,
+          1360,
+          686,
+          688
+        ],
+        [
+          686,
+          1360,
+          672,
+          688
+        ],
+        [
+          1358,
+          1360,
+          690,
+          688
+        ]
+      ],
+      "xs": [
+        0,
+        686,
+        1358,
+        2048
+      ],
+      "ys": [
+        0,
+        700,
+        1360,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "task 032",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a small superhero figure wearing a red cape and mask standing on sand.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: hero stands tall with cape flowing wide in the hot sun of Dubai\nCharacter 2: hero jumps high into the air doing a backflip with cape trailing\nCharacter 3: hero leans forward shouting with one arm stretched toward distant skyscrapers\nCharacter 4: hero sits on a rock looking bored with cape draped over knees slowly\nCharacter 5: hero spins rapidly in a circle with cape creating a big blur around body\nCharacter 6: hero lies flat on stomach staring up at blue sky with arms by head\nCharacter 7: hero kneels with hands on knees looking worried and frowning deeply\nCharacter 8: hero laughs loud with hands covering mouth standing in a happy pose\nCharacter 9: hero runs fast on one leg with cape flapping wildly behind like wind\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. the hero shifts feet slightly while keeping arms relaxed at sides\n2. the hero rotates backward mid-air before landing softly on feet\n3. the hero bends at the waist and pushes chest out to yell loudly\n4. the hero shifts weight from one leg to the other lazily\n5. the hero circles fast on feet keeping hands near hips tightly\n6. the hero rolls slightly onto side then back to lying position gently\n7. the hero rocks back and forth while keeping head bowed low\n8. the hero bends knees and hops excitedly while shaking shoulders\n9. the hero strides forward quickly lifting opposite knee high each step\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "a small superhero figure wearing a red cape and mask standing on sand",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "hero stands tall with cape flowing wide in the hot sun of Dubai",
+        "tags": [
+          "superhero_stand_proud",
+          "cape_flow",
+          "sand",
+          "sunshine"
+        ],
+        "emoji": "🦸‍♂️☀️",
+        "motion": "the hero shifts feet slightly while keeping arms relaxed at sides"
+      },
+      {
+        "pos": 2,
+        "label": "hero jumps high into the air doing a backflip with cape trailing",
+        "tags": [
+          "superhero_jump_spin",
+          "mid_air",
+          "action",
+          "sky"
+        ],
+        "emoji": "🚀💥",
+        "motion": "the hero rotates backward mid-air before landing softly on feet"
+      },
+      {
+        "pos": 3,
+        "label": "hero leans forward shouting with one arm stretched toward distant skyscrapers",
+        "tags": [
+          "superhero_reach_shout",
+          "urban",
+          "call",
+          "power"
+        ],
+        "emoji": "🏙️📢",
+        "motion": "the hero bends at the waist and pushes chest out to yell loudly"
+      },
+      {
+        "pos": 4,
+        "label": "hero sits on a rock looking bored with cape draped over knees slowly",
+        "tags": [
+          "superhero_sit_bored",
+          "relax",
+          "sand",
+          "still"
+        ],
+        "emoji": "🪨😴",
+        "motion": "the hero shifts weight from one leg to the other lazily"
+      },
+      {
+        "pos": 5,
+        "label": "hero spins rapidly in a circle with cape creating a big blur around body",
+        "tags": [
+          "superhero_spin_fast",
+          "circle",
+          "blur",
+          "turn"
+        ],
+        "emoji": "🌪️🌀",
+        "motion": "the hero circles fast on feet keeping hands near hips tightly"
+      },
+      {
+        "pos": 6,
+        "label": "hero lies flat on stomach staring up at blue sky with arms by head",
+        "tags": [
+          "superhero_lie_down",
+          "sky_gaze",
+          "rest",
+          "flat"
+        ],
+        "emoji": "🌌💤",
+        "motion": "the hero rolls slightly onto side then back to lying position gently"
+      },
+      {
+        "pos": 7,
+        "label": "hero kneels with hands on knees looking worried and frowning deeply",
+        "tags": [
+          "superhero_kneel_worry",
+          "frown",
+          "doubt",
+          "sand"
+        ],
+        "emoji": "😰🤔",
+        "motion": "the hero rocks back and forth while keeping head bowed low"
+      },
+      {
+        "pos": 8,
+        "label": "hero laughs loud with hands covering mouth standing in a happy pose",
+        "tags": [
+          "superhero_laugh_happy",
+          "joy",
+          "hands_cover",
+          "dance"
+        ],
+        "emoji": "😂🥳",
+        "motion": "the hero bends knees and hops excitedly while shaking shoulders"
+      },
+      {
+        "pos": 9,
+        "label": "hero runs fast on one leg with cape flapping wildly behind like wind",
+        "tags": [
+          "superhero_run_fast",
+          "speed",
+          "dash",
+          "wind"
+        ],
+        "emoji": "💨🏃",
+        "motion": "the hero strides forward quickly lifting opposite knee high each step"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "032",
+  "name_key": "superhero_dubai",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791013904.808,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 53.3
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 229 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 229.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 7.8
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 25.8
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            686,
+            1358,
+            2048
+          ],
+          "ys": [
+            0,
+            700,
+            1360,
+            2048
+          ],
+          "ms": 21.8
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 3.9 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 3.89,
+        "limit": 12.0,
+        "data": {
+          "ms": 47.3
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "superhero_stand_proud",
+      "tags": [
+        "superhero_stand_proud",
+        "cape_flow",
+        "sand",
+        "sunshine"
+      ],
+      "emoji": "🦸‍♂️☀️",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero stands tall with cape flowing wide in the hot sun of Dubai, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-stand_proud-20261003T075209-3d71bb",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 148366,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 21.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 97008,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 97.008,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "186.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 186.2,
+          "limit": 512,
+          "data": {
+            "ms": 4.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          686,
+          700
+        ],
+        "bg": [
+          2,
+          233,
+          2
+        ],
+        "threshold": 115.5,
+        "fg_px": 148366,
+        "bbox": [
+          47,
+          64,
+          655,
+          650
+        ],
+        "scale": 0.7158,
+        "scale_mode": "clamped",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 186.2,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-stand_proud-20261003T075209-3d71bb.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.316,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A cartoon boy superhero stands confidently with hands on hips, smiling brightly.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "0fefca93ece8769b",
+        "ts": 1791013962.138
+      }
+    },
+    {
+      "index": 2,
+      "key": "superhero_jump_spin",
+      "tags": [
+        "superhero_jump_spin",
+        "mid_air",
+        "action",
+        "sky"
+      ],
+      "emoji": "🚀💥",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero jumps high into the air doing a backflip with cape trailing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-jump_spin-20261003T075209-b2c3cb",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 124620,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 89014,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 89.014,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0009,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.3
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 33 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 33,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "169.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 169.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          686,
+          0,
+          672,
+          700
+        ],
+        "bg": [
+          2,
+          233,
+          2
+        ],
+        "threshold": 115.5,
+        "fg_px": 124620,
+        "bbox": [
+          62,
+          82,
+          604,
+          629
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0009,
+        "holes": 0.0,
+        "kb": 169.6,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-jump_spin-20261003T075209-b2c3cb.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.321,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A cartoon character in a superhero costume falls upside down with a surprised expression.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "2e8278f058477bb8",
+        "ts": 1791013962.138
+      },
+      "title_proposal": {
+        "name": "Surprised superhero falling upside down",
+        "caption": "A cartoon character in a superhero costume falls upside down with a surprised expression.",
+        "ts": 1791013964.791
+      }
+    },
+    {
+      "index": 3,
+      "key": "superhero_reach_shout",
+      "tags": [
+        "superhero_reach_shout",
+        "urban",
+        "call",
+        "power"
+      ],
+      "emoji": "🏙️📢",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero leans forward shouting with one arm stretched toward distant skyscrapers, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-reach_shout-20261003T075209-e2c7aa",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 112360,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 19.1
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 79396,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 79.396,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "153.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 153.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1358,
+          0,
+          690,
+          700
+        ],
+        "bg": [
+          2,
+          233,
+          2
+        ],
+        "threshold": 115.0,
+        "fg_px": 112360,
+        "bbox": [
+          36,
+          96,
+          612,
+          633
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 153.6,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-reach_shout-20261003T075209-e2c7aa.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.325,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A cartoon superhero boy with angry eyes runs forward shouting.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "618eb1b9b9755573",
+        "ts": 1791013962.138
+      }
+    },
+    {
+      "index": 4,
+      "key": "superhero_sit_bored",
+      "tags": [
+        "superhero_sit_bored",
+        "relax",
+        "sand",
+        "still"
+      ],
+      "emoji": "🪨😴",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero sits on a rock looking bored with cape draped over knees slowly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-sit_bored-20261003T075209-a268b3",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 121438,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 79789,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 79.789,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "163.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 163.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          700,
+          686,
+          660
+        ],
+        "bg": [
+          2,
+          233,
+          2
+        ],
+        "threshold": 115.0,
+        "fg_px": 121438,
+        "bbox": [
+          162,
+          51,
+          577,
+          600
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 163.5,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-sit_bored-20261003T075209-a268b3.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.329,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A sad superhero character sits on a rock looking down with a frown.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "ac2bcfe86a5d53c8",
+        "ts": 1791013962.138
+      }
+    },
+    {
+      "index": 5,
+      "key": "superhero_spin_fast",
+      "tags": [
+        "superhero_spin_fast",
+        "circle",
+        "blur",
+        "turn"
+      ],
+      "emoji": "🌪️🌀",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero spins rapidly in a circle with cape creating a big blur around body, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-spin_fast-20261003T075209-3dbea8",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 152289,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 104586,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "79px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 79,
+          "limit": 104.586,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0013,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.1% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0007,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 13 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 13,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "198.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 198.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          686,
+          700,
+          672,
+          660
+        ],
+        "bg": [
+          2,
+          233,
+          2
+        ],
+        "threshold": 115.0,
+        "fg_px": 152289,
+        "bbox": [
+          40,
+          50,
+          636,
+          607
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 79,
+        "chroma_risk": 0.0013,
+        "holes": 0.0007,
+        "kb": 198.6,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-spin_fast-20261003T075209-3dbea8.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.333,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A determined superhero boy with a swirling red cape flies forward.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "b973c86ac34e36a1",
+        "ts": 1791013962.138
+      },
+      "title_proposal": {
+        "name": "Flying superhero with swirling red cape",
+        "caption": "A determined superhero boy with a swirling red cape flies forward.",
+        "ts": 1791013964.791
+      }
+    },
+    {
+      "index": 6,
+      "key": "superhero_lie_down",
+      "tags": [
+        "superhero_lie_down",
+        "sky_gaze",
+        "rest",
+        "flat"
+      ],
+      "emoji": "🌌💤",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero lies flat on stomach staring up at blue sky with arms by head, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-lie_down-20261003T075209-09d36a",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 118369,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 78388,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "17px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 17,
+          "limit": 78.388,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0013,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "151.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 151.9,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1358,
+          700,
+          690,
+          660
+        ],
+        "bg": [
+          3,
+          233,
+          2
+        ],
+        "threshold": 115.0,
+        "fg_px": 118369,
+        "bbox": [
+          129,
+          134,
+          648,
+          558
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 17,
+        "chroma_risk": 0.0013,
+        "holes": 0.0,
+        "kb": 151.9,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-lie_down-20261003T075209-09d36a.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.337,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A superhero boy in a blue suit with a red cape lies on his stomach looking surprised.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "9c53c1640194ff0b",
+        "ts": 1791013962.138
+      }
+    },
+    {
+      "index": 7,
+      "key": "superhero_kneel_worry",
+      "tags": [
+        "superhero_kneel_worry",
+        "frown",
+        "doubt",
+        "sand"
+      ],
+      "emoji": "😰🤔",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero kneels with hands on knees looking worried and frowning deeply, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-kneel_worry-20261003T075209-86dc7a",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 115987,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 15.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 75572,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "15px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 15,
+          "limit": 75.572,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 5",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 5,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "150.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 150.2,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1360,
+          686,
+          688
+        ],
+        "bg": [
+          3,
+          232,
+          2
+        ],
+        "threshold": 86.2,
+        "fg_px": 115987,
+        "bbox": [
+          120,
+          71,
+          487,
+          622
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 15,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 150.2,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                3,
+                232,
+                2
+              ],
+              "threshold": 115.0,
+              "fg_px": 116611,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-superhero_dubai-kneel_worry-20261003T075209-86dc7a.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.341,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A sad superhero character kneels on a grey background.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "6d1ce638d8d98c79",
+        "ts": 1791013962.138
+      }
+    },
+    {
+      "index": 8,
+      "key": "superhero_laugh_happy",
+      "tags": [
+        "superhero_laugh_happy",
+        "joy",
+        "hands_cover",
+        "dance"
+      ],
+      "emoji": "😂🥳",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero laughs loud with hands covering mouth standing in a happy pose, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-laugh_happy-20261003T075209-d81404",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 116825,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 77685,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 77.685,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "154.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 154.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          686,
+          1360,
+          672,
+          688
+        ],
+        "bg": [
+          3,
+          232,
+          2
+        ],
+        "threshold": 115.0,
+        "fg_px": 116825,
+        "bbox": [
+          183,
+          53,
+          471,
+          641
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 154.6,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-laugh_happy-20261003T075209-d81404.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.345,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A happy superhero boy laughs with hands over his mouth.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "8b2fb61dbd7ef69d",
+        "ts": 1791013962.138
+      }
+    },
+    {
+      "index": 9,
+      "key": "superhero_run_fast",
+      "tags": [
+        "superhero_run_fast",
+        "speed",
+        "dash",
+        "wind"
+      ],
+      "emoji": "💨🏃",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero runs fast on one leg with cape flapping wildly behind like wind, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-run_fast-20261003T075209-5e67b4",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 125249,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 19.1
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 90618,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 90.618,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.4% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0042,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 8",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 8,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "163.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 163.3,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1358,
+          1360,
+          690,
+          688
+        ],
+        "bg": [
+          3,
+          232,
+          2
+        ],
+        "threshold": 114.5,
+        "fg_px": 125249,
+        "bbox": [
+          42,
+          73,
+          584,
+          620
+        ],
+        "scale": 0.7201,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0042,
+        "kb": 163.3,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-run_fast-20261003T075209-5e67b4.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791013930.349,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A cartoon superhero with brown hair runs forward confidently in a blue suit and red cape.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "b8ecc9ccce289589",
+        "ts": 1791013962.138
+      }
+    }
+  ],
+  "sheet_issues": []
+}

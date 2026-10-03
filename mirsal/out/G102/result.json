@@ -1,0 +1,2820 @@
+{
+  "generation_id": "G102",
+  "number": 102,
+  "owner": "local",
+  "created": 1791004021.063,
+  "parent": null,
+  "prompt": "school buss",
+  "task": "school buss",
+  "task_slug": "school_buss",
+  "source": {
+    "subject": "school_buss",
+    "subject_id": "031",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J042/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          716,
+          670
+        ],
+        [
+          716,
+          0,
+          684,
+          670
+        ],
+        [
+          1400,
+          0,
+          648,
+          670
+        ],
+        [
+          0,
+          670,
+          716,
+          706
+        ],
+        [
+          716,
+          670,
+          684,
+          706
+        ],
+        [
+          1400,
+          670,
+          648,
+          706
+        ],
+        [
+          0,
+          1376,
+          716,
+          672
+        ],
+        [
+          716,
+          1376,
+          684,
+          672
+        ],
+        [
+          1400,
+          1376,
+          648,
+          672
+        ]
+      ],
+      "xs": [
+        0,
+        716,
+        1400,
+        2048
+      ],
+      "ys": [
+        0,
+        670,
+        1376,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "stills_reviewed",
+  "error": null,
+  "plan_source": "task 031",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a small yellow school bus.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: yellow bus driving happily down the street\nCharacter 2: yellow bus stopping suddenly to let out smoke\nCharacter 3: yellow bus tilted sideways by strong wind\nCharacter 4: yellow bus spinning in a tight circle fast\nCharacter 5: yellow bus lying flat on the grass after crash\nCharacter 6: yellow bus jumping over a giant puddle\nCharacter 7: yellow bus reaching out to touch a passing cloud\nCharacter 8: yellow bus shivering in heavy rain and snow\nCharacter 9: yellow bus dancing on the dance floor at a parade\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. the bus rolls forward with a cheerful bounce in its wheels\n2. the bus jerks to a halt and puffs steam from its grill\n3. the bus leans heavily to one side as gusts push it\n4. the bus rotates rapidly on its axis creating a blur of yellow\n5. the bus sits motionless on the ground with wheels askew\n6. the bus leaps high into the air clearing water below\n7. the bus extends its front bumper toward the sky\n8. the bus shakes violently as cold water hits its metal body\n9. the bus wobbles side to side performing rhythmic moves\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure blue (#0000FF) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "a small yellow school bus",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "yellow bus driving happily down the street",
+        "tags": [
+          "school_buss_driving_happy",
+          "road",
+          "morning",
+          "cheerful"
+        ],
+        "emoji": "🚌😊",
+        "motion": "the bus rolls forward with a cheerful bounce in its wheels"
+      },
+      {
+        "pos": 2,
+        "label": "yellow bus stopping suddenly to let out smoke",
+        "tags": [
+          "school_buss_stopping_smoke",
+          "emergency",
+          "steam",
+          "pause"
+        ],
+        "emoji": "🚌😵",
+        "motion": "the bus jerks to a halt and puffs steam from its grill"
+      },
+      {
+        "pos": 3,
+        "label": "yellow bus tilted sideways by strong wind",
+        "tags": [
+          "school_buss_tilted_wind",
+          "storm",
+          "lean",
+          "danger"
+        ],
+        "emoji": "🚌💨",
+        "motion": "the bus leans heavily to one side as gusts push it"
+      },
+      {
+        "pos": 4,
+        "label": "yellow bus spinning in a tight circle fast",
+        "tags": [
+          "school_buss_spinning_fast",
+          "spin",
+          "circle",
+          "quick"
+        ],
+        "emoji": "🚌🌀",
+        "motion": "the bus rotates rapidly on its axis creating a blur of yellow"
+      },
+      {
+        "pos": 5,
+        "label": "yellow bus lying flat on the grass after crash",
+        "tags": [
+          "school_buss_lying_crashed",
+          "flat",
+          "grass",
+          "broken"
+        ],
+        "emoji": "🚌😴",
+        "motion": "the bus sits motionless on the ground with wheels askew"
+      },
+      {
+        "pos": 6,
+        "label": "yellow bus jumping over a giant puddle",
+        "tags": [
+          "school_buss_jumping_puddle",
+          "splash",
+          "airborne",
+          "bounce"
+        ],
+        "emoji": "🚌💦",
+        "motion": "the bus leaps high into the air clearing water below"
+      },
+      {
+        "pos": 7,
+        "label": "yellow bus reaching out to touch a passing cloud",
+        "tags": [
+          "school_buss_reaching_cloud",
+          "touch",
+          "sky",
+          "dreamy"
+        ],
+        "emoji": "🚌☁️",
+        "motion": "the bus extends its front bumper toward the sky"
+      },
+      {
+        "pos": 8,
+        "label": "yellow bus shivering in heavy rain and snow",
+        "tags": [
+          "school_buss_shivering_cold",
+          "rain",
+          "snow",
+          "cold"
+        ],
+        "emoji": "🚌🥶",
+        "motion": "the bus shakes violently as cold water hits its metal body"
+      },
+      {
+        "pos": 9,
+        "label": "yellow bus dancing on the dance floor at a parade",
+        "tags": [
+          "school_buss_dancing_parade",
+          "party",
+          "dance",
+          "celebration"
+        ],
+        "emoji": "🚌💃",
+        "motion": "the bus wobbles side to side performing rhythmic moves"
+      }
+    ],
+    "action_guidance": "school",
+    "key_colour": "blue",
+    "loop": false
+  },
+  "task_id": "031",
+  "name_key": "school_buss",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791003996.655,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 55.0
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 180 blue-ward; a sheet without a blue screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 180.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 8.5
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": false,
+        "detail": "found 4x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "4x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 25.6
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            716,
+            1400,
+            2048
+          ],
+          "ys": [
+            0,
+            670,
+            1376,
+            2048
+          ],
+          "ms": 23.7
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 4.9 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 4.91,
+        "limit": 12.0,
+        "data": {
+          "ms": 61.6
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "school_buss_driving_happy",
+      "tags": [
+        "school_buss_driving_happy",
+        "road",
+        "morning",
+        "cheerful"
+      ],
+      "emoji": "🚌😊",
+      "prompt": "a small yellow school bus yellow bus driving happily down the street, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-driving_happy-20261003T050701-524477",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 135449,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 15.7
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 79973,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "214px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 214,
+          "limit": 79.973,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "11.3% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.1132,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "150.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 150.0,
+          "limit": 512,
+          "data": {
+            "ms": 2.9
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          716,
+          670
+        ],
+        "bg": [
+          1,
+          74,
+          255
+        ],
+        "threshold": 90.5,
+        "fg_px": 135449,
+        "bbox": [
+          118,
+          162,
+          601,
+          570
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 214,
+        "chroma_risk": 0.1132,
+        "waived": [
+          "no_spill"
+        ],
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0,
+        "kb": 150.0,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-driving_happy-20261003T050701-524477.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.476,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.476,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 214,
+            "limit": 79.973,
+            "note": "214px on the edge band",
+            "data": {
+              "ms": 3.0
+            }
+          }
+        },
+        {
+          "ts": 1791004207.647,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791004207.91,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791004207.907
+    },
+    {
+      "index": 2,
+      "key": "school_buss_stopping_smoke",
+      "tags": [
+        "school_buss_stopping_smoke",
+        "emergency",
+        "steam",
+        "pause"
+      ],
+      "emoji": "🚌😵",
+      "prompt": "a small yellow school bus yellow bus stopping suddenly to let out smoke, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-stopping_smoke-20261003T050701-964784",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 156186,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 96245,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "564px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 564,
+          "limit": 96.245,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "12.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.12,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "2 enclosed hole(s), 0.3% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0033,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 27 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 27,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "170.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 170.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.9
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          716,
+          0,
+          684,
+          670
+        ],
+        "bg": [
+          1,
+          74,
+          255
+        ],
+        "threshold": 90.5,
+        "fg_px": 156186,
+        "bbox": [
+          40,
+          160,
+          652,
+          550
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 564,
+        "chroma_risk": 0.12,
+        "waived": [
+          "no_spill"
+        ],
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0033,
+        "kb": 170.6,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-stopping_smoke-20261003T050701-964784.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.478,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.478,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 564,
+            "limit": 96.245,
+            "note": "564px on the edge band",
+            "data": {
+              "ms": 2.0
+            }
+          }
+        },
+        {
+          "ts": 1791013463.413,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791013463.84,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791013463.836
+    },
+    {
+      "index": 3,
+      "key": "school_buss_tilted_wind",
+      "tags": [
+        "school_buss_tilted_wind",
+        "storm",
+        "lean",
+        "danger"
+      ],
+      "emoji": "🚌💨",
+      "prompt": "a small yellow school bus yellow bus tilted sideways by strong wind, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-tilted_wind-20261003T050701-20c1af",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 141802,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 85358,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "437px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 437,
+          "limit": 85.358,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "12.5% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.1254,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "173.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 173.2,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1400,
+          0,
+          648,
+          670
+        ],
+        "bg": [
+          1,
+          74,
+          255
+        ],
+        "threshold": 90.5,
+        "fg_px": 141802,
+        "bbox": [
+          51,
+          148,
+          558,
+          569
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 437,
+        "chroma_risk": 0.1254,
+        "waived": [
+          "no_spill"
+        ],
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0,
+        "kb": 173.2,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-tilted_wind-20261003T050701-20c1af.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.479,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.479,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 437,
+            "limit": 85.358,
+            "note": "437px on the edge band",
+            "data": {
+              "ms": 2.2
+            }
+          }
+        },
+        {
+          "ts": 1791013463.413,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791013463.846,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791013463.843
+    },
+    {
+      "index": 4,
+      "key": "school_buss_spinning_fast",
+      "tags": [
+        "school_buss_spinning_fast",
+        "spin",
+        "circle",
+        "quick"
+      ],
+      "emoji": "🚌🌀",
+      "prompt": "a small yellow school bus yellow bus spinning in a tight circle fast, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-spinning_fast-20261003T050701-22d3e7",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 161669,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 94390,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "310px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 310,
+          "limit": 94.39,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "5.7% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0573,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0019,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 25 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 25,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "177.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 177.3,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          670,
+          716,
+          706
+        ],
+        "bg": [
+          1,
+          73,
+          255
+        ],
+        "threshold": 90.5,
+        "fg_px": 161669,
+        "bbox": [
+          79,
+          156,
+          649,
+          522
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 310,
+        "chroma_risk": 0.0573,
+        "waived": [
+          "no_spill"
+        ],
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0019,
+        "kb": 177.3,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-spinning_fast-20261003T050701-22d3e7.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.481,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.481,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 310,
+            "limit": 94.39,
+            "note": "310px on the edge band",
+            "data": {
+              "ms": 2.5
+            }
+          }
+        },
+        {
+          "ts": 1791013463.413,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791013463.851,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791013463.847
+    },
+    {
+      "index": 5,
+      "key": "school_buss_lying_crashed",
+      "tags": [
+        "school_buss_lying_crashed",
+        "flat",
+        "grass",
+        "broken"
+      ],
+      "emoji": "🚌😴",
+      "prompt": "a small yellow school bus yellow bus lying flat on the grass after crash, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-lying_crashed-20261003T050701-39638c",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 143365,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 85098,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "39px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 39,
+          "limit": 85.098,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "8.9% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0895,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "165.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 165.9,
+          "limit": 512,
+          "data": {
+            "ms": 4.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          716,
+          670,
+          684,
+          706
+        ],
+        "bg": [
+          1,
+          73,
+          255
+        ],
+        "threshold": 90.5,
+        "fg_px": 143365,
+        "bbox": [
+          24,
+          205,
+          619,
+          525
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 39,
+        "chroma_risk": 0.0895,
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0,
+        "kb": 165.9,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-lying_crashed-20261003T050701-39638c.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.482,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.486,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ]
+          }
+        },
+        {
+          "ts": 1791004037.038,
+          "stage": "naming",
+          "actor": "human",
+          "decision": "TITLE",
+          "reason": "Yellow bus lying down looking dazed",
+          "ref": null,
+          "detail": {
+            "was": null,
+            "via": "AI vision proposal"
+          }
+        },
+        {
+          "ts": 1791004068.09,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "agentic creator: the person's standing approval",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "caption": {
+        "text": "A yellow school bus lies on its side with X eyes, looking dazed.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "bd3f3949dc7b7994",
+        "ts": 1791004025.786
+      },
+      "title": "Yellow bus lying down looking dazed",
+      "judge": {
+        "decision": "UNJUDGED",
+        "confidence": 0.0,
+        "scores": {},
+        "reasons": [],
+        "suggested_emoji": null,
+        "notes": "unjudged: the vision model is unavailable",
+        "model": "",
+        "version": "judge_v1",
+        "error": "the model answered nonsense twice: unknown reason code(s): EXCELLENT CONCEPT MATCH - THE BUS IS CLEARLY LYING ON ITS SIDE IN A CRASHED STATE., CLEARLY READABLE - THE POSE AND DETAILS ARE DISTINCT EVEN AT SMALL SIZE., NO ARTIFACTS DETECTED - CLEAN CUT-OUT WITH NO VISIBLE GLITCHES OR ARTIFACTS.; use only DUPLICATE, WEAK_CONCEPT, AMBIGUOUS_ACTION, STYLE_DRIFT, IDENTITY_DRIFT, SEVERE_ARTIFACT, POOR_COMPOSITION, ANIMATION_RISK, CHROMA_RISK, MISSING_REQUIRED_ELEMENT, ANATOMY_ERROR, OBJECT_DEFORMATION, EMOJI_MISMATCH, UNWANTED_TEXT"
+      }
+    },
+    {
+      "index": 6,
+      "key": "school_buss_jumping_puddle",
+      "tags": [
+        "school_buss_jumping_puddle",
+        "splash",
+        "airborne",
+        "bounce"
+      ],
+      "emoji": "🚌💦",
+      "prompt": "a small yellow school bus yellow bus jumping over a giant puddle, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-jumping_puddle-20261003T050701-0309b4",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 164346,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 104929,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "1494px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1494,
+          "limit": 104.929,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "12.2% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.1218,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.6% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0064,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 24 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 24,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "198.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 198.2,
+          "limit": 512,
+          "data": {
+            "ms": 4.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1400,
+          670,
+          648,
+          706
+        ],
+        "bg": [
+          1,
+          73,
+          255
+        ],
+        "threshold": 90.5,
+        "fg_px": 164346,
+        "bbox": [
+          47,
+          89,
+          548,
+          622
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 1494,
+        "chroma_risk": 0.1218,
+        "waived": [
+          "no_spill"
+        ],
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0064,
+        "kb": 198.2,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-jumping_puddle-20261003T050701-0309b4.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.487,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.487,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 1494,
+            "limit": 104.929,
+            "note": "1494px on the edge band",
+            "data": {
+              "ms": 2.4
+            }
+          }
+        },
+        {
+          "ts": 1791013463.413,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791013463.855,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791013463.852
+    },
+    {
+      "index": 7,
+      "key": "school_buss_reaching_cloud",
+      "tags": [
+        "school_buss_reaching_cloud",
+        "touch",
+        "sky",
+        "dreamy"
+      ],
+      "emoji": "🚌☁️",
+      "prompt": "a small yellow school bus yellow bus reaching out to touch a passing cloud, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-reaching_cloud-20261003T050701-eb0a03",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 147753,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 88884,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "639px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 639,
+          "limit": 88.884,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "8.2% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0824,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.3% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0034,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.3
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 25 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 25,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "175.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 175.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1376,
+          716,
+          672
+        ],
+        "bg": [
+          2,
+          73,
+          254
+        ],
+        "threshold": 90.5,
+        "fg_px": 147753,
+        "bbox": [
+          70,
+          126,
+          687,
+          560
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 639,
+        "chroma_risk": 0.0824,
+        "waived": [
+          "no_spill"
+        ],
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0034,
+        "kb": 175.4,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-reaching_cloud-20261003T050701-eb0a03.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.487,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.487,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 639,
+            "limit": 88.884,
+            "note": "639px on the edge band",
+            "data": {
+              "ms": 2.1
+            }
+          }
+        },
+        {
+          "ts": 1791013463.413,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791013463.86,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791013463.857
+    },
+    {
+      "index": 8,
+      "key": "school_buss_shivering_cold",
+      "tags": [
+        "school_buss_shivering_cold",
+        "rain",
+        "snow",
+        "cold"
+      ],
+      "emoji": "🚌🥶",
+      "prompt": "a small yellow school bus yellow bus shivering in heavy rain and snow, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-shivering_cold-20261003T050701-374afb",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 152710,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 110689,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "798px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 798,
+          "limit": 110.68900000000001,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "11.8% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.1175,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.1% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0008,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "2 part(s); the second is 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.002,
+          "limit": 0.12,
+          "data": {
+            "parts": 2,
+            "ms": 1.3
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "211.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 211.1,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          716,
+          1376,
+          684,
+          672
+        ],
+        "bg": [
+          1,
+          73,
+          255
+        ],
+        "threshold": 90.5,
+        "fg_px": 152710,
+        "bbox": [
+          34,
+          84,
+          611,
+          578
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 798,
+        "chroma_risk": 0.1175,
+        "waived": [
+          "no_spill"
+        ],
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0008,
+        "kb": 211.1,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-shivering_cold-20261003T050701-374afb.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.488,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.488,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 798,
+            "limit": 110.68900000000001,
+            "note": "798px on the edge band",
+            "data": {
+              "ms": 1.9
+            }
+          }
+        },
+        {
+          "ts": 1791013463.413,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791013463.865,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791013463.862
+    },
+    {
+      "index": 9,
+      "key": "school_buss_dancing_parade",
+      "tags": [
+        "school_buss_dancing_parade",
+        "party",
+        "dance",
+        "celebration"
+      ],
+      "emoji": "🚌💃",
+      "prompt": "a small yellow school bus yellow bus dancing on the dance floor at a parade, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-school_buss-dancing_parade-20261003T050701-45ce6b",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 173934,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.7
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 116982,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "70px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 70,
+          "limit": 116.982,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": false,
+          "detail": "10.9% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.1088,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "2 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0017,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "2 part(s); the second is 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0016,
+          "limit": 0.12,
+          "data": {
+            "parts": 2,
+            "ms": 1.5
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "217.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 217.0,
+          "limit": 512,
+          "data": {
+            "ms": 4.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1400,
+          1376,
+          648,
+          672
+        ],
+        "bg": [
+          2,
+          73,
+          254
+        ],
+        "threshold": 90.5,
+        "fg_px": 173934,
+        "bbox": [
+          22,
+          83,
+          601,
+          595
+        ],
+        "scale": 0.6877,
+        "scale_mode": "pack",
+        "spill_px": 70,
+        "chroma_risk": 0.1088,
+        "warnings": [
+          "chroma_risk"
+        ],
+        "holes": 0.0017,
+        "kb": 217.0,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-school_buss-dancing_parade-20261003T050701-45ce6b.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791004022.489,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "4x3",
+            "limit": "3x3",
+            "note": "found 4x3, plan says 3x3",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791004022.493,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "chroma_risk"
+            ]
+          }
+        },
+        {
+          "ts": 1791004068.071,
+          "stage": "still",
+          "actor": "vlm",
+          "decision": "APPROVE",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "reasons": [],
+            "confidence": 0.95,
+            "scores": {
+              "concept_match": 1.0,
+              "emoji_fit": 0.8,
+              "character_match": null,
+              "style_match": 1.0
+            },
+            "notes": "The bus is clearly dancing on a checkered floor with confetti, perfectly matching the 'dancing parade' concept.",
+            "model": "qwen3.5-4b",
+            "version": "judge_v1",
+            "suggested_emoji": "🚌💃"
+          }
+        },
+        {
+          "ts": 1791004068.106,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "agentic creator: the person's standing approval",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "caption": {
+        "text": "A happy yellow school bus with confetti celebrating on a checkered platform.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "e754151713314549",
+        "ts": 1791004025.786
+      },
+      "judge": {
+        "decision": "APPROVE",
+        "confidence": 0.95,
+        "scores": {
+          "concept_match": 1.0,
+          "emoji_fit": 0.8,
+          "character_match": null,
+          "style_match": 1.0
+        },
+        "reasons": [],
+        "suggested_emoji": "🚌💃",
+        "notes": "The bus is clearly dancing on a checkered floor with confetti, perfectly matching the 'dancing parade' concept.",
+        "model": "qwen3.5-4b",
+        "version": "judge_v1",
+        "error": null
+      }
+    }
+  ],
+  "key_colour": "blue",
+  "sheet_issues": [
+    {
+      "check": "grid_detected",
+      "value": "4x3",
+      "limit": "3x3",
+      "note": "found 4x3, plan says 3x3",
+      "forced": false
+    }
+  ],
+  "added": {
+    "f8912e13": [
+      "static:5",
+      "static:9"
+    ]
+  }
+}

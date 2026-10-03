@@ -1,0 +1,39 @@
+{
+  "id": "J048",
+  "kind": "video",
+  "task": "superhero dubai",
+  "generation": "G105",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {
+      "mode": "pro",
+      "duration": "3"
+    },
+    "prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. swaying slightly while keeping feet planted firmly together\n2. mid-air leap before landing softly on both feet\n3. twitching shoulders while leaning heavily on one leg\n4. dropping low to the ground and sliding forward slowly\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "custom_prompt": false,
+    "start_image": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/G105/video_sheet/A1/sheet.png",
+    "sheet": "A1",
+    "label": "superhero dubai",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "CLAIMED",
+  "external_task_id": "81ba5956-7337-4dbc-80c1-dd4f8b1f4f8d",
+  "result": null,
+  "cost": null,
+  "error": null,
+  "created_at": 1791023700.94,
+  "claimed_at": 1791024104.958,
+  "completed_at": null,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "working",
+  "waiting_pid": null
+}

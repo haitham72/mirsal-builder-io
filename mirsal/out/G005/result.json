@@ -103,7 +103,7 @@
     3,
     3
   ],
-  "stage": "pack_final",
+  "stage": "video_sliced",
   "error": null,
   "plan_source": "task 008",
   "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A pink Barbie doll with long blonde hair, wearing a heart-patterned dress, identical in every cell.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:\nCharacter 1: Barbie smiling sweetly with hearts sparkling in her eyes\nCharacter 2: Barbie blowing a kiss with puckered lips and a wink\nCharacter 3: Barbie shyly looking down with cheeks blushing deeply\nCharacter 4: Barbie with hands clasped over her heart, eyes closed in bliss\nCharacter 5: Barbie looking surprised with wide eyes and an open mouth\nCharacter 6: Barbie laughing joyfully with head tilted back and eyes closed\nCharacter 7: Barbie looking dreamy with half-closed eyes and a soft smile\nCharacter 8: Barbie wringing hands nervously with a worried frown\nCharacter 9: Barbie holding a rose close with a proud smile and confident eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -250,19 +250,11 @@
       }
     },
     "pack": {
-      "decision": "APPROVE",
+      "decision": "REJECT",
       "by": "human",
-      "ts": 1790925229.395,
-      "note": "approved by Add",
-      "stickers": [
-        1,
-        3,
-        5,
-        6,
-        7,
-        8,
-        9
-      ]
+      "ts": 1791013173.552,
+      "note": "reopened: a sticker was changed",
+      "stickers": []
     }
   },
   "video_sheets": [
@@ -392,7 +384,7 @@
               "9": 0.99
             },
             "bad": [],
-            "ms": 55.8
+            "ms": 58.2
           }
         },
         {
@@ -1945,18 +1937,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 122.5,
+        "threshold": 123.0,
         "ms": {
-          "decode": 659,
-          "key": 611,
-          "bounds": 179,
-          "render": 1581,
-          "seam": 929,
-          "encode": 3903,
+          "decode": 146,
+          "key": 244,
+          "bounds": 152,
+          "render": 824,
+          "seam": 599,
+          "encode": 2340,
           "encodes": 3,
-          "probe": 233,
-          "verify": 18,
-          "finish": 6846
+          "probe": 173,
+          "verify": 11,
+          "finish": 4102
         },
         "frames": 72,
         "fps": 24.0,
@@ -1973,16 +1965,16 @@
           "cross_slot"
         ],
         "scale": 1.0122,
-        "motion": 27.58,
-        "loop_seam_before": 91.39,
+        "motion": 27.6,
+        "loop_seam_before": 91.44,
         "loop_seam": 0.0,
-        "loop_limit": 39.79,
+        "loop_limit": 39.82,
         "frames_out": 66,
         "crf": 38,
         "sharp_kept": 0.99,
         "detail_vs_still": 1.06,
         "soft_sigma": 0.0,
-        "kb": 201.0,
+        "kb": 201.3,
         "cache": "hit"
       },
       "webm": "slices/vid-005-barbie_love-barbie_blow_kiss.webm",
@@ -2785,6 +2777,260 @@
           "reason": "dropped from the set",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791013164.505,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot, inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot",
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013165.637,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 38, 7px over the 7px edge band",
+            "data": {
+              "frame": 38,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 41.8
+            }
+          }
+        },
+        {
+          "ts": 1791013166.572,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013171.491,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791013173.587,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791013179.719,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot, inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot",
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013180.136,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 38, 7px over the 7px edge band",
+            "data": {
+              "frame": 38,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 41.8
+            }
+          }
+        },
+        {
+          "ts": 1791013184.8,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013185.25,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791013187.489,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot, inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot",
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013187.93,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 38, 7px over the 7px edge band",
+            "data": {
+              "frame": 38,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 41.8
+            }
+          }
+        },
+        {
+          "ts": 1791013331.669,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013332.148,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791013335.17,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot, inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot",
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013335.646,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 38, 7px over the 7px edge band",
+            "data": {
+              "frame": 38,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 41.8
+            }
+          }
+        },
+        {
+          "ts": 1791013337.922,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013338.39,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791013339.73,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
         }
       ],
       "rendered_at": 1790878615.668,
@@ -2801,30 +3047,30 @@
             "frame": 38,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 55.6
+            "ms": 50.2
           }
         },
         {
           "name": "cross_slot",
           "ok": false,
-          "detail": "4424px of foreign foreground, first at frame 33 (allowed by you)",
+          "detail": "4432px of foreign foreground, first at frame 33 (allowed by you)",
           "severity": "WARN",
           "stage": "slot",
-          "value": 4424,
+          "value": 4432,
           "limit": 0,
           "data": {
             "frame": 33,
-            "px": 4424,
-            "ms": 56.9
+            "px": 4432,
+            "ms": 54.5
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "200KB @crf38",
+          "detail": "201KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 200,
+          "value": 201,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2911,17 +3157,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.9
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 39.79",
+          "detail": "0.0 <= 39.82",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 39.79,
+          "limit": 39.82,
           "data": {
             "ms": 0.0
           }
@@ -2935,16 +3181,16 @@
           "value": 0.957,
           "limit": 0.5,
           "data": {
-            "ms": 2.3
+            "ms": 2.5
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 27.58",
+          "detail": "median frame-to-frame change 27.6",
           "severity": "WARN",
           "stage": "anim",
-          "value": 27.58,
+          "value": 27.6,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2959,7 +3205,7 @@
           "value": 0.036,
           "limit": 0.35,
           "data": {
-            "ms": 15.7
+            "ms": 8.1
           }
         },
         {
@@ -3186,18 +3432,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 122.5,
+        "threshold": 123.0,
         "ms": {
-          "decode": 680,
-          "key": 595,
-          "bounds": 184,
-          "render": 1667,
-          "seam": 892,
-          "encode": 4947,
+          "decode": 195,
+          "key": 379,
+          "bounds": 165,
+          "render": 1166,
+          "seam": 757,
+          "encode": 3742,
           "encodes": 4,
-          "probe": 222,
-          "verify": 17,
-          "finish": 7933
+          "probe": 212,
+          "verify": 13,
+          "finish": 6059
         },
         "frames": 72,
         "fps": 24.0,
@@ -3215,21 +3461,20 @@
         ],
         "scale": 0.992,
         "motion": 27.64,
-        "loop_seam_before": 91.09,
+        "loop_seam_before": 91.15,
         "loop_seam": 0.0,
-        "loop_limit": 41.46,
+        "loop_limit": 41.47,
         "frames_out": 66,
         "crf": 34,
         "sharp_kept": 1.0,
         "detail_vs_still": 1.03,
         "soft_sigma": 0.0,
-        "kb": 247.7,
-        "cache": "hit"
+        "kb": 246.9
       },
       "webm": "slices/vid-005-barbie_love-barbie_shy_blush.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -4239,6 +4484,65 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791023179.355,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot, inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot",
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791023180.751,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 39, 7px over the 7px edge band",
+            "data": {
+              "frame": 39,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 54.4
+            }
+          }
+        },
+        {
+          "ts": 1791023183.721,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791023190.83,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790878615.69,
@@ -4255,7 +4559,7 @@
             "frame": 39,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 56.1
+            "ms": 55.0
           }
         },
         {
@@ -4269,16 +4573,16 @@
           "data": {
             "frame": 39,
             "px": 2100,
-            "ms": 58.9
+            "ms": 49.4
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "247KB @crf34",
+          "detail": "246KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 247,
+          "value": 246,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4371,11 +4675,11 @@
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 41.46",
+          "detail": "0.0 <= 41.47",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 41.46,
+          "limit": 41.47,
           "data": {
             "ms": 0.0
           }
@@ -4389,7 +4693,7 @@
           "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 1.7
+            "ms": 3.3
           }
         },
         {
@@ -4413,7 +4717,7 @@
           "value": 0.027,
           "limit": 0.35,
           "data": {
-            "ms": 15.1
+            "ms": 9.5
           }
         },
         {
@@ -5875,18 +6179,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 123.5,
+        "threshold": 124.5,
         "ms": {
-          "decode": 633,
-          "key": 635,
-          "bounds": 214,
-          "render": 1738,
-          "seam": 857,
-          "encode": 4111,
+          "decode": 153,
+          "key": 307,
+          "bounds": 147,
+          "render": 949,
+          "seam": 612,
+          "encode": 2254,
           "encodes": 3,
-          "probe": 243,
-          "verify": 19,
-          "finish": 7186
+          "probe": 198,
+          "verify": 10,
+          "finish": 4174
         },
         "frames": 72,
         "fps": 24.0,
@@ -5904,21 +6208,20 @@
         ],
         "scale": 0.8267,
         "motion": 32.1,
-        "loop_seam_before": 124.18,
+        "loop_seam_before": 124.15,
         "loop_seam": 0.0,
         "loop_limit": 50.04,
         "frames_out": 66,
         "crf": 38,
         "sharp_kept": 0.99,
-        "detail_vs_still": 1.15,
+        "detail_vs_still": 1.16,
         "soft_sigma": 0.0,
-        "kb": 230.8,
-        "cache": "hit"
+        "kb": 231.6
       },
       "webm": "slices/vid-005-barbie_love-barbie_love_shock.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -6717,6 +7020,65 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791013314.537,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot, inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot",
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013315.563,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 27, 7px over the 7px edge band",
+            "data": {
+              "frame": 27,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 45.6
+            }
+          }
+        },
+        {
+          "ts": 1791013394.216,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013399.325,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790878615.733,
@@ -6733,7 +7095,7 @@
             "frame": 27,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 63.8
+            "ms": 43.6
           }
         },
         {
@@ -6747,16 +7109,16 @@
           "data": {
             "frame": 27,
             "px": 3960,
-            "ms": 75.3
+            "ms": 55.0
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "230KB @crf38",
+          "detail": "231KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 230,
+          "value": 231,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -6843,7 +7205,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.1
+            "ms": 0.5
           }
         },
         {
@@ -6867,7 +7229,7 @@
           "value": 0.989,
           "limit": 0.5,
           "data": {
-            "ms": 2.2
+            "ms": 2.4
           }
         },
         {
@@ -6891,7 +7253,7 @@
           "value": 0.097,
           "limit": 0.35,
           "data": {
-            "ms": 16.5
+            "ms": 7.9
           }
         },
         {
@@ -9796,18 +10158,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 123.5,
+        "threshold": 124.5,
         "ms": {
-          "decode": 297,
-          "key": 474,
-          "bounds": 182,
-          "render": 1492,
-          "seam": 570,
-          "encode": 2617,
+          "decode": 160,
+          "key": 272,
+          "bounds": 178,
+          "render": 964,
+          "seam": 633,
+          "encode": 2225,
           "encodes": 3,
-          "probe": 170,
-          "verify": 15,
-          "finish": 5050
+          "probe": 185,
+          "verify": 11,
+          "finish": 4199
         },
         "frames": 72,
         "fps": 24.0,
@@ -9824,22 +10186,21 @@
           "cross_slot"
         ],
         "scale": 0.8267,
-        "motion": 25.25,
-        "loop_seam_before": 102.55,
+        "motion": 25.28,
+        "loop_seam_before": 102.51,
         "loop_seam": 0.0,
-        "loop_limit": 38.67,
+        "loop_limit": 38.74,
         "frames_out": 66,
         "crf": 38,
         "sharp_kept": 1.0,
         "detail_vs_still": 1.17,
         "soft_sigma": 0.0,
-        "kb": 197.6,
-        "cache": "hit"
+        "kb": 197.7
       },
       "webm": "slices/vid-005-barbie_love-barbie_nervous.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -10636,6 +10997,65 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791013235.017,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot, inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot",
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013235.986,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 26, 7px over the 7px edge band",
+            "data": {
+              "frame": 26,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 42.4
+            }
+          }
+        },
+        {
+          "ts": 1791013237.252,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791013242.331,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790878615.792,
@@ -10652,21 +11072,21 @@
             "frame": 26,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 47.7
+            "ms": 57.7
           }
         },
         {
           "name": "cross_slot",
           "ok": false,
-          "detail": "3368px of foreign foreground, first at frame 17 (allowed by you)",
+          "detail": "3366px of foreign foreground, first at frame 17 (allowed by you)",
           "severity": "WARN",
           "stage": "slot",
-          "value": 3368,
+          "value": 3366,
           "limit": 0,
           "data": {
             "frame": 17,
-            "px": 3368,
-            "ms": 58.1
+            "px": 3366,
+            "ms": 60.1
           }
         },
         {
@@ -10678,7 +11098,7 @@
           "value": 197,
           "limit": 256,
           "data": {
-            "ms": 0.0
+            "ms": 0.1
           }
         },
         {
@@ -10762,17 +11182,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 0.6
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 38.67",
+          "detail": "0.0 <= 38.74",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 38.67,
+          "limit": 38.74,
           "data": {
             "ms": 0.0
           }
@@ -10786,16 +11206,16 @@
           "value": 0.987,
           "limit": 0.5,
           "data": {
-            "ms": 1.5
+            "ms": 2.3
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 25.25",
+          "detail": "median frame-to-frame change 25.28",
           "severity": "WARN",
           "stage": "anim",
-          "value": 25.25,
+          "value": 25.28,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -10810,7 +11230,7 @@
           "value": 0.086,
           "limit": 0.35,
           "data": {
-            "ms": 13.2
+            "ms": 8.1
           }
         },
         {

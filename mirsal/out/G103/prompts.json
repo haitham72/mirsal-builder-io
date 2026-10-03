@@ -1,0 +1,261 @@
+{
+  "task": "superhero in dubai",
+  "task_slug": "superhero_dubai",
+  "subject": "superhero",
+  "context": "dubai",
+  "kind": "default",
+  "grid": [
+    3,
+    3
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "a small superhero figure wearing a red cape and mask standing on sand",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "hero stands tall with cape flowing wide in the hot sun of Dubai",
+        "tags": [
+          "superhero_stand_proud",
+          "cape_flow",
+          "sand",
+          "sunshine"
+        ],
+        "emoji": "🦸‍♂️☀️",
+        "motion": "the hero shifts feet slightly while keeping arms relaxed at sides"
+      },
+      {
+        "pos": 2,
+        "label": "hero jumps high into the air doing a backflip with cape trailing",
+        "tags": [
+          "superhero_jump_spin",
+          "mid_air",
+          "action",
+          "sky"
+        ],
+        "emoji": "🚀💥",
+        "motion": "the hero rotates backward mid-air before landing softly on feet"
+      },
+      {
+        "pos": 3,
+        "label": "hero leans forward shouting with one arm stretched toward distant skyscrapers",
+        "tags": [
+          "superhero_reach_shout",
+          "urban",
+          "call",
+          "power"
+        ],
+        "emoji": "🏙️📢",
+        "motion": "the hero bends at the waist and pushes chest out to yell loudly"
+      },
+      {
+        "pos": 4,
+        "label": "hero sits on a rock looking bored with cape draped over knees slowly",
+        "tags": [
+          "superhero_sit_bored",
+          "relax",
+          "sand",
+          "still"
+        ],
+        "emoji": "🪨😴",
+        "motion": "the hero shifts weight from one leg to the other lazily"
+      },
+      {
+        "pos": 5,
+        "label": "hero spins rapidly in a circle with cape creating a big blur around body",
+        "tags": [
+          "superhero_spin_fast",
+          "circle",
+          "blur",
+          "turn"
+        ],
+        "emoji": "🌪️🌀",
+        "motion": "the hero circles fast on feet keeping hands near hips tightly"
+      },
+      {
+        "pos": 6,
+        "label": "hero lies flat on stomach staring up at blue sky with arms by head",
+        "tags": [
+          "superhero_lie_down",
+          "sky_gaze",
+          "rest",
+          "flat"
+        ],
+        "emoji": "🌌💤",
+        "motion": "the hero rolls slightly onto side then back to lying position gently"
+      },
+      {
+        "pos": 7,
+        "label": "hero kneels with hands on knees looking worried and frowning deeply",
+        "tags": [
+          "superhero_kneel_worry",
+          "frown",
+          "doubt",
+          "sand"
+        ],
+        "emoji": "😰🤔",
+        "motion": "the hero rocks back and forth while keeping head bowed low"
+      },
+      {
+        "pos": 8,
+        "label": "hero laughs loud with hands covering mouth standing in a happy pose",
+        "tags": [
+          "superhero_laugh_happy",
+          "joy",
+          "hands_cover",
+          "dance"
+        ],
+        "emoji": "😂🥳",
+        "motion": "the hero bends knees and hops excitedly while shaking shoulders"
+      },
+      {
+        "pos": 9,
+        "label": "hero runs fast on one leg with cape flapping wildly behind like wind",
+        "tags": [
+          "superhero_run_fast",
+          "speed",
+          "dash",
+          "wind"
+        ],
+        "emoji": "💨🏃",
+        "motion": "the hero strides forward quickly lifting opposite knee high each step"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "key": "superhero_stand_proud",
+      "tags": [
+        "superhero_stand_proud",
+        "cape_flow",
+        "sand",
+        "sunshine"
+      ],
+      "emoji": "🦸‍♂️☀️",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero stands tall with cape flowing wide in the hot sun of Dubai, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "key": "superhero_jump_spin",
+      "tags": [
+        "superhero_jump_spin",
+        "mid_air",
+        "action",
+        "sky"
+      ],
+      "emoji": "🚀💥",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero jumps high into the air doing a backflip with cape trailing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "key": "superhero_reach_shout",
+      "tags": [
+        "superhero_reach_shout",
+        "urban",
+        "call",
+        "power"
+      ],
+      "emoji": "🏙️📢",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero leans forward shouting with one arm stretched toward distant skyscrapers, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "key": "superhero_sit_bored",
+      "tags": [
+        "superhero_sit_bored",
+        "relax",
+        "sand",
+        "still"
+      ],
+      "emoji": "🪨😴",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero sits on a rock looking bored with cape draped over knees slowly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 5,
+      "id": "prompt05",
+      "key": "superhero_spin_fast",
+      "tags": [
+        "superhero_spin_fast",
+        "circle",
+        "blur",
+        "turn"
+      ],
+      "emoji": "🌪️🌀",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero spins rapidly in a circle with cape creating a big blur around body, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 6,
+      "id": "prompt06",
+      "key": "superhero_lie_down",
+      "tags": [
+        "superhero_lie_down",
+        "sky_gaze",
+        "rest",
+        "flat"
+      ],
+      "emoji": "🌌💤",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero lies flat on stomach staring up at blue sky with arms by head, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 7,
+      "id": "prompt07",
+      "key": "superhero_kneel_worry",
+      "tags": [
+        "superhero_kneel_worry",
+        "frown",
+        "doubt",
+        "sand"
+      ],
+      "emoji": "😰🤔",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero kneels with hands on knees looking worried and frowning deeply, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 8,
+      "id": "prompt08",
+      "key": "superhero_laugh_happy",
+      "tags": [
+        "superhero_laugh_happy",
+        "joy",
+        "hands_cover",
+        "dance"
+      ],
+      "emoji": "😂🥳",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero laughs loud with hands covering mouth standing in a happy pose, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 9,
+      "id": "prompt09",
+      "key": "superhero_run_fast",
+      "tags": [
+        "superhero_run_fast",
+        "speed",
+        "dash",
+        "wind"
+      ],
+      "emoji": "💨🏃",
+      "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero runs fast on one leg with cape flapping wildly behind like wind, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    }
+  ],
+  "expanded_by": "ai",
+  "expand_model": "qwen3.5-4b",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a small superhero figure wearing a red cape and mask standing on sand.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: hero stands tall with cape flowing wide in the hot sun of Dubai\nCharacter 2: hero jumps high into the air doing a backflip with cape trailing\nCharacter 3: hero leans forward shouting with one arm stretched toward distant skyscrapers\nCharacter 4: hero sits on a rock looking bored with cape draped over knees slowly\nCharacter 5: hero spins rapidly in a circle with cape creating a big blur around body\nCharacter 6: hero lies flat on stomach staring up at blue sky with arms by head\nCharacter 7: hero kneels with hands on knees looking worried and frowning deeply\nCharacter 8: hero laughs loud with hands covering mouth standing in a happy pose\nCharacter 9: hero runs fast on one leg with cape flapping wildly behind like wind\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. the hero shifts feet slightly while keeping arms relaxed at sides\n2. the hero rotates backward mid-air before landing softly on feet\n3. the hero bends at the waist and pushes chest out to yell loudly\n4. the hero shifts weight from one leg to the other lazily\n5. the hero circles fast on feet keeping hands near hips tightly\n6. the hero rolls slightly onto side then back to lying position gently\n7. the hero rocks back and forth while keeping head bowed low\n8. the hero bends knees and hops excitedly while shaking shoulders\n9. the hero strides forward quickly lifting opposite knee high each step\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders."
+}

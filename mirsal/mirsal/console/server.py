@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from ..flow import effects as fx_flow, gates, metrics, particle_sets as fx_sets, sources, sticker_history, watch
+from ..flow import batches, effects as fx_flow, gates, metrics, particle_sets as fx_sets, sources, sticker_history, watch
 from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
 from ..services import llm, telegram
 from ..vision import consent as vision_consent, transcribe
@@ -1066,6 +1066,8 @@ def make_handler(c: Console):
                     return self._json(200, {"busy": c.lock.locked(), "generations": page, **meta})
                 page, meta = self._page(pl.summary(c.out))
                 return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": page, **meta})
+            if path == "/api/generations/removed":      # the trash of batches (owner only like the rest): Restore is reachable long after the remove
+                return self._json(200, {"batches": batches.list_removed(c.out)})
             if path.startswith("/api/generations/"):
                 gid = int(path.rsplit("/", 1)[1])
                 st = pl.state(c.out, gid)
@@ -1577,6 +1579,12 @@ def make_handler(c: Console):
             parts = path.strip("/").split("/")
             if len(parts) == 4 and parts[:2] == ["api", "generations"]:
                 gid = int(parts[2])
+                if parts[3] == "remove":         # to the trash, never straight to nothing (flow/batches.py); stickers already in packs stay in their packs
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    return self._json(200, batches.remove(c.out, gid, by=self.user.get("id") or "human"))
+                if parts[3] == "restore":
+                    return self._json(200, batches.restore(c.out, gid))
                 if parts[3] == "more":
                     if c.lock.locked():
                         raise pl.PipelineError("busy", 409)

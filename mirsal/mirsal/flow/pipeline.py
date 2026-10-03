@@ -48,6 +48,22 @@ def list_ids(out: Path) -> list[int]:
     return sorted(int(m[1]) for d in out.iterdir() if (m := re.fullmatch(r"G(\d{3,})", d.name)))
 
 
+def trash_batches_dir(out: Path) -> Path:
+    return Path(out) / "trash" / "batches"
+
+
+def removed_ids(out: Path) -> list[int]:
+    """The batches in the trash (flow/batches.py): their numbers stay taken, so a Restore can never collide with a new batch."""
+    d = trash_batches_dir(out)
+    if not d.is_dir():
+        return []
+    return sorted(int(m[1]) for x in d.iterdir() if x.is_dir() and (m := re.fullmatch(r"G(\d{3,})", x.name)))
+
+
+def next_gid(out: Path) -> int:
+    return max([0, *list_ids(out), *removed_ids(out)]) + 1
+
+
 import contextvars
 
 OWNER = contextvars.ContextVar("mirsal_owner", default="local")     # who is acting: the request's user, copied into the threads it starts
@@ -244,7 +260,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         measured = detect_grid(load_rgb(pick.sheet))
         plan = prompter.expand(prompt, measured if measured in prompter.GRIDS else tuple(grid or (3, 3)))
     out.mkdir(parents=True, exist_ok=True)
-    gid = (list_ids(out) or [0])[-1] + 1
+    gid = next_gid(out)
     d = gen_dir(out, gid)
     (d / "source").mkdir(parents=True)
     (d / "slices").mkdir()

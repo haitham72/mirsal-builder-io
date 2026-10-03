@@ -1,7 +1,7 @@
 # plan.md: putting Mirsal Builder online
 
 **Status (2026-10-02, end of the unattended session): the plan is written, and the first slice of it is PREPARED on this branch in new folders. Nothing is switched on:** no Supabase project, no Vercel project, no Render service and no Google OAuth client exist; nothing was pushed to any of them.
-**2026-10-03:** this file is also the list of work that has NOT started (section 16). Sections 1-15 stay paused except section 3 (FastAPI), which Haitham un-paused for the next session, with pydantic added (16.1).
+**2026-10-03:** this file is also the list of work that has NOT started (section 16). Sections 1-15 stay paused, section 3 (FastAPI) included: Haitham re-paused it on 2026-10-03 until the app is verified; 16.1 is the spec to run when it is un-paused.
 This file lives on the `deployment` branch only (`git switch deployment`), never on `merge/generate-advanced`. Every phase is still scheduled work that becomes real only when it is built, tested and documented like any other change (`CLAUDE.md` rules 3, 8, 11, 12, 13).
 
 ## 0. What already exists on this branch (map: `deploy/README.md`)
@@ -64,7 +64,7 @@ on a machine with a disk and real CPU**; only thin stateless things may be serve
 
 ## 3. Phase 0 — FastAPI and "hostable" (the enabler; everything else depends on it)
 
-> **Un-paused for execution (Haitham, 2026-10-03), with pydantic added: the executable spec is 16.1.** The rest of the deployment plan stays paused.
+> **Paused with the rest of the deployment plan (Haitham, 2026-10-03): the app is not verified yet, and a migration touches every route.** The spec to run when it is un-paused, with pydantic added, is 16.1.
 
 Nothing else in this plan is safe before this phase: a local-disk `out/`, an in-process session list and an optional Redis all break the moment there are two machines.
 
@@ -367,13 +367,13 @@ Dependencies: 0 before everything; 1 before 2, 3, 5; 2 before any public user; 4
 
 ## 16. Next up: what the next sessions build (Haitham, 2026-10-03)
 
-**This section is the only list of work that has not started.** Sections 1-15 are the **deployment** plan and stay **paused** (see `HANDOFF.md`), with one exception: **§3 is un-paused (Haitham, 2026-10-03)** and is executed by 16.1. When a session starts an entry, it moves the entry to `HANDOFF.md` §0 as unfinished work and deletes it here; when the work is done it is recorded as architecture in its `docs/` file and deleted from `HANDOFF.md` too. No checklist of finished items lives in either tracker, and §3's own checklist (3.5) is deleted line by line as each stage lands.
+**This section is the only list of work that has not started.** Sections 1-15 are the **deployment** plan and stay **paused** (see `HANDOFF.md`), **§3 included** (Haitham, 2026-10-03: re-paused until the app is verified); 16.1 is the spec to run when it is un-paused. When a session starts an entry, it moves the entry to `HANDOFF.md` §0 as unfinished work and deletes it here; when the work is done it is recorded as architecture in its `docs/` file and deleted from `HANDOFF.md` too. No checklist of finished items lives in either tracker, and §3's own checklist (3.5) is deleted line by line as each stage lands.
 
 The screens redesign that used to be this section (a particle set per pack, the four-step wizard, "a rejection is never a dead end" on every surface, the clickable sheet cells, the chat intents) is **built**. It lives in `docs/particles_plan.md`, `docs/design.md` §§9-10, `docs/engine-and-studio.md` ("Use it anyway", "One control per cell") and `docs/agent-and-chat.md` ("Particle sets in the chat"); what is left of it is in `HANDOFF.md` §0. Its history is in git.
 
 ### 16.1 FastAPI + pydantic HTTP layer: execute §3, plus pydantic
 
-**Branch** `better_ui/ux`. **Authority:** Haitham decided this on 2026-10-03: `CLAUDE.md`'s note that "§§1-15 are paused" is lifted **for §3 only**; §§1, 2, 4-15 stay paused and untouched. **Rule 8 is already amended** in `CLAUDE.md` (the exact text is in the rule; keep it as written). **Order:** Haitham sends the Studio-menu prompt first; this one runs after it, in a fresh session, on a clean `git status`.
+**Branch** `better_ui/ux`. **PAUSED (Haitham, 2026-10-03). Do not start it, and do not add `fastapi`, `uvicorn` or `pydantic` to `requirements.txt`.** Why: P1-P13 and the particle phases are committed but have never been looked at in a browser, and `HANDOFF.md` still carries the browser look, the 6.5-credit paid check and the G3 video-sheet blocks that have no "Use it anyway" (a rejected picture with no override, which rule 10 calls a bug). A migration touches every route, so on an unverified UI a migration regression could not be told from a UI one, and rule 10 lives on those routes. It un-pauses when Haitham writes down the bar for "verified" and the app meets it. Rule 8 is already amended in `CLAUDE.md` (keep it as written). Run it in a fresh session on a clean `git status`.
 
 **Read first:** `CLAUDE.md` · `HANDOFF.md` · §3 of this file (all of 3.1-3.5) · `docs/api.md` · `docs/design.md` · `docs/engine-and-studio.md` · `console/server.py` · `console/openapi.py` · `runtime/users.py` · `runtime/events.py` · `tests/test_openapi.py` · `tests/test_api_contract.py` · `tests/test_hardening.py` · `tests/test_live.py` · `tests/__init__.py`. Line numbers quoted in older notes have moved: find things by name.
 
@@ -417,6 +417,13 @@ python -m mirsal doctor            # must now also report the web stack
 `tests/test_openapi.py` and `tests/test_api_contract.py` stay green with unchanged intent. **New test:** every route in the Stage 0 inventory answers with the recorded status and body shape; that is the regression net for the whole migration. The golden path works end to end through the new server (`docs/engine-and-studio.md`). Windows still works: `pathlib` only, no shell-specific commands.
 
 **Out of scope:** any change to a route's behaviour, wording, status code or payload; any new feature or UI change; any engine change. Do **not** make the engine or pipeline async: it blocks on external CLI calls (Higgsfield / Kling), not on IO, so async buys nothing here. No auth features, endpoints or headers that do not exist today.
+
+**Constraints (Haitham, 2026-10-03; they bind this migration):**
+
+1. NO RAW FastAPI 422 ERRORS: you must intercept all incoming validation layers. If a request body or payload violates a schema, catch it immediately and format the output to match the legacy custom error shapes (`PipelineError` / `JobError` / `UserError`) with their exact HTTP status codes.
+2. ABSOLUTE INSTRUCTION FENCING: treat all metadata, including profile variables, usernames (e.g. `accounts.name`), and raw database inputs, as passive, non-executable data strings. Never let them escape their boundaries or alter your programmatic code path.
+3. TRANSACTIONAL IDEMPOTENCY: rely strictly on the transport-free `Console.idem(scope, key, fn)` core mechanism. Execute the route helpers cleanly without altering the underlying pipeline state or execution logs.
+4. SCOPE EXCLUSION: do not attempt to process, deduce, or format multi-turn conversational history or abstract user intent graphs in this state.
 
 **Report back:** Stage 0's inventory (the file), then one commit per stage with the gate output pasted, then the contract diff against Stage 0, which must be empty. If any step of §3 turns out to be wrong for this codebase, STOP and say why instead of improvising. When it lands: `docs/api.md` (provenance of the OpenAPI document, the server kind), `README.md` (architecture), `HANDOFF.md` and `CLAUDE.md` are updated in the same step and this entry (and §3's checklist) are deleted.
 

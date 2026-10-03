@@ -1,0 +1,417 @@
+{
+  "id": "033",
+  "number": 33,
+  "provider": "higgsfield-manual",
+  "external_task_id": "67cd4ce2-5025-413a-aeaf-dca98202911b",
+  "name_key": "spiderman_school",
+  "status": "running",
+  "created": 1791023364.103,
+  "prompt": "spiderman in school",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "clay_3d",
+  "folders": {
+    "img": "img-033-spiderman",
+    "vid": "vid-033-spiderman"
+  },
+  "paths": {
+    "img": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/Images_gen/img-033-spiderman",
+    "vid": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/videos_gen/vid-033-spiderman"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "Spider-Man uniformed student",
+      "style_id": "clay_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "Happy student running to class with excitement",
+          "tags": [
+            "spiderman_running_jump",
+            "school",
+            "excitement",
+            "speed"
+          ],
+          "emoji": "🏃😄",
+          "motion": "leaps forward with arms pumping and legs bouncing"
+        },
+        {
+          "pos": 2,
+          "label": "Confused student rubbing head in doubt",
+          "tags": [
+            "spiderman_rub_chin",
+            "confusion",
+            "thinking",
+            "school"
+          ],
+          "emoji": "🤔😕",
+          "motion": "tilts head slowly while scratching chin vigorously"
+        },
+        {
+          "pos": 3,
+          "label": "Excited student waving at teacher proudly",
+          "tags": [
+            "spiderman_wave_fist",
+            "pride",
+            "welcome",
+            "classroom"
+          ],
+          "emoji": "👋🌟",
+          "motion": "raises arm high and shakes fist in the air"
+        },
+        {
+          "pos": 4,
+          "label": "Tired student slouching over desk bored",
+          "tags": [
+            "spiderman_slouch_yawn",
+            "boredom",
+            "fatigue",
+            "study"
+          ],
+          "emoji": "😴📚",
+          "motion": "leans back heavily while yawning widely open mouth"
+        },
+        {
+          "pos": 5,
+          "label": "Scared student cowering behind chair in fear",
+          "tags": [
+            "spiderman_cower_huddle",
+            "fear",
+            "panic",
+            "schoolyard"
+          ],
+          "emoji": "😱🪑",
+          "motion": "shrinks down low and clutches knees tightly"
+        },
+        {
+          "pos": 6,
+          "label": "Angry student kicking table with frustration",
+          "tags": [
+            "spiderman_kick_table",
+            "anger",
+            "frustration",
+            "classroom"
+          ],
+          "emoji": "😡💢",
+          "motion": "punches leg hard against the wooden surface"
+        },
+        {
+          "pos": 7,
+          "label": "Shocked student falling jaw in surprise",
+          "tags": [
+            "spiderman_open_mouth",
+            "shock",
+            "awe",
+            "surprise"
+          ],
+          "emoji": "🤯👀",
+          "motion": "drops mouth open wide and stands frozen still"
+        },
+        {
+          "pos": 8,
+          "label": "Embarrassed student hiding face in hands red",
+          "tags": [
+            "spiderman_hide_face",
+            "embarrassment",
+            "shame",
+            "gym"
+          ],
+          "emoji": "🙈🍂",
+          "motion": "picks head up low with fingers covering eyes"
+        },
+        {
+          "pos": 9,
+          "label": "Mischief student grinning while hiding under desk",
+          "tags": [
+            "spiderman_grin_peek",
+            "mischief",
+            "prank",
+            "school"
+          ],
+          "emoji": "😏🤡",
+          "motion": "peeks up sideways with a wicked smile and grin"
+        }
+      ],
+      "action_guidance": "school",
+      "key_colour": "green",
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "spiderman in school",
+    "task_slug": "spiderman_school",
+    "subject": "spiderman",
+    "context": "school",
+    "kind": "school",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "Spider-Man uniformed student",
+      "style_id": "clay_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "Happy student running to class with excitement",
+          "tags": [
+            "spiderman_running_jump",
+            "school",
+            "excitement",
+            "speed"
+          ],
+          "emoji": "🏃😄",
+          "motion": "leaps forward with arms pumping and legs bouncing"
+        },
+        {
+          "pos": 2,
+          "label": "Confused student rubbing head in doubt",
+          "tags": [
+            "spiderman_rub_chin",
+            "confusion",
+            "thinking",
+            "school"
+          ],
+          "emoji": "🤔😕",
+          "motion": "tilts head slowly while scratching chin vigorously"
+        },
+        {
+          "pos": 3,
+          "label": "Excited student waving at teacher proudly",
+          "tags": [
+            "spiderman_wave_fist",
+            "pride",
+            "welcome",
+            "classroom"
+          ],
+          "emoji": "👋🌟",
+          "motion": "raises arm high and shakes fist in the air"
+        },
+        {
+          "pos": 4,
+          "label": "Tired student slouching over desk bored",
+          "tags": [
+            "spiderman_slouch_yawn",
+            "boredom",
+            "fatigue",
+            "study"
+          ],
+          "emoji": "😴📚",
+          "motion": "leans back heavily while yawning widely open mouth"
+        },
+        {
+          "pos": 5,
+          "label": "Scared student cowering behind chair in fear",
+          "tags": [
+            "spiderman_cower_huddle",
+            "fear",
+            "panic",
+            "schoolyard"
+          ],
+          "emoji": "😱🪑",
+          "motion": "shrinks down low and clutches knees tightly"
+        },
+        {
+          "pos": 6,
+          "label": "Angry student kicking table with frustration",
+          "tags": [
+            "spiderman_kick_table",
+            "anger",
+            "frustration",
+            "classroom"
+          ],
+          "emoji": "😡💢",
+          "motion": "punches leg hard against the wooden surface"
+        },
+        {
+          "pos": 7,
+          "label": "Shocked student falling jaw in surprise",
+          "tags": [
+            "spiderman_open_mouth",
+            "shock",
+            "awe",
+            "surprise"
+          ],
+          "emoji": "🤯👀",
+          "motion": "drops mouth open wide and stands frozen still"
+        },
+        {
+          "pos": 8,
+          "label": "Embarrassed student hiding face in hands red",
+          "tags": [
+            "spiderman_hide_face",
+            "embarrassment",
+            "shame",
+            "gym"
+          ],
+          "emoji": "🙈🍂",
+          "motion": "picks head up low with fingers covering eyes"
+        },
+        {
+          "pos": 9,
+          "label": "Mischief student grinning while hiding under desk",
+          "tags": [
+            "spiderman_grin_peek",
+            "mischief",
+            "prank",
+            "school"
+          ],
+          "emoji": "😏🤡",
+          "motion": "peeks up sideways with a wicked smile and grin"
+        }
+      ],
+      "action_guidance": "school",
+      "key_colour": "green",
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "key": "spiderman_running_jump",
+        "tags": [
+          "spiderman_running_jump",
+          "school",
+          "excitement",
+          "speed"
+        ],
+        "emoji": "🏃😄",
+        "prompt": "Spider-Man uniformed student Happy student running to class with excitement, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "key": "spiderman_rub_chin",
+        "tags": [
+          "spiderman_rub_chin",
+          "confusion",
+          "thinking",
+          "school"
+        ],
+        "emoji": "🤔😕",
+        "prompt": "Spider-Man uniformed student Confused student rubbing head in doubt, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "key": "spiderman_wave_fist",
+        "tags": [
+          "spiderman_wave_fist",
+          "pride",
+          "welcome",
+          "classroom"
+        ],
+        "emoji": "👋🌟",
+        "prompt": "Spider-Man uniformed student Excited student waving at teacher proudly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "key": "spiderman_slouch_yawn",
+        "tags": [
+          "spiderman_slouch_yawn",
+          "boredom",
+          "fatigue",
+          "study"
+        ],
+        "emoji": "😴📚",
+        "prompt": "Spider-Man uniformed student Tired student slouching over desk bored, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "key": "spiderman_cower_huddle",
+        "tags": [
+          "spiderman_cower_huddle",
+          "fear",
+          "panic",
+          "schoolyard"
+        ],
+        "emoji": "😱🪑",
+        "prompt": "Spider-Man uniformed student Scared student cowering behind chair in fear, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "key": "spiderman_kick_table",
+        "tags": [
+          "spiderman_kick_table",
+          "anger",
+          "frustration",
+          "classroom"
+        ],
+        "emoji": "😡💢",
+        "prompt": "Spider-Man uniformed student Angry student kicking table with frustration, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "key": "spiderman_open_mouth",
+        "tags": [
+          "spiderman_open_mouth",
+          "shock",
+          "awe",
+          "surprise"
+        ],
+        "emoji": "🤯👀",
+        "prompt": "Spider-Man uniformed student Shocked student falling jaw in surprise, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "key": "spiderman_hide_face",
+        "tags": [
+          "spiderman_hide_face",
+          "embarrassment",
+          "shame",
+          "gym"
+        ],
+        "emoji": "🙈🍂",
+        "prompt": "Spider-Man uniformed student Embarrassed student hiding face in hands red, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "key": "spiderman_grin_peek",
+        "tags": [
+          "spiderman_grin_peek",
+          "mischief",
+          "prank",
+          "school"
+        ],
+        "emoji": "😏🤡",
+        "prompt": "Spider-Man uniformed student Mischief student grinning while hiding under desk, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+    ],
+    "expanded_by": "ai",
+    "expand_model": "qwen3.5-4b",
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Spider-Man uniformed student.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: Happy student running to class with excitement\nCharacter 2: Confused student rubbing head in doubt\nCharacter 3: Excited student waving at teacher proudly\nCharacter 4: Tired student slouching over desk bored\nCharacter 5: Scared student cowering behind chair in fear\nCharacter 6: Angry student kicking table with frustration\nCharacter 7: Shocked student falling jaw in surprise\nCharacter 8: Embarrassed student hiding face in hands red\nCharacter 9: Mischief student grinning while hiding under desk\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. leaps forward with arms pumping and legs bouncing\n2. tilts head slowly while scratching chin vigorously\n3. raises arm high and shakes fist in the air\n4. leans back heavily while yawning widely open mouth\n5. shrinks down low and clutches knees tightly\n6. punches leg hard against the wooden surface\n7. drops mouth open wide and stands frozen still\n8. picks head up low with fingers covering eyes\n9. peeks up sideways with a wicked smile and grin\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders."
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791023364.103,
+    "note": "approved when the task was reserved"
+  },
+  "generations": []
+}

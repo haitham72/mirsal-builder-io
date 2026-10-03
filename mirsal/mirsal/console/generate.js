@@ -158,8 +158,8 @@ RENDER.generate=async()=>{
    <div class=sh>${ic('gen')} Studio</div>
    <div class=gform>${ic('search')}<input id=prompt type=text placeholder="Describe the stickers, for example: teddy bear for school" autocomplete=off><button id=go class="btn pri gbig" data-act=ggo>Generate</button></div>
    <div class=gopts><span class=mut>White outline</span><div class=tabs id=opills></div><span class=mut id=ohint></span></div>
-   <div id=gsug class=gsug></div><div id=gplan></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
-  $('prompt').value=SES.prompt||'';$('prompt').oninput=planPreview;planPreview();$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
+   <div id=gsug class=gsug></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
+  $('prompt').value=SES.prompt||'';$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
   document.documentElement.style.setProperty('--tile',GS.tile+'px');
   drawOutline();glast='';await loadInputs();drawSug();tick(true)};
 function drawOutline(){const on=GS.outline>0;$('opills').innerHTML=[[12,'On'],[0,'Off']].map(([px,l])=>`<button class="tab ${(on?12:0)===px?'on':''}" data-act=goutline data-px=${px}>${l}</button>`).join('');
@@ -167,7 +167,7 @@ function drawOutline(){const on=GS.outline>0;$('opills').innerHTML=[[12,'On'],[0
 ACT.goutline=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);drawOutline();glast='';tick(true)};
 async function loadInputs(){const r=await api('/api/inputs');if(r.ok)GINP=r.j.inputs;const a=await api('/api/ai');if(a.ok)GAI=a.j;const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health}
 function drawSug(){const el=$('gsug');if(!el)return;
-  el.innerHTML=GINP.length?`<span class=mut>Prepared sheets:</span>`+GINP.map(s=>`<button class=chip2 data-act=gsug data-s="${esc(s.subject)}">${esc(s.subject.replace(/_/g,' '))} <small>${s.variants.length} ${s.variants.length>1?'sheets':'sheet'}</small></button>`).join(''):`<span class=mut>No prepared sheets found in inputs/Images_gen.</span>`}
+  el.innerHTML=GINP.length?`<span class=mut>Prepared sheets:</span>`+GINP.map(s=>`<button class=chip2 data-act=gsug data-s="${esc(s.subject)}">${esc(s.subject.replace(/_/g,' '))} <small>${s.variants.length} ${s.variants.length>1?'sheets':'sheet'}</small></button>`).join(''):''}
 ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');ACT.ggo()};
 
 /* a new request starts a session with Batch 1; "Create more" adds the next batch */
@@ -238,6 +238,7 @@ function gview(){
   const s=gstats(gs),{pk,allAdded,n}=s;
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
     <button class="btn" data-act=gmore ${s.ready&&!s.busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
+    <button class="btn dng" data-act=grm title="Move ${gs.length===1?'this batch':'these batches'} to the trash. You can restore ${gs.length===1?'it':'them'} from Removed batches under Earlier batches.">${ic('trash')} Remove batch</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
    ${stepsHtml(s)}
@@ -318,18 +319,13 @@ ACT.pgsheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='
 ACT.pgvideo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
   const ok=await liveStart('video',{g:g.number,video_prompt:pdCustom(g,'video')?PD[pdKey(g.number,'video')]:undefined});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'video')];glast='';tick(true)};
+/* Remove batch (like Delete pack, but into the trash): says what it does before it does it; stickers already added to a pack are copies and stay in their packs */
+const grmText=gs=>`Remove ${gs.map(g=>g.generation_id).join(', ')}? ${gs.length===1?'It moves':'They move'} to the trash, nothing is deleted, and you can restore ${gs.length===1?'it':'them'} from “Removed batches” under Earlier batches. Stickers you already added to a pack stay in their packs.`;
+ACT.grm=()=>{const gs=sessionGens();if(!gs.length)return;
+  confirmDlg(grmText(gs),async()=>{for(const g of gs){const r=await post(`/api/generations/${g.number}/remove`,{});if(!r.ok){toast(r.j.error,1);return}}
+    const gone=gs.map(g=>g.number);SES.gens=SES.gens.filter(id=>!gone.includes(id));saveSes();gone.forEach(n=>GM.delete(n));HB.items=HB.items.filter(x=>!gone.includes(x.id));
+    glast='';await remLoad();histLoad(false);tick(true)},'Remove')};
 ACT.gtab=el=>{GS.tab=el.dataset.t;glast='';tick(true)};
-/* the same prompts, live under the request box while typing (nothing is reserved) */
-let PQ=0,PT=null;
-function planPreview(){clearTimeout(PT);const p=$('prompt').value.trim();if(!$('gplan'))return;
-  if(p.length<2){$('gplan').innerHTML='';return}
-  PT=setTimeout(async()=>{const n=++PQ,r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:false}),el=$('gplan');if(n!==PQ||!el)return;
-    if(!r.ok){el.innerHTML='';return}
-    const open=el.querySelector('details')&&el.querySelector('details').open;
-    el.innerHTML=`<details class=gpv ${open?'open':''}><summary>Prompt preview <span class=mut>template ${esc(r.j.template_id)} v${r.j.template_version} · ${r.j.stickers.length} cell prompt${r.j.stickers.length>1?'s':''}, 1 to 5 tags each · ${r.j.expanded_by==='transformation'?'the transformation template wrote these cells, no AI call':(typeof aiOn==='function'&&aiOn())?'the AI enhancer writes the 9 concepts when you press Generate':'built-in sets, no AI call'}</span></summary>
-      ${r.j.expand_error?`<div class=warn>${esc(r.j.expand_error)}</div>`:''}
-      <div class=pcols><div>${copyBox('Sheet prompt',r.j.sheet_prompt,'pv1',9)}${copyBox('Video prompt',r.j.video_prompt,'pv2',5)}</div>
-      <ul class=pcells>${r.j.stickers.map(t=>`<li><b>${t.index}. ${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=ptags>${(t.tags||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></li>`).join('')}</ul></div></details>`},450)}
 
 /* ---------- Animate, Add: both act on the included batches of the session. */
 

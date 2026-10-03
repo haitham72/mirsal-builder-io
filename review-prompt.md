@@ -71,8 +71,8 @@ short report full of reproduced facts beats a long one of opinions.
 12. **Never judge a decision you were told is paused.** `plan.md` §§1, 2, 4-15
     (deployment) are **paused by decision**: groundwork only, nothing switched on.
     Do not raise their open questions as findings and do not propose deleting them.
-    §3 (the HTTP-layer migration) was **un-paused on 2026-10-03** and is now the
-    next build.
+    §3 (the HTTP-layer migration) was briefly un-paused and **re-paused on
+    2026-10-03** until the app is verified.
 13. **Respect the boundaries the project sets on itself.** The engine must stay
     import-clean; the screens are a sandbox, not the product. A finding that says
     "move this into the engine" without respecting those boundaries is not a
@@ -117,8 +117,8 @@ say which in the report.
 
 **Deliberately not finished, so you do not mistake it for rot:**
 - The HTTP layer is still stdlib. The move to **FastAPI + pydantic** is **decided
-  and next** (`plan.md` **§3**, not §16), which amends rule 8 for the HTTP layer
-  only. "Not FastAPI yet" is **not** a finding.
+  but paused until the app is verified** (`plan.md` §16.1 is the spec), which
+  amends rule 8 for the HTTP layer only. "Not FastAPI yet" is **not** a finding.
 - The **particle-set model** (a set belongs to pack(s), not to stickers) is built:
   `flow/particle_sets.py`, the Library > Particles screens, the pack particle
   studio, the chat intents. Only Telegram delivery of a burst is open.

@@ -8,6 +8,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import cv2
 import numpy as np
@@ -367,6 +368,40 @@ class GoldenPathTests(Api):
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": False})[0], 202)
         g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
         self.assertEqual((g["stickers"][0]["anim_reason"], g["stickers"][0]["anim_override"]), ("inside_slot", []))
+
+    def test_switching_a_verdict_back_swaps_the_finished_clip_and_renders_nothing(self):
+        """The clip is the same under both verdicts, only the verdict differs: the first allow renders (no clip existed), every later allow / take-back of the same cell restores the finished
+        state at once (Haitham, 2026-10-03: it "loads and renders again ... as if it was deleted and generated from scratch")."""
+        from mirsal.flow import gates as G
+        gid, g = self.new("blob")
+        self.review(gid, "still", "APPROVE", "ready")
+        aid, g = self.drive_video(gid, drift={1: (-70, 0)})
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": True})[0], 202)
+        g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+        webm = g["stickers"][0]["webm"]
+        with mock.patch.object(G, "process_video", side_effect=AssertionError("a verdict switch must not render again")):
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": False})[0], 202)
+            g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
+            s1 = g["stickers"][0]
+            self.assertEqual((s1["anim_reason"], s1["anim_override"], s1["webm"]), ("inside_slot", [], webm), "blocked again, and the clip is still there to look at")
+            self.assertEqual(s1["review"]["anim"], "BLOCKED")
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": True})[0], 202)
+            g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+            s1 = g["stickers"][0]
+            self.assertEqual((s1["anim_override"], s1["webm"], s1["review"]["anim"]), (["inside_slot"], webm, "PENDING"))
+            chk = next(c for c in s1["anim_report"] if c["name"] == "inside_slot")
+            self.assertEqual((chk["ok"], chk["severity"]), (False, "WARN"))
+            human = [x for x in s1["history"] if x["actor"] == "human" and x["stage"] == "video"]
+            self.assertEqual([x["decision"] for x in human], ["APPROVE", "REJECT", "APPROVE"], "every click is still a recorded decision")
+        # a new cut of the video throws the remembered state away: the next switch renders again
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 4, "erode": 0, "reslice": True})[0], 200)
+        g = self.wait(gid, lambda x: not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]))
+        rendered = []
+        real = G.process_video
+        with mock.patch.object(G, "process_video", side_effect=lambda *a, **k: (rendered.append(1), real(*a, **k))[1]):
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": False})[0], 202)
+            self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
+        self.assertTrue(rendered, "after a re-cut nothing is remembered, so the switch renders")
 
     def test_allow_all_and_every_cell_toggles(self):
         gid, g = self.new("blob")

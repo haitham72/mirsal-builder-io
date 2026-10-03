@@ -5,3 +5,4 @@
 {"ts": 1790991930.173, "stage": "keyed", "status": "done", "ms": 240, "detail": {"bg": [8, 253, 2], "threshold": [122.5, 122.0, 123.0, 122.5], "grid": "2x2", "cut": "gutter", "xs": [0, 923, 2048], "ys": [0, 911, 2048]}}
 {"ts": 1790991930.173, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
 {"ts": 1790991930.405, "stage": "sliced", "status": "done", "ms": 232, "detail": {"ready": 1, "failed": 3}}
+{"ts": 1791013516.428, "stage": "still_allowed", "status": "done", "ms": 0, "detail": {"indexes": [2, 3, 4]}, "actor": "human", "decision": "APPROVE"}

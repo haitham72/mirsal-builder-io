@@ -1,0 +1,1119 @@
+{
+  "generation_id": "G104",
+  "number": 104,
+  "owner": "local",
+  "created": 1791023548.3,
+  "parent": null,
+  "prompt": "superhero dubai",
+  "task": "superhero dubai",
+  "task_slug": "superhero_dubai",
+  "source": {
+    "subject": "superhero_dubai",
+    "subject_id": "035",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J046/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 2,
+      "cols": 2,
+      "rects": [
+        [
+          0,
+          0,
+          913,
+          1041
+        ],
+        [
+          913,
+          0,
+          1135,
+          1041
+        ],
+        [
+          0,
+          1041,
+          913,
+          1007
+        ],
+        [
+          913,
+          1041,
+          1135,
+          1007
+        ]
+      ],
+      "xs": [
+        0,
+        913,
+        2048
+      ],
+      "ys": [
+        0,
+        1041,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    2,
+    2
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "task 035",
+  "sheet_prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: a bold red caped figure with a yellow emblem on the chest.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: standing tall with arms crossed in proud victory pose\nCharacter 2: jumping high with cape flowing behind in pure joy\nCharacter 3: leaning forward with hands clasped in deep concern\nCharacter 4: falling to knees with head down in total defeat\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. swaying slightly while keeping feet planted firmly together\n2. mid-air leap before landing softly on both feet\n3. twitching shoulders while leaning heavily on one leg\n4. dropping low to the ground and sliding forward slowly\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_2x2",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "a bold red caped figure with a yellow emblem on the chest",
+    "style_id": "clay_3d",
+    "mode": "sheet_2x2",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "standing tall with arms crossed in proud victory pose",
+        "tags": [
+          "superhero_dubai_victory_stance",
+          "heroic",
+          "dubai",
+          "confident"
+        ],
+        "emoji": "🦸‍♂️✨",
+        "motion": "swaying slightly while keeping feet planted firmly together"
+      },
+      {
+        "pos": 2,
+        "label": "jumping high with cape flowing behind in pure joy",
+        "tags": [
+          "superhero_dubai_celebratory_jump",
+          "happy",
+          "energy",
+          "flight"
+        ],
+        "emoji": "🎉🚀",
+        "motion": "mid-air leap before landing softly on both feet"
+      },
+      {
+        "pos": 3,
+        "label": "leaning forward with hands clasped in deep concern",
+        "tags": [
+          "superhero_dubai_worriedlean",
+          "sad",
+          "dubai",
+          "anxious"
+        ],
+        "emoji": "😰🌧️",
+        "motion": "twitching shoulders while leaning heavily on one leg"
+      },
+      {
+        "pos": 4,
+        "label": "falling to knees with head down in total defeat",
+        "tags": [
+          "superhero_dubai_defeated_slump",
+          "tired",
+          "hopeless",
+          "grounded"
+        ],
+        "emoji": "😫🏙️",
+        "motion": "dropping low to the ground and sliding forward slowly"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "035",
+  "name_key": "superhero_dubai",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791023520.795,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 56.0
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 248 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 248.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 6.5
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 2x2, plan says 2x2",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2x2",
+        "limit": "2x2",
+        "data": {
+          "ms": 28.1
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            913,
+            2048
+          ],
+          "ys": [
+            0,
+            1041,
+            2048
+          ],
+          "ms": 27.1
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 1.4 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.4,
+        "limit": 12.0,
+        "data": {
+          "ms": 65.0
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "superhero_dubai_victory_stance",
+      "tags": [
+        "superhero_dubai_victory_stance",
+        "heroic",
+        "dubai",
+        "confident"
+      ],
+      "emoji": "🦸‍♂️✨",
+      "prompt": "a bold red caped figure with a yellow emblem on the chest standing tall with arms crossed in proud victory pose, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-victory_stance-20261003T103228-3b94b6",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 255440,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 31.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 78836,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 78.836,
+          "data": {
+            "ms": 3.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.5
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "137.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 137.2,
+          "limit": 512,
+          "data": {
+            "ms": 6.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          913,
+          1041
+        ],
+        "bg": [
+          2,
+          253,
+          3
+        ],
+        "threshold": 125.0,
+        "fg_px": 255440,
+        "bbox": [
+          266,
+          91,
+          736,
+          966
+        ],
+        "scale": 0.4915,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 137.2,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-victory_stance-20261003T103228-3b94b6.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791023549.249,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A confident superhero with crossed arms stands proudly in his red suit.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "68ece30a701f5b38",
+        "ts": 1791023558.123
+      }
+    },
+    {
+      "index": 2,
+      "key": "superhero_dubai_celebratory_jump",
+      "tags": [
+        "superhero_dubai_celebratory_jump",
+        "happy",
+        "energy",
+        "flight"
+      ],
+      "emoji": "🎉🚀",
+      "prompt": "a bold red caped figure with a yellow emblem on the chest jumping high with cape flowing behind in pure joy, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-celebratory_jump-20261003T103228-2ead06",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 243899,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 41.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 79896,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 79.896,
+          "data": {
+            "ms": 3.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 4.5
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "138.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 138.1,
+          "limit": 512,
+          "data": {
+            "ms": 7.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          913,
+          0,
+          1135,
+          1041
+        ],
+        "bg": [
+          3,
+          252,
+          3
+        ],
+        "threshold": 124.5,
+        "fg_px": 243899,
+        "bbox": [
+          159,
+          120,
+          880,
+          904
+        ],
+        "scale": 0.4915,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 138.1,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-celebratory_jump-20261003T103228-2ead06.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791023549.257,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A happy superhero in red with a yellow emblem flies through the air.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "5f98a1ffedd6798b",
+        "ts": 1791023558.123
+      }
+    },
+    {
+      "index": 3,
+      "key": "superhero_dubai_worriedlean",
+      "tags": [
+        "superhero_dubai_worriedlean",
+        "sad",
+        "dubai",
+        "anxious"
+      ],
+      "emoji": "😰🌧️",
+      "prompt": "a bold red caped figure with a yellow emblem on the chest leaning forward with hands clasped in deep concern, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-worriedlean-20261003T103228-d1eac8",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 253679,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 34.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 78574,
+          "limit": 400,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 78.574,
+          "data": {
+            "ms": 3.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.4
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 14 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 14,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "138.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 138.9,
+          "limit": 512,
+          "data": {
+            "ms": 5.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1041,
+          913,
+          1007
+        ],
+        "bg": [
+          3,
+          252,
+          3
+        ],
+        "threshold": 124.5,
+        "fg_px": 253679,
+        "bbox": [
+          226,
+          74,
+          753,
+          906
+        ],
+        "scale": 0.4915,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 138.9,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-worriedlean-20261003T103228-d1eac8.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791023549.263,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A red superhero with a yellow emblem looks worried while clasping his hands.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "9700a445feadb272",
+        "ts": 1791023558.123
+      }
+    },
+    {
+      "index": 4,
+      "key": "superhero_dubai_defeated_slump",
+      "tags": [
+        "superhero_dubai_defeated_slump",
+        "tired",
+        "hopeless",
+        "grounded"
+      ],
+      "emoji": "😫🏙️",
+      "prompt": "a bold red caped figure with a yellow emblem on the chest falling to knees with head down in total defeat, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superhero_dubai-defeated_slump-20261003T103228-6f0e0c",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 229942,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 32.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 74244,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 74.244,
+          "data": {
+            "ms": 4.4
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.3% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0026,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 6.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 28 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 28,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "132.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 132.1,
+          "limit": 512,
+          "data": {
+            "ms": 6.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          913,
+          1041,
+          1135,
+          1007
+        ],
+        "bg": [
+          3,
+          251,
+          3
+        ],
+        "threshold": 123.5,
+        "fg_px": 229942,
+        "bbox": [
+          315,
+          258,
+          1017,
+          891
+        ],
+        "scale": 0.4915,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0026,
+        "kb": 132.1,
+        "format": "png"
+      },
+      "png": "slices/img-superhero_dubai-defeated_slump-20261003T103228-6f0e0c.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791023549.269,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A red superhero with a yellow emblem kneels on his knees looking sad.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "0a67c1c23aeb7e5d",
+        "ts": 1791023558.123
+      }
+    }
+  ],
+  "sheet_issues": []
+}

@@ -1237,6 +1237,47 @@
      }
     ]
    }
+  },
+  {
+   "id": "f8912e13",
+   "name": "school buss",
+   "slug": "school_buss",
+   "cover": "17b9bdbc",
+   "created": 1791004068.123286,
+   "stickers": [
+    {
+     "id": "17b9bdbc",
+     "name": "Yellow bus lying down looking dazed",
+     "file": "G102/img-school_buss-lying_crashed-school_buss-20261003T050748-3c600c.png",
+     "type": "static",
+     "emoji": "🚌😴",
+     "kb": 165,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 5
+     },
+     "created": 1791004068.126889,
+     "file_name": "img-school_buss-lying_crashed-20261003T050701-39638c"
+    },
+    {
+     "id": "a20189cf",
+     "name": "School buss dancing parade",
+     "file": "G102/img-school_buss-dancing_parade-school_buss-20261003T050748-6c6afa.png",
+     "type": "static",
+     "emoji": "🚌💃",
+     "kb": 216,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 9
+     },
+     "created": 1791004068.1306849,
+     "file_name": "img-school_buss-dancing_parade-20261003T050701-45ce6b"
+    }
+   ]
   }
  ],
  "layout": 2

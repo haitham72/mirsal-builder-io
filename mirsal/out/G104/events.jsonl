@@ -1,0 +1,7 @@
+{"ts": 1791023548.308, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "superhero dubai", "task_slug": "superhero_dubai"}}
+{"ts": 1791023548.318, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023548.585, "stage": "sheet_picked", "status": "done", "ms": 266, "detail": {"subject": "superhero_dubai", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791023548.586, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023548.887, "stage": "keyed", "status": "done", "ms": 300, "detail": {"bg": [2, 253, 3], "threshold": [125.0, 124.5, 124.5, 123.5], "grid": "2x2", "cut": "gutter", "xs": [0, 913, 2048], "ys": [0, 1041, 2048]}}
+{"ts": 1791023548.887, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023549.283, "stage": "sliced", "status": "done", "ms": 396, "detail": {"ready": 4, "failed": 0}}

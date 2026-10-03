@@ -461,8 +461,8 @@
       "emoji": "🦇👊",
       "prompt": "separate small pieces that burst out of Batman Lego lego brick, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
       "name": "img-batman_lego_pieces-brick-20261003T014529-e894e4",
-      "status": "FAILED",
-      "reason": "inside_cell",
+      "status": "READY",
+      "reason": null,
       "report": [
         {
           "name": "blank_cell",
@@ -493,7 +493,7 @@
             4
           ],
           "data": {
-            "ms": 25.4
+            "ms": 22.5
           }
         },
         {
@@ -517,14 +517,14 @@
           "value": 45943,
           "limit": 400,
           "data": {
-            "ms": 0.2
+            "ms": 0.1
           }
         },
         {
           "name": "inside_cell",
           "ok": false,
-          "detail": "64px on cell border",
-          "severity": "BLOCK",
+          "detail": "64px on cell border (allowed by you)",
+          "severity": "WARN",
           "stage": "still",
           "value": 64,
           "limit": 8,
@@ -541,7 +541,7 @@
           "value": 0,
           "limit": 45.943,
           "data": {
-            "ms": 1.7
+            "ms": 1.6
           }
         },
         {
@@ -579,7 +579,7 @@
           "limit": 0.12,
           "data": {
             "parts": 2,
-            "ms": 2.6
+            "ms": 2.3
           }
         },
         {
@@ -604,7 +604,7 @@
           "value": 76.8,
           "limit": 512,
           "data": {
-            "ms": 2.2
+            "ms": 2.1
           }
         }
       ],
@@ -630,44 +630,23 @@
         ],
         "scale": 0.4327,
         "scale_mode": "pack",
+        "waived": [
+          "inside_cell"
+        ],
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
         "kb": 76.8,
         "format": "png",
-        "ruled_out": true,
-        "attempts": [
-          {
-            "name": "default",
-            "ok": false,
-            "reason": "inside_cell"
-          },
-          {
-            "name": "dissect",
-            "ok": null,
-            "note": {
-              "ring_polluted": 0.008,
-              "bg": [
-                8,
-                252,
-                2
-              ],
-              "threshold": 122.0,
-              "fg_px": 245375,
-              "edge_px": 64,
-              "verdict": "the subject crosses the cell border; keying cannot fix that (regenerate the sheet or adjust the grid)"
-            }
-          }
-        ],
         "sheet_issue": "grid_detected"
       },
-      "png": null,
+      "png": "slices/img-batman_lego_pieces-brick-20261003T014529-e894e4.png",
       "anim_status": "NOT_REQUESTED",
       "anim_reason": null,
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "BLOCKED",
+        "still": "PENDING",
         "anim": "NONE"
       },
       "history": [
@@ -703,8 +682,39 @@
               "ms": 0.0
             }
           }
+        },
+        {
+          "ts": 1791013515.995,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_cell",
+          "ref": null,
+          "detail": {
+            "override": [
+              "inside_cell"
+            ]
+          }
+        },
+        {
+          "ts": 1791013516.411,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [],
+            "waived": [
+              "inside_cell"
+            ]
+          }
         }
-      ]
+      ],
+      "still_override": [
+        "inside_cell"
+      ],
+      "rendered_at": 1791013516.408
     },
     {
       "index": 3,
@@ -715,8 +725,8 @@
       "emoji": "🦇👊",
       "prompt": "separate small pieces that burst out of Batman Lego cape piece, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
       "name": "img-batman_lego_pieces-cape_piece-20261003T014529-6ee37a",
-      "status": "FAILED",
-      "reason": "inside_cell",
+      "status": "READY",
+      "reason": null,
       "report": [
         {
           "name": "blank_cell",
@@ -747,7 +757,7 @@
             4
           ],
           "data": {
-            "ms": 24.9
+            "ms": 23.8
           }
         },
         {
@@ -771,14 +781,14 @@
           "value": 48532,
           "limit": 400,
           "data": {
-            "ms": 0.1
+            "ms": 0.3
           }
         },
         {
           "name": "inside_cell",
           "ok": false,
-          "detail": "64px on cell border",
-          "severity": "BLOCK",
+          "detail": "64px on cell border (allowed by you)",
+          "severity": "WARN",
           "stage": "still",
           "value": 64,
           "limit": 8,
@@ -795,7 +805,7 @@
           "value": 0,
           "limit": 48.532000000000004,
           "data": {
-            "ms": 1.8
+            "ms": 2.9
           }
         },
         {
@@ -833,7 +843,7 @@
           "limit": 0.12,
           "data": {
             "parts": 2,
-            "ms": 2.6
+            "ms": 3.5
           }
         },
         {
@@ -858,7 +868,7 @@
           "value": 52.2,
           "limit": 512,
           "data": {
-            "ms": 1.8
+            "ms": 2.0
           }
         }
       ],
@@ -884,6 +894,9 @@
         ],
         "scale": 0.4327,
         "scale_mode": "pack",
+        "waived": [
+          "inside_cell"
+        ],
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0135,
@@ -892,39 +905,15 @@
         ],
         "kb": 52.2,
         "format": "png",
-        "ruled_out": true,
-        "attempts": [
-          {
-            "name": "default",
-            "ok": false,
-            "reason": "inside_cell"
-          },
-          {
-            "name": "dissect",
-            "ok": null,
-            "note": {
-              "ring_polluted": 0.008,
-              "bg": [
-                6,
-                252,
-                2
-              ],
-              "threshold": 123.0,
-              "fg_px": 259090,
-              "edge_px": 64,
-              "verdict": "the subject crosses the cell border; keying cannot fix that (regenerate the sheet or adjust the grid)"
-            }
-          }
-        ],
         "sheet_issue": "grid_detected"
       },
-      "png": null,
+      "png": "slices/img-batman_lego_pieces-cape_piece-20261003T014529-6ee37a.png",
       "anim_status": "NOT_REQUESTED",
       "anim_reason": null,
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "BLOCKED",
+        "still": "PENDING",
         "anim": "NONE"
       },
       "history": [
@@ -960,8 +949,41 @@
               "ms": 0.0
             }
           }
+        },
+        {
+          "ts": 1791013515.995,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_cell",
+          "ref": null,
+          "detail": {
+            "override": [
+              "inside_cell"
+            ]
+          }
+        },
+        {
+          "ts": 1791013516.415,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ],
+            "waived": [
+              "inside_cell"
+            ]
+          }
         }
-      ]
+      ],
+      "still_override": [
+        "inside_cell"
+      ],
+      "rendered_at": 1791013516.412
     },
     {
       "index": 4,
@@ -972,8 +994,8 @@
       "emoji": "🦇👊",
       "prompt": "separate small pieces that burst out of Batman Lego megaphone, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
       "name": "img-batman_lego_pieces-megaphone-20261003T014529-acfd58",
-      "status": "FAILED",
-      "reason": "inside_cell",
+      "status": "READY",
+      "reason": null,
       "report": [
         {
           "name": "blank_cell",
@@ -1004,7 +1026,7 @@
             4
           ],
           "data": {
-            "ms": 50.9
+            "ms": 31.5
           }
         },
         {
@@ -1028,14 +1050,14 @@
           "value": 36250,
           "limit": 400,
           "data": {
-            "ms": 0.3
+            "ms": 0.2
           }
         },
         {
           "name": "inside_cell",
           "ok": false,
-          "detail": "128px on cell border",
-          "severity": "BLOCK",
+          "detail": "128px on cell border (allowed by you)",
+          "severity": "WARN",
           "stage": "still",
           "value": 128,
           "limit": 8,
@@ -1052,7 +1074,7 @@
           "value": 0,
           "limit": 36.25,
           "data": {
-            "ms": 1.8
+            "ms": 1.7
           }
         },
         {
@@ -1077,7 +1099,7 @@
           "limit": 0.01,
           "data": {
             "count": 0,
-            "ms": 0.4
+            "ms": 0.2
           }
         },
         {
@@ -1090,7 +1112,7 @@
           "limit": 0.12,
           "data": {
             "parts": 2,
-            "ms": 5.8
+            "ms": 3.1
           }
         },
         {
@@ -1115,7 +1137,7 @@
           "value": 62.9,
           "limit": 512,
           "data": {
-            "ms": 2.1
+            "ms": 2.0
           }
         }
       ],
@@ -1141,6 +1163,9 @@
         ],
         "scale": 0.3828,
         "scale_mode": "clamped",
+        "waived": [
+          "inside_cell"
+        ],
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
@@ -1149,39 +1174,15 @@
         ],
         "kb": 62.9,
         "format": "png",
-        "ruled_out": true,
-        "attempts": [
-          {
-            "name": "default",
-            "ok": false,
-            "reason": "inside_cell"
-          },
-          {
-            "name": "dissect",
-            "ok": null,
-            "note": {
-              "ring_polluted": 0.014,
-              "bg": [
-                6,
-                251,
-                3
-              ],
-              "threshold": 122.5,
-              "fg_px": 248095,
-              "edge_px": 128,
-              "verdict": "the subject crosses the cell border; keying cannot fix that (regenerate the sheet or adjust the grid)"
-            }
-          }
-        ],
         "sheet_issue": "grid_detected"
       },
-      "png": null,
+      "png": "slices/img-batman_lego_pieces-megaphone-20261003T014529-acfd58.png",
       "anim_status": "NOT_REQUESTED",
       "anim_reason": null,
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "BLOCKED",
+        "still": "PENDING",
         "anim": "NONE"
       },
       "history": [
@@ -1217,8 +1218,41 @@
               "ms": 0.0
             }
           }
+        },
+        {
+          "ts": 1791013515.995,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_cell",
+          "ref": null,
+          "detail": {
+            "override": [
+              "inside_cell"
+            ]
+          }
+        },
+        {
+          "ts": 1791013516.418,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "single_subject"
+            ],
+            "waived": [
+              "inside_cell"
+            ]
+          }
         }
-      ]
+      ],
+      "still_override": [
+        "inside_cell"
+      ],
+      "rendered_at": 1791013516.416
     }
   ],
   "sheet_issues": [

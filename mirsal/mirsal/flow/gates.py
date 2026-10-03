@@ -307,6 +307,10 @@ def preview_sheet(out: Path, gid: int, cfg: EngineConfig, fill: float, px: int =
     if not kept:
         raise refuse("There are no kept stickers to put on a video sheet.")
     d = pl.gen_dir(out, gid)
+    missing = [i for i in kept if not (d / "source" / "plain" / f"S{i}.png").is_file()]
+    if missing:        # a batch cut before the pictures were kept (or rejected before the blue-screen logic): say so in words, never a 500
+        raise refuse(f"No stored picture for {', '.join(f'S{i}' for i in missing)} in G{gid:03d}, so the video sheet cannot be previewed. "
+                     "The batch was cut before its pictures were kept. Drop those stickers from the set, or make the batch again.")
     plain = {i: _read_rgba(d / "source" / "plain" / f"S{i}.png") for i in kept}
     sheet, _ = build_video_sheet(plain, kept, replace(cfg, slot_fill=float(fill)), tuple(res["grid"]))
     scale = px / max(sheet.shape[:2])

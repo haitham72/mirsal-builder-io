@@ -26,7 +26,7 @@ function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m|
    </div>
    <div class=cp-styles id=cpstyles></div>`;
   const p=$('prompt');p.value=SES.prompt||prev||'';
-  p.oninput=()=>{grow();planPreview()};planPreview();
+  p.oninput=()=>grow();
   p.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ACT.ggo()}};
   const grow=()=>{p.style.height='auto';p.style.height=Math.min(p.scrollHeight,190)+'px'};grow();
   const box=$('cpbox');
@@ -77,8 +77,8 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    <span class=cp-gap></span>
    <button id=go class=cp-go data-act=ggo title="Starts at once with the model, style and stroke shown here. The number is the price in Higgsfield credits.">Generate${liveReady()?'<span class=cp-bp id=cpprice>…</span>':''}</button>`;
   if(liveReady())lcost('image',true).then(c=>{const e=$('cpprice');if(e)e.textContent=c==null?'':'◈ '+fcr(c)})}
-ACT.cploop=()=>{LIVE.loop=!LIVE.loop;lsave();cpDrawBar();document.querySelectorAll('[data-lvloop]').forEach(c=>c.checked=LIVE.loop);planPreview()};
-ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar();planPreview()};
+ACT.cploop=()=>{LIVE.loop=!LIVE.loop;lsave();cpDrawBar();document.querySelectorAll('[data-lvloop]').forEach(c=>c.checked=LIVE.loop)};
+ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar()};
 ACT.cpstroke=e=>{CP.pop=CP.pop==='stroke'?null:'stroke';cpDrawBar();if(e&&e.stopPropagation)e.stopPropagation()};
 ACT.cpstrokeset=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);CP.pop=null;cpDrawBar()};
 const inside=(e,cls)=>e.composedPath().some(n=>n.classList&&n.classList.contains(cls));      // the path at the time of the click: the clicked node may already be replaced by a redraw
@@ -100,4 +100,4 @@ ACT.ggo=()=>{const p=(($('prompt')||{}).value||'').trim();
     liveStart('sheet',{prompt:p,ai:aiOn(),refs:CP.refs.filter(r=>r.id).map(r=>r.id)}).finally(()=>{CP.go=false;cpDrawBar()});return}
   if(CP.refs.length){say('Reference images need Higgsfield, which is not available right now.');return}
   return _ggo()};
-ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');planPreview();_ggo()};      // a prepared-sheet chip uses the prepared sheet, never a new generation
+ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');_ggo()};      // a prepared-sheet chip uses the prepared sheet, never a new generation

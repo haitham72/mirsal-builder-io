@@ -1,0 +1,39 @@
+{
+  "id": "J046",
+  "kind": "sheet",
+  "task": "035",
+  "generation": "G104",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: a bold red caped figure with a yellow emblem on the chest.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: standing tall with arms crossed in proud victory pose\nCharacter 2: jumping high with cape flowing behind in pure joy\nCharacter 3: leaning forward with hands clasped in deep concern\nCharacter 4: falling to knees with head down in total defeat\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "superhero dubai",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "f4159457-c766-40cb-9796-b97ec47ad65f",
+  "result": {
+    "file": "jobs/J046/result.png",
+    "sha256": "68f277f1c1a1c951fc49438db62f9ee2e4fb8d68343f46b6755a97bb88236516",
+    "bytes": 4051981
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791023521.299,
+  "claimed_at": 1791023522.429,
+  "completed_at": 1791023548.265,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

@@ -30,7 +30,7 @@ const SW = { label: 'Allow AI vision', on: 'AI vision on', off: 'AI vision off',
 
 test('undecided: the switch glows, sits on the right, and saves a setting instead of making a turn', () => {
   const h = load(null)(SW);
-  assert.match(h, /class="ai-chip ai-sw glow"/);
+  assert.match(h, /<span class="ai-vis glow"><button class="ai-chip" data-act=agsetting/, 'a chamfered box with its own class: the settings toggle .ai-sw (44x26 px) is not reused, that is what squashed it');
   assert.match(h, /data-act=agsetting data-set="\{&quot;allow_vlm&quot;:true\}"/);
   assert.match(h, />Allow AI vision</);
   assert.match(h, /aria-pressed=false/);
@@ -65,7 +65,8 @@ test('the handler only saves the setting, the message repaints when the switch c
   assert.doesNotMatch(src.match(/ACT\.agsetting=[^\n]*/)[0], /agSend|post\(`\/api\/chat\/sessions\/\$\{A\.sid\}\/messages/, 'no message is sent');
   assert.match(src, /\(m\.chips\|\|\[\]\)\.some\(c=>c\.setting\)\?String\(A\.sess[^)]*allow_vlm\)/, 'the signature of a message with a switch includes the live setting');
   assert.match(css, /@property --ag-ang/);
-  assert.match(css, /\.ai-sw\.glow\{[^}]*animation:ag-spin/);
-  assert.match(css, /prefers-reduced-motion:reduce\)\{[^}]*\.ai-sw\.glow\{animation:none/);
-  assert.match(css, /\.ai-sw\{[^}]*margin-left:auto/, 'it sits on the right');
+  assert.match(css, /\.ai-vis\.glow \.ai-chip\{animation:ag-spin/);
+  assert.match(css, /\.ai-vis \.ai-chip\{[^}]*clip-path:polygon/, 'chamfered corners');
+  assert.match(css, /prefers-reduced-motion:reduce\)\{[^}]*\.ai-vis\.glow \.ai-chip\{animation:none/);
+  assert.match(css, /\.ai-vis\{[^}]*margin-left:auto/, 'it sits on the right');
 });

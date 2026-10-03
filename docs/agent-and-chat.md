@@ -301,6 +301,10 @@ Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi
 - **Particle effects from the chat** (`n_effects`, intent `EFFECTS`, card `effects`): see `docs/effects.md` §8. Free; opens the effects screen for a library pack.
 
 
+## The bar under the chat box (2026-10-03)
+
+The sheet size is a drop-down (`drawBar`, `<select data-aggrid>`; a `change` handler sends `saveSet({grid})`, the same settings route as the gear's 3x3 / 2x2 buttons). The one-time AI vision switch under a message is `chipHTML` -> `<span class="ai-vis"><button class="ai-chip" data-act=agsetting>` (look: `docs/design.md`).
+
 ## Particle sets in the chat (2026-10-03)
 
 `resolver.particles_intent(text, has_set)` -> `make | more | delete | restore | assign | None`; `classify` returns `PARTICLES`, and a message that names no particles ("generate more", "also use them for the Princess pack") is about **the set the chat has in focus** (`session.particles = {set, pack}`). "particle effects" (the working-session card), a singular "particle burst" and a sticker request are not it. The node is `Agent.n_particles`; the tools are `particle_sets`, `particle_deleted`, `particle_options`, `particles_start`, `particles_delete`, `particles_restore`, `particles_assign` (owner only; `FakeTools` mirrors them).

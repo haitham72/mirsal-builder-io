@@ -80,11 +80,14 @@
 .ai-chip.pri:hover{color:#fff;background:linear-gradient(135deg,#2ADBF5,#0E7490)}
 /* the one-time AI vision switch (UI/UX spec P9): on the right, a subtle conic glow turns round its border while the question is undecided; at rest under reduced motion */
 @property --ag-ang{syntax:'<angle>';inherits:false;initial-value:0deg}
-.ai-sw{margin-left:auto}
-.ai-sw.glow{border-color:transparent;background:linear-gradient(#fff,#fff) padding-box,conic-gradient(from var(--ag-ang),#22D3EE,#a78bfa,#22D3EE) border-box;box-shadow:0 0 14px rgba(34,211,238,.25);animation:ag-spin 6s linear infinite}
-.ai-sw.is-on{border-color:var(--ai);color:var(--aid)}
+.ai-vis{margin-left:auto;display:inline-flex;flex:none;filter:drop-shadow(0 0 7px rgba(34,211,238,.35))}
+.ai-vis .ai-chip{--cut:11px;position:relative;isolation:isolate;border:0;border-radius:0;padding:10px 22px;min-height:42px;white-space:nowrap;font-weight:600;color:var(--aid);background:conic-gradient(from var(--ag-ang),#22D3EE,#a78bfa,#22D3EE);backdrop-filter:none;transform:none;clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+.ai-vis .ai-chip::before{content:"";position:absolute;inset:1.5px;z-index:-1;background:#fff;clip-path:polygon(calc(var(--cut) - 1.5px) 0,100% 0,100% calc(100% - var(--cut) + 1.5px),calc(100% - var(--cut) + 1.5px) 100%,0 100%,0 calc(var(--cut) - 1.5px))}
+.ai-vis .ai-chip:hover{background:conic-gradient(from var(--ag-ang),#22D3EE,#a78bfa,#22D3EE);color:var(--aid);transform:none}.ai-vis .ai-chip:hover::before{background:#F3FCFE}
+.ai-vis.glow{filter:drop-shadow(0 0 11px rgba(34,211,238,.55))}.ai-vis.glow .ai-chip{animation:ag-spin 6s linear infinite}
+.ai-vis.is-on .ai-chip::before{background:linear-gradient(135deg,#E4FAFD,#EDEBFF)}
 @keyframes ag-spin{to{--ag-ang:360deg}}
-@media (prefers-reduced-motion:reduce){.ai-sw.glow{animation:none}}
+@media (prefers-reduced-motion:reduce){.ai-vis.glow .ai-chip{animation:none}}
 
 /* the minimal settings: grid and whether to ask before spending. Nothing else. */
 .ai-set{position:absolute;left:0;bottom:calc(100% + 10px);width:290px;padding:14px;border-radius:var(--r);background:rgba(255,255,255,.92);backdrop-filter:blur(18px);box-shadow:0 18px 50px rgba(8,80,100,.20),inset 0 0 0 1px var(--aline);display:none;z-index:5}
@@ -187,6 +190,7 @@ button.tr-t{cursor:pointer}button.tr-t:hover{color:var(--aid)}
 @media (hover:none){.car-nav{display:none}}
 
 /* ---- quick replies */
+.ag-sel{display:inline-flex;align-items:center;gap:6px;position:relative;cursor:pointer}.ag-sel select{appearance:none;-webkit-appearance:none;border:0;background:none;font:inherit;color:inherit;cursor:pointer;padding:0 16px 0 0;outline:0}.ag-sel::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;margin-top:-5px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);pointer-events:none}.ag-sel:focus-within{border-color:var(--ai)}
 .ai-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
 
 /* ---- the chats in the shared second column (the column, the rail and the phone layout are the shell's: studio.css) */

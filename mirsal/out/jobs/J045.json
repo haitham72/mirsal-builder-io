@@ -1,0 +1,35 @@
+{
+  "id": "J045",
+  "kind": "sheet",
+  "task": "034",
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: <spiderman in Dubai>.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: spiderman standing tall with arms wide open laughing joyfully at the sun\nCharacter 2: spiderman leaning forward pointing down at the city with a serious look\nCharacter 3: spiderman crouching low with fists clenched looking scared and worried\nCharacter 4: spiderman lying on the ground with eyes closed feeling sleepy and tired\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "spiderman in dubai",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "FAILED",
+  "external_task_id": "6977b2f7-b172-4cb7-953d-5d5a86d2a6c7",
+  "result": null,
+  "cost": null,
+  "error": "Error: job 6977b2f7-b172-4cb7-953d-5d5a86d2a6c7 ended with status \"nsfw\"",
+  "created_at": 1791023450.319,
+  "claimed_at": 1791023451.513,
+  "completed_at": 1791023466.782,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "working",
+  "waiting_pid": null
+}

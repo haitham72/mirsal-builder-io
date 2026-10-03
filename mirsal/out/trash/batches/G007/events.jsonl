@@ -1,0 +1,11 @@
+{"ts": 1790879615.938, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "cherries in love", "task_slug": "cherries_love"}}
+{"ts": 1790879615.944, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790879616.328, "stage": "sheet_picked", "status": "done", "ms": 383, "detail": {"subject": "cherries", "variant": 1, "of": 1, "file": "result.png", "blocked": "grid_detected", "warnings": []}}
+{"ts": 1790879616.328, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790879616.404, "stage": "sliced", "status": "done", "ms": 75, "detail": {"ready": 0, "failed": 9, "blocked": "grid_detected"}}
+{"ts": 1791013418.717, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791013418.983, "stage": "sheet_picked", "status": "done", "ms": 265, "detail": {"subject": "cherries", "variant": 1, "of": 1, "file": "sheet.png", "blocked": null, "cut_anyway": ["grid_detected"], "warnings": []}}
+{"ts": 1791013418.985, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791013419.217, "stage": "keyed", "status": "done", "ms": 232, "detail": {"bg": [2, 72, 255], "threshold": [91.5, 91.5, 91.5, 91.5, 91.0, 91.0, 90.5, 90.5, 90.5], "grid": "3x3", "cut": "gutter", "xs": [0, 657, 1371, 2048], "ys": [0, 666, 1337, 2048]}}
+{"ts": 1791013419.218, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791013419.656, "stage": "sliced", "status": "error", "ms": 438, "detail": "[Errno 2] No such file or directory: '<path>/img-007-cherries_love-cherries_shy_love.png'"}

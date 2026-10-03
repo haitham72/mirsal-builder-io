@@ -169,7 +169,7 @@ function traceHTML(m,work){
    The switch reads the live setting: undecided it glows (subtle, rotating, at rest under reduced motion) on the right; decided it says "AI vision on" / "AI vision off" and flips on a press. */
 function chipHTML(c){
  if(c.setting){const k=Object.keys(c.setting)[0],cur=A.sess&&A.sess.settings?A.sess.settings[k]:null,on=cur===true,off=cur===false,next={[k]:!on};
-  return `<button class="ai-chip ai-sw${cur==null&&c.glow?' glow':''}${on?' is-on':''}" data-act=agsetting data-set="${AIU.esc(JSON.stringify(next))}" aria-pressed=${on} title="${on?'Click to switch it off':'Click to switch it on'}">${AIU.esc(on?(c.on||c.label):off?(c.off||c.label):c.label)}</button>`}
+  return `<span class="ai-vis${cur==null&&c.glow?' glow':''}${on?' is-on':''}"><button class="ai-chip" data-act=agsetting data-set="${AIU.esc(JSON.stringify(next))}" aria-pressed=${on} title="${on?'Click to switch it off':'Click to switch it on'}">${AIU.esc(on?(c.on||c.label):off?(c.off||c.label):c.label)}</button></span>`}
  if(c.editor)return `<button class="ai-chip pri" data-act=agedit data-g="${AIU.esc(c.editor.generation)}" data-i=${+c.editor.index}>${AIU.esc(c.label)}</button>`;
  return c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
   :`<button class=ai-chip data-act=agchip data-text="${AIU.esc(c.text||c.label)}">${AIU.esc(c.label)}</button>`}
@@ -309,12 +309,14 @@ ACT.agopen=el=>{location.hash='#/agent/'+el.dataset.id};
 ACT.agdel=el=>{const id=el.dataset.id;confirmDlg('Delete this chat? The stickers it made stay in the Studio.',async()=>{await post(`/api/chat/sessions/${id}/delete`);if(A.sid===id)ACT.agnew();await loadSessions();agList()},'Delete')};
 ACT.agset=()=>{A.setOpen=!A.setOpen;setSet();if(A.setOpen)loadModels()};
 ACT.agsetgrid=async el=>saveSet({grid:el.dataset.v});
+/* the sheet size in the bar is a drop-down: a choice is made on purpose, one click never flips it */
+document.addEventListener('change',e=>{const s=e.target;if(s&&s.dataset&&s.dataset.aggrid!==undefined)saveSet({grid:s.value})});
 /* ---------- under the box: what the next sheet will be made with, one click from changing it (the same settings as the gear, and the style tiles the Studio has, smaller) */
 const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(A.agent&&A.agent.default_style)||'flat_vector';
 function drawBar(){const bar=$('ag-bar'),box=$('ag-styles');if(!bar||!box)return;
- const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},list=(A.agent&&A.agent.styles)||[],cur=styleNow(),other=st.grid==='3x3'?'2x2':'3x3';
+ const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},list=(A.agent&&A.agent.styles)||[],cur=styleNow();
  const now=list.find(s=>s.id===cur);
- bar.innerHTML=`${now?`<span class="ag-chip ag-cur" title="The style of the next sheet"><img src="/assets/styles/${AIU.esc(now.id)}" alt="">${AIU.esc(now.label)} style</span>`:''}<button type=button class=ag-chip data-act=agsetgrid data-v=${other} title="${st.grid==='3x3'?'Nine':'Four'} stickers in one sheet. Click for ${other.replace('x','×')}">${ic('lib')}${st.grid.replace('x','×')} sheet</button>
+ bar.innerHTML=`${now?`<span class="ag-chip ag-cur" title="The style of the next sheet"><img src="/assets/styles/${AIU.esc(now.id)}" alt="">${AIU.esc(now.label)} style</span>`:''}<label class="ag-chip ag-sel" title="How many stickers in one sheet: nine (3×3) or four (2×2)">${ic('lib')}<select data-aggrid aria-label="Stickers per sheet"><option value=3x3${st.grid==='3x3'?' selected':''}>3×3 sheet</option><option value=2x2${st.grid==='2x2'?' selected':''}>2×2 sheet</option></select></label>
   <button type=button class="ag-chip${st.ask_before_spending?'':' warn'}" data-act=agsetask title="${st.ask_before_spending?'The price is shown and you say go before anything is spent':'Sheets start at once, without showing the price first'}">${ic(st.ask_before_spending?'check':'x')}${st.ask_before_spending?'Asks before spending':'Spends without asking'}</button>`;
  box.innerHTML=list.map(s=>`<button type=button class="ag-st${s.id===cur?' on':''}" role=radio aria-checked=${s.id===cur} data-act=agstyle data-id="${AIU.esc(s.id)}" title="${AIU.esc(s.label)}: ${AIU.esc(s.hint)}"><img src="/assets/styles/${AIU.esc(s.id)}" alt="" loading=lazy><b>${AIU.esc(s.label)}</b></button>`).join('')}
 ACT.agstyle=async el=>{A.pre=el.dataset.id;store.set('mirsal.ai.style',A.pre);if(A.sess)await saveSet({style_id:A.pre});else drawBar()};

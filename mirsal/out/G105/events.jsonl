@@ -1,0 +1,14 @@
+{"ts": 1791023626.576, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "superhero dubai", "task_slug": "superhero_dubai"}}
+{"ts": 1791023626.586, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023626.844, "stage": "sheet_picked", "status": "done", "ms": 257, "detail": {"subject": "superhero_dubai", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791023626.845, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023627.114, "stage": "keyed", "status": "done", "ms": 269, "detail": {"bg": [2, 253, 3], "threshold": [124.5, 124.5, 123.5, 123.5], "grid": "2x2", "cut": "gutter", "xs": [0, 913, 2048], "ys": [0, 1035, 2048]}}
+{"ts": 1791023627.115, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023627.396, "stage": "sliced", "status": "done", "ms": 281, "detail": {"ready": 4, "failed": 0}}
+{"ts": 1791023697.183, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 1, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791023697.185, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 2, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791023697.186, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 3, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791023697.188, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 4, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791023697.189, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791023697.608, "stage": "video_sheet_built", "status": "done", "ms": 398, "detail": {"sheet": "A1", "slots": [1, 2, 3, 4], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791023697.611, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A1", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}

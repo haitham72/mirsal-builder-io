@@ -1,0 +1,39 @@
+{
+  "id": "J043",
+  "kind": "sheet",
+  "task": "032",
+  "generation": "G103",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a small superhero figure wearing a red cape and mask standing on sand.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: hero stands tall with cape flowing wide in the hot sun of Dubai\nCharacter 2: hero jumps high into the air doing a backflip with cape trailing\nCharacter 3: hero leans forward shouting with one arm stretched toward distant skyscrapers\nCharacter 4: hero sits on a rock looking bored with cape draped over knees slowly\nCharacter 5: hero spins rapidly in a circle with cape creating a big blur around body\nCharacter 6: hero lies flat on stomach staring up at blue sky with arms by head\nCharacter 7: hero kneels with hands on knees looking worried and frowning deeply\nCharacter 8: hero laughs loud with hands covering mouth standing in a happy pose\nCharacter 9: hero runs fast on one leg with cape flapping wildly behind like wind\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "superhero in dubai",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "3ca7276d-d8c8-498f-a230-857418fc5305",
+  "result": {
+    "file": "jobs/J043/result.png",
+    "sha256": "84bb206ae5add08c196e722c848623a3575af448684e19e3df569872f61a7a92",
+    "bytes": 4419146
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791013905.236,
+  "claimed_at": 1791013906.41,
+  "completed_at": 1791013929.334,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}
