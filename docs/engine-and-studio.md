@@ -370,7 +370,30 @@ Haitham: "Python blocking the imported images is stupid, it does not let me bypa
 - `background_is_key` (no key screen) still stops, because every cell would come out wrong, but never as a dead end: `POST /api/generations/{id}/recut` (`pipeline.recut`, free, from the stored sheet, refused once a sticker has a human decision or a video sheet exists) cuts it anyway. The Studio's sheet-problem panel and the chat's problem card show **Cut it anyway** next to *Try the sheet again* (`flow/explain.py` carries `cut_anyway`). Old blocked batches (G094, G098) can be cut with it.
 - Test: `tests/test_golden.py::test_a_layout_problem_cuts_the_sheet_anyway_and_a_stopped_sheet_has_one_free_click`.
 
-## "Use it anyway" (2026-10-03): every judgement-call block can be allowed
+## "Use it anyway" — every judgement-call block can be allowed, on every surface (2026-10-03)
 
-Haitham: "any rejected image/video must give me an option to allow it". `engine/verify.py` holds the one table: `TECHNICAL` blocks (Telegram would reject the file: `dimensions`, `transparent_corners`, `static_file`, anim `size_budget`, `codec_vp9`, `dimensions`, `fps`, `duration`, `no_audio`, `alpha_mode_tag`, `alpha_decoded`, a crashed check) stay final, as does a cell with nothing cut; `OVERRIDABLE` lists the judgement calls: stills `blank_cell` (only when something was found), `foreground`, `inside_cell`, `no_spill`, `holes`; animations `inside_slot`, `cross_slot`, `loop_seam`; sheet-level cases already have "Cut it anyway". `POST /api/generations/{id}/allow {kind: still|animation, index | indexes | all, allow}` (202, free, a background re-cut from the stored sheet / video) stores `still_override` / `anim_override` on the sticker with a human history line (APPROVE "allowed anyway: ..."; taking it back writes REJECT); the check stays in the report as a WARN "(allowed by you)" and `metrics.waived`, `verify.run(inp["waive"])` keeps it through every recut, `set_appearance`, reslice and re-animate, and G2 / G4 then approve normally. `GET /api/generations/{id}` carries `allow.{still, animation}` `{can, allowed, undo, why, final}`; the tiles in `generate.js` draw only what the server reports. Open (see HANDOFF): G3 video-sheet blocks `no_outline_on_sheet`, `video_specs`, `layout_match` have no "Use it anyway" yet (a design is in HANDOFF); a bulk "Use all anyway" for stills; the chat agent's tools.
+**Rule 10's standing rule:** a rejected picture is never a dead end and never a bare word. Where a rejected picture is shown, the person sees the picture, one sentence of plain-words reason, and the override on that picture. A rejection with no picture and no override is a bug.
+
+**Every surface that shows a rejected picture must carry the override:**
+
+| surface | what it must show | state |
+|---|---|---|
+| the Studio tile (`generate.js` `tileHtml` / `blockedBox`) | the picture (or the still's plain cell), the reason, `Use it anyway` / `Take it back` | built |
+| **a slice of the left image sheet** — the sheet SVG itself, not only the cut tiles | the cell's rect is clickable; hovering shows the same sentence; a click allows / takes back | **open** (the anim path has `data-act` on the rects in `issueSvg`; the still path does not, and neither path opens the tile) |
+| the chat's card (`agent.js` `tileHTML`, `runHTML`) | the picture, the reason, the override | **open** (the tile shows the picture but has no allow button; the creator's stop card shows no picture at all) |
+| the batch's bulk control | **one** `Use all anyway (N)` / `Take all back (N)` over whatever is allow-able now | animation only; **stills open** |
+
+**The sheet is a first-class surface.** The left sheet (`cutSvg`) already draws the cell rectangles, the cut lines, the index numbers and the issue marks, so it can be the cheapest place to allow: a rejected cell must be clickable exactly like its tile, with the same hover, tooltip and `aria` treatment. Not a new panel — the same control on the picture that is already there. `pointer-events` on the mark, a hit area the size of the cell, and the click routed to the same `POST /api/generations/{id}/allow` the tile uses.
+
+**One bulk control per batch, per kind.** `allowAllRow` (`generate.js`) covers animations only (`ALW(g,'animation')`); it must cover stills as well, and each control says plainly how many are allow-able *now* ("Use all anyway (3)"), never a count of everything. The chat needs the same pair on the creator's card, because a creator run stops per-sticker and the person is left clicking one chip at a time.
+
+**The AI/vision verdict never removes a picture.** `docs/agent-and-chat.md` (the creator) and the judge: a sticker the vision model would reject is shown, with the reasons, and `Continue with them` / `Continue without them` — it never deletes and never hides. When the judge cannot run at all, the run says so in words rather than silently treating everything as approved.
+
+
+
+### The engine side (built 2026-10-03)
+
+Haitham: "any rejected image/video must give me an option to allow it". `engine/verify.py` holds the one table: `TECHNICAL` blocks (Telegram would reject the file: `dimensions`, `transparent_corners`, `static_file`, anim `size_budget`, `codec_vp9`, `dimensions`, `fps`, `duration`, `no_audio`, `alpha_mode_tag`, `alpha_decoded`, a crashed check) stay final, as does a cell with nothing cut; `OVERRIDABLE` lists the judgement calls: stills `blank_cell` (only when something was found), `foreground`, `inside_cell`, `no_spill`, `holes`; animations `inside_slot`, `cross_slot`, `loop_seam`; sheet-level cases already have "Cut it anyway". `POST /api/generations/{id}/allow {kind: still|animation, index | indexes | all, allow}` (202, free, a background re-cut from the stored sheet / video) stores `still_override` / `anim_override` on the sticker with a human history line (APPROVE "allowed anyway: ..."; taking it back writes REJECT); the check stays in the report as a WARN "(allowed by you)" and `metrics.waived`, `verify.run(inp["waive"])` keeps it through every recut, `set_appearance`, reslice and re-animate, and G2 / G4 then approve normally. `GET /api/generations/{id}` carries `allow.{still, animation}` `{can, allowed, undo, why, final}`; the tiles in `generate.js` draw only what the server reports.
+
+Still open there: the G3 video-sheet blocks `no_outline_on_sheet`, `video_specs`, `layout_match` have no "Use it anyway" (a design is in `HANDOFF.md`); a bulk "Use all anyway" for stills; the chat agent's tools.
 

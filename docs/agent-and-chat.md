@@ -184,6 +184,30 @@ Each stop or finish is a message of its own in the chat, with the buttons for wh
   ("Approve and continue", or typing "continue").
 - **Any rejection stops the run, with or without bypass**: a cell Python blocked (a block is final: "Continue without S4" drops it, nothing forces it), a sticker the vision judge would reject (it only advises: "Continue without S2" rejects it by the person's decision, "Continue with them" keeps it),
   an animation Python blocked, a failed job, a sheet Python blocked (with the "Try the sheet again" button; the run follows the new sheet), a Telegram pack the platform would refuse, Telegram not connected (the pack stays in the library; "Try again" sends it). Nothing is deleted.
+
+### A rejection in the creator is never a dead end (2026-10-03, Haitham)
+
+Reproduced with the real server: a creator run stopped on a Python-blocked cell and the chat offered only **Continue without S4** and **Stop** — no way to allow it, and the stop card carried no picture at all. Rule 10 says both are wrong: a judgement-call block must be allow-able in place, and a person cannot judge what they cannot see.
+
+**What is wrong today** (`agent/creator.py`):
+
+- `cut` on a Python-blocked cell (`:118-124`) stops with chips `creator_skip` / `creator_stop`. There is no allow chip, so a judgement call (a character touching its cell, a hole, `no_spill`) can only be dropped, never used — even though `gates.allow_stills` would allow exactly that and for free.
+- `video` on a blocked animation (`:166-170`) is the same: `creator_skip` / `creator_stop`, never "use it anyway", although `inside_slot`, `cross_slot` and `loop_seam` are overridable.
+- `resume` (`:195-219`) knows `creator_force`, which only clears the *vision* rejection by moving the step; it never calls the allow route.
+- The stop message (`_creator_say`, `graph.py:463-472`) attaches **only** the `creator` card. `runHTML` (`agent.js:202-207`) renders steps and the sentence, no carousel: the person is told S4 is rejected without seeing it.
+
+**What it must be** (engine first, `CLAUDE.md` rule 11; the engine half is already built and only needs exposing):
+
+1. `ConsoleTools.allow(gid, indexes, kind, allow)` -> `gates.check_allow` + `gates.allow_cells` (free, a re-cut from the stored sheet / video), the same call the Studio's tile makes. `FakeTools` records it in `calls`.
+2. The `cut` stop carries `Use it anyway` for every blocked sticker whose block is **overridable** (`gates.allowable(res, True, "still")`) and `Take it back` for the allowed ones; the same for `approve_anim` on animations (`gates.allowable(res, True, "animation")`). A **technical** block (Telegram's own limits) or a cell with no picture offers no allow and says why in words — never a dead word like "a block is final".
+3. The creator's chips become `creator_allow` / `creator_unallow` with the indexes, handled in `resume` like `creator_skip` (so the override is a recorded human decision in the sticker's history, `actor human`, and reversible).
+4. **The picture travels with the message.** `_creator_say` attaches the generation card next to the creator card, so `runHTML` is followed by the real carousel: the rejected cells are visible, marked with the locked issue colours (red = dropped or blocked, `docs/design.md` §2), with the override on each tile.
+5. **The AI section is always retrievable.** The vision verdict is stored, not thrown away: the stop message lists the judge's reasons per sticker (`judge.reasons[]` in plain words) whatever the run does next, and the chat keeps a way to read the full verdict later. A judge that failed to run says so instead of leaving the run as if all were approved.
+6. **One bulk control on the creator's card**: `Use all anyway (N)` / `Take all back (N)` over whatever is allow-able now, mirroring the Studio's `allowAllRow` (which today covers animations only — stills are open there too, `docs/engine-and-studio.md`).
+
+Tests: `tests/test_creator.py` gains the case that drove this — a Python-blocked cell offers allow, allowing it (`creator_allow`) puts the sticker back in the set and the run finishes to Telegram, and a *technical* block offers no allow.
+
+
 - **Money**: nothing is spent before the click; the run makes exactly one sheet call and, for `Full video`, one animation call. If the animation's price is more than 25% above the one shown, the run stops BEFORE sending it ("Animate for about N" is the person's new go-ahead). The server-side
   rules are unchanged: `can_spend`, the daily cap, one paid call at a time, every call in `out/model_calls.jsonl`.
 - **Tests**: `tests/test_creator.py` (the state machine on `FakeTools`: the happy path, waiting without bypass, a blocked cell, a vision rejection, a blocked sheet and its retry, a failed job, Telegram down, a price rise, a blocked animation, stop, a second request) and

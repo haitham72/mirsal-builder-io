@@ -30,7 +30,7 @@ chat / prompt ─► plan (template-locked prompt, 1-5 tags per cell)  G1  you a
    ─► pack  G5  ─► Telegram
 ```
 
-Python's blocks are final; a human approves at every gate; the vision model only pre-reviews; rejection never deletes; a sticker keeps its `S#` through every stage. Details:
+Python's blocks are final where Telegram itself would refuse the file, and nowhere else: every other block is a judgement call the person can allow with one recorded click — **on the picture itself** (the Studio tile, a cell of the left sheet, the chat tile), with a plain-words reason and one `Use all anyway` per batch. A human approves at every gate; the vision model only pre-reviews; rejection never deletes; a sticker keeps its `S#` through every stage. Details:
 [engine and gates](docs/engine-and-studio.md).
 
 ## What is in it
@@ -39,6 +39,7 @@ Python's blocks are final; a human approves at every gate; the vision model only
 |---|---|
 | **AI chat** (`#/agent`) | "What will you create today?": an agent with memory per subject, a step trace, plan cards with the price, swipeable carousels, one-tap selection, two settings. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
 | **Studio** (`#/studio`) | the detailed workspace: request, prompt, stickers with issue colours, edge and stroke, animation, packs, Telegram. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
+| **"Use it anyway"** | every judgement-call block is allow-able in one click, on the picture, everywhere it appears (Studio tile, a clickable cell of the left sheet, the chat card, the agentic creator), reversible and recorded; only Telegram's own limits are final. [docs/engine-and-studio.md](docs/engine-and-studio.md), [docs/design.md](docs/design.md) |
 | **Engine** | sheet → key → scale → stickers → WEBM; a verifier of 44 checks over 9 stages; the five review gates; Studio edits as layers. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
 | **Live generation** | template-locked prompts (v1-v3), an emotion bank, an AI slot filler with a lint, Higgsfield through its CLI, jobs as files, credits and a usage ledger. [docs/generation.md](docs/generation.md), [docs/higgsfield.md](docs/higgsfield.md), [docs/operator.md](docs/operator.md) |
 | **Store and search** | Postgres mirror (generations, decisions, tasks, jobs, ledger, chats), the sticker pool with local vector search, photo cutouts, LangSmith tracing. [docs/store-and-search.md](docs/store-and-search.md) |
