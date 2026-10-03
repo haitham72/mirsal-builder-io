@@ -1,26 +1,29 @@
 # CLAUDE.md — Mirsal Builder (rules + routing)
 
 **Product:** high-quality, flashy **animated stickers**, **not emoji**. Emoji appear only as the ≥1 tag Telegram requires per sticker; there is no 100×100 custom-emoji output.
-The app is in its **dev cycle**: the build phases are retired; what exists is documented in `docs/`, what is open is in `HANDOFF.md`. The root `README.md` is the index.
+The app is in its **dev cycle**: the build phases are retired; what exists is documented in `docs/`, what is open is in `HANDOFF.md`, and what the next sessions build is in `plan.md` §16 (the screens redesign). The root `README.md` is the index and carries the architecture.
 
 **Session hand-off:** read `HANDOFF.md` first (open work by area, gates waiting for Haitham, guardrails, quirks), then the doc of the area you touch:
 
 | area | doc |
 |---|---|
-| engine, verifier, gates, Studio, Telegram | `docs/engine-and-studio.md` — the golden path, the 5 review gates (G1–G5), the 44-check verifier, Studio screens and Telegram send |
+| engine, verifier, gates, Studio, Telegram | `docs/engine-and-studio.md` — the golden path, the 5 review gates (G1–G5), the 44-check verifier, Studio screens, "Use it anyway", Telegram send |
 | live generation (prompts, Higgsfield, jobs, credits) | `docs/generation.md` — the pipeline from request through Higgsfield/Kling, `docs/higgsfield.md` — what the CLI really offers with measurements, `docs/operator.md` — how the operator loop fulfils jobs |
 | Postgres, search, the pool, photos, tracing | `docs/store-and-search.md` — schema, migrations, vector search, photo cutout, LangSmith tracing |
-| the AI chat, the agent, memory, Redis, the vision judge, events | `docs/agent-and-chat.md` — LangGraph agent, per-subject memory, vision pre-review, event feed |
+| the AI chat, the agent, memory, Redis, the vision judge, events | `docs/agent-and-chat.md` — LangGraph agent, per-subject memory, vision pre-review, the agentic creator, event feed |
 | the HTTP contract | `docs/api.md` — JSON routes, SSE, idempotency, signed links, accounts, rate limits, OpenAPI |
-| the look of the screens: the shell, the rail, the palette, the tiles | `docs/design.md` — one shell and one token set for every section, the AI screen as the reference, the Earlier-batches column, and §9 "every rejected picture carries its own override". **Read it before changing any CSS, the Studio's markup, or adding a screen** |
+| the look of the screens: the shell, the rail, the palette, the tiles | `docs/design.md` — one shell and one token set for every section, the AI screen as the reference, the Earlier-batches column, §9 "every rejected picture carries its own override". **Read it before changing any CSS, the Studio's markup, or adding a screen** |
 | particle effects (Telegram-style bursts, from a pack) | `docs/effects.md` — what exists, the Kling measurements, the contract, what is open |
 | the particle-set redesign (a set belongs to pack(s), not to stickers; use / generate more / delete) | `docs/particles_plan.md` — the plan, data model, API, screens, phases (not built yet; read before touching effects) |
+| what the next sessions build (the screens redesign: set per pack, the four-step wizard, no dead-end rejection) | `plan.md` §16 — the model change, the wizard, the rejection rule, the build order |
 | recorded numbers | [measurements.md](measurements.md) — never-opinion metrics on slot fill, search precision, vision-judge agreement, sharpness |
 | a prompt to hand to an independent reviewing LLM | `docs/review-prompt.md` — paste-ready prompt that audits the whole repo in one pass |
-| the welcome modal (film + feature slides, logo = home) | `docs/onboarding.md` — what it shows, how the media were made and paid, the prompts; `docs/design.md` §9 |
+| the welcome modal (film + feature slides, logo = home) | `docs/onboarding.md` — what it shows, how the media were made and paid, the prompts; `docs/design.md` §10 |
 | reference inputs | `docs/inputs/` — Haitham's reference material: `prompt_samples.md`, `resolver_utterances.md`, `search_queries.md`, `telegram-plan.md` |
 
-Work branch: `merge/generate-advanced` (merged into `main` on 2026-10-02; `main` is 8 commits behind again — Haitham decides when it fast-forwards). Restart the server from `mirsal/.venv` before judging anything in the browser (the Studio warns when it runs older code than the files on disk).
+**Three things to know before you touch anything.** (1) `HANDOFF.md` §0c: a rejected picture is never a dead end — the override must exist on **every** surface that shows it. (2) `HANDOFF.md` §0a and §0b: the particles work is mid-flight; the per-sticker model is being replaced by a set per pack (`plan.md` §16.1). (3) `plan.md` §§1-15 (deployment) are **paused**: groundwork only, nothing switched on, do not delete it and do not raise its open questions.
+
+Work branches (2026-10-03): `deployment` carries the build; **`better_ui/ux` branches from it and is where the screens redesign of `plan.md` §16 is worked**. `merge/generate-advanced` is retired (its remote branch was deleted; `deployment` holds everything). Restart the server from `mirsal/venv` on macOS (`mirsal/.venv` on Windows) before judging anything in the browser — the Studio warns when it runs older code than the files on disk.
 Never commit a Telegram token (any token pasted in chat must be revoked), `.env`, `opencode.json` or `mirsal/telegram-id.md`, and never `git add -A` blind.
 
 ## Structure

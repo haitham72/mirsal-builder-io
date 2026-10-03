@@ -362,7 +362,81 @@ Dependencies: 0 before everything; 1 before 2, 3, 5; 2 before any public user; 4
 
 ---
 
-## 16. Open questions for Haitham (answers go into this file, and each answer deletes its question here)
+## 16. The screens redesign (Haitham, 2026-10-03; what the next sessions build)
+
+Sections 1-15 are the **deployment** plan and it is **paused by Haitham** (see `HANDOFF.md` §1). This section is the **product** plan: what the app looks like and how it behaves, in the order it must be built. Every item is an engine function + JSON first, a screen second (`CLAUDE.md` rule 11); the design half is `docs/design.md`.
+
+### 16.0 Why (the three complaints, in his words)
+
+1. "I still did not see the particles history anywhere." The particles screens exist in three places with three vocabularies and none of them is where a person looks.
+2. "The output does not live in its own history in studio, they live embedded to the emoji sticker." Wrong direction: the unit is the **pack**, not the sticker.
+3. "'Pieces that burst' is an awful name by the way." The word "pieces" survives in places a person reads it.
+
+### 16.1 The model change (one set belongs to pack(s))
+
+`docs/particles_plan.md` is the full plan; this is the shape. A Telegram **particle burst** is the effect played when someone reacts to a message with an emoji. A **sticker pack is only the group it is attached to**, never one effect per sticker.
+
+| | today | correct |
+|---|---|---|
+| the unit | an effect per sticker, a gallery per sticker | a **Particle set** `P###`, assigned to **one pack, several packs, or stand-alone** |
+| the gallery | the sticker view, the Studio section | the **pack's particle studio**; a sticker shows one line linking to it |
+| "use it" | none: the drawn sheet just sits there | **Use as particle set** saves `P###`, names it, asks where it lives |
+| lifecycle | no more, no rename, no delete | **Generate more** (appends cells, deletes nothing), Rename, Duplicate, Assign / Unassign, Delete to trash + Restore |
+| the words | effect / pieces / sprites / burst / set | **particle set**, **particles**, **burst** — "pieces" never appears where a person reads it |
+
+**Where it lives:** `Library > Particles` (every set as a card: cells strip, name, `used in: Barbie, Princess` or `stand-alone`, cost) and `Pack page > Particle studio` (the sets of this pack, its bursts, *Make particles for this pack* / *Use an existing set* / *Generate more*). One wizard, four steps, used by the Studio tab and by `Create > Particle effects`.
+
+### 16.2 The wizard, in four steps (self-explanatory, one decision per step)
+
+| step | what the person does | what the screen shows |
+|---|---|---|
+| **1 · Source** | picks a pack (locked when started from a pack) and a source: **the pack's own stickers** (free, no generation) / **draw new** (price shown, click = go) / **use an existing set** | three cards, each with its cost in words ("Free", "about 2 credits"); nothing spent |
+| **2 · Particles** | picks how many (4 for 2x2, 9 for 3x3); the vision model reads the **batch's own sheet** (no per-sticker check, no "check all") and offers 8-12 short names; the person picks N; the sheet is drawn; **a few seconds later pre-cut cells** come back and the person ticks which to keep | chips, a price line, then a cell grid; every cell with a picture is usable |
+| **3 · Motion** | live simulation with presets and sliders | **one** preview for the pack (not one row per sticker), preset cards, and the sliders renamed for a person: **Energy / Float / Swirl**, with count / spin / size under *Advanced* |
+| **4 · Finish** | renders a burst, adds it | the burst with a badge, its warnings in words, one **Add to pack** |
+
+Two rules that shape it: **the price is on its own line, never inside the button** (the button says what it does; the line says what it costs), and **a rejection is never a dead end** (section 16.3).
+
+### 16.3 A rejection is never a dead end (`CLAUDE.md` rule 10, everywhere)
+
+The engine half is built and tested: `POST /api/generations/{id}/allow {kind: still|animation}`, free, recorded, reversible (`engine/verify.py` `OVERRIDABLE` vs `TECHNICAL`). Missing are the **surfaces**:
+
+- **The left image sheet must be clickable per slice.** Today `generate.js issueSvg` draws every cell but only the *animation* marks carry a click; a still cannot be allowed from the sheet at all. Full-cell hit area, same hover / tooltip / aria as the tile, same route.
+- **One universal allow-all.** `allowAllRow` covers animations only. It must cover stills too, per kind, and the number must count what is allow-able **now** ("Use all anyway (3)"), never everything.
+- **The AI / vision section is always retrievable and always marked.** The chat tile has no allow button, and the creator's stop card shows no picture at all. The stop message must carry the generation card, the rejected cells wear the locked red marks (hatched = not in the set, solid + check = allowed by you), and the judge's per-sticker reasons stay readable whatever the run does next.
+- **The agentic creator may not stop on a Python block without offering to allow it** (`agent/creator.py:118-124`, `:166-170`): only *Continue without S#* / *Stop* today. It needs `tools.allow` + `creator_allow` / `creator_unallow`; a **technical** block says why and offers nothing.
+
+Design: `docs/design.md` §9. Engine: `docs/engine-and-studio.md` "Use it anyway". Creator: `docs/agent-and-chat.md`. Open work: `HANDOFF.md` §0c.
+
+### 16.4 What the Studio should feel like
+
+One shell, one palette, one header, one second column (`docs/design.md` §§3-4). Then:
+
+- **The batch is the unit of attention.** A click on a batch presents that batch and only that batch. The tabs are *Stickers / Animation / Particles / Pack* and nothing else competes.
+- **"History of G###" is gone.** It was decisions and captions nobody reads. Its place is the batch's own Particles section, which reads from the pack.
+- **The Particles tab is a small wizard, not a studio.** Three cards (free / price / existing set) and a `Create particles for pack` button; the professional surface is `Create > Particle effects`, which is the same wizard with every control.
+
+### 16.5 Build order (each step ends green and documented)
+
+| # | step | size |
+|---|---|---|
+| 1 | `flow/particle_sets.py` + `POST /api/particles {from_effect}` + assign / unassign / more / delete / restore + tests (the bridge; the screens are written once against it) | M |
+| 2 | `Library > Particles` + `Pack page > Particle studio` + the **Use as particle set** step in both wizards | L |
+| 3 | re-point the sticker view, the pack-grid badge and the Studio section to the pack; delete the per-sticker framing and the word "pieces" | M |
+| 4 | the surfaces of 17.3: clickable sheet cells, allow-all for stills, the chat tile + creator card | M |
+| 5 | AI chat intents (make, assign, more, delete) | M |
+| 6 | Telegram: how a burst is delivered (open question 3 of `docs/particles_plan.md`) | S |
+
+### 16.6 Still open for Haitham (do not build on a guess)
+
+1. One burst per **pack** (every emoji of the pack plays the same burst) or one per **emoji** (same particles, different motion)? The plan assumes per pack.
+2. Is a stand-alone set a real library pack (sendable to Telegram on its own) or only an asset?
+3. Does a burst reach Telegram as ordinary animated stickers in the pack (works today) or as a downloadable file / a Telegram *effect*?
+4. Show the credits a set cost on its card? (the plan says yes)
+
+---
+
+## 17. Open questions for Haitham (answers go into this file, and each answer deletes its question here)
 
 1. Supabase Auth for Google, or our own OAuth client? (Recommendation: Supabase Auth.)
 2. Render (suspend quota, is the worker free?) or an Oracle Always Free VM (ops)? (Recommendation: Render + Supabase + Upstash; VM if the suspend is unwelcome.)

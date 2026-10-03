@@ -21,7 +21,9 @@ Haitham's correction: particles are the **burst Telegram plays when you react to
 
 ## 0c. OPEN, from Haitham's own use on 2026-10-03: "reject and end of story" is wrong
 
-Found by using the app, not by reading it. All three are rule 10 (`CLAUDE.md`): a judgement-call block must be allow-able **in place**, and a rejection must never hide the picture. The engine half is **built and tested** (agent D: `POST /api/generations/{id}/allow {kind: still|animation}`, free re-cut, recorded, reversible, `engine/verify.py` `OVERRIDABLE`). What is missing is the **surfaces**.
+**Where the session reached:** the sign-off is committed and pushed (`deployment` up to `1eed2bf`, `better_ui/ux` branched from it and pushed; `merge/generate-advanced`'s remote branch deleted). Everything in section 0 (agents A-D, the docs, the `out/` snapshot) is committed. **Nothing in this section 0c is built** — it is what Haitham found by using the app after that commit, and it is the first work on `better_ui/ux`.
+
+Found by using the app, not by reading it. All of it is rule 10 (`CLAUDE.md`): a judgement-call block must be allow-able **in place**, and a rejection must never hide the picture. The engine half is **built and tested** (agent D: `POST /api/generations/{id}/allow {kind: still|animation}`, free re-cut, recorded, reversible, `engine/verify.py` `OVERRIDABLE`). What is missing is the **surfaces**.
 
 1. **The left image sheet must be clickable per slice.** Today the sheet's cell rects are drawn (`generate.js` `issueSvg`) but only the *animation* marks carry `data-act=gallow`; a still has no click at all, so the place Haitham naturally looks first cannot allow anything. Make every cell a full-cell hit area that allows / takes back (or opens the tile), with the same hover, tooltip and `aria` as the tile. Design: `docs/design.md` §9.
 2. **A universal allow-all control.** `allowAllRow` covers **animations only** (`ALW(g,'animation')`). It must cover **stills** too, per kind, with N counting what is allow-able *now* ("Use all anyway (3)", never a count of everything), and the chat needs the same pair on the creator's card.

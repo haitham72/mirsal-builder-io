@@ -21,6 +21,37 @@ python -m unittest discover -s tests -t .                  # the tests (python +
 Everything the app writes goes to `mirsal/out/` (the engine's own names, which the database uses; they never change). Copy `mirsal/.env.example` to `mirsal/.env` for keys and options.
 Prepared sheets (optional) go in `inputs/Images_gen/img-NNN-<subject>/` and `inputs/videos_gen/vid-NNN-<subject>/` (the folder names are final: never renamed).
 
+## Architecture
+
+One engine, two interfaces over it. Every feature is an engine function and a stable JSON contract **first**, a screen second (`CLAUDE.md` rule 11) — the screens in this repo are a sandbox that drives the engine through [the HTTP API](docs/api.md).
+
+```
+mirsal/mirrors nothing:  one out/ directory is the source of truth, Postgres mirrors it
+browser ── console/ (Studio, AI chat, Library, Create)  ── stdlib http.server :8770
+                          │  JSON only (docs/api.md, OpenAPI in console/openapi.py)
+                          ▼
+   flow/     the golden path: pipeline.py (stages, result.json), gates.py (G1-G5)
+   engine/   pure: sheet, key, video, particles, verify.py (44 checks), no I/O, no deps
+   generation/ Higgsfield through its CLI: prompts, jobs (ticket-first), credits, ledger
+   vision/   the judge: pre-review only, and effect_plan (what a burst is made of)
+   agent/    LangGraph chat over the Studio's own functions; creator.py (run to Telegram)
+   store/    Postgres mirror + pgvector pool; media/ library, cutout; runtime/ cache, atomic
+   services/ llm, embed, telegram        obs/ tracing        engine/ never imports any of these
+```
+
+**The invariants that hold it up** (each is a test, not a promise):
+
+| invariant | where it is enforced |
+|---|---|
+| the engine is deterministic, pure and free of I/O — no `psycopg`, no `redis`, no model client | `tests/test_store.py::test_engine_boundary` |
+| a ticket is written **before** the wait, so a crash never loses or double-charges a paid job | `generation/jobs.py` `fulfil`, `tests/test_jobs.py` |
+| no paid call without a shown price and a go-ahead | `agent/graph.py` `n_confirm`, `tests/test_agent.py` |
+| the vision model pre-reviews and **never** approves | `vision/judge.py`, `CLAUDE.md` rule 10 |
+| Python's blocks are final only where Telegram itself would refuse the file; every other block is a judgement call with one recorded, reversible **Use it anyway** on the picture itself | `engine/verify.py` `OVERRIDABLE` vs `TECHNICAL`, `flow/gates.py` |
+| history is append-only: rejection never deletes, a sticker keeps its `S#` | `flow/pipeline.py` `hist` |
+| a web page the owner visits cannot drive the local server; `/out/` cannot escape `out/` | `console/server.py` `_foreign` / `_authorize`, `tests/test_hardening.py` |
+| no secret ever reaches git or a response | `runtime/users.py`, `services/telegram.py`, `tests/test_hardening.py` |
+
 ## How a sticker is made (the golden path)
 
 ```
@@ -49,7 +80,7 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Particle sets (plan)** | the corrected model: a set of particles belongs to pack(s) or stands alone; use, generate more, save, delete; screens and API | [docs/particles_plan.md](docs/particles_plan.md) |
 | **Design** | one shell and one palette for every screen: the rail, the second column, the token set, the style tiles, and the Earlier-batches column. [docs/design.md](docs/design.md) |
 | **Welcome / onboarding** | the modal that opens once per browser session and on the logo: a fast-cut Seedance ad film and four sliding feature images; the prompts, the credits spent and the checks | [docs/onboarding.md](docs/onboarding.md) |
-| **Independent review** | a ready-made prompt for another LLM to audit the whole app: [docs/review-prompt.md](docs/review-prompt.md) |
+| **Independent review** | a ready-made prompt for another LLM to audit the whole app: [docs/review-prompt.md](docs/review-prompt.md). The standing rules above are the outcome of the 2026-10-02 audit, now architecture here rather than a report. |
 | **Measurements** | recorded numbers — slot fill, search precision, vision-judge agreement, sharpness; no opinions: [docs/measurements.md](docs/measurements.md) |
 | **Telegram** | send a pack (images and video are split into two sets), a no-token fallback for @stickers. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
 
