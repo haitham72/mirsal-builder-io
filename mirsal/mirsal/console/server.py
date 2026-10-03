@@ -30,7 +30,7 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 # What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,
@@ -239,6 +239,12 @@ class Console:
             pl.OWNER.reset(tok)
         tasks.link_generation(self.out, t["id"], gid)
         jobs.attach_generation(self.out, job["id"], gid)
+        pieces = req.get("pieces")                         # the sheet is the pieces of a particle effect: its cells become that group's sprites (thread mode and queue mode both run this)
+        if isinstance(pieces, dict) and pieces.get("effect") and pieces.get("group"):
+            try:
+                fx_flow.link_pieces(self.out, str(pieces["effect"]), str(pieces["group"]), gid, job=job["id"], grid=t["plan"].get("grid"))
+            except fx_flow.EffectError:                    # the effect was removed meanwhile: the batch is still a normal batch
+                pass
         self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
 
     def save_ref(self, data: bytes, name: str) -> dict:
@@ -343,9 +349,10 @@ class Console:
         except (OSError, ValueError):
             raise pl.PipelineError("That batch has no saved plan to start from", 404)
 
-    def live(self, what, body, base_plan=None):
+    def live(self, what, body, base_plan=None, pieces=None):
         """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
-        `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>."""
+        `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>.
+        `pieces` ({effect, group}, in-process only, never from HTTP) marks a sheet as the pieces of a particle effect: `start_from_job` links its cells to that group."""
         if what not in ("cost", "sheet", "video"):
             raise pl.PipelineError(NO_ROUTE, 404)
         who = self.actor()
@@ -380,7 +387,10 @@ class Console:
                 job = jobs.create(self.out, "sheet", task=t["id"], request={
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
                     "outline": int(body["outline"]) if body.get("outline") is not None else None, "custom_prompt": bool(custom),
-                    "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"]})
+                    "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"],
+                    **({"pieces": {"effect": str(pieces["effect"]), "group": str(pieces["group"])}} if pieces else {})})
+                if pieces:                                         # before the job runs, so the page sees REQUESTED and the later link is never overwritten
+                    fx_flow.request_pieces(self.out, str(pieces["effect"]), str(pieces["group"]), job["id"], t["plan"]["grid"], who["id"])
                 self.fulfil_async(job["id"], after=self.start_from_job)
                 return {"job": job["id"], "task": t["id"], "estimate": est, "model": model, "params": params,
                         "expanded_by": t["plan"].get("expanded_by"), "expand_error": t["plan"].get("expand_error")}
@@ -710,6 +720,8 @@ def make_handler(c: Console):
             if (path in MEMBER_POST) if post else (path in MEMBER_GET):
                 return None
             parts = path.strip("/").split("/")
+            if not post and parts[:2] == ["api", "packs"] and parts[-1] == "particles" and len(parts) in (4, 6):      # a member's particles answer is empty, not an error (the handler says so)
+                return None
             if not post and len(parts) == 3 and parts[:2] == ["api", "jobs"]:          # one job: only the one this user asked for
                 try:
                     return None if (jobs.read(c.out, parts[2]).get("request") or {}).get("user") == user["id"] else gone
@@ -835,6 +847,13 @@ def make_handler(c: Console):
                 return self._json(200, {"users": c.users.list()})
             if path == "/api/telegram":      # connected or not and which bot: never the token
                 return self._json(200, telegram.status(c.out))
+            pp = path.strip("/").split("/")
+            if pp[:2] == ["api", "packs"] and pp[-1] == "particles" and len(pp) in (4, 6) and (len(pp) == 4 or pp[3] == "stickers"):
+                # the particles made for a sticker (GET /api/packs/{id}/stickers/{sid}/particles) or the counts for a whole pack (GET /api/packs/{id}/particles): a pure read; effects are owner only,
+                # a member's answer is simply empty (docs/effects.md)
+                if self.user.get("role") != "owner":
+                    return self._json(200, {"sticker": pp[4], "created": [], "saved": [], "effects": [], "can_make": False} if len(pp) == 6 else {})
+                return self._json(200, fx_flow.for_sticker(c.out, c.lib, pp[2], pp[4]) if len(pp) == 6 else fx_flow.counts_for_pack(c.out, c.lib, pp[2]))
             if path.startswith("/api/packs/") and path.endswith("/telegram"):          # dry run: what would be created, every problem
                 st = telegram.status(c.out)
                 name = parse_qs(urlparse(self.path).query).get("name", [None])[0]
@@ -985,6 +1004,12 @@ def make_handler(c: Console):
                 return self._json(200, dict(model_catalog.catalog(), styles=styles.PRESETS, default_style=styles.DEFAULT, slot_fill=c.cfg.slot_fill))
             if path == "/api/usage":
                 return self._json(200, usage.summary(c.out, int(parse_qs(urlparse(self.path).query).get("limit", ["100"])[0])))
+            if path.startswith("/assets/welcome/"):            # the welcome modal's own video and slides: real files, with Range (a browser seeks and loops a video through it)
+                name = path.rsplit("/", 1)[-1]
+                f = placeholders.ASSETS / "welcome" / name
+                if not placeholders.WELCOME.match(name) or not f.is_file():
+                    raise pl.PipelineError("not found", 404)
+                return self._file(f)
             if path.startswith("/assets/"):
                 parts = path.strip("/").split("/")
                 a = placeholders.find(parts[1], parts[2]) if len(parts) == 3 else None
@@ -1109,12 +1134,35 @@ def make_handler(c: Console):
                 job = fx_flow.new_video_job(c.out, eid, gid, grid=tuple(plan["grid"]), user=who["id"], model=body.get("model"), options=body.get("options"))
                 c.fulfil_async(job["id"], after=lambda j: fx_flow.on_video_done(c.out, eid, gid, j, c.cfg))
                 return self._json(202, {"job": job["id"], "estimate": credits, "id": eid, "group": gid})
+            if act in ("pieces_estimate", "pieces"):               # the AI-drawn sheet of the burst's own pieces: an ordinary sheet job (Nano Banana 2), outline 0, linked to the group by start_from_job
+                gid = str(body.get("group") or "")
+                plan = fx_flow.pieces_plan(c.out, eid, gid, body.get("grid"))
+                if not higgsfield.available():
+                    raise pl.PipelineError("The Higgsfield CLI is not installed (npm i -g @higgsfield/cli, then higgsfield auth login).", 503)
+                model, params = model_catalog.resolve("image", body.get("model"), body.get("options"))
+                try:
+                    credits = higgsfield.cost(model, params, plan["prompt"])
+                except higgsfield.HiggsError as ex:
+                    credits = None
+                    plan["cost_error"] = str(ex)
+                plan.update(credits=credits, model=model, params=params)
+                if act == "pieces_estimate" or body.get("estimate") is True:
+                    return self._json(200, plan)
+                who = c.actor()
+                if not who.get("can_spend") or who.get("disabled"):
+                    raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
+                if body.get("go") is not True:
+                    return self._json(409, {"error": f"This costs {credits} credits. Send go: true to start it.", "estimate": plan})
+                base = fx_flow.pieces_base_plan(c.out, eid, gid, plan["grid"])
+                j = c.live("sheet", {"prompt": base["task"], "grid": f"{plan['grid'][0]}x{plan['grid'][1]}", "outline": 0, "model": body.get("model"), "options": body.get("options")},
+                           base_plan=base, pieces={"effect": eid, "group": gid})
+                return self._json(202, {"job": j["job"], "task": j["task"], "estimate": j["estimate"], "id": eid, "group": gid, "grid": plan["grid"]})
             if act == "preview":
                 return self._json(200, fx_flow.sim_preview(c.out, c.lib, eid, str(body.get("sticker_id") or ""), body.get("params") or {}, int(body.get("size") or 256)))
             if act == "render":
                 return self._json(200, fx_flow.sim_render(c.out, c.lib, eid, str(body.get("sticker_id") or ""), c.cfg, body.get("params") or {}))
             if act == "add":
-                return self._json(200, fx_flow.add_to_pack(c.out, c.lib, eid, body.get("results"), body.get("pack_id"), self.user["id"]))
+                return self._json(200, fx_flow.add_to_pack(c.out, c.lib, eid, body.get("results"), body.get("pack_id"), self.user["id"], body.get("sticker_ids")))
             raise pl.PipelineError(NO_ROUTE, 404)
 
         def _post_projects(self, path, query):

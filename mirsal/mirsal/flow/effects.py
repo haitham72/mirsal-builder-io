@@ -249,11 +249,16 @@ def sprites_of(out: Path, lib, eid: str, gid: str) -> list[np.ndarray]:
     if isinstance(src, dict) and src.get("generation") is not None:
         from . import pipeline as pl
         gn = int(str(src["generation"]).upper().lstrip("G"))
-        res = pl.read_result(out, gn)
+        try:
+            res = pl.read_result(out, gn)
+        except pl.PipelineError:
+            raise EffectError(f"the pieces batch G{gn:03d} does not exist", 409)
         d = pl.gen_dir(out, gn)
-        for st in res["stickers"]:
-            if st.get("status") == "READY" and st.get("png") and (st.get("review") or {}).get("still") != "REJECTED":
+        for st in res["stickers"]:       # a cell with only warnings is READY and is used; a rejected one is not
+            if st.get("status") == "READY" and st.get("png") and (st.get("review") or {}).get("still") != "REJECTED" and (d / st["png"]).is_file():
                 pcs.append(np.asarray(Image.open(d / st["png"]).convert("RGBA"), np.uint8))
+        if not pcs and any(st.get("status") == "PENDING" for st in res["stickers"]):
+            raise EffectError(f"the pieces of G{gn:03d} are still being cut: try again in a moment", 409)
     else:
         d = _dir(out, eid)
         for sid in g["stickers"]:
@@ -261,7 +266,7 @@ def sprites_of(out: Path, lib, eid: str, gid: str) -> list[np.ndarray]:
             if s.get("src") and (d / s["src"]).is_file():
                 pcs.append(np.asarray(Image.open(d / s["src"]).convert("RGBA"), np.uint8))
     if not pcs:
-        raise EffectError("there are no pieces to burst: the sprite batch has no approved stickers yet" if isinstance(src, dict) else "the stickers of this group have no picture", 409)
+        raise EffectError("there are no pieces to burst: the pieces batch has no ready cell (none was cut, or all were rejected)" if isinstance(src, dict) else "the stickers of this group have no picture", 409)
     return pcs
 
 
@@ -342,6 +347,71 @@ def sim_render(out: Path, lib, eid: str, sticker_id: str, cfg, overrides: dict |
     return res
 
 
+# ---------- mode "sim": the AI-drawn pieces sheet (an ordinary batch, its cells are the sprites) ----------
+def _grid_of(grid) -> tuple[int, int]:
+    rows, cols = (tuple(int(x) for x in grid.lower().split("x")) if isinstance(grid, str) else tuple(int(x) for x in grid)) if grid else (2, 2)
+    if rows != cols or rows not in (2, 3):
+        raise EffectError("the pieces sheet is 2x2 or 3x3")
+    return rows, cols
+
+
+def pieces_base_plan(out: Path, eid: str, gid: str, grid=None) -> dict:
+    """The plan the normal sheet path accepts (`tasks.reserve(base_plan=...)`) for a sheet of the group's pieces: template `sheet_2x2|sheet_3x3` v3 for the cell layout, the pieces prompt
+    kept as `custom.sheet_prompt` so it is exactly what is sent, one cell per piece (key = the piece name, emoji = the source sticker's emoji)."""
+    from ..generation import prompter
+    e = read(out, eid)
+    g = _group(e, gid)
+    rows, cols = _grid_of(grid)
+    d = ep.describe_pieces({"subject": g["subject"], "elements": g["elements"], "style": g.get("style")}, rows, cols)
+    first = next((s for s in e["stickers"] if s["sticker_id"] in (g.get("stickers") or [])), None) or {}
+    emoji = first.get("emoji") or "🙂"
+    cells, stickers = [], []
+    for c in d["cells"]:
+        key = prompter.slug(c["label"]) or f"piece_{c['pos']}"
+        cell = {"pos": c["pos"], "label": c["label"], "tags": prompter.clean_tags(key), "emoji": emoji}
+        cells.append(cell)
+        stickers.append({"index": c["pos"], "id": f"prompt{c['pos']:02d}", "prompt": f"{c['label']}, isolated and centred", "key": key, "tags": cell["tags"], "emoji": emoji})
+    subj = f"{d['plan']['subject']} pieces"
+    tid = prompter.TEMPLATE_OF[(rows, cols)]
+    slots = {"subject_description": f"separate small pieces that burst out of {ep._theme(d['plan']['subject'])}", "style_id": "flat_vector", "mode": tid, "cells": cells,
+             "action_guidance": "default", "key_colour": d["key"], "loop": False}
+    return {"task": subj, "task_slug": prompter.slug(subj) or "pieces", "subject": subj, "context": "", "kind": "default", "grid": [rows, cols], "template_id": tid,
+            "template_version": prompter.TEMPLATE_VERSION, "slots": slots, "guidelines": {}, "sheet_prompt": d["prompt"], "video_prompt": "", "stickers": stickers,
+            "custom": {"sheet_prompt": d["prompt"]}, "effect": {"id": e["id"], "group": gid, "template": d["template"], "version": d["version"]}}
+
+
+def pieces_plan(out: Path, eid: str, gid: str, grid=None) -> dict:
+    """What the page shows before anything is spent: the prompt that will be sent, the cells, the screen colour, the grid. (The price is asked of the provider by the caller.)"""
+    e = read(out, eid)
+    g = _group(e, gid)
+    rows, cols = _grid_of(grid)
+    d = ep.describe_pieces({"subject": g["subject"], "elements": g["elements"], "style": g.get("style")}, rows, cols)
+    return {**d, "group": gid, "outline": 0}
+
+
+def request_pieces(out: Path, eid: str, gid: str, job: str, grid, user: str = "local") -> dict:
+    """The pieces sheet job exists: the group says so (`pieces.status` REQUESTED) so the page can poll the job. Called before the job runs, so the link can never be overwritten by it."""
+    with _LOCK:
+        e = read(out, eid)
+        _group(e, gid)["pieces"] = {"job": job, "grid": [int(grid[0]), int(grid[1])], "status": "REQUESTED"}
+        hist(e, user, "REQUEST", f"{gid}: pieces sheet job {job} ({int(grid[0])}x{int(grid[1])})", {"job": job})
+        return _write(out, e)
+
+
+def link_pieces(out: Path, eid: str, gid: str, generation, job: str | None = None, grid=None) -> dict:
+    """The pieces sheet became a batch (the sheet job is DONE, `Console.start_from_job` runs in thread mode and in queue mode alike): the group's sprites are its cells. The cells are cut and
+    judged by the normal stills run; `sprites_of` uses the ready ones (a cell with warnings included) and answers 409 until there is one."""
+    gn = int(str(generation).upper().lstrip("G"))
+    with _LOCK:
+        e = read(out, eid)
+        g = _group(e, gid)
+        prev = g.get("pieces") or {}
+        g["sprites"] = {"generation": gn}
+        g["pieces"] = {"generation": gn, "job": job or prev.get("job"), "grid": [int(x) for x in (grid or prev.get("grid") or e["grid"])], "status": "DRAWN"}
+        hist(e, "python", "LINK", f"{gid}: the pieces are the cells of G{gn:03d}", {"generation": f"G{gn:03d}", "job": g["pieces"]["job"]})
+        return _write(out, e)
+
+
 # ---------- add to the pack (the person's click) ----------
 def targets(e: dict, result_ids=None) -> list[tuple[dict, dict]]:
     """(source sticker, result) pairs. A sim result belongs to its sticker; a video result (one per cell) goes to the stickers of its group in order, cell by cell, round robin."""
@@ -361,11 +431,14 @@ def targets(e: dict, result_ids=None) -> list[tuple[dict, dict]]:
     return pairs
 
 
-def add_to_pack(out: Path, lib, eid: str, result_ids=None, pack_id: str | None = None, user: str = "local") -> dict:
+def add_to_pack(out: Path, lib, eid: str, result_ids=None, pack_id: str | None = None, user: str = "local", sticker_ids=None) -> dict:
     """Put results into a pack as animated stickers tagged with their source sticker's emoji. This click is the person's approval of the effect (history `APPROVE`); a FAILED result (a
     Telegram limit is broken) cannot be added, everything else can, warnings included."""
     e = read(out, eid)
     pairs = targets(e, result_ids)
+    if sticker_ids:                                  # a sticker's own gallery adds a take for THAT sticker only (a video cell would otherwise go to every sticker of its group)
+        keep = {str(i) for i in sticker_ids}
+        pairs = [(s, r) for s, r in pairs if s["sticker_id"] in keep]
     if not pairs:
         raise EffectError("there is nothing to add yet: render an effect first", 409)
     bad = [r["id"] for _, r in pairs if r["status"] != "READY" or not r.get("file")]
@@ -388,3 +461,102 @@ def add_to_pack(out: Path, lib, eid: str, result_ids=None, pack_id: str | None =
         hist(e, user, "APPROVE", f"{len(added)} effect sticker(s) added to the pack", {"pack": pack_id, "added": added})
         _write(out, e)
     return {"added": added, "pack_id": pack_id}
+
+
+# ---------- the particles of a sticker: what was created for it and what was saved (a pure read) ----------
+def _lib_index(lib) -> tuple[dict, dict]:
+    """(sticker id -> (pack id, pack name) for every library sticker, (effect, result) -> [library stickers made from it]) from one read of the library."""
+    from urllib.parse import quote
+    with lib.lock:
+        db = lib._load()
+    where, made = {}, {}
+    for p in db.get("packs", []):
+        for s in p.get("stickers", []):
+            where[s["id"]] = (p["id"], p["name"])
+            src = s.get("source") or {}
+            if src.get("effect"):
+                made.setdefault((src["effect"], src.get("result")), []).append(
+                    {"sticker_id": s["id"], "name": s.get("name"), "emoji": s.get("emoji"), "pack_id": p["id"], "pack": p["name"], "effect": src["effect"], "result": src.get("result"),
+                     "source_sticker": src.get("source_sticker"), "file": s.get("file"), "url": "/lib/" + quote(s.get("file") or ""), "kb": s.get("kb"), "created": s.get("created"),
+                     "missing": not (lib.files / (s.get("file") or "\0")).is_file()})
+    return where, made
+
+
+def _gallery(out: Path, lib, pack_id: str, only: str | None = None) -> dict[str, dict]:
+    """sticker id -> {created: [...], saved: [...], effects: [...]} for the stickers of `pack_id` (or just `only`). An effect counts for a sticker when the sticker is in the pack now
+    (it may have been moved since) or when the effect was made for that pack. Reads effect.json files only; nothing is written, nothing is rendered."""
+    where, made = _lib_index(lib)
+    in_pack = {sid for sid, (pid, _) in where.items() if pid == pack_id}
+    want = {only} if only else in_pack
+    gal: dict[str, dict] = {}
+
+    def slot(sid):
+        return gal.setdefault(sid, {"created": [], "saved": [], "effects": []})
+    for p in sorted(effects_dir(out).glob("E[0-9]*")):
+        try:
+            e = json.loads(atomic.read_text(p / "effect.json"))
+        except (OSError, ValueError):
+            continue
+        eid = e.get("id") or p.name
+        mine = [s["sticker_id"] for s in e.get("stickers") or [] if s["sticker_id"] in want and (s["sticker_id"] in in_pack or e.get("pack_id") == pack_id)]
+        if not mine:
+            continue
+        groups = {g["id"]: g for g in e.get("groups") or []}
+        for sid in mine:
+            for r in e.get("results") or []:
+                shared = r.get("mode") == "video"
+                g = groups.get(r.get("group")) or {}
+                if shared and sid not in (g.get("stickers") or []):
+                    continue
+                if not shared and r.get("sticker_id") != sid:
+                    continue
+                f = (p / r["file"]) if r.get("file") else None
+                got = [m for m in made.get((eid, r["id"])) or [] if m["source_sticker"] == sid]            # saved FOR this sticker (a video cell may have been saved for another sticker of its group)
+                item = {"effect": eid, "result": r["id"], "mode": r.get("mode"), "status": r.get("status"), "bytes": r.get("bytes") or 0, "warnings": list(r.get("warnings") or []),
+                        "blocks": list(r.get("blocks") or []), "url": f"/out/effects/{eid}/{r['file']}" if r.get("file") else None, "missing": not (f and f.is_file()),
+                        "added_to": got[0]["pack_id"] if got else None,                      # the library's word, not the flag the effect kept (a sticker deleted since is not "added")
+                        "created": round(f.stat().st_mtime, 3) if f and f.is_file() else e.get("created"), "shared": shared, "group": r.get("group")}
+                item["usable"] = item["status"] == "READY" and not item["missing"]
+                if shared:
+                    cells = sorted(x["cell"] for x in e["results"] if x.get("mode") == "video" and x.get("group") == r.get("group"))
+                    item["cell"] = r.get("cell")
+                    item["assigned"] = bool(cells) and cells[(g.get("stickers") or []).index(sid) % len(cells)] == r.get("cell")      # the cell `add_to_pack` gives this sticker
+                slot(sid)["created"].append(item)
+            if eid not in slot(sid)["effects"]:
+                slot(sid)["effects"].append(eid)
+    for lst in made.values():
+        for m in lst:
+            if m["source_sticker"] in want:
+                slot(m["source_sticker"])["saved"].append(m)
+    for v in gal.values():
+        v["created"].sort(key=lambda i: (i["created"] or 0, i["effect"], i["result"]), reverse=True)
+        v["saved"].sort(key=lambda i: i["created"] or 0, reverse=True)
+        v["effects"] = sorted(v["effects"], reverse=True)
+    return gal
+
+
+def for_sticker(out: Path, lib, pack_id: str, sticker_id: str) -> dict:
+    """Every particle made for one sticker, newest first. `created`: the results of the effects that include it (a simulated result is its own; every cell of its group's video is a take,
+    `shared: true`, `assigned` marks the cell `add_to_pack` would give it). `saved`: the library stickers made from them, in any pack. A missing file or a FAILED result is listed and flagged
+    (`missing`, `usable: false`). 404 when the pack does not exist or the sticker is in neither the pack nor any effect."""
+    _pack(lib, pack_id)
+    g = _gallery(out, lib, pack_id, only=str(sticker_id))
+    row = g.get(str(sticker_id))
+    if row is None:
+        with lib.lock:
+            db = lib._load()
+        if not any(s["id"] == sticker_id for p in db.get("packs", []) if p["id"] == pack_id for s in p["stickers"]):
+            raise EffectError(f"no sticker {sticker_id} in this pack", 404)
+        row = {"created": [], "saved": [], "effects": []}
+    return {"sticker": str(sticker_id), "pack_id": pack_id, **row, "can_make": True}
+
+
+def counts_for_pack(out: Path, lib, pack_id: str) -> dict[str, dict]:
+    """{sticker id: {created, saved}} for the stickers of a pack that have any particles (created counts the usable ones: READY with its file), one pass for the whole pack."""
+    _pack(lib, pack_id)
+    res = {}
+    for sid, v in _gallery(out, lib, pack_id).items():
+        n, s = sum(1 for i in v["created"] if i["usable"]), sum(1 for i in v["saved"] if not i["missing"])
+        if n or s:
+            res[sid] = {"created": n, "saved": s}
+    return res

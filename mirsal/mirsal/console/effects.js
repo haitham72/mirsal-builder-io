@@ -4,7 +4,7 @@
    Results are 3-second Telegram stickers; Add puts them into the pack tagged with the source emoji. Everything here calls /api/effects; nothing is decided in the browser. */
 'use strict';
 ICONS.fx='<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/><circle cx="12" cy="12" r="1.8"/>';
-const FX={pack:'',sel:new Set(),mode:'video',grid:'2x2',note:'',eid:'',rec:null,past:[],par:{},pv:{},est:{},pick:new Set(),timer:0,pvT:{},busy:{}};
+const FX={pack:'',sel:new Set(),mode:'video',grid:'2x2',note:'',eid:'',rec:null,past:[],par:{},pv:{},est:{},pick:new Set(),timer:0,pvT:{},busy:{},pgrid:'2x2',pest:{},gen:{},sig:{}};
 const FXSL=[['magnitude','Explosion',0,3,.05],['gravity','Gravity',-2,3,.05],['vortex','Vortex',-2,2,.05],['count','Pieces',4,80,1],['spin','Spin',0,3,.05]];
 const FXPRESETS=['burst','fountain','vortex','rain','confetti'];
 const FXWHY={effect_tail_faded:'Pieces were still on screen at the end, so the last frames were faded out to end empty, like a Telegram effect.',effect_empty_start:'Something is on screen in the first frames.',
@@ -17,9 +17,19 @@ RENDER.effects=async arg=>{await loadLib();clearTimeout(FX.timer);
 ACT.fxopen=()=>{location.hash='#/effects'};
 ACT.fxback=()=>{FX.eid='';FX.rec=null;location.hash='#/effects'};
 async function fxLoad(){const r=await api('/api/effects/'+FX.eid);if(!r.ok){toast(r.j.error||'No such effect',1);FX.eid='';FX.rec=null;return}
- FX.rec=r.j;const e=r.j;for(const g of e.groups||[]){const v=(e.video||{})[g.id];if(v&&v.status==='REQUESTED'&&v.job){const j=await api('/api/jobs/'+v.job);if(j.ok)v.live=j.j}}
- const live=['NEW'].includes(e.status)||Object.values(e.video||{}).some(v=>v.status==='REQUESTED'&&v.live&&!['FAILED','DONE'].includes(v.live.status));
+ FX.rec=r.j;const e=r.j;for(const g of e.groups||[]){const v=(e.video||{})[g.id];if(v&&v.status==='REQUESTED'&&v.job){const j=await api('/api/jobs/'+v.job);if(j.ok)v.live=j.j}
+  const pc=g.pieces;if(pc&&pc.status==='REQUESTED'&&pc.job){const j=await api('/api/jobs/'+pc.job);if(j.ok)pc.live=j.j}
+  const n=e.mode==='sim'?fxGn(g):0;if(n){const q=await api('/api/generations/'+n);if(q.ok)FX.gen[n]=q.j}
+  const sig=g.id+':'+n+':'+(n?fxReady(n).length:0);if(FX.sig[g.id]!==sig){FX.sig[g.id]=sig;for(const sid of g.stickers)delete FX.pv[sid]}}      /* the pieces changed: the previews are drawn again from them */
+ const live=['NEW'].includes(e.status)||Object.values(e.video||{}).some(v=>v.status==='REQUESTED'&&v.live&&!['FAILED','DONE'].includes(v.live.status))||(e.groups||[]).some(fxPiecesBusy);
  clearTimeout(FX.timer);if(live&&route_==='effects')FX.timer=setTimeout(async()=>{await fxLoad();if(route_==='effects')fxDraw()},2200)}
+
+/* ---------- the drawn pieces of a group: the job, then the cells of the batch it became */
+const fxGn=g=>{const s=g&&g.sprites;return s&&typeof s==='object'&&s.generation!=null?+String(s.generation).replace(/\D/g,'')||0:0};
+const fxReady=n=>{const r=FX.gen[n];return r?(r.stickers||[]).filter(s=>s.status==='READY'&&s.png&&(s.review||{}).still!=='REJECTED'):[]};
+function fxPiecesBusy(g){const pc=g.pieces;if(!pc)return false;
+ if(pc.status==='REQUESTED')return !['FAILED','TIMEOUT'].includes((pc.live||{}).status);
+ const n=fxGn(g);if(!n||pc.generation!==n)return false;const r=FX.gen[n];return !r||(!r.error&&(r.stage!=='sliced'||!!r.busy))}
 
 /* ---------- setup: a pack, its stickers, how */
 const fxPackOf=()=>packById(FX.pack);
@@ -31,7 +41,7 @@ function fxSetup(){const p=fxPackOf(),packs=LIB.packs.filter(x=>x.stickers.lengt
   ${p?`<div class=sh style="margin-top:18px">2 · Which stickers <button class="link" data-act=fxall data-v=1>all</button><button class=link data-act=fxall data-v=0>none</button></div>
   <div class=fx-sts>${p.stickers.map(s=>`<button class="fx-st${FX.sel.has(s.id)?' on':''}" data-act=fxst data-id=${s.id} title="${esc(s.name)}">${media(s)}<span>${esc(s.emoji||'')}</span></button>`).join('')}</div>
   <div class=sh style="margin-top:18px">3 · How is the burst made</div>
-  <div class=fx-modes><label class="fx-mode${FX.mode==='sim'?' on':''}"><input type=radio name=fxm ${FX.mode==='sim'?'checked':''} data-act=fxmode data-v=sim><b>Simulate</b><small>Free. The pieces fly by gravity, explosion and vortex sliders you move, with a live preview. The pieces are the stickers themselves, or a batch of drawn pieces.</small></label>
+  <div class=fx-modes><label class="fx-mode${FX.mode==='sim'?' on':''}"><input type=radio name=fxm ${FX.mode==='sim'?'checked':''} data-act=fxmode data-v=sim><b>Simulate</b><small>Free. The pieces fly by gravity, explosion and vortex sliders you move, with a live preview. The pieces are drawn for you by AI (a sheet of different small pieces, a few credits once), or they are the stickers themselves.</small></label>
    <label class="fx-mode${FX.mode==='video'?' on':''}"><input type=radio name=fxm ${FX.mode==='video'?'checked':''} data-act=fxmode data-v=video><b>Video from scratch</b><small>Kling draws the burst from text only, on an empty screen. About 4.5 credits for a clip of 4 cells (2x2); the price is shown before anything is spent.</small></label></div>
   ${FX.mode==='video'?`<div class=row><span class=mut>Cells in one clip</span><div class=tabs style="margin:0;gap:6px"><button class="tab${FX.grid==='2x2'?' on':''}" data-act=fxgrid data-v=2x2>2 x 2</button><button class="tab${FX.grid==='3x3'?' on':''}" data-act=fxgrid data-v=3x3>3 x 3</button></div>${FX.grid==='3x3'?'<span class=fx-warn>3 x 3 was measured poor: pieces cross cells and nothing ends empty.</span>':''}</div>`:''}
   <div class=row><input id=fxnote type=text placeholder="Your own pieces? e.g. pieces: gold bars, diamonds (optional)" value="${esc(FX.note)}" style="flex:1;min-width:260px"></div>
@@ -63,11 +73,26 @@ function fxSimRow(e,g,sid){const s=fxSticker(e,sid),p=FX.par[sid]||{},u=FX.pv[si
   <div class=fx-ctl><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${(g.preset||{})[sid]===n&&!FX.par[sid]?.touched?' on':''}" data-act=fxpreset data-sid=${sid} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=fxshuffle data-sid=${sid}>shuffle</button></div>
    ${FXSL.map(([k,l,a,b,st])=>`<label class=fx-sl><span>${l}</span><input type=range min=${a} max=${b} step=${st} value="${p[k]??''}" data-fxp=${k} data-sid=${sid}><output>${p[k]??''}</output></label>`).join('')}
    <div class=row><button class="btn pri sm" data-act=fxrender data-sid=${sid}>Render</button><small class=mut>the final 512 px sticker, checked</small></div></div></div>`}
-function fxSimPanel(e,g){const src=g.sprites==='own'||!g.sprites?'own':'gen';
- return `<div class=fx-job><div class=row><span class=mut>Pieces</span><label><input type=radio name=fxs-${g.id} ${src==='own'?'checked':''} data-act=fxsprites data-g=${g.id} data-v=own> the stickers themselves</label>
-  <label><input type=radio name=fxs-${g.id} ${src==='gen'?'checked':''} data-act=fxsprites data-g=${g.id} data-v=gen> approved stickers of batch G<input type=number id=fxgen-${g.id} min=1 style="width:70px" value="${src==='gen'?(g.sprites.generation||''):''}"></label></div>
-  <div class=mut>Draw the pieces first in the Studio (a sheet of ${esc(g.elements.join(', '))}), approve the ones you like, then use that batch here.</div>
-  ${g.stickers.map(sid=>fxSimRow(e,g,sid)).join('')}</div>`}
+function fxPiecesPanel(e,g){const pc=g.pieces||{},n=fxGn(g),grid=FX.pgrid,k=g.id+grid,est=FX.pest[k],cells=grid==='3x3'?9:4,src=n?'gen':'own';
+ const drawn=n?fxReady(n):[],r=n?FX.gen[n]:null;
+ let state='';
+ if(pc.status==='REQUESTED'){const j=pc.live||{};
+  state=j.status==='FAILED'||j.status==='TIMEOUT'?`<div class=fx-pc-st><b class=bad>The pieces sheet failed</b><span class=mut>${esc(j.error||j.status)}</span></div>`
+   :`<div class=fx-pc-st><span class=spin></span> <b>Drawing the pieces</b> <span class=mut>${esc(pc.job||'')} · ${esc(j.stage||j.status||'waiting')}</span></div>`}
+ else if(n){
+  state=!r&&pc.generation!==n?`<div class=fx-warn>There is no batch G${String(n).padStart(3,'0')}.</div>`:!r||fxPiecesBusy(g)?`<div class=fx-pc-st><span class=spin></span> <b>Cutting the pieces</b> <span class=mut>G${String(n).padStart(3,'0')}</span></div>`
+   :`<div class=fx-pc-st><b>${drawn.length} of ${(r.stickers||[]).length} pieces ready</b> <span class=mut>G${String(n).padStart(3,'0')} · the burst uses these</span></div>
+     <div class=fx-pc-ths>${drawn.map(s=>`<span class=fx-pc-th title="${esc(s.key||'')}"><img src="/out/${esc(r.generation_id)}/${esc(s.png)}" alt="${esc(s.key||'')}" loading=lazy></span>`).join('')}</div>
+     ${drawn.length?'':'<div class=fx-warn>None of the cells is usable: draw again, or use the stickers themselves.</div>'}`}
+ const busy=pc.status==='REQUESTED'&&!['FAILED','TIMEOUT'].includes((pc.live||{}).status);
+ return `<div class=fx-pc><div class=fx-pc-h><b>Pieces that burst</b><span class=mut>an AI-drawn sheet of ${esc(g.elements.join(', '))}: one different piece per cell</span></div>
+  <div class=fx-pc-draw><div class=tabs style="margin:0;gap:6px"><button class="tab${grid==='2x2'?' on':''}" data-act=fxpgrid data-v=2x2 ${busy?'disabled':''}>2 x 2</button><button class="tab${grid==='3x3'?' on':''}" data-act=fxpgrid data-v=3x3 ${busy?'disabled':''}>3 x 3</button></div>
+   <button class="btn pri" data-act=fxpieces data-g=${g.id} ${busy?'disabled':''}>${ic('fx')} ${n&&pc.generation===n?`Draw ${cells} pieces again`:`Draw ${cells} pieces with AI`}${est&&est.credits!=null?` · ${est.credits} credits`:''}</button></div>
+  ${state}
+  <div class=fx-pc-alt><span class=mut>or use</span><label><input type=radio name=fxs-${g.id} ${src==='own'?'checked':''} data-act=fxsprites data-g=${g.id} data-v=own> the stickers themselves</label>
+   <label><input type=radio name=fxs-${g.id} ${src==='gen'?'checked':''} data-act=fxsprites data-g=${g.id} data-v=gen> a batch I already made, G<input type=number id=fxgen-${g.id} min=1 style="width:70px" value="${n||''}"></label></div></div>`}
+function fxSimPanel(e,g){
+ return `<div class=fx-job>${fxPiecesPanel(e,g)}${g.stickers.map(sid=>fxSimRow(e,g,sid)).join('')}</div>`}
 function fxResults(e){const rs=e.results||[];if(!rs.length)return '';const n=FX.pick.size;
  return `<div class=sh style="margin-top:22px">Results <button class=link data-act=fxpickall>select all that can be added</button></div><div class=fx-res>${rs.map(r=>{
   const ok=r.status==='READY',ws=(r.checks||[]).filter(c=>c.verdict==='WARN'),bl=(r.checks||[]).filter(c=>c.verdict==='BLOCK');
@@ -84,14 +109,22 @@ function fxRecord(){const e=FX.rec;if(!e)return '';
   ${fxPieces(g)}<div class=fx-gst>${g.stickers.map(sid=>{const s=fxSticker(e,sid);return s?`<span class=fx-th title="${esc(s.name)}">${media(s)}</span>`:''}).join('')}</div>${e.mode==='sim'?fxSimPanel(e,g):fxVideoPanel(e,g)}</section>`).join('')+fxResults(e)}
 function fxDraw(){const el=$('s-effects');if(!el)return;el.innerHTML=`<div class="page fx">${FX.eid?fxRecord():fxSetup()}</div>`;
  if(FX.rec&&FX.rec.status==='READY'||FX.rec&&FX.rec.status==='RESULTS'||FX.rec&&FX.rec.status==='VIDEO_REQUESTED'||FX.rec&&FX.rec.status==='DONE'){
-  if(FX.rec.mode==='sim')for(const g of FX.rec.groups)for(const sid of g.stickers)if(!FX.pv[sid])fxPreview(sid,true);
+  if(FX.rec.mode==='sim')for(const g of FX.rec.groups){fxPiecesEstimate(g.id);const n=fxGn(g);if(n&&!fxReady(n).length)continue;for(const sid of g.stickers)if(!FX.pv[sid])fxPreview(sid,true)}
   if(FX.rec.mode==='video')for(const g of FX.rec.groups)fxEstimate(g.id)}}
 async function fxEstimate(gid){const e=FX.rec,k=gid+e.grid.join('x');if(FX.est[k]||FX.busy[k])return;FX.busy[k]=1;
  const r=await api(`/api/effects/${e.id}/estimate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({group:gid})});FX.busy[k]=0;
  FX.est[k]=r.ok?r.j:{credits:null};if(route_==='effects'&&FX.rec&&FX.rec.id===e.id){const b=document.querySelector(`[data-act=fxvideo][data-g=${gid}]`);if(b&&r.ok&&r.j.credits!=null)b.innerHTML=`${ic('film')} Make the video · ${r.j.credits} credits`}}
 
+async function fxPiecesEstimate(gid){const e=FX.rec,k=gid+FX.pgrid;if(FX.pest[k]||FX.busy['pe'+k])return;FX.busy['pe'+k]=1;
+ const r=await post(`/api/effects/${e.id}/pieces_estimate`,{group:gid,grid:FX.pgrid});FX.busy['pe'+k]=0;
+ FX.pest[k]=r.ok?r.j:{credits:null};if(route_==='effects'&&FX.rec&&FX.rec.id===e.id&&k===gid+FX.pgrid){const b=document.querySelector(`[data-act=fxpieces][data-g=${gid}]`);if(b&&r.ok&&r.j.credits!=null&&!/credits/.test(b.textContent))b.innerHTML=b.innerHTML+` · ${r.j.credits} credits`}}
+ACT.fxpgrid=el=>{FX.pgrid=el.dataset.v;fxDraw()};
+ACT.fxpieces=async el=>{const g=el.dataset.g;el.disabled=true;
+ const r=await post(`/api/effects/${FX.eid}/pieces`,{group:g,grid:FX.pgrid,go:true});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not start',1)}
+ toast(`Drawing ${FX.pgrid==='3x3'?9:4} pieces: ${r.j.estimate!=null?r.j.estimate+' credits':'the price is shown in your ledger'}`);await fxLoad();fxDraw()};
+
 /* ---------- editing the pieces and the video */
-async function fxPlan(body){const r=await post(`/api/effects/${FX.eid}/plan`,body);if(!r.ok)return toast(r.j.error||'Not possible',1);FX.rec=r.j;FX.est={};FX.pv={};fxDraw()}
+async function fxPlan(body){const r=await post(`/api/effects/${FX.eid}/plan`,body);if(!r.ok)return toast(r.j.error||'Not possible',1);FX.rec=r.j;FX.est={};FX.pest={};FX.pv={};await fxLoad();fxDraw()}
 ACT.fxdelpiece=el=>{const g=FX.rec.groups.find(x=>x.id===el.dataset.g);if(!g)return;const els=g.elements.filter((_,i)=>i!==+el.dataset.i);if(!els.length)return toast('Keep at least one piece',1);fxPlan({group:g.id,elements:els})};
 ACT.fxaddpiece=el=>{const g=FX.rec.groups.find(x=>x.id===el.dataset.g),i=$('fxadd-'+el.dataset.g),v=i?i.value.trim():'';if(!g||!v)return;fxPlan({group:g.id,elements:g.elements.concat(v)})};
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.fxadd){e.preventDefault();ACT.fxaddpiece({dataset:{g:t.dataset.fxadd}})}});

@@ -16,6 +16,7 @@ The app is in its **dev cycle**: the build phases are retired; what exists is do
 | particle effects (Telegram-style bursts, from a pack) | `docs/effects.md` — what exists, the Kling measurements, the contract, what is open |
 | recorded numbers | [measurements.md](measurements.md) — never-opinion metrics on slot fill, search precision, vision-judge agreement, sharpness |
 | a prompt to hand to an independent reviewing LLM | `docs/review-prompt.md` — paste-ready prompt that audits the whole repo in one pass |
+| the welcome modal (film + feature slides, logo = home) | `docs/onboarding.md` — what it shows, how the media were made and paid, the prompts; `docs/design.md` §9 |
 | reference inputs | `docs/inputs/` — Haitham's reference material: `prompt_samples.md`, `resolver_utterances.md`, `search_queries.md`, `telegram-plan.md` |
 
 Work branch: `merge/generate-advanced` (merged into `main` on 2026-10-02; `main` is 8 commits behind again — Haitham decides when it fast-forwards). Restart the server from `mirsal/.venv` before judging anything in the browser (the Studio warns when it runs older code than the files on disk).

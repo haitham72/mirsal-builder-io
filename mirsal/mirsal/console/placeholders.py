@@ -9,6 +9,7 @@ ASSETS = Path(__file__).parent / "assets"
 EXTS = (".png", ".jpg", ".jpeg", ".webp", ".svg")
 SAFE = re.compile(r"^[a-z0-9_]{1,40}$")
 BRAND = re.compile(r"^[a-z0-9_-]{1,40}\.(png|jpg|svg|webp)$")
+WELCOME = re.compile(r"^[a-z0-9_-]{1,40}\.(mp4|webm|webp|jpg|png)$")
 
 # an abstract swatch for each style: one orb drawn the way the style looks. It claims nothing the style does not do (the first version drew a teddy head, which read as the subject of the
 # style); a preset with no entry here gets a colour of its own derived from its id, so a new preset never shows a broken or identical tile.

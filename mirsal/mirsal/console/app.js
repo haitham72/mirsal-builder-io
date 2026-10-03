@@ -63,7 +63,7 @@ const packById=id=>LIB.packs.find(p=>p.id===id);
 const SCREENS=['agent','effects','generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
 const RAIL=[['agent','ai','AI'],['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={effects:'create',pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
 let route_='generate',PACK_ID=null;
-function drawRail(){$('c2tog').innerHTML=ic('panel');$('rail').innerHTML=`<div class=logo><img src=/assets/brand/mirsal-logo.png alt=Mirsal></div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
+function drawRail(){$('c2tog').innerHTML=ic('panel');$('rail').innerHTML=`<button class=logo data-act=home title="Home: the welcome" aria-label="Mirsal home"><img src=/assets/brand/mirsal-logo.png alt=""></button>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
 /* narrow screens: the second column is a drawer (studio.css, 'the shell on narrow screens') */
 ACT.c2tog=()=>document.body.classList.toggle('c2open');
 ACT.nav=el=>{location.hash='#/'+(el.dataset.to==='generate'?'studio':el.dataset.to)};

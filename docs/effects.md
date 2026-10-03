@@ -1,6 +1,6 @@
 # docs/effects.md — particle effects: the burst that Telegram plays when you press an emoji
 
-**Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). The AI-chat entry is built (§8). NOT built: an AI-drawn sprite sheet for the simulated mode, real tile art / examples (§8).**
+**Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). The AI-chat entry is built (§8). Built 2026-10-03: the AI-drawn pieces sheet and the per-sticker particles gallery (§8). NOT built: real tile art / examples (§8).**
 Haitham asked for this on 2026-10-02: when someone presses an emoji in Telegram a burst of small pieces explodes from it (a strawberry bursts strawberries, a heart hearts). The product
 is the same thing as **animated stickers**: one 3-second WEBM per effect, starting from nothing and ending with nothing, tagged with the source emoji.
 
@@ -63,10 +63,12 @@ Anim checks that describe a character that stays itself (`loop_seam`, `alpha_sta
 | `engine/particles.py` | `ParticleParams`, `PRESETS`, `simulate(sprites, params) -> frames`, `to_webm`, `preview_webp` (pure, deterministic, 0.5 s at 512 px) |
 | `engine/effect_checks.py` | the PASS / WARN checks, `coverage_curve` |
 | `engine/effect_video.py` | `cut_cells` (key a returned clip into cells), `resample` (Telegram's clock), `settle` (empty ends by construction), `finish_cell`, `encode_and_check` (shared with mode A) |
-| `generation/effect_prompts.py` | template `effect_video` v1: `lint_plan`, `video_prompt`, `key_colour_for`, `describe` |
+| `generation/effect_prompts.py` | template `effect_video` v1: `lint_plan`, `video_prompt`, `key_colour_for`, `describe`; template `effect_pieces` v1 (the pieces sheet): `pieces_cells`, `pieces_prompt`, `describe_pieces` |
+| `flow/effects.py` | the `E###` lifecycle; `pieces_base_plan` / `pieces_plan` / `request_pieces` / `link_pieces` (the drawn sheet); `for_sticker` / `counts_for_pack` (the gallery) |
+| `console/effects.js`, `console/packs.js` | the effects screen (incl. the pieces panel `fxPiecesPanel`); the sticker view's Particles section (`ptHtml`, `ptCard`, `ptBadge`) and the pack grid counter |
 | `vision/effect_plan.py` | `analyse(stickers, allowed=...)` (vision model or table, groups, moods -> presets, consent as for captions), `lexicon_plan` |
 | `generation/jobs.py` | `request.t2v` (no start image), parallel jobs (`paid_parallel`) |
-| tests | `test_particles` (38), `test_effect_video`, `test_effect_plan`, `test_effect_prompts`, `test_live.FulfilTests` (t2v, parallel, cap in flight) |
+| tests | `test_effect_pieces` (14), `test_effect_gallery` (13), `tests/js/pack_particles.test.js`, `test_particles` (38), `test_effect_video`, `test_effect_plan`, `test_effect_prompts`, `test_live.FulfilTests` (t2v, parallel, cap in flight) |
 
 ## 7. The contract (built: `flow/effects.py`, `console/server.py` `_effects`, `docs/api.md`)
 
@@ -82,8 +84,11 @@ The screen (`console/effects.js`, `studio.css` `.fx-*`): 1 choose the pack, 2 wh
 (editable chips, the screen colour, who chose them), Simulate rows with presets, **explosion / gravity / vortex / pieces / spin sliders** and a live preview (debounced, the same engine at 256 px), Render; Video with the
 price in the button (`estimate`, free) and the job's state; the results with their warnings in words and "Add N to the pack". The Queue pill cannot cover the last buttons (`.page.fx` bottom padding).
 
+**The pieces sheet (built 2026-10-03; the burst is no longer the same sticker repeated).** In a simulated group the first choice is "Draw N pieces with AI": a 2x2 (default) or 3x3 sheet of DIFFERENT small pieces of the group's elements (Batman: bat signal, bat, cape fragment, mask piece), drawn through the normal sheet pipeline (Nano Banana 2), no outline, on the screen colour, cut into cells; the READY cells are the sprites of the burst. `POST /api/effects/{id}/pieces_estimate | pieces {group, grid?, estimate?, go?}` follows the video contract (price first; 409 with the estimate unless `go: true`; 202 `{job, task, estimate, id, group, grid}`); the job request carries `outline: 0` and `pieces: {effect, group}`; `Console.start_from_job` (thread mode and queue mode alike) links the batch with `flow.effects.link_pieces`: `group.sprites = {generation: N}` and `group.pieces = {generation, job, grid, status: REQUESTED | DRAWN}`. A cell with only WARNs is used; BLOCKED / REJECTED cells are skipped; with no usable cell `sprites_of` answers a 409 with the reason. The old options (the stickers themselves, a batch number) stay as secondary choices.
+
+**The particles gallery on every sticker (built 2026-10-03).** `flow.effects.for_sticker(out, lib, pack_id, sticker_id)` lists what was made for a sticker: `created` (sim results of that sticker, and every cell of its group's video as a shared take, `assigned` marking the cell Add would give it) and `saved` (library stickers whose `source.source_sticker` is it). `GET /api/packs/{pack}/stickers/{sid}/particles` (a member gets an empty answer) and `GET /api/packs/{pack}/particles` (counts per sticker for the grid badge). `added_to` is the library's word, not the effect file's flag (a deleted saved sticker reads as not added). `POST /api/effects/{id}/add` accepts `sticker_ids` (one video cell for one sticker). The sticker view (library carousel) shows the Particles section: looping thumbnails, warnings in words, "Add to pack", "Open effect", and "Make particles" when there are none (it opens `#/effects` with the pack and the sticker chosen).
+
 Open:
 1. **The AI chat entry (built 2026-10-03)**: intent `EFFECTS` (`resolver.classify`: particle / burst / explosion / confetti + effect / pack / sticker / emoji), node `graph.n_effects`: finds the library pack the words name (or the only pack; else asks which, with chips), calls `tools.effects_start` (the same `fx.create` + background `analyse` as `POST /api/effects`, owner only), and answers with an `effects` card linking `#/effects/E###`. Nothing is spent in chat; the video's price is shown on the screen's button. Open: refining the pieces from chat ("only bat signals").
-2. **An AI-drawn sprite sheet for the simulated mode** (a button that makes a 2x2 sheet of the pieces through the normal batch pipeline with outline 0; today a person makes it in the Studio and types the batch number).
-3. Real tile art / examples, mobile layout check, 3x3-specific prompt, the green-frame start/end variant only if 2x2 ever fails.
-4. A real end-to-end paid run from the screen (the price and the job path are tested on a fake CLI; the real Kling path was exercised by the two experiment clips through `jobs.fulfil`).
+2. Real tile art / examples, a browser look at the pieces panel and the gallery (built from tests and node checks only), how a real Nano Banana pieces sheet cuts (the tests use a synthetic sheet), 3x3-specific prompt, the green-frame start/end variant only if 2x2 ever fails.
+3. A real end-to-end paid run from the screen (the price and the job path are tested on a fake CLI; the real Kling path was exercised by the two experiment clips through `jobs.fulfil`).
