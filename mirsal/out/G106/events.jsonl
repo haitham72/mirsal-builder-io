@@ -1,0 +1,7 @@
+{"ts": 1791045734.828, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "Superhero particles", "task_slug": "superhero_particles"}}
+{"ts": 1791045734.837, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791045735.036, "stage": "sheet_picked", "status": "done", "ms": 199, "detail": {"subject": "superhero_particles", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791045735.037, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791045735.283, "stage": "keyed", "status": "done", "ms": 246, "detail": {"bg": [4, 252, 3], "threshold": [124.0, 123.5, 123.5, 123.0], "grid": "2x2", "cut": "equal", "xs": [0, 1024, 2048], "ys": [0, 1024, 2048]}}
+{"ts": 1791045735.284, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791045735.505, "stage": "sliced", "status": "done", "ms": 220, "detail": {"ready": 4, "failed": 0}}

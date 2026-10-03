@@ -1,0 +1,5334 @@
+{
+  "generation_id": "G107",
+  "number": 107,
+  "owner": "local",
+  "created": 1791046402.91,
+  "parent": null,
+  "prompt": "old man",
+  "task": "old man",
+  "task_slug": "old_man",
+  "source": {
+    "subject": "old_man",
+    "subject_id": "038",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J050/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          667,
+          684
+        ],
+        [
+          667,
+          0,
+          719,
+          684
+        ],
+        [
+          1386,
+          0,
+          662,
+          684
+        ],
+        [
+          0,
+          684,
+          667,
+          692
+        ],
+        [
+          667,
+          684,
+          719,
+          692
+        ],
+        [
+          1386,
+          684,
+          662,
+          692
+        ],
+        [
+          0,
+          1376,
+          667,
+          672
+        ],
+        [
+          667,
+          1376,
+          719,
+          672
+        ],
+        [
+          1386,
+          1376,
+          662,
+          672
+        ]
+      ],
+      "xs": [
+        0,
+        667,
+        1386,
+        2048
+      ],
+      "ys": [
+        0,
+        684,
+        1376,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "video_sliced",
+  "error": null,
+  "plan_source": "task 038",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: an elderly person with white hair, wrinkled face, and a cane.\nStyle: photorealistic character, natural material and fur texture, realistic proportions and lighting, expressive face.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: elderly man laughing heartily while clapping hands together\nCharacter 2: old man crying tears of overwhelming sadness alone\nCharacter 3: grizzled warrior shouting in fierce anger and rage\nCharacter 4: wise elder looking shocked by a surprising revelation\nCharacter 5: senior man jumping for joy with pure delight and pride\nCharacter 6: old woman fearfully hiding her eyes from danger\nCharacter 7: senior man sitting bored with eyes half closed\nCharacter 8: mischievous old man grinning sneakily with a wink\nCharacter 9: elderly man leaning casually against wall with smile\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. bouncing up and down while shaking his head in joy\n2. slumping shoulders down and wiping eyes with a handkerchief\n3. stomping feet hard on the ground while pointing finger\n4. jarring back in chair and opening mouth wide in surprise\n5. leaping into air while sticking tongue out happily\n6. cowering low to ground and shaking hands nervously\n7. sitting perfectly still and yawning wide open mouth\n8. leaning forward and scratching back of neck cheekily\n9. leaning heavily and rocking gently side to side relaxingly\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "an elderly person with white hair, wrinkled face, and a cane",
+    "style_id": "realistic",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "elderly man laughing heartily while clapping hands together",
+        "tags": [
+          "old_man_clapping_laughing",
+          "happy",
+          "senior",
+          "celebration"
+        ],
+        "emoji": "😂👵",
+        "motion": "bouncing up and down while shaking his head in joy"
+      },
+      {
+        "pos": 2,
+        "label": "old man crying tears of overwhelming sadness alone",
+        "tags": [
+          "old_man_crying_sadness",
+          "sad",
+          "lonely",
+          "tears"
+        ],
+        "emoji": "😢👴",
+        "motion": "slumping shoulders down and wiping eyes with a handkerchief"
+      },
+      {
+        "pos": 3,
+        "label": "grizzled warrior shouting in fierce anger and rage",
+        "tags": [
+          "old_man_shouting_anger",
+          "angry",
+          "furious",
+          "loud"
+        ],
+        "emoji": "😡👨",
+        "motion": "stomping feet hard on the ground while pointing finger"
+      },
+      {
+        "pos": 4,
+        "label": "wise elder looking shocked by a surprising revelation",
+        "tags": [
+          "old_man_looking_shocked",
+          "shock",
+          "surprised",
+          "stunned"
+        ],
+        "emoji": "😱👴",
+        "motion": "jarring back in chair and opening mouth wide in surprise"
+      },
+      {
+        "pos": 5,
+        "label": "senior man jumping for joy with pure delight and pride",
+        "tags": [
+          "old_man_jumping_pride",
+          "joyful",
+          "proud",
+          "excited"
+        ],
+        "emoji": "😄🏃",
+        "motion": "leaping into air while sticking tongue out happily"
+      },
+      {
+        "pos": 6,
+        "label": "old woman fearfully hiding her eyes from danger",
+        "tags": [
+          "old_man_hiding_fear",
+          "scared",
+          "terrified",
+          "frightened"
+        ],
+        "emoji": "😨👵",
+        "motion": "cowering low to ground and shaking hands nervously"
+      },
+      {
+        "pos": 7,
+        "label": "senior man sitting bored with eyes half closed",
+        "tags": [
+          "old_man_sitting_boredom",
+          "boring",
+          "tired",
+          "restless"
+        ],
+        "emoji": "😴👨",
+        "motion": "sitting perfectly still and yawning wide open mouth"
+      },
+      {
+        "pos": 8,
+        "label": "mischievous old man grinning sneakily with a wink",
+        "tags": [
+          "old_man_grinning_mischief",
+          "sneaky",
+          "playful",
+          "clever"
+        ],
+        "emoji": "😏👴",
+        "motion": "leaning forward and scratching back of neck cheekily"
+      },
+      {
+        "pos": 9,
+        "label": "elderly man leaning casually against wall with smile",
+        "tags": [
+          "old_man_leaning_relaxed",
+          "relaxed",
+          "chill",
+          "cool"
+        ],
+        "emoji": "😌🧓",
+        "motion": "leaning heavily and rocking gently side to side relaxingly"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "038",
+  "name_key": "old_man",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 0,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791046379.053,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {
+      "A1": {
+        "decision": "APPROVE",
+        "by": "human",
+        "ts": 1791046454.313,
+        "note": "approved by Make a video"
+      }
+    },
+    "pack": null
+  },
+  "video_sheets": [
+    {
+      "id": "A1",
+      "slots": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grid": [
+        3,
+        3
+      ],
+      "file": "video_sheet/A1/sheet.png",
+      "layout": "video_sheet/A1/layout.json",
+      "video": "video_sheet/A1/video.mp4",
+      "status": "SLICED",
+      "ts": 1791046454.245,
+      "verify": [
+        {
+          "name": "slots_match_approved",
+          "ok": true,
+          "detail": "filled slots are exactly the approved stickers; blank slots are pure key colour",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "limit": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "data": {
+            "problems": [],
+            "ms": 60.6
+          }
+        },
+        {
+          "name": "no_outline_on_sheet",
+          "ok": true,
+          "detail": "no white ring around the subjects",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [],
+          "limit": [],
+          "data": {
+            "slots": [],
+            "ms": 165.3
+          }
+        }
+      ],
+      "blocked": null,
+      "canvas": [
+        2048,
+        2048
+      ],
+      "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. bouncing up and down while shaking his head in joy\n2. slumping shoulders down and wiping eyes with a handkerchief\n3. stomping feet hard on the ground while pointing finger\n4. jarring back in chair and opening mouth wide in surprise\n5. leaping into air while sticking tongue out happily\n6. cowering low to ground and shaking hands nervously\n7. sitting perfectly still and yawning wide open mouth\n8. leaning forward and scratching back of neck cheekily\n9. leaning heavily and rocking gently side to side relaxingly\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+      "slot_fill": 0.74,
+      "video_name": "J051.mp4",
+      "block": null,
+      "video_flags": [],
+      "video_checks": [
+        {
+          "name": "video_decodes",
+          "ok": true,
+          "detail": "h264 1440x1440",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": "h264",
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "video_specs",
+          "ok": true,
+          "detail": "1440x1440 24.0 fps, 3.04s",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 3.04,
+          "limit": 1.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "layout_match",
+          "ok": true,
+          "detail": "lowest slot IoU 0.97",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.974,
+          "limit": 0.6,
+          "data": {
+            "ious": {
+              "1": 0.98,
+              "2": 0.978,
+              "3": 0.976,
+              "4": 0.978,
+              "5": 0.974,
+              "6": 0.984,
+              "7": 0.981,
+              "8": 0.98,
+              "9": 0.979
+            },
+            "bad": [],
+            "ms": 55.3
+          }
+        },
+        {
+          "name": "blank_slots_stay_empty",
+          "ok": true,
+          "detail": "blank slots stayed empty",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.0,
+          "limit": 0.002,
+          "data": {
+            "bad": {},
+            "ms": 0.0
+          }
+        }
+      ],
+      "preview": "video_sheet/A1/preview.mp4",
+      "video_prompt_sent": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. bouncing up and down while shaking his head in joy\n2. slumping shoulders down and wiping eyes with a handkerchief\n3. stomping feet hard on the ground while pointing finger\n4. jarring back in chair and opening mouth wide in surprise\n5. leaping into air while sticking tongue out happily\n6. cowering low to ground and shaking hands nervously\n7. sitting perfectly still and yawning wide open mouth\n8. leaning forward and scratching back of neck cheekily\n9. leaning heavily and rocking gently side to side relaxingly\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+      "video_prompt_custom": false,
+      "video_info": {
+        "codec": "h264",
+        "width": 1440,
+        "height": 1440,
+        "fps": 24.0,
+        "duration": 3.04
+      }
+    }
+  ],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 58.4
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 219 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 219.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 7.4
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 25.7
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            667,
+            1386,
+            2048
+          ],
+          "ys": [
+            0,
+            684,
+            1376,
+            2048
+          ],
+          "ms": 25.1
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 1.3 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.3,
+        "limit": 12.0,
+        "data": {
+          "ms": 48.7
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "old_man_clapping_laughing",
+      "tags": [
+        "old_man_clapping_laughing",
+        "happy",
+        "senior",
+        "celebration"
+      ],
+      "emoji": "😂👵",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane elderly man laughing heartily while clapping hands together, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-clapping_laughing-20261003T165322-c486c4",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 109805,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 47976,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 66.229,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "126.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 126.3,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          667,
+          684
+        ],
+        "bg": [
+          3,
+          223,
+          1
+        ],
+        "threshold": 110.0,
+        "fg_px": 109805,
+        "bbox": [
+          217,
+          49,
+          551,
+          667
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 126.3,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-clapping_laughing-20261003T165322-c486c4.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 480,
+          "key": 628,
+          "bounds": 194,
+          "render": 725,
+          "seam": 170,
+          "encode": 20881,
+          "encodes": 2,
+          "probe": 248,
+          "verify": 23,
+          "finish": 22243
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          130,
+          14,
+          378,
+          412
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 398,
+        "scale": 0.997,
+        "motion": 132.88,
+        "loop_seam_before": 172.71,
+        "loop_seam": 172.71,
+        "loop_limit": 199.33,
+        "frames_out": 72,
+        "crf": 42,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.72,
+        "soft_sigma": 1.1,
+        "warnings": [
+          "sharpness"
+        ],
+        "kb": 213.0
+      },
+      "webm": "slices/vid-old_man-clapping_laughing-20261003T165322-c486c4.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.805,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046453.854,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046651.792,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.002,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046755.192,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
+        }
+      ],
+      "caption": {
+        "text": "A joyful elderly man clapping his hands with a wide smile.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "6f8ec1505b05e64c",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 72.6
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 59.3
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "212KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 212,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "172.71 <= 199.33",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 172.71,
+          "limit": 199.33,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.972,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.7
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 132.88",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 132.88,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.047,
+          "limit": 0.35,
+          "data": {
+            "ms": 18.7
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": false,
+          "detail": "0.72x of the still's edge detail (as soft as the still blurred 1.1 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.72,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1791046731.001,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 2,
+      "key": "old_man_crying_sadness",
+      "tags": [
+        "old_man_crying_sadness",
+        "sad",
+        "lonely",
+        "tears"
+      ],
+      "emoji": "😢👴",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane old man crying tears of overwhelming sadness alone, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-crying_sadness-20261003T165322-1a3d6f",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 109298,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 47599,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 68.289,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 15 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 15,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "129.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 129.2,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          667,
+          0,
+          719,
+          684
+        ],
+        "bg": [
+          3,
+          223,
+          2
+        ],
+        "threshold": 110.0,
+        "fg_px": 109298,
+        "bbox": [
+          213,
+          64,
+          527,
+          665
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 129.2,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-crying_sadness-20261003T165322-1a3d6f.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 480,
+          "key": 629,
+          "bounds": 199,
+          "render": 647,
+          "seam": 905,
+          "encode": 43369,
+          "encodes": 4,
+          "probe": 240,
+          "verify": 19,
+          "finish": 45383
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          148,
+          56,
+          356,
+          480
+        ],
+        "edge_touch_frames": 9,
+        "subject_px_in_video": 424,
+        "waived": [
+          "inside_slot",
+          "cross_slot"
+        ],
+        "scale": 0.9358,
+        "motion": 28.57,
+        "loop_seam_before": 164.51,
+        "loop_seam": 0.0,
+        "loop_limit": 43.9,
+        "frames_out": 66,
+        "crf": 30,
+        "sharp_kept": 0.98,
+        "detail_vs_still": 0.92,
+        "soft_sigma": 0.5,
+        "kb": 244.8
+      },
+      "webm": "slices/vid-old_man-crying_sadness-20261003T165322-1a3d6f.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.81,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1791046453.855,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046634.174,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 42, 7px over the 7px edge band",
+            "data": {
+              "frame": 42,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 44.5
+            }
+          }
+        },
+        {
+          "ts": 1791046715.855,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791046730.641,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.022,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046778.353,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A sad elderly man cries while holding a handkerchief and leaning on his cane.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "7369d9cccc27a1fc",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 42, 7px over the 7px edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 42,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 69.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "238px of foreign foreground, first at frame 42 (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 238,
+          "limit": 0,
+          "data": {
+            "frame": 42,
+            "px": 238,
+            "ms": 62.2
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "244KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 244,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 43.9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 43.9,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.99",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.985,
+          "limit": 0.5,
+          "data": {
+            "ms": 5.7
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 28.57",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 28.57,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 4% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.043,
+          "limit": 0.35,
+          "data": {
+            "ms": 12.9
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.92x of the still's edge detail (as soft as the still blurred 0.5 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.92,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "anim_override": [
+        "cross_slot",
+        "inside_slot"
+      ],
+      "rendered_at": 1791046731.022,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 3,
+      "key": "old_man_shouting_anger",
+      "tags": [
+        "old_man_shouting_anger",
+        "angry",
+        "furious",
+        "loud"
+      ],
+      "emoji": "😡👨",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane grizzled warrior shouting in fierce anger and rage, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-shouting_anger-20261003T165322-2a21e4",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 123099,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 53693,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "3px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 3,
+          "limit": 79.72,
+          "data": {
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 34 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 34,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "147.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 147.2,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1386,
+          0,
+          662,
+          684
+        ],
+        "bg": [
+          3,
+          223,
+          1
+        ],
+        "threshold": 110.0,
+        "fg_px": 123099,
+        "bbox": [
+          59,
+          60,
+          515,
+          661
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 3,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 147.2,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-shouting_anger-20261003T165322-2a21e4.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 493,
+          "key": 625,
+          "bounds": 196,
+          "render": 1005,
+          "seam": 1053,
+          "encode": 33975,
+          "encodes": 3,
+          "probe": 285,
+          "verify": 27,
+          "finish": 36544
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          42,
+          14,
+          458,
+          404
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 416,
+        "waived": [
+          "cross_slot"
+        ],
+        "scale": 0.9538,
+        "motion": 48.65,
+        "loop_seam_before": 196.0,
+        "loop_seam": 0.0,
+        "loop_limit": 83.23,
+        "frames_out": 66,
+        "crf": 38,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.76,
+        "soft_sigma": 1.0,
+        "kb": 237.5
+      },
+      "webm": "slices/vid-old_man-shouting_anger-20261003T165322-2a21e4.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.814,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1791046453.855,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046634.322,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "cross_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "cross_slot",
+            "value": 282,
+            "limit": 0,
+            "note": "282px of foreign foreground, first at frame 14",
+            "data": {
+              "frame": 14,
+              "px": 282,
+              "ms": 48.3
+            }
+          }
+        },
+        {
+          "ts": 1791046715.855,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791046730.478,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.044,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046769.512,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "An angry old man with white hair shouts while holding a cane.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "1ff91619155cac64",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 72.9
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "282px of foreign foreground, first at frame 14 (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 282,
+          "limit": 0,
+          "data": {
+            "frame": 14,
+            "px": 282,
+            "ms": 63.5
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "237KB @crf38",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 237,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 83.23",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 83.23,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.89",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.892,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.5
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 48.65",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 48.65,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.052,
+          "limit": 0.35,
+          "data": {
+            "ms": 22.9
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.76x of the still's edge detail (as soft as the still blurred 1.0 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.76,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "anim_override": [
+        "cross_slot"
+      ],
+      "rendered_at": 1791046731.044,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 4,
+      "key": "old_man_looking_shocked",
+      "tags": [
+        "old_man_looking_shocked",
+        "shock",
+        "surprised",
+        "stunned"
+      ],
+      "emoji": "😱👴",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane wise elder looking shocked by a surprising revelation, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-looking_shocked-20261003T165322-325c85",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 118143,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 51349,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 71.795,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "140.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 140.3,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          684,
+          667,
+          692
+        ],
+        "bg": [
+          3,
+          223,
+          2
+        ],
+        "threshold": 110.0,
+        "fg_px": 118143,
+        "bbox": [
+          172,
+          37,
+          515,
+          660
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 140.3,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-looking_shocked-20261003T165322-325c85.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 479,
+          "key": 625,
+          "bounds": 193,
+          "render": 671,
+          "seam": 1028,
+          "encode": 34057,
+          "encodes": 3,
+          "probe": 242,
+          "verify": 18,
+          "finish": 36212
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          146,
+          58,
+          394,
+          410
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 352,
+        "scale": 1.1273,
+        "motion": 21.21,
+        "loop_seam_before": 200.84,
+        "loop_seam": 0.0,
+        "loop_limit": 32.92,
+        "frames_out": 66,
+        "crf": 38,
+        "sharp_kept": 0.99,
+        "detail_vs_still": 0.81,
+        "soft_sigma": 0.8,
+        "kb": 211.7
+      },
+      "webm": "slices/vid-old_man-looking_shocked-20261003T165322-325c85.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.818,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046453.856,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046675.085,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.059,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046769.173,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A cartoon elderly man with wide eyes and an open mouth looks shocked.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "ca9214a7cc1c93c8",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 75.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 59.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "211KB @crf38",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 211,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 32.92",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 32.92,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.92",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.921,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.3
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 21.21",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 21.21,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 6% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.064,
+          "limit": 0.35,
+          "data": {
+            "ms": 14.5
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.81x of the still's edge detail (as soft as the still blurred 0.8 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.81,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1791046731.059,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 5,
+      "key": "old_man_jumping_pride",
+      "tags": [
+        "old_man_jumping_pride",
+        "joyful",
+        "proud",
+        "excited"
+      ],
+      "emoji": "😄🏃",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane senior man jumping for joy with pure delight and pride, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-jumping_pride-20261003T165322-cbb85c",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 124985,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 54489,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 81.548,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.3
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "152.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 152.3,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          667,
+          684,
+          719,
+          692
+        ],
+        "bg": [
+          3,
+          223,
+          2
+        ],
+        "threshold": 110.0,
+        "fg_px": 124985,
+        "bbox": [
+          117,
+          18,
+          662,
+          668
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 152.3,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-jumping_pride-20261003T165322-cbb85c.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 478,
+          "key": 632,
+          "bounds": 204,
+          "render": 793,
+          "seam": 1146,
+          "encode": 23191,
+          "encodes": 2,
+          "probe": 252,
+          "verify": 23,
+          "finish": 25614
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          54,
+          0,
+          394,
+          448
+        ],
+        "edge_touch_frames": 10,
+        "subject_px_in_video": 448,
+        "waived": [
+          "inside_slot",
+          "cross_slot"
+        ],
+        "scale": 0.8857,
+        "motion": 155.31,
+        "loop_seam_before": 268.31,
+        "loop_seam": 0.0,
+        "loop_limit": 200.99,
+        "frames_out": 66,
+        "crf": 42,
+        "sharp_kept": 1.01,
+        "detail_vs_still": 0.75,
+        "soft_sigma": 1.0,
+        "kb": 246.5
+      },
+      "webm": "slices/vid-old_man-jumping_pride-20261003T165322-cbb85c.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.821,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046453.857,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046634.245,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 41, 7px over the 7px edge band",
+            "data": {
+              "frame": 41,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 45.9
+            }
+          }
+        },
+        {
+          "ts": 1791046715.855,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791046728.904,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.075,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046758.577,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A joyful elderly man with white hair jumps happily while holding a cane in one hand and raising his other fist.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "e9dcb94145dcdcc1",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 41, 7px over the 7px edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 41,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 70.4
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "176px of foreign foreground, first at frame 10 (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 176,
+          "limit": 0,
+          "data": {
+            "frame": 10,
+            "px": 176,
+            "ms": 59.9
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "246KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 246,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 200.99",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 200.99,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.98",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.979,
+          "limit": 0.5,
+          "data": {
+            "ms": 4.1
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 155.31",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 155.31,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 8% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.077,
+          "limit": 0.35,
+          "data": {
+            "ms": 18.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.75x of the still's edge detail (as soft as the still blurred 1.0 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.75,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "anim_override": [
+        "cross_slot",
+        "inside_slot"
+      ],
+      "rendered_at": 1791046731.075,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 6,
+      "key": "old_man_hiding_fear",
+      "tags": [
+        "old_man_hiding_fear",
+        "scared",
+        "terrified",
+        "frightened"
+      ],
+      "emoji": "😨👵",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane old woman fearfully hiding her eyes from danger, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-hiding_fear-20261003T165322-f7979a",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 113878,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 49652,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 64.986,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.3% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0026,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 12 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 12,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "124.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 124.4,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1386,
+          684,
+          662,
+          692
+        ],
+        "bg": [
+          3,
+          223,
+          2
+        ],
+        "threshold": 110.0,
+        "fg_px": 113878,
+        "bbox": [
+          176,
+          84,
+          477,
+          660
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0026,
+        "kb": 124.4,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-hiding_fear-20261003T165322-f7979a.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 499,
+          "key": 586,
+          "bounds": 196,
+          "render": 651,
+          "seam": 1099,
+          "encode": 43511,
+          "encodes": 4,
+          "probe": 245,
+          "verify": 18,
+          "finish": 45724
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          112,
+          54,
+          344,
+          398
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 344,
+        "scale": 1.1535,
+        "motion": 17.25,
+        "loop_seam_before": 211.15,
+        "loop_seam": 0.0,
+        "loop_limit": 26.64,
+        "frames_out": 66,
+        "crf": 34,
+        "sharp_kept": 0.98,
+        "detail_vs_still": 0.84,
+        "soft_sigma": 0.7,
+        "kb": 246.4
+      },
+      "webm": "slices/vid-old_man-hiding_fear-20261003T165322-f7979a.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.825,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046453.857,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046492.237,
+          "stage": "naming",
+          "actor": "human",
+          "decision": "TITLE",
+          "reason": "Scared woman hiding her eyes",
+          "ref": null,
+          "detail": {
+            "was": null,
+            "via": "AI vision proposal"
+          }
+        },
+        {
+          "ts": 1791046674.96,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.087,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046778.695,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A cartoon elderly woman with white hair covers her eyes in distress.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "a4f44a79a1b61a2f",
+        "ts": 1791046440.661
+      },
+      "title": "Scared woman hiding her eyes",
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 73.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 63.5
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "246KB @crf34",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 246,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 26.64",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 26.64,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.94",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.936,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.7
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 17.25",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 17.25,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 8% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.08,
+          "limit": 0.35,
+          "data": {
+            "ms": 14.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.84x of the still's edge detail (as soft as the still blurred 0.7 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.84,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1791046731.087,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 7,
+      "key": "old_man_sitting_boredom",
+      "tags": [
+        "old_man_sitting_boredom",
+        "boring",
+        "tired",
+        "restless"
+      ],
+      "emoji": "😴👨",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane senior man sitting bored with eyes half closed, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-sitting_boredom-20261003T165322-eba9a8",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 127467,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 55560,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "16px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 16,
+          "limit": 75.01,
+          "data": {
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "2 enclosed hole(s), 2.1% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.021,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "145.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 145.0,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1376,
+          667,
+          672
+        ],
+        "bg": [
+          3,
+          222,
+          3
+        ],
+        "threshold": 109.5,
+        "fg_px": 127467,
+        "bbox": [
+          131,
+          45,
+          534,
+          640
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 16,
+        "chroma_risk": 0.0,
+        "holes": 0.021,
+        "kb": 145.0,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-sitting_boredom-20261003T165322-eba9a8.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 275,
+          "key": 404,
+          "bounds": 264,
+          "render": 857,
+          "seam": 800,
+          "encode": 26415,
+          "encodes": 4,
+          "probe": 233,
+          "verify": 17,
+          "finish": 28589
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          118,
+          60,
+          362,
+          402
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 342,
+        "scale": 1.1602,
+        "motion": 8.41,
+        "loop_seam_before": 195.48,
+        "loop_seam": 0.0,
+        "loop_limit": 14.53,
+        "frames_out": 66,
+        "crf": 34,
+        "sharp_kept": 0.98,
+        "detail_vs_still": 0.83,
+        "soft_sigma": 0.8,
+        "kb": 221.6
+      },
+      "webm": "slices/vid-old_man-sitting_boredom-20261003T165322-eba9a8.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.828,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046453.858,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046676.002,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.102,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046784.658,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A tired old man sits on a bench holding a cane with a sad expression.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "5c8344d9db899300",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 76.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 99.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "221KB @crf34",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 221,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 14.53",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 14.53,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.99",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.989,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.2
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 8.41",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 8.41,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 3% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.034,
+          "limit": 0.35,
+          "data": {
+            "ms": 13.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.83x of the still's edge detail (as soft as the still blurred 0.8 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.83,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1791046731.102,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 8,
+      "key": "old_man_grinning_mischief",
+      "tags": [
+        "old_man_grinning_mischief",
+        "sneaky",
+        "playful",
+        "clever"
+      ],
+      "emoji": "😏👴",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane mischievous old man grinning sneakily with a wink, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-grinning_mischief-20261003T165322-049aed",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 115425,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 50242,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 71.398,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 6 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 6,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "138.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 138.8,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          667,
+          1376,
+          719,
+          672
+        ],
+        "bg": [
+          3,
+          223,
+          3
+        ],
+        "threshold": 109.5,
+        "fg_px": 115425,
+        "bbox": [
+          219,
+          37,
+          558,
+          636
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 138.8,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-grinning_mischief-20261003T165322-049aed.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 256,
+          "key": 457,
+          "bounds": 232,
+          "render": 947,
+          "seam": 878,
+          "encode": 22741,
+          "encodes": 3,
+          "probe": 228,
+          "verify": 15,
+          "finish": 25045
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          48,
+          54,
+          380,
+          404
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 350,
+        "scale": 1.1337,
+        "motion": 21.82,
+        "loop_seam_before": 228.43,
+        "loop_seam": 0.0,
+        "loop_limit": 36.41,
+        "frames_out": 66,
+        "crf": 38,
+        "sharp_kept": 0.98,
+        "detail_vs_still": 0.83,
+        "soft_sigma": 0.7,
+        "kb": 254.2
+      },
+      "webm": "slices/vid-old_man-grinning_mischief-20261003T165322-049aed.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.832,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1791046453.859,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046669.881,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.117,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046784.509,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A winking old man with a cane makes a shushing gesture.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "a2aada9757050d65",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 72.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 71.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "254KB @crf38",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 254,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 36.41",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 36.41,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.93",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.926,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.6
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 21.82",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 21.82,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.051,
+          "limit": 0.35,
+          "data": {
+            "ms": 11.7
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.83x of the still's edge detail (as soft as the still blurred 0.7 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.83,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1791046731.117,
+      "anim_verdict_stale": true
+    },
+    {
+      "index": 9,
+      "key": "old_man_leaning_relaxed",
+      "tags": [
+        "old_man_leaning_relaxed",
+        "relaxed",
+        "chill",
+        "cool"
+      ],
+      "emoji": "😌🧓",
+      "prompt": "an elderly person with white hair, wrinkled face, and a cane elderly man leaning casually against wall with smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-old_man-leaning_relaxed-20261003T165322-9ab483",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 104800,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 45823,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 64.619,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.3% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0033,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 15 to cell 8",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 15,
+          "limit": 4,
+          "data": {
+            "of": 8,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "126.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 126.3,
+          "limit": 512,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1386,
+          1376,
+          662,
+          672
+        ],
+        "bg": [
+          3,
+          222,
+          3
+        ],
+        "threshold": 109.5,
+        "fg_px": 104800,
+        "bbox": [
+          170,
+          20,
+          492,
+          636
+        ],
+        "scale": 0.6602,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0033,
+        "kb": 126.3,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
+      },
+      "png": "slices/img-old_man-leaning_relaxed-20261003T165322-9ab483.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 119.0,
+        "ms": {
+          "decode": 254,
+          "key": 405,
+          "bounds": 230,
+          "render": 702,
+          "seam": 723,
+          "encode": 14235,
+          "encodes": 4,
+          "probe": 223,
+          "verify": 12,
+          "finish": 16130
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          152,
+          68,
+          368,
+          410
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 342,
+        "scale": 1.1602,
+        "motion": 9.02,
+        "loop_seam_before": 252.81,
+        "loop_seam": 0.0,
+        "loop_limit": 17.48,
+        "frames_out": 66,
+        "crf": 34,
+        "sharp_kept": 0.98,
+        "detail_vs_still": 0.84,
+        "soft_sigma": 0.7,
+        "kb": 251.2
+      },
+      "webm": "slices/vid-old_man-leaning_relaxed-20261003T165322-9ab483.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046403.835,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046453.859,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046454.245,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046454.313,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046676.102,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046731.132,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791046786.201,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "caption": {
+        "text": "A smiling elderly man with white hair, wearing a vest and holding a cane.",
+        "text_visible": null,
+        "model": "qwen3.5-4b",
+        "version": "caption_v1",
+        "png_sha": "9cfe69f79cd431c2",
+        "ts": 1791046440.661
+      },
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 68.1
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 79.9
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "251KB @crf34",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 251,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 17.48",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 17.48,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.971,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 9.02",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 9.02,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.047,
+          "limit": 0.35,
+          "data": {
+            "ms": 9.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.84x of the still's edge detail (as soft as the still blurred 0.7 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.84,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "rendered_at": 1791046731.132,
+      "anim_verdict_stale": true
+    }
+  ],
+  "sheet_issues": [],
+  "edge_history": [
+    {
+      "outline": 12,
+      "erode": 0,
+      "ts": 1791046402.91,
+      "via": "initial"
+    },
+    {
+      "outline": 0,
+      "erode": 0,
+      "ts": 1791046731.212,
+      "via": "apply"
+    }
+  ]
+}

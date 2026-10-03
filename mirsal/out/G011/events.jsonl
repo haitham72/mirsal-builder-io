@@ -1,5 +1,0 @@
-{"ts": 1790907284.598, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "i need superman as watermelon", "task_slug": "i_need_superman_as_watermelon"}}
-{"ts": 1790907284.625, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
-{"ts": 1790907285.024, "stage": "sheet_picked", "status": "done", "ms": 399, "detail": {"subject": "i_need_superman_as_watermelon", "variant": 1, "of": 1, "file": "result.png", "blocked": "grid_detected", "warnings": []}}
-{"ts": 1790907285.026, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
-{"ts": 1790907285.114, "stage": "sliced", "status": "done", "ms": 87, "detail": {"ready": 0, "failed": 9, "blocked": "grid_detected"}}

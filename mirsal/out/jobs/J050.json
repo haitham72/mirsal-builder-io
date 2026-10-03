@@ -1,0 +1,40 @@
+{
+  "id": "J050",
+  "kind": "sheet",
+  "task": "038",
+  "generation": "G107",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: an elderly person with white hair, wrinkled face, and a cane.\nStyle: photorealistic character, natural material and fur texture, realistic proportions and lighting, expressive face.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: elderly man laughing heartily while clapping hands together\nCharacter 2: old man crying tears of overwhelming sadness alone\nCharacter 3: grizzled warrior shouting in fierce anger and rage\nCharacter 4: wise elder looking shocked by a surprising revelation\nCharacter 5: senior man jumping for joy with pure delight and pride\nCharacter 6: old woman fearfully hiding her eyes from danger\nCharacter 7: senior man sitting bored with eyes half closed\nCharacter 8: mischievous old man grinning sneakily with a wink\nCharacter 9: elderly man leaning casually against wall with smile\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "old man",
+    "refs": [],
+    "outline": null,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "04b5c750-116d-4993-828c-2cd278c481e1",
+  "result": {
+    "file": "jobs/J050/result.png",
+    "sha256": "33cc63ad3c916fafc44295e814af04f61bd6b0725663468fabfa36355a9e1a40",
+    "bytes": 4922888
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791046379.483,
+  "claimed_at": 1791046380.605,
+  "completed_at": 1791046402.881,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

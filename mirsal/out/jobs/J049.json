@@ -1,0 +1,43 @@
+{
+  "id": "J049",
+  "kind": "sheet",
+  "task": "037",
+  "generation": "G106",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate small particles, one at each position: top-left, top-right, bottom-left and bottom-right, evenly spaced.\nParticles of Superhero: small things that fly out when the Superhero emoji is pressed. Draw only the particles listed, never Superhero itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every particle directly on the backdrop with no outline, stroke, die-cut edge or halo around it.\nEach particle is alone at its position and centred there, and differs from every other one in kind, size or angle:\nParticle 1 (top-left): purple superhero cape\nParticle 2 (top-right): red fabric piece\nParticle 3 (bottom-left): yellow diamond emblem\nParticle 4 (bottom-right): black utility belt buckle\nConsistency: the same drawing style, lighting and colour quality for all 4 particles.\nBackground: one seamless, flat, uniform pure #00FF00 green backdrop from edge to edge in exactly one shade, with no texture, no shading, no tint, no gradient, no vignette, no glow, no shadows, no noise, and nothing on it but the particles.\nSpacing: every particle has a generous empty margin on every side (at least 20% of its own size), and no particle touches another.",
+    "label": "Superhero particles",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local",
+    "particles": {
+      "effect": "E014"
+    }
+  },
+  "status": "DONE",
+  "external_task_id": "8c12e02b-3f23-4c94-bfb8-5c9ae0b7378a",
+  "result": {
+    "file": "jobs/J049/result.png",
+    "sha256": "e5f8c17c83d349a34cb03f406404616b91b88228c9a6d57334a06d16819997cf",
+    "bytes": 3838696
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791045713.732,
+  "claimed_at": 1791045714.931,
+  "completed_at": 1791045734.787,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

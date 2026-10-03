@@ -19,14 +19,18 @@
     "loop": false,
     "user": "local"
   },
-  "status": "CLAIMED",
+  "status": "DONE",
   "external_task_id": "81ba5956-7337-4dbc-80c1-dd4f8b1f4f8d",
-  "result": null,
-  "cost": null,
+  "result": {
+    "file": "jobs/J048/result.mp4",
+    "sha256": "0a189d66d37722f6569f6944291e51eeace0e04cdb249efff731814fc8652d85",
+    "bytes": 5568956
+  },
+  "cost": 4.5,
   "error": null,
   "created_at": 1791023700.94,
-  "claimed_at": 1791024104.958,
-  "completed_at": null,
+  "claimed_at": 1791025647.663,
+  "completed_at": 1791025648.353,
   "params": {
     "aspect_ratio": "1:1",
     "sound": "off",
@@ -34,6 +38,6 @@
     "duration": "3"
   },
   "cost_estimate": 4.5,
-  "stage": "working",
+  "stage": "downloading",
   "waiting_pid": null
 }

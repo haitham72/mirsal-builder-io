@@ -1,0 +1,551 @@
+{
+ "id": "S009",
+ "user": "local",
+ "title": "old man",
+ "created": 1791046348.787,
+ "updated": 1791046492.312,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "realistic",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": "G107",
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "old man",
+   "slug": "old_man",
+   "passes": [
+    {
+     "generation": "G107",
+     "job": "J050",
+     "prompt": "old man",
+     "grid": "3x3",
+     "style_id": "realistic",
+     "parent": null,
+     "created": 1791046379.492,
+     "ready": 9,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791046361.144,
+   "user": "old man",
+   "assistant": "Here's the plan for **old man**: 9 stickers, realistic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791046379.509,
+   "user": "confirm",
+   "assistant": "Creating **old man** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791046447.298,
+   "user": "animate them",
+   "assistant": "I'll animate the 9 stickers of **Old man** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "intents": [
+    "ANIMATE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G107",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 4,
+   "ts": 1791046457.964,
+   "user": "confirm",
+   "assistant": "Animating **Old man** (about 4.5 credits). I'll show each one as it's ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 5,
+   "ts": 1791046492.307,
+   "user": "names_apply",
+   "assistant": "Renamed S6. The files and the search keep their own names; only what you read changed.",
+   "intents": [
+    "NAMES_DECIDE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "old man",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046348.897
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **old man**: 9 stickers, realistic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "old man",
+     "grid": "3x3",
+     "style": "realistic",
+     "count": 9,
+     "names": [
+      "old man clapping laughing",
+      "old man crying sadness",
+      "old man shouting anger",
+      "old man looking shocked",
+      "old man jumping pride",
+      "old man hiding fear",
+      "old man sitting boredom",
+      "old man grinning mischief",
+      "old man leaning relaxed"
+     ],
+     "estimate": 2.0,
+     "balance": 3108.12,
+     "prompt": "old man",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046348.94
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046348.957
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046348.969
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "old man clapping laughing",
+       "old man crying sadness",
+       "old man shouting anger",
+       "old man looking shocked",
+       "old man jumping pride",
+       "old man hiding fear",
+       "old man sitting boredom",
+       "old man grinning mischief",
+       "old man leaning relaxed"
+      ]
+     },
+     "status": "done",
+     "ts": 1791046360.42
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046361.13
+    }
+   ],
+   "ts": 1791046348.897,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046378.975
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Creating **old man** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J050",
+     "subject": "old man",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046378.99
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046379.025
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046379.036
+    },
+    {
+     "kind": "final",
+     "label": "started · J050",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046379.492
+    }
+   ],
+   "ts": 1791046378.975,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m5",
+   "role": "assistant",
+   "text": "I looked at **Old man**. These names do not fit the picture:\nS6: \"old man hiding fear\" -> **Scared woman hiding her eyes**",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046431.417
+    },
+    {
+     "kind": "step",
+     "label": "looked at 9 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046444.848
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046444.854
+    }
+   ],
+   "ts": 1791046431.374,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Apply the new names",
+     "action": "names_apply",
+     "generation": "G107"
+    },
+    {
+     "label": "Keep my names",
+     "action": "names_keep",
+     "generation": "G107"
+    }
+   ]
+  },
+  {
+   "id": "m6",
+   "role": "user",
+   "text": "animate them",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046447.193
+  },
+  {
+   "id": "m7",
+   "role": "assistant",
+   "text": "I'll animate the 9 stickers of **Old man** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046447.211
+    },
+    {
+     "kind": "step",
+     "label": "understood: an animation",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.251
+    },
+    {
+     "kind": "step",
+     "label": "working in Old man",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.267
+    },
+    {
+     "kind": "step",
+     "label": "9 stickers ready to move",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.281
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.29
+    }
+   ],
+   "ts": 1791046447.193,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Animate",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m8",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046453.779
+  },
+  {
+   "id": "m9",
+   "role": "assistant",
+   "text": "Animating **Old man** (about 4.5 credits). I'll show each one as it's ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": "G107",
+     "job": "J051",
+     "subject": "old man",
+     "animating": true
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046453.794
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046453.833
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: animate",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046453.844
+    },
+    {
+     "kind": "final",
+     "label": "animation started",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046457.942
+    }
+   ],
+   "ts": 1791046453.779,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m10",
+   "role": "user",
+   "text": "Apply the new names",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046492.167
+  },
+  {
+   "id": "m11",
+   "role": "assistant",
+   "text": "Renamed S6. The files and the search keep their own names; only what you read changed.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046492.183
+    },
+    {
+     "kind": "step",
+     "label": "understood: your answer about the names",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046492.223
+    },
+    {
+     "kind": "task",
+     "label": "renaming",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046492.284
+    },
+    {
+     "kind": "step",
+     "label": "renamed 1 sticker",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046492.292
+    },
+    {
+     "kind": "final",
+     "label": "recorded in each sticker's history",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046492.299
+    }
+   ],
+   "ts": 1791046492.167,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "named": [
+  "G107"
+ ]
+}

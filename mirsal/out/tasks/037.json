@@ -1,0 +1,190 @@
+{
+  "id": "037",
+  "number": 37,
+  "provider": "higgsfield-manual",
+  "external_task_id": "8c12e02b-3f23-4c94-bfb8-5c9ae0b7378a",
+  "name_key": "superhero_particles",
+  "status": "running",
+  "created": 1791045713.247,
+  "prompt": "Superhero particles",
+  "grid": [
+    2,
+    2
+  ],
+  "style_id": "flat_vector",
+  "folders": {
+    "img": "img-037-superhero_particles",
+    "vid": "vid-037-superhero_particles"
+  },
+  "paths": {
+    "img": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/Images_gen/img-037-superhero_particles",
+    "vid": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/videos_gen/vid-037-superhero_particles"
+  },
+  "request": {
+    "template_id": "sheet_2x2",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "separate small particles that burst out of Superhero",
+      "style_id": "flat_vector",
+      "mode": "sheet_2x2",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "purple superhero cape",
+          "tags": [
+            "purple_superhero_cape"
+          ],
+          "emoji": "🦸‍♂️✨"
+        },
+        {
+          "pos": 2,
+          "label": "red fabric piece",
+          "tags": [
+            "red_fabric_piece"
+          ],
+          "emoji": "🦸‍♂️✨"
+        },
+        {
+          "pos": 3,
+          "label": "yellow diamond emblem",
+          "tags": [
+            "yellow_diamond_emblem"
+          ],
+          "emoji": "🦸‍♂️✨"
+        },
+        {
+          "pos": 4,
+          "label": "black utility belt buckle",
+          "tags": [
+            "black_utility_belt_buckle"
+          ],
+          "emoji": "🦸‍♂️✨"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "loop": false
+    },
+    "grid": [
+      2,
+      2
+    ]
+  },
+  "plan": {
+    "task": "Superhero particles",
+    "task_slug": "superhero_particles",
+    "subject": "Superhero particles",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      2,
+      2
+    ],
+    "template_id": "sheet_2x2",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "separate small particles that burst out of Superhero",
+      "style_id": "flat_vector",
+      "mode": "sheet_2x2",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "purple superhero cape",
+          "tags": [
+            "purple_superhero_cape"
+          ],
+          "emoji": "🦸‍♂️✨"
+        },
+        {
+          "pos": 2,
+          "label": "red fabric piece",
+          "tags": [
+            "red_fabric_piece"
+          ],
+          "emoji": "🦸‍♂️✨"
+        },
+        {
+          "pos": 3,
+          "label": "yellow diamond emblem",
+          "tags": [
+            "yellow_diamond_emblem"
+          ],
+          "emoji": "🦸‍♂️✨"
+        },
+        {
+          "pos": 4,
+          "label": "black utility belt buckle",
+          "tags": [
+            "black_utility_belt_buckle"
+          ],
+          "emoji": "🦸‍♂️✨"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "loop": false
+    },
+    "guidelines": {},
+    "sheet_prompt": "One illustration of 4 separate small particles, one at each position: top-left, top-right, bottom-left and bottom-right, evenly spaced.\nParticles of Superhero: small things that fly out when the Superhero emoji is pressed. Draw only the particles listed, never Superhero itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every particle directly on the backdrop with no outline, stroke, die-cut edge or halo around it.\nEach particle is alone at its position and centred there, and differs from every other one in kind, size or angle:\nParticle 1 (top-left): purple superhero cape\nParticle 2 (top-right): red fabric piece\nParticle 3 (bottom-left): yellow diamond emblem\nParticle 4 (bottom-right): black utility belt buckle\nConsistency: the same drawing style, lighting and colour quality for all 4 particles.\nBackground: one seamless, flat, uniform pure #00FF00 green backdrop from edge to edge in exactly one shade, with no texture, no shading, no tint, no gradient, no vignette, no glow, no shadows, no noise, and nothing on it but the particles.\nSpacing: every particle has a generous empty margin on every side (at least 20% of its own size), and no particle touches another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. purple superhero cape, with big lively expressive movement in place\n2. red fabric piece, with big lively expressive movement in place\n3. yellow diamond emblem, with big lively expressive movement in place\n4. black utility belt buckle, with big lively expressive movement in place\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "separate small particles that burst out of Superhero purple superhero cape, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "purple_superhero_cape",
+        "tags": [
+          "purple_superhero_cape"
+        ],
+        "emoji": "🦸‍♂️✨"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "separate small particles that burst out of Superhero red fabric piece, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "red_fabric_piece",
+        "tags": [
+          "red_fabric_piece"
+        ],
+        "emoji": "🦸‍♂️✨"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "separate small particles that burst out of Superhero yellow diamond emblem, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "yellow_diamond_emblem",
+        "tags": [
+          "yellow_diamond_emblem"
+        ],
+        "emoji": "🦸‍♂️✨"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "separate small particles that burst out of Superhero black utility belt buckle, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "black_utility_belt_buckle",
+        "tags": [
+          "black_utility_belt_buckle"
+        ],
+        "emoji": "🦸‍♂️✨"
+      }
+    ],
+    "custom": {
+      "sheet_prompt": "One illustration of 4 separate small particles, one at each position: top-left, top-right, bottom-left and bottom-right, evenly spaced.\nParticles of Superhero: small things that fly out when the Superhero emoji is pressed. Draw only the particles listed, never Superhero itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every particle directly on the backdrop with no outline, stroke, die-cut edge or halo around it.\nEach particle is alone at its position and centred there, and differs from every other one in kind, size or angle:\nParticle 1 (top-left): purple superhero cape\nParticle 2 (top-right): red fabric piece\nParticle 3 (bottom-left): yellow diamond emblem\nParticle 4 (bottom-right): black utility belt buckle\nConsistency: the same drawing style, lighting and colour quality for all 4 particles.\nBackground: one seamless, flat, uniform pure #00FF00 green backdrop from edge to edge in exactly one shade, with no texture, no shading, no tint, no gradient, no vignette, no glow, no shadows, no noise, and nothing on it but the particles.\nSpacing: every particle has a generous empty margin on every side (at least 20% of its own size), and no particle touches another."
+    },
+    "effect": {
+      "id": "E014",
+      "template": "effect_pieces",
+      "version": 2
+    }
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791045713.247,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G106"
+  ]
+}

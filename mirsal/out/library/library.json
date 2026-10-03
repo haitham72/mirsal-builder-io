@@ -1278,6 +1278,152 @@
      "file_name": "img-school_buss-dancing_parade-20261003T050701-45ce6b"
     }
    ]
+  },
+  {
+   "id": "782c4187",
+   "name": "Superhero Dubai",
+   "slug": "superhero_dubai",
+   "cover": "83659804",
+   "created": 1791045546.962616,
+   "stickers": [
+    {
+     "id": "83659804",
+     "name": "Superhero dubai victory stance",
+     "file": "G105/vid-superhero_dubai-victory_stance-superhero_dubai-20261003T163907-3c754a.webm",
+     "type": "animated",
+     "emoji": "🦸‍♂️✨",
+     "kb": 252,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 1
+     },
+     "created": 1791045547.031662,
+     "file_name": "img-superhero_dubai-victory_stance-20261003T103346-b2b948"
+    },
+    {
+     "id": "a7917758",
+     "name": "Superhero dubai celebratory jump",
+     "file": "G105/vid-superhero_dubai-celebratory_jump-superhero_dubai-20261003T163907-4baf66.webm",
+     "type": "animated",
+     "emoji": "🎉🚀",
+     "kb": 204,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 2
+     },
+     "created": 1791045547.033846,
+     "file_name": "img-superhero_dubai-celebratory_jump-20261003T103346-0be1ef"
+    },
+    {
+     "id": "df212b02",
+     "name": "Superhero dubai worriedlean",
+     "file": "G105/vid-superhero_dubai-worriedlean-superhero_dubai-20261003T163907-981cb9.webm",
+     "type": "animated",
+     "emoji": "😰🌧️",
+     "kb": 211,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 3
+     },
+     "created": 1791045547.035757,
+     "file_name": "img-superhero_dubai-worriedlean-20261003T103346-8c1b28"
+    },
+    {
+     "id": "6ea20fa2",
+     "name": "Superhero dubai defeated slump",
+     "file": "G105/vid-superhero_dubai-defeated_slump-superhero_dubai-20261003T163907-5c7b6e.webm",
+     "type": "animated",
+     "emoji": "😫🏙️",
+     "kb": 236,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 4
+     },
+     "created": 1791045547.037685,
+     "file_name": "img-superhero_dubai-defeated_slump-20261003T103346-31fcee"
+    }
+   ]
+  },
+  {
+   "id": "49468197",
+   "name": "Superhero Dubai 2",
+   "slug": "superhero_dubai_2",
+   "cover": "a386e55b",
+   "created": 1791046021.934216,
+   "stickers": [
+    {
+     "id": "a386e55b",
+     "name": "Superhero dubai victory stance",
+     "file": "G105/vid-superhero_dubai-victory_stance-superhero_dubai_2-20261003T164702-97e1e0.webm",
+     "type": "animated",
+     "emoji": "🦸‍♂️✨",
+     "kb": 252,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 1
+     },
+     "created": 1791046022.002113,
+     "file_name": "img-superhero_dubai-victory_stance-20261003T103346-b2b948"
+    },
+    {
+     "id": "495356c5",
+     "name": "Superhero dubai celebratory jump",
+     "file": "G105/vid-superhero_dubai-celebratory_jump-superhero_dubai_2-20261003T164702-7acf4d.webm",
+     "type": "animated",
+     "emoji": "🎉🚀",
+     "kb": 204,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 2
+     },
+     "created": 1791046022.004576,
+     "file_name": "img-superhero_dubai-celebratory_jump-20261003T103346-0be1ef"
+    },
+    {
+     "id": "aab253fd",
+     "name": "Superhero dubai worriedlean",
+     "file": "G105/vid-superhero_dubai-worriedlean-superhero_dubai_2-20261003T164702-0ad821.webm",
+     "type": "animated",
+     "emoji": "😰🌧️",
+     "kb": 211,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 3
+     },
+     "created": 1791046022.0068889,
+     "file_name": "img-superhero_dubai-worriedlean-20261003T103346-8c1b28"
+    },
+    {
+     "id": "141ebfa0",
+     "name": "Superhero dubai defeated slump",
+     "file": "G105/vid-superhero_dubai-defeated_slump-superhero_dubai_2-20261003T164702-76b065.webm",
+     "type": "animated",
+     "emoji": "😫🏙️",
+     "kb": 236,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G105",
+      "index": 4
+     },
+     "created": 1791046022.009036,
+     "file_name": "img-superhero_dubai-defeated_slump-20261003T103346-31fcee"
+    }
+   ]
   }
  ],
  "layout": 2

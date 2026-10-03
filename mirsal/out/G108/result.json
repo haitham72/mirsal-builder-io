@@ -1,0 +1,3589 @@
+{
+  "generation_id": "G108",
+  "number": 108,
+  "owner": "local",
+  "created": 1791046917.247,
+  "parent": null,
+  "prompt": "kitten dubai",
+  "task": "kitten dubai",
+  "task_slug": "kitten_dubai",
+  "source": {
+    "subject": "kitten_dubai",
+    "subject_id": "039",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J052/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          695,
+          691
+        ],
+        [
+          695,
+          0,
+          662,
+          691
+        ],
+        [
+          1357,
+          0,
+          691,
+          691
+        ],
+        [
+          0,
+          691,
+          695,
+          691
+        ],
+        [
+          695,
+          691,
+          662,
+          691
+        ],
+        [
+          1357,
+          691,
+          691,
+          691
+        ],
+        [
+          0,
+          1382,
+          695,
+          666
+        ],
+        [
+          695,
+          1382,
+          662,
+          666
+        ],
+        [
+          1357,
+          1382,
+          691,
+          666
+        ]
+      ],
+      "xs": [
+        0,
+        695,
+        1357,
+        2048
+      ],
+      "ys": [
+        0,
+        691,
+        1382,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "video_sliced",
+  "error": null,
+  "plan_source": "task 039",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: <a cute kitten with fluffy fur>.\nStyle: 16-bit pixel art character, crisp square pixels, limited colour palette, clean dark outline, retro game sprite look.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: <the kitten jumps happily with paws in the air>\nCharacter 2: <the kitten sits calmly watching a distant object>\nCharacter 3: <the kitten runs fast across the floor quickly>\nCharacter 4: <the kitten lies down stretching all its limbs out>\nCharacter 5: <the kitten spins around in a tight circle fast>\nCharacter 6: <the kitten leans forward curiously sniffing the air>\nCharacter 7: <the kitten looks shocked with wide eyes and open mouth>\nCharacter 8: <the kitten nods its head firmly saying yes clearly>\nCharacter 9: <the kitten huddles in a tight ball sleeping deeply>\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. <it leaps energetically and lands softly on all fours>\n2. <it blinks slowly while swaying its tail gently>\n3. <its legs move rapidly in a blur as it speeds along>\n4. <it extends every paw and yawns widely before settling>\n5. <it rotates dizzily and then stops facing forward>\n6. <its head dips down low as it sniffs the breeze>\n7. <its ears flatten back as it stares in stunned silence>\n8. <it bobs up and down rapidly to agree enthusiastically>\n9. <its breathing slows until it is completely motionless>\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [
+    "sheet_prompt"
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "<a cute kitten with fluffy fur>",
+    "style_id": "pixel_art",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "<the kitten jumps happily with paws in the air>",
+        "tags": [
+          "kitten_dubai_jump",
+          "playful",
+          "energy",
+          "cute"
+        ],
+        "emoji": "🐱💫",
+        "motion": "<it leaps energetically and lands softly on all fours>"
+      },
+      {
+        "pos": 2,
+        "label": "<the kitten sits calmly watching a distant object>",
+        "tags": [
+          "kitten_dubai_sit",
+          "calm",
+          "patient",
+          "relaxed"
+        ],
+        "emoji": "🛋️😌",
+        "motion": "<it blinks slowly while swaying its tail gently>"
+      },
+      {
+        "pos": 3,
+        "label": "<the kitten runs fast across the floor quickly>",
+        "tags": [
+          "kitten_dubai_run",
+          "speed",
+          "agile",
+          "busy"
+        ],
+        "emoji": "🏃‍♂️✨",
+        "motion": "<its legs move rapidly in a blur as it speeds along>"
+      },
+      {
+        "pos": 4,
+        "label": "<the kitten lies down stretching all its limbs out>",
+        "tags": [
+          "kitten_dubai_stretch",
+          "lazy",
+          "comfortable",
+          "big"
+        ],
+        "emoji": "🤸‍♀️☀️",
+        "motion": "<it extends every paw and yawns widely before settling>"
+      },
+      {
+        "pos": 5,
+        "label": "<the kitten spins around in a tight circle fast>",
+        "tags": [
+          "kitten_dubai_spin",
+          "confused",
+          "twisty",
+          "fast"
+        ],
+        "emoji": "🌀😵",
+        "motion": "<it rotates dizzily and then stops facing forward>"
+      },
+      {
+        "pos": 6,
+        "label": "<the kitten leans forward curiously sniffing the air>",
+        "tags": [
+          "kitten_dubai_lean",
+          "curious",
+          "sniffing",
+          "close"
+        ],
+        "emoji": "👃🕵️",
+        "motion": "<its head dips down low as it sniffs the breeze>"
+      },
+      {
+        "pos": 7,
+        "label": "<the kitten looks shocked with wide eyes and open mouth>",
+        "tags": [
+          "kitten_dubai_shock",
+          "surprised",
+          "screaming",
+          "wide"
+        ],
+        "emoji": "😱🤯",
+        "motion": "<its ears flatten back as it stares in stunned silence>"
+      },
+      {
+        "pos": 8,
+        "label": "<the kitten nods its head firmly saying yes clearly>",
+        "tags": [
+          "kitten_dubai_nod",
+          "affirmative",
+          "happy",
+          "agreed"
+        ],
+        "emoji": "✅👏",
+        "motion": "<it bobs up and down rapidly to agree enthusiastically>"
+      },
+      {
+        "pos": 9,
+        "label": "<the kitten huddles in a tight ball sleeping deeply>",
+        "tags": [
+          "kitten_dubai_sleep",
+          "zombie",
+          "peaceful",
+          "closed"
+        ],
+        "emoji": "💤🌙",
+        "motion": "<its breathing slows until it is completely motionless>"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "039",
+  "name_key": "kitten_dubai",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791046892.794,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {
+      "A1": {
+        "decision": "APPROVE",
+        "by": "human",
+        "ts": 1791046940.287,
+        "note": "approved by Make a video"
+      }
+    },
+    "pack": null
+  },
+  "video_sheets": [
+    {
+      "id": "A1",
+      "slots": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grid": [
+        3,
+        3
+      ],
+      "file": "video_sheet/A1/sheet.png",
+      "layout": "video_sheet/A1/layout.json",
+      "video": "video_sheet/A1/video.mp4",
+      "status": "SLICED",
+      "ts": 1791046940.224,
+      "verify": [
+        {
+          "name": "slots_match_approved",
+          "ok": true,
+          "detail": "filled slots are exactly the approved stickers; blank slots are pure key colour",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "limit": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "data": {
+            "problems": [],
+            "ms": 68.0
+          }
+        },
+        {
+          "name": "no_outline_on_sheet",
+          "ok": true,
+          "detail": "no white ring around the subjects",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [],
+          "limit": [],
+          "data": {
+            "slots": [],
+            "ms": 192.8
+          }
+        }
+      ],
+      "blocked": null,
+      "canvas": [
+        2048,
+        2048
+      ],
+      "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. <it leaps energetically and lands softly on all fours>\n2. <it blinks slowly while swaying its tail gently>\n3. <its legs move rapidly in a blur as it speeds along>\n4. <it extends every paw and yawns widely before settling>\n5. <it rotates dizzily and then stops facing forward>\n6. <its head dips down low as it sniffs the breeze>\n7. <its ears flatten back as it stares in stunned silence>\n8. <it bobs up and down rapidly to agree enthusiastically>\n9. <its breathing slows until it is completely motionless>\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+      "slot_fill": 0.85,
+      "video_name": "J053.mp4",
+      "block": null,
+      "video_flags": [],
+      "video_checks": [
+        {
+          "name": "video_decodes",
+          "ok": true,
+          "detail": "h264 1440x1440",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": "h264",
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "video_specs",
+          "ok": true,
+          "detail": "1440x1440 24.0 fps, 3.04s",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 3.04,
+          "limit": 1.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "layout_match",
+          "ok": true,
+          "detail": "lowest slot IoU 0.97",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.966,
+          "limit": 0.6,
+          "data": {
+            "ious": {
+              "1": 0.99,
+              "2": 0.989,
+              "3": 0.989,
+              "4": 0.988,
+              "5": 0.966,
+              "6": 0.989,
+              "7": 0.99,
+              "8": 0.992,
+              "9": 0.994
+            },
+            "bad": [],
+            "ms": 44.1
+          }
+        },
+        {
+          "name": "blank_slots_stay_empty",
+          "ok": true,
+          "detail": "blank slots stayed empty",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.0,
+          "limit": 0.002,
+          "data": {
+            "bad": {},
+            "ms": 0.0
+          }
+        }
+      ],
+      "preview": "video_sheet/A1/preview.mp4",
+      "video_prompt_sent": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. <it leaps energetically and lands softly on all fours>\n2. <it blinks slowly while swaying its tail gently>\n3. <its legs move rapidly in a blur as it speeds along>\n4. <it extends every paw and yawns widely before settling>\n5. <it rotates dizzily and then stops facing forward>\n6. <its head dips down low as it sniffs the breeze>\n7. <its ears flatten back as it stares in stunned silence>\n8. <it bobs up and down rapidly to agree enthusiastically>\n9. <its breathing slows until it is completely motionless>\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+      "video_prompt_custom": false,
+      "video_info": {
+        "codec": "h264",
+        "width": 1440,
+        "height": 1440,
+        "fps": 24.0,
+        "duration": 3.04
+      }
+    }
+  ],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 53.3
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 248 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 248.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 5.5
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 17.7
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            695,
+            1357,
+            2048
+          ],
+          "ys": [
+            0,
+            691,
+            1382,
+            2048
+          ],
+          "ms": 22.7
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 1.9 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.94,
+        "limit": 12.0,
+        "data": {
+          "ms": 50.9
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "kitten_dubai_jump",
+      "tags": [
+        "kitten_dubai_jump",
+        "playful",
+        "energy",
+        "cute"
+      ],
+      "emoji": "🐱💫",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten jumps happily with paws in the air>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-jump-20261003T170157-433a4d",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 158950,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 108702,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 108.702,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "167.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 167.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          695,
+          691
+        ],
+        "bg": [
+          1,
+          253,
+          2
+        ],
+        "threshold": 125.0,
+        "fg_px": 158950,
+        "bbox": [
+          112,
+          61,
+          614,
+          635
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 167.4,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-jump-20261003T170157-433a4d.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 579,
+          "key": 386,
+          "bounds": 163
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          46,
+          0,
+          474,
+          456
+        ],
+        "edge_touch_frames": 3,
+        "subject_px_in_video": 456
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791046918.2,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.703,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047171.734,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 20, 7px over the 7px edge band",
+            "data": {
+              "frame": 20,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 50.2
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 20, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 20,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 50.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 56.3
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "kitten_dubai_sit",
+      "tags": [
+        "kitten_dubai_sit",
+        "calm",
+        "patient",
+        "relaxed"
+      ],
+      "emoji": "🛋️😌",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten sits calmly watching a distant object>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-sit-20261003T170157-80372a",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 125926,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 83061,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 83.061,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 29 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 29,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "128.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 128.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          695,
+          0,
+          662,
+          691
+        ],
+        "bg": [
+          1,
+          253,
+          3
+        ],
+        "threshold": 125.0,
+        "fg_px": 125926,
+        "bbox": [
+          135,
+          113,
+          524,
+          615
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 128.4,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-sit-20261003T170157-80372a.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 575,
+          "key": 379,
+          "bounds": 159
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          14,
+          65,
+          404,
+          480
+        ],
+        "edge_touch_frames": 3,
+        "subject_px_in_video": 415
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791046918.205,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.706,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047171.524,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 46, 7px over the 7px edge band",
+            "data": {
+              "frame": 46,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 49.2
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 46, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 46,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 49.2
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "2906px of foreign foreground, first at frame 46",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 2906,
+          "limit": 0,
+          "data": {
+            "frame": 46,
+            "px": 2906,
+            "ms": 54.4
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "kitten_dubai_run",
+      "tags": [
+        "kitten_dubai_run",
+        "speed",
+        "agile",
+        "busy"
+      ],
+      "emoji": "🏃‍♂️✨",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten runs fast across the floor quickly>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-run-20261003T170157-d2edd7",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 137755,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 25.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 94851,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 94.851,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 24 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 24,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "135.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 135.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1357,
+          0,
+          691,
+          691
+        ],
+        "bg": [
+          1,
+          252,
+          2
+        ],
+        "threshold": 125.0,
+        "fg_px": 137755,
+        "bbox": [
+          46,
+          143,
+          619,
+          563
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 135.6,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-run-20261003T170157-d2edd7.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 577,
+          "key": 380,
+          "bounds": 153
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          40,
+          54,
+          480,
+          396
+        ],
+        "edge_touch_frames": 29,
+        "subject_px_in_video": 440
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791046918.21,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.709,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047171.443,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 3, 7px over the 7px edge band",
+            "data": {
+              "frame": 3,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 48.9
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 3, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 3,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 48.9
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 49.3
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "kitten_dubai_stretch",
+      "tags": [
+        "kitten_dubai_stretch",
+        "lazy",
+        "comfortable",
+        "big"
+      ],
+      "emoji": "🤸‍♀️☀️",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten lies down stretching all its limbs out>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-stretch-20261003T170157-03f9c5",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 157749,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 22.1
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 104484,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 104.48400000000001,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "147.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 147.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.6
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          691,
+          695,
+          691
+        ],
+        "bg": [
+          2,
+          252,
+          3
+        ],
+        "threshold": 125.0,
+        "fg_px": 157749,
+        "bbox": [
+          41,
+          67,
+          645,
+          609
+        ],
+        "scale": 0.7205,
+        "scale_mode": "clamped",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 147.7,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-stretch-20261003T170157-03f9c5.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 576,
+          "key": 374,
+          "bounds": 162
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          20,
+          36,
+          480,
+          436
+        ],
+        "edge_touch_frames": 29,
+        "subject_px_in_video": 460
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791046918.214,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.71,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047171.594,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 42, 7px over the 7px edge band",
+            "data": {
+              "frame": 42,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 48.7
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 42, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 42,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 48.7
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "1536px of foreign foreground, first at frame 13",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 1536,
+          "limit": 0,
+          "data": {
+            "frame": 13,
+            "px": 1536,
+            "ms": 58.3
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "kitten_dubai_spin",
+      "tags": [
+        "kitten_dubai_spin",
+        "confused",
+        "twisty",
+        "fast"
+      ],
+      "emoji": "🌀😵",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten spins around in a tight circle fast>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-spin-20261003T170157-d9f542",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 176628,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 144573,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 144.573,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "3 enclosed hole(s), 0.4% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0038,
+          "limit": 0.01,
+          "data": {
+            "count": 3,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.3
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 27 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 27,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "207.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 207.8,
+          "limit": 512,
+          "data": {
+            "ms": 4.6
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          695,
+          691,
+          662,
+          691
+        ],
+        "bg": [
+          2,
+          252,
+          3
+        ],
+        "threshold": 124.5,
+        "fg_px": 176628,
+        "bbox": [
+          51,
+          56,
+          616,
+          620
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0038,
+        "kb": 207.8,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-spin-20261003T170157-d9f542.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 571,
+          "key": 379,
+          "bounds": 187
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          0,
+          454,
+          480
+        ],
+        "edge_touch_frames": 5,
+        "subject_px_in_video": 480
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791046918.22,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.711,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047171.95,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 46, 7px over the 7px edge band",
+            "data": {
+              "frame": 46,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 49.3
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 46, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 46,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 49.3
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "10027px of foreign foreground, first at frame 0",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 10027,
+          "limit": 0,
+          "data": {
+            "frame": 0,
+            "px": 10027,
+            "ms": 79.3
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "kitten_dubai_lean",
+      "tags": [
+        "kitten_dubai_lean",
+        "curious",
+        "sniffing",
+        "close"
+      ],
+      "emoji": "👃🕵️",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten leans forward curiously sniffing the air>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-lean-20261003T170157-ecbcea",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 154123,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 104775,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 104.775,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 25 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 25,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "155.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 155.9,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1357,
+          691,
+          691,
+          691
+        ],
+        "bg": [
+          2,
+          251,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 154123,
+        "bbox": [
+          66,
+          56,
+          599,
+          599
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 155.9,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-lean-20261003T170157-ecbcea.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 598,
+          "key": 357,
+          "bounds": 170
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          20,
+          50,
+          480,
+          450
+        ],
+        "edge_touch_frames": 3,
+        "subject_px_in_video": 460
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791046918.225,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.712,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047171.817,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 9, 7px over the 7px edge band",
+            "data": {
+              "frame": 9,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 49.9
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 9, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 9,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 49.9
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "366px of foreign foreground, first at frame 0",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 366,
+          "limit": 0,
+          "data": {
+            "frame": 0,
+            "px": 366,
+            "ms": 61.6
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "kitten_dubai_shock",
+      "tags": [
+        "kitten_dubai_shock",
+        "surprised",
+        "screaming",
+        "wide"
+      ],
+      "emoji": "😱🤯",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten looks shocked with wide eyes and open mouth>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-shock-20261003T170157-651f5f",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 161571,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 109674,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 109.674,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "166.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 166.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1382,
+          695,
+          666
+        ],
+        "bg": [
+          2,
+          251,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 161571,
+        "bbox": [
+          92,
+          72,
+          584,
+          584
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 166.5,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-shock-20261003T170157-651f5f.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 288,
+          "key": 410,
+          "bounds": 158,
+          "render": 1113,
+          "seam": 707,
+          "encode": 3071,
+          "encodes": 2,
+          "probe": 240,
+          "verify": 13,
+          "finish": 5305
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          15,
+          52,
+          422,
+          414
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 407,
+        "scale": 0.9749,
+        "motion": 32.16,
+        "loop_seam_before": 103.24,
+        "loop_seam": 0.0,
+        "loop_limit": 51.37,
+        "frames_out": 66,
+        "crf": 42,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.01,
+        "soft_sigma": 0.0,
+        "kb": 214.0
+      },
+      "webm": "slices/vid-kitten_dubai-shock-20261003T170157-651f5f.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046918.23,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.713,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047177.542,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 48.6
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 53.8
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "213KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 213,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 51.37",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 51.37,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.99",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.987,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 32.16",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 32.16,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 2% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.023,
+          "limit": 0.35,
+          "data": {
+            "ms": 10.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "kitten_dubai_nod",
+      "tags": [
+        "kitten_dubai_nod",
+        "affirmative",
+        "happy",
+        "agreed"
+      ],
+      "emoji": "✅👏",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten nods its head firmly saying yes clearly>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-nod-20261003T170157-799837",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 146652,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 100122,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 100.122,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.4% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0035,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 12 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 12,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "142.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 142.9,
+          "limit": 512,
+          "data": {
+            "ms": 3.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          695,
+          1382,
+          662,
+          666
+        ],
+        "bg": [
+          2,
+          251,
+          4
+        ],
+        "threshold": 123.5,
+        "fg_px": 146652,
+        "bbox": [
+          73,
+          103,
+          585,
+          584
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0035,
+        "kb": 142.9,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-nod-20261003T170157-799837.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 243,
+          "key": 386,
+          "bounds": 157
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          14,
+          0,
+          430,
+          413
+        ],
+        "edge_touch_frames": 3,
+        "subject_px_in_video": 416
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791046918.234,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.714,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047172.387,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 35, 7px over the 7px edge band",
+            "data": {
+              "frame": 35,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 49.0
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 35, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 35,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 49.0
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "1293px of foreign foreground, first at frame 0",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 1293,
+          "limit": 0,
+          "data": {
+            "frame": 0,
+            "px": 1293,
+            "ms": 54.7
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "kitten_dubai_sleep",
+      "tags": [
+        "kitten_dubai_sleep",
+        "zombie",
+        "peaceful",
+        "closed"
+      ],
+      "emoji": "💤🌙",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten huddles in a tight ball sleeping deeply>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-kitten_dubai-sleep-20261003T170157-f56dd8",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 162309,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 101608,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 101.608,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 15 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 15,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "145.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 145.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1357,
+          1382,
+          691,
+          666
+        ],
+        "bg": [
+          2,
+          251,
+          3
+        ],
+        "threshold": 123.5,
+        "fg_px": 162309,
+        "bbox": [
+          77,
+          123,
+          599,
+          543
+        ],
+        "scale": 0.7308,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 145.5,
+        "format": "png"
+      },
+      "png": "slices/img-kitten_dubai-sleep-20261003T170157-f56dd8.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.0,
+        "ms": {
+          "decode": 230,
+          "key": 304,
+          "bounds": 158,
+          "render": 1009,
+          "seam": 666,
+          "encode": 3063,
+          "encodes": 2,
+          "probe": 255,
+          "verify": 12,
+          "finish": 5167
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          34,
+          71,
+          420,
+          386
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 386,
+        "scale": 1.028,
+        "motion": 27.93,
+        "loop_seam_before": 44.27,
+        "loop_seam": 0.0,
+        "loop_limit": 41.89,
+        "frames_out": 66,
+        "crf": 42,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.97,
+        "soft_sigma": 0.5,
+        "kb": 231.2
+      },
+      "webm": "slices/vid-kitten_dubai-sleep-20261003T170157-f56dd8.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791046918.24,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791046939.714,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791046940.224,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791046940.287,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791047177.444,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 49.1
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 54.1
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "231KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 231,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.75",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.75,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 41.89",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 41.89,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.99",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.995,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 27.93",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 27.93,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 2% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.023,
+          "limit": 0.35,
+          "data": {
+            "ms": 8.4
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.97x of the still's edge detail (as soft as the still blurred 0.5 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.97,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "sheet_issues": []
+}

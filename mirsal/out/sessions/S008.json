@@ -3,7 +3,7 @@
  "user": "local",
  "title": "spiderman in school",
  "created": 1791023315.793,
- "updated": 1791023637.757,
+ "updated": 1791025920.094,
  "settings": {
   "grid": "2x2",
   "style_id": "clay_3d",
@@ -17,7 +17,7 @@
   }
  },
  "focus": {
-  "generation": "G104",
+  "generation": "G105",
   "stickers": []
  },
  "subjects": [
@@ -79,19 +79,21 @@
      "error": null
     },
     {
-     "generation": null,
+     "generation": "G105",
      "job": "J047",
      "prompt": "superhero dubai",
      "grid": "2x2",
      "style_id": "clay_3d",
      "parent": "G104",
      "created": 1791023594.527,
-     "ready": 0,
-     "approved": 0,
+     "ready": 4,
+     "approved": 4,
      "rejected": 0,
      "liked": [],
      "disliked": [],
-     "note": "tweak: wear purple and black suite, with arab head scarf"
+     "note": "tweak: wear purple and black suite, with arab head scarf",
+     "stage": "video_sliced",
+     "error": null
     }
    ]
   }
@@ -276,6 +278,28 @@
     "spent_estimate": 2.0
    },
    "generation_id": null
+  },
+  {
+   "seq": 9,
+   "ts": 1791025920.093,
+   "user": "are they all having same cloth?",
+   "assistant": "Not quite; while most are wearing a purple and black suit with an Arab headscarf, the \"superhero in dubai\" batch (G105) specifically mentions this tweak, whereas other batches like G104 or G103 do not confirm they share that exact outfit.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G105",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G105"
   }
  ],
  "messages": [
@@ -955,6 +979,53 @@
      "generation": "G105"
     }
    ]
+  },
+  {
+   "id": "m19",
+   "role": "user",
+   "text": "are they all having same cloth?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791025917.678
+  },
+  {
+   "id": "m20",
+   "role": "assistant",
+   "text": "Not quite; while most are wearing a purple and black suit with an Arab headscarf, the \"superhero in dubai\" batch (G105) specifically mentions this tweak, whereas other batches like G104 or G103 do not confirm they share that exact outfit.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791025917.742
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791025917.762
+    },
+    {
+     "kind": "step",
+     "label": "working in Superhero dubai",
+     "detail": null,
+     "status": "done",
+     "ts": 1791025918.573
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1791025920.078
+    }
+   ],
+   "ts": 1791025917.678,
+   "status": "done",
+   "chips": []
   }
  ],
  "summary": {
