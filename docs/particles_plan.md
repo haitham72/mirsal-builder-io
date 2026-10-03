@@ -1,6 +1,6 @@
 # Particles: the plan (Haitham, 2026-10-03, written at the end of a session)
 
-**Status: PLAN, not built.** It corrects the model the particles feature was built on. Read it before touching `flow/effects.py`, `console/effects.js`, `console/particles.js` or the Particles section of the sticker view. What exists today is in `docs/effects.md`; what is open is in `HANDOFF.md` section 0.
+**Status: phase 1 is BUILT (2026-10-03, branch `better_ui/ux`).** `flow/particle_sets.py` and every route of section 6 are in, with tests (`tests/test_particle_sets.py`, 22, over the real server on the fake CLI). **Still to build:** the screens of section 5 (phase 2), re-pointing the per-sticker gallery (phase 3), the chat intents (phase 4), Telegram delivery (phase 5). This file corrects the model the particles feature was built on; what exists today is in `docs/effects.md`; what is open is in `HANDOFF.md` sections 0a-0c.
 
 ## 1. What the task really is (the correction)
 
@@ -73,6 +73,17 @@ GET    /api/packs/{pack}/particles          the pack's sets and bursts (replaces
 ```
 The existing `/api/effects/*` routes stay (the working session) and `POST /api/particles {from_effect}` is the bridge. Engine functions live in a new `flow/particle_sets.py` (engine purity rule: no `psycopg`, `redis`, `langgraph`, model client in `engine/`).
 
+**What phase 1 actually built, and where it differs from the sketch above:**
+
+| planned | built (`flow/particle_sets.py`) |
+|---|---|
+| `POST /api/particles/{id}/more {grid, elements?, go?}` | **not built.** It needs a sheet job like `POST /api/effects/{id}/particles` (price first, `go: true`) that APPENDS to the set's cells. The screen cannot offer *Generate more* without it; nothing else in the model depends on it. |
+| `POST /api/particles/{id}/preview` / `/render` / `/add` | **not built.** They need a burst record per (set, pack, preset) under `renders/`; `for_pack` already reads `renders[]`, so only the writers are missing. The simulation itself is `flow/effects.py sim_preview` / `sim_render` and needs re-pointing at a set's picked cells instead of an effect's group. |
+| `GET /api/particles` cards | built: `id, name, created, user, kind, elements, packs, used_in[{id, name}], cells[], picked[], n_cells, n_picked, renders, credits` |
+| delete → trash + restore | built, with the refusal that matters: a set assigned to packs answers **409 with the pack names** unless `{confirm: true}` (so a set in use cannot vanish under a pack). Ids are shared with the trash, so a restore can never collide with a new set. |
+| motion | `motion{preset, params}` is linted against the engine itself: the preset must be in `engine/particles.PRESETS` and the params must pass `ParticleParams.from_dict`, so a set's motion can never mean something the renderer does not read (400 otherwise). |
+| one source of truth | `set.packs` only. The library pack record gets no copy; `GET /api/packs/{id}/particles` answers `{pack_id, sets, bursts, counts}` (the old per-sticker counts are kept so nothing that reads them breaks). |
+
 ## 7. Migration and what to change in the code already written (do these first)
 
 - **`flow/effects.py`**: `sprites` per group stays for the working session; add `set_from_effect()` (creates `P###` from `E###`: copies cells into `out/particles/`, records the source). The per-sticker `for_sticker` / `counts_for_pack` are re-pointed to pack level (`for_pack`); keep `for_sticker` as "the particles of the pack(s) this sticker is in".
@@ -83,8 +94,8 @@ The existing `/api/effects/*` routes stay (the working session) and `POST /api/p
 
 ## 8. Phases (each ends green and documented)
 
-1. `flow/particle_sets.py` + routes + tests (set from effect, assign/unassign, picked, more (fake CLI), delete/restore, pack listing).
-2. Library > Particles section + Pack page particle studio + the "Use as particle set" step in both wizards.
+1. **DONE (2026-10-03, `e56146a`)** `flow/particle_sets.py` + routes + tests (set from effect, rename/elements/motion/picked, assign/unassign, duplicate, delete/restore with the in-use refusal, the pack listing). *Left out on purpose: `more`, `preview`, `render`, `add` — see section 6; `more` is the next backend step because the wizard's *Generate more* needs it.*
+2. Library > Particles section + Pack page particle studio + the "Use as particle set" step in both wizards. The backend answers both reads (`GET /api/particles`, `GET /api/packs/{id}/particles`), so this phase is screens only.
 3. Re-point the sticker view / pack grid / Studio section to the pack; remove per-sticker framing from copy.
 4. AI chat intents (make, assign, more, delete).
 5. Telegram: how the burst is delivered (open question 3).

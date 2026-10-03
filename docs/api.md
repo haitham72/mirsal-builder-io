@@ -115,3 +115,18 @@ estimate unless `go`; 202 `{job}`; the finished clip is cut into results by `on_
 a Telegram limit is a 409; `sticker_ids?` keeps only those source stickers, so one video cell can be saved for one sticker) · `POST /api/effects/{id}/pieces_estimate {group, grid?: "2x2" | "3x3"}` and `POST /api/effects/{id}/pieces {group, grid?, go}` (the AI-drawn pieces sheet: price first, 409 with the estimate unless `go: true`, 202 `{job, task, estimate, id, group, grid}`; owner only, needs `can_spend`) · `GET /api/packs/{pack}/stickers/{sid}/particles` (`{sticker, pack_id, created[], saved[], effects[], can_make}`; a member gets empty lists) · `GET /api/packs/{pack}/particles` (`{sticker_id: {created, saved}}`). `params` are the `ParticleParams` fields (`gravity`, `magnitude`, `vortex`, `count`, `size_min`, `size_max`, `spin`, `lifetime`, `spread`, `seed`, ...; an unknown key is a 400).
 
 `POST /api/generations/{id}/allow {kind?: "still" | "animation" (default animation), index? | indexes? | all?, allow?: bool (default true)}` -> 202 `{id, kind, indexes, allow}`; errors are JSON (400 bad kind / index, 404 no batch, 409 busy / nothing to allow / cannot be allowed with the reason). `GET /api/generations/{id}` carries `allow.{still, animation}`: `can`, `allowed`, `undo`, `why`, `final`. See `docs/engine-and-studio.md` ("Use it anyway").
+
+## Particle sets (`/api/particles`, `docs/particles_plan.md`)
+
+The **durable** particle asset (`P###`, `out/particles/P###/`): a set belongs to one pack, to several, or to none. Owner only for now. Free: nothing here spends.
+`GET /api/particles` -> `{sets: [{id, name, created, user, kind, elements[], packs[], used_in[{id, name}], cells[], picked[], n_cells, n_picked, renders, credits}]}` ·
+`POST /api/particles {from_effect: E###, name?, packs?, picked?}` -> **201 the set** (*Use as particle set*: the drawn sheet's picked cells are copied into `out/particles/P###/cells/`, so the set outlives the run; `packs` defaults to the effect's own pack) · without `from_effect` it makes an empty stand-alone set `{name?, elements?, kind?: "drawn" | "stickers" | "video"}` for *Generate more* ·
+`GET /api/particles/{id}` (the set with `n_cells` / `n_picked` / `picked`, `used_in`, `trashed: false`) ·
+`POST /api/particles/{id} {name?, elements?, packs?, picked?, motion?}` (rename / re-pick / default motion / move; **unpicking never deletes a cell file**, an empty `picked` is a 400; `motion` is linted against the engine: the preset must be in `engine/particles.PRESETS` and the params must pass `ParticleParams.from_dict`, else 400) ·
+`POST /api/particles/{id}/assign {packs}` and `/unassign {packs}` (list edits; no file is copied and **unassigning keeps the set**) ·
+`POST /api/particles/{id}/duplicate {name?}` -> 201 an independent copy (cells and all, `source.duplicated_from`) ·
+`POST /api/particles/{id}/delete {confirm?}` -> the folder moves to `out/trash/particles/` (**a set assigned to packs is 409 with the pack names unless `confirm: true`**; nothing is deleted from disk) ·
+`POST /api/particles/{id}/restore` -> back under the same id and packs (409 when that id is taken again) ·
+`GET /api/packs/{id}/particles` -> the pack's studio: `{pack_id, sets[], bursts[], counts}` (`counts` is the old `{sticker id: {created, saved}}`, kept so existing readers keep working).
+
+Not built yet: `POST /api/particles/{id}/more` (Generate more: price first, `go: true`, **appends** cells), and `/preview`, `/render`, `/add` (a burst per set, pack and preset, recorded under `renders/`).
