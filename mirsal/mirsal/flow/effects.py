@@ -3,8 +3,8 @@
 An effect belongs to a PACK of the library: a person picks a pack (an emoji pack) and some of its stickers, a vision model (or a built-in table) decides what bursts out of each
 (`vision/effect_plan.py`), and the result is one 3-second Telegram video sticker per source sticker, added to the pack tagged with the source emoji. Two ways to make the burst:
 
-- **"sim"**: the engine simulates it (`engine/particles.py`) from sprites (the pack's own stickers, or the approved stickers of a sprite-sheet batch) with gravity / explosion / vortex
-  sliders. Preview and render are free.
+- **"sim"**: the engine simulates it (`engine/particles.py`) from sprites (the pack's own stickers, or the cells of ONE particle sheet drawn for the whole effect, `effect.set`) with
+  gravity / explosion / vortex sliders. The sprites are fitted to `sprite_px` x `scale` before simulating (latency). Preview and render are free.
 - **"video"**: Kling draws it from text only (`generation/effect_prompts.py`, no start image); the returned clip is cut into cells (`engine/effect_video.py`), one result per cell.
 
 Everything is a file under `out/effects/E###/` (`effect.json`, `src/`, `results/`, `previews/`): addressable by id and reproducible from what is stored (rule 11). Nothing here approves
@@ -14,8 +14,11 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import math
+import re
 import threading
 import time
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -157,8 +160,9 @@ def analyse(out: Path, eid: str, *, allowed=None, vlm=None) -> dict:
     with _LOCK:
         e = read(out, eid)
         e.update(groups=r["groups"], per_sticker=r["per_sticker"], notes=r["notes"], analysed_by=r["model"] or "table", status="READY")
+        drawn = e.get("set") or {}
         for g in e["groups"]:
-            g.setdefault("sprites", "own")
+            g.setdefault("sprites", {"generation": drawn["generation"], "picked": drawn.get("picked")} if drawn.get("status") == "DRAWN" and drawn.get("generation") else "own")
         hist(e, "python", "ANALYSE", ", ".join(f"{g['subject']}: {', '.join(g['elements'])}" for g in e["groups"])[:300], {"model": r["model"]})
         return _write(out, e)
 
@@ -168,6 +172,11 @@ def _group(e: dict, gid: str) -> dict:
     if not g:
         raise EffectError(f"no group {gid}", 404)
     return g
+
+
+def group_elements(out: Path, eid: str, gid: str) -> list[str]:
+    """The pieces of one group (404 when there is no such group): the picks of the old per-group routes."""
+    return list(_group(read(out, eid), gid).get("elements") or [])
 
 
 def set_pieces(out: Path, eid: str, gid: str, *, elements=None, subject=None, style=None, by: str = "you") -> dict:
@@ -240,83 +249,138 @@ def on_video_done(out: Path, eid: str, gid: str, job: dict, cfg) -> dict:
 
 
 # ---------- mode "sim": the engine's own burst ----------
+DEFAULT_SPRITE_PX = 100                  # the sprites of a simulated burst are fitted into this many px BEFORE simulating (latency); `sprite_px` of the preview / render params
+SPRITE_PX_RANGE = (32, 512)
+SCALE_RANGE = (1, 4)                     # `scale` multiplies the fitted size: 100 px -> 200 / 300 / 400
+
+
+def split_fit(overrides) -> tuple[int, float, dict]:
+    """`sprite_px` (a whole number 32..512, default 100) and `scale` (1..4, default 1) out of the params of a preview / render; what is left are the particle params (strict, as before).
+    Anything invalid -> EffectError 400."""
+    if overrides is not None and not isinstance(overrides, dict):
+        raise EffectError("params must be an object")
+    o = dict(overrides or {})
+    px, sc = o.pop("sprite_px", DEFAULT_SPRITE_PX), o.pop("scale", SCALE_RANGE[0])
+    if isinstance(px, bool) or not isinstance(px, (int, float)) or not math.isfinite(px) or px != int(px) or not SPRITE_PX_RANGE[0] <= px <= SPRITE_PX_RANGE[1]:
+        raise EffectError(f"sprite_px must be a whole number from {SPRITE_PX_RANGE[0]} to {SPRITE_PX_RANGE[1]}")
+    if isinstance(sc, bool) or not isinstance(sc, (int, float)) or not math.isfinite(sc) or not SCALE_RANGE[0] <= sc <= SCALE_RANGE[1]:
+        raise EffectError(f"scale must be a number from {SCALE_RANGE[0]} to {SCALE_RANGE[1]}")
+    return int(px), (int(sc) if sc == int(sc) else float(sc)), o
+
+
+def _batch_cells(out: Path, gn: int, picked=None) -> tuple[list[tuple[int, Path]], bool]:
+    """(cell index, picture file) of the cells of batch G{gn} that can be a sprite, in cell order, and whether a cell is still being cut. With `picked` (the person's decision) exactly those
+    cells with a picture count, whatever their verifier status; without it every READY cell that was not rejected does (a cell with only warnings is READY). A cell whose file is missing is skipped."""
+    from . import pipeline as pl
+    try:
+        res = pl.read_result(out, gn)
+    except pl.PipelineError:
+        raise EffectError(f"the particles batch G{gn:03d} does not exist", 409)
+    d = pl.gen_dir(out, gn)
+    keep = None if picked is None else {int(i) for i in picked}
+    cells = []
+    for st in res["stickers"]:
+        f = d / st["png"] if st.get("png") else None
+        if f is None or not f.is_file():
+            continue
+        if (int(st["index"]) in keep) if keep is not None else (st.get("status") == "READY" and (st.get("review") or {}).get("still") != "REJECTED"):
+            cells.append((int(st["index"]), f))
+    return cells, any(st.get("status") == "PENDING" for st in res["stickers"])
+
+
 def sprites_of(out: Path, lib, eid: str, gid: str) -> list[np.ndarray]:
-    """The pieces of a group: its own stickers (default) or the approved stickers of a sprite-sheet batch ({"generation": 12})."""
+    """The particles of a group: its own stickers (default), or the cells of the effect's drawn batch (`sprites: {"generation": 12, "picked": [1, 3]}`): the picked cells, or, for a record
+    without `picked` (made before the set existed), every READY cell that was not rejected."""
     e = read(out, eid)
     g = _group(e, gid)
     src = g.get("sprites") or "own"
     pcs: list[np.ndarray] = []
     if isinstance(src, dict) and src.get("generation") is not None:
-        from . import pipeline as pl
         gn = int(str(src["generation"]).upper().lstrip("G"))
-        try:
-            res = pl.read_result(out, gn)
-        except pl.PipelineError:
-            raise EffectError(f"the pieces batch G{gn:03d} does not exist", 409)
-        d = pl.gen_dir(out, gn)
-        for st in res["stickers"]:       # a cell with only warnings is READY and is used; a rejected one is not
-            if st.get("status") == "READY" and st.get("png") and (st.get("review") or {}).get("still") != "REJECTED" and (d / st["png"]).is_file():
-                pcs.append(np.asarray(Image.open(d / st["png"]).convert("RGBA"), np.uint8))
-        if not pcs and any(st.get("status") == "PENDING" for st in res["stickers"]):
-            raise EffectError(f"the pieces of G{gn:03d} are still being cut: try again in a moment", 409)
+        cells, pending = _batch_cells(out, gn, src.get("picked"))
+        pcs = [np.asarray(Image.open(f).convert("RGBA"), np.uint8) for _, f in cells]
+        if not pcs and pending:
+            raise EffectError(f"the particles of G{gn:03d} are still being cut: try again in a moment", 409)
+        if not pcs:
+            raise EffectError("there are no particles to burst: the particles batch has no ready cell (none was cut, or all were rejected)" if src.get("picked") is None
+                              else "none of the picked cells has a picture: pick others", 409)
     else:
         d = _dir(out, eid)
         for sid in g["stickers"]:
             s = next(x for x in e["stickers"] if x["sticker_id"] == sid)
             if s.get("src") and (d / s["src"]).is_file():
                 pcs.append(np.asarray(Image.open(d / s["src"]).convert("RGBA"), np.uint8))
-    if not pcs:
-        raise EffectError("there are no pieces to burst: the pieces batch has no ready cell (none was cut, or all were rejected)" if isinstance(src, dict) else "the stickers of this group have no picture", 409)
+        if not pcs:
+            raise EffectError("the stickers of this group have no picture", 409)
     return pcs
 
 
+def _picked_of(v) -> list[int]:
+    if not isinstance(v, list) or any(isinstance(i, bool) or not isinstance(i, int) or i < 1 for i in v):
+        raise EffectError("picked must be a list of cell numbers (1 is the first cell)")
+    return sorted(set(v))
+
+
 def set_sprites(out: Path, eid: str, gid: str, source) -> dict:
-    """Where a group's pieces come from: "own" or {"generation": N} (an AI sprite sheet cut and approved in the Studio)."""
+    """Where a group's particles come from: "own" or {"generation": N[, "picked": [cells]]} (a drawn particle sheet cut by the engine)."""
     if source != "own" and not (isinstance(source, dict) and source.get("generation") is not None):
         raise EffectError('sprites must be "own" or {"generation": N}')
+    if source != "own":
+        try:
+            gn = int(str(source["generation"]).upper().lstrip("G"))
+        except ValueError:
+            raise EffectError("generation must be a batch number")
+        source = {"generation": gn, **({"picked": _picked_of(source["picked"])} if source.get("picked") is not None else {})}
     with _LOCK:
         e = read(out, eid)
         _group(e, gid)["sprites"] = source
-        hist(e, "you", "EDIT", f"{gid}: pieces from {source if source == 'own' else 'G%03d' % int(str(source['generation']).upper().lstrip('G'))}")
+        hist(e, "you", "EDIT", f"{gid}: particles from {source if source == 'own' else 'G%03d' % source['generation']}")
         return _write(out, e)
 
 
 def params_for(out: Path, eid: str, sticker_id: str, overrides: dict | None = None) -> particles.ParticleParams:
-    """The preset the sticker's mood picked, with the person's slider values on top. Unknown keys raise (the contract is the dataclass)."""
+    """The preset the sticker's mood picked, with the person's slider values on top. Unknown keys raise (the contract is the dataclass); `sprite_px` / `scale` are not particle params
+    (`split_fit`) and are ignored here."""
     e = read(out, eid)
     g = next((g for g in e["groups"] if sticker_id in g["stickers"]), None)
     if not g:
         raise EffectError(f"{sticker_id} is not part of this effect", 404)
     try:
-        return particles.preset(g["preset"].get(sticker_id, "burst"), **(overrides or {}))
+        return particles.preset(g["preset"].get(sticker_id, "burst"), **split_fit(overrides)[2])
     except ValueError as ex:
         raise EffectError(str(ex))
 
 
-def _digest(sprites, p) -> str:
-    h = hashlib.sha256(json.dumps(p.to_dict(), sort_keys=True).encode())
+def _digest(sprites, p, fit=()) -> str:
+    """What a preview was made from: every pixel of every sprite (not a prefix: the top rows of a sticker are all transparent), the particle params and the resize settings."""
+    h = hashlib.sha256(json.dumps({"p": p.to_dict(), "fit": list(fit)}, sort_keys=True).encode())
     for s in sprites:
-        h.update(s.tobytes()[:4096])
         h.update(str(s.shape).encode())
+        h.update(np.ascontiguousarray(s).tobytes())
     return h.hexdigest()[:16]
 
 
+def _fit(pcs: list[np.ndarray], px: int, scale) -> list[np.ndarray]:
+    return particles.fit_sprites(pcs, max(1, round(px * scale)))
+
+
 def sim_preview(out: Path, lib, eid: str, sticker_id: str, overrides: dict | None = None, size: int = 256) -> dict:
-    """The burst as a small looping WebP, rendered by the same engine as the final file (the sliders are live). Cached by what it was made from."""
+    """The burst as a small looping WebP, rendered by the same engine as the final file (the sliders are live). Cached by what it was made from (sprites, params, `sprite_px`, `scale`)."""
     e = read(out, eid)
     g = next((g for g in e["groups"] if sticker_id in g["stickers"]), None)
     if not g:
         raise EffectError(f"{sticker_id} is not part of this effect", 404)
+    px, sc, _ = split_fit(overrides)
     p = params_for(out, eid, sticker_id, overrides)
     pcs = sprites_of(out, lib, eid, g["id"])
-    key = _digest(pcs, p) + f"-{int(size)}"
+    key = _digest(pcs, p, (px, sc)) + f"-{int(size)}"
     f = _dir(out, eid) / "previews" / f"{key}.webp"
     if not f.is_file():
         small = particles.ParticleParams.from_dict({**p.to_dict(), "size": int(size)})
-        fr = particles.simulate(pcs, small)
+        fr = particles.simulate(_fit(pcs, px, sc), small)
         f.parent.mkdir(exist_ok=True)
         atomic.write_bytes(f, particles.preview_webp(fr, size=int(size)))
-    return {"url": f"/out/effects/{e['id']}/previews/{f.name}", "file": f"previews/{f.name}", "params": p.to_dict(), "sprites": len(pcs)}
+    return {"url": f"/out/effects/{e['id']}/previews/{f.name}", "file": f"previews/{f.name}", "params": {**p.to_dict(), "sprite_px": px, "scale": sc}, "sprites": len(pcs)}
 
 
 def sim_render(out: Path, lib, eid: str, sticker_id: str, cfg, overrides: dict | None = None) -> dict:
@@ -325,9 +389,10 @@ def sim_render(out: Path, lib, eid: str, sticker_id: str, cfg, overrides: dict |
     g = next((g for g in e["groups"] if sticker_id in g["stickers"]), None)
     if not g:
         raise EffectError(f"{sticker_id} is not part of this effect", 404)
+    px, sc, _ = split_fit(overrides)
     p = params_for(out, eid, sticker_id, overrides)
     pcs = sprites_of(out, lib, eid, g["id"])
-    fr = particles.simulate(pcs, p)
+    fr = particles.simulate(_fit(pcs, px, sc), p)
     r = ev.encode_and_check(fr, cfg, label=f"{sticker_id} burst")
     d = _dir(out, eid)
     (d / "results").mkdir(exist_ok=True)
@@ -339,7 +404,7 @@ def sim_render(out: Path, lib, eid: str, sticker_id: str, cfg, overrides: dict |
             fname = f"results/{rid}.webm"
             atomic.write_bytes(d / fname, r["data"])
         res = {"id": rid, "mode": "sim", "group": g["id"], "sticker_id": sticker_id, "file": fname, "bytes": len(r["data"]) if r.get("data") else 0, "status": r["status"], "checks": r["checks"],
-               "warnings": r["warnings"], "blocks": r["blocks"], "metrics": r["metrics"], "params": p.to_dict()}
+               "warnings": r["warnings"], "blocks": r["blocks"], "metrics": r["metrics"], "params": {**p.to_dict(), "sprite_px": px, "scale": sc}}
         e["results"].append(res)
         e["status"] = "RESULTS"
         hist(e, "python", "RENDER", f"{sticker_id}: {r['status']} {res['bytes'] // 1024} KB", {"result": rid, "warnings": r["warnings"]})
@@ -347,69 +412,292 @@ def sim_render(out: Path, lib, eid: str, sticker_id: str, cfg, overrides: dict |
     return res
 
 
-# ---------- mode "sim": the AI-drawn pieces sheet (an ordinary batch, its cells are the sprites) ----------
+# ---------- the particle SET: ONE sheet drawn for the whole effect, shared by every sticker (an ordinary batch of kind "particles", its cells are the sprites) ----------
 def _grid_of(grid) -> tuple[int, int]:
-    rows, cols = (tuple(int(x) for x in grid.lower().split("x")) if isinstance(grid, str) else tuple(int(x) for x in grid)) if grid else (2, 2)
+    try:
+        rows, cols = (tuple(int(x) for x in grid.lower().split("x")) if isinstance(grid, str) else tuple(int(x) for x in grid)) if grid else (2, 2)
+    except (TypeError, ValueError):
+        raise EffectError("the grid is 2x2 or 3x3")
     if rows != cols or rows not in (2, 3):
-        raise EffectError("the pieces sheet is 2x2 or 3x3")
+        raise EffectError("the particle sheet is 2x2 or 3x3")
     return rows, cols
 
 
-def pieces_base_plan(out: Path, eid: str, gid: str, grid=None) -> dict:
-    """The plan the normal sheet path accepts (`tasks.reserve(base_plan=...)`) for a sheet of the group's pieces: template `sheet_2x2|sheet_3x3` v3 for the cell layout, the pieces prompt
-    kept as `custom.sheet_prompt` so it is exactly what is sent, one cell per piece (key = the piece name, emoji = the source sticker's emoji)."""
+def _default_grid(e: dict) -> tuple[int, int]:
+    try:
+        return _grid_of((e.get("set") or {}).get("grid") or e.get("grid"))
+    except EffectError:
+        return 2, 2
+
+
+def _describe(plan: dict, rows: int, cols: int) -> dict:
+    """The prompt template's own description of a rows x cols sheet of particles (`generation/effect_prompts`: `describe_particles`, formerly `describe_pieces`)."""
+    fn = getattr(ep, "describe_particles", None) or ep.describe_pieces
+    try:
+        return fn(plan, rows, cols)
+    except ValueError as ex:
+        raise EffectError(str(ex))
+
+
+def set_of(e: dict) -> dict | None:
+    """The effect's particle set: the stored `set`, else (a record made before the set existed: a group with `pieces` / `sprites: {generation: N}`) one derived from that group, flagged
+    `legacy: true`. None when nothing was ever asked for."""
+    s = e.get("set")
+    if isinstance(s, dict):
+        return s
+    for g in e.get("groups") or []:
+        sp, pc = g.get("sprites"), g.get("pieces") or {}
+        gn = pc.get("generation") if pc.get("generation") is not None else sp.get("generation") if isinstance(sp, dict) else None
+        if gn is None and not pc:
+            continue
+        return {"grid": [int(x) for x in (pc.get("grid") or e.get("grid") or (2, 2))], "elements": list(g.get("elements") or []), "options": [], "source": None, "by": None,
+                "status": pc.get("status") or ("DRAWN" if gn is not None else "REQUESTED"), "job": pc.get("job"), "generation": int(str(gn).upper().lstrip("G")) if gn is not None else None,
+                "picked": sp.get("picked") if isinstance(sp, dict) else None, "legacy": True}
+    return None
+
+
+def _base_set(out: Path, e: dict) -> dict:
+    """The stored set to build on (a copy, no `legacy` flag): the record's own, or the one derived from an old drawn group, with `picked` as a list (an old record had none: the cells that
+    would be used)."""
+    s = {k: v for k, v in (set_of(e) or {}).items() if k != "legacy"}
+    if s and s.get("picked") is None:
+        try:
+            s["picked"] = [i for i, _ in _batch_cells(out, s["generation"])[0]] if s.get("generation") is not None else []
+        except EffectError:
+            s["picked"] = []
+    return s
+
+
+def view(out: Path, eid: str) -> dict:
+    """The effect as the API shows it: the stored record, with `set` filled for an older record that has a drawn group (`legacy: true`, `picked` = the cells that would be used)."""
+    e = read(out, eid)
+    if not isinstance(e.get("set"), dict):
+        s = _base_set(out, e)
+        if s:
+            e["set"] = {**s, "legacy": True}
+    return e
+
+
+def _subject_of(e: dict) -> str:
+    """What the sheet says the particles burst out of: the subject of the group with the most stickers, else the pack's name."""
+    gs = sorted(e.get("groups") or [], key=lambda g: -len(g.get("stickers") or []))
+    return (gs[0]["subject"] if gs else None) or e.get("pack_name") or "the emoji"
+
+
+def _style_of(e: dict) -> str | None:
+    gs = sorted(e.get("groups") or [], key=lambda g: -len(g.get("stickers") or []))
+    return gs[0].get("style") if gs else None
+
+
+def _emoji_of(e: dict) -> str:
+    """The emoji tag of the particle cells: the pack's most common one (a cell of the plan needs one)."""
+    c = Counter(s.get("emoji") for s in e.get("stickers") or [] if s.get("emoji"))
+    return c.most_common(1)[0][0] if c else "🙂"
+
+
+def _picks(e: dict, elements, n: int, truncate: bool = False) -> list[str]:
+    """The particles the person picked (1..n; fewer than n are cycled as variants by the sheet's template, more than n is a 400). Without any: the set's own picks, else the groups' pieces,
+    cut to the first n (that is not the person's pick, so it is never an error). `truncate` does the same for picks that came from an old per-group route. Linted like everything else."""
+    if elements is None:
+        elements, truncate = (set_of(e) or {}).get("elements") or [x for g in e.get("groups") or [] for x in g.get("elements") or []], True
+    if not isinstance(elements, list) or any(not isinstance(x, str) for x in elements):
+        raise EffectError("elements must be a list of particle names")
+    try:
+        clean = ep.lint_plan({"subject": _subject_of(e), "elements": elements, "style": _style_of(e)})["elements"]
+    except ValueError as ex:
+        raise EffectError(str(ex))
+    if not clean:
+        raise EffectError("pick at least one particle")
+    if len(clean) > n and truncate:
+        clean = clean[:n]
+    if len(clean) > n:
+        raise EffectError(f"pick at most {n} particles for a sheet of {n} cells (fewer are repeated in other sizes and angles)")
+    return clean
+
+
+def particles_plan(out: Path, eid: str, grid=None, elements=None, truncate: bool = False) -> dict:
+    """What the page shows before anything is spent: the prompt that will be sent, the cells, the screen colour, the grid, `outline: 0`, `picks` (the particles the sheet is drawn from).
+    (The price is asked of the provider by the caller.)"""
+    e = read(out, eid)
+    rows, cols = _grid_of(grid) if grid else _default_grid(e)
+    els = _picks(e, elements, rows * cols, truncate)
+    d = _describe({"subject": _subject_of(e), "elements": els, "style": _style_of(e)}, rows, cols)
+    return {**d, "id": eid, "n": rows * cols, "outline": 0, "kind": "particles", "picks": els}
+
+
+def particles_base_plan(out: Path, eid: str, grid, elements) -> dict:
+    """The plan the normal sheet path accepts (`tasks.reserve(base_plan=...)`) for the set's sheet: template `sheet_2x2|sheet_3x3` v3 for the cell layout, the particles prompt kept as
+    `custom.sheet_prompt` so it is exactly what is sent, one cell per particle (key = the particle name, emoji = the pack's most common one)."""
     from ..generation import prompter
     e = read(out, eid)
-    g = _group(e, gid)
     rows, cols = _grid_of(grid)
-    d = ep.describe_pieces({"subject": g["subject"], "elements": g["elements"], "style": g.get("style")}, rows, cols)
-    first = next((s for s in e["stickers"] if s["sticker_id"] in (g.get("stickers") or [])), None) or {}
-    emoji = first.get("emoji") or "🙂"
+    d = _describe({"subject": _subject_of(e), "elements": _picks(e, elements, rows * cols), "style": _style_of(e)}, rows, cols)
+    emoji = _emoji_of(e)
     cells, stickers = [], []
     for c in d["cells"]:
-        key = prompter.slug(c["label"]) or f"piece_{c['pos']}"
+        key = prompter.slug(c["label"]) or f"particle_{c['pos']}"
         cell = {"pos": c["pos"], "label": c["label"], "tags": prompter.clean_tags(key), "emoji": emoji}
         cells.append(cell)
         stickers.append({"index": c["pos"], "id": f"prompt{c['pos']:02d}", "prompt": f"{c['label']}, isolated and centred", "key": key, "tags": cell["tags"], "emoji": emoji})
-    subj = f"{d['plan']['subject']} pieces"
+    subj = f"{d['plan']['subject']} particles"
     tid = prompter.TEMPLATE_OF[(rows, cols)]
-    slots = {"subject_description": f"separate small pieces that burst out of {ep._theme(d['plan']['subject'])}", "style_id": "flat_vector", "mode": tid, "cells": cells,
+    slots = {"subject_description": f"separate small particles that burst out of {ep._theme(d['plan']['subject'])}", "style_id": "flat_vector", "mode": tid, "cells": cells,
              "action_guidance": "default", "key_colour": d["key"], "loop": False}
-    return {"task": subj, "task_slug": prompter.slug(subj) or "pieces", "subject": subj, "context": "", "kind": "default", "grid": [rows, cols], "template_id": tid,
+    return {"task": subj, "task_slug": prompter.slug(subj) or "particles", "subject": subj, "context": "", "kind": "default", "grid": [rows, cols], "template_id": tid,
             "template_version": prompter.TEMPLATE_VERSION, "slots": slots, "guidelines": {}, "sheet_prompt": d["prompt"], "video_prompt": "", "stickers": stickers,
-            "custom": {"sheet_prompt": d["prompt"]}, "effect": {"id": e["id"], "group": gid, "template": d["template"], "version": d["version"]}}
+            "custom": {"sheet_prompt": d["prompt"]}, "effect": {"id": e["id"], "template": d["template"], "version": d["version"]}}
 
 
-def pieces_plan(out: Path, eid: str, gid: str, grid=None) -> dict:
-    """What the page shows before anything is spent: the prompt that will be sent, the cells, the screen colour, the grid. (The price is asked of the provider by the caller.)"""
-    e = read(out, eid)
-    g = _group(e, gid)
-    rows, cols = _grid_of(grid)
-    d = ep.describe_pieces({"subject": g["subject"], "elements": g["elements"], "style": g.get("style")}, rows, cols)
-    return {**d, "group": gid, "outline": 0}
-
-
-def request_pieces(out: Path, eid: str, gid: str, job: str, grid, user: str = "local") -> dict:
-    """The pieces sheet job exists: the group says so (`pieces.status` REQUESTED) so the page can poll the job. Called before the job runs, so the link can never be overwritten by it."""
+def request_particles(out: Path, eid: str, job: str, grid, elements, user: str = "local") -> dict:
+    """The sheet job exists: the set says so (`status` REQUESTED, the job, the picks) so the page can poll the job. Called before the job runs, so the link can never be overwritten by it.
+    A set that was drawn before keeps its generation and picks until the new sheet is cut."""
     with _LOCK:
         e = read(out, eid)
-        _group(e, gid)["pieces"] = {"job": job, "grid": [int(grid[0]), int(grid[1])], "status": "REQUESTED"}
-        hist(e, user, "REQUEST", f"{gid}: pieces sheet job {job} ({int(grid[0])}x{int(grid[1])})", {"job": job})
+        prev = _base_set(out, e)
+        rows, cols = int(grid[0]), int(grid[1])
+        e["set"] = {"options": [], "source": None, "by": "you", "picked": [], **prev, "grid": [rows, cols], "elements": list(elements), "status": "REQUESTED", "job": job}
+        hist(e, user, "REQUEST", f"particle sheet job {job} ({rows}x{cols}): {', '.join(elements)}"[:300], {"job": job})
         return _write(out, e)
 
 
-def link_pieces(out: Path, eid: str, gid: str, generation, job: str | None = None, grid=None) -> dict:
-    """The pieces sheet became a batch (the sheet job is DONE, `Console.start_from_job` runs in thread mode and in queue mode alike): the group's sprites are its cells. The cells are cut and
-    judged by the normal stills run; `sprites_of` uses the ready ones (a cell with warnings included) and answers 409 until there is one."""
+def link_particles(out: Path, eid: str, generation, job: str | None = None, grid=None) -> dict:
+    """The sheet became a batch (the sheet job is DONE; `Console.start_from_job` runs in thread mode and in queue mode alike): EVERY group's sprites are its cells
+    (`{generation: N, picked: [all cells]}`). The cells are cut equally and judged by the particle rules of the normal stills run; `sprites_of` uses the picked ones that have a picture
+    and answers 409 until there is one."""
     gn = int(str(generation).upper().lstrip("G"))
     with _LOCK:
         e = read(out, eid)
-        g = _group(e, gid)
-        prev = g.get("pieces") or {}
-        g["sprites"] = {"generation": gn}
-        g["pieces"] = {"generation": gn, "job": job or prev.get("job"), "grid": [int(x) for x in (grid or prev.get("grid") or e["grid"])], "status": "DRAWN"}
-        hist(e, "python", "LINK", f"{gid}: the pieces are the cells of G{gn:03d}", {"generation": f"G{gn:03d}", "job": g["pieces"]["job"]})
+        prev = _base_set(out, e)
+        rows, cols = _grid_of(grid or prev.get("grid") or e.get("grid"))
+        picked = list(range(1, rows * cols + 1))
+        e["set"] = {"options": [], "source": None, "by": "you", "elements": [], **prev, "grid": [rows, cols], "status": "DRAWN", "generation": gn, "job": job or prev.get("job"), "picked": picked}
+        for g in e.get("groups") or []:
+            g["sprites"] = {"generation": gn, "picked": list(picked)}
+        hist(e, "python", "LINK", f"the particles are the cells of G{gn:03d}", {"generation": f"G{gn:03d}", "job": e["set"]["job"]})
         return _write(out, e)
+
+
+def recut_check(out: Path, eid: str) -> int:
+    """The drawn batch of the effect's set, when it can be cut again as particles (an old sheet from before batches knew they were particles): its number, else EffectError 409 with the reason."""
+    from . import pipeline as pl
+    gn = (set_of(read(out, eid)) or {}).get("generation")
+    if gn is None:
+        raise EffectError("there is no drawn particle sheet yet: draw the particles first", 409)
+    try:
+        pl.recut_check(out, gn)
+        if pl.read_result(out, gn).get("kind") == "particles":
+            raise pl.PipelineError("This sheet was already cut as particles.", 409)
+    except pl.PipelineError as ex:
+        raise EffectError(str(ex), ex.code)
+    return gn
+
+
+def pick_particles(out: Path, eid: str, indexes, user: str = "you") -> dict:
+    """The person's decision about which cells of the drawn sheet are particles (`set.picked`, and every group's `sprites.picked`). A cell can be picked whatever its verifier status (a warning is
+    not a verdict); only a cell with no picture cannot (400). Recorded in the history."""
+    idx = _picked_of(indexes)
+    if not idx:
+        raise EffectError("pick at least one cell")
+    with _LOCK:
+        e = read(out, eid)
+        s = _base_set(out, e)
+        if s.get("generation") is None:
+            raise EffectError("there is no drawn particle sheet yet: draw the particles first", 409)
+        have = {i for i, _ in _batch_cells(out, s["generation"], idx)[0]}
+        bad = [i for i in idx if i not in have]
+        if bad:
+            raise EffectError(f"cell {', '.join(map(str, bad))} has no picture (it was not cut): pick other cells", 400)
+        e["set"] = {**s, "picked": idx}
+        for g in e.get("groups") or []:
+            g["sprites"] = {"generation": s["generation"], "picked": list(idx)}
+        hist(e, user, "PICK", f"particles picked: cell {', '.join(map(str, idx))} of G{s['generation']:03d}", {"picked": idx, "generation": s["generation"]})
+        return _write(out, e)
+
+
+# ---------- the candidate particles for the set: ONE picture, the model's (or the table's) short list ----------
+def _sheet_png(out: Path, gn: int) -> bytes | None:
+    """The master sheet of batch G{gn}, downscaled to at most 1024 px (PNG), or None when it is not there."""
+    from . import pipeline as pl
+    try:
+        res = pl.read_result(out, gn)
+    except pl.PipelineError:
+        return None
+    gd = pl.gen_dir(out, gn)
+    for f in [gd / (res["source"].get("sheet_copy") or "-"), *sorted((gd / "source").glob("sheet.*")), Path(res["source"].get("sheet_path") or "-")]:
+        if not f.is_file():
+            continue
+        try:
+            im = Image.open(f)
+            im.load()
+        except Exception:
+            continue
+        im = im.convert("RGB")
+        im.thumbnail((1024, 1024), Image.LANCZOS)
+        b = io.BytesIO()
+        im.save(b, "PNG")
+        return b.getvalue()
+    return None
+
+
+def _contact_png(d: Path, e: dict) -> bytes | None:
+    """A contact sheet of the effect's stickers (at most 9, spread over the pack) on grey, one picture for the model; None when no sticker has a picture."""
+    have = [d / s["src"] for s in e.get("stickers") or [] if s.get("src") and (d / s["src"]).is_file()]
+    if not have:
+        return None
+    if len(have) > 9:
+        have = [have[i] for i in sorted({round(k * (len(have) - 1) / 8) for k in range(9)})]
+    side = 1 if len(have) == 1 else 2 if len(have) <= 4 else 3
+    tile = min(512, 1020 // side)
+    sheet = Image.new("RGBA", (tile * side, tile * side), (200, 200, 200, 255))
+    for k, f in enumerate(have):
+        im = Image.open(f).convert("RGBA")
+        im.thumbnail((tile - 12, tile - 12), Image.LANCZOS)
+        sheet.alpha_composite(im, ((k % side) * tile + (tile - im.width) // 2, (k // side) * tile + (tile - im.height) // 2))
+    b = io.BytesIO()
+    sheet.convert("RGB").save(b, "PNG")
+    return b.getvalue()
+
+
+def _source_picture(out: Path, lib, e: dict) -> tuple[bytes | None, dict]:
+    """The ONE picture the model looks at: the master sheet of the batch the effect's stickers were cut from (the batch most of them came from), else a contact sheet of the stickers."""
+    with lib.lock:
+        db = lib._load()
+    by_id = {s["id"]: s for p in db.get("packs", []) for s in p.get("stickers", [])}
+    gens = []
+    for st in e.get("stickers") or []:
+        m = re.fullmatch(r"G(\d{3,})", str(((by_id.get(st["sticker_id"]) or {}).get("source") or {}).get("generation") or ""))
+        if m:
+            gens.append(int(m[1]))
+    for gn, _ in Counter(gens).most_common():
+        png = _sheet_png(out, gn)
+        if png:
+            return png, {"kind": "batch", "generation": gn}
+    return _contact_png(_dir(out, e["id"]), e), {"kind": "contact"}
+
+
+def suggest(out: Path, lib, eid: str, grid=None, *, allowed=None, vlm=None) -> dict:
+    """Candidate particles for the effect's ONE shared set (8-12 short names). The vision model looks at one picture (the batch's own master sheet, else a contact sheet of the stickers) with the
+    person's yes (`allowed`); without it, without a model or on nonsense the built-in table answers and `by` says so. Stored in `effect.set.options`; the person's picks are `/particles`."""
+    e = read(out, eid)
+    rows, cols = _grid_of(grid) if grid else _default_grid(e)
+    png, source = _source_picture(out, lib, e)
+    r = effect_plan.suggest_options(png, kind=source["kind"], stickers=[{"name": s.get("name"), "emoji": s.get("emoji")} for s in e["stickers"]], pack_name=e.get("pack_name") or "",
+                                    grid=(rows, cols), allowed=allowed, vlm=vlm, out=out)
+    with _LOCK:
+        e = read(out, eid)
+        prev = _base_set(out, e)
+        s = {"elements": [], "picked": [], **prev, "options": r["options"], "source": source, "by": r["by"]}
+        if prev.get("status") not in ("REQUESTED", "DRAWN"):         # a sheet that is drawn (or being drawn) keeps its grid and status; only the candidates change
+            s.update(grid=[rows, cols], status="SUGGESTED")
+        if r.get("model"):
+            s["model"] = r["model"]
+        else:
+            s.pop("model", None)
+        e["set"] = s
+        hist(e, "python", "SUGGEST", f"{len(r['options'])} candidate particles by {r['by']} from {'the master sheet G%03d' % source['generation'] if source['kind'] == 'batch' else 'a contact sheet of the stickers'}",
+             {"by": r["by"], "model": r.get("model"), "source": source})
+        _write(out, e)
+    return {"options": r["options"], "n": rows * cols, "grid": [rows, cols], "source": source, "by": r["by"], **({"model": r["model"]} if r.get("model") else {}), "notes": r["notes"]}
 
 
 # ---------- add to the pack (the person's click) ----------

@@ -276,6 +276,29 @@ def _prepare_all(sprites, p: ParticleParams) -> list:
     return ready
 
 
+def fit_sprites(sprites: list, px: int) -> list:
+    """Resize the sprites BEFORE simulating, for latency (a sticker is 512 px, a burst never draws a piece bigger than ~170 px): each sprite is trimmed to its alpha bbox and fitted into
+    `px` x `px` (aspect kept, LANCZOS on premultiplied colour, never enlarged). A fully transparent sprite is returned as it is (`simulate` ignores it). Same order, same count."""
+    px = int(px)
+    if px < 1:
+        raise ValueError("px must be positive")
+    out = []
+    for img in sprites:
+        if not isinstance(img, np.ndarray) or img.dtype != np.uint8 or img.ndim != 3 or img.shape[2] != 4:
+            raise ValueError("a sprite must be an RGBA uint8 array of shape (H, W, 4)")
+        ys, xs = np.where(img[..., 3] > ALPHA_TRIM)
+        if len(ys) == 0:
+            out.append(img)
+            continue
+        crop = img[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        h, w = crop.shape[:2]
+        if max(h, w) > px:
+            k = px / max(h, w)
+            crop = np.asarray(Image.fromarray(np.ascontiguousarray(crop), "RGBA").resize((max(1, round(w * k)), max(1, round(h * k))), Image.LANCZOS), np.uint8)
+        out.append(np.ascontiguousarray(crop))
+    return out
+
+
 # ---- drawing --------------------------------------------------------------------------------------------------------
 def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
     """Draw one burst. `sprites` are RGBA uint8 arrays of any size (trimmed to their alpha bbox; fully transparent ones are ignored;

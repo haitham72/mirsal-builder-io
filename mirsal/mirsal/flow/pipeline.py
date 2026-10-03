@@ -214,9 +214,12 @@ def list_inputs(inp: Path) -> list[dict]:
 
 def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: sources.Pick | None = None, parent: int | None = None,
           grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None,
-          outline: int | None = None, erode: int | None = None) -> int:
+          outline: int | None = None, erode: int | None = None, kind: str | None = None) -> int:
     """Synchronous part: match source, run the prompter, allocate G00N. Returns the id fast.
-    grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters."""
+    grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters.
+    kind: "particles" marks the batch as a particle sheet (docs/effects.md): its layout is the plan's, it is cut into EXACT equal cells and no sticker rule can stop a cell (verify.PARTICLE_KEEP)."""
+    if kind not in (None, "particles"):
+        raise PipelineError("kind must be 'particles' or left out")
     if outline is not None and not 0 <= int(outline) <= 40:
         raise PipelineError("outline must be 0 (none) to 40 px")
     if erode is not None and not 0 <= int(erode) <= 8:
@@ -258,6 +261,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         "sheet_prompt": plan.get("sheet_prompt", ""), "video_prompt": plan.get("video_prompt", ""), "custom_prompts": sorted(plan.get("custom") or {}),
         "template_id": plan.get("template_id"), "template_version": plan.get("template_version"), "slots": plan.get("slots"),
         "task_id": task["id"] if task else None, "name_key": plan["task_slug"], "regen_of": regen_of,
+        **({"kind": kind} if kind else {}),                # only a particle sheet says so: every other batch is written exactly as before
         "verify_version": verify.VERIFY_VERSION,
         "outline_px": int(outline) if outline is not None else EngineConfig().outline_px,    # the white die-cut stroke is a choice, kept with the generation
         "erode_px": int(erode) if erode is not None else EngineConfig().erode_px,          # fringe trim, kept with the generation; 0 = none
@@ -342,6 +346,7 @@ def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
 # with no key screen at all (`background_is_key`) still stops, because every cell would come out wrong, but ONE click ("Cut it anyway", `recut`) cuts it.
 SHEET_FATAL = {"sheet_decodes"}                  # nothing can be cut from a file that does not open
 SHEET_PROCEED = {"grid_detected", "sheet_size"}  # layout problems: cut anyway, say so
+PARTICLE_INSET = 0.02                            # a particle sheet: this share of a cell's shorter side is wiped at every cell border (an image model draws white divider lines between cells; the prompt keeps 20 % margins, so no piece loses anything)
 
 
 def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
@@ -371,6 +376,8 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
             if res.get("task_id"):
                 tasks.annotate_key(out, res["task_id"], key, asked)
             vin = {"data": dest.read_bytes(), "grid": (rows, cols), "chroma": cfg.chroma}
+            if res.get("kind") == "particles":                       # a particle sheet: its layout is the plan's (no detection), cut into exact equal cells, no sticker rule blocks a cell
+                vin["particles"] = True
             checks = verify.run("sheet", vin, cfg)                  # the sheet is judged on arrival, before anything is sliced
             res["verify"]["sheet"] = [c.to_dict() for c in checks]
             hard = [c for c in checks if not c.ok and c.severity == verify.BLOCK]
@@ -397,8 +404,10 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
             return
         with Stage(out, gid, "keyed", pace) as s:
             rects, ginfo = vin["rects"], vin["split_info"]
-            res["source"]["grid"] = {"rows": rows, "cols": cols, "rects": [list(r) for r in rects], **ginfo}
-            cells = key_sheet(sheet, cfg, rects)
+            particles = res.get("kind") == "particles"
+            inset = max(4, round(PARTICLE_INSET * min(min(r[2], r[3]) for r in rects))) if particles else 0
+            res["source"]["grid"] = {"rows": rows, "cols": cols, "rects": [list(r) for r in rects], **ginfo, **({"inset_px": inset} if particles else {})}
+            cells = key_sheet(sheet, cfg, rects, inset, particles)
             ok, buf = cv2.imencode(".png", cv2.cvtColor(stitch_keyed(cells, sheet.shape), cv2.COLOR_RGBA2BGRA))
             (d / "source" / "keyed.png").write_bytes(buf.tobytes())
             res["source"]["keyed"] = "source/keyed.png"
@@ -407,7 +416,8 @@ def run_stills(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> Non
             res["stage"] = "keyed"; write_result(out, gid, res)
         with Stage(out, gid, "sliced", pace) as s:
             (d / "source" / "plain").mkdir(exist_ok=True)
-            for st, r in zip(res["stickers"], slice_cells(cells, cfg)):
+            waive = {st["index"]: set(st.get("still_override") or []) for st in res["stickers"]}          # blocks a human allowed, kept across every cut of this sheet
+            for st, r in zip(res["stickers"], slice_cells(cells, cfg, waive=waive)):
                 st.update(status=r.status, reason=r.reason, report=r.report.checks, metrics=r.metrics)
                 for iss in res.get("sheet_issues") or []:        # the sheet had a layout problem and was cut anyway: this cell may be mis-cut, the human decides
                     hist(st, "sheet", "python", "WARN", iss["check"], detail={**iss, "cut_anyway": True})
@@ -463,6 +473,80 @@ def recut(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, by: str = "
         hist(st, "sheet", by, "APPROVE", "cut anyway", detail={"override": True})
     write_result(out, gid, res)
     run_stills(out, gid, cfg, pace)
+
+
+def recut_as_particles(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, by: str = "human") -> None:
+    """A batch that was drawn as a particle sheet before batches knew they were particles (G100: a 2x2 sheet with a white divider cross, read as "3x3", three cells blocked `inside_cell`) is cut
+    again as one, from the sheet it stores, free: exact equal cells, no sticker rule blocks a cell (docs/effects.md). Same refusals as `recut` (a decided sticker or a video sheet would lose
+    its decision); a batch that already is a particle batch is refused (nothing would change)."""
+    recut_check(out, gid)
+    res = read_result(out, gid)
+    if res.get("kind") == "particles":
+        raise PipelineError("This batch was already cut as particles.", 409)
+    src = Path(res["source"].get("sheet_path") or "")
+    kept = res["source"].get("sheet_copy")
+    if not src.is_file() and kept and (gen_dir(out, gid) / kept).is_file():
+        res["source"]["sheet_path"] = str(gen_dir(out, gid) / kept)
+    elif not src.is_file():
+        raise PipelineError("The stored sheet is missing: make the sheet again.", 409)
+    res["kind"] = "particles"
+    res.pop("error", None)
+    res.pop("cut_anyway", None)
+    for st in res["stickers"]:
+        hist(st, "sheet", by, "PASS", "cut again as particles", detail={"kind": "particles"})
+    write_result(out, gid, res)
+    run_stills(out, gid, cfg, pace)
+
+
+@serialized
+def recut_cells(out: Path, gid: int, indexes: list, cfg: EngineConfig) -> None:
+    """Cut these cells of a batch again from the sheet it stores (free: no provider), the way `run_stills` cut them, but only these, with the blocks a human allowed (`still_override`) kept as
+    warnings. Used by "Use it anyway" and by taking it back (flow/gates.py `allow_stills`). A cell that comes out READY enters G2 as pending (a decision it already has is kept); a cell that is
+    blocked again goes back to BLOCKED and loses the file it had (it comes back, the same, with the next click). The pack-wide scale and the neighbours' hashes come from the whole sheet, so the
+    cell comes out exactly as the first cut would have made it."""
+    res = read_result(out, gid)
+    d = gen_dir(out, gid)
+    kept, grid = res["source"].get("sheet_copy"), res["source"].get("grid")
+    if not kept or not grid or not (d / kept).is_file():
+        raise PipelineError("The stored sheet is missing: make the sheet again.", 409)
+    cfg = cfg_for(res, replace(cfg, chroma="blue" if res.get("key_colour") == "blue" else "green"))
+    want = {int(i) for i in indexes}
+    cells = key_sheet(load_rgb(d / kept), cfg, [tuple(r) for r in grid["rects"]], grid.get("inset_px", 0), res.get("kind") == "particles")      # a particle batch is cut again as one
+    waive = {st["index"]: set(st.get("still_override") or []) for st in res["stickers"]}
+    (d / "source" / "plain").mkdir(parents=True, exist_ok=True)
+    for r in slice_cells(cells, cfg, waive=waive, only=want):
+        st = res["stickers"][r.index - 1]
+        old = st.get("png")
+        st.update(status=r.status, reason=r.reason, report=r.report.checks, metrics=r.metrics, rendered_at=round(time.time(), 3))
+        for iss in res.get("sheet_issues") or []:
+            st["metrics"]["sheet_issue"] = iss["check"]
+        plain = d / "source" / "plain" / f"S{st['index']}.png"
+        if r.data:
+            st["png"] = f"slices/{st['name']}.{r.fmt}"
+            if old and old != st["png"]:
+                (d / old).unlink(missing_ok=True)
+            (d / st["png"]).write_bytes(r.data)
+        elif old:
+            (d / old).unlink(missing_ok=True)
+            st["png"] = None
+        if r.plain is not None:
+            ok, buf = cv2.imencode(".png", cv2.cvtColor(r.plain, cv2.COLOR_RGBA2BGRA))
+            plain.write_bytes(buf.tobytes())
+        else:
+            plain.unlink(missing_ok=True)
+        if r.status == "READY":
+            if st["review"]["still"] not in ("APPROVED", "REJECTED"):
+                st["review"]["still"] = "PENDING"
+            hist(st, "sliced", "python", "PASS", detail={"warnings": r.metrics.get("warnings", []), "waived": r.metrics.get("waived", [])})
+        else:
+            st["review"]["still"] = "BLOCKED"
+            hist(st, "sliced", "python", "BLOCK", r.reason, detail=block_detail(r.report.checks))
+        try:
+            from ..runtime import events as _events
+            _events.sticker_events(out, gid, [st])
+        except Exception:
+            pass
+    write_result(out, gid, res)
 
 
 def record_anim(d: Path, st: dict, r, ref: str) -> None:
@@ -735,7 +819,7 @@ def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None =
         ok, buf = cv2.imencode(".png", img_bgra)
         data = buf.tobytes()
         report = verify.run("still", {"plain": rgba[..., 3], "metrics": metrics, "img": fin,
-                                      "render": lambda: fin,
+                                      "render": lambda: fin, "waive": st.get("still_override") or (),
                                       "encode": lambda img, c: (data, "png")}, cfg, only=APPEARANCE_CHECKS)
         fresh = {c.id: c.to_dict() for c in report}
         if any(c["severity"] == "BLOCK" and not c["ok"] for c in fresh.values()):
@@ -817,9 +901,10 @@ def check_animate(out: Path, gid: int, scope: str, index: int | None) -> dict:
     return res
 
 
-def animate_cells(res: dict, cfg: EngineConfig, cells: list[int], on_cell=None, cache: AnimCache | None = None) -> list[AnimationResult]:
+def animate_cells(res: dict, cfg: EngineConfig, cells: list[int], on_cell=None, cache: AnimCache | None = None, waive: dict | None = None) -> list[AnimationResult]:
     """Animate these cells of a generation from its prepared sources (pre-sliced clips where there are any, else the 3x3 mp4).
-    Nothing is saved here; `cache` (out/cache/anim) lets the same source cell come back without being rendered again."""
+    Nothing is saved here; `cache` (out/cache/anim) lets the same source cell come back without being rendered again.
+    waive = {cell: {check ids}}: the blocks a human allowed for that cell (`anim_override`), kept as warnings."""
     clips = {int(k): {f: Path(p) for f, p in v.items()} for k, v in res["source"].get("clips", {}).items()}
     mp4 = Path(res["source"]["video_path"]) if res["source"].get("video_path") else None
     use_clips = [i for i in cells if i in clips]
@@ -830,11 +915,11 @@ def animate_cells(res: dict, cfg: EngineConfig, cells: list[int], on_cell=None, 
         results.append(AnimationResult(i, "FAILED", "no_video_source"))
         on_cell and on_cell(results[-1])
     if use_clips:
-        results += process_clips({i: clips[i] for i in use_clips}, cfg, on_cell=on_cell, cache=cache)
+        results += process_clips({i: clips[i] for i in use_clips}, cfg, on_cell=on_cell, cache=cache, waive=waive)
     if use_mp4:
         g = res["source"].get("grid")
         results += process_video(mp4, cfg, use_mp4, on_cell=on_cell, rects=g["rects"] if g else None,
-                                 sheet_wh=tuple(res["source"]["sheet_size"]) if g else None, cache=cache)
+                                 sheet_wh=tuple(res["source"]["sheet_size"]) if g else None, cache=cache, waive=waive)
     return results
 
 
@@ -874,7 +959,8 @@ def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int |
             for i in todo:
                 res["stickers"][i - 1]["anim_status"] = "PROCESSING"
             write_result(out, gid, res)
-            results = animate_cells(res, cfg, todo, on_cell, AnimCache(out / "cache" / "anim"))
+            waive = {i: set(res["stickers"][i - 1].get("anim_override") or []) for i in todo}          # blocks a human allowed, kept when the cell is animated again
+            results = animate_cells(res, cfg, todo, on_cell, AnimCache(out / "cache" / "anim"), waive=waive)
             s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
             res["stage"] = "video_sliced"; write_result(out, gid, res)
     except Exception as e:
@@ -894,6 +980,7 @@ def state(out: Path, gid: int) -> dict:
     res["gate"] = gates.gate_info(res)
     res["final"] = gates.final_indices(res)
     res["problem"] = problem_of(out, res)
+    res["allow"] = gates.allow_info(res)               # what the page may offer as "Use it anyway" / "Take it back" (flow/gates.py)
     return res
 
 
@@ -958,7 +1045,7 @@ def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
                       "edited": round(edited[gid], 3), "stage": r["stage"], "error": r.get("error"), "ready": len(ready),
                       "animated": sum(1 for s in ready if s.get("anim_status") == "READY"),
                       "grid": [rows, cols], "cells": sorted(cells, key=lambda c: c["index"]),
-                      "outline_px": r.get("outline_px")})
+                      "outline_px": r.get("outline_px"), **({"kind": r["kind"]} if r.get("kind") else {})})
     return {"items": items, "more": offset + limit < len(ids), "total": len(ids)}
 
 

@@ -120,7 +120,7 @@ def analyse(stickers: list[dict], *, vlm: VisionJudge | None = None, allowed=Non
     model = None
     use_vlm = allowed is True and any(s.get("png") for s in stickers)
     if allowed is not True:
-        notes.append("Pictures were not sent to a model (not allowed), so the built-in table chose the pieces: you can edit them.")
+        notes.append("Pictures were not sent to a model (not allowed), so the built-in table chose the particles: you can edit them.")
     vlm = vlm or (VisionJudge(out=out) if use_vlm else None)
     todo = [s for s in stickers if s.get("png")][:MAX_VLM_STICKERS] if use_vlm else []
     for s in todo:
@@ -140,14 +140,14 @@ def analyse(stickers: list[dict], *, vlm: VisionJudge | None = None, allowed=Non
         except consent.ConsentRequired:
             raise
         except (JudgeError, llm.LLMError, OSError, ValueError) as e:             # a model that fails, or a picture that does not open: the table answers for this sticker
-            notes.append(f"The model could not read {s.get('name') or s['id']} ({str(e)[:120]}): the built-in table chose its pieces.")
+            notes.append(f"The model could not read {s.get('name') or s['id']} ({str(e)[:120]}): the built-in table chose its particles.")
     for s in stickers:
         per.setdefault(s["id"], lexicon_plan(s.get("name", ""), s.get("emoji")))
     user_els = _pieces_from_note(note)
     if user_els:
         for p in per.values():
             p["elements"], p["by"] = user_els, "you"
-        notes.append("Your own pieces replace the suggested ones.")
+        notes.append("Your own particles replace the suggested ones.")
     groups: dict[str, dict] = {}
     for s in stickers:
         p = per[s["id"]]
@@ -170,8 +170,8 @@ def analyse(stickers: list[dict], *, vlm: VisionJudge | None = None, allowed=Non
 
 
 def _pieces_from_note(note: str) -> list[str]:
-    """'bats and moons' / 'pieces: gold bars, diamonds' -> pieces, when the note really names some; a sentence about anything else gives nothing."""
-    m = re.search(r"(?:pieces?|elements?|burst(?:s)? (?:of|with|into)|made of|explode[sd]? (?:into|to)|only|just)\s*[:\-]?\s+([a-z0-9 ,&'\-]{3,120})$", str(note or "").strip().lower())
+    """'bats and moons' / 'particles: gold bars, diamonds' (or the older 'pieces: ...') -> particles, when the note really names some; a sentence about anything else gives nothing."""
+    m = re.search(r"(?:particles?|pieces?|elements?|burst(?:s)? (?:of|with|into)|made of|explode[sd]? (?:into|to)|only|just)\s*[:\-]?\s+([a-z0-9 ,&'\-]{3,120})$", str(note or "").strip().lower())
     if not m:
         return []
     parts = [x.strip(" .") for x in re.split(r",| and | & ", m.group(1)) if x.strip(" .")]
@@ -179,3 +179,106 @@ def _pieces_from_note(note: str) -> list[str]:
         return ep.lint_plan({"subject": "x", "elements": parts})["elements"]
     except ValueError:
         return []
+
+
+# ---------- the particle SET of a whole effect (one set for the pack, drawn once: docs/effects.md) ----------
+SET_VERSION = "effect_set_v1"
+SET_MAX = 12                     # candidate particles offered at most
+SET_ASK = "8 to 12"              # what the model is asked for ...
+SET_MIN_USABLE = 3               # ... and the fewest it may answer with once the lint has dropped what is not allowed (less is nonsense: the table answers)
+TABLE_PAD = ["small sparkles", "tiny stars", "little confetti pieces", "glitter dots", "round bubbles", "small light rays", "tiny circles", "soft glow dots"]
+TABLE_MIN = 8                    # the table pads its answer with generic particles up to this many
+
+SET_SYSTEM = f"""You choose the PARTICLES of a Telegram-style burst effect. When someone presses a sticker's emoji, small separate pieces burst out of it and fall away. ONE set of particles is
+drawn for a WHOLE sticker pack and shared by every sticker, so the particles must fit the pack as a whole, not one pose of it. You are shown ONE picture: either the master sheet the stickers were cut
+from, or a contact sheet of some of the pack's stickers. Look at what the pack is ABOUT (its character, objects, props, theme, colours) and list {SET_ASK} candidate particles: small concrete objects
+related to what you see, never the character itself and never the whole picture (a Batman pack: bat signals, bats, cape pieces, utility belt pieces; a jewelry pack: small gold bars, diamonds, rings).
+Rules: every candidate is at most 4 words, a concrete thing (no actions, no feelings), different from the others, and never contains text, letters, logos, faces, hands or people, nor the word "sticker".
+Reply with ONE JSON object and nothing else: {{"options": ["...", "..."]}}
+{llm.DATA_RULE}"""
+
+
+def _clean_options(items) -> list[str]:
+    """Each candidate through the lint of the effect prompts, one at a time: the ones that break a rule (too long, text, people, the word sticker) are dropped, the rest kept in order."""
+    out: list[str] = []
+    for it in items if isinstance(items, list) else []:
+        try:
+            e = ep.lint_plan({"subject": "x", "elements": [it]})["elements"][0]
+        except (ValueError, IndexError):
+            continue
+        if e.lower() not in {x.lower() for x in out}:
+            out.append(e)
+    return out[:SET_MAX]
+
+
+def _parse_set(text: str, model: str) -> _Parsed:
+    obj = _first_json(text)
+    if not isinstance(obj, dict):
+        raise ValueError("the answer is not a JSON object")
+    items = obj.get("options")
+    if items is None:
+        items = obj.get("particles") if obj.get("particles") is not None else obj.get("elements")
+    if not isinstance(items, list):
+        raise ValueError("'options' must be a list of particle names")
+    clean = _clean_options(items)
+    if len(clean) < SET_MIN_USABLE:
+        raise ValueError(f"only {len(clean)} usable particle(s) after the rules (at most 4 words, no text, logos, people or the word sticker): list {SET_ASK}")
+    return _Parsed({"options": clean}, model)
+
+
+def table_options(stickers: list[dict]) -> list[str]:
+    """The built-in table's answer for a pack: what each sticker's emoji (or a word of its name) says, one subject after another so every subject is heard, then generic particles up to
+    `TABLE_MIN`, at most `SET_MAX`. `stickers`: [{name, emoji}]."""
+    lists: list[list[str]] = []
+    seen_subjects: set[str] = set()
+    for s in stickers:
+        p = lexicon_plan(s.get("name", ""), s.get("emoji"))
+        if p["by"] != "lexicon" or p["subject"] in seen_subjects:
+            continue
+        seen_subjects.add(p["subject"])
+        lists.append(list(p["elements"]))
+    out: list[str] = []
+    for r in range(max((len(x) for x in lists), default=0)):
+        for x in lists:
+            if r < len(x) and x[r].lower() not in {y.lower() for y in out}:
+                out.append(x[r])
+    for pad in (GENERIC if not out else []) + TABLE_PAD:
+        if len(out) >= TABLE_MIN:
+            break
+        if pad.lower() not in {y.lower() for y in out}:
+            out.append(pad)
+    return out[:SET_MAX]
+
+
+def suggest_options(png: bytes | None, *, kind: str, stickers: list[dict], pack_name: str = "", grid=(2, 2), allowed=None, vlm: VisionJudge | None = None,
+                    out: Path | None = None) -> dict:
+    """Candidate particles for the pack's ONE shared set. `png`: the single picture the model looks at (the batch's master sheet, `kind` "batch", or a contact sheet of the stickers, `kind`
+    "contact"); `stickers`: [{name, emoji}] for the table's answer. The model is used only with the person's yes (`allowed is True`, the same consent and the same ledger line as the plan);
+    without it, without a model or when it answers nonsense the table answers. Returns {"options": [str], "by": "vlm" | "table", "model": str | None, "notes": [str]}."""
+    notes: list[str] = []
+    if allowed is not True:
+        notes.append("The picture was not sent to a model (not allowed), so the built-in table chose the candidate particles.")
+    elif not png:
+        notes.append("There is no picture to show a model, so the built-in table chose the candidate particles.")
+    else:
+        vlm = vlm or VisionJudge(out=out)
+        try:
+            consent.require(allowed)
+            sha = hashlib.sha256(png).hexdigest()
+            key = vlm.cache.key("vlm", "effect_set", sha, target()["model"], SET_VERSION)
+            hit = vlm.cache.get(key, "vlm_effect_set")
+            if hit:
+                return {"options": list(hit["options"]), "by": "vlm", "model": hit.get("model"), "notes": notes, "cached": True}
+            what = "the master sheet the pack's stickers were cut from" if kind == "batch" else "a contact sheet of the pack's stickers"
+            names = ", ".join(str(s.get("name") or "") for s in stickers[:9] if s.get("name"))
+            user = (f"The picture is {what}. Pack name: {llm.fence('PACK', pack_name or 'unknown', 120)}. Sticker names: {llm.fence('NAMES', names or 'unknown', 400)}. "
+                    f"Emoji tags: {''.join(str(s.get('emoji') or '') for s in stickers[:9]) or 'none'}. The set will be drawn as a {grid[0]} by {grid[1]} sheet of {grid[0] * grid[1]} particles.")
+            v, meta = vlm._structured("VLM_EFFECT_SET", SET_SYSTEM, user, [png], None, "set", SET_VERSION, _parse_set)
+            res = {"options": v.plan["options"], "model": meta.get("model")}
+            vlm.cache.set(key, res, CACHE_TTL)
+            return {**res, "by": "vlm", "notes": notes}
+        except consent.ConsentRequired:
+            raise
+        except (JudgeError, llm.LLMError, OSError, ValueError) as e:
+            notes.append(f"The model could not read the picture ({str(e)[:120]}): the built-in table chose the candidate particles.")
+    return {"options": table_options(stickers), "by": "table", "model": None, "notes": notes}

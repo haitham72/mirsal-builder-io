@@ -23,6 +23,8 @@ class CellKey:
     fg_px: int
     edge_px: int
     raw: np.ndarray | None = None   # the untouched RGB cell (a view), kept so a failed cell can be keyed again
+    inset: int = 0                  # a PARTICLE cell: this many px at the cell border were wiped (the divider line a model draws between cells lives there)
+    particles: bool = False         # a particle cell is judged by the particle rules (verify.PARTICLE_KEEP): every sticker rule is a warning
 
 
 @dataclass
@@ -38,22 +40,25 @@ class StickerResult:
     plain: np.ndarray | None = None  # the same sticker WITHOUT the outline: what the video sheet is built from (the outline is added once, after the video)
 
 
-def _cellkey(index: int, rect: tuple, raw: np.ndarray, k: Keyed) -> CellKey:
+def _cellkey(index: int, rect: tuple, raw: np.ndarray, k: Keyed, inset: int = 0, particles: bool = False) -> CellKey:
     alpha = k.rgba[..., 3]
+    if inset > 0:                                     # in place: `k` was keyed for this cell alone
+        alpha[:inset] = 0; alpha[-inset:] = 0; alpha[:, :inset] = 0; alpha[:, -inset:] = 0
     ring = np.zeros(alpha.shape, bool)
     ring[:2] = True; ring[-2:] = True; ring[:, :2] = True; ring[:, -2:] = True
-    return CellKey(index, rect, k, bbox_of(alpha), int((alpha > 127).sum()), int((alpha[ring] > 127).sum()), raw)
+    return CellKey(index, rect, k, bbox_of(alpha), int((alpha > 127).sum()), int((alpha[ring] > 127).sum()), raw, max(0, int(inset)), bool(particles))
 
 
-def key_sheet(sheet_rgb: np.ndarray, cfg, rects: list | None = None) -> list[CellKey]:
-    """rects = row-major (x, y, w, h) from grid.split_grid(); None = equal thirds (old behaviour)."""
+def key_sheet(sheet_rgb: np.ndarray, cfg, rects: list | None = None, inset: int = 0, particles: bool = False) -> list[CellKey]:
+    """rects = row-major (x, y, w, h) from grid.split_grid(); None = equal thirds (old behaviour). `particles` / `inset`: the cells of a particle sheet (docs/effects.md): judged by the
+    particle rules, and `inset` px at every cell border are wiped after keying (the white divider lines an image model draws between cells would otherwise stay in the particle)."""
     if rects is None:
         h, w = sheet_rgb.shape[:2]
         rects = [(c * (w // 3), r * (h // 3), w // 3, h // 3) for r in range(3) for c in range(3)]
     out = []
     for i, (x, y, cw, ch) in enumerate(rects):
         raw = sheet_rgb[y:y + ch, x:x + cw]
-        out.append(_cellkey(i + 1, (int(x), int(y), int(cw), int(ch)), raw, key_image(raw, cfg)))
+        out.append(_cellkey(i + 1, (int(x), int(y), int(cw), int(ch)), raw, key_image(raw, cfg), inset, particles))
     return out
 
 
@@ -76,7 +81,7 @@ def encode_static(rgba: np.ndarray, cfg):
     return bio.getvalue(), "webp"
 
 
-def _make(c: CellKey, cfg, pack: float, hashes: dict | None = None) -> StickerResult:
+def _make(c: CellKey, cfg, pack: float, hashes: dict | None = None, waive=()) -> StickerResult:
     S = cfg.size
     m = {"cell": list(c.rect), "bg": c.keyed.bg, "threshold": round(c.keyed.t, 1), "fg_px": c.fg_px, "bbox": list(c.bbox) if c.bbox else None}
 
@@ -89,7 +94,9 @@ def _make(c: CellKey, cfg, pack: float, hashes: dict | None = None) -> StickerRe
         scale["s"] = s
         return render_sticker(c.keyed.rgba, c.bbox, s, cfg)
 
-    inp = {"cell": c, "metrics": m, "render": render, "encode": encode_static, "hashes": hashes}
+    inp = {"cell": c, "metrics": m, "render": render, "encode": encode_static, "hashes": hashes, "waive": waive}
+    if c.particles:
+        inp["particles"] = True                        # verify.run: no sticker rule blocks a particle
     rep = Report(verify.run("still", inp, cfg))
     if rep.ok:
         plain = render_sticker(c.keyed.rgba, c.bbox, scale["s"], cfg, outline_px=0, erode_px=0)   # untrimmed base for the video sheet and later re-renders
@@ -117,7 +124,7 @@ def _ladder(reason: str, c: CellKey, gbg, gt) -> list:
     return [("sheet-wide background", gbg, gt, None)]
 
 
-def _recover(c: CellKey, first: StickerResult, cfg, pack: float, gbg, gt, hashes=None) -> StickerResult:
+def _recover(c: CellKey, first: StickerResult, cfg, pack: float, gbg, gt, hashes=None, waive=()) -> StickerResult:
     """Failed cell -> dissect -> key again (bounded ladder) -> finally rule it out. Every step is logged in metrics.attempts."""
     attempts = [{"name": "default", "ok": False, "reason": first.reason}]
     attempts.append({"name": "dissect", "ok": None, "note": _diagnose(c, cfg)})
@@ -129,8 +136,8 @@ def _recover(c: CellKey, first: StickerResult, cfg, pack: float, gbg, gt, hashes
                                            "the subject crosses the cell border; keying cannot fix that (regenerate the sheet or adjust the grid)")
     for name, bg, t, band in steps:
         cfg2 = replace(cfg, despill_band_px=band or cfg.despill_band_px)
-        c2 = _cellkey(c.index, c.rect, c.raw, key_image(c.raw, cfg2, (bg, float(t))))
-        r = _make(c2, cfg2, pack, hashes)
+        c2 = _cellkey(c.index, c.rect, c.raw, key_image(c.raw, cfg2, (bg, float(t))), c.inset, c.particles)
+        r = _make(c2, cfg2, pack, hashes, waive)
         attempts.append({"name": name, "ok": r.status == "READY", "reason": r.reason})
         if r.status == "READY":
             r.metrics["recovered_by"] = name
@@ -142,7 +149,9 @@ def _recover(c: CellKey, first: StickerResult, cfg, pack: float, gbg, gt, hashes
     return best
 
 
-def slice_cells(cells: list[CellKey], cfg) -> list[StickerResult]:
+def slice_cells(cells: list[CellKey], cfg, waive: dict | None = None, only=None) -> list[StickerResult]:
+    """waive = {cell index: {check ids}}: the BLOCKs a human allowed for that cell (verify.run turns them into warnings). only = the cell indexes to judge (the pack-wide scale, the
+    sheet-wide background and the duplicate hashes still come from EVERY cell, so a cell cut again alone comes out exactly as it did in the full run); the result lists just those."""
     valid = [c for c in cells if c.bbox and c.fg_px >= cfg.min_foreground_px]
     fits = [fit_scale(c.bbox, cfg) for c in valid]
     pack = float(np.median(fits)) if fits else 1.0     # ONE pack-wide scale: no size jumping between poses
@@ -151,9 +160,12 @@ def slice_cells(cells: list[CellKey], cfg) -> list[StickerResult]:
     hashes = {c.index: verify.cell_hash(c.keyed.rgba) for c in valid}
     results = []
     for c in cells:
-        r = _make(c, cfg, pack, hashes)
+        if only is not None and c.index not in only:
+            continue
+        w = (waive or {}).get(c.index, ())
+        r = _make(c, cfg, pack, hashes, w)
         if r.status != "READY" and c.raw is not None:
-            r = _recover(c, r, cfg, pack, gbg, gt, hashes)
+            r = _recover(c, r, cfg, pack, gbg, gt, hashes, w)
         results.append(r)
     return results
 
