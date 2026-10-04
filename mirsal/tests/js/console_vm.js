@@ -32,6 +32,8 @@ function gbodyHtml(gs,c){return 'ORIGINAL BODY'}
 function stepsHtml(c){return 'ORIGINAL STEPS'}
 const PKPT={d:{},c:{}};
 function ptBody(j,s){return '<ptbody data-for='+(s?s.id:'')+'>'+(j?'data':'null')+'</ptbody>'}
+function ptRow(r,s,draft){return '<div class="pk-row" data-particle-row='+r.id+'>'+(draft?'Draft':'v'+r.version)+'</div>'}
+const ptCount=j=>(j.rows||[]).length+(j.drafts||[]).length+(j.created||[]).length+(j.saved||[]).length;
 async function ptLoad(){}
 `;
 function loadConsole(files, { studio = false, extra = '' } = {}) {

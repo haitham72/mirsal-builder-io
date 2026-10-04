@@ -93,14 +93,27 @@ const LINK = (id, pid = 'p1', pack = 'Fruits <b>') => ({ pack_id: pid, pack, sti
 const sec = (b, many = false) => run(`spSecBatchHtml(${JSON.stringify(b)},${many})`);
 
 test('the section shows scoped creation, existing galleries and one approval offer', () => {
- const h=sec({gid:'G012',cells:[CELL(1,{link:LINK('a1'),n:1,det:{sets:[{id:'P001'}]}}),CELL(2,{link:LINK('a2')}),CELL(3),CELL(4)]});
- assert.match(h,/data-act=spmake data-p=p1 data-s=a1>Generate more/);
+ const h=sec({gid:'G012',cells:[CELL(1,{link:LINK('a1'),n:1,det:{sets:[{id:'P001'}],rows:[{id:'P001',version:1}]}}),CELL(2,{link:LINK('a2')}),CELL(3),CELL(4)]});
+ assert.match(h,/data-act=spmake data-p=p1 data-s=a1>New version/);
  assert.match(h,/data-act=spmake data-p=p1 data-s=a2>Create particles/);
  assert.match(h,/<ptbody data-for=a1>/);
  assert.equal((h.match(/Approve as a pack/g)||[]).length,1);
  assert.match(h,/data-act=spapprove data-g=G012/);
  assert.doesNotMatch(h,/Add to a pack to give/);
  assert.match(sec({gid:'G012',cells:[]},true),/sp-bh/);
+});
+
+test('a set shared by several stickers of the batch is ONE row drawn once, not one per sticker', () => {
+ const row={id:'P008',version:1,label:'Animated sprites',n_sprites:16,saved:true,sprites:[],in_pack:[],addable:null,preview:null,credits:0};
+ const det=()=>({rows:[row],drafts:[],sets:[{id:'P008'}],created:[],saved:[]});
+ const h=sec({gid:'G001',cells:[1,2,3,4,5,6,7,8,9].map(i=>CELL(i,{link:LINK('s'+i),n:1,det:det()}))});
+ assert.equal((h.match(/data-particle-row=P008/g)||[]).length,1,'nine owners, one row');
+ assert.match(h,/Shared by S1, S2, S3, S4, S5, S6, S7, S8, S9/);
+ assert.equal((h.match(/Uses the shared particles above/g)||[]).length,9,'each sticker points at it instead of repeating it');
+ assert.doesNotMatch(h,/<ptbody/,'no sticker has a row of its own here');
+ const solo=sec({gid:'G001',cells:[CELL(1,{link:LINK('s1'),n:1,det:det()}),CELL(2,{link:LINK('s2')})]});
+ assert.doesNotMatch(solo,/Shared by/,'a set of one sticker stays in that sticker\'s block');
+ assert.match(solo,/<ptbody data-for=s1>/);
 });
 
 test('the section: the data comes from the Studio’s batches, the library and the counts; a dropped sticker is not offered', () => {
