@@ -13,7 +13,7 @@ Mirsal Builder is a local, private app that makes animated Telegram stickers (no
 - **"Use it anyway" (allow)** — a recorded, reversible human click that lets a judgement-call block through. Only Telegram's own limits stay final.
 - **Sheet / video sheet / `sheet_fixed`** — the model-drawn grid; the video sheet rebuilt from approved stickers; `sheet_fixed` is the edited-sheet view.
 - **Particle set / burst** — a set of effect sprites linked to library stickers, and the animation rendered from it.
-- **Paused** — deployment (`deployment_plan.md`), OAuth and rate-limit activation remain parked. FastAPI + pydantic (`fastapi_plan.md`) is authorized after particles; preserve the JSON contract and compatibility server.
+- **Paused** — public deployment (`deployment_plan.md`) and Google OAuth remain parked. **The order now (2026-10-04):** FastAPI + pydantic (`fastapi_plan.md`, in progress; preserve the JSON contract and the compatibility server) → streaming chat → the ticket logger (`tickets_plan.md`) → the office LAN with accounts, the Telegram admin bot and per-user credits (`office_lan_plan.md`).
 
 ## Where things are tracked (CLAUDE.md rule 7)
 
@@ -46,7 +46,7 @@ An entry is deleted the moment it is built and documented (history lives in git)
 | Everything stays local for now | embeddings stay local and hardcoded (`services/embed.py` `EMBED_MODEL`, the DB is local). `gpt-4o-mini` is for greeting and routing only; the real work runs on the local server. No hosted embeddings, no swap of the embedding model |
 | Never a block a person cannot get past (2026-10-02) | every new check is a WARN with a visible "use it anyway"; only limits Telegram itself rejects (format, size, codec) or a file that does not open may stop something, and even then with words and a next step (`CLAUDE.md` rule 10). Applied: `pipeline.SHEET_PROCEED`, `recut`, `engine/effect_checks.py` |
 | Several sheets / effects are made all at once (2026-10-02) | `jobs.paid_parallel()`; `CLAUDE.md` rule 13 |
-| Tracking stays in Postgres; LangSmith is off (2026-10-03) | `LANGSMITH_TRACING=false` and `MIRSAL_TRACE=none` in this PC's `mirsal/.env`; decisions, tasks, jobs and chats are recorded in Postgres (`MIRSAL_DB_WRITE=1`, `docs/store-and-search.md`). `obs/trace.py` stays for a machine that wants LangSmith |
+| Tracking stays in Postgres; **LangSmith is retired** (off 2026-10-03, retired 2026-10-04: the ticket logger in Postgres replaces it, `tickets_plan.md`) | `LANGSMITH_TRACING=false` and `MIRSAL_TRACE=none` in this PC's `mirsal/.env`; decisions, tasks, jobs and chats are recorded in Postgres (`MIRSAL_DB_WRITE=1`, `docs/store-and-search.md`). `obs/trace.py` stays for a machine that wants LangSmith |
 | Particle effects: both modes, video first-class, 2x2 default (2026-10-02) | the video is text-only (no start image) and starts and ends empty; 3x3 is offered but measured poor; the simulated mode has gravity / explosion / vortex sliders (`docs/effects.md`) |
 | The daily credit cap must never block the owner | decided in principle; the code change is W36 |
 
@@ -105,8 +105,8 @@ Dismiss the welcome modal first (`document.getElementById('welcome').classList.r
 > Read `CLAUDE.md`, `README.md`, `HANDOFF.md`, this file and the doc of the area you touch. Then:
 >
 > 1. **Built, do not redo:** the visual redesign (`docs/design.md`), the sheet-problem fix (cut anyway + `recut`), the local model (`docs/agent-and-chat.md` Models), parallel paid jobs, the particle-effects engine and its Kling measurements (`docs/effects.md`), particle sets owned by library stickers with the burst maker, the trash and the chat intents (`docs/particles_plan.md`), one control per cell and edits by what they mean, verdict replay, stalled-job recovery, G3 overrides, the trash purge and the Generate prompt step (`docs/engine-and-studio.md`, `docs/agent-and-chat.md`, `docs/api.md`).
-> 2. **Open:** `docs/backlog.md` for what to build, `docs/waiting-for-haitham.md` for what only a person can settle. The FastAPI + pydantic migration is authorized after particles (`docs/fastapi_plan.md`). Deployment, OAuth and rate-limit activation remain paused.
+> 2. **Open:** `docs/backlog.md` for what to build, `docs/waiting-for-haitham.md` for what only a person can settle. The order is in `docs/office_lan_plan.md` §4: FastAPI + pydantic (`docs/fastapi_plan.md`, in progress), streaming chat, the ticket logger, then the office LAN. Public deployment and Google OAuth remain paused.
 > 3. **Standing rules from Haitham:** never a block a person cannot get past (`CLAUDE.md` rule 10); several paid jobs may run at once but never spend without the price shown and a go-ahead; judge media only with numbers; tracking stays in Postgres and LangSmith is off.
-> 4. **Paused, do not touch, do not delete, do not re-ask:** rate limiting, deployment (`docs/deployment_plan.md` and the `deployment` branch's gateway files) and OAuth, and every held question in `waiting-for-haitham.md` marked held or parked.
+> 4. **Paused, do not touch, do not delete, do not re-ask:** public deployment (`docs/deployment_plan.md` and the `deployment` branch's gateway files) and Google OAuth (the office LAN's sign-in throttling in `office_lan_plan.md` §2.2 is the one planned use of the rate limiter), and every held question in `waiting-for-haitham.md` marked held or parked.
 >
 > Method: a failing-then-passing test for every fix, run alone by name (the test budget in `docs/testing.md`: never re-run what already passed, never stack tiers), docs updated in the same step, no paid call without Haitham's go, judge media only with Python, and use `mirsal/venv` on the macOS checkout. The trackers are trackers: delete an entry the moment it is implemented and documented.

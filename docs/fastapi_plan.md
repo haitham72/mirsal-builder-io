@@ -1,6 +1,6 @@
 # FastAPI + pydantic HTTP layer: migration spec
 
-**Status: authorized after particles (Haitham, 2026-10-04), not implemented yet.** This is the executable HTTP-layer migration spec for section 3 of [deployment_plan.md](deployment_plan.md). Deployment, OAuth and activating rate limits remain paused. The JSON contract must stay byte-compatible. Related: [api.md](api.md), [testing.md](testing.md).
+**Status: started (Haitham, 2026-10-04: "do these"); particles are built. Stage 0's inventory is `docs/http_route_inventory.md`. Step 2 of the order in `docs/office_lan_plan.md` §4; streaming chat (below) and the ticket logger (`docs/tickets_plan.md`) follow it.** This is the executable HTTP-layer migration spec for section 3 of [deployment_plan.md](deployment_plan.md). Deployment, OAuth and activating rate limits remain paused. The JSON contract must stay byte-compatible. Related: [api.md](api.md), [testing.md](testing.md).
 
 **Branch:** `better_ui/ux`. Continue after the particle flow's acceptance checks. The user authorized unattended coding in the existing working tree; do not require a fresh session or clean git before coding. Haitham then authorized "once finished comment commit push sync" (2026-10-04), superseding the previous review-wait gate. Finish and validate before committing, with one commit per phase/stage and explicit staging paths. Protect unrelated changes; exclude secrets and real-out runtime artifacts.
 
@@ -58,3 +58,8 @@ venv/bin/python -m mirsal doctor                            # must report the we
 4. SCOPE EXCLUSION: do not attempt to process, deduce, or format multi-turn conversational history or abstract user intent graphs in this state.
 
 **Report back:** Stage 0's inventory (the file), then one commit per stage with the gate output pasted, then the contract diff against Stage 0, which must be empty. If any step of §3 turns out to be wrong for this codebase, STOP and say why instead of improvising. When it lands: `docs/api.md` (provenance of the OpenAPI document, the server kind), `README.md` (architecture), `docs/backlog.md`, `docs/waiting-for-haitham.md` and `CLAUDE.md` are updated in the same step and this file (and section 3's checklist in `deployment_plan.md`) are deleted or reduced to what is still open.
+
+## After the migration: streaming chat (step 3 of `office_lan_plan.md` §4)
+
+Today the chat page polls `GET /api/chat/sessions/{id}` and downloads the whole session (up to about 600 KB at the caps) on every poll (`docs/backlog.md`, chat). Once FastAPI is accepted: `GET /api/chat/sessions/{id}/stream` (SSE, the same keep-alive and per-connection cap as the generation stream, point d above) sends each agent step as it happens (`step`, `card`, `message`, `done`), from the steps the graph already records (`messages[-1].steps`); the page keeps polling only as the fallback when the stream drops. The chat's typed payloads (point c) are the stream's event models. This is a new route, documented in `docs/api.md`; it changes no existing one.
+

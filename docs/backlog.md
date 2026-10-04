@@ -40,7 +40,7 @@ Other open items:
 - Multi-reference: "make 5 like 2" sends sticker 2 as a reference; the other roles (pose, expression, ...) are recorded (`generation_references`) but not yet worded into prompts. **open**.
 - The 40-utterance resolver eval (>= 95% exact ids). **needs Haitham** (W15).
 - Selective regeneration as ONE sheet: several edited stickers are one 1x1 generation each (at most 4, and the reply says so); "keep 1-4 and redo 5-9 as one 2x2 / 3x3" (one paid sheet instead of N) and the `inherited_from` carry-over rows are not built. **open**.
-- The chat polls; streaming the agent's steps over SSE is not built. There is no terminal `mirsal chat`. The reducer's model summary has only run against fakes. **open, low**.
+- The chat polls (streaming is planned after FastAPI, see API and production). There is no terminal `mirsal chat`. The reducer's model summary has only run against fakes. **open, low**.
 - A real chat -> Create run and a creator run against the real Higgsfield and a real bot. **needs a paid test** (W6).
 
 ## Engine and Studio (`docs/engine-and-studio.md`)
@@ -86,8 +86,11 @@ Other open items:
 - The React frontend `mirsal/web/`: extend or delete (W33); the editor's mobile screens. **needs Haitham**.
 - The retired History screen (`console/history.js`, `#/history`). **needs Haitham** (W34).
 - Content safety, OpenAI calls without a plan card, `out/` in git, a backup command. **needs Haitham** (W18, W29, W30, W31).
-- The FastAPI + pydantic migration: **authorized after particles** (Haitham, 2026-10-04); the executable spec is [`fastapi_plan.md`](fastapi_plan.md). It is not implemented yet.
-- Rate limiting and OAuth: **parked** (Haitham, 2026-10-02). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
+- The FastAPI + pydantic migration: **in progress** (Haitham, 2026-10-04: "do these"); the executable spec is [`fastapi_plan.md`](fastapi_plan.md), Stage 0 is [`http_route_inventory.md`](http_route_inventory.md). **open**.
+- Streaming chat: the agent's steps over SSE instead of polling the whole session ([`fastapi_plan.md`](fastapi_plan.md), "After the migration"). **open**, after FastAPI.
+- The ticket logger in Postgres; LangSmith retired ([`tickets_plan.md`](tickets_plan.md)). **open**, after streaming chat.
+- The office LAN: `@nadi.ae` email + password accounts, *Waiting for approval*, Settings > People, the Telegram admin bot, 10 credits per user, forgot password gated by Haitham ([`office_lan_plan.md`](office_lan_plan.md)). **open**, after the ticket logger; W49-W50 first.
+- Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `office_lan_plan.md`). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
 ## Deployment (branch `deployment`): parked
 

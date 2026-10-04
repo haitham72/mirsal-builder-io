@@ -6,3 +6,6 @@ onnxruntime>=1.17   # optional: AI cutout for photos and video (see mirsal/model
 psycopg[binary]>=3.2   # Phase 3A: Postgres state (mirsal-db on 5434); the engine never imports it
 redis>=5   # the disposable cache, locks and event streams (mirsal/runtime/cache.py); without a server it falls back to memory
 langgraph>=1.0   # the chat agent's state graph (mirsal/agent/graph.py); the engine never imports it
+FastAPI
+pydantic
+uvicorn
