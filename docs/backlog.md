@@ -4,7 +4,7 @@
 
 Status words: **open** (can be built now) · **needs Haitham** (a verdict first, W#) · **needs a paid test** (money first, W#) · **parked** (paused on purpose, do not touch).
 
-**The order of the next steps is [`plan.md`](../plan.md)**; this file lists everything open, by area.
+**v1.0 is done (2026-10-04).** This file lists everything still open, by area.
 
 ## Visual design (`docs/design.md`)
 
@@ -81,7 +81,7 @@ Other open items:
 
 ## API and production (`docs/api.md`)
 
-- Packs and the library per user, reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json`: part of the office LAN ([`office_lan_plan.md`](office_lan_plan.md) §2.7). **open** (the office LAN, `plan.md` steps 4 and 7).
+- Packs and the library per user, reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json`: members have private work and the Trending gallery today; a Library of their own (packs, Use in my workflow as a copy) is the next step. **open** (the office LAN, `plan.md` steps 4 and 7).
 - Per-job temp directories and retention policies; the Studio has no queue panel for DEAD rows yet (`mirsal queue status` shows them). **open**.
 - **Contract polish:** a role-dependent shape for `GET /api/generations` (an owner also gets `health`, `paths`, `stale`); `GET /api/live/cost` answers `200 {"credits": null, "error"}` when a price is unknown (by design for the page, not a status code); camelCase leaks in a snake_case API (`updatedAt` in `media/video_project.py`, `packId` in `console/server.py`: the Studio reads them); the Host check needs the port in the header; no `Deprecation` policy yet; pagination is opt-in on three lists only (`/api/library`, `/api/tasks`, `/api/usage`, `/api/watch` still return everything); `415` for a wrong `Content-Type` is not built (W35). **open**.
 - The regression suites (visual, chroma, transformation, conversation datasets) in one command. The metrics (`flow/metrics.py`) count what happened; what they mean for taste waits for the judge's calibration (W11). **open**.
@@ -89,8 +89,8 @@ Other open items:
 - The retired History screen (`console/history.js`, `#/history`). **needs Haitham** (W34).
 - Content safety, OpenAI calls without a plan card, `out/` in git, a backup command. **needs Haitham** (W18, W29, W30, W31).
 - A native FastAPI rewrite of the legacy routes (today they run through the adapter over the original handler, byte-identical; `docs/http_route_inventory.md` is the baseline). After v1.0: it changes nothing a person sees. **open, low**.
-- The office LAN: the Trending gallery ([`plan.md`](../plan.md), [`office_lan_plan.md`](office_lan_plan.md)). **open**.
-- Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `office_lan_plan.md`). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
+- The office LAN runs on this PC: if it sleeps or restarts, everyone is offline (`serve --lan` says so on start). A machine that stays on, or a hosted server (paused: `deployment_plan.md`), would remove this. **needs Haitham**.
+- Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `api.md` "Office accounts on the LAN"). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
 ## Deployment (branch `deployment`): parked
 

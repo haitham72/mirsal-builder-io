@@ -13,7 +13,7 @@ You are drawing the architecture of **Mirsal Builder**, a local app that makes a
 - `docs/generation.md` ("Prompts", "The Higgsfield CLI", "Jobs", "Credits and usage", "Several paid jobs at once")
 - `docs/agent-and-chat.md` ("One turn", "Memory", "Models", "The agentic creator", "Several subjects, per-subject feedback, taste", "Particle sets in the chat", "Edits by what they mean")
 - `docs/particles.md`, `docs/effects.md`, `docs/store-and-search.md`, `docs/api.md`
-- `plan.md` and `docs/office_lan_plan.md` (PLANNED work: draw it only in diagram 7, dashed); `docs/api.md` "Office accounts on the LAN" and "Tickets" (built)
+- `docs/api.md` "Office accounts on the LAN", "Trending", "Tickets" (built in v1.0); `docs/backlog.md` (what is still open: draw it only in diagram 7, dashed)
 - When a doc is unclear, open the code it names (`mirsal/mirsal/agent/graph.py`, `flow/pipeline.py`, `flow/gates.py`, `generation/jobs.py`, `flow/particle_sets.py`) and draw what the code does.
 
 ## 2. The diagrams (one `.excalidraw` file each, in `docs/diagrams/`)
@@ -26,7 +26,7 @@ You are drawing the architecture of **Mirsal Builder**, a local app that makes a
 | `04-paid-generation.excalidraw` | a paid job end to end | price shown → the person's go → job ticket written BEFORE waiting → Higgsfield CLI → result → batch; up to 3 jobs in flight; the ledger (`model_calls`); stalled-job recovery; the daily cap |
 | `05-particles.excalidraw` | particles for a sticker | sticker → New version → three sources (sprites from the sticker · AI image sprites · Kling animated from scratch) → the simulator (Energy / Float / Swirl / Size) → Save (a row v1, v2…) / Save as new → Render → Add to pack (In pack ✓); rows live under the sticker; Echo test in chat |
 | `06-data.excalidraw` | where things live | `out/` (batches `G###/result.json`, `library.json`, particle sets `P###`, effect runs `E###`, jobs `J###`, chat sessions `S###`, trash) mirrored to Postgres tables (generations with `group_id`, stickers, reviews, tasks, model_calls, sessions, sticker_index with vectors); Redis as a disposable cache; batch groups (a family: root + variations) |
-| `07-next.excalidraw` | PLANNED, every box dashed and grey-tinted, titled "Planned (plan.md)" | FastAPI on uvicorn; streaming chat; the ticket logger; office sign-in on the LAN (HTTPS) → *Waiting for approval* → Telegram admin card (Approve / Reject / Admin) → 10 credits; Trending gallery (share, like, comment, use in my workflow) |
+| `07-office.excalidraw` | the office LAN (built): colleagues, sign-in, approval, credits and Trending; open items from `docs/backlog.md` dashed and grey-tinted | FastAPI on uvicorn; streaming chat; the ticket logger; office sign-in on the LAN (HTTPS) → *Waiting for approval* → Telegram admin card (Approve / Reject / Admin) → 10 credits; Trending gallery (share, like, comment, use in my workflow) |
 
 At most ~25 boxes per diagram. If a diagram needs more, split it (`03a`, `03b`) rather than crowd it.
 

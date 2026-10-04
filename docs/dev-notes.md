@@ -1,6 +1,6 @@
 # Dev notes: glossary, guardrails, how to run this checkout, quirks
 
-What a session needs that is neither architecture (the other files of `docs/`) nor a tracker (`waiting-for-haitham.md`, `backlog.md`). Owner: **Haitham** (they/them; never guess pronouns). GitHub `haitham72/mirsal-builder-io` (private). Windows PC (macOS also supported). Read order: `CLAUDE.md`, `HANDOFF.md` (a save point), `plan.md` (the next step), this file, then the doc of the area you touch.
+What a session needs that is neither architecture (the other files of `docs/`) nor a tracker (`waiting-for-haitham.md`, `backlog.md`). Owner: **Haitham** (they/them; never guess pronouns). GitHub `haitham72/mirsal-builder-io` (private). Windows PC (macOS also supported). Read order: `CLAUDE.md`, `HANDOFF.md` (a save point), this file, then the doc of the area you touch.
 
 ## Glossary (the words the docs keep using)
 
@@ -22,7 +22,6 @@ Mirsal Builder is a local, private app that makes animated Telegram stickers (no
 | a verdict, eyes or money from Haitham | `waiting-for-haitham.md` (numbered W1-W48) |
 | open work to build, by area | `backlog.md` |
 | this file: guardrails, how to run, quirks | `dev-notes.md` |
-| the next steps | `plan.md` (repo root) |
 | the paused deployment plan and its nine questions | `deployment_plan.md` |
 | the independent audit baseline | `review.md` (appendix A holds the triage of the 2026-10-02 review; a fresh audit updates that one file per `review-prompt.md`) |
 
@@ -104,11 +103,11 @@ Dismiss the welcome modal first (`document.getElementById('welcome').classList.r
 
 ## Starting a session (the prompt for the next LLM)
 
-> Read `CLAUDE.md`, `HANDOFF.md` (a save point: anything left half-done), `plan.md` (the next step), this file and the doc of the area you touch. Then:
+> Read `CLAUDE.md`, `HANDOFF.md` (a save point: anything left half-done), this file and the doc of the area you touch. Then:
 >
 > 1. **Built, do not redo:** the visual redesign (`docs/design.md`), the sheet-problem fix (cut anyway + `recut`), the local model (`docs/agent-and-chat.md` Models), parallel paid jobs, the particle-effects engine and its Kling measurements (`docs/effects.md`), particle sets owned by library stickers with the burst maker, the trash and the chat intents (`docs/particles.md`), one control per cell and edits by what they mean, verdict replay, stalled-job recovery, G3 overrides, the trash purge and the Generate prompt step (`docs/engine-and-studio.md`, `docs/agent-and-chat.md`, `docs/api.md`).
-> 2. **Open:** `docs/backlog.md` for what to build, `docs/waiting-for-haitham.md` for what only a person can settle. The next steps are `plan.md`. Public deployment and Google OAuth remain paused.
+> 2. **Open:** `docs/backlog.md` for what to build, `docs/waiting-for-haitham.md` for what only a person can settle. Public deployment and Google OAuth remain paused.
 > 3. **Standing rules from Haitham:** never a block a person cannot get past (`CLAUDE.md` rule 10); several paid jobs may run at once but never spend without the price shown and a go-ahead; judge media only with numbers; tracking stays in Postgres and LangSmith is off.
-> 4. **Paused, do not touch, do not delete, do not re-ask:** public deployment (`docs/deployment_plan.md` and the `deployment` branch's gateway files) and Google OAuth (the office LAN's sign-in throttling in `office_lan_plan.md` §2.2 is the one planned use of the rate limiter), and every held question in `waiting-for-haitham.md` marked held or parked.
+> 4. **Paused, do not touch, do not delete, do not re-ask:** public deployment (`docs/deployment_plan.md` and the `deployment` branch's gateway files) and Google OAuth (the office LAN's sign-in throttling in `api.md` "Office accounts on the LAN" §2.2 is the one planned use of the rate limiter), and every held question in `waiting-for-haitham.md` marked held or parked.
 >
 > Method: a failing-then-passing test for every fix, run alone by name (the test budget in `docs/testing.md`: never re-run what already passed, never stack tiers), docs updated in the same step, no paid call without Haitham's go, judge media only with Python, and use `mirsal/venv` on the macOS checkout. The trackers are trackers: delete an entry the moment it is implemented and documented.

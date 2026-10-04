@@ -1,4 +1,4 @@
-// The sign-in card, Waiting for approval, and Settings > People (auth.js, docs/office_lan_plan.md): the pure builders in AUV, run in a vm. Run: node --test tests/js
+// The sign-in card, Waiting for approval, and Settings > People (auth.js, docs/api.md, Office accounts on the LAN): the pure builders in AUV, run in a vm. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

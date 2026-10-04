@@ -1,4 +1,4 @@
-"""Streaming chat (plan.md step 2): GET /api/chat/sessions/{id}/stream on the FastAPI server sends `turn` events while the turn works and `done` when it ends,
+"""Streaming chat: GET /api/chat/sessions/{id}/stream on the FastAPI server sends `turn` events while the turn works and `done` when it ends,
 with the session route's own access rules (a stranger's or unknown session, a foreign Host). Rules only: no provider, no language model."""
 import http.client
 import json

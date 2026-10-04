@@ -175,7 +175,7 @@ class UserStore:
             return None
         return None if u.get("disabled") else dict(u, via="gateway")
 
-    # ---------- office accounts on the LAN (docs/office_lan_plan.md): email + password, approval, sessions ----------
+    # ---------- office accounts on the LAN (docs/api.md, Office accounts on the LAN): email + password, approval, sessions ----------
     DOMAIN = os.environ.get("MIRSAL_EMAIL_DOMAIN", "nadi.ae")
 
     def _norm_email(self, email: str) -> str:
@@ -314,7 +314,7 @@ class UserStore:
         return self.public(u)
 
     def charge(self, uid: str, credits: float) -> dict | None:
-        """Credits per person (office_lan_plan.md 2.5): `credits` > 0 spends, < 0 gives back. The owner `local` has no balance."""
+        """Credits per person (docs/api.md, Office accounts on the LAN): `credits` > 0 spends, < 0 gives back. The owner `local` has no balance."""
         if uid == "local":
             return None
         with _LOCK:

@@ -1,4 +1,4 @@
-"""Credits per person (docs/office_lan_plan.md 2.5): a paid job reserves its price from the person's balance before it starts, the real cost replaces the
+"""Credits per person (docs/api.md, Office accounts on the LAN): a paid job reserves its price from the person's balance before it starts, the real cost replaces the
 reservation when it ends, a failed job gives everything back, a job that could not be created never keeps the credits, and a price above the balance is
 refused in words before anything starts. The owner and token accounts without a balance spend as before. No provider is called."""
 import shutil

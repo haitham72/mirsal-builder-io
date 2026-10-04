@@ -1,4 +1,4 @@
-/* Trending (docs/office_lan_plan.md 2.7): shared packs, Higgsfield-style, in the Library's Trending tab (a member, who has no library, gets it as their Library).
+/* Trending (docs/api.md, Office accounts on the LAN): shared packs, Higgsfield-style, in the Library's Trending tab (a member, who has no library, gets it as their Library).
    Cards: the cover, the name, likes and comments; Trending / New / Most liked; a card opens the pack with its stickers, its comments and Use in my workflow.
    The owner and admins Share a pack from its page (trShareBtn). Everything is GET/POST /api/trending (console/app.py). Top-level names start with TR / tr;
    TRV holds the pure builders for node. */

@@ -181,7 +181,7 @@ def done(out: Path, jid: str, file: str, model: str, cost=None) -> dict:
 
 
 def _settle(out: Path, job: dict, real) -> None:
-    """Credits per person (docs/office_lan_plan.md 2.5): the price was reserved from the person's balance when the job was created
+    """Credits per person (docs/api.md, Office accounts on the LAN): the price was reserved from the person's balance when the job was created
     (`request.reserved`); now the real cost replaces it (a failed job costs 0: everything goes back). Once per job (`settled`)."""
     req = job.get("request") or {}
     reserved, uid = req.get("reserved"), req.get("user")

@@ -1,4 +1,4 @@
-"""Trending (flow/trending.py, docs/office_lan_plan.md 2.7): the owner or an admin shares a pack; everyone signed in likes, comments and uses it; the three
+"""Trending (flow/trending.py, docs/api.md, Office accounts on the LAN): the owner or an admin shares a pack; everyone signed in likes, comments and uses it; the three
 orders; an unshared pack's files stay private; Use in my workflow copies the pack for the owner and gives a member a prompt and a reference. No provider."""
 import http.client
 import json

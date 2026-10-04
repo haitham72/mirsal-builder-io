@@ -68,7 +68,7 @@ class Console:
         self.started, self._stale_checked, self._stale = time.time(), 0.0, False
         self._health = None
         self.users = UserStore(out)
-        self.lan = os.environ.get("MIRSAL_LAN", "").strip() in ("1", "true", "yes", "on")      # serve --lan: office colleagues reach this server (docs/office_lan_plan.md)
+        self.lan = os.environ.get("MIRSAL_LAN", "").strip() in ("1", "true", "yes", "on")      # serve --lan: office colleagues reach this server (docs/api.md, Office accounts on the LAN)
         self.lan_names: set = set()
         if self.lan:
             from ..runtime import net
@@ -473,7 +473,7 @@ class Console:
             raise pl.PipelineError(str(e), getattr(e, "code", 400))
 
     def reserve(self, who: dict, est) -> float | None:
-        """Credits per person (docs/office_lan_plan.md 2.5): an account with a balance pays from it. The price is checked BEFORE the job starts (an account
+        """Credits per person (docs/api.md, Office accounts on the LAN): an account with a balance pays from it. The price is checked BEFORE the job starts (an account
         without enough credits is refused in words, with the way to ask for more) and reserved; `jobs._settle` replaces it with the real cost when the job ends.
         The owner and token accounts without a balance spend as before (rule 13: the price was shown and accepted either way)."""
         u = self.users.get(who.get("id")) or {}
@@ -1902,7 +1902,7 @@ def make_handler(c: Console):
 def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, block: bool = True, stdlib: bool | None = None, lan: bool = False,
           tls: dict | None = None):
     """FastAPI on uvicorn (console/app.py) by default; `stdlib=True` or MIRSAL_SERVER=stdlib runs the old ThreadingHTTPServer (kept for one release).
-    Both serve the same handler, so every answer is the same. `lan`: office colleagues reach it on the local network (0.0.0.0; they sign in; docs/office_lan_plan.md),
+    Both serve the same handler, so every answer is the same. `lan`: office colleagues reach it on the local network (0.0.0.0; they sign in; docs/api.md, Office accounts on the LAN),
     `tls`: {cert, key} for HTTPS."""
     if lan:
         os.environ["MIRSAL_LAN"] = "1"

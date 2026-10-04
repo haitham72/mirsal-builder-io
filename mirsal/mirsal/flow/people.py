@@ -1,4 +1,4 @@
-"""Account requests on the office LAN (docs/office_lan_plan.md 2.2-2.6): a sign-up waiting for approval, a forgotten password, a request for more
+"""Account requests on the office LAN (docs/api.md, Office accounts on the LAN): a sign-up waiting for approval, a forgotten password, a request for more
 credits. Each is one record in `out/account_requests.json` (git-ignored: emails), decided by Haitham in Settings > People or with a button in the
 Telegram bot (`services/admin_bot.py`); every decision says who made it and when. Nothing is decided automatically: no credit refills on its own,
 no password is reset without Haitham."""
@@ -82,7 +82,7 @@ def latest(out: Path, user: str, kind: str) -> dict | None:
 
 
 def _notify(out: Path, r: dict) -> None:
-    """Haitham's card in the Telegram bot (step 5 of plan.md); never stops the request."""
+    """Haitham's card in the Telegram bot; never stops the request."""
     try:
         from ..services import admin_bot
         admin_bot.notify_request(out, r)

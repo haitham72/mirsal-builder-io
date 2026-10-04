@@ -1,4 +1,4 @@
-"""Haitham's admin channel in the Mirsal Telegram bot (docs/office_lan_plan.md 2.4): the bot already configured in Settings (token + Haitham's user id,
+"""Haitham's admin channel in the Mirsal Telegram bot (docs/api.md, Office accounts on the LAN): the bot already configured in Settings (token + Haitham's user id,
 `out/telegram.json`) sends a card for every account request and every new ticket, and Haitham answers with one tap. The server long-polls `getUpdates` in
 one background thread, so no public webhook or open port is needed. Only callbacks and messages from Haitham's own user id are obeyed; everything else is
 ignored. A tap edits the card to its outcome, so a second tap does nothing.

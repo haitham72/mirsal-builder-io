@@ -1,4 +1,4 @@
-"""Trending (docs/office_lan_plan.md 2.7, Haitham 2026-10-04: "higgsfield 'trending' style … liked and commented, and use pack in your workflow"):
+"""Trending (docs/api.md, Office accounts on the LAN, Haitham 2026-10-04: "higgsfield 'trending' style … liked and commented, and use pack in your workflow"):
 packs the owner or an admin chose to Share, in a Library tab everyone signed in can open, like and comment on, ordered three ways:
 - `trending`: likes (3 points), comments (2) and the share itself (4), each fading with age (half of its weight after about 5 days), recomputed on read;
 - `new`: the most recently shared first; `liked`: the most likes first.

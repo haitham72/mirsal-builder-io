@@ -1,4 +1,4 @@
-"""The names this machine answers to on the office network (docs/office_lan_plan.md 2.1): its LAN addresses, its host name, and MIRSAL_LAN_HOSTS
+"""The names this machine answers to on the office network (docs/api.md, Office accounts on the LAN): its LAN addresses, its host name, and MIRSAL_LAN_HOSTS
 (comma-separated, for a DNS name the office uses). Nothing is sent: the UDP 'connect' only asks the operating system which interface would be used."""
 from __future__ import annotations
 

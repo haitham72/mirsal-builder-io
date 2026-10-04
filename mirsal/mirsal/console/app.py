@@ -1,4 +1,4 @@
-"""The HTTP server: FastAPI on uvicorn (docs/fastapi_plan.md, plan.md step 1).
+"""The HTTP server: FastAPI on uvicorn.
 
 Every existing route is served by an ADAPTER over the existing handler (`server.make_handler`): the request is handed to the same `do_GET` / `do_POST` code, in a
 worker thread, writing into a pipe; the adapter reads the status line and the headers it wrote and streams the body. So every answer is byte-identical to the
@@ -154,7 +154,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             msg = e.errors()[0]["msg"] if isinstance(e, ValidationError) else str(e)
             return None, f"bad request: {msg}"
 
-    # ---------- office accounts (docs/office_lan_plan.md 2.2-2.6): sign-up, sign-in, sign-out, forgot password, change password; Settings > People
+    # ---------- office accounts (docs/api.md, Office accounts on the LAN): sign-up, sign-in, sign-out, forgot password, change password; Settings > People
     import time as _time
     from collections import defaultdict, deque
     from pydantic import BaseModel as _BM, ConfigDict as _CD, Field as _F
@@ -366,7 +366,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             return _uerr(request, e)
         return _j(request, 200, {"user": u, **({"password": pw} if pw else {})})
 
-    # ---------- Trending (docs/office_lan_plan.md 2.7): shared packs everyone signed in can open, like, comment on and use
+    # ---------- Trending (docs/api.md, Office accounts on the LAN): shared packs everyone signed in can open, like, comment on and use
     from ..flow import trending as tr
 
     class Comment(_BM):
@@ -541,7 +541,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
     @app.get("/api/chat/sessions/{sid}/stream", include_in_schema=False)
     @app.get("/api/v1/chat/sessions/{sid}/stream", include_in_schema=False)
     async def chat_stream(request: Request, sid: str):
-        """The chat turn as it happens (plan.md step 2): `turn` each time the last message changes (its steps, cards, text), then `done`; a comment every 15 s keeps
+        """The chat turn as it happens: `turn` each time the last message changes (its steps, cards, text), then `done`; a comment every 15 s keeps
         the connection open; the stream ends after 10 minutes (EventSource reconnects). Access is the session route's own: the same headers go through the handler."""
         import json
         from starlette.responses import Response
