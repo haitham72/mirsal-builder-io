@@ -1,6 +1,6 @@
 # Particle effects: sprites, simulation and Kling
 
-The durable asset is a sticker-owned particle set; [particles_plan.md](particles_plan.md) describes ownership, persistence and compatibility. This document covers the working `E###` pipeline and its measurements. Animated cell clips play inside the simulator (each particle plays its own frames), with peak PNGs as posters/fallbacks; built and accepted 2026-10-04.
+The durable asset is a sticker-owned particle set; [particles.md](particles.md) describes ownership, persistence and compatibility. This document covers the working `E###` pipeline and its measurements. Animated cell clips play inside the simulator (each particle plays its own frames), with peak PNGs as posters/fallbacks; built and accepted 2026-10-04.
 
 The final burst is an ordinary animated Telegram sticker in the selected parent pack. Emoji tags make it discoverable; Mirsal does not promise Telegram's native Premium effect behavior. Output is 3-second WEBM/VP9 with alpha, 512×512, 30 fps, ≤256 KB.
 
@@ -15,7 +15,7 @@ The final burst is an ordinary animated Telegram sticker in the selected parent 
 
 ## 2. Sprite sources, one simulator
 
-The editor offers three equal cards for every new version: **Sprites from the sticker** (selected slices/library artwork, free), **AI image sprites** and **Kling animated · from scratch**. All paths feed one simulator, and each saved pass is one row under the sticker (`docs/particles_plan.md` §3). Add more retains both AI choices regardless of a set's initial source. Provider options live under Advanced, not in an extra creation screen.
+The editor offers three equal cards for every new version: **Sprites from the sticker** (selected slices/library artwork, free), **AI image sprites** and **Kling animated · from scratch**. All paths feed one simulator, and each saved pass is one row under the sticker (`docs/particles.md` §3). Add more retains both AI choices regardless of a set's initial source. Provider options live under Advanced, not in an extra creation screen.
 
 | Source | Preparation | Simulation input |
 | --- | --- | --- |

@@ -208,7 +208,7 @@ function fxResults(X,e){const rs=e.results||[];if(!rs.length)return '';const n=X
   <div class=row><button class="btn pri gbig" data-act=fxadd ${n?'':'disabled'}>Add ${n||''} sprite clips</button><span class=mut>Warnings are only warnings: you decide. A particle sticker keeps the emoji of its source and is saved under that sticker.</span></div></details>`}
 function fxBody(X,e){const sim=e.mode==='sim';
  return (e.notes||[]).map(n=>`<div class=mut style="margin-top:6px">${esc(n)}</div>`).join('')+(sim&&X.src!=='own'?fxDrawn(X,e):'')+(sim?fxSaveBlock(X,e)+fxMotion(X,e):(e.groups||[]).map(g=>fxGroupHtml(X,e,g)).join('')+fxSaveBlock(X,e)+fxMotion(X,e))+fxResults(X,e)}
-/* Motion (a simulation): ONE section for the whole run, whatever its stickers or groups (docs/particles_plan.md section 4). The burst is made from the SET for the PACK, so it waits for the run to be saved as a set;
+/* Motion (a simulation): ONE section for the whole run, whatever its stickers or groups (docs/particles.md section 4). The burst is made from the SET for the PACK, so it waits for the run to be saved as a set;
    then the panel is the set's own (spBurstHtml: one preview, the presets, Energy / Float / Swirl, Render, Add). */
 function fxMotion(X,e){const s=X.set;
  if(!s)return `<section class="fx-g fx-mo"><header><b>Motion</b></header><div class=mut>Save the particles as a set first (above): the burst is made from the set, for the whole pack, with one preview.</div></section>`;
@@ -248,7 +248,7 @@ ACT.fxpickall=el=>{const X=fxX(el);(X.rec.results||[]).filter(r=>r.status==='REA
 ACT.fxadd=async el=>{const X=fxX(el),r=await post(`/api/effects/${X.eid}/add`,{results:[...X.pick]});if(!r.ok)return toast(r.j.error||'Could not add',1);
  toast(`Added ${r.j.added.length} particle sticker${r.j.added.length===1?'':'s'} to the pack: saved under the sticker${r.j.added.length===1?'':'s'}`);X.pick.clear();await loadLib();if(typeof ptForget==='function')ptForget();await fxLoad(X);X.draw();if(typeof spSecSync==='function')spSecSync(true)};
 
-/* ---------- Use as particle set: the working session ends in a durable set P### (docs/particles_plan.md 4.5). POST /api/particles {from_effect, name, packs, picked?}.
+/* ---------- Use as particle set: the working session ends in a durable set P### (docs/particles.md 4.5). POST /api/particles {from_effect, name, packs, picked?}.
    One implementation for the pro screen and the Studio tab (the block sits in fxBody, the state comes from the root). A drawn sheet is saved with its picked cells (the set outlives the run); a run
    that drew nothing can save the pack's own stickers as the set (free). Either way the run goes on to Motion below with that set. Nothing is moved or deleted: the run stays as it is. */
 const fxGen=n=>'G'+String(n).padStart(3,'0');

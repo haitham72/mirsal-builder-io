@@ -1,4 +1,4 @@
-// The pack's particle studio and the sticker's one line (2026-10-03, docs/particles_plan.md section 5): one set belongs to the pack, so the pack page carries the
+// The pack's particle studio and the sticker's one line (2026-10-03, docs/particles.md section 5): one set belongs to the pack, so the pack page carries the
 // particle studio (its sets as shared cards, its bursts with Add, Make particles for this pack / Use an existing set) and a sticker shows one line
 // linking to it. The statements are read out of packs.js and run with the few globals they use stubbed. Run: node --test tests/js
 const test = require('node:test');

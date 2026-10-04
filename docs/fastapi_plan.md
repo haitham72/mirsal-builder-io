@@ -1,6 +1,8 @@
 # FastAPI + pydantic HTTP layer: migration spec
 
-**Status: started (Haitham, 2026-10-04: "do these"); particles are built. Stage 0's inventory is `docs/http_route_inventory.md`. Step 2 of the order in `docs/office_lan_plan.md` §4; streaming chat (below) and the ticket logger (`docs/tickets_plan.md`) follow it.** This is the executable HTTP-layer migration spec for section 3 of [deployment_plan.md](deployment_plan.md). Deployment, OAuth and activating rate limits remain paused. The JSON contract must stay byte-compatible. Related: [api.md](api.md), [testing.md](testing.md).
+**Step 1 of [`plan.md`](../plan.md).** The acceptance baseline is the route inventory, [`http_route_inventory.md`](http_route_inventory.md): every stage ends with an empty diff against it.
+
+**For v1.0 (Haitham, 2026-10-04: "go to the finish line"):** uvicorn serves every existing route through an adapter over the existing handler (byte-identical by construction, the same guards in the same order); only the generation SSE route and every NEW route (streaming chat, tickets, accounts, the admin bot, credits) are native FastAPI with pydantic models. The route-by-route native rewrite described below (points a-e) is **after v1.0**: it changes nothing a person sees and is the riskiest part.
 
 **Branch:** `better_ui/ux`. Continue after the particle flow's acceptance checks. The user authorized unattended coding in the existing working tree; do not require a fresh session or clean git before coding. Haitham then authorized "once finished comment commit push sync" (2026-10-04), superseding the previous review-wait gate. Finish and validate before committing, with one commit per phase/stage and explicit staging paths. Protect unrelated changes; exclude secrets and real-out runtime artifacts.
 
@@ -17,7 +19,7 @@
 - **e. Static (§3 step 8):** `StaticFiles` for `/ui`, `/assets`, `/out`; keep the `/out/` containment check as a dependency that rejects `..`, symlinks and absolute paths. `tests/test_hardening.py` must still pass.
 - **f. A/B (§3 step 10):** `python -m mirsal serve` starts uvicorn; **`--stdlib` keeps the old server** so both run on one PC. `tests/__init__.py::serve()` gets a switch, the default becomes FastAPI, and `tests/test_api_contract.py` runs against **both for one release**. Do not drop this.
 
-**Stage 0: the inventory, written down first, as a file in the repo.** From the inline dispatch in `console/server.py` (`do_GET`, `do_POST`, the `startswith()` branches), enumerate every route: method, path, request body shape, response shape, auth, SSE or not. **This list is the acceptance criterion for every later stage: diff against it.** Record explicitly what must survive verbatim:
+**The baseline: the route inventory** ([`http_route_inventory.md`](http_route_inventory.md)) lists every route: method, path, request body, response, auth, SSE or not. **It is the acceptance criterion for every stage: diff against it.** Keep it current as routes are added. It records what must survive verbatim:
 
 - the `/api/v1/` prefix alias;
 - the short-lived signed asset links and `POST /api/assets/sign`;
@@ -46,7 +48,7 @@ venv/bin/python -m tests.test_js                             # the shared-ACT / 
 venv/bin/python -m mirsal doctor                            # must report the web stack
 ```
 
-`tests/test_openapi.py` and `tests/test_api_contract.py` stay green with unchanged intent. **New test:** every route in the Stage 0 inventory answers with the recorded status and body shape; that is the regression net for the whole migration. The golden path works end to end through the new server (`docs/engine-and-studio.md`). Windows still works: `pathlib` only, no shell-specific commands.
+`tests/test_openapi.py` and `tests/test_api_contract.py` stay green with unchanged intent. **New test:** every route in the inventory answers with the recorded status and body shape; that is the regression net for the whole migration. The golden path works end to end through the new server (`docs/engine-and-studio.md`). Windows still works: `pathlib` only, no shell-specific commands.
 
 **Out of scope:** any change to a route's behaviour, wording, status code or payload; any new feature or UI change; any engine change. Do **not** make the engine or pipeline async: it blocks on external CLI calls (Higgsfield / Kling), not on IO, so async buys nothing here. No auth features, endpoints or headers that do not exist today.
 
@@ -57,9 +59,9 @@ venv/bin/python -m mirsal doctor                            # must report the we
 3. TRANSACTIONAL IDEMPOTENCY: rely strictly on the transport-free `Console.idem(scope, key, fn)` core mechanism. Execute the route helpers cleanly without altering the underlying pipeline state or execution logs.
 4. SCOPE EXCLUSION: do not attempt to process, deduce, or format multi-turn conversational history or abstract user intent graphs in this state.
 
-**Report back:** Stage 0's inventory (the file), then one commit per stage with the gate output pasted, then the contract diff against Stage 0, which must be empty. If any step of §3 turns out to be wrong for this codebase, STOP and say why instead of improvising. When it lands: `docs/api.md` (provenance of the OpenAPI document, the server kind), `README.md` (architecture), `docs/backlog.md`, `docs/waiting-for-haitham.md` and `CLAUDE.md` are updated in the same step and this file (and section 3's checklist in `deployment_plan.md`) are deleted or reduced to what is still open.
+**Report back:** one commit per stage with the gate output pasted, then the contract diff against the inventory, which must be empty. If any step of §3 turns out to be wrong for this codebase, STOP and say why instead of improvising. When it lands: `docs/api.md` (provenance of the OpenAPI document, the server kind), `README.md` (architecture), `docs/backlog.md`, `docs/waiting-for-haitham.md` and `CLAUDE.md` are updated in the same step and this file (and section 3's checklist in `deployment_plan.md`) are deleted or reduced to what is still open.
 
-## After the migration: streaming chat (step 3 of `office_lan_plan.md` §4)
+## After the migration: streaming chat (step 2 of `plan.md`)
 
 Today the chat page polls `GET /api/chat/sessions/{id}` and downloads the whole session (up to about 600 KB at the caps) on every poll (`docs/backlog.md`, chat). Once FastAPI is accepted: `GET /api/chat/sessions/{id}/stream` (SSE, the same keep-alive and per-connection cap as the generation stream, point d above) sends each agent step as it happens (`step`, `card`, `message`, `done`), from the steps the graph already records (`messages[-1].steps`); the page keeps polling only as the fallback when the stream drops. The chat's typed payloads (point c) are the stream's event models. This is a new route, documented in `docs/api.md`; it changes no existing one.
 

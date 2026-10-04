@@ -138,7 +138,7 @@ a Telegram limit is a 409; `sticker_ids?` keeps only those source stickers, so o
 
 `POST /api/generations/{id}/allow {kind?: "still" | "animation" | "video_sheet" (default animation), sheet?: "A#", index? | indexes? | all?, allow?: bool (default true)}` -> 202 `{id, kind, indexes, allow}`; errors are JSON (400 bad kind / index, 404 no batch, 409 busy / nothing to allow / cannot be allowed with the reason). `GET /api/generations/{id}` carries `allow.{still, animation, video_sheet}`: `can`, `allowed`, `undo`, `why`, `final`. Video-sheet lists contain A# strings; use `sheet`, string `indexes`, or `all` for the bulk pair. The judgement calls `no_outline_on_sheet`, `video_specs`, and `layout_match` are reversible permissions stored as `sheet_override`, with human sheet and cell history. Their checks remain `ok:false, severity:"WARN"`, marked “allowed by you”, including on later slices. Decode failures, verifier crashes and mismatched approved slots stay final. Allowing a held, blocked video re-slices that same file, free; it never starts another provider job. Generation chat cards include `video_sheets` with `picture` URLs and the same computed allow block. See `docs/engine-and-studio.md` ("Use it anyway").
 
-## Particle sets (`/api/particles`, `docs/particles_plan.md`)
+## Particle sets (`/api/particles`, `docs/particles.md`)
 
 Particle sets (`P###`, `out/particles/P###/`) belong to **library stickers** through `owner:[{pack_id,sticker_id,generation,index}]`. `packs[]` and `used_in[]` are derived compatibility views. `affirmed_in[]` records where a rendered burst was added; it does not own the set. Owner only for now.
 

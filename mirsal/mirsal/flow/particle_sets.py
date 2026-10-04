@@ -1,4 +1,4 @@
-"""Durable sticker-owned particle sets (`docs/particles_plan.md`).
+"""Durable sticker-owned particle sets (`docs/particles.md`).
 
 P### stores owner sticker links, selected still/animated sprites, saved motion,
 source jobs/credits and rendered bursts. Packs are derived read views; adding a

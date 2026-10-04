@@ -360,7 +360,7 @@ test('choosing particles keeps within the sheet and can add the person’s own',
   run("delete SPM.P001;SPL.sets=null");
 });
 
-// ---------- the burst maker: Motion and Finish for a SET, one preview for the whole pack (docs/particles_plan.md section 4) ----------
+// ---------- the burst maker: Motion and Finish for a SET, one preview for the whole pack (docs/particles.md section 4) ----------
 const BURSTPACKS = "LIB.packs=[{id:'p1',name:'Fruits <b>',stickers:[]},{id:'p2',name:'Princess',stickers:[]}]";
 const REND = (o = {}) => ({ id: 'R001', set: 'P001', pack_id: 'p1', preset: 'fountain', status: 'READY', bytes: 120 * 1024, url: '/out/particles/P001/renders/R001.webm', warnings: [], blocks: [], added_to: null, added: [], ...o });
 const burst = (o = {}, pre = '') => run(`(()=>{${BURSTPACKS};delete SPB.P001;${pre};return spBurstHtml(${JSON.stringify(SET(o))})})()`);

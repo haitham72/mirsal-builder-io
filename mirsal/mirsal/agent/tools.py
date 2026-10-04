@@ -383,7 +383,7 @@ class ConsoleTools:
             return []
         return [{"id": p["id"], "name": p["name"], "count": len(p.get("stickers") or [])} for p in self.c.lib.snapshot()["packs"]]
 
-    # ---- particle sets (docs/particles_plan.md): the chat's reads and free edits, and the one call that spends (a sheet) ----
+    # ---- particle sets (docs/particles.md): the chat's reads and free edits, and the one call that spends (a sheet) ----
     def _owner(self) -> None:
         if self.member:
             raise ToolError("Particle sets are for the owner's account for now.", 403)

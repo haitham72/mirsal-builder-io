@@ -4,7 +4,7 @@
 
 Status words: **open** (can be built now) · **needs Haitham** (a verdict first, W#) · **needs a paid test** (money first, W#) · **parked** (paused on purpose, do not touch).
 
-**Next, in order** (Haitham, 2026-10-04; `HANDOFF.md`): FastAPI + pydantic → streaming chat → the ticket logger → the office LAN. Each is an entry under *API and production* below.
+**The order of the next steps is [`plan.md`](../plan.md)**; this file lists everything open, by area.
 
 ## Visual design (`docs/design.md`)
 
@@ -12,14 +12,14 @@ Status words: **open** (can be built now) · **needs Haitham** (a verdict first,
 - Inline `style="font-size:..."` in the scripts is still off the type scale. **open**.
 - Haitham's eyes on every screen. **needs Haitham** (W1).
 
-## Particles and the welcome modal (`docs/effects.md` section 8, `docs/particles_plan.md`, `docs/onboarding.md`)
+## Particles and the welcome modal (`docs/effects.md` section 8, `docs/particles.md`, `docs/onboarding.md`)
 
 - A real paid run of the AI-drawn particle sheet from the screen, to see how a real Nano Banana particle sheet cuts (the price and the job path are tested on the fake CLI). **needs a paid test** (W2).
-- Per-emoji burst motion versus shared motion (W25), and separate Telegram effect/download delivery. Ordinary animated stickers in the destination pack are implemented. **needs Haitham** for the alternatives.
+- Per-emoji burst motion versus shared motion (W25), and separate Telegram effect/download delivery. **needs Haitham**.
 - Burst creation, many packs from one liked sheet (P14; `docs/burst_plan.md`). **needs Haitham** (W27).
 - Particle sets are not part of the trash purge yet (a deleted set waits in `out/trash/particles/`). **open**.
 - `DEFAULT_SPRITE_PX` 100 vs 200. **needs Haitham** (W21).
-- A preview of the would-be sticker in the video-sheet override dialog (the G3 override itself is built). **open**.
+- A preview of the would-be sticker in the video-sheet override dialog. **open**.
 - Older batches with no keyed/raw sheet on disk are not rebuilt when a slice of an animation edit merges back into the sheet (`rebuild_sheet` returns null; nothing breaks). **open, low**.
 - Rule for all of it: effect checks are warnings with "use it anyway"; only Telegram's own limits may block.
 
@@ -81,14 +81,14 @@ Other open items:
 
 ## API and production (`docs/api.md`)
 
-- Accounts are built (owner / member) and are enough for now: one local user, no OAuth, no sign-in screen. Held for later, not to be started: packs and the library per user, reference images, the Redis cache keys (`u:local`), a browser login, moving accounts out of `out/users.json`. **parked**.
+- Packs and the library per user, reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json`: part of the office LAN ([`office_lan_plan.md`](office_lan_plan.md) §2.7). **needs Haitham** (W50).
 - Per-job temp directories and retention policies; the Studio has no queue panel for DEAD rows yet (`mirsal queue status` shows them). **open**.
 - **Contract polish:** a role-dependent shape for `GET /api/generations` (an owner also gets `health`, `paths`, `stale`); `GET /api/live/cost` answers `200 {"credits": null, "error"}` when a price is unknown (by design for the page, not a status code); camelCase leaks in a snake_case API (`updatedAt` in `media/video_project.py`, `packId` in `console/server.py`: the Studio reads them); the Host check needs the port in the header; no `Deprecation` policy yet; pagination is opt-in on three lists only (`/api/library`, `/api/tasks`, `/api/usage`, `/api/watch` still return everything); `415` for a wrong `Content-Type` is not built (W35). **open**.
 - The regression suites (visual, chroma, transformation, conversation datasets) in one command. The metrics (`flow/metrics.py`) count what happened; what they mean for taste waits for the judge's calibration (W11). **open**.
 - The React frontend `mirsal/web/`: extend or delete (W33); the editor's mobile screens. **needs Haitham**.
 - The retired History screen (`console/history.js`, `#/history`). **needs Haitham** (W34).
 - Content safety, OpenAI calls without a plan card, `out/` in git, a backup command. **needs Haitham** (W18, W29, W30, W31).
-- The FastAPI + pydantic migration: **in progress** (Haitham, 2026-10-04: "do these"); the executable spec is [`fastapi_plan.md`](fastapi_plan.md), Stage 0 is [`http_route_inventory.md`](http_route_inventory.md). **open**.
+- The FastAPI + pydantic migration ([`plan.md`](../plan.md) step 1); the executable spec is [`fastapi_plan.md`](fastapi_plan.md), the baseline is [`http_route_inventory.md`](http_route_inventory.md). **open**.
 - Streaming chat: the agent's steps over SSE instead of polling the whole session ([`fastapi_plan.md`](fastapi_plan.md), "After the migration"). **open**, after FastAPI.
 - The ticket logger in Postgres; LangSmith retired ([`tickets_plan.md`](tickets_plan.md)). **open**, after streaming chat.
 - The office LAN: `@nadi.ae` email + password accounts, *Waiting for approval*, Settings > People, the Telegram admin bot, 10 credits per user, forgot password gated by Haitham ([`office_lan_plan.md`](office_lan_plan.md)). **open**, after the ticket logger; W49-W50 first.

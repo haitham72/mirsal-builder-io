@@ -183,7 +183,7 @@ the project against them) -> `docs/waiting-for-haitham.md` and `docs/backlog.md`
 `docs/engine-and-studio.md` (the golden path, the verifier, the gates, "Use it
 anyway") -> `docs/agent-and-chat.md` -> `docs/generation.md` +
 `docs/higgsfield.md` + `docs/operator.md` -> `docs/store-and-search.md` ->
-`docs/api.md` -> `docs/design.md` -> `docs/effects.md` + `docs/particles_plan.md`
+`docs/api.md` -> `docs/design.md` -> `docs/effects.md` + `docs/particles.md`
 -> `docs/burst_plan.md` (a proposal) -> `docs/onboarding.md` -> `docs/measurements.md`.
 Then `docs/inputs/` if you want the owner's own reference material.
 
@@ -250,7 +250,7 @@ other to a one-liner in §6.
   `packs.js`, `editor.js`, `studio.js`, `live.js`, `studio.css` / `agent.css`,
   `console/index.html` vs `UI_FILES` servability, `tests/test_js.py` guard,
   `docs/api.md` vs `openapi.py` vs `server.py` drift, `docs/design.md` §9,
-  `docs/engine-and-studio.md`, `docs/particles_plan.md` §6,
+  `docs/engine-and-studio.md`, `docs/particles.md` §6,
   `docs/burst_plan.md`, README/CLAUDE/tracker contradictions, `out/`-in-git
   counts. Claims C23, C24. Hunts: dead stubs, disabled/ignored controls,
   servability (every script in `index.html` ⊆ `UI_FILES`), polling/memory
@@ -314,7 +314,7 @@ exercise the API with curl. Never press Create.
 | C16 | **Migrations 001-005 are re-runnable** and never wipe data on re-apply (note `005_vectors.sql`); `db import` and write-through are idempotent | `mirsal/migrations/`, `store/db.py`, `store/repo.py` |
 | C17 | **Pool search never returns "the closest junk"**: a quality gate returns nothing for what does not exist. `search_text` embeds `subject — action — key — emoji — style` and **never the file name** (a name with a date and a fingerprint would only add noise); `subject` and `action` are separate vector columns with weights. | `store/pool.py` (`index_row`, `_subject_action`, `search`), `docs/measurements.md`, `tests/test_pool.py` |
 | C18 | **The agentic creator can always get past a block**: a run that stops on a Python block asks `tools.allowable` and offers `creator_allow` for exactly the overridable ones; a technical block offers nothing and says why; the pictures are attached to the message. Judge whether any other surface is a dead end. | `agent/creator.py` (`_stop_blocked`, `resume`), `agent/graph.py` (`n_creator`, `_creator_say`) |
-| C19 | **The particle model matches the plan**: one set belongs to pack(s) or stands alone, is saved by an explicit *Use as particle set*, supports generate-more / rename / duplicate / assign / delete+restore, and is never deleted by a click. Phases 1-4 are built; only Telegram delivery is open. Check that a render is FAILED only for a Telegram limit and that *Generate more* never deletes or overwrites a cell. | `flow/particle_sets.py`, `flow/effects.py`, `console/server.py` `_particles`, `console/particles.js`, `docs/particles_plan.md` §6 |
+| C19 | **The particle model matches the plan**: one set belongs to pack(s) or stands alone, is saved by an explicit *Use as particle set*, supports generate-more / rename / duplicate / assign / delete+restore, and is never deleted by a click. Phases 1-4 are built; only Telegram delivery is open. Check that a render is FAILED only for a Telegram limit and that *Generate more* never deletes or overwrites a cell. | `flow/particle_sets.py`, `flow/effects.py`, `console/server.py` `_particles`, `console/particles.js`, `docs/particles.md` §6 |
 | C20 | **Particles are cropped sprites, not stickers**; a particle batch's cells cannot be added to a pack as stickers; after a slice is edited the batch is rebuilt as **one sheet** with the same layout and the same `S#`; the rebuilt sheet is what later turns see. | `flow/particle_sets.py` (crop), `flow/pipeline.py` (`sheet_fixed`), `console/server.py` (`recut_particles`), `agent/editroute.py` |
 | C21 | **The edit router classifies before it generates**: a transformation or cleaning of one slice goes to the **editor** (Save returns to the AI, not the Studio); a `tweak` or a new `action` sends the current sheet as the picture; a `redesign` sends **no picture** and reuses the prompt with the new subject; one slice alone goes as its own cell with the 400px minimum said out loud; an unsupported request is refused rather than improvised. | `agent/editroute.py` (`classify_edit`, `plan_for`, `unsupported`, `REF_CLAUSES`), `agent/graph.py` (`n_editroute`, `n_unsupported`) |
 | C22 | **Vision consent is state, never a turn**: allowing or refusing writes session state and emits no card and no assistant message; the next turn carries the permission and acknowledges it once. The first message offers *Create it* + a right-hand *Allow AI Vision*, with no "Not yet" and no "Keep it off". | `agent/graph.py`, `agent/memory.py`, `console/agent.js` |

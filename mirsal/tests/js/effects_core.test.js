@@ -180,7 +180,7 @@ test('the body of a simulated effect: the drawn panel, the way to save it, and O
   const pre = "LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]";
   const h = html('fxBody(X,e)', { rec: REC(), pre });
   assert.match(h, /data-fxdr=make/);
-  assert.doesNotMatch(h, /fx-sim|class=fx-size|data-sid=|fxpv-|data-fxp=/, 'docs/particles_plan.md section 4: one preview for the pack, not a row per sticker');
+  assert.doesNotMatch(h, /fx-sim|class=fx-size|data-sid=|fxpv-|data-fxp=/, 'docs/particles.md section 4: one preview for the pack, not a row per sticker');
   assert.doesNotMatch(h, /fx-chip/, 'a simulation has no per-group chips: the particles are chosen in the drawn panel');
   assert.equal((h.match(/class="fx-g fx-mo"/g) || []).length, 1, 'one motion section for the whole run, whatever the number of stickers or groups');
   assert.match(h, /Save the particles as a set first/, 'the burst is made from the SET, so the motion waits for it');

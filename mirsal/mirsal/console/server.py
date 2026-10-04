@@ -912,7 +912,7 @@ def make_handler(c: Console):
                     return self._json(200, {"sticker": pp[4], "created": [], "saved": [], "effects": [], "can_make": False} if len(pp) == 6 else {})
                 if len(pp) == 6:
                     return self._json(200, fx_sets.for_sticker(c.out, c.lib, pp[2], pp[4]))
-                # the pack's particle studio (docs/particles_plan.md 5): its sets and its bursts, plus the per-sticker counts the old answer carried
+                # the pack's particle studio (docs/particles.md 5): its sets and its bursts, plus the per-sticker counts the old answer carried
                 try:
                     return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_sets.counts_for_pack(c.out, c.lib, pp[2])})
                 except fx_sets.SetError as e:
@@ -1134,7 +1134,7 @@ def make_handler(c: Console):
             raise pl.PipelineError(NO_ROUTE, 404)
 
         def _particles(self, method: str, path: str, body: dict):
-            """Particle sets `P###` (docs/particles_plan.md section 6): the durable sticker-owned particle asset with derived pack views. The working
+            """Particle sets `P###` (docs/particles.md section 6): the durable sticker-owned particle asset with derived pack views. The working
             session stays `/api/effects`; `POST /api/particles {from_effect}` is the bridge that saves one. Free: nothing here spends. A delete moves the
             folder to the trash and a set in use says which packs before it goes (rule 9's spirit: nothing is destroyed on a click)."""
             ps = fx_sets

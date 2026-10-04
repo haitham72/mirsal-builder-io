@@ -150,7 +150,7 @@ ACT.ptadd=async el=>{const pid=el.dataset.p,sid=el.dataset.s;el.disabled=true;
  ptForget();await loadLib();toast('Added to '+ptPackName(pid)+', saved under the sticker');if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();else if(route_==='generate'&&typeof spSecSync==='function')spSecSync(true);
    const cur=LCI===null?null:LCL[LCI];if(cur&&cur.id===sid)ptLoad(cur)};
 
-/* ---------- the pack's particle studio (docs/particles_plan.md 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
+/* ---------- the pack's particle studio (docs/particles.md 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
    the pack: a sticker shows one line linking here (pkStickerLine), never a gallery of its own. The set cards are shared with the Library (particles.js).
    The bursts rendered FOR this pack are listed with Add (POST /api/particles/{id}/add, the same handler as the set card's burst maker: particles.js psbadd); making one is in the set's card. */
 function pkPsHtml(p){const sets=PKPT.sets[p.id];

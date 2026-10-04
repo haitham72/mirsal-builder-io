@@ -158,7 +158,7 @@ async function spSecSync(force){if(SPS.busy||!$('gpart'))return;SPS.busy=true;
  finally{SPS.busy=false}}
 setInterval(()=>{if(route_==='generate'&&!document.hidden)spSecSync()},2500);
 
-/* ---------- Library > Particles: every durable set as a card (docs/particles_plan.md 5). Reads GET /api/particles; writes rename/assign/unassign/duplicate/delete/restore.
+/* ---------- Library > Particles: every durable set as a card (docs/particles.md 5). Reads GET /api/particles; writes rename/assign/unassign/duplicate/delete/restore.
    The trash is listed (GET /api/particles/deleted): Restore is offered on the notice right after a delete AND from the "Deleted" list under the sets, long after. One set belongs to pack(s): the card says
    "used in: A, B" or "stand-alone", never per sticker. */
 const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:null,poll:0};
@@ -236,7 +236,7 @@ function spTrashHtml(list){if(!list||!list.length)return '';
    <b>${esc(s.name||s.id)}</b><small class=mut>${esc(s.id)} · ${s.n_cells} cell${s.n_cells===1?'':'s'} · ${was.length?`was on ${was.map(p=>esc(p.name||p.id)).join(', ')}`:'was stand-alone'}</small>
    <button class="btn sm" data-act=psrestore data-id=${esc(s.id)}>Restore</button></div>`}).join('')}</details>`}
 
-/* ---------- Generate more (docs/particles_plan.md 4.8): draw another sheet for the set; its cut cells are ADDED, nothing it has is changed.
+/* ---------- Generate more (docs/particles.md 4.8): draw another sheet for the set; its cut cells are ADDED, nothing it has is changed.
    POST /api/particles/{id}/more {grid, elements, estimate:true} is the free quote, {grid, elements, go:true} the click. The price is on its own line, never inside the button. */
 const SPM={};                                   // set id -> {grid, chosen[], extra[], est{key: {credits, error}}, busy: the key being priced}
 const spMoreN=m=>m.grid==='3x3'?9:4;
@@ -280,7 +280,7 @@ ACT.psmoredraw=async el=>{const id=el.dataset.id,s=spFind(id);if(!s)return;const
  const r=await post(`/api/particles/${id}/more`,{mode:m.mode,grid:m.grid,elements:m.chosen,prompt:m.prompt,...(est.effect?{effect:est.effect}:{}),go:true});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not start',1)}
  toast('Generating sprites');delete SPL.detail[id];m.est={};if(r.j.id&&/^E/.test(r.j.id)&&SP.target===id){SP.eid=r.j.id;SP.set=null;spKind(m.mode);spSave();await fxLoad(SP);spDraw()}else spLibSync(true);
  if(typeof route_!=='undefined'&&route_==='pack'&&typeof ptCounts==='function'&&typeof PACK_ID!=='undefined')ptCounts(PACK_ID)};
-/* ---------- the burst maker: Motion and Finish of the wizard, for a SET and a PACK (docs/particles_plan.md section 4, docs/particles_plan.md 4.6-4.7).
+/* ---------- the burst maker: Motion and Finish of the wizard, for a SET and a PACK (docs/particles.md section 4, docs/particles.md 4.6-4.7).
    ONE preview for the whole pack (not a row per sticker): the five presets, Energy / Float / Swirl (count and spin under Advanced), the particle size, then Render (the final 512 px WebM, checked) and
    Add (an animated sticker of the pack). Everything calls POST /api/particles/{id}/preview | render | add; the same panel sits in the open set card (Library and the pack's studio) and in the wizard
    once the run has been saved as a set. It redraws only itself ([data-psb]), so a slider never moves the rest of the page. A burst is free: there is no price anywhere. */

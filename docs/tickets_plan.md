@@ -1,6 +1,6 @@
 # Tickets: an AI logger in Postgres instead of LangSmith
 
-**Status: planned (Haitham, 2026-10-04), not built.** Built after the FastAPI migration and streaming chat (`office_lan_plan.md` §4, step 4), with its pydantic models written once in the new API layer. **LangSmith is retired**: it is a trace viewer for LLM developers, it sends data off the machine, and it cannot hold what the person meant or what should be fixed. `obs/trace.py` stays dormant (`MIRSAL_TRACE=none`) until this lands, then is removed with its docs.
+**Step 3 of [`plan.md`](../plan.md)**, after the FastAPI migration and streaming chat, with its pydantic models written once in the new API layer. **LangSmith is retired**: it is a trace viewer for LLM developers, it sends data off the machine, and it cannot hold what the person meant or what should be fixed. `obs/trace.py` stays dormant (`MIRSAL_TRACE=none`) until this lands, then is removed with its docs.
 
 Written for Haitham and the LLM sessions that build it.
 

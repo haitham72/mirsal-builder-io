@@ -1,8 +1,8 @@
 # Office LAN: accounts, approval, credits and the admin bot
 
-**Status: planned (Haitham, 2026-10-04), not built.** It comes after the FastAPI migration, streaming chat and the ticket logger (the order is in the table below), because its sign-in, sessions and admin routes are FastAPI dependencies and pydantic models, and its notifications reuse the ticket logger's Telegram channel. It replaces the paused Google OAuth / hosting plan for now: the app stays on this PC and office colleagues reach it over the local network. `docs/deployment_plan.md` stays paused for anything public.
+**Steps 4-6 of [`plan.md`](../plan.md)**, after the ticket logger: sign-in, sessions and admin routes are FastAPI dependencies and pydantic models, and its notifications reuse the ticket logger's Telegram channel. The app stays on this PC and office colleagues reach it over the local network; public hosting (`deployment_plan.md`) stays paused.
 
-Written for Haitham and for the LLM sessions that implement it. Read first: `CLAUDE.md`, `docs/fastapi_plan.md`, `docs/tickets_plan.md`, `runtime/users.py`, `services/telegram.py`, `generation/jobs.py`, `docs/api.md` ("Accounts").
+Read first: `CLAUDE.md`, `docs/fastapi_plan.md`, `docs/tickets_plan.md`, `runtime/users.py`, `services/telegram.py`, `generation/jobs.py`, `docs/api.md` ("Accounts").
 
 ## 0. What Haitham asked (his words, condensed)
 
@@ -13,17 +13,9 @@ Written for Haitham and for the LLM sessions that implement it. Read first: `CLA
 5. **Credits:** every approved user gets 10, all spent through Haitham's Higgsfield account. **Never refilled** until Haitham approves a request in Telegram, which shows the name and **Approve / Reject / Ignore**.
 6. **Forgot password:** automated by the server, but gated by Haitham's approval. A user's details can be changed both in the dashboard and in Telegram.
 
-## 1. What already exists (build on it, do not rebuild it)
+## 1. Builds on
 
-| piece | where | state |
-|---|---|---|
-| accounts with roles `owner` / `member`, hashed tokens, `can_spend` | `runtime/users.py` (`UserStore`, `out/users.json`), `migrations/006_users.sql` | built; token sign-in only, no email or password |
-| owner-only routes, members see only their own batches, chats and jobs | `console/server.py` `_authorize`, `Console.visible` | built |
-| exact Host check (`127.0.0.1`, `localhost`, `[::1]`) and Origin check | `console/server.py` guards | built; **refuses a LAN address today** |
-| per-user rate limits (read/write per minute) | `console/server.py` `_wait` | built, active only for token users |
-| daily credit cap, price shown before every paid call | `generation/jobs.py` (`MIRSAL_DAILY_CREDITS`), rule 13 | built; process-wide, no per-user balance |
-| the Mirsal Telegram bot (token + Haitham's user id in Settings) | `services/telegram.py`, `out/telegram.json` | built; **sends only**, never reads replies |
-| one ledger line per paid call | `out/model_calls.jsonl`, Postgres `model_calls` | built; carries no user id |
+`runtime/users.py` (accounts, roles, hashed tokens; `out/users.json`), the Host / Origin guards and `_authorize` in `console/server.py`, the per-user rate limiter (`_wait`), `generation/jobs.py` (the price check and the paid queue), `services/telegram.py` (the Mirsal bot, which only sends today) and the paid-call ledger (`out/model_calls.jsonl`, Postgres `model_calls`). Extend them; do not rebuild them.
 
 ## 2. The design
 
@@ -85,19 +77,11 @@ Additive migrations, mirrored from `out/users.json` (the file stays the source o
 - `model_calls` gains `user_id` and `reserved`.
 - Every admin action is a row in `account_requests` or an `audit` line; the ticket logger links to them.
 
-## 4. Order of work (Haitham, 2026-10-04: "do these", then this)
+## 4. Steps (each its own commit, its doc updated in the same step)
 
-| # | work | doc | ends with |
-|---|---|---|---|
-| 1 | Variations layout | `engine-and-studio.md` "Batch groups" | **built** (`30c463a`) |
-| 2 | FastAPI + pydantic, in its planned stages, byte-compatible | `fastapi_plan.md` | the contract diff against `http_route_inventory.md` is empty; `serve --stdlib` keeps the old server for one release |
-| 3 | Streaming chat (SSE of the agent's steps, no more polling the whole session) | `fastapi_plan.md` §"After the migration" | a chat turn shows each step as it happens |
-| 4 | Ticket logger (Postgres, pydantic models, local model drafts), LangSmith retired | `tickets_plan.md` | a failure or a Report opens one ticket with its questions |
-| 5 | Office LAN: §2.1-§2.3, §2.6 | this file | a colleague signs in from another machine |
-| 6 | The Telegram admin bot: §2.4 | this file | approve / reject / role / password from the bot |
-| 7 | Credits per user: §2.5 | this file | a member spends from 10 credits and can request more |
-
-Each step is its own phase and commit (`HANDOFF.md`), with its doc updated in the same step (rule 12).
+1. **Accounts on the LAN** (§2.1-§2.3, §2.6): `serve --lan [--tls]`, email + password, *Waiting for approval*, Settings > People, forgot password. Done when a colleague signs in from another machine.
+2. **The Telegram admin bot** (§2.4). Done when approve / reject / role / new password work from the bot.
+3. **Credits per user** (§2.5). Done when a member spends from 10 credits and can request more.
 
 ## 5. Risks
 

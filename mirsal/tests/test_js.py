@@ -347,7 +347,7 @@ class ShellTests(unittest.TestCase):
         self.assertIn("data-act=fxopen", (ui / "editor.js").read_text(encoding="utf-8"), "a tool of Create")
         for route in ("/api/effects", "/estimate", "/video", "/add", "/plan"):
             self.assertIn(route, fx)
-        # docs/particles_plan.md section 4: the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes
+        # docs/particles.md section 4: the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes
         pt = (ui / "particles.js").read_text(encoding="utf-8")
         for route in ("/api/particles/${id}/preview", "/api/particles/${s.id}/render", "/api/particles/${id}/add"):
             self.assertIn(route, pt)

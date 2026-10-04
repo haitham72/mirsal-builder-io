@@ -1,4 +1,4 @@
-"""Particle sets `P###` over the real HTTP server (docs/particles_plan.md sections 3, 4 and 6): a set belongs to pack(s) or stands alone,
+"""Particle sets `P###` over the real HTTP server (docs/particles.md sections 3, 4 and 6): a set belongs to pack(s) or stands alone,
 *Use as particle set* saves what a run drew, unpicking never deletes a file, assign/unassign/duplicate are list edits, and a delete moves the
 folder to the trash with Restore (nothing is destroyed on a click). The engine half is `tests/test_particle_set.py`; nothing here reaches a provider."""
 import http.client
@@ -311,7 +311,7 @@ class SetRoutesTests(SetBase):
 
 
 class SetMoreTests(SetBase):
-    """*Generate more* (docs/particles_plan.md 4.8): price first (409 until `go`), an ordinary sheet job, and the cut cells are APPENDED to the set. Nothing existing is deleted or
+    """*Generate more* (docs/particles.md 4.8): price first (409 until `go`), an ordinary sheet job, and the cut cells are APPENDED to the set. Nothing existing is deleted or
     overwritten, an unpicked cell stays unpicked, and a set made by hand (no run behind it) can gain cells too. Real server, fake CLI: nothing is spent."""
 
     def made(self, **body):
@@ -503,7 +503,7 @@ class SetMoreTests(SetBase):
 
 
 class SetBurstTests(SetBase):
-    """A burst is made from a SET's picked cells for a PACK (docs/particles_plan.md 4.6-4.7): `preview` (a looping WebP), `render` (the 512 px WebM, stored under `renders/` with its checks)
+    """A burst is made from a SET's picked cells for a PACK (docs/particles.md 4.6-4.7): `preview` (a looping WebP), `render` (the 512 px WebM, stored under `renders/` with its checks)
     and `add` (an animated sticker in the pack, tagged with the pack's emoji). Only Telegram's own limits may make a render FAILED (rule 10). Nothing here spends: the simulation is the engine's own."""
 
     def made(self, **body):

@@ -65,4 +65,4 @@ A "better scheme" was looked for and not found: putting `Q###` in the file name 
 
 ## 7. Open: what happens next (former `plan.md` 16.3, P14)
 
-**Nothing is built.** The idea is to reuse a liked sheet, prepare actions and one priced card, then create one async lane per action. Its go-ahead and four choices remain W27 in `waiting-for-haitham.md`. Sticker-owned particle sets, detached retention and ordinary animated-sticker delivery are settled in `particles_plan.md`; per-emoji motion remains W25. Until burst creation is authorized, chat still answers that many packs of the same character are unsupported (`agent/editroute.unsupported`).
+**Nothing is built.** The idea is to reuse a liked sheet, prepare actions and one priced card, then create one async lane per action. Its go-ahead and four choices remain W27 in `waiting-for-haitham.md`. Sticker-owned particle sets, detached retention and ordinary animated-sticker delivery are settled in `particles.md`; per-emoji motion remains W25. Until burst creation is authorized, chat still answers that many packs of the same character are unsupported (`agent/editroute.unsupported`).

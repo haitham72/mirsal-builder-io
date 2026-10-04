@@ -14,25 +14,9 @@
 **2026-10-04:** the local HTTP migration follows particle acceptance; the rest of deployment remains paused. Its executable spec is `fastapi_plan.md`.
 This file lives on the `deployment` branch only (`git switch deployment`), never on `merge/generate-advanced`. Every phase is still scheduled work that becomes real only when it is built, tested and documented like any other change (`CLAUDE.md` rules 3, 8, 11, 12, 13).
 
-## 0. What already exists on this branch (map: `deploy/README.md`)
+## 0. Builds on
 
-| Plan item | Prepared | Where | Tested |
-|---|---|---|---|
-| Phase 0 (FastAPI) | **a FastAPI gateway in front of the unchanged engine** (strangler instead of a rewrite: every route and every existing test keeps working; the gateway adds the public-name rules, `/healthz`, `/readyz`, the rate limit, SSE pass-through) | `deploy/gateway/` | `mirsal/tests/test_gateway.py` (12) |
-| Phase 1 (Google sign-in) | JWT verification (Supabase, RS256/ES256 by JWKS, HS256 optional, Google only), cookie session, `/auth/*`, the engine's **trusted-gateway login** (a member per Google subject, created on first sight) | `deploy/gateway/auth.py`, `runtime/users.py` | `test_gateway.py`, `tests/test_gateway_login.py` |
-| the two tables (+ credits) | `009_accounts`, `010_user_analysis` (closed event vocabulary, forbidden keys refused, `purge_old_ip`), `011_credit_ledger` (atomic reserve / settle / refund) | `deploy/supabase/migrations/` | applied twice + exercised on a scratch Postgres |
-| Phase 4 (Telegram never twice) | **built in the engine**: pack fingerprint, export record, `mode = once | replace | new_set` | `services/telegram.py`, `media/library.py` | `tests/test_telegram.py::NeverTwice` |
-| Phase 6 (hosting files) | Dockerfile (VP9 checked at build), `start.py`, `compose.yml` (VM option), `render.yaml` (web + worker), `env.example` | `deploy/docker/`, `deploy/render.yaml`, `deploy/env.example` | the entry point smoke-run locally; the image itself NOT built |
-| Phase 2 (per-person credits) | the SQL (ledger + functions) | `deploy/supabase/migrations/011_credit_ledger.sql` | SQL only; the engine code that calls it is NOT written |
-| Phase 3, 5 | nothing yet (the `user_analysis` table exists; the writer, the notice, the retention job, the per-person LangGraph checkpointer do not) | | |
-
-Also done on `merge/generate-advanced` and inherited here: the idempotency tests of section 14 are green again (the suite had been writing its keys into the real Postgres through the real `.env`; `tests/__init__.py` pins `MIRSAL_DB_WRITE=0`), the library files are grouped per batch and
-named by `runtime/names.py`, the chat has an Auto / Local / Cloud engine choice, the agentic creator exists (one click to Telegram), and LangSmith is finished.
-
-Read first: `docs/waiting-for-haitham.md` and `docs/backlog.md` (what is open), `CLAUDE.md` (the rules), `docs/api.md` (the contract that must survive), `docs/store-and-search.md` (Postgres, Redis, assets), `docs/generation.md`
-(the Higgsfield path and the credit ledger), `docs/agent-and-chat.md` (the agent, memory and the spend guard).
-
----
+The prepared files are mapped in `deploy/README.md`; the app's own pieces it extends are in the area docs (`api.md`, `store-and-search.md`).
 
 ## 1. The seven asks
 
@@ -355,13 +339,6 @@ Dependencies: 0 before everything; 1 before 2, 3, 5; 2 before any public user; 4
 | ffmpeg/VP9 missing on the platform | encoding silently fails | `doctor` checks `libvpx-vp9` at boot; the platform is chosen so the binary exists |
 | Free-tier database pauses | Supabase free projects pause after inactivity; the first request after a pause is slow | a scheduled ping from a platform cron, or accept the latency |
 | Rate limits per IP break behind a proxy | everyone shares one IP | key on `u_id` once signed in, hashed IP only for anonymous calls |
-
----
-
-## 14. Known-red tests this plan inherited (FIXED 2026-10-02)
-
-`test_a_repeated_idempotency_key_never_starts_a_second_paid_job` and `test_two_requests_in_flight_at_once_with_one_key_start_exactly_one_job` were red because the suite shared state with the real Postgres: the real `mirsal/.env` sets `MIRSAL_DB_WRITE=1`, so
-`idem_store` kept every test's `Idempotency-Key` in the developer's database and the next run was answered from it. `tests/__init__.py` now pins `MIRSAL_DB_WRITE=0` and `MIRSAL_TRACE=none`. The guard itself was never broken.
 
 ---
 
