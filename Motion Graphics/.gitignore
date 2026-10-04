@@ -1,0 +1,6 @@
+# renders, re-made by app/scripts/render.ts and analysis/sfx_mix.py
+out/
+# the alignment model (95 MB): fetched once, see README "Layout of this folder"
+analysis/models/*.onnx
+__pycache__/
+.DS_Store
