@@ -255,6 +255,12 @@ class Library:
         g = str((source or {}).get("generation") or "")
         return g if _GENERATION.match(g) else "own"
 
+    def _group_dir(self, source: dict | None) -> str:
+        """The folder a NEW file goes to: its batch's folder name on disk (`G111-dog_as_banana-...` for a labelled batch, `G110` for an older one), else `own`.
+        The record keeps the path, so nothing ever has to work the label out again."""
+        g = self.group_of(source)
+        return pl.gen_dir(self.root.parent, int(g[1:])).name if g != "own" else g
+
     @staticmethod
     def new_file_name(media: str, name: str, pack_slug: str, ext: str, created: float, sid: str, gen_file_name: str | None = None) -> str:
         """`img-falcon_stickers-open_arms-gold_pack-20261002T133320-a3f9c1.png`. Subject and action come from the generator's own file name when there is one, else from the sticker's name."""
@@ -477,7 +483,7 @@ class Library:
             media = "vid" if kind == "animated" else "img"
             base = slug(name) or "sticker"
             sid, now = uuid.uuid4().hex[:8], time.time()
-            fname = f"{self.group_of(source)}/" + self.new_file_name(media, name or base, p["slug"], ext, now, sid, gen_file_name)
+            fname = f"{self._group_dir(source)}/" + self.new_file_name(media, name or base, p["slug"], ext, now, sid, gen_file_name)
             (self.files / fname).parent.mkdir(parents=True, exist_ok=True)
             (self.files / fname).write_bytes(data)
             s = {"id": sid, "name": (name or base)[:60], "file": fname, "type": kind, "emoji": emoji or "🙂",
@@ -503,7 +509,7 @@ class Library:
         rel = t.get("webm") if kind == "animated" else t.get("png")
         if not rel or (kind == "animated" and t.get("anim_status") != "READY") or (kind != "animated" and t.get("status") != "READY"):
             raise LibraryError("that sticker is not READY" + (" (animate it first)" if kind == "animated" else ""), 409)
-        f = Path(out) / st["generation_id"] / rel
+        f = pl.gen_dir(Path(out), gid) / rel
         if not f.is_file():
             raise LibraryError("sticker file is missing", 404)
         s = self.add_bytes(pid, f.read_bytes(), f.suffix.lstrip("."), (name or "").strip()[:60] or (t.get("title") or readable_name(t.get("key") or f.stem)), kind, (emoji or "").strip()[:20] or t.get("emoji") or "🙂",

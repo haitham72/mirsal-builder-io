@@ -22,6 +22,7 @@ from mirsal.services import llm
 from mirsal.generation import tasks as _tasks
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
+from mirsal.flow import pipeline as pl
 from tests import synth
 from tests.test_golden import shape_sheet
 
@@ -861,7 +862,7 @@ class LiveConsoleTests(Base):
         self.assertEqual(s, 409, j)                                                                            # G3 not approved: a human decides first
         self.assertIn("G3", j["error"])
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/review", {"gate": "video_sheet", "decision": "APPROVE", "index": "A1"})[0], 200)
-        base = self.out / st["generation_id"]
+        base = pl.out_path(self.out, st["generation_id"])
         entry = next(v for v in self.req("GET", f"/api/generations/{gid}")[1]["video_sheets"] if v["id"] == "A1")
         mp4 = self.tmp / "kling.mp4"
         synth.make_layout_video(mp4, np.array(Image.open(base / entry["file"]).convert("RGB")), json.loads((base / entry["layout"]).read_text()), size=600, frames=45)
@@ -881,8 +882,8 @@ class LiveConsoleTests(Base):
         self.assertEqual(next(v for v in final["video_sheets"] if v["id"] == "A1")["status"], "SLICED")
         # a light preview of the returned video exists for the browser, next to the full-size original
         sheet = next(v for v in final["video_sheets"] if v["id"] == "A1")
-        self.assertTrue((self.out / st["generation_id"] / sheet["video"]).is_file())
-        self.assertTrue(sheet.get("preview") and (self.out / st["generation_id"] / sheet["preview"]).is_file())
+        self.assertTrue((pl.out_path(self.out, st["generation_id"]) / sheet["video"]).is_file())
+        self.assertTrue(sheet.get("preview") and (pl.out_path(self.out, st["generation_id"]) / sheet["preview"]).is_file())
         # changing the edge afterwards never loses the video: it is re-applied to the stored video, no new job and no credits
         jobs_before = len(self.req("GET", "/api/jobs")[1]["jobs"])
         s, r = self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 6, "erode": 1, "reslice": True})

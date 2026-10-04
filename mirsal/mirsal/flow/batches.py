@@ -35,9 +35,9 @@ def remove(out: Path, gid: int, by: str = "human") -> dict:
     busy = [j["id"] for j in jobs.list(out) if j.get("status") in OPEN_JOBS and _gid(j) == gid]
     if busy:
         raise pl.PipelineError(f"G{gid:03d} cannot be removed while {', '.join(busy)} is still working on it. Wait for it to finish, then remove the batch.", 409)
-    dest = pl.trash_batches_dir(out) / f"G{gid:03d}"
-    if dest.exists():
+    if trash_entry(out, gid).exists():
         raise pl.PipelineError(f"G{gid:03d} is already in the trash.", 409)
+    dest = pl.trash_batches_dir(out) / src.name                 # the folder keeps its label (G111-dog_as_banana-...) in the trash and back
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.move(str(src), str(dest))
     meta = {"id": f"G{gid:03d}", "number": gid, "removed": round(time.time(), 3), "by": by}
@@ -48,11 +48,11 @@ def remove(out: Path, gid: int, by: str = "human") -> dict:
 def restore(out: Path, gid: int) -> dict:
     """Put a removed batch back under the same name. Never overwrites: if something is there now, it says so and the removed one stays safe."""
     out = Path(out)
-    src = pl.trash_batches_dir(out) / f"G{gid:03d}"
+    src = trash_entry(out, gid)
     if not src.is_dir():
         raise pl.PipelineError(f"G{gid:03d} is not in the trash.", 404)
-    dest = pl.gen_dir(out, gid)
-    if dest.exists():
+    dest = out / src.name
+    if dest.exists() or pl.gen_dir(out, gid).exists():
         raise pl.PipelineError(f"G{gid:03d} cannot be restored: a batch with that number exists now.", 409)
     shutil.move(str(src), str(dest))
     (src.parent / f"G{gid:03d}.meta.json").unlink(missing_ok=True)
@@ -70,7 +70,7 @@ def list_removed(out: Path) -> list[dict]:
         except (OSError, ValueError):
             pass
         try:
-            r = json.loads((pl.trash_batches_dir(Path(out)) / f"G{gid:03d}" / "result.json").read_text(encoding="utf-8"))
+            r = json.loads((trash_entry(out, gid) / "result.json").read_text(encoding="utf-8"))
             meta["subject"] = (r.get("source") or {}).get("subject") or r.get("task_slug")
         except (OSError, ValueError):
             meta["subject"] = None
@@ -80,7 +80,7 @@ def list_removed(out: Path) -> list[dict]:
 
 # ---- purge: the real delete of a batch that is already in the trash (flow/purge.py is the caller; the database rows are store/purge_rows.py's)
 def trash_entry(out: Path, gid: int) -> Path:
-    return pl.trash_batches_dir(Path(out)) / f"G{gid:03d}"
+    return pl.labelled_dir(pl.trash_batches_dir(Path(out)), f"G{gid:03d}")
 
 
 def _meta_file(out: Path, gid: int) -> Path:

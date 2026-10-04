@@ -113,7 +113,7 @@ clickable, can be opened, brought back or allowed.
 
 ## Jobs (`generation/jobs.py`)
 
-`out/jobs/J###.json` (`REQUESTED|CLAIMED|DONE|FAILED|TIMEOUT`) as before, plus `params`, `cost_estimate` and, for sheets, the `generation` it started. `fulfil(out, jid)`:
+`out/jobs/J###.json` (`REQUESTED|CLAIMED|DONE|FAILED|TIMEOUT`; a job created since 2026-10-04 is labelled `J058-<subject>-<kind>.json` with its files in `J058-<subject>-<kind>/`, the subject from its task, else its batch, else the request's label; the id stays `J058` and `jobs._path` / `jobs.job_dir` find either form; J001-J057 keep their bare names) as before, plus `params`, `cost_estimate` and, for sheets, the `generation` it started. `fulfil(out, jid)`:
 
 1. resolves the selection through the catalog (and refuses references the model cannot take);
 2. `generate cost` (and the optional daily cap `MIRSAL_DAILY_CREDITS`, refused before anything is paid);

@@ -18,7 +18,7 @@ import cv2
 from mirsal.console.server import MEMBER_GEN_POST, serve
 from mirsal.engine.config import EngineConfig
 from mirsal.engine import verify
-from mirsal.flow import gates
+from mirsal.flow import gates, pipeline as pl
 from tests import synth
 from tests.test_golden import Api, build_inputs as golden_inputs, shape_sheet
 
@@ -135,8 +135,8 @@ class StillsTests(unittest.TestCase):
         self.assertIn("allowed by you", chk["detail"])
         self.assertEqual(s3["metrics"]["waived"], ["inside_cell"])
         self.assertNotIn("inside_cell", s3["metrics"].get("warnings", []))
-        self.assertTrue(s3["png"] and (self.rig.tmp / "out" / g["generation_id"] / s3["png"]).is_file())
-        self.assertTrue((self.rig.tmp / "out" / g["generation_id"] / "source" / "plain" / "S3.png").is_file())      # the video sheet can be built from it
+        self.assertTrue(s3["png"] and (pl.out_path(self.rig.tmp / "out", g["generation_id"]) / s3["png"]).is_file())
+        self.assertTrue((pl.out_path(self.rig.tmp / "out", g["generation_id"]) / "source" / "plain" / "S3.png").is_file())      # the video sheet can be built from it
         self.assertEqual(s3["review"]["still"], "PENDING")                                    # an ordinary pending still now
         h = next(x for x in reversed(s3["history"]) if x["actor"] == "human")
         self.assertEqual((h["stage"], h["decision"], h["reason"], h["detail"]["override"]), ("still", "APPROVE", "allowed anyway: inside_cell", ["inside_cell"]))

@@ -59,7 +59,7 @@ For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` 
 - **Never open or judge media.** Judge with Python (`ffprobe`, the verifier, `measure-cells`
   when it exists, file sizes). Haitham looks at the pictures.
 - **Never write inside `inputs/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`;
-  `job done` copies the file into `out/jobs/<J>/`.
+  `job done` copies the file into the job's folder (`out/jobs/J057/`, or the labelled `out/jobs/J058-<subject>-<kind>/` of a newer job: `jobs.job_dir`).
 - **Ledger.** Every claim/done/fail appends to `out/model_calls.jsonl` (what, parameters,
   latency, cost, output path). Postgres mirrors it as `model_calls`.
 

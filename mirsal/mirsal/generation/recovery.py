@@ -40,7 +40,7 @@ def check(out, jid, hf=None, on_done=None, by="local"):
         ext = Path(str(url).split("?")[0]).suffix.lower()
         if ext not in (".png", ".jpg", ".jpeg", ".webp", ".mp4", ".webm"):
             ext = ".mp4" if job["kind"] == "video" else ".png"
-        tmp = jobs.jobs_dir(out) / job["id"] / ("checked" + ext)
+        tmp = jobs.job_dir(out, job["id"]) / ("checked" + ext)
         hf.download(url, tmp)
         with jobs._paid(out):
             current = jobs.read(out, jid)

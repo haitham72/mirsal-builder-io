@@ -12,6 +12,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from mirsal.flow import pipeline as pl
 from mirsal.generation import higgsfield, jobs
 from mirsal.runtime import cache as cachemod
 from mirsal.console.server import serve
@@ -190,7 +191,7 @@ class UsersServerTests(unittest.TestCase):
     # ---- what a member owns ----------------------------------------------------------------------------------------------
     def test_batches_are_stamped_with_their_owner_and_hidden_from_strangers(self):
         gid = self.make_batch(self.A)
-        res = json.loads((self.tmp / "out" / f"G{gid:03d}" / "result.json").read_text(encoding="utf-8"))
+        res = json.loads((pl.out_path(self.tmp / "out", f"G{gid:03d}") / "result.json").read_text(encoding="utf-8"))
         self.assertEqual(res["owner"], self.alice["id"])
         g = f"/api/generations/{gid}"
         self.assertEqual(self.req("GET", g, headers=self.A)[0], 200)
@@ -202,7 +203,7 @@ class UsersServerTests(unittest.TestCase):
         self.assertEqual(self.req("POST", g + "/reveal", {}, self.A)[0], 403)                         # opens a window on the owner's machine
         self.assertEqual(self.req("POST", g + "/add", {"pack_id": "x"}, self.A)[0], 403)              # into the owner's library
         self.assertEqual(self.req("GET", g + "/edge_preview?index=1", headers=self.A)[0], 200)
-        png = next(f for f in (self.tmp / "out" / f"G{gid:03d}" / "slices").glob("*.png"))
+        png = next(f for f in (pl.out_path(self.tmp / "out", f"G{gid:03d}") / "slices").glob("*.png"))
         url = f"/out/G{gid:03d}/slices/{png.name}"
         self.assertEqual(self.req("GET", url, headers=self.A)[0], 200)
         self.assertEqual(self.req("GET", url, headers=self.B)[0], 404)
@@ -243,7 +244,7 @@ class UsersServerTests(unittest.TestCase):
 
     def test_signed_links_are_for_files_the_signer_may_see_and_work_without_a_header(self):
         gid = self.make_batch(self.A)
-        png = next(f for f in (self.tmp / "out" / f"G{gid:03d}" / "slices").glob("*.png"))
+        png = next(f for f in (pl.out_path(self.tmp / "out", f"G{gid:03d}") / "slices").glob("*.png"))
         key = f"G{gid:03d}/slices/{png.name}"
         s, link = self.req("POST", "/api/assets/sign", {"key": key, "ttl": 30}, self.A)
         self.assertEqual(s, 200)
@@ -297,7 +298,7 @@ class UsersServerTests(unittest.TestCase):
         self.c.wait_jobs()
         j = self.req("GET", f"/api/chat/sessions/{sid}", headers=self.A)[1]
         card = next(c for m in j["messages"] for c in (m.get("cards") or []) if c["type"] == "generation")
-        res = json.loads((self.tmp / "out" / card["generation"] / "result.json").read_text(encoding="utf-8"))
+        res = json.loads((pl.out_path(self.tmp / "out", card["generation"]) / "result.json").read_text(encoding="utf-8"))
         self.assertEqual(res["owner"], self.alice["id"])                  # the batch the chat started is Alice's, though it ran in another thread
         self.assertEqual(self.req("GET", f"/api/generations/{res['number']}", headers=self.B)[0], 404)
         self.assertEqual(self.req("POST", f"/api/chat/sessions/{sid}/delete", {}, self.A)[0], 200)

@@ -37,11 +37,11 @@ UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js"
 # usage and balance, tasks, the operator's job actions and the user list. Generation paths are checked for ownership too (a stranger's batch is a 404).
 _GEN_PATH = re.compile(r"^/api/generations/(\d+)(?:/(\w+))?$")
 NO_ROUTE = "no such route"                    # what a URL the server does not serve answers (a missing batch / pack / job says so in its own words); tests/test_openapi.py probes every documented route for it
-_BATCH_DIR = re.compile(r"^G(\d+)$")
+_BATCH_DIR = re.compile(r"^G(\d+)(?:-[A-Za-z0-9_-]+)?$")       # a batch folder: the bare G110 of older batches or the labelled G111-dog_as_banana-... (runtime/names.folder)
 _RID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 _LOG_IDS = (re.compile(r"^/api/generations/(\d+)"), "generation_id", "G"), (re.compile(r"^/api/chat/sessions/(S\d+)"), "session_id", "")
 _SRC_PATH = re.compile(r"^/src/(\d+)/")
-_KEY_PATH = re.compile(r"^G(\d+)/")
+_KEY_PATH = re.compile(r"^G(\d+)(?:-[A-Za-z0-9_-]+)?/")
 MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck"}
 MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
 MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs"}
@@ -53,7 +53,7 @@ def _out_batch(out: Path, path: str) -> int | None:
     """The generation number a `/out/...` URL lands in once resolved, or None when it lands outside every `G###/` folder (users.json, telegram.json, refs/)."""
     root = out.resolve()
     try:
-        parts = (root / path[5:]).resolve().relative_to(root).parts
+        parts = pl.out_path(root, path[5:]).resolve().relative_to(root).parts
     except (ValueError, OSError):
         return None
     m = _BATCH_DIR.match(parts[0]) if len(parts) > 1 else None
@@ -1173,7 +1173,7 @@ def make_handler(c: Console):
                 return self._file(f)
             if path.startswith("/out/"):
                 root = c.out.resolve()
-                f = (root / path[5:]).resolve()
+                f = pl.out_path(root, path[5:]).resolve()                # /out/G111/... reaches the labelled folder G111-dog_as_banana-.../
                 if root not in f.parents:
                     raise pl.PipelineError("forbidden path", 400)
                 if not f.is_file():

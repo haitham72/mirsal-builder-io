@@ -82,7 +82,7 @@ class CreatorThroughTheServer(Base):
         self.assertEqual(len(stickers), 9)
         lib = self.req("GET", "/api/library")[1]
         self.assertEqual([len(p["stickers"]) for p in lib["packs"]], [9])
-        self.assertTrue(lib["packs"][0]["stickers"][0]["file"].startswith("G001/img-"), "library files are grouped per batch and carry the new names")
+        self.assertRegex(lib["packs"][0]["stickers"][0]["file"], r"^G001-[a-z0-9_]+-\d{8}T\d{6}/img-", "library files are grouped per batch (its labelled folder name) and carry the new names")
         last = self.req("GET", f"/api/chat/sessions/{sid}")[1]["messages"][-1]
         self.assertIn("t.me/addstickers", last["text"])
 

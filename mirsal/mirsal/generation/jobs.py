@@ -10,6 +10,7 @@ import contextlib
 import hashlib
 import json
 import os
+import re
 import shutil
 import threading
 import time
@@ -53,21 +54,55 @@ def _now() -> float:
 
 
 def next_id(out: Path) -> str:
+    from ..runtime import names
     n = 0
-    d = jobs_dir(out)
-    for f in d.glob("J*.json"):
-        try:
-            n = max(n, int(f.stem[1:]))
-        except ValueError:
-            pass
+    for f in jobs_dir(out).glob("J*.json"):
+        i = names.folder_id(f.stem)             # J057.json, or J058-dog_as_banana-sheet.json since 2026-10-04
+        if i and i[0] == "J":
+            n = max(n, int(i[1:]))
     return f"J{n + 1:03d}"
 
 
 def _path(out: Path, jid: str) -> Path:
-    p = (jobs_dir(out) / f"{jid.upper()}.json").resolve()
-    if p.parent != jobs_dir(out).resolve() or not p.is_file():
-        raise JobError(f"no job {jid.upper()}", 404)
+    """The file of job `jid`: the bare `J057.json` of an older job, else its labelled `J058-dog_as_banana-sheet.json`."""
+    jid = str(jid or "").upper()
+    if not re.fullmatch(r"J\d{3,}", jid):
+        raise JobError(f"no job {jid}", 404)
+    d = jobs_dir(out)
+    p = d / f"{jid}.json"
+    if not p.is_file():
+        p = next((f for f in sorted(d.glob(f"{jid}-*.json")) if f.is_file()), p)
+    if p.resolve().parent != d.resolve() or not p.is_file():
+        raise JobError(f"no job {jid}", 404)
     return p
+
+
+def job_dir(out: Path, jid: str) -> Path:
+    """The folder of job `jid`'s files (result, download): named like its json file, `J058-dog_as_banana-sheet/` (bare `J057/` for an older job)."""
+    try:
+        return jobs_dir(out) / _path(out, jid).stem
+    except JobError:
+        return jobs_dir(out) / str(jid).upper()
+
+
+def _label(out: Path, kind: str, task: str | None, generation: str | None, request: dict | None) -> list[str]:
+    """What a new job's file name says after its id: the subject (the task's, else the batch's, else the request's label) and the kind."""
+    subject = None
+    try:
+        if task:
+            from . import tasks as _t
+            subject = _t.read_task(out, str(task)).get("name_key")
+    except Exception:
+        pass
+    if not subject and generation:
+        try:
+            from ..flow import pipeline as pl
+            subject = pl.read_result(Path(out), int(str(generation).upper().lstrip("G")))["task_slug"]
+        except Exception:
+            pass
+    if not subject:
+        subject = (request or {}).get("label")
+    return [w for w in (subject, kind) if w]
 
 
 def _write(p: Path, job: dict) -> dict:
@@ -114,8 +149,9 @@ def create(out: Path, kind: str, task: str | None = None, generation: str | None
            request: dict | None = None, provider: str = PROVIDER) -> dict:
     if kind not in KINDS:
         raise JobError(f"kind must be one of {KINDS}")
+    from ..runtime import names
     jid = next_id(out)
-    return _write(jobs_dir(out) / f"{jid}.json", {
+    return _write(jobs_dir(out) / f"{names.folder(jid, *_label(out, kind, task, generation, request))}.json", {
         "id": jid, "kind": kind, "task": task, "generation": generation,
         "provider": provider, "model": None,
         "request": request or {},
@@ -158,7 +194,7 @@ def done(out: Path, jid: str, file: str, model: str, cost=None) -> dict:
         raise JobError(f"result file not found: {file}", 400)
     if not str(model or "").strip():
         raise JobError("the model name is required", 400)
-    dest = jobs_dir(out) / job["id"] / ("result" + src.suffix.lower())
+    dest = job_dir(out, job["id"]) / ("result" + src.suffix.lower())
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, dest)
     digest = hashlib.sha256(dest.read_bytes()).hexdigest()
@@ -441,7 +477,7 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
                 res = _wait_with_retry(hf, ticket, timeout_s=max(120, min(timeout_s(), 3600) - 60))
                 update(out, jid, stage="downloading")
                 ext = (res["result_url"].split("?")[0].rsplit(".", 1)[-1] or "bin")[:5].lower()
-                tmp = jobs_dir(out) / jid.upper() / f"download.{ext}"
+                tmp = job_dir(out, jid) / f"download.{ext}"
                 hf.download(res["result_url"], tmp)
                 with _paid(out):
                     job = done(out, jid, str(tmp), model, cost=est)         # under the lock: the next cap check reads a spend that includes this one

@@ -86,6 +86,25 @@ def parse(name: str) -> dict | None:
     return None
 
 
+FOLDER = re.compile(r"^(?P<id>[GJ]\d{3,})(?:-(?P<label>[A-Za-z0-9_-]+))?$")
+
+
+def folder(ident: str, *words, when: float | None = None) -> str:
+    """A batch or job folder on disk: the id, then what it is and when, so a folder list reads by itself (Haitham, 2026-10-04):
+    `G111-dog_as_banana-20261005T093012`, `J058-dog_as_banana-sheet`. The id stays the address everywhere else (API, URLs, chat, Postgres);
+    only the disk carries the label, and `folder_id` reads the id back. Batches and jobs made before keep their bare `G110` / `J057`, never renamed."""
+    parts = [ident] + [s for s in (slug(w, SUBJECT_MAX) for w in words) if s]
+    if when is not None:
+        parts.append(stamp(when))
+    return "-".join(parts)
+
+
+def folder_id(name: str) -> str | None:
+    """'G111-dog_as_banana-20261005T093012' -> 'G111', 'G110' -> 'G110'; None for anything else."""
+    m = FOLDER.match(str(name or ""))
+    return m["id"] if m else None
+
+
 def readable(name: str) -> str:
     """'Open arms' for a name of either convention, '' if it fits neither."""
     p = parse(name)

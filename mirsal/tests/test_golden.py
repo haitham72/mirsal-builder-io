@@ -16,6 +16,7 @@ from PIL import Image
 
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
+from mirsal.flow import pipeline as pl
 from tests import synth
 
 
@@ -113,7 +114,7 @@ class Api(unittest.TestCase):
         aid = j["sheet"]
         st = self.req("GET", f"/api/generations/{gid}")[1]
         e = next(v for v in st["video_sheets"] if v["id"] == aid)
-        base = self.tmp / "out" / st["generation_id"]
+        base = pl.out_path(self.tmp / "out", st["generation_id"])
         s, j = self.req("POST", f"/api/generations/{gid}/video_sheet/{aid}/video?name=v.mp4", raw=b"x")
         self.assertEqual(s, 409, j)                                        # G3 not approved yet
         self.review(gid, "video_sheet", "APPROVE", aid)
@@ -136,7 +137,7 @@ class GoldenPathTests(Api):
             self.assertEqual(s["history"][0]["actor"], "python")
         self.assertEqual((g["gate"]["active"], g["template_id"]), ("still", "sheet_3x3"))       # pressing Generate approved the plan (G1)
         self.assertEqual(g["reviews"]["plan"]["note"], "approved by pressing Generate")
-        self.assertTrue((self.tmp / "out" / g["generation_id"] / "source" / "plain" / "S5.png").exists())
+        self.assertTrue((pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "plain" / "S5.png").exists())
 
         # gate order, server side
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 409)       # no plan approval, no still decided
@@ -192,7 +193,7 @@ class GoldenPathTests(Api):
         # the final WEBMs have the outline exactly once (12 px ring, not 24)
         from mirsal.engine import ffmpeg as ff
         for i in (3, 4, 7, 8, 9):
-            a = ff.decode_alpha(self.tmp / "out" / g["generation_id"] / g["stickers"][i - 1]["webm"], 2)[0]
+            a = ff.decode_alpha(pl.out_path(self.tmp / "out", g["generation_id"]) / g["stickers"][i - 1]["webm"], 2)[0]
             opaque = a[..., 3] > 127
             subject = opaque & ~((a[..., :3].min(-1) > 235))
             dist = cv2.distanceTransform((~subject).astype(np.uint8), cv2.DIST_L2, 3)
@@ -247,7 +248,7 @@ class GoldenPathTests(Api):
 
     def test_the_outline_is_a_choice(self):
         """The white die-cut stroke is not forced: 0 gives the plain sticker, a width gives that stroke, both are stored with the generation."""
-        alpha = lambda g, rel: np.array(Image.open(self.tmp / "out" / g["generation_id"] / rel).convert("RGBA"))[..., 3]
+        alpha = lambda g, rel: np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / rel).convert("RGBA"))[..., 3]
         opaque = lambda a: int((a > 127).sum())
         gid0, g0 = self.new("create a blob for school", outline=0)
         gid12, g12 = self.new("create a blob for school")
@@ -266,16 +267,16 @@ class GoldenPathTests(Api):
         marks animations STALE so Animate redraws them. Bad values never touch the files."""
         from mirsal.engine.render import apply_edge
         gid, g = self.new("create a blob for school")
-        before = {s["png"]: (self.tmp / "out" / g["generation_id"] / s["png"]).read_bytes() for s in g["stickers"]}
-        plain_a = np.array(Image.open(self.tmp / "out" / g["generation_id"] / "source" / "plain" / "S1.png").convert("RGBA"))[..., 3]
+        before = {s["png"]: (pl.out_path(self.tmp / "out", g["generation_id"]) / s["png"]).read_bytes() for s in g["stickers"]}
+        plain_a = np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "plain" / "S1.png").convert("RGBA"))[..., 3]
         s, j = self.req("POST", f"/api/generations/{gid}/appearance", {"erode": 2})
         self.assertEqual(s, 200, j)
         self.assertEqual((j["outline_px"], j["erode_px"], j["rerendered"]), (12, 2, 9))
         g = self.req("GET", f"/api/generations/{gid}")[1]
         self.assertEqual((g["outline_px"], g["erode_px"]), (12, 2))
-        after = np.array(Image.open(self.tmp / "out" / g["generation_id"] / g["stickers"][0]["png"]).convert("RGBA"))
+        after = np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / g["stickers"][0]["png"]).convert("RGBA"))
         ring_free = int((((after[..., :3].min(-1) < 128) & (after[..., 3] > 127)).sum()))
-        plain_rgb = np.array(Image.open(self.tmp / "out" / g["generation_id"] / "source" / "plain" / "S1.png").convert("RGBA"))[..., :3]
+        plain_rgb = np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "plain" / "S1.png").convert("RGBA"))[..., :3]
         plain_dark = int(((plain_rgb.min(-1) < 128) & (plain_a > 127)).sum())
         self.assertLess(ring_free, plain_dark)                                 # erosion trimmed fringe, what remains is mostly the ring
         solid = (plain_a > 200)
@@ -285,7 +286,7 @@ class GoldenPathTests(Api):
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"erode": 99})[0], 400)
         s, j = self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 0, "erode": 0})
         self.assertEqual(s, 200, j)
-        self.assertTrue((np.array(Image.open(self.tmp / "out" / g["generation_id"] / g["stickers"][0]["png"]).convert("RGBA"))[..., 3]
+        self.assertTrue((np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / g["stickers"][0]["png"]).convert("RGBA"))[..., 3]
                                  == plain_a).all())                                            # outline 0 + erode 0 = the plain twin
         # the subject renders exactly once through alpha, even on white: composited over white == white where transparent
         fin = apply_edge(np.full((4, 4, 3), 128.0, np.float32), np.pad(np.ones((2, 2)), 1)[..., None].reshape(4, 4) / 1.0, 4, 0)
@@ -443,8 +444,8 @@ class GoldenPathTests(Api):
         aid = j["sheet"]
         self.review(gid, "video_sheet", "APPROVE", aid)
         other = self.tmp / "other.mp4"
-        layout = json.loads((self.tmp / "out" / g["generation_id"] / "video_sheet" / aid / "layout.json").read_text())
-        synth.make_layout_video(other, np.array(Image.open(self.tmp / "out" / g["generation_id"] / "video_sheet" / aid / "sheet.png").convert("RGB"))[::-1, ::-1].copy(), layout, size=600, frames=30)
+        layout = json.loads((pl.out_path(self.tmp / "out", g["generation_id"]) / "video_sheet" / aid / "layout.json").read_text())
+        synth.make_layout_video(other, np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / "video_sheet" / aid / "sheet.png").convert("RGB"))[::-1, ::-1].copy(), layout, size=600, frames=30)
         s, j = self.req("POST", f"/api/generations/{gid}/video_sheet/{aid}/video", raw=other.read_bytes())
         self.assertEqual(s, 202)
         g = self.wait(gid, lambda x: x["video_sheets"][0]["status"] in ("SLICED", "VIDEO_BLOCKED"))

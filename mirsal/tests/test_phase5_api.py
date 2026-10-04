@@ -11,6 +11,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from mirsal.flow import pipeline as pl
 from mirsal.generation import higgsfield
 from mirsal.runtime import cache as cachemod
 from mirsal.console.server import serve
@@ -114,7 +115,7 @@ class Phase5Tests(unittest.TestCase):
         s, r = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "variant": 1})
         gid = r["id"]
         self.c.wait_jobs()
-        res = json.loads((self.tmp / "out" / f"G{gid:03d}" / "result.json").read_text(encoding="utf-8"))
+        res = json.loads((pl.out_path(self.tmp / "out", f"G{gid:03d}") / "result.json").read_text(encoding="utf-8"))
         key = f"G{gid:03d}/{next(x['png'] for x in res['stickers'] if x['png'])}"
         s, link = self.req("POST", "/api/assets/sign", {"key": key, "ttl": 5})
         self.assertEqual(s, 200)

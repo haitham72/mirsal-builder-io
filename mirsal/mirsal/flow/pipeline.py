@@ -38,14 +38,51 @@ class PipelineError(Exception):
 
 
 # ---------- storage ----------
+_DIRS: dict = {}     # (base, id) -> the labelled folder found last time; checked on every use, so a move or a removal is never served stale
+
+
+def labelled_dir(base: Path, ident: str) -> Path:
+    """The folder of `ident` (G110, J057) under `base`: the bare `G110/` of a batch made before 2026-10-04, else its labelled
+    `G111-dog_as_banana-20261005T093012/` (runtime/names.folder). The bare path when neither exists yet, so a caller that only builds a path
+    (an older batch, a test fixture) gets exactly what it got before."""
+    base = Path(base)
+    bare = base / ident
+    if bare.is_dir():
+        return bare
+    hit = _DIRS.get((str(base), ident))
+    if hit is not None and hit.is_dir():
+        return hit
+    found = sorted(p for p in base.glob(ident + "-*") if p.is_dir()) if base.is_dir() else []
+    if found:
+        _DIRS[(str(base), ident)] = found[0]
+        return found[0]
+    return bare
+
+
 def gen_dir(out: Path, gid: int) -> Path:
-    return out / f"G{gid:03d}"
+    return labelled_dir(out, f"G{gid:03d}")
+
+
+def out_path(out: Path, rel: str) -> Path:
+    """`G111/slices/x.png` (a `/out/...` URL or an asset key, which always name a batch by its id) -> the file under its labelled folder.
+    Not resolved and not checked: the caller still confirms the result stays inside `out`."""
+    import posixpath
+    rel = posixpath.normpath(str(rel).replace("\\", "/"))     # `G001/../G002/x` names G002: resolve the dots before the id is looked up
+    head, sep, rest = rel.partition("/")
+    if re.fullmatch(r"G\d{3,}", head):
+        return gen_dir(out, int(head[1:])) / rest if sep else gen_dir(out, int(head[1:]))
+    return Path(out) / rel
+
+
+def _ids_in(d: Path) -> list[int]:
+    from ..runtime import names
+    return sorted({int(i[1:]) for x in d.iterdir() if (i := names.folder_id(x.name)) and i[0] == "G" and x.is_dir()})
 
 
 def list_ids(out: Path) -> list[int]:
     if not out.is_dir():
         return []
-    return sorted(int(m[1]) for d in out.iterdir() if (m := re.fullmatch(r"G(\d{3,})", d.name)))
+    return _ids_in(out)
 
 
 def trash_batches_dir(out: Path) -> Path:
@@ -57,7 +94,7 @@ def removed_ids(out: Path) -> list[int]:
     d = trash_batches_dir(out)
     if not d.is_dir():
         return []
-    return sorted(int(m[1]) for x in d.iterdir() if x.is_dir() and (m := re.fullmatch(r"G(\d{3,})", x.name)))
+    return _ids_in(d)
 
 
 def purge_ledger(out: Path) -> Path:
@@ -243,6 +280,25 @@ def list_inputs(inp: Path) -> list[dict]:
         for subj, picks in sources.scan(inp).items()]
 
 
+def _allocate(out: Path, task_slug: str, created: float) -> tuple[int, Path]:
+    """The next number and its labelled folder, `G111-dog_as_banana-20261005T093012/` (with `source/` made). A bare `G111/` could only be made once
+    (the second mkdir failed); labels differ, so a race with another process is caught by looking: two folders for one number -> ours goes, take the next."""
+    from ..runtime import names
+    with _IO_LOCK:
+        for _ in range(20):
+            gid = next_gid(out)
+            d = out / names.folder(f"G{gid:03d}", task_slug, when=created)
+            try:
+                (d / "source").mkdir(parents=True)
+            except FileExistsError:
+                continue
+            if [x for x in out.glob(f"G{gid:03d}*") if x.is_dir() and names.folder_id(x.name) == f"G{gid:03d}" and x != d]:
+                shutil.rmtree(d, ignore_errors=True)
+                continue
+            return gid, d
+    raise PipelineError("could not allocate a batch number: another process keeps taking them", 503)
+
+
 def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: sources.Pick | None = None, parent: int | None = None,
           grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None,
           outline: int | None = None, erode: int | None = None, kind: str | None = None) -> int:
@@ -275,12 +331,10 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         measured = detect_grid(load_rgb(pick.sheet))
         plan = prompter.expand(prompt, measured if measured in prompter.GRIDS else tuple(grid or (3, 3)))
     out.mkdir(parents=True, exist_ok=True)
-    gid = next_gid(out)
-    d = gen_dir(out, gid)
-    (d / "source").mkdir(parents=True)
+    created = round(time.time(), 3)
+    gid, d = _allocate(out, plan["task_slug"], created)
     (d / "slices").mkdir()
     (d / "prompts.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
-    created = round(time.time(), 3)
     res = {
         "generation_id": f"G{gid:03d}", "number": gid, "owner": current_owner(), "created": created, "parent": parent, "prompt": prompt, "task": plan["task"], "task_slug": plan["task_slug"],
         "source": {"subject": pick.subject, "subject_id": pick.subject_id, "variant": pick.variant,

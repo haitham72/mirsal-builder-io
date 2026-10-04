@@ -37,7 +37,7 @@ class JobsTests(unittest.TestCase):
         fake.write_bytes(b"\x89PNG\r\n\x1a\n" + b"0" * 100)
         j = jobs.done(self.out, "J001", str(fake), "higgs-img-v1", cost=2.5)
         self.assertEqual(j["status"], "DONE")
-        self.assertTrue((self.out / "jobs" / "J001" / "result.png").is_file())
+        self.assertTrue((jobs.job_dir(self.out, "J001") / "result.png").is_file())
         self.assertEqual(j["result"]["sha256"], jobs.read(self.out, "J001")["result"]["sha256"])
         self.assertEqual([x["status"] for x in jobs.list(self.out)], ["DONE"])
         self.assertEqual(jobs.list(self.out, "REQUESTED"), [])
@@ -62,7 +62,7 @@ class JobsTests(unittest.TestCase):
 
     def test_stale_jobs_show_timeout(self):
         j = jobs.create(self.out, "sheet", request={})
-        p = self.out / "jobs" / f"{j['id']}.json"
+        p = jobs._path(self.out, j["id"])
         old = dict(json.loads(p.read_text(encoding="utf-8")))
         old["created_at"] -= jobs.timeout_s() + 10
         p.write_text(json.dumps(old), encoding="utf-8")
