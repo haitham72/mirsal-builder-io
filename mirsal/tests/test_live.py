@@ -688,7 +688,7 @@ class LiveConsoleTests(Base):
     def test_the_edge_is_a_preview_until_applied_then_one_snapshot_that_undo_restores(self):
         import io
         gid = self._stills_ready()
-        slices = self.out / f"G{gid:03d}" / "slices"
+        slices = pl.gen_dir(self.out, gid) / "slices"
         stamp = lambda: sorted((p.name, p.stat().st_mtime_ns) for p in slices.glob("*"))
         before, files = self.req("GET", f"/api/generations/{gid}")[1], stamp()
 
@@ -777,7 +777,7 @@ class LiveConsoleTests(Base):
         for i in range(1, 10):                                                                      # the video sheet follows: a blue screen, and the video prompt says nothing else
             self.req("POST", f"/api/generations/{gid}/review", {"gate": "still", "decision": "APPROVE", "index": i})
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
-        vs = np.asarray(Image.open(self.out / f"G{gid:03d}" / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
+        vs = np.asarray(Image.open(pl.gen_dir(self.out, gid) / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
         self.assertEqual(vs[3, 3].tolist(), [0, 0, 255])
         self.assertNotIn("green", self.c.video_prompt_for(gid, "A1").lower())
         # a green sheet leaves no mark at all

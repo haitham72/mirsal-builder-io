@@ -73,6 +73,16 @@ class Profile:
             out[name] = t if t and t[1] >= MIN_SIGNALS else None
         return out
 
+    def name(self) -> str | None:
+        """What the person told the chat to call them ("my name is Haitham"), or None."""
+        return self.load().get("name") or None
+
+    def set_name(self, name: str) -> None:
+        with _LOCK:
+            d = self.load()
+            d["name"] = str(name or "").strip()[:60] or None
+            self.save(d)
+
     def forget(self) -> None:
         try:
             self.path.unlink()

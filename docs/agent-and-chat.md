@@ -34,7 +34,8 @@ Paths are relative to the Python package `mirsal/mirsal/`.
 ## One turn
 
 1. `understand`: rules first (`classify`); a model only when confidence is under 0.6. Intents: `NEW, ANOTHER, EDIT_STICKERS, UNDO, ANIMATE, FEEDBACK, REVIEW,
-   ASK, CHANGE_SETTINGS, SEARCH, CONFIRM, CANCEL, SMALLTALK, AMBIGUOUS`. A message can carry two ("I like 2 but make 5 happier" = feedback, then edit).
+   ASK, CHANGE_SETTINGS, SEARCH, CONFIRM, CANCEL, SMALLTALK, INTRODUCE, AMBIGUOUS`. A message can carry two ("I like 2 but make 5 happier" = feedback, then edit).
+   Only a request to make something is `NEW` (Haitham's transcript, 2026-10-04: "hello from haitham" was a 9-sticker plan). `INTRODUCE` (`resolver.introduced_name`: "my name is Haitham", "call me Sam", "hello from haitham", "I'm Haitham", a quoted or capitalised "it is 'haitham'"; never "hi falcon", "I am tired", "I'm Batman stickers") remembers the name and leaves a held plan held. A statement about me or "it" (`resolver.STATEMENT`: "it is cute", "that's it") is `AMBIGUOUS`, never a subject to draw. "what is my name?" / "who am I?" (`NAME_QUESTION`) is answered from the profile, and the name is the first line of the facts the model answers from.
 2. `resolve`: sticker ids from the text, the UI selection or the focus. Two equally plausible candidates ask **one short question** with chips; a clear
    mapping ("make number 3 happier") never asks.
 3. an intent node: `particles` (see below), `new` (plan with the user's memory added, a priced plan card), `another`, `edit` (one 1x1 child generation per sticker made from the parent's own prompt, the rest stay), `undo` (the last refinement, below),
@@ -329,6 +330,7 @@ Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi
   or colour clause is replaced, never stacked; `plan["refinements"]` keeps the lineage). The new sheet is a child of the old batch (`parent`); the old one stays. One card with both changes, one price, one go-ahead.
 - **Styles are the real presets.** `resolver.STYLE_WORDS` and `refine.STYLE_WORDS` only name ids of `generation/styles.PRESETS` (a test says so; the chat used to name two that did not exist and the plan silently became Flat).
   `n_new` reads a style from the sentence ("a teddy bear in clay style"), takes the words out of the subject and passes the id. Adopted Studio batches read their style from `slots.style_id` (`memory._info`).
+- **The person's name, per user** (`out/profile/<user>.json` `name`, `Profile.name` / `set_name`): set by an `INTRODUCE` turn ("Nice to meet you, Haitham! I'll remember your name."), used by the hello ("Hi Haitham!") and the answer to "what is my name?".
 - **Taste memory, per user** (`out/profile/<user>.json`, plain counters, `agent/profile.py`): the style / size / colour of a change the person asked for is counted when that batch really starts. A taste is applied to a later request
   only after TWO consistent signals and only when it is strictly ahead (a split taste is no taste); a style in the sentence always wins; the card says what it assumed ("I used cartoonish because you asked for it 2 times").
 - **Particle effects from the chat** (`n_effects`, intent `EFFECTS`, card `effects`): see `docs/effects.md` §8. Free; opens the effects screen for a library pack.
@@ -392,6 +394,6 @@ older refine flow. The classifier's table of examples is `tests/test_agent.py::E
 
 ## The AI vision switch (2026-10-03, UI/UX spec P9-P10)
 
-A one-time decision is not a creation control. The first answer of a chat shows **Create it** and, on the right, ONE switch **Allow AI vision** with a subtle rotating glow while it is undecided (no "Not yet", no "Keep it off"; a typed "no" still cancels the plan). Pressing it calls the settings route, which writes
+A one-time decision is not a creation control. The first answer of a chat about stickers (not a hello, a name or a question: `_ask_vision_early` waits for a turn with something to look at) shows **Create it** and, on the right, ONE switch **Allow AI vision** with a subtle rotating glow while it is undecided (no "Not yet", no "Keep it off"; a typed "no" still cancels the plan). Pressing it calls the settings route, which writes
 state only (`SessionStore.set_vision`): no message, no card, no turn. The next turn proceeds normally and acknowledges the permission once ("AI vision is on, as you allowed…" / "AI vision is off, as you chose…"); a refusal is respected by describe and names. The switch then reads the live setting
 and flips on a press; the glow rests under `prefers-reduced-motion`.

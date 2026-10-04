@@ -329,6 +329,45 @@ def is_smalltalk(text: str) -> bool:
     return near(words[0], GREETING_STARTERS) and all(near(w, GREETING_WORDS) for w in words) and "kitty" not in words
 
 
+_NAME = r"([^\W\d_][^\W\d_'’-]{1,29}(?:[ -][^\W\d_][^\W\d_'’-]{1,29})?)"
+_GREET = r"(?:hi|hiya|hello|hallo|hey|heya|hola|yo|salam|salaam|marhaba|ahlan|good (?:morning|evening|afternoon))"
+NOT_A_NAME = {"here", "back", "fine", "good", "ok", "okay", "ready", "done", "sure", "sorry", "new", "busy", "happy", "sad", "tired", "bored", "confused", "lost", "late", "home", "in", "out",
+              "it", "me", "you", "him", "her", "them", "this", "that", "cute", "nice", "great", "bad", "wrong", "right", "true", "false", "the", "a", "an", "not", "just", "also", "still"}
+
+
+def introduced_name(text: str) -> str | None:
+    """The person's own name when the message introduces them ("my name is Haitham", "call me Sam", "hello from haitham", "I'm Haitham", "it is 'haitham'"), else None.
+    A self-introduction is never a sticker request: "hello from haitham" used to become a plan with the subject "hello from haitham". A bare "it is X" / "I am X" counts only when X is
+    quoted or written with a capital ("I am Haitham", not "I am tired" or "it is cute")."""
+    s = re.sub(r"\s+", " ", str(text or "").strip()).rstrip(".!؟?")
+    if not s or len(s.split()) > 8 or re.search(NEW_VERBS, s.lower()):
+        return None
+    m = (re.search(rf"\bmy name(?:'s| is)\s+[\"'“‘]?{_NAME}[\"'”’]?$", s, re.I) or re.search(rf"\bcall me\s+[\"'“‘]?{_NAME}[\"'”’]?$", s, re.I)
+         or re.match(rf"^{_GREET}[,! ]+(?:it'?s |this is |i'?m |i am |from )[\"'“‘]?{_NAME}[\"'”’]?$", s, re.I)
+         or re.match(rf"^{_GREET}[,! ]+[\"'“‘]?{_NAME}[\"'”’]? here$", s, re.I))      # "hi falcon" stays what it was: a greeting needs "from" / "it's" / "I'm" / "... here" to introduce
+    if m and m.group(1).lower() not in {"there", "everyone", "all", "again", "guys", "friend", "bot", "mirsal", "kitty"}:
+        name = m.group(1)
+    else:
+        m = re.match(rf"^(?:it'?s|it is|this is|i'?m|i am)\s+(?:[\"'“‘]{_NAME}[\"'”’]|{_NAME})$", s, re.I)
+        if not m:
+            return None
+        quoted, bare = m.group(1), m.group(2)
+        if bare and (not bare[0].isupper() or bare.lower() in NOT_A_NAME):
+            return None
+        name = quoted or bare
+    if name.lower() in NOT_A_NAME or any(w in ("sticker", "stickers", "pack", "packs", "emoji", "set", "sets") for w in name.lower().split()):
+        return None
+    return " ".join(w[:1].upper() + w[1:] for w in name.split())
+
+
+STATEMENT = (r"^(?:i|it|this|that|he|she|we|you|they|there)\s+(?:am|is|are|was|were|feel|felt|think|thought|guess|mean|meant|just|really|so|not|still|have|had|did|said|told|know)\b"
+             r"|^(?:i'm|im|it's|that's|thats|there's|i've|i'd)\b")
+"""A sentence about me or about "it" ("it is haitham", "I am tired", "that's it"): never a bare subject to draw."""
+
+
+NAME_QUESTION =r"\b(?:what(?:'s| is) my name|who am i|do you (?:know|remember) (?:my name|who i am)|what do you call me)\b"
+
+
 NAMES_RX = (r"\b(?:rename|re-name|better names?|new names?|nicer names?|suggest (?:some |better )?names?|propose (?:some |better )?names?|check (?:the |their )?names?"
             r"|name (?:them|these|the stickers|each)|give (?:them|these|the stickers) (?:new |better )?names?)\b")
 """A request to look at the pictures and propose better names ("suggest better names", "rename them"): it needs AI vision, so it needs the person's yes like a description does."""
@@ -376,6 +415,10 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["UNDO"], 0.9                                         # "undo" / "revert": the last refinement of this chat, never "which sticker?"
     if (is_smalltalk(t) or is_ack(t)) and not re.search(NEW_VERBS, t):
         return ["SMALLTALK"], 0.95
+    if introduced_name(text):
+        return ["INTRODUCE"], 0.95                                   # "hello from haitham", "it is 'haitham'": a name to remember, never a plan (and never a replacement of the held one)
+    if re.search(NAME_QUESTION, t):
+        return ["ASK"], 0.9                                          # "what is my name?": answered from what the person told me
     if _parse_multi(t):
         return ["NEW_MULTI"], 0.9                                    # "create three sticker packs of fruits": several subjects, one plan, one price
     if particles_intent(t, False):
@@ -424,6 +467,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         intents, conf = ["EDIT_STICKERS"], 0.7        # "him", "the guy", "last guy": the character of the chat. A change to what is open, never a new subject called "last guy"
     elif has_generation and len(t.split()) <= 5 and (re.search(COMPARATIVE, t) or re.search(COLOURS, t) or re.match(r"^(?:same|again|more|one more|undo|revert|redo)\b", t)) and not re.search(NEW_VERBS, t):
         intents, conf = ["EDIT_STICKERS"], 0.7        # "bigger", "same but red", "happier": a change to what is open, never a new subject (the next question is which sticker)
+    elif re.match(STATEMENT, t):
+        intents, conf = ["AMBIGUOUS"], 0.3            # a statement, not a subject: the model may still read it, else I ask what to make (it used to become a plan for "it is haitham")
     elif len(t.split()) <= 8 and not t.endswith("?") and not re.match(r"^(?:undo|revert|ok|okay|yes|no)\b", t):
         intents, conf = ["NEW"], 0.62                 # "falcon dancing", "teddy bear with a book": a bare subject is a request
     elif not t.endswith("?") and re.search(r"\b(?:in|with|on|of|holding|wearing|sitting|standing|style|and|for|a|an|the)\b", t) \

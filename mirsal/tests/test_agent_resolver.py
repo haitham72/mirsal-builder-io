@@ -117,7 +117,7 @@ class IntentTests(unittest.TestCase):
     def test_an_opinion_about_this_is_feedback_not_a_new_subject(self):
         for text in ("this is bad", "I like this one", "that one is ugly", "they are great"):
             self.assertEqual(self.intent(text), ["FEEDBACK"], text)
-        self.assertEqual(self.intent("this is bad", gen=False), ["NEW"])                  # with nothing on screen there is nothing to have an opinion about
+        self.assertEqual(self.intent("this is bad", gen=False), ["AMBIGUOUS"])            # with nothing on screen it is no opinion, and a statement is never a subject to draw: I ask
         self.assertEqual(self.intent("make it not blurry"), ["NEW"])                      # a request keeps being a request
 
 
