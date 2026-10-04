@@ -35,6 +35,7 @@ mirsal/migrations/
   004_sessions.sql  sessions, interactions, feedback, generation_references, stickers.annotation
   005_vectors.sql   sticker_index.subject_vec / action_vec as vector(768) + cosine HNSW (re-runnable: never wipes vectors)
   009_groups.sql    generations.group_id (the family root, flow/groups.py) and relation (joined | redo | edit), written by every save_generation
+  011_user_profiles.sql  user_profiles (user_id, facts jsonb, updated_at): the copy of out/profile/<user>.json facts (agent/profile.py, sync.sync_profile; the file is the record)
 mirsal/mirsal/store/
   db.py             connect (2 s timeout), cached available(), migrate(), reset(confirm='yes')
   repo.py           save_generation() in ONE transaction (idempotent re-import); import_tasks / save_job / import_jobs / save_model_call /

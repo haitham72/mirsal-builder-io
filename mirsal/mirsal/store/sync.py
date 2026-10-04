@@ -150,3 +150,21 @@ def sync_ticket(out, t: dict) -> bool:
         _note("failed", e)
         return False
 
+
+def sync_profile(out, user: str, facts: dict) -> bool:
+    """The Postgres copy of one person's profile facts (agent/profile.py); best effort, the file stays the record."""
+    try:
+        if not enabled(out):
+            return False
+        if not db.available():
+            _note("skipped")
+            return False
+        import json as _json
+        with db.connect() as c:
+            c.execute("INSERT INTO user_profiles (user_id, facts, updated_at) VALUES (%s, %s::jsonb, now()) "
+                      "ON CONFLICT (user_id) DO UPDATE SET facts = EXCLUDED.facts, updated_at = now()", (str(user), _json.dumps(facts, ensure_ascii=False)))
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False

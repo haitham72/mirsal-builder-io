@@ -17,7 +17,7 @@ SYSTEM = """You plan sticker packs. You are given a short request (any language)
 {"subject_description": "<one line: the single character/subject, its look, identical in every cell>",
  "cells": [ {"label": "<the expression plus body language, 6-14 words, English>", "motion": "<one sentence: how this character moves when animated in place, English>", "key": "<snake_case action, 1-4 words, no subject>", "tags": ["<0-3 extra snake_case search words>"], "emoji": ["<1-2 emoji that fit the pose>"]} ]}
 Rules: exactly N cells, all completely different; cover a WIDE range of emotions and reactions (for example joy, love, laughter, pride, doubt, sadness, anger, shock, fear, embarrassment, boredom, mischief, sleepiness), each exaggerated and readable at small size, and in a different state of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two share a pose or a silhouette; every label animatable (a character that can move in place);
-no text, captions, logos, flags or real people in any label; keep the user's subject and constraints, never add another character; labels in English even when the request is Arabic or Arabizi.
+no text, captions, logos, flags or real people in any label; keep the user's subject and constraints, never add another character; a place, vehicle or prop the request names ("in a Lamborghini", "with a book", "on the beach") is part of subject_description and shows in the cells, never dropped; labels in English even when the request is Arabic or Arabizi.
 """ + llm.DATA_RULE
 
 
@@ -110,9 +110,20 @@ def review(slots: dict, n: int, subject_slug: str, request: str, complete=None) 
         return {"ok": True, "problems": [], "model": None, "review_error": str(e)[:200]}
 
 
+def scene_missing(scene: str | None, ai: dict) -> bool:
+    """A scene the request names ("in Lamborghini") that reaches no cell: not in subject_description (which starts every cell prompt) and in no label. Such a plan is re-planned, never shown."""
+    words = [w for w in re.findall(r"[a-z]{3,}", str(scene or "").lower()) if w not in {"the", "and", "with"}]
+    if not words:
+        return False
+    text = " ".join([str(ai.get("subject_description", ""))] + [str(c.get("label", "")) for c in (ai.get("cells") or []) if isinstance(c, dict)]).lower()
+    return not any(w in text for w in words)
+
+
 def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=None, review_ai: bool = False) -> dict:
     """The plan for a typed request, in `prompter.expand`'s exact shape, plus `expanded_by` ('ai' | 'deterministic'), `expand_model`, `expand_error`.
     `complete(system, user) -> (text, meta)` is injectable for tests. `review_ai` runs the slot reviewer after the lint."""
+    from . import spelling
+    task = spelling.fix_text(task)                            # "camel in lamborgini" is planned (and shown) as "camel in Lamborghini"
     base = prompter.expand(task, grid)
     base["expanded_by"] = "deterministic"
     from .. import transformations  # "dog as banana": one new character, built by a versioned template (no model needed, so none is asked)
@@ -137,6 +148,8 @@ def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=No
             problems = _lint(ai.get("cells"), n, subject_slug, task)
             if not problems and not str(ai.get("subject_description", "")).strip():
                 problems = ["subject_description is empty"]
+            if not problems and scene_missing(base.get("scene"), ai):
+                problems = [f"the request says \"{base['scene']}\": put it in subject_description (every cell is drawn from it)"]
         except (llm.LLMError, ValueError) as e:
             if isinstance(e, llm.LLMError):
                 base["expand_error"] = str(e)[:240]

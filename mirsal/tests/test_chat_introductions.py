@@ -29,7 +29,7 @@ class TheTranscript(Base):
         self.assertIn("still waiting", m["text"])
 
     def test_no_name_yet_is_said_plainly(self):
-        self.assertIn("haven't told me your name", self.say("what is my name?")["text"])
+        self.assertIn("I don't know your name yet. What should I call you?", self.say("what is my name?")["text"])
 
     def test_a_statement_is_not_a_subject(self):
         for text in ("I am tired", "it is cute", "that's it"):

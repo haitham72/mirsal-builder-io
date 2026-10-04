@@ -69,3 +69,5 @@ mirsal/out/account_requests.json
 mirsal/out/tls/
 mirsal/out/tickets/
 mirsal/out/trending.json
+# what the chat knows about each person (name, place, age, likes): personal, never committed (agent/profile.py)
+mirsal/out/profile/

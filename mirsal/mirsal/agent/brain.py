@@ -12,7 +12,7 @@ import time
 
 from ..services import llm
 
-INTENTS = ("NEW", "NEW_MULTI", "REFINE", "ANOTHER", "EDIT_STICKERS", "ANIMATE", "FEEDBACK", "REVIEW", "ASK", "CHANGE_SETTINGS", "SEARCH", "SMALLTALK", "AMBIGUOUS")
+INTENTS = ("NEW", "NEW_MULTI", "REFINE", "ANOTHER", "EDIT_STICKERS", "ANIMATE", "FEEDBACK", "REVIEW", "ASK", "CHANGE_SETTINGS", "SEARCH", "SMALLTALK", "PROFILE", "AMBIGUOUS")
 
 SUBJECTS_SYSTEM = f"""You choose subjects for sticker packs. Given a category and a number N, answer with N DIFFERENT concrete subjects of that category: varied (not just the most obvious N),
 each one to three words, something a pack of stickers can be about; never a brand, a real person or the word "sticker". Reply with ONE JSON object only: {{"subjects": ["...", "..."]}}
@@ -29,7 +29,12 @@ Intents: {", ".join(INTENTS)}.
 NEW: a request for a new set ("make me falcon stickers", "teddy bear with a book"). NEW_MULTI: a request for SEVERAL sets from a category ("three sticker packs of fruits"). REFINE: a change to a whole batch or subject ("the cherries were too realistic, make them cartoonish", "the banana was too small"). ANOTHER: more of the same subject. EDIT_STICKERS: change specific stickers
 ("make number 3 happier"). ANIMATE: make them move. FEEDBACK: likes/dislikes ("I like 2 but not 3"). REVIEW: approve or reject ("approve all but 5").
 ASK: a question about what exists ("which one is the shocked banana?"). CHANGE_SETTINGS: grid, style, animation, asking before spending. SEARCH: find an old
-sticker. SMALLTALK: greetings and thanks. AMBIGUOUS: you cannot tell. A message can carry two intents ("I like 2 but make 5 happier" = FEEDBACK + EDIT_STICKERS).
+sticker. SMALLTALK: greetings and thanks. PROFILE: the person says something about THEMSELVES (their name, where they live, age, what they like) or answers a question I asked about them ("haitham" right after "what should I call you?", "hello from haitham", "it is 'haitham'"): never NEW, a name is not a subject. AMBIGUOUS: you cannot tell. Use the context: a short reply to MY LAST QUESTION answers it; a plan I am holding stays held unless they ask for something new. A message can carry two intents ("I like 2 but make 5 happier" = FEEDBACK + EDIT_STICKERS).
+{llm.DATA_RULE}"""
+
+PROFILE_SYSTEM = f"""A person in a sticker studio says something about THEMSELVES. Write down only what they state about themselves (not about anyone else, not a sticker request). Reply with ONE JSON object only,
+with only these keys and only the ones they stated: {{"name": "...", "place": "...", "age": 30, "likes": ["..."], "dislikes": ["..."], "extra": {{"short_key": "short value"}}}}.
+A correction replaces the old value ("my name is not Sam, it is Haitham" = {{"name": "Haitham"}}). Values are short plain words (at most 60 characters). Nothing they did not say. {{}} when there is nothing.
 {llm.DATA_RULE}"""
 
 PICK_SYSTEM = """You map a phrase to sticker numbers. You get the numbered stickers of one batch and the user's phrase. Reply with ONE JSON object only:
@@ -155,6 +160,15 @@ class Brain:
             return None
         got = [str(i).upper() for i in (d.get("intents") or []) if str(i).upper() in INTENTS]
         return got or None
+
+    def extract_profile(self, text: str, known: str = "") -> dict | None:
+        """The facts a person states about themselves when the rules could not read them (several at once, a correction, a reference). The answer is a PROPOSAL:
+        the caller passes it through profile.validate_facts before anything is written, so unknown keys and long values never reach storage."""
+        d = self._json("LLM_PROFILE", PROFILE_SYSTEM, f"{llm.fence('KNOWN', known or 'nothing', 600)}\n\n{llm.fence('MESSAGE', text, 600)}")
+        if not isinstance(d, dict):
+            return None
+        from .profile import validate_facts
+        return validate_facts(d) or None
 
     def pick_stickers(self, phrase: str, stickers: list) -> list | None:
         listing = "\n".join(f"{s['index']}: {s.get('key', '')} {''.join(s.get('emoji') or []) if isinstance(s.get('emoji'), list) else s.get('emoji') or ''}"

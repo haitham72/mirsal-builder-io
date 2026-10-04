@@ -101,8 +101,8 @@ class Taste(Base):
         self.assertEqual(p.defaults()["style_id"], ("toon_shade", 2))
         m = self.say("create three sticker packs of animals")
         self.assertEqual(len({i["style"] for i in m["cards"][0]["items"]}), 1)
-        self.assertEqual(self.sess()["pending"]["items"][0]["style_id"], "toon_shade")
-        self.assertTrue(m["cards"][0]["assumed"], "the card says what it assumed")
+        self.assertEqual(self.sess()["pending"]["items"][0]["style_id"], "flat_vector")             # offered, never applied unasked (Haitham, 2026-10-04)
+        self.assertTrue(m["cards"][0]["assumed"], "the card says how to use the remembered style")
 
     def test_a_style_in_the_sentence_beats_the_taste(self):
         p = Profile(self.out)

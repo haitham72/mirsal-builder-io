@@ -248,7 +248,7 @@ DESCRIBE = (r"\b(?:describe|caption|captions|transcribe)\b|\bwhat(?:'s| is| are)
 # A go-ahead is a WHOLE message from a short closed list (audit 2026-10-02: the first word alone was enough, so "create a dragon pack", "yes make it red" and "start over" spent the OLD plan).
 YES_PHRASES = ("yes please", "go ahead", "do it", "create it", "generate it", "let's go", "lets go", "make it", "looks good", "sounds good", "yes", "yep", "yeah", "yup", "ya", "y", "ok", "okay", "sure",
                "go", "create", "generate", "confirm", "start", "perfect", "great", "nice", "please", "yalla", "👍", "✅", "ايوه", "أيوه", "نعم", "تمام", "ماشي", "اوكي", "أوكي", "ايه", "إيه", "tamam", "aywa", "aiwa", "naam")
-NO_PHRASES = ("no thanks", "no thank you", "not now", "never mind", "nevermind", "no", "nope", "nah", "na", "n", "cancel", "stop", "don't", "dont", "لا", "لأ", "مش دلوقتي", "خلاص", "👎", "❌", "la", "laa")
+NO_PHRASES = ("no thanks", "no thank you", "not now", "not yet", "maybe later", "later", "hold on", "wait", "not really", "not today", "never mind", "nevermind", "no", "nope", "nah", "na", "n", "cancel", "stop", "don't", "dont", "لا", "لأ", "مش دلوقتي", "خلاص", "👎", "❌", "la", "laa")
 
 
 def _closed(text: str, phrases) -> bool:
@@ -295,6 +295,8 @@ def smalltalk_kind(text: str) -> str:
         return "thanks"
     if re.search(r"\b(bye|goodbye|see you|cya)\b", low):
         return "bye"
+    if is_no(text):
+        return "no"
     if is_ack(text) and not re.search(r"\b(hi|hello|hey|hola|salam|marhaba)\b", low):
         return "ack"
     return "hello"
@@ -330,42 +332,101 @@ def is_smalltalk(text: str) -> bool:
 
 
 _NAME = r"([^\W\d_][^\W\d_'’-]{1,29}(?:[ -][^\W\d_][^\W\d_'’-]{1,29})?)"
+_Q = r"[\"'“‘]?"
+_QE = r"[\"'”’]?"
 _GREET = r"(?:hi|hiya|hello|hallo|hey|heya|hola|yo|salam|salaam|marhaba|ahlan|good (?:morning|evening|afternoon))"
 NOT_A_NAME = {"here", "back", "fine", "good", "ok", "okay", "ready", "done", "sure", "sorry", "new", "busy", "happy", "sad", "tired", "bored", "confused", "lost", "late", "home", "in", "out",
-              "it", "me", "you", "him", "her", "them", "this", "that", "cute", "nice", "great", "bad", "wrong", "right", "true", "false", "the", "a", "an", "not", "just", "also", "still"}
+              "it", "me", "you", "him", "her", "them", "this", "that", "cute", "nice", "great", "bad", "wrong", "right", "true", "false", "the", "a", "an", "not", "just", "also", "still",
+              "there", "everyone", "all", "again", "guys", "friend", "bot", "mirsal", "kitty", "back", "hungry", "sick", "well", "alive", "awake", "free", "excited", "curious"}
+_STICKERISH = {"sticker", "stickers", "pack", "packs", "emoji", "set", "sets"}
+_REFS = r"\b(?:it|this|that|these|those|them|him|her|he|she|they|guy|girl|man|woman|character|one|ones|number|no\.?|sticker|stickers|batch|pack|s\d|g\d+|#?\d{1,2})\b"
+GREETING_ONLY = re.compile(rf"^(?:{_GREET}|hey there|hi there|hello there|thanks|thank you)$", re.I)
+
+
+def _name_ok(n: str) -> str | None:
+    if not n or n.lower() in NOT_A_NAME or any(w in _STICKERISH for w in n.lower().split()) or n.lower().split()[0] in ("not", "no", "never", "also", "still", "actually"):
+        return None
+    return " ".join(w[:1].upper() + w[1:] for w in n.split())
+
+
+def _clause_facts(c: str, first: bool) -> dict | None:
+    """The facts ONE clause states about the speaker, {} for a greeting with nothing in it, None when it is not about the speaker at all (a request, a subject, an opinion)."""
+    low = c.lower()
+    if GREETING_ONLY.match(low):
+        return {}
+    m = (re.search(rf"\bmy name(?:'s| is)\s+{_Q}{_NAME}{_QE}$", c, re.I) or re.search(rf"\bcall me\s+{_Q}{_NAME}{_QE}$", c, re.I)
+         or (first and re.match(rf"^{_GREET}[,! ]+(?:it'?s |this is |i'?m |i am |from ){_Q}{_NAME}{_QE}$", c, re.I))
+         or (first and re.match(rf"^{_GREET}[,! ]+{_Q}{_NAME}{_QE} here$", c, re.I)))       # "hi falcon" is not this: a greeting needs from / it's / I'm / ... here
+    if m:
+        n = _name_ok(m.group(1))
+        return {"name": n} if n else None
+    m = re.match(rf"^(?:{_GREET}[,! ]+)?(?:i live in|i'?m based in|i am based in|i'?m from|i am from|i come from|my (?:city|town|country) is)\s+{_Q}(.{{2,40}}?){_QE}$", c, re.I)
+    if m and not re.search(_REFS, m.group(1).lower()):
+        return {"place": " ".join(w[:1].upper() + w[1:] for w in m.group(1).split())}
+    m = re.match(r"^(?:i'?m|i am|my age is|age)\s+(\d{1,3})(?:\s*(?:years? old|yrs?|y/?o))?$", low)
+    if m and 3 <= int(m.group(1)) <= 120:
+        return {"age": int(m.group(1))}
+    m = re.match(r"^(?:i (?:really )?(?:like|love|adore|enjoy)|i'?m into|i am into|my fav(?:ou?rite)?(?: \w+)? (?:is|are))\s+(.{2,60})$", low)
+    if m and not re.search(_REFS, m.group(1)) and not re.search(NEW_VERBS, low):
+        return {"likes": [x.strip() for x in re.split(r",|\band\b|&", m.group(1)) if x.strip()]}
+    m = re.match(r"^i (?:really )?(?:hate|dislike|don'?t like|do not like|can'?t stand|cannot stand)\s+(.{2,60})$", low)
+    if m and not re.search(_REFS, m.group(1)):
+        return {"dislikes": [x.strip() for x in re.split(r",|\band\b|&", m.group(1)) if x.strip()]}
+    m = re.match(rf"^(?:it'?s|it is|this is|i'?m|i am)\s+(?:[\"'“‘]{_NAME}[\"'”’]|{_NAME})$", c, re.I)
+    if m:                                                    # a bare "it is X" / "I am X": a name only when quoted or capitalised ("I am Haitham", never "I am tired", "it is cute")
+        quoted, bare = m.group(1), m.group(2)
+        if quoted or (bare and bare[0].isupper()):
+            n = _name_ok(quoted or bare)
+            return {"name": n} if n else None
+    return None
+
+
+def profile_facts(text: str) -> tuple[dict, str]:
+    """(the facts the message states about the speaker, what is left of it): the deterministic templates (name, place, age, likes, dislikes), clause by clause.
+    "hello from haitham" -> ({name: Haitham}, ""); "I'm Haitham, I live in Dubai" -> ({name, place}, ""); "hi, I'm Sam, make me a falcon" -> ({name: Sam}, "make me a falcon").
+    Nothing here is stored: profile.validate_facts is the gate before any write. A self-introduction is never a sticker request."""
+    s = re.sub(r"\s+", " ", str(text or "").strip())
+    if not s:
+        return {}, ""
+    parts = [p.strip(" .!?؟") for p in re.split(r"[,;.!?؟]+\s*|\s+(?:and|but)\s+(?=(?:i\b|i'm|my\b|call me))", s, flags=re.I) if p and p.strip(" .!?؟")]
+    facts, rest, found = {}, [], False
+    for i, p in enumerate(parts):
+        f = _clause_facts(p, i == 0)
+        if f is None:
+            rest.append(p)
+            continue
+        found = found or bool(f)
+        for k, v in f.items():
+            facts[k] = facts.get(k, []) + v if k in ("likes", "dislikes") else v
+    return (facts, ", ".join(rest)) if found else ({}, s)
 
 
 def introduced_name(text: str) -> str | None:
-    """The person's own name when the message introduces them ("my name is Haitham", "call me Sam", "hello from haitham", "I'm Haitham", "it is 'haitham'"), else None.
-    A self-introduction is never a sticker request: "hello from haitham" used to become a plan with the subject "hello from haitham". A bare "it is X" / "I am X" counts only when X is
-    quoted or written with a capital ("I am Haitham", not "I am tired" or "it is cute")."""
-    s = re.sub(r"\s+", " ", str(text or "").strip()).rstrip(".!؟?")
-    if not s or len(s.split()) > 8 or re.search(NEW_VERBS, s.lower()):
-        return None
-    m = (re.search(rf"\bmy name(?:'s| is)\s+[\"'“‘]?{_NAME}[\"'”’]?$", s, re.I) or re.search(rf"\bcall me\s+[\"'“‘]?{_NAME}[\"'”’]?$", s, re.I)
-         or re.match(rf"^{_GREET}[,! ]+(?:it'?s |this is |i'?m |i am |from )[\"'“‘]?{_NAME}[\"'”’]?$", s, re.I)
-         or re.match(rf"^{_GREET}[,! ]+[\"'“‘]?{_NAME}[\"'”’]? here$", s, re.I))      # "hi falcon" stays what it was: a greeting needs "from" / "it's" / "I'm" / "... here" to introduce
-    if m and m.group(1).lower() not in {"there", "everyone", "all", "again", "guys", "friend", "bot", "mirsal", "kitty"}:
-        name = m.group(1)
-    else:
-        m = re.match(rf"^(?:it'?s|it is|this is|i'?m|i am)\s+(?:[\"'“‘]{_NAME}[\"'”’]|{_NAME})$", s, re.I)
-        if not m:
-            return None
-        quoted, bare = m.group(1), m.group(2)
-        if bare and (not bare[0].isupper() or bare.lower() in NOT_A_NAME):
-            return None
-        name = quoted or bare
-    if name.lower() in NOT_A_NAME or any(w in ("sticker", "stickers", "pack", "packs", "emoji", "set", "sets") for w in name.lower().split()):
-        return None
-    return " ".join(w[:1].upper() + w[1:] for w in name.split())
+    """The speaker's own name when the message states it ("my name is Haitham", "hello from haitham", "it is 'haitham'"), else None."""
+    return profile_facts(text)[0].get("name")
+
+
+def request_text(text: str) -> str:
+    """The request without the speaker's scaffolding: a greeting, "please", "ok", "it is", a self-introduction ("hello from haitham, make me a camel" -> "make me a camel").
+    Content is never dropped: "in / on / with" phrases, counts and style words all stay (they are the request)."""
+    facts, rest = profile_facts(text)
+    s = rest if facts else str(text or "").strip()
+    for _ in range(3):
+        s = re.sub(rf"^(?:{_GREET}|hey there|hi there|hello there)[,!.\s]+", "", s, flags=re.I)
+        s = re.sub(r"^(?:please|pls|ok(?:ay)?|so|well|um+|it is|it's)\b[,!\s]*", "", s, flags=re.I)
+    s = re.sub(r"[,\s]+(?:please|pls)[.!]*$", "", s, flags=re.I)
+    return s.strip() or str(text or "").strip()
+
+
+PROFILE_CUES =r"\b(?:my name|call me|i live|i'?m from|i am from|my age|years old|i (?:like|love|hate|dislike)|my fav|i'?m into)\b"
+"""A message that talks about the speaker: when the templates cannot read all of it (several facts at once, a correction, a reference), the model may, through the validator."""
 
 
 STATEMENT = (r"^(?:i|it|this|that|he|she|we|you|they|there)\s+(?:am|is|are|was|were|feel|felt|think|thought|guess|mean|meant|just|really|so|not|still|have|had|did|said|told|know)\b"
              r"|^(?:i'm|im|it's|that's|thats|there's|i've|i'd)\b")
 """A sentence about me or about "it" ("it is haitham", "I am tired", "that's it"): never a bare subject to draw."""
 
-
-NAME_QUESTION =r"\b(?:what(?:'s| is) my name|who am i|do you (?:know|remember) (?:my name|who i am)|what do you call me)\b"
+NAME_QUESTION = r"\b(?:what(?:'s| is) my name|who am i|do you (?:know|remember) (?:my name|who i am|me)|what do you call me|what(?:'s| is| do you know) about me|what do you know about me)\b"
 
 
 NAMES_RX = (r"\b(?:rename|re-name|better names?|new names?|nicer names?|suggest (?:some |better )?names?|propose (?:some |better )?names?|check (?:the |their )?names?"
@@ -413,12 +474,19 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["ASK"], 0.85                                         # a price question is never small talk ("how much?" used to answer "Hi!")
     if re.match(UNDO_RX, t):
         return ["UNDO"], 0.9                                         # "undo" / "revert": the last refinement of this chat, never "which sticker?"
+    if is_no(t):
+        return ["SMALLTALK"], 0.9                                    # "not yet" with nothing held: an answer, never a plan for "not yet"
     if (is_smalltalk(t) or is_ack(t)) and not re.search(NEW_VERBS, t):
         return ["SMALLTALK"], 0.95
-    if introduced_name(text):
-        return ["INTRODUCE"], 0.95                                   # "hello from haitham", "it is 'haitham'": a name to remember, never a plan (and never a replacement of the held one)
-    if re.search(NAME_QUESTION, t):
-        return ["ASK"], 0.9                                          # "what is my name?": answered from what the person told me
+    facts, rest = profile_facts(text)
+    if has_generation and facts and set(facts) <= {"likes", "dislikes"} and any(x.startswith("the ") for x in facts.get("likes", []) + facts.get("dislikes", [])):
+        facts = {}                                                   # "I like the falcon" next to a falcon batch is feedback on what is open, not a taste of the person
+    if facts:                                                        # "hello from haitham", "it is 'haitham'", "I live in Dubai": the person, never a subject, never a replacement of the held plan
+        return (["PROFILE", "NEW"], 0.9) if rest and re.search(NEW_VERBS, rest.lower()) else (["PROFILE"], 0.95)
+    if re.search(NAME_QUESTION, t) or (re.search(PROFILE_CUES, t) and t.endswith("?")):
+        return ["ASK"], 0.9                                          # "what is my name?", "do you know where I live?": answered from what the person told me
+    if re.search(PROFILE_CUES, t) and not has_generation and not re.search(NEW_VERBS, t):
+        return ["PROFILE"], 0.55                                     # about the speaker but the templates could not read it ("my name is not Sam, it is Haitham"): the model reads it, through the validator
     if _parse_multi(t):
         return ["NEW_MULTI"], 0.9                                    # "create three sticker packs of fruits": several subjects, one plan, one price
     if particles_intent(t, False):

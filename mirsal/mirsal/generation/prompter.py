@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from . import emotions, styles
+from . import emotions, spelling, styles
 
 TEMPLATES = Path(__file__).resolve().parent.parent / "prompts" / "templates"
 MARGIN = ("full body, centred, generous empty margin on every side (at least 20% of the cell), "
@@ -53,6 +53,7 @@ STOP = {"a", "an", "the", "of", "and", "to", "my", "some"}
 COLORS = {"yellow", "red", "blue", "green", "pink", "purple", "orange", "brown", "black", "white", "gray", "grey",
           "golden", "cute", "little", "big", "small", "happy"}
 SPLIT = re.compile(r"\b(for|in|at|during|with|on)\b")
+SCENE_WORDS = {"in", "at", "with", "on"}               # what follows is drawn (a place, a vehicle, a prop); "for" / "during" name a theme
 
 
 def slug(text: str) -> str:
@@ -147,10 +148,12 @@ def expand(task: str, grid: tuple = (3, 3)) -> dict:
     words = re.findall(r"[a-z0-9]+", task.lower())
     body = " ".join(w for w in words if w not in VERBS or words.index(w) > 2)
     parts = SPLIT.split(body, maxsplit=1)
-    subject = parts[0].strip() or "sticker"
-    context = parts[2].strip() if len(parts) > 2 else ""
+    subject = spelling.fix_text(parts[0].strip()) or "sticker"
+    context = spelling.fix_text(parts[2].strip()) if len(parts) > 2 else ""
+    scene = f"{parts[1]} {context}" if len(parts) > 2 and parts[1] in SCENE_WORDS and context else ""
+    described = re.sub(r"^(?:a|an|the|some) ", "", f"{subject} {scene}".strip())     # "camel in Lamborghini": a setting / prop / vehicle is part of what is drawn, never dropped (a theme, "for school", picks the actions instead)
     subject_slug = slug(" ".join(w for w in subject.split() if w not in COLORS | STOP)) or "sticker"
-    ctx_words = [w for w in context.split() if w not in STOP]
+    ctx_words = [w for w in context.lower().split() if w not in STOP]
     ctx_slug = slug(" ".join(ctx_words))
     kind = next((w for w in ctx_words + words if w in ACTIONS), "default")
     task_slug = subject_slug + (f"_{ctx_slug}" if ctx_slug else "")
@@ -161,8 +164,8 @@ def expand(task: str, grid: tuple = (3, 3)) -> dict:
         key = f"{subject_slug}_{suffix}"                  # searchable action name; also the file name tail
         words = [w for w in re.findall(r"[a-z0-9]+", phrase) if len(w) > 2 and w not in STOP and w not in {"with", "holding", "wearing"}]
         tags = clean_tags(key, words[:3] + ctx_tags)
-        cells.append({"pos": i, "label": phrase, "tags": tags, "emoji": emoji, "motion": motion})
-    slots = {"subject_description": subject, "style_id": "flat_vector", "mode": TEMPLATE_OF[(rows, cols)], "cells": cells,
+        cells.append({"pos": i, "label": phrase, "tags": tags, "emoji": emoji, "motion": motion})      # every cell prompt starts with the subject description, scene included
+    slots = {"subject_description": described, "style_id": "flat_vector", "mode": TEMPLATE_OF[(rows, cols)], "cells": cells,
              "action_guidance": kind, "key_colour": "green"}
     tid = TEMPLATE_OF[(rows, cols)]
     built = render_plan(slots, tid, TEMPLATE_VERSION)
@@ -171,7 +174,7 @@ def expand(task: str, grid: tuple = (3, 3)) -> dict:
                          "tags": c["tags"], "emoji": c["emoji"]})
     g = {k: v.format(rows=rows, cols=cols, n=rows * cols) for k, v in GUIDELINES.items()}
     return {
-        "task": body, "task_slug": task_slug, "subject": subject, "context": context, "kind": kind, "grid": [rows, cols],
+        "task": body, "task_slug": task_slug, "subject": subject, "scene": scene, "described": described, "context": context, "kind": kind, "grid": [rows, cols],
         "template_id": tid, "template_version": TEMPLATE_VERSION, "slots": slots,
         "guidelines": g,
         "sheet_prompt": built["sheet_prompt"],

@@ -33,11 +33,13 @@ from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from . import editroute, refine, subjects
 from .profile import Profile
-from .resolver import DESCRIBE, NAME_QUESTION, Resolution, beyond, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind, introduced_name
+from .resolver import DESCRIBE, NAME_QUESTION, Resolution, beyond, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind, profile_facts, request_text
+from .profile import profile_said
 from .tools import ConsoleTools, ToolError
 
 INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
 CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
+CREATION_INTENTS = {"NEW", "NEW_MULTI", "ANOTHER", "REFINE", "EDIT_STICKERS", "EDIT_ROUTE", "ANIMATE", "CONFIRM", "EFFECTS", "PARTICLES", "CREATOR", "RETRY"}
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
 STYLE_NAMES = {p["id"]: p["label"].lower() for p in styles.PRESETS}          # the names the cards and replies use: the real presets, never a list of the chat's own
 
@@ -102,6 +104,8 @@ class Turn:
     er: dict | None = None                       # what an edit request means (agent/editroute.classify_edit): the editor, or a tweak / an action / a redesign
     answer: str = ""                             # the typed answer to my "which sticker?" (t.text then holds the original request + the answer): "12" is checked against the batch's size
     unsure_review: bool = False                  # an approve / reject sentence with a negation in it: nothing is decided, the person is asked
+    profile_answer: dict | None = None           # the reply to my own "what should I call you?": {"name": "Haitham"}, never a subject
+    prefix: str = ""                             # what the profile node said, put before the rest of the turn's answer ("Nice to meet you, Sam! ..." then the plan)
     _lock: Any = None
 
 
@@ -127,7 +131,7 @@ class Agent:
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "particles": self.n_particles, "editroute": self.n_editroute, "unsupported": self.n_unsupported, "refine": self.n_refine, "another": self.n_another,
                  "edit": self.n_edit, "undo": self.n_undo, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "introduce": self.n_introduce, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "profile": self.n_profile, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -205,6 +209,28 @@ class Agent:
         gids = dict.fromkeys(f"G{int(m):03d}" for m in re.findall(r"\bg0*(\d{1,4})\b", text, flags=re.I))
         return [g for g in gids if self.store.subject_for_generation(sess, g) or self.store.outside_info(g)]
 
+    @staticmethod
+    def _profile_reply(text: str) -> str | None:
+        """A short reply that can be the answer to my "what should I call you?": "haitham", "it's Haitham", "Sam!". Not a question, not a request, not a no."""
+        s = text.strip().strip("\"'“”‘’.!")
+        named = profile_facts(s)[0].get("name")
+        if named:
+            return named
+        if not s or "?" in s or len(s.split()) > 3 or re.search(r"\b(?:make|create|generate|draw|give|no|nope|not|never|why|sticker|stickers)\b", s.lower()):
+            return None
+        return " ".join(w[:1].upper() + w[1:] for w in s.split()) if re.fullmatch(r"[^\W\d_][^\W\d_'’ -]{0,40}", s) else None
+
+    def _route_context(self, sess: dict, asked: dict | None) -> str:
+        """What the model router sees besides the message: the person's profile, the question I asked last turn, the plan I am holding, then the chat's summary.
+        Without these, "haitham" after "what should I call you?" reads like a subject."""
+        bits = [self._profile().facts_text() or "The person: nothing known yet."]
+        if asked:
+            bits.append("My last question: " + ("what should I call you?" if asked.get("profile") else str(asked.get("text") or "")[:200]))
+        held = sess.get("pending") or {}
+        if held:
+            bits.append(f"A plan I am holding (not started, waiting for the go-ahead): {held.get('subject') or held.get('type')}.")
+        return "\n".join(bits + [self.store.summary_text(sess)])
+
     def n_understand(self, state: State) -> dict:
         t: Turn = state["turn"]
         sess = t.sess
@@ -224,6 +250,9 @@ class Agent:
             t.intents, t.conf = ["CREATOR"], 0.95
         elif t.action and t.action.get("type") in ("names_apply", "names_keep"):
             t.intents, t.conf = ["NAMES_DECIDE"], 1.0
+        elif asked and asked.get("profile") and self._profile_reply(t.text):
+            t.profile_answer = {asked["profile"]: self._profile_reply(t.text)}       # "haitham" right after my "what should I call you?" is the answer, never a subject
+            t.intents, t.conf, answered = ["PROFILE"], 0.95, True
         elif asked and asked.get("intents") and is_sticker_answer(t.text, bool(t.selected)):
             t.answer = t.text
             t.text = f"{asked['text']} {t.text}".strip()       # the original request plus the missing "which": everything downstream reads it as one sentence
@@ -239,10 +268,10 @@ class Agent:
                 else:
                     t.intents, t.conf = ["REVIEW"], 0.9
             if t.conf < 0.6 and self.brain.available:
-                got = self.brain.classify(t.text, self.store.summary_text(sess))
+                got = self.brain.classify(t.text, self._route_context(sess, asked))
                 if got:
                     t.intents, t.conf = got, 0.7
-            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "INTRODUCE", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO"):         # a question ("can you rotate him?") is an ASK until the rules read it
+            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "PROFILE", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO"):         # a question ("can you rotate him?") is an ASK until the rules read it
                 if editroute.unsupported(t.text):
                     t.intents, t.conf = ["UNSUPPORTED"], 0.9
                 else:
@@ -257,12 +286,12 @@ class Agent:
                     t.intents, t.conf = ["REFINE"], 0.9
         names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "PARTICLES": "particles", "EDIT_ROUTE": "an edit", "UNSUPPORTED": "something I cannot do yet", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "UNDO": "an undo", "ANIMATE": "an animation", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
-                 "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "INTRODUCE": "your name", "AMBIGUOUS": "something I need to ask about"}
+                 "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "PROFILE": "something about you", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                  "EDIT_STICKERS": "edit", "UNDO": "undo", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
-                 "SMALLTALK": "smalltalk", "INTRODUCE": "introduce", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
+                 "SMALLTALK": "smalltalk", "PROFILE": "profile", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
 
@@ -346,10 +375,11 @@ class Agent:
     def n_new(self, state: State) -> dict:
         t: Turn = state["turn"]
         sess, st = t.sess, t.sess["settings"]
+        asked = request_text(t.text)                    # "hello from haitham, make me a camel in lamborgini" -> "make me a camel in lamborgini": the speaker's words go, every content word stays
         guess = re.sub(r"^(?:please\s+)?(?:can you\s+)?(?:make|create|generate|give|draw|design|build)\s+(?:me\s+)?(?:some\s+|a\s+|an\s+)?|\bstickers?\b|\bpack of\b|\bset of\b",
-                       " ", t.text, flags=re.I).strip(" .,!?") or t.text
+                       " ", asked, flags=re.I).strip(" .,!?") or asked
         t.trace.retitle(f"generating {guess}")
-        sid, said_text, assumed = self._style_for(t, t.text)
+        sid, said_text, assumed = self._style_for(t, asked)
         prefs, notes = self._prefs(t, guess)
         notes = list(notes) + assumed
         prompt = said_text.strip() + (f". {prefs[0].upper() + prefs[1:]}" if prefs else "")
@@ -362,7 +392,9 @@ class Agent:
             t.trace.end("could not plan", ok=False)
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
             return {}
-        names = [s["key"].replace("_", " ") for s in plan["stickers"]]
+        scene = str(plan.get("scene") or "")
+        names = [n + (f" {scene}" if scene and scene.split()[-1].lower() not in n.lower() else "")       # the card says what every cell is drawn with: "camel waving in Lamborghini"
+                 for n in (s["key"].replace("_", " ") for s in plan["stickers"])]
         t.trace.step("expand prompt", {"title": f"{len(names)} stickers", "lines": names})
         if plan.get("expand_error"):                # the AI could not write the ideas (not reachable, bad answer): say so, the built-in sets were used instead
             t.trace.note("the AI could not write the ideas (" + str(plan["expand_error"])[:140] + "): I used the built-in sets")
@@ -375,7 +407,7 @@ class Agent:
             t.trace.note(f"a transformation: the whole character is a {tr['target']} with the {tr['subject']}'s face"
                          + (f"; {', '.join(tr['required'])} included" if tr.get("required") else "")
                          + (f"; left out as you asked: {', '.join(tr['forbidden'])}" if tr.get("forbidden") else ""))
-        subject = plan.get("subject") or guess
+        subject = (plan.get("described") if plan.get("scene") else None) or plan.get("subject") or guess         # the normalised request ("camel in Lamborghini"), never the bare character
         t.res.generation = None
         est = self.tools.estimate("image") if self.tools.live() else None
         card = {"type": "plan", "subject": subject, "grid": st["grid"], "style": STYLE_NAMES.get(sid, sid),
@@ -634,8 +666,8 @@ class Agent:
         if st.get("style_id") != _styles.DEFAULT:
             return st["style_id"], text, []
         d = self._profile().defaults().get("style_id")
-        if d:
-            return d[0], text, [f"I used {refine.LABEL.get(d[0], d[0])} because you asked for it {d[1]} times (say \"flat\" or another style to change it)"]
+        if d:                                                          # a remembered taste is offered, never applied unasked (Haitham, 2026-10-04: "paper cut" appeared on a plan nobody asked for)
+            return st["style_id"], text, [f"you asked for {refine.LABEL.get(d[0], d[0])} {d[1]} times before: say \"{refine.LABEL.get(d[0], d[0]).lower()}\" to use it here"]
         return st["style_id"], text, []
 
     def _items_card(self, title: str, items: list, st: dict, est_each, extra: dict | None = None) -> dict:
@@ -1449,12 +1481,20 @@ class Agent:
             t.reply = f"{total} stickers made in this chat, {appr} approved."
             t.trace.end("counted")
             return {}
-        who = self._profile().name()
-        if re.search(NAME_QUESTION, low):                               # "what is my name?": what the person told me, never a guess from the stickers
-            t.reply = f"You're {who}." if who else "You haven't told me your name yet. Say \"my name is ...\" and I'll remember it."
+        prof = self._profile()
+        who = prof.name()
+        if re.search(NAME_QUESTION, low):                               # "what is my name?": what the person told me (their profile), never a guess from the stickers
+            if re.search(r"\babout me\b", low):
+                known = prof.facts_text()
+                t.reply = (known.replace("The person: ", "What you told me: ") if known else "Nothing yet.") + " Tell me anything else you'd like me to remember."
+            elif who:
+                t.reply = f"You're {who}."
+            else:                                                       # one honest question, and the answer that follows sticks (n_understand reads it as the name)
+                t.reply = "I don't know your name yet. What should I call you?"
+                t.sess["awaiting"] = {"profile": "name", "text": t.text}
             t.trace.end("answered from what you told me")
             return {}
-        facts = (f"The person's name is {who}.\n" if who else "") + self.store.summary_text(t.sess)
+        facts = ((prof.facts_text() + "\n") if prof.facts_text() else "") + self.store.summary_text(t.sess)
         ans = self.brain.answer(t.text, facts) if self.brain.available else None
         t.reply = ans or facts
         t.trace.end("answered" if ans else "here is what we have")
@@ -1673,25 +1713,36 @@ class Agent:
     def n_smalltalk(self, state: State) -> dict:
         t: Turn = state["turn"]
         kind = smalltalk_kind(t.text)
-        t.trace.task({"thanks": "saying you're welcome", "bye": "saying goodbye", "ack": "noting that"}.get(kind, "saying hello"))
+        t.trace.task({"thanks": "saying you're welcome", "bye": "saying goodbye", "ack": "noting that", "no": "noting that"}.get(kind, "saying hello"))
         t.reply = {"thanks": "You're welcome! Tell me what to change, or what to make next.", "bye": "Bye! Your stickers will be here when you come back.",
-                   "ack": "Anytime. Tell me what to change, or what to make next."}.get(kind, f"Hi{' ' + who if (who := self._profile().name()) else ''}! What will you create today?")
+                   "ack": "Anytime. Tell me what to change, or what to make next.", "no": "Okay. Tell me when you want to make something."}.get(kind, f"Hi{' ' + who if (who := self._profile().name()) else ''}! What will you create today?")
         t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
         t.trace.end("ready")
         return {}
 
-    def n_introduce(self, state: State) -> dict:
-        """"my name is Haitham", "hello from haitham", "it is 'haitham'": the name is remembered for this person (out/profile/<user>.json) and nothing else changes. A plan I am holding stays
-        held: an introduction used to become a plan of its own and replace it."""
+    def n_profile(self, state: State) -> dict:
+        """What the person says about themselves ("hello from haitham", "it is 'haitham'", "I live in Dubai", the answer to my "what should I call you?") goes to THEIR profile
+        (out/profile/<user>.json, agent/profile.py) and nothing else changes: no subject, no plan, and a plan I am holding stays held. The rules read it first; the model only reads what
+        they could not (several facts, a correction, a reference), and whatever it proposes passes profile.validate_facts before anything is written. The reply says what was saved."""
         t: Turn = state["turn"]
-        name = introduced_name(t.text)
-        t.trace.task("remembering your name")
-        self._profile().set_name(name)
+        prof = self._profile()
+        facts = dict(t.profile_answer or profile_facts(t.text)[0])
+        if not facts and self.brain.available:
+            facts = self.brain.extract_profile(t.text, prof.facts_text()) or {}
+        t.trace.task("remembering what you told me")
+        saved = prof.set_facts(facts, t.text)
+        if not saved:
+            t.prefix = "I didn't catch what to remember. Say it like \"my name is Haitham\" or \"I live in Dubai\"."
+            t.trace.end("nothing saved", ok=False)
+            return {}
         held = (t.sess.get("pending") or {}).get("subject")
-        t.reply = f"Nice to meet you, {name}! I'll remember your name." + (f" Your plan for {held} is still waiting: say \"create it\" when you're ready." if held else " What will you create today?")
-        if not held:
+        said = profile_said(saved)
+        hello = f"Nice to meet you, {saved['name']}! " if "name" in saved else "Got it! "
+        more = "NEW" in t.intents                                       # "hi, I'm Sam, make me a falcon": the request goes on after this
+        t.prefix = hello + f"I'll remember {said}." + ("" if more else f" Your plan for {held} is still waiting: say \"create it\" when you're ready." if held else " What will you create today?")
+        if not held and not more:
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
-        t.trace.end("remembered")
+        t.trace.end("saved: " + said)
         return {}
 
     def n_clarify(self, state: State) -> dict:
@@ -1735,8 +1786,8 @@ class Agent:
         sess = t.sess
         if sess["settings"].get("allow_vlm") is not None or sess.get("vision_asked"):
             return False
-        if not t.intents or all(i in ("SMALLTALK", "INTRODUCE", "ASK", "AMBIGUOUS") for i in t.intents):
-            return False                                  # a hello, a name or a question has nothing to look at: the question waits for a turn about stickers
+        if not set(t.intents) & CREATION_INTENTS:
+            return False                                  # only on the creation path: a hello, a name, a question or a "not yet" has nothing to look at
         if sess.get("awaiting") or (sess.get("pending") or {}).get("type") in ("describe", "names") or any(x in ("CONFIRM", "CANCEL") for x in t.intents) and not sess["interactions"]:
             return False                                  # a question of mine is open (which sticker? the describe consent): one question at a time
         sess["vision_asked"] = True
@@ -1748,6 +1799,8 @@ class Agent:
 
     def _finish(self, t: Turn, ok: bool = True) -> None:
         sess, msg = t.sess, t.msg
+        if t.prefix:
+            t.reply = t.prefix + ("\n\n" + t.reply if t.reply else "")
         if t.res.generation and t.res.stickers:
             sess["focus"] = {"generation": t.res.generation, "stickers": t.res.stickers[:3]}
         elif t.generation:
