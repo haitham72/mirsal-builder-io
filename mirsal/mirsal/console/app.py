@@ -24,6 +24,21 @@ _END = object()
 _HOP = {b"server", b"date", b"connection", b"keep-alive", b"transfer-encoding"}     # uvicorn writes these itself
 
 
+def quiet_loop():
+    """Event loop for `Server`: identical, except a client that vanishes mid-connection stays silent. On Windows every
+    aborted keep-alive (a closed tab, a parallel fetch, antivirus) otherwise prints a ConnectionResetError traceback
+    from the event loop; the disconnect itself is harmless and anything else still goes to the default handler."""
+    loop = asyncio.new_event_loop()
+
+    def _quiet(failed, context):
+        if isinstance(context.get("exception"), (ConnectionResetError, BrokenPipeError)):
+            return
+        failed.default_exception_handler(context)
+
+    loop.set_exception_handler(_quiet)
+    return loop
+
+
 class _Pipe:
     """The handler's `wfile`: what it writes goes to the adapter; once the client is gone a write raises BrokenPipeError, so a long stream (SSE) stops."""
 
@@ -633,6 +648,7 @@ class Server:
         tls = tls or {}
         self.app = create_app(c, self.server_address[1], secure=bool(tls))
         self.uv = uvicorn.Server(uvicorn.Config(self.app, log_level="warning", access_log=False, lifespan="off", timeout_keep_alive=5,
+                                                loop="mirsal.console.app:quiet_loop",
                                                 ssl_certfile=tls.get("cert"), ssl_keyfile=tls.get("key")))
         self._stopped = threading.Event()
 
