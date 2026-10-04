@@ -92,3 +92,13 @@ If the test fails, check that Docker Desktop is running and that `mirsal-db` is 
 ## select chat
 
 select user_message, assistant_message from interactions order by created_at desc limit 20;
+
+## using docker
+
+opens a SQL prompt inside the database container:
+
+docker exec -it mirsal-db psql -U mirsal mirsal
+Then type, for example:
+
+select user_message, assistant_message from interactions order by created_at desc limit 20;
+Type \q to leave.
