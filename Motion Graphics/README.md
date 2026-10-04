@@ -2,7 +2,7 @@
 
 This folder is a motion-as-code kit. Every frame of the film is a deterministic function of time, written in TypeScript and rendered by three.js. The browser preview and the exported MP4 are the same pixels. This guide turns the kit into **the launch film for the Mirsal Creator**, the sticker engine this repo builds for the Mirsal app.
 
-**Where it stands (2026-10-04).** The rough cut plays end to end: the eight plates in order, each a karaoke card (`app/src/scenes/card.ts`) over **provisional word timings** (`analysis/approx_vo.py`, about 106 s), in the Mirsal palette with the orb as the pen. The first film's plates are kept as references in `app/src/scenes/_old/`. **Still to do:** the voiceover (the Haytham voice is in the ElevenLabs account, but a free account cannot use library voices through the API: it needs a paid plan, or a read made in the ElevenLabs web app and saved as `audio/voiceover.mp3`), then the real alignment, the eight plates one by one, the sound and the render. Until then, `audio/voiceover.mp3` is still the old film's read: the preview plays it out of sync, so render drafts with `--noaudio`.
+**Where it stands (2026-10-04).** The voiceover is in (ElevenLabs, Liam, 87.4 s) and aligned word by word. The engine wears the Mirsal app's clean iOS look (§4). The rough cut plays end to end with sound: the eight plates in order, each a karaoke card (`app/src/scenes/card.ts`) over the real word timings, rendered to `out/mirsal-creator-roughcut.mp4`. The first film's plates are kept as references in `app/src/scenes/_old/` (they were drawn for the old dark look). **Still to do:** the eight real plates (§5) one by one, each replacing its `card(...)` entry in the timeline, then the sound effects (§7) and the final render.
 
 Companion file: [`mirsal-ai-redesign-prompt.md`](mirsal-ai-redesign-prompt.md) holds the prompt for the new look of Mirsal AI, a full redesign of the original Mirsal chat. Plate 7 of the film shows that new look, so both pieces should agree.
 
@@ -15,7 +15,7 @@ Companion file: [`mirsal-ai-redesign-prompt.md`](mirsal-ai-redesign-prompt.md) h
 | Length | about 90 s (the voiceover sets the length; the timeline follows it) |
 | Format | 1920×1080 at 60 fps, H.264. `--scale 2` gives 4K. The engine is fixed at 16:9 (`W`, `H` in `app/src/engine/gl.ts`); a 9:16 cut for phones is separate work (§10) |
 | Story | one sentence becomes a moving sticker pack → **one click** → **it learns you** → **batching** → **no dead ends** → **the whole team** → **inside the Mirsal app** → logo, loop |
-| Look | the kit's plotter-and-spark language, retuned to Mirsal: deep navy stage, Mirsal blue `#3B82F6` as the signal colour, AI cyan `#22D3EE` as the hot core, the glossy blue orb as the pen head |
+| Look | **the Mirsal app's clean iOS look** (Haitham, 2026-10-04: "clean iOS, based on the app design"; not the plotter-on-graph-paper style and not the busy concept board): a light `#F7F8FA` stage, white cards with soft shadows and continuous corners, Inter, slate text, Mirsal blue `#3B82F6` for every action and the spoken word, the glossy blue orb as the guide, AI cyan `#22D3EE` only while the AI works |
 | Sound | a new ElevenLabs voiceover. The kit's 28 effects are reused, and about 8 new Mirsal sounds are added (§7) |
 
 ---
@@ -45,8 +45,8 @@ analysis/sfx_mix.py (cue sheet from the same word times) ─► out/mix.wav ─�
 | `Cam2D` | a keyframed 2D camera: `.key(t, cx, cy, zoom, roll, ease)`. The ease shapes the move that arrives at that key |
 | `placeRow` + `drawKaraoke` | words laid out in world space. An unsaid word is a hairline outline; the word being said wipes in the **signal** colour; a said word cools to bone (or ink on a paper plate) |
 | `Plot` | the plotter: strokes laid down by the pen on a timetable, plus construction lines, dimensions and mono notes |
-| `drawPen`, `sparkHead`, `sparkParticles` | the spark that draws. For Mirsal it becomes the orb (§4) |
-| `gridPass` + `setGrid` | the graph-paper sheet behind a plate (reveal, fade, ink, paper) |
+| `drawOrb` (`scenes/card.ts`) | the Mirsal orb, drawn like the logo, as the guide that moves under the spoken word. The first film's additive `drawPen` / `sparkHead` glow does not show on a light stage |
+| `gridPass` + `setGrid` | the graph-paper sheet of the first film. Not used in the Mirsal look; plates clear to the light stage (`clearRT(renderer, out, LIN.bone)`) |
 | `label`, `arrowHead`, `triangle`, `returnArrow` | the mono UI voice and drawn arrows that match the hairlines |
 | `Layer2D` | a Canvas2D layer uploaded as a texture: `U.clear()`, draw, then `comp.draw(renderer, U.upload(), out)` |
 | `ease`, `prog`, `pulse`, `keys`, `noise1`, `hash` (`engine/util.ts`) | easing; 0..1 progress between two times; a decaying hit; piecewise keys; deterministic noise |
@@ -117,80 +117,70 @@ The film may only say what the code does. If a line changes, check it against th
 
 ---
 
-## 4. Re-skin: from P(doom) orange to Mirsal blue
+## 4. The look: the Mirsal app, clean iOS
 
-### 4.1 Palette (`app/src/engine/palette.ts`)
+The film looks like the app it sells, at its best: what a person would see on an iPhone or a Mac, animated. Not a mood board, not a dark tech film, not graph paper. **Rule of thumb: if a frame would not pass as a screenshot of a beautifully designed iOS app, it is wrong.**
 
-Keep the key names, because every plate and the karaoke read them. Change only the values:
+### 4.1 Palette (`app/src/engine/palette.ts`, built)
 
 ```ts
-export const HEX = {
-  ink: '#070B16',      // stage: deep night navy (the film is dark; the app is light, so keep the two apart)
-  ink2: '#111A2E',     // raised navy: cards, panels, the chat window frame
-  graphite: '#475569', // dim lines, secondary text (Slate 600)
-  ash: '#94A3B8',      // mid grey, unsaid karaoke outlines (Slate 400)
-  bone: '#F7F8FA',     // paper white: primary text and light plates (the app's background)
-  signal: '#3B82F6',   // Mirsal blue: the said word, the pen, the one button, every "go"
-  ember: '#22D3EE',    // AI cyan: the hot core of the orb and the rolling highlight
-  blood: '#2563EB',    // Primary Dark: the shadow side of signal
-  acid: '#F59E0B',     // one rare accent: the falcon's gold, the price, the Trending heart
-} as const;
+ink: '#1E293B',      // text on the light stage (Slate 800)
+ink2: '#FFFFFF',     // surface: cards, sheets, the window
+graphite: '#64748B', // secondary text (Slate 500)
+ash: '#CBD5E1',      // hairlines, separators (Slate 300)
+bone: '#F7F8FA',     // the stage: the app's background
+signal: '#3B82F6',   // Mirsal blue: the spoken word, every button, every "go"
+ember: '#22D3EE',    // AI cyan: only while the AI works (the rolling highlight)
+blood: '#2563EB',    // Primary Dark: pressed states, gradients
+acid: '#F59E0B',     // gold, at most once per plate: the falcon, the price, the heart
 ```
 
-These come from the builder board (`ref/Mirsal-Builder-upscaled.jpg`) and `docs/design.md` §3. Use `acid` at most once per plate. It is the falcon's beak, not a second brand colour.
+Plus, inside UI mockups, the app's own semantic colours: Success `#10B981`, Danger `#EF4444`, and the locked issue colours of `docs/design.md` §2 on a blocked sticker.
 
-### 4.2 Glow and halation
+### 4.2 Post-processing (`app/src/engine/post.ts`, built)
 
-**Blue does not bloom like orange.** Mirsal blue `#3B82F6` has a much lower luminance than the old orange, so at the default `bloomThreshold` 0.85 it barely glows. In additive passes (the pen, the orb, the button) scale `LIN.signal` and `LIN.ember` by 2 to 3, or return a `bloomThreshold` of about 0.6 from the plate.
+`DEFAULT_POST` is now the clean look: bloom 0.06 (threshold 1.4, so it barely acts), **no** halation, **no** chromatic aberration, **no** vignette, grain 0.006 (only against banding in gradients), `paper: 1`. The tone shoulder starts at 0.92, so the light stage stays white and does not go grey. A plate may punch in with `zoom` or a soft white `flash`; it never adds film grit.
 
-**Halation** (`app/src/engine/post.ts`, line 141)
+### 4.3 The visual language
 
-The film glow around highlights is hard-coded as red-orange: `vec3(1.0, 0.18, 0.04)`. Retune it to a cold blue, `vec3(0.18, 0.55, 1.0)`. Without this change every highlight bleeds orange and the blue reads muddy. In `DEFAULT_POST`, start with `halation: 0.3` and `bloom: 0.6` for a glossy, product-launch feel.
-
-### 4.3 Motifs
-
-| kit motif | Mirsal version |
+| element | how |
 |---|---|
-| the spark (`sparkHead`, the pen of `drawPen`) | **the Mirsal orb**: a blue disc with a lighter inner sphere and one small white highlight (`ref/mirsal logo.jpeg`), with a cyan `ember` core and the existing particles for the trail. Change `sparkHead` / `sparkHead2D` in `_motifs.ts` once, and every plate inherits the change |
-| graph-paper construction sheet | keep it for the "how it works" plates (creator, batch). It is the engine's blueprint |
-| bone-paper forms (`paper: 1`) | the Mirsal app itself: light `#F7F8FA` cards, 16 px radius, the chat wallpaper's faint doodles. Use it for the persona, users and app plates |
-| the P(doom) readout (`hud.ts`) | leave it off (`pdoom: 0` is already the default). The crop-mark frame is optional for the bookends |
-| the mask motif (`MASK`, `drawMask2D`) | do not use. The Mirsal character is the falcon (`console/assets/welcome/s1.webp`) |
+| stage | `#F7F8FA`, with at most a faint blue radial wash from one corner (10% alpha) |
+| cards | white, radius 20 to 28 (continuous-corner feel), shadow `rgba(15,23,42,0.08)` blur 16 to 40, offset y 4 to 12. No borders, or a 1 px `#E2E8F0` hairline |
+| type | **Inter** (`F.inter(weight)`, static TTFs in `app/public/fonts/inter/`): display 64 to 96 at weight 700 with tracking −0.02; UI 15 to 17 at 500/600; numbers and prices in Inter too (no mono) |
+| the orb | `drawOrb` (`scenes/card.ts`): the logo, a blue sphere with a lighter inner sphere and a small white highlight, a soft blue shadow. It guides the eye; it replaces the spark |
+| UI | real iOS patterns: pill buttons (Mirsal blue, white text 600), segmented controls, bottom sheets with a grabber, chat bubbles (blue outgoing, white incoming), switches, list rows with chevrons, SF-style outline icons at 2 px |
+| motion | iOS motion: springs (`ease.outBack` at small overshoot), 250 to 450 ms moves, sheets that slide up, cards that scale from 0.96 to 1 as they appear, gentle parallax. No shake, no glitch, no flash cuts |
+| the AI | the only "magic": the cyan highlight rolling around the composer while the AI works, and stickers coming alive |
 
-### 4.4 Type
-
-Keep **Archivo** for display and kinetic type. Its width axis (620 to 1250) drives the word stretches, and opentype.js needs TTF outlines. Keep **IBM Plex Mono** for labels, prices, ids (`G111`, `S4`) and timecodes. The Mirsal app's own face is Inter (`ref/InterVariable.woff2`). It may appear only inside UI mockups drawn with Canvas2D. To add it, copy the file to `app/public/fonts/`, then register a `FontFace` for it alone. Do not add it to `DEFS`: opentype.js cannot parse WOFF2, so `layout()` and `ot()` would fail on it. Drop Cormorant. A serif has no place in this brand.
-
-### 4.5 Real Mirsal pictures
+### 4.4 Real Mirsal pictures
 
 Code draws everything except the stickers. Use real ones:
 
-1. Copy 9 to 18 finished stickers (512 px PNG/WEBP, transparent) from `mirsal/out/library/files/<G…>/` into `app/public/stickers/`. Copy the falcon slides `mirsal/mirsal/console/assets/welcome/s1.webp…s4.webp` into `app/public/brand/`. Do not commit stickers from personal packs.
-2. In a plate's `init()`, load them with `await img.decode()` (`const img = new Image(); img.src = 'stickers/s1.webp'; await img.decode();`). Then draw with `ctx.drawImage` inside `setWorld(...)`. Loading belongs in `init()` only, never in `render()`.
+1. Copy 9 to 18 finished stickers (512 px PNG/WEBP, transparent) from `mirsal/out/library/files/<G…>/` into `app/public/stickers/`, and the falcon slides `mirsal/mirsal/console/assets/welcome/s1.webp…s4.webp` into `app/public/brand/`. Do not commit stickers from personal packs.
+2. Load them in a plate's `init()` (`const img = new Image(); img.src = 'stickers/s1.webp'; await img.decode();`), then draw with `ctx.drawImage`. Loading belongs in `init()` only, never in `render()`.
 3. Choose stickers by their names and the verifier's status, not by opening files (rule 9). Haitham chooses the final set by eye in the preview.
-
----
 
 ## 5. The plates
 
 Estimated times assume a read of about 160 wpm. The real times come from the alignment. Each plate lists its **anchor words** (the words that trigger beats), what happens on screen, the old plate to copy from as a starting point, and its sound.
 
 ### P1 `hook`: 0 to ~9.5 s. "What if one sentence…" / "No designer… Just Mirsal."
-- A dark stage. A Mirsal composer bar ("Type a message", with the paperclip, lightning, emoji and mic icons) draws itself in hairlines. The sentence types into it as it is said: the karaoke words sit **inside** the bar.
+- The light stage. A Mirsal composer bar ("Type a message", with the paperclip, lightning, emoji and mic icons) slides up like an iOS keyboard accessory. The sentence types into it as it is said: the karaoke words sit **inside** the bar.
 - **"whole sticker pack"**: the send button fires and the orb flies out. Behind it, a 3×3 sheet unfolds tile by tile, one tile per syllable.
 - **"already moving"**: every tile starts a small loop (bob, wave, squash), drawn from the real stickers. **"already in your chat"**: the sheet folds down into a chat bubble.
-- **"No designer. No editing app."**: two struck-out mono labels (`snip`). **"Just Mirsal."**: a hard cut to the orb. It swells, `flash 0.4`, and the wordmark writes on in Archivo 125/900.
+- **"No designer. No editing app."**: two app icons (a design tool, an editor) slide away and fade (`snip`). **"Just Mirsal."**: the orb springs to the centre and the wordmark appears beside it in Inter 800.
 - From: `hook.ts` (typing plus the pen reveal). Sound: `typewriter`/`key_click` on the typed words, `enter_key` on send, `whoosh_fast` on the unfold, a new `sticker_pop` per tile, `snip` ×2, `impact_slam` on "Mirsal".
 
 ### P2 `creator`: ~9.5 to ~23 s. "Meet the Mirsal Creator." / "…press one button." / "…the whole path…"
-- **"Meet the Mirsal Creator"**: the title in kinetic Archivo. The width stretches from 620 to 1250 across the word "Creator".
+- **"Meet the Mirsal Creator"**: the title in Inter 800, the word "Creator" in Mirsal blue, rising in with a spring.
 - **"Turn on approve for me"**: a small switch on the card's footer flips on, in Mirsal blue.
-- **"you see the price"**: a plan card slides up (bone paper): subject, style, a 3×3 grid icon, and the price in Plex Mono ticking up to its value (`acid`). **"press one button"**: one big Mirsal-blue button, "Create and send", and a cursor. The click is a `zoom` punch, `flash 0.3`, `impact_slam`.
-- **"sheet, cut, check, approve, animate, pack — and send"**: the camera pulls back onto the graph paper. Seven nodes light up in sequence, one per said word, joined by the orb's trail: sheet → cut → check → approve → animate → pack → send. Each node shows its real artifact (the sheet, nine cut cells, a green tick from the verifier, the G2 approval stamp, a moving cell, a pack tray, a paper plane). The human gates G1 to G5 sit under their nodes as small mono labels.
+- **"you see the price"**: a plan card slides up as an iOS bottom sheet: subject, style, a 3×3 grid icon, and the price ticking up to its value (`acid`). **"press one button"**: one big Mirsal-blue button, "Create and send", and a cursor. The click is a `zoom` punch, `flash 0.3`, `impact_slam`.
+- **"sheet, cut, check, approve, animate, pack — and send"**: the card becomes a run card with seven steps in a row, each turning from grey to a blue check, one per said word, the orb travelling along them: sheet → cut → check → approve → animate → pack → send. Each node shows its real artifact (the sheet, nine cut cells, a green tick from the verifier, the G2 approval stamp, a moving cell, a pack tray, a paper plane). The human gates G1 to G5 sit under their nodes as small mono labels.
 - From: `prompt.ts` for the card and `pipeline.ts` for the chain. Sound: `ui_blip` per node, `stamp` on "approve", `whoosh_soft` on "send", new `coin_tick` under the price, new `orb_whoosh` along the trail.
 
 ### P3 `persona`: ~23 to ~36 s. "And it gets to know you." / "…it remembers." / "…It never decides for you."
-- A light plate (`paper: 1`). A profile card on bone paper: **"name"**, **"where you live"** and **"what you love"** each fill in with the plotter's stroke font (`strokeText`, `writtenLength`). The values are generic examples ("Sara", "Dubai", "falcons, coffee"); never use a real person's details.
+- An iOS bottom sheet, "What Mirsal knows about you": the rows **"name"**, **"where you live"** and **"what you love"** each fill in as they are said, like a form being typed. The values are generic examples ("Sara", "Dubai", "falcons, coffee"); never use a real person's details.
 - **"remembers"**: the card folds into the orb, which pulses once.
 - **"Ask for cartoonish twice"**: two chat bubbles, "make it more cartoonish" ×2, and a counter in mono, `cartoonish ×1 → ×2`. **"next time it offers it"**: a new plan card shows a soft chip: *you asked for cartoonish 2 times: say "cartoonish" to use it here*. **"It never decides for you"**: a cursor hovers and does **not** click, and the chip stays a choice. That is the point of the beat.
 - From: `model.ts` (a card that writes itself) and `edits.ts` (the chat commands). Sound: `pen_line` while writing, `ui_tick` on the counter, `confirm_chime` on the offer, and silence on the non-click.
@@ -254,16 +244,15 @@ Move the nine old plates to `app/src/scenes/_old/` before starting. The timeline
 // CREATOR — "Meet the Mirsal Creator." / "…press one button." / "…the whole path…"
 import type * as THREE from 'three';
 import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { Layer2D } from '../engine/gl';
-import { rgba } from '../engine/palette';
+import { Layer2D, clearRT } from '../engine/gl';
+import { LIN, rgba } from '../engine/palette';
 import { F } from '../engine/type';
 import { type Word } from '../engine/lyrics';
 import { ease, prog, pulse } from '../engine/util';
-import { Cam2D, gridPass, setGrid, drawKaraoke, placeRow, setWorld, lineOf, wordOf, type KWord } from './_vo';
+import { Cam2D, drawKaraoke, placeRow, setWorld, lineOf, wordOf, type KWord } from './_vo';
 
 export default class Creator extends Scene {
   cam = new Cam2D();
-  grid = gridPass(24, 96);
   ui = new Layer2D();
   kw: KWord[] = [];
   button!: Word;
@@ -272,15 +261,14 @@ export default class Creator extends Scene {
     const ly = this.ctx.lyrics;
     const L = lineOf(ly, 'press one button');
     this.button = wordOf(L, 'button');
-    this.kw.push(...placeRow(L.words, -760, -320, 58, F.archivo(100, 700), 'r1', { ant: 0.2 }).words);
+    this.kw.push(...placeRow(L.words, -760, -320, 58, F.inter(700), 'r1', { ant: 0.08, tracking: -0.02 }).words);
     this.cam.key(this.ctx.start, 0, 0, 1.2).key(this.button.start, 0, 40, 1.6, 0, ease.outExpo).key(this.ctx.end, 0, 40, 1.5);
   }
 
   override render(f: Frame, out: THREE.WebGLRenderTarget): PostOverrides {
     const { renderer, comp } = this.ctx;
     const t = f.t, c = this.cam.at(t);
-    setGrid(this.grid, c, { reveal: [0, 0, 1e5], ink: 0.6 });
-    this.grid.render(renderer, out);            // background first: it overwrites `out`
+    clearRT(renderer, out, LIN.bone);           // the light stage first: it overwrites `out`
     const U = this.ui; U.clear(); const ctx = U.ctx;
     // the one button: grows in before the word, pressed on it
     const k = ease.outBack(prog(t, this.button.start - 0.5, this.button.start));
@@ -288,9 +276,9 @@ export default class Creator extends Scene {
     ctx.fillStyle = rgba('signal', 1);
     ctx.beginPath(); ctx.roundRect(-220, -48, 440, 96, 48); ctx.fill();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    drawKaraoke(ctx, c, t, this.kw);
+    drawKaraoke(ctx, c, t, this.kw, { paper: true, outline: false });
     comp.draw(renderer, U.upload(), out);
-    return { bloom: 0.65, zoom: 1 + 0.03 * pulse(t, this.button.start, 0.1), flash: 0.3 * pulse(t, this.button.start, 0.08) };
+    return { zoom: 1 + 0.03 * pulse(t, this.button.start, 0.1), flash: 0.3 * pulse(t, this.button.start, 0.08) };
   }
 }
 ```
@@ -303,13 +291,13 @@ Check which names `ease` offers in `engine/util.ts` before using one. `outExpo`,
 
 **Spending: this is a paid call.** Show the character count and price, and wait for Haitham's go before generating (rule 13; it is a voiceover, but the rule is the same). One take of about 1,400 characters costs very little on any plan, but the go-ahead still comes first.
 
-**With the ElevenLabs MCP connected** (it is not connected in this session yet; add it in claude.ai connector settings or with `claude mcp add`, then ask Claude to "voice the Mirsal Creator script"), the request is:
+**Through the ElevenLabs MCP** (`claude mcp add elevenlabs -s user -e ELEVENLABS_API_KEY=… -- uvx elevenlabs-mcp`; the key stays in the user config, never in the repo), `text_to_speech` with:
 - **Text**: the `SCRIPT` lines above, one paragraph per plate, with a line break between plates. That gives the natural 0.3 to 0.6 s pause that `cut()` lands in.
-- **Voice**: **Haytham – Dramatic and Narrative**, id `wxweiHvoC2r2jFM7mS8b` (Haitham's pick, 2026-10-04), a shared ElevenLabs library voice: a warm middle-aged Egyptian storyteller reading the English script. For an Arabic version later the same voice fits natively (§10).
+- **Voice**: **Liam – Energetic, Social Media Creator** (`TX3LPaxmHKxFdv7VOQHJ`, an ElevenLabs premade voice; Haitham, 2026-10-04: "any available male voice"). The take is `audio/takes/liam-take1.mp3`, `eleven_multilingual_v2`, stability 0.45, similarity 0.8, style 0.3, `mp3_44100_128` (the free plan refuses 192 kbps, and refuses shared library voices through the API, which ruled out the first pick, Haytham – Dramatic and Narrative).
 - **Model**: the newest multilingual model offered (an Arabic read comes later, §10). **Stability** 0.45, **similarity** 0.8, **style** 0.3, speaker boost on, speed 1.0 to 1.05.
 - **Output**: MP3 44.1 kHz, 192 kbps or better. Save it as `audio/voiceover.mp3`, replacing the old one. Keep the old one in git history only.
 
-**Without the MCP**, do the same in the ElevenLabs web app and download the MP3 to the same path.
+**Without the MCP**, do the same in the ElevenLabs web app and download the MP3 to the same path. A shared library voice works there on the free plan; through the API it needs a paid plan.
 
 Read-through check before aligning: the read must say every word of `SCRIPT` exactly. An ad-lib breaks the alignment. If the voice says "A-P-I" as "appy", regenerate that line or add the spoken form to `SPOKEN`.
 
@@ -365,7 +353,7 @@ All commands run from `Motion Graphics/`. Needed tools: bun, Google Chrome, ffmp
    uv run --no-project --with numpy python analysis/audio_vo.py
    ```
    Check `data/lyrics.json`: every line is present and no word has `end - start < 0.04`.
-4. **Re-skin**: palette (§4.1), halation (§4.2), the orb in `_motifs.ts` (§4.3).
+4. **The look** (§4): built; new plates follow §4.3.
 5. **Retire the old plates**: move them to `app/src/scenes/_old/`. Write `timeline.ts` (§5).
 6. **Plates, one at a time**, in film order. Preview each and lock it before starting the next:
    ```sh
@@ -404,7 +392,7 @@ All commands run from `Motion Graphics/`. Needed tools: bun, Google Chrome, ffmp
 ### Done means
 
 - [ ] Every line of the script is on screen when it is said, and every claim is in the table in §3
-- [ ] No orange left anywhere: palette, halation and the old spark sounds
+- [ ] Every frame passes as a well-designed iOS screen (§4); no grit, glow or old spark sounds
 - [ ] Real Mirsal stickers and the falcon, with no personal or real-person data
 - [ ] The P7 window matches `mirsal-ai-redesign-prompt.md`
 - [ ] The film loops (last frame = frame 0) and plays from `mirsal-creator_web.mp4` in a browser
@@ -416,10 +404,10 @@ All commands run from `Motion Graphics/`. Needed tools: bun, Google Chrome, ffmp
 
 | path | what |
 |---|---|
-| `audio/voiceover.mp3` | the voiceover the whole film is timed to |
+| `audio/voiceover.mp3` | the voiceover the whole film is timed to (Liam, ElevenLabs) |
+| `audio/takes/` | every ElevenLabs take (ignored; the old film's read is `takes/old/`) |
 | `audio/sfx/` | the effect library, `name_N.mp3` = take N |
 | `data/lyrics.json` | word timings made by the aligner, read by the plates and the cue sheet (never edit by hand) |
-| `data/voiceover.words.json` | the old read's raw word times; nothing reads it, so delete it with the old voiceover |
 | `data/audio.json` | loudness envelopes, word onsets, a nominal 120 BPM grid that only feeds generic helpers |
 | `analysis/align_vo.py` | CTC forced alignment with wav2vec2-base-960h (quantized ONNX, `analysis/models/`), then word edges refined against the silences |
 | `analysis/audio_vo.py` | the audio analysis |

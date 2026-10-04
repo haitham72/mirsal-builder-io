@@ -7,7 +7,7 @@ import { FSPass, makeRT, W, H, SCALE } from './gl';
 export const SHOULDER_GLSL = /* glsl */ `
 vec3 shoulder(vec3 x) {
   // identity below k, smooth exponential shoulder above; very bright values desaturate toward white
-  const float k = 0.72;
+  const float k = 0.92; // high: the stage is light (#F7F8FA) and must stay clean white, not grey
   vec3 y = mix(x, k + (1.0 - k) * (1.0 - exp(-(x - k) / (1.0 - k))), step(k, x));
   float over = max(max(x.r, x.g), x.b);
   return mix(y, vec3(1.0), smoothstep(2.0, 12.0, over) * 0.85);
@@ -43,18 +43,19 @@ export interface PostParams {
 
 export const DEFAULT_POST: PostParams = {
   exposure: 1,
-  bloom: 0.55,
-  bloomThreshold: 0.85,
+  // the clean iOS look: almost no glow, no halation, no fringing, a trace of grain against banding
+  bloom: 0.06,
+  bloomThreshold: 1.4,
   bloomKnee: 0.5,
   bloomRadius: 0.75,
-  halation: 0.25,
-  ca: 1.2,
-  grain: 0.055,
-  vignette: 0.35,
+  halation: 0,
+  ca: 0,
+  grain: 0.006,
+  vignette: 0,
   hud: 1,
   frame: 0,
   pdoom: 0,
-  paper: 0,
+  paper: 1,
   fade: 0,
   flash: 0,
   shake: [0, 0],

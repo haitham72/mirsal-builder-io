@@ -6,7 +6,8 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-**The Mirsal Creator film (`Motion Graphics/`, 2026-10-04): the rough cut plays; waiting on the voiceover.** `Motion Graphics/README.md` "Where it stands" says what is built.
+**The Mirsal Creator film (`Motion Graphics/`, 2026-10-04): voiced, aligned, rough cut rendered; the real plates are next.** `Motion Graphics/README.md` "Where it stands" says what is built.
 
-- **Blocked on Haitham:** the voice `wxweiHvoC2r2jFM7mS8b` (Haytham – Dramatic and Narrative) is added to the ElevenLabs account, but text-to-speech returns 402: "Free users cannot use library voices via the API". It needs either the Starter plan, or the read made in the ElevenLabs web app and saved as `Motion Graphics/audio/voiceover.mp3`. The text is the `SCRIPT` in `analysis/align_vo.py`, one paragraph per plate. The free tier also refuses `mp3_44100_192`, so use `mp3_44100_128`.
-- **Then:** `uv run --no-project --with onnxruntime --with numpy python analysis/align_vo.py` and `uv run --no-project --with numpy python analysis/audio_vo.py` (these replace the provisional `data/lyrics.json` and `data/audio.json`). After that, write the plates P1 to P8 (README §5), each replacing its `card(...)` entry in `app/src/timeline.ts`. Then sound (§7) and render (§8).
+- **The look is the Mirsal app's clean iOS style** (Haitham: the concept board and the dark plotter look are rejected). README §4 is the rule; every new plate follows §4.3.
+- **Voice:** Liam (ElevenLabs premade), `audio/voiceover.mp3`, 87.4 s, aligned (`data/lyrics.json`).
+- **Next:** write the plates P1 to P8 (README §5), each replacing its `card(...)` entry in `app/src/timeline.ts`, starting with P1 `hook`. Then the sound effects (§7), the cue sheet and the final render (§8).

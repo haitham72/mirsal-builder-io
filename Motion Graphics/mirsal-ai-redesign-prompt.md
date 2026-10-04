@@ -3,10 +3,10 @@
 A complete redesign of the original **Mirsal chat**, the messaging app this repo was built to serve. In the redesign, the Creator is part of the chat itself, not a separate tool. This file has three prompts:
 
 - **A** is the full design brief, for a design LLM or a designer.
-- **B** is a one-shot image prompt for a presentation board, in the format of `ref/Mirsal-Builder-upscaled.jpg`.
+- **B** is a set of image prompts, one clean iOS screen each, in the style of Apple's own product pages. They are **not** a concept board: Haitham rejected the board format of `ref/Mirsal-Builder-upscaled.jpg` (2026-10-04: "so awful, it should look and feel clean iOS, based on the app design").
 - **C** is the short spec that plate P7 of the Creator film draws in code (`README.md` §5).
 
-Sources: the current app as it is today (`ref/ref-only.jpg`, right half: rail, chat list, a conversation over a doodle wallpaper, the composer with paperclip, lightning, emoji and mic); the logo (`ref/mirsal logo.jpeg`, a glossy blue orb); the builder's design system (`ref/Mirsal-Builder-upscaled.jpg`); the rolling cyan highlight (`ref/chat with cyan rolling highlight.jpg`, a cyan light along the edge of a panel); and `docs/design.md` (tokens, locked issue colours, rule 10).
+Sources (for content, not for style): the current app as it is today (`ref/ref-only.jpg`, right half: rail, chat list, a conversation over a doodle wallpaper, the composer with paperclip, lightning, emoji and mic); the logo (`ref/mirsal logo.jpeg`, a glossy blue orb); the builder board's colour values only (`ref/Mirsal-Builder-upscaled.jpg`; its layout and busy board style are rejected); the rolling cyan highlight (`ref/chat with cyan rolling highlight.jpg`, a cyan light along the edge of a panel); and `docs/design.md` (tokens, locked issue colours, rule 10).
 
 Generating an image from prompt B is a paid call: show the price and wait for a go-ahead (rule 13).
 
@@ -33,39 +33,59 @@ Generating an image from prompt B is a paid call: show the price and wait for a 
 > 9. **People and credits.** Settings gains **Team**: who is approved, who is waiting (with Approve / Decline), each person's **credits** as a bar, and their usage. For a member, Settings shows their own credits only.
 > 10. **Sending.** A finished pack sends as a real sticker message in any chat, with the animated sticker at 512 px, a timestamp and read ticks. Long-press (mobile) or right-click (desktop) offers "Make more like this", which opens the Creator with the sticker as reference.
 >
-> **Mood.** A bright, airy, premium messenger: calm white and blue surfaces, generous space, soft shadows, and glass only on the AI layers (the plan, run and multi cards get a faint frosted panel with a 1 px cyan inner edge). Motion is quick and purposeful: 150 to 250 ms eases, with springs only for stickers. The falcon mascot (glossy 3D, caramel feathers, gold beak) may appear in empty states and onboarding only, never in the chrome.
+> **Mood.** Native iOS first: it should feel like an Apple app with Mirsal's colours (SF-style system controls, large titles, inset grouped lists, bottom sheets with grabbers, continuous corners, the system's spacing). A bright, airy, premium messenger: calm white and blue surfaces, generous space, soft shadows, and glass only on the AI layers (the plan, run and multi cards get a faint frosted panel with a 1 px cyan inner edge). Motion is quick and purposeful: 150 to 250 ms eases, with springs only for stickers. The falcon mascot (glossy 3D, caramel feathers, gold beak) may appear in empty states and onboarding only, never in the chrome.
 >
-> **Avoid.** A second accent colour on buttons. Dark navy panels inside the light app. A dashboard look. Hiding the reason for a rejection behind a tooltip. Fake user data that looks like real people (use generic names and initials). Logos of other messengers.
+> **Avoid.** Presentation boards, mood boards, collages, annotations or numbered callouts around the screens. A second accent colour on buttons. Dark navy panels inside the light app. A dashboard look. Hiding the reason for a rejection behind a tooltip. Fake user data that looks like real people (use generic names and initials). Logos of other messengers.
 >
 > **Deliver.** (1) Desktop: the chat list with Mirsal AI pinned, plus Mirsal AI's conversation with a plan card. (2) Desktop: a run card mid-way, including one blocked sticker with "Use it anyway". (3) Desktop: the sticker panel open on Trending, inside a normal chat. (4) Mobile: the composer with the rolling highlight and the orb button. (5) Mobile: the "What Mirsal knows about you" sheet. (6) Mobile, RTL Arabic: a conversation with a sent animated sticker. (7) Dark mode for (1). (8) A design-system strip: colours, type, icons, the composer states (idle, typing, AI busy) and the card family (plan, run, multi, blocked sticker).
 
 ---
 
-## B. Image prompt (concept board, 16:9, 4K)
+## B. Image prompts: clean iOS screens, one per image
 
-For a model that writes text well, such as Nano Banana 2. Keep every visible word in quotes so the model spells it exactly. Expect to fix small garbled letters afterwards; text in a generated board is never exact.
+Each prompt makes **one** screen on **one** device, the way Apple shows its own apps: the device straight on or at a slight angle, on a soft plain background, nothing else in the frame. Keep every visible word in quotes so the model spells it exactly, and expect to fix small garbled letters afterwards. Each one is a paid call: show the price first (rule 13).
+
+**Shared style line** (append to every prompt):
 
 ```
-A premium product design presentation board, 16:9, ultra clean white background with soft light-gray section cards, in the style of a Dribbble/Behance case-study board. Top-left header: a glossy blue orb logo and the words "Mirsal AI" in bold Inter, then a thin divider and "The new chat". Top-right small caps: "Create • Learn • Batch • Share".
-
-Left section, "1  Mirsal AI on desktop": a large light-mode desktop messenger window. Left: a narrow icon rail with outline icons. Next: a chat list titled "Chats" with a search pill; the first row is pinned, a glowing blue orb avatar named "Mirsal AI" with a blue verified tick and the preview "Your pack is ready". Right: the open conversation over a very faint blue doodle wallpaper. A user bubble says "make me a falcon pack, cartoonish". Below it, a frosted-glass AI card with a thin cyan inner edge titled "Falcon pack · 3×3 · Full video", a small 3×3 preview grid of cute glossy 3D falcon stickers, the price "≈ 12 credits" in a monospace font, and one bright blue pill button "Create and send" plus a quiet text link "Not yet". At the bottom, a white pill composer "Type a message" with a paperclip, a blue orb button, an emoji face and a mic; a thin cyan light travels along the composer's edge.
-
-Middle section, "2  One click, every step": a run card with seven small steps in a row, "sheet", "cut", "check", "approve", "animate", "pack", "send", the first five with blue checks, the sixth spinning. Inside, a 3×3 sheet of falcon stickers; one tile is hatched with an orange outline, the sentence "The wing crosses the edge of its square." under it, and a small blue button "Use it anyway" on the picture.
-
-Right section, "3  Mobile": three phone mockups. Phone one: the composer with the orb button and the cyan rolling highlight, a tray above it reading "3 in flight" with three progress rings (cherry, banana, mango). Phone two: a bottom sheet "What Mirsal knows about you" with rows "Name", "City", "Likes" and an edit pencil on each, and a soft chip "You asked for cartoonish 2 times. Use it here?". Phone three: an Arabic right-to-left chat with a large animated falcon sticker sent as a message, with timestamp and blue read ticks.
-
-Bottom strip, "4  Design system": colour swatches labelled "Primary Blue #3B82F6", "Primary Dark #2563EB", "AI Cyan #22D3EE", "Slate #1E293B", "Background #F7F8FA", "Success #10B981", "Warning #F59E0B", "Danger #EF4444"; a type ramp in Inter; a row of 2px outline icons; the composer in three states labelled "Idle", "Typing", "AI busy".
-
-Bright high-key lighting, crisp vector UI, soft shadows, generous whitespace, pixel-perfect alignment, no real people's faces, no other brands' logos, no watermark.
+Native iOS 26 design language, Apple product-page quality: an iPhone 17 Pro in natural titanium, front view, floating on a soft seamless #F7F8FA background with a gentle shadow beneath. The screen is pixel-perfect light-mode UI: Inter / SF Pro typography, large titles, inset grouped lists, continuous rounded corners, generous spacing, soft shadows. One accent colour only: Mirsal blue #3B82F6 for buttons and outgoing bubbles. No other objects, no annotations, no labels outside the phone, no collage, no watermark, no other brands' logos, no real people's faces.
 ```
 
-Suggested run: 16:9, 4K (or 2K first to check the layout), one take. If the board comes out right, upscale and store it as `ref/Mirsal-AI-redesign.jpg` next to the builder board.
+**B1. Mirsal AI in the chat list**
 
----
+```
+The screen: a messenger's chat list with the large title "Chats" and a search field "Search". The first row is pinned: a glossy blue orb avatar with a small white highlight, the name "Mirsal AI" with a blue verified tick, the preview "Your falcon pack is ready", time "9:41". Below it four ordinary rows with soft pastel initial avatars ("S", "A", "R", "K") and grey previews. A bottom tab bar with outline icons "Chats", "Stickers", "Contacts", "Settings", the first selected in blue.
+```
+
+**B2. The plan card: one click**
+
+```
+The screen: the "Mirsal AI" conversation over a very faint light-blue doodle wallpaper. An outgoing blue bubble says "make me a falcon pack, cartoonish". Below it, an incoming white card with rounded corners titled "Falcon pack", a small 3×3 grid of cute glossy 3D cartoon falcon stickers, a row "3×3 · Full video", a row "Approve for me" with an iOS switch turned on, the price "12 credits", and one wide blue pill button "Create and send" with a quiet grey text button "Not yet" under it. At the bottom, a white pill composer "Message" with a plus icon, a small blue orb button, and a mic; a thin cyan light runs along the composer's edge.
+```
+
+**B3. No dead ends**
+
+```
+The screen: an incoming white card titled "Falcon pack · checking", a row of seven tiny steps with blue checks ("sheet", "cut", "check") and grey circles for the rest, and a 3×3 grid of cute 3D falcon stickers. One sticker has a thin orange outline and a soft orange tint; under the grid one plain sentence, "Sticker 4: the wing crosses the edge of its square.", and a small blue pill button "Use it anyway" sitting on that sticker.
+```
+
+**B4. What Mirsal knows about you**
+
+```
+The screen: an iOS bottom sheet with a grabber over a dimmed chat, titled "What Mirsal knows about you". An inset grouped list: "Name: Sara", "City: Dubai", "Likes: falcons, coffee", each with a chevron. Below, a section "Your taste" with one row "Cartoonish: asked 2 times" and the footnote "Mirsal only offers this. It never decides for you." A red text button "Clear everything" at the bottom.
+```
+
+**B5. Arabic, right to left**
+
+```
+The screen: the same messenger in Arabic, right to left: the large title "الدردشات" aligned right, a conversation where a large animated cute 3D falcon sticker has just been sent as a message on the right, with the time "٩:٤١" and two blue read ticks; the composer "رسالة" mirrored, with the blue orb button.
+```
+
+Suggested run: 16:9 or 4:5, 2K, one take each, B1 and B2 first. Store the ones Haitham keeps as `ref/mirsal-ai-<name>.jpg`.
 
 ## C. What plate P7 draws in code
 
-The film draws this with Canvas2D, Inter allowed (`README.md` §4.4), on a light plate (`paper: 1`), at about 1400×860 world px, centred:
+The film draws this with Canvas2D in Inter (`README.md` §4.3), on the light stage, at about 1400×860 world px, centred:
 
 1. **Window**: white, 16 px radius, a soft shadow, three window dots replaced by the orb and "Mirsal" at top-left.
 2. **Rail**: 72 px, five outline icons (chats active in blue, contacts, stickers, star, settings).

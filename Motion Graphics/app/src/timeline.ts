@@ -38,13 +38,13 @@ export function makeTimeline(ly: Lyrics, au: AudioData): TimelineEntry[] {
   const card = (id: string, fig: string, start: number, end: number, lines: string[]) =>
     E(id, 'card', start, end, { params: { fig, lines } });
   return [
-    card('hook', 'P1 · hook', 0, b.creator, ['What if one sentence', 'No designer']),
-    card('creator', 'P2 · one click', b.creator, b.persona, ['Meet the Mirsal Creator', 'press one button', 'that one click runs']),
-    card('persona', 'P3 · it learns you', b.persona, b.batch, ['And it gets to know you', 'Tell it your name', 'Ask for cartoonish']),
-    card('batch', 'P4 · batching', b.batch, b.override, ['Need more than one', 'It picks the subjects', 'Nine stickers a sheet']),
-    card('override', 'P5 · no dead ends', b.override, b.users, ['a rejection is never', 'Every blocked sticker']),
-    card('users', 'P6 · the whole team', b.users, b.app, ['made for the whole team', 'Everyone signs in', 'The best packs']),
-    card('app', 'P7 · inside Mirsal', b.app, b.outro, ['Mirsal has been waiting', 'The Creator is an engine']),
-    card('outro', 'P8 · one click', b.outro, b.end, ['Your words', 'Mirsal Creator —']),
+    card('hook', 'Hook', 0, b.creator, ['What if one sentence', 'No designer']),
+    card('creator', 'One click', b.creator, b.persona, ['Meet the Mirsal Creator', 'press one button', 'that one click runs']),
+    card('persona', 'It learns you', b.persona, b.batch, ['And it gets to know you', 'Tell it your name', 'Ask for cartoonish']),
+    card('batch', 'Batching', b.batch, b.override, ['Need more than one', 'It picks the subjects', 'Nine stickers a sheet']),
+    card('override', 'No dead ends', b.override, b.users, ['a rejection is never', 'Every blocked sticker']),
+    card('users', 'The whole team', b.users, b.app, ['made for the whole team', 'Everyone signs in', 'The best packs']),
+    card('app', 'Inside Mirsal', b.app, b.outro, ['Mirsal has been waiting', 'The Creator is an engine']),
+    card('outro', 'Mirsal Creator', b.outro, b.end, ['Your words', 'Mirsal Creator —']),
   ];
 }

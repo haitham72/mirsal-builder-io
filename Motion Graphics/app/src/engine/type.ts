@@ -22,6 +22,9 @@ for (const wt of [400, 600]) {
 for (const [n, f] of [['300', 'Light'], ['400', 'Regular'], ['500', 'Medium'], ['600', 'SemiBold'], ['700', 'Bold']] as const)
   DEFS.push({ family: `Plex-${n}`, file: `src/IBMPlexMono-${f}.ttf` });
 DEFS.push({ family: 'PlexItalic-400', file: 'src/IBMPlexMono-Italic.ttf' });
+// Inter: the Mirsal app's face (static TTFs from rsms/inter 4.1, OFL; opentype.js cannot read WOFF2)
+for (const [n, f] of [['400', 'Regular'], ['500', 'Medium'], ['600', 'SemiBold'], ['700', 'Bold'], ['800', 'ExtraBold']] as const)
+  DEFS.push({ family: `Inter-${n}`, file: `inter/Inter-${f}.ttf`, features: '"cv11" 1, "ss01" 1' });
 
 /** Convenience family names. */
 export const F = {
@@ -36,6 +39,10 @@ export const F = {
   },
   serif(weight = 400, italic = false): string {
     return `${italic ? 'CormorantItalic' : 'Cormorant'}-${weight < 500 ? 400 : 600}`;
+  },
+  /** Inter, the app's face: weight 400..800. */
+  inter(weight = 600): string {
+    return `Inter-${nearest([400, 500, 600, 700, 800], weight)}`;
   },
   mono(weight = 400, italic = false): string {
     if (italic) return 'PlexItalic-400';

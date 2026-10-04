@@ -1,13 +1,13 @@
 import { hexToLinear } from './util';
 
-// The Mirsal palette (README §4.1): a night-navy stage, paper white, and one signal colour,
-// Mirsal blue. AI cyan is the hot core of the orb; gold is the one rare accent.
+// The Mirsal palette (README §4.1), the app's own iOS look: a light stage, slate text, one signal
+// colour (Mirsal blue). AI cyan only marks the AI at work; gold is the one rare accent.
 export const HEX = {
-  ink: '#070B16', // stage: deep night navy
-  ink2: '#111A2E', // raised navy: cards, panels, the window frame
-  graphite: '#475569', // dim lines, secondary text (Slate 600)
-  ash: '#94A3B8', // mid grey, unsaid karaoke outlines (Slate 400)
-  bone: '#F7F8FA', // paper white: primary text, light plates (the app's background)
+  ink: '#1E293B', // text on the light stage (Slate 800)
+  ink2: '#FFFFFF', // surface: cards, sheets, the window
+  graphite: '#64748B', // secondary text (Slate 500)
+  ash: '#CBD5E1', // hairlines, separators, unsaid words (Slate 300)
+  bone: '#F7F8FA', // the stage: the app's background
   signal: '#3B82F6', // Mirsal blue: the said word, the pen, the one button
   ember: '#22D3EE', // AI cyan: the orb's core, the rolling highlight
   blood: '#2563EB', // Primary Dark: the shadow side of signal
