@@ -463,7 +463,25 @@ a:focus-visible,button:focus-visible,[data-act]:focus-visible,select:focus-visib
 .seeall:hover{text-decoration:underline}
 .vchip:hover{border-color:var(--pri);color:var(--pri-d)}
 .btn,.tab,.rbtn,.crow,.iconbtn,.lv-hrow,.cp-chip,.cp-style,.vchip{transition:background-color .15s,border-color .15s,box-shadow .2s,color .15s}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* motion, one language for the whole app (Haitham, 2026-10-04: "subtle animations everywhere, like the AI enhancer"): the enhancer's own .22s rise-and-fade (agent.css aiin)
+   for things that OPEN on a click, and soft hover / press / selected transitions for everything you touch. Entrance animations go only on what is drawn by a click
+   (a dialog, a menu, the style tiles, the engine strip, a toast): lists the Studio redraws on a timer (batches, rows, tiles) would replay them, so they only transition. */
+:root{--ease:cubic-bezier(.2,.8,.2,1)}
+@keyframes mz-in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes mz-fade{from{opacity:0}to{opacity:1}}
+#dlg.on,#modal.on{animation:mz-fade .18s ease-out both}
+#dlg.on .dbox,#modal.on .dbox{animation:mz-in .24s var(--ease) both}
+.cp-pop,.cp-engwrap:not([hidden])>.cp-eng{animation:mz-in .22s var(--ease) both}
+.cp-styles>.cp-style{animation:mz-in .24s var(--ease) both}
+.cp-styles>.cp-style:nth-child(2){animation-delay:.02s}.cp-styles>.cp-style:nth-child(3){animation-delay:.04s}.cp-styles>.cp-style:nth-child(4){animation-delay:.06s}
+.cp-styles>.cp-style:nth-child(5){animation-delay:.08s}.cp-styles>.cp-style:nth-child(6){animation-delay:.1s}.cp-styles>.cp-style:nth-child(n+7){animation-delay:.12s}
+.btn,.tab,.rbtn,.iconbtn,.cp-chip,.cp-style,.vchip,.gst,.gvb,.lv-hrow,.pk-row,.sp-mode,.cp-go,.ai-seg button,.ps-pick,.fx-pack,.fx-st{transition:background-color .18s var(--ease),border-color .18s var(--ease),box-shadow .22s var(--ease),color .18s var(--ease),transform .18s var(--ease),opacity .18s var(--ease)}
+.btn:active:not(:disabled),.tab:active,.cp-chip:active:not(:disabled),.cp-go:active:not(:disabled),.gvb:active,.sp-mode:active,.ai-seg button:active{transform:scale(.97)}
+.cp-style:hover,.gvb:hover,.sp-mode:hover,.fx-pack:hover,.fx-st:hover{transform:translateY(-2px)}
+.pk-row:hover,.lv-hrow:hover{box-shadow:inset 0 0 0 1px var(--ai)}
+.cp-sw i{transition:transform .22s var(--ease)}.cp-sw{transition:background-color .22s var(--ease)}
+#toast{transition:opacity .2s ease,transform .22s var(--ease)}#toast:not(.on){transform:translate(-50%,8px)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-delay:0s!important;scroll-behavior:auto!important}}
 
 /* particle effects (#/effects, docs/effects.md): one page width, the shared tokens, no palette of its own; room below so the fixed Queue pill never covers the last buttons */
 .page.fx{padding-bottom:110px}

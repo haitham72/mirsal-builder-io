@@ -91,6 +91,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
   12px, `.sh` …). Define ~6 steps and use them, so a screen cannot drift.
 - **One radius scale** derived from `--r:16px` (8 / 12 / 16 / 24). The composer currently uses 20/24/30px on its own.
 - Motion: the app already has `transition:box-shadow .2s` on `.cp-box` and `.lv-hitem` hover transitions. **Every interactive element gets a hover and a
+- **One motion language (Haitham, 2026-10-04: "subtle animations everywhere, like the AI enhancer")** — `studio.css` after the interaction rules: `--ease` (`cubic-bezier(.2,.8,.2,1)`), `mz-in` (the enhancer's .22s rise-and-fade) on what **opens on a click** (dialogs and their backdrop, the stroke menu, the engine strip, the style tiles with a light stagger), soft hover / press (`scale(.97)`) / selected transitions on every touchable element, a 2px lift on cards, a slide on the toast. Never an entrance animation on what the Studio redraws on a timer (batches, rows, tiles, the variations strip, the credits menu): it would replay on every poll. `prefers-reduced-motion` turns all of it off.
   `:focus-visible`**, matching `.lv-hitem` (`studio.css:353`), which is currently the best-behaved rule in the app and should be the template.
 
 ---
