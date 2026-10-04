@@ -250,6 +250,7 @@ function gview(){
     <button class="btn dng" data-act=grm title="Move ${gs.length===1?'this batch':'these batches'} to the trash. You can restore ${gs.length===1?'it':'them'} from Removed batches under Earlier batches.">${ic('trash')} Remove batch</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
+   ${typeof gvarsHtml==='function'?gvarsHtml(gs):''}
    ${stepsHtml(s)}
    ${gbodyHtml(s.gs,{inc:s.inc,todoAnim:s.todoAnim,busyAnim:s.busyAnim,n:s.n})}
    <div class=gbar>${barHtml(s)}</div>`}
