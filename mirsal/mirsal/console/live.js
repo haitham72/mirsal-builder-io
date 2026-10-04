@@ -292,8 +292,21 @@ const histInfo=it=>`${esc(it.generation_id)} · ${it.ready} sticker${it.ready===
 /* a batch is ONE picture: the first of its stickers that has one (P4 of the UI/UX spec: not the sheet's 4 or 9 cells); a batch with no picture yet is the checkerboard */
 const histThumb=it=>{const c=(it.cells||[]).find(x=>x.png);return`<span class=lv-hth>${c?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="${esc(String(((it.cells||[])[0]||{}).status||it.stage||'').toLowerCase())}"></span>`}</span>`};
 /* one entry of the column: a click presents the batch in the Studio. `on` = it is the batch the Studio presents now. */
-const histRow=it=>{const on=SES.gens.includes(it.id);
-  return`<button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${it.id} aria-pressed=${on} title="Show ${esc(it.generation_id)} in the Studio">${histThumb(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(it)}</small></span></button>`};
+/* a family (flow/groups.py: a batch, its edits, redos and the batches added to it) is ONE entry: the root's title, then › a strip of its variations, the one in view outlined.
+   Any entry can be dragged onto another: the one dropped on is the parent (POST /api/generations/{id}/join). A variation that is not the root has × to leave. */
+const histVars=it=>(it.variants&&it.variants.length?it.variants:[it]);
+const histRow=it=>{const vs=histVars(it),cur=vs.find(v=>SES.gens.includes(v.id)),on=!!cur,shown=cur||vs[vs.length-1];
+  const main=`<button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${shown.id} aria-pressed=${on} title="Show ${esc(shown.generation_id)} in the Studio">${histThumb(shown)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(shown)}</small></span></button>`;
+  if(vs.length<2)return`<div class=lv-hfam draggable=true data-hid=${it.id}>${main}</div>`;
+  return`<div class="lv-hfam many" draggable=true data-hid=${it.id}>${main}<div class=lv-hvars><span class=lv-harr aria-hidden=true>›</span>${vs.map((v,i)=>`<span class="lv-hvar${v===shown&&on?' on':''}"><button class=lv-hvb data-act=hopen data-id=${v.id} aria-pressed=${v===shown&&on} title="${esc(v.generation_id)} · ${esc(titleCase(String(v.prompt||'').replace(/_/g,' ')))}">${histThumb(v)}<small>${esc(v.generation_id)}</small></button>${i?`<button class=lv-hx data-act=hleave data-id=${v.id} title="Take ${esc(v.generation_id)} out of this group" aria-label="Take ${esc(v.generation_id)} out of this group">×</button>`:''}</span>`).join('')}</div></div>`};
+async function histJoin(id,to){if(!id||!to||id===to)return;const r=await post(`/api/generations/${id}/join`,{to});if(!r.ok)return toast(r.j.error||'Could not add it to the group',1);
+  toast(`Added to ${r.j.root}'s group`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)}
+ACT.hleave=async el=>{const r=await post(`/api/generations/${el.dataset.id}/leave`,{});if(!r.ok)return toast(r.j.error||'Could not take it out',1);toast(`${r.j.id} is on its own again`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)};
+if(typeof document!=='undefined'&&document.addEventListener){
+  document.addEventListener('dragstart',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;ev.dataTransfer.setData('text/x-mirsal-batch',f.dataset.hid);ev.dataTransfer.effectAllowed='move'});
+  document.addEventListener('dragover',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f||!ev.dataTransfer.types.includes('text/x-mirsal-batch'))return;ev.preventDefault();f.classList.add('drop')});
+  document.addEventListener('dragleave',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(f)f.classList.remove('drop')});
+  document.addEventListener('drop',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;const id=ev.dataTransfer.getData('text/x-mirsal-batch');if(!id)return;ev.preventDefault();f.classList.remove('drop');histJoin(+id,+f.dataset.hid)})}
 /* the column: a title and the whole list, newest edit first; the next page is asked for when the list is scrolled near its end (no "Load more") */
 function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
   <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histRow).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div><div class=c2rem id=c2rem></div>`}
@@ -329,7 +342,7 @@ function histCol(){const c2=document.getElementById('col2');if(!c2)return;
 /* the column is redrawn here; under the Studio's view the batch's Particles section is drawn by particles.js (spSecDraw) */
 function drawHist(){if(['generate','create'].includes(route_))histCol();if(typeof spSecDraw==='function')spSecDraw()}
 /* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio, as does a row of the Earlier-batches column */
-ACT.hopen=el=>{const it=HB.items.find(x=>x.id===+el.dataset.id);if(!it)return;
+ACT.hopen=el=>{const it=HB.items.flatMap(histVars).find(x=>x.id===+el.dataset.id);if(!it)return;
   gdHide();
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();

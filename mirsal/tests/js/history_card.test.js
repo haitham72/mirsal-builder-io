@@ -44,7 +44,7 @@ function load(route = 'library') {
     histCol: () => { sandbox.calls.col++; },
     spSecDraw: () => { sandbox.calls.sec++; },
   };
-  const body = ['const histTitle=', 'const histInfo=', 'const histThumb=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
+  const body = ['const histTitle=', 'const histInfo=', 'const histThumb=', 'const histVars=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
   const api = new Function(...Object.keys(sandbox), body + '\nreturn {histThumb,histRow,histColHTML,drawHist};')(...Object.values(sandbox));
   return { ...sandbox, ...api, env: sandbox };          // env: the globals the statements closed over (mutate them, not the copy)
 }
@@ -78,7 +78,7 @@ test('the row says which batch it is; when the first cell has no picture the nex
 test('a row is one button that presents the batch; the batch the Studio presents is marked', () => {
   const hx = load();
   const it = BATCH([3, 3]);
-  assert.match(hx.histRow(it), /^<button class="lv-hrow" data-act=hopen data-id=5 aria-pressed=false/);
+  assert.match(hx.histRow(it), /^<div class=lv-hfam draggable=true data-hid=5><button class="lv-hrow" data-act=hopen data-id=5 aria-pressed=false/, 'one button in a draggable entry (drop it on another batch to join its group)');
   hx.SES.gens = [5];
   assert.match(hx.histRow(it), /class="lv-hrow on"[^>]*aria-pressed=true/);
   hx.SES.gens = [6];
@@ -111,4 +111,20 @@ test('drawHist redraws the column on the Studio and Create, and always the batch
     assert.deepEqual(hx.env.calls, { col: 1, sec: 1 }, r);
   }
   assert.ok(!/ghist|hxBatch|History of/.test(statement('function drawHist')), 'nothing about the old per-sticker history');
+});
+
+test('a family is ONE entry: the root title, then › one thumbnail per variation; the one in view is outlined; only non-root variations can leave', () => {
+  const hx = load();
+  const root = { ...BATCH([2, 2]), id: 104, generation_id: 'G104', prompt: 'superhero dubai' };
+  const edit = { ...BATCH([2, 2]), id: 105, generation_id: 'G105', prompt: 'superhero dubai' };
+  const fam = { ...root, variants: [root, edit] };
+  hx.SES.gens = [105];
+  const h = hx.histRow(fam);
+  assert.match(h, /^<div class="lv-hfam many" draggable=true data-hid=104>/);
+  assert.match(h, /<b>Superhero Dubai<\/b>/, 'the family carries the parent\'s title');
+  assert.match(h, /class=lv-harr aria-hidden=true>›<\/span>/);
+  assert.match(h, /data-act=hopen data-id=104 aria-pressed=false[\s\S]*<small>G104<\/small>/);
+  assert.match(h, /class="lv-hvar on"><button class=lv-hvb data-act=hopen data-id=105 aria-pressed=true/, 'the variation in view is marked');
+  assert.equal((h.match(/data-act=hleave/g) || []).length, 1, 'the root has no ×');
+  assert.match(h, /data-act=hleave data-id=105/);
 });

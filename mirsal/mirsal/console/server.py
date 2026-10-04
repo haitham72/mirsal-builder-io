@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from ..flow import batches, effects as fx_flow, gates, metrics, particle_sets as fx_sets, purge, sources, sticker_history, watch
+from ..flow import batches, effects as fx_flow, gates, groups, metrics, particle_sets as fx_sets, purge, sources, sticker_history, watch
 from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
 from ..services import llm, telegram
 from ..vision import consent as vision_consent, transcribe
@@ -1684,6 +1684,10 @@ def make_handler(c: Console):
                     return self._json(200, batches.remove(c.out, gid, by=self.user.get("id") or "human"))
                 if parts[3] == "restore":
                     return self._json(200, batches.restore(c.out, gid))
+                if parts[3] == "join":           # Add to group / drag onto a batch: this batch's family goes under the family of `to` (the target is the parent; flow/groups.py)
+                    return self._json(200, groups.join(c.out, gid, int(str(body.get("to") or "0").upper().lstrip("G") or 0), by=self.user.get("id") or "human"))
+                if parts[3] == "leave":          # out of its family again: its own root
+                    return self._json(200, groups.leave(c.out, gid, by=self.user.get("id") or "human"))
                 if parts[3] == "more":
                     if c.lock.locked():
                         raise pl.PipelineError("busy", 409)

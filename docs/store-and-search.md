@@ -34,6 +34,7 @@ mirsal/migrations/
   003_pool.sql      sticker_index (lexical columns, hidden, shared, topics) + pg_trgm
   004_sessions.sql  sessions, interactions, feedback, generation_references, stickers.annotation
   005_vectors.sql   sticker_index.subject_vec / action_vec as vector(768) + cosine HNSW (re-runnable: never wipes vectors)
+  009_groups.sql    generations.group_id (the family root, flow/groups.py) and relation (joined | redo | edit), written by every save_generation
 mirsal/mirsal/store/
   db.py             connect (2 s timeout), cached available(), migrate(), reset(confirm='yes')
   repo.py           save_generation() in ONE transaction (idempotent re-import); import_tasks / save_job / import_jobs / save_model_call /

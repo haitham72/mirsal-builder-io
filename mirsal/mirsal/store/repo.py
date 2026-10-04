@@ -114,13 +114,19 @@ def save_generation(conn, out: Path, gid: int) -> str:
     grid = _grid(res)
     src = res.get("source") or {}
 
+    from ..flow import groups
+    try:
+        group_id, relation = f"G{groups.root_of(out, gid):03d}", groups.relation(res)
+    except Exception:
+        group_id, relation = gen_id, None
     with conn.cursor() as cur:
         cur.execute(
             """INSERT INTO generations (id, parent_id, grid, regen_of, verify_version, prompt, subject,
                   source, source_ref, task, task_slug, sheet_prompt, video_prompt, plan, engine_version,
-                  status, name_key, task_id, template_id, template_version, slots, outline_px, erode_px, owner)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                  status, name_key, task_id, template_id, template_version, slots, outline_px, erode_px, owner, group_id, relation)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                ON CONFLICT (id) DO UPDATE SET owner=EXCLUDED.owner, status=EXCLUDED.status, plan=EXCLUDED.plan,
+                 group_id=EXCLUDED.group_id, relation=EXCLUDED.relation,
                  slots=EXCLUDED.slots, outline_px=EXCLUDED.outline_px, erode_px=EXCLUDED.erode_px,
                  task_id=EXCLUDED.task_id, name_key=EXCLUDED.name_key""",
             (gen_id, _parent_id(res.get("parent")), grid, res.get("regen_of"), str(res.get("verify_version") or ""),
@@ -131,7 +137,7 @@ def save_generation(conn, out: Path, gid: int) -> str:
              res.get("task_id"), res.get("template_id"),
              (str(res.get("template_version")) if res.get("template_version") is not None else None),
              json.dumps(res.get("slots")) if res.get("slots") is not None else None,
-             res.get("outline_px"), res.get("erode_px"), str(res.get("owner") or "local")))
+             res.get("outline_px"), res.get("erode_px"), str(res.get("owner") or "local"), group_id, relation))
 
         # video sheets first (stickers + assets reference them)
         vs_map: dict = {}

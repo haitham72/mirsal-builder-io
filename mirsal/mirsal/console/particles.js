@@ -140,17 +140,18 @@ const SPS={batches:{},sig:'',busy:false,html:'',el:null,loaded:false};
    The batch's particles are ONE list: every saved version made for any of its stickers, once, oldest first (v1, v2...), then the drafts. A set owned by
    several stickers is still one version (it used to be drawn once per sticker). Making a new one is the section's Create particles or a sticker's own window. */
 function spSecRows(b){const seen=new Map();
- for(const c of b.cells)if(c.link&&c.det)for(const r of [...(c.det.rows||[]),...(c.det.drafts||[])])if(!seen.has(r.id))seen.set(r.id,{r,s:{id:c.link.sticker.id,pack_id:c.link.pack_id}});
+ for(const c of [...b.cells,...(b.family||[])])if(c.link&&c.det)for(const r of [...(c.det.rows||[]),...(c.det.drafts||[])])if(!seen.has(r.id))seen.set(r.id,{r,s:{id:c.link.sticker.id,pack_id:c.link.pack_id}});
  const all=[...seen.values()],when=x=>x.r.saved_at||x.r.created||0,rows=all.filter(x=>x.r.saved!==false).sort((a,b)=>when(a)-when(b)),drafts=all.filter(x=>x.r.saved===false);
  return {rows:rows.map((x,i)=>({...x,r:{...x.r,version:i+1,shared_with:0}})),drafts:drafts.map(x=>({...x,r:{...x.r,shared_with:0}}))}}
 function spSecBatchHtml(b,many){const free=b.cells.filter(c=>!c.link),{rows,drafts}=spSecRows(b);
  return `<div class=sp-bt>${many?`<div class=sp-bh><b>${esc(b.gid)}</b></div>`:''}
- ${rows.length||drafts.length?`<div class=pk-rows>${rows.map(x=>ptRow(x.r,x.s,false)).join('')}${drafts.map(x=>ptRow(x.r,x.s,true)).join('')}</div>`:b.cells.some(c=>c.link)?'<span class=mut>No particles yet</span>':''}
+ ${rows.length||drafts.length?`<div class=pk-rows>${rows.map(x=>ptRow(x.r,x.s,false)).join('')}${drafts.map(x=>ptRow(x.r,x.s,true)).join('')}</div>`:[...b.cells,...(b.family||[])].some(c=>c.link)?'<span class=mut>No particles yet</span>':''}
  ${free.length?spApproveHtml({generation:b.gid}):''}</div>`}
 const spSecHtml=bs=>bs.length?`<section class=sp-sec><div class=sp-sech><h2>${ic('fx')} Particles</h2><button class="btn sm pri" data-act=spopen>${ic('fx')} Create particles</button></div>${bs.map(b=>spSecBatchHtml(b,bs.length>1)).join('')}</section>`:'';
 function spSecData(){const out=[];for(const id of SES.gens){const g=GM.get(id);if(!g)continue;const gid=spGid(g.generation_id),ix=spLinkIndex(LIB.packs,gid),batch=SPS.batches[gid];
  out.push({gid,cells:g.stickers.filter(t=>t.status==='READY'&&t.png&&(t.review||{}).still!=='REJECTED').map(t=>{const det=batch?(batch.cells||[]).find(c=>c.index===t.index):null,l=det?det.link:ix[t.index]||null,fallback=l?PKPT.d[l.sticker.id]:null,d=det||fallback,c=l?(PKPT.c[l.pack_id]||{})[l.sticker.id]:null;
- return{index:t.index,key:t.key,png:t.png,link:l,n:d?(d.sets||[]).length+(d.created||[]).length+(d.saved||[]).length:c?c.created+c.saved:0,det:d||null}})})}return out}
+ return{index:t.index,key:t.key,png:t.png,link:l,n:d?(d.sets||[]).length+(d.created||[]).length+(d.saved||[]).length:c?c.created+c.saved:0,det:d||null}}),
+ family:((batch||{}).family||[]).map(c=>({index:c.index,key:c.key,png:c.png,link:c.link,n:1,det:c,generation:c.generation}))})}return out}
 function spSecDraw(){const el=$('gpart');if(!el)return;const html=spSecHtml(spSecData());if(html!==SPS.html||el!==SPS.el){SPS.html=html;SPS.el=el;el.innerHTML=html}}
 async function spSecSync(force){if(SPS.busy||!$('gpart'))return;SPS.busy=true;
  try{for(const b of spSecData()){const r=await api(`/api/generations/${b.gid}/particles`);if(r.ok)SPS.batches[b.gid]=r.j}SPS.loaded=true;spSecDraw()}

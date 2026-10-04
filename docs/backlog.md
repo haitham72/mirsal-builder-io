@@ -61,6 +61,11 @@ Other open items:
 - Stalled-job recovery has not run against the real Higgsfield (J022-J025). **needs a paid test** (W5).
 - Per-chat paid parallelism and `MIRSAL_JOB_MODE=queue` have only run on the fake CLI. **needs a paid test** (W10).
 
+## Batch groups (`docs/engine-and-studio.md`, "Batch groups")
+
+- **Suggest a family by meaning**: a batch whose subject/prompt embedding (local `nomic-embed-text`) is close to another family's (G103 "superhero in dubai" vs the Superhero Dubai family) shows one chip *"Looks like Superhero Dubai: Join?"* with **Join** / **Not related** (remembered, never asked again); moving a sticker into a pack whose stickers belong to another family asks the same. Never merges without a click. **open**.
+- **Trace a batch to its request**: jobs carry no chat session (`J046-J048: session None`); record `origin {session, message}` and `intent` (the person's words) on jobs and batches, mirrored to Postgres, so a chat edit is linked both ways. **open**.
+
 ## Store and search (`docs/store-and-search.md`)
 
 - 3B: the eval set and precision@5 >= 0.8; an Arabic / Arabizi query parser (a small model; deterministic patterns today); a search-result cache keyed by a `pool_version` counter (embeddings and plans are cached, hits are not); the gap flow shows no price. **needs Haitham** (W12).

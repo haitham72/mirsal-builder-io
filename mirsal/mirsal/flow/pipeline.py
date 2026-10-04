@@ -1129,49 +1129,55 @@ def _held_by_particle_rows(out: Path) -> set[int]:
     return {g for g in held if (gen_dir(out, g) / "result.json").is_file() and read_result(out, g).get("kind") == "particles"}
 
 
+def _history_item(out: Path, gid: int, edited: float) -> dict:
+    r = read_result(out, gid)
+    d = gen_dir(out, gid)
+    ready = [s for s in r["stickers"] if s.get("status") == "READY" and s.get("png")]
+    try:
+        created = r.get("created") or round((d / "prompts.json").stat().st_mtime, 3)
+    except OSError:
+        created = None
+    rows, cols = _grid_of(r)
+    cells = []
+    for s in r["stickers"]:
+        row, col = divmod(int(s["index"]) - 1, cols)
+        png = s.get("png")
+        cells.append({"index": int(s["index"]), "row": row, "col": col,
+                      "png": f"{png}?e={s.get('rendered_at') or s.get('edited_at') or 0}" if png else None,
+                      "status": s.get("status"), "animated": s.get("anim_status") == "READY"})
+    from . import groups
+    return {"id": gid, "generation_id": r["generation_id"], "prompt": r.get("prompt") or r["source"].get("subject", ""), "created": created,
+            "edited": round(edited, 3), "stage": r["stage"], "error": r.get("error"), "ready": len(ready),
+            "animated": sum(1 for s in ready if s.get("anim_status") == "READY"),
+            "grid": [rows, cols], "cells": sorted(cells, key=lambda c: c["index"]),
+            "outline_px": r.get("outline_px"), "relation": groups.relation(r), **({"kind": r["kind"]} if r.get("kind") else {})}
+
+
 def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
-    """Every batch ever made, the most recently EDITED first (any change to a batch counts: a new stroke, an animation, a decision), a page at a time:
-    title, times, counts and the stickers as the sheet's own grid (`grid: [rows, cols]`, `cells: [{index, row, col, png, status, animated}]`), so a card
-    can draw a 3x3 or a 2x2 exactly as it was cut."""
+    """Every batch FAMILY, the most recently EDITED first (any change to any of its batches counts), a page at a time (docs/engine-and-studio.md, "Batch
+    groups"). An item is the family's root batch (title, times, counts, the stickers as the sheet's own grid: `grid: [rows, cols]`, `cells: [{index, row, col,
+    png, status, animated}]`) with `variants`: every batch of the family as the same item shape, root first. A batch alone is a family of one."""
+    from . import groups
     held = _held_by_particle_rows(out)
-    stamped = []
+    edited_at = {}
     for gid in list_ids(out):
         if gid in held:                          # a particle sheet a sticker's row holds lives under that sticker, not in this list
             continue
         try:
-            stamped.append(((gen_dir(out, gid) / "result.json").stat().st_mtime, gid))
+            edited_at[gid] = (gen_dir(out, gid) / "result.json").stat().st_mtime
         except OSError:
             continue
-    stamped.sort(reverse=True)
-    ids = [g for _, g in stamped]
+    fams = groups.families(out, list(edited_at))
+    order = sorted(fams, key=lambda r: (max(edited_at[g] for g in fams[r]), r), reverse=True)
     offset, limit = max(0, int(offset)), max(1, min(int(limit), 50))
-    edited = dict((g, t) for t, g in stamped)
     items = []
-    for gid in ids[offset:offset + limit]:
+    for root in order[offset:offset + limit]:
         try:
-            r = read_result(out, gid)
+            variants = [_history_item(out, g, edited_at[g]) for g in fams[root]]
         except Exception:
             continue
-        d = gen_dir(out, gid)
-        ready = [s for s in r["stickers"] if s.get("status") == "READY" and s.get("png")]
-        try:
-            created = r.get("created") or round((d / "prompts.json").stat().st_mtime, 3)
-        except OSError:
-            created = None
-        rows, cols = _grid_of(r)
-        cells = []
-        for s in r["stickers"]:
-            row, col = divmod(int(s["index"]) - 1, cols)
-            png = s.get("png")
-            cells.append({"index": int(s["index"]), "row": row, "col": col,
-                          "png": f"{png}?e={s.get('rendered_at') or s.get('edited_at') or 0}" if png else None,
-                          "status": s.get("status"), "animated": s.get("anim_status") == "READY"})
-        items.append({"id": gid, "generation_id": r["generation_id"], "prompt": r.get("prompt") or r["source"].get("subject", ""), "created": created,
-                      "edited": round(edited[gid], 3), "stage": r["stage"], "error": r.get("error"), "ready": len(ready),
-                      "animated": sum(1 for s in ready if s.get("anim_status") == "READY"),
-                      "grid": [rows, cols], "cells": sorted(cells, key=lambda c: c["index"]),
-                      "outline_px": r.get("outline_px"), **({"kind": r["kind"]} if r.get("kind") else {})})
-    return {"items": items, "more": offset + limit < len(ids), "total": len(ids)}
+        items.append({**variants[0], "edited": max(v["edited"] for v in variants), "variants": variants})
+    return {"items": items, "more": offset + limit < len(order), "total": len(order)}
 
 
 def summary(out: Path) -> list[dict]:

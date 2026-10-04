@@ -246,6 +246,7 @@ function gview(){
   const s=gstats(gs),{pk,allAdded,n}=s;
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
     <button class="btn" data-act=gmore ${s.ready&&!s.busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
+    ${gs.length===1?`<button class=btn data-act=ggroup title="Put this batch in the group of another batch: that batch becomes its parent">Add to group</button>`:''}
     <button class="btn dng" data-act=grm title="Move ${gs.length===1?'this batch':'these batches'} to the trash. You can restore ${gs.length===1?'it':'them'} from Removed batches under Earlier batches.">${ic('trash')} Remove batch</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
@@ -386,6 +387,11 @@ ACT.pgvideo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'video')];glast='';tick(true)};
 /* Remove batch (like Delete pack, but into the trash): says what it does before it does it; stickers already added to a pack are copies and stay in their packs */
 const grmText=gs=>`Remove ${gs.map(g=>g.generation_id).join(', ')}? ${gs.length===1?'It moves':'They move'} to the trash, nothing is deleted, and you can restore ${gs.length===1?'it':'them'} from “Removed batches” under Earlier batches. Stickers you already added to a pack stay in their packs.`;
+/* Add to group: pick the batch (family) this one joins; the picked one is the parent (flow/groups.py) */
+ACT.ggroup=()=>{const g=sessionGens()[0];if(!g)return;const fams=(typeof HB!=='undefined'?HB.items:[]).filter(it=>!(it.variants||[it]).some(v=>v.id===g.number));
+  if(!fams.length)return toast('Scroll Earlier batches to load more batches first',1);
+  dlg(`<h2>Add ${esc(g.generation_id)} to the group of…</h2><div class=lv-hcol>${fams.map(it=>`<button class=lv-hrow data-act=ggroupgo data-from=${g.number} data-to=${it.id}>${histThumb(it)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${esc(it.generation_id)}${(it.variants||[]).length>1?` · ${it.variants.length} variations`:''}</small></span></button>`).join('')}</div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button></div>`)};
+ACT.ggroupgo=el=>{closeDlg();histJoin(+el.dataset.from,+el.dataset.to)};
 ACT.grm=()=>{const gs=sessionGens();if(!gs.length)return;
   confirmDlg(grmText(gs),async()=>{for(const g of gs){const r=await post(`/api/generations/${g.number}/remove`,{});if(!r.ok){toast(r.j.error,1);return}}
     const gone=gs.map(g=>g.number);SES.gens=SES.gens.filter(id=>!gone.includes(id));saveSes();gone.forEach(n=>GM.delete(n));HB.items=HB.items.filter(x=>!gone.includes(x.id));

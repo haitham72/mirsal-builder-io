@@ -274,12 +274,9 @@ def counts_for_pack(out, lib, pack_id):
     return counts
 
 
-def for_generation(out, lib, gid):
+def _generation_cells(out, lib, gn, db):
     from . import pipeline
-    gn = int(str(gid).upper().lstrip("G"))
     res = pipeline.read_result(out, gn)
-    with lib.lock:
-        db = lib._load()
     cells = []
     for st in res.get("stickers", []):
         if st.get("status") != "READY":
@@ -292,7 +289,21 @@ def for_generation(out, lib, gid):
         cells.append({"index": st["index"], "key": st.get("key"), "png": st.get("png"), "sticker": x or None,
                       "link": {"pack_id": p["id"], "pack": p.get("name"), "sticker": x} if matches else None,
                       "offer_approve": not matches, **det})
-    return {"generation": f"G{gn:03d}", "cells": cells}
+    return cells
+
+
+def for_generation(out, lib, gid):
+    """The batch section's one read: per READY cell its library sticker (or the approval offer) and its particle rows; `family`: the cells of the other batches
+    of its family (flow/groups.py) that are in a pack, so the variations of one idea share one particle list."""
+    from . import groups
+    gn = int(str(gid).upper().lstrip("G"))
+    with lib.lock:
+        db = lib._load()
+    family = []
+    for other in groups.members(out, gn):
+        if other != gn:
+            family += [{**c, "generation": f"G{other:03d}"} for c in _generation_cells(out, lib, other, db) if c["link"]]
+    return {"generation": f"G{gn:03d}", "cells": _generation_cells(out, lib, gn, db), "family": family}
 
 
 def detach_pack(out, lib, pack_id):
