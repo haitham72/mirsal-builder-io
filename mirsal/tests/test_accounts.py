@@ -1,5 +1,5 @@
 """Office accounts on the LAN (docs/api.md, Office accounts on the LAN): @nadi.ae sign-up waits for approval, sign-in with a session cookie, the same words for a wrong email
-and a wrong password, Haitham's decisions in Settings > People and in the Telegram bot (only his user id is obeyed). The server runs as if on the LAN with
+and a wrong password, Haitham's decisions in Users > People and in the Telegram bot (only his user id is obeyed). The server runs as if on the LAN with
 127.0.0.1 treated as another machine; Telegram is a fake."""
 import http.client
 import json
