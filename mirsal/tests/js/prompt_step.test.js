@@ -1,4 +1,4 @@
-// The Studio's "Generate prompt" step (plan.md 16.4, 2026-10-03): the button reads Generate prompt and spends nothing; it opens the Prompt editor BEFORE any batch exists (no G### is allocated);
+// The Studio's "Generate prompt" step (docs/engine-and-studio.md, 2026-10-03): the button reads Generate prompt and spends nothing; it opens the Prompt editor BEFORE any batch exists (no G### is allocated);
 // "Generate sheet" inside it shows the Higgsfield price on its own line and is the only click that spends; the edited text is forwarded to the live sheet route as `sheet_prompt`; edits survive
 // re-renders and a reload; with the AI enhancer On the plan is written through the engine the person chose (POST /api/plan {ai:true}), a failed model shows its reason in the step and the built-in plan, and nothing is ever refused. The statements are read out of generate.js /
 // live.js and run with the few globals they use stubbed (nothing here touches a DOM, a server or a provider). Run: node --test tests/js

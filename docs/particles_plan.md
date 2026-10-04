@@ -1,6 +1,6 @@
 # Particle sets and bursts
 
-This is the particle area's architecture document; the filename remains for existing links. The ownership rework is implemented in the working tree. The compact editor, animated-sprite restoration and mistaken-pack recovery are being completed against [the flow design](sticker_particles_flow.md). The active implementation checklist is [particles_rework_plan.md](particles_rework_plan.md); retain it until those acceptance checks pass.
+This is the particle area's architecture document (the filename stays for existing links). Particles are owned by library stickers; every saved version is a row under its sticker; the editor offers three equal sources; animated sprites play inside the simulator; mistaken sticker packs can be recovered as particles. Accepted by Haitham in his browser on 2026-10-04. Open work is in `backlog.md` (particles).
 
 ## 1. Ownership and vocabulary
 
@@ -44,7 +44,7 @@ All paths end in one simulator: selected sprites, preview, presets, **Energy / F
 
 The full animated path is **prompt → text-only Kling 2×2/3×3 animated sheet → key and slice → animated sprites in the simulator → render → add to the same pack**. The existing nothing-to-nothing pipeline and technical checks remain. Each flying particle plays its own sprite's frames while simulator movement, spin, scale and fade are applied. Image sprites are single-frame inputs. Selected video tiles loop; job/credit details remain accessible. Directly adding a cut clip remains a secondary legacy action.
 
-Recovery for artwork accidentally saved as a sticker pack is **Use as particle pack → This sticker / All N stickers → Parent pack and target stickers → Use selected · free**. Source artwork is copied without deleting originals. The selected parent stickers own the set; supplying artwork does not make source stickers owners. This recovery action is being implemented; see the flow document's acceptance checks.
+Recovery for artwork accidentally saved as a sticker pack is **Use as particle pack → This sticker / All N stickers → Parent pack and target stickers → Use selected · free**. Source artwork is copied without deleting originals. The selected parent stickers own the set; supplying artwork does not make source stickers owners.
 
 ## 5. Galleries and chat
 
@@ -78,12 +78,8 @@ The authoritative shapes and errors are in [api.md](api.md) and the OpenAPI docu
 
 Legacy `/api/effects/*`, `packs` input and `/assign`/`unassign` remain for one release. Pack input maps to its library stickers. It does not restore pack ownership. Member reads preserve their authorization boundaries; writes remain owner-only.
 
-## 7. Acceptance and remaining work
+## 7. How it is tested, and what is open
 
-Use fake providers and temporary libraries. Headless Chromium runs against scratch out on a spare port. Named/area Python tests run serially, with fast, node and `tests.test_js` as appropriate. Slow tier and full discovery are retired; neither is run or requested.
+Fake providers, temporary libraries and scratch copies of `out/` only; the browser on a spare port, never the live server; nothing is generated for a check (`docs/testing.md`, the test budget). The guards: `tests/test_particle_rows.py` (rows, Save / Save as new, Add to pack and its parent link, adopting older runs and drawn sheets), `tests/test_particle_sets.py`, `tests/test_particle_owner.py`, `tests/test_particle_animated.py`, and the node tests `pack_particles`, `particles`, `particle_editor`.
 
-Acceptance prioritizes already-created sheets/clips copied to scratch, following stored effect/job/generation paths and free recut/import/recovery through the real simulator and Add. Diagnose stuck-state causes without fresh provider calls. Synthetic temporal fixtures supplement this evidence. Required coverage also includes scoped approval, no stale-run reopening or stale async replies, own-set-first chat with explicit-name override, summed counts, idempotent append/resume, animated frame changes inside particles, mixed static/video sets, full fake Kling-to-Add browser flow, free recovery preserving originals, warnings/override, soft delete/restore and purge retention. An injected completed fixture at Render is not an end-to-end video check.
-
-Ordinary animated stickers in the destination pack are the settled delivery. Per-emoji motion remains a separate open design choice (W25). Separate Telegram effect/download delivery, refinement of sprites from chat, real v2 Kling/AI-sheet measurements, and permanent deleted-set purge remain open. The multi-pack burst-creation proposal is independent and unbuilt (W27, [burst_plan.md](burst_plan.md)).
-
-Recorded-artifact debugging (2026-10-04) found connected failures rather than generation failures. E013/G101 already held a completed sheet but lacked a durable set; free import opens the simulator directly. Reopening an imported E run hid its entry; **Open in simulator** now reuses its saved set. E002's old clips lacked poster/timeline fields and a copied global job file; import decodes the existing clips, caches temporal frames and recovers recorded job/cost. G100 was classified as stickers by the older gutter layout path; free particle recut or slice/recovery import is available without generating another sheet. Settings previously lived only in previews/renders; explicit Save now persists motion and sizing, and stale preview results cannot replace a newer preset. Echo previously dropped sticker IDs and merely displayed a heart; it now requests current owned particles on reply/reaction. The sticker-window gallery exposed raw slice results as separate top-level cards and its loader targeted an obsolete lightbox element; the grouped-run read model and correct DOM target are being integrated and browser-checked. Scratch checks preserve original bytes and spend nothing.
+Ordinary animated stickers in the destination pack are the settled delivery. Open (`backlog.md`): per-emoji motion (W25), separate Telegram effect delivery, sprite refinement from the chat, a permanent purge of deleted sets, and burst creation across packs (W27, [burst_plan.md](burst_plan.md)).

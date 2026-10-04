@@ -4,6 +4,8 @@
 
 Status words: **open** (can be built now) · **needs Haitham** (a verdict first, W#) · **needs a paid test** (money first, W#) · **parked** (paused on purpose, do not touch).
 
+**Next, in order** (Haitham, 2026-10-04; `HANDOFF.md`): FastAPI + pydantic → streaming chat → the ticket logger → the office LAN. Each is an entry under *API and production* below.
+
 ## Visual design (`docs/design.md`)
 
 - Real tile art for the twelve style presets: the swatches are abstract placeholders; drop `<id>.png` into `console/assets/styles/`. **needs Haitham** (the art).

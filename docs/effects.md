@@ -1,6 +1,6 @@
 # Particle effects: sprites, simulation and Kling
 
-The durable asset is a sticker-owned particle set; [particles_plan.md](particles_plan.md) describes ownership, persistence and compatibility. This document covers the working `E###` pipeline and its measurements. The current full-flow correction is [sticker_particles_flow.md](sticker_particles_flow.md): animated cell clips must play inside the simulator, with peak PNGs used as posters/fallbacks. Animated restoration and compact UI acceptance are underway; they are not declared complete here.
+The durable asset is a sticker-owned particle set; [particles_plan.md](particles_plan.md) describes ownership, persistence and compatibility. This document covers the working `E###` pipeline and its measurements. Animated cell clips play inside the simulator (each particle plays its own frames), with peak PNGs as posters/fallbacks; built and accepted 2026-10-04.
 
 The final burst is an ordinary animated Telegram sticker in the selected parent pack. Emoji tags make it discoverable; Mirsal does not promise Telegram's native Premium effect behavior. Output is 3-second WEBM/VP9 with alpha, 512×512, 30 fps, ≤256 KB.
 

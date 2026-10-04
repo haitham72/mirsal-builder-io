@@ -58,7 +58,7 @@ short report full of reproduced facts beats a long one of opinions.
    mis-described). Equally: do not report as a finding something that was open in
    those trackers but is now built — check the code first.
 8. **The docs are the contract, and a doc that disagrees with the code is itself a
-   finding.** Where `README.md`, `CLAUDE.md`, `HANDOFF.md`, `plan.md` (both only pointers now) or `docs/`
+   finding.** Where `README.md`, `CLAUDE.md`, `HANDOFF.md` (only a pointer plus the session state) or `docs/`
    says something the code does not do, that is a finding with **both sides
    cited**. Do not silently believe either one, and do not assume the code is the
    side that is right.

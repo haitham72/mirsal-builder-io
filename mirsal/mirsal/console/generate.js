@@ -341,7 +341,7 @@ document.addEventListener('input',e=>{const t=e.target;if(!t.dataset||t.dataset.
   const g=t.dataset.g==='draft'?GD:GM.get(+t.dataset.g);if(!g)return;PD[pdKey(g.number,t.dataset.pd)]=t.value;if(g===GD)gdSave();
   const foot=t.closest('.pbox').querySelector('[data-pdfoot]');if(foot){const tmp=document.createElement('div');tmp.innerHTML=pdFoot(g,t.dataset.pd);foot.replaceWith(tmp.firstChild);if(typeof fillPrices==='function')fillPrices();if(g===GD)gdPrice()}});
 ACT.pgreset=el=>{const n=el.dataset.g==='draft'?'draft':+el.dataset.g;delete PD[pdKey(n,el.dataset.kind)];if(n==='draft')gdSave();glast='';tick(true)};
-/* The same Prompt editor, before a sheet exists (plan.md 16.4). "Generate prompt" is POST /api/plan: no G### is allocated, nothing enters SES or GM, no Higgsfield credit is spent.
+/* The same Prompt editor, before a sheet exists (docs/engine-and-studio.md, the Generate prompt step). "Generate prompt" is POST /api/plan: no G### is allocated, nothing enters SES or GM, no Higgsfield credit is spent.
    With the AI enhancer On the plan is written through the engine the person chose (ai:true; Local is free, Cloud is one small OpenAI call); a model that fails never blocks, the server answers the built-in plan with expand_error and the step says why.
    "Generate sheet" is the one click that spends: the Higgsfield price sits on its own line above it, the edited text goes to the live sheet route as `sheet_prompt` and the previewed plan (its cells, tags and emoji) as `plan`, which the server re-validates (rule 13). */
 const gdOn=()=>!!(GD&&GD.active&&GD.gens===SES.gens.join());      // another batch taking the Studio (an opened batch, a finished sheet) ends this screen; the composer's "Prompt draft" brings it back
