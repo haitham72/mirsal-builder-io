@@ -32,8 +32,7 @@ def redis() -> dict:
 def models() -> dict:
     from ..services import llm
     from ..vision import judge
-    from ..obs import trace
-    return {"llm": llm.status(probe=False), "vision": judge.status(), "trace": trace.status()}      # a health check never waits for a model: the last probe's answer, else whether anything listens
+    return {"llm": llm.status(probe=False), "vision": judge.status(), "trace": {"backend": "none"}}      # a health check never waits for a model: the last probe's answer, else whether anything listens
 
 
 def providers() -> dict:

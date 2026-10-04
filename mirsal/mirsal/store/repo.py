@@ -610,3 +610,20 @@ def save_session(conn, s: dict) -> str:
                     (s["id"], _ts(fb.get("ts")), sid.split("/")[0] if sid else None, sid, fb["polarity"], fb["scope"], fb.get("text") or ""))
     conn.commit()
     return s["id"]
+
+
+def save_ticket(conn, t: dict) -> None:
+    """Upsert one ticket (the whole record in `body`, the searchable fields beside it)."""
+    from datetime import datetime, timezone
+    ts = lambda v: datetime.fromtimestamp(float(v or 0), timezone.utc)
+    with conn.cursor() as cur:
+        cur.execute(
+            """INSERT INTO tickets (id, source, at, last_at, user_id, status, issue, summary, what_happened, intent, proposed_fix, fingerprint, count, fixed_by, body)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET last_at=EXCLUDED.last_at, status=EXCLUDED.status, issue=EXCLUDED.issue, summary=EXCLUDED.summary,
+                 proposed_fix=EXCLUDED.proposed_fix, count=EXCLUDED.count, fixed_by=EXCLUDED.fixed_by, body=EXCLUDED.body""",
+            (t["id"], t.get("source") or "report", ts(t.get("at")), ts(t.get("last_at") or t.get("at")), t.get("user"), t.get("status") or "open", t.get("issue") or "other",
+             t.get("summary") or "", t.get("what_happened") or "", t.get("intent") or "", t.get("proposed_fix") or "", t.get("fingerprint"), int(t.get("count") or 1),
+             t.get("fixed_by"), json.dumps(t, ensure_ascii=False)))
+    conn.commit()
+

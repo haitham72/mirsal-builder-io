@@ -140,7 +140,7 @@ function paint(){
   msgs.forEach((m,i)=>{const k=AIU.sig(m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',')+((m.chips||[]).some(c=>c.setting)?String(A.sess&&A.sess.settings&&A.sess.settings.allow_vlm):'');let el=A.els.get(m.id);
    if(!el){el=document.createElement('div');A.els.set(m.id,el);list.appendChild(el);changed=true}
    if(el._k!==k){const keep=[...el.querySelectorAll('.car-track')].map(t=>t.scrollLeft);el._k=k;el.className='ai-m '+(m.role==='user'?'user':'bot'+(m.status==='working'?' working':''));
-    el.innerHTML=m.role==='user'?`<div class=b>${AIU.esc(m.text)}</div>`:botHTML(m);
+    el.innerHTML=m.role==='user'?`<div class=b>${AIU.esc(m.text)}</div>`:botHTML(m)+(m.status==='working'?'':`<button class="link ai-rep" data-act=tkreport data-k=chat data-id="${AIU.esc(A.sid||'')}" title="Something wrong with this answer? Send a report">Report</button>`);
     el.querySelectorAll('.car-track').forEach((t,j)=>{if(keep[j])t.scrollLeft=keep[j];carSync(t)});changed=true}});
   for(const [id,el] of [...A.els])if(!msgs.some(m=>m.id===id)){el.remove();A.els.delete(id)}
   if(switched){A.shown=A.sid;sc.scrollTop=sc.scrollHeight;pinBottom(sc,list)}
@@ -383,7 +383,18 @@ async function agSend(text,action){
  try{await loadSession(sid,true)}catch(e){}            // a paint error must not stop this turn from being polled
  startPoll();
 }
-function startPoll(){clearTimeout(A.poll);A.since=A.since||Date.now();
+/* while a turn is working the page listens to GET /api/chat/sessions/{id}/stream (SSE: `turn` each time the last message changes, then `done`) instead of
+   downloading the whole session every 700 ms; polling stays as the fallback (no EventSource, a dropped stream) and for what keeps running after the turn (jobs, cards) */
+function startStream(){const sid=A.sid;if(A.es)A.es.close();const es=A.es=new EventSource('/api/chat/sessions/'+sid+'/stream');
+ es.addEventListener('turn',ev=>{if(A.sid!==sid){es.close();return}let t;try{t=JSON.parse(ev.data)}catch(e){return}if(!A.sess)return;const ms=A.sess.messages||(A.sess.messages=[]);
+  if(t.message){if(ms.length===t.count)ms[ms.length-1]=t.message;else if(ms.length===t.count-1)ms.push(t.message);else{loadSession(sid,true);return}}
+  A.sess.working=t.working;A.busy=t.working;try{paint()}catch(e){}});
+ es.addEventListener('done',async()=>{es.close();if(A.es===es)A.es=null;A.busy=false;let s=null;try{s=await loadSession(sid,true)}catch(e){}busyUi();
+  if(s&&AIU.needPoll(s)){A.noStream=1;startPoll();A.noStream=0}else{A.since=0;await loadSessions();agList()}});
+ es.onerror=()=>{es.close();if(A.es===es)A.es=null;A.noStream=1;startPoll();A.noStream=0}}
+function startPoll(){clearTimeout(A.poll);
+ if(A.sid&&!A.noStream&&typeof EventSource!=='undefined'&&(A.busy||(A.sess&&A.sess.working)))return startStream();
+ A.since=A.since||Date.now();
  const tick=async()=>{if(route_!=='agent'||document.hidden||!A.sid){A.busy=false;return}
   let s=null;
   try{s=await loadSession(A.sid,true)}catch(e){s=null}                  // one failed frame must never stop the polling (a paint error used to freeze the chat at "Thinking")

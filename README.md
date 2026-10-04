@@ -51,7 +51,7 @@ One engine, two interfaces over it. Every feature is an engine function and a st
 
 ```
 mirsal/mirrors nothing:  one out/ directory is the source of truth, Postgres mirrors it
-browser ── console/ (Studio, AI chat, Library, Create)  ── stdlib http.server :8770
+browser ── console/ (Studio, AI chat, Library, Create)  ── FastAPI on uvicorn :8770
                           │  JSON only (docs/api.md, OpenAPI in console/openapi.py)
                           ▼
    flow/     the golden path: pipeline.py (stages, result.json), gates.py (G1-G5)
@@ -99,7 +99,9 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Live generation** | template-locked prompts (v1-v3), an emotion bank, an AI slot filler with a lint, Higgsfield through its CLI, jobs as files, credits and a usage ledger. [docs/generation.md](docs/generation.md), [docs/higgsfield.md](docs/higgsfield.md), [docs/operator.md](docs/operator.md) |
 | **Store and search** | Postgres mirror (generations, decisions, tasks, jobs, ledger, chats), the sticker pool with local vector search, photo cutouts, optional LangSmith tracing (off on this PC: tracking stays in Postgres). [docs/store-and-search.md](docs/store-and-search.md) |
 | **Vision judge** | a local multimodal model pre-reviews stickers and animations; uncalibrated until 30 labels exist. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
-| **HTTP API** | JSON routes, SSE events per generation, idempotency keys, signed asset links, accounts (owner / member tokens, per-user ownership), per-minute rate limits, an OpenAPI document, health. [docs/api.md](docs/api.md) |
+| **HTTP API** | FastAPI on uvicorn (existing routes through an adapter over the original handler, byte-identical; new routes native with pydantic), JSON routes, SSE events per generation and per chat turn (`/api/chat/sessions/{id}/stream`), idempotency keys, signed asset links, accounts (owner / member tokens, per-user ownership), per-minute rate limits, an OpenAPI document, health. [docs/api.md](docs/api.md) |
+| **Office accounts** | `serve --lan` on the office network with HTTPS; `@nadi.ae` email + password; sign-up waits for approval; Settings > People (add people with a generated password shown once, approve, roles, new password, credits); forgot password goes to Haitham; the Telegram bot sends Haitham a card per request (Approve / Reject / Admin / Send new password / +10 credits) and obeys only his user id. [docs/api.md](docs/api.md) |
+| **Tickets** | every server error, failed job or refused Telegram send, and every **Report** (batch, particle row, chat reply) is a ticket: what happened, the person's words, the issue, a proposed fix drafted by the local model, one-click questions; Settings > Tickets; a Postgres copy. LangSmith is gone. [docs/store-and-search.md](docs/store-and-search.md) |
 | **Testing** | tiers chosen by what a change can actually break: `mirsal test fast` (9s), `focused`, `area <module>` (what that file maps to). The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Nothing maps, nothing runs. [docs/testing.md](docs/testing.md) |
 | **Particle effects** | AI image or text-only Kling animated sheets, keyed/cut sprites, one deterministic particle simulator, and ordinary animated-sticker delivery. Animated-sprite restoration is undergoing acceptance. [docs/effects.md](docs/effects.md) |
 | **Particle sets** | Sets belong to library stickers, one saved version per row (v1, v2...); three equal sources (sticker sprites, AI image sprites, Kling from scratch); animated sprites in the simulator; Save / Save as new / Add to pack; mistaken-pack recovery; soft delete and restore. [docs/particles.md](docs/particles.md) |
@@ -117,7 +119,7 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 
 | | |
 |---|---|
-| Studio and API | `127.0.0.1:8770` (`serve --port N`; stdlib server, localhost only) |
+| Studio and API | `127.0.0.1:8770` (`serve --port N`; FastAPI on uvicorn, `serve --stdlib` for the old server; localhost only) |
 | Postgres + pgvector | `localhost:5434` (`mirsal-db`; 5433, 5436 and 5437 belong to other projects: never touched) |
 | Redis | `localhost:6380` (`mirsal-redis`; 6379 is another project's) |
 | LM Studio (or vLLM) | `localhost:1234` (`MIRSAL_LOCAL_URL`): **whatever the server lists** for the assistant, the plan expansion and the vision judge (the chat's model dropdown; a real readiness probe; a `:N` instance suffix falls back to the base id), **`text-embedding-nomic-embed-text-v1.5`** for the pool (hardcoded) |

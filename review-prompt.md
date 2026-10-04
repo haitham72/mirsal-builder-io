@@ -129,7 +129,7 @@ say which in the report.
 
 **Deliberately not finished, so you do not mistake it for rot:**
 - The HTTP layer is still stdlib. The move to **FastAPI + pydantic** is **decided
-  but paused until the app is verified** (`docs/fastapi_plan.md` is the spec), which
+  but paused until the app is verified** (`docs/api.md` is the spec), which
   amends rule 8 for the HTTP layer only. "Not FastAPI yet" is **not** a finding.
 - The **particle-set model** (a set belongs to pack(s), not to stickers) is built:
   `flow/particle_sets.py`, the Library > Particles screens, the pack particle
@@ -179,7 +179,7 @@ docs record it.
 
 `README.md` (architecture + invariants) -> `CLAUDE.md` (**13 binding rules**; judge
 the project against them) -> `docs/waiting-for-haitham.md` and `docs/backlog.md` (what is open; `HANDOFF.md` is a pointer) ->
-`docs/fastapi_plan.md` (the HTTP migration, paused) and `docs/dev-notes.md` ->
+`docs/api.md` (the HTTP migration, paused) and `docs/dev-notes.md` ->
 `docs/engine-and-studio.md` (the golden path, the verifier, the gates, "Use it
 anyway") -> `docs/agent-and-chat.md` -> `docs/generation.md` +
 `docs/higgsfield.md` + `docs/operator.md` -> `docs/store-and-search.md` ->
@@ -345,7 +345,7 @@ generic advice. Name the file and the line.
   (messages, steps, streams, caches).
 - **API design**: stable JSON contracts, error shapes, status codes, ids
   everywhere, pagination, versioning, what an integrator would trip over. Is
-  `docs/api.md` true today? Would it survive the FastAPI migration in `docs/fastapi_plan.md`
+  `docs/api.md` true today? Would it survive the FastAPI migration in `docs/api.md`
   without a byte changing — and is the hand-written spec drift-tested well enough
   to be replaced by a generated one?
 - **Data model**: the Postgres schema (keys, FKs, indexes, JSONB vs columns),

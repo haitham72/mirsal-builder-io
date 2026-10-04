@@ -32,13 +32,6 @@ def append(out, kind: str, provider: str, model: str, status: str = "OK", latenc
             row[k] = v
         except (TypeError, ValueError):
             row[k] = str(v)[:500]
-    try:  # tracing (backend none: returns None at once): a run per call, under its generation when it names one
-        from ..obs import trace
-        rid = trace.model_call(Path(out) if out is not None else log_path(None).parent, row)
-        if rid:
-            row["trace_run_id"] = rid
-    except Exception:
-        pass
     line = json.dumps(row, ensure_ascii=False)
     try:
         p = log_path(out)

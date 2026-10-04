@@ -30,7 +30,7 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "trash.js": "text/javascript", "sheet-recovery.js": "text/javascript", "job-recovery.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "trash.js": "text/javascript", "tickets.js": "text/javascript", "auth.js": "text/javascript", "sheet-recovery.js": "text/javascript", "job-recovery.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
 # What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,
@@ -68,6 +68,11 @@ class Console:
         self.started, self._stale_checked, self._stale = time.time(), 0.0, False
         self._health = None
         self.users = UserStore(out)
+        self.lan = os.environ.get("MIRSAL_LAN", "").strip() in ("1", "true", "yes", "on")      # serve --lan: office colleagues reach this server (docs/office_lan_plan.md)
+        self.lan_names: set = set()
+        if self.lan:
+            from ..runtime import net
+            self.lan_names = net.lan_names()
         self._ingest = None
         self._ingest_stop = threading.Event()
         self.lib = Library(out)
@@ -713,13 +718,13 @@ def make_handler(c: Console):
             must be our own and a browser-sent Origin on anything that is not a read must be our own too. A client that sends no
             Origin (curl, the tests, the CLI) passes; a browser always sends one on a cross-origin POST."""
             port = self.server.server_address[1]
-            hosts = {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"}
+            hosts = {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"} | {f"{n}:{port}" for n in c.lan_names}
             if (self.headers.get("Host") or "").lower() not in hosts:
                 return "unexpected Host header"
             if self.command in ("GET", "HEAD", "OPTIONS"):
                 return None
             origin = self.headers.get("Origin")
-            if origin is not None and origin.lower() not in {f"http://{h}" for h in hosts}:
+            if origin is not None and origin.lower() not in {f"{sch}://{h}" for h in hosts for sch in ("http", "https")}:
                 return "cross-origin request refused"
             if (self.headers.get("Sec-Fetch-Site") or "same-origin") not in ("same-origin", "none"):
                 return "cross-site request refused"
@@ -735,12 +740,22 @@ def make_handler(c: Console):
             gw = c.users.authenticate_gateway(self.headers.get("X-Mirsal-Gateway-Secret"), self.headers.get("X-Mirsal-Subject"), self.headers.get("X-Mirsal-Name"), self.client_address[0])
             if gw:                                                     # the hosted gateway vouches for this person (runtime/users.py); everything else is unchanged
                 return gw
-            return c.users.authenticate(self.headers.get("Authorization"), self.headers.get("Sec-Fetch-Site") == "same-origin")
+            from http.cookies import SimpleCookie
+            jar = SimpleCookie()
+            try:
+                jar.load(self.headers.get("Cookie") or "")
+            except Exception:
+                pass
+            sess = jar["mirsal_session"].value if "mirsal_session" in jar else None
+            return c.users.authenticate(self.headers.get("Authorization"), self.headers.get("Sec-Fetch-Site") == "same-origin", session=sess,
+                                        client_ip=self.client_address[0], lan=c.lan)
 
         def _authorize(self, user: dict, path: str):
             """None = allowed, else (status, body). Owners may do everything; a member reaches the chat, search, and what they own."""
             if user.get("role") == "owner":
                 return None
+            if user.get("status") == "pending":          # signed up, not approved yet: the page shows Waiting for approval and nothing else
+                return 403, {"error": "waiting for approval"}
             post = self.command == "POST"
             deny, gone = (403, {"error": "this account cannot do that (owner only)"}), (404, {"error": "not found"})
             m = _GEN_PATH.match(path)
@@ -825,6 +840,13 @@ def make_handler(c: Console):
             try:
                 fn()
             except (pl.PipelineError, LibraryError, watch.WatchError, telegram.TelegramError, UserError, fx_flow.EffectError) as e:
+                if isinstance(e, telegram.TelegramError) and self.command == "POST":
+                    try:                                 # a refused Telegram send is a ticket (flow/tickets.py)
+                        from ..flow import tickets
+                        tickets.open_auto(c.out, source="telegram", issue="other", what=f"Telegram refused: {e}", where=urlparse(self.path).path,
+                                          context={"request_id": self._rid}, user=user.get("id"))
+                    except Exception:
+                        pass
                 self._json(e.code, {"error": str(e)})
             except (ValueError, KeyError, TypeError) as e:
                 self._json(400, {"error": f"bad request: {e}"})
@@ -838,8 +860,14 @@ def make_handler(c: Console):
                 pl.OWNER.reset(tok)
 
         def _internal(self, e: Exception):
-            from ..obs import trace
-            print(f"[mirsal] 500 {self.command} {urlparse(self.path).path} [{self._rid}]: {type(e).__name__}: {trace.scrub_paths(str(e))[:300]}", file=sys.stderr, flush=True)
+            from ..obs.scrub import scrub_paths
+            print(f"[mirsal] 500 {self.command} {urlparse(self.path).path} [{self._rid}]: {type(e).__name__}: {scrub_paths(str(e))[:300]}", file=sys.stderr, flush=True)
+            try:                                         # every 500 is a ticket (flow/tickets.py), folded with the same failure seen before
+                from ..flow import tickets
+                tickets.open_auto(c.out, source="crash", issue="crash", what=f"{type(e).__name__}: {e}", where=f"{self.command} {urlparse(self.path).path}",
+                                  context={"request_id": self._rid}, user=(getattr(self, "user", None) or {}).get("id"))
+            except Exception:
+                pass
             if not getattr(self, "_started", False):
                 self._json(500, {"error": "internal error", "request_id": self._rid})
 
@@ -1850,12 +1878,33 @@ def make_handler(c: Console):
     return H
 
 
-def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, block: bool = True):
+def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, block: bool = True, stdlib: bool | None = None, lan: bool = False,
+          tls: dict | None = None):
+    """FastAPI on uvicorn (console/app.py) by default; `stdlib=True` or MIRSAL_SERVER=stdlib runs the old ThreadingHTTPServer (kept for one release).
+    Both serve the same handler, so every answer is the same. `lan`: office colleagues reach it on the local network (0.0.0.0; they sign in; docs/office_lan_plan.md),
+    `tls`: {cert, key} for HTTPS."""
+    if lan:
+        os.environ["MIRSAL_LAN"] = "1"
     c = Console(out, inp, pace, cfg)
-    srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(c))
+    if stdlib is None:
+        stdlib = os.environ.get("MIRSAL_SERVER", "").strip().lower() == "stdlib"
+    if stdlib:
+        srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(c))
+    else:
+        from .app import Server
+        srv = Server(c, "0.0.0.0" if lan else "127.0.0.1", port, tls=tls)
+    if lan:
+        from ..services import admin_bot
+        admin_bot.start(c)                             # Haitham's approvals in the Telegram bot (when the bot is configured in Settings)
     if not block:
         return srv, c
-    print(f"Mirsal console on http://127.0.0.1:{srv.server_address[1]}  (input: {inp}  out: {out})")
+    scheme = "https" if tls else "http"
+    print(f"Mirsal console on {scheme}://127.0.0.1:{srv.server_address[1]}  ({'stdlib' if stdlib else 'FastAPI on uvicorn'}; input: {inp}  out: {out})")
+    if lan:
+        names = sorted(n for n in c.lan_names if n[:1].isdigit())
+        print("Office network: " + ", ".join(f"{scheme}://{n}:{srv.server_address[1]}" for n in names) + "  (colleagues sign in with an @nadi.ae account; this PC must stay on)")
+        if not tls:
+            print("WARNING: no TLS: passwords and sign-in cookies cross the office network unencrypted (serve --lan uses HTTPS unless --no-tls)")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

@@ -13,7 +13,7 @@ You are drawing the architecture of **Mirsal Builder**, a local app that makes a
 - `docs/generation.md` ("Prompts", "The Higgsfield CLI", "Jobs", "Credits and usage", "Several paid jobs at once")
 - `docs/agent-and-chat.md` ("One turn", "Memory", "Models", "The agentic creator", "Several subjects, per-subject feedback, taste", "Particle sets in the chat", "Edits by what they mean")
 - `docs/particles.md`, `docs/effects.md`, `docs/store-and-search.md`, `docs/api.md`
-- `plan.md` and `docs/office_lan_plan.md`, `docs/tickets_plan.md` (PLANNED work: draw it only in diagram 7, dashed)
+- `plan.md` and `docs/office_lan_plan.md` (PLANNED work: draw it only in diagram 7, dashed); `docs/api.md` "Office accounts on the LAN" and "Tickets" (built)
 - When a doc is unclear, open the code it names (`mirsal/mirsal/agent/graph.py`, `flow/pipeline.py`, `flow/gates.py`, `generation/jobs.py`, `flow/particle_sets.py`) and draw what the code does.
 
 ## 2. The diagrams (one `.excalidraw` file each, in `docs/diagrams/`)

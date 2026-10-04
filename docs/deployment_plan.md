@@ -1,6 +1,6 @@
 # Deployment plan: putting Mirsal Builder online (PAUSED)
 
-**Status: deployment remains PAUSED.** Hosting, OAuth, credits and external activation are groundwork only; retain the prepared files and held questions. **The local FastAPI + pydantic HTTP migration is authorized after particles (Haitham, 2026-10-04)** under [fastapi_plan.md](fastapi_plan.md). That authorization does not enable deployment or activate rate limiting. Prepared deployment files remain on `deployment`; `better_ui/ux` branches from it.
+**Status: deployment remains PAUSED.** Hosting, OAuth, credits and external activation are groundwork only; retain the prepared files and held questions. **The local FastAPI + pydantic HTTP migration is authorized after particles (Haitham, 2026-10-04)** under [api.md](api.md). That authorization does not enable deployment or activate rate limiting. Prepared deployment files remain on `deployment`; `better_ui/ux` branches from it.
 
 ## Glossary (the words this file keeps using)
 
@@ -11,7 +11,7 @@
 - **Paused** — external deployment, OAuth, credit infrastructure and rate-limit activation. The local HTTP migration is separately authorized.
 
 **Status (2026-10-02, end of the unattended session): the plan is written, and the first slice of it is PREPARED on this branch in new folders. Nothing is switched on:** no Supabase project, no Vercel project, no Render service and no Google OAuth client exist; nothing was pushed to any of them.
-**2026-10-04:** the local HTTP migration follows particle acceptance; the rest of deployment remains paused. Its executable spec is `fastapi_plan.md`.
+**2026-10-04:** the local HTTP migration follows particle acceptance; the rest of deployment remains paused. The app server is FastAPI on uvicorn since 2026-10-04 (`docs/api.md`).
 This file lives on the `deployment` branch only (`git switch deployment`), never on `merge/generate-advanced`. Every phase is still scheduled work that becomes real only when it is built, tested and documented like any other change (`CLAUDE.md` rules 3, 8, 11, 12, 13).
 
 ## 0. Builds on
@@ -58,7 +58,7 @@ on a machine with a disk and real CPU**; only thin stateless things may be serve
 
 ## 3. Phase 0 — FastAPI and "hostable" (the enabler; everything else depends on it)
 
-> **The local FastAPI + pydantic migration is authorized after particles (2026-10-04)** under `docs/fastapi_plan.md`. External deployment and infrastructure activation remain paused; implement only the authorized local HTTP-layer scope.
+> **The app server is FastAPI on uvicorn (2026-10-04, `docs/api.md`).** External deployment and infrastructure activation remain paused; implement only the authorized local HTTP-layer scope.
 
 Nothing else in this plan is safe before this phase: a local-disk `out/`, an in-process session list and an optional Redis all break the moment there are two machines.
 

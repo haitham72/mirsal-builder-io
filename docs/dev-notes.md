@@ -13,7 +13,7 @@ Mirsal Builder is a local, private app that makes animated Telegram stickers (no
 - **"Use it anyway" (allow)** — a recorded, reversible human click that lets a judgement-call block through. Only Telegram's own limits stay final.
 - **Sheet / video sheet / `sheet_fixed`** — the model-drawn grid; the video sheet rebuilt from approved stickers; `sheet_fixed` is the edited-sheet view.
 - **Particle set / burst** — a set of effect sprites linked to library stickers, and the animation rendered from it.
-- **Paused** — public deployment (`deployment_plan.md`) and Google OAuth remain parked. **The order now (2026-10-04):** FastAPI + pydantic (`fastapi_plan.md`, in progress; preserve the JSON contract and the compatibility server) → streaming chat → the ticket logger (`tickets_plan.md`) → the office LAN with accounts, the Telegram admin bot and per-user credits (`office_lan_plan.md`).
+- **Paused** — public deployment (`deployment_plan.md`) and Google OAuth remain parked. What comes next is `plan.md`.
 
 ## Where things are tracked (CLAUDE.md rule 7)
 
@@ -22,7 +22,7 @@ Mirsal Builder is a local, private app that makes animated Telegram stickers (no
 | a verdict, eyes or money from Haitham | `waiting-for-haitham.md` (numbered W1-W48) |
 | open work to build, by area | `backlog.md` |
 | this file: guardrails, how to run, quirks | `dev-notes.md` |
-| the paused FastAPI + pydantic spec | `fastapi_plan.md` |
+| the next steps | `plan.md` (repo root) |
 | the paused deployment plan and its nine questions | `deployment_plan.md` |
 | the independent audit baseline | `review.md` (appendix A holds the triage of the 2026-10-02 review; a fresh audit updates that one file per `review-prompt.md`) |
 
@@ -46,7 +46,7 @@ An entry is deleted the moment it is built and documented (history lives in git)
 | Everything stays local for now | embeddings stay local and hardcoded (`services/embed.py` `EMBED_MODEL`, the DB is local). `gpt-4o-mini` is for greeting and routing only; the real work runs on the local server. No hosted embeddings, no swap of the embedding model |
 | Never a block a person cannot get past (2026-10-02) | every new check is a WARN with a visible "use it anyway"; only limits Telegram itself rejects (format, size, codec) or a file that does not open may stop something, and even then with words and a next step (`CLAUDE.md` rule 10). Applied: `pipeline.SHEET_PROCEED`, `recut`, `engine/effect_checks.py` |
 | Several sheets / effects are made all at once (2026-10-02) | `jobs.paid_parallel()`; `CLAUDE.md` rule 13 |
-| Tracking stays in Postgres; **LangSmith is retired** (off 2026-10-03, retired 2026-10-04: the ticket logger in Postgres replaces it, `tickets_plan.md`) | `LANGSMITH_TRACING=false` and `MIRSAL_TRACE=none` in this PC's `mirsal/.env`; decisions, tasks, jobs and chats are recorded in Postgres (`MIRSAL_DB_WRITE=1`, `docs/store-and-search.md`). `obs/trace.py` stays for a machine that wants LangSmith |
+| Tracking stays in Postgres; **LangSmith is retired** (off 2026-10-03, removed 2026-10-04: problems are tickets, `store-and-search.md` "Tickets") | `LANGSMITH_TRACING=false` and `MIRSAL_TRACE=none` in this PC's `mirsal/.env`; decisions, tasks, jobs and chats are recorded in Postgres (`MIRSAL_DB_WRITE=1`, `docs/store-and-search.md`). `obs/trace.py` stays for a machine that wants LangSmith |
 | Particle effects: both modes, video first-class, 2x2 default (2026-10-02) | the video is text-only (no start image) and starts and ends empty; 3x3 is offered but measured poor; the simulated mode has gravity / explosion / vortex sliders (`docs/effects.md`) |
 | The daily credit cap must never block the owner | decided in principle; the code change is W36 |
 
@@ -66,6 +66,8 @@ venv/bin/python -m mirsal test focused                        # approved ~22-cas
 venv/bin/python -m mirsal test area engine/video              # Tier 2: the explicit module -> test-class map in mirsal/test_tiers.py
 node --test tests/js/*.test.js && venv/bin/python -m tests.test_js   # the console scripts; the slow tier is RETIRED (never run), full `unittest discover` also RETIRED (never run or requested)
 venv/bin/python -m mirsal serve --port 8789                   # YOUR server on a spare port; MIRSAL_OUT=<copy of out/G###> keeps real data untouched
+venv/bin/python -m mirsal serve --lan                         # the office network (HTTPS: out/tls/cert.pem + key.pem from mkcert once; --no-tls for plain HTTP); colleagues sign in
+venv/bin/python -m mirsal serve --stdlib                      # the old stdlib server (kept for one release; the default is FastAPI on uvicorn)
 ```
 
 **Test tiers and counts.** The tiers are explicit commands; `focused [profile]` is the approved ~22-case regression selection with the exact item-0 gate first. Tier 1 (`fast`) is the fast edit loop. Tier 2 (`area`) first uses the reviewable hand-picked module -> test-class map; for the rest it derives a lower-bound map from the production modules each test imports directly, and says when a module maps to nothing instead of guessing upward. Each run prints **SELECTED**, **RAN** and **SKIPPED** separately; any skip is never a PASS. **Tier 3 (`mirsal test slow`: `test_golden`, `test_effect_video`, `test_allow_still`, `test_anim_speed`, `test_engine`, `test_verify`) is RETIRED by Haitham, 2026-10-03: it is never run and never requested** (it was a 15-20 minute "required media gate" and the old bar for "verified"; a legacy command remaining in code must not be run; `doctor` no longer asks for it). Those six modules still run as ordinary test modules through `area`/`focused` when a change maps to them. Full `unittest discover` is also RETIRED: never run or requested. "Verified" is Haitham's own browser look. Full policy: `docs/testing.md`. Python test runs go **one at a time** (parallel runs collide with `409 busy`).
@@ -105,7 +107,7 @@ Dismiss the welcome modal first (`document.getElementById('welcome').classList.r
 > Read `CLAUDE.md`, `HANDOFF.md` (a save point: anything left half-done), `plan.md` (the next step), this file and the doc of the area you touch. Then:
 >
 > 1. **Built, do not redo:** the visual redesign (`docs/design.md`), the sheet-problem fix (cut anyway + `recut`), the local model (`docs/agent-and-chat.md` Models), parallel paid jobs, the particle-effects engine and its Kling measurements (`docs/effects.md`), particle sets owned by library stickers with the burst maker, the trash and the chat intents (`docs/particles.md`), one control per cell and edits by what they mean, verdict replay, stalled-job recovery, G3 overrides, the trash purge and the Generate prompt step (`docs/engine-and-studio.md`, `docs/agent-and-chat.md`, `docs/api.md`).
-> 2. **Open:** `docs/backlog.md` for what to build, `docs/waiting-for-haitham.md` for what only a person can settle. The order is in `docs/office_lan_plan.md` §4: FastAPI + pydantic (`docs/fastapi_plan.md`, in progress), streaming chat, the ticket logger, then the office LAN. Public deployment and Google OAuth remain paused.
+> 2. **Open:** `docs/backlog.md` for what to build, `docs/waiting-for-haitham.md` for what only a person can settle. The next steps are `plan.md`. Public deployment and Google OAuth remain paused.
 > 3. **Standing rules from Haitham:** never a block a person cannot get past (`CLAUDE.md` rule 10); several paid jobs may run at once but never spend without the price shown and a go-ahead; judge media only with numbers; tracking stays in Postgres and LangSmith is off.
 > 4. **Paused, do not touch, do not delete, do not re-ask:** public deployment (`docs/deployment_plan.md` and the `deployment` branch's gateway files) and Google OAuth (the office LAN's sign-in throttling in `office_lan_plan.md` §2.2 is the one planned use of the rate limiter), and every held question in `waiting-for-haitham.md` marked held or parked.
 >

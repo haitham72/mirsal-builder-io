@@ -189,6 +189,13 @@ def fail(out: Path, jid: str, reason: str) -> dict:
     _write(p, job)
     _mc.append(out, KIND_CALL[job["kind"]], job["provider"], job.get("model") or "unknown",
                status="ERROR", error=job["error"], extra={"job": job["id"]})
+    try:                                             # a failed paid job is a ticket (flow/tickets.py); never stops the failure from being recorded
+        from ..flow import tickets
+        tickets.open_auto(out, source="job", issue="stuck_job", what=f"{job['kind']} job failed: {job['error']}", where=f"{job['kind']}/{job.get('model') or 'unknown'}",
+                          context={"job": job["id"], "generation": job.get("generation"), "paid": bool(job.get("external_task_id"))},
+                          user=(job.get("request") or {}).get("user"))
+    except Exception:
+        pass
     return job
 
 

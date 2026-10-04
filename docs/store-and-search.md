@@ -80,27 +80,14 @@ A photo becomes a validated 512 sticker in `out/photo/` (private, `shared: false
 AI matte `media/matte.py` (U2-Net / IS-Net through onnxruntime, weights in `mirsal/mirsal/models/`), then OpenCV GrabCut as the no-weights fallback) followed by the engine's edge finish and
 the verifier (`single_subject`, `foreground`, `static_file`, size and format). On-device by default: the photo never leaves the machine and the default mode makes no network call.
 
-## Tracing (`obs/trace.py`)
+## Tickets (`flow/tickets.py`, `migrations/010_tickets.sql`)
 
-`MIRSAL_TRACE=none|langsmith` (default `none`: zero network calls). With `langsmith`: **one root run per generation** (`out/G###/trace.json` keeps its id), **one child run per
-pipeline event** (`pipeline.emit` is the single sink, so every stage and gate shows up) and **per model call** (`model_calls.append`); **each gate decision is feedback** on the run it
-judges (`gate_<plan|still|video_sheet|anim|pack>`, `vlm_<gate>` for the judge; score 1 for APPROVE / PASS, 0 for REJECT / BLOCK). The payload follows LangSmith's REST shape
-(`POST /runs`, `PATCH /runs/{id}`, `POST /feedback`; verified against the real service on 2026-10-02); a failed post is dropped and counted, a PATCH or feedback that arrives before
-its run is ingested is retried in the background; tracing never blocks the pipeline. **What leaves the machine:** ids, slot JSON, prompts, metrics, decisions. Never image or video bytes.
-The project is `MIRSAL_LANGSMITH_PROJECT` (default `mirsal`); `LANGSMITH_PROJECT` is deliberately ignored because `mirsal/.env` may hold another project's. `mirsal trace backfill`
-replays rows that have no `trace_run_id`. (`reviews.trace_run_id` exists but nothing writes it yet.)
-
-**Finished 2026-10-02.** `python -m mirsal trace check` posts one synthetic run (a child and a piece of feedback, all marked `synthetic`) to the configured project and reads the run back: on this PC's key it printed
-`OK ... sent 3, dropped 0, read back: True` against LangSmith cloud (`https://api.smith.langchain.com`, project `mirsal`, which exists in the account behind the key; cloud was chosen, self-hosting is a one-line `LANGSMITH_ENDPOINT` change).
-**Retired 2026-10-04 (Haitham): LangSmith is the wrong tool; problems become tickets in Postgres (`docs/tickets_plan.md`), and this section and `obs/trace.py` are removed when the ticket logger lands.** **Since 2026-10-03 LangSmith is OFF on this PC** (`LANGSMITH_TRACING=false` and `MIRSAL_TRACE=none` in the git-ignored `mirsal/.env`; Haitham's decision): tracking stays in Postgres (`MIRSAL_DB_WRITE=1`: the `reviews`, `tasks`, `jobs`, ledger and chat rows above), and the code of this section stays for a machine that turns it on; while it is off nothing is sent. Two more kinds of run exist: **one run per chat turn** (`trace.chat_turn`: the text, the intents the agent read, the steps it showed, the reply, the cards, the
-estimated spend; no pictures) and **one run per stop / wait / finish of the agentic creator** (`trace.creator_event`: the scope, whether it approved for the person, where it stopped and why, the log). The test suite pins `MIRSAL_TRACE=none` whatever `.env` says.
-`.env` values with a trailing `# comment` are now read correctly (`runtime/envfile.py`): the old loaders kept the comment as part of the value, which turned the chat's provider into a garbage string (see `docs/agent-and-chat.md`).
+Problems are tickets, not traces: LangSmith was retired on 2026-10-04 (it sent data off the machine and could not hold what a person meant). A ticket is `out/tickets/T###.json` (the record) and a row of `tickets` in Postgres (the searchable copy, `store/repo.py` `save_ticket`, best effort like every write-through): what happened and when, the person's words, the issue, a summary, a proposed fix, 2-4 questions with the answers, a status (open / answered / fixed / won't fix) and the commit that fixed it. Automatic tickets (a server error, a FAILED job, a refused Telegram send) fold by a fingerprint that blanks numbers, ids and quoted values. The local model drafts the issue, summary, fix and questions (`flow/ticket_models.py` `TicketDraft`, validated; a bad or missing draft keeps the preset questions). Free text is scrubbed of absolute paths (`obs/scrub.py`). Routes: `docs/api.md` (Tickets); the screen: Settings > Tickets and **Report** on a batch, a particle row and a chat reply.
 
 ## Verified
 
 - 2026-10-01: 92 generations, 828 stickers in Postgres, re-import adds zero rows, `docker restart mirsal-db` keeps everything.
 - 2026-10-02 on the real `out/` of this PC: `db import` = 8 generations, 11 task files, 14 jobs, 43 model calls, again = 0 new; 45 approved stickers indexed and embedded; the pool searches
-  in `docs/measurements.md`; one real LangSmith run accepted by the service.
 - Tests that need the database (`test_store.py`, `test_pool.py`) **skip as whole classes when `mirsal-db` is down**; run `python -m mirsal db up` first.
 
 ## Principles that held (the rules the code follows)

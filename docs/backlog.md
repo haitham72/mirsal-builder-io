@@ -88,10 +88,8 @@ Other open items:
 - The React frontend `mirsal/web/`: extend or delete (W33); the editor's mobile screens. **needs Haitham**.
 - The retired History screen (`console/history.js`, `#/history`). **needs Haitham** (W34).
 - Content safety, OpenAI calls without a plan card, `out/` in git, a backup command. **needs Haitham** (W18, W29, W30, W31).
-- The FastAPI + pydantic migration ([`plan.md`](../plan.md) step 1); the executable spec is [`fastapi_plan.md`](fastapi_plan.md), the baseline is [`http_route_inventory.md`](http_route_inventory.md). **open**.
-- Streaming chat: the agent's steps over SSE instead of polling the whole session ([`fastapi_plan.md`](fastapi_plan.md), "After the migration"). **open**, after FastAPI.
-- The ticket logger in Postgres; LangSmith retired ([`tickets_plan.md`](tickets_plan.md)). **open**, after streaming chat.
-- The office LAN: `@nadi.ae` email + password accounts, *Waiting for approval*, Settings > People, the Telegram admin bot, 10 credits per user, forgot password gated by Haitham ([`office_lan_plan.md`](office_lan_plan.md)). **open**, after the ticket logger (HTTPS and the Trending gallery decided 2026-10-04).
+- A native FastAPI rewrite of the legacy routes (today they run through the adapter over the original handler, byte-identical; `docs/http_route_inventory.md` is the baseline). After v1.0: it changes nothing a person sees. **open, low**.
+- The office LAN: credits per person and the Trending gallery ([`plan.md`](../plan.md), [`office_lan_plan.md`](office_lan_plan.md)). **open**.
 - Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `office_lan_plan.md`). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
 ## Deployment (branch `deployment`): parked

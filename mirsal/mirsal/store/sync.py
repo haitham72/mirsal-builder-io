@@ -132,3 +132,21 @@ def sync_result(out, gid: int, res: dict) -> bool:
     except Exception as e:
         _note("failed", e)
         return False
+
+
+def sync_ticket(out, t: dict) -> bool:
+    """The Postgres copy of one ticket (flow/tickets.py); best effort like every other write-through."""
+    try:
+        if not enabled(out):
+            return False
+        if not db.available():
+            _note("skipped")
+            return False
+        with db.connect() as c:
+            repo.save_ticket(c, t)
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False
+

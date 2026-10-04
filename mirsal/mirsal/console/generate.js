@@ -247,6 +247,7 @@ function gview(){
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
     <button class="btn" data-act=gmore ${s.ready&&!s.busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
     ${gs.length===1?`<button class=btn data-act=ggroup title="Put this batch in the group of another batch: that batch becomes its parent">Add to group</button>`:''}
+    ${gs.length===1?`<button class="btn" data-act=tkreport data-k=generation data-id=${esc(gs[0].generation_id)} title="Something wrong with this batch? Send a report">Report</button>`:''}
     <button class="btn dng" data-act=grm title="Move ${gs.length===1?'this batch':'these batches'} to the trash. You can restore ${gs.length===1?'it':'them'} from Removed batches under Earlier batches.">${ic('trash')} Remove batch</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>

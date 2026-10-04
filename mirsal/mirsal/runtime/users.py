@@ -28,7 +28,8 @@ import threading
 import time
 from pathlib import Path
 
-ROLES = ("owner", "member")
+ROLES = ("owner", "admin", "member")
+LOOPBACK = ("127.0.0.1", "::1", "localhost")
 LOCAL = {"id": "local", "name": "local", "role": "owner", "can_spend": True, "disabled": False}
 _LOCK = threading.RLock()
 
@@ -60,7 +61,8 @@ class UserStore:
 
     @staticmethod
     def public(u: dict) -> dict:
-        return {k: u[k] for k in ("id", "name", "role", "can_spend", "created", "disabled") if k in u}
+        return {k: u[k] for k in ("id", "name", "role", "can_spend", "created", "disabled", "email", "status", "must_change_password", "credits_left",
+                                  "credits_spent", "last_seen") if k in u}
 
     def any(self) -> bool:
         """Is authentication on? (any account exists, disabled or not, or the env token is set). Disabling the only user must never open the server:
@@ -173,7 +175,219 @@ class UserStore:
             return None
         return None if u.get("disabled") else dict(u, via="gateway")
 
-    def authenticate(self, header: str | None, same_origin_page: bool) -> dict | None:
+    # ---------- office accounts on the LAN (docs/office_lan_plan.md): email + password, approval, sessions ----------
+    DOMAIN = os.environ.get("MIRSAL_EMAIL_DOMAIN", "nadi.ae")
+
+    def _norm_email(self, email: str) -> str:
+        e = str(email or "").strip().lower()
+        if not re.fullmatch(r"[a-z0-9._%+-]{1,64}@[a-z0-9.-]{1,190}", e):
+            raise UserError("a valid email is required")
+        if self.DOMAIN and not e.endswith("@" + self.DOMAIN):
+            raise UserError(f"only @{self.DOMAIN} accounts can join")
+        return e
+
+    @staticmethod
+    def hash_password(pw: str) -> str:
+        salt = secrets.token_bytes(16)
+        n, r, p = 2 ** 14, 8, 1
+        h = hashlib.scrypt(str(pw).encode(), salt=salt, n=n, r=r, p=p, dklen=32)
+        return f"scrypt${n}${r}${p}${salt.hex()}${h.hex()}"
+
+    @staticmethod
+    def check_password(pw: str, stored: str) -> bool:
+        try:
+            _, n, r, p, salt, h = str(stored).split("$")
+            got = hashlib.scrypt(str(pw).encode(), salt=bytes.fromhex(salt), n=int(n), r=int(r), p=int(p), dklen=32)
+            return hmac.compare_digest(got.hex(), h)
+        except (ValueError, TypeError):
+            return False
+
+    @staticmethod
+    def _check_new_password(pw: str) -> None:
+        if len(str(pw or "")) < 8:
+            raise UserError("a password of at least 8 characters is required")
+
+    @staticmethod
+    def new_password() -> str:
+        return secrets.token_urlsafe(12)[:16]
+
+    def by_email(self, email: str) -> dict | None:
+        e = str(email or "").strip().lower()
+        return next((u for u in self._read() if u.get("email") == e), None)
+
+    def _next_uid(self, users: list) -> str:
+        return f"U{max([int(u['id'][1:]) for u in users if str(u.get('id', '')).startswith('U') and u['id'][1:].isdigit()] or [0]) + 1:03d}"
+
+    def signup(self, email: str, name: str, password: str) -> dict:
+        """Self sign-up in onboarding: the account waits for Haitham (status `pending`) and can do nothing until approved."""
+        e = self._norm_email(email)
+        name = " ".join(str(name or "").split())[:60]
+        if not name:
+            raise UserError("a name is required")
+        self._check_new_password(password)
+        with _LOCK:
+            users = self._read()
+            if any(u.get("email") == e for u in users):
+                raise UserError("this email already has an account: sign in, or use Forgot password", 409)
+            u = {"id": self._next_uid(users), "name": name, "email": e, "role": "member", "status": "pending", "can_spend": True, "token_sha256": "",
+                 "password_hash": self.hash_password(password), "must_change_password": False, "credits_left": 0, "credits_spent": 0,
+                 "created": round(time.time(), 3), "disabled": True}
+            users.append(u)
+            self._write(users)
+        return self.public(u)
+
+    def add_people(self, emails, credits: int = 10) -> list[dict]:
+        """Haitham's 'Add people': each email gets an active account and a generated password, returned ONCE (to send by hand; there is no email)."""
+        made = []
+        with _LOCK:
+            users = self._read()
+            for raw in emails:
+                e = self._norm_email(raw)
+                if any(u.get("email") == e for u in users):
+                    raise UserError(f"{e} already has an account", 409)
+                pw = self.new_password()
+                u = {"id": self._next_uid(users), "name": e.split("@")[0].replace(".", " ").title(), "email": e, "role": "member", "status": "active", "can_spend": True,
+                     "token_sha256": "", "password_hash": self.hash_password(pw), "must_change_password": True, "credits_left": int(credits), "credits_spent": 0,
+                     "created": round(time.time(), 3), "disabled": False}
+                users.append(u)
+                made.append({**self.public(u), "password": pw})
+            self._write(users)
+        return made
+
+    def decide(self, uid: str, action: str, *, role: str | None = None, credits: int | None = None, name: str | None = None, email: str | None = None,
+               start_credits: int = 10) -> tuple[dict, str | None]:
+        """approve | reject | disable | enable | role | password | edit | credits -> (the account, a new password when one was made). The owner cannot be demoted or disabled."""
+        new_pw = None
+        with _LOCK:
+            users = self._read()
+            u = next((x for x in users if x["id"] == uid), None)
+            if not u:
+                raise UserError(f"no user {uid}", 404)
+            if u.get("role") == "owner" and action in ("reject", "disable", "role"):
+                raise UserError("the owner account cannot be changed this way", 409)
+            if action == "approve":
+                if u.get("status") != "active":
+                    u["credits_left"] = int(u.get("credits_left") or 0) or int(start_credits)
+                u.update(status="active", disabled=False)
+            elif action == "reject":
+                u.update(status="rejected", disabled=True)
+            elif action == "disable":
+                u.update(status="disabled", disabled=True)
+            elif action == "enable":
+                u.update(status="active", disabled=False)
+            elif action == "role":
+                if role not in ("admin", "member"):
+                    raise UserError("role must be admin or member")
+                u["role"] = role
+            elif action == "password":
+                new_pw = self.new_password()
+                u.update(password_hash=self.hash_password(new_pw), must_change_password=True)
+            elif action == "edit":
+                if name is not None:
+                    n = " ".join(str(name).split())[:60]
+                    if not n:
+                        raise UserError("a name is required")
+                    u["name"] = n
+                if email is not None:
+                    e = self._norm_email(email)
+                    if any(x.get("email") == e and x["id"] != uid for x in users):
+                        raise UserError(f"{e} already has an account", 409)
+                    u["email"] = e
+            elif action == "credits":
+                if credits is None or int(credits) < 0 or int(credits) > 10000:
+                    raise UserError("credits must be 0-10000")
+                u["credits_left"] = int(u.get("credits_left") or 0) + int(credits)
+            else:
+                raise UserError(f"unknown action {action}")
+            self._write(users)
+        return self.public(u), new_pw
+
+    def change_password(self, uid: str, old: str, new: str) -> dict:
+        self._check_new_password(new)
+        with _LOCK:
+            users = self._read()
+            u = next((x for x in users if x["id"] == uid), None)
+            if not u or not self.check_password(old, u.get("password_hash", "")):
+                raise UserError("the current password is wrong", 403)
+            u.update(password_hash=self.hash_password(new), must_change_password=False)
+            self._write(users)
+        return self.public(u)
+
+    def charge(self, uid: str, credits: float) -> dict | None:
+        """Credits per person (office_lan_plan.md 2.5): `credits` > 0 spends, < 0 gives back. The owner `local` has no balance."""
+        if uid == "local":
+            return None
+        with _LOCK:
+            users = self._read()
+            u = next((x for x in users if x["id"] == uid), None)
+            if not u or "credits_left" not in u:
+                return None
+            u["credits_left"] = round(float(u.get("credits_left") or 0) - float(credits), 3)
+            u["credits_spent"] = round(float(u.get("credits_spent") or 0) + float(credits), 3)
+            self._write(users)
+        return self.public(u)
+
+    # sessions: a random cookie value, kept only as a digest with its expiry (out/auth_sessions.json, git-ignored)
+    SESSION_HOURS = 8
+
+    def _sessions_path(self) -> Path:
+        return self.path.parent / "auth_sessions.json"
+
+    def _sessions(self) -> dict:
+        try:
+            return json.loads(self._sessions_path().read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+
+    def _save_sessions(self, ss: dict) -> None:
+        from . import atomic
+        now = time.time()
+        atomic.write_text(self._sessions_path(), json.dumps({k: v for k, v in ss.items() if v.get("expires", 0) > now}))
+
+    def login(self, email: str, password: str) -> tuple[dict, str]:
+        """-> (the account, the session cookie value). The same words for a wrong email and a wrong password, so emails cannot be probed."""
+        u = self.by_email(email)
+        bad = UserError("email or password is wrong", 401)
+        if not u or not u.get("password_hash"):
+            self.check_password(password, "scrypt$16384$8$1$" + "00" * 16 + "$" + "00" * 32)      # the same work either way
+            raise bad
+        if not self.check_password(password, u["password_hash"]):
+            raise bad
+        if u.get("status") == "rejected":
+            raise UserError("this account was not approved", 403)
+        if u.get("status") == "disabled":
+            raise UserError("this account is disabled", 403)
+        token = secrets.token_urlsafe(32)
+        with _LOCK:
+            ss = self._sessions()
+            ss[_digest(token)] = {"uid": u["id"], "expires": time.time() + self.SESSION_HOURS * 3600}
+            self._save_sessions(ss)
+        return self.public(u), token
+
+    def logout(self, token: str) -> None:
+        with _LOCK:
+            ss = self._sessions()
+            ss.pop(_digest(token or ""), None)
+            self._save_sessions(ss)
+
+    def by_session(self, token: str | None) -> dict | None:
+        """The account behind a session cookie (rolling: each use moves the expiry), or None. A pending account is returned so the page can say
+        'Waiting for approval'; the server refuses it everything else."""
+        if not token:
+            return None
+        with _LOCK:
+            ss = self._sessions()
+            rec = ss.get(_digest(token))
+            if not rec or rec.get("expires", 0) < time.time():
+                return None
+            u = next((x for x in self._read() if x["id"] == rec["uid"]), None)
+            if not u or u.get("status") in ("rejected", "disabled"):
+                return None
+            rec["expires"] = time.time() + self.SESSION_HOURS * 3600
+            self._save_sessions(ss)
+        return self.public(u)
+
+    def authenticate(self, header: str | None, same_origin_page: bool, session: str | None = None, client_ip: str = "127.0.0.1", lan: bool = False) -> dict | None:
         """The caller, with `via` saying how: `token` (a user token, or MIRSAL_API_TOKEN = the owner `local`), `page` (the Studio's own page: a browser
         marks its fetches same-origin, and a user token is checked FIRST so a client cannot widen itself by also sending that header), `open` (no
         authentication is configured: the local sandbox as before). None = refused (401)."""
@@ -185,6 +399,12 @@ class UserStore:
             u = self.find_by_token(tok)
             if u:
                 return dict(u, via="token")
+        if session:
+            u = self.by_session(session)
+            if u:
+                return dict(u, via="session")
+        if lan and client_ip not in LOOPBACK:            # on the office LAN another machine is never the owner by loading the page: it signs in
+            return None
         if same_origin_page:
             return dict(LOCAL, via="page")
         return None if self.any() else dict(LOCAL, via="open")

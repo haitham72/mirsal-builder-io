@@ -137,7 +137,7 @@ class StreamAndLogTests(Base):
         h.request("GET", "/api/generations/1/events")
         r = h.getresponse()
         self.assertEqual((r.status, r.getheader("X-API-Version")), (200, openapi.VERSION))
-        first = r.fp.readline().decode()
+        first = r.readline().decode()                    # through the HTTP layer: uvicorn frames an open stream as chunked (HTTP/1.1), the stdlib server as close-delimited
         h.close()
         self.assertEqual(first.strip(), "retry: 3000")                                         # a browser reconnects after 3 s when the 10 minute stream ends
 

@@ -185,34 +185,6 @@ class StoreTests(unittest.TestCase):
         self.assertEqual((float(rows[0][2]), rows[0][4], rows[0][5]["output"]), (12.5, "J001", "jobs/J001/result.png"))
         self.assertEqual((rows[1][3], rows[1][5]["task"]), (300, "teddy"))
 
-    def test_trace_backfill_replays_once(self):
-        from mirsal.obs import trace
-        from tests.test_trace import FakeLangSmith
-        fake = FakeLangSmith()
-        env = {k: os.environ.get(k) for k in ("MIRSAL_TRACE", "LANGSMITH_ENDPOINT", "LANGSMITH_API_KEY")}
-        os.environ.update(MIRSAL_TRACE="langsmith", LANGSMITH_ENDPOINT=f"http://127.0.0.1:{fake.srv.server_port}",
-                          LANGSMITH_API_KEY="k")
-        trace.reset()
-        try:
-            with self._conn() as c:
-                c.execute("update generation_events set trace_run_id = null")
-                c.execute("update reviews set trace_run_id = null")
-                c.commit()
-                n_ev = c.execute("select count(*) from generation_events").fetchone()[0]
-                n_rv = c.execute("select count(*) from reviews").fetchone()[0]
-                first = trace.backfill(c, self.tmp)
-                second = trace.backfill(c, self.tmp)
-                left = c.execute("select count(*) from generation_events where trace_run_id is null").fetchone()[0]
-            self.assertEqual((first["events"], first["reviews"]), (n_ev, n_rv))
-            self.assertEqual((second["events"], second["reviews"]), (0, 0))
-            self.assertEqual(left, 0)
-            self.assertEqual(len([r for r in fake.runs() if r["parent_run_id"] is None]), 2)   # G001, G002 roots
-            self.assertTrue(fake.feedback())
-        finally:
-            for k, v in env.items():
-                os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
-            trace.reset()
-
     def test_a_chat_session_mirrors_with_feedback_and_references_once(self):
         from mirsal.store import repo
         sess = {"id": "S900", "title": "teddy", "created": 1700000000.0, "updated": 1700000100.0, "settings": {"grid": "3x3"},
@@ -250,59 +222,6 @@ class StoreTests(unittest.TestCase):
                 "bad=[m for m in ('fastapi','psycopg','langgraph','anthropic','pydantic','redis') if m in sys.modules];"
                 "sys.exit(1 if bad else 0)")
         self.assertEqual(subprocess.run([sys.executable, "-c", code]).returncode, 0)
-
-    def test_trace_none_makes_no_network_calls(self):
-        from mirsal.obs import trace as tr
-        real = socket.socket
-        socket.socket = lambda *a, **k: (_ for _ in ()).throw(OSError("blocked"))
-        try:
-            os.environ["MIRSAL_TRACE"] = "none"
-            t = tr.Tracer()
-            with t.span("stage", {"a": 1}) as rid:
-                self.assertIsNone(rid)
-            t.feedback(None, "gate_still", 1, "ok")
-        finally:
-            socket.socket = real
-            os.environ.pop("MIRSAL_TRACE", None)
-
-    def test_trace_langsmith_shape_and_failure(self):
-        from mirsal.obs import trace as tr
-        seen, calls = [], {"n": 0}
-
-        class H(BaseHTTPRequestHandler):
-            def do_POST(self):
-                n = int(self.headers.get("Content-Length", 0))
-                seen.append(json.loads(self.rfile.read(n).decode()))
-                calls["n"] += 1
-                self.send_response(500 if calls["n"] == 1 else 200)  # first post fails
-                self.end_headers()
-
-            do_PATCH = do_POST      # a span is created with POST /runs and closed with PATCH /runs/{id}
-
-            def log_message(self, *a):
-                pass
-
-        srv = HTTPServer(("127.0.0.1", 0), H)
-        threading.Thread(target=srv.serve_forever, daemon=True).start()
-        os.environ.update(MIRSAL_TRACE="langsmith",
-                          LANGSMITH_ENDPOINT=f"http://127.0.0.1:{srv.server_port}",
-                          LANGSMITH_API_KEY="test-key")
-        try:
-            t = tr.Tracer(project="p")
-            with t.span("sliced", {"prompt": "x"}) as rid:
-                pass
-            t.feedback(rid, "gate_still", 1, "good")
-            t._q.join()
-        finally:
-            os.environ.pop("MIRSAL_TRACE", None)
-            os.environ.pop("LANGSMITH_ENDPOINT", None)
-            os.environ.pop("LANGSMITH_API_KEY", None)
-            srv.shutdown()
-        self.assertTrue(seen)
-        blob = json.dumps(seen)
-        self.assertNotIn("bytes", blob.replace("latency_ms", ""))
-        self.assertEqual(t.dropped, 1)  # the 500 was dropped, the pipeline never noticed
-
 
 class ComposeFileTests(unittest.TestCase):
     """`db up` finds the compose file that is tracked in git (needs no database)."""

@@ -158,13 +158,6 @@ def emit(out: Path, gid: int, stage: str, status: str, ms: int = 0, detail=None,
     ev = {"ts": round(time.time(), 3), "stage": stage, "status": status, "ms": ms, "detail": detail}
     if actor:                                  # gate decisions: who decided (python | human | vlm) and what
         ev["actor"], ev["decision"] = actor, decision
-    try:                                       # tracing (backend none: returns None at once): the run id rides on the event
-        from ..obs import trace
-        rid = trace.emit_event(out, gid, ev)
-        if rid:
-            ev["trace_run_id"] = rid
-    except Exception:
-        pass
     line = json.dumps(ev, ensure_ascii=False)
     with open(gen_dir(out, gid) / "events.jsonl", "a", encoding="utf-8") as f:
         f.write(line + "\n")
@@ -210,8 +203,8 @@ class Stage:
     def __exit__(self, et, ev, tb):
         ms = int((time.perf_counter() - self.t0) * 1000)
         if ev:
-            from ..obs import trace
-            emit(self.out, self.gid, self.stage, "error", ms, trace.scrub_paths(str(ev))[:300])      # events.jsonl, the SSE stream and tracing all carry this text
+            from ..obs.scrub import scrub_paths
+            emit(self.out, self.gid, self.stage, "error", ms, scrub_paths(str(ev))[:300])      # events.jsonl, the SSE stream and tracing all carry this text
             return False
         if self.pace:
             time.sleep(self.pace)

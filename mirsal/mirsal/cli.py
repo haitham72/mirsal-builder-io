@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import os
+from pathlib import Path
 import time
 
 from .flow import pipeline as pl
@@ -205,30 +207,6 @@ def user_cmd(out, args) -> int:
     except UserError as e:
         print(f"ERROR   {e}")
         return 1
-
-
-def trace_cmd(out, args) -> int:
-    from .obs import trace
-    st = trace.status()
-    if args.action == "status":
-        print(f"trace backend: {st['backend']}" + (f", project {st['project']}, reachable: {st['reachable']}" if st["backend"] == "langsmith" else
-              " (set MIRSAL_TRACE=langsmith and LANGSMITH_API_KEY to send runs; the project is MIRSAL_LANGSMITH_PROJECT, default mirsal)"))
-        return 0
-    if args.action == "check":
-        r = trace.check()
-        print(("OK      " if r["ok"] else "FAIL    ") + f"LangSmith project {r['project']} at {r['endpoint']}: sent {r['sent']}, dropped {r['dropped']}, read back: {r['read_back']}"
-              + (f" ({r['error']})" if r["error"] else "") + (f"; run {r['run_id']}" if r["run_id"] else ""))
-        return 0 if r["ok"] else 1
-    if st["backend"] != "langsmith":
-        print("MIRSAL_TRACE is not langsmith: nothing to send (set it and LANGSMITH_API_KEY first)")
-        return 1
-    c = _dbc()
-    if c is None:
-        return 1
-    with c:
-        r = trace.backfill(c, out, args.since)
-    print(f"replayed {r['events']} event run(s) and {r['reviews']} gate decision(s) to project {st['project']}")
-    return 0
 
 
 def out_root_compose():
@@ -554,7 +532,9 @@ def main(argv=None) -> int:
     rc = sub.add_parser("recheck", help="run the border check on animations made before it existed"); rc.add_argument("gid", nargs="?", default="all")
     pr = sub.add_parser("profile", help="time the animation of a generation stage by stage (nothing is saved)")
     pr.add_argument("gid", nargs="?"); pr.add_argument("--sweep", default="", help="worker counts to compare, e.g. 1,4,9")
-    s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0)
+    s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0); s.add_argument("--stdlib", action="store_true", help="the old stdlib server (kept for one release)")
+    s.add_argument("--lan", action="store_true", help="serve the office network: colleagues sign in with @nadi.ae accounts (docs/office_lan_plan.md)")
+    s.add_argument("--no-tls", action="store_true", help="with --lan: plain HTTP (passwords cross the network unencrypted)")
     for p_ in (s, a):
         p_.add_argument("--workers", type=int, help="cells animated at the same time (default: CPU count up to 9, or MIRSAL_ANIM_WORKERS)")
     d = sub.add_parser("db", help="Postgres: up (start mirsal-db) | migrate | status (applied vs pending files) | check (does the live schema match the files?) | reset --yes (dev only) | import (backfill out/)")
@@ -599,8 +579,6 @@ def main(argv=None) -> int:
     wk.add_argument("--id", dest="wid"); wk.add_argument("--kinds", help="only these kinds, comma separated (sheet,video,single)")
     qu = sub.add_parser("queue", help="the job queue: status | retry JOB | reap | sync (enqueue unfinished job files)")
     qu.add_argument("action", choices=["status", "retry", "reap", "sync"]); qu.add_argument("job", nargs="?")
-    tr = sub.add_parser("trace", help="tracing: status | check (post one synthetic run to the project and read it back) | backfill [--since DATE] (replay Postgres rows with no trace run to LangSmith)")
-    tr.add_argument("action", choices=["status", "check", "backfill"]); tr.add_argument("--since")
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
     po.add_argument("action", choices=["search", "reindex", "hide", "status"]); po.add_argument("query", nargs="?")
     po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")
@@ -738,8 +716,6 @@ def main(argv=None) -> int:
         return user_cmd(out, args)
     if args.cmd in ("worker", "queue"):
         return worker_cmd(out, args) if args.cmd == "worker" else queue_cmd(out, args)
-    if args.cmd == "trace":
-        return trace_cmd(out, args)
     if args.cmd == "pool":
         return pool_cmd(args)
     if args.cmd == "photo":
@@ -747,7 +723,18 @@ def main(argv=None) -> int:
     try:
         if args.cmd == "serve":
             from .console.server import serve
-            serve(out, inp, args.port, args.pace, cfg)
+            tls = None
+            if args.lan and not args.no_tls:
+                cert = Path(os.environ.get("MIRSAL_TLS_CERT") or out / "tls" / "cert.pem")
+                key = Path(os.environ.get("MIRSAL_TLS_KEY") or out / "tls" / "key.pem")
+                if not (cert.is_file() and key.is_file()):
+                    print(f"ERROR   serve --lan uses HTTPS and needs a certificate: {cert} and {key}.\n"
+                          f"        Once, on this PC: brew install mkcert (Windows: choco install mkcert), mkcert -install, then\n"
+                          f"        mkcert -cert-file {cert} -key-file {key} <this PC's IP> localhost   (and run `mkcert -install` on each office machine)\n"
+                          f"        Or serve --lan --no-tls (plain HTTP).")
+                    return 1
+                tls = {"cert": str(cert), "key": str(key)}
+            serve(out, inp, args.port, args.pace, cfg, stdlib=True if args.stdlib else None, lan=args.lan, tls=tls)
             return 0
         with WriterLock(out, f"mirsal {args.cmd}"):          # create / more / animate write result.json: one writer at a time
             if args.cmd == "create":
@@ -837,6 +824,13 @@ def doctor() -> int:
             print(f"NOTE    Higgsfield: installed but not usable ({str(e)[:140]}): run higgsfield auth login")
     import os
     print(f"OK      animation workers: {EngineConfig().anim_workers} of {os.cpu_count()} CPUs (MIRSAL_ANIM_WORKERS or serve --workers N changes it)")
+    try:                                                  # the HTTP server: FastAPI on uvicorn (console/app.py); `serve --stdlib` keeps the old one
+        import fastapi, pydantic, uvicorn
+        print(f"OK      web: FastAPI {fastapi.__version__}, pydantic {pydantic.__version__}, uvicorn {uvicorn.__version__}"
+              + ("  (MIRSAL_SERVER=stdlib: the old server is in use)" if os.environ.get("MIRSAL_SERVER", "").lower() == "stdlib" else ""))
+    except ImportError as e:
+        bad += 1
+        print(f"MISSING web: {e.name} (pip install -r requirements.txt); `serve --stdlib` still runs the old server")
     try:
         from .store import db as _db
         if _db.available():
@@ -890,12 +884,12 @@ def doctor() -> int:
                   + ("the cloud model or its rules" if os.environ.get(_llm.KEY_VAR) else "its rules"))
     except Exception as e:
         print(f"NOTE    local model: {e}")
-    try:
-        from .obs import trace as _tr
-        st = _tr.status()
-        print(f"OK      trace backend: {st['backend']}" + (f" (reachable)" if st["reachable"] else " (unreachable)" if st["reachable"] is False else ""))
+    try:                                                  # problems are tickets (flow/tickets.py); LangSmith is retired
+        from .flow import tickets as _tk
+        n = len(_tk.listing(out_root(), status="open"))
+        print(f"OK      tickets: {n} open" + ("  (Settings > Tickets)" if n else ""))
     except Exception as e:
-        print(f"NOTE    trace: {e}")
+        print(f"NOTE    tickets: {e}")
     from .services import telegram
     try:
         import ssl

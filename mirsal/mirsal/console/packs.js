@@ -117,7 +117,7 @@ function ptRowMedia(r){if(r.preview)return `<video src="${esc(r.preview)}" autop
 function ptRow(r,s,draft){const inPack=(r.in_pack||[]).length,a=r.addable,meta=[r.n_sprites?`${r.n_sprites} sprite${r.n_sprites===1?'':'s'}`:'',r.credits?spCredits(r.credits):'free',r.job,r.shared_with?`shared with ${r.shared_with} other sticker${r.shared_with===1?'':'s'}`:''].filter(Boolean);
  return `<div class="pk-row${draft?' draft':''}" data-particle-row=${esc(r.id)}><span class=pk-row-v>${draft?'Draft':'v'+r.version}</span><div class=pk-pt-m>${ptRowMedia(r)}</div>
   <div class=pk-row-id><b>${esc(r.label)}</b><small>${esc(meta.join(' · '))}</small></div>
-  <div class=pk-row-a><button class="btn sm" data-act=psshow data-id=${esc(r.id)} data-p=${esc(s.pack_id)} data-s=${esc(s.id)}>Open</button>
+  <div class=pk-row-a><button class="btn sm" data-act=psshow data-id=${esc(r.id)} data-p=${esc(s.pack_id)} data-s=${esc(s.id)}>Open</button><button class=link data-act=tkreport data-k=particle_set data-id=${esc(r.id)} title="Something wrong with these particles? Send a report">Report</button>
   ${inPack?'<small class=mut>In pack ✓</small>':a&&!draft?`<button class="btn sm pri" data-act=psbadd data-id=${esc(r.id)} data-r=${esc(a.render)} data-p=${esc(a.pack_id||s.pack_id)} data-s=${esc(s.id)}>Add to pack</button>`:''}</div></div>`}
 function ptRowsHtml(j,s){const rows=j.rows||[],drafts=j.drafts||[],runs=ptGroupRuns(j);
  return `<div class=pk-rows>${rows.map(r=>ptRow(r,s,false)).join('')}${drafts.map(r=>ptRow(r,s,true)).join('')}${runs.map(r=>ptRunCard(r,s)).join('')}</div>`}

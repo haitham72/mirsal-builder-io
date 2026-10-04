@@ -62,3 +62,9 @@ deploy/.env
 
 # one-time safety copies made before a data migration (local only, never in git)
 mirsal/out/backups/
+
+# office LAN: session cookies (hashed), account requests (emails), TLS keys and tickets (people's own words) never go to git
+mirsal/out/auth_sessions.json
+mirsal/out/account_requests.json
+mirsal/out/tls/
+mirsal/out/tickets/

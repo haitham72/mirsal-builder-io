@@ -1,6 +1,6 @@
 # HTTP API
 
-All JSON, served by `python -m mirsal serve` (stdlib server, `127.0.0.1:8770`). **The Studio is a sandbox over this API** (CLAUDE.md rule 11): every feature is an
+All JSON, served by `python -m mirsal serve` (FastAPI on uvicorn, `127.0.0.1:8770`; `console/app.py`). **Every route below is served by an adapter over the original handler, so its answer is byte-identical to the stdlib server** (`serve --stdlib` / `MIRSAL_SERVER=stdlib` still runs that one); new routes are native FastAPI with pydantic models. An open stream (the generation events) is framed as chunked on HTTP/1.1 (the stdlib server closed the connection instead): the event bytes are the same. **The Studio is a sandbox over this API** (CLAUDE.md rule 11): every feature is an
 engine function and a stable JSON shape first, a screen second, so the existing Mirsal app can call the same routes. Everything is addressable by id
 (generation `12` in a URL and `G012` in `result.json` and the chat, sticker `G012/S3`, job `J004`, session `S002`, video sheet `A1`).
 
@@ -61,6 +61,7 @@ server that the table does not describe, and it calls every documented operation
 | `GET /api/llm/models` | the local server's chat models for the model dropdown (member-readable): `{models: [{id, loaded: null \| bool}], current, preference, chosen, configured, ok, why}`. `models` is `GET {MIRSAL_LOCAL_URL}/models` without the embedding models, in the server's order (cached 30 s; `[]` when the server is down); `current` is the id every local call sends (the person's pick, else `MIRSAL_LOCAL_MODEL`, else it without a `:N` instance suffix, else the first listed model); `loaded` is `true` for the model the probe just heard from, else `null`; `ok` / `why` are the probe (`why` is `null` when it answers). `/api/models` is the Higgsfield catalogue, not this |
 | `GET /api/chat/sessions` · `POST /api/chat/sessions {title?, settings?}` | list · create |
 | `GET /api/chat/sessions/{id}` | the whole session for display: messages with steps and cards (each generation card carries its live stickers with file urls, or its job state), subjects with their passes, settings, `working`, `summary_text` |
+| `GET /api/chat/sessions/{id}/stream` | SSE of the turn in progress (native FastAPI): `event: turn` `{working, count, message}` each time the last message changes, then `event: done` `{working: false, count}`; `retry: 3000`, a comment every 15 s, ends after 10 minutes. The same access as `GET /api/chat/sessions/{id}` (401 / 403 / 404 as JSON, before any event) |
 | `POST /api/chat/sessions/{id}/messages {text, selected?, action?}` | start a turn in the background (`202`); `action` is `{type: "confirm" | "cancel"}`; `409` while the last turn is still running |
 | `POST /api/chat/sessions/{id}/settings {grid?, ask_before_spending?, ai?, style_id?}` | the visible settings (grid, ask before spending, style) and two quiet ones; a `style_id` that is not one of the presets is a 400 `unknown style`, nothing is stored |
 | `POST /api/chat/sessions/{id}/delete` | delete the chat (its stickers stay) |
@@ -106,6 +107,22 @@ pack_complete, generation_failed`. Payload: `{event, generation_id, stage, statu
 
 **Health** (every dependency reports itself; nothing raises): `GET /api/health` (database with write-through counters, Redis engine, models, providers, storage, the job queue's mode and counts),
 `/api/health/models`, `/api/health/storage`, `GET /api/vision`. **Metrics**: `GET /api/metrics` (owner only; `python -m mirsal metrics` prints it): from what is already on disk, the time from a batch's request to its first cut sticker (median, p90, max), the share approved of the stickers a human decided at G2 (stills) and G4 (animations), the share of batches that are a redo, batches with no sticker, and one line per batch (`flow/metrics.py`).
+
+## Office accounts on the LAN (native FastAPI, `console/app.py`; `runtime/users.py`, `flow/people.py`, `services/admin_bot.py`)
+
+`python -m mirsal serve --lan` serves the office network (0.0.0.0) with HTTPS (`out/tls/cert.pem` + `key.pem` from mkcert, or `MIRSAL_TLS_CERT` / `MIRSAL_TLS_KEY`; `--no-tls` runs plain HTTP with a warning). The Host and Origin checks then accept this PC's network names (`runtime/net.py`, plus `MIRSAL_LAN_HOSTS`). **On the LAN another machine is never the owner by loading the page**: it signs in; this PC itself still is the owner. Accounts are `@nadi.ae` (`MIRSAL_EMAIL_DOMAIN`), passwords are scrypt hashes, a session is an HttpOnly `SameSite=Strict` cookie (`mirsal_session`, `Secure` over TLS, 8 hours rolling; stored as a digest in `out/auth_sessions.json`). A `pending` account is refused every route with `403 {"error": "waiting for approval"}`. Roles: `owner`, `admin` (manages people), `member`.
+
+* `GET /api/auth/me` -> `{user, lan, requests}` or `401 {error, signed_out: true, lan}` (the page shows the sign-in card).
+* `POST /api/auth/signup {email, name, password}` -> `201 {user, waiting: true}` + the cookie; the account is `pending` and a sign-up request goes to Haitham. `POST /api/auth/login {email, password}` -> `{user}` + the cookie; a wrong email and a wrong password get the same `401 "email or password is wrong"`; 10 attempts per email or address in 15 minutes, then 429. `POST /api/auth/logout`.
+* `POST /api/auth/forgot {email}` -> always the same `{ok, message}`; a real active account gets a password request. `POST /api/auth/password {old, new}` (8+ characters; clears `must_change_password`). `POST /api/auth/credits {reason?}` -> a credit request (`201`).
+* `GET /api/people` (owner, admin) -> `{people, requests}`; `POST /api/people {emails}` -> `201 {people: [{..., password}]}` (generated passwords, shown once); `POST /api/people/{uid} {action: approve | reject | admin | member | disable | enable | password | edit | credits | ignore, credits?, name?, email?}` -> `{user, password?}`. The same function (`admin_bot.apply`) serves the Telegram bot's buttons; the requests it answers are closed with who decided.
+
+## Tickets (native FastAPI; `flow/tickets.py`, docs/store-and-search.md "Tickets")
+
+* `GET /api/tickets?status=` -> `{tickets: [...]}` (the owner sees every ticket, a member their own); `GET /api/tickets/{id}` -> the whole ticket (404 for another member's).
+* `POST /api/tickets {text, target?: {kind: generation | sticker | particle_set | chat | pack | other, id?, sticker?}}` -> `201` the ticket (a Report: the person's words plus what happened around the target).
+* `POST /api/tickets/{id}/answer {question, choice? | text?}`; `POST /api/tickets/{id}/status {status: open | answered | fixed | wont_fix, fixed_by?}` (owner).
+* A body that does not match answers `400 {"error": "bad request: ..."}` (never FastAPI's 422). Every native answer carries `X-API-Version` and `X-Request-Id` like the rest.
 
 ## Not built yet
 

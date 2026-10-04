@@ -495,11 +495,6 @@ class Agent:
         if run["status"] == "stopped" and run.get("generation") and run["stop"].get("kind") != "error":
             cards.append({"type": "generation", "generation": run["generation"], "subject": name})
         self.store.add_message(sess, "assistant", text, chips=chips, cards=cards)
-        try:
-            from ..obs import trace as _trace
-            _trace.creator_event(sess.get("id", ""), run)
-        except Exception:
-            pass
 
     def _start_create(self, t: Turn, p: dict, plan_card: dict | None = None, parent: str | None = None, regen_of: str | None = None,
                       refs: list | None = None, note: str = "") -> bool:
@@ -1748,12 +1743,6 @@ class Agent:
         if self.brain.last_error:                                      # the model was asked in this turn and could not answer: the rules answered, and the person is told why
             t.trace.rules_note(self.brain.last_error)
         msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done" if ok else "error")
-        try:
-            from ..obs import trace as _trace
-            _trace.chat_turn(sess.get("id", ""), t.text or (t.action or {}).get("type", ""), t.intents, t.reply, msg.get("steps"), t.cards, t.generation or t.res.generation, t.spent,
-                             None if ok else msg.get("error"), user=getattr(self.store, "user", "local"))
-        except Exception:
-            pass
         if msg["steps"] and msg["steps"][-1]["kind"] != "final":
             t.trace.end("done" if ok else "stopped", ok=ok)
         self.store.add_interaction(sess, t.text or (t.action or {}).get("type", ""), t.reply, t.intents,
