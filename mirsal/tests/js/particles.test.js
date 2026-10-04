@@ -378,15 +378,16 @@ test('Motion: ONE preview for the pack, the five presets, Energy / Float / Swirl
   assert.match(h, /id=psbpv-P001/);
   assert.doesNotMatch(h, /fx-sim|data-sid=/, 'no per-sticker row');
   for (const n of ['burst', 'fountain', 'vortex', 'rain', 'confetti']) assert.match(h, new RegExp(`data-act=psbpreset data-id=P001 data-n=${n}`));
-  for (const l of ['Energy', 'Float', 'Swirl']) assert.match(h, new RegExp(`<span>${l}<\\/span>`));
+  for (const l of ['Energy', 'Float', 'Swirl', 'Size']) assert.match(h, new RegExp(`<span>${l}<\\/span>`));
   assert.doesNotMatch(h, /Explosion|Gravity/);
   assert.match(h, /data-psbp=magnitude data-id=P001/, 'the engine’s keys travel unchanged: only the labels were renamed');
   assert.match(h, /<details class=fx-adv><summary>Advanced: particles, spin<\/summary>/);
   assert.match(h, /data-psbp=count/);
   assert.match(h, /data-psbp=spin/);
-  assert.match(h, /Advanced: particle size/);
-  assert.match(h, /value="100" data-psbpx/, 'the particles are 100 px by default');
-  for (const k of [1, 2, 3, 4]) assert.match(h, new RegExp(`data-act=psbscale data-id=P001 data-v=${k}`));
+  assert.match(h, /data-psbp=particle_size data-id=P001/, 'Size is a main slider: how big the particles look (engine particle_size)');
+  assert.match(h, /Advanced: sprite resolution/);
+  assert.match(h, /value="100" data-psbpx/, 'sprites are fitted to 100 px by default');
+  assert.doesNotMatch(h, /data-act=psbscale|Advanced: particle size/, 'one input-size control, not two that mean the same');
   assert.match(h, /for Fruits &lt;b&gt;/, 'a set in one pack is a burst for that pack');
 });
 
@@ -469,7 +470,7 @@ test('the set card opens with Generate more AND the burst maker', () => {
 
 test('every new burst action has a handler, and the burst listeners are the file’s own', () => {
   const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
-  for (const a of ['psbpreset', 'psbshuffle', 'psbscale', 'psbrender', 'psbadd']) assert.match(src, new RegExp(`ACT\\.${a}=`), `${a} has a handler`);
+  for (const a of ['psbpreset', 'psbshuffle', 'psbrender', 'psbadd']) assert.match(src, new RegExp(`ACT\\.${a}=`), `${a} has a handler`);
   assert.match(src, /addEventListener\('input'/);
   assert.match(src, /addEventListener\('change'/);
 });

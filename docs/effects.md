@@ -23,7 +23,7 @@ The editor offers three equal cards for every new version: **Sprites from the st
 | Kling animated sheet | Text-only nothing-to-nothing 2×2/3×3, keyed and sliced to cell clips | Each sprite's temporal RGBA frames; poster PNG only for thumbnails/fallback |
 | Existing artwork | Selected batch slices or library still/animated stickers copied without deleting originals | Static or animated frames matching the source |
 
-`engine/particles.py` supplies seeded motion, presets and the Energy / Float / Swirl controls. Sprite animation plays alongside movement, spin, scale and fade. Preview and final render use the same simulator; motion tuning is free. Directly adding a cut Kling clip through legacy `/api/effects/{id}/add` remains available as a secondary action.
+`engine/particles.py` supplies seeded motion, presets and the Energy / Float / Swirl / Size controls. **Size** (`particle_size`, ×0.25–×3, default 1) scales how big the particles look on screen; *Sprite resolution* (`sprite_px`, under Advanced) only sets the sharpness each sprite is fitted to before it flies (the older `scale` multiplier still works for saved motions but has no control). Sprite animation plays alongside movement, spin, scale and fade. Preview and final render use the same simulator; motion tuning is free. Directly adding a cut Kling clip through legacy `/api/effects/{id}/add` remains available as a secondary action.
 
 ## 3. Video from scratch: what was measured (real Kling, 2026-10-02)
 

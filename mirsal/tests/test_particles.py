@@ -220,6 +220,15 @@ class SimulateTests(unittest.TestCase):
         self.assertGreater(big, tiny * 4)
         self.assertEqual(pt.trajectories(small(count=33), 4).pos.shape[1], 33)
 
+    def test_the_size_slider_scales_how_big_the_particles_look_and_its_default_changes_nothing(self):
+        base = pt.simulate(SPRITES, small(seed=5))
+        self.assertEqual(digest(base), digest(pt.simulate(SPRITES, small(seed=5, particle_size=1.0))), "Size 1 is the clip as it was")
+        half = cov(pt.simulate(SPRITES, small(seed=5, particle_size=0.5))).sum()
+        double = cov(pt.simulate(SPRITES, small(seed=5, particle_size=2.0))).sum()
+        self.assertGreater(double, cov(base).sum() * 2)
+        self.assertLess(half, cov(base).sum() * 0.5)
+        self.assertEqual((small(particle_size=9).clamped().particle_size, small(particle_size=0).clamped().particle_size), (3.0, 0.25))
+
     def test_gravity_sign(self):
         slow = dict(magnitude=0.2, count=24, seed=3)
         down = pt.simulate(SPRITES, small(gravity=1.0, **slow))

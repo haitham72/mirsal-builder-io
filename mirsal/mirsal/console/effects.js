@@ -13,8 +13,8 @@ const fxNew=who=>({who,pack:'',sel:new Set(),mode:'video',grid:'2x2',note:'',eid
   dr:{grid:'2x2',opts:{},extra:[],chosen:[],est:{},busy:{},use:null,useN:0,redo:false,change:false,picked:''}});
 const FX=FXS.fx=fxNew('fx');
 const fxX=el=>{const r=el&&el.closest?el.closest('[data-fxx]'):null;return FXS[r?r.dataset.fxx:'fx']||FX};
-const FXSL=[['magnitude','Energy',0,3,.05],['gravity','Float',-2,3,.05],['vortex','Swirl',-2,2,.05],['count','Particles',4,80,1],['spin','Spin',0,3,.05]];
-const FXMAIN=['magnitude','gravity','vortex'];
+const FXSL=[['magnitude','Energy',0,3,.05],['gravity','Float',-2,3,.05],['vortex','Swirl',-2,2,.05],['particle_size','Size',.25,3,.05],['count','Particles',4,80,1],['spin','Spin',0,3,.05]];
+const FXMAIN=['magnitude','gravity','vortex','particle_size'];
 const FXPRESETS=['burst','fountain','vortex','rain','confetti'];
 const FXWHY={effect_tail_faded:'Particles were still on screen at the end, so the last frames were faded out to end empty, like a Telegram effect.',effect_empty_start:'Something is on screen in the first frames.',
  effect_empty_end:'Something is still on screen in the last frames.',effect_has_burst:'Hardly anything bursts: the effect is nearly empty.',effect_not_a_still:'Nothing moves.',effect_inside_cell:'Particles leave their cell.',

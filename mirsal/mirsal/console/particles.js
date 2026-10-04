@@ -305,8 +305,7 @@ function spBurstHtml(s){SPBS[s.id]=s;const b=spBurstState(s,spHint()),own=s.pack
    <div class=fx-ctl><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${spPresetOf(s,b)===n?' on':''}" data-act=psbpreset data-id=${id} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=psbshuffle data-id=${id}>shuffle</button></div>
     ${FXMAIN.map(k=>spBSlider(s.id,b,k)).join('')}
     <details class=fx-adv><summary>Advanced: particles, spin</summary>${['count','spin'].map(k=>spBSlider(s.id,b,k)).join('')}</details>
-    <details class=fx-adv><summary>Advanced: particle size</summary><div class=fx-size><span class=mut>Particle size</span><label class=fx-px><input type=number min=32 max=512 step=4 value="${b.size.px}" data-psbpx data-id=${id} aria-label="Particle size in pixels"> px</label>
-     <div class=tabs style="margin:0;gap:6px">${[1,2,3,4].map(k=>`<button class="tab${b.size.scale===k?' on':''}" data-act=psbscale data-id=${id} data-v=${k} title="${k} times as big">x${k}</button>`).join('')}</div></div></details>
+    <details class=fx-adv><summary>Advanced: sprite resolution</summary><div class=fx-size><span class=mut>Sprite resolution</span><label class=fx-px><input type=number min=32 max=512 step=4 value="${b.size.px}" data-psbpx data-id=${id} aria-label="Sprite resolution in pixels"> px</label><small class=mut>sharpness of each sprite; Size changes how big they look</small></div></details>
     <div class=row><button class="btn pri sm" data-act=psbrender data-id=${id}>Render</button><button class="btn sm${spSaved(s)?'':' pri'}" data-act=psbsave data-id=${id}>${spSaved(s)?'Save':'Save as a row'}</button>${spSaved(s)?`<button class=link data-act=psbsaveas data-id=${id}>Save as new</button>`:''}<button class=link data-act=psassign data-id=${id}>Assign to stickers</button><button class=link data-act=pschat data-id=${id}>Test in chat</button></div></div></div>
   ${rs.length?`<div class=ps-brs>${rs.map(r=>spBurstCard(s,b,r)).join('')}</div>`:''}</div>`}
 function spBurstRedraw(id){const s=SPBS[id],el=typeof document!=='undefined'&&document.querySelector?document.querySelector(`[data-psb="${id}"]`):null;if(s&&el)el.outerHTML=spBurstHtml(s)}
@@ -326,7 +325,6 @@ async function spBurstReload(id){const r=await api('/api/particles/'+id);if(r.ok
 const spBurstSet=el=>{const s=SPBS[el.dataset.id]||spFind(el.dataset.id);return s?[s,spBurstState(s,spHint())]:[null,null]};
 ACT.psbpreset=el=>{const [s,b]=spBurstSet(el);if(!s)return;b.preset=el.dataset.n;b.par={};b.shown={};spBurstRedraw(s.id);spBurstPreview(s.id)};
 ACT.psbshuffle=el=>{const [s,b]=spBurstSet(el);if(!s)return;b.par.seed=1+Math.floor(Math.random()*9999);b.par.touched=1;spBurstPreview(s.id)};
-ACT.psbscale=el=>{const [s,b]=spBurstSet(el);if(!s)return;b.size.scale=Math.max(1,Math.min(4,+el.dataset.v||1));spBurstRedraw(s.id);spBurstPreview(s.id)};
 document.addEventListener('input',ev=>{const t=ev.target;if(!t||!t.dataset)return;
  if(t.dataset.psbp){const [s,b]=spBurstSet({dataset:{id:t.dataset.id}});if(!s)return;b.par[t.dataset.psbp]=+t.value;b.par.touched=1;if(t.nextElementSibling)t.nextElementSibling.textContent=t.value;clearTimeout(b.pvT);b.pvT=setTimeout(()=>spBurstPreview(s.id),220)}
  else if(t.dataset.psbpx!==undefined){const [s,b]=spBurstSet({dataset:{id:t.dataset.id}});if(!s)return;b.size.px=Math.max(32,Math.min(512,Math.round(+t.value)||100));clearTimeout(b.pvT);b.pvT=setTimeout(()=>spBurstPreview(s.id),350)}});

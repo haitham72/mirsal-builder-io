@@ -50,6 +50,7 @@ class ParticleParams:
     count: int = 28                 # 4..80 particles
     size_min: float = 0.10          # sprite's longest side, fraction of the canvas (0.02..0.8)
     size_max: float = 0.22
+    particle_size: float = 1.0      # 0.25..3: how big the particles look, a multiplier on size_min/size_max (the "Size" slider)
     spin: float = 1.0               # 0..3: rotation speed (0 = never rotates)
     lifetime: float = 2.2           # seconds a particle lives (<= duration - 0.4)
     spread: float = 360.0           # degrees of emission arc, centred upward when < 360
@@ -116,6 +117,7 @@ class ParticleParams:
             vortex=lim(num("vortex", self.vortex), -2.0, 2.0),
             count=int(lim(round(count), 4, 80)),
             size_min=size_min, size_max=size_max,
+            particle_size=lim(num("particle_size", self.particle_size), 0.25, 3.0),
             spin=lim(num("spin", self.spin), 0.0, 3.0),
             lifetime=lifetime,
             spread=lim(num("spread", self.spread), 10.0, 360.0),
@@ -193,7 +195,7 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     window = min(SPAWN_WINDOW, 0.15 * p.duration)
     spawn = LEAD_FRAMES + np.rint(rng.uniform(0.0, window, n) * p.fps).astype(np.int64)     # never before frame 3: the start is empty
     speed = p.magnitude * SPEED * rng.uniform(0.5, 1.1, n)
-    size_frac = rng.uniform(p.size_min, p.size_max, n)
+    size_frac = np.minimum(rng.uniform(p.size_min, p.size_max, n) * p.particle_size, 0.9)
     omega = p.spin * rng.uniform(-2.0, 2.0, n)
     theta0 = p.spin * rng.uniform(-0.6, 0.6, n)
     jitter = rng.uniform(0.8, 1.0, n)
@@ -316,7 +318,7 @@ def _prepare(img, max_long: int, keep_canvas: bool = False) -> _Sprite | None:
 def _prepare_all(sprites, p: ParticleParams) -> list:
     if sprites is None or len(sprites) == 0:
         raise ValueError("no sprites given")
-    max_long = max(8, math.ceil(p.size_max * p.size * 1.5))      # the biggest a particle gets: size_max x pop overshoot x growth
+    max_long = max(8, math.ceil(min(p.size_max * p.particle_size, 0.9) * p.size * 1.5))      # the biggest a particle gets: size_max x Size x pop overshoot x growth
     ready = []
     for img in sprites:
         if isinstance(img, AnimatedSprite):

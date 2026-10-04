@@ -34,7 +34,7 @@ Image sprites enter the same simulator as still frames. Existing animated sticke
 
 ## Compact simulator
 
-One selectable sprite strip, one preview, presets, and **Energy / Float / Swirl**. Put count, size, spin and technical controls under **Advanced**. Then **Save** makes the draft the next row, or on a saved row replaces its motion and sizing; **Save as new** saves the same sprites with the edited motion as another row and leaves the first unchanged; **Assign to stickers → Test in chat** tests the branch as the Echo reply/reaction on that sticker. **Render → Add to pack → In pack ✓** remains the export path.
+One selectable sprite strip, one preview, presets, and **Energy / Float / Swirl / Size**. Put count, spin, sprite resolution and technical controls under **Advanced**. Then **Save** makes the draft the next row, or on a saved row replaces its motion and sizing; **Save as new** saves the same sprites with the edited motion as another row and leaves the first unchanged; **Assign to stickers → Test in chat** tests the branch as the Echo reply/reaction on that sticker. **Render → Add to pack → In pack ✓** remains the export path.
 
 Save imported/generated cells in their scoped set through the engine. Remove the extra naming/“Use as particle set” modal from the normal flow; rename is secondary. No permanent explanations about ownership, saving, the ledger or what Telegram plays. Visible text is limited to labels, actual prices, progress/status and warnings attached to the affected media. Warn with **Use it anyway**; only Telegram technical failures remain final, with a reason and next action.
 
