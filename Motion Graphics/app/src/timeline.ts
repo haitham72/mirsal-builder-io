@@ -13,7 +13,16 @@ const scene = (name: string) => () => {
   return m ? m() : Promise.reject(new Error(`scene module not found: scenes/${name}.ts`));
 };
 
+// Which film the kit plays. 'reel': the 30 s fast-cut ad on a 128 BPM grid (scenes/reel.ts, data/audio.json).
+// 'voiced': the 87 s voiced cut (copy data/voiced/audio.json over data/audio.json first).
+const FILM: 'reel' | 'voiced' = 'reel';
+
 export function makeTimeline(ly: Lyrics, au: AudioData): TimelineEntry[] {
+  if (FILM === 'reel') return [{ id: 'reel', load: scene('reel'), start: 0, end: au.duration }];
+  return makeVoiced(ly, au);
+}
+
+function makeVoiced(ly: Lyrics, au: AudioData): TimelineEntry[] {
   /** Cut in the pause before the line containing q: 0.18 s before its first word (less if the pause is short). */
   const cut = (q: string, nth = 0) => {
     const l = ly.get(q, nth);
