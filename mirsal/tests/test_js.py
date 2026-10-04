@@ -293,6 +293,10 @@ class ShellTests(unittest.TestCase):
         self.assertRegex(tile, r"width:\d{2,3}px")
         self.assertIn(".cp-style.on", css)
         self.assertIn("LIVE.m.styles.map(", (ui / "composer.js").read_text(encoding="utf-8"), "the tiles come from the API's presets")
+        comp = (ui / "composer.js").read_text(encoding="utf-8")
+        self.assertIn("data-act=cpstyles", comp, "one Style chip in the bar opens the tiles (Haitham, 2026-10-04: always-open tiles took three rows)")
+        self.assertIn("if(!CP.styles){el.innerHTML='';return}", comp, "the tiles are hidden until the chip is clicked")
+        self.assertIn(".cp-styles:empty{display:none}", css)
 
     def test_sizes_and_radii_come_from_one_scale_and_everything_answers_focus(self):
         """docs/design.md 3.2: six type steps and one radius scale, so a screen cannot drift; every interactive thing has a keyboard focus ring; motion respects the user's setting."""

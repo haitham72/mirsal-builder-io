@@ -3,7 +3,7 @@
    Generate always makes a NEW sheet with Higgsfield when it is available (prepared sheets stay one click away in the chips below); without it, the old
    lookup of prepared sheets runs. Every control is wired: the model/style/stroke/references go to /api/live/sheet exactly as shown. */
 'use strict';
-const CP={refs:[],pop:null,ai:false,go:false,menu:false};
+const CP={refs:[],pop:null,ai:false,go:false,menu:false,styles:false};
 try{CP.ai=localStorage.getItem('mirsal.ai')==='1'}catch(e){}
 const aiOn=()=>CP.ai&&!!(typeof GAI!=='undefined'&&GAI.configured);
 /* GAI is GET /api/ai: `configured` is true when ANY backend the person's engine choice allows can answer (auto: the local model when LM Studio listens, else the cloud key; local; cloud with a key), so LM Studio alone enables the chip. When it is off, the tooltip says which of the two is missing */
@@ -80,7 +80,9 @@ async function cpAddFiles(files){const {model}=lsel('image');if(model&&model.ref
 
 /* ---------- the bar: model, stroke, price, Generate */
 function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('image'),st=GS.outline;
+  const sty=(LIVE.m&&LIVE.m.styles||[]).find(x=>x.id===LIVE.style);
   el.innerHTML=`<button class=cp-chip data-act=lmodels title="Choose the image model">${logoHtml(model)}<span><b>${esc(model?model.label:'Model')}</b><em>${esc(optSummary(model,sel))}</em></span></button>
+   <button class="cp-chip ${CP.styles?'open':''}" data-act=cpstyles aria-expanded=${!!CP.styles} title="Choose the look of the stickers">${sty?`<img class=cp-chipimg src="/assets/styles/${esc(sty.id)}" alt="">`:''}<span><b>Style</b><em>${esc(sty?sty.label:'Choose')}</em></span></button>
    <div class=cp-pw><button class="cp-chip ${CP.pop==='stroke'?'open':''}" data-act=cpstroke aria-haspopup=true aria-expanded=${CP.pop==='stroke'}>${glyph(st)}<span><b>Stroke</b><em>${strokeName(st)}</em></span></button>
     ${CP.pop==='stroke'?`<div class=cp-pop role=menu>${STROKES.map(([px,n])=>`<button role=menuitemradio aria-checked=${px===st} class="${px===st?'on':''}" data-act=cpstrokeset data-px=${px}>${glyph(px)}<span><b>${n}</b><em>${px?px+' px':'no border'}</em></span></button>`).join('')}</div>`:''}</div>
    <button class="cp-chip cp-ai ${LIVE.loop?'on':''}" data-act=cploop aria-pressed=${!!LIVE.loop} title="Off: the animation plays once through and Mirsal closes the loop itself. On: the video prompt asks for a loop and Kling ends on its first pose. A loop wording makes the stickers bounce several times in the 3 seconds."><span class=cp-sw><i></i></span><span><b>Loop</b><em>${LIVE.loop?'On':'Off'}</em></span></button>
@@ -93,9 +95,9 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    and also while it cannot run, so the person can pick an engine that can. One implementation, the same endpoints (an owner picks; a member sees the server's refusal as a toast). */
 const cpEngSrc=()=>{const g=typeof GAI!=='undefined'?GAI:{};return{agent:{provider:g.provider||'none',model:g.model||''},agent_status:{},availability:g.availability||{},preference:g.preference||'auto',noModel:'no model, the built-in prompt is used'}};
 function cpDrawEngine(){const el=$('cpeng');if(!el)return;const show=typeof AIENG!=='undefined'&&(CP.ai||!(GAI&&GAI.configured));
-  el.hidden=!show;if(!show){el.innerHTML='';return}
+  el.hidden=!show;if(!show){el.innerHTML='';el._h='';return}          // forget what was drawn: turning the enhancer On again must draw the engine again (it stayed empty)
   AIENG.ensure();
-  const html=`<div class="ai-set on cp-eng" aria-label="AI enhancer engine">${AIENG.rows(cpEngSrc())}<div class=cp-engnote><small>Local: free. Cloud: one small OpenAI call.</small></div></div>`;
+  const html=`<div class="ai-set on cp-eng" aria-label="AI enhancer engine" title="Local: free. Cloud: one small OpenAI call.">${AIENG.rows(cpEngSrc())}</div>`;
   if(el._h!==html){el._h=html;el.innerHTML=html}}          // only when it changed: the bar is redrawn often, and a redraw would close an open drop-down
 ACT.cploop=()=>{LIVE.loop=!LIVE.loop;lsave();cpDrawBar();document.querySelectorAll('[data-lvloop]').forEach(c=>c.checked=LIVE.loop)};
 ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar();if(CP.ai){if(typeof AIENG!=='undefined')AIENG.load();if(typeof aiRefresh==='function')aiRefresh()}};      // turning it On reads the engine and the models again (LM Studio may have started since the page opened)
@@ -106,9 +108,12 @@ document.addEventListener('click',e=>{if(CP.pop&&!inside(e,'cp-pw')){CP.pop=null
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CP.pop){CP.pop=null;cpDrawBar()}});
 drawOutline=function(){cpDrawBar()};                 // the old On/Off pills are gone; the Request tab's On/Off still sets GS.outline and lands here
 
-/* ---------- the styles */
+/* ---------- the styles: hidden until the Style chip is clicked (Haitham, 2026-10-04: the always-open tiles took three rows); picking one closes them */
+ACT.cpstyles=e=>{CP.styles=!CP.styles;cpDrawBar();cpDrawStyles();if(e&&e.stopPropagation)e.stopPropagation()};
+ACT.cpstylepick=el=>{CP.styles=false;ACT.lstyle(el)};
 function cpDrawStyles(){const el=$('cpstyles');if(!el||!LIVE.m)return;
-  el.innerHTML=LIVE.m.styles.map(s=>`<button class="cp-style ${LIVE.style===s.id?'on':''}" data-act=lstyle data-id="${esc(s.id)}" aria-pressed=${LIVE.style===s.id}><img src="/assets/styles/${esc(s.id)}" alt="" loading=lazy><span><b>${esc(s.label)}</b><em>${esc(s.hint)}</em></span></button>`).join('')}
+  if(!CP.styles){el.innerHTML='';return}
+  el.innerHTML=LIVE.m.styles.map(s=>`<button class="cp-style ${LIVE.style===s.id?'on':''}" data-act=cpstylepick data-id="${esc(s.id)}" aria-pressed=${LIVE.style===s.id}><img src="/assets/styles/${esc(s.id)}" alt="" loading=lazy><span><b>${esc(s.label)}</b><em>${esc(s.hint)}</em></span></button>`).join('')}
 
 /* ---------- Generate: a NEW sheet with Higgsfield (after the price is confirmed), else the prepared-sheet lookup */
 const _ggo=ACT.ggo;

@@ -175,6 +175,18 @@ test('a redraw with nothing changed leaves the drop-down alone (an open <select>
   assert.equal(writes, 0);
 });
 
+test('On, Off, On again: the engine and model choice come back (the panel stayed empty after an Off)', () => {
+  const c = chip({ ai: true, gai: G() });
+  c.cpDrawEngine();
+  assert.match(c.el.innerHTML, /<ROWS>/);
+  c.sb.CP.ai = false; c.cpDrawEngine();
+  assert.equal((c.el.hidden, c.el.innerHTML), '');
+  c.sb.CP.ai = true; c.cpDrawEngine();
+  assert.equal(c.el.hidden, false);
+  assert.match(c.el.innerHTML, /<ROWS>/, 'drawn again, not skipped as unchanged');
+  assert.doesNotMatch(c.el.innerHTML, /cp-engnote/, 'compact: the cost note is the tooltip, not a third row');
+});
+
 test('turning the enhancer On reads the models and the engine again', async () => {
   const c = chip({ ai: false, gai: G() });
   c.ACT.cpai();

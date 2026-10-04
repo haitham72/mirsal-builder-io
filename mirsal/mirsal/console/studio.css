@@ -336,8 +336,9 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .cp-pop button{display:flex;align-items:center;gap:12px;border:0;background:none;color:var(--ink);border-radius:var(--r-m);padding:7px 10px;text-align:left}.cp-pop button:hover{background:#F0F9FC}.cp-pop button.on{background:#E3F4F9}
 .cp-pop span{display:flex;flex-direction:column;line-height:1.15}.cp-pop b{font-weight:600;font-size:var(--fs-m)}.cp-pop em{font-style:normal;color:var(--ink3);font-size:var(--fs-s)}
 /* the style tiles: compact, wrapping, chosen by a ring and a check (never by size); the picture is the swatch from /assets/styles/<id> */
-.cp-styles{display:flex;flex-wrap:wrap;gap:10px 8px;margin-top:16px}
-.cp-style{position:relative;width:104px;flex:none;display:flex;flex-direction:column;gap:6px;padding:6px 6px 8px;border:0;border-radius:var(--r);background:#ffffff80;text-align:left;color:var(--ink);box-shadow:inset 0 0 0 1px var(--aline);transition:box-shadow .2s,background .2s}
+.cp-styles{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.cp-styles:empty{display:none}
+.cp-chipimg{width:22px;height:22px;border-radius:var(--r-s);object-fit:cover;flex:none}
+.cp-style{position:relative;width:84px;flex:none;display:flex;flex-direction:column;gap:6px;padding:6px 6px 8px;border:0;border-radius:var(--r);background:#ffffff80;text-align:left;color:var(--ink);box-shadow:inset 0 0 0 1px var(--aline);transition:box-shadow .2s,background .2s}
 .cp-style img{width:100%;aspect-ratio:1;border-radius:var(--r-m);object-fit:cover;display:block}
 .cp-style>span{display:flex;flex-direction:column;line-height:1.2;padding:0 2px}
 .cp-style b{font-size:var(--fs-m);font-weight:600}.cp-style em{font-style:normal;font-size:var(--fs-xs);color:var(--ink3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -354,8 +355,10 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 
 /* the AI enhancer's engine control: the AI screen's own rows (.ai-set .r, .ai-seg, .ag-sel in agent.css), laid flat under the bar instead of floating as a pop-over */
 .cp-engwrap{margin-top:10px}.cp-engwrap[hidden]{display:none}
-.ai-set.cp-eng{position:static;width:auto;max-width:420px;padding:10px 14px;background:#ffffffb3;backdrop-filter:none;box-shadow:inset 0 0 0 1px var(--aline);animation:none}
-.cp-eng .cp-engnote{border-top:1px solid var(--aline);margin-top:8px;padding-top:6px}
+.ai-set.cp-eng{position:static;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;width:auto;max-width:none;padding:4px 10px;border-radius:var(--r-m);background:#ffffffb3;backdrop-filter:none;box-shadow:inset 0 0 0 1px var(--aline);animation:none}
+.ai-set.cp-eng .r,.ai-set.cp-eng .r + .r{flex:0 1 auto;gap:8px;padding:0;margin:0;border:0}
+.ai-set.cp-eng .r>div{flex:0 1 auto}.ai-set.cp-eng b{display:inline;font-size:var(--fs-s)}.ai-set.cp-eng small{display:inline;margin:0 0 0 6px;font-size:var(--fs-xs)}
+.ai-set.cp-eng .ai-seg button{padding:2px 10px;font-size:var(--fs-s)}.ai-set.cp-eng select{font-size:var(--fs-s);padding:2px 6px;max-width:240px}
 /* the line under the Prompt step's title about the AI enhancer (the model wrote it / why the built-in prompt is shown) */
 .gdnote{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0;padding:8px 12px;border-radius:var(--r-m);background:var(--wash);box-shadow:inset 0 0 0 1px var(--aline);font-size:var(--fs-s);color:var(--ink2)}
 .gdnote.bad{background:#FFFBEB;box-shadow:inset 0 0 0 1px var(--run);color:var(--tx)}
@@ -378,7 +381,7 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .lv-hfam{border-radius:var(--r-m)}.lv-hfam.drop{box-shadow:inset 0 0 0 2px var(--acc,#3b82f6)}
 .lv-hvars{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:2px 8px 8px 12px}.lv-harr{color:var(--mut2);font-size:var(--fs-l);line-height:1}
 .lv-hvar{position:relative;display:inline-flex}.lv-hvb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px;border-radius:var(--r-s);background:none;border:1px solid var(--bd);cursor:pointer}
-.lv-hvb .lv-hth{width:40px;height:40px}.lv-hvb small{font-size:var(--fs-xs);color:var(--mut2)}.lv-hvar.on .lv-hvb{border-color:var(--acc,#3b82f6);box-shadow:0 0 0 1px var(--acc,#3b82f6)}
+.lv-hvb .lv-hth,.lv-hvb .lv-hth img,.lv-hvb .lv-hth .lv-hnoimg{width:40px;height:40px}.lv-hvb small{font-size:var(--fs-xs);color:var(--mut2)}.lv-hvar.on .lv-hvb{border-color:var(--acc,#3b82f6);box-shadow:0 0 0 1px var(--acc,#3b82f6)}
 .lv-hx{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:1px solid var(--bd);background:var(--bg,#fff);font-size:var(--fs-xs);line-height:1;cursor:pointer;padding:0}
 .lv-vgen.done{font-size:var(--fs-m);color:var(--ok);font-weight:600}
 .cp-top{position:relative}.cp-cr{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 12px 0 10px;border-radius:var(--r-pill);border:0;background:#ffffffb3;color:var(--ink);box-shadow:inset 0 0 0 1px var(--aline)}

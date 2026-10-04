@@ -185,7 +185,7 @@ whether to delete it; do not fold it into this column.
 - One token set; `--pri` is the accent on every screen; no `#070b1c` island remains.
 - Six rail items including AI declared in `app.js`, identical width, position and order on every route; one phone layout (bottom bar) on every screen, not only AI.
 - The second column exists on every list-bearing screen and remembers its state.
-- Style tiles are compact, honest, and read from `styles.PRESETS`.
+- Style tiles are compact, honest, and read from `styles.PRESETS`. **They are hidden until the Style chip in the composer bar is clicked** (Haitham, 2026-10-04: always-open tiles took three rows, each as tall as a sticker); picking one closes them and the chip names it (`composer.js` `ACT.cpstyles`, `cpstylepick`). The AI enhancer's engine control under the bar is one compact strip (segment + model drop-down; the cost note is its tooltip), and it reappears every time the enhancer is turned On again.
 - Earlier batches: one vertical column, no "Load more", reachable from anywhere.
 - `tests/test_js.py` green (it guards the shared `ACT` names and that every `data-act` button has a handler) — **a redesign that trips it has broken the
   app.** `tests/js/*.test.js` must still pass. No duplicate top-level `const`, no new top-level `ACT.*`.
