@@ -110,6 +110,20 @@ the scope is not understood yet.
 | `tests/test_job_recovery.py`, `tests/test_sheet_allow.py` | stalled-job recovery and the G3 video-sheet override | the focused profiles `recovery` and `video-sheet` where they are named there; otherwise the named module/mapped area |
 | `tests/js/trash.test.js`, `job_recovery.test.js`, `sheet_recovery.test.js`, `sheet_size_chip.test.js`, `prompt_step.test.js` | the pure builders of the console scripts of the same names | `python -m tests.test_js` + the node suite |
 
+## Test files added for v1.0 (2026-10-04)
+
+| file | what it guards |
+|---|---|
+| `tests/test_chat_stream.py` | the chat SSE route: turn events then done, the session route's access |
+| `tests/test_tickets.py` | fingerprint folding, Report context, answers, the model draft validated, the routes, a 500 opens a ticket |
+| `tests/test_accounts.py` | sign-up / approval / sessions / LAN owner rule, the admin bot's taps (fake Telegram), the routes |
+| `tests/test_credits.py` | reserve, settle on the real cost, refund on failure, 402 when short |
+| `tests/test_trending.py` | share, likes, comments, orders, private files, Use in my workflow, the routes |
+| `tests/test_groups.py`, `tests/test_particle_rows.py` | batch families; particle rows, adopt, drawn sheets |
+| `tests/js/tickets.test.js`, `auth.test.js`, `anim_create.test.js` | the screens' pure builders |
+
+The contract suites (`test_api_contract`, `test_openapi`, `test_hardening`, `test_live`) run on FastAPI by default; `MIRSAL_SERVER=stdlib` runs them on the old server.
+
 ## Worked scenarios
 
 **A button layout, a chip, a CSS rule.** Blast radius: the shell guards. Run

@@ -92,6 +92,18 @@ Other open items:
 - The office LAN runs on this PC: if it sleeps or restarts, everyone is offline (`serve --lan` says so on start). A machine that stays on, or a hosted server (paused: `deployment_plan.md`), would remove this. **needs Haitham**.
 - Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `api.md` "Office accounts on the LAN"). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
+## Office LAN (`docs/api.md` "Office accounts on the LAN", "Trending")
+
+- **A Library of their own for members.** Today a member has private batches, chats, jobs and particles plus Trending; the Library (packs) is owner-only, so a member's *Use in my workflow* starts a batch from the pack's subject and cover instead of copying the pack. Packs need an `owner` and the library routes need per-owner filtering (`media/library.py`, `console/server.py` `_authorize`). **open**.
+- **The admin role** manages people (Settings > People, the bot's buttons via `admin_bot.apply`) and shares to Trending; everywhere else it is treated as a member. Whether an admin should also see everyone's batches is undecided. **needs Haitham**.
+- The Telegram admin bot runs only with `serve --lan` and a configured bot; its cards have run against a fake Telegram only (`tests/test_accounts.py`). The first real sign-up is the live check. **needs a run**.
+- Ticket drafts use the LOCAL model only (free); with no local model every ticket keeps its preset questions. **open, low**.
+- `GET /api/chat/sessions/{id}/stream` sends the last message only; a turn that adds two messages at once is caught by the full read at `done`. **open, low**.
+
+## Testing
+
+- `tests.test_golden` failed intermittently once under heavy load (another Python suite running at the same time): one test left the server busy (`409 busy`) for the next. It passes alone and as a suite on a quiet machine (FastAPI and stdlib alike). If it returns, make `GoldenPathTests.wait` also wait for `busy` to stay false for a moment before the next create. **watch**.
+
 ## Deployment (branch `deployment`): parked
 
 Paused by Haitham on 2026-10-02: nothing here is worked on, extended, turned on or deleted until he asks. The reasoning, phases, runbook and open questions are in [`deployment_plan.md`](deployment_plan.md); the prepared files are `deploy/` (map: `deploy/README.md`); the questions are W40-W48. Branches (2026-10-03): `deployment` holds the build and `better_ui/ux` branches from it; `merge/generate-advanced` is retired. Of the prepared slice, only **Telegram never-twice** (`services/telegram.py` `fingerprint()`, `send(mode="once" | "replace" | "new_set")`, `tests/test_telegram.py::NeverTwice`) and the **library fingerprint** are app work worth keeping; the gateway, SQL, Docker and Render files stay untouched. `deploy/gateway/ratelimit.py` stays inert.
