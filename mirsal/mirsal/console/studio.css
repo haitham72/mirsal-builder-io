@@ -379,6 +379,11 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .lv-hrow .lv-hmeta b{font-size:var(--fs-m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lv-hrow .lv-hmeta small{font-size:var(--fs-s);color:var(--mut2);line-height:1.35}
 .lv-hcol{display:flex;flex-direction:column;gap:2px}
 .lv-hfam{border-radius:var(--r-m)}.lv-hfam.drop{box-shadow:inset 0 0 0 2px var(--acc,#3b82f6)}
+.ganew{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}@media (max-width:900px){.ganew{grid-template-columns:1fr}}
+.ganew-prev{margin:0 0 10px}.ganew-prev img{width:100%;max-width:520px;border-radius:var(--r-m);display:block;background:conic-gradient(#e9edf1 25%,#fbfcfd 0 50%,#e9edf1 0 75%,#fbfcfd 0) 0 0/12px 12px}.ganew-prev figcaption{font-size:var(--fs-s);margin-top:4px}
+.ganew-sts{display:flex;flex-direction:column;gap:8px;margin-top:12px}.ganew-st{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:start;padding:8px;border-radius:var(--r-m);box-shadow:inset 0 0 0 1px var(--aline)}
+.ganew-st img{width:56px;height:56px;object-fit:contain;border-radius:var(--r-s)}.ganew-mo{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.ganew-chip{border:1px solid var(--bd);background:#ffffffb3;border-radius:var(--r-pill);padding:2px 10px;font-size:var(--fs-xs);color:var(--ink2);white-space:nowrap;cursor:pointer;transition:background-color .18s var(--ease),border-color .18s var(--ease),transform .18s var(--ease)}.ganew-chip:hover{border-color:var(--ai);background:#fff}.ganew-chip:active{transform:scale(.97)}
 .gvars{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px}.gvars>.mut{font-size:var(--fs-s)}
 .gvar{position:relative;display:inline-flex}.gvb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px;border-radius:var(--r-s);background:none;border:1px solid var(--bd);cursor:pointer}
 .gvb .lv-hth,.gvb .lv-hth img,.gvb .lv-hth .lv-hnoimg{width:44px;height:44px}.gvb small{font-size:var(--fs-xs);color:var(--mut2)}.gvar.on .gvb{border-color:var(--acc,#3b82f6);box-shadow:0 0 0 1px var(--acc,#3b82f6)}

@@ -259,13 +259,29 @@ function gview(){
 function gbodyHtml(gs,c){const t=GS.tab;
   if(t==='request')return requestView(gs);
   if(t==='plan')return planView(gs[0]);
-  if(t==='anim'&&!gs.some(animPhase)&&!c.busyAnim&&!gs.some(g=>PVON.has(g.number)))return animEmpty(gs,c);
+  if(t==='anim'&&!gs.some(animPhase)&&!c.busyAnim&&!gs.some(g=>PVON.has(g.number)))return gs.some(g=>g.source.has_video)?animEmpty(gs,c):animCreate(gs);
   return gs.map((g,k)=>batchHtml(g,k,gs.length,t==='anim'?'anim':'still')).join('')}
 function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);   // a prepared video; a Kling video has already produced the animations
   return`<section class=gplan style="text-align:center;padding:44px 16px"><h2 style="margin:0 0 6px">${hasVid?'Animate your stickers':'No video prepared for this sheet'}</h2>
    <div class=mut style="max-width:560px;margin:0 auto 18px">${hasVid?`${c.n} sticker${c.n===1?'':'s'} will be animated from the prepared video. Each animation is checked frame by frame (size, loop, and whether the character stays inside its cell) and shows up here as soon as it is ready.`
      :(typeof liveReadyNow==='function'&&liveReadyNow()?'Generate the animation on the Stickers view: the box under the green screen has the model and the price.':'Make a video from the sheet in your own tool, then add it with “Make a video…” on the Stickers view.')}</div>
    ${hasVid?`<button class="btn pri gbig" data-act=ganimate ${c.todoAnim.length?'':'disabled'}>${ic('play')} Animate</button>`:''}</section>`}
+
+/* The Animation tab before any animation exists (Haitham, 2026-10-04: it said "nothing to see here" while the controls lived on Stickers). Per batch: the video sheet
+   that would be sent (the server's preview of the kept stickers), the model and price with Generate (vgenBox, inside the sheet panel), the editable video prompt with the
+   same footer as the Prompt tab (Generate video with my prompt), and each kept sticker with motion suggestions that add a phrase to the prompt. Nothing here spends
+   without the price shown on the button (rule 13). Pure, except the two live.js helpers it reads when they exist. */
+const ANIM_MOTIONS=['bounces','waves','nods','jumps','spins','laughs','leans in','sparkles appear'];
+function animCreate(gs){return gs.map(g=>{const kept=keptStills(g),live=typeof liveReadyNow==='function'&&liveReadyNow(),base=`/out/${g.generation_id}/`;
+  const prev=kept.length&&typeof previewUrl==='function'&&typeof fillNow==='function'?`<figure class=ganew-prev><img src="${esc(previewUrl(g,fillNow()))}" alt="The video sheet that will be animated" loading=lazy><figcaption class=mut>The video sheet that will be sent: your ${kept.length} kept sticker${kept.length===1?'':'s'}</figcaption></figure>`:'';
+  return`<section class=gbatch><div class=gbhead><b>${esc(g.generation_id)}</b><span class=mut>${kept.length?`${kept.length} kept sticker${kept.length===1?'':'s'} to animate`:'Keep at least one sticker on the Stickers view first'}</span>
+    ${live?'':`<span class=gbact><button class="btn sm" data-act=gvideo data-g=${g.number} ${kept.length?'':'disabled'} title="Higgsfield is not connected: make the video from the sheet in your own tool">${ic('film')} Make a video…</button></span>`}</div>
+   <div class=ganew><div class=ganew-l>${prev}${typeof sheetPanel==='function'?sheetPanel(g):''}</div>
+    <div class=ganew-r>${copyBox('Video prompt',pdText(g,'video'),'ap'+g.number,6,{kind:'video',g:g.number,foot:pdFoot(g,'video')})}
+     <div class=ganew-sts>${kept.map(t=>`<div class=ganew-st>${t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" alt="" loading=lazy>`:''}<div><b>S${t.index} · ${esc(String(t.key||'').replace(/_/g,' '))}</b>
+       <div class=ganew-mo>${ANIM_MOTIONS.map(m=>`<button class=ganew-chip data-act=ganmo data-g=${g.number} data-m="${esc('S'+t.index+' '+m)}">${esc(m)}</button>`).join('')}</div></div></div>`).join('')}</div></div></div></section>`}).join('')}
+/* a motion suggestion adds "S3 waves" to the batch's video prompt draft (the same draft the Prompt tab edits), so the person sees and can change what is sent */
+ACT.ganmo=el=>{const g=GM.get(+el.dataset.g);if(!g)return;const cur=pdText(g,'video')||'';PD[pdKey(g.number,'video')]=(cur.trim()?cur.replace(/\s*$/,'')+'\n':'')+el.dataset.m+'.';glast='';tick(true)};
 
 /* Request: the original request, editable; generating again starts a new session */
 function requestView(gs){const g=gs[0],s=g.source,on=GS.outline>0;
