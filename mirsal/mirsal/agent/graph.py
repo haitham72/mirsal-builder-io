@@ -733,36 +733,16 @@ class Agent:
         return self._offer_items(t, title, items, est, card, reply)
 
     def n_effects(self, state: State) -> dict:
-        """"Make particle effects for my Superman pack": the effect is made per library pack (docs/effects.md), so the chat finds the pack the words name (or the only one there is), opens an E###
-        (free: the pieces are planned in the background) and answers with a card that opens the effects screen, where the price of a video is shown before anything is spent."""
-        t: Turn = state["turn"]
-        t.trace.retitle("particle effects")
-        packs = [p for p in self.tools.packs() if p["count"]]
-        if not packs:
-            t.reply = "Effects are made for a pack in your library, and there is none with stickers yet. Make a pack first (approve stickers, then add them to a pack)."
-            t.trace.end("no pack", ok=False)
-            return {}
-        low = t.text.lower()
-        words = lambda s: {refine.stem(w) for w in re.findall(r"[a-z\u0600-\u06ff]+", s.lower()) if w not in ("pack", "set", "stickers", "sticker", "the", "a", "an", "my")}
-        said = {refine.stem(w) for w in re.findall(r"[a-z\u0600-\u06ff]+", low)}
-        hit = [p for p in packs if words(p["name"]) and words(p["name"]) <= said] or [p for p in packs if words(p["name"]) & said]
-        pick = hit[0] if len(hit) == 1 else packs[0] if len(packs) == 1 else None
-        if not pick:
-            t.reply = ("Which pack? " if not hit else "Several packs match. Which one? ") + "Say its name, for example \"particle effects for the " + (hit or packs)[0]["name"] + " pack\"."
-            t.chips = [{"label": p["name"], "text": f"make particle effects for the {p['name']} pack"} for p in (hit or packs)[:4]]
-            t.trace.end("asked which pack")
-            return {}
-        try:
-            r = self.tools.effects_start(pick["id"], allowed=t.sess["settings"].get("allow_vlm") is True)
-        except ToolError as e:
-            t.reply = f"I could not start the effects: {e}"
-            t.trace.end("could not start", ok=False)
-            return {}
-        t.trace.step(f"{r['id']}: {r['count']} sticker(s) of {r['pack_name']}")
-        t.cards.append({"type": "effects", "id": r["id"], "pack": r["pack_name"], "count": r["count"]})
-        t.reply = (f"I opened particle effects **{r['id']}** for **{r['pack_name']}** ({r['count']} stickers) and I am working out what bursts out of each one. Nothing is spent: "
-                   "open it to choose the pieces, play with gravity, explosion and vortex, or make a video (its price is shown on the button first).")
-        t.trace.end(f"opened {r['id']}")
+        """Legacy Kling intent enters the same scoped wizard; spending stays behind its quote and click."""
+        t = state['turn']
+        packs = [p for p in self.tools.packs() if p['count']]
+        hit = self._named(t.text, packs)
+        pick = hit[0] if len(hit)==1 else packs[0] if len(packs)==1 else None
+        if pick:
+            t.cards.append({'type':'particles_scope', 'pack_id':pick['id'], 'pack':pick['name'], 'kind':'video'})
+            t.reply = f"Open Video from scratch for **{pick['name']}**. It starts and ends empty; the price appears before your paid click."
+        else:
+            return self._particles_make(t)
         return {}
 
     # -- particle sets (docs/agent-and-chat.md, particle sets in the chat) -------------------------------------------------------------------------------------------------
@@ -791,16 +771,40 @@ class Agent:
             t.trace.end("could not", ok=False)
             return {}
 
+    def _particle_scope(self, t):
+        focus = t.sess.get('focus') or {}
+        gen = t.res.generation or focus.get('generation')
+        explicit = re.search(r'\bG(\d+)\b', t.text, re.I)
+        if explicit:
+            gen = f"G{int(explicit[1]):03d}"
+        ids = list(t.selected or t.res.stickers or focus.get('stickers') or [])
+        number = re.search(r'\b(?:sticker|S)\s*(\d+)\b', t.text, re.I)
+        if number and gen:
+            ids = [f"{gen}/S{int(number[1])}"]
+        packs = self._named(t.text, self.tools.packs())
+        pid = packs[0]['id'] if len(packs)==1 else None
+        return self.tools.particle_owners(pack_id=pid, generation=None if pid else gen, sticker_ids=ids or None), gen, ids
+
     def _focus_set(self, t: Turn, sets: list) -> tuple[dict | None, str]:
-        """The set the message means: named, else the one in focus, else the only one. (None, the words it used) when there is none to take."""
+        """Explicit set name overrides; otherwise newest owned set, focused set, sole set, then chips."""
         hit = self._named(t.text, sets)
-        if len(hit) == 1:
-            return hit[0], ""
-        if len(hit) > 1:
-            return None, "several"
-        fid = (t.sess.get("particles") or {}).get("set")
-        pick = next((s for s in sets if s["id"] == fid), None) or (sets[0] if len(sets) == 1 and not self._words(t.text) else None)
-        return pick, " ".join(sorted(self._words(t.text)))
+        if len(hit)==1:
+            return hit[0], ''
+        if len(hit)>1:
+            return None, 'several'
+        owners, gen, ids = self._particle_scope(t)
+        wanted = {o['sticker_id'] for o in owners}
+        mine = [s for s in sets if any(o['sticker_id'] in wanted for o in s.get('owner', []))]
+        if mine:
+            ordered = [pid for o in owners for pid in o.get('particles', [])]
+            newest = next((s for pid in reversed(ordered) for s in mine if s['id']==pid), None)
+            return newest or max(mine, key=lambda s:(s.get('created') or 0, s['id'])), ''
+        fid = (t.sess.get('particles') or {}).get('set')
+        pick = next((s for s in sets if s['id']==fid), None)
+        words = self._words(t.text) - {'burst', 'render', 'save', 'next'}
+        if pick or (len(sets)==1 and not words):
+            return pick or sets[0], ''
+        return None, '' if ids or owners else ' '.join(sorted(words))
 
     def _no_set(self, t: Turn, sets: list, why: str, verb: str) -> dict:
         if why == "several":
@@ -809,17 +813,24 @@ class Agent:
             t.reply = f"I could not find a particle set called \"{why}\" to {verb}." + (" You have " + ", ".join(f"**{s['name']}**" for s in sets[:4]) + "." if sets else " There are none yet: say \"make particles for my <pack> pack\".")
         else:
             t.reply = f"Which particle set should I {verb}? " + (", ".join(f"**{s['name']}**" for s in sets[:4]) if sets else "There are none yet.")
+        t.chips = [{"label":s["name"], "text":f"{verb} {s['name']} particles"} for s in sets[:4]]
         t.trace.end("asked which set")
         return {}
 
     def _particles_make(self, t: Turn) -> dict:
         packs = [p for p in self.tools.packs() if p["count"]]
+        owners, gen, ids = self._particle_scope(t)
+        if gen and not owners:
+            t.cards.append({'type':'particles_approve', 'generation':gen})
+            t.reply = 'Approve this batch as a pack first, so the particles have a sticker to live in.'
+            return {}
         if not packs:
-            t.reply = "Particles are made for a pack in your library, and there is none with stickers yet. Make a pack first (approve stickers, then add them to a pack)."
-            t.trace.end("no pack", ok=False)
+            t.reply = 'Choose a batch to approve as a pack, then create particles for its stickers.'
             return {}
         hit = self._named(t.text, packs)
         pick = hit[0] if len(hit) == 1 else packs[0] if len(packs) == 1 else None
+        if not hit and owners:
+            pick = next((p for p in packs if p['id'] == owners[0]['pack_id']), None)
         if not pick:
             t.reply = ("Which pack? " if not hit else "Several packs match. Which one? ") + "Say its name, for example \"make particles for my " + (hit or packs)[0]["name"] + " pack\"."
             t.chips = [{"label": p["name"], "text": f"make particles for my {p['name']} pack"} for p in (hit or packs)[:4]]
@@ -829,9 +840,13 @@ class Agent:
             t.reply = "Drawing particles needs the Higgsfield CLI, and it is not available here. Nothing was started."
             t.trace.end("no provider", ok=False)
             return {}
+        owners = owners or self.tools.particle_owners(pack_id=pick["id"])
+        current, _ = self._focus_set(t, self.tools.particle_sets())
+        if current and owners and "fresh" not in t.text.lower():
+            return self._particles_more(t)
         els = self.tools.particle_options(pick["id"], 4)
-        spec = {"type": "particles", "op": "make", "pack": pick["id"], "pack_name": pick["name"], "set": None, "grid": "2x2", "elements": els, "estimate": self.tools.estimate("image")}
-        return self._offer_particles(t, spec, f"I'll draw {len(els)} particles for the **{pick['name']}** pack: {', '.join(els)}. When the sheet is back they become a particle set on the pack")
+        spec = {"type": "particles", "op": "make", "pack": pick["id"], "pack_name": pick["name"], "set": None, "grid": "2x2", "elements": els, "estimate": self.tools.estimate("image"), "owners": owners, "fresh": "fresh" in t.text.lower()}
+        return self._offer_particles(t, spec, f"I'll draw {len(els)} particles for the **{pick['name']}** pack: {', '.join(els)}. When the sheet is back they join a set owned by its selected stickers")
 
     def _particles_more(self, t: Turn) -> dict:
         sets = self.tools.particle_sets()
@@ -840,6 +855,11 @@ class Agent:
             return self._no_set(t, sets, why, "add particles to")
         if not self.tools.live():
             t.reply = "Drawing particles needs the Higgsfield CLI, and it is not available here. Nothing was started."
+            return {}
+        if (s.get('source') or {}).get('kind') in ('video', 'stickers'):
+            owners = s.get('owner') or []
+            t.cards.append({'type':'particles_scope', 'pack_id':owners[0]['pack_id'] if owners else None, 'pack':s['name'], 'kind':'video' if s['source']['kind']=='video' else 'pack', 'set':s['id']})
+            t.reply = f"Open Generate more for **{s['name']}**. New cells join the same set; any AI price appears before the paid click."
             return {}
         els = (s.get("elements") or [])[:4]
         if not els:
@@ -851,6 +871,9 @@ class Agent:
     def _offer_particles(self, t: Turn, spec: dict, what: str) -> dict:
         card = {"type": "particles_plan", "op": spec["op"], "pack": spec.get("pack_name"), "pack_id": spec.get("pack"), "set": spec.get("set"), "name": spec.get("set_name"),
                 "grid": spec["grid"], "elements": spec["elements"], "estimate": spec["estimate"]}
+        if spec.get('estimate') is None:
+            t.reply = 'The price is unavailable. Try again to get a price before starting.'
+            return {}
         t.sess["pending"] = spec
         if self.tools.live() and t.sess["settings"].get("ask_before_spending", True):
             t.cards.append(card)
@@ -872,7 +895,7 @@ class Agent:
             return
         t.trace.retitle("drawing particles")
         try:
-            r = self.tools.particles_start(p.get("set"), p.get("pack"), p["grid"], p["elements"])
+            r = self.tools.particles_start(p.get("set"), p.get("pack"), p["grid"], p["elements"], owners=p.get("owners"), fresh=p.get("fresh", False))
         except ToolError as e:
             t.sess["pending"] = p                                    # a refused start must not cost the plan
             t.reply = f"I couldn't start the sheet: {e}. I kept the plan: press Draw them to try again, or Not yet to drop it."
@@ -883,6 +906,36 @@ class Agent:
         t.cards.append({"type": "particles", "set": r["set"], "name": p.get("set_name") or f"{p.get('pack_name')} particles", "pack_id": p.get("pack"), "job": r["job"], "estimate": r.get("estimate"), "drawing": True})
         t.reply = f"Drawing {len(p['elements'])} particles" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". When the sheet is cut they join the set by themselves; open the pack's particle studio to move them."
         t.trace.end("sheet started")
+
+    def _particles_render(self, t):
+        sets = self.tools.particle_sets()
+        s, why = self._focus_set(t, sets)
+        if not s:
+            return self._no_set(t, sets, why, 'render')
+        owners, _, _ = self._particle_scope(t)
+        pid = (owners[0] if owners else (s.get('owner') or [{}])[0]).get('pack_id')
+        if not pid:
+            t.reply = 'Link these particles to a sticker first.'
+            return {}
+        r = self.tools.particles_burst(s['id'], pid)
+        t.sess['particles'] = {'set':s['id'], 'pack':pid}
+        t.cards.append({'type':'particles', 'set':s['id'], 'name':s['name'], 'pack_id':pid})
+        t.reply = f"Rendered a burst from **{s['name']}**. Open it to review and add it to the pack."
+        return {}
+
+    def _particles_add(self, t):
+        sets = self.tools.particle_sets()
+        s, why = self._focus_set(t, sets)
+        if not s:
+            return self._no_set(t, sets, why, 'add')
+        owners, _, _ = self._particle_scope(t)
+        pid = (owners[0] if owners else (s.get('owner') or [{}])[0]).get('pack_id')
+        if not pid:
+            t.reply = 'Link these particles to a sticker first.'
+            return {}
+        self.tools.particles_add(s['id'], pid)
+        t.reply = f"**{s['name']}**: in the pack ✓."
+        return {}
 
     def _particles_delete(self, t: Turn) -> dict:
         sets = self.tools.particle_sets()
@@ -907,22 +960,23 @@ class Agent:
             return {}
         self.tools.particles_restore(hit[0]["id"])
         t.sess["particles"] = {"set": hit[0]["id"], "pack": None}
-        t.reply = f"**{hit[0]['name']}** is back, with its cells and its packs."
+        t.reply = f"**{hit[0]['name']}** is back, with its cells and sticker links."
         return {}
 
     def _particles_assign(self, t: Turn) -> dict:
         sets = self.tools.particle_sets()
-        s, why = self._focus_set(t, [x for x in sets] if self._named(t.text, sets) else sets)
-        packs = self.tools.packs()
-        hit = [p for p in self._named(t.text, packs) if p["id"] not in (s or {}).get("packs", [])] if s else []
+        named = self._named(t.text, sets)
+        fid = (t.sess.get('particles') or {}).get('set')
+        s = named[0] if len(named)==1 else next((x for x in sets if x['id']==fid), None)
         if not s:
-            return self._no_set(t, sets, why, "put on a pack")
-        if not hit:
-            t.reply = f"Which pack should **{s['name']}** also be used for? " + (", ".join(f"**{p['name']}**" for p in packs[:4]) if packs else "There are no packs yet.")
+            return self._no_set(t, sets, '', 'reuse')
+        owners, _, _ = self._particle_scope(t)
+        if not owners:
+            t.reply = 'Choose the sticker to link these particles to.'
             return {}
-        self.tools.particles_assign(s["id"], [p["id"] for p in hit])
-        t.sess["particles"] = {"set": s["id"], "pack": hit[0]["id"]}
-        t.reply = f"**{s['name']}** is now also used for {', '.join('**' + p['name'] + '**' for p in hit)}. Nothing was spent: it is the same set, not a copy."
+        self.tools.particles_link(s['id'], [o['sticker_id'] for o in owners])
+        names = [p['name'] for p in self.tools.packs() if p['id'] in {o['pack_id'] for o in owners}]
+        t.reply = f"**{s['name']}** is linked to those stickers ({', '.join(names)}). Nothing was spent; it is the same set."
         return {}
 
     def n_refine(self, state: State) -> dict:

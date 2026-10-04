@@ -393,7 +393,7 @@ class ConsoleTools:
         if self.member:
             return []
         from ..flow import particle_sets as ps
-        return [{k: r.get(k) for k in ("id", "name", "packs", "used_in", "n_cells", "n_picked", "elements", "drawing")} for r in ps.list_sets(self.out, self.c.lib)]
+        return [{k: r.get(k) for k in ("id", "name", "packs", "used_in", "n_cells", "n_picked", "elements", "drawing", "owner", "source", "created", "credits")} for r in ps.list_sets(self.out, self.c.lib)]
 
     def particle_deleted(self) -> list:
         if self.member:
@@ -412,9 +412,48 @@ class ConsoleTools:
                                         grid=(2, 2) if n <= 4 else (3, 3), allowed=False, out=self.out)
         return list(r["options"])[:n]
 
-    def particles_start(self, set_id=None, pack_id=None, grid: str = "2x2", elements=None, name=None) -> dict:
-        """SPENDS: draw a sheet of particles for a set (`set_id`), or for a new set on a pack (`pack_id`), through the same call as POST /api/particles/{id}/more. The caller has shown the price
-        and has the person's go-ahead; the cells join the set when the sheet is cut."""
+    def particle_owners(self, pack_id=None, generation=None, sticker_ids=None):
+        """Resolve library stickers by explicit scope, retaining their ordered set links."""
+        self._owner()
+        rows = []
+        for p in self.c.lib.snapshot()['packs']:
+            for st in p.get('stickers', []):
+                src = st.get('source') or {}
+                if pack_id and p['id'] != pack_id:
+                    continue
+                if generation and src.get('generation') != generation:
+                    continue
+                if sticker_ids and st['id'] not in sticker_ids and f"{src.get('generation')}/S{src.get('index')}" not in sticker_ids:
+                    continue
+                rows.append({'sticker_id':st['id'], 'pack_id':p['id'], 'generation':src.get('generation'), 'index':src.get('index'), 'particles':st.get('particles', [])})
+        return rows
+
+    def particles_link(self, set_id, sticker_ids):
+        self._owner()
+        from ..flow import particle_sets as ps
+        try:
+            return ps.link(self.out, self.c.lib, set_id, sticker_ids, self.user['id'])
+        except ps.SetError as e:
+            raise ToolError(str(e), e.code)
+
+    def particles_burst(self, set_id, pack_id):
+        self._owner()
+        from ..flow import particle_sets as ps
+        try:
+            return ps.render(self.out, self.c.lib, set_id, self.c.cfg, pack_id=pack_id, user=self.user['id'])
+        except ps.SetError as e:
+            raise ToolError(str(e), e.code)
+
+    def particles_add(self, set_id, pack_id):
+        self._owner()
+        from ..flow import particle_sets as ps
+        try:
+            return ps.add(self.out, self.c.lib, set_id, pack_id=pack_id, user=self.user['id'])
+        except ps.SetError as e:
+            raise ToolError(str(e), e.code)
+
+    def particles_start(self, set_id=None, pack_id=None, grid: str = "2x2", elements=None, name=None, owners=None, fresh=False) -> dict:
+        """SPENDS after the caller's quoted confirmation. Reuse the newest common owner set unless fresh was requested."""
         self._owner()
         self._may_spend()
         from ..flow import particle_sets as ps
@@ -422,10 +461,17 @@ class ConsoleTools:
             raise ToolError("Drawing particles needs the Higgsfield CLI (it is not installed or not logged in).", 503)
         try:
             if set_id is None:
-                pk = next((p for p in self.c.lib.snapshot()["packs"] if p["id"] == pack_id), None)
-                if not pk:
-                    raise ToolError("No such pack", 404)
-                set_id = ps.create(self.out, self.c.lib, name=name or f"{pk['name']} particles", elements=elements, packs=[pack_id], user=self.user["id"])["id"]
+                rows = owners if owners is not None else self.particle_owners(pack_id=pack_id)
+                resolved = ps.owners_for(self.c.lib, rows)
+                if not resolved:
+                    raise ToolError('Choose the stickers these particles are for', 400)
+                candidates = ps.list_sets(self.out, self.c.lib)
+                ids = {o['sticker_id'] for o in resolved}
+                existing = next((s for s in candidates if ids <= {o['sticker_id'] for o in s['owner']}), None)
+                if existing and not fresh:
+                    set_id = existing['id']
+                else:
+                    set_id = ps.create(self.out, self.c.lib, name=name or 'Sticker particles', elements=elements, owners=resolved, user=self.user['id'])['id']
             plan = ps.more_plan(self.out, self.c.lib, set_id, grid, elements)
             base = ps.more_base_plan(self.out, self.c.lib, plan["id"], plan["grid"], plan["picks"])
             r = self.c.live("sheet", {"prompt": base["task"], "grid": f"{plan['grid'][0]}x{plan['grid'][1]}", "outline": 0}, base_plan=base, particles={"set": plan["id"], "elements": plan["picks"]})
@@ -727,7 +773,22 @@ class FakeTools:
     def particle_options(self, pack_id, n=4):
         return ["pink hearts", "gold stars", "tiny sparkles", "flower petals", "soft bubbles"][:n]
 
-    def particles_start(self, set_id=None, pack_id=None, grid="2x2", elements=None, name=None):
+    def particle_owners(self, pack_id=None, generation=None, sticker_ids=None):
+        return [dict(o) for o in getattr(self, 'owner_rows', []) if (not pack_id or o.get('pack_id')==pack_id) and (not generation or o.get('generation')==generation) and (not sticker_ids or o['sticker_id'] in sticker_ids or f"{o.get('generation')}/S{o.get('index')}" in sticker_ids)]
+
+    def particles_link(self, set_id, sticker_ids):
+        self.calls.append(('particles_link', set_id, list(sticker_ids)))
+        return {'id':set_id}
+
+    def particles_burst(self, set_id, pack_id):
+        self.calls.append(('particles_burst', set_id, pack_id))
+        return {'id':'R001', 'status':'READY'}
+
+    def particles_add(self, set_id, pack_id):
+        self.calls.append(('particles_add', set_id, pack_id))
+        return {'added':1}
+
+    def particles_start(self, set_id=None, pack_id=None, grid="2x2", elements=None, name=None, owners=None, fresh=False):
         self.calls.append(("particles_start", set_id, pack_id, grid, list(elements or [])))
         self.n_jobs += 1
         return {"set": set_id or "S9", "job": f"J{self.n_jobs:03d}", "estimate": 2.0, "grid": [2, 2]}

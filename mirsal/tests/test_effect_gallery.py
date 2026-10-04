@@ -217,11 +217,13 @@ class GalleryApiTests(unittest.TestCase):
         self.assertEqual(j["created"][0]["added_to"], self.pack["id"])
         s, studio = self.req("GET", f"/api/packs/{self.pack['id']}/particles")
         counts = studio["counts"]          # the pack's studio answer is {pack_id, sets, bursts, counts}; `counts` is the old per-sticker map (docs/api.md)
-        self.assertEqual((s, counts[self.s[2]]), (200, {"created": 1, "saved": 1}))
-        self.assertEqual(counts[self.s[0]]["created"], 5)
+        self.assertEqual((s, counts[self.s[2]]), (200, {"created": 1, "saved": 1, "sets": 0}))
+        self.assertEqual(counts[self.s[0]]["created"], 2, "the badge counts versions: each run once, never once per slice")
         self.assertEqual(self.req("GET", "/api/packs/nope/particles")[0], 404)
 
     def test_a_member_gets_an_empty_answer_not_an_error(self):
+        status, preview = self.req("GET", f"/api/packs/{self.pack['id']}/stickers/{self.s[0]}/particle-preview", headers=self.M)
+        self.assertEqual((status, preview), (200, {"set": None, "url": None}))
         s, j = self.req("GET", f"/api/packs/{self.pack['id']}/stickers/{self.s[0]}/particles", headers=self.M)
         self.assertEqual((s, j["created"], j["saved"], j["can_make"]), (200, [], [], False))
         self.assertEqual(self.req("GET", f"/api/packs/{self.pack['id']}/particles", headers=self.M), (200, {}))

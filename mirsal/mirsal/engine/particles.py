@@ -237,9 +237,43 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
 
 # ---- sprites --------------------------------------------------------------------------------------------------------
 @dataclass
+class AnimatedSprite:
+    """One sprite's RGBA timeline. Every frame shares a canvas; playback begins at particle birth."""
+    frames: np.ndarray
+    fps: float = 30.0
+
+    def __post_init__(self):
+        if (not isinstance(self.frames, np.ndarray) or self.frames.dtype != np.uint8
+                or self.frames.ndim != 4 or self.frames.shape[-1] != 4 or not len(self.frames)
+                or not self.frames.shape[1] or not self.frames.shape[2]):
+            raise ValueError("animated sprite frames must be non-empty RGBA uint8 (F, H, W, 4)")
+        if not math.isfinite(float(self.fps)) or self.fps <= 0:
+            raise ValueError("animated sprite fps must be positive and finite")
+
+
+def trim_animation(sprite: AnimatedSprite, pad: int = 2) -> AnimatedSprite | None:
+    """Crop once around the whole timeline, preserving internal movement and empty frames."""
+    ys, xs = np.where((sprite.frames[..., 3] > ALPHA_TRIM).any(axis=0))
+    if not len(ys):
+        return None
+    y0, y1 = max(0, int(ys.min()) - pad), min(sprite.frames.shape[1], int(ys.max()) + 1 + pad)
+    x0, x1 = max(0, int(xs.min()) - pad), min(sprite.frames.shape[2], int(xs.max()) + 1 + pad)
+    return AnimatedSprite(sprite.frames[:, y0:y1, x0:x1].copy(), sprite.fps)
+
+
+@dataclass
 class _Sprite:
     levels: list             # premultiplied float32 RGBA, a 1 px transparent border, each level half the one before
     content: list            # longest side of the drawn content at each level (the border excluded)
+
+
+@dataclass
+class _Animated:
+    frames: list[_Sprite]
+    fps: float
+
+    def at(self, age: float) -> _Sprite:
+        return self.frames[int(math.floor(max(0.0, age) * self.fps + 1e-9)) % len(self.frames)]
 
 
 def trim_sprite(img, pad: int = 2):
@@ -255,15 +289,15 @@ def trim_sprite(img, pad: int = 2):
     return img[y0:y1, x0:x1].copy()
 
 
-def _prepare(img, max_long: int) -> _Sprite | None:
+def _prepare(img, max_long: int, keep_canvas: bool = False) -> _Sprite | None:
     """Trim to the alpha bbox (+1 px transparent padding), premultiply, shrink to the largest size it will ever be drawn at, and
     build a half-size pyramid so a small particle is never sampled from a big image (no aliasing). None when fully transparent."""
     if not isinstance(img, np.ndarray) or img.dtype != np.uint8 or img.ndim != 3 or img.shape[2] != 4:
         raise ValueError("a sprite must be an RGBA uint8 array of shape (H, W, 4)")
     ys, xs = np.where(img[..., 3] > ALPHA_TRIM)
-    if len(ys) == 0:
+    if len(ys) == 0 and not keep_canvas:
         return None
-    crop = img[ys.min():ys.max() + 1, xs.min():xs.max() + 1].astype(np.float32) * (1.0 / 255.0)
+    crop = (img if keep_canvas else img[ys.min():ys.max() + 1, xs.min():xs.max() + 1]).astype(np.float32) * (1.0 / 255.0)
     crop[..., :3] *= crop[..., 3:4]
     h, w = crop.shape[:2]
     r = min(1.0, max_long / max(h, w))
@@ -283,7 +317,16 @@ def _prepare_all(sprites, p: ParticleParams) -> list:
     if sprites is None or len(sprites) == 0:
         raise ValueError("no sprites given")
     max_long = max(8, math.ceil(p.size_max * p.size * 1.5))      # the biggest a particle gets: size_max x pop overshoot x growth
-    ready = [s for s in (_prepare(img, max_long) for img in sprites) if s is not None]
+    ready = []
+    for img in sprites:
+        if isinstance(img, AnimatedSprite):
+            trimmed = trim_animation(img, pad=0)
+            if trimmed is not None:
+                ready.append(_Animated([_prepare(fr, max_long, keep_canvas=True) for fr in trimmed.frames], trimmed.fps))
+        else:
+            spr = _prepare(img, max_long)
+            if spr is not None:
+                ready.append(spr)
     if not ready:
         raise ValueError("no usable sprite: every sprite is fully transparent")
     return ready
@@ -297,6 +340,19 @@ def fit_sprites(sprites: list, px: int) -> list:
         raise ValueError("px must be positive")
     out = []
     for img in sprites:
+        if isinstance(img, AnimatedSprite):
+            trimmed = trim_animation(img, pad=0)
+            if trimmed is None:
+                out.append(img)
+                continue
+            h, w = trimmed.frames.shape[1:3]
+            if max(h, w) > px:
+                ratio = px / max(h, w)
+                wh = (max(1, round(w * ratio)), max(1, round(h * ratio)))
+                fitted = [np.asarray(Image.fromarray(np.ascontiguousarray(fr), "RGBA").resize(wh, Image.LANCZOS), np.uint8) for fr in trimmed.frames]
+                trimmed = AnimatedSprite(np.stack(fitted), img.fps)
+            out.append(trimmed)
+            continue
         if not isinstance(img, np.ndarray) or img.dtype != np.uint8 or img.ndim != 3 or img.shape[2] != 4:
             raise ValueError("a sprite must be an RGBA uint8 array of shape (H, W, 4)")
         ys, xs = np.where(img[..., 3] > ALPHA_TRIM)
@@ -314,7 +370,7 @@ def fit_sprites(sprites: list, px: int) -> list:
 
 # ---- drawing --------------------------------------------------------------------------------------------------------
 def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
-    """Draw one burst. `sprites` are RGBA uint8 arrays of any size (trimmed to their alpha bbox; fully transparent ones are ignored;
+    """Draw one burst. `sprites` are static RGBA uint8 arrays or AnimatedSprite timelines (trimmed to their union alpha bbox; fully transparent ones are ignored;
     ValueError when none is usable). Returns `(N, size, size, 4) uint8` with N = round(fps * duration) (90 at the defaults) and STRAIGHT
     alpha (composited premultiplied, then un-premultiplied). Frame 0 and the last frames are empty by construction. Pieces may leave the
     canvas. With more particles than sprites every sprite appears; with fewer particles than sprites only `count` of them can.
@@ -335,6 +391,8 @@ def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
         dirty = None
         for i in idx:
             spr = ready[sprite_of[i]]
+            if isinstance(spr, _Animated):
+                spr = spr.at((f - int(tr.spawn[i])) / p.fps)
             L = float(length[f, i])
             if L < 0.5:
                 continue

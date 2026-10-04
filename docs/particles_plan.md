@@ -1,118 +1,89 @@
-# Particles: the plan (Haitham, 2026-10-03, written at the end of a session)
+# Particle sets and bursts
 
-**Status: phases 1-4 are BUILT (2026-10-03, branch `better_ui/ux`).** `flow/particle_sets.py` and every route of section 6 are in (including `more`, `preview`, `render`, `add` and the trash listing `GET /api/particles/deleted`), the screens of section 5 are re-pointed to the set and the pack, and the chat has the intents (make, more, delete, restore, assign: `agent/graph.py` `n_particles`). **Still to build:** Telegram delivery of a burst (phase 5, open question 3). This file corrects the model the particles feature was built on; what exists today is in `docs/effects.md`; what is open is in section 11 below, `docs/backlog.md` (particles) and `docs/waiting-for-haitham.md`.
+This is the particle area's architecture document; the filename remains for existing links. The ownership rework is implemented in the working tree. The compact editor, animated-sprite restoration and mistaken-pack recovery are being completed against [the flow design](sticker_particles_flow.md). The active implementation checklist is [particles_rework_plan.md](particles_rework_plan.md); retain it until those acceptance checks pass.
 
-## 1. What the task really is (the correction)
+## 1. Ownership and vocabulary
 
-In Telegram, when you react to a message with an emoji, a **tiny particle burst** plays on that message. Mirsal makes that burst. The unit is **not a sticker**: a **sticker pack is only the group** the effect is attached to. All stickers of a pack share one set of particles. Barbie pack: hearts and flowers. Batman pack: bat signals. The particles are found "in the Barbie pack" as its *particle studio*.
+A durable particle set (`P###`) belongs to its library stickers, never to a pack. Selected stickers can share a set. Stored `owner[]` records contain `{sticker_id, pack_id, generation, index}`; the library supplies the parent pack and provenance. Each sticker has ordered `particles[]` links, newest last. Pack views show the union of their stickers' sets; sticker views show their own sets.
 
-What the first build got wrong (and what to change):
+A **sprite** is reusable still or animated artwork. A **burst** is the composition rendered from selected sprites and motion settings. `E###` is a working generation session, not an owner. Adding a burst as an ordinary animated sticker **affirms** its set in the destination pack: `in the pack ✓`. Neither rendering nor adding changes set ownership.
 
-| built | correct |
-|---|---|
-| an effect belongs to one sticker; each sticker gets its own burst | a **Particle set** belongs to the **pack(s)** it is assigned to; every sticker of the pack uses it |
-| the AI suggests elements, the sheet is drawn, then it "sits there": no way to say "use these particles as the pack's particles" | an explicit **Use as particle set** step that SAVES it as a durable asset |
-| the gallery is per sticker (library sticker view, Studio section) | the gallery is per **pack** (and per **set**); a sticker only shows "the particles of its pack" |
-| results live inside the `E###` working record | `E###` stays the *working session*; the durable thing is the **Particle set** `P###` |
-| no generate-more / delete / rename / reuse | full lifecycle (section 4) |
+Unresolvable owners leave a **detached set**, retained visibly in Library > Particles with **Attach to a sticker**. There is no standalone particle pack.
 
-## 2. Vocabulary
+## 2. Storage, migration and deletion
 
-- **Particle set** (`P###`): a named collection of particle images (cells of a drawn sheet, or chosen stickers), the elements it was made from, the default motion, and where it is used. The durable asset.
-- **Particle pack**: a set as the person sees it in the library (a card with its particles). A set can be **stand-alone** (assigned to no pack), assigned to **one** pack, or to **several** packs.
-- **Burst** (rendered effect): a 3-second 512 px WebM (Telegram limits) made from a set with a motion preset, for a pack (one per preset; optionally one per emoji of the pack). These are what gets added to the pack / sent to Telegram.
-- **Working session** (`E###`): today's effect record: analysis, suggestions, drawing, picking, previews. Ends in "Use as particle set".
+`out/particles/P###/set.json` holds owners, source metadata, cells, picked flags, motion, sheets, renders and history. Stored sets have no `packs[]`; API `packs[]` remains derived and read-only for compatibility. Existing records migrate idempotently with an untouched `set.json.pre-owner` backup. Owners come from source sticker IDs or the effect's selected stickers within old packs. Unknown owners are retained as detached sets.
 
-## 3. Data model (all under `out/`, mirrored to Postgres later like everything else)
+Cells are copied into the set. Image cells use tight alpha sprites rather than 512px sticker canvases. Kling imports retain keyed cell WebMs, poster PNGs, job IDs, credits and source provenance. The corrected animated simulation contract uses each clip's frame sequence: a poster is not a substitute for internal motion. This restoration is under acceptance, not yet declared complete.
 
-```
-out/particles/P001/set.json     {id, name, created, user, elements[], source{kind: drawn|stickers|video, effect: E###, generation: G###, job: J###},
-                                 cells[{n, file, status, warnings[], picked: bool}], motion{preset, params}, packs[pack ids], history[]}
-out/particles/P001/cells/c01.png ...        the cut particle images (kept even when unpicked, so "generate more" never loses them)
-out/particles/P001/renders/R001.webm        bursts rendered from this set for a pack (record: pack_id, preset, params, checks, added_to)
-out/trash/particles/P001/                   delete = move here (rule 9 spirit: nothing is destroyed on a click; Restore puts it back)
-```
-A pack's list of sets is derived from `set.packs` (one source of truth); the library pack record gets no copy. Assigning is a list edit, never a copy of files.
+Add more appends cells to the same set and preserves existing bytes. Repeated completion/import is idempotent. Job requests retain their target set so restarting resumes the same operation without billing/importing twice. A set may contain mixed image and video sources; the initial source must not restrict later creation choices.
 
-## 4. Lifecycle and actions (the "generate more, save, delete" the screen was missing)
+Delete moves a set to `out/trash/particles/`; Restore keeps its ID and ownership. IDs are shared with trash, avoiding collisions. A set in use asks for confirmation and names affected packs. Pack purge detaches owner links in active and trashed sets and retains the sets. Permanent purge of deleted particle sets is still unbuilt.
 
-1. **Make**: from the Studio Particles tab, the Create > Particle effects screen, or the AI chat. Three ways to get particles: *Pack stickers* (free, pick existing stickers), *Drawn particles* (AI image sheet), *Video particles* (Kling 2x2 clip cut into cells).
-2. **Suggest** (drawn): the vision model looks at the pack's own sheet and offers 8-12 text options (hearts, flowers, ...); the person picks N (4 for 2x2, 9 for 3x3).
-3. **Draw** (price shown first, click = go-ahead): sheet returned, cut by the exact equal grid, every cell usable (warnings only; any rejected cell has **Use it anyway**).
-4. **Pick**: tick the cells to keep.
-5. **Use as particle set** (NEW, the missing button): names it (default "<pack> particles"), saves `P###`, and asks where it lives: *this pack* (default when started from a pack), *other packs* (multi-select), or *stand-alone*.
-6. **Simulate** live with presets (burst, fountain, vortex, rain, confetti) and the sliders (explosion, gravity, vortex, count, spin), particle size (100 px default, x1-x4 for latency). The preview uses the set's picked cells.
-7. **Render** a burst for a pack, **Add to pack** (animated sticker tagged with an emoji of the pack; Telegram needs >= 1 emoji tag).
-8. **Generate more**: draws another sheet with the same elements (new variants) or new elements (suggest again) and **appends** the new cells to the same set; old cells stay, none are deleted; the person ticks what to keep.
-9. **Manage**: Rename, Duplicate, Assign to a pack, Remove from a pack (the set stays), Delete (to trash, with Restore; a set used by packs says which and asks first), Save / Unsave a single cell (unpick keeps the file).
-10. **Never a block a person cannot get past** (CLAUDE.md rule 10 and the standing rule): only Telegram's own limits (size, codec, format of the rendered WebM) fail a render.
+## 3. One scoped editor
 
-## 5. Screens
+Open Particles from a sticker, batch, pack or Library. Sticker entry chooses that sticker; batch entry chooses only that batch; pack entry chooses its stickers. Library entry asks for the target. No guessed pack or unrelated persisted run is opened. Explicit **Continue the last run** is available only for matching scope.
 
-- **Library > Particles** (new section/tab of the Library): every set as a card (the picked cells as a strip, name, "used in: Barbie, Princess" or "stand-alone", cost spent, created). Actions on the card: Open, Assign, Duplicate, Delete. A big "New particle set".
-- **Pack page > Particle studio** (new panel on `#/pack/<id>`, the place the person expects): the sets assigned to this pack, the bursts rendered for it (looping thumbnails with Add to pack / Delete), and buttons: *Make particles for this pack* (starts the wizard with the pack chosen), *Use an existing set* (picker), *Generate more*.
-- **Studio > Particles tab** (small wizard): steps 1-7 of section 4; ends on "Use as particle set".
-- **Create > Particle effects** (pro studio): the same steps with every control; reads/writes the same sets.
-- **Sticker view / pack grid**: no per-sticker gallery as the main thing. A sticker shows one line: "Particles of this pack: Barbie hearts and flowers" (a link to the pack's particle studio), and the pack grid badge counts bursts per pack, not per sticker.
-- **AI chat**: "make particles for my Barbie pack" -> plan card (elements suggested, price, grid) -> go-ahead -> the set is saved and assigned; "also use them for the Princess pack"; "make more"; "delete the bat particles".
+A batch outside the library offers **Approve as a pack**, using the existing modal and returning directly to its scoped editor after success. Back remains available. The offer costs nothing.
 
-## 6. API (owner only for now; JSON first, screens second; each route also in `console/openapi.py`)
+**Rows (Haitham, 2026-10-04).** Every saved version of a sticker's particles is **one row under that sticker**, oldest first: v1, v2, v3... Entering Particles always starts a **new version** (a draft set, `saved_at: null`); it never reopens an older set by itself. A saved row is opened explicitly with **Open** on its row. Each pass picks its own source from three equal cards, whatever earlier rows used:
 
-```
-GET    /api/particles                       list sets (cells, packs, used_in)
-POST   /api/particles                       {from_effect: E###, name?, packs?: [ids], picked?: [cells]}   -> 201 set   (Use as particle set)
-GET    /api/particles/{id}
-POST   /api/particles/{id}                  {name?, picked?, motion?}            rename / pick / default motion
-POST   /api/particles/{id}/assign           {packs: [ids]}   and  /unassign {packs}
-POST   /api/particles/{id}/more             {grid, elements?, go?}   price first, 409 unless go (draws a sheet, APPENDS cells)
-POST   /api/particles/{id}/duplicate
-POST   /api/particles/{id}/delete           -> out/trash/particles/ (Restore: POST /api/particles/{id}/restore)
-POST   /api/particles/{id}/preview | render {pack_id, preset, params, sprite_px?, scale?}   (the existing preview / render, keyed by set)
-POST   /api/particles/{id}/add              {renders: [...], pack_id}            animated sticker(s) into the pack
-GET    /api/packs/{pack}/particles          the pack's sets and bursts (replaces the per-sticker counts)
-```
-The existing `/api/effects/*` routes stay (the working session) and `POST /api/particles {from_effect}` is the bridge. Engine functions live in a new `flow/particle_sets.py` (engine purity rule: no `psycopg`, `redis`, `langgraph`, model client in `engine/`).
+| Card | Choices |
+| --- | --- |
+| **Sprites from the sticker** · free | Select slices of its sheet or library artwork, **Use selected · free** |
+| **AI image sprites** · credits | prompt, 2×2/3×3, quote, Generate (Nano Banana sheet, keyed and cut to tight sprites) |
+| **Kling animated · from scratch** · credits | prompt, 2×2/3×3, quote, Generate (text-only nothing-to-nothing Kling sheet, cut into animated sprites) |
 
-**What phase 1 actually built, and where it differs from the sketch above:**
+**Add more** inside an open set still appends cells to that set. The default grid is 2×2; 3×3 is available with its measured warning. Advanced contains provider/key settings. Unknown price offers Retry price and starts nothing. Saving/importing is automatic through the engine; normal creation does not need an extra naming or assignment modal.
 
-| planned | built (`flow/particle_sets.py`) |
-|---|---|
-| `POST /api/particles/{id}/more {grid, elements?, go?}` | **built.** Price first (409 until `go`, or `estimate: true` for the free quote), an ordinary sheet job (`particles={"set": P###}` in the job request, so `Console.start_from_job` links it and Resume / Retry work), and `particle_sets.settle` APPENDS the cut cells (idempotent; also run before every read of the set, so a restart loses nothing). `set.sheets[]` records each sheet (REQUESTED / DRAWN / DONE / FAILED / NO_CELLS); `set.plan {subject, style}` keeps what a new sheet is drawn about; `credits` sums the sheets. |
-| `POST /api/particles/{id}/preview` / `/render` / `/add` | **built.** The same engine (`engine/particles`, `engine/effect_video.encode_and_check`) pointed at the set's PICKED cells (a set of kind `stickers` bursts the pack's stickers, `source.sticker_ids` or the pack's own); a render is a record in `set.renders[]` + `renders/R###.webm` with its checks, FAILED only for Telegram's own limits; `add` puts it in the pack as an animated sticker tagged with the pack's emoji. A burst belongs to the pack it was rendered for (`for_pack` lists it even when the set is not assigned there). The working-session routes `/api/effects/{id}/preview | render | add` stay as they were. |
-| `GET /api/particles` cards | built: `id, name, created, user, kind, elements, packs, used_in[{id, name}], cells[], picked[], n_cells, n_picked, renders, credits` |
-| delete → trash + restore | built, with the refusal that matters: a set assigned to packs answers **409 with the pack names** unless `{confirm: true}` (so a set in use cannot vanish under a pack). Ids are shared with the trash, so a restore can never collide with a new set. |
-| motion | `motion{preset, params}` is linted against the engine itself: the preset must be in `engine/particles.PRESETS` and the params must pass `ParticleParams.from_dict`, so a set's motion can never mean something the renderer does not read (400 otherwise). |
-| one source of truth | `set.packs` only. The library pack record gets no copy; `GET /api/packs/{id}/particles` answers `{pack_id, sets, bursts, counts}` (the old per-sticker counts are kept so nothing that reads them breaks). |
+All paths end in one simulator: selected sprites, preview, presets, **Energy / Float / Swirl**, then **Render → Add to pack → In pack ✓**. Count, size and spin live under Advanced. UI copy is labels, actual prices, progress and local warnings; model/ownership explanations belong in these docs.
 
-## 7. Migration and what to change in the code already written (do these first)
+**Save** turns a draft into the next row; on a row that is already saved it **replaces** that row's motion, count and sizing. **Save as new** (`POST /api/particles/{id}/save-as-new`) keeps the row as it was and saves the same sprites with the edited motion as a **new row**; bursts rendered with the old motion stay with the old row. Example: a fast, chaotic row is reopened, slowed down, then saved over itself or saved as a new row. A row reaches the pack only through **Add to pack** on it (option C): the burst becomes an animated pack sticker carrying `source.particle_set`, `source.render` and `source.parent_sticker`, and the row then reads **In pack ✓**. **Assign to stickers → Test in chat** is the free test path: Echo's reply/reaction plays that sent sticker's current linked set with saved settings. It requires no rendered pack sticker. Replay refreshes assignment rather than remembering an old set.
 
-- **`flow/effects.py`**: `sprites` per group stays for the working session; add `set_from_effect()` (creates `P###` from `E###`: copies cells into `out/particles/`, records the source). The per-sticker `for_sticker` / `counts_for_pack` are re-pointed to pack level (`for_pack`); keep `for_sticker` as "the particles of the pack(s) this sticker is in".
-- **Group semantics**: stop splitting stickers into VLM groups for drawn sets (one set per pack: agent A's `effect.set` already is one per effect; make "effect = pack" the rule). Per-sticker presets (mood) stay as the default *motion variety* inside a pack.
-- **`console/packs.js`** Particles section of the sticker view and `ptBadge`: re-point to the pack.
-- **`live.js`**: the Studio's replacement of "History of G###" shows the **pack's particle studio** for the pack(s) the open batch's stickers belong to (agent C is building it per sticker; change the data source, not the markup).
-- **Existing data**: E008's drawn sheet (G100) becomes `P001` ("Batman Lego particles") through `set_from_effect`, E002's video cells likewise (a video set's cells are the keyed cell clips; its render is the clip itself).
+## 4. Animated sprites and recovery
 
-## 8. Phases (each ends green and documented)
+The full animated path is **prompt → text-only Kling 2×2/3×3 animated sheet → key and slice → animated sprites in the simulator → render → add to the same pack**. The existing nothing-to-nothing pipeline and technical checks remain. Each flying particle plays its own sprite's frames while simulator movement, spin, scale and fade are applied. Image sprites are single-frame inputs. Selected video tiles loop; job/credit details remain accessible. Directly adding a cut clip remains a secondary legacy action.
 
-1. **DONE (2026-10-03, `e56146a`)** `flow/particle_sets.py` + routes + tests (set from effect, rename/elements/motion/picked, assign/unassign, duplicate, delete/restore with the in-use refusal, the pack listing). *Left out on purpose: `more`, `preview`, `render`, `add` — see section 6; `more` is the next backend step because the wizard's *Generate more* needs it.*
-2. Library > Particles section + Pack page particle studio + the "Use as particle set" step in both wizards. The backend answers both reads (`GET /api/particles`, `GET /api/packs/{id}/particles`), so this phase is screens only.
-3. **DONE** Re-point the sticker view / pack grid / Studio section to the pack; remove per-sticker framing from copy. The wizard's Motion step is ONE section for the pack (`effects.js` `fxMotion`, the set's `spBurstHtml` in `particles.js`): one preview, the five presets, Energy / Float / Swirl, Render, Add; it needs the run saved as a set (the run points at its sets: `effect.sets[]`).
-4. **DONE** AI chat intents: "make particles for my Barbie pack" (a plan card with the price, waits for the go, then a new set on the pack), "generate more" (same, for the set named or in focus), "delete the bat particles" (free; a set in use asks first), "restore ...", "also use them for the Princess pack" (a free list edit). `docs/agent-and-chat.md`.
-5. Telegram: how the burst is delivered (open question 3).
+Recovery for artwork accidentally saved as a sticker pack is **Use as particle pack → This sticker / All N stickers → Parent pack and target stickers → Use selected · free**. Source artwork is copied without deleting originals. The selected parent stickers own the set; supplying artwork does not make source stickers owners. This recovery action is being implemented; see the flow document's acceptance checks.
 
-## 9. Acceptance (what Haitham should be able to do)
+## 5. Galleries and chat
 
-Open a Barbie pack -> Particle studio -> *Make particles* -> choose 2x2 -> see "hearts, flowers, sparkles, ..." -> pick 4 -> price -> particles appear -> untick one -> **Use as particle set** "Barbie hearts" -> it is saved on the pack -> **Generate more** adds 4 more cells to the same set -> simulate with a preset -> render -> Add to pack. Then open the Princess pack -> *Use an existing set* -> "Barbie hearts" -> the same set, no new credits. Delete it from the library: both packs say it is gone, Restore brings it back. Nothing is ever blocked for a reason that is not Telegram's.
+The batch section reads `GET /api/generations/{id}/particles`, displaying each READY cell's library sticker or approval offer, owner sets and affirmation. Source kind, job and credits are available on set cards. A sticker with any set cannot read "never created". The badge sums owner sets, legacy E### results and saved stickers once, rather than showing competing badges.
 
-## 10. Open questions (for Haitham)
+A cut sprite is a cell **inside** its row, never a particle set of its own. The sticker window reads `rows[]` and `drafts[]` from `GET /api/packs/{id}/stickers/{sid}/particles` (`particle_sets.rows_for_sticker`): each row shows `v#`, how it was made (*Sprites*, *AI image sprites*, *Kling from scratch*, *Animated sprites*, *The sticker itself*), its sprite count, credits, job, its newest burst (or a strip of its sprites), **Open**, and **Add to pack** / **In pack ✓**. A set shared by several stickers is a row under each of them. Drafts are listed apart and never lost. **Older effect runs** that produced something are adopted once as rows by `python -m mirsal particles adopt` (`particle_sets.adopt_effects`, idempotent, free, nothing moved): a Kling run's cut clips become one row of animated sprites, a simulated run's bursts become the row's renders, and runs that produced nothing stay hidden. On 2026-10-04 this put the Batman Lego Kling take (E002, J039, 4 cells) under its sticker as a row instead of a stand-alone run (backup: `out/backups/particle-rows-2026-10-04/`). A run not yet adopted still shows as one grouped card (`runs[]`); raw `created[]`/`saved[]` remain for legacy clients.
 
-1. One burst per **pack** (all emoji of the pack the same effect), or one per **emoji** of the pack (different motion per emoji, same particles)? The plan assumes: one set per pack, one rendered burst per motion preset, tagged with the pack's emojis.
-2. Should a stand-alone set be a **real library pack** of animated stickers (so it can be sent to Telegram on its own) or only a library asset?
-3. How should the burst reach Telegram: as ordinary animated stickers in the pack (works today), or only as a file to download / use as a Telegram *effect*? (Telegram's own effect stickers are tied to Premium; today's plan is "animated stickers tagged with the emoji".)
-4. Cost visibility: show the credits a set cost (sum of its sheets) on the card? (The plan says yes.)
+The chat resolves an explicitly named set first; otherwise it prefers the focused sticker's newest owned set, then the focused set, then the only suitable set, then asks with chips. The explicit-name exception is intentional. Make/more preserve owner scope; linking to another sticker is free. A batch outside the library gets an approval card. The tools call the same engine functions as Studio; see [agent-and-chat.md](agent-and-chat.md).
 
-## 11. Open: Telegram delivery of a burst (phase 5; size S; former `plan.md` 16.2)
+Mirsal Echo is separate from AI-chat language selection. `preview_for_sticker` chooses only a set linked to the actual sent sticker, newest link first, and uses saved defaults. Unassigned stickers get no particles. The browser retains sticker IDs, anchors the preview to the replied-to outgoing sticker, and rejects stale/cleared message requests.
 
-Today a burst reaches the pack as an ordinary animated sticker tagged with the pack's emoji (`POST /api/particles/{id}/add`). Whether that is the delivery (it works today), or a downloadable file, or a Telegram *effect*, is Haitham's verdict (question 3 of section 10, question 24 of `docs/waiting-for-haitham.md`). **Build nothing until it is answered.** The same verdict list gates the burst creation proposal (`docs/burst_plan.md`): questions 1-3 of section 10 above are the "burst verdicts" there (one burst per pack or per emoji, is a stand-alone set a real library pack, how a burst reaches Telegram); question 4 of `docs/burst_plan.md` section 6 is its lane id.
+## 6. JSON contract and compatibility
 
-Also open from the browser look of 2026-10-03: the legacy per-sticker burst badge (`ptBadge`, the `for_sticker` counts kept so nothing that reads them breaks) still exists beside the pack-level particle set; whether to retire it is question 28 of `docs/waiting-for-haitham.md`.
+The authoritative shapes and errors are in [api.md](api.md) and the OpenAPI document. Functions live in `flow/particle_sets.py`, using the pure simulator in `engine/particles.py` and shared video verification in `engine/effect_video.py`.
+
+| Route | Purpose |
+| --- | --- |
+| `GET /api/particles`, `GET /api/particles/{id}` | Sets with owners, derived packs, source metadata, cells, renders and affirmation |
+| `GET /api/particles/deleted` | Trash listing with Restore |
+| `GET /api/generations/{id}/particles` | Per-cell owners, sets, approval offer and legacy results |
+| `GET /api/packs/{id}/particles` | Sticker-set union, bursts and summed per-sticker counts |
+| `GET /api/packs/{id}/stickers/{sid}/particles` | That sticker's sets and legacy gallery |
+| `GET /api/packs/{id}/stickers/{sid}/particle-preview` | Free current-owned-set preview with saved motion for Echo |
+| `POST /api/particles` | Create/import via owners and `from_effect`, `from_generation`, `from_slices` or `from_video`; free `from_stickers` recovery with a selected parent is being tested; imports can target an existing set |
+| `POST /api/particles/{id}` | Rename, pick cells and save motion |
+| `POST /api/particles/{id}/link`, `/unlink` | Free edits to sticker links |
+| `POST /api/particles/{id}/more` | Quote first, confirmed AI generation, append to the same set |
+| `POST /api/particles/{id}/preview`, `/render` | Same deterministic simulator; render verifies Telegram limits |
+| `POST /api/particles/{id}/add` | Add render to destination pack and record affirmation |
+| `POST /api/particles/{id}/duplicate`, `/delete`, `/restore` | Independent copy; soft delete; restoration |
+
+Legacy `/api/effects/*`, `packs` input and `/assign`/`unassign` remain for one release. Pack input maps to its library stickers. It does not restore pack ownership. Member reads preserve their authorization boundaries; writes remain owner-only.
+
+## 7. Acceptance and remaining work
+
+Use fake providers and temporary libraries. Headless Chromium runs against scratch out on a spare port. Named/area Python tests run serially, with fast, node and `tests.test_js` as appropriate. Slow tier and full discovery are retired; neither is run or requested.
+
+Acceptance prioritizes already-created sheets/clips copied to scratch, following stored effect/job/generation paths and free recut/import/recovery through the real simulator and Add. Diagnose stuck-state causes without fresh provider calls. Synthetic temporal fixtures supplement this evidence. Required coverage also includes scoped approval, no stale-run reopening or stale async replies, own-set-first chat with explicit-name override, summed counts, idempotent append/resume, animated frame changes inside particles, mixed static/video sets, full fake Kling-to-Add browser flow, free recovery preserving originals, warnings/override, soft delete/restore and purge retention. An injected completed fixture at Render is not an end-to-end video check.
+
+Ordinary animated stickers in the destination pack are the settled delivery. Per-emoji motion remains a separate open design choice (W25). Separate Telegram effect/download delivery, refinement of sprites from chat, real v2 Kling/AI-sheet measurements, and permanent deleted-set purge remain open. The multi-pack burst-creation proposal is independent and unbuilt (W27, [burst_plan.md](burst_plan.md)).
+
+Recorded-artifact debugging (2026-10-04) found connected failures rather than generation failures. E013/G101 already held a completed sheet but lacked a durable set; free import opens the simulator directly. Reopening an imported E run hid its entry; **Open in simulator** now reuses its saved set. E002's old clips lacked poster/timeline fields and a copied global job file; import decodes the existing clips, caches temporal frames and recovers recorded job/cost. G100 was classified as stickers by the older gutter layout path; free particle recut or slice/recovery import is available without generating another sheet. Settings previously lived only in previews/renders; explicit Save now persists motion and sizing, and stale preview results cannot replace a newer preset. Echo previously dropped sticker IDs and merely displayed a heart; it now requests current owned particles on reply/reaction. The sticker-window gallery exposed raw slice results as separate top-level cards and its loader targeted an obsolete lightbox element; the grouped-run read model and correct DOM target are being integrated and browser-checked. Scratch checks preserve original bytes and spend nothing.

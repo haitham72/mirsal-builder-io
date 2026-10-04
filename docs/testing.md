@@ -1,6 +1,18 @@
 # Testing: which tier, and when
 
-> **Retired by Haitham, 2026-10-03: the slow tier is never run and never requested.** (Haitham: "this suite test must be stopped and never requested again, it is a joke of a test".) No agent runs it, no doc requires it, nothing is gated on it, and the full `unittest discover` is not a routine gate either (it takes ~17 minutes and includes those six modules); it runs only if Haitham asks for it by name. The routine loop is `mirsal test fast`, `mirsal test focused`, `mirsal test area <module>`, the node tests and `python -m tests.test_js`. `python -m mirsal test slow` still exists in code for an explicit, named request by Haitham, and for nothing else. It was Tier 3 and a "required media gate"; it existed to prove the Telegram rejection limits end to end, and that role is gone.
+> **Retired by Haitham, 2026-10-03: the slow tier is never run and never requested.** (Haitham: "this suite test must be stopped and never requested again, it is a joke of a test".) No agent runs it, no doc requires it, nothing is gated on it, and full `unittest discover` is also retired: never run or requested. The routine loop is `mirsal test fast`, `mirsal test focused`, `mirsal test area <module>`, the node tests and `python -m tests.test_js`. An old command remaining in code is not authorization to run it. It was Tier 3 and a "required media gate"; it existed to prove the Telegram rejection limits end to end, and that role is gone.
+
+## The test budget (Haitham, 2026-10-04: overrides anything below that asks for more)
+
+Tests are a small part of a session, not most of it. These tests have passed hundreds of times; re-running them proves nothing new.
+
+1. **One run per change, the narrowest one.** Run the single test you wrote or touched by name (`venv/bin/python -m unittest tests.test_x.Class.test_y`). If you need more, run the one command the changed file maps to (`mirsal test area <module>`; for console `*.js`/`*.css`: `python -m tests.test_js` plus that script's own `tests/js/<name>.test.js`). Never stack fast + area + focused + node + openapi for one change.
+2. **A pass stays valid.** A test that passed in this session, or at the last commit, is not run again unless a file it covers changed since. Do not re-run "to be sure", before a commit, after a doc edit, or at the start of a session to "check the baseline".
+3. **Docs, trackers, comments, prose: zero tests.**
+4. **`focused` is never automatic.** Run it at most once, at the end of a phase that changed gate, recovery or video-sheet code, or when Haitham asks. Never per edit and never "because the change is a route".
+5. **A failure outside your change:** report it in one line (`still unknown:`) and keep working. Do not open a fix-and-rerun loop on a suite you did not touch.
+6. **Browser checks:** once at the end of a phase, on a scratch copy; never after each edit.
+7. **If testing is taking more time than building, stop testing and continue the task.** Say what is still unknown instead.
 
 The map from a changed file to the tests that could be affected is **code**, not prose:
 `mirsal/test_tiers.py` (`MODULE_TESTS`, `FOCUSED_PROFILES`, `FAST_TESTS`; `SLOW_MODULES` stays only for the retired command), reached through
@@ -29,7 +41,7 @@ is to ask, not to run the suite.
 
 Verification is a function of **blast radius**, not of caution. Most changes are a chip, a
 string, one function: their whole test plan is under a second. The full suite is not a gate
-and not the default answer to "am I done?": it runs only if Haitham asks.
+and full discovery is retired: never run or requested.
 
 Two clauses make this enforceable rather than aspirational:
 
@@ -47,31 +59,32 @@ Two clauses make this enforceable rather than aspirational:
 | fast | `python -m mirsal test fast` | **9s** (72 tests, measured 2026-10-03) | a small deterministic smoke set. **It does not verify the app** and never says so |
 | focused | `python -m mirsal test focused [animation\|recovery\|video-sheet]` | **86s measured**; the exact golden gate dominates | 22 Python regression cases by default, including the full node suite as one wrapper; narrower named profiles print their actual count |
 | area | `python -m mirsal test area engine/video` | seconds–a minute | exactly the classes that import what you changed |
-| ~~slow~~ | ~~`python -m mirsal test slow`~~ | ~15–20 min | **RETIRED (Haitham, 2026-10-03).** Never run, never requested; the command exists in code only for an explicit named request by Haitham |
-| all | `python -m unittest discover -s tests -t .` | ~17 min | not a routine gate; only if Haitham asks. Nothing was removed from it |
+| ~~slow~~ | ~~`python -m mirsal test slow`~~ | ~15–20 min | **RETIRED (Haitham, 2026-10-03).** Never run, never requested; a remaining legacy command must not be run |
+| ~~all~~ | ~~`python -m unittest discover -s tests -t .`~~ | ~17 min | **RETIRED (Haitham, 2026-10-03).** Never run or requested; coverage remains available through mapped/named tests |
 
 The six modules the retired slow tier ran (`tests.test_golden`, `test_effect_video`,
 `test_allow_still`, `test_anim_speed`, `test_engine`, `test_verify`) are still ordinary test
-modules: they run through `mirsal test area <module>`, `focused` and a full discovery whenever a
+modules: they run through `mirsal test area <module>`, named modules or `focused` whenever a
 changed file maps to them. Only the "mandatory gate" and the doctor freshness stamp are retired.
 
 **Python runs ALONE** (Haitham's current instruction). Parallel runs can collide and return `409 busy`; never start a second Python test run while another is active.
 
 **Focused tier (Haitham approved, 2026-10-03).** This is an explicit, reviewed regression selection, not deleted coverage or the first 20 tests of a larger suite. The default runs 22 cases: the exact item-0 golden test first, six stored-verdict/crash/waiver regressions, six recovery tests, seven video-sheet/creator/HTTP tests, the allow-body contract test and the node-suite wrapper. Every named profile includes the exact golden gate and stops on its first failure. No green claim is possible if that gate fails. Counts include the node wrapper once, not each of its individual JS cases. Add a relevant profile for a new area rather than assuming these cases cover unrelated purge/storage work.
 
-Focused success is not a claim that the whole app was tested: the report says what it ran and what is still unknown. There is no freshness stamp any more.
+Focused success is not a claim that the whole app was tested: the report says what it ran and what is still unknown. There is no freshness stamp any more. Focused is never automatic (budget rule 4).
 
-## When each tier is mandatory
+## Which run a change earns (one, per the budget above)
 
-| trigger | tier |
+| trigger | the one run |
 |---|---|
-| a change outside the reviewed focused profiles | mapped area; fast for cross-cutting behavior, no tests for prose-only edits |
-| verdict replay, recovery UI or video-sheet override/catalogue-only work covered by a focused profile | focused (or its named profile), plus any specific new regression |
-| media-processing implementation, encoding/decoding/keying/layout algorithms, shared engine config or technical Telegram limits | the mapped area (`mirsal test area engine/video` etc.) and `focused` when a profile covers it; say what is still unknown |
-| a change to a route, a request body or a response | focused when covered (otherwise area) + `tests.test_openapi` |
-| before the browser look, before a pack is sent to Telegram | no test is required; the slow tier is retired |
+| docs, trackers, comments, prose | nothing |
+| a fix or a new behavior | the one test you wrote, by name |
+| any other Python change | `mirsal test area <module>` of the changed file; if it maps to nothing, nothing |
+| a change to a route, a request body or a response | `tests.test_openapi` (the drift guard) and the test of that route, by name |
+| a change to `console/*.css` or `*.js` | `python -m tests.test_js` (0.2s) and that script's own node file |
+| end of a phase that changed gate, recovery or video-sheet code | `mirsal test focused [profile]`, once |
+| before a commit, a push, a browser look or a Telegram send | nothing extra: what already passed stays valid |
 | before anyone says the app is "verified" | Haitham's own browser look (`docs/waiting-for-haitham.md`, item 1); no test run is part of that bar |
-| a change to `console/*.css` or `*.js` | `python -m tests.test_js` (18 tests, 0.2s) |
 
 ## The rule that ends a change
 
@@ -87,14 +100,14 @@ That line is the checkable artefact: Haitham can agree or refuse the boundary in
 seconds, instead of discovering the cost afterwards. If an agent cannot finish that sentence,
 the scope is not understood yet.
 
-## Test files added on 2026-10-03 (all run in `unittest discover`; node files in `tests/js`)
+## Test files added on 2026-10-03 (mapped/named modules; node files in `tests/js`)
 
 | file | what it guards | tier it belongs to |
 |---|---|---|
-| `tests/test_verify_fixtures.py` | the PASS / FAIL fixture table over `verify.CATALOGUE`: every one of the 44 checks has a case that passes and a case that fails (a check never seen to fail proves nothing); `tests/test_verify_gaps.py` is the ratchet that names unnamed checks | complete discovery and the derived area of `engine/verify` |
-| `tests/test_purge.py` | the trash purge: Delete pack is soft, `GET /api/trash` shows exactly what a purge removes, the shared-sticker refusals, "delete all" and its typed phrase, idempotent re-run (`flow/purge.py`, `store/purge_rows.py`) | complete discovery and the derived area of `flow/purge` (not in a focused profile yet: add one before relying on it) |
-| `tests/test_chat_resolver_fixes.py` | the chat resolver and edits: a bare person reference is the last subject, `last` is an ordinal only as an ordinal, an edit reuses the parent prompt, undo, "number 12 in a batch of 9", "don't ask me about vision again" | complete discovery and the derived area of `agent/resolver` |
-| `tests/test_job_recovery.py`, `tests/test_sheet_allow.py` | stalled-job recovery and the G3 video-sheet override | the focused profiles `recovery` and `video-sheet` where they are named there; otherwise discovery |
+| `tests/test_verify_fixtures.py` | the PASS / FAIL fixture table over `verify.CATALOGUE`: every one of the 44 checks has a case that passes and a case that fails (a check never seen to fail proves nothing); `tests/test_verify_gaps.py` is the ratchet that names unnamed checks | the named module or derived area of `engine/verify` |
+| `tests/test_purge.py` | the trash purge: Delete pack is soft, `GET /api/trash` shows exactly what a purge removes, the shared-sticker refusals, "delete all" and its typed phrase, idempotent re-run (`flow/purge.py`, `store/purge_rows.py`) | the named module or derived area of `flow/purge` (not in a focused profile yet: add one before relying on it) |
+| `tests/test_chat_resolver_fixes.py` | the chat resolver and edits: a bare person reference is the last subject, `last` is an ordinal only as an ordinal, an edit reuses the parent prompt, undo, "number 12 in a batch of 9", "don't ask me about vision again" | the named module or derived area of `agent/resolver` |
+| `tests/test_job_recovery.py`, `tests/test_sheet_allow.py` | stalled-job recovery and the G3 video-sheet override | the focused profiles `recovery` and `video-sheet` where they are named there; otherwise the named module/mapped area |
 | `tests/js/trash.test.js`, `job_recovery.test.js`, `sheet_recovery.test.js`, `sheet_size_chip.test.js`, `prompt_step.test.js` | the pure builders of the console scripts of the same names | `python -m tests.test_js` + the node suite |
 
 ## Worked scenarios

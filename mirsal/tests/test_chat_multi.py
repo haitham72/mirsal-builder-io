@@ -122,8 +122,8 @@ class Effects(Base):
         self.tools.pack_list = [{"id": "P1", "name": "Superman", "count": 8}, {"id": "P2", "name": "Cats", "count": 5}]
         m = self.say("make particle effects for my Superman pack")
         card = m["cards"][0]
-        self.assertEqual((card["type"], card["id"], card["pack"], card["count"]), ("effects", "E001", "Superman", 8))
-        self.assertEqual([c[:2] for c in self.tools.calls if c[0] == "effects_start"], [("effects_start", "P1")])
+        self.assertEqual((card["type"], card["kind"], card["pack"], card["pack_id"]), ("particles_scope", "video", "Superman", "P1"))
+        self.assertEqual([c[:2] for c in self.tools.calls if c[0] == "effects_start"], [])
         self.assertEqual([c for c in self.tools.calls if c[0] == "create"], [], "no sheet, no spend")
         self.assertIsNone(self.sess()["pending"])
 

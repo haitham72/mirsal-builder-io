@@ -29,6 +29,8 @@ function load(pkpt) {
     esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
     ic: n => `<svg data-i=${n}></svg>`,
     PKPT: pkpt,
+    ptBody: (j,s) => '<owner-gallery>'+(j.rows||[]).map(x=>x.id).join(',')+'</owner-gallery>',
+    ptCount: j => (j.rows||[]).length + (j.drafts||[]).length,
     ptCounts: pid => { counts.push(pid); },
     spSetCard: s => `<setcard data-for=${s.id}>`,
   };
@@ -37,7 +39,7 @@ function load(pkpt) {
   return { ...f, counts };
 }
 
-const SETS = [{ id: 'P001', name: 'Barbie <hearts>' }, { id: 'P002', name: 'Bats' }];
+const SETS = [{ id: 'P001', name: 'Barbie <hearts>',owner:[{sticker_id:'a1'}] }, { id: 'P002', name: 'Bats',owner:[{sticker_id:'a2'}] }];
 const BURSTS = [{ set: 'P001', id: 'R001', set_name: 'Barbie hearts', preset: 'burst', status: 'READY', url: '/out/particles/P001/renders/R001.webm', warnings: ['effect_tail_faded'], blocks: [], added_to: null }];
 
 test('while the pack’s sets are not read yet the studio says so and asks for nothing', () => {
@@ -51,13 +53,13 @@ test('while the pack’s sets are not read yet the studio says so and asks for n
 test('the studio shows the pack’s sets as shared cards and both ways to get one', () => {
   const h = load({ sets: { p1: SETS }, bursts: {} });
   const s = h.pkPsHtml({ id: 'p1', name: 'Barbie' });
-  assert.match(s, /one set of particles for the whole pack/);
+  assert.match(s, /particles made for the stickers in this pack/);
   assert.match(s, /data-act=psmakepack data-p=p1>Make particles for this pack</);
-  assert.match(s, /data-act=pspickpack data-p=p1>Use an existing set</);
+  assert.match(s, /data-act=pspickpack data-p=p1>Use particles of another sticker</);
   assert.match(s, /<setcard data-for=P001>/);
   assert.match(s, /<setcard data-for=P002>/);
   const empty = load({ sets: { p1: [] }, bursts: {} }).pkPsHtml({ id: 'p1', name: 'Barbie' });
-  assert.match(empty, /No particle set on this pack yet/);
+  assert.match(empty, /No particles made for these stickers yet/);
   assert.match(empty, /data-act=psmakepack/);
 });
 
@@ -85,24 +87,18 @@ test('a burst’s warnings are sentences, a missing file says so', () => {
   assert.match(h.pkBurst({ ...BURSTS[0], url: null, missing: true }), /file missing/);
 });
 
-test('a sticker shows one line linking to the pack’s studio, never a gallery', () => {
-  const h = load({ sets: {}, bursts: {} });
-  assert.match(h.pkStickerLine({ id: 'a1', pack_id: 'p1' }), /Reading the pack's particles/, 'not read yet');
-  assert.deepEqual(h.counts, ['p1'], 'one cheap read for the whole pack');
-  const none = load({ sets: { p1: [] }, bursts: {} });
-  assert.match(none.pkStickerLine({ id: 'a1', pack_id: 'p1' }), /No particles on this pack yet\./);
-  assert.match(none.pkStickerLine({ id: 'a1', pack_id: 'p1' }), /href="#\/pack\/p1">Open the particle studio</);
-  const some = load({ sets: { p1: SETS }, bursts: {} });
-  const line = some.pkStickerLine({ id: 'a1', pack_id: 'p1' });
-  assert.match(line, /Particles of this pack: <b>Barbie &lt;hearts&gt;<\/b>, <b>Bats<\/b>/);
-  assert.match(line, /open the particle studio/);
-  assert.doesNotMatch(line, /<video|data-act=ptmake|pk-pt-grid/);
-  assert.equal(some.pkStickerLine({ id: 'a1' }), '<span class=mut>No pack.</span>');
+test('a sticker shows only its own particles and scoped creation',()=>{
+ const h=load({sets:{},bursts:{}});assert.match(h.pkStickerLine({id:'a1',pack_id:'p1'}),/Reading the sticker/);
+ const none=load({sets:{p1:[]},bursts:{}});assert.match(none.pkStickerLine({id:'a1',pack_id:'p1'}),/data-act=ptmake data-p=p1 data-s=a1>Create particles/);
+ const reading=load({sets:{p1:SETS},bursts:{}}).pkStickerLine({id:'a1',pack_id:'p1'});
+ assert.match(reading,/Reading the sticker/);assert.match(reading,/>New version</);
+ const some=load({sets:{p1:SETS},bursts:{},d:{a1:{rows:[{id:'P001',version:1}],drafts:[]}}}),line=some.pkStickerLine({id:'a1',pack_id:'p1'});
+ assert.match(line,/1 saved version/);assert.doesNotMatch(line,/Bats|P002|No particles yet/);assert.match(line,/New version/);assert.match(line,/<owner-gallery>P001/);
 });
 
 test('the Library has a Particles tab on the shared switch, and every new action has a handler', () => {  assert.match(app, /data-act=libtab data-t=particles>Particles</, 'the third Library tab');
   const all = src + fs.readFileSync(path.join(DIR, 'particles.js'), 'utf8') + fs.readFileSync(path.join(DIR, 'effects.js'), 'utf8');
-  for (const act of ['psopen', 'psassign', 'psassignsave', 'psunassign', 'psdup', 'psrename', 'psdel', 'psrestore', 'pspickcell', 'pspickcancel', 'pspicksave', 'pspickset', 'psmakepack', 'pspickpack', 'pspackassign', 'fxuseset', 'psusesave']) {
+  for (const act of ['psopen', 'psassign', 'psassignsave', 'psunassign', 'psdup', 'psrename', 'psdel', 'psrestore', 'pspickcell', 'pspickcancel', 'pspicksave', 'pspickset', 'psmakepack', 'pspickpack', 'fxuseset']) {
     assert.match(all, new RegExp(`ACT\\.${act}=`), `${act} has a handler`);
     assert.match(all, new RegExp(`data-act=${act}\\b`), `${act} is used`);
   }

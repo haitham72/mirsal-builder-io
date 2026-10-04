@@ -341,11 +341,15 @@ def particles_intent(text: str, has_set: bool) -> str | None:
     if re.search(r"\beffects?\b", t):
         return None
     word = bool(re.search(r"\bparticles\b", t))
+    if re.search(r"\b(?:burst|render)\b", t) and (word or has_set or re.search(r"\bsticker\s*\d+", t)):
+        return "render"
+    if (word or has_set) and re.search(r"\b(?:add|save)\b.*\bpack\b", t):
+        return "add"
     if word and re.search(r"\b(?:delete|remove|trash|get rid of)\b", t):
         return "delete"
     if word and re.search(r"\b(?:restore|undelete|bring back|get back)\b", t):
         return "restore"
-    if (word or has_set) and re.search(r"\buse\b.*\b(?:for|on|in|with)\b.*\bpacks?\b", t):
+    if (word or has_set) and re.search(r"\buse\b.*\b(?:for|on|in|with)\b.*\b(?:packs?|stickers?|next one)\b", t):
         return "assign"
     if (word or has_set) and re.search(r"\b(?:generate|make|draw|create|add|give me)\b\s+(?:me\s+)?(?:some\s+|a few\s+|\d+\s+)?more\b", t):
         return "more"

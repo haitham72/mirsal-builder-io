@@ -170,7 +170,7 @@ test('results: a warning is "Use it anyway", never a block; only a failed file c
   assert.match(h, /class="fx-r bad"/);
   assert.match(h, /Over Telegram’s size limit\./);
   assert.doesNotMatch(h, /data-act=fxpick data-id=R003/, 'a file Telegram would reject cannot be picked');
-  assert.match(h, /data-act=fxadd >Add 1 to Fruits &lt;b&gt;</);
+  assert.match(h, /data-act=fxadd >Add 1 sprite clips</, 'raw clips are a secondary action inside Original sprite clips');
   assert.match(h, /saved under that sticker/);
   assert.match(html('fxResults(X,e)', { rec }), /data-act=fxpick data-id=R001>Use</, 'no warning: just Use');
   assert.equal(html('fxResults(X,e)', { rec: REC() }), '');
@@ -191,7 +191,7 @@ test('the body of a simulated effect: the drawn panel, the way to save it, and O
   const v = html('fxBody(X,e)', { rec: REC({ mode: 'video' }) });
   assert.match(v, /fx-chip/);
   assert.match(v, /Make the video/);
-  assert.doesNotMatch(v, /fx-dr|fx-mo|fxuseset/);
+  assert.doesNotMatch(v, /fx-dr/); assert.match(v, /fx-mo/);
 });
 
 test('"Draw again" can be taken back: the particles you have stay', () => {
@@ -216,15 +216,15 @@ test('the way to a set: a drawn sheet is kept with Use as particle set, the pack
   assert.match(none, /Free/);
   const drawn = REC({ set: { status: 'DRAWN', generation: 100, picked: [1, 2] } });
   const h = html('fxSaveBlock(X,e)', { rec: drawn });
-  assert.match(h, /data-act=fxuseset data-v=drawn>Use as particle set</);
-  assert.match(h, /Save the 2 drawn particles as a particle set/);
-  assert.match(h, /it lives in the Library/);
+  assert.match(h, /data-act=fxuseset data-v=drawn>Use in simulator · free</);
+  assert.doesNotMatch(h, /Save the 2 drawn particles as a particle set/);
+  assert.doesNotMatch(h, /it lives in the Library/);
   assert.match(html('fxSaveBlock(X,e)', { rec: REC({ set: { status: 'DRAWN', generation: 100, picked: [] } }) }), /data-v=stickers/, 'no picked cell: nothing durable to save, the stickers are still an option');
   const saved = "X.set={id:'P001',name:'Fruits particles',source:{kind:'drawn',generation:'G100'}}";
-  assert.equal(html('fxSaveBlock(X,e)', { rec: REC({ ...drawn, sets: ['P001'] }), pre: saved }), '', 'saved already: the motion is next, not another save');
-  assert.match(html('fxSaveBlock(X,e)', { rec: REC({ set: { status: 'DRAWN', generation: 101, picked: [1] }, sets: ['P001'] }), pre: saved }), /data-v=drawn>Use as particle set</, 'a newer sheet is a new set to keep');
+  assert.match(html('fxSaveBlock(X,e)', { rec: REC({ ...drawn, sets: ['P001'] }), pre: saved }), /data-act=fxopenset>Open in simulator/, 'saved run opens the editor without another import');
+  assert.match(html('fxSaveBlock(X,e)', { rec: REC({ set: { status: 'DRAWN', generation: 101, picked: [1] }, sets: ['P001'] }), pre: saved }), /data-v=drawn>Use in simulator · free</, 'a newer sheet is a new set to keep');
   const body = html('fxBody(X,e)', { rec: drawn, gen: { 100: BATCH([cell(1)]) }, pre: "X.src='drawn';X.dr.picked='E001:100';LIB.packs=[{id:'p1',stickers:[{id:'a1',name:'Berry'}]}]" });
-  assert.match(body, /data-act=fxuseset data-v=drawn>Use as particle set</, 'the finish sits in the shared body, so both wizards have it');
+  assert.match(body, /data-act=fxuseset data-v=drawn>Use in simulator · free</, 'the finish sits in the shared body, so both wizards have it');
 });
 
 test('Motion: locked until the run is a set, then the set’s own section (the burst maker is particles.js’s)', () => {

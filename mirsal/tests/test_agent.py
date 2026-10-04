@@ -891,8 +891,9 @@ class ParticleIntents(Base):
 
     def test_also_use_them_for_another_pack_is_a_free_list_edit(self):
         s = self.sess(); s["particles"] = {"set": "S1"}; self.store.save(s)
+        self.tools.owner_rows = [{"sticker_id":"princess1", "pack_id":"P2"}]
         m = self.say("also use them for the Princess pack")
-        self.assertEqual(self.calls("particles_assign")[0][1:], ("S1", ["P2"]))
+        self.assertEqual(self.calls("particles_link")[0][1:], ("S1", ["princess1"]))
         self.assertEqual(self.calls("particles_start"), [], "no credits")
         self.assertIn("Princess", m["text"])
 

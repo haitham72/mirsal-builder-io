@@ -203,13 +203,13 @@ def video_plan(out: Path, eid: str, gid: str, grid=None) -> dict:
     return {**d, "group": gid, "cells": rows * cols, "stickers": len(g["stickers"])}
 
 
-def new_video_job(out: Path, eid: str, gid: str, *, grid=None, user: str = "local", model=None, options=None) -> dict:
+def new_video_job(out: Path, eid: str, gid: str, *, grid=None, user: str = "local", model=None, options=None, particle_target=None) -> dict:
     """Create (not start) the text-only Kling job of a group. The caller shows the price and starts it with `fulfil_async(job, after=...)`."""
     from ..generation import jobs, model_catalog
     plan = video_plan(out, eid, gid, grid)
     m, params = model_catalog.resolve("video", model, options)
     job = jobs.create(out, "video", request={"model": m, "options": options or {}, "prompt": plan["prompt"], "t2v": True, "label": f"effect {eid} {gid}", "user": user,
-                                            "effect": {"id": eid, "group": gid, "grid": plan["grid"], "template": plan["template"], "version": plan["version"], "key": plan["key"], "plan": plan["plan"]}})
+                                            "effect": {"id": eid, "group": gid, "grid": plan["grid"], "template": plan["template"], "version": plan["version"], "key": plan["key"], "plan": plan["plan"], "particle_target": particle_target}})
     with _LOCK:
         e = read(out, eid)
         e["video"][gid] = {"job": job["id"], "grid": plan["grid"], "key": plan["key"], "status": "REQUESTED"}
@@ -223,6 +223,8 @@ def on_video_done(out: Path, eid: str, gid: str, job: dict, cfg) -> dict:
     """The clip is back: cut it into cells, make one sticker of each, store the results. Never raises on a bad cell (it comes back FAILED with the reason)."""
     f = Path(out) / (job.get("result") or {}).get("file", "")
     e = read(out, eid)
+    if any(r.get("job") == job["id"] for r in e.get("results", [])):
+        return e
     v = e["video"].get(gid) or {}
     rows, cols = v.get("grid") or e["grid"]
     cells = ev.cut_cells(f, rows, cols, cfg, v.get("key") or "green")
@@ -231,9 +233,32 @@ def on_video_done(out: Path, eid: str, gid: str, job: dict, cfg) -> dict:
     made = []
     for cell in cells:
         r = ev.finish_cell(cell, cfg)
+        if cell.get("frames") is not None:
+            import io
+            import numpy as np
+            from PIL import Image
+            from ..engine.particles import trim_sprite, trim_animation, AnimatedSprite
+            frames = cell["frames"]
+            peak = frames[np.argmax((frames[..., 3] > 4).sum(axis=(1, 2)))]
+            poster = trim_sprite(peak)
+            if poster is not None:
+                buf = io.BytesIO()
+                Image.fromarray(poster).save(buf, format="PNG")
+                sprite = f"results/sprite-{gid}-{cell['index']}.png"
+                atomic.write_bytes(d / sprite, buf.getvalue())
+                r["sprite_file"] = sprite
+                timeline = trim_animation(AnimatedSprite(ev.resample(frames, cell['src_fps']), ev.FPS))
+                buf = io.BytesIO()
+                np.savez_compressed(buf, frames=timeline.frames, fps=timeline.fps)
+                r['timeline_file'] = f"results/timeline-{gid}-{cell['index']}.npz"
+                atomic.write_bytes(d / r['timeline_file'], buf.getvalue())
+                r['fps'], r['frames'] = timeline.fps, len(timeline.frames)
+            r["key"] = cell.get("key")
         made.append((cell["index"], r))
     with _LOCK:
         e = read(out, eid)
+        if any(r.get('job') == job['id'] for r in e.get('results', [])):
+            return e
         for idx, r in made:
             rid = f"R{len(e['results']) + 1:03d}"
             fname = None
@@ -241,7 +266,8 @@ def on_video_done(out: Path, eid: str, gid: str, job: dict, cfg) -> dict:
                 fname = f"results/{rid}.webm"
                 atomic.write_bytes(d / fname, r["data"])
             e["results"].append({"id": rid, "mode": "video", "group": gid, "cell": idx, "file": fname, "bytes": len(r["data"]) if r.get("data") else 0, "status": r["status"],
-                                 "checks": r["checks"], "warnings": r["warnings"], "blocks": r["blocks"], "metrics": r["metrics"], "job": job["id"]})
+                                 "checks": r["checks"], "warnings": r["warnings"], "blocks": r["blocks"], "metrics": r["metrics"], "job": job["id"], "sprite_file": r.get("sprite_file"), "key": r.get("key"),
+                                 "timeline_file": r.get("timeline_file"), "fps": r.get('fps'), "frames": r.get('frames')})
         e["video"][gid] = {**(e["video"].get(gid) or {}), "status": "DONE", "cells": len(made), "cost": job.get("cost")}
         e["status"] = "RESULTS"
         hist(e, "python", "CUT", f"{gid}: {sum(1 for _, r in made if r['status'] == 'READY')} of {len(made)} cells are stickers", {"job": job["id"]})
@@ -355,6 +381,9 @@ def _digest(sprites, p, fit=()) -> str:
     """What a preview was made from: every pixel of every sprite (not a prefix: the top rows of a sticker are all transparent), the particle params and the resize settings."""
     h = hashlib.sha256(json.dumps({"p": p.to_dict(), "fit": list(fit)}, sort_keys=True).encode())
     for s in sprites:
+        if isinstance(s, particles.AnimatedSprite):
+            h.update(f"animated:{s.fps}".encode())
+            s = s.frames
         h.update(str(s.shape).encode())
         h.update(np.ascontiguousarray(s).tobytes())
     return h.hexdigest()[:16]

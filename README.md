@@ -16,13 +16,13 @@ Mirsal Builder is a local, private app. The words below mean the same in
   model pre-reviews only and never approves.
 - **"Use it anyway" (allow)** — a recorded, reversible human click that lets a
   judgement-call block through. Only Telegram's own limits stay final.
-- **Particle set / burst** — effect sprites belonging to pack(s), and the
-  animation rendered from them.
+- **Particle set / burst** — still/animated sprites owned by library stickers, and the
+  burst rendered from them. Adding the burst affirms it in a pack.
 
 - **Plan** — saved character, cell, tag and prompt instructions before generation.
 - **Sheet / video sheet** — a 3×3 or 2×2 character image; the video sheet is rebuilt from approved stickers for animation.
 - **Pack / pool** — a named Telegram sticker collection, and the shared searchable sticker store.
-- **Test tiers** — `focused`: about 22 reviewed regressions with the exact golden gate first; `fast`: smoke; `area`: mapped checks. The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Python runs alone; focused success is not full verification.
+- **Test tiers** — the test budget comes first (`docs/testing.md`): one narrow run per change, nothing re-run that already passed, nothing for docs. `area`: mapped checks; `fast`: smoke; `focused`: about 22 reviewed regressions, at most once per phase. The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Python runs alone; focused success is not full verification.
 
 High-quality **animated stickers** (not emoji) for Telegram. You say what you want, in a chat or a prompt; the app makes the sheet, cuts and keys it into stickers, checks every one with a
 deterministic verifier, lets a human approve, animates the approved ones, and puts them in a pack that goes to a Telegram set. One engine; a chat and a Studio on top.
@@ -39,7 +39,7 @@ pip install -r requirements.txt                            # once
 python -m mirsal db up                                     # Postgres :5434 and Redis :6380 in Docker (both optional: the app falls back to files and memory)
 python -m mirsal doctor                                    # one health check for everything
 python -m mirsal serve                                     # http://127.0.0.1:8770 : opens on the AI chat, "Studio" is the detailed workspace
-python -m mirsal test fast                                 # the routine tests (then focused / area <module>, node --test, tests.test_js); a full `unittest discover` only if Haitham asks
+python -m mirsal test fast                                 # the routine tests (then focused / area <module>, node --test, tests.test_js); slow tier and full discovery are retired: never run or requested
 ```
 
 Everything the app writes goes to `mirsal/out/` (the engine's own names, which the database uses; they never change). Copy `mirsal/.env.example` to `mirsal/.env` for keys and options.
@@ -101,10 +101,10 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Vision judge** | a local multimodal model pre-reviews stickers and animations; uncalibrated until 30 labels exist. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
 | **HTTP API** | JSON routes, SSE events per generation, idempotency keys, signed asset links, accounts (owner / member tokens, per-user ownership), per-minute rate limits, an OpenAPI document, health. [docs/api.md](docs/api.md) |
 | **Testing** | tiers chosen by what a change can actually break: `mirsal test fast` (9s), `focused`, `area <module>` (what that file maps to). The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Nothing maps, nothing runs. [docs/testing.md](docs/testing.md) |
-| **Particle effects** | Telegram-style bursts for a pack's emoji: a text-only Kling clip (2x2 cells that start and end empty) or a simulated burst with gravity / explosion / vortex sliders, output 3 s WEBM stickers tagged with the emoji. Engine, flow, routes and the Create > Particle effects screen built; the chat entry is open. [docs/effects.md](docs/effects.md) |
-| **Particle sets** | the corrected model, built: a set of particles belongs to pack(s) or stands alone; use as a set, generate more (appends cells, price first), save, delete + a trash listing with restore, assign; ONE burst maker per set and pack (preview / render / add); chat intents; screens and API. Telegram delivery of a burst is open | [docs/particles_plan.md](docs/particles_plan.md) |
+| **Particle effects** | AI image or text-only Kling animated sheets, keyed/cut sprites, one deterministic particle simulator, and ordinary animated-sticker delivery. Animated-sprite restoration is undergoing acceptance. [docs/effects.md](docs/effects.md) |
+| **Particle sets** | Sets belong to library stickers. Scoped creation, Add more, free linking, owner galleries, affirmation and soft delete/restore; compact editor and mistaken-pack recovery are underway. [docs/particles_plan.md](docs/particles_plan.md), [full flow](docs/sticker_particles_flow.md) |
 | **Open work** | what to build, by area: [docs/backlog.md](docs/backlog.md) · what only Haitham can settle (verdicts, eyes, money): [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md) · guardrails, how to run, quirks: [docs/dev-notes.md](docs/dev-notes.md) |
-| **Paused plans** | the FastAPI + pydantic spec: [docs/fastapi_plan.md](docs/fastapi_plan.md) · hosting, OAuth, credits, the scrub runbook: [docs/deployment_plan.md](docs/deployment_plan.md) |
+| **Migration and paused deployment** | FastAPI + pydantic is authorized after particles: [spec](docs/fastapi_plan.md). Hosting, OAuth and credit infrastructure remain paused: [deployment_plan.md](docs/deployment_plan.md) |
 | **Burst creation (proposal)** | many packs from one liked sheet: reuse the image, pick actions, one queue each, async; nothing built, four questions for Haitham | [docs/burst_plan.md](docs/burst_plan.md) |
 | **Design** | one shell and one palette for every screen: the rail, the second column, the token set, the style tiles, and the Earlier-batches column. [docs/design.md](docs/design.md) |
 | **Welcome / onboarding** | the modal that opens once per browser session and on the logo: a fast-cut Seedance ad film and four sliding feature images; the prompts, the credits spent and the checks | [docs/onboarding.md](docs/onboarding.md) |

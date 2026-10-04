@@ -12,9 +12,10 @@ const ICONS={},RENDER={},ACT={};
 let route_='generate';
 const DOMSTUB={},$=id=>DOMSTUB[id]||null;
 let APICALLS=0;
+const APIREPLIES=[],POSTREPLIES=[];
 const POSTS=[];                                    // every post a handler sends: [url, body]
-const api=async()=>{APICALLS++;return{ok:false,status:404,j:{}}},post=async(u,b)=>{POSTS.push([u,b]);return{ok:false,status:404,j:{}}};
-const toast=()=>{},dlg=()=>{},closeDlg=()=>{};
+const api=async()=>{APICALLS++;return APIREPLIES.shift()||{ok:false,status:404,j:{}}},post=async(u,b)=>{POSTS.push([u,b]);return POSTREPLIES.shift()||{ok:false,status:404,j:{}}};
+const DIALOGS=[],toast=()=>{},dlg=html=>DIALOGS.push(html),closeDlg=()=>{};
 const media=s=>'<img data-m='+s.id+'>',coverMedia=p=>'<img data-c='+p.id+'>';
 let LIB={packs:[]};
 const packById=id=>LIB.packs.find(p=>p.id===id);

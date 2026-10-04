@@ -345,20 +345,32 @@ Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi
 
 The one-time AI vision switch under a message is `chipHTML` -> `<span class="ai-vis"><button class="ai-chip" data-act=agsetting>` (look: `docs/design.md`; behaviour: "The AI vision switch" below).
 
-## Particle sets in the chat (2026-10-03)
+## Particle sets in the chat (2026-10-04)
 
-`resolver.particles_intent(text, has_set)` -> `make | more | delete | restore | assign | None`; `classify` returns `PARTICLES`, and a message that names no particles ("generate more", "also use them for the Princess pack") is about **the set the chat has in focus** (`session.particles = {set, pack}`). "particle effects" (the working-session card), a singular "particle burst" and a sticker request are not it. The node is `Agent.n_particles`; the tools are `particle_sets`, `particle_deleted`, `particle_options`, `particles_start`, `particles_delete`, `particles_restore`, `particles_assign` (owner only; `FakeTools` mirrors them).
+`resolver.particles_intent` selects make, more, link/assign, render/add, delete or restore. The node is `Agent.n_particles`; tools call `flow/particle_sets.py`, the same functions as Studio. Durable sets belong to library stickers. A pack request resolves its selected stickers; a batch outside the library gets an Approve-as-a-pack card that continues to the scoped editor.
 
-| says | does |
-|---|---|
-| "make particles for my Barbie pack" | finds the pack (asks when unclear), suggests 4 particles from the free table, shows a **`particles_plan` card with the price** and waits for the go-ahead (or goes at once when *Ask before spending* is off); on the go: a new set on the pack + the sheet job. Without the Higgsfield CLI it says so and starts nothing |
-| "generate more [bat particles]" | the same for the set named or in focus: the cells it has stay, the new ones are added |
-| "delete the bat particles" | free: to the trash (restorable); a set **in use asks first**, naming the packs |
-| "restore the bat particles" | from the trash, same id and packs |
-| "also use them for the Princess pack" | `assign`: a list edit, no credits |
+Set choice is centralized in `_focus_set`: **an explicit set name overrides; otherwise the focused sticker's newest owned set comes first, then the focused set, then the only suitable set, then chips**. A session's unrelated old set must not replace the chosen sticker's own particles. `particles_start` reuses the newest common owned set unless New set/fresh is explicit. Linking adds sticker ownership without copying sprite files or spending.
 
-A refused start keeps the plan (press the same button again). The cards are `particles_plan` (op, pack or set, grid, the particles, the price) and `particles` (the set, `drawing`, a link to the pack's particle studio).
+| Request | Behavior |
+| --- | --- |
+| "make particles for my Barbie pack" | Resolve its stickers, reuse their common current set or create one; quote an AI sheet before confirmation |
+| "more particles for sticker 3" | Choose S3's newest owned set; append without overwriting |
+| A request naming another set | Use the explicitly named set |
+| "use them for the next sticker" | Free link edit, preserving the set |
+| "render a burst for sticker 3" / "add it to the pack" | Same set selection order; render/add to the destination and affirm |
+| "delete the bat particles" / "restore the bat particles" | Soft delete with confirmation when in use; restore the same ID and ownership |
 
+The legacy effects intent links into the scoped editor, preserving the animated choice. Both Image sprites and Animated sprites · Kling must be available during Add more; source-kind-locked cards are being replaced in the compact-flow pass. Priced chat cards retain pending plans on a refused start. No chat/browser provider job starts without the shown quote and permitted confirmation.
+
+### Mirsal Echo: testing assigned particle settings
+
+The local **Chat → Mirsal Echo** contact tests saved particle settings independently of Render/Add. Save particles stores the current motion in its set; Save as new branches settings, and assigning that branch to another sticker lets the person test its reaction there. Assignment controls which settings Echo plays; it is a free sticker link edit.
+
+Send a library sticker from the tray, its carousel, or the simulator's Test in chat action. The browser preserves its library `id` and `pack_id`. Echo replies to it and likes the outgoing sticker. At that moment `chat.js` requests `GET /api/packs/{pack}/stickers/{sid}/particle-preview`: the engine resolves that sticker's newest assigned set and saved motion and returns `{set, motion, params, url}`. The overlay is anchored to the outgoing sticker that received the reply. Clicking its reaction re-fetches and replays, so subsequent assignment/settings changes apply to existing messages.
+
+The message does not cache a set choice. There is no unrelated focused/session-set fallback; unassigned stickers return `{set:null,url:null}` and retain their ordinary heart reaction. Old local messages missing library IDs omit particle playback. Per-message request tokens and a chat-clear epoch reject late previews and pending Echo replies after clear. No preview response repaints a different screen. This path spends nothing and does not add a rendered sticker to a pack.
+
+Node regressions in `tests/js/chat_particles.test.js` cover identity preservation, current-assignment lookup, outgoing-sticker overlay, replay after changed assignment, clear/late-response handling and old-message compatibility. Endpoint and scratch-browser validation belong to the integration acceptance gate.
 
 ## Edits by what they mean (2026-10-03, UI/UX spec P11-P13)
 

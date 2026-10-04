@@ -605,6 +605,8 @@ def main(argv=None) -> int:
     po.add_argument("action", choices=["search", "reindex", "hide", "status"]); po.add_argument("query", nargs="?")
     po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
+    pa = sub.add_parser("particles", help="adopt: older effect runs that made something become saved particle rows under their stickers (idempotent, free)")
+    pa.add_argument("action", choices=["adopt"])
     ph = sub.add_parser("photo", help="a photo -> a cut-out 512 sticker (3C; on-device by default)")
     ph.add_argument("file"); ph.add_argument("--method", default="auto", choices=["auto", "matte", "grabcut"])
     ph.add_argument("--outline", type=int, default=12); ph.add_argument("--erode", type=int, default=0)
@@ -622,6 +624,14 @@ def main(argv=None) -> int:
         cfg = replace(cfg, anim_workers=max(1, args.workers))
     if args.cmd == "doctor":
         return doctor()
+    if args.cmd == "particles":
+        from .flow import particle_sets
+        from .media.library import Library
+        made = particle_sets.adopt_effects(out, Library(out))
+        for m in made:
+            print(f"{m['effect']} -> {m['set']} ({m['mode']}) under {', '.join(m['owners']) or 'no sticker'}")
+        print(f"{len(made)} run(s) adopted" if made else "nothing to adopt")
+        return 0
     from .runtime.writer_lock import WriterBusy, WriterLock
     if args.cmd == "recheck":
         ids = pl.list_ids(out) if args.gid == "all" else [_gid(args.gid)]

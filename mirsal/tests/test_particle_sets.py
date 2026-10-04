@@ -122,6 +122,7 @@ class SetRoutesTests(SetBase):
 
     def test_a_set_can_be_made_for_several_packs_or_none(self):
         other = self.c.lib.create_pack("Princess")
+        self.c.lib.add_bytes(other["id"], sticker_png(), "png", "Owner", "static", "🙂")
         _, one = self.set_from_effect(packs=[self.pack["id"], other["id"]])
         self.assertEqual(one["packs"], [self.pack["id"], other["id"]])
         self.assertEqual([u["name"] for u in one["used_in"]], ["Fruits", "Princess"])
@@ -173,6 +174,7 @@ class SetRoutesTests(SetBase):
     # ---------- assign / unassign / duplicate ----------
     def test_assigning_is_a_list_edit_and_unassigning_keeps_the_set(self):
         other = self.c.lib.create_pack("Princess")
+        self.c.lib.add_bytes(other["id"], sticker_png(), "png", "Owner", "static", "🙂")
         _, a = self.set_from_effect(packs=[])
         _, j = self.req("POST", f"/api/particles/{a['id']}/assign", {"packs": [self.pack["id"], other["id"]]})
         self.assertEqual(j["packs"], [self.pack["id"], other["id"]])
@@ -186,6 +188,9 @@ class SetRoutesTests(SetBase):
         person's (first assigned, first listed); a later assign appends."""
         hi, lo = sorted([self.pack["id"], self.c.lib.create_pack("Princess")["id"]], reverse=True)      # `hi` sorts AFTER `lo`, whatever the uuids are
         third = self.c.lib.create_pack("Third")["id"]
+        for pid in (hi, lo, third):
+            if pid != self.pack["id"]:
+                self.c.lib.add_bytes(pid, sticker_png(), "png", "Owner", "static", "🙂")
         _, a = self.set_from_effect(packs=[])
         _, j = self.req("POST", f"/api/particles/{a['id']}/assign", {"packs": [hi, lo]})
         self.assertEqual(j["packs"], [hi, lo], "the order given, not the alphabet")
@@ -287,6 +292,8 @@ class SetRoutesTests(SetBase):
     def test_the_pack_route_only_lists_the_sets_of_that_pack(self):
         _, a = self.set_from_effect()
         other = self.c.lib.create_pack("Princess")
+        self.c.lib.add_bytes(other["id"], sticker_png(), "png", "Owner", "static", "🙂")
+        self.c.lib.add_bytes(other["id"], sticker_png(), "png", "Owner", "static", "🙂")
         j = self.req("GET", f"/api/packs/{other['id']}/particles")[1]
         self.assertEqual(j["sets"], [])
 
@@ -551,6 +558,7 @@ class SetBurstTests(SetBase):
         code, j = self.post(s["id"], "render")
         self.assertEqual((code, j["pack_id"]), (200, self.pack["id"]))
         other = self.c.lib.create_pack("Princess")
+        self.c.lib.add_bytes(other["id"], sticker_png(), "png", "Owner", "static", "🙂")
         self.req("POST", f"/api/particles/{s['id']}/assign", {"packs": [other["id"]]})
         code, j = self.post(s["id"], "render")
         self.assertEqual(code, 400, "two packs: which one is the burst for?")

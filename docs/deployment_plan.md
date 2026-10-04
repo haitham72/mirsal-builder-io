@@ -1,6 +1,6 @@
 # Deployment plan: putting Mirsal Builder online (PAUSED)
 
-**Status: PAUSED (Haitham, 2026-10-02; the FastAPI part re-paused 2026-10-03).** This is the former `plan.md` sections 0-15 and 17, moved here unchanged except for the links to the trackers (which moved when `HANDOFF.md` and `plan.md` were retired into `docs/waiting-for-haitham.md`, `docs/backlog.md`, `docs/dev-notes.md` and this file). It is groundwork: hosting, Google sign-in, per-person credits, the two Supabase tables, the scrub runbook, Telegram never-twice, privacy and per-user agent memory. Nothing in it is switched on, nothing is deleted, and its open questions (section 17) are **not to be raised again until Haitham asks**; they are numbered in `docs/waiting-for-haitham.md` so they are kept in one place. Read it, do not build it. Section 3 (Phase 0, FastAPI) is paused with the rest, and its executable spec, with pydantic added and Haitham's four constraints, is in [`fastapi_plan.md`](fastapi_plan.md). Branch note: the prepared files live on the `deployment` branch under `deploy/` (map: `deploy/README.md`); `better_ui/ux` branches from it.
+**Status: deployment remains PAUSED.** Hosting, OAuth, credits and external activation are groundwork only; retain the prepared files and held questions. **The local FastAPI + pydantic HTTP migration is authorized after particles (Haitham, 2026-10-04)** under [fastapi_plan.md](fastapi_plan.md). That authorization does not enable deployment or activate rate limiting. Prepared deployment files remain on `deployment`; `better_ui/ux` branches from it.
 
 ## Glossary (the words this file keeps using)
 
@@ -8,10 +8,10 @@
 - **Golden path** — how a sticker is made: plan, sheet, stills, video sheet, video, animations, pack. A human approves at five gates (G1-G5).
 - **Contract** — the stable JSON API in [`api.md`](api.md). A migration must not change it by one byte.
 - **Trackers** — what needs a person is in [`waiting-for-haitham.md`](waiting-for-haitham.md); what is open to build is in [`backlog.md`](backlog.md); what is built is in the other files of `docs/`.
-- **Paused** — everything in this file, FastAPI (section 3) included, until the app is verified and Haitham asks.
+- **Paused** — external deployment, OAuth, credit infrastructure and rate-limit activation. The local HTTP migration is separately authorized.
 
 **Status (2026-10-02, end of the unattended session): the plan is written, and the first slice of it is PREPARED on this branch in new folders. Nothing is switched on:** no Supabase project, no Vercel project, no Render service and no Google OAuth client exist; nothing was pushed to any of them.
-**2026-10-03:** these sections stay paused, section 3 (FastAPI) included: Haitham re-paused it on 2026-10-03 until the app is verified; `docs/fastapi_plan.md` is the spec to run when it is un-paused (the former 16.1).
+**2026-10-04:** the local HTTP migration follows particle acceptance; the rest of deployment remains paused. Its executable spec is `fastapi_plan.md`.
 This file lives on the `deployment` branch only (`git switch deployment`), never on `merge/generate-advanced`. Every phase is still scheduled work that becomes real only when it is built, tested and documented like any other change (`CLAUDE.md` rules 3, 8, 11, 12, 13).
 
 ## 0. What already exists on this branch (map: `deploy/README.md`)
@@ -74,7 +74,7 @@ on a machine with a disk and real CPU**; only thin stateless things may be serve
 
 ## 3. Phase 0 — FastAPI and "hostable" (the enabler; everything else depends on it)
 
-> **Paused with the rest of the deployment plan (Haitham, 2026-10-03): the app is not verified yet, and a migration touches every route.** The spec to run when it is un-paused, with pydantic added, is `docs/fastapi_plan.md`.
+> **The local FastAPI + pydantic migration is authorized after particles (2026-10-04)** under `docs/fastapi_plan.md`. External deployment and infrastructure activation remain paused; implement only the authorized local HTTP-layer scope.
 
 Nothing else in this plan is safe before this phase: a local-disk `out/`, an in-process session list and an optional Redis all break the moment there are two machines.
 

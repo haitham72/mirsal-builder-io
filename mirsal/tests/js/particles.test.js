@@ -47,53 +47,20 @@ test('the library sticker of a batch cell: the one that came from it, a still pr
   assert.deepEqual(run(withPacks("spLinkIndex(LIB.packs,'')")), {});
 });
 
-test('a run starts with the batch’s stickers of the pack, else the pack’s first ones, at most 24', () => {
-  assert.deepEqual(run(withPacks("[...spPickSel(LIB.packs[0],['G012'])]")), ['a1', 'a2']);
-  assert.deepEqual(run(withPacks("[...spPickSel(LIB.packs[0],['G999'])]")), ['a1', 'a2', 'a3']);
-  assert.equal(run("spPickSel({stickers:Array.from({length:40},(_,i)=>({id:'s'+i,source:{}}))},[]).size"), 24);
+test('a scope preselects only its batch or sticker, never another pack', () => {
+  assert.deepEqual(run(withPacks("spScopeStickers({generation:'G012'},LIB.packs).map(r=>r.sticker.id)")), ['a1','a2','b1','b2']);
+  assert.deepEqual(run(withPacks("spScopeStickers({generation:'G999'},LIB.packs)")), []);
+  assert.deepEqual(run(withPacks("spScopeStickers(null,LIB.packs)")), []);
+  assert.deepEqual(run(withPacks("spScopeStickers({sticker_id:'a2'},LIB.packs).map(r=>r.sticker.id)")), ['a2']);
 });
 
-test('the pack a run starts with: the one holding the most of this batch, then the session’s, then the first with stickers', () => {
-  assert.equal(run(withPacks("spDefaultPack(LIB.packs,['G012'],'')")), 'p1');
-  assert.equal(run(withPacks("spDefaultPack(LIB.packs,['G012','G013'],'')")), 'p1');
-  assert.equal(run(withPacks("spDefaultPack(LIB.packs,['G999'],'p2')")), 'p2');
-  assert.equal(run(withPacks("spDefaultPack(LIB.packs,['G999'],'zzz')")), 'p1');
-  assert.equal(run("spDefaultPack([{id:'x',stickers:[]}],[],'')"), '');
-});
-
-test('setup: the pack, three plain choices, the stickers; nothing starts without a click', () => {
-  const S = (o = {}) => `Object.assign(fxNew('sp'),{kind:'pack',pack:'p1',sel:new Set(['a1','a2']),grid:'2x2'},${JSON.stringify(o)},{sel:new Set(${JSON.stringify(o.sel || ['a1', 'a2'])})})`;
-  const html = (o, gids = ['G012']) => run(withPacks(`spSetupHtml(${S(o)},LIB.packs.filter(p=>p.stickers.length),${JSON.stringify(gids)})`));
-  const h = html();
-  assert.match(h, /Choose the pack/);
-  assert.match(h, /data-act=sppack data-id=p1/);
-  assert.match(h, /Fruits &lt;b&gt;/, 'pack names are escaped');
-  assert.doesNotMatch(h, /Empty/, 'a pack with no stickers is not offered');
-  assert.match(h, /3 stickers · 2 from this batch/);
-  for (const l of ['Pack stickers', 'Drawn particles', 'Use an existing set']) assert.match(h, new RegExp(`<b>${l}</b>`));
-  assert.equal((h.match(/<em>Free<\/em>/g) || []).length, 2, 'the pack’s stickers and an existing set cost nothing');
-  assert.equal((h.match(/<em>Costs credits<\/em>/g) || []).length, 1, 'only drawing costs');
-  assert.match(h, /class="sp-mode on" data-act=spkind data-v=pack aria-pressed=true/);
-  assert.match(h, /The price is on the button before anything is spent/);
-  assert.match(h, /Which stickers fly out \(they are the particles and they burst\)/);
-  assert.match(h, /class="fx-st on" data-act=spst data-id=a1/);
-  assert.match(h, /class="fx-st" data-act=spst data-id=a3/);
-  assert.match(h, /data-act=spstart >.*Continue with 2 stickers<\/button>/s);
-  assert.match(h, /Nothing is drawn or spent yet/);
-  assert.doesNotMatch(h, /spgrid/, 'the grid is asked for video only');
-  const drawn = html({ kind: 'drawn' });
-  assert.match(drawn, /class="sp-mode on" data-act=spkind data-v=drawn/);
-  assert.match(drawn, /Which stickers get particles/);
-  const existing = html({ kind: 'existing' });
-  assert.match(existing, /class="sp-mode on" data-act=spkind data-v=existing/);
-  assert.match(existing, /Reading the particle sets/, 'an existing set is picked, not drawn');
-  assert.doesNotMatch(existing, /data-act=spstart/, 'no run starts from a set that already exists');
-  const none = html({ sel: [] });
-  assert.match(none, /data-act=spstart disabled>.*Continue with 0 stickers/s);
-  const many = html({ sel: Array.from({ length: 25 }, (_, i) => 's' + i) });
-  assert.match(many, /data-act=spstart disabled>/);
-  assert.match(many, /at most 24 stickers/);
-  assert.match(run("spSetupHtml(Object.assign(fxNew('sp'),{pack:'',kind:'pack'}),[],[])"), /Make a pack first/);
+test('three creation cards (sticker sprites, AI images, Kling) and scoped slices', () => {
+  const h=run(withPacks("spSetupHtml(Object.assign(fxNew('sp'),{scope:{generation:'G012'},pack:'p1',kind:'drawn',sel:new Set(['a1','a2']),grid:'2x2'}),LIB.packs,['G012'])"));
+  for(const label of ['Sprites from the sticker','AI image sprites','Kling animated · from scratch'])assert.match(h,new RegExp(label));
+  assert.equal((h.match(/class="sp-mode/g)||[]).length,3,'three equal choices: the sticker\'s sprites, AI images, Kling from scratch');
+  assert.doesNotMatch(h,/data-id=a3/);
+  assert.match(h,/data-act=spst data-id=a1/);
+  assert.doesNotMatch(h,/Nothing is drawn or spent yet/);
 });
 
 test('the Studio’s header gets a Particles step after Animation, and the steps after it are numbered again', () => {
@@ -125,22 +92,15 @@ const CELL = (i, o = {}) => ({ index: i, key: 'cape_piece', png: `slices/S${i}.p
 const LINK = (id, pid = 'p1', pack = 'Fruits <b>') => ({ pack_id: pid, pack, sticker: { id } });
 const sec = (b, many = false) => run(`spSecBatchHtml(${JSON.stringify(b)},${many})`);
 
-test('the section: a sticker with particles shows its gallery, one without is a chip, one outside a pack is ONE line', () => {
-  const h = sec({ gid: 'G012', cells: [CELL(1, { link: LINK('a1'), n: 2, det: { created: [] } }), CELL(2, { link: LINK('a2') }), CELL(3, { link: LINK('a3') }), CELL(4), CELL(5)] });
-  assert.match(h, /<b>S1 · cape piece<\/b>/);
-  assert.match(h, /in <button class=link data-act=ptsaved data-id=p1>Fruits &lt;b&gt;<\/button>/, 'the pack is a link, escaped');
-  assert.match(h, /<ptbody data-for=a1>data<\/ptbody>/, 'the gallery of the library’s sticker view is reused');
-  assert.match(h, /data-act=spmake data-p=p1 data-s=a1>.*Make more/s);
-  assert.match(h, /No particles yet, click one to make some:/);
-  assert.match(h, /class=sp-chip data-act=spmake data-p=p1 data-s=a2 title="Make particles for S2 \(in Fruits &lt;b&gt;\)"/);
-  assert.match(h, /data-s=a3/);
-  assert.equal((h.match(/Add to a pack to give them particles/g) || []).length, 1, 'one line for all the stickers that are not in a pack');
-  assert.equal((h.match(/class=sp-th title="S[45]"/g) || []).length, 2);
-  assert.doesNotMatch(h, /<ptbody data-for=a2/, 'a sticker with no particles has no gallery');
-  assert.doesNotMatch(h, /sp-bh/, 'a single batch has no heading of its own');
-  assert.match(sec({ gid: 'G012', cells: [CELL(4)] }), /Add to a pack to give it particles/, 'one sticker: "it"');
-  assert.match(sec({ gid: 'G012', cells: [CELL(1, { link: LINK('a1'), n: 1 })] }, true), /<div class=sp-bh><b>G012<\/b>/, 'several batches: each has its name');
-  assert.equal(sec({ gid: 'G012', cells: [] }).replace(/\s+/g, ''), '<divclass=sp-bt></div>');
+test('the section shows scoped creation, existing galleries and one approval offer', () => {
+ const h=sec({gid:'G012',cells:[CELL(1,{link:LINK('a1'),n:1,det:{sets:[{id:'P001'}]}}),CELL(2,{link:LINK('a2')}),CELL(3),CELL(4)]});
+ assert.match(h,/data-act=spmake data-p=p1 data-s=a1>Generate more/);
+ assert.match(h,/data-act=spmake data-p=p1 data-s=a2>Create particles/);
+ assert.match(h,/<ptbody data-for=a1>/);
+ assert.equal((h.match(/Approve as a pack/g)||[]).length,1);
+ assert.match(h,/data-act=spapprove data-g=G012/);
+ assert.doesNotMatch(h,/Add to a pack to give/);
+ assert.match(sec({gid:'G012',cells:[]},true),/sp-bh/);
 });
 
 test('the section: the data comes from the Studio’s batches, the library and the counts; a dropped sticker is not offered', () => {
@@ -149,7 +109,7 @@ test('the section: the data comes from the Studio’s batches, the library and t
   const d = run(withPacks(`(GM.set(12,${JSON.stringify(g)}),SES.gens=[12,99],PKPT.c={p1:{a1:{created:2,saved:1}}},PKPT.d={a1:{created:[1]}},spSecData())`));
   assert.equal(d.length, 1, 'a batch that is not loaded yet is skipped');
   assert.deepEqual(d[0].cells.map(c => c.index), [1, 4], 'dropped and blocked stickers are not offered');
-  assert.equal(d[0].cells[0].n, 3);
+  assert.equal(d[0].cells[0].n, 1);
   assert.equal(d[0].cells[0].link.sticker.id, 'a1');
   assert.deepEqual(d[0].cells[0].det, { created: [1] });
   assert.equal(d[0].cells[1].link, null);
@@ -159,23 +119,23 @@ test('the section: the data comes from the Studio’s batches, the library and t
 test('the section: a heading with the one button that opens the tab, and nothing at all without a batch', () => {
   const h = run("spSecHtml([{gid:'G012',cells:[]}])");
   assert.match(h, /<h2><svg data-i=fx><\/svg> Particles<\/h2>/);
-  assert.match(h, /data-act=spopen>.*Create particles for pack/s);
+  assert.match(h, /data-act=spopen>.*Create particles/s);
   assert.equal(run("spSecHtml([])"), '');
 });
 
 test('the tab replaces the body only while it is current, and a person can leave the flow at any point', () => {
   assert.equal(run("(GS.tab='stickers',gbodyHtml([],{}))"), 'ORIGINAL BODY');
-  const h = run(withPacks("(GS.tab='particles',SP.eid='',SP.pack='',gbodyHtml([{generation_id:'G012'}],{}))"));
+  const h = run(withPacks("(GS.tab='particles',SP.scope={generation:'G012'},SP.eid='',SP.pack='p1',SP.sel=new Set(['a1','a2']),gbodyHtml([{generation_id:'G012'}],{}))"));
   assert.match(h, /^<section class="gplan sp fx" id=sp-root data-fxx=sp>/, 'the root every handler finds its state from');
-  assert.match(h, /Give the stickers of a pack a burst of particles/);
-  assert.match(h, /Whatever you make is saved under its sticker/);
+  assert.match(h, /<h2>Particles<\/h2>/);
+  assert.doesNotMatch(h, /Whatever you make is saved under its sticker/);
   assert.match(h, /data-act=spstart/);
-  assert.match(run("(SP.eid='E007',SP.rec={id:'E007',pack_name:'Fruits',status:'NEW'},spBody([]))"), /Looking at your stickers…/);
+  assert.match(run("(SP.eid='E007',SP.rec={id:'E007',pack_name:'Fruits',status:'NEW'},spBody([]))"), /Preparing sprites…/);
   const head = run("spBody([])");
   assert.doesNotMatch(head, /spstart/);
   const ready = run("(SP.rec={id:'E007',pack_name:'Fruits <b>',mode:'sim',status:'READY',grid:[2,2],groups:[],stickers:[],results:[],video:{},history:[]},spBody([]))");
-  assert.match(ready, /<a class=link href="#\/effects\/E007"[^>]*>Open in the particle studio<\/a>/, 'the same effect in the full particle studio');
-  assert.match(ready, /data-act=spreset>Start over/);
+  assert.match(ready, /<a class=link href="#\/effects\/E007"[^>]*>Original run · E007<\/a>/, 'the same effect in the full particle studio');
+  assert.match(ready, /data-act=spreset>Back/);
   assert.match(ready, /Fruits &lt;b&gt;/);
   assert.match(run("(SP.rec={id:'E007',status:'ERROR',error:'It <broke>'},spBody([]))"), /It &lt;broke&gt;/);
   run("(GS.tab='stickers',SP.eid='',SP.rec=null)");
@@ -183,10 +143,10 @@ test('the tab replaces the body only while it is current, and a person can leave
 
 test('the section is drawn into its container, once, and again when the container is a new one', () => {
   const g = { generation_id: 'G012', stickers: [{ index: 1, key: 'a', png: 'slices/S1.png', status: 'READY', review: {} }] };
-  run(withPacks(`(GM.set(12,${JSON.stringify(g)}),SES.gens=[12],DOMSTUB.gpart={writes:0,set innerHTML(v){this.writes++;this.html=v}},0)`));
+  run(withPacks(`(GM.set(12,${JSON.stringify(g)}),SES.gens=[12],PKPT.d={},PKPT.c={},SPS.batches={},DOMSTUB.gpart={writes:0,set innerHTML(v){this.writes++;this.html=v}},0)`));
   run("spSecDraw()");
   assert.equal(run("DOMSTUB.gpart.writes"), 1);
-  assert.match(run("DOMSTUB.gpart.html"), /No particles yet, click one to make some/);
+  assert.match(run("DOMSTUB.gpart.html"), /No particles yet/);
   run("spSecDraw()");
   assert.equal(run("DOMSTUB.gpart.writes"), 1, 'nothing changed: the videos in it are not restarted');
   run("DOMSTUB.gpart={writes:0,set innerHTML(v){this.writes++;this.html=v}}");
@@ -196,7 +156,7 @@ test('the section is drawn into its container, once, and again when the containe
 });
 
 const SET = (o = {}) => ({ id: 'P001', name: 'Barbie <hearts>', n_cells: 4, n_picked: 3, kind: 'drawn', credits: 2.5,
-  packs: ['p1'], used_in: [{ id: 'p1', name: 'Fruits <b>' }],
+  packs: ['p1'], owner:[{pack_id:'p1',sticker_id:'a1'}], used_in: [{ id: 'p1', name: 'Fruits <b>' }],
   cells: [{ n: 1, key: 'heart', picked: true, url: '/out/particles/P001/cells/c01.png' }, { n: 2, key: 'flower', picked: true, url: '/out/particles/P001/cells/c02.png' },
     { n: 3, key: 'spark', picked: false, url: '/out/particles/P001/cells/c03.png' }, { n: 4, key: 'dot', picked: true, url: null, missing: true }],
   picked: [1, 2, 4], elements: ['hearts', 'flowers'], motion: { preset: 'burst' }, source: { kind: 'drawn', effect: 'E002', generation: 'G100' }, ...o });
@@ -205,14 +165,14 @@ test('a set card: the picked cells as a strip, the name, where it is used, what 
   const h = run(`spSetCard(${JSON.stringify(SET())})`);
   assert.match(h, /data-ps=P001/);
   assert.match(h, /Barbie &lt;hearts&gt;/, 'names are escaped');
-  assert.match(h, /P001 · 4 cells · 3 picked · drawn/);
-  assert.match(h, /used in: Fruits &lt;b&gt;/);
+  assert.match(h, /P001 · 4 cells · 3 picked · From AI sheet/);
+  assert.match(h, /made for 1 sticker/);
   assert.match(h, /about 2\.5 credits spent/);
   assert.equal((h.match(/class=ps-cell/g) || []).length, 3, 'the strip is the picked cells only');
   assert.match(h, /\/out\/particles\/P001\/cells\/c01\.png/);
   for (const a of ['psopen', 'psassign', 'psdup', 'psrename', 'psdel']) assert.match(h, new RegExp(`data-act=${a} data-id=P001`), `${a} is on the card`);
-  const lone = run(`spSetCard(${JSON.stringify(SET({ id: 'P002', name: 'Lone', packs: [], used_in: [], credits: 0 }))})`);
-  assert.match(lone, /stand-alone/);
+  const lone = run(`spSetCard(${JSON.stringify(SET({ id: 'P002', name: 'Lone', packs: [], owner: [], used_in: [], credits: 0 }))})`);
+  assert.match(lone, /Detached · attach to a sticker/);
   assert.match(lone, /nothing spent yet/);
 });
 
@@ -225,7 +185,7 @@ test('the open card: elements, source, motion, every cell with what is kept, and
   assert.equal((h.match(/data-act=pspickcell/g) || []).length, 4, 'every cell is ticked, unpicked ones kept');
   assert.match(h, /aria-pressed=true/);
   assert.match(h, /Tick the cells to keep/);
-  assert.match(h, /data-act=psunassign data-id=P001 data-p=p1>take off</, 'unassigning keeps the set: it only leaves the pack');
+  assert.match(h, /data-act=psunassign data-id=P001 data-s=a1>unlink</, 'unassigning keeps the set: it only leaves the pack');
   run("SPL.open=''");
 });
 
@@ -244,14 +204,14 @@ test('the library list: loading, empty, and the sets with a way to make more', (
 
 test('the wizard’s existing-set card lists the sets with what they cost and where they are', () => {
   run("SPL.sets=null");
-  assert.match(run("spExistingHtml({pack:'p1'})"), /Reading the particle sets/);
+  assert.match(run("spExistingHtml({pack:'p1',sel:new Set(['a1'])})"), /Reading the particle sets/);
   run("SPL.sets=[]");
-  assert.match(run("spExistingHtml({pack:'p1'})"), /No particle sets yet/);
-  run(`SPL.sets=[${JSON.stringify(SET())},${JSON.stringify(SET({ id: 'P002', name: 'Bats', packs: [], used_in: [], n_picked: 2 }))}]`);
-  const h = run("spExistingHtml({pack:'p1'})");
+  assert.match(run("spExistingHtml({pack:'p1',sel:new Set(['a1'])})"), /No saved particles yet/);
+  run(`SPL.sets=[${JSON.stringify(SET())},${JSON.stringify(SET({ id: 'P002', name: 'Bats', owner:[], packs: [], used_in: [], n_picked: 2 }))}]`);
+  const h = run("spExistingHtml({pack:'p1',sel:new Set(['a1'])})");
   assert.match(h, /Barbie &lt;hearts&gt;/);
   assert.match(h, /3 picked · used in: Fruits &lt;b&gt;/);
-  assert.match(h, /on this pack/);
+  assert.match(h, /linked to these stickers/);
   assert.match(h, /data-act=pspickset data-id=P002>Use this set</);
   run("SPL.sets=null");
 });
@@ -317,29 +277,28 @@ const moreOf = (o = {}) => run(`(delete SPM.P001, spMoreHtml(${JSON.stringify(SE
 
 test('the open set offers Generate more: the grid, the particles to draw, the price on its own line, a button that says what it does', () => {
   const h = moreOf();
-  assert.match(h, /Generate more/);
-  assert.match(h, /The cells you have stay exactly as they are/, 'the person is told nothing is replaced');
+  assert.match(h, /Image sprites/);
+  assert.match(h, /Animated sprites · Kling/);
   assert.match(h, /data-act=psmoregrid data-id=P001 data-v=2x2/);
   assert.match(h, /data-act=psmoregrid data-id=P001 data-v=3x3/);
-  assert.match(h, /data-act=psmorechip data-id=P001 data-v="hearts"[^>]*aria-pressed=true/, 'the set’s own particles start chosen');
-  assert.match(h, /data-act=psmorechip data-id=P001 data-v="flowers"/);
-  assert.match(h, /data-psmoreown=P001/);
-  assert.match(h, /2 of 4 chosen/);
+  assert.match(h, /value="hearts, flowers"/, 'the set’s particles seed the prompt');
+
+  assert.match(h, /data-psmoreprompt=P001/);
   assert.match(h, /<div class=fx-price data-psmoreprice[^>]*>[^<]*<\/div>/, 'the price has its own line');
   const btn = h.match(/<button[^>]*data-act=psmoredraw[^>]*>[\s\S]*?<\/button>/)[0];
-  assert.match(btn, /Draw 4 more particles/);
+  assert.match(btn, /Generate image sprites/);
   assert.doesNotMatch(btn, /credit/, 'the price is never inside the button');
   assert.match(btn, /disabled/, 'nothing can be pressed before the price is known');
-  assert.match(h, /Nothing is spent until you press the button/);
+  assert.doesNotMatch(h, /Nothing is spent until you press the button/);
 });
 
 test('once the price is known the button works; a price that is not available is said, never hidden', () => {
   run("SPL.sets=[" + JSON.stringify(SET()) + "]");
-  run("SPM.P001={grid:'2x2',chosen:['hearts','flowers'],extra:[],est:{'2x2|hearts|flowers':{credits:2}},busy:0}");
+  run("SPM.P001={mode:'drawn',prompt:'hearts, flowers',grid:'2x2',chosen:['hearts','flowers'],extra:[],est:{'drawn|2x2|hearts, flowers|hearts|flowers':{credits:2}},busy:0}");
   const h = run(`spMoreHtml(${JSON.stringify(SET())})`);
-  assert.match(h, /data-psmoreprice[^>]*>about 2 credits</);
+  assert.match(h, /data-psmoreprice[^>]*>2 credits</);
   assert.doesNotMatch(h.match(/<button[^>]*data-act=psmoredraw[^>]*>/)[0], /disabled/);
-  run("SPM.P001.est['2x2|hearts|flowers']={credits:null,error:'The price is not available.'}");
+  run("SPM.P001.est['drawn|2x2|hearts, flowers|hearts|flowers']={credits:null,error:'The price is not available.'}");
   const bad = run(`spMoreHtml(${JSON.stringify(SET())})`);
   assert.match(bad, /The price is not available/);
   assert.match(bad.match(/<button[^>]*data-act=psmoredraw[^>]*>/)[0], /disabled/);
@@ -366,12 +325,12 @@ test('every kind of sheet is told in plain words, newest first, and a dead end a
 });
 
 test('names the person types are escaped, and the third grid is nine', () => {
-  run("SPM.P001={grid:'3x3',chosen:[],extra:['<img src=x>'],est:{},busy:0}");
+  run("SPM.P001={mode:'drawn',prompt:'<img src=x>',grid:'3x3',chosen:[],extra:[],est:{},busy:0}");
   const h = run(`spMoreHtml(${JSON.stringify(SET())})`);
   assert.doesNotMatch(h, /<img src=x>/);
   assert.match(h, /&lt;img src=x&gt;/);
-  assert.match(h, /Draw 9 more particles/);
-  assert.match(h, /0 of 9 chosen/);
+  assert.match(h, /Generate image sprites/);
+  assert.match(h, /3 × 3/);
   run("delete SPM.P001");
 });
 
@@ -379,12 +338,12 @@ test('Generate more never posts without a known price, and posts the person’s 
   run(`SPL.sets=[${JSON.stringify(SET())}];SPL.detail={};POSTS.length=0;delete SPM.P001`);
   await run0("ACT.psmoredraw({dataset:{id:'P001'},disabled:false})");
   assert.deepEqual(run("POSTS.length"), 0, 'no price, no request');
-  run("SPM.P001={grid:'2x2',chosen:['hearts','flowers'],extra:[],est:{'2x2|hearts|flowers':{credits:2}},busy:0}");
+  run("SPM.P001={mode:'drawn',prompt:'hearts, flowers',grid:'2x2',chosen:['hearts','flowers'],extra:[],est:{'drawn|2x2|hearts, flowers|hearts|flowers':{credits:2}},busy:0}");
   await run0("ACT.psmoredraw({dataset:{id:'P001'},disabled:false})");
-  assert.deepEqual(run("POSTS"), [['/api/particles/P001/more', { grid: '2x2', elements: ['hearts', 'flowers'], go: true }]]);
+  assert.deepEqual(run("POSTS"), [['/api/particles/P001/more', { mode:'drawn', prompt:'hearts, flowers', grid: '2x2', elements: ['hearts', 'flowers'], go: true }]]);
   run("POSTS.length=0;SPM.P001.est={}");
   await run0("spMoreEstimate('P001')");
-  assert.deepEqual(run("POSTS"), [['/api/particles/P001/more', { grid: '2x2', elements: ['hearts', 'flowers'], estimate: true }]], 'the quote is a free request, not a go');
+  assert.deepEqual(run("POSTS"), [['/api/particles/P001/more', { mode:'drawn', prompt:'hearts, flowers', grid: '2x2', elements: ['hearts', 'flowers'], estimate: true }]], 'the quote is a free request, not a go');
   run("delete SPM.P001;SPL.sets=null;POSTS.length=0");
 });
 
@@ -434,14 +393,14 @@ test('Motion: ONE preview for the pack, the five presets, Energy / Float / Swirl
 test('Finish: Render says what it does and the checked file is the next thing you see', () => {
   const h = burst();
   assert.match(h, /data-act=psbrender data-id=P001>[^<]*Render</);
-  assert.match(h, /the final 512 px sticker, checked/);
+  assert.doesNotMatch(h, /the final 512 px sticker, checked/);
   assert.doesNotMatch(h, /<button[^>]*psbrender[^>]*>[^<]*credit/, 'a burst is free: no price anywhere');
 });
 
 test('a drawn set with nothing picked has no particles to move, and says how to get some', () => {
   const h = burst({ n_picked: 0, n_cells: 0, cells: [], picked: [] });
-  assert.match(h, /no particles yet/i);
-  assert.match(h, /Generate more/);
+  assert.match(h, /Add sprites to preview/);
+  assert.match(h, /Add sprites/);
   assert.doesNotMatch(h, /psbrender|psbpreset/, 'no control that cannot work');
   const st = burst({ n_picked: 0, n_cells: 0, cells: [], picked: [], source: { kind: 'stickers' } });
   assert.match(st, /psbrender/, 'a set of the pack’s own stickers bursts them');
@@ -466,13 +425,13 @@ test('the bursts of this pack: a clean one is added with one click, a warning is
     REND({ id: 'R003', status: 'FAILED', blocks: ['size_budget'], checks: [{ id: 'size_budget', verdict: 'BLOCK' }], url: null }), REND({ id: 'R004', added_to: 'p1', added: [{ sticker: 'x', pack: 'p1' }] }),
     REND({ id: 'R005', pack_id: 'p2' })];
   const h = burst({ renders: rs });
-  assert.match(h, /data-act=psbadd data-id=P001 data-r=R001 data-p=p1>Add to Fruits &lt;b&gt;</);
-  assert.match(h, /data-act=psbadd data-id=P001 data-r=R002 data-p=p1>Add anyway</);
+  assert.match(h, /data-act=psbadd data-id=P001 data-r=R001 data-p=p1>Add to pack</);
+  assert.match(h, /data-act=psbadd data-id=P001 data-r=R002 data-p=p1>Use it anyway · Add</);
   assert.match(h, /last frames were faded out/, 'the warning is in words');
-  assert.match(h, /Warnings are only warnings: you decide/);
+  assert.doesNotMatch(h, /Warnings are only warnings: you decide/);
   assert.doesNotMatch(h, /data-r=R003/, 'a file Telegram would reject cannot be added');
   assert.match(h, /Over Telegram’s size limit\./);
-  assert.match(h, /in Fruits &lt;b&gt;/, 'an added burst says where it is');
+  assert.match(h, /In pack ✓/, 'an added burst says where it is');
   assert.doesNotMatch(h, /data-r=R004/);
   assert.doesNotMatch(h, /R005/, 'a burst made for another pack is listed under that pack');
   assert.equal((h.match(/<video /g) || []).length, 3, 'a looping thumbnail for each burst that has a file');

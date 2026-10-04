@@ -30,7 +30,7 @@ Your prepared sheets and videos are read from `inputs\Images_gen` and `inputs\vi
 ```
 python -m mirsal create "create teddy yellow bear for school"    # same pipeline from the CLI
 python -m mirsal more | animate [G001] [--slice N]
-python -m mirsal test fast                            # stdlib unittest underneath: no pytest needed (docs/testing.md; the full discover only if Haitham asks)
+python -m mirsal test fast                            # stdlib unittest underneath: no pytest needed (docs/testing.md; slow tier and full discovery are retired: never run or requested)
 ```
 
 Python >= 3.10. Everything uses `pathlib`; paths come from `mirsal/runtime/paths.py` (`MIRSAL_INPUT`, `MIRSAL_OUT` override; `MIRSAL_FFMPEG` overrides ffmpeg).
@@ -453,3 +453,5 @@ The "Batman Lego pieces" sheet (G100) came back from the image model with random
 (`inside_cell`, an overridable judgement call), which is the right verdict for a line that really crosses a cell. **The cut is not weakened** and the test that pins it stays (`tests/test_particle_set.py::test_the_white_divider_cross_of_the_real_g100_no_longer_kills_cells`:
 a sticker batch still blocks, a particle batch cuts exact equal cells with a 2% inset that wipes the divider). The ways out are: cut it again as particles (`POST /api/generations/{id}/recut_particles`, free), allow the cell (`Use it anyway`), or open the slice
 in the editor, erase the lines and save: the batch's sheet is rebuilt with that slice fixed and keeps its S#.
+
+The particle entry carries the batch or library sticker scope. Approve as a pack offers the existing modal scoped to the batch and returns to particles when adding succeeds. It spends nothing.

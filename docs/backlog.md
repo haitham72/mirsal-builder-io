@@ -13,9 +13,8 @@ Status words: **open** (can be built now) · **needs Haitham** (a verdict first,
 ## Particles and the welcome modal (`docs/effects.md` section 8, `docs/particles_plan.md`, `docs/onboarding.md`)
 
 - A real paid run of the AI-drawn particle sheet from the screen, to see how a real Nano Banana particle sheet cuts (the price and the job path are tested on the fake CLI). **needs a paid test** (W2).
-- Telegram delivery of a burst (phase 5). **needs Haitham** (W24, W25, W26).
+- Per-emoji burst motion versus shared motion (W25), and separate Telegram effect/download delivery. Ordinary animated stickers in the destination pack are implemented. **needs Haitham** for the alternatives.
 - Burst creation, many packs from one liked sheet (P14; `docs/burst_plan.md`). **needs Haitham** (W27).
-- The legacy per-sticker burst badge (`ptBadge`). **needs Haitham** (W28).
 - Particle sets are not part of the trash purge yet (a deleted set waits in `out/trash/particles/`). **open**.
 - `DEFAULT_SPRITE_PX` 100 vs 200. **needs Haitham** (W21).
 - A preview of the would-be sticker in the video-sheet override dialog (the G3 override itself is built). **open**.
@@ -82,7 +81,7 @@ Other open items:
 - The React frontend `mirsal/web/`: extend or delete (W33); the editor's mobile screens. **needs Haitham**.
 - The retired History screen (`console/history.js`, `#/history`). **needs Haitham** (W34).
 - Content safety, OpenAI calls without a plan card, `out/` in git, a backup command. **needs Haitham** (W18, W29, W30, W31).
-- The FastAPI + pydantic migration: **parked**, spec in [`fastapi_plan.md`](fastapi_plan.md), un-pausing is W38.
+- The FastAPI + pydantic migration: **authorized after particles** (Haitham, 2026-10-04); the executable spec is [`fastapi_plan.md`](fastapi_plan.md). It is not implemented yet.
 - Rate limiting and OAuth: **parked** (Haitham, 2026-10-02). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
 ## Deployment (branch `deployment`): parked

@@ -1,26 +1,18 @@
-"""Particle sets `P###`: the DURABLE particle asset (docs/particles_plan.md).
+"""Durable sticker-owned particle sets (`docs/particles_plan.md`).
 
-A Telegram particle burst is the effect played when someone reacts to a message with an emoji. A **sticker pack is only the group it is attached to**: a
-Barbie pack bursts hearts and flowers, a Batman pack bat signals, and every sticker of the pack shares them. So the unit is **not a sticker** — it is a
-**Particle set**, which belongs to one pack, to several packs, or to none (stand-alone). `flow/effects.py` keeps the `E###` *working session* (this run's
-analysis, ideas, drawing, picking, previews); this module owns the thing that survives it.
-
-    out/particles/P001/set.json      {id, name, created, user, elements[], source{kind, effect, generation, job}, cells[{n, file, status, warnings[], picked}],
-                                     motion{preset, params}, packs[pack ids], credits, history[]}
-    out/particles/P001/cells/c01.png the cut particle images (KEPT even when unpicked, so generate-more never loses a variant)
-    out/particles/P001/renders/      bursts rendered from this set for a pack (R001.webm ...; the record in set.json carries its checks)
-    out/particles/P001/previews/     the looping WebP previews (cached by what they were made from)
-    out/trash/particles/P001/        delete moves the folder here; Restore puts it back (rule 9's spirit: nothing is destroyed on a click)
-
-Nothing is approved for a person here: this is a library of particle images and their default motion. **Only Telegram's own limits can make a rendered
-burst FAILED** (`engine/effect_video.TECHNICAL`); every other check is a warning the person decides on. A set is never deleted by a click (trash + restore),
-never silently re-pointed (assigning is a list edit, never a copy of files), and a set in use says which packs before it goes to the trash."""
+P### stores owner sticker links, selected still/animated sprites, saved motion,
+source jobs/credits and rendered bursts. Packs are derived read views; adding a
+burst affirms it in a pack. E### is a working run, never an owner. Images,
+clips and RGBA timelines live in cells/; previews/ and renders/ use the same
+simulator. Delete is reversible; parent purge detaches without deleting sets.
+"""
 from __future__ import annotations
 
 import json
 import shutil
 import threading
 import time
+from collections import OrderedDict
 from pathlib import Path
 
 from ..runtime import atomic
@@ -30,6 +22,39 @@ MAX_NAME = 60
 MAX_ELEMENTS = 12
 KINDS = ("drawn", "stickers", "video")
 VERSION = 1
+_MEDIA_CACHE = OrderedDict()
+_MEDIA_CACHE_BYTES = 64 * 1024 * 1024
+
+
+def _animated_media(clip: Path, *, timeline: Path | None = None, fps=None, px=512):
+    """Load once per file/fit size, retaining alpha and clock. Cache is bounded to 64 MiB."""
+    import math
+    import numpy as np
+    from ..engine import ffmpeg, particles
+    path = timeline if timeline is not None and timeline.is_file() else clip
+    stamp = path.stat()
+    key = (str(path.resolve()), stamp.st_mtime_ns, stamp.st_size, fps, px)
+    with _LOCK:
+        if key in _MEDIA_CACHE:
+            value = _MEDIA_CACHE.pop(key)
+            _MEDIA_CACHE[key] = value
+            return value
+    if path.suffix.lower() == '.npz':
+        with np.load(path, allow_pickle=False) as data:
+            value = particles.AnimatedSprite(data['frames'], float(data['fps']))
+    else:
+        info = ffmpeg.probe(path)
+        clock = float(fps or info.get('fps') or 30)
+        count = min(400, max(1, math.ceil(float(info.get('duration') or 3) * clock)))
+        frames = ffmpeg.decode_full(path, info['width'], info['height'], count, None)
+        value = particles.AnimatedSprite(frames, clock)
+    value = particles.fit_sprites([value], px)[0]
+    value.frames.flags.writeable = False
+    with _LOCK:
+        _MEDIA_CACHE[key] = value
+        while sum(v.frames.nbytes for v in _MEDIA_CACHE.values()) > _MEDIA_CACHE_BYTES:
+            _MEDIA_CACHE.popitem(last=False)
+    return value
 
 
 class SetError(Exception):
@@ -78,9 +103,212 @@ def read_deleted(out: Path, pid: str) -> dict:
 
 
 def _write(out: Path, s: dict) -> dict:
+    if "owner" in s:
+        s.pop("packs", None)
     s["updated"] = round(time.time(), 3)
     atomic.write_text(_dir(out, s["id"]) / "set.json", json.dumps(s, indent=2, ensure_ascii=False))
     return s
+
+
+def owners_for(lib, owners=None, packs=None) -> list[dict]:
+    """Resolve live library stickers; pack ids are deprecated input aliases only."""
+    if owners is not None and not isinstance(owners, list):
+        raise SetError("owners must be a list of sticker ids or owner records")
+    if lib is None:
+        if owners:
+            raise SetError("owner stickers require a library")
+        return []
+    with lib.lock:
+        db = lib._load()
+    requested = owners
+    if requested is None:
+        requested = [{"sticker_id": st["id"], "pack_id": p["id"]}
+                     for pid in _clean_packs(packs, lib) for p in db.get("packs", []) if p["id"] == pid
+                     for st in p.get("stickers", [])]
+    result = []
+    for item in requested:
+        sid = item.get("sticker_id") if isinstance(item, dict) else item
+        match = next(((p, st) for p in db.get("packs", []) for st in p.get("stickers", [])
+                      if st["id"] == sid and (not isinstance(item, dict) or not item.get("pack_id") or item["pack_id"] == p["id"])), None)
+        if match is None:
+            raise SetError(f"no owner sticker {sid}", 404)
+        p, st = match
+        src = st.get("source") or {}
+        row = {"sticker_id": sid, "pack_id": p["id"], "generation": src.get("generation"), "index": src.get("index")}
+        if row not in result:
+            result.append(row)
+    return result
+
+
+def _sync_links(lib, s):
+    if lib is None:
+        return
+    ids = {o["sticker_id"] for o in s.get("owner", [])}
+    with lib.lock:
+        db = lib._load()
+        changed = False
+        for p in db.get("packs", []) + (db.get('trash') or {}).get('packs', []):
+            for st in p.get("stickers", []):
+                links = list(st.get("particles") or [])
+                new = [x for x in links if x != s["id"]]
+                if st["id"] in ids:
+                    new = links if s["id"] in links else links + [s["id"]]
+                if new != links:
+                    st["particles"] = new
+                    changed = True
+        if changed:
+            lib._save(db)
+
+
+def _normalize_owner(out, lib, s, f):
+    legacy = 'owner' not in s
+    before = s.get('owner')
+    if legacy:
+        backup = f.with_name('set.json.pre-owner')
+        if not backup.exists():
+            atomic.write_bytes(backup, f.read_bytes())
+        src = s.get('source') or {}
+        ids = src.get('sticker_ids')
+        if ids is None and src.get('effect'):
+            from . import effects
+            try:
+                ids = [st['sticker_id'] for st in effects.read(out, src['effect']).get('stickers', [])]
+            except effects.EffectError:
+                ids = []
+    else:
+        ids = [o['sticker_id'] for o in before]
+    if lib is not None:
+        with lib.lock:
+            db = lib._load()
+        packs = db.get('packs', []) + (db.get('trash') or {}).get('packs', [])
+        rows = []
+        for sid in ids or []:
+            pair = next(((p, st) for p in packs for st in p.get('stickers', [])
+                         if st['id'] == sid and (not legacy or p['id'] in (s.get('packs') or []))), None)
+            if pair:
+                p, st = pair
+                src = st.get('source') or {}
+                row = {'sticker_id':sid, 'pack_id':p['id'], 'generation':src.get('generation'), 'index':src.get('index')}
+                if row not in rows:
+                    rows.append(row)
+        s['owner'] = rows
+    elif legacy:
+        s['owner'] = []
+    if legacy:
+        s['version'] = 2
+        s.pop('packs', None)
+        hist(s, 'python', 'MIGRATE_OWNER', 'sticker owners; unresolvable sets stay detached')
+    return legacy or before != s.get('owner')
+
+
+def migrate(out: Path, lib, pid: str) -> dict:
+    """Idempotent migration; owner pack/provenance follow sticker IDs, including pack trash."""
+    with _LOCK:
+        s = read(out, pid)
+        if _normalize_owner(out, lib, s, _dir(out, pid) / 'set.json'):
+            _write(out, s)
+        _sync_links(lib, s)
+        return s
+
+
+def _derived(s):
+    packs = list(dict.fromkeys(o["pack_id"] for o in s.get("owner", []) if o.get("pack_id")))
+    affirmed = list(dict.fromkeys(p for r in s.get("renders", []) for p in r.get("affirmed_in", [])))
+    return {**s, "packs": packs, "affirmed_in": affirmed, "detached": not s.get("owner")}
+
+
+def link(out, lib, pid, sticker_ids, user="local", unlink=False):
+    with _LOCK:
+        s = migrate(out, lib, pid)
+        if unlink:
+            if not isinstance(sticker_ids, list):
+                raise SetError("sticker_ids must be a list")
+            ids = {x.get("sticker_id") if isinstance(x, dict) else x for x in sticker_ids}
+            s["owner"] = [o for o in s["owner"] if o["sticker_id"] not in ids]
+        else:
+            rows = owners_for(lib, sticker_ids)
+            s["owner"] += [o for o in rows if o not in s["owner"]]
+        hist(s, user, "UNLINK" if unlink else "LINK", detail=sticker_ids)
+        _write(out, s)
+        _sync_links(lib, s)
+    return view(out, lib, pid)
+
+
+def for_sticker(out, lib, pack_id, sticker_id):
+    from . import effects
+    legacy = effects.for_sticker(out, lib, pack_id, sticker_id)
+    mine = [s for s in list_sets(out, lib) if any(o["sticker_id"] == sticker_id for o in s["owner"])]
+    runs = {}
+    for cell in legacy.get("created", []):
+        eid = cell["effect"]
+        run = runs.setdefault(eid, {"effect": eid, "mode": cell.get("mode"), "cells": [], "saved": [], "imported_as": []})
+        run["cells"].append(cell)
+    for saved in legacy.get("saved", []):
+        eid = saved.get("effect")
+        if not eid:
+            continue
+        run = runs.setdefault(eid, {"effect": eid, "mode": saved.get("mode"), "cells": [], "saved": [], "imported_as": []})
+        run["saved"].append(saved)
+    for run in runs.values():
+        run["imported_as"] = [s["id"] for s in mine if (s.get("source") or {}).get("effect") == run["effect"]
+                              or any(str(c.get("import", "")).startswith(run["effect"] + "/") for c in s.get("cells", []))]
+    return {**legacy, "sets": mine, "runs": list(runs.values()), "affirmed": any(pack_id in s["affirmed_in"] for s in mine),
+            **rows_for_sticker(out, lib, sticker_id)}
+
+
+def counts_for_pack(out, lib, pack_id):
+    """{sticker id: {created, saved, sets}} for the pack grid's badge: one per particle VERSION of the sticker (a set it owns, saved or draft) plus one per
+    older run not yet adopted as a row (a run counts once, never once per slice); `saved` is the pack stickers made from its bursts."""
+    from . import effects
+    legacy = effects._gallery(out, lib, pack_id)
+    sets = list_sets(out, lib)
+    adopted = {(x.get("source") or {}).get("effect") for x in sets}
+    counts = {}
+    for st in _lib_pack(lib, pack_id).get("stickers", []):
+        n = sum(any(o["sticker_id"] == st["id"] for o in x["owner"]) for x in sets)
+        g = legacy.get(st["id"]) or {}
+        runs = {i["effect"] for i in g.get("created") or [] if i.get("usable") and i["effect"] not in adopted}
+        saved = sum(1 for i in g.get("saved") or [] if not i.get("missing"))
+        if n or runs or saved:
+            counts[st["id"]] = {"created": n + len(runs), "saved": saved, "sets": n}
+    return counts
+
+
+def for_generation(out, lib, gid):
+    from . import pipeline
+    gn = int(str(gid).upper().lstrip("G"))
+    res = pipeline.read_result(out, gn)
+    with lib.lock:
+        db = lib._load()
+    cells = []
+    for st in res.get("stickers", []):
+        if st.get("status") != "READY":
+            continue
+        matches = [(p, x) for p in db.get("packs", []) for x in p.get("stickers", [])
+                   if str((x.get("source") or {}).get("generation", "")).upper() == f"G{gn:03d}" and (x.get("source") or {}).get("index") == st["index"]]
+        matches.sort(key=lambda pair: pair[1].get("type") == "animated")
+        p, x = matches[0] if matches else ({}, {})
+        det = for_sticker(out, lib, p["id"], x["id"]) if matches else {"sets": [], "affirmed": False}
+        cells.append({"index": st["index"], "key": st.get("key"), "png": st.get("png"), "sticker": x or None,
+                      "link": {"pack_id": p["id"], "pack": p.get("name"), "sticker": x} if matches else None,
+                      "offer_approve": not matches, **det})
+    return {"generation": f"G{gn:03d}", "cells": cells}
+
+
+def detach_pack(out, lib, pack_id):
+    """Purge detaches links, including trashed sets; it never deletes a set."""
+    for root in (sets_dir(out), trash_dir(out)):
+        for f in root.glob("P*/set.json"):
+            s = json.loads(atomic.read_text(f))
+            changed = _normalize_owner(out, lib, s, f)
+            if not any(o.get('pack_id') == pack_id for o in s['owner']):
+                if changed:
+                    atomic.write_text(f, json.dumps(s, indent=2, ensure_ascii=False))
+                continue
+            s["owner"] = [o for o in s.get("owner", []) if o.get("pack_id") != pack_id]
+            s.pop("packs", None)
+            hist(s, "python", "DETACH_PURGED_PACK", detail=pack_id)
+            atomic.write_text(f, json.dumps(s, indent=2, ensure_ascii=False))
 
 
 def hist(s: dict, actor: str, decision: str, reason: str | None = None, detail=None) -> None:
@@ -117,7 +345,7 @@ def _lib_pack(lib, pid: str) -> dict:
 
 
 def _clean_packs(packs, lib=None) -> list[str]:
-    """The packs a set lives in. With a library, every id must exist (a typo would be a set that belongs to nothing and looks assigned)."""
+    """Deprecated input: packs whose stickers will be linked. With a library, every id must exist (a typo would be a set that belongs to nothing and looks assigned)."""
     if packs is None:
         return []
     if not isinstance(packs, list) or any(not isinstance(x, str) for x in packs):
@@ -147,8 +375,10 @@ def _clean_motion(motion) -> dict:
     params = motion.get("params")
     if isinstance(params, dict):
         try:
-            particles.ParticleParams.from_dict({k: v for k, v in params.items() if k != "preset"})
-        except ValueError as e:
+            from . import effects as fx
+            _, _, dynamics = fx.split_fit({k: v for k, v in params.items() if k != "preset"})
+            particles.ParticleParams.from_dict(dynamics)
+        except (ValueError, fx.EffectError) as e:
             raise SetError(str(e))
         out["params"] = params
     return out
@@ -158,7 +388,7 @@ def _clean_motion(motion) -> dict:
 def view(out: Path, lib, pid: str) -> dict:
     """The set as the API shows it: the record with the cell files resolved to `/out/` urls, how many cells there are and how many are picked
     (the wizard's numbers), `used_in` the names of the packs it is assigned to, and `trashed: false`. A pure read: nothing is rendered, nothing is written."""
-    s = read(out, pid)
+    s = _derived(migrate(out, lib, pid))
     d = _dir(out, pid)
     cells = [cell_view(out, d, c) for c in s.get("cells") or []]
     picked = [c["n"] for c in cells if c.get("picked")]
@@ -170,7 +400,13 @@ def cell_view(out: Path, d: Path, c: dict, base: str = "particles") -> dict:
     """A cell with its file resolved to an `/out/` url (`base` is the folder the set lives in: `particles`, or `trash/particles` for a deleted one), and `missing` when the file is gone."""
     f = d / (c.get("file") or "")
     ok = bool(c.get("file") and f.is_file())
-    return {**c, "url": f"/out/{base}/{d.name}/{c['file']}" if ok else None, "missing": not ok}
+    clip = d / (c.get('clip') or '')
+    animated = bool(c.get('clip') and clip.is_file())
+    clock = c.get('fps') or 30.0
+    return {**c, "url": f"/out/{base}/{d.name}/{c['file']}" if ok else None, "missing": not ok,
+            "clip_url": f"/out/{base}/{d.name}/{c['clip']}" if animated else None,
+            "type": "animated" if animated else "static", "fps": clock if animated else None,
+            "duration": round(c['frames'] / clock, 3) if animated and c.get('frames') else None}
 
 
 def pack_names(lib, ids) -> list[dict]:
@@ -190,14 +426,14 @@ def list_sets(out: Path, lib) -> list[dict]:
     rows = []
     for p in sorted(sets_dir(out).glob("P[0-9]*")):
         try:
-            s = json.loads(atomic.read_text(p / "set.json"))
+            s = _derived(migrate(out, lib, p.name))
         except (OSError, ValueError):
             continue
         d = p
         cells = [cell_view(out, d, c) for c in s.get("cells") or []]
         picked = [c for c in cells if c.get("picked")]
         rows.append({"id": s.get("id", p.name), "name": s.get("name") or p.name, "created": s.get("created"), "user": s.get("user"),
-                     "kind": (s.get("source") or {}).get("kind"), "elements": list(s.get("elements") or []), "packs": list(s.get("packs") or []),
+                     "owner": s.get("owner", []), "affirmed_in": s.get("affirmed_in", []), "detached": s.get("detached"), "kind": (s.get("source") or {}).get("kind"), "elements": list(s.get("elements") or []), "packs": list(s.get("packs") or []),
                      "used_in": pack_names(lib, s.get("packs") or []), "cells": cells, "picked": [c["n"] for c in picked],
                      "n_cells": len(cells), "n_picked": len(picked), "renders": len(s.get("renders") or []),
                      "credits": s.get("credits"), "drawing": drawing(s), "sheets": list(s.get("sheets") or []), "motion": s.get("motion") or {}, "source": s.get("source") or {}, "trashed": False})
@@ -206,7 +442,7 @@ def list_sets(out: Path, lib) -> list[dict]:
 
 
 def for_pack(out: Path, lib, pack_id: str) -> dict:
-    """The pack's particle studio in one read: every set assigned to it (`set.packs` is the one source of truth) and every burst rendered FOR it. A burst belongs to the pack it was rendered for,
+    """The pack's particle studio in one read: the union of its stickers’ owned sets and every burst rendered FOR it. A burst belongs to the pack it was rendered for,
     whether or not its set is assigned there (a stand-alone set can burst for a pack)."""
     all_ = list_sets(out, lib)
     mine = [r for r in all_ if pack_id in (r.get("packs") or [])]
@@ -260,7 +496,7 @@ def _cell_record(n: int, idx: int, data: bytes, sprite: bool, st: dict, extra: d
             "sprite": sprite, "w": w, "h": h, "picked": True, "created": round(time.time(), 3), **(extra or {})}
 
 
-def set_from_effect(out: Path, lib, eid: str, *, name=None, packs=None, picked=None, user: str = "local") -> dict:
+def set_from_effect(out: Path, lib, eid: str, *, name=None, packs=None, owners=None, target=None, picked=None, mode=None, user: str = "local") -> dict:
     """**Use as particle set** (`POST /api/particles {from_effect: E###}`): save what this run drew as a durable `P###`.
 
     The drawn sheet's cells become the set's cells as TIGHT SPRITES (copied into `out/particles/P###/cells/`, so the set survives the `E###` and the batch; a particle is never a 512 px sticker
@@ -270,42 +506,127 @@ def set_from_effect(out: Path, lib, eid: str, *, name=None, packs=None, picked=N
     e = fx.view(out, eid)
     s0 = fx.set_of(e) or {}
     gen = s0.get("generation")
-    kind = "video" if e.get("mode") == "video" else "drawn"
+    if mode is not None and mode not in ('video', 'sim'):
+        raise SetError('mode must be video or sim')
+    kind = "video" if (mode or e.get("mode")) == "video" else "drawn"
     notes: list[str] = []
-    rows, sprites = ([], {}) if gen is None else _batch_rows(out, int(gen), picked)[:2]
+    rows, sprites = ([], {}) if gen is None or kind == 'video' else _batch_rows(out, int(gen), picked)[:2]
     if not rows:
         kind = "stickers" if kind != "video" else kind
         notes.append("This set has no drawn cells yet: the burst uses the pack's own stickers (generate more to add drawn particles).")
     default_name = f"{e.get('pack_name') or 'particles'} particles"
+    if owners is None and packs is None and lib is not None:
+        with lib.lock:
+            db = lib._load()
+        live = {st['id'] for pk in db.get('packs', []) for st in pk.get('stickers', [])}
+        resolved_owners = owners_for(lib, [st['sticker_id'] for st in e.get('stickers', []) if st['sticker_id'] in live])
+    else:
+        resolved_owners = owners_for(lib, owners, packs)
     with _LOCK:
-        pid = _next_id(out)
+        previous = read(out, target) if target else None
+        pid = previous["id"] if previous else _next_id(out)
+        offset = max([c["n"] for c in (previous or {}).get("cells", [])] or [0])
         d = sets_dir(out) / pid
-        (d / "cells").mkdir(parents=True)
+        (d / "cells").mkdir(parents=True, exist_ok=True)
         cells: list[dict] = []
-        for n, (idx, f, st) in enumerate(rows, 1):
+        for idx, f, st in rows:
+            token = f"{eid}/G{gen}/S{idx}"
+            if token in ((previous or {}).get("imports") or []):
+                continue
+            n = offset + len(cells) + 1
             data = sprites.get(idx) or f.read_bytes()
             atomic.write_bytes(d / f"cells/c{n:02d}.png", data)
-            cells.append(_cell_record(n, idx, data, idx in sprites, st))
-        pack_ids = _clean_packs(e.get("pack_id") and [e["pack_id"]] if packs is None else packs, lib)
+            cells.append(_cell_record(n, idx, data, idx in sprites, st, {"import": token}))
+        if kind == "video":
+            keep = None if picked is None else {int(i) for i in picked}
+            for r in e.get("results", []):
+                if r.get("mode") != "video" or not r.get("file"):
+                    continue
+                if keep is not None and int(r.get('cell', 0)) not in keep:
+                    continue
+                token = f"{eid}/{r['id']}"
+                if token in ((previous or {}).get("imports") or []):
+                    continue
+                n = offset + len(cells) + 1
+                animation = None
+                if r.get("sprite_file"):
+                    data = (fx._dir(out, eid) / r["sprite_file"]).read_bytes()
+                else:
+                    import io
+                    import numpy as np
+                    from PIL import Image
+                    from ..engine import particles
+                    animation = _animated_media(fx._dir(out, eid) / r['file'])
+                    frames = animation.frames
+                    peak = frames[np.argmax((frames[..., 3] > 4).sum(axis=(1, 2)))]
+                    poster = particles.trim_sprite(peak)
+                    if poster is None:
+                        notes.append(f"Cell {r.get('cell')} has no visible pixels; choose another sprite")
+                        continue
+                    buf = io.BytesIO()
+                    Image.fromarray(poster).save(buf, format="PNG")
+                    data = buf.getvalue()
+                atomic.write_bytes(d / f"cells/c{n:02d}.png", data)
+                rec = _cell_record(n, r.get("cell", n), data, True, {"status": r["status"], "key": r.get("key"), "metrics": {"warnings": r.get("warnings", [])}})
+                if r.get("file"):
+                    clip = f"cells/c{n:02d}.webm"
+                    atomic.write_bytes(d / clip, (fx._dir(out, eid) / r["file"]).read_bytes())
+                    rec["clip"] = clip
+                    rec['fps'] = r.get('fps') or 30.0
+                    rec['frames'] = r.get('frames') or 90
+                    if r.get('timeline_file'):
+                        rec['timeline'] = f"cells/c{n:02d}.npz"
+                        atomic.write_bytes(d / rec['timeline'], (fx._dir(out, eid) / r['timeline_file']).read_bytes())
+                    elif animation is not None:
+                        rec['timeline'] = f"cells/c{n:02d}.npz"
+                        rec['fps'], rec['frames'] = animation.fps, len(animation.frames)
+                        buf = io.BytesIO()
+                        np.savez_compressed(buf, frames=animation.frames, fps=animation.fps)
+                        atomic.write_bytes(d / rec['timeline'], buf.getvalue())
+                rec["import"] = token
+                rec["job"] = r.get("job") or (e.get('video', {}).get(r.get('group')) or {}).get('job')
+                cells.append(rec)
+            s0 = {**s0, "job": next((v.get("job") for v in e.get("video", {}).values() if v.get("job")), None)}
+        pack_ids = list(dict.fromkeys(o['pack_id'] for o in resolved_owners))
         s = {"id": pid, "name": _clean_name(name, default_name), "created": round(time.time(), 3), "user": user,
              "elements": _clean_elements(s0.get("elements") or [x for g in e.get("groups") or [] for x in g.get("elements") or []]),
-             "source": {"kind": kind, "effect": eid, "generation": f"G{int(gen):03d}" if gen is not None else None, "particles": bool(cells) and all(c["sprite"] for c in cells),
+             "source": {"sticker_ids": [x["sticker_id"] for x in e.get("stickers") or []], "kind": kind, "effect": eid, "generation": f"G{int(gen):03d}" if gen is not None else None, "particles": bool(cells) and all(c["sprite"] for c in cells),
                         "job": s0.get("job"), "grid": s0.get("grid"), "by": s0.get("by"), "options": list(s0.get("options") or [])},
              "plan": {"subject": fx._subject_of(e), "style": fx._style_of(e)},          # what *Generate more* draws about, kept here so the set outlives its run
-             "cells": cells, "motion": {}, "packs": pack_ids, "renders": [], "credits": _job_cost(out, s0.get("job")) if cells else 0.0, "notes": notes, "history": []}
+             "cells": cells, "motion": {}, "saved_at": None, "owner": resolved_owners, "renders": [], "credits": _job_cost(out, s0.get("job")) if cells else 0.0, "notes": notes, "history": []}
         if not cells and kind == "stickers":                 # the particles ARE the stickers the run was made with: remember which (a burst needs them long after the run)
             s["source"]["sticker_ids"] = [x["sticker_id"] for x in e.get("stickers") or []]
-        hist(s, user, "CREATE", f"from {eid}: {len(cells)} cell(s), {len(pack_ids)} pack(s)", {"effect": eid, "generation": s["source"]["generation"]})
+        if previous:
+            s = {**previous, "cells": previous.get("cells", []) + cells,
+                 "source": {**(previous.get("source") or {}), **s["source"]},
+                 "credits": round(float(previous.get("credits") or 0) + (s["credits"] if cells else 0), 3)}
+        if kind == "video":
+            old_source = (previous or {}).get('source') or {}
+            old_jobs = list(dict.fromkeys(list(old_source.get('jobs') or []) + ([old_source['job']] if old_source.get('job') else [])
+                                         + [sh['job'] for sh in (previous or {}).get('sheets', []) if sh.get('job')]))
+            new_jobs = list(dict.fromkeys(c.get('job') for c in cells if c.get('job')))
+            if cells and not new_jobs and s0.get('job'):
+                new_jobs = [s0['job']]
+            all_jobs = list(dict.fromkeys(old_jobs + new_jobs))
+            s["source"]["jobs"] = all_jobs
+            s["source"]["job"] = all_jobs[-1] if all_jobs else None
+            def recorded_cost(job):
+                return _job_cost(out, job) or next((float(v.get('cost') or 0) for v in e.get('video', {}).values() if v.get('job') == job), 0.0)
+            s["credits"] = round(float((previous or {}).get('credits') or 0) + sum(recorded_cost(j) for j in new_jobs if j not in old_jobs), 3)
+        s.setdefault("imports", []).extend(c["import"] for c in cells if c.get("import"))
+        hist(s, user, "APPEND" if previous else "CREATE", f"from {eid}: {len(cells)} cell(s), {len(pack_ids)} pack(s)", {"effect": eid, "generation": s["source"].get("generation")})
         atomic.write_text(d / "set.json", json.dumps(s, indent=2, ensure_ascii=False))
     with fx._LOCK:                                           # the run points at the set saved from it (the wizard goes on with the set: its motion and finish steps are the set's)
         rec = fx.read(out, eid)
-        rec.setdefault("sets", []).append(pid)
+        rec.setdefault("sets", [])
+        if pid not in rec["sets"]:
+            rec["sets"].append(pid)
         fx.hist(rec, user, "SAVE", f"saved as particle set {pid}", {"set": pid})
         fx._write(out, rec)
     return view(out, lib, pid)
 
 
-def set_from_generation(out: Path, lib, gid, *, name=None, packs=None, picked=None, user: str = "local") -> dict:
+def set_from_generation(out: Path, lib, gid, *, name=None, packs=None, owners=None, picked=None, user: str = "local") -> dict:
     """The import path for a sheet of particles that is already a batch (`POST /api/particles {from_generation: G###}`): its cells become a set, as tight sprites, with no effect behind it. Only a
     batch that was CUT AS PARTICLES (exact equal cells, no sticker rule) qualifies: a sheet cut as stickers (gutter detection, Python's sticker blocks, the 512 px canvas) is refused with the
     reason and the free way out (cut it again as particles), never guessed at. Nothing is changed or deleted in the batch."""
@@ -322,6 +643,7 @@ def set_from_generation(out: Path, lib, gid, *, name=None, packs=None, picked=No
                        f"POST /api/generations/{gn}/recut_particles. The batch is not changed.", 409)
     if not rows:
         raise SetError(f"no cell of G{gn:03d} has a picture" + (" among the ones you picked" if picked else "") + ": a cell with nothing in it cannot be a particle.", 409)
+    owners_for(lib, owners, packs)
     with _LOCK:
         pid = _next_id(out)
         d = sets_dir(out) / pid
@@ -333,7 +655,7 @@ def set_from_generation(out: Path, lib, gid, *, name=None, packs=None, picked=No
             cells.append(_cell_record(n, idx, data, idx in sprites, st))
         s = {"id": pid, "name": _clean_name(name, f"{res.get('prompt') or 'particles'}"), "created": round(time.time(), 3), "user": user, "elements": [],
              "source": {"kind": "drawn", "effect": None, "generation": f"G{gn:03d}", "particles": all(c["sprite"] for c in cells), "job": None, "grid": res.get("grid")},
-             "cells": cells, "motion": {}, "packs": _clean_packs(packs, lib), "renders": [], "credits": 0.0, "notes": [], "history": []}
+             "cells": cells, "motion": {}, "saved_at": None, "owner": owners_for(lib, owners, packs), "renders": [], "credits": 0.0, "notes": [], "history": []}
         hist(s, user, "CREATE", f"from G{gn:03d}: {len(cells)} cell(s)", {"generation": f"G{gn:03d}"})
         atomic.write_text(d / "set.json", json.dumps(s, indent=2, ensure_ascii=False))
     return view(out, lib, pid)
@@ -350,16 +672,108 @@ def _job_cost(out: Path, job) -> float:
         return 0.0
 
 
-def create(out: Path, lib, *, name=None, elements=None, packs=None, kind: str = "drawn", user: str = "local") -> dict:
+def set_from_slices(out, lib, slices, *, owners=None, name=None, target=None, user="local"):
+    """Copy selected batch slices into a new or existing sticker-owned set. Free."""
+    if not isinstance(slices, list) or not slices:
+        raise SetError("select at least one slice")
+    rows = []
+    for item in slices:
+        gn = int(str(item["generation"]).upper().lstrip("G"))
+        batch, sprites, _ = _batch_rows(out, gn, [int(item["index"])])
+        rows += [(idx, sprites.get(idx) or f.read_bytes(), idx in sprites, st, gn) for idx, f, st in batch]
+    if not rows:
+        raise SetError("the selected slices have no picture", 409)
+    with _LOCK:
+        v = view(out, lib, target) if target else create(out, lib, owners=owners, name=name, kind="stickers", user=user)
+        s = read(out, v["id"])
+        n = max([c["n"] for c in s.get("cells", [])] or [0])
+        for idx, data, sprite, st, gn in rows:
+            n += 1
+            atomic.write_bytes(_dir(out, s["id"]) / f"cells/c{n:02d}.png", data)
+            s["cells"].append(_cell_record(n, idx, data, sprite, st, {"generation": f"G{gn:03d}"}))
+        s["source"].setdefault("slices", []).extend(slices)
+        hist(s, user, "APPEND_SLICES", detail=slices)
+        _write(out, s)
+    return view(out, lib, s["id"])
+
+
+def set_from_stickers(out, lib, sticker_ids, parent_pack_id, *, owners=None, name=None, target=None, user="local"):
+    """Recover ordinary library stickers as tight particle sprites, preserving the originals."""
+    import io
+    import numpy as np
+    from PIL import Image
+    from . import effects
+    from ..engine import particles
+    if not isinstance(sticker_ids, list) or not sticker_ids:
+        raise SetError('select at least one sticker')
+    owners = owners_for(lib, owners, packs=[parent_pack_id])
+    if not owners:
+        raise SetError('choose a parent pack with stickers')
+    with lib.lock:
+        db = lib._load()
+    rows = []
+    for sid in dict.fromkeys(sticker_ids):
+        st = next((st for p in db.get('packs', []) for st in p.get('stickers', []) if st['id']==sid), None)
+        if st is None:
+            raise SetError(f'no source sticker {sid}', 404)
+        clip = (lib.files / st['file']) if st.get('type') == 'animated' or Path(st['file']).suffix.lower() == '.webm' else None
+        animation = None
+        if clip is not None:
+            try:
+                animation = _animated_media(clip)
+                rgba = animation.frames[np.argmax((animation.frames[..., 3] > 4).sum(axis=(1, 2)))]
+            except (OSError, ValueError, RuntimeError) as ex:
+                raise SetError(f"{st.get('name') or sid} has no readable animation: {ex}. Choose another sticker", 409) from ex
+        else:
+            rgba = effects.sticker_rgba(lib, st)
+        if rgba is None:
+            raise SetError(f"{st.get('name') or sid} has no readable picture", 409)
+        poster = particles.trim_sprite(rgba)
+        if poster is None:
+            raise SetError(f"{st.get('name') or sid} has no visible picture. Choose another sticker", 409)
+        buf = io.BytesIO()
+        Image.fromarray(poster).save(buf, format='PNG')
+        rows.append((st, buf.getvalue(), clip, animation))
+    with _LOCK:
+        v = view(out, lib, target) if target else create(out, lib, owners=owners, name=name or 'Recovered particles', kind='stickers', user=user)
+        s = read(out, v['id'])
+        n = max([c['n'] for c in s['cells']] or [0])
+        for st, data, clip, animation in rows:
+            n += 1
+            atomic.write_bytes(_dir(out, s['id']) / f'cells/c{n:02d}.png', data)
+            rec = _cell_record(n, (st.get('source') or {}).get('index') or n, data, True, {'status':'READY','key':st.get('name')})
+            rec['source_sticker'] = st['id']
+            rec['source_pack'] = next(p['id'] for p in db.get('packs', []) if any(x['id'] == st['id'] for x in p.get('stickers', [])))
+            if clip is not None:
+                rec['clip'] = f"cells/c{n:02d}{clip.suffix.lower()}"
+                atomic.write_bytes(_dir(out, s['id']) / rec['clip'], clip.read_bytes())
+                rec['fps'], rec['frames'] = animation.fps, len(animation.frames)
+                rec['timeline'] = f"cells/c{n:02d}.npz"
+                buf = io.BytesIO()
+                np.savez_compressed(buf, frames=animation.frames, fps=animation.fps)
+                atomic.write_bytes(_dir(out, s['id']) / rec['timeline'], buf.getvalue())
+            s['cells'].append(rec)
+        s['source'].setdefault('recovered_stickers', []).extend(sticker_ids)
+        hist(s, user, 'RECOVER_STICKERS', detail={'stickers':sticker_ids,'parent_pack_id':parent_pack_id})
+        _write(out, s)
+    if target:
+        link(out, lib, target, owners, user)
+    return view(out, lib, s['id'])
+
+
+def create(out: Path, lib, *, name=None, elements=None, packs=None, owners=None, kind: str = "drawn", user: str = "local") -> dict:
     """A stand-alone set the person names now (no sheet yet): `Library > Particles > New particle set`. Its cells arrive with *Generate more*."""
     if kind not in KINDS:
         raise SetError(f"kind must be one of {', '.join(KINDS)}")
+    owners_for(lib, owners, packs)
     with _LOCK:
         pid = _next_id(out)
         d = sets_dir(out) / pid
         (d / "cells").mkdir(parents=True)
         s = {"id": pid, "name": _clean_name(name, "particles"), "created": round(time.time(), 3), "user": user, "elements": _clean_elements(elements),
-             "source": {"kind": kind}, "cells": [], "motion": {}, "packs": _clean_packs(packs, lib), "renders": [], "credits": 0.0, "notes": [], "history": []}
+             "source": {"kind": kind}, "cells": [], "motion": {}, "saved_at": None, "owner": owners_for(lib, owners, packs), "renders": [], "credits": 0.0, "notes": [], "history": []}
+        if kind == "stickers":
+            s["source"]["sticker_ids"] = [o["sticker_id"] for o in s["owner"]]
         hist(s, user, "CREATE", f"a new set ({kind})")
         atomic.write_text(d / "set.json", json.dumps(s, indent=2, ensure_ascii=False))
     return view(out, lib, pid)
@@ -574,7 +988,7 @@ def _pick_pack(s: dict, lib, pack_id, required: bool) -> str | None:
     if pack_id:
         _lib_pack(lib, str(pack_id))
         return str(pack_id)
-    packs = s.get("packs") or []
+    packs = _derived(s).get("packs") or []
     if len(packs) == 1:
         return packs[0]
     if required:
@@ -582,14 +996,25 @@ def _pick_pack(s: dict, lib, pack_id, required: bool) -> str | None:
     return None
 
 
-def sprites_of(out: Path, lib, s: dict, pack_id: str | None) -> tuple[list, str]:
+def sprites_of(out: Path, lib, s: dict, pack_id: str | None, sprite_px=512) -> tuple[list, str]:
     """The particles that fly: the set's PICKED cells (an unpicked cell stays on disk and does not fly). A set of kind "stickers" has no cells: the pack's own stickers are its particles, the ones its run
     was made with (`source.sticker_ids`), else every sticker of `pack_id`. A drawn set with no cell yet has none (409). Returns (RGBA arrays, "cells" | "stickers"); 409/400 with the reason when there is nothing to burst."""
     import numpy as np
     from PIL import Image
     d = sets_dir(out) / s["id"]
     if s.get("cells"):
-        pcs = [np.asarray(Image.open(d / c["file"]).convert("RGBA"), np.uint8) for c in s["cells"] if c.get("picked") and c.get("file") and (d / c["file"]).is_file()]
+        pcs = []
+        for c in s['cells']:
+            if not c.get('picked'):
+                continue
+            if c.get('clip') and (d / c['clip']).is_file():
+                try:
+                    pcs.append(_animated_media(d / c['clip'], timeline=d / c['timeline'] if c.get('timeline') else None,
+                                               fps=c.get('fps'), px=sprite_px))
+                except (OSError, ValueError, RuntimeError) as ex:
+                    raise SetError(f"animated sprite {c['n']} could not be decoded: {ex}. Unpick it or import it again", 409) from ex
+            elif c.get('file') and (d / c['file']).is_file():
+                pcs.append(np.asarray(Image.open(d / c['file']).convert('RGBA'), np.uint8))
         if not pcs:
             raise SetError("none of the picked cells has a picture: pick others", 409)
         return pcs, "cells"
@@ -606,7 +1031,18 @@ def sprites_of(out: Path, lib, s: dict, pack_id: str | None) -> tuple[list, str]
         picked = next((p["stickers"] for p in db.get("packs", []) if p["id"] == pack_id), [])
     else:
         raise SetError("this set's particles are the pack's own stickers: say which pack (pack_id)")
-    pcs = [a for a in (fx.sticker_rgba(lib, x) for x in picked[:fx.MAX_STICKERS]) if a is not None]
+    pcs = []
+    for x in picked[:fx.MAX_STICKERS]:
+        f = lib.files / x['file']
+        if x.get('type') == 'animated' or f.suffix.lower() == '.webm':
+            try:
+                pcs.append(_animated_media(f, px=sprite_px))
+            except (OSError, ValueError, RuntimeError) as ex:
+                raise SetError(f"{x.get('name') or x['id']} could not be decoded: {ex}. Choose another sprite", 409) from ex
+        else:
+            a = fx.sticker_rgba(lib, x)
+            if a is not None:
+                pcs.append(a)
     if not pcs:
         raise SetError("there are no particles to burst: this set uses the pack's own stickers and none of them has a picture. Draw some with Generate more", 409)
     return pcs, "stickers"
@@ -617,15 +1053,17 @@ def _burst(s: dict, preset, params) -> tuple[str, int, float, object]:
     contract of the engine: an unknown preset or parameter is a 400 with the reason."""
     from . import effects as fx
     from ..engine import particles
+    mo = s.get("motion") or {}
+    base = {k: v for k, v in (mo.get("params") or {}).items() if k != "preset"}
+    if params is not None and not isinstance(params, dict):
+        raise SetError("params must be an object")
     try:
-        px, sc, rest = fx.split_fit(params)
+        px, sc, rest = fx.split_fit({**base, **(params or {})})
     except fx.EffectError as ex:
         raise SetError(str(ex))
-    mo = s.get("motion") or {}
     name = str(preset or mo.get("preset") or "burst")
-    base = {k: v for k, v in (mo.get("params") or {}).items() if k != "preset"}
     try:
-        return name, px, sc, particles.preset(name, **{**base, **rest})
+        return name, px, sc, particles.preset(name, **rest)
     except ValueError as ex:
         raise SetError(str(ex))
 
@@ -639,8 +1077,8 @@ def preview(out: Path, lib, pid: str, *, pack_id=None, preset=None, params=None,
         raise SetError("size must be a whole number from 64 to 512")
     s = read(out, pid)
     pack = _pick_pack(s, lib, pack_id, required=False)
-    pcs, source = sprites_of(out, lib, s, pack)
     name, px, sc, p = _burst(s, preset, params)
+    pcs, source = sprites_of(out, lib, s, pack, sprite_px=max(1, round(px * sc)))
     key = fx._digest(pcs, p, (px, sc)) + f"-{int(size)}"
     f = _dir(out, pid) / "previews" / f"{key}.webp"
     if not f.is_file():
@@ -652,6 +1090,23 @@ def preview(out: Path, lib, pid: str, *, pack_id=None, preset=None, params=None,
             "sprites": len(pcs), "source": source, "pack_id": pack}
 
 
+def preview_for_sticker(out: Path, lib, pack_id: str, sticker_id: str) -> dict:
+    """Echo reaction: this sticker's newest linked set with its saved motion. Free."""
+    with lib.lock:
+        pack = _lib_pack(lib, pack_id)
+        sticker = next((st for st in pack.get("stickers", []) if st["id"] == sticker_id), None)
+        if sticker is None:
+            raise SetError(f"no sticker {sticker_id} in {pack_id}", 404)
+        ordered = list(sticker.get("particles") or [])
+    owned = [s for s in list_sets(out, lib) if any(o["sticker_id"] == sticker_id for o in s["owner"])]
+    if not owned:
+        return {"set": None, "url": None}
+    available = {s["id"]: s for s in owned}
+    chosen = next((available[pid] for pid in reversed(ordered) if pid in available), None)
+    chosen = chosen or max(owned, key=lambda s: (s.get("created", 0), s["id"]))
+    return {**preview(out, lib, chosen["id"], pack_id=pack_id), "set": chosen["id"], "motion": chosen.get("motion") or {}}
+
+
 def render(out: Path, lib, pid: str, cfg, *, pack_id=None, preset=None, params=None, user: str = "local") -> dict:
     """The final 512 px WebM of the burst for a pack, judged and stored under `renders/` (R001.webm ...) with its checks. A render is stored whatever the checks say: **only Telegram's own limits
     make it FAILED** (`engine/effect_video.TECHNICAL`), every other check is a warning the person sees and decides on (rule 10); a failed one is kept too (rejection never deletes)."""
@@ -659,8 +1114,8 @@ def render(out: Path, lib, pid: str, cfg, *, pack_id=None, preset=None, params=N
     from ..engine import effect_video as ev, particles
     s = read(out, pid)
     pack = _pick_pack(s, lib, pack_id, required=True)
-    pcs, source = sprites_of(out, lib, s, pack)
     name, px, sc, p = _burst(s, preset, params)
+    pcs, source = sprites_of(out, lib, s, pack, sprite_px=max(1, round(px * sc)))
     r = ev.encode_and_check(particles.simulate(fx._fit(pcs, px, sc), p), cfg, label=f"{s['id']} burst")
     d = _dir(out, pid)
     with _LOCK:
@@ -691,7 +1146,7 @@ def _pack_emoji(lib, pack_id: str) -> str:
     return "".join(e for e, _ in c.most_common(MAX_EMOJI)) or "🙂"
 
 
-def add(out: Path, lib, pid: str, renders=None, pack_id=None, user: str = "local") -> dict:
+def add(out: Path, lib, pid: str, renders=None, pack_id=None, sticker_id=None, user: str = "local") -> dict:
     """Put rendered bursts into a pack as animated stickers tagged with the pack's emoji. This click is the person's approval of the burst (history `APPROVE`). Without `renders` it takes every READY
     burst rendered for that pack that is not in a pack yet. A FAILED render (a Telegram limit is broken) cannot be added; a warning never stops it. The same burst is not put in the same pack
     twice by accident (409): render another to have a second."""
@@ -717,12 +1172,16 @@ def add(out: Path, lib, pid: str, renders=None, pack_id=None, user: str = "local
         twice = [r["id"] for r in chosen if any(a.get("pack") == pack for a in r.get("added") or [])]
         if twice:
             raise SetError(f"{', '.join(twice)} is already in that pack: render another to add a second", 409)
+        owners = [o["sticker_id"] for o in s.get("owner") or []]
+        parent = str(sticker_id) if sticker_id and str(sticker_id) in owners else (owners[0] if owners else None)
         emoji, d, added = _pack_emoji(lib, pack), _dir(out, pid), []
         for r in chosen:
             st = lib.add_bytes(pack, (d / r["file"]).read_bytes(), "webm", f"{s.get('name') or s['id']} · {r['preset']}"[:60], "animated", emoji,
-                               source={"particle_set": s["id"], "render": r["id"], "preset": r["preset"], "source_pack": r.get("pack_id")})
+                               source={"kind": (s.get("source") or {}).get("kind"), "particle_set": s["id"], "render": r["id"], "preset": r["preset"], "source_pack": r.get("pack_id"),
+                                       "parent_sticker": parent})
+            r.setdefault("affirmed_in", []).append(pack)
             r["added_to"] = pack
-            r.setdefault("added", []).append({"sticker": st["id"], "pack": pack, "ts": round(time.time(), 3)})
+            r.setdefault("added", []).append({"sticker": st["id"], "pack": pack, "of": parent, "ts": round(time.time(), 3)})
             added.append({"sticker": st["id"], "name": st["name"], "render": r["id"]})
         hist(s, user, "APPROVE", f"{len(added)} burst(s) added to the pack", {"pack": pack, "added": added})
         _write(out, s)
@@ -730,9 +1189,9 @@ def add(out: Path, lib, pid: str, renders=None, pack_id=None, user: str = "local
 
 
 # ---------- edit ----------
-def update(out: Path, lib, pid: str, *, name=None, elements=None, packs=None, picked=None, motion=None, user: str = "local") -> dict:
+def update(out: Path, lib, pid: str, *, name=None, elements=None, packs=None, picked=None, motion=None, save: bool = False, user: str = "local") -> dict:
     """Rename, re-pick the cells, set the default motion, or move the set between packs. A pick never deletes a file: an unpicked cell stays
-    (`generate more` appends; nothing is lost)."""
+    (`generate more` appends; nothing is lost). `save` is the person's **Save**: the set becomes (or stays) a saved row under its stickers and its motion is replaced."""
     with _LOCK:
         s = read(out, pid)
         if name is not None:
@@ -740,7 +1199,7 @@ def update(out: Path, lib, pid: str, *, name=None, elements=None, packs=None, pi
         if elements is not None:
             s["elements"] = _clean_elements(elements)
         if packs is not None:
-            s["packs"] = _clean_packs(packs, lib)
+            s["owner"] = owners_for(lib, packs=packs)
         if motion is not None:
             s["motion"] = _clean_motion(motion)
         if picked is not None:
@@ -753,7 +1212,9 @@ def update(out: Path, lib, pid: str, *, name=None, elements=None, packs=None, pi
                 raise SetError("a set needs at least one picked cell (or its own stickers)")
             for c in s.get("cells") or []:
                 c["picked"] = int(c["n"]) in keep
-        hist(s, user, "EDIT", ", ".join(k for k, v in (("name", name is not None), ("elements", elements is not None), ("packs", packs is not None),
+        if save:
+            s["saved_at"] = round(time.time(), 3)
+        hist(s, user, "SAVE" if save else "EDIT", ", ".join(k for k, v in (("name", name is not None), ("elements", elements is not None), ("packs", packs is not None),
                                                    ("picked", picked is not None), ("motion", motion is not None)) if v))
         _write(out, s)
     return view(out, lib, pid)
@@ -766,48 +1227,143 @@ def _clean_picks(picked) -> list[int]:
 
 
 def assign(out: Path, lib, pid: str, packs, user: str = "local") -> dict:
-    """Add packs to the set (it is then used by every sticker of each). A list edit: no file is copied and no batch is touched."""
-    with _LOCK:
-        s = read(out, pid)
-        add = _clean_packs(packs, lib)
-        have = list(s.get("packs") or [])
-        s["packs"] = have + [p for p in add if p not in have]         # the person's order (pack ids are random, so sorting them shuffled the "used in" line)
-        hist(s, user, "ASSIGN", f"now in {', '.join(s['packs']) or 'nothing'}", {"packs": add})
-        _write(out, s)
-    return view(out, lib, pid)
+    """Deprecated one-release alias: link the pack's stickers."""
+    return link(out, lib, pid, owners_for(lib, packs=packs), user)
 
 
 def unassign(out: Path, lib, pid: str, packs, user: str = "local") -> dict:
-    """Take the set off packs. **The set stays** (and its cells): unassigning is not deleting."""
-    with _LOCK:
-        s = read(out, pid)
-        drop = set(_clean_packs(packs))
-        s["packs"] = [p for p in (s.get("packs") or []) if p not in drop]
-        hist(s, user, "UNASSIGN", f"now in {', '.join(s['packs']) or 'nothing'}", {"packs": sorted(drop)})
-        _write(out, s)
-    return view(out, lib, pid)
+    """Deprecated one-release alias: unlink the pack's stickers."""
+    return link(out, lib, pid, owners_for(lib, packs=packs), user, unlink=True)
 
 
-def duplicate(out: Path, lib, pid: str, *, name=None, user: str = "local") -> dict:
-    """A copy of the set under a new id, cells and all, with the same packs. The copy is independent: unpicking or deleting one leaves the other."""
+def duplicate(out: Path, lib, pid: str, *, name=None, user: str = "local", renders: bool = True) -> dict:
+    """A copy of the set under a new id, cells and all, with the same sticker owners. The copy is independent: unpicking or deleting one leaves the other."""
     with _LOCK:
-        s = read(out, pid)
+        s = migrate(out, lib, pid)
         src = _dir(out, pid)
         nid = _next_id(out)
         dst = sets_dir(out) / nid
         (dst / "cells").mkdir(parents=True)
         for c in s.get("cells") or []:
-            f = src / (c.get("file") or "")
-            if f.is_file():
-                atomic.write_bytes(dst / c["file"], f.read_bytes())
-        for sub in ("renders",):
-            if (src / sub).is_dir():
-                shutil.copytree(src / sub, dst / sub)
+            for field in ('file', 'clip', 'timeline'):
+                f = src / (c.get(field) or '')
+                if f.is_file():
+                    atomic.write_bytes(dst / c[field], f.read_bytes())
+        if renders and (src / "renders").is_dir():
+            shutil.copytree(src / "renders", dst / "renders")
         copy = {**s, "id": nid, "name": _clean_name(name, f"{s.get('name')} (copy)"), "created": round(time.time(), 3), "user": user, "history": [],
-                "source": {**(s.get("source") or {}), "duplicated_from": pid}}
+                "source": {**(s.get("source") or {}), "duplicated_from": pid},
+                "renders": [{**r, 'added_to':None, 'added':[], 'affirmed_in':[]} for r in s.get('renders', [])] if renders else []}
         hist(copy, user, "DUPLICATE", f"a copy of {pid}")
         atomic.write_text(dst / "set.json", json.dumps(copy, indent=2, ensure_ascii=False))
     return view(out, lib, nid)
+
+
+# ---------- rows: every saved version of a sticker's particles is one row under that sticker (Haitham, 2026-10-04) ----------
+def saved(s: dict) -> bool:
+    """A set is a saved row once the person pressed Save (or Save as new). Sets made before rows existed have no `saved_at` key and count as saved;
+    a set made by the editor starts as a draft (`saved_at: None`) until Save."""
+    return "saved_at" not in s or s.get("saved_at") is not None
+
+
+def kind_label(s: dict) -> str:
+    """How the row was made, in the words the sticker window shows."""
+    src = s.get("source") or {}
+    animated = any(c.get("clip") for c in s.get("cells") or [])
+    if src.get("kind") == "video":
+        return "Kling from scratch"
+    if src.get("kind") == "drawn":
+        return "AI image sprites, animated" if animated else "AI image sprites"
+    if src.get("recovered_stickers") or animated:
+        return "Animated sprites"
+    if not s.get("cells"):
+        return "The sticker itself"
+    return "Sprites"
+
+
+def _row(out: Path, s: dict, sticker_id: str) -> dict:
+    d = _dir(out, s["id"])
+    cells = [cell_view(out, d, c) for c in s.get("cells") or []]
+    renders = [render_view(out, s["id"], r) for r in s.get("renders") or []]
+    ready = [r for r in renders if r.get("status") == "READY" and r.get("url")]
+    in_pack = [{"sticker_id": a.get("sticker"), "pack_id": a.get("pack"), "render": r["id"]} for r in s.get("renders") or [] for a in r.get("added") or []
+               if a.get("of") in (None, sticker_id)]
+    src = s.get("source") or {}
+    return {"id": s["id"], "name": s.get("name") or s["id"], "kind": src.get("kind"), "label": kind_label(s), "created": s.get("created"),
+            "saved_at": s.get("saved_at", s.get("created")), "saved": saved(s), "motion": s.get("motion") or {},
+            "sprites": [{k: c.get(k) for k in ("n", "url", "clip_url", "type", "picked", "missing")} for c in cells],
+            "n_sprites": sum(1 for c in cells if c.get("picked")) or len(cells),
+            "preview": ready[-1]["url"] if ready else None, "renders": len(renders), "credits": s.get("credits") or 0.0,
+            "addable": next(({"render": r["id"], "pack_id": r.get("pack_id")} for r in reversed(ready) if not r.get("added")), None),
+            "job": src.get("job"), "effect": src.get("effect"), "shared_with": max(0, len(s.get("owner") or []) - 1), "in_pack": in_pack}
+
+
+def rows_for_sticker(out: Path, lib, sticker_id: str) -> dict:
+    """The particle versions of one sticker: `rows` are the saved ones, oldest first, numbered v1, v2...; `drafts` are sets the editor started for it
+    and nobody saved yet (shown apart, never lost). A set shared by several stickers is a row under each of them. A pure read."""
+    mine = []
+    for p in sorted(sets_dir(out).glob("P[0-9]*")):
+        try:
+            s = _derived(migrate(out, lib, p.name))
+        except (OSError, ValueError, SetError):
+            continue
+        if any(o.get("sticker_id") == str(sticker_id) for o in s.get("owner") or []):
+            mine.append(s)
+    rows = sorted((x for x in mine if saved(x)), key=lambda x: (x.get("saved_at") or x.get("created") or 0, x["id"]))
+    drafts = sorted((x for x in mine if not saved(x)), key=lambda x: (x.get("created") or 0, x["id"]))
+    out_rows = [{**_row(out, x, str(sticker_id)), "version": i + 1} for i, x in enumerate(rows)]
+    return {"sticker": str(sticker_id), "rows": out_rows, "drafts": [_row(out, x, str(sticker_id)) for x in drafts]}
+
+
+def save_as_new(out: Path, lib, pid: str, *, motion=None, name=None, user: str = "local") -> dict:
+    """**Save as new**: the same sprites with the new motion become a new row under the same stickers; the row it came from is unchanged.
+    Bursts rendered with the old motion stay with the old row (they do not show the new motion)."""
+    v = duplicate(out, lib, pid, name=name, user=user, renders=False)
+    with _LOCK:
+        s = read(out, v["id"])
+        if motion is not None:
+            s["motion"] = _clean_motion(motion)
+        s["saved_at"] = round(time.time(), 3)
+        s["name"] = _clean_name(name, str(s.get("name") or "").replace(" (copy)", "")) or s["id"]
+        hist(s, user, "SAVE", f"saved as a new row from {pid}", {"from": pid})
+        _write(out, s)
+    return view(out, lib, v["id"])
+
+
+def adopt_effects(out: Path, lib, user: str = "python") -> list[dict]:
+    """One-time and idempotent: every older effect run (`E###`) that produced something and was never saved as a set becomes a saved row under the
+    stickers it was made for. A Kling run's cut clips become ONE row of animated sprites (never one particle per slice); a simulated run's bursts become
+    the row's renders. Nothing is deleted or paid; the run stays where it is and points at its row (`sets`). Runs that produced nothing are left alone."""
+    from . import effects as fx
+    made = []
+    for p in sorted(fx.effects_dir(out).glob("E[0-9]*")):
+        try:
+            e = json.loads(atomic.read_text(p / "effect.json"))
+        except (OSError, ValueError):
+            continue
+        results = [r for r in e.get("results") or [] if r.get("file") and (p / r["file"]).is_file()]
+        if e.get("sets") or not results:
+            continue
+        mode = "video" if any(r.get("mode") == "video" for r in results) else "sim"
+        v = set_from_effect(out, lib, p.name, mode=mode, user=user)
+        with _LOCK:
+            s = read(out, v["id"])
+            if mode == "sim":
+                (_dir(out, s["id"]) / "renders").mkdir(exist_ok=True)
+                for i, r in enumerate(results, 1):
+                    rid = f"R{i:03d}"
+                    atomic.write_bytes(_dir(out, s["id"]) / f"renders/{rid}.webm", (p / r["file"]).read_bytes())
+                    s.setdefault("renders", []).append({"id": rid, "pack_id": e.get("pack_id"), "preset": "burst", "params": r.get("params") or {}, "source": "own",
+                                                        "file": f"renders/{rid}.webm", "bytes": r.get("bytes") or 0, "status": r.get("status"), "checks": r.get("checks") or [],
+                                                        "warnings": r.get("warnings") or [], "blocks": r.get("blocks") or [], "metrics": r.get("metrics") or {},
+                                                        "created": e.get("created"), "added_to": None, "added": [], "from": f"{p.name}/{r['id']}"})
+                s["motion"] = {"preset": "burst", "params": results[0].get("params") or {}}
+            s["name"] = f"{e.get('pack_name') or 'Particles'} · {'Kling' if mode == 'video' else 'sprites'} ({p.name})"
+            s["saved_at"] = e.get("created") or s.get("created")
+            hist(s, user, "ADOPT", f"saved as a row from the older run {p.name}", {"effect": p.name})
+            _write(out, s)
+        made.append({"effect": p.name, "set": s["id"], "mode": mode, "owners": [o["sticker_id"] for o in s.get("owner") or []]})
+    return made
 
 
 # ---------- delete / restore: nothing is destroyed on a click (rule 9's spirit) ----------
@@ -815,8 +1371,8 @@ def delete(out: Path, lib, pid: str, *, confirm_packs: bool = False, user: str =
     """Move the set to `out/trash/particles/P###/`. A set that is assigned to packs **says which** and needs `confirm_packs` (the screen asks first):
     without it the call is refused with the list, so a set in use can never disappear under a pack by accident. Nothing is deleted from disk."""
     with _LOCK:
-        s = read(out, pid)
-        used = list(s.get("packs") or [])
+        s = migrate(out, lib, pid)
+        used = _derived(s)["packs"]
         if used and not confirm_packs:
             raise SetError(f"This set is used by {', '.join(n['name'] for n in pack_names(lib, used))}. Deleting it takes it off those packs; "
                            f"confirm to go on.", 409)
@@ -825,6 +1381,7 @@ def delete(out: Path, lib, pid: str, *, confirm_packs: bool = False, user: str =
         src, dst = _dir(out, pid), trash_dir(out) / str(pid).upper()
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(src), str(dst))
+        _sync_links(lib, {"id": s["id"], "owner": []})
     return {"ok": True, "id": str(pid).upper(), "trashed": True, "was_in": used}
 
 
@@ -849,7 +1406,7 @@ def list_deleted(out: Path, lib) -> list[dict]:
     rows = []
     for p in sorted(trash_dir(out).glob("P[0-9]*")):
         try:
-            s = json.loads(atomic.read_text(p / "set.json"))
+            s = _derived(json.loads(atomic.read_text(p / "set.json")))
         except (OSError, ValueError):
             continue
         cells = [cell_view(out, p, c, "trash/particles") for c in s.get("cells") or []]

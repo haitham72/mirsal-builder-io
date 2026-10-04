@@ -190,6 +190,8 @@ function cardHTML(c,m,i){
     <div class=plan-tags>${(it.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div></div>`).join('')}
    ${(c.assumed||[]).map(x=>`<div class=multi-assume>${AIU.esc(x)}</div>`).join('')}
    <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`All together <b>${AIU.credits(c.estimate)}</b>${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}</div></div></div>`}
+ if(c.type==='particles_approve')return `<div class="ai-card plan"><p>Approve this batch as a pack first, so the particles have a sticker to live in</p><button class="btn pri" data-act=agpapprove data-g=${AIU.esc(c.generation)}>Approve as a pack</button></div>`;
+ if(c.type==='particles_scope')return `<div class="ai-card plan"><b>Particles · ${AIU.esc(c.pack)}</b><button class="btn pri" data-act=agpscope data-p=${AIU.esc(c.pack_id)} data-k=${AIU.esc(c.kind||'drawn')} data-id=${AIU.esc(c.set||'')}>${c.kind==='video'?'Video from scratch':'Create particles'}</button></div>`;
  if(c.type==='effects')return `<div class="ai-card plan"><div class=ai-ch><b>Particle effects · ${AIU.esc(c.id)}</b><small>${AIU.esc(c.pack)} · ${c.count} stickers</small><span class=sp></span><a class=ai-link href="#/effects/${AIU.esc(c.id)}">Open effects</a></div></div>`
  if(c.type==='particles_plan')return `<div class="ai-card plan"><div class=ai-ch><b>${c.op==='more'?'More particles':'Particles'} · ${AIU.esc(c.op==='more'?(c.name||c.set):c.pack)}</b><small>${AIU.esc(c.grid)} · ${(c.elements||[]).length} particles</small></div>
    <div class=plan-tags>${(c.elements||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div>

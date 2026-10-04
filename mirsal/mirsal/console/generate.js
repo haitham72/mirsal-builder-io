@@ -390,7 +390,7 @@ ACT.grm=()=>{const gs=sessionGens();if(!gs.length)return;
   confirmDlg(grmText(gs),async()=>{for(const g of gs){const r=await post(`/api/generations/${g.number}/remove`,{});if(!r.ok){toast(r.j.error,1);return}}
     const gone=gs.map(g=>g.number);SES.gens=SES.gens.filter(id=>!gone.includes(id));saveSes();gone.forEach(n=>GM.delete(n));HB.items=HB.items.filter(x=>!gone.includes(x.id));
     glast='';await remLoad();histLoad(false);tick(true)},'Remove')};
-ACT.gtab=el=>{GS.tab=el.dataset.t;glast='';tick(true)};
+ACT.gtab=el=>{if(el.dataset.t==='particles'&&typeof ACT.spopen==='function')return ACT.spopen(el);GS.tab=el.dataset.t;glast='';tick(true)};
 
 /* ---------- Animate, Add: both act on the included batches of the session. */
 
@@ -402,7 +402,7 @@ ACT.ganimate=async el=>{const todo=included().filter(g=>g.source.has_video&&!ani
 let PW=null;
 const rname=k=>{const t=String(k).replace(/[-_]+/g,' ').trim();return(t.charAt(0).toUpperCase()+t.slice(1)).slice(0,60)};
 const PWBG=[['chat','Chat'],['light','Light'],['dark','Dark'],['checker','Transparent'],['wall','Wallpaper']];
-ACT.gadd=async el=>{await loadLib();const inc=included(),rows=[];
+ACT.gadd=async el=>{await loadLib();const inc=el&&el.dataset.g?included().filter(g=>spGid(g.generation_id)===spGid(el.dataset.g)):included(),rows=[];
   for(const g of inc)for(const t of keptOf(g))rows.push({g:g.number,gen:g.generation_id,i:t.index,anim:animPhase(g),src:`/out/${g.generation_id}/${animPhase(g)?t.webm:t.png}`,name:rname(t.key),emoji:t.emoji,file:t.name});
   if(!rows.length)return;
   const ps=LIB.packs,def=SES.pack&&packById(SES.pack)?SES.pack:'',base=titleCase(inc[0].source.subject);
@@ -448,6 +448,7 @@ async function gaddrun(pid,mode,names){let added=0,replaced=0,err='';const edge=
   gens=[...new Set(PW.rows.map(r=>r.g))].map(n=>GM.get(n)).filter(Boolean);
   for(const g of gens){if(!keptOf(g).length)continue;const r=await postWait(`/api/generations/${g.number}/add`,{pack_id:pid,mode,names:(names||{})[g.number]||{}});if(r.ok){added+=r.j.added;replaced+=r.j.replaced||0}else err=r.j.error}
   await loadLib();PW.pid=pid;SES.pack=pid;saveSes();glast='';tick(true);
+  if(!err&&typeof spAfterPack==='function')await spAfterPack();
   if(err)toast(err,1);else toast(replaced?`Replaced ${replaced} still${replaced===1?'':'s'} with animated stickers in “${packById(pid).name}”`:added?`Added ${added} to “${packById(pid).name}”`:'Those are already in that pack')}
 /* Open the pack this view just added to */
 ACT.gopenpack=()=>{const pid=(PW&&PW.pid)||SES.pack;if(pid)location.hash='#/pack/'+pid};

@@ -95,10 +95,10 @@ const fxSticker=(e,sid)=>{const p=packById(e.pack_id),s=p&&p.stickers.find(x=>x.
 function fxPieces(X,g){return `<div class=fx-pieces>${g.elements.map((x,i)=>`<span class=fx-chip>${esc(x)}<button data-act=fxdelpiece data-g=${g.id} data-i=${i} aria-label="Remove ${esc(x)}">${ic('x')}</button></span>`).join('')}
  <input class=fx-add type=text placeholder="add a particle" data-fxadd=${g.id}><button class="btn sm" data-act=fxaddpiece data-g=${g.id}>Add</button></div>`}
 function fxVideoPanel(X,e,g){const v=(e.video||{})[g.id]||{},est=X.est[g.id+e.grid.join('x')];
- if(v.status==='REQUESTED'){const j=v.live||{};return `<div class=fx-job>${fxJobBad(j)?`<b class=bad>The video failed</b><div class=mut>${esc(j.error||'')}</div><button class="btn" data-act=fxvideo data-g=${g.id}>Try again</button>`:`<span class=spin></span> <b>Making the video</b> <span class=mut>${esc(v.job||'')} · ${esc(j.stage||j.status||'waiting')}</span>`}</div>`}
+ if(v.status==='REQUESTED'){const j=v.live||{};return `<div class=fx-job>${fxJobBad(j)?`<b class=bad>The video failed</b><div class=mut>${esc(j.error||'')}</div><button class="btn" data-act=fxvideo data-g=${g.id} ${est&&est.credits!=null?'':'disabled'}>Try again</button>`:`<span class=spin></span> <b>Making the video</b> <span class=mut>${esc(v.job||'')} · ${esc(j.stage||j.status||'waiting')}</span>`}</div>`}
  return `<div class=fx-job><span class=mut>${e.grid[0]} x ${e.grid[1]} cells, screen ${esc(g.key)}, Kling pro 3 s, no start image.</span>
-  <div class=fx-price data-fxest=${g.id}>${est&&est.credits!=null?`about ${est.credits} credits`:''}</div>
-  <button class="btn pri" data-act=fxvideo data-g=${g.id}>${ic('film')} Make the video</button>${v.status==='DONE'?`<small class=mut>Made (${v.cells} cells, ${v.cost!=null?v.cost+' credits':''}). Make another to get more takes.</small>`:''}</div>`}
+  <div class=fx-price data-fxest=${g.id}>${est&&est.credits!=null?`about ${est.credits} credits`:est?'The price is unavailable.':'Getting the price…'}</div>${est&&est.credits==null?`<button class=link data-act=fxprice data-g=${g.id}>Retry price</button>`:''}
+  <button class="btn pri" data-act=fxvideo data-g=${g.id} ${est&&est.credits!=null?'':'disabled'}>${ic('film')} Make the video</button>${v.status==='DONE'?`<small class=mut>Made (${v.cells} cells, ${v.cost!=null?v.cost+' credits':''}). Make another to get more takes.</small>`:''}</div>`}
 /* ---------- the drawn particles: ideas -> pick the names -> price -> draw -> tick the cells -> the simulation uses them
    POST suggest {grid, allow_vlm} (the vision model looks at the batch's sheet) -> particles_estimate {grid, elements} -> particles {grid, elements, go} -> the effect's `set` (REQUESTED, then DRAWN with
    its batch) -> the cells are the batch's stickers -> particles_pick {indexes}. Nothing is blocked: every cell with a picture can be used, a warning is a sentence. */
@@ -199,15 +199,15 @@ function fxGroupHtml(X,e,g){
  return `<section class=fx-g><header><b>${esc(g.subject)}</b><span class="fx-key ${esc(g.key)}">screen ${esc(g.key)}</span><small class=mut>particles chosen by ${g.by==='vlm'?'the vision model':g.by==='you'?'you':'the built-in table'}</small></header>
   ${fxPieces(X,g)}<div class=fx-gst>${g.stickers.map(sid=>{const s=fxSticker(e,sid);return s?`<span class=fx-th title="${esc(s.name)}">${media(s)}</span>`:''}).join('')}</div>${fxVideoPanel(X,e,g)}</section>`}
 function fxResults(X,e){const rs=e.results||[];if(!rs.length)return '';const n=X.pick.size;
- return `<div class=sh style="margin-top:22px">Results <button class=link data-act=fxpickall>select all that can be added</button></div><div class=fx-res>${rs.map(r=>{
+ return `<details class=fx-original><summary>Original sprite clips</summary><div class=sh style="margin-top:22px">Results <button class=link data-act=fxpickall>select all that can be added</button></div><div class=fx-res>${rs.map(r=>{
   const ok=r.status==='READY',ws=(r.checks||[]).filter(c=>c.verdict==='WARN'),bl=(r.checks||[]).filter(c=>c.verdict==='BLOCK'),on=X.pick.has(r.id);
   return `<div class="fx-r${on?' on':''}${ok?'':' bad'}"><div class=fx-rv>${r.file?`<video src="/out/effects/${e.id}/${r.file}" autoplay loop muted playsinline></video>`:'<span class=mut>no file</span>'}</div>
    <div class=fx-rm><b>${esc(r.id)} · ${r.mode==='video'?'cell '+r.cell:esc((fxSticker(e,r.sticker_id)||{}).name||'')}</b><small>${Math.round((r.bytes||0)/1024)} KB · ${esc(String(r.status).toLowerCase())}</small>
    ${bl.map(c=>`<span class="fx-w bad" title="${esc(c.detail||'')}">${esc(fxWords(c.id))}</span>`).join('')}${ws.map(c=>`<span class=fx-w title="${esc(c.detail||'')}">${esc(fxWords(c.id))}</span>`).join('')}
    ${r.added_to?'<small class=mut>added to the pack</small>':''}${ok?`<button class="btn sm${on?' pri':''}" data-act=fxpick data-id=${r.id}>${on?'Selected':ws.length?'Use it anyway':'Use'}</button>`:''}</div></div>`}).join('')}</div>
-  <div class=row><button class="btn pri gbig" data-act=fxadd ${n?'':'disabled'}>Add ${n||''} to ${esc(e.pack_name||'the pack')}</button><span class=mut>Warnings are only warnings: you decide. A particle sticker keeps the emoji of its source and is saved under that sticker.</span></div>`}
+  <div class=row><button class="btn pri gbig" data-act=fxadd ${n?'':'disabled'}>Add ${n||''} sprite clips</button><span class=mut>Warnings are only warnings: you decide. A particle sticker keeps the emoji of its source and is saved under that sticker.</span></div></details>`}
 function fxBody(X,e){const sim=e.mode==='sim';
- return (e.notes||[]).map(n=>`<div class=mut style="margin-top:6px">${esc(n)}</div>`).join('')+(sim&&X.src!=='own'?fxDrawn(X,e):'')+(sim?fxSaveBlock(X,e)+fxMotion(X,e):(e.groups||[]).map(g=>fxGroupHtml(X,e,g)).join(''))+fxResults(X,e)}
+ return (e.notes||[]).map(n=>`<div class=mut style="margin-top:6px">${esc(n)}</div>`).join('')+(sim&&X.src!=='own'?fxDrawn(X,e):'')+(sim?fxSaveBlock(X,e)+fxMotion(X,e):(e.groups||[]).map(g=>fxGroupHtml(X,e,g)).join('')+fxSaveBlock(X,e)+fxMotion(X,e))+fxResults(X,e)}
 /* Motion (a simulation): ONE section for the whole run, whatever its stickers or groups (docs/particles_plan.md section 4). The burst is made from the SET for the PACK, so it waits for the run to be saved as a set;
    then the panel is the set's own (spBurstHtml: one preview, the presets, Energy / Float / Swirl, Render, Add). */
 function fxMotion(X,e){const s=X.set;
@@ -221,19 +221,20 @@ function fxRecord(){const e=FX.rec;if(!e)return '';
  return head+fxBody(FX,e)}
 function fxDraw(){const el=$('s-effects');if(!el)return;el.innerHTML=`<div class="page fx" data-fxx=fx>${FX.eid?fxRecord():fxSetup()}</div>`;FX.last=fxSig(FX);fxAfterDraw(FX)}
 /* what a freshly drawn effect asks for: the ideas and the price of the drawn sheet, the first preview of the set's burst, the price of a video */
-function fxAfterDraw(X){const e=X.rec;if(!e||!['READY','RESULTS','VIDEO_REQUESTED','DONE'].includes(e.status))return;
- if(e.mode==='sim'){fxDrNeeds(X);if(X.set&&typeof spBurstPreview==='function'){const b=typeof SPB!=='undefined'?SPB[X.set.id]:null;if(!b||!b.pv)spBurstPreview(X.set.id)}}
+function fxAfterDraw(X){if(X.who==='sp'&&typeof spAfterDraw==='function')return spAfterDraw();const e=X.rec;if(!e||!['READY','RESULTS','VIDEO_REQUESTED','DONE'].includes(e.status))return;
+ if(e.mode==='sim')fxDrNeeds(X);if(X.set){if(X.set&&typeof spBurstPreview==='function'){const b=typeof SPB!=='undefined'?SPB[X.set.id]:null;if(!b||!b.pv)spBurstPreview(X.set.id)}}
  if(e.mode==='video')for(const g of e.groups)fxEstimate(X,g.id)}
 async function fxEstimate(X,gid){const e=X.rec,k=gid+e.grid.join('x');if(X.est[k]||X.busy[k])return;X.busy[k]=1;
- const r=await post(`/api/effects/${e.id}/estimate`,{group:gid});X.busy[k]=0;
- X.est[k]=r.ok?r.j:{credits:null};if(X.alive()&&X.rec&&X.rec.id===e.id){const b=X.root().querySelector(`[data-fxest=${gid}]`);if(b&&r.ok&&r.j.credits!=null)b.textContent=`about ${r.j.credits} credits`}}
+ const r=await post(`/api/effects/${e.id}/estimate`,{group:gid,...(X.who==='sp'&&X.note?{elements:spPromptElements(X.note,X.grid),subject:X.note}: {})});X.busy[k]=0;
+ X.est[k]=r.ok?r.j:{credits:null};if(X.alive()&&X.rec&&X.rec.id===e.id){if(X.who==='sp')return X.draw();const b=X.root().querySelector(`[data-fxest=${gid}]`);if(b&&r.ok&&r.j.credits!=null){b.textContent=`about ${r.j.credits} credits`;const btn=X.root().querySelector(`[data-act=fxvideo][data-g="${gid}"]`);if(btn)btn.disabled=false}}}
+ACT.fxprice=el=>{const X=fxX(el);delete X.est[el.dataset.g+X.rec.grid.join('x')];fxEstimate(X,el.dataset.g).then(()=>X.draw())};
 
 /* ---------- editing the elements of a video */
 async function fxPlan(X,body){const r=await post(`/api/effects/${X.eid}/plan`,body);if(!r.ok)return toast(r.j.error||'Not possible',1);X.rec=r.j;X.est={};await fxLoad(X);X.draw()}
 ACT.fxdelpiece=el=>{const X=fxX(el),g=X.rec.groups.find(x=>x.id===el.dataset.g);if(!g)return;const els=g.elements.filter((_,i)=>i!==+el.dataset.i);if(!els.length)return toast('Keep at least one particle',1);fxPlan(X,{group:g.id,elements:els})};
 function fxAddPiece(X,gid,value){const g=X.rec.groups.find(x=>x.id===gid),v=String(value||'').trim();if(!g||!v)return;fxPlan(X,{group:g.id,elements:g.elements.concat(v)})}
 ACT.fxaddpiece=el=>{const X=fxX(el),i=X.root().querySelector(`[data-fxadd="${el.dataset.g}"]`);fxAddPiece(X,el.dataset.g,i?i.value:'')};
-ACT.fxvideo=async el=>{const X=fxX(el),g=el.dataset.g;el.disabled=true;
+ACT.fxvideo=async el=>{const X=fxX(el),g=el.dataset.g,est=X.est[g+X.rec.grid.join('x')];if(!est||est.credits==null)return;el.disabled=true;
  const r=await post(`/api/effects/${X.eid}/video`,{group:g,go:true});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not start',1)}
  toast(`Started: ${r.j.estimate!=null?r.j.estimate+' credits':'the price is shown in your ledger'}`);await fxLoad(X);X.draw()};
 
@@ -255,27 +256,20 @@ const fxGen=n=>'G'+String(n).padStart(3,'0');
 function fxSaved(X,e){const t=X.set;if(!t)return false;const n=fxSetGen(e),s=fxSet(e);
  if(s&&s.status==='DRAWN'&&n&&Array.isArray(s.picked)&&s.picked.length)return (t.source||{}).generation===fxGen(n);
  return true}
-function fxSaveBlock(X,e){if(fxSaved(X,e))return '';
+function fxSaveBlock(X,e){if(fxSaved(X,e))return '<div class=fx-save><button class="btn pri" data-act=fxopenset>Open in simulator</button></div>';
+ if(e.mode==='video'){const n=(e.results||[]).filter(r=>r.mode==='video'&&r.file).length;return n?`<div class=fx-save><b>From Kling video · ${n} cells</b><button class="btn pri" data-act=fxuseset data-v=video>Use in simulator · free</button></div>`:'';}
  const s=fxSet(e),n=s&&s.status==='DRAWN'&&Array.isArray(s.picked)?s.picked:[];
- if(n.length)return `<div class=fx-save><b>Keep these particles</b><span class=mut>Save the ${n.length} drawn particles as a particle set${e.pack_name?` for ${esc(e.pack_name)}`:''}: it lives in the Library, outlives this run, and other packs can use it.</span><button class="btn pri" data-act=fxuseset data-v=drawn>Use as particle set</button></div>`;
+ if(n.length)return `<div class=fx-save><b>Keep these particles</b><button class="btn pri" data-act=fxuseset data-v=drawn>Use in simulator · free</button></div>`;
  return `<div class=fx-save><b>Or use the pack’s own stickers</b><span class=mut>Free. Nothing is drawn: the stickers of ${esc(e.pack_name||'the pack')} fly out as the particles.</span><button class="btn" data-act=fxuseset data-v=stickers>Use the pack’s stickers as the set</button></div>`}
 const fxPendingSet={eid:'',who:'fx',picked:null};
-function fxUseSetDlg(X,kind){const e=X.rec,s=fxSet(e),drawn=kind==='drawn'&&!!s&&s.status==='DRAWN'&&Array.isArray(s.picked)&&s.picked.length>0;
- if(kind==='drawn'&&!drawn)return;
- const packs=(typeof LIB!=='undefined'&&LIB.packs)||[];
- fxPendingSet.eid=e.id;fxPendingSet.who=X.who;fxPendingSet.picked=drawn?s.picked.map(fxNum):null;
- dlg(`<h2>${drawn?'Use as particle set':'Use the pack’s stickers as a set'}</h2><div class=mut style="margin-bottom:10px">${drawn?`${fxPendingSet.picked.length} drawn cells travel with it.`:`The ${(e.stickers||[]).length} sticker${(e.stickers||[]).length===1?'':'s'} of this run are the particles; nothing is drawn.`} The run stays as it is: nothing is moved or deleted.</div>
-  <div class=fld><label>Name</label><input type=text id=psname value="${esc(`${e.pack_name||'Particles'} ${drawn?'particles':'stickers'}`)}"></div>
-  <div class=fld><label>Where does it live</label>${packs.map(p=>`<label class=ps-pack><input type=checkbox data-pspack=${esc(p.id)} ${p.id===e.pack_id?'checked':''}> ${esc(p.name)}</label>`).join('')||'<div class=mut>No packs yet.</div>'}
-  <div class=mut>Tick packs, or nothing for a stand-alone set.</div></div>
-  <div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=psusesave>Save particle set</button></div>`);
- const i=$('psname');if(i){i.focus();i.select()}}
-ACT.fxuseset=el=>fxUseSetDlg(fxX(el),el.dataset.v==='stickers'?'stickers':'drawn');
-ACT.psusesave=async()=>{const i=$('psname'),packs=[...document.querySelectorAll('[data-pspack]')].filter(c=>c.checked&&c.dataset.pspack).map(c=>c.dataset.pspack);
- const r=await post('/api/particles',{from_effect:fxPendingSet.eid,name:((i&&i.value)||'').trim()||undefined,packs,...(fxPendingSet.picked?{picked:fxPendingSet.picked}:{})});
- if(!r.ok)return toast(r.j.error||'Could not save it',1);
- closeDlg();if(typeof spSetsForget==='function')spSetsForget();
- const X=FXS[fxPendingSet.who];
- if(X&&X.eid===fxPendingSet.eid&&X.alive()){toast(`Saved ${r.j.id||'the set'}: now give it motion below`);await fxLoad(X);X.draw();const m=X.root().querySelector('.fx-mo');if(m&&m.scrollIntoView)m.scrollIntoView({behavior:'smooth',block:'start'});return}
- toast(`Saved ${r.j.id||'the set'}: ${r.j.n_cells!=null?r.j.n_cells:0} particles`);
- if(typeof LIBTAB!=='undefined')LIBTAB='particles';location.hash='#/library'};
+function fxOpenSimulator(X,set,owners){const e=X.rec;if(typeof spEnter==='function'){spEnter({pack_id:e.pack_id,sticker_ids:owners.map(o=>o.sticker_id)});SP.entry=(SP.entry||0)+1;SP.set=set;SP.target=set.id;SP.eid='';SPL.detail[set.id]=set;spDraw();spBurstPreview(set.id);return}X.set=set;X.draw()}
+ACT.fxopenset=el=>{const X=fxX(el);if(!X.set)return;const owners=X.set.owner||[];fxOpenSimulator(X,X.set,owners.length?owners:(X.rec.stickers||[]).map(st=>({pack_id:X.rec.pack_id,sticker_id:st.sticker_id})))};
+async function fxUseSetDlg(X,kind){const e=X.rec,s=fxSet(e);if(!e)return;
+ const owners=X.who==='sp'?spOwners(SP):(e.stickers||[]).map(st=>({pack_id:e.pack_id,sticker_id:st.sticker_id}));
+ const picked=kind==='drawn'&&s?s.picked:kind==='video'?(e.results||[]).filter(r=>r.file).map(r=>r.cell):null;
+ const r=await post('/api/particles',{from_effect:e.id,owners,target:X.target||undefined,...(picked?{picked}:{})});
+ if(!r.ok)return toast(r.j.error||'Could not use the sprites',1);
+ if(typeof spSetsForget==='function')spSetsForget();await loadLib();
+ fxOpenSimulator(X,r.j,owners)}
+ACT.fxuseset=el=>fxUseSetDlg(fxX(el),el.dataset.v);
+ACT.psusesave=()=>fxUseSetDlg(FXS[fxPendingSet.who],'drawn');

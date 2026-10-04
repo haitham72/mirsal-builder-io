@@ -1,31 +1,29 @@
-# docs/effects.md — particle effects: the burst that Telegram plays when you press an emoji
+# Particle effects: sprites, simulation and Kling
 
-> **2026-10-03 (later): the wizard's Motion and Finish steps are the SET's now: ONE preview for the pack (`particles.js` `spBurstHtml`, `POST /api/particles/{id}/preview | render | add`), no row per sticker; a run is saved as a set first (`effect.sets[]`). The `/api/effects/{id}/preview | render | add` routes below still work (the working session, old results).**
-> **2026-10-03: the per-sticker model below (an effect and a gallery per sticker) is being replaced by [particles_plan.md](particles_plan.md): a durable Particle set belongs to pack(s) or stands alone. Read that plan first.**
+The durable asset is a sticker-owned particle set; [particles_plan.md](particles_plan.md) describes ownership, persistence and compatibility. This document covers the working `E###` pipeline and its measurements. The current full-flow correction is [sticker_particles_flow.md](sticker_particles_flow.md): animated cell clips must play inside the simulator, with peak PNGs used as posters/fallbacks. Animated restoration and compact UI acceptance are underway; they are not declared complete here.
 
-**Status (2026-10-02): built and tested: the engine, the prompts, the vision step, the `E###` lifecycle, the `/api/effects` routes, and the screen (Create > Particle effects, `#/effects`, checked in a browser on a scratch copy). The AI-chat entry is built (§8). Built 2026-10-03: the AI-drawn pieces sheet and the per-sticker particles gallery (§8). NOT built: real tile art / examples (§8).**
-Haitham asked for this on 2026-10-02: when someone presses an emoji in Telegram a burst of small pieces explodes from it (a strawberry bursts strawberries, a heart hearts). The product
-is the same thing as **animated stickers**: one 3-second WEBM per effect, starting from nothing and ending with nothing, tagged with the source emoji.
+The final burst is an ordinary animated Telegram sticker in the selected parent pack. Emoji tags make it discoverable; Mirsal does not promise Telegram's native Premium effect behavior. Output is 3-second WEBM/VP9 with alpha, 512×512, 30 fps, ≤256 KB.
 
 ## 1. What an effect is
 
-- **Input: a pack** (an emoji / sticker pack in the library). The effect is made per sticker of the pack, and the effect stickers are added to the same pack (or a new one) as animated
-  stickers linked to their source and tagged with its emoji (Telegram then offers them for that emoji).
+- **Input: selected library stickers.** Their pack supplies context and is the default output destination. Working runs retain pack/group context for legacy routes; durable ownership remains in stickers.
 - **Smart, not literal.** The burst is made of *related pieces*, never the picture itself: Batman gives bat signals and bats (not Batman), Superman cape pieces and shield badges, a jewelry
   sticker small gold bars and diamonds, a cat paws / ears / fish, a heart hearts, a strawberry strawberries + leaves + seeds. A vision model reads each sticker (`vision/effect_plan.py`) and
   answers a small JSON `{subject, elements, mood}`; code lints it; a table of ~60 emoji and subjects (`LEXICON`) answers when no model may or can. A pack of eight Superman poses is ONE group
   (one video / one sprite sheet), and a sticker's mood picks its motion (sad rains, happy bursts, calm is a fountain).
 - **Output: Telegram video stickers.** WEBM VP9 + alpha, 512 x 512, 30 fps, 3 s, <= 256 KB, empty on the first and the last frames (`engine/effect_video.py`, `engine/particles.py`).
 
-## 2. Two ways to make the burst (both built at the engine level)
+## 2. Sprite sources, one simulator
 
-| | A. Simulated (`engine/particles.py`) | B. Video from scratch (`generation/effect_prompts.py`, `engine/effect_video.py`) |
-|---|---|---|
-| pieces | sprites: the pack's own stickers, or an AI-drawn sheet of the pieces (an ordinary batch through the golden path, cut into cells) | whatever Kling draws from the text |
-| motion | a seeded, deterministic simulator with sliders: **explosion magnitude, gravity (negative floats up), vortex (swirl, either direction)**, plus count, size, spin, lifetime, presets (burst, fountain, vortex, rain, confetti) | Kling, from a timeline in the prompt |
-| cost | the sprite sheet (about 2 credits per subject group) once; every re-tune is free | **4.5 credits per clip** (Kling pro, 3 s, 1:1) for 4 cells (2x2) or 9 (3x3) |
-| start / end empty | by construction (pieces spawn from frame 3 and are all gone 0.2 s before the end) | asked for in the prompt, checked, and repaired by `settle` (a fade) |
-| preview | the same engine at 256 px (0.15 s), so the sliders are live | no |
+The editor offers three equal cards for every new version: **Sprites from the sticker** (selected slices/library artwork, free), **AI image sprites** and **Kling animated · from scratch**. All paths feed one simulator, and each saved pass is one row under the sticker (`docs/particles_plan.md` §3). Add more retains both AI choices regardless of a set's initial source. Provider options live under Advanced, not in an extra creation screen.
+
+| Source | Preparation | Simulation input |
+| --- | --- | --- |
+| AI image sheet | 2×2/3×3 through the particle-sheet pipeline, keyed and cut to tight sprites | Static RGBA frames |
+| Kling animated sheet | Text-only nothing-to-nothing 2×2/3×3, keyed and sliced to cell clips | Each sprite's temporal RGBA frames; poster PNG only for thumbnails/fallback |
+| Existing artwork | Selected batch slices or library still/animated stickers copied without deleting originals | Static or animated frames matching the source |
+
+`engine/particles.py` supplies seeded motion, presets and the Energy / Float / Swirl controls. Sprite animation plays alongside movement, spin, scale and fade. Preview and final render use the same simulator; motion tuning is free. Directly adding a cut Kling clip through legacy `/api/effects/{id}/add` remains available as a secondary action.
 
 ## 3. Video from scratch: what was measured (real Kling, 2026-10-02)
 
@@ -57,7 +55,7 @@ Anim checks that describe a character that stays itself (`loop_seam`, `alpha_sta
 
 ## 5. Money and concurrency
 
-- Nothing is spent without the price shown and a go-ahead (rule 13). A real video costs 4.5 credits; the page shows it before the click.
+- Nothing is spent without the price shown and a go-ahead (rule 13). The measured 2026-10-02 video price was 4.5 credits; current calls use the actual free quote, shown on its own line before Generate. Unknown quotes offer Retry price and start nothing.
 - Several provider jobs may be in flight at once (Haitham, "all at once"): `jobs.fulfil` now holds the paid lock only while it decides, checks the daily cap, creates the job and stores its
   ticket; the wait is outside it, bounded by `MIRSAL_PAID_PARALLEL` (default 3, 1 = the old one-at-a-time), and the daily cap counts the jobs already in flight. One waiter per ticket.
 
@@ -68,7 +66,7 @@ Anim checks that describe a character that stays itself (`loop_seam`, `alpha_sta
 | `engine/particles.py` | `ParticleParams`, `PRESETS`, `simulate(sprites, params) -> frames`, `to_webm`, `preview_webp` (pure, deterministic, 0.5 s at 512 px) |
 | `engine/effect_checks.py` | the PASS / WARN checks, `coverage_curve` |
 | `engine/effect_video.py` | `cut_cells` (key a returned clip into cells), `resample` (Telegram's clock), `settle` (empty ends by construction), `finish_cell`, `encode_and_check` (shared with mode A) |
-| `generation/effect_prompts.py` | template `effect_video` v1: `lint_plan`, `video_prompt`, `key_colour_for`, `describe`; template `effect_pieces` v1 (the pieces sheet): `pieces_cells`, `pieces_prompt`, `describe_pieces` |
+| `generation/effect_prompts.py` | template `effect_video` v2 (v1 retained for stored jobs): `lint_plan`, `video_prompt`, `key_colour_for`, `describe`; template `effect_pieces` v2 (the image-sprite sheet): `pieces_cells`, `pieces_prompt`, `describe_pieces` |
 | `flow/effects.py` | the `E###` lifecycle; `pieces_base_plan` / `pieces_plan` / `request_pieces` / `link_pieces` (the drawn sheet); `for_sticker` / `counts_for_pack` (the gallery) |
 | `console/effects.js`, `console/packs.js` | the effects screen (incl. the pieces panel `fxPiecesPanel`); the sticker view's Particles section (`ptHtml`, `ptCard`, `ptBadge`) and the pack grid counter |
 | `vision/effect_plan.py` | `analyse(stickers, allowed=...)` (vision model or table, groups, moods -> presets, consent as for captions), `lexicon_plan` |
@@ -83,25 +81,25 @@ file, bytes, status, checks, warnings, blocks, metrics, params, added_to}], hist
 `GET /api/effects/{id}`, `POST .../analyse | plan | estimate | video | preview | render | add`. The analysis runs in a background thread (consent: `allow_vlm`), the video needs `go: true`, a result that breaks a
 Telegram limit is FAILED and cannot be added, everything else can. **Adding is the person's click** (history `APPROVE`); a video result goes to the stickers of its group cell by cell (round robin).
 
-## 8. The screen (built) and what is open
+## 8. Screens and remaining acceptance
 
-The screen (`console/effects.js`, `studio.css` `.fx-*`): 1 choose the pack, 2 which stickers, 3 Simulate or Video (2x2 default, a warning on 3x3), a note for your own pieces, then the effect: per group the pieces
-(editable chips, the screen colour, who chose them), Simulate rows with presets, **explosion / gravity / vortex / pieces / spin sliders** and a live preview (debounced, the same engine at 256 px), Render; Video with the
-price in the button (`estimate`, free) and the job's state; the results with their warnings in words and "Add N to the pack". The Queue pill cannot cover the last buttons (`.page.fx` bottom padding).
+New entry points use the scoped editor (`console/particles.js`, common helpers in `effects.js`). The clicked sticker/batch establishes the target; a batch outside the library offers Approve as a pack and continues automatically. Image, animated and existing sources feed the same sprite selection and simulator. See [design.md](design.md) for compact copy and control placement.
 
-**The pieces sheet (built 2026-10-03; the burst is no longer the same sticker repeated).** In a simulated group the first choice is "Draw N pieces with AI": a 2x2 (default) or 3x3 sheet of DIFFERENT small pieces of the group's elements (Batman: bat signal, bat, cape fragment, mask piece), drawn through the normal sheet pipeline (Nano Banana 2), no outline, on the screen colour, cut into cells; the READY cells are the sprites of the burst. `POST /api/effects/{id}/pieces_estimate | pieces {group, grid?, estimate?, go?}` follows the video contract (price first; 409 with the estimate unless `go: true`; 202 `{job, task, estimate, id, group, grid}`); the job request carries `outline: 0` and `pieces: {effect, group}`; `Console.start_from_job` (thread mode and queue mode alike) links the batch with `flow.effects.link_pieces`: `group.sprites = {generation: N}` and `group.pieces = {generation, job, grid, status: REQUESTED | DRAWN}`. A cell with only WARNs is used; BLOCKED / REJECTED cells are skipped; with no usable cell `sprites_of` answers a 409 with the reason. The old options (the stickers themselves, a batch number) stay as secondary choices.
+The batch/sticker gallery combines owner sets with legacy created/saved results; the pack view displays its stickers' union. Kind, job and credits remain accessible. Adding a rendered burst affirms it. A set with no cells still counts as created; a detached set remains attachable. The explicit old `#/effects/E###` route is retained for one release.
 
-**The particles gallery on every sticker (built 2026-10-03).** `flow.effects.for_sticker(out, lib, pack_id, sticker_id)` lists what was made for a sticker: `created` (sim results of that sticker, and every cell of its group's video as a shared take, `assigned` marking the cell Add would give it) and `saved` (library stickers whose `source.source_sticker` is it). `GET /api/packs/{pack}/stickers/{sid}/particles` (a member gets an empty answer) and `GET /api/packs/{pack}/particles` (counts per sticker for the grid badge). `added_to` is the library's word, not the effect file's flag (a deleted saved sticker reads as not added). `POST /api/effects/{id}/add` accepts `sticker_ids` (one video cell for one sticker). The sticker view (library carousel) shows the Particles section: looping thumbnails, warnings in words, "Add to pack", "Open effect", and "Make particles" when there are none (it opens `#/effects` with the pack and the sticker chosen).
+Legacy cut results are sprites within a run. `particle_sets.for_sticker` adds `runs[]`, grouping `created[]` and effect-linked `saved[]` by E### and recording `imported_as[]` owned set IDs. The sticker-window gallery is being integrated to display set/run cards with sprite strips and **Open in simulator**, not one full particle-pack card per slice. Raw clip Add is secondary under collapsed compatibility details. Existing raw result arrays and legacy Add routes stay available for one release; browser acceptance includes the real lightbox loader target and grouped display.
 
-Open:
-1. **The AI chat entry (built 2026-10-03)**: intent `EFFECTS` (`resolver.classify`: particle / burst / explosion / confetti + effect / pack / sticker / emoji), node `graph.n_effects`: finds the library pack the words name (or the only pack; else asks which, with chips), calls `tools.effects_start` (the same `fx.create` + background `analyse` as `POST /api/effects`, owner only), and answers with an `effects` card linking `#/effects/E###`. Nothing is spent in chat; the video's price is shown on the screen's button. Open: refining the pieces from chat ("only bat signals").
-2. Real tile art / examples, a browser look at the pieces panel and the gallery (built from tests and node checks only), how a real Nano Banana pieces sheet cuts (the tests use a synthetic sheet), 3x3-specific prompt, the green-frame start/end variant only if 2x2 ever fails.
-3. A real end-to-end paid run from the screen (the price and the job path are tested on a fake CLI; the real Kling path was exercised by the two experiment clips through `jobs.fulfil`).
+The AI image-sheet path is an ordinary paid sheet job with outline 0 and exact equal-grid particle cutting. `pieces_estimate`/`pieces` retain their legacy quote/go contract; the job request identifies the effect/group. READY cells become tight sprites. Judgment warnings have Use it anyway; technical unreadability/Telegram limits get a reason and next action.
 
+The old Kling working pipeline remains text-only `estimate → video → cut_cells → finish_cell`; its cell clips, timing, job and credits are retained on import. The restoration must demonstrate animation inside flying particles, not merely keep WebMs alongside static peak frames. The normal flow saves into its target set automatically and does not ask where a pack-owned set lives.
+
+Acceptance uses already-created sheets/clips copied into scratch out: follow their stored job/effect/generation paths, diagnose blocked state, then exercise free recut/import/recovery, temporal simulation, Render and Add. Synthetic temporal fixtures supplement that proof. Do not make a new provider call merely for acceptance, and do not treat an injected finished Render panel as the complete pipeline.
+
+Open work outside the current flow: real v2 prompt/sheet measurements (W2), examples/tile art, a 3×3-specific prompt, chat refinement of sprite choices, and the green-frame start/end experiment only if 2×2 fails. Per-emoji motion and separate Telegram effect/download delivery remain distinct choices; ordinary animated-sticker delivery is settled.
 
 ## Particles are particles, not stickers (2026-10-03, UI/UX spec P6)
 
 A set built from a drawn sheet stores its cells as **tight sprites** (`engine/particles.trim_sprite`: the alpha bounding box plus 2 px of air, cropped out of the batch's keyed sheet at native resolution by `pipeline.particle_sprites`), never the 512 px sticker
 that the still stage makes of the same cell (a sticker canvas is the deliverable of a sticker, with the sticker size checks). The slice file is the fallback only for a batch with no keyed sheet (`cells[].sprite: false`). The same holds for the cells *Generate more*
-appends. A batch cut as particles cannot be added to a pack as stickers (409); it becomes a set (`POST /api/particles {from_generation}` or *Use as particle set*). The cause of the original "Batman Lego pieces" trouble (separator lines drawn by the image model)
+appends. A batch cut as particles cannot be added to a pack as stickers (409); it becomes a set (`POST /api/particles {from_generation}` or the scoped editor's automatic import). The cause of the original "Batman Lego pieces" trouble (separator lines drawn by the image model)
 is recorded in `docs/engine-and-studio.md`: the cut is not weakened.

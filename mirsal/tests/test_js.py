@@ -130,7 +130,7 @@ class StudioActionTests(unittest.TestCase):
         for keep in ("const vlmState=", "const vlmSet=", "ACT.vlmyes=", "const VLM="):
             self.assertIn(keep, live, "the consent for AI vision is still asked once and remembered: " + keep)
         sp = (ui / "particles.js").read_text(encoding="utf-8")
-        for needs in ("function spSecBatchHtml(", "Add to a pack to give", "/api/packs/${pid}/particles", "ptBody(", "spLinkIndex(", "data-act=spopen", "Create particles for pack"):
+        for needs in ("function spSecBatchHtml(", "Approve as a pack", "/api/generations/${b.gid}/particles", "ptBody(", "spLinkIndex(", "data-act=spopen", "Adding a burst to the pack affirms it."):
             self.assertIn(needs, sp)
 
     def test_the_particles_tab_is_a_studio_step_in_its_own_file(self):

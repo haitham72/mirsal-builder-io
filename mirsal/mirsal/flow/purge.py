@@ -201,6 +201,8 @@ def _purge_item(out: Path, lib, kind: str, ident: str, by: str, confirm_shared: 
         fl = batches.purge_files(out, gid)
         _record(out, "batch", "done", f"G{gid:03d}", by, number=gid, files=fl["files"], bytes=fl["bytes"], database=rows, task=task)
         return {"kind": "batch", "id": f"G{gid:03d}", "number": gid, "files": fl["files"], "bytes": fl["bytes"], "database": rows}
+    from . import particle_sets
+    particle_sets.detach_pack(out, lib, ident)
     try:
         r = lib.purge_pack(ident, confirm_shared=confirm_shared)
     except LibraryError as e:

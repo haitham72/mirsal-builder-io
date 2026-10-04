@@ -211,7 +211,11 @@ class Console:
         req = job.get("request") or {}
         effect = req.get("effect")
         if isinstance(effect, dict) and effect.get("id") and effect.get("group"):
-            return lambda j: fx_flow.on_video_done(self.out, effect["id"], effect["group"], j, self.cfg)
+            def finish(j):
+                fx_flow.on_video_done(self.out, effect["id"], effect["group"], j, self.cfg)
+                if effect.get("particle_target"):
+                    fx_sets.set_from_effect(self.out, self.lib, effect["id"], mode="video", target=effect["particle_target"], user=req.get("user") or "local")
+            return finish
         return self.start_from_job if job["kind"] == "sheet" else self.attach_video_from_job if job["kind"] == "video" and job.get("generation") else None
 
     def wait_jobs(self, timeout: float = 60.0) -> None:
@@ -761,7 +765,7 @@ def make_handler(c: Console):
                     return None if (jobs.read(c.out, parts[2]).get("request") or {}).get("user") == user["id"] else gone
                 except jobs.JobError:
                     return gone
-            if not post and parts[:2] == ["api", "packs"] and parts[-1] == "particles" and len(parts) in (4, 6):      # a member's particles answer is empty, not an error (the handler says so)
+            if not post and parts[:2] == ["api", "packs"] and parts[-1] in ("particles", "particle-preview") and len(parts) in (4, 6):      # a member's particles answer is empty, not an error (the handler says so)
                 return None
             if not post and len(parts) == 3 and parts[:2] == ["api", "jobs"]:          # one job: only the one this user asked for
                 try:
@@ -881,6 +885,9 @@ def make_handler(c: Console):
                 return self._file(f)
             if path == "/api/effects" or path.startswith("/api/effects/"):
                 return self._effects("GET", path, {})
+            gp = path.strip("/").split("/")
+            if gp[:2] == ["api", "generations"] and len(gp) == 4 and gp[3] == "particles":
+                return self._json(200, fx_sets.for_generation(c.out, c.lib, gp[2]))
             if path == "/api/particles" or path.startswith("/api/particles/"):
                 return self._particles("GET", path, {})
             if path == "/api/me":            # who the server thinks you are (and what you may do): for clients that hold a token
@@ -891,16 +898,23 @@ def make_handler(c: Console):
             if path == "/api/telegram":      # connected or not and which bot: never the token
                 return self._json(200, telegram.status(c.out))
             pp = path.strip("/").split("/")
+            if len(pp) == 6 and pp[:2] == ["api", "packs"] and pp[3] == "stickers" and pp[5] == "particle-preview":
+                if self.user.get("role") != "owner":
+                    return self._json(200, {"set": None, "url": None})
+                try:
+                    return self._json(200, fx_sets.preview_for_sticker(c.out, c.lib, pp[2], pp[4]))
+                except fx_sets.SetError as e:
+                    raise pl.PipelineError(str(e), e.code)
             if pp[:2] == ["api", "packs"] and pp[-1] == "particles" and len(pp) in (4, 6) and (len(pp) == 4 or pp[3] == "stickers"):
                 # the particles made for a sticker (GET /api/packs/{id}/stickers/{sid}/particles) or the counts for a whole pack (GET /api/packs/{id}/particles): a pure read; effects are owner only,
                 # a member's answer is simply empty (docs/effects.md)
                 if self.user.get("role") != "owner":
                     return self._json(200, {"sticker": pp[4], "created": [], "saved": [], "effects": [], "can_make": False} if len(pp) == 6 else {})
                 if len(pp) == 6:
-                    return self._json(200, fx_flow.for_sticker(c.out, c.lib, pp[2], pp[4]))
+                    return self._json(200, fx_sets.for_sticker(c.out, c.lib, pp[2], pp[4]))
                 # the pack's particle studio (docs/particles_plan.md 5): its sets and its bursts, plus the per-sticker counts the old answer carried
                 try:
-                    return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_flow.counts_for_pack(c.out, c.lib, pp[2])})
+                    return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_sets.counts_for_pack(c.out, c.lib, pp[2])})
                 except fx_sets.SetError as e:
                     raise pl.PipelineError(str(e), e.code)
             if path.startswith("/api/packs/") and path.endswith("/telegram"):          # dry run: what would be created, every problem
@@ -1120,7 +1134,7 @@ def make_handler(c: Console):
             raise pl.PipelineError(NO_ROUTE, 404)
 
         def _particles(self, method: str, path: str, body: dict):
-            """Particle sets `P###` (docs/particles_plan.md section 6): the DURABLE particle asset, assigned to pack(s) or stand-alone. The working
+            """Particle sets `P###` (docs/particles_plan.md section 6): the durable sticker-owned particle asset with derived pack views. The working
             session stays `/api/effects`; `POST /api/particles {from_effect}` is the bridge that saves one. Free: nothing here spends. A delete moves the
             folder to the trash and a set in use says which packs before it goes (rule 9's spirit: nothing is destroyed on a click)."""
             ps = fx_sets
@@ -1130,13 +1144,19 @@ def make_handler(c: Console):
                     if method == "GET":
                         ps.settle_open(c.out)                      # the cells of a sheet that was cut since the last read join their set first
                         return self._json(200, {"sets": ps.list_sets(c.out, c.lib)})
+                    if body.get("from_stickers"):
+                        return self._json(201, ps.set_from_stickers(c.out, c.lib, body["from_stickers"], body.get("parent_pack_id"), owners=body.get("owners"), name=body.get("name"), target=body.get("target"), user=self.user["id"]))
                     if body.get("from_generation"):                # a sheet of particles that is already a batch: its cells as tight sprites, no effect behind it
-                        return self._json(201, ps.set_from_generation(c.out, c.lib, str(body["from_generation"]), name=body.get("name"), packs=body.get("packs"),
+                        return self._json(201, ps.set_from_generation(c.out, c.lib, str(body["from_generation"]), name=body.get("name"), owners=body.get("owners"), packs=body.get("packs"),
                                                                          picked=body.get("picked"), user=self.user["id"]))
+                    if body.get("from_video"):
+                        return self._json(201, ps.set_from_effect(c.out, c.lib, str(body["from_video"]), mode="video", target=body.get("target"), owners=body.get("owners"), name=body.get("name"), picked=body.get("picked"), user=self.user["id"]))
+                    if body.get("from_slices"):
+                        return self._json(201, ps.set_from_slices(c.out, c.lib, body["from_slices"], owners=body.get("owners"), name=body.get("name"), target=body.get("target"), user=self.user["id"]))
                     if body.get("from_effect"):
-                        return self._json(201, ps.set_from_effect(c.out, c.lib, str(body["from_effect"]), name=body.get("name"), packs=body.get("packs"),
+                        return self._json(201, ps.set_from_effect(c.out, c.lib, str(body["from_effect"]), target=body.get("target"), name=body.get("name"), owners=body.get("owners"), packs=body.get("packs"),
                                                                        picked=body.get("picked"), user=self.user["id"]))
-                    return self._json(201, ps.create(c.out, c.lib, name=body.get("name"), elements=body.get("elements"), packs=body.get("packs"),
+                    return self._json(201, ps.create(c.out, c.lib, name=body.get("name"), elements=body.get("elements"), owners=body.get("owners"), packs=body.get("packs"),
                                                       kind=str(body.get("kind") or "drawn"), user=self.user["id"]))
                 pid = parts[2]
                 if len(parts) == 3:
@@ -1146,16 +1166,20 @@ def make_handler(c: Console):
                         ps.settle(c.out, pid)                      # (a 404 for a missing set comes from here)
                         return self._json(200, ps.view(c.out, c.lib, pid))
                     return self._json(200, ps.update(c.out, c.lib, pid, name=body.get("name"), elements=body.get("elements"), packs=body.get("packs"),
-                                                     picked=body.get("picked"), motion=body.get("motion"), user=self.user["id"]))
+                                                     picked=body.get("picked"), motion=body.get("motion"), save=body.get("save") is True, user=self.user["id"]))
                 act = parts[3]
                 if method != "POST":
                     raise pl.PipelineError(NO_ROUTE, 404)
+                if act in ("link", "unlink"):
+                    return self._json(200, ps.link(c.out, c.lib, pid, body.get("sticker_ids"), self.user["id"], unlink=act == "unlink"))
                 if act == "assign":
                     return self._json(200, ps.assign(c.out, c.lib, pid, body.get("packs"), self.user["id"]))
                 if act == "unassign":
                     return self._json(200, ps.unassign(c.out, c.lib, pid, body.get("packs"), self.user["id"]))
                 if act == "duplicate":
                     return self._json(201, ps.duplicate(c.out, c.lib, pid, name=body.get("name"), user=self.user["id"]))
+                if act == "save-as-new":                           # the same sprites with the new motion as a new saved row under the same stickers
+                    return self._json(201, ps.save_as_new(c.out, c.lib, pid, motion=body.get("motion"), name=body.get("name"), user=self.user["id"]))
                 if act == "delete":
                     return self._json(200, ps.delete(c.out, c.lib, pid, confirm_packs=body.get("confirm") is True, user=self.user["id"]))
                 if act == "restore":
@@ -1165,8 +1189,30 @@ def make_handler(c: Console):
                 if act == "render":                                # the final 512 px WebM for a pack, judged and stored under renders/ (only Telegram's own limits make it FAILED)
                     return self._json(200, ps.render(c.out, c.lib, pid, c.cfg, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, user=self.user["id"]))
                 if act == "add":                                   # rendered bursts into the pack as animated stickers tagged with the pack's emoji
-                    return self._json(200, ps.add(c.out, c.lib, pid, body.get("renders"), body.get("pack_id"), self.user["id"]))
+                    return self._json(200, ps.add(c.out, c.lib, pid, body.get("renders"), body.get("pack_id"), body.get("sticker_id"), self.user["id"]))
                 if act == "more":                                  # Generate more: the price first (409 until go), then an ordinary sheet job whose cut cells are APPENDED to the set
+                    saved = ps.migrate(c.out, c.lib, pid)
+                    mode = body.get("mode") or saved.get("source", {}).get("kind") or "drawn"
+                    if mode not in ("video", "drawn", "image", "stickers"):
+                        raise ps.SetError("mode must be video, drawn, image or stickers")
+                    if mode == "video":
+                        eid = body.get("effect") or saved.get("source", {}).get("effect")
+                        if eid and fx_flow.read(c.out, eid).get("mode") != "video":
+                            eid = None
+                        if not eid:
+                            owners = saved.get("owner") or []
+                            if not owners:
+                                raise ps.SetError("Attach this set to a sticker before generating video", 409)
+                            pack_id = owners[0]["pack_id"]
+                            e = fx_flow.create(c.out, c.lib, pack_id=pack_id,
+                                               sticker_ids=[o["sticker_id"] for o in owners if o["pack_id"] == pack_id],
+                                               mode="video", grid=body.get("grid") or "2x2", user=self.user["id"], note=str(body.get("prompt") or ""))
+                            eid = e["id"]
+                            fx_flow.analyse(c.out, eid, allowed=False)
+                        e = fx_flow.read(c.out, eid)
+                        group = str(body.get("group") or (e.get("groups") or [{}])[0].get("id") or "")
+                        return self._effects("POST", f"/api/effects/{eid}/" + ("estimate" if body.get("estimate") else "video"), {**body, "group": group, "particle_target": pid})
+
                     plan = ps.more_plan(c.out, c.lib, pid, body.get("grid"), body.get("elements"))
                     if self._price_sheet(plan, body, False):
                         return
@@ -1198,6 +1244,9 @@ def make_handler(c: Console):
                 raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
             if body.get("go") is not True:
                 self._json(409, {"error": f"This costs {credits} credits. Send go: true to start it.", "estimate": plan})
+                return True
+            if credits is None:
+                self._json(409, {"error": "The price is unavailable. Retry the price before starting.", "estimate": plan})
                 return True
             return False
 
@@ -1250,6 +1299,8 @@ def make_handler(c: Console):
                 return self._json(200, fx_flow.view(c.out, eid))
             if act in ("estimate", "video"):
                 gid = str(body.get("group") or "")
+                if any(k in body for k in ("elements", "subject")):
+                    fx_flow.set_pieces(c.out, eid, gid, elements=body.get("elements"), subject=body.get("subject"), by=self.user["id"])
                 grid = body.get("grid")
                 plan = fx_flow.video_plan(c.out, eid, gid, tuple(int(x) for x in str(grid).lower().split("x")) if grid else None)
                 if not higgsfield.available():
@@ -1260,7 +1311,7 @@ def make_handler(c: Console):
                 except higgsfield.HiggsError as ex:
                     credits = None
                     plan["cost_error"] = str(ex)
-                plan.update(credits=credits, model=model, params=params)
+                plan.update(credits=credits, model=model, params=params, effect=eid)
                 if act == "estimate":
                     return self._json(200, plan)
                 who = c.actor()
@@ -1268,8 +1319,14 @@ def make_handler(c: Console):
                     raise pl.PipelineError("This account cannot start paid generation (it spends the owner's credits). Ask the owner to allow it.", 403)
                 if body.get("go") is not True:
                     return self._json(409, {"error": f"This costs {credits} credits. Send go: true to start it.", "estimate": plan})
-                job = fx_flow.new_video_job(c.out, eid, gid, grid=tuple(plan["grid"]), user=who["id"], model=body.get("model"), options=body.get("options"))
-                c.fulfil_async(job["id"], after=lambda j: fx_flow.on_video_done(c.out, eid, gid, j, c.cfg))
+                if credits is None:
+                    return self._json(409, {"error": "The price is unavailable. Retry the price before starting.", "estimate": plan})
+                job = fx_flow.new_video_job(c.out, eid, gid, grid=tuple(plan["grid"]), user=who["id"], model=body.get("model"), options=body.get("options"), particle_target=body.get("particle_target"))
+                def finish_video(j):
+                    fx_flow.on_video_done(c.out, eid, gid, j, c.cfg)
+                    if body.get("particle_target"):
+                        fx_sets.set_from_effect(c.out, c.lib, eid, mode="video", target=body["particle_target"], user=who["id"])
+                c.fulfil_async(job["id"], after=finish_video)
                 return self._json(202, {"job": job["id"], "estimate": credits, "id": eid, "group": gid})
             if act == "suggest":                                   # candidate particles for the ONE set of the whole effect: the model looks at one picture (with consent), else the table answers
                 return self._json(200, fx_flow.suggest(c.out, c.lib, eid, body.get("grid"), allowed=body.get("allow_vlm") is True))
