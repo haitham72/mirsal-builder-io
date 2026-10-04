@@ -43,6 +43,15 @@ test('People: a waiting sign-up has Approve and Reject; an active member has rol
   assert.doesNotMatch(h.split('data-uid=local')[1], /data-act=aupeople/, 'the owner cannot be changed from here');
 });
 
+test('People: a credit request offers the amount it asked for first, 10 beside it; answered requests are listed', () => {
+  const h = A.people([{ id: 'U002', name: 'Bilal', email: 'b@nadi.ae', role: 'member', status: 'active', credits_left: 0 }],
+    [{ id: 'R003', kind: 'credits', user: 'U002', name: 'Bilal', reason: '25 for Eid', wanted: 25 }],
+    [{ id: 'R001', kind: 'credits', user: 'U002', name: 'Bilal', wanted: 7, status: 'approved', decided_by: 'telegram' }]);
+  assert.match(h, /Bilal asks for 25 credits[\s\S]*class="btn sm pri" data-act=aupeople data-id=U002 data-a=credits data-n=25>Give 25<[\s\S]*data-n=10>Give 10</);
+  assert.match(h, /Answered lately \(1\)[\s\S]*Bilal · credits \(asked 7\) · approved by telegram/);
+  assert.doesNotMatch(A.people([], [], []), /Answered lately/, 'nothing answered, nothing shown');
+});
+
 test('a background 401 never wipes the card: re-show only a mode that is not already up', () => {
   assert.equal(A.reshow(null, 'signin'), true, 'first display shows');
   assert.equal(A.reshow('signin', 'signin'), false, 'typed text and error messages survive the polls');

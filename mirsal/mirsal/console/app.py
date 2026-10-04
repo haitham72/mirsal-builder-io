@@ -351,7 +351,8 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         user, resp = await _admin(request, "/api/people")
         if resp:
             return resp
-        return _j(request, 200, {"people": await asyncio.to_thread(c.users.list), "requests": await asyncio.to_thread(pp.waiting, c.out)})
+        return _j(request, 200, {"people": await asyncio.to_thread(c.users.list), "requests": await asyncio.to_thread(pp.waiting, c.out),
+                                 "recent": await asyncio.to_thread(pp.recent, c.out)})
 
     @app.post("/api/people", include_in_schema=False)
     async def people_add(request: Request):

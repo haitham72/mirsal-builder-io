@@ -5,6 +5,7 @@ no password is reset without Haitham."""
 from __future__ import annotations
 
 import json
+import re
 import threading
 import time
 from pathlib import Path
@@ -32,6 +33,16 @@ def _write(out: Path, rows: list) -> None:
     atomic.write_text(_path(out), json.dumps({"requests": rows}, indent=1, ensure_ascii=False))
 
 
+def _wanted(kind: str, reason: str) -> int | None:
+    """A credit ask "7" or "7 more please" asks for 7: the leading number, so the card can offer exactly it.
+    Anything else (a purpose in words) leaves the default."""
+    if kind != "credits":
+        return None
+    m = re.match(r"\s*(\d{1,5})\b", str(reason or ""))
+    n = int(m.group(1)) if m else 0
+    return n if 1 <= n <= 10000 else None
+
+
 def add(out: Path, kind: str, user: dict, reason: str = "") -> dict:
     """A new request (one waiting request of a kind per person: asking twice returns the waiting one)."""
     if kind not in KINDS:
@@ -42,7 +53,7 @@ def add(out: Path, kind: str, user: dict, reason: str = "") -> dict:
         if same:
             return same
         r = {"id": f"R{max([int(x['id'][1:]) for x in rows] or [0]) + 1:03d}", "kind": kind, "user": user["id"], "name": user.get("name"), "email": user.get("email"),
-             "reason": str(reason or "")[:300], "status": "waiting", "at": round(time.time(), 3), "decided_by": None, "decided_at": None, "telegram_message_id": None}
+             "reason": str(reason or "")[:300], "wanted": _wanted(kind, reason), "status": "waiting", "at": round(time.time(), 3), "decided_by": None, "decided_at": None, "telegram_message_id": None}
         rows.append(r)
         _write(out, rows)
     _notify(out, r)
@@ -75,6 +86,11 @@ def close(out: Path, rid: str, status: str, by: str) -> dict:
 
 def waiting(out: Path, user: str | None = None) -> list:
     return [r for r in _read(out) if r["status"] == "waiting" and (user is None or r["user"] == user)]
+
+
+def recent(out: Path, n: int = 5) -> list:
+    """The latest decided requests, newest first: what Haitham already answered (in Telegram or People)."""
+    return [r for r in reversed(_read(out)) if r["status"] != "waiting"][:max(0, n)]
 
 
 def latest(out: Path, user: str, kind: str) -> dict | None:

@@ -54,8 +54,10 @@ def _request_card(r: dict) -> tuple[str, dict]:
     if r["kind"] == "signup":
         return f"New sign-up: {who}", _kb([[("Approve", f"a:{r['id']}:approve"), ("Reject", f"a:{r['id']}:reject"), ("Admin role", f"a:{r['id']}:admin")]])
     if r["kind"] == "credits":
-        return (f"Credit request: {who}" + (f"\nReason: {r['reason']}" if r.get("reason") else ""),
-                _kb([[("Approve +10", f"a:{r['id']}:credits"), ("Reject", f"a:{r['id']}:ignore"), ("Ignore", f"a:{r['id']}:ignore")]]))
+        n = r.get("wanted")                              # the amount the person asked for (people._wanted); the default 10 stays one tap away
+        give = [(f"Approve +{n}", f"a:{r['id']}:credits:{n}"), ("Give 10", f"a:{r['id']}:credits")] if n and n != 10 else [("Approve +10", f"a:{r['id']}:credits")]
+        return (f"Credit request: {who}" + (f" asks for {n}" if n else "") + (f"\nReason: {r['reason']}" if r.get("reason") else ""),
+                _kb([give + [("Reject", f"a:{r['id']}:ignore"), ("Ignore", f"a:{r['id']}:ignore")]]))
     return f"Forgot password: {who}", _kb([[("Send new password", f"a:{r['id']}:password"), ("Ignore", f"a:{r['id']}:ignore")]])
 
 
@@ -116,10 +118,14 @@ def _on_tap(c, cfg: dict, cq: dict) -> None:
             if r["status"] != "waiting":
                 note = f"already {r['status']}"
             else:
-                u, pw = apply(c, r["user"], action, "telegram", request_id=r["id"])
+                action, _, amount = action.partition(":")  # credits:7 = approve the 7 asked for; plain credits = the default 10
+                n = int(amount) if amount.isdigit() and 1 <= int(amount) <= 10000 else None
+                if amount and n is None:
+                    raise ValueError(f"bad amount {amount}")
+                u, pw = apply(c, r["user"], action, "telegram", request_id=r["id"], credits=n)
                 if action == "admin":                    # Admin role on a sign-up also approves it
                     u, _ = apply(c, r["user"], "approve", "telegram")
-                note = {"approve": "approved", "reject": "rejected", "admin": "approved as admin", "credits": "+10 credits", "password": "new password sent",
+                note = {"approve": "approved", "reject": "rejected", "admin": "approved as admin", "credits": f"+{n or 10} credits", "password": "new password sent",
                         "ignore": "ignored"}.get(action, action)
                 if pw:
                     telegram._call(cfg["token"], "sendMessage", {"chat_id": cfg["user_id"], "text": f"New password for {u.get('email')}: {pw}\n(They change it at the next sign-in. Delete this message once you sent it.)"}, timeout=20)

@@ -114,6 +114,26 @@ class AdminBotTests(unittest.TestCase):
         self.assertEqual([s["chat_id"] for s in sent], ["777"], "the new password goes to Haitham's chat only")
         self.assertTrue(self.c.users.get(a["id"])["must_change_password"])
 
+    def test_a_credit_request_offers_the_amount_asked_and_the_tap_gives_exactly_it(self):
+        from mirsal.services import admin_bot
+        a = self.c.users.signup("g@nadi.ae", "Ghada", "password1")
+        self.c.users.decide(a["id"], "approve")
+        self.c.users.charge(a["id"], 10)
+        r = pp.add(self.out, "credits", self.c.users.get(a["id"]), "25 for the Eid pack")
+        self.assertEqual(r["wanted"], 25)
+        card = [f for m, f in self.calls if m == "sendMessage"][-1]
+        self.assertIn("asks for 25", card["text"])
+        self.assertEqual([(b["text"], b["callback_data"]) for b in card["reply_markup"]["inline_keyboard"][0]][:2],
+                         [("Approve +25", f"a:{r['id']}:credits:25"), ("Give 10", f"a:{r['id']}:credits")])
+        admin_bot.handle_update(self.c, {"update_id": 4, "callback_query": {"id": "q", "from": {"id": 777}, "data": f"a:{r['id']}:credits:25", "message": {}}})
+        self.assertEqual(self.c.users.get(a["id"])["credits_left"], 25, "the 25 asked for, not the default 10")
+        self.assertEqual(pp.get(self.out, r["id"])["status"], "approved")
+        self.assertEqual([x["id"] for x in pp.recent(self.out)], [r["id"]])
+        self.assertIsNone(pp.add(self.out, "credits", self.c.users.get(a["id"]), "for a client")["wanted"], "a purpose in words asks for no number")
+        r3 = pp.waiting(self.out, a["id"])[0]
+        admin_bot.handle_update(self.c, {"update_id": 5, "callback_query": {"id": "q", "from": {"id": 777}, "data": f"a:{r3['id']}:credits:99999", "message": {}}})
+        self.assertEqual((self.c.users.get(a["id"])["credits_left"], pp.get(self.out, r3["id"])["status"]), (25, "waiting"), "an amount out of range gives nothing")
+
 
 class AccountRouteTests(unittest.TestCase):
     """The routes on the FastAPI server, as on the LAN: this test's own client counts as another machine."""
