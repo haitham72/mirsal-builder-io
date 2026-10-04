@@ -1736,10 +1736,14 @@ class Agent:
             t.trace.end("nothing saved", ok=False)
             return {}
         held = (t.sess.get("pending") or {}).get("subject")
+        dropped = ""
+        if held and "name" in saved and re.sub(r"[^a-z]", "", str(held).lower()) in (re.sub(r"[^a-z]", "", saved["name"].lower()), re.sub(r"[^a-z]", "", t.text.lower())):
+            t.sess.pop("pending", None)                                 # a plan "for haitham" was the name misread as a subject (before 2026-10-04): it goes, said once
+            dropped, held = f" I dropped the plan for \"{held}\": that was your name, not a sticker subject.", None
         said = profile_said(saved)
         hello = f"Nice to meet you, {saved['name']}! " if "name" in saved else "Got it! "
         more = "NEW" in t.intents                                       # "hi, I'm Sam, make me a falcon": the request goes on after this
-        t.prefix = hello + f"I'll remember {said}." + ("" if more else f" Your plan for {held} is still waiting: say \"create it\" when you're ready." if held else " What will you create today?")
+        t.prefix = hello + f"I'll remember {said}." + dropped + ("" if more else f" Your plan for {held} is still waiting: say \"create it\" when you're ready." if held else " What will you create today?")
         if not held and not more:
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
         t.trace.end("saved: " + said)

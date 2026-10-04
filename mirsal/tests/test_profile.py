@@ -59,6 +59,17 @@ class Transcript(Base):
         self.assertEqual(self.say("what is my name?")["text"], "You're Haitham.")
         self.assertEqual(len(self.plans(self.say("haitham"))), 1, "without my question, a bare word is still a request")
 
+    def test_a_plan_made_of_the_name_goes_when_the_name_is_said(self):
+        self.say("haitham")                                                                        # the old misreading: a plan "for haitham"
+        self.assertIsNotNone(self.sess().get("pending"))
+        m = self.say("my name is haitham")
+        self.assertIsNone(self.sess().get("pending"), "the plan made of the name is dropped")
+        self.assertIn("I dropped the plan for", m["text"])
+        self.assertNotIn("still waiting", m["text"])
+        self.say("make me falcon stickers")
+        self.say("my name is haitham")
+        self.assertIsNotNone(self.sess().get("pending"), "a real plan stays held")
+
     def test_line_7_the_whole_request_is_planned(self):
         m = self.say("create camel in lamborgini")
         card = self.plans(m)[0]
