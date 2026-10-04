@@ -31,20 +31,21 @@ const AUV=(()=>{
       ${(list||[]).map(person).join('')||'<div class=mut>Nobody yet.</div>'}`};
   const me=u=>u&&u.id!=='local'?`<div class=row style="justify-content:space-between"><span>Signed in as <b>${esc(u.name)}</b> <span class=mut>${esc(u.email||'')}${u.credits_left!=null?` · ${u.credits_left} credits left`:''}</span></span>
     <span class=row><button class="btn sm" data-act=aucreditask>Request credits</button><button class="btn sm" data-act=aulogout>Sign out</button></span></div>`:'';
-  return {esc,gate,waiting,change,people,person,me};
+  const reshow=(shown,mode)=>shown!==mode;   /* a background 401 must not wipe the card: re-show only a mode that is not already up (typed text and error messages survive the polls) */
+  return {esc,gate,waiting,change,people,person,me,reshow};
 })();
 if(typeof globalThis!=='undefined')globalThis.AUV=AUV;
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
-  const AU={me:null,mode:'signin',lan:false};
+  const AU={me:null,mode:'signin',lan:false,shown:null};
   const auVal=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
-  function auShow(html){let o=document.getElementById('au-gate');if(!o){o=document.createElement('div');o.id='au-gate';document.body.appendChild(o)}o.innerHTML=html;o.classList.add('on');
+  function auShow(html,key){const k=key||AU.mode;if(!AUV.reshow(AU.shown,k))return;let o=document.getElementById('au-gate');if(!o){o=document.createElement('div');o.id='au-gate';document.body.appendChild(o)}o.innerHTML=html;o.classList.add('on');AU.shown=k;
     const f=o.querySelector('input');if(f)f.focus()}
-  function auHide(){const o=document.getElementById('au-gate');if(o)o.classList.remove('on')}
+  function auHide(){const o=document.getElementById('au-gate');if(o)o.classList.remove('on');AU.shown=null}
   async function auCheck(){const r=await api('/api/auth/me');
     if(r.status===401){AU.me=null;AU.lan=!!r.j.lan;return auShow(AUV.gate(AU.mode))}
     if(!r.ok)return;AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;
-    if(AU.me.status==='pending'){auShow(AUV.waiting(AU.me));setTimeout(auCheck,15000);return}
-    if(AU.me.must_change_password)return auShow(AUV.change(AU.me));
+    if(AU.me.status==='pending'){auShow(AUV.waiting(AU.me),'waiting');setTimeout(auCheck,15000);return}
+    if(AU.me.must_change_password)return auShow(AUV.change(AU.me),'change');
     auHide()}
   const auPost=async(u,b)=>{const r=await post(u,b);if(!r.ok){const m=r.j.error||'Something went wrong';const box=document.querySelector('#au-gate .au-card');
     if(box){let el=box.querySelector('.au-msg');if(!el){el=document.createElement('div');el.className='au-msg';box.insertBefore(el,box.querySelector('label'))}el.textContent=m}else toast(m,1)}return r};
@@ -65,7 +66,7 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   ACT.aucredits=async el=>{const n=prompt('How many credits to give?','10');if(!n||!(+n>0))return;const r=await post('/api/people/'+el.dataset.id,{action:'credits',credits:Math.round(+n)});toast(r.ok?'Given':(r.j.error||'Could not'),!r.ok);auPeople()};
   ACT.auignore=async el=>{const r=await post('/api/people/'+el.dataset.id,{action:'ignore'});toast(r.ok?'Ignored':(r.j.error||'Could not'),!r.ok);auPeople()};
   const realFetch=window.fetch.bind(window);
-  window.fetch=async(...a)=>{const r=await realFetch(...a);const u=String(a[0]||'');if(r.status===401&&u.startsWith('/api/')&&!u.startsWith('/api/auth/'))auCheck();return r};
+  window.fetch=async(...a)=>{const r=await realFetch(...a);const u=String(a[0]||'');if(r.status===401&&u.startsWith('/api/')&&!u.startsWith('/api/auth/')&&AU.shown===null)auCheck();return r};
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.closest&&e.target.closest('#au-gate')){const b=document.querySelector('#au-gate .au-go');if(b)b.click()}});
   const auOrig=RENDER.settings;
   RENDER.settings=async(...a)=>{const r=await auOrig(...a);const page=document.querySelector('#s-settings .page');

@@ -42,3 +42,10 @@ test('People: a waiting sign-up has Approve and Reject; an active member has rol
   assert.match(h, /Bilal asks for more credits: “a client”[\s\S]*data-a=credits data-n=10>Give 10/);
   assert.doesNotMatch(h.split('data-uid=local')[1], /data-act=aupeople/, 'the owner cannot be changed from here');
 });
+
+test('a background 401 never wipes the card: re-show only a mode that is not already up', () => {
+  assert.equal(A.reshow(null, 'signin'), true, 'first display shows');
+  assert.equal(A.reshow('signin', 'signin'), false, 'typed text and error messages survive the polls');
+  assert.equal(A.reshow('signin', 'signup'), true, 'switching ways in still switches');
+  assert.equal(A.reshow('waiting', 'signin'), true);
+});

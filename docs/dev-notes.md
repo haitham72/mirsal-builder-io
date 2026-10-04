@@ -103,6 +103,7 @@ Dismiss the welcome modal first (`document.getElementById('welcome').classList.r
 - **A `# comment` after a value in `mirsal/.env` used to become part of the value** (the chat's provider was `"auto   # the chat assistant;..."`): fixed by one parser, `runtime/envfile.py`; the suite pins `MIRSAL_DB_WRITE=0` and `MIRSAL_TRACE=none` because the real `.env` sets them.
 - The venv is `mirsal/venv` on the macOS checkout (Python 3.14) and `mirsal/.venv` on Windows. In a bash heredoc, an apostrophe or `\\1` / `\\n` inside a Python string is mangled: write edit scripts with the Write tool and raw strings, run them afterwards.
 - **A Settings card that says `ffmpeg: not found` / VP9 `missing` while `doctor` is green means `GET /api/generations` is failing, not ffmpeg**: the card reads health from that endpoint, and one batch whose `result.json` lacks the `"error"` key used to fail the whole list (`flow/pipeline.py` `summary`, fixed 2026-10-04 with `.get`; `tests/test_summary_robust.py`). Check the endpoint's status before touching ffmpeg.
+- **The LAN sign-in card must never re-render under the person typing**: every background poll that 401s used to re-show the card (wiping typed text and error messages and stealing focus), which looks like the page keeps refreshing. `console/auth.js` re-shows only a mode that is not already up (`AUV.reshow`, `tests/js/auth.test.js`); the fetch wrapper only wakes `auCheck` when no card is displayed.
 
 ## Starting a session (the prompt for the next LLM)
 
