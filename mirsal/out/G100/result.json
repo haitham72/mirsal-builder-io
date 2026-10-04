@@ -32,39 +32,40 @@
         [
           0,
           0,
-          923,
-          911
+          1024,
+          1024
         ],
         [
-          923,
+          1024,
           0,
-          1125,
-          911
+          1024,
+          1024
         ],
         [
           0,
-          911,
-          923,
-          1137
+          1024,
+          1024,
+          1024
         ],
         [
-          923,
-          911,
-          1125,
-          1137
+          1024,
+          1024,
+          1024,
+          1024
         ]
       ],
       "xs": [
         0,
-        923,
+        1024,
         2048
       ],
       "ys": [
         0,
-        911,
+        1024,
         2048
       ],
-      "method": "gutter"
+      "method": "equal",
+      "inset_px": 20
     },
     "keyed": "source/keyed.png"
   },
@@ -73,7 +74,6 @@
     2
   ],
   "stage": "sliced",
-  "error": null,
   "plan_source": "task 029",
   "sheet_prompt": "One illustration of 4 separate small objects arranged in 2 rows of 2, evenly spaced across a single seamless background.\nTheme: pieces that burst out of Batman Lego. Draw only the pieces listed, never Batman Lego itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every piece directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nEach cell holds exactly ONE piece, isolated and centred in its own cell, a different piece or a different size and angle from every other cell:\nPiece 1 (top row, left): bat signal\nPiece 2 (top row, right): lego brick\nPiece 3 (bottom row, left): cape piece\nPiece 4 (bottom row, right): megaphone\nConsistency: the same drawing style, lighting and colour quality for all 4 pieces.\nBackground: a single, seamless, solid pure #00FF00 green background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise, and no objects other than the pieces.\nSpacing: every piece has a generous empty margin on every side (at least 20% of its own size), nothing touches the edge of its cell, and no piece touches or crosses another.",
   "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. bat signal, with big lively expressive movement in place\n2. lego brick, with big lively expressive movement in place\n3. cape piece, with big lively expressive movement in place\n4. megaphone, with big lively expressive movement in place\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
@@ -152,19 +152,7 @@
         "value": "2048x2048",
         "limit": "RGB/RGBA image",
         "data": {
-          "ms": 51.1
-        }
-      },
-      {
-        "name": "sheet_size",
-        "ok": true,
-        "detail": "shortest side 2048px",
-        "severity": "BLOCK",
-        "stage": "sheet",
-        "value": 2048,
-        "limit": 1024,
-        "data": {
-          "ms": 0.0
+          "ms": 47.3
         }
       },
       {
@@ -176,41 +164,29 @@
         "value": 244.0,
         "limit": 60.0,
         "data": {
-          "ms": 8.0
-        }
-      },
-      {
-        "name": "grid_detected",
-        "ok": false,
-        "detail": "found 3x3, plan says 2x2",
-        "severity": "BLOCK",
-        "stage": "sheet",
-        "value": "3x3",
-        "limit": "2x2",
-        "data": {
-          "ms": 30.5
+          "ms": 7.5
         }
       },
       {
         "name": "cut_clean",
         "ok": true,
-        "detail": "cut method: gutter",
+        "detail": "particle sheet: 2x2 equal cells",
         "severity": "WARN",
         "stage": "sheet",
-        "value": "gutter",
-        "limit": "gutter",
+        "value": "equal",
+        "limit": "equal",
         "data": {
           "xs": [
             0,
-            923,
+            1024,
             2048
           ],
           "ys": [
             0,
-            911,
+            1024,
             2048
           ],
-          "ms": 26.2
+          "ms": 0.0
         }
       },
       {
@@ -222,7 +198,7 @@
         "value": 1.61,
         "limit": 12.0,
         "data": {
-          "ms": 63.1
+          "ms": 50.2
         }
       }
     ]
@@ -246,7 +222,7 @@
           "detail": "foreground below minimum",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 230355,
+          "value": 227583,
           "limit": 400,
           "data": {
             "ms": 0.0
@@ -269,7 +245,7 @@
             4
           ],
           "data": {
-            "ms": 13.2
+            "ms": 13.1
           }
         },
         {
@@ -290,7 +266,252 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 43293,
+          "value": 88043,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "3px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 3,
+          "limit": 88.043,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0004,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "115.0KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 115.0,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          1024,
+          1024
+        ],
+        "bg": [
+          252,
+          254,
+          250
+        ],
+        "threshold": 8.0,
+        "fg_px": 227583,
+        "bbox": [
+          247,
+          215,
+          771,
+          805
+        ],
+        "scale": 0.6214,
+        "scale_mode": "pack",
+        "spill_px": 3,
+        "chroma_risk": 0.0004,
+        "holes": 0.0,
+        "kb": 115.0,
+        "format": "png"
+      },
+      "png": "slices/img-batman_lego_pieces-bat_signal-20261003T014529-fa730f.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790991930.385,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x3",
+            "limit": "2x2",
+            "note": "found 3x3, plan says 2x2",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1790991930.388,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791084059.372,
+          "stage": "sheet",
+          "actor": "local",
+          "decision": "PASS",
+          "reason": "cut again as particles",
+          "ref": null,
+          "detail": {
+            "kind": "particles"
+          }
+        },
+        {
+          "ts": 1791084060.072,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "lego_brick",
+      "tags": [
+        "lego_brick"
+      ],
+      "emoji": "🦇👊",
+      "prompt": "separate small pieces that burst out of Batman Lego lego brick, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-batman_lego_pieces-brick-20261003T014529-e894e4",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 229651,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 13.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 87506,
           "limit": 400,
           "data": {
             "ms": 0.2
@@ -315,7 +536,7 @@
           "severity": "BLOCK",
           "stage": "still",
           "value": 0,
-          "limit": 43.293,
+          "limit": 87.506,
           "data": {
             "ms": 1.7
           }
@@ -355,240 +576,16 @@
           "limit": 0.12,
           "data": {
             "parts": 1,
-            "ms": 2.1
-          }
-        },
-        {
-          "name": "duplicate_cell",
-          "ok": true,
-          "detail": "no earlier cell",
-          "severity": "WARN",
-          "stage": "still",
-          "value": 64,
-          "limit": 4,
-          "data": {
-            "of": null,
-            "ms": 0.0
-          }
-        },
-        {
-          "name": "static_file",
-          "ok": true,
-          "detail": "66.0KB png",
-          "severity": "BLOCK",
-          "stage": "still",
-          "value": 66.0,
-          "limit": 512,
-          "data": {
             "ms": 2.2
           }
-        }
-      ],
-      "metrics": {
-        "cell": [
-          0,
-          0,
-          923,
-          911
-        ],
-        "bg": [
-          8,
-          253,
-          2
-        ],
-        "threshold": 122.5,
-        "fg_px": 230355,
-        "bbox": [
-          246,
-          214,
-          772,
-          807
-        ],
-        "scale": 0.4327,
-        "scale_mode": "pack",
-        "spill_px": 0,
-        "chroma_risk": 0.0,
-        "holes": 0.0,
-        "kb": 66.0,
-        "format": "png",
-        "sheet_issue": "grid_detected"
-      },
-      "png": "slices/img-batman_lego_pieces-bat_signal-20261003T014529-fa730f.png",
-      "anim_status": "NOT_REQUESTED",
-      "anim_reason": null,
-      "anim_metrics": {},
-      "webm": null,
-      "review": {
-        "still": "PENDING",
-        "anim": "NONE"
-      },
-      "history": [
-        {
-          "ts": 1790991930.385,
-          "stage": "sheet",
-          "actor": "python",
-          "decision": "WARN",
-          "reason": "grid_detected",
-          "ref": null,
-          "detail": {
-            "check": "grid_detected",
-            "value": "3x3",
-            "limit": "2x2",
-            "note": "found 3x3, plan says 2x2",
-            "forced": false,
-            "cut_anyway": true
-          }
-        },
-        {
-          "ts": 1790991930.388,
-          "stage": "sliced",
-          "actor": "python",
-          "decision": "PASS",
-          "reason": null,
-          "ref": null,
-          "detail": {
-            "warnings": []
-          }
-        }
-      ]
-    },
-    {
-      "index": 2,
-      "key": "lego_brick",
-      "tags": [
-        "lego_brick"
-      ],
-      "emoji": "🦇👊",
-      "prompt": "separate small pieces that burst out of Batman Lego lego brick, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
-      "name": "img-batman_lego_pieces-brick-20261003T014529-e894e4",
-      "status": "READY",
-      "reason": null,
-      "report": [
-        {
-          "name": "blank_cell",
-          "ok": true,
-          "detail": "foreground below minimum",
-          "severity": "BLOCK",
-          "stage": "still",
-          "value": 245375,
-          "limit": 400,
-          "data": {
-            "ms": 0.0
-          }
-        },
-        {
-          "name": "dimensions",
-          "ok": true,
-          "detail": "(512, 512, 4)",
-          "severity": "BLOCK",
-          "stage": "still",
-          "value": [
-            512,
-            512,
-            4
-          ],
-          "limit": [
-            512,
-            512,
-            4
-          ],
-          "data": {
-            "ms": 22.5
-          }
-        },
-        {
-          "name": "transparent_corners",
-          "ok": true,
-          "detail": "",
-          "severity": "BLOCK",
-          "stage": "still",
-          "value": null,
-          "limit": null,
-          "data": {
-            "ms": 0.0
-          }
-        },
-        {
-          "name": "foreground",
-          "ok": true,
-          "detail": "",
-          "severity": "BLOCK",
-          "stage": "still",
-          "value": 45943,
-          "limit": 400,
-          "data": {
-            "ms": 0.1
-          }
-        },
-        {
-          "name": "inside_cell",
-          "ok": false,
-          "detail": "64px on cell border (allowed by you)",
-          "severity": "WARN",
-          "stage": "still",
-          "value": 64,
-          "limit": 8,
-          "data": {
-            "ms": 0.0
-          }
-        },
-        {
-          "name": "no_spill",
-          "ok": true,
-          "detail": "0px on the edge band",
-          "severity": "BLOCK",
-          "stage": "still",
-          "value": 0,
-          "limit": 45.943,
-          "data": {
-            "ms": 1.6
-          }
-        },
-        {
-          "name": "chroma_risk",
-          "ok": true,
-          "detail": "0.0% of the subject is key-coloured",
-          "severity": "WARN",
-          "stage": "still",
-          "value": 0.0,
-          "limit": 0.03,
-          "data": {
-            "ms": 0.0
-          }
-        },
-        {
-          "name": "holes",
-          "ok": true,
-          "detail": "0 enclosed hole(s), 0.0% of the subject",
-          "severity": "WARN",
-          "stage": "still",
-          "value": 0.0,
-          "limit": 0.01,
-          "data": {
-            "count": 0,
-            "ms": 0.2
-          }
-        },
-        {
-          "name": "single_subject",
-          "ok": true,
-          "detail": "2 part(s); the second is 5.9% of the subject",
-          "severity": "WARN",
-          "stage": "still",
-          "value": 0.0594,
-          "limit": 0.12,
-          "data": {
-            "parts": 2,
-            "ms": 2.3
-          }
         },
         {
           "name": "duplicate_cell",
           "ok": true,
-          "detail": "hash distance 30 to cell 1",
+          "detail": "hash distance 25 to cell 1",
           "severity": "WARN",
           "stage": "still",
-          "value": 30,
+          "value": 25,
           "limit": 4,
           "data": {
             "of": 1,
@@ -598,47 +595,43 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "76.8KB png",
+          "detail": "125.3KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 76.8,
+          "value": 125.3,
           "limit": 512,
           "data": {
-            "ms": 2.1
+            "ms": 3.4
           }
         }
       ],
       "metrics": {
         "cell": [
-          923,
+          1024,
           0,
-          1125,
-          911
+          1024,
+          1024
         ],
         "bg": [
-          8,
           252,
-          2
+          254,
+          251
         ],
-        "threshold": 122.0,
-        "fg_px": 245375,
+        "threshold": 8.0,
+        "fg_px": 229651,
         "bbox": [
-          93,
-          0,
-          969,
-          911
+          163,
+          263,
+          868,
+          760
         ],
-        "scale": 0.4327,
-        "scale_mode": "pack",
-        "waived": [
-          "inside_cell"
-        ],
+        "scale": 0.6173,
+        "scale_mode": "clamped",
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "kb": 76.8,
-        "format": "png",
-        "sheet_issue": "grid_detected"
+        "kb": 125.3,
+        "format": "png"
       },
       "png": "slices/img-batman_lego_pieces-brick-20261003T014529-e894e4.png",
       "anim_status": "NOT_REQUESTED",
@@ -709,6 +702,28 @@
               "inside_cell"
             ]
           }
+        },
+        {
+          "ts": 1791084059.372,
+          "stage": "sheet",
+          "actor": "local",
+          "decision": "PASS",
+          "reason": "cut again as particles",
+          "ref": null,
+          "detail": {
+            "kind": "particles"
+          }
+        },
+        {
+          "ts": 1791084060.078,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "still_override": [
@@ -734,7 +749,7 @@
           "detail": "foreground below minimum",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 259090,
+          "value": 240578,
           "limit": 400,
           "data": {
             "ms": 0.0
@@ -757,7 +772,7 @@
             4
           ],
           "data": {
-            "ms": 23.8
+            "ms": 17.9
           }
         },
         {
@@ -778,19 +793,19 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 48532,
+          "value": 93022,
           "limit": 400,
           "data": {
-            "ms": 0.3
+            "ms": 0.1
           }
         },
         {
           "name": "inside_cell",
-          "ok": false,
-          "detail": "64px on cell border (allowed by you)",
-          "severity": "WARN",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
           "stage": "still",
-          "value": 64,
+          "value": 0,
           "limit": 8,
           "data": {
             "ms": 0.0
@@ -799,13 +814,13 @@
         {
           "name": "no_spill",
           "ok": true,
-          "detail": "0px on the edge band",
+          "detail": "5px on the edge band",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 0,
-          "limit": 48.532000000000004,
+          "value": 5,
+          "limit": 93.022,
           "data": {
-            "ms": 2.9
+            "ms": 1.8
           }
         },
         {
@@ -823,36 +838,36 @@
         {
           "name": "holes",
           "ok": false,
-          "detail": "1 enclosed hole(s), 1.4% of the subject",
+          "detail": "1 enclosed hole(s), 1.6% of the subject",
           "severity": "WARN",
           "stage": "still",
-          "value": 0.0135,
+          "value": 0.0161,
           "limit": 0.01,
           "data": {
             "count": 1,
-            "ms": 0.3
+            "ms": 0.2
           }
         },
         {
           "name": "single_subject",
           "ok": true,
-          "detail": "2 part(s); the second is 5.7% of the subject",
+          "detail": "1 part(s); the second is 0.0% of the subject",
           "severity": "WARN",
           "stage": "still",
-          "value": 0.057,
+          "value": 0.0,
           "limit": 0.12,
           "data": {
-            "parts": 2,
-            "ms": 3.5
+            "parts": 1,
+            "ms": 2.3
           }
         },
         {
           "name": "duplicate_cell",
           "ok": true,
-          "detail": "hash distance 21 to cell 2",
+          "detail": "hash distance 28 to cell 2",
           "severity": "WARN",
           "stage": "still",
-          "value": 21,
+          "value": 28,
           "limit": 4,
           "data": {
             "of": 2,
@@ -862,50 +877,46 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "52.2KB png",
+          "detail": "90.5KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 52.2,
+          "value": 90.5,
           "limit": 512,
           "data": {
-            "ms": 2.0
+            "ms": 2.8
           }
         }
       ],
       "metrics": {
         "cell": [
           0,
-          911,
-          923,
-          1137
+          1024,
+          1024,
+          1024
         ],
         "bg": [
-          6,
-          252,
-          2
+          253,
+          254,
+          248
         ],
-        "threshold": 123.0,
-        "fg_px": 259090,
+        "threshold": 8.0,
+        "fg_px": 240578,
         "bbox": [
-          0,
-          105,
-          923,
-          955
+          193,
+          185,
+          828,
+          841
         ],
-        "scale": 0.4327,
+        "scale": 0.6214,
         "scale_mode": "pack",
-        "waived": [
-          "inside_cell"
-        ],
-        "spill_px": 0,
+        "spill_px": 5,
         "chroma_risk": 0.0,
-        "holes": 0.0135,
+        "holes": 0.0161,
         "warnings": [
           "holes"
         ],
-        "kb": 52.2,
-        "format": "png",
-        "sheet_issue": "grid_detected"
+        "kb": 90.5,
+        "format": "png"
       },
       "png": "slices/img-batman_lego_pieces-cape_piece-20261003T014529-6ee37a.png",
       "anim_status": "NOT_REQUESTED",
@@ -978,6 +989,30 @@
               "inside_cell"
             ]
           }
+        },
+        {
+          "ts": 1791084059.372,
+          "stage": "sheet",
+          "actor": "local",
+          "decision": "PASS",
+          "reason": "cut again as particles",
+          "ref": null,
+          "detail": {
+            "kind": "particles"
+          }
+        },
+        {
+          "ts": 1791084060.082,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
         }
       ],
       "still_override": [
@@ -1003,7 +1038,7 @@
           "detail": "foreground below minimum",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 248095,
+          "value": 209371,
           "limit": 400,
           "data": {
             "ms": 0.0
@@ -1026,7 +1061,7 @@
             4
           ],
           "data": {
-            "ms": 31.5
+            "ms": 13.1
           }
         },
         {
@@ -1047,19 +1082,19 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 36250,
+          "value": 80814,
           "limit": 400,
           "data": {
-            "ms": 0.2
+            "ms": 0.1
           }
         },
         {
           "name": "inside_cell",
-          "ok": false,
-          "detail": "128px on cell border (allowed by you)",
-          "severity": "WARN",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
           "stage": "still",
-          "value": 128,
+          "value": 0,
           "limit": 8,
           "data": {
             "ms": 0.0
@@ -1072,9 +1107,9 @@
           "severity": "BLOCK",
           "stage": "still",
           "value": 0,
-          "limit": 36.25,
+          "limit": 80.81400000000001,
           "data": {
-            "ms": 1.7
+            "ms": 1.8
           }
         },
         {
@@ -1104,77 +1139,70 @@
         },
         {
           "name": "single_subject",
-          "ok": false,
-          "detail": "2 part(s); the second is 14.5% of the subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
           "severity": "WARN",
           "stage": "still",
-          "value": 0.1448,
+          "value": 0.0,
           "limit": 0.12,
           "data": {
-            "parts": 2,
-            "ms": 3.1
+            "parts": 1,
+            "ms": 1.8
           }
         },
         {
           "name": "duplicate_cell",
           "ok": true,
-          "detail": "hash distance 13 to cell 2",
+          "detail": "hash distance 28 to cell 1",
           "severity": "WARN",
           "stage": "still",
-          "value": 13,
+          "value": 28,
           "limit": 4,
           "data": {
-            "of": 2,
+            "of": 1,
             "ms": 0.0
           }
         },
         {
           "name": "static_file",
           "ok": true,
-          "detail": "62.9KB png",
+          "detail": "105.2KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 62.9,
+          "value": 105.2,
           "limit": 512,
           "data": {
-            "ms": 2.0
+            "ms": 3.1
           }
         }
       ],
       "metrics": {
         "cell": [
-          923,
-          911,
-          1125,
-          1137
+          1024,
+          1024,
+          1024,
+          1024
         ],
         "bg": [
-          6,
-          251,
-          3
+          252,
+          253,
+          252
         ],
-        "threshold": 122.5,
-        "fg_px": 248095,
+        "threshold": 8.0,
+        "fg_px": 209371,
         "bbox": [
-          0,
-          0,
-          1125,
-          1137
+          205,
+          265,
+          827,
+          755
         ],
-        "scale": 0.3828,
-        "scale_mode": "clamped",
-        "waived": [
-          "inside_cell"
-        ],
+        "scale": 0.6214,
+        "scale_mode": "pack",
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "warnings": [
-          "single_subject"
-        ],
-        "kb": 62.9,
-        "format": "png",
-        "sheet_issue": "grid_detected"
+        "kb": 105.2,
+        "format": "png"
       },
       "png": "slices/img-batman_lego_pieces-megaphone-20261003T014529-acfd58.png",
       "anim_status": "NOT_REQUESTED",
@@ -1247,6 +1275,28 @@
               "inside_cell"
             ]
           }
+        },
+        {
+          "ts": 1791084059.372,
+          "stage": "sheet",
+          "actor": "local",
+          "decision": "PASS",
+          "reason": "cut again as particles",
+          "ref": null,
+          "detail": {
+            "kind": "particles"
+          }
+        },
+        {
+          "ts": 1791084060.086,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "still_override": [
@@ -1255,13 +1305,6 @@
       "rendered_at": 1791013516.416
     }
   ],
-  "sheet_issues": [
-    {
-      "check": "grid_detected",
-      "value": "3x3",
-      "limit": "2x2",
-      "note": "found 3x3, plan says 2x2",
-      "forced": false
-    }
-  ]
+  "sheet_issues": [],
+  "kind": "particles"
 }

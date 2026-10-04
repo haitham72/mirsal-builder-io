@@ -1,0 +1,185 @@
+{
+  "id": "P002",
+  "name": "Old Man particles",
+  "created": 1791078876.247,
+  "user": "local",
+  "elements": [
+    "brown leather vest",
+    "white button shirt",
+    "wooden walking cane",
+    "grey curly hair"
+  ],
+  "source": {
+    "sticker_ids": [
+      "8434d3b4",
+      "3ca99871",
+      "a8e79bbf",
+      "e4536295",
+      "2f276704",
+      "a4b28cca",
+      "b04e9ec3",
+      "54c3636d",
+      "d4914f63"
+    ],
+    "kind": "drawn",
+    "effect": "E015",
+    "generation": "G109",
+    "particles": true,
+    "job": "J054",
+    "grid": [
+      2,
+      2
+    ],
+    "by": "vlm",
+    "options": [
+      "brown leather vest",
+      "white button shirt",
+      "wooden walking cane",
+      "grey curly hair",
+      "brown leather shoes",
+      "brown trousers pants",
+      "white collared undershirt",
+      "brown belt buckle"
+    ]
+  },
+  "plan": {
+    "subject": "laughing",
+    "style": "glossy cartoon look, bold clean shapes, vivid colours"
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 1,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "brown_leather_vest",
+      "sprite": true,
+      "w": 412,
+      "h": 438,
+      "picked": true,
+      "created": 1791078876.246,
+      "import": "E015/G109/S1"
+    },
+    {
+      "n": 2,
+      "cell": 2,
+      "file": "cells/c02.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "white_button_shirt",
+      "sprite": true,
+      "w": 495,
+      "h": 464,
+      "picked": true,
+      "created": 1791078876.246,
+      "import": "E015/G109/S2"
+    },
+    {
+      "n": 3,
+      "cell": 3,
+      "file": "cells/c03.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "wooden_walking_cane",
+      "sprite": true,
+      "w": 310,
+      "h": 545,
+      "picked": true,
+      "created": 1791078876.246,
+      "import": "E015/G109/S3"
+    },
+    {
+      "n": 4,
+      "cell": 4,
+      "file": "cells/c04.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "grey_curly_hair",
+      "sprite": true,
+      "w": 551,
+      "h": 475,
+      "picked": true,
+      "created": 1791078876.246,
+      "import": "E015/G109/S4"
+    }
+  ],
+  "motion": {},
+  "owner": [
+    {
+      "sticker_id": "8434d3b4",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 1
+    },
+    {
+      "sticker_id": "3ca99871",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 2
+    },
+    {
+      "sticker_id": "a8e79bbf",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 3
+    },
+    {
+      "sticker_id": "e4536295",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 4
+    },
+    {
+      "sticker_id": "2f276704",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 5
+    },
+    {
+      "sticker_id": "a4b28cca",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 6
+    },
+    {
+      "sticker_id": "b04e9ec3",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 7
+    },
+    {
+      "sticker_id": "54c3636d",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 8
+    },
+    {
+      "sticker_id": "d4914f63",
+      "pack_id": "9f3e5ef8",
+      "generation": "G107",
+      "index": 9
+    }
+  ],
+  "renders": [],
+  "credits": 2.0,
+  "notes": [],
+  "history": [
+    {
+      "ts": 1791078876.247,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "from E015: 4 cell(s), 1 pack(s)",
+      "detail": {
+        "effect": "E015",
+        "generation": "G109"
+      }
+    }
+  ],
+  "imports": [
+    "E015/G109/S1",
+    "E015/G109/S2",
+    "E015/G109/S3",
+    "E015/G109/S4"
+  ]
+}

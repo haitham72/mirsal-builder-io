@@ -59,3 +59,6 @@ deploy/.env
 .DS_Store
 **/.DS_Store
 .claude/worktrees/
+
+# one-time safety copies made before a data migration (local only, never in git)
+mirsal/out/backups/

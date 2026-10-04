@@ -90,9 +90,6 @@
     }
   ],
   "motion": {},
-  "packs": [
-    "782c4187"
-  ],
   "renders": [],
   "credits": 2.0,
   "notes": [],
@@ -106,6 +103,41 @@
         "effect": "E014",
         "generation": "G106"
       }
+    },
+    {
+      "ts": 1791075946.695,
+      "actor": "python",
+      "decision": "MIGRATE_OWNER",
+      "reason": "sticker owners; unresolvable sets stay detached",
+      "detail": null
     }
-  ]
+  ],
+  "owner": [
+    {
+      "sticker_id": "83659804",
+      "pack_id": "782c4187",
+      "generation": "G105",
+      "index": 1
+    },
+    {
+      "sticker_id": "a7917758",
+      "pack_id": "782c4187",
+      "generation": "G105",
+      "index": 2
+    },
+    {
+      "sticker_id": "df212b02",
+      "pack_id": "782c4187",
+      "generation": "G105",
+      "index": 3
+    },
+    {
+      "sticker_id": "6ea20fa2",
+      "pack_id": "782c4187",
+      "generation": "G105",
+      "index": 4
+    }
+  ],
+  "version": 2,
+  "updated": 1791075946.695
 }

@@ -1,0 +1,43 @@
+{
+  "id": "J054",
+  "kind": "sheet",
+  "task": "040",
+  "generation": "G109",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate small particles, one at each position: top-left, top-right, bottom-left and bottom-right, evenly spaced.\nParticles of laughing: small things that fly out when the laughing emoji is pressed. Draw only the particles listed, never laughing itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every particle directly on the backdrop with no outline, stroke, die-cut edge or halo around it.\nEach particle is alone at its position and centred there, and differs from every other one in kind, size or angle:\nParticle 1 (top-left): brown leather vest\nParticle 2 (top-right): white button shirt\nParticle 3 (bottom-left): wooden walking cane\nParticle 4 (bottom-right): grey curly hair\nConsistency: the same drawing style, lighting and colour quality for all 4 particles.\nBackground: one seamless, flat, uniform pure #00FF00 green backdrop from edge to edge in exactly one shade, with no texture, no shading, no tint, no gradient, no vignette, no glow, no shadows, no noise, and nothing on it but the particles.\nSpacing: every particle has a generous empty margin on every side (at least 20% of its own size), and no particle touches another.",
+    "label": "laughing particles",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local",
+    "particles": {
+      "effect": "E015"
+    }
+  },
+  "status": "DONE",
+  "external_task_id": "5fc9d153-ec1c-4ae6-af04-62b2e84d843b",
+  "result": {
+    "file": "jobs/J054/result.png",
+    "sha256": "e0374806b4aa48b178e38a1002399596d78affcc1eb93f144c826198a39ceb1b",
+    "bytes": 3762630
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791078822.32,
+  "claimed_at": 1791078823.379,
+  "completed_at": 1791078846.201,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

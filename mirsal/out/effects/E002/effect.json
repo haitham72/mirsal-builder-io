@@ -42,7 +42,7 @@
       "preset": {
         "1e01c5a6": "burst"
       },
-      "by": "vlm",
+      "by": "you",
       "sprites": "own"
     }
   ],
@@ -223,9 +223,25 @@
       "detail": {
         "job": "J039"
       }
+    },
+    {
+      "ts": 1791082945.857,
+      "actor": "python",
+      "decision": "SAVE",
+      "reason": "saved as particle set P005",
+      "detail": {
+        "set": "P005"
+      }
+    },
+    {
+      "ts": 1791084606.948,
+      "actor": "local",
+      "decision": "EDIT",
+      "reason": "g1: bat signal, lego brick, cape piece",
+      "detail": null
     }
   ],
-  "updated": 1790984210.09,
+  "updated": 1791084606.948,
   "per_sticker": {
     "1e01c5a6": {
       "subject": "Batman Lego",
@@ -242,5 +258,8 @@
     }
   },
   "notes": [],
-  "analysed_by": "table"
+  "analysed_by": "table",
+  "sets": [
+    "P005"
+  ]
 }

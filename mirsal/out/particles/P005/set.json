@@ -1,0 +1,276 @@
+{
+  "id": "P005",
+  "name": "Batman Lego · Kling (E002)",
+  "created": 1791082945.856,
+  "user": "python",
+  "elements": [
+    "bat signal",
+    "lego brick",
+    "cape piece"
+  ],
+  "source": {
+    "sticker_ids": [
+      "1e01c5a6"
+    ],
+    "kind": "video",
+    "effect": "E002",
+    "generation": null,
+    "particles": true,
+    "job": "J039",
+    "grid": null,
+    "by": null,
+    "options": [],
+    "jobs": [
+      "J039"
+    ]
+  },
+  "plan": {
+    "subject": "Batman Lego",
+    "style": "glossy cartoon look, bold clean shapes, vivid colours"
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 1,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": null,
+      "sprite": true,
+      "w": 308,
+      "h": 356,
+      "picked": true,
+      "created": 1791082944.528,
+      "clip": "cells/c01.webm",
+      "fps": 30.0,
+      "frames": 90,
+      "timeline": "cells/c01.npz",
+      "import": "E002/R001",
+      "job": "J039"
+    },
+    {
+      "n": 2,
+      "cell": 2,
+      "file": "cells/c02.png",
+      "status": "READY",
+      "warnings": [],
+      "key": null,
+      "sprite": true,
+      "w": 281,
+      "h": 258,
+      "picked": true,
+      "created": 1791082944.89,
+      "clip": "cells/c02.webm",
+      "fps": 30.0,
+      "frames": 90,
+      "timeline": "cells/c02.npz",
+      "import": "E002/R002",
+      "job": "J039"
+    },
+    {
+      "n": 3,
+      "cell": 3,
+      "file": "cells/c03.png",
+      "status": "READY",
+      "warnings": [],
+      "key": null,
+      "sprite": true,
+      "w": 322,
+      "h": 346,
+      "picked": true,
+      "created": 1791082945.265,
+      "clip": "cells/c03.webm",
+      "fps": 30.0,
+      "frames": 90,
+      "timeline": "cells/c03.npz",
+      "import": "E002/R003",
+      "job": "J039"
+    },
+    {
+      "n": 4,
+      "cell": 4,
+      "file": "cells/c04.png",
+      "status": "READY",
+      "warnings": [],
+      "key": null,
+      "sprite": true,
+      "w": 312,
+      "h": 306,
+      "picked": true,
+      "created": 1791082945.658,
+      "clip": "cells/c04.webm",
+      "fps": 30.0,
+      "frames": 90,
+      "timeline": "cells/c04.npz",
+      "import": "E002/R004",
+      "job": "J039"
+    }
+  ],
+  "motion": {
+    "preset": "burst",
+    "params": {
+      "seed": 1,
+      "magnitude": 1,
+      "gravity": 1,
+      "vortex": 0,
+      "particle_size": 1,
+      "count": 28,
+      "spin": 1,
+      "sprite_px": 200,
+      "scale": 1
+    }
+  },
+  "saved_at": 1791084956.294,
+  "owner": [
+    {
+      "sticker_id": "1e01c5a6",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 1
+    }
+  ],
+  "renders": [
+    {
+      "id": "R001",
+      "pack_id": "20b742ee",
+      "preset": "burst",
+      "params": {
+        "gravity": 1.0,
+        "magnitude": 1.0,
+        "vortex": 0.0,
+        "count": 28,
+        "size_min": 0.1,
+        "size_max": 0.22,
+        "spin": 1.0,
+        "lifetime": 2.2,
+        "spread": 360.0,
+        "pop": 0.25,
+        "seed": 1,
+        "fps": 30.0,
+        "duration": 3.0,
+        "size": 512,
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "show_source": false,
+        "sprite_px": 200,
+        "scale": 1
+      },
+      "source": "cells",
+      "sprites": 4,
+      "file": "renders/R001.webm",
+      "bytes": 258916,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 30,
+        "kb": 252.8,
+        "label": "P005 burst",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.039
+      },
+      "created": 1791083404.585,
+      "added_to": "20b742ee",
+      "added": [
+        {
+          "sticker": "28ec987b",
+          "pack": "20b742ee",
+          "of": "1e01c5a6",
+          "ts": 1791083413.471
+        }
+      ],
+      "affirmed_in": [
+        "20b742ee"
+      ]
+    }
+  ],
+  "credits": 4.5,
+  "notes": [
+    "This set has no drawn cells yet: the burst uses the pack's own stickers (generate more to add drawn particles)."
+  ],
+  "history": [
+    {
+      "ts": 1791082945.857,
+      "actor": "python",
+      "decision": "CREATE",
+      "reason": "from E002: 4 cell(s), 1 pack(s)",
+      "detail": {
+        "effect": "E002",
+        "generation": null
+      }
+    },
+    {
+      "ts": 1791082945.863,
+      "actor": "python",
+      "decision": "ADOPT",
+      "reason": "saved as a row from the older run E002",
+      "detail": {
+        "effect": "E002"
+      }
+    },
+    {
+      "ts": 1791083404.585,
+      "actor": "python",
+      "decision": "RENDER",
+      "reason": "R001 for 20b742ee: READY 252 KB (burst)",
+      "detail": {
+        "render": "R001",
+        "pack": "20b742ee",
+        "warnings": []
+      }
+    },
+    {
+      "ts": 1791083413.471,
+      "actor": "local",
+      "decision": "APPROVE",
+      "reason": "1 burst(s) added to the pack",
+      "detail": {
+        "pack": "20b742ee",
+        "added": [
+          {
+            "sticker": "28ec987b",
+            "name": "Batman Lego · Kling (E002) · burst",
+            "render": "R001"
+          }
+        ]
+      }
+    },
+    {
+      "ts": 1791083424.763,
+      "actor": "local",
+      "decision": "SAVE",
+      "reason": "motion",
+      "detail": null
+    },
+    {
+      "ts": 1791083517.694,
+      "actor": "local",
+      "decision": "EDIT",
+      "reason": "motion",
+      "detail": null
+    },
+    {
+      "ts": 1791084956.294,
+      "actor": "local",
+      "decision": "SAVE",
+      "reason": "motion",
+      "detail": null
+    }
+  ],
+  "imports": [
+    "E002/R001",
+    "E002/R002",
+    "E002/R003",
+    "E002/R004"
+  ],
+  "updated": 1791084956.294
+}

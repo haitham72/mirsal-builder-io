@@ -1,0 +1,579 @@
+{
+  "id": "E015",
+  "created": 1791078788.619,
+  "user": "local",
+  "pack_id": "9f3e5ef8",
+  "pack_name": "Old Man",
+  "mode": "sim",
+  "grid": [
+    2,
+    2
+  ],
+  "note": "",
+  "title": "Old Man · effects",
+  "status": "READY",
+  "stickers": [
+    {
+      "sticker_id": "8434d3b4",
+      "name": "Old man clapping laughing",
+      "emoji": "😂👵",
+      "file": "G107/vid-old_man-clapping_laughing-old_man-20261004T015244-12fa72.webm",
+      "type": "animated",
+      "src": "src/8434d3b4.png"
+    },
+    {
+      "sticker_id": "3ca99871",
+      "name": "Old man crying sadness",
+      "emoji": "😢👴",
+      "file": "G107/vid-old_man-crying_sadness-old_man-20261004T015244-382b7a.webm",
+      "type": "animated",
+      "src": "src/3ca99871.png"
+    },
+    {
+      "sticker_id": "a8e79bbf",
+      "name": "Old man shouting anger",
+      "emoji": "😡👨",
+      "file": "G107/vid-old_man-shouting_anger-old_man-20261004T015244-c00c47.webm",
+      "type": "animated",
+      "src": "src/a8e79bbf.png"
+    },
+    {
+      "sticker_id": "e4536295",
+      "name": "Old man looking shocked",
+      "emoji": "😱👴",
+      "file": "G107/vid-old_man-looking_shocked-old_man-20261004T015244-9da52e.webm",
+      "type": "animated",
+      "src": "src/e4536295.png"
+    },
+    {
+      "sticker_id": "2f276704",
+      "name": "Old man jumping pride",
+      "emoji": "😄🏃",
+      "file": "G107/vid-old_man-jumping_pride-old_man-20261004T015244-7b982a.webm",
+      "type": "animated",
+      "src": "src/2f276704.png"
+    },
+    {
+      "sticker_id": "a4b28cca",
+      "name": "Old man hiding fear",
+      "emoji": "😨👵",
+      "file": "G107/vid-old_man-hiding_fear-old_man-20261004T015244-d60305.webm",
+      "type": "animated",
+      "src": "src/a4b28cca.png"
+    },
+    {
+      "sticker_id": "b04e9ec3",
+      "name": "Old man sitting boredom",
+      "emoji": "😴👨",
+      "file": "G107/vid-old_man-sitting_boredom-old_man-20261004T015244-5484ac.webm",
+      "type": "animated",
+      "src": "src/b04e9ec3.png"
+    },
+    {
+      "sticker_id": "54c3636d",
+      "name": "Old man grinning mischief",
+      "emoji": "😏👴",
+      "file": "G107/vid-old_man-grinning_mischief-old_man-20261004T015244-8afa3b.webm",
+      "type": "animated",
+      "src": "src/54c3636d.png"
+    },
+    {
+      "sticker_id": "d4914f63",
+      "name": "Old man leaning relaxed",
+      "emoji": "😌🧓",
+      "file": "G107/vid-old_man-leaning_relaxed-old_man-20261004T015244-144cfa.webm",
+      "type": "animated",
+      "src": "src/d4914f63.png"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "subject": "laughing",
+      "elements": [
+        "tears of joy",
+        "small stars",
+        "tiny sparkles"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "8434d3b4"
+      ],
+      "moods": {
+        "8434d3b4": "neutral"
+      },
+      "preset": {
+        "8434d3b4": "burst"
+      },
+      "by": "lexicon",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g2",
+      "subject": "Old man crying",
+      "elements": [
+        "tear drops",
+        "walking stick",
+        "brown shoes"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "3ca99871"
+      ],
+      "moods": {
+        "3ca99871": "sad"
+      },
+      "preset": {
+        "3ca99871": "rain"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g3",
+      "subject": "angry old man",
+      "elements": [
+        "furrowed brow",
+        "open mouth",
+        "shaking fists"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "a8e79bbf"
+      ],
+      "moods": {
+        "a8e79bbf": "angry"
+      },
+      "preset": {
+        "a8e79bbf": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g4",
+      "subject": "Old man looking shocked",
+      "elements": [
+        "shocked eyes",
+        "open mouth",
+        "brown vest",
+        "white hair"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "e4536295"
+      ],
+      "moods": {
+        "e4536295": "sad"
+      },
+      "preset": {
+        "e4536295": "rain"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g5",
+      "subject": "Old man jumping",
+      "elements": [
+        "brown shoes",
+        "white hair",
+        "green cane"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "blue",
+      "stickers": [
+        "2f276704"
+      ],
+      "moods": {
+        "2f276704": "happy"
+      },
+      "preset": {
+        "2f276704": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g6",
+      "subject": "old man",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "a4b28cca"
+      ],
+      "moods": {
+        "a4b28cca": "neutral"
+      },
+      "preset": {
+        "a4b28cca": "burst"
+      },
+      "by": "generic",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g7",
+      "subject": "Old man sitting boredom",
+      "elements": [
+        "closed eyes",
+        "frown lines",
+        "empty cane"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "b04e9ec3"
+      ],
+      "moods": {
+        "b04e9ec3": "sad"
+      },
+      "preset": {
+        "b04e9ec3": "rain"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g8",
+      "subject": "Old man grinning mischief",
+      "elements": [
+        "brown vest",
+        "white shirt",
+        "walking stick"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "54c3636d"
+      ],
+      "moods": {
+        "54c3636d": "happy"
+      },
+      "preset": {
+        "54c3636d": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g9",
+      "subject": "Old man laughing",
+      "elements": [
+        "laughing mouth",
+        "wrinkled eyes",
+        "white hair",
+        "brown vest"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "d4914f63"
+      ],
+      "moods": {
+        "d4914f63": "happy"
+      },
+      "preset": {
+        "d4914f63": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 109,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    }
+  ],
+  "results": [],
+  "video": {},
+  "history": [
+    {
+      "ts": 1791078788.619,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "9 sticker(s), sim",
+      "detail": null
+    },
+    {
+      "ts": 1791078806.128,
+      "actor": "python",
+      "decision": "ANALYSE",
+      "reason": "laughing: tears of joy, small stars, tiny sparkles, Old man crying: tear drops, walking stick, brown shoes, angry old man: furrowed brow, open mouth, shaking fists, Old man looking shocked: shocked eyes, open mouth, brown vest, white hair, Old man jumping: brown shoes, white hair, green cane, old ma",
+      "detail": {
+        "model": "qwen3.5-4b"
+      }
+    },
+    {
+      "ts": 1791078809.902,
+      "actor": "python",
+      "decision": "SUGGEST",
+      "reason": "8 candidate particles by vlm from the master sheet G107",
+      "detail": {
+        "by": "vlm",
+        "model": "qwen3.5-4b",
+        "source": {
+          "kind": "batch",
+          "generation": 107
+        }
+      }
+    },
+    {
+      "ts": 1791078822.329,
+      "actor": "local",
+      "decision": "REQUEST",
+      "reason": "particle sheet job J054 (2x2): brown leather vest, white button shirt, wooden walking cane, grey curly hair",
+      "detail": {
+        "job": "J054"
+      }
+    },
+    {
+      "ts": 1791078846.251,
+      "actor": "python",
+      "decision": "LINK",
+      "reason": "the particles are the cells of G109",
+      "detail": {
+        "generation": "G109",
+        "job": "J054"
+      }
+    },
+    {
+      "ts": 1791078876.248,
+      "actor": "local",
+      "decision": "SAVE",
+      "reason": "saved as particle set P002",
+      "detail": {
+        "set": "P002"
+      }
+    }
+  ],
+  "updated": 1791078876.248,
+  "per_sticker": {
+    "3ca99871": {
+      "subject": "Old man crying",
+      "elements": [
+        "tear drops",
+        "walking stick",
+        "brown shoes"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "sad",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "a8e79bbf": {
+      "subject": "angry old man",
+      "elements": [
+        "furrowed brow",
+        "open mouth",
+        "shaking fists"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "angry",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "e4536295": {
+      "subject": "Old man looking shocked",
+      "elements": [
+        "shocked eyes",
+        "open mouth",
+        "brown vest",
+        "white hair"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "sad",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "2f276704": {
+      "subject": "Old man jumping",
+      "elements": [
+        "brown shoes",
+        "white hair",
+        "green cane"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "b04e9ec3": {
+      "subject": "Old man sitting boredom",
+      "elements": [
+        "closed eyes",
+        "frown lines",
+        "empty cane"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "sad",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "54c3636d": {
+      "subject": "Old man grinning mischief",
+      "elements": [
+        "brown vest",
+        "white shirt",
+        "walking stick"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "d4914f63": {
+      "subject": "Old man laughing",
+      "elements": [
+        "laughing mouth",
+        "wrinkled eyes",
+        "white hair",
+        "brown vest"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "8434d3b4": {
+      "subject": "laughing",
+      "elements": [
+        "tears of joy",
+        "small stars",
+        "tiny sparkles"
+      ],
+      "mood": "neutral",
+      "by": "lexicon"
+    },
+    "a4b28cca": {
+      "subject": "old man",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "mood": "neutral",
+      "by": "generic"
+    }
+  },
+  "notes": [
+    "The model could not read Old man clapping laughing (the model answered nonsense twice: 'clapping hands' cannot be a particle of a burst (no text, logos, hands, faces, peopl): the built-in table chose its particles.",
+    "The model could not read Old man hiding fear (the model answered nonsense twice: 'raised hands' cannot be a particle of a burst (no text, logos, hands, faces, people,): the built-in table chose its particles."
+  ],
+  "analysed_by": "qwen3.5-4b",
+  "set": {
+    "options": [
+      "brown leather vest",
+      "white button shirt",
+      "wooden walking cane",
+      "grey curly hair",
+      "brown leather shoes",
+      "brown trousers pants",
+      "white collared undershirt",
+      "brown belt buckle"
+    ],
+    "source": {
+      "kind": "batch",
+      "generation": 107
+    },
+    "by": "vlm",
+    "elements": [
+      "brown leather vest",
+      "white button shirt",
+      "wooden walking cane",
+      "grey curly hair"
+    ],
+    "picked": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "grid": [
+      2,
+      2
+    ],
+    "status": "DRAWN",
+    "model": "qwen3.5-4b",
+    "job": "J054",
+    "generation": 109
+  },
+  "sets": [
+    "P002"
+  ]
+}

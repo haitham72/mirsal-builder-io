@@ -217,9 +217,18 @@
         "generation": "G100",
         "job": "J040"
       }
+    },
+    {
+      "ts": 1791084066.146,
+      "actor": "python",
+      "decision": "SAVE",
+      "reason": "saved as particle set P006",
+      "detail": {
+        "set": "P006"
+      }
     }
   ],
-  "updated": 1790991929.665,
+  "updated": 1791084066.146,
   "per_sticker": {
     "1e01c5a6": {
       "subject": "Batman Lego",
@@ -327,5 +336,8 @@
     }
   },
   "notes": [],
-  "analysed_by": "table"
+  "analysed_by": "table",
+  "sets": [
+    "P006"
+  ]
 }

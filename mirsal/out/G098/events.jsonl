@@ -1,5 +1,0 @@
-{"ts": 1790949556.639, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "make him wear a coat in the winter", "task_slug": "him_wear_coat_winter"}}
-{"ts": 1790949556.653, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
-{"ts": 1790949556.908, "stage": "sheet_picked", "status": "done", "ms": 254, "detail": {"subject": "him_wear_coat", "variant": 1, "of": 1, "file": "result.png", "blocked": "grid_detected", "warnings": []}}
-{"ts": 1790949556.91, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
-{"ts": 1790949556.92, "stage": "sliced", "status": "done", "ms": 9, "detail": {"ready": 0, "failed": 9, "blocked": "grid_detected"}}

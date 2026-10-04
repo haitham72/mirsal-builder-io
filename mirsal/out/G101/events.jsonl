@@ -5,3 +5,8 @@
 {"ts": 1790995556.446, "stage": "keyed", "status": "done", "ms": 272, "detail": {"bg": [2, 251, 3], "threshold": [124.0, 123.5, 123.5, 123.5], "grid": "2x2", "cut": "equal", "xs": [0, 1024, 2048], "ys": [0, 1024, 2048]}}
 {"ts": 1790995556.447, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
 {"ts": 1790995556.728, "stage": "sliced", "status": "done", "ms": 281, "detail": {"ready": 4, "failed": 0}}
+{"ts": 1791075990.799, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 1, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791075990.853, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 2, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791075990.854, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 3, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791075990.855, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 4, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791075990.855, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4]}, "actor": "human", "decision": "APPROVE"}

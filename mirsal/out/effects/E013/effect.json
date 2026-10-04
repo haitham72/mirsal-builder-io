@@ -401,9 +401,18 @@
         ],
         "generation": 101
       }
+    },
+    {
+      "ts": 1791084066.277,
+      "actor": "python",
+      "decision": "SAVE",
+      "reason": "saved as particle set P007",
+      "detail": {
+        "set": "P007"
+      }
     }
   ],
-  "updated": 1790995603.707,
+  "updated": 1791084066.277,
   "per_sticker": {
     "144848e7": {
       "subject": "Barbie doll",
@@ -561,5 +570,8 @@
     "model": "qwen3.5-4b",
     "job": "J041",
     "generation": 101
-  }
+  },
+  "sets": [
+    "P007"
+  ]
 }

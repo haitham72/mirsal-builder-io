@@ -104,7 +104,7 @@
     3,
     3
   ],
-  "stage": "video_sliced",
+  "stage": "pack_final",
   "error": null,
   "plan_source": "task 038",
   "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: an elderly person with white hair, wrinkled face, and a cane.\nStyle: photorealistic character, natural material and fur texture, realistic proportions and lighting, expressive face.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: elderly man laughing heartily while clapping hands together\nCharacter 2: old man crying tears of overwhelming sadness alone\nCharacter 3: grizzled warrior shouting in fierce anger and rage\nCharacter 4: wise elder looking shocked by a surprising revelation\nCharacter 5: senior man jumping for joy with pure delight and pride\nCharacter 6: old woman fearfully hiding her eyes from danger\nCharacter 7: senior man sitting bored with eyes half closed\nCharacter 8: mischievous old man grinning sneakily with a wink\nCharacter 9: elderly man leaning casually against wall with smile\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -251,7 +251,23 @@
         "note": "approved by Make a video"
       }
     },
-    "pack": null
+    "pack": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791078764.264,
+      "note": "approved by Add",
+      "stickers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
   },
   "video_sheets": [
     {
@@ -745,7 +761,7 @@
       "webm": "slices/vid-old_man-clapping_laughing-20261003T165322-c486c4.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -821,6 +837,24 @@
               "sharpness"
             ]
           }
+        },
+        {
+          "ts": 1791078764.151,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -1272,7 +1306,7 @@
       "webm": "slices/vid-old_man-crying_sadness-20261003T165322-1a3d6f.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1382,6 +1416,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.155,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -1836,7 +1888,7 @@
       "webm": "slices/vid-old_man-shouting_anger-20261003T165322-2a21e4.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1944,6 +1996,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.156,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -2391,7 +2461,7 @@
       "webm": "slices/vid-old_man-looking_shocked-20261003T165322-325c85.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -2465,6 +2535,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.157,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -2913,7 +3001,7 @@
       "webm": "slices/vid-old_man-jumping_pride-20261003T165322-cbb85c.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -3021,6 +3109,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.157,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -3469,7 +3575,7 @@
       "webm": "slices/vid-old_man-hiding_fear-20261003T165322-f7979a.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -3555,6 +3661,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.158,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -4000,7 +4124,7 @@
       "webm": "slices/vid-old_man-sitting_boredom-20261003T165322-eba9a8.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -4074,6 +4198,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.159,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -4521,7 +4663,7 @@
       "webm": "slices/vid-old_man-grinning_mischief-20261003T165322-049aed.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -4597,6 +4739,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.161,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -5041,7 +5201,7 @@
       "webm": "slices/vid-old_man-leaning_relaxed-20261003T165322-9ab483.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -5115,6 +5275,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791078764.162,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791078764.264,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "caption": {
@@ -5330,5 +5508,18 @@
       "ts": 1791046731.212,
       "via": "apply"
     }
-  ]
+  ],
+  "added": {
+    "9f3e5ef8": [
+      "animated:1",
+      "animated:2",
+      "animated:3",
+      "animated:4",
+      "animated:5",
+      "animated:6",
+      "animated:7",
+      "animated:8",
+      "animated:9"
+    ]
+  }
 }

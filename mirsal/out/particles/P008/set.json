@@ -1,0 +1,547 @@
+{
+  "id": "P008",
+  "name": "Recovered particles",
+  "created": 1791084781.815,
+  "user": "local",
+  "elements": [],
+  "source": {
+    "kind": "stickers",
+    "sticker_ids": [
+      "031868b4",
+      "a6be1731",
+      "d450042e",
+      "2689488e",
+      "5843680c",
+      "04e0be52",
+      "bc7bc82d",
+      "05ffb025",
+      "3458432b",
+      "7c00f84a",
+      "7f6ddedc",
+      "c9148c04",
+      "5e9f5412",
+      "eae10b30",
+      "a05764ac",
+      "8fb546c8"
+    ],
+    "recovered_stickers": [
+      "031868b4",
+      "a6be1731",
+      "d450042e",
+      "2689488e",
+      "5843680c",
+      "04e0be52",
+      "bc7bc82d",
+      "05ffb025",
+      "3458432b",
+      "7c00f84a",
+      "7f6ddedc",
+      "c9148c04",
+      "5e9f5412",
+      "eae10b30",
+      "a05764ac",
+      "8fb546c8"
+    ]
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 1,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper waving",
+      "sprite": true,
+      "w": 385,
+      "h": 429,
+      "picked": true,
+      "created": 1791084781.819,
+      "source_sticker": "031868b4",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 2,
+      "cell": 2,
+      "file": "cells/c02.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper excited",
+      "sprite": true,
+      "w": 379,
+      "h": 429,
+      "picked": true,
+      "created": 1791084781.82,
+      "source_sticker": "a6be1731",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 3,
+      "cell": 3,
+      "file": "cells/c03.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper in love",
+      "sprite": true,
+      "w": 363,
+      "h": 429,
+      "picked": true,
+      "created": 1791084781.82,
+      "source_sticker": "d450042e",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 4,
+      "cell": 4,
+      "file": "cells/c04.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper ok sign",
+      "sprite": true,
+      "w": 361,
+      "h": 433,
+      "picked": true,
+      "created": 1791084781.82,
+      "source_sticker": "2689488e",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 5,
+      "cell": 5,
+      "file": "cells/c05.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper eye roll",
+      "sprite": true,
+      "w": 362,
+      "h": 432,
+      "picked": true,
+      "created": 1791084781.82,
+      "source_sticker": "5843680c",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 6,
+      "cell": 6,
+      "file": "cells/c06.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper sad",
+      "sprite": true,
+      "w": 336,
+      "h": 415,
+      "picked": true,
+      "created": 1791084781.82,
+      "source_sticker": "04e0be52",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 7,
+      "cell": 7,
+      "file": "cells/c07.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper angry",
+      "sprite": true,
+      "w": 367,
+      "h": 407,
+      "picked": true,
+      "created": 1791084781.821,
+      "source_sticker": "bc7bc82d",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 8,
+      "cell": 8,
+      "file": "cells/c08.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper scared",
+      "sprite": true,
+      "w": 357,
+      "h": 410,
+      "picked": true,
+      "created": 1791084781.821,
+      "source_sticker": "05ffb025",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 9,
+      "cell": 9,
+      "file": "cells/c09.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper scheming",
+      "sprite": true,
+      "w": 361,
+      "h": 414,
+      "picked": true,
+      "created": 1791084781.821,
+      "source_sticker": "3458432b",
+      "source_pack": "fab32429"
+    },
+    {
+      "n": 10,
+      "cell": 1,
+      "file": "cells/c10.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper waving",
+      "sprite": true,
+      "w": 363,
+      "h": 420,
+      "picked": true,
+      "created": 1791084781.821,
+      "source_sticker": "7c00f84a",
+      "source_pack": "7f7b2e70",
+      "clip": "cells/c10.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c10.npz"
+    },
+    {
+      "n": 11,
+      "cell": 3,
+      "file": "cells/c11.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper in love",
+      "sprite": true,
+      "w": 370,
+      "h": 380,
+      "picked": true,
+      "created": 1791084782.573,
+      "source_sticker": "7f6ddedc",
+      "source_pack": "7f7b2e70",
+      "clip": "cells/c11.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c11.npz"
+    },
+    {
+      "n": 12,
+      "cell": 4,
+      "file": "cells/c12.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper ok sign",
+      "sprite": true,
+      "w": 419,
+      "h": 388,
+      "picked": true,
+      "created": 1791084783.24,
+      "source_sticker": "c9148c04",
+      "source_pack": "7f7b2e70",
+      "clip": "cells/c12.webm",
+      "fps": 24.0,
+      "frames": 72,
+      "timeline": "cells/c12.npz"
+    },
+    {
+      "n": 13,
+      "cell": 5,
+      "file": "cells/c13.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper eye roll",
+      "sprite": true,
+      "w": 377,
+      "h": 416,
+      "picked": true,
+      "created": 1791084784.015,
+      "source_sticker": "5e9f5412",
+      "source_pack": "7f7b2e70",
+      "clip": "cells/c13.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c13.npz"
+    },
+    {
+      "n": 14,
+      "cell": 6,
+      "file": "cells/c14.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper sad",
+      "sprite": true,
+      "w": 350,
+      "h": 423,
+      "picked": true,
+      "created": 1791084784.744,
+      "source_sticker": "eae10b30",
+      "source_pack": "7f7b2e70",
+      "clip": "cells/c14.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c14.npz"
+    },
+    {
+      "n": 15,
+      "cell": 7,
+      "file": "cells/c15.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper angry",
+      "sprite": true,
+      "w": 412,
+      "h": 414,
+      "picked": true,
+      "created": 1791084785.379,
+      "source_sticker": "a05764ac",
+      "source_pack": "7f7b2e70",
+      "clip": "cells/c15.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c15.npz"
+    },
+    {
+      "n": 16,
+      "cell": 8,
+      "file": "cells/c16.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Angel reading newspaper scared",
+      "sprite": true,
+      "w": 366,
+      "h": 369,
+      "picked": true,
+      "created": 1791084786.228,
+      "source_sticker": "8fb546c8",
+      "source_pack": "7f7b2e70",
+      "clip": "cells/c16.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c16.npz"
+    }
+  ],
+  "motion": {},
+  "saved_at": null,
+  "owner": [
+    {
+      "sticker_id": "031868b4",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 1
+    },
+    {
+      "sticker_id": "a6be1731",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 2
+    },
+    {
+      "sticker_id": "d450042e",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 3
+    },
+    {
+      "sticker_id": "2689488e",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 4
+    },
+    {
+      "sticker_id": "5843680c",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 5
+    },
+    {
+      "sticker_id": "04e0be52",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 6
+    },
+    {
+      "sticker_id": "bc7bc82d",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 7
+    },
+    {
+      "sticker_id": "05ffb025",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 8
+    },
+    {
+      "sticker_id": "3458432b",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 9
+    },
+    {
+      "sticker_id": "7c00f84a",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 1
+    },
+    {
+      "sticker_id": "7f6ddedc",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 3
+    },
+    {
+      "sticker_id": "c9148c04",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 4
+    },
+    {
+      "sticker_id": "5e9f5412",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 5
+    },
+    {
+      "sticker_id": "eae10b30",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 6
+    },
+    {
+      "sticker_id": "a05764ac",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 7
+    },
+    {
+      "sticker_id": "8fb546c8",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 8
+    }
+  ],
+  "renders": [
+    {
+      "id": "R001",
+      "pack_id": "fab32429",
+      "preset": "burst",
+      "params": {
+        "gravity": 1.0,
+        "magnitude": 0.5,
+        "vortex": 0.0,
+        "count": 6,
+        "size_min": 0.1,
+        "size_max": 0.22,
+        "particle_size": 1.45,
+        "spin": 1.0,
+        "lifetime": 2.2,
+        "spread": 360.0,
+        "pop": 0.25,
+        "seed": 1,
+        "fps": 30.0,
+        "duration": 3.0,
+        "size": 512,
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "show_source": false,
+        "sprite_px": 100,
+        "scale": 1
+      },
+      "source": "cells",
+      "sprites": 16,
+      "file": "renders/R001.webm",
+      "bytes": 251136,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 42,
+        "kb": 245.2,
+        "label": "P008 burst",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.2149
+      },
+      "created": 1791084844.498,
+      "added_to": "fab32429",
+      "added": [
+        {
+          "sticker": "4ca741fa",
+          "pack": "fab32429",
+          "of": "031868b4",
+          "ts": 1791084849.094
+        }
+      ],
+      "affirmed_in": [
+        "fab32429"
+      ]
+    }
+  ],
+  "credits": 0.0,
+  "notes": [],
+  "history": [
+    {
+      "ts": 1791084781.815,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "a new set (stickers)",
+      "detail": null
+    },
+    {
+      "ts": 1791084786.875,
+      "actor": "local",
+      "decision": "RECOVER_STICKERS",
+      "reason": null,
+      "detail": {
+        "stickers": [
+          "031868b4",
+          "a6be1731",
+          "d450042e",
+          "2689488e",
+          "5843680c",
+          "04e0be52",
+          "bc7bc82d",
+          "05ffb025",
+          "3458432b",
+          "7c00f84a",
+          "7f6ddedc",
+          "c9148c04",
+          "5e9f5412",
+          "eae10b30",
+          "a05764ac",
+          "8fb546c8"
+        ],
+        "parent_pack_id": "fab32429"
+      }
+    },
+    {
+      "ts": 1791084844.498,
+      "actor": "python",
+      "decision": "RENDER",
+      "reason": "R001 for fab32429: READY 245 KB (burst)",
+      "detail": {
+        "render": "R001",
+        "pack": "fab32429",
+        "warnings": []
+      }
+    },
+    {
+      "ts": 1791084849.094,
+      "actor": "local",
+      "decision": "APPROVE",
+      "reason": "1 burst(s) added to the pack",
+      "detail": {
+        "pack": "fab32429",
+        "added": [
+          {
+            "sticker": "4ca741fa",
+            "name": "Recovered particles · burst",
+            "render": "R001"
+          }
+        ]
+      }
+    }
+  ],
+  "updated": 1791084849.094
+}

@@ -121,9 +121,18 @@
         "result": "R001",
         "warnings": []
       }
+    },
+    {
+      "ts": 1791082944.283,
+      "actor": "python",
+      "decision": "SAVE",
+      "reason": "saved as particle set P004",
+      "detail": {
+        "set": "P004"
+      }
     }
   ],
-  "updated": 1790984004.728,
+  "updated": 1791082944.283,
   "per_sticker": {
     "1e01c5a6": {
       "subject": "Batman Lego",
@@ -139,5 +148,8 @@
     }
   },
   "notes": [],
-  "analysed_by": "qwen3.5-4b"
+  "analysed_by": "qwen3.5-4b",
+  "sets": [
+    "P004"
+  ]
 }
