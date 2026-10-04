@@ -32,18 +32,7 @@ deterministic verifier, lets a human approve, animates the approved ones, and pu
 
 ## Start
 
-```
-cd mirsal
-python -m venv .venv && .venv\Scripts\activate            # once; always use this venv (the Anaconda base env has a broken numpy)
-pip install -r requirements.txt                            # once
-python -m mirsal db up                                     # Postgres :5434 and Redis :6380 in Docker (both optional: the app falls back to files and memory)
-python -m mirsal doctor                                    # one health check for everything
-python -m mirsal serve                                     # http://127.0.0.1:8770 : opens on the AI chat, "Studio" is the detailed workspace
-python -m mirsal test fast                                 # the routine tests (then focused / area <module>, node --test, tests.test_js); slow tier and full discovery are retired: never run or requested
-```
-
-Everything the app writes goes to `mirsal/out/` (the engine's own names, which the database uses; they never change). Copy `mirsal/.env.example` to `mirsal/.env` for keys and options.
-Prepared sheets (optional) go in `inputs/Images_gen/img-NNN-<subject>/` and `inputs/videos_gen/vid-NNN-<subject>/` (the folder names are final: never renamed).
+How to set up and run it, alone or for the office: **[run.md](run.md)**.
 
 ## Architecture
 
