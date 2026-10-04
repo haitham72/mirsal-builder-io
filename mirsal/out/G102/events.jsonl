@@ -1,0 +1,14 @@
+{"ts": 1791004021.073, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "school buss", "task_slug": "school_buss"}}
+{"ts": 1791004021.087, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791004021.359, "stage": "sheet_picked", "status": "done", "ms": 272, "detail": {"subject": "school_buss", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": ["grid_detected"], "warnings": []}}
+{"ts": 1791004021.361, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791004021.61, "stage": "keyed", "status": "done", "ms": 249, "detail": {"bg": [1, 74, 255], "threshold": [90.5, 90.5, 90.5, 90.5, 90.5, 90.5, 90.5, 90.5, 90.5], "grid": "3x3", "cut": "gutter", "xs": [0, 716, 1400, 2048], "ys": [0, 670, 1376, 2048]}}
+{"ts": 1791004021.61, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791004022.502, "stage": "sliced", "status": "done", "ms": 891, "detail": {"ready": 2, "failed": 7}}
+{"ts": 1791004068.085, "stage": "vlm_still", "status": "done", "ms": 12633, "detail": {"judged": 1, "rejected": [], "unjudged": [5], "model": "qwen3.5-4b", "version": "judge_v1", "gate": "still"}, "actor": "vlm", "decision": "APPROVE"}
+{"ts": 1791004068.09, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 5, "note": "agentic creator: the person's standing approval"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791004068.106, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 9, "note": "agentic creator: the person's standing approval"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791004068.108, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [5, 9]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791004068.142, "stage": "added_to_pack", "status": "done", "ms": 0, "detail": {"pack": "f8912e13", "kind": "static", "stickers": [5, 9], "replaced_stills": 0}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791004207.924, "stage": "still_allowed", "status": "done", "ms": 0, "detail": {"indexes": [1]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791013463.88, "stage": "still_allowed", "status": "done", "ms": 0, "detail": {"indexes": [2, 3, 4, 6, 7, 8]}, "actor": "human", "decision": "APPROVE"}

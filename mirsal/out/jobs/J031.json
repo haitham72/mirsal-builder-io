@@ -1,0 +1,38 @@
+{
+  "id": "J031",
+  "kind": "sheet",
+  "task": "026",
+  "generation": "G097",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: eid mubarak ios 3d style.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: arms wide open, ready for a big hug, warm smile\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open\nCharacter 3: hands pressed together in thanks, eyes closed, grateful smile\nCharacter 4: winking and giving a confident thumbs up\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: mid-sneeze with a tissue, watery eyes\nCharacter 7: facepalming in disbelief, eyes closed, sighing\nCharacter 8: terrified, trembling, peeking through hands, wide eyes\nCharacter 9: drooling with a fork and knife, wide hungry eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "eid mubarak ios 3d style",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "2384cffd-8bb3-4845-80fd-1da732d60d57",
+  "result": {
+    "file": "jobs/J031/result.png",
+    "sha256": "bbf83f1e470eb62ad2d4e02dc1668910b5b24d546926ad1569981eb4dcda610a",
+    "bytes": 4114257
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790949106.307,
+  "claimed_at": 1790949109.095,
+  "completed_at": 1790949132.104,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

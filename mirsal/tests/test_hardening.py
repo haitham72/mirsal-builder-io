@@ -54,7 +54,7 @@ class OneWriterOfResults(unittest.TestCase):
     """`mirsal recheck` while the server runs could interleave a read and a write of result.json and lose a decision."""
 
     def test_second_writer_is_refused_and_release_frees_it(self):
-        from mirsal.writer_lock import WriterBusy, WriterLock
+        from mirsal.runtime.writer_lock import WriterBusy, WriterLock
         with tempfile.TemporaryDirectory() as td:
             first = WriterLock(Path(td), "serve").acquire()
             with self.assertRaises(WriterBusy) as cm:
@@ -66,8 +66,8 @@ class OneWriterOfResults(unittest.TestCase):
     def test_another_process_is_refused(self):
         import subprocess
         import sys
-        from mirsal.writer_lock import WriterLock
-        code = ("import sys\nfrom pathlib import Path\nfrom mirsal.writer_lock import WriterBusy, WriterLock\n"
+        from mirsal.runtime.writer_lock import WriterLock
+        code = ("import sys\nfrom pathlib import Path\nfrom mirsal.runtime.writer_lock import WriterBusy, WriterLock\n"
                 "try:\n    WriterLock(Path(sys.argv[1]), 'child').acquire()\nexcept WriterBusy:\n    sys.exit(3)\n")
         with tempfile.TemporaryDirectory() as td:
             with WriterLock(Path(td), "serve"):
@@ -78,7 +78,7 @@ class OneWriterOfResults(unittest.TestCase):
 
     def test_server_holds_it_and_a_second_server_on_the_same_out_refuses(self):
         from mirsal.console.server import serve
-        from mirsal.writer_lock import WriterBusy
+        from mirsal.runtime.writer_lock import WriterBusy
         with tempfile.TemporaryDirectory() as td:
             out, inp = Path(td) / "out", Path(td) / "in"
             inp.mkdir()
@@ -138,6 +138,27 @@ class ServerRefusesForeignPages(unittest.TestCase):
         s, _ = self.req("POST", "/api/library/packs", {"Sec-Fetch-Site": "cross-site", "Content-Type": "application/json"}, "{}")
         self.assertEqual(s, 403)
 
+    def test_an_unexpected_exception_is_a_json_500_and_never_shows_a_path(self):
+        """only typed errors were caught, so an OSError dropped the socket (and printed a traceback nobody reads)."""
+        import contextlib
+        import io
+        from mirsal.generation import jobs
+        console = io.StringIO()
+        with mock.patch.object(jobs, "list", side_effect=OSError(r"cannot read D:\secret\keys\token.txt")), contextlib.redirect_stderr(console):
+            s, raw = self.req("GET", "/api/jobs")
+        self.assertEqual(s, 500)
+        self.assertEqual(json.loads(raw)["error"], "internal error")
+        self.assertNotIn(b"secret", raw)
+        self.assertRegex(console.getvalue(), r"500 GET /api/jobs \[[A-Za-z0-9._-]+\]: OSError")   # the detail is on the server console, with the request id ...
+        self.assertIn("token.txt", console.getvalue())
+        self.assertNotIn("secret", console.getvalue())                                         # ... with the absolute path scrubbed to its file name
+        self.assertEqual(self.req("GET", "/api/jobs")[0], 200)                                  # the server is still up and answers the next request
+
+    def test_every_answer_is_json_even_for_a_method_the_server_does_not_have(self):
+        s, raw = self.req("PUT", "/api/jobs", {"Content-Type": "application/json"}, "{}")
+        self.assertEqual(s, 501)
+        self.assertIn("error", json.loads(raw))                                                  # it used to be an HTML page
+
 
 class AuditFindings(unittest.TestCase):
     """Triage of the 2026-10-02 independent report: the findings that held up are fixed here, the ones that did not are pinned."""
@@ -153,7 +174,7 @@ class AuditFindings(unittest.TestCase):
         self.assertIn("boom", st["last_error"])
 
     def test_health_snapshot_reports_every_part_and_never_raises(self):
-        from mirsal import health
+        from mirsal.runtime import health
         with tempfile.TemporaryDirectory() as td:
             h = health.snapshot(Path(td))
         for k in ("database", "redis", "models", "providers", "storage", "warnings", "ok"):

@@ -1,0 +1,39 @@
+{
+  "id": "J017",
+  "kind": "sheet",
+  "task": "013",
+  "generation": "G010",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile\nCharacter 2: shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open\nCharacter 3: squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling\nCharacter 4: waving hello with a big happy grin\nCharacter 5: huge shiny puppy eyes, hands clasped, begging please\nCharacter 6: flexing a muscle proudly, chest out, huge grin\nCharacter 7: rolling eyes with a bored deadpan face\nCharacter 8: sad and drooping, a single tear, slumped shoulders\nCharacter 9: furious, steaming, fists clenched, deep scowl\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "cat as a banana",
+    "refs": [],
+    "outline": 0,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "881c8a59-d3db-44c7-99c0-c217b1826d5f",
+  "result": {
+    "file": "jobs/J017/result.png",
+    "sha256": "70412e18f6924a26be02c5dfc7fcc5edacfd57eceb212f5e50d9493c7a038ffe",
+    "bytes": 4293127
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790905574.922,
+  "claimed_at": 1790905575.93,
+  "completed_at": 1790905601.778,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

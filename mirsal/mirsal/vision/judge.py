@@ -82,7 +82,7 @@ class Judgement:
 
 # ---- configuration -----------------------------------------------------------------------------------------------------------
 def _env(name: str, default):
-    from .. import llm
+    from ..services import llm
     llm._load_dotenv()
     return os.environ.get(name, default)
 
@@ -94,11 +94,12 @@ def policy() -> str:
 
 def target() -> dict:
     """Where the judge calls: {provider, model, base_url}. Local first (free); OpenAI when only a key exists."""
-    from .. import llm
+    from ..services import llm
     base = _env("VISION_BASE_URL", "") or None
-    want = str(_env("MIRSAL_VISION_PROVIDER", "auto")).lower()
+    from ..runtime import envfile
+    want = envfile.choice("MIRSAL_VISION_PROVIDER")
     if want == "auto":
-        want = "local" if (base or llm.local_reachable()) else ("openai" if os.environ.get(llm.KEY_VAR) else "none")
+        want = "local" if base else llm.resolve()
     model = _env("VISION_MODEL", "") or (llm.local_model() if want == "local" else os.environ.get("MIRSAL_VISION_OPENAI_MODEL", llm.DEFAULT_MODEL))
     return {"provider": want, "model": model, "base_url": base if want == "local" else None}
 
@@ -216,7 +217,7 @@ class VisionJudge:
         self._complete = complete
         self.policy = pol or policy()
         if cache is None:
-            from .. import cache as _c
+            from ..runtime import cache as _c
             cache = _c.default()
         self.cache = cache
         self.calls = 0
@@ -224,7 +225,8 @@ class VisionJudge:
     # -- one model call, logged ---------------------------------------------------------------------------------------------
     def _ask(self, kind: str, system: str, user: str, images: list, gen: str | None, sticker: str | None,
              version: str) -> tuple[str, dict]:
-        from .. import llm, model_calls
+        from ..generation import model_calls
+        from ..services import llm
         t = target()
         t0 = time.perf_counter()
         try:
@@ -249,7 +251,7 @@ class VisionJudge:
     def _log(self, kind, t, status, ms, meta, gen, sticker, version, error=None, extra=None):
         if self.out is None:
             return
-        from .. import model_calls
+        from ..generation import model_calls
         meta = meta or {}
         model_calls.append(self.out, kind, meta.get("provider") or t["provider"], meta.get("model") or t["model"], status=status,
                            latency_ms=meta.get("ms", ms), tokens_in=meta.get("tokens_in"), tokens_out=meta.get("tokens_out"),
@@ -344,12 +346,14 @@ class VisionJudge:
 
 
 # ---- over one generation ---------------------------------------------------------------------------------------------------------------
-def judge_generation(out: Path, gid: int, scope: str = "still", judge: VisionJudge | None = None, force: bool = False) -> dict:
+def judge_generation(out: Path, gid: int, scope: str = "still", judge: VisionJudge | None = None, force: bool = False, allowed=True) -> dict:
     """Pre-review every READY sticker of a generation. Writes, per sticker: a history line (actor `vlm`, decision APPROVE/REJECT, reason = the
     first code, detail = the whole judgement) at gate `still` or `anim`, and `judge` / `judge_anim` on the sticker; one event per run; the plan of
     bounded recovery for the rejections. Never touches `review.*`: the human decides. Returns a summary."""
-    from .. import pipeline as pl
+    from ..flow import pipeline as pl
+    from . import consent
     from .recovery import plan_recovery
+    consent.require(allowed)                  # `allowed` is the person's yes to AI vision (vision/consent.py); the operator's CLI passes True. Without it no image is read for a model.
     out = Path(out)
     judge = judge or VisionJudge(out=out)
     res = pl.read_result(out, gid)

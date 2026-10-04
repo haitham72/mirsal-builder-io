@@ -1,0 +1,35 @@
+{
+  "id": "J025",
+  "kind": "sheet",
+  "task": "020",
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: dubai emoji face.\nStyle: cel-shaded toon style, crisp two-tone shading, clean colour blocks, a soft rim light, expressive cartoon features.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: waving hello with a big happy grin\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open\nCharacter 3: huge shiny puppy eyes, hands clasped, begging please\nCharacter 4: flexing a muscle proudly, chest out, huge grin\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: mid-sneeze with a tissue, watery eyes\nCharacter 7: facepalming in disbelief, eyes closed, sighing\nCharacter 8: terrified, trembling, peeking through hands, wide eyes\nCharacter 9: drooling with a fork and knife, wide hungry eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "Dubai emoji face with cloth",
+    "refs": [],
+    "outline": 0,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "FAILED",
+  "external_task_id": "4c6430b4-f012-463f-8dac-2c8d99f43b98",
+  "result": null,
+  "cost": null,
+  "error": "could not download the result: [ASN1: NOT_ENOUGH_DATA] not enough data (_ssl.c:4047)",
+  "created_at": 1790920661.457,
+  "claimed_at": 1790920710.65,
+  "completed_at": 1790920711.078,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

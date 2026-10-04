@@ -8,6 +8,7 @@ import tempfile
 import threading
 import time
 import unittest
+import uuid
 from pathlib import Path
 from unittest import mock
 
@@ -15,10 +16,13 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from mirsal import expander, higgsfield, jobs, llm, model_catalog, prompter, styles, usage
-from mirsal import tasks as _tasks
+from mirsal.generation import expander, higgsfield, jobs, model_catalog, prompter, styles, usage
+from mirsal.runtime import cache as cachemod
+from mirsal.services import llm
+from mirsal.generation import tasks as _tasks
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
+from mirsal.flow import pipeline as pl
 from tests import synth
 from tests.test_golden import shape_sheet
 
@@ -106,6 +110,85 @@ class FulfilTests(Base):
         row = json.loads((self.out / "model_calls.jsonl").read_text().splitlines()[-1])
         self.assertEqual((row["kind"], row["model"], row["cost"], row["external_task_id"]), ("IMAGE_SHEET", "nano_banana_flash", 2.0, "fake-job-1"))
 
+    def test_several_paid_jobs_wait_at_the_same_time_but_are_created_one_by_one(self):
+        """Haitham, 2026-10-02: several sheets "all at once". The lock now covers only deciding, the cap check, the creation and storing the ticket; the wait (a minute or two) is outside
+        it, so jobs overlap there, up to MIRSAL_PAID_PARALLEL at once. Creation stays one at a time and every ticket is stored before anything waits (rule 10)."""
+        import os, threading, time
+        os.environ["MIRSAL_PAID_PARALLEL"] = "3"
+        self.addCleanup(os.environ.pop, "MIRSAL_PAID_PARALLEL", None)
+        js = [self.sheet_job()[0] for _ in range(3)]
+        live = {"now": 0, "max": 0}
+        mu = threading.Lock()
+
+        def at_wait(ticket):
+            with mu:
+                live["now"] += 1
+                live["max"] = max(live["max"], live["now"])
+            time.sleep(0.4)
+            with mu:
+                live["now"] -= 1
+        self.cli.wait_hook = at_wait
+        res = []
+        ts = [threading.Thread(target=lambda j=j: res.append(jobs.fulfil(self.out, j["id"]))) for j in js]
+        [t.start() for t in ts]
+        [t.join(30) for t in ts]
+        self.assertEqual(sorted(r["status"] for r in res), ["DONE"] * 3)
+        self.assertGreaterEqual(live["max"], 2, "the waits overlapped")
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 3)
+        self.assertEqual(len({r["external_task_id"] for r in res}), 3, "three provider jobs, each with its own ticket")
+
+    def test_the_parallel_limit_is_honoured_and_the_cap_counts_jobs_in_flight(self):
+        import os, threading, time
+        os.environ["MIRSAL_PAID_PARALLEL"] = "1"
+        self.addCleanup(os.environ.pop, "MIRSAL_PAID_PARALLEL", None)
+        live = {"now": 0, "max": 0}
+        mu = threading.Lock()
+
+        def at_wait(ticket):
+            with mu:
+                live["now"] += 1
+                live["max"] = max(live["max"], live["now"])
+            time.sleep(0.3)
+            with mu:
+                live["now"] -= 1
+        self.cli.wait_hook = at_wait
+        js = [self.sheet_job()[0] for _ in range(2)]
+        ts = [threading.Thread(target=lambda j=j: jobs.fulfil(self.out, j["id"])) for j in js]
+        [t.start() for t in ts]
+        [t.join(30) for t in ts]
+        self.assertEqual(live["max"], 1, "with a limit of 1 the old behaviour holds: one at a time")
+        # the cap: 9 credits a day, 4 already spent above, 2 per call; two are in flight (4 + 2 + 2), the third (would be 10) is refused BEFORE it is created
+        os.environ["MIRSAL_PAID_PARALLEL"] = "3"
+        os.environ["MIRSAL_DAILY_CREDITS"] = "9"
+        self.addCleanup(os.environ.pop, "MIRSAL_DAILY_CREDITS", None)
+        before = len([c for c in self.cli.calls if c[:2] == ["generate", "create"]])
+        a, b, c = (self.sheet_job()[0] for _ in range(3))
+        started = threading.Event()
+        self.cli.wait_hook = lambda t: (started.set(), time.sleep(0.5))
+        outs = {}
+        t1 = threading.Thread(target=lambda: outs.update(a=jobs.fulfil(self.out, a["id"])))
+        t1.start(); started.wait(10)
+        t2 = threading.Thread(target=lambda: outs.update(b=jobs.fulfil(self.out, b["id"])))
+        t2.start(); time.sleep(0.1)
+        outs["c"] = jobs.fulfil(self.out, c["id"])
+        [t.join(30) for t in (t1, t2)]
+        self.assertEqual((outs["c"]["status"], "daily credit cap" in (outs["c"]["error"] or "")), ("FAILED", True), "4 spent + 2 + 2 in flight + 2 would pass 9")
+        self.assertEqual(len([x for x in self.cli.calls if x[:2] == ["generate", "create"]]) - before, 2)
+
+    def test_a_text_only_video_job_needs_no_start_image(self):
+        """The particle effects ask Kling for a clip that starts and ends on an empty screen: there is no picture to start from (request.t2v). Any other video job still refuses a
+        missing start image."""
+        j = jobs.create(self.out, "video", request={"model": "kling3_0", "options": {}, "prompt": "an empty green screen, then a burst, then empty again", "t2v": True, "label": "effect"})
+        done = jobs.fulfil(self.out, j["id"])
+        self.assertEqual((done["status"], done["model"]), ("DONE", "kling3_0"))
+        create = next(c for c in self.cli.calls if c[:2] == ["generate", "create"])
+        self.assertNotIn("--start-image", create)
+        self.assertNotIn("--end-image", create)
+        j2 = jobs.create(self.out, "video", request={"model": "kling3_0", "options": {}, "prompt": "p"})
+        again = jobs.fulfil(self.out, j2["id"])
+        self.assertEqual(again["status"], "FAILED")
+        self.assertIn("start image", again["error"])
+
     def test_a_claimed_job_resumes_by_its_ticket_and_never_creates_a_second_paid_job(self):
         j, _ = self.sheet_job()
         jobs.claim(self.out, j["id"], "fake-job-9")
@@ -121,11 +204,11 @@ class FulfilTests(Base):
 
         def flaky(ticket):
             boom["n"] += 1
-            if boom["n"] == 1:
+            if boom["n"] <= jobs.WAIT_RETRIES:
                 raise higgsfield.HiggsError("Higgsfield API error (HTTP 503) request failed with status 503 Service Unavailable")
         self.cli.wait_hook = flaky
         failed = jobs.fulfil(self.out, j["id"])
-        self.assertEqual((failed["status"], failed["external_task_id"]), ("FAILED", "fake-job-1"))          # the job exists at Higgsfield; only the waiting broke
+        self.assertEqual((failed["status"], failed["external_task_id"]), ("TIMEOUT", "fake-job-1"))         # retries exhausted; the paid provider ticket still exists
         again = jobs.resume(self.out, j["id"])
         self.assertEqual((again["status"], again["external_task_id"], again["error"]), ("CLAIMED", "fake-job-1", None))
         done = jobs.fulfil(self.out, j["id"])
@@ -136,6 +219,71 @@ class FulfilTests(Base):
         j2, _ = self.sheet_job()
         jobs.fail(self.out, j2["id"], "nothing was created")
         self.assertEqual(jobs.resume(self.out, j2["id"])["status"], "REQUESTED")                               # no ticket: asked again from scratch
+
+    def test_a_requeue_of_a_ticketed_job_never_creates_a_second_paid_job(self):
+        """`requeue` kept the ticket but set REQUESTED, so `fulfil` called `hf.create` again (a second charge) and `claim` overwrote the first ticket."""
+        j, _ = self.sheet_job()
+        self.cli.wait_hook = lambda t: (_ for _ in ()).throw(higgsfield.HiggsError("HTTP 503 while waiting"))
+        failed = jobs.fulfil(self.out, j["id"])
+        self.assertEqual((failed["status"], failed["external_task_id"]), ("TIMEOUT", "fake-job-1"))
+        again = jobs.requeue(self.out, j["id"])
+        self.assertEqual((again["status"], again["external_task_id"]), ("CLAIMED", "fake-job-1"))        # the ticket is waited for, not replaced
+        self.cli.wait_hook = None
+        self.assertEqual(jobs.fulfil(self.out, j["id"])["status"], "DONE")
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)
+        j2, _ = self.sheet_job()                                              # a job in any other state that holds a ticket is never created again either
+        jobs.update(self.out, j2["id"], external_task_id="fake-job-7", status="REQUESTED")
+        with self.assertRaises(jobs.JobError) as cm:
+            jobs.fulfil(self.out, j2["id"])
+        self.assertEqual(cm.exception.code, 409)
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)
+
+    def test_two_runs_of_one_job_pay_once_and_the_loser_does_not_fail_the_winner(self):
+        """both read the status before the paid lock, the loser paid, and its 409 handler marked the winner's job FAILED."""
+        j, _ = self.sheet_job()
+        waiting, release = threading.Event(), threading.Event()
+
+        def hold(ticket):
+            waiting.set()
+            release.wait(10)
+        self.cli.wait_hook = hold
+        results = {}
+        t1 = threading.Thread(target=lambda: results.__setitem__(1, jobs.fulfil(self.out, j["id"])))
+        t1.start()
+        self.assertTrue(waiting.wait(10))
+        t2 = threading.Thread(target=lambda: results.__setitem__(2, jobs.fulfil(self.out, j["id"])))
+        t2.start()
+        time.sleep(0.3)                                                       # the second run is now parked on the paid lock
+        release.set()
+        t1.join(30)
+        t2.join(30)
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)
+        self.assertEqual(jobs.read(self.out, j["id"])["status"], "DONE")
+        self.assertEqual(results[1]["status"], "DONE")
+        self.assertIn(results[2]["status"], ("CLAIMED", "DONE"))               # the loser reports what is true at that moment (the winner may still be waiting), it does not run, pay or fail anything
+
+    def test_the_daily_cap_counts_a_call_until_its_row_is_written(self):
+        """`done()` ran after the paid lock was released, so a second call could read the spend before the first was booked."""
+        os.environ["MIRSAL_DAILY_CREDITS"] = "3"
+        j1, _ = self.sheet_job()
+        j2, _ = self.sheet_job()
+        real, in_done, go = jobs.done, threading.Event(), threading.Event()
+
+        def slow_done(*a, **k):
+            in_done.set()
+            time.sleep(0.4)                                                   # the window in which the second job used to read a spend of 0
+            return real(*a, **k)
+        out = {}
+        with mock.patch.object(jobs, "done", slow_done):
+            t1 = threading.Thread(target=lambda: out.__setitem__(1, jobs.fulfil(self.out, j1["id"])))
+            t1.start()
+            self.assertTrue(in_done.wait(10))
+            out[2] = jobs.fulfil(self.out, j2["id"])
+            t1.join(30)
+        self.assertEqual(out[1]["status"], "DONE")
+        self.assertEqual(out[2]["status"], "FAILED")
+        self.assertIn("daily credit cap", out[2]["error"])
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)
 
     def test_provider_failure_marks_the_job_failed_with_the_reason(self):
         j, _ = self.sheet_job()
@@ -196,6 +344,53 @@ class FulfilTests(Base):
         self.assertEqual(u["by_group"]["image"]["credits"], 6.5)
 
 
+class DownloadTlsTests(unittest.TestCase):
+    """On some Windows PCs one malformed entry in the certificate store makes Python's default TLS context raise `[ASN1: NOT_ENOUGH_DATA]`. The Higgsfield CLI
+    (node) still worked, the job was created and PAID, and then Mirsal's own download of the result failed: 'could not download the result: [ASN1: NOT_ENOUGH_DATA]'."""
+
+    def test_the_result_download_uses_the_tolerant_tls_context(self):
+        class Answer:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                return b"\x89PNG-bytes"
+        seen = {}
+
+        def fake_urlopen(url, timeout=None, context=None):
+            seen["context"] = context
+            return Answer()
+        marker = object()
+        with tempfile.TemporaryDirectory() as td, mock.patch("urllib.request.urlopen", fake_urlopen), mock.patch("mirsal.services.telegram._ssl_context", lambda: marker):
+            sha, n = higgsfield.download("https://cdn.example/result.png", Path(td) / "sub" / "r.png")
+            self.assertEqual((n, (Path(td) / "sub" / "r.png").read_bytes()), (10, b"\x89PNG-bytes"))
+        self.assertIs(seen["context"], marker)
+
+    def test_a_malformed_store_entry_is_skipped_not_fatal(self):
+        import ssl
+        from mirsal.services import telegram
+        try:
+            import certifi
+        except ImportError:
+            self.skipTest("certifi is not installed")
+        pem = Path(certifi.where()).read_text(encoding="ascii")
+        good = ssl.PEM_cert_to_DER_cert(pem[pem.index("-----BEGIN CERTIFICATE-----"):pem.index("-----END CERTIFICATE-----") + len("-----END CERTIFICATE-----")])
+        store = [(b"\x30\x03garbage", "x509_asn", set()), (good, "x509_asn", set())]            # the bad one first: it must not stop the good one
+        telegram._CTX = None
+        try:
+            with mock.patch.object(ssl, "create_default_context", side_effect=ssl.SSLError("[ASN1: NOT_ENOUGH_DATA] not enough data")), \
+                    mock.patch.object(ssl, "enum_certificates", lambda name: store, create=True):
+                ctx = telegram._ssl_context()
+            self.assertEqual(ctx.verify_mode, ssl.CERT_REQUIRED)
+            self.assertTrue(ctx.check_hostname)
+            self.assertGreaterEqual(ctx.cert_store_stats()["x509_ca"], 1)
+        finally:
+            telegram._CTX = None
+
+
 class PromptV2Tests(unittest.TestCase):
     def test_v2_prompts_avoid_the_words_that_caused_the_white_outline_and_the_checkerboard(self):
         p = prompter.expand("teddy bear", (3, 3))
@@ -227,7 +422,14 @@ class PromptV2Tests(unittest.TestCase):
         b = prompter.render_plan(dict(prompter.expand("teddy bear", (3, 3))["slots"], style_id="toon_shade"), "sheet_3x3", 2)["sheet_prompt"]
         self.assertIn(styles.PHRASE["glossy_3d"], a)
         self.assertIn(styles.PHRASE["toon_shade"], b)
-        self.assertEqual(len(styles.PRESETS), 6)
+        ids = [s["id"] for s in styles.PRESETS]
+        self.assertGreaterEqual(len(ids), 12, "a choice, not six")
+        self.assertEqual(len(ids), len(set(ids)), "an id is one preset")
+        self.assertIn(styles.DEFAULT, ids)
+        self.assertEqual(len({s["phrase"] for s in styles.PRESETS}), len(ids), "two presets never say the same thing")
+        for s in styles.PRESETS:
+            self.assertNotIn("sticker", s["phrase"].lower(), "the word sticker makes image models draw a white die-cut border: " + s["id"])
+            self.assertTrue(s["label"] and s["hint"], s["id"])
 
 
 class LiveConsoleTests(Base):
@@ -245,9 +447,9 @@ class LiveConsoleTests(Base):
         self.srv.shutdown()
         super().tearDown()
 
-    def req(self, method, path, body=None):
+    def req(self, method, path, body=None, headers=None):
         h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=60)
-        h.request(method, path, json.dumps(body) if body is not None else None, {"Content-Type": "application/json"})
+        h.request(method, path, json.dumps(body) if body is not None else None, {"Content-Type": "application/json", **(headers or {})})
         r = h.getresponse(); data = r.read(); h.close()
         try:
             return r.status, json.loads(data)
@@ -276,28 +478,53 @@ class LiveConsoleTests(Base):
         self.assertEqual(([i["generation_id"] for i in p1["items"]], p1["more"], p1["total"]), (["G007", "G006", "G005", "G004", "G003"], True, 7))
         p2 = self.req("GET", "/api/history?limit=5&offset=5")[1]
         self.assertEqual(([i["generation_id"] for i in p2["items"]], p2["more"]), (["G002", "G001"], False))
-        self.assertEqual((p1["items"][0]["ready"], p1["items"][0]["animated"], len(p1["items"][0]["thumbs"]), p1["items"][0]["prompt"]), (9, 9, 4, "batch 7"))
+        self.assertEqual((p1["items"][0]["ready"], p1["items"][0]["animated"], len(p1["items"][0]["cells"]), p1["items"][0]["prompt"]), (9, 9, 9, "batch 7"))
 
-    def test_the_export_folder_is_a_choice_and_every_live_batch_is_mirrored(self):
-        from mirsal import export
-        elsewhere = self.tmp / "my_stickers"
-        os.environ["MIRSAL_EXPORT_DIR"] = str(elsewhere)
-        try:
-            gid = self._stills_ready("export blob")
-            self.assertEqual(export.sync_all(self.out), 1)                                      # the back-fill at server start
-            imgs = elsewhere / "images" / "img-001-export_blob"
-            self.assertTrue(imgs.is_dir() and any(p.name.startswith("img-001-export_blob-s1-") for p in imgs.iterdir()))
-            self.assertFalse((self.out / "export").exists() and any((self.out / "export" / "images").glob("img-001-export_blob")))
-            self.assertEqual(self.req("GET", f"/api/generations/{gid}/files")[1]["package"], str(imgs))
-        finally:
-            os.environ.pop("MIRSAL_EXPORT_DIR", None)
+    def _one_batch_on_disk(self, gid: str, grid, animated=()):
+        d = self.out / gid
+        (d / "slices").mkdir(parents=True)
+        (d / "prompts.json").write_text("{}", encoding="utf-8")
+        n = grid[0] * grid[1]
+        res = {"generation_id": gid, "number": int(gid[1:]), "prompt": "a sad owl", "stage": "sliced", "error": None, "grid": list(grid),
+               "source": {"subject": "owl"},
+               "stickers": [{"index": i, "key": f"k{i}", "status": "READY", "png": f"slices/S{i}.png",
+                             "anim_status": "READY" if i in animated else "NOT_REQUESTED"} for i in range(1, n + 1)]}
+        (d / "result.json").write_text(json.dumps(res), encoding="utf-8")
+
+    def test_every_history_card_carries_its_own_grid(self):
+        """A batch's card shows its stickers as the sheet's own grid (3x3 or 2x2), not four thumbnails: GET /api/history reads the grid out of result.json and names every cell."""
+        self._one_batch_on_disk("G002", (3, 3), animated=(1, 5, 9))
+        self._one_batch_on_disk("G001", (2, 2), animated=(2,))
+        by = {i["generation_id"]: i for i in self.req("GET", "/api/history?limit=5")[1]["items"]}
+        g3, g2 = by["G002"], by["G001"]
+        self.assertEqual(g3["grid"], [3, 3])
+        self.assertEqual([c["index"] for c in g3["cells"]], list(range(1, 10)))
+        self.assertEqual([(c["row"], c["col"]) for c in g3["cells"]], [(r, c) for r in range(3) for c in range(3)])
+        self.assertEqual([c["animated"] for c in g3["cells"]], [True, False, False, False, True, False, False, False, True])
+        self.assertTrue(g3["cells"][0]["png"].startswith("slices/S1.png?e="))                     # the cache-buster the browser needs
+        self.assertEqual((g3["ready"], g3["animated"], g3["stage"]), (9, 3, "sliced"))
+        self.assertEqual(g2["grid"], [2, 2])
+        self.assertEqual([(c["row"], c["col"]) for c in g2["cells"]], [(0, 0), (0, 1), (1, 0), (1, 1)])
+        self.assertNotIn("thumbs", g3, "the four-thumbnail shortcut is gone: a card draws the whole grid")
+
+    def test_a_batch_without_a_grid_or_a_picture_still_has_a_card(self):
+        """An unfinished batch (no grid read yet, one cell with no png) must not break the list: 3x3 is the default and a cell with no picture is still a cell."""
+        d = self.out / "G001"
+        (d / "slices").mkdir(parents=True)
+        (d / "prompts.json").write_text("{}", encoding="utf-8")
+        res = {"generation_id": "G001", "number": 1, "prompt": "", "stage": "requested", "error": None, "source": {"subject": ""},
+               "stickers": [{"index": 1, "key": "waving", "status": "PENDING", "png": None}]}
+        (d / "result.json").write_text(json.dumps(res), encoding="utf-8")
+        it = self.req("GET", "/api/history?limit=5")[1]["items"][0]
+        self.assertEqual((it["grid"], it["ready"], it["animated"]), ([3, 3], 0, 0))
+        self.assertEqual([(c["index"], c["png"], c["status"]) for c in it["cells"]], [(1, None, "PENDING")])
 
     def test_models_account_usage_and_assets_endpoints(self):
         s, j = self.req("GET", "/api/models")
         self.assertEqual(s, 200)
         self.assertEqual((j["defaults"], j["default_style"]), ({"image": "nano_banana_flash", "video": "kling3_0"}, "flat_vector"))
         self.assertEqual([m["id"] for m in j["video"]], ["kling3_0", "grok_video_v15"])
-        self.assertEqual(len(j["styles"]), 6)
+        self.assertEqual([s["id"] for s in j["styles"]], [s["id"] for s in styles.PRESETS])      # the page gets exactly the presets, however many there are
         s, j = self.req("GET", "/api/higgsfield")
         self.assertEqual((s, j["available"], j["credits"], j["plan"]), (200, True, 100.5, "creator"))
         for kind, name in (("styles", "glossy_3d"), ("vendors", "openai"), ("vendors", "google")):
@@ -341,6 +568,51 @@ class LiveConsoleTests(Base):
         finally:
             os.environ.pop("MIRSAL_OUT", None)
 
+    def test_a_repeated_idempotency_key_never_starts_a_second_paid_job(self):
+        """`/api/live/sheet|video` ignored the header, so a double click, a retry after a lost answer or a second tab paid twice."""
+        mem = cachemod.Cache(force_memory=True)
+        with mock.patch.object(cachemod, "default", lambda: mem):
+            key = {"Idempotency-Key": "click-1"}
+            s1, a = self.req("POST", "/api/live/sheet", {"prompt": "owl"}, key)
+            s2, b = self.req("POST", "/api/live/sheet", {"prompt": "owl"}, key)
+            self.assertEqual((s1, s2), (200, 200))
+            self.assertEqual((b["job"], b.get("idempotent")), (a["job"], True))
+            self.until(lambda: self.req("GET", "/api/jobs/" + a["job"])[1]["status"] == "DONE", "the one job")
+            self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)
+            s3, c3 = self.req("POST", "/api/live/sheet", {"prompt": "owl"}, {"Idempotency-Key": "click-2"})     # a new click is a new job
+            self.assertNotEqual(c3["job"], a["job"])
+            s4, d = self.req("POST", "/api/live/sheet", {"prompt": "owl"})                                       # no key: nothing to compare, it just runs (as before)
+            self.assertNotIn(d["job"], (a["job"], c3["job"]))
+
+    def test_two_requests_in_flight_at_once_with_one_key_start_exactly_one_job(self):
+        """The review's missing test: the key is held under a cache lock while the first request runs, so a second one that arrives in that window is refused (409), and a retry
+        afterwards is answered with the first job. Sequential tests could not tell a lock from no lock."""
+        mem = cachemod.Cache(force_memory=True)
+        real = _tasks.reserve
+
+        def slow(*a, **k):
+            time.sleep(0.8)                                                  # the window in which the double click arrives
+            return real(*a, **k)
+        out = []
+        go = threading.Barrier(2)
+
+        def post():
+            go.wait()
+            out.append(self.req("POST", "/api/live/sheet", {"prompt": "owl"}, {"Idempotency-Key": "double-click"}))
+        with mock.patch.object(cachemod, "default", lambda: mem), mock.patch.object(_tasks, "reserve", slow):
+            ts = [threading.Thread(target=post) for _ in range(2)]
+            [t.start() for t in ts]
+            [t.join(60) for t in ts]
+            codes = sorted(s for s, _ in out)
+            self.assertEqual(codes, [200, 409], out)                        # one runs, the other is told it is still running
+            first = next(j for s, j in out if s == 200)
+            self.assertIn("still running", next(j for s, j in out if s == 409)["error"])
+            s, again = self.req("POST", "/api/live/sheet", {"prompt": "owl"}, {"Idempotency-Key": "double-click"})
+            self.assertEqual((s, again["job"], again.get("idempotent")), (200, first["job"], True))      # the retry gets the first answer
+        self.until(lambda: self.req("GET", "/api/jobs/" + first["job"])[1]["status"] == "DONE", "the one job")
+        self.assertEqual(len(list((self.out / "jobs").glob("J*.json"))), 1)
+        self.assertEqual(len([c for c in self.cli.calls if c[:2] == ["generate", "create"]]), 1)
+
     def test_reference_images_are_uploaded_stored_and_sent_with_the_sheet_job(self):
         h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)
         h.request("POST", "/api/live/ref?name=angel.png", png_bytes(shape_sheet(300, [(150, 150)])), {"Content-Type": "application/octet-stream"})
@@ -358,6 +630,20 @@ class LiveConsoleTests(Base):
         self.assertIn(prompter.REFERENCE_CLAUSE, create[create.index("--prompt") + 1])
         job = self.req("GET", "/api/jobs/" + j["job"])[1]
         self.assertEqual((job["request"]["refs"], job["params"]["references"]), (["refs/R001.png"], 1))   # reproducible from the stored job
+        # P12 of the UI/UX spec: a tweak or a new action says what the picture is FOR, instead of the default "change only the expression and the pose"
+        clause = "Reference: the attached image is the sheet to keep. Apply only this change: cuter."
+        s, k = self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R001"], "model": "nano_banana_pro", "ref_clause": clause})
+        self.assertEqual(s, 200, k)
+        self.until(lambda: self.req("GET", "/api/jobs/" + k["job"])[1]["status"] == "DONE", "job with its own clause")
+        text = [c for c in self.cli.calls if c[:3] == ["generate", "create", "nano_banana_pro"]][-1]
+        text = text[text.index("--prompt") + 1]
+        self.assertIn(clause, text)
+        self.assertNotIn(prompter.REFERENCE_CLAUSE, text, "the default clause would contradict a detail change")
+        s, k = self.req("POST", "/api/live/sheet", {"prompt": "blob", "model": "nano_banana_pro", "ref_clause": clause})
+        self.until(lambda: self.req("GET", "/api/jobs/" + k["job"])[1]["status"] == "DONE", "job without a picture")
+        text = [c for c in self.cli.calls if c[:3] == ["generate", "create", "nano_banana_pro"]][-1]
+        self.assertNotIn(clause, text[text.index("--prompt") + 1], "no picture attached: no sentence about it")
+        self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R001"], "ref_clause": "x" * 7000})[0], 400)
         self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R999"]})[0], 400)
         self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "refs": ["R001"] * 5})[0], 400)
         model_catalog.set_dump({"image": [{"job_type": "no_refs", "display_name": "No Refs", "params": [{"name": "prompt", "type": "string"}]}], "video": [], "counts": {}})
@@ -402,7 +688,7 @@ class LiveConsoleTests(Base):
     def test_the_edge_is_a_preview_until_applied_then_one_snapshot_that_undo_restores(self):
         import io
         gid = self._stills_ready()
-        slices = self.out / f"G{gid:03d}" / "slices"
+        slices = pl.gen_dir(self.out, gid) / "slices"
         stamp = lambda: sorted((p.name, p.stat().st_mtime_ns) for p in slices.glob("*"))
         before, files = self.req("GET", f"/api/generations/{gid}")[1], stamp()
 
@@ -437,6 +723,24 @@ class LiveConsoleTests(Base):
         self.assertEqual([h["via"] for h in res["edge_history"]], ["initial", "apply", "undo"])
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/edge", {})[0], 400)
 
+    def test_a_plan_handed_in_is_the_plan_that_runs_and_is_not_planned_again(self):
+        """The chat shows a plan card and Create used to plan the request AGAIN (a second model call, different cells). The approved plan is now handed to the sheet job in-process and rebuilt
+        from its cells and slots: the task holds exactly those cells."""
+        from mirsal.agent.graph import compact_plan
+        plan = compact_plan(_tasks.preview("owl", "3x3", "flat_vector", False))
+        keys = [f"approved_{i}" for i in range(1, 10)]
+        for st, k in zip(plan["stickers"], keys):
+            st["key"] = k
+        plan["slots"]["cells"] = [dict(c, label=k.replace("_", " ")) for c, k in zip(plan["slots"]["cells"], keys)] if plan["slots"].get("cells") else plan["slots"].get("cells")
+        r = self.c.live("sheet", {"prompt": "owl", "grid": "3x3", "style_id": "flat_vector", "ai": False}, base_plan=plan)
+        task = _tasks.read_task(self.out, r["task"])
+        self.assertEqual(task["request"]["slots"], plan["slots"], "the slots of the card are the slots of the task")
+        self.c.wait_jobs(60)
+        s, via_http = self.req("POST", "/api/live/sheet", {"prompt": "owl", "grid": "3x3", "style_id": "flat_vector", "ai": False, "base_plan": plan})
+        self.assertEqual(s, 200)
+        self.assertNotEqual(_tasks.read_task(self.out, via_http["task"])["request"]["slots"], plan["slots"], "the HTTP layer ignores a plan in the body: only code in this process can hand one in")
+        self.c.wait_jobs(60)
+
     def test_a_pending_edge_becomes_real_exactly_at_video_generation_and_at_the_pack(self):
         gid = self._stills_ready()
         was = self.req("GET", f"/api/generations/{gid}")[1]["outline_px"]
@@ -453,7 +757,7 @@ class LiveConsoleTests(Base):
         self.assertEqual(len(self.req("GET", f"/api/generations/{gid}")[1]["edge_history"]), 3)
 
     def test_a_blue_screen_sheet_is_keyed_as_blue_and_marked_only_because_it_is_blue(self):
-        from mirsal import export, pipeline as pl
+        from mirsal.flow import pipeline as pl
         from mirsal.engine import chroma
         green = shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)])
         blue = np.ascontiguousarray(green[..., [0, 2, 1]])                                  # the same sheet on a blue screen
@@ -462,47 +766,46 @@ class LiveConsoleTests(Base):
         self.assertEqual(chroma.detect_key(np.full((300, 300, 3), 128, np.uint8), asked="blue")[0], "blue")     # no screen at all: the colour that was asked, and the sheet check blocks it
         self.assertEqual(pl.cfg_for({"key_colour": "blue"}, EngineConfig()).chroma, "blue")
         self.assertEqual(pl.cfg_for({}, EngineConfig()).chroma, "green")
-        os.environ["MIRSAL_EXPORT_DIR"] = str(self.tmp / "exp")
-        try:
-            self.files["png"] = png_bytes(blue)
-            gid = self._stills_ready("blue blob")
-            res = self.req("GET", f"/api/generations/{gid}")[1]
-            self.assertEqual(res["key_colour"], "blue")
-            self.assertGreaterEqual(sum(1 for s in res["stickers"] if s["status"] == "READY"), 7)       # keyed, not refused by the green check
-            self.assertFalse([c for c in res["verify"]["sheet"] if not c["ok"] and c["name"] == "background_is_key"])
-            task = _tasks.read_task(self.out, res["task_id"])
-            self.assertEqual((task["key_colour"], task.get("key_detected")), ("blue", True))           # green was asked, the model returned blue
-            imgs = export.sync(self.out, gid)
-            self.assertIn("KEY: blue (the sheet came back blue although green was asked", (imgs / "prompts.txt").read_text(encoding="utf-8"))
-            for i in range(1, 10):                                                                      # the video sheet follows: a blue screen, and the video prompt says nothing else
-                self.req("POST", f"/api/generations/{gid}/review", {"gate": "still", "decision": "APPROVE", "index": i})
-            self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
-            vs = np.asarray(Image.open(self.out / f"G{gid:03d}" / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
-            self.assertEqual(vs[3, 3].tolist(), [0, 0, 255])
-            self.assertNotIn("green", self.c.video_prompt_for(gid, "A1").lower())
-            # a green sheet leaves no mark at all
-            self.files["png"] = png_bytes(green)
-            gid2 = self._stills_ready("green blob")
-            res2 = self.req("GET", f"/api/generations/{gid2}")[1]
-            self.assertNotIn("key_colour", res2)
-            task2 = _tasks.read_task(self.out, res2["task_id"])
-            self.assertNotIn("key_colour", task2)
-            self.assertNotIn("KEY:", (export.sync(self.out, gid2) / "prompts.txt").read_text(encoding="utf-8"))
-        finally:
-            os.environ.pop("MIRSAL_EXPORT_DIR", None)
+        self.files["png"] = png_bytes(blue)
+        gid = self._stills_ready("blue blob")
+        res = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual(res["key_colour"], "blue")
+        self.assertGreaterEqual(sum(1 for s in res["stickers"] if s["status"] == "READY"), 7)       # keyed, not refused by the green check
+        self.assertFalse([c for c in res["verify"]["sheet"] if not c["ok"] and c["name"] == "background_is_key"])
+        task = _tasks.read_task(self.out, res["task_id"])
+        self.assertEqual((task["key_colour"], task.get("key_detected")), ("blue", True))           # green was asked, the model returned blue
+        for i in range(1, 10):                                                                      # the video sheet follows: a blue screen, and the video prompt says nothing else
+            self.req("POST", f"/api/generations/{gid}/review", {"gate": "still", "decision": "APPROVE", "index": i})
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
+        vs = np.asarray(Image.open(pl.gen_dir(self.out, gid) / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
+        self.assertEqual(vs[3, 3].tolist(), [0, 0, 255])
+        self.assertNotIn("green", self.c.video_prompt_for(gid, "A1").lower())
+        # a green sheet leaves no mark at all
+        self.files["png"] = png_bytes(green)
+        gid2 = self._stills_ready("green blob")
+        res2 = self.req("GET", f"/api/generations/{gid2}")[1]
+        self.assertNotIn("key_colour", res2)
+        task2 = _tasks.read_task(self.out, res2["task_id"])
+        self.assertNotIn("key_colour", task2)
 
-    def test_the_export_root_is_inside_the_repo_for_the_project_data_only(self):
-        from mirsal import export
-        from mirsal.paths import PROJECT, REPO
-        os.environ.pop("MIRSAL_EXPORT_DIR", None)
-        self.assertEqual(export.export_root(PROJECT / "out"), REPO / "generated")      # visible in the repo, next to inputs/ and mirsal/
-        self.assertEqual(export.export_root(self.out), self.out / "export")            # a copy of the data or a test never writes into the repo
+    def test_generated_stays_out_of_git(self):
+        from mirsal.runtime.paths import REPO
         self.assertIn("generated/", (REPO / ".gitignore").read_text(encoding="utf-8").splitlines())
-        os.environ["MIRSAL_EXPORT_DIR"] = str(self.tmp / "mine")
+
+    def test_the_secrets_and_locks_of_out_are_never_committed(self):
+        """`out/` is tracked on purpose (docs/engine-and-studio.md), but the token digests, the signed-link key, the locks and the logs are not part of that."""
+        import subprocess
+        from mirsal.runtime.paths import REPO
+        lines = (REPO / ".gitignore").read_text(encoding="utf-8").splitlines()
+        for must in ("mirsal/out/users.json", "mirsal/out/.asset_secret", "mirsal/out/.writer.lock", "mirsal/out/.paid.lock", "mirsal/out/*.log", "**/telegram.json"):
+            self.assertIn(must, lines)
         try:
-            self.assertEqual(export.export_root(PROJECT / "out"), self.tmp / "mine")
-        finally:
-            os.environ.pop("MIRSAL_EXPORT_DIR", None)
+            tracked = subprocess.run(["git", "ls-files", "mirsal/out"], cwd=REPO, capture_output=True, text=True, timeout=60).stdout.split()
+        except (OSError, subprocess.SubprocessError):
+            return                                                            # no git here (an exported copy): the ignore lines above are what is left to check
+        for bad in ("mirsal/out/users.json", "mirsal/out/.asset_secret", "mirsal/out/.writer.lock", "mirsal/out/.paid.lock"):
+            self.assertNotIn(bad, tracked)
+        self.assertFalse([f for f in tracked if f.startswith("mirsal/out/") and f.count("/") == 2 and f.endswith(".log")])
 
     def test_the_gap_is_a_slider_and_loop_is_a_choice(self):
         gid = self._stills_ready()
@@ -526,7 +829,7 @@ class LiveConsoleTests(Base):
         sheets = {x["id"]: x for x in st["video_sheets"]}
         self.assertEqual((sheets["A1"]["status"], sheets["A2"]["slot_fill"]), ("REJECTED", 0.6))
         self.assertEqual(sheets["A1"]["slot_fill"], self.c.cfg.slot_fill)
-        create = next(c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"])
+        create = self.until(lambda: next((c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"]), None), "the Kling create call")      # the job runs in a thread
         self.assertEqual(create[create.index("--start-image") + 1], create[create.index("--end-image") + 1])
         self.assertIn("seamless loop", create[create.index("--prompt") + 1])
         # the plan keeps the choice too: Loop off is the default in the saved video prompt
@@ -559,7 +862,7 @@ class LiveConsoleTests(Base):
         self.assertEqual(s, 409, j)                                                                            # G3 not approved: a human decides first
         self.assertIn("G3", j["error"])
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/review", {"gate": "video_sheet", "decision": "APPROVE", "index": "A1"})[0], 200)
-        base = self.out / st["generation_id"]
+        base = pl.out_path(self.out, st["generation_id"])
         entry = next(v for v in self.req("GET", f"/api/generations/{gid}")[1]["video_sheets"] if v["id"] == "A1")
         mp4 = self.tmp / "kling.mp4"
         synth.make_layout_video(mp4, np.array(Image.open(base / entry["file"]).convert("RGB")), json.loads((base / entry["layout"]).read_text()), size=600, frames=45)
@@ -579,8 +882,8 @@ class LiveConsoleTests(Base):
         self.assertEqual(next(v for v in final["video_sheets"] if v["id"] == "A1")["status"], "SLICED")
         # a light preview of the returned video exists for the browser, next to the full-size original
         sheet = next(v for v in final["video_sheets"] if v["id"] == "A1")
-        self.assertTrue((self.out / st["generation_id"] / sheet["video"]).is_file())
-        self.assertTrue(sheet.get("preview") and (self.out / st["generation_id"] / sheet["preview"]).is_file())
+        self.assertTrue((pl.out_path(self.out, st["generation_id"]) / sheet["video"]).is_file())
+        self.assertTrue(sheet.get("preview") and (pl.out_path(self.out, st["generation_id"]) / sheet["preview"]).is_file())
         # changing the edge afterwards never loses the video: it is re-applied to the stored video, no new job and no credits
         jobs_before = len(self.req("GET", "/api/jobs")[1]["jobs"])
         s, r = self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 6, "erode": 1, "reslice": True})
@@ -597,25 +900,80 @@ class LiveConsoleTests(Base):
         again2 = self.until(lambda: (lambda x: x if not x["busy"] and not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]) else None)(
             self.req("GET", f"/api/generations/{gid}")[1]), "cached re-apply")
         self.assertTrue(all((t.get("anim_metrics") or {}).get("cache") == "hit" for t in again2["stickers"] if t["anim_status"] == "READY"))
-        # properly named folders for copy and paste: images/img-NNN-subject and videos/vid-NNN-subject, every stroke/trim setting its own snapshot (nothing is deleted)
-        import re
-        imgs, vids = self.out / "export" / "images" / "img-001-blob", self.out / "export" / "videos" / "vid-001-blob"
-        stick = lambda: [p.name for p in imgs.iterdir() if re.fullmatch(r"img-001-blob-s\d-[a-z_0-9]+-stroke\d+px-trim\d+px-\d{8}\.png", p.name)] if imgs.is_dir() else []
-        self.until(lambda: any("stroke6px-trim1px" in n for n in stick()), "the new stroke snapshot is mirrored")
-        names = sorted(p.name for p in imgs.iterdir())
-        self.assertTrue(any(re.fullmatch(r"img-001-blob-sheet-nano_banana_flash-2k-\d{8}\.png", n) for n in names), names)
-        self.assertGreaterEqual(len(stick()), 18)                                                            # the first edge and the second: both kept
-        self.assertTrue(any("stroke6px" not in n for n in stick()))
-        self.assertTrue((imgs / "prompts.txt").is_file())
-        vnames = sorted(p.name for p in vids.iterdir())
-        self.assertTrue(any(re.fullmatch(r"vid-001-blob-video-kling3_0-pro-3s-\d{8}\.mp4", n) for n in vnames), vnames)
-        self.assertTrue(any(re.fullmatch(r"vid-001-blob-videosheet-gap\d+-\d{8}\.png", n) for n in vnames), vnames)
-        self.assertTrue(any(re.fullmatch(r"vid-001-blob-s\d-[a-z_0-9]+-stroke\d+px-trim\d+px-\d{8}\.webm", n) for n in vnames), vnames)
         h = self.req("GET", "/api/history?limit=1")[1]
         self.assertEqual((len(h["items"]), h["items"][0]["generation_id"], h["items"][0]["animated"], h["more"] is False), (1, st["generation_id"], sum(1 for t in again2["stickers"] if t["anim_status"] == "READY"), True))
         u = self.req("GET", "/api/usage")[1]
         self.assertEqual((u["credits_spent"], u["runs"][0]["generation"]), (6.5, st["generation_id"]))
         self.assertEqual(sorted(m["credits"] for m in u["by_model"]), [2.0, 4.5])
+
+
+    # ---------- the Prompt tab: a hand-written prompt is what is sent (2026-10-02, `prompter.apply_custom`)
+
+    def _creates(self, model):
+        return [c for c in self.cli.calls if c[:3] == ["generate", "create", model]]
+
+    def test_the_prompt_tab_sends_the_sheet_prompt_the_user_typed(self):
+        """`sheet_prompt` + `from_generation`: a new sheet from that batch's own plan (same cells, same tags) with the user's own wording, and the batch says so."""
+        gid = self._stills_ready("blob")
+        st = self.req("GET", f"/api/generations/{gid}")[1]
+        before = len(self._creates("nano_banana_flash"))
+        mine = "3x3 sticker sheet, nine owls in equal cells.\nBackground: flat pure green (#00FF00).\nMy own wording, exactly as typed."
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": mine})
+        self.assertEqual(s, 200, j)
+        call = self.until(lambda: (self._creates("nano_banana_flash") or [None])[before] if len(self._creates("nano_banana_flash")) > before else None, "the sheet create call")
+        self.assertEqual(call[call.index("--prompt") + 1], mine)                                   # the CLI got the user's text, not the template's
+        job = self.until(lambda: (lambda x: x if x.get("generation") and x["status"] == "DONE" else None)(self.req("GET", "/api/jobs/" + j["job"])[1]), "sheet job")
+        new = int(job["generation"][1:])
+        fresh = self.until(lambda: (lambda x: x if x["stage"] == "sliced" and not x["busy"] else None)(self.req("GET", f"/api/generations/{new}")[1]), "stills")
+        self.assertEqual((fresh["sheet_prompt"], fresh["custom_prompts"]), (mine, ["sheet_prompt"]))
+        self.assertEqual([(t["index"], t["key"], t["tags"], t["emoji"]) for t in fresh["stickers"]],
+                         [(t["index"], t["key"], t["tags"], t["emoji"]) for t in st["stickers"]])  # same cells and tags as the batch it came from
+        self.assertEqual(self.req("GET", f"/api/tasks/{j['task']}")[1]["plan"]["custom"], {"sheet_prompt": mine})
+        self.assertIs(self.req("GET", "/api/jobs/" + j["job"])[1]["request"]["custom_prompt"], True)
+        # the key still guards a hand-written run: the same key twice pays once
+        key = {"Idempotency-Key": "typed-once-" + uuid.uuid4().hex}
+        other = mine + " A second wording."
+        s1, first = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": other}, key)
+        s2, again = self.req("POST", "/api/live/sheet", {"prompt": st["prompt"], "from_generation": gid, "sheet_prompt": other}, key)
+        self.assertEqual((s1, s2, again["job"], again.get("idempotent")), (200, 200, first["job"], True))
+        self.assertNotEqual(first["job"], j["job"])
+
+    def test_a_hand_written_video_prompt_is_sent_verbatim_and_kept_with_the_sheet(self):
+        gid = self._stills_ready("blob")
+        mine = "animate every owl in place, no camera move, no cut"
+        s, j = self.req("POST", "/api/live/video", {"generation": gid, "video_prompt": mine})
+        self.assertEqual(s, 200, j)
+        create = self.until(lambda: next((c for c in self._creates("kling3_0")), None), "the Kling create call")
+        self.assertEqual(create[create.index("--prompt") + 1], mine)
+        self.assertIs(self.req("GET", "/api/jobs/" + j["job"])[1]["request"]["custom_prompt"], True)
+        st = self.until(lambda: (lambda x: x if next((v for v in x["video_sheets"] if v["id"] == "A1"), {}).get("video_prompt_sent") else None)(
+            self.req("GET", f"/api/generations/{gid}")[1]), "the returned video")
+        sheet = next(v for v in st["video_sheets"] if v["id"] == "A1")
+        self.assertEqual((sheet["video_prompt_sent"], sheet["video_prompt_custom"]), (mine, True))
+
+    def test_an_empty_or_absurd_hand_written_prompt_is_refused_and_starts_nothing(self):
+        for body in ({"prompt": "blob", "sheet_prompt": "   "}, {"prompt": "blob", "sheet_prompt": ""},
+                     {"prompt": "blob", "sheet_prompt": 7}, {"prompt": "blob", "sheet_prompt": "x" * (prompter.MAX_PROMPT + 1)}):
+            body["sheet_prompt"] = body["sheet_prompt"] if body["sheet_prompt"] != "" else " "
+            s, j = self.req("POST", "/api/live/sheet", body)
+            self.assertEqual(s, 400, (body["sheet_prompt"][:12] if isinstance(body["sheet_prompt"], str) else body["sheet_prompt"], s, j))
+        gid = self._stills_ready("blob")
+        self.assertEqual(self.req("POST", "/api/live/video", {"generation": gid, "video_prompt": "  "})[0], 400)
+        self.assertEqual(self.req("POST", "/api/live/video", {"generation": gid, "video_prompt": "z" * (prompter.MAX_PROMPT + 1)})[0], 400)
+        self.assertEqual(self.req("POST", "/api/live/sheet", {"prompt": "blob", "from_generation": "nope"})[0], 400)
+        self.assertEqual([c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"]], [])      # nothing was sent
+        self.assertEqual(len(self.req("GET", "/api/tasks")[1]["tasks"]), 1)                                   # only the one real task (the stills of gid)
+
+    def test_a_member_cannot_start_a_new_sheet_from_a_batch_it_cannot_see(self):
+        gid = self._stills_ready("blob")
+        _, tok = self.c.users.create("Amira", "member", True)                                                # accounts on: every other caller now needs a token
+        mine = {"Authorization": f"Bearer {tok}"}
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "from_generation": gid, "sheet_prompt": "mine"}, mine)
+        self.assertEqual((s, j["error"]), (404, "No such batch"), "a stranger's batch is 404, never 403 and never readable")
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "sheet_prompt": "mine"}, mine)
+        self.assertEqual(s, 200, j)                                                                          # its own request is fine: only the other batch was refused
+        self.until(lambda: len(self._creates("nano_banana_flash")) == 2 or None, "the member's own sheet create call")
+        self.assertEqual(len(self._creates("nano_banana_flash")), 2)
 
 
 if __name__ == "__main__":

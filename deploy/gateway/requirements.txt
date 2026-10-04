@@ -1,0 +1,5 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+httpx>=0.27
+pyjwt[crypto]>=2.8
+redis>=5   # optional here: the rate limit is shared by every replica when MIRSAL_REDIS_URL answers, per process otherwise

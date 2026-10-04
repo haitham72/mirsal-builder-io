@@ -1,0 +1,304 @@
+{
+  "id": "E014",
+  "created": 1791045697.441,
+  "user": "local",
+  "pack_id": "782c4187",
+  "pack_name": "Superhero Dubai",
+  "mode": "sim",
+  "grid": [
+    2,
+    2
+  ],
+  "note": "",
+  "title": "Superhero Dubai · effects",
+  "status": "READY",
+  "stickers": [
+    {
+      "sticker_id": "83659804",
+      "name": "Superhero dubai victory stance",
+      "emoji": "🦸‍♂️✨",
+      "file": "G105/vid-superhero_dubai-victory_stance-superhero_dubai-20261003T163907-3c754a.webm",
+      "type": "animated",
+      "src": "src/83659804.png"
+    },
+    {
+      "sticker_id": "a7917758",
+      "name": "Superhero dubai celebratory jump",
+      "emoji": "🎉🚀",
+      "file": "G105/vid-superhero_dubai-celebratory_jump-superhero_dubai-20261003T163907-4baf66.webm",
+      "type": "animated",
+      "src": "src/a7917758.png"
+    },
+    {
+      "sticker_id": "df212b02",
+      "name": "Superhero dubai worriedlean",
+      "emoji": "😰🌧️",
+      "file": "G105/vid-superhero_dubai-worriedlean-superhero_dubai-20261003T163907-981cb9.webm",
+      "type": "animated",
+      "src": "src/df212b02.png"
+    },
+    {
+      "sticker_id": "6ea20fa2",
+      "name": "Superhero dubai defeated slump",
+      "emoji": "😫🏙️",
+      "file": "G105/vid-superhero_dubai-defeated_slump-superhero_dubai-20261003T163907-5c7b6e.webm",
+      "type": "animated",
+      "src": "src/6ea20fa2.png"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "subject": "Superhero",
+      "elements": [
+        "purple cape pieces",
+        "yellow shield badge",
+        "black boots",
+        "black shorts fragments",
+        "purple boots shards"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "83659804",
+        "a7917758"
+      ],
+      "moods": {
+        "83659804": "excited",
+        "a7917758": "excited"
+      },
+      "preset": {
+        "83659804": "burst",
+        "a7917758": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 106,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g2",
+      "subject": "Superhero Dubai",
+      "elements": [
+        "raindrops",
+        "clouds",
+        "umbrella pieces"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "df212b02"
+      ],
+      "moods": {
+        "df212b02": "neutral"
+      },
+      "preset": {
+        "df212b02": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 106,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g3",
+      "subject": "Superhero defeated",
+      "elements": [
+        "purple cape pieces",
+        "yellow shield badge",
+        "red and white keffiyeh",
+        "black belt buckle"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "6ea20fa2"
+      ],
+      "moods": {
+        "6ea20fa2": "sad"
+      },
+      "preset": {
+        "6ea20fa2": "rain"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 106,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    }
+  ],
+  "results": [],
+  "video": {},
+  "history": [
+    {
+      "ts": 1791045697.441,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "4 sticker(s), sim",
+      "detail": null
+    },
+    {
+      "ts": 1791045703.923,
+      "actor": "python",
+      "decision": "ANALYSE",
+      "reason": "Superhero: purple cape pieces, yellow shield badge, black boots, black shorts fragments, purple boots shards, Superhero Dubai: raindrops, clouds, umbrella pieces, Superhero defeated: purple cape pieces, yellow shield badge, red and white keffiyeh, black belt buckle",
+      "detail": {
+        "model": "qwen3.5-4b"
+      }
+    },
+    {
+      "ts": 1791045707.728,
+      "actor": "python",
+      "decision": "SUGGEST",
+      "reason": "8 candidate particles by vlm from the master sheet G105",
+      "detail": {
+        "by": "vlm",
+        "model": "qwen3.5-4b",
+        "source": {
+          "kind": "batch",
+          "generation": 105
+        }
+      }
+    },
+    {
+      "ts": 1791045713.741,
+      "actor": "local",
+      "decision": "REQUEST",
+      "reason": "particle sheet job J049 (2x2): purple superhero cape, red fabric piece, yellow diamond emblem, black utility belt buckle",
+      "detail": {
+        "job": "J049"
+      }
+    },
+    {
+      "ts": 1791045734.836,
+      "actor": "python",
+      "decision": "LINK",
+      "reason": "the particles are the cells of G106",
+      "detail": {
+        "generation": "G106",
+        "job": "J049"
+      }
+    },
+    {
+      "ts": 1791045854.104,
+      "actor": "local",
+      "decision": "SAVE",
+      "reason": "saved as particle set P001",
+      "detail": {
+        "set": "P001"
+      }
+    }
+  ],
+  "updated": 1791045854.104,
+  "per_sticker": {
+    "83659804": {
+      "subject": "Superhero",
+      "elements": [
+        "purple cape pieces",
+        "yellow shield badge",
+        "black boots"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "a7917758": {
+      "subject": "Superhero",
+      "elements": [
+        "purple cape pieces",
+        "yellow shield badge",
+        "black shorts fragments",
+        "purple boots shards"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "df212b02": {
+      "subject": "Superhero Dubai",
+      "elements": [
+        "raindrops",
+        "clouds",
+        "umbrella pieces"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "neutral",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    },
+    "6ea20fa2": {
+      "subject": "Superhero defeated",
+      "elements": [
+        "purple cape pieces",
+        "yellow shield badge",
+        "red and white keffiyeh",
+        "black belt buckle"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "sad",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    }
+  },
+  "notes": [],
+  "analysed_by": "qwen3.5-4b",
+  "set": {
+    "options": [
+      "purple superhero cape",
+      "red fabric piece",
+      "yellow diamond emblem",
+      "black utility belt buckle",
+      "purple boot sole",
+      "purple sleeve cuff",
+      "black shorts leg band",
+      "purple thigh armor plate"
+    ],
+    "source": {
+      "kind": "batch",
+      "generation": 105
+    },
+    "by": "vlm",
+    "elements": [
+      "purple superhero cape",
+      "red fabric piece",
+      "yellow diamond emblem",
+      "black utility belt buckle"
+    ],
+    "picked": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "grid": [
+      2,
+      2
+    ],
+    "status": "DRAWN",
+    "model": "qwen3.5-4b",
+    "job": "J049",
+    "generation": 106
+  },
+  "sets": [
+    "P001"
+  ]
+}

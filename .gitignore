@@ -1,8 +1,8 @@
 # Private test photos (people, pets): never commit
 inputs/photos/
 # Build outputs
-mirsal/out/
 generated/
+
 mirsal/.venv/
 # Python / offline wheels
 __pycache__/
@@ -34,6 +34,15 @@ mirsal/mirsal/console/dist/
 mirsal/web/test-results/
 mirsal/web/playwright-report/
 
+# mirsal/out/ is tracked ON PURPOSE (the real generations are the product's data, docs/engine-and-studio.md), but not these: account token digests,
+# the signed-link key, the lock files that change on every run, and the console logs
+mirsal/out/users.json
+mirsal/out/.asset_secret
+mirsal/out/.writer.lock
+mirsal/out/.paid.lock
+mirsal/out/*.log
+mirsal/.test-results/
+
 # Secrets: never commit tokens (Telegram bot token lives in env or out/telegram.json)
 Phase_01/telegram.md
 mirsal/telegram-id.md
@@ -44,3 +53,21 @@ opencode.json
 # keys and tokens: never committed
 mirsal/.env
 .env
+deploy/.env
+
+# macOS and agent worktrees: never committed
+.DS_Store
+**/.DS_Store
+.claude/worktrees/
+
+# one-time safety copies made before a data migration (local only, never in git)
+mirsal/out/backups/
+
+# office LAN: session cookies (hashed), account requests (emails), TLS keys and tickets (people's own words) never go to git
+mirsal/out/auth_sessions.json
+mirsal/out/account_requests.json
+mirsal/out/tls/
+mirsal/out/tickets/
+mirsal/out/trending.json
+# what the chat knows about each person (name, place, age, likes): personal, never committed (agent/profile.py)
+mirsal/out/profile/

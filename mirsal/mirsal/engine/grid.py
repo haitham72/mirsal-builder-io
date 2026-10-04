@@ -55,6 +55,15 @@ def split_grid(rgb: np.ndarray, rows: int, cols: int, chroma: str = "green", bor
     return rects, {"xs": xs, "ys": ys, "method": method}
 
 
+def equal_rects(width: int, height: int, rows: int, cols: int) -> tuple[list[tuple], dict]:
+    """The EXACT equal rows x cols division of a width x height sheet (cell sizes differ by at most one pixel), for a sheet whose layout is KNOWN and whose
+    cells are inputs to something else, not Telegram stickers (a particle sheet: a few small pieces on a screen, so no gutter profile means anything). Same shape as `split_grid`."""
+    xs = [int(round(k * width / cols)) for k in range(cols + 1)]
+    ys = [int(round(k * height / rows)) for k in range(rows + 1)]
+    rects = [(xs[c], ys[r], xs[c + 1] - xs[c], ys[r + 1] - ys[r]) for r in range(rows) for c in range(cols)]
+    return rects, {"xs": xs, "ys": ys, "method": "equal"}
+
+
 def detect_grid(rgb: np.ndarray, chroma: str = "green", border_px: int = 4, max_n: int = 4) -> tuple[int, int]:
     """(rows, cols) from the number of interior gutter bands (at least 1% of the side wide). 1..max_n each."""
     pc, pr = background_profile(rgb, chroma, border_px)

@@ -46,7 +46,7 @@ function drawPanel(){const el=document.getElementById('lvpanel');if(!el||!LIVE.m
    <div class=lv-row><span class=mut>Models</span><button class="lv-model" data-act=lmodels>${logoHtml(im.model)}<span><small>Image</small><b>${esc(im.model?im.model.label:'?')}</b><em>${esc(optSummary(im.model,im.sel))}</em></span></button>
     <button class="lv-model" data-act=lmodels>${logoHtml(vi.model)}<span><small>Animation</small><b>${esc(vi.model?vi.model.label:'?')}</b><em>${esc(optSummary(vi.model,vi.sel))}</em></span></button>
     <span class=mut id=lvhint>${LIVE.hf&&LIVE.hf.available===false?'Higgsfield is not installed: only prepared sheets can be used.':'Used when no prepared sheet matches the request.'}</span></div>`}
-ACT.lstyle=el=>{LIVE.style=el.dataset.id;lsave();drawPanel();if(typeof composerDraw==='function')composerDraw();if(typeof planPreview==='function')planPreview()};
+ACT.lstyle=el=>{LIVE.style=el.dataset.id;lsave();drawPanel();if(typeof composerDraw==='function')composerDraw()};
 
 /* ---------- the model dialog */
 let LMD=null;
@@ -59,7 +59,7 @@ function modelSection(kind,title){const {model,sel}=lsel(kind),more=(LIVE.m.more
    ${more.length?`<details ${isMore?'open':''}><summary class=mut>All Higgsfield ${kind} models (${more.length} more${LIVE.m.counts&&LIVE.m.counts[kind]?` of ${LIVE.m.counts[kind]}`:''})</summary>
      <select data-lvmore="${kind}"><option value="">Choose another model…</option>${more.map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)} (${esc(m.id)})</option>`).join('')}</select></details>`:''}`}
 function drawModels(){if(!LIVE.m)return;
-  dlg(`<div class="vdlg lv-md"><h2>Models</h2><div class=mut>What makes the sheet and what animates it. The price in credits is on the Generate button.</div>
+  dlg(`<div class="vdlg lv-md"><h2>Models</h2><div class=mut>What makes the sheet and what animates it. The sheet's price is on its own line in the Prompt step, above Generate sheet.</div>
    ${modelSection('image','Images')}${modelSection('video','Animation')}
    <div class=row style="justify-content:flex-end"><button class="btn pri" data-act=lmdone>Done</button></div></div>`);
   for(const k of ['image','video'])lcost(k)}
@@ -73,18 +73,20 @@ async function lcost(kind,quiet){const {model,sel}=lsel(kind);if(!model)return n
   const e=document.getElementById('lvest-'+kind);if(e&&!quiet)e.textContent=LIVE.est[key]==null?'price not available':`≈ ${fcr(LIVE.est[key])} credits per ${kind==='image'?'sheet':'clip'}`;
   return LIVE.est[key]}
 
-/* ---------- run: no questions. The price is on the button, the selection is the one made before; Generate just starts */
+/* ---------- run: no questions. The sheet's price is shown on its own line in the Prompt step (Generate prompt is free); the selection is the one made before; Generate sheet just starts */
 const liveReadyNow=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{prompt,ai:typeof aiOn==='function'&&aiOn(),refs:[]});return true}
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
-  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:!!LIVE.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[]}
-    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
-  const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…');
+  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:ctx.style_id||LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:ctx.loop===undefined?!!LIVE.loop:!!ctx.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
+      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{}),...(ctx.plan?{plan:ctx.plan}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
+    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(ctx.video_prompt?{video_prompt:ctx.video_prompt}:{}),...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
+  const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…',{'Idempotency-Key':ikey()});
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
   LIVE.jobs.push({id:r.j.job,kind:isSheet?'sheet':'video',label:isSheet?ctx.prompt:`Batch ${ctx.g}`,model:m?m.label:r.j.model,est:r.j.estimate,t0:Date.now(),gen:isSheet?null:ctx.g,ai:r.j.expanded_by==='ai'});
-  if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
+  if(isSheet&&ctx.ai&&r.j.expanded_by==='transformation')toast('Transformation: the built-in template wrote the cells, so the AI enhancer was not asked');
+  else if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
   if(!isSheet&&egDirty())egClear();
   lsave();say('');drawLive();liveTick();refreshHf();return true}
 
@@ -94,6 +96,8 @@ const fillNow=()=>LIVE.fill!=null?LIVE.fill:(LIVE.m&&LIVE.m.slot_fill)||0.74;
 const gapPct=f=>Math.round((1-f)*100);
 const previewUrl=(g,f)=>`/api/generations/${g.number}/sheet_preview?fill=${f.toFixed(3)}&px=520&k=${typeof keptStills==='function'?keptStills(g).map(t=>t.index).join(''):''}`;
 function vgenBox(g){const vs=typeof sheetOf==='function'?sheetOf(g):null;
+  const stalled=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&JR.stalled(j));
+  if(stalled)return JR.controls(stalled);
   if(vs&&['VIDEO_RETURNED','SLICED'].includes(vs.status))return`<div class="lv-vgen done"><span>${vs.status==='SLICED'?'Animated':'Video received'}${vs.video_info&&vs.video_info.width?` · ${vs.video_info.width}×${vs.video_info.height}`:''}</span></div>`;
   if(!liveReadyNow()||g.source.has_video||making(g))return'';
   const qj=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&QACTIVE.includes(j.status)),
@@ -110,8 +114,8 @@ document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset
   LIVE.fill=1-(+t.value)/100;t.nextElementSibling.textContent=t.value+'%';clearTimeout(GPT);
   GPT=setTimeout(()=>{const g=GM.get(+t.dataset.g),img=t.closest('.gsheet')&&t.closest('.gsheet').querySelector('[data-lvprev]');if(g&&img)img.src=previewUrl(g,LIVE.fill)},120)});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvgap!==undefined)lsave();
-  if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw();if(typeof planPreview==='function')planPreview()}});
-function fillPrices(){const c=lcached('video');document.querySelectorAll('[data-lvprice=video]').forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c))}
+  if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw()}});
+function fillPrices(){for(const kind of ['video','image']){const c=lcached(kind);document.querySelectorAll(`[data-lvprice=${kind}]`).forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c));if(c===undefined&&document.querySelector(`[data-lvprice=${kind}]`))lcost(kind,true).then(()=>fillPrices())}}
 ACT.lvgen=async el=>{el.disabled=true;const ok=await liveStart('video',{g:+el.dataset.g});if(!ok)el.disabled=false;glast='';if(typeof tick==='function')tick(true)};
 
 /* ---------- running jobs */
@@ -120,13 +124,14 @@ const QACTIVE=['REQUESTED','CLAIMED'];
 const mmss=sec=>{sec=Math.max(0,Math.round(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')};
 const hhmm=ts=>new Date(ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 function qRows(){const now=Date.now()/1000;
-  return(LIVE.q||[]).filter(j=>!LIVE.dis.includes(j.id)&&(QACTIVE.includes(j.status)&&now-(j.created_at||0)<86400||(j.completed_at||0)>now-900||(['FAILED','TIMEOUT'].includes(j.status)&&now-(j.created_at||0)<86400)))
-    .sort((a,b)=>(b.created_at||0)-(a.created_at||0)).slice(0,8)}
+  return(LIVE.q||[]).filter(j=>!LIVE.dis.includes(j.id)&&(QACTIVE.includes(j.status)||(j.completed_at||0)>now-900||['FAILED','TIMEOUT'].includes(j.status)))
+    .sort((a,b)=>(b.created_at||0)-(a.created_at||0))}
 function qState(j){const now=Date.now()/1000,typ=(LIVE.typ||{})[(j.kind==='video'?'video:':'image:')+j.model],started=j.claimed_at||j.created_at,el=(j.completed_at||now)-started,
     num=j.generation?+String(j.generation).replace(/\D/g,''):null,g=num?GM.get(num):null;
   if(j.status==='REQUESTED')return{t:'Waiting to start',pct:3,cls:'run',el};
   if(j.status==='CLAIMED'){const dl=j.stage==='downloading',pct=dl?96:typ?Math.min(94,5+el/typ*89):null;
     return{t:dl?'Downloading the result':'Higgsfield is working',pct,cls:'run',el,typ}}
+  if(j.provider_check&&j.provider_check.classification==='DIVERGENCE')return{t:j.provider_check.message+(j.status==='DONE'?' Result recovered on the same ticket.':''),pct:100,cls:j.status==='DONE'?'done':'bad',el};
   if(j.status==='DONE'){
     if(j.kind==='video'&&g){const n=g.stickers.filter(t=>t.status==='READY').length,doneN=g.stickers.filter(t=>['READY','FAILED'].includes(t.anim_status)).length,work=g.stickers.some(t=>['PROCESSING','STALE'].includes(t.anim_status));
       if(work)return{t:`Cutting the animations: ${doneN} of ${n}`,pct:96+4*doneN/Math.max(1,n),cls:'run',el};
@@ -144,17 +149,18 @@ function qRow(j){const st=qState(j),m=lfind(j.kind==='video'?'video':'image',j.m
     <div class=lv-qbar>${st.pct==null?'<i class=ind></i>':`<i style="width:${st.pct.toFixed(0)}%"></i>`}</div>
     <small><span class=lv-qs>${esc(st.t)}</span>${st.cls==='run'||st.cls==='done'?` · ${mmss(st.el)}${st.typ&&j.status==='CLAIMED'?` of about ${mmss(st.typ)}`:''}`:''}</small>
     <small class=mut>${esc(j.id)} · ${esc(m?m.label:(j.model||''))}${opts?' · '+esc(opts):''}${j.cost||j.cost_estimate?` · ◈ ${fcr(j.cost||j.cost_estimate)}`:''} · ${hhmm(j.claimed_at||j.created_at)}${j.generation?` · ${esc(j.generation)}`:''}${j.external_task_id?` · <code>${esc(String(j.external_task_id).slice(0,8))}</code> <button class=link data-act=qcopy data-t="${esc(j.external_task_id)}">copy id</button>`:''}</small>
-    </div>${st.retry?`<button class="btn sm" data-act=qretry data-id="${esc(j.id)}" title="${st.ticket?'Wait for the same Higgsfield job again: no second charge':'Send it again'}">Retry</button>`:''}${QACTIVE.includes(j.status)?'':`<button class="iconbtn" data-act=ljdismiss data-id="${esc(j.id)}" title="Remove from the list">${ic('x')}</button>`}</div>`}
+    ${JR.stalled(j)?JR.controls(j):''}</div>${QACTIVE.includes(j.status)?'':`<button class="iconbtn" data-act=ljdismiss data-id="${esc(j.id)}" title="Remove from the list">${ic('x')}</button>`}</div>`}
 function drawLive(){const el=ensureQueue(),rows=qRows();
+  document.body.classList.toggle('hasq',rows.length>0);      // the fixed pill reserves room at the foot of every screen (studio.css body.hasq)
   if(!rows.length){el.innerHTML='';el.className='';return}
   const run=rows.filter(j=>QACTIVE.includes(j.status)),bad=rows.filter(j=>qState(j).cls==='bad').length,first=run[0],fs=first&&qState(first);
   const head=run.length?`<span class=spin></span><span><b>${run.length} running</b><small>${first.kind==='video'?'Animation':'Sheet'} · ${esc(fs.t)} · ${mmss(fs.el)}${fs.typ&&first.status==='CLAIMED'?` of ~${mmss(fs.typ)}`:''}</small></span>`
-    :`<span class="lv-dot ${bad?'bad':'ok'}"></span><span><b>Queue</b><small>${bad?`${bad} failed`:'all done'}</small></span>`;
+    :`<span class="lv-dot ${bad?'bad':'ok'}"></span><span><b>Queue</b><small>${bad?`${bad} need attention`:'all done'}</small></span>`;
   el.className='on'+(QO?' open':'');
   el.innerHTML=`<button class=lv-qhead data-act=qtoggle aria-expanded=${QO}>${head}<i class=lv-caret></i></button>${QO?`<div class=lv-qlist>${rows.map(qRow).join('')}</div>`:''}`}
 ACT.qtoggle=()=>{QO=!QO;try{localStorage.setItem('mirsal.qopen',QO?'1':'0')}catch(e){}drawLive()};
 async function qRefresh(){const r=await api('/api/jobs');if(r.ok){LIVE.q=r.j.jobs;LIVE.typ=r.j.typical||{}}drawLive();if(typeof cpDrawTop==='function')cpDrawTop()}
-ACT.qretry=async el=>{const r=await post(`/api/jobs/${el.dataset.id}/retry`);if(!r.ok)return toast(r.j.error||'Could not retry',1);toast('Retrying '+el.dataset.id);LIVE.dis=LIVE.dis.filter(x=>x!==el.dataset.id);qRefresh()};
+ACT.qretry=el=>ACT.jrcontinue(el); // old saved markup uses the same-ticket action
 ACT.qcopy=async el=>{try{await navigator.clipboard.writeText(el.dataset.t);toast('Higgsfield job id copied')}catch(e){toast('Copy failed',1)}};
 ACT.ljdismiss=el=>{LIVE.dis.push(el.dataset.id);LIVE.jobs=LIVE.jobs.filter(j=>j.id!==el.dataset.id);lsave();drawLive()};
 let LTB=false;
@@ -192,7 +198,7 @@ const EG={outline:null,erode:null,pick:null,busy:false,drag:false};
 const edgeBatches=()=>typeof included==='function'?included().filter(g=>g.stickers.some(t=>t.status==='READY')):[];
 function ensureBars(){const g=document.querySelector('.gen2');if(!g)return;
   if(!document.getElementById('gedge')){const e=document.createElement('div');e.id='gedge';const ref=document.getElementById('gres');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
-  if(!document.getElementById('ghist')){const h=document.createElement('section');h.id='ghist';g.appendChild(h)}}
+  if(!document.getElementById('gpart')){const h=document.createElement('section');h.id='gpart';g.appendChild(h)}}
 /* Undo replays the log as a stack: an applied edge is pushed, an undo entry pops it, so Undo always steps back one real snapshot (and never flips between two) */
 function egCommitted(){const g=edgeBatches()[0];if(!g)return{o:0,e:0,hist:[],prev:null};
   const st=[];(g.edge_history||[]).forEach(h=>{if(h.via==='undo')st.length>1&&st.pop();else st.push(h)});
@@ -211,7 +217,7 @@ function edgeControlsHtml(){return`<label>Stroke <input type=range min=0 max=24 
   <span class=lv-eact><button class="btn sm pri" data-act=egapply>Apply</button><button class="btn sm" data-act=egundo>Undo</button></span><span class=lv-est data-eghint></span>`}
 /* bring every edge control (the bar and the open thumbnail's) in line with the state; never rebuild or move the slider that is being dragged */
 function egSync(){const bar=document.getElementById('gedge'),gs=edgeBatches();
-  if(bar){if(!gs.length){bar.innerHTML='';bar.removeAttribute('data-built')}
+  if(bar){if(!gs.length){bar.innerHTML='';bar.className='';bar.removeAttribute('data-built')}      // no batch, no bar: the empty strip (a bordered white box) must not stay behind after Remove batch
     else if(!bar.dataset.built){bar.dataset.built='1';bar.className='lv-edge';bar.innerHTML='<b>Edge</b>'+edgeControlsHtml()}}
   const c=egCommitted(),v=egVals(),dirty=egDirty(),prev=c.prev,t=egTarget(),
     working=gs.some(x=>x.stickers.some(s=>['PROCESSING','STALE'].includes(s.anim_status)));
@@ -255,22 +261,93 @@ ACT.egundo=async()=>{if(EG.busy)return;
 ['pointerup','keyup','blur'].forEach(ev=>document.addEventListener(ev,e=>{if(EG.drag&&e.target&&e.target.dataset&&e.target.dataset.edge)EG.drag=false},true));
 setInterval(()=>{egSync();applyEdgePreview()},800);       // egSync leaves the slider that is being dragged alone
 
-/* ---------- persistent history of batches: every batch ever made, 5 at a time (nothing is lost when another batch is opened) */
-const HB={items:[],more:false,total:0,loading:false,limit:5};
+/* ---------- persistent history of batches: every batch ever made, in the shared second column (docs/design.md 6). The API is paged (50 at a time, it reads one result.json per batch);
+   the column asks for the next page by itself when it is scrolled near the end, so the person sees one list that scrolls and no "Load more". Page 1 is read again now and then and merged
+   over what is already loaded (nothing that was loaded is dropped). */
+const HB={items:[],more:false,total:0,loading:false,page:50,loaded:false,tried:false,sig:''};
 const ago=ts=>{if(!ts)return'';const s=Math.max(0,Date.now()/1000-ts);return s<90?'just now':s<5400?Math.round(s/60)+' min ago':s<129600?Math.round(s/3600)+' h ago':s<2592000?Math.round(s/86400)+' d ago':new Date(ts*1000).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'})};
-async function histLoad(more){if(HB.loading)return;HB.loading=true;
-  const off=more?HB.items.length:0,lim=more?HB.limit:Math.max(HB.limit,HB.items.length),r=await api(`/api/history?offset=${off}&limit=${lim}`);HB.loading=false;
-  if(r.ok){HB.items=more?HB.items.concat(r.j.items):r.j.items;HB.more=r.j.more;HB.total=r.j.total}drawHist();if(typeof cpDrawTop==='function')cpDrawTop()}
+const hbSig=()=>HB.items.map(x=>[x.id,x.edited,x.ready,x.animated].join(':')).join(',')+'|'+HB.total;
+async function histLoad(more,quiet){if(HB.loading)return;HB.loading=true;
+  const r=await api(`/api/history?offset=${more?HB.items.length:0}&limit=${HB.page}`);HB.loading=false;
+  if(r.ok){
+    if(more){const seen=new Set(HB.items.map(x=>x.id));HB.items=HB.items.concat(r.j.items.filter(x=>!seen.has(x.id)))}
+    else{const fresh=new Set(r.j.items.map(x=>x.id));HB.items=r.j.items.concat(HB.items.filter(x=>!fresh.has(x.id)))}
+    HB.total=r.j.total;HB.more=HB.items.length<HB.total;HB.loaded=true}
+  const sig=hbSig(),same=sig===HB.sig;HB.sig=sig;
+  if(!(quiet&&same)){drawHist();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()}}
 const histReload=()=>histLoad(false);
-const histItem=it=>`<button class="lv-hitem ${SES.gens.includes(it.id)?'on':''}" data-act=hopen data-id=${it.id}><span class=lv-hth>${it.thumbs.map(u=>`<img src="/out/${esc(it.generation_id)}/${esc(u)}" loading=lazy alt="">`).join('')}</span>
-  <span class=lv-hmeta><b>${esc(titleCase(String(it.prompt||'').replace(/_/g,' ')))}</b><small>${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}</small></span></button>`;
-function drawHist(){const el=document.getElementById('ghist');if(!el)return;
-  if(!HB.items.length){el.innerHTML='';return}
-  el.innerHTML=`<div class=lv-hh><h2>Earlier batches</h2><span class=mut>${HB.total} in total</span></div><div class=lv-hlist>${HB.items.map(histItem).join('')}</div>
-   ${HB.more?`<div class=lv-hmore><button class=btn data-act=hmore>Load more</button></div>`:''}`}
-ACT.hmore=()=>histLoad(true);
-ACT.hopen=el=>{const it=HB.items.find(x=>x.id===+el.dataset.id);if(!it)return;
+/* while the Studio or Create is showing, the column is read again every 10 s (a batch that was edited or finished moves to the top); it redraws only when something changed */
+setInterval(()=>{if(!document.hidden&&['generate','create'].includes(route_))histLoad(false,true)},10000);
+/* A batch is one entry of the column (histRow: ONE picture, the first sticker, from `cells` of GET /api/history, with its title, G###, counts and edited time). A click on it
+   makes it THE batch the Studio presents (ACT.hopen: the Studio's own view of it, nothing else beside it). Under that view sits the batch's Particles section (particles.js, spSecDraw): what was
+   made for each of its stickers that is in a pack. The decisions on a batch's stickers are not shown here: they stay in its result.json and in GET /api/generations/<id>/history. */
+/* "Allow AI vision of generated media?": asked once, the answer is remembered in this browser (localStorage mirsal.allow_vlm = 1 / 0). The server enforces it too: the request itself carries allow_vlm.
+   VLM.then is what runs once the person has said yes (the particle effects screen asks before the vision model looks at stickers). */
+const VLM={then:null};
+const vlmState=()=>{try{return localStorage.getItem('mirsal.allow_vlm')}catch(e){return null}};
+const vlmSet=v=>{try{localStorage.setItem('mirsal.allow_vlm',v)}catch(e){}};
+ACT.vlmyes=()=>{vlmSet('1');closeDlg();const f=VLM.then;VLM.then=null;if(f)f()};
+const histTitle=it=>esc(titleCase(String(it.prompt||'').replace(/_/g,' '))||it.generation_id);
+const histInfo=it=>`${esc(it.generation_id)} · ${it.ready} sticker${it.ready===1?'':'s'}${it.animated?` · ${it.animated} animated`:''} · edited ${ago(it.edited||it.created)}`;
+/* a batch is ONE picture: the first of its stickers that has one (P4 of the UI/UX spec: not the sheet's 4 or 9 cells); a batch with no picture yet is the checkerboard */
+const histThumb=it=>{const c=(it.cells||[]).find(x=>x.png);return`<span class=lv-hth>${c?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="${esc(String(((it.cells||[])[0]||{}).status||it.stage||'').toLowerCase())}"></span>`}</span>`};
+/* one entry of the column: a click presents the batch in the Studio. `on` = it is the batch the Studio presents now. */
+/* a family (flow/groups.py: a batch, its edits, redos and the batches added to it) is ONE entry here: the root's title and the variation in view (else the newest).
+   Any entry can be dragged onto another: the one dropped on is the parent (POST /api/generations/{id}/join). The variations themselves are chosen in the Studio's view of the
+   batch, above its workflow steps (gvarsHtml), not in this column (Haitham, 2026-10-04). */
+const histVars=it=>(it.variants&&it.variants.length?it.variants:[it]);
+const histRow=it=>{const vs=histVars(it),cur=vs.find(v=>SES.gens.includes(v.id)),on=!!cur,shown=cur||vs[vs.length-1];
+  return`<div class=lv-hfam draggable=true data-hid=${it.id}><button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${shown.id} aria-pressed=${on} title="Show ${esc(shown.generation_id)} in the Studio">${histThumb(shown)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(shown)}${vs.length>1?` · ${vs.length} variations`:''}</small></span></button></div>`};
+/* the variations strip of the batch the Studio presents: one thumbnail per batch of its family, the one in view outlined, × to take a non-root one out (pure) */
+function gvarsHtml(gs){if(!gs||gs.length!==1||typeof HB==='undefined')return '';const id=gs[0].number,fam=HB.items.find(it=>histVars(it).some(v=>v.id===id));
+  const vs=fam?histVars(fam):[];if(vs.length<2)return '';
+  return`<div class=gvars><span class=mut>Variations</span>${vs.map((v,i)=>`<span class="gvar${v.id===id?' on':''}"><button class=gvb data-act=hopen data-id=${v.id} aria-pressed=${v.id===id} title="${esc(v.generation_id)} · ${esc(titleCase(String(v.prompt||'').replace(/_/g,' ')))}">${histThumb(v)}<small>${esc(v.generation_id)}</small></button>${i?`<button class=gvx data-act=hleave data-id=${v.id} title="Take ${esc(v.generation_id)} out of this group" aria-label="Take ${esc(v.generation_id)} out of this group">×</button>`:''}</span>`).join('')}</div>`}
+async function histJoin(id,to){if(!id||!to||id===to)return;const r=await post(`/api/generations/${id}/join`,{to});if(!r.ok)return toast(r.j.error||'Could not add it to the group',1);
+  toast(`Added to ${r.j.root}'s group`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)}
+ACT.hleave=async el=>{const r=await post(`/api/generations/${el.dataset.id}/leave`,{});if(!r.ok)return toast(r.j.error||'Could not take it out',1);toast(`${r.j.id} is on its own again`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)};
+if(typeof document!=='undefined'&&document.addEventListener){
+  document.addEventListener('dragstart',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;ev.dataTransfer.setData('text/x-mirsal-batch',f.dataset.hid);ev.dataTransfer.effectAllowed='move'});
+  document.addEventListener('dragover',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f||!ev.dataTransfer.types.includes('text/x-mirsal-batch'))return;ev.preventDefault();f.classList.add('drop')});
+  document.addEventListener('dragleave',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(f)f.classList.remove('drop')});
+  document.addEventListener('drop',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;const id=ev.dataTransfer.getData('text/x-mirsal-batch');if(!id)return;ev.preventDefault();f.classList.remove('drop');histJoin(+id,+f.dataset.hid)})}
+/* the column: a title and the whole list, newest edit first; the next page is asked for when the list is scrolled near its end (no "Load more") */
+function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
+  <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histRow).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div><div class=c2rem id=c2rem></div>`}
+/* the trash of batches (GET /api/generations/removed, owner only): Restore puts a batch back under its own number; the list is empty (and hidden) for anyone else */
+const REM={items:[],tried:false};
+async function remLoad(){const r=await api('/api/generations/removed');REM.items=r.ok?r.j.batches:[];REM.tried=true;remDraw()}
+function remDraw(){const el=document.getElementById('c2rem');if(!el)return;const was=el.querySelector('details')&&el.querySelector('details').open;
+  el.innerHTML=remHtml(REM.items,was)}
+/* each removed batch: Restore (back under its own number) or Remove (gone for good: files and database rows, flow/purge.py); Remove all = every removed batch, trashed packs stay */
+function remHtml(items,open){return items.length?`<details ${open?'open':''}><summary>Removed batches (${items.length})</summary>${items.map(b=>`<div class=rrow><span><b>${esc(b.id)}</b> ${b.subject?esc(String(b.subject).replace(/_/g,' ')):''} <span class=mut>${ago(b.removed)}</span></span><span class=row><button class="btn sm" data-act=grestore data-n=${b.number}>Restore</button><button class="btn sm dng" data-act=gpurge data-id=${esc(b.id)}>Remove</button></span></div>`).join('')}<div class=row style="justify-content:flex-end;padding:8px 0"><button class="btn sm dng" data-act=gpurgeall>Remove all (${items.length})</button></div></details>`:''}
+async function remPurge(url,body){const r=await post(url,body);if(!r.ok){toast(r.j.error||'Nothing was removed',1);return null}
+  let t=r.j;for(let i=0;t&&t.status==='running'&&t.id&&i<240;i++){await new Promise(res=>setTimeout(res,500));const q=await api('/api/trash/purges/'+t.id);if(q.ok)t=q.j}
+  const done=(t&&t.done)||0,refused=(t&&t.refused||[]).length;toast(t&&t.status==='failed'?(t.error||'The removal stopped'):`${done} removed for good${refused?`, ${refused} kept (they need their own decision in Settings > Trash)`:''}`,t&&t.status==='failed');
+  await remLoad();return t}
+ACT.gpurge=el=>{const id=el.dataset.id;confirmDlg(`Remove ${id} for good? Its files and database rows are deleted. This cannot be undone.`,async()=>{const r=await post('/api/trash/purge',{type:'batch',id});
+  if(!r.ok&&r.status===409&&/Confirm to go on/.test(r.j.error||''))return confirmDlg(r.j.error,()=>remPurge('/api/trash/purge',{type:'batch',id,confirm_shared:true}),'Remove anyway');
+  if(!r.ok)return toast(r.j.error||'Nothing was removed',1);let t=r.j;for(let i=0;t.status==='running'&&t.id&&i<240;i++){await new Promise(res=>setTimeout(res,500));const q=await api('/api/trash/purges/'+t.id);if(q.ok)t=q.j}
+  toast(t.status==='failed'?(t.error||'The removal stopped'):`${id} removed for good`,t.status==='failed');await remLoad()},'Remove')};
+ACT.gpurgeall=async()=>{const r=await api('/api/trash');if(!r.ok)return toast(r.j.error||'Could not read the trash',1);const pb=r.j.purge_batches||{count:0};
+  if(!pb.count)return toast('Every removed batch needs its own decision: use Remove on it',1);
+  dlg(`<h2>Remove all ${pb.count} removed batch${pb.count===1?'':'es'} for good?</h2><p>Their files and database rows are deleted. This cannot be undone. Type “${esc(pb.phrase)}” to go on.</p><input type=text id=rem-typed autocomplete=off placeholder="${esc(pb.phrase)}"><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn dng" data-act=gpurgeallgo data-phrase="${esc(pb.phrase)}">Remove all</button></div>`);
+  const i=document.getElementById('rem-typed');if(i)i.focus()};
+ACT.gpurgeallgo=el=>{const i=document.getElementById('rem-typed'),typed=i?i.value.trim().toLowerCase():'';if(typed!==el.dataset.phrase)return toast(`Type exactly “${el.dataset.phrase}” to go on.`,1);
+  closeDlg();remPurge('/api/trash/purge_all',{confirm:typed,kind:'batch'})};
+ACT.grestore=async el=>{const r=await post(`/api/generations/${el.dataset.n}/restore`,{});if(!r.ok){toast(r.j.error,1);return}toast(`${r.j.id} is back`);await remLoad();histLoad(false)};
+function histCol(){const c2=document.getElementById('col2');if(!c2)return;
+  if(!c2.querySelector('#c2hist')||c2.dataset.k!=='batches'){c2.dataset.k='batches';c2.innerHTML=histColHTML();const l=document.getElementById('c2hist');
+    l.addEventListener('scroll',()=>{if(HB.more&&!HB.loading&&l.scrollTop+l.clientHeight>l.scrollHeight-320)histLoad(true)})}
+  else{const l=document.getElementById('c2hist'),top=l.scrollTop;c2.querySelector('.c2n').textContent=HB.loaded?`${HB.total} in total`:'';l.innerHTML=HB.items.map(histRow).join('')||l.innerHTML;l.scrollTop=top}
+  if(!REM.tried){REM.tried=true;remLoad()}else remDraw();
+  if(!HB.loaded){if(!HB.tried){HB.tried=true;histLoad(false)}}
+  else{const l=document.getElementById('c2hist');if(HB.more&&!HB.loading&&l.scrollHeight<=l.clientHeight+320)histLoad(true)}}
+/* the column is redrawn here; under the Studio's view the batch's Particles section is drawn by particles.js (spSecDraw) */
+function drawHist(){if(['generate','create'].includes(route_))histCol();if(typeof spSecDraw==='function')spSecDraw()}
+/* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio, as does a row of the Earlier-batches column */
+ACT.hopen=el=>{const it=HB.items.flatMap(histVars).find(x=>x.id===+el.dataset.id);if(!it)return;
+  gdHide();
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
   if(typeof CP!=='undefined')CP.menu=false;if(location.hash!=='#/studio')location.hash='#/studio';
-  if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});drawHist();if(typeof cpDrawTop==='function')cpDrawTop()};
+  if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});drawHist();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()};

@@ -1,0 +1,22 @@
+[
+  {
+    "created_at": "2026-10-01T16:32:11.876344Z",
+    "display_name": "Nano Banana 2",
+    "id": "21f740dc-fd82-4103-a23d-aa7515ab492f",
+    "job_type": "nano_banana_flash",
+    "min_result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_163211_21f740dc-fd82-4103-a23d-aa7515ab492f_min.webp",
+    "params": {
+      "aspect_ratio": "1:1",
+      "batch_size": 1,
+      "height": 2048,
+      "is_inpaint": false,
+      "medias": [],
+      "prompt": "Illustration sheet: a 3x3 arrangement of 9 separate characters, one per equal cell of an invisible grid, with wide empty gaps between them.\r\nSubject: teddy bear.\r\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\r\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\r\nEach cell shows a clearly different, highly expressive emotion and pose, row-major:\r\n1. arms wide open, ready for a big hug, warm smile\r\n2. dancing with joyful moves, eyes closed, big smile\r\n3. huge shiny puppy eyes, hands clasped, begging please\r\n4. making an OK sign with a cheerful squint\r\n5. thinking hard, chin in hand, one eyebrow raised\r\n6. sad and drooping, a single tear, slumped shoulders\r\n7. grumpy with arms crossed, pouting, turned slightly away\r\n8. shocked, jaw dropped, eyes huge, hands on cheeks\r\n9. embarrassed and blushing, hiding the face behind paws, peeking\r\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\r\nConsistency: the same character design, proportions and colours in all 9 cells.\r\nBackground: one single flat pure green (#00FF00) colour over the entire image, the identical exact shade in every cell and in the gaps between the characters; no visible cell, panel or grid lines, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\r\nMargin: every character is full body, centred in its cell, with a generous empty margin on every side (at least 20% of its cell), nothing touching or crossing a cell edge.",
+      "reference_elements": [],
+      "resolution": "2k",
+      "width": 2048
+    },
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_37CCPXDdxsgwGNn2frvHwfIdxWI/hf_20261001_163211_21f740dc-fd82-4103-a23d-aa7515ab492f.png",
+    "status": "completed"
+  }
+]

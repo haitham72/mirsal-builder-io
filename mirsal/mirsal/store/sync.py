@@ -34,7 +34,7 @@ def status() -> dict:
 
 
 def _default_out() -> Path:
-    from ..paths import out_root
+    from ..runtime.paths import out_root
     try:
         return out_root().resolve()
     except Exception:
@@ -88,6 +88,21 @@ def sync_model_call(out, line: str) -> bool:
         return False
 
 
+def sync_users(out) -> bool:
+    """out/users.json changed: mirror it into Postgres (digests only). Best effort, never raises."""
+    try:
+        if not enabled(out) or not db.available():
+            _note("skipped")
+            return False
+        with db.connect() as c:
+            repo.import_users(c, Path(out))
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False
+
+
 def sync_session(out, sess: dict) -> bool:
     """A chat session changed: mirror it into Postgres. Best effort, never raises."""
     try:
@@ -112,6 +127,42 @@ def sync_result(out, gid: int, res: dict) -> bool:
             return False
         with db.connect() as c:
             repo.save_generation(c, Path(out), gid)
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False
+
+
+def sync_ticket(out, t: dict) -> bool:
+    """The Postgres copy of one ticket (flow/tickets.py); best effort like every other write-through."""
+    try:
+        if not enabled(out):
+            return False
+        if not db.available():
+            _note("skipped")
+            return False
+        with db.connect() as c:
+            repo.save_ticket(c, t)
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False
+
+
+def sync_profile(out, user: str, facts: dict) -> bool:
+    """The Postgres copy of one person's profile facts (agent/profile.py); best effort, the file stays the record."""
+    try:
+        if not enabled(out):
+            return False
+        if not db.available():
+            _note("skipped")
+            return False
+        import json as _json
+        with db.connect() as c:
+            c.execute("INSERT INTO user_profiles (user_id, facts, updated_at) VALUES (%s, %s::jsonb, now()) "
+                      "ON CONFLICT (user_id) DO UPDATE SET facts = EXCLUDED.facts, updated_at = now()", (str(user), _json.dumps(facts, ensure_ascii=False)))
         _note("ok")
         return True
     except Exception as e:

@@ -1,0 +1,793 @@
+{
+ "id": "S007",
+ "user": "local",
+ "title": "superhero in dubai",
+ "created": 1791013874.396,
+ "updated": 1791014271.347,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "glossy_3d",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": "G103",
+  "stickers": [
+   "G103/S5"
+  ]
+ },
+ "subjects": [
+  {
+   "name": "superhero",
+   "slug": "superhero",
+   "passes": [
+    {
+     "generation": "G103",
+     "job": "J043",
+     "prompt": "superhero in dubai",
+     "grid": "3x3",
+     "style_id": "glossy_3d",
+     "parent": null,
+     "created": 1791013905.249,
+     "ready": 9,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791013886.248,
+   "user": "superhero in dubai",
+   "assistant": "Here's the plan for **superhero**: 9 stickers, glossy 3d. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791013897.793,
+   "user": "vision_yes",
+   "assistant": "Good: when stickers are ready I will look at them and suggest better names where one does not fit.",
+   "intents": [
+    "VISION"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791013905.281,
+   "user": "confirm",
+   "assistant": "Creating **superhero** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1791014110.66,
+   "user": "what is he doing in the second frame?",
+   "assistant": "G103/S2: superhero jump spin 🚀💥",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G103/S2"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G103",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G103"
+  },
+  {
+   "seq": 5,
+   "ts": 1791014222.919,
+   "user": "can you rotate him?",
+   "assistant": "I can't rotate stickers directly; however, since your focus is on **G103/S2**, you might be able to adjust the angle in your design software or command line. Would you like help with that instead?",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G103/S5"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G103",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "language model",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G103"
+  },
+  {
+   "seq": 6,
+   "ts": 1791014262.262,
+   "user": "can you make him iron man?",
+   "assistant": "Here's the plan for **can you him iron man**: 9 stickers, glossy 3d. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1791014271.347,
+   "user": "cancel",
+   "assistant": "No problem, nothing was spent. Tell me what to change, or what else to make.",
+   "intents": [
+    "CANCEL"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "superhero in dubai",
+   "cards": [],
+   "steps": [],
+   "ts": 1791013874.529
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **superhero**: 9 stickers, glossy 3d. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "superhero",
+     "grid": "3x3",
+     "style": "glossy 3d",
+     "count": 9,
+     "names": [
+      "superhero stand proud",
+      "superhero jump spin",
+      "superhero reach shout",
+      "superhero sit bored",
+      "superhero spin fast",
+      "superhero lie down",
+      "superhero kneel worry",
+      "superhero laugh happy",
+      "superhero run fast"
+     ],
+     "estimate": 2.0,
+     "balance": 3138.12,
+     "prompt": "superhero in dubai",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superhero in dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791013874.623
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013874.637
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013874.655
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "superhero stand proud",
+       "superhero jump spin",
+       "superhero reach shout",
+       "superhero sit bored",
+       "superhero spin fast",
+       "superhero lie down",
+       "superhero kneel worry",
+       "superhero laugh happy",
+       "superhero run fast"
+      ]
+     },
+     "status": "done",
+     "ts": 1791013886.216
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013886.232
+    }
+   ],
+   "ts": 1791013874.529,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    },
+    {
+     "label": "Allow AI vision",
+     "action": "vision_yes"
+    },
+    {
+     "label": "Keep it off",
+     "action": "vision_no"
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "Allow AI vision",
+   "cards": [],
+   "steps": [],
+   "ts": 1791013897.705
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Good: when stickers are ready I will look at them and suggest better names where one does not fit.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791013897.72
+    },
+    {
+     "kind": "step",
+     "label": "understood: your answer about AI vision",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013897.757
+    },
+    {
+     "kind": "task",
+     "label": "saving your answer",
+     "detail": null,
+     "status": "running",
+     "ts": 1791013897.768
+    },
+    {
+     "kind": "step",
+     "label": "AI vision allowed",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013897.776
+    },
+    {
+     "kind": "final",
+     "label": "saved",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013897.784
+    }
+   ],
+   "ts": 1791013897.705,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791013904.715
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Creating **superhero** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J043",
+     "subject": "superhero",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superhero",
+     "detail": null,
+     "status": "running",
+     "ts": 1791013904.735
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013904.777
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013904.789
+    },
+    {
+     "kind": "final",
+     "label": "started · J043",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013905.249
+    }
+   ],
+   "ts": 1791013904.715,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m7",
+   "role": "assistant",
+   "text": "I looked at **Superhero in dubai**. These names do not fit the picture:\nS2: \"superhero jump spin\" -> **Surprised superhero falling upside down**\nS5: \"superhero spin fast\" -> **Flying superhero with swirling red cape**",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Superhero in dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791013953.662
+    },
+    {
+     "kind": "step",
+     "label": "looked at 9 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013964.805
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791013964.817
+    }
+   ],
+   "ts": 1791013953.613,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Apply the new names",
+     "action": "names_apply",
+     "generation": "G103"
+    },
+    {
+     "label": "Keep my names",
+     "action": "names_keep",
+     "generation": "G103"
+    }
+   ]
+  },
+  {
+   "id": "m8",
+   "role": "user",
+   "text": "what is he doing in the second frame?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791014110.56
+  },
+  {
+   "id": "m9",
+   "role": "assistant",
+   "text": "G103/S2: superhero jump spin 🚀💥",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G103/S2",
+       "index": 2,
+       "key": "superhero_jump_spin",
+       "name": "img-superhero_dubai-jump_spin-20261003T075209-b2c3cb",
+       "emoji": "🚀💥",
+       "tags": [
+        "superhero_jump_spin",
+        "mid_air",
+        "action",
+        "sky"
+       ],
+       "title": null,
+       "proposed_title": "Surprised superhero falling upside down",
+       "status": "READY",
+       "reason": null,
+       "still": "PENDING",
+       "anim": "NONE",
+       "anim_status": "NOT_REQUESTED",
+       "allow": {
+        "still": {
+         "can": false,
+         "allowed": false,
+         "undo": false,
+         "why": null,
+         "final": null
+        },
+        "animation": {
+         "can": false,
+         "allowed": false,
+         "undo": false,
+         "why": null,
+         "final": null
+        }
+       },
+       "waived": [],
+       "png": "/out/G103/slices/img-superhero_dubai-jump_spin-20261003T075209-b2c3cb.png",
+       "webm": null,
+       "prompt": "a small superhero figure wearing a red cape and mask standing on sand hero jumps high into the air doing a backflip with cape trailing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791014110.583
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014110.624
+    },
+    {
+     "kind": "step",
+     "label": "found S2 in Superhero · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014110.64
+    },
+    {
+     "kind": "final",
+     "label": "answered from what we made",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014110.651
+    }
+   ],
+   "ts": 1791014110.56,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m10",
+   "role": "user",
+   "text": "can you rotate him?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791014220.728
+  },
+  {
+   "id": "m11",
+   "role": "assistant",
+   "text": "I can't rotate stickers directly; however, since your focus is on **G103/S2**, you might be able to adjust the angle in your design software or command line. Would you like help with that instead?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791014220.75
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014220.789
+    },
+    {
+     "kind": "step",
+     "label": "found S5 in Superhero · language model",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014221.584
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014222.905
+    }
+   ],
+   "ts": 1791014220.728,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m12",
+   "role": "user",
+   "text": "can you make him iron man?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791014251.515
+  },
+  {
+   "id": "m13",
+   "role": "assistant",
+   "text": "Here's the plan for **can you him iron man**: 9 stickers, glossy 3d. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "can you him iron man",
+     "grid": "3x3",
+     "style": "glossy 3d",
+     "count": 9,
+     "names": [
+      "can you him iron man victory pose",
+      "can you him iron man spin jump",
+      "can you him iron man sad kneel",
+      "can you him iron man anger fist",
+      "can you him iron man doubt stare",
+      "can you him iron man run sprint",
+      "can you him iron man joy jump",
+      "can you him iron man sleep lie",
+      "can you him iron man reach grab"
+     ],
+     "estimate": 2.0,
+     "balance": 3136.12,
+     "prompt": "can you make him iron man?",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating him iron man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791014251.528
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014251.562
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014251.575
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "can you him iron man victory pose",
+       "can you him iron man spin jump",
+       "can you him iron man sad kneel",
+       "can you him iron man anger fist",
+       "can you him iron man doubt stare",
+       "can you him iron man run sprint",
+       "can you him iron man joy jump",
+       "can you him iron man sleep lie",
+       "can you him iron man reach grab"
+      ]
+     },
+     "status": "done",
+     "ts": 1791014261.778
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014262.242
+    }
+   ],
+   "ts": 1791014251.515,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m14",
+   "role": "user",
+   "text": "No",
+   "cards": [],
+   "steps": [],
+   "ts": 1791014271.254
+  },
+  {
+   "id": "m15",
+   "role": "assistant",
+   "text": "No problem, nothing was spent. Tell me what to change, or what else to make.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791014271.274
+    },
+    {
+     "kind": "step",
+     "label": "understood: a change of mind",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014271.317
+    },
+    {
+     "kind": "step",
+     "label": "cancelled, nothing was spent",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014271.328
+    },
+    {
+     "kind": "final",
+     "label": "done",
+     "detail": null,
+     "status": "done",
+     "ts": 1791014271.338
+    }
+   ],
+   "ts": 1791014271.254,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "named": [
+  "G103"
+ ]
+}

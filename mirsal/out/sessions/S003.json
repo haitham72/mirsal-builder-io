@@ -1,0 +1,690 @@
+{
+ "id": "S003",
+ "user": "local",
+ "title": "hi",
+ "created": 1790907668.343,
+ "updated": 1790908379.351,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "ask_before_spending": true,
+  "ai": true
+ },
+ "focus": {
+  "generation": "G012",
+  "stickers": [
+   "G012/S5"
+  ]
+ },
+ "subjects": [
+  {
+   "name": "superman",
+   "slug": "superman",
+   "passes": [
+    {
+     "generation": "G012",
+     "job": "J020",
+     "prompt": "superman in dubai",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790907697.998,
+     "ready": 9,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    }
+   ]
+  },
+  {
+   "name": "5",
+   "slug": "5",
+   "passes": [
+    {
+     "generation": "G013",
+     "job": "J021",
+     "prompt": "5",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790907899.019,
+     "ready": 9,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1790907668.84,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1790907685.937,
+   "user": "superman in dubai",
+   "assistant": "Here's the plan for **superman**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1790907698.014,
+   "user": "confirm",
+   "assistant": "Creating **superman** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1790907770.661,
+   "user": "this was horrible, this is not superman at all",
+   "assistant": "Tell me which numbers you like or don't, for example \"I like 2 and 7 but not 3\".",
+   "intents": [
+    "FEEDBACK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G012/S5"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G012",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "selection",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G012"
+  },
+  {
+   "seq": 5,
+   "ts": 1790907791.645,
+   "user": "5",
+   "assistant": "Here's the plan for **5**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 6,
+   "ts": 1790907899.049,
+   "user": "confirm",
+   "assistant": "Creating **5** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1790908379.351,
+   "user": "what was the output?",
+   "assistant": "The facts show that both Superman (G012) and Subject 5 (G013) had 9 stickers ready, but they do not state what the actual output was. I cannot invent an answer for you.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G012",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G012"
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907668.573
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907668.759
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907668.776
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907668.798
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907668.818
+    }
+   ],
+   "ts": 1790907668.573,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "superman in dubai",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907675.726
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Here's the plan for **superman**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "superman",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "superman soaring high",
+      "superman landing softly",
+      "superman pointing proudly",
+      "superman bowing in awe",
+      "superman punching power",
+      "superman shielding sun",
+      "superman floating reverse",
+      "superman peace sign",
+      "superman collapsing tired"
+     ],
+     "estimate": 2.0,
+     "balance": 3939.12,
+     "prompt": "superman in dubai",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superman in dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907675.763
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907675.808
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "superman soaring high",
+       "superman landing softly",
+       "superman pointing proudly",
+       "superman bowing in awe",
+       "superman punching power",
+       "superman shielding sun",
+       "superman floating reverse",
+       "superman peace sign",
+       "superman collapsing tired"
+      ]
+     },
+     "status": "done",
+     "ts": 1790907685.12
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907685.925
+    }
+   ],
+   "ts": 1790907675.726,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907689.823
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Creating **superman** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J020",
+     "subject": "superman",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superman",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907689.838
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907689.864
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907689.877
+    },
+    {
+     "kind": "final",
+     "label": "started · J020",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907697.998
+    }
+   ],
+   "ts": 1790907689.823,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "this was horrible, this is not superman at all",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907770.53
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "Tell me which numbers you like or don't, for example \"I like 2 and 7 but not 3\".",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907770.543
+    },
+    {
+     "kind": "step",
+     "label": "understood: feedback",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907770.587
+    },
+    {
+     "kind": "step",
+     "label": "found S5 in G012 · selection",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907770.616
+    },
+    {
+     "kind": "final",
+     "label": "done",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907770.634
+    }
+   ],
+   "ts": 1790907770.53,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "5",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907783.177
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "Here's the plan for **5**: 9 stickers, flat vector. It costs about 2 credits. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "5",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "5 jumping happy",
+      "5 crying sad",
+      "5 shaking angry",
+      "5 shocked surprise",
+      "5 blushing shy",
+      "5 yawning bored",
+      "5 winking mischievous",
+      "5 nodding proud",
+      "5 dropping sleepy"
+     ],
+     "estimate": 2.0,
+     "balance": 3937.12,
+     "prompt": "5",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating 5",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907783.213
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907783.259
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "5 jumping happy",
+       "5 crying sad",
+       "5 shaking angry",
+       "5 shocked surprise",
+       "5 blushing shy",
+       "5 yawning bored",
+       "5 winking mischievous",
+       "5 nodding proud",
+       "5 dropping sleepy"
+      ]
+     },
+     "status": "done",
+     "ts": 1790907791.123
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907791.628
+    }
+   ],
+   "ts": 1790907783.177,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790907889.891
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "Creating **5** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J021",
+     "subject": "5",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating 5",
+     "detail": null,
+     "status": "running",
+     "ts": 1790907889.926
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907889.969
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907889.986
+    },
+    {
+     "kind": "final",
+     "label": "started · J021",
+     "detail": null,
+     "status": "done",
+     "ts": 1790907899.019
+    }
+   ],
+   "ts": 1790907889.891,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "what was the output?",
+   "cards": [],
+   "steps": [],
+   "ts": 1790908373.907
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "The facts show that both Superman (G012) and Subject 5 (G013) had 9 stickers ready, but they do not state what the actual output was. I cannot invent an answer for you.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1790908374.088
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1790908374.117
+    },
+    {
+     "kind": "step",
+     "label": "working in G012",
+     "detail": null,
+     "status": "done",
+     "ts": 1790908376.642
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1790908379.338
+    }
+   ],
+   "ts": 1790908373.907,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null
+}

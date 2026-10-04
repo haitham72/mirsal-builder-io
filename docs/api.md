@@ -1,62 +1,197 @@
 # HTTP API
 
-All JSON, served by `python -m mirsal serve` (stdlib server, `127.0.0.1:8770`). **The Studio is a sandbox over this API** (CLAUDE.md rule 11): every feature is an
+All JSON, served by `python -m mirsal serve` (FastAPI on uvicorn, `127.0.0.1:8770`; `console/app.py`). **Every route below is served by an adapter over the original handler, so its answer is byte-identical to the stdlib server** (`serve --stdlib` / `MIRSAL_SERVER=stdlib` still runs that one); new routes are native FastAPI with pydantic models. An open stream (the generation events) is framed as chunked on HTTP/1.1 (the stdlib server closed the connection instead): the event bytes are the same. **The Studio is a sandbox over this API** (CLAUDE.md rule 11): every feature is an
 engine function and a stable JSON shape first, a screen second, so the existing Mirsal app can call the same routes. Everything is addressable by id
-(generation `G012`, sticker `G012/S3`, job `J004`, session `S002`, video sheet `A1`).
+(generation `12` in a URL and `G012` in `result.json` and the chat, sticker `G012/S3`, job `J004`, session `S002`, video sheet `A1`).
 
 ## Safety on every request
 
 - **Host / Origin guard**: the Host header must be this server's own (`127.0.0.1`, `localhost`, `[::1]` with its port), and on anything that is not a read a browser-sent
   `Origin` must be its own and `Sec-Fetch-Site` must not be cross-site. A web page the owner visits cannot POST to the server; a client that sends no `Origin` (curl, the
   tests, the CLI) passes. Refusals are `403`.
-- **API token** (optional): set `MIRSAL_API_TOKEN`; every caller that is not this server's own page (`Sec-Fetch-Site: same-origin`) must send `Authorization: Bearer <token>`
-  (`401` otherwise). Unset, the local sandbox behaves as before.
+- **Accounts** (below): with no account and no `MIRSAL_API_TOKEN` the local sandbox is open exactly as before; once one account exists every caller that is not the Studio's own
+  page must send `Authorization: Bearer <token>` (`401` otherwise).
+- **Rate limits**: a token holder gets 240 writes and 3000 reads a minute (`MIRSAL_RATE_WRITE`, `MIRSAL_RATE_READ`; `0` switches one off); over it the answer is `429` with `Retry-After`
+  (seconds). Health checks and event streams are exempt, and the open sandbox and the owner's own page are never limited (the Studio polls a lot). Counters live in Redis (or in memory
+  without it), one per user, per minute.
+- **Versioning and tracing**: every route is also served under `/api/v1/...` (pin it before anything changes); every answer carries `X-API-Version` (the OpenAPI document's version) and `X-Request-Id` (your own `X-Request-Id`, when it is 1-64 of `A-Za-z0-9._-`, is echoed; otherwise a fresh one). An internal `500` includes the `request_id`, and the console line carries it. `MIRSAL_ACCESS_LOG=1` prints one JSON line per request on the server's stderr (`ts, request_id, method, path, status, ms, user, via, generation_id?, session_id?`; never the query string).
+- **Pagination** is opt-in: `GET /api/generations`, `/api/jobs` and `/api/chat/sessions` take `?limit=1-500&offset=N` and then add `{total, limit, offset}`; without either, the whole list comes back as before (`400` for a bad value; an offset past the end is an empty page). A `429` is `Cache-Control: no-store`. The event stream starts with `retry: 3000`.
 - **One writer of `result.json`** per `out/` across processes (`.writer.lock`): the server and the CLI commands that write results refuse to run together.
-- **Idempotency**: `POST /api/generations` and `POST /api/chat/sessions/{id}/messages` accept `Idempotency-Key`; the same key within 24 h returns the first answer with
-  `"idempotent": true` and runs nothing again.
-- Errors are `{"error": "..."}` with the HTTP status that says why (400 bad input, 401, 403, 404, 409 busy or wrong state, 413 too large, 503 provider missing).
+- **Idempotency**: `POST /api/generations` (both forms), `POST /api/live/sheet | video` (the routes that spend credits) and `POST /api/chat/sessions/{id}/messages` accept `Idempotency-Key`; the same key within 24 h
+  returns the first answer with `"idempotent": true` and runs nothing again. Without a key nothing is compared. The cache (Redis, or memory when it is down) answers first; the answer is also kept for 24 h in Postgres (`idempotency_keys`, migration 008, `store/idem.py`: the key hashed, scoped by route and caller, the first answer wins), so a restart without Redis does not forget it. Like every write-through it only works for the real `out/` and never blocks the request.
+- **AI vision needs consent in the request**: `POST .../judge` and `POST .../captions` answer `409 {error, consent_required: true}` and send nothing unless the body carries `allow_vlm: true` (the person's yes, asked once: `vision/consent.py`). Reading stored captions needs none. The chat session setting is `allow_vlm` (`null` until asked).
+- Errors are `{"error": "..."}` with the HTTP status that says why (400 bad input, 401, 403, 404, 409 busy or wrong state, 413 too large, 503 provider missing), **always JSON**: an unexpected exception is a `500 {"error": "internal error"}` (the detail goes to the server console with absolute paths scrubbed, never into the answer), an unsupported method is a JSON `501`, and a URL the server does not serve is `404 {"error": "no such route"}` (a missing batch, pack or job says so in its own words).
+
+## Accounts (`runtime/users.py`, `console/server.py` `_who` / `_authorize`)
+
+`mirsal user add NAME [--owner] [--spend] | list | disable ID | enable ID | rotate ID | allow-spend ID | deny-spend ID` (or the routes below) manages `out/users.json`. A token
+(`mk_…`) is shown **once** and only its SHA-256 is stored; it is compared in constant time. Authentication stays on once any account exists, even a disabled one (disabling the
+only account must never open the server: delete `out/users.json` on purpose to go back).
+
+- **Who is calling**: a user token is that user (checked first, so a client cannot widen itself by also sending `Sec-Fetch-Site`); the Studio's own page (`Sec-Fetch-Site: same-origin`)
+  and `MIRSAL_API_TOKEN` are the implicit owner `local`. The page's own files (`/`, `/ui/…`, `/assets/…`) and a signed link need no header: they hold no data / the link is the credential.
+  *A reverse proxy in front of the server must strip `Sec-Fetch-Site` from outside requests*, because that header is what marks the page.
+- **Roles**: an `owner` sees and does everything. A `member` reaches only the chat, search, `GET /api/me`, `GET /api/health` (not `/api/health/models` or `/api/health/storage`), the OpenAPI document and **what they own**: their chats, the
+  batches they started (and those batches' files, events, jobs and links) and the actions on them (`review, more, regen, animate, video_sheet, quick_sheet, drop, allow, judge, appearance,
+  edge, reslice, recheck`). A stranger's chat, batch, job or file is **`404`** (never a `403` that says it exists). Everything else is owner-only (`403`): the library, packs, projects,
+  Telegram, watch folders, tasks, usage and credits, the operator's job actions, `files` / `reveal` / `add` on a batch, and the user list.
+- **Spending**: live generation (`POST /api/live/sheet | video`, and the chat's Create / Animate on the live path) needs `can_spend`, because it spends the owner's Higgsfield credits; the check
+  comes before anything about the provider is revealed. A member never sees the owner's balance.
+- **Ownership** is stamped on the batch at creation (`result.json` `owner`, `generations.owner`), on the chat (`sessions.user_id`) and on the job (`request.user`), so a sheet that comes back
+  minutes later still belongs to whoever asked for it. A chat turn runs in a thread and acts as its user.
+
+| route | |
+|---|---|
+| `GET /api/me` | `{id, name, role, can_spend, via}` for the caller (`via`: `token`, `page`, `open`) |
+| `GET /api/users` · `POST /api/users {name, role?, can_spend?}` | owner only; the create answer is `{user, token}` (the only time the token is visible) |
+| `POST /api/users/{id}/update {name?, role?, can_spend?}` · `disable` · `enable` · `rotate` | owner only; `rotate` answers `{user, token}` and the old token stops working at once |
+
+Not per user yet: the library and packs (owner-only; per-user packs wait for the app's pack curation) and reference images (`out/refs/R###`, shared by id).
+
+## Contract
+
+`GET /api/openapi.json` is the machine-readable contract (OpenAPI 3.1; `console/openapi.py` is one hand-written table next to the server). `tests/test_openapi.py` guards it **both ways**: it fails when a route exists in the
+server that the table does not describe, and it calls every documented operation on a scratch server and fails when one answers `no such route`. `python -m mirsal openapi [--json FILE] [--ts FILE]` writes it and TypeScript types for the app.
 
 ## Chat (docs/agent-and-chat.md)
 
 | route | |
 |---|---|
-| `GET /api/chat/agent` | which model runs the assistant and the vision judge, and whether live generation is available |
+| `GET /api/chat/agent` | which model runs the assistant and the vision judge, whether live generation is available, what is available (`availability.local.ok` is a REAL readiness probe: one tiny chat completion, cached 60 s / 15 s, with `why` in plain words when the model cannot answer), `agent_status: {fallback, reason}` (`fallback: true` = the chat is on its rules only, and why) and the style presets (`styles`, `default_style`) the AI screen shows |
+| `GET /api/llm/models` | the local server's chat models for the model dropdown (member-readable): `{models: [{id, loaded: null \| bool}], current, preference, chosen, configured, ok, why}`. `models` is `GET {MIRSAL_LOCAL_URL}/models` without the embedding models, in the server's order (cached 30 s; `[]` when the server is down); `current` is the id every local call sends (the person's pick, else `MIRSAL_LOCAL_MODEL`, else it without a `:N` instance suffix, else the first listed model); `loaded` is `true` for the model the probe just heard from, else `null`; `ok` / `why` are the probe (`why` is `null` when it answers). `/api/models` is the Higgsfield catalogue, not this |
 | `GET /api/chat/sessions` · `POST /api/chat/sessions {title?, settings?}` | list · create |
 | `GET /api/chat/sessions/{id}` | the whole session for display: messages with steps and cards (each generation card carries its live stickers with file urls, or its job state), subjects with their passes, settings, `working`, `summary_text` |
+| `GET /api/chat/sessions/{id}/stream` | SSE of the turn in progress (native FastAPI): `event: turn` `{working, count, message}` each time the last message changes, then `event: done` `{working: false, count}`; `retry: 3000`, a comment every 15 s, ends after 10 minutes. The same access as `GET /api/chat/sessions/{id}` (401 / 403 / 404 as JSON, before any event) |
 | `POST /api/chat/sessions/{id}/messages {text, selected?, action?}` | start a turn in the background (`202`); `action` is `{type: "confirm" | "cancel"}`; `409` while the last turn is still running |
-| `POST /api/chat/sessions/{id}/settings {grid?, ask_before_spending?, ai?, style_id?}` | the two visible settings (and two quiet ones) |
+| `POST /api/chat/sessions/{id}/settings {grid?, ask_before_spending?, ai?, style_id?}` | the visible settings (grid, ask before spending, style) and two quiet ones; a `style_id` that is not one of the presets is a 400 `unknown style`, nothing is stored |
 | `POST /api/chat/sessions/{id}/delete` | delete the chat (its stickers stay) |
 
 ## Generations, gates and animation (docs/engine-and-studio.md, docs/generation.md)
 
-`GET /api/generations` (list) · `GET /api/generations/{id}` (full snapshot: `result.json` + events) · `POST /api/generations {prompt, variant?, outline?, erode?}` ·
-`POST /api/generations/{id}/…`: `more`, `regen`, `review {gate, decision, index?, note?}`, `drop`, `allow`, `video_sheet`, `quick_sheet`, `animate`, `add`, `pack_add`, `edge`,
-`appearance`, `reslice`, `recheck`, `edit`, `studio_edit`, `render`, `stickers`, `telegram`, `reveal`, `delete`, **`judge {scope: still | anim, force?}`** (the vision pre-review, `202`).
-Live generation (Higgsfield): `POST /api/live/cost | sheet | video`, `POST /api/live/ref` (a reference image), `GET /api/jobs`, `GET /api/jobs/{id}`, `GET /api/models`, `GET /api/higgsfield`
+`GET /api/generations` (list) · `GET /api/generations/{id}` (full snapshot: `result.json` + events + `problem`: the plain-words reason when the sheet was blocked, else null) · `GET /api/generations/{id}/captions` (the stored AI caption of every cell, read-only) · `POST /api/generations/{id}/captions {allow_vlm: true, force?}` (writes the missing ones in the background) · `GET /api/generations/{id}/history[?index=N]` (every sticker's generation history, decisions grouped by stage in the order they happened, newest line first, trimmed to readable facts: `flow/sticker_history.py`; a member sees only their own batch) · `POST /api/generations {prompt, variant?, outline?, erode?}` ·
+`POST /api/generations/{id}/…`: `recut` ("Cut it anyway": cut a batch whose sheet was stopped, from the stored sheet, free; 409 once a sticker was decided), `more`, `regen`, `review {gate, decision, index?, note?}`, `drop`, `allow`, `video_sheet`, `quick_sheet`, `animate`, `add`, `pack_add`, `edge`,
+`appearance`, `reslice`, `recheck`, `edit`, `studio_edit`, `reveal`, **`judge {scope: still | anim, force?}`** (the vision pre-review, `202`); an unknown batch is a `404` before anything starts. A batch is removed from the Studio through `/api/watch/remove` (to the trash); there is no `delete`, `render`, `stickers` or `telegram` on a generation (the pack routes below do those).
+**Batch groups** (owner only; `flow/groups.py`): `POST /api/generations/{id}/join {to}` puts the batch and its family under `to`'s family (the target is the parent) -> `{id, root, members}` (404 unknown batch, 409 already there); `POST /api/generations/{id}/leave` -> `{id, root, left, members}` (409 for the root). `GET /api/history` items are families: the root's fields plus `variants[]` and `relation`; `GET /api/generations/{id}/particles` adds `family[]` (the sister variations' linked cells).
+
+**Remove batch** (owner only; `flow/batches.py`): `POST /api/generations/{id}/remove` moves the batch folder (`out/G###`, or its labelled `G###-<subject>-<time>`) to `out/trash/batches/` under the same name and answers `{id, number, removed, by}` (nothing is deleted; `404` unknown batch, `409` busy or, in words, while a job for it is in flight), `GET /api/generations/removed` lists the trash `{batches: [{id, number, removed, by, subject}]}`, `POST /api/generations/{id}/restore` puts it back under the same name `{id, number, restored}` (`404` not in the trash, `409` a batch with that number exists now). A removed number is never given to a new batch. `GET /api/generations/{id}/sheet_preview` answers `409` in words (never a 500) when a kept sticker has no stored picture.
+Live generation (Higgsfield): `POST /api/live/cost | sheet | video`, `POST /api/live/ref` (a reference image), `GET /api/jobs`, `GET /api/jobs/{id}`, the operator's `POST /api/jobs/{id}/claim | done | fail | requeue` (`requeue` resumes an existing ticket), and the human recovery actions below, `GET /api/models`, `GET /api/higgsfield`
 (credits), `GET /api/usage` (the ledger roll-up). The Inbox: `GET /api/inbox`, `POST /api/plan`, `GET/POST /api/tasks`.
+
+### Job recovery
+
+Every stalled job offers **Refresh · Check · Continue · Retry**, in that order. Refresh reads local `/api/jobs` and `/api/jobs/{id}`, reloads the batch/chat and reconnects its generation SSE when a batch exists; it makes no provider call. The other actions are owner-only or available to the member who requested that job (another member sees 404).
+
+- `POST /api/jobs/{id}/check` (no body, 200 Job): exactly one free `higgsfield generate get <external_task_id>` lookup. Completed results without a held file are downloaded and attached by the same ticket, then enter the normal follow-up. No cost/create/wait command runs. The Job carries `provider_check: {status, checked_at, classification: MATCH|DIVERGENCE, message}`. Local FAILED/TIMEOUT plus provider completed is **“Divergence, not a failure”**, retained after reconciliation. Every click and reconciliation has a human `history` entry. A job without a ticket returns 409 in words.
+- `POST /api/jobs/{id}/continue` (no body, 200 Job): `jobs.resume` on the same stored ticket, then wait again. No new charge; 409 without a ticket or when another waiter owns it.
+- `POST /api/jobs/{id}/retry_estimate` (no body, 200 `{credits, message}`): price a new request; create nothing. `POST /api/jobs/{id}/retry {go: true, estimate: <credits>}` (200 Job) is explicitly **paid**, requires spending permission and the matching quote from the last five minutes. It creates a new job with `retry_of`; the original retains its ticket and `retried_as`. Repeating the original Retry returns that same replacement job. A changed provider price prevents creation and asks for approval again. Retry is never the default button.
+
+Generation chat cards carry `job_info` (id, status, error, external_task_id, provider_check) so the chat renders the same controls and divergence message as the Queue and Studio.
 
 ## Events (SSE)
 
-`GET /api/generations/{id}/events` (`Last-Event-ID` or `?after=` to replay): `text/event-stream`, one frame per event, `id:` is the stream id.
+`GET /api/ai` (the active AI backend, the person's choice and what is available) · `POST /api/ai/backend {backend?: auto | local | cloud, model?: <id>}` (owner only; `model` must be one of the ids `GET /api/llm/models` lists, else `400 {error, models: [...]}` and nothing is saved; both are kept in `out/ai_backend.json`, a call with neither is a 400; the answer is `GET /api/ai`'s) · `GET /api/generations/{id}/events` (`Last-Event-ID` or `?after=` to replay): `text/event-stream`, one frame per event, `id:` is the stream id.
 Names: `generation_started, sheet_generated, sticker_processing, sticker_ready, sticker_failed, animation_started, animation_ready, video_sheet_ready, review_decided,
 pack_complete, generation_failed`. Payload: `{event, generation_id, stage, status, ts, ms, actor?, decision?, gate?, index?, sticker_id?, asset_url?, trace_run_id?}`.
 
 ## Files
 
-- `GET /out/{path}` serves a generated file (path checked against the root after resolving it, so a link or `..` cannot leave `out/`).
+- `GET /out/{path}` serves a generated file. The path is resolved first (`..`, `%2e%2e` and links included) and everything is decided on the RESOLVED file: it must stay inside `out/`, and a member may read it only when it lies inside a batch folder they own (`out/users.json` or `out/telegram.json` are never reachable, however the URL is spelled).
 - **Signed links**: `POST /api/assets/sign {key, ttl?}` (a path under `out/` such as `G002/slices/….png`, ttl 5-3600 s) returns `{url, expires_in}`; `GET /api/assets/{token}`
   serves it until it expires. The token is an HMAC over key, user and expiry; an edited token is `403`.
 
 ## Library, packs, Telegram, projects, search, health
 
-`/api/library`, `/api/packs…` (create, rename, reorder, export `.wastickers`, send to Telegram), `/api/stickers/delete`, `/api/cutout`, `/api/projects…` (video / GIF projects),
+`/api/library`, `/api/packs…` (create, rename, reorder, delete to the trash and restore (see Trash and purge below), send to Telegram, `GET /api/packs/{id}/export.zip` to download the pack as a zip: the files as stored, `.webm` / `.png` / `.webp`, plus `manifest.json`; `GET /api/packs/{id}/telegram.zip` is the same files renamed with `@stickers` instructions, `POST /api/packs/{id}/stickers/{sid}/move {to}` for one sticker), `/api/stickers/move {to, items}` (bulk, all or nothing) and `/api/stickers/delete`, `/api/cutout`, `/api/projects…` (video / GIF projects),
 `/api/telegram…` (status, config, disconnect; the token is never returned), `GET /api/search?q=` (Postgres when the database is up, else files),
-`/api/watch…` (the watch folders: list, remove to the trash, restore, purge), `GET /api/history` (every batch, newest edit first).
+`/api/watch…` (the watch folders: list, remove to the trash, restore, purge), `GET /api/history` (every batch, newest edit first, a page at a time: each item carries `grid: [rows, cols]` and `cells: [{index, row, col, png, status, animated}]`, so a card draws the sheet's own 3x3 / 2x2 as it was cut).
 
-**Health** (every dependency reports itself; nothing raises): `GET /api/health` (database with write-through counters, Redis engine, models, providers, storage),
-`/api/health/models`, `/api/health/storage`, `GET /api/vision`.
+**Health** (every dependency reports itself; nothing raises): `GET /api/health` (database with write-through counters, Redis engine, models, providers, storage, the job queue's mode and counts),
+`/api/health/models`, `/api/health/storage`, `GET /api/vision`. **Metrics**: `GET /api/metrics` (owner only; `python -m mirsal metrics` prints it): from what is already on disk, the time from a batch's request to its first cut sticker (median, p90, max), the share approved of the stickers a human decided at G2 (stills) and G4 (animations), the share of batches that are a redo, batches with no sticker, and one line per batch (`flow/metrics.py`).
+
+## Office accounts on the LAN (native FastAPI, `console/app.py`; `runtime/users.py`, `flow/people.py`, `services/admin_bot.py`)
+
+`python -m mirsal serve --lan` serves the office network (0.0.0.0) with HTTPS (`out/tls/cert.pem` + `key.pem` made once with mkcert, [certificate-guide.md](../certificate-guide.md), or `MIRSAL_TLS_CERT` / `MIRSAL_TLS_KEY`; `--no-tls` runs plain HTTP with a warning). The Host and Origin checks then accept this PC's network names (`runtime/net.py`, plus `MIRSAL_LAN_HOSTS`). **On the LAN another machine is never the owner by loading the page**: it signs in; this PC itself still is the owner. Accounts are `@nadi.ae` (`MIRSAL_EMAIL_DOMAIN`), passwords are scrypt hashes, a session is an HttpOnly `SameSite=Strict` cookie (`mirsal_session`, `Secure` over TLS, 8 hours rolling; stored as a digest in `out/auth_sessions.json`). A `pending` account is refused every route with `403 {"error": "waiting for approval"}`. Roles: `owner`, `admin` (manages people), `member`.
+
+* `GET /api/auth/me` -> `{user, lan, requests}` or `401 {error, signed_out: true, lan}` (the page shows the sign-in card).
+* `POST /api/auth/signup {email, name, password}` -> `201 {user, waiting: true}` + the cookie; the account is `pending` and a sign-up request goes to Haitham. `POST /api/auth/login {email, password}` -> `{user}` + the cookie; a wrong email and a wrong password get the same `401 "email or password is wrong"`; 10 attempts per email or address in 15 minutes, then 429. `POST /api/auth/logout`.
+* `POST /api/auth/forgot {email}` -> always the same `{ok, message}`; a real active account gets a password request. `POST /api/auth/password {old, new}` (8+ characters; clears `must_change_password`). `POST /api/auth/credits {reason?}` -> a credit request (`201`); a reason that starts with a number (`25 for the Eid pack`, 1..10000) is the amount asked for, stored as `wanted` (`people._wanted`).
+* **Users** (native FastAPI, `flow/user_report.py`, the Users section): `GET /api/users/overview` (owner, admin; a member 403) -> `{users: [{id, name, email, role, status, credits_left, credits_spent, batches, stickers, animated, jobs_ok, jobs_failed, spent, estimated, bytes, last_active, series {days, spend, batches}}], totals}`; `GET /api/users/{id}` (`me` = yourself) -> `{user, summary, series, jobs [{id, kind, status, cost, estimate, generation, label, created, error}], ledger [{ts, kind, model, status, cost, job}], families [{root, batches [{id, created, stage, prompt, sheet_prompt, video_prompt, stickers [{index, png, webm}]}]}]}`. The owner and admins open anyone; a member only themselves, anyone else is `404 not found` (never a disclosure). Computed on request from `users.json`, `out/jobs`, the job lines of `out/model_calls.jsonl` and each batch's `owner` in `result.json` (storage = the batch folders' size); nothing is written. The 30-day series are UTC days; spend counts DONE jobs' real cost.
+* `GET /api/people` (owner, admin) -> `{people, requests, recent}` (`recent`: the last 5 answered requests, newest first, `people.recent`, shown as *Answered lately* under People); `POST /api/people {emails}` -> `201 {people: [{..., password}]}` (generated passwords, shown once); `POST /api/people/{uid} {action: approve | reject | admin | member | disable | enable | password | edit | credits | ignore, credits?, name?, email?}` -> `{user, password?}`. The same function (`admin_bot.apply`) serves the Telegram bot's buttons; the requests it answers are closed with who decided.
+
+**Credits per person.** An approved account starts with 10 credits (`credits_left`, `credits_spent`). Before a paid sheet or video starts, its price is checked against the person's balance (`402` in words, with *Request credits*, when it is short) and reserved (`Console.reserve`, the job's `request.reserved`); when the job ends the real cost replaces the reservation and a failed job gives everything back (`jobs._settle`, once per job). Nothing refills on its own: only Haitham's *Give credits* (Users > People) or the bot's card. A credit request that asked for an amount offers it first: the bot's *Approve +N* (`a:<request>:credits:<N>`) beside *Give 10*, and People's *Give N* beside *Give 10*; a request without a number offers *Approve +10* / *Give 10*. The owner and token accounts without a balance spend as before; rule 13 (the price shown and accepted) holds for everyone. The composer's credits pill shows a member's own balance.
+
+## Trending (native FastAPI; `flow/trending.py`)
+
+Shared packs everyone signed in can open, like, comment on and use (state in `out/trending.json`, git-ignored). `GET /api/trending?order=trending|new|liked` -> `{packs: [{pack_id, name, stickers, cover, likes, liked, comments, score, shared_at}], can_share}` (trending: the share 4, a like 3, a comment 2, each worth half after 5 days); `GET /api/trending/{pack}` -> stickers and comments; `GET /api/trending/{pack}/file/{sticker}` (only a shared pack's files); `POST /api/trending/{pack}/share | unshare` (owner, admin), `like | unlike`, `comments {text}`, `comments/{id}/delete` (its writer, an admin or the owner), `use` -> the owner gets `201 {copied: {pack_id, name}}` (a copy in the library, `source.shared_from`), anyone else `{prompt, refs}` (the pack's subject and its cover as a reference picture for the Studio). The Library's Trending tab; a member's Library is Trending; a pack page has **Share to Trending**.
+
+## Tickets (native FastAPI; `flow/tickets.py`, docs/store-and-search.md "Tickets")
+
+* `GET /api/tickets?status=` -> `{tickets: [...]}` (the owner sees every ticket, a member their own); `GET /api/tickets/{id}` -> the whole ticket (404 for another member's).
+* `POST /api/tickets {text, target?: {kind: generation | sticker | particle_set | chat | pack | other, id?, sticker?}}` -> `201` the ticket (a Report: the person's words plus what happened around the target).
+* `POST /api/tickets/{id}/answer {question, choice? | text?}`; `POST /api/tickets/{id}/status {status: open | answered | fixed | wont_fix, fixed_by?}` (owner).
+* A body that does not match answers `400 {"error": "bad request: ..."}` (never FastAPI's 422). Every native answer carries `X-API-Version` and `X-Request-Id` like the rest.
 
 ## Not built yet
 
-An OpenAPI document and generated TypeScript types, user accounts and per-user authorization (the signed link already carries a user), rate limiting, a durable `jobs` table with
-separate worker processes (jobs are files fulfilled by threads of the server today), Postgres as the durable idempotency backstop. See `HANDOFF.md`.
+See `docs/backlog.md` (API and production).
+
+## Hosted mode (branch `deployment`)
+
+With `MIRSAL_GATEWAY_SECRET` set (32+ characters) the engine listens on loopback and trusts exactly one front door, `deploy/gateway` (FastAPI): a request that carries `X-Mirsal-Gateway-Secret`, comes from loopback and names a well-formed `X-Mirsal-Subject` is that person, a `member` created on
+first sight; every other request needs an API token as before (`runtime/users.py`). The gateway verifies the Google sign-in (a Supabase JWT, `Authorization: Bearer` or the `mirsal_session` cookie set by `POST /auth/session`), adds `GET /healthz`, `GET /readyz`, `GET /auth/config`, `GET /auth/me`,
+`POST /auth/session`, `POST /auth/logout`, and passes everything else through unchanged (this contract, SSE included). It answers `401` without a valid sign-in, `429` with `Retry-After` over the rate limit (paid routes have their own, lower one), `403` for a cross-origin POST, `400` for an unknown Host.
+Telegram: `POST /api/packs/{id}/telegram {name?, mode?}`, `mode` = `once` (default), `replace` or `new_set`; a pack whose exact content was already sent answers `already: true` with the earlier sets and never calls Telegram.
+
+## Trash and purge (owner only; `flow/purge.py`, `store/purge_rows.py`, `media/library.py`, `flow/batches.py`)
+
+Remove batch, **Delete pack** (soft since 2026-10-03: `POST /api/packs/{id}/delete` moves the pack to `trash.packs` in library.json, files untouched, answers `{ok, id, trashed, name, stickers}`; `POST /api/packs/{id}/restore` puts it back under the same id, `404` not in the trash) and a deleted particle set all go to the trash. The only real delete is the purge of what is already there.
+
+* `GET /api/trash` -> `{batches: [...], packs: [...], totals: {items, batches, packs, stickers, files, bytes, needs_confirm, blocked}, purge_all: {count, phrase, skipped[]}, database, purge, record}`. A **batch** item: `{type: "batch", id, number, subject, removed, by, stickers, content, files_total, bytes, files: [{path, bytes}] (first 40, files_truncated), db: {available, reason?, present, stickers, tombstones, indexed, shared_in_pool, vectors, assets, events, video_sheets, reviews_kept, tasks_kept}, copies_in_packs: [{id, name, stickers, trashed}] (they stay), shared: {pool, packs}, in_flight[], needs_confirm, confirm_words, blocked}`. A **pack** item: `{type: "pack", id, name, deleted, by, stickers, files: [{sticker, name, file, bytes, missing, shared}], files_total, bytes, shared: [{sticker, name, file, also_in: [{id, name, trashed}]}], from_batches[], particle_sets[], needs_confirm, confirm_words, blocked: null}`. `purge_all.phrase` is the typed confirmation of "delete all" (`purge N`), `purge_all.skipped` the items "delete all" will not touch, with the reason in words; `purge` is the last purge task (or `null`; a `running` one with no thread behind it reads `interrupted`); `record` the last 20 lines of the ledger.
+* `POST /api/trash/purge {type: "batch"|"pack", id, confirm_shared?}` deletes one item for good. `404` not in the trash, `400` unknown type, `409` in words: a job is running, another purge is running, a job is in flight for that batch, or the item **shares** something (a pack sticker file another pack, live or trashed, also holds; a batch with stickers in the shared pool) and `confirm_shared` is not `true` (the sentence names the packs). Everything refusable is refused before a thread starts. Answers `200` + the task when it finished within the request, `202` + the running task otherwise. Running it again after it finished is `200` with `results[0].already: true` (idempotent); after an interruption it finishes what is left.
+* `POST /api/trash/purge_all {confirm, kind?}` deletes every item that needs no confirmation of its own; `kind: "batch"` limits it to the removed batches (the Earlier-batches column's Remove all; its count and phrase are `purge_batches` in `GET /api/trash`). `confirm` must be the typed phrase `purge N` with N the count the server computes **now** (`409` in words with the current phrase when it does not match); items that share stickers or have a job in flight are skipped and returned in `refused[]`. Nothing deletable is `200 {nothing_to_do: true}`.
+* `GET /api/trash/purges/{id}` -> `{id, status: running|done|failed|interrupted, total, done, items[], results[{kind, id, ok, files, bytes, database|error|already}], refused[], error, by, started, finished}`.
+
+## Particle effects (`/api/effects`, `docs/effects.md`)
+
+Owner only for now. `GET /api/effects` (list) · `POST /api/effects {pack_id, sticker_ids | "all", mode: "video" | "sim", grid: "2x2" | "3x3", note?, allow_vlm?}` (202: the analysis runs in the background; poll
+`GET /api/effects/{id}` until `status` is `READY`, `ERROR` carries `error`) · `POST /api/effects/{id}/analyse {allow_vlm?}` · `POST /api/effects/{id}/plan {group, elements?, subject?, style?, sprites?}` (400 with the
+reason when the pieces fail the lint) · `POST /api/effects/{id}/estimate {group, grid?}` (prompt, screen colour, cells, **credits**, model; free) · `POST /api/effects/{id}/video {group, grid?, go: true}` (409 with the
+estimate unless `go`; 202 `{job}`; the finished clip is cut into results by `on_video_done`) · `POST /api/effects/{id}/preview {sticker_id, params, size?}` (a looping WebP at `/out/effects/E###/previews/...`) ·
+`POST /api/effects/{id}/render {sticker_id, params}` (the 512 px WebM, stored with its checks) · `POST /api/effects/{id}/add {results?, pack_id?}` (animated stickers tagged with the source emoji; a result that breaks
+a Telegram limit is a 409; `sticker_ids?` keeps only those source stickers, so one video cell can be saved for one sticker) · `POST /api/effects/{id}/pieces_estimate {group, grid?: "2x2" | "3x3"}` and `POST /api/effects/{id}/pieces {group, grid?, go}` (the AI-drawn pieces sheet: price first, 409 with the estimate unless `go: true`, 202 `{job, task, estimate, id, group, grid}`; owner only, needs `can_spend`) · `GET /api/packs/{pack}/stickers/{sid}/particles` (`{sticker, pack_id, created[], saved[], effects[], can_make}`; a member gets empty lists) · `GET /api/packs/{pack}/particles` (`{pack_id,sets,bursts,counts}`). `params` are the `ParticleParams` fields (`gravity`, `magnitude`, `vortex`, `count`, `size_min`, `size_max`, `spin`, `lifetime`, `spread`, `seed`, ...; an unknown key is a 400).
+
+`POST /api/generations/{id}/allow {kind?: "still" | "animation" | "video_sheet" (default animation), sheet?: "A#", index? | indexes? | all?, allow?: bool (default true)}` -> 202 `{id, kind, indexes, allow}`; errors are JSON (400 bad kind / index, 404 no batch, 409 busy / nothing to allow / cannot be allowed with the reason). `GET /api/generations/{id}` carries `allow.{still, animation, video_sheet}`: `can`, `allowed`, `undo`, `why`, `final`. Video-sheet lists contain A# strings; use `sheet`, string `indexes`, or `all` for the bulk pair. The judgement calls `no_outline_on_sheet`, `video_specs`, and `layout_match` are reversible permissions stored as `sheet_override`, with human sheet and cell history. Their checks remain `ok:false, severity:"WARN"`, marked “allowed by you”, including on later slices. Decode failures, verifier crashes and mismatched approved slots stay final. Allowing a held, blocked video re-slices that same file, free; it never starts another provider job. Generation chat cards include `video_sheets` with `picture` URLs and the same computed allow block. See `docs/engine-and-studio.md` ("Use it anyway").
+
+## Particle sets (`/api/particles`, `docs/particles.md`)
+
+Particle sets (`P###`, `out/particles/P###/`) belong to **library stickers** through `owner:[{pack_id,sticker_id,generation,index}]`. `packs[]` and `used_in[]` are derived compatibility views. `affirmed_in[]` records where a rendered burst was added; it does not own the set. Owner only for now.
+
+| Operation | Contract |
+| --- | --- |
+| `GET /api/particles`, `GET /api/particles/{id}` | Set cards/detail include owners, source kind/jobs, credits, cells, picked counts, motion, drawing/sheets and render history. Reads reconcile completed sheets and legacy owner links. |
+| `POST /api/particles` | Empty set `{name?,elements?,owners?,kind?}`, or free import `{from_effect:E###}`, `{from_video:E###,picked?:[source cell indices]}`, `{from_generation:G###,picked?}`, `{from_slices:[{generation,index}]}`, or recovery `{from_stickers:[library ids],parent_pack_id,owners?}`. Imports accept `target:P###` to append and retain originals. Video import is idempotent by effect/result. |
+| `POST /api/particles/{id}` | `{name?,elements?,picked?,motion?:{preset,params},save?:true}`; `save:true` is **Save**: a draft (`saved_at:null`, how every new set starts) becomes the sticker's next row, a saved row has its motion replaced; persisted params include `sprite_px` (32–512) and `scale` (1–4). Unpicking keeps files. Empty picked list is 400. Preview/render/Echo merge these saved defaults with explicit request overrides. |
+| `POST /api/particles/{id}/link`, `/unlink` | `{sticker_ids:[ids or owner records]}`; free link edits, assets remain. Deprecated `packs` inputs and `/assign`, `/unassign {packs:[ids]}` map packs to their stickers for one release. |
+| `POST /api/particles/{id}/duplicate` | `{name?}` → 201 independent branch including saved motion, images, clips and timelines, linked to the same stickers; copied render affirmations are cleared. |
+| `POST /api/particles/{id}/save-as-new` | `{motion?,name?}` → 201: **Save as new**, the same sprites with the edited motion as a new saved row under the same stickers; the source row and its bursts are unchanged and the new row has no bursts. |
+| `POST /api/particles/{id}/delete`, `/restore`; `GET /api/particles/deleted` | Soft delete and reachable restore. Linked sets require `confirm:true`; restore preserves IDs and owners. Parent purge detaches, never silently deletes sets. |
+| `POST /api/particles/{id}/more` | `{mode?:drawn|image|video|stickers,prompt?,grid?:2x2|3x3,elements?,estimate?,go?,effect?}`. Any set can append image or animated sprites. Defaults to original source kind. `estimate:true` returns a free quote; Kling quote includes `effect` context to resend on go. Missing go or unavailable price returns 409 without starting a paid job. `go:true` returns 202 job data after price approval. Existing cells/settings remain. |
+| `POST /api/particles/{id}/preview` | `{pack_id?,preset?,params?,size?:64–512}` → cached looping WebP `{url,file,params,preset,sprites,source,pack_id}`. Mixed still/animated sprites use the same deterministic temporal engine. Free. |
+| `POST /api/particles/{id}/render` | `{pack_id?,preset?,params?}` → stored 512px WebM `{id,set,pack_id,preset,params,status,bytes,url,checks,warnings,blocks,metrics,added_to}`. Only Telegram technical limits fail; warnings permit Use it anyway. Free. |
+| `POST /api/particles/{id}/add` | `{renders?:[R###],pack_id?,sticker_id?}` (the sticker whose row it is; the pack sticker records it as `source.parent_sticker` and the row reads `in_pack`) → `{added:[{sticker,name,render}],pack_id}`. The click approves the burst, tags it with source emoji and records affirmation. Same burst/pack twice is 409. |
+| `GET /api/packs/{id}/stickers/{sid}/particle-preview` | Free Echo lookup: newest set linked to **this sticker**, saved motion/size and preview `{set,motion,url,params,preset,...}`. Unassigned stickers/members receive `{set:null,url:null}`. No unrelated fallback. |
+| `GET /api/packs/{id}/particles` | `{pack_id,sets,bursts,counts}`; stickers’ set union plus legacy results. Badge counts use `created+saved`; created already includes sets. |
+| `GET /api/packs/{id}/stickers/{sid}/particles` | `rows[]` (saved versions, oldest first: `version`, `label`, `sprites[]` inside the row, `motion`, `preview`, `addable`, `in_pack[]`, `credits`, `job`, `shared_with`) and `drafts[]`, plus `sets[]`, `affirmed`, and grouped legacy `runs:[{effect,mode,cells,saved,imported_as:[Pids]}]`. Gallery displays one item per set/run, with slices inside; runs already imported into owned sets are suppressed. Compatibility `created[]`/`saved[]` remain intact. A sticker with an empty set still counts as created. |
+| `GET /api/generations/{id}/particles` | READY batch cells with links, sets, affirmation and optional approve-as-pack offer. |
+| `POST /api/generations/{id}/recut_particles` | Free re-cut of stored sheet mistakenly classified as stickers; 202. Existing slices can instead be imported directly. |
+
+Animated cells expose `type:static|animated`, poster `url`, `clip_url`, `fps`, `frames`, `duration`; clips and lossless frame timelines retain transparency and timing. A peak PNG is a poster. Kling source job/cost survive even when the global job record is missing. Existing artwork recovery preserves source IDs and bytes and links only selected parent stickers. Sheet job records retain status, cost, appended/skipped cells and recoverable errors. Provider completion and video imports are idempotent.
+
+
+## Edits and the AI (2026-10-03, UI/UX spec P8-P13)
+
+* `POST /api/generations/{id}/edit {index, png}` (and the animated `studio_edit` commit) now also answers `sheet_fixed: {file, cells}` (or null): the batch's sheet rebuilt with every edited slice fixed, `source/sheet_fixed.png`, listed in the batch as `source.sheet_fixed` / `source.sheet_fixed_cells`. Same layout, so the same S# by position.
+* `POST /api/live/sheet {..., outline?, erode?, refs: [R###], ref_clause?}`: `outline` (0-40 px) and `erode` (0-8 px) are the edge finish the batch is started with (stored in the job's `request`, applied when the sheet comes back); left out, the defaults apply.  `ref_clause` is what the attached picture is for (a tweak keeps the design, a new action keeps the shape); without it the default "change only the expression and the pose" is used, and without `refs` it is ignored. Max 6000 characters, else 400.
+* `POST /api/live/sheet {..., plan?}`: `plan` is the object `POST /api/plan` (Generate prompt) returned, sent back so the batch keeps the cells, tags and emoji the person saw (an AI-written draft costs no second model call; with `plan` the `ai` flag is ignored and no model is asked). It is untrusted: `generation/tasks.plan_from_preview` reads only `slots.cells` (exactly one per grid slot: `pos`, `label`, 1-5 `tags`, `emoji`, optional `motion`), `slots.subject_description` and `slots.key_colour`, checks type, size (64 KB for the whole object, per-field limits) and characters (no line breaks or control characters, no letters in an emoji), lints the cells with the enhancer's own rules (`expander.lint_slots`: distinct labels and keys, banned words), and rebuilds everything else (task, template, style, loop, the prompts) from the request and the saved template; a `sheet_prompt` still overrides only the sheet text. A plan for a transformation request (`dog as banana`) is rebuilt whole by the built-in template. An invalid plan, or `plan` together with `from_generation`, is a 400 in words and starts nothing; without `plan` the request is planned as before. The task's plan then carries `previewed: true`. A `plan` is never taken from `base_plan` (that field is still ignored over HTTP).
+* `POST /api/chat/sessions/{id}/settings {allow_vlm: true|false}` is the AI vision switch: it writes the setting (and `vision_asked`, `vision_ack`) and makes **no message and no turn**; the next turn says it once. Any other value changes nothing.
+* The chat's generation card carries `allow` (exactly `gates.allow_info`) and `png` urls with `?e=<edit time>`.

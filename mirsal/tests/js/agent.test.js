@@ -72,9 +72,76 @@ test('the page polls while anything still moves and stops when it does not', () 
   assert.equal(U.needPoll(null), false);
 });
 
+test('only the last assistant message holds the pending plan card', () => {
+  const ms = [{ id: 'm1', role: 'user' }, { id: 'm2', role: 'assistant' }, { id: 'm3', role: 'user' }, { id: 'm4', role: 'assistant' }];
+  assert.equal(U.lastBot(ms), ms[3]);          // the newest plan card is the live one
+  assert.equal(U.lastBot([ms[0], ms[1], ms[2]]), ms[1]);
+  assert.equal(U.lastBot([{ id: 'm1', role: 'user' }]), null);
+  assert.equal(U.lastBot([]), null);
+  assert.equal(U.lastBot(null), null);         // nothing to hang on: the card renders as done
+});
+
 test('the session id is read from the hash', () => {
   assert.equal(U.sid('#/agent/S012'), 'S012');
   assert.equal(U.sid('#/agent'), null);
   assert.equal(U.sid('#/library'), null);
   assert.equal(U.sid(''), null);
+});
+
+test('a running creator keeps the page polling, a stopped or finished one does not', () => {
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'running' } }), true);
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'stopped' } }), false);
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'waiting' } }), false);
+  assert.equal(U.needPoll({ messages: [], creator_run: { status: 'done' } }), false);
+});
+
+const agentInfo = (over) => ({ agent: { provider: 'local', model: 'qwen3.5-4b' }, preference: 'auto', vision: { model: 'qwen3.5-4b' },
+  agent_status: { fallback: false, reason: null }, availability: { local: { ok: true, model: 'qwen3.5-4b', why: null }, cloud: { ok: false, model: 'gpt-4.1-mini', why: 'no key' } }, ...over });
+
+test('the engine pill names the model when one answers', () => {
+  const e = U.engine(agentInfo());
+  assert.deepEqual([e.on, e.rules, e.label], [true, false, 'Auto · Local · qwen3.5-4b']);
+  assert.match(e.title, /qwen3\.5-4b \(local\)/);
+  assert.equal(U.engine(agentInfo({ preference: 'local', agent: { provider: 'local', model: 'qwen3.5-4b:2' } })).label, 'Local · qwen3.5-4b');   // an instance suffix is not shown
+  assert.equal(U.engine(agentInfo({ preference: 'cloud', agent: { provider: 'openai', model: 'gpt-4.1-mini' } })).label, 'Cloud · gpt-4.1-mini');
+});
+
+test('a local engine that cannot answer is "Rules only (local model not loaded)" with the reason in the tooltip, not just "Rules only"', () => {
+  const why = 'LM Studio is running but the model could not answer: No models loaded. Load qwen3.5-4b in LM Studio (or turn on Just-in-Time loading)';
+  const e = U.engine(agentInfo({ agent_status: { fallback: true, reason: why }, availability: { local: { ok: false, model: 'qwen3.5-4b', why }, cloud: { ok: false } } }));
+  assert.deepEqual([e.on, e.rules, e.label], [false, true, 'Rules only (local model not loaded)']);
+  assert.ok(e.title.includes('No models loaded'));
+  const none = U.engine(agentInfo({ agent: { provider: 'none', model: null }, agent_status: { fallback: true, reason: why }, availability: { local: { ok: false, why }, cloud: { ok: false } } }));
+  assert.equal(none.label, 'Rules only (local model not loaded)');                                    // the server is up but nothing answers: the same words
+  const cloudChosen = U.engine(agentInfo({ preference: 'cloud', agent: { provider: 'none', model: null }, agent_status: { fallback: true, reason: 'no OPENAI_API_KEY in mirsal/.env' }, availability: { local: { ok: false }, cloud: { ok: false } } }));
+  assert.equal(cloudChosen.label, 'Rules only');                                                       // no local engine is wanted: nothing to say about it
+  assert.ok(cloudChosen.title.includes('no OPENAI_API_KEY'));
+  const lastCallFailed = U.engine(agentInfo({ agent_status: { fallback: true, reason: 'the last call to the model failed: timed out' } }));
+  assert.deepEqual([lastCallFailed.rules, lastCallFailed.label], [true, 'Rules only']);                // the probe answers but the last real call did not: rules, with that reason
+  assert.equal(U.engine(null).label, '…');
+});
+
+test('the model dropdown line says what runs, or why the local model cannot answer in the server\'s last sentence', () => {
+  assert.equal(U.modelNote({ ok: true, current: 'qwen3.5-4b' }), 'now: qwen3.5-4b');
+  assert.equal(U.modelNote({ ok: false, why: 'LM Studio is running but the model could not answer: No models loaded. Load qwen3.5-4b in LM Studio (or turn on Just-in-Time loading)' }),
+    'Local model not loaded: Load qwen3.5-4b in LM Studio (or turn on Just-in-Time loading)');
+  assert.equal(U.modelNote({ ok: false, why: 'LM Studio is not answering at http://localhost:1234/v1: start it and load x' }), 'Local model not loaded: LM Studio is not answering at http://localhost:1234/v1: start it and load x');
+  assert.equal(U.modelNote(null), '');
+});
+
+test('a creator card is rebuilt when its run moves, a blocked sheet when its check appears', () => {
+  const m = (run) => ({ id: 'm', status: 'done', text: '', steps: [], chips: [], cards: [{ type: 'creator', run }] });
+  assert.notEqual(U.sig(m({ step: 'cut', status: 'running', updated: 1 })), U.sig(m({ step: 'look', status: 'running', updated: 2 })));
+  assert.equal(U.sig(m({ step: 'cut', status: 'running', updated: 1 })), U.sig(m({ step: 'cut', status: 'running', updated: 1 })));
+});
+
+test('the chat draws the two particle cards: the plan with its price, and the started set with a way to the pack’s studio; names are escaped', () => {
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'agent.js'), 'utf8');
+  const plan = src.match(/c\.type==='particles_plan'\)return `[\s\S]*?`\n/)[0];
+  assert.match(plan, /AIU\.credits\(c\.estimate\)/, 'the price is on the plan');
+  assert.match(plan, /AIU\.esc\(n\)/);
+  assert.match(plan, /The price is shown before anything is spent/);
+  const set = src.match(/c\.type==='particles'\)return `[\s\S]*?`\n/)[0];
+  assert.match(set, /#\/pack\/\$\{AIU\.esc\(c\.pack_id\)\}/);
+  assert.match(set, /AIU\.esc\(c\.name\|\|c\.set\)/);
 });

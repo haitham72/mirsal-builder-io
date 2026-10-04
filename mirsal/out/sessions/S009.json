@@ -1,0 +1,1309 @@
+{
+ "id": "S009",
+ "user": "local",
+ "title": "old man",
+ "created": 1791046348.787,
+ "updated": 1791111588.395,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "realistic",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": "G107",
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "old man",
+   "slug": "old_man",
+   "passes": [
+    {
+     "generation": "G107",
+     "job": "J050",
+     "prompt": "old man",
+     "grid": "3x3",
+     "style_id": "realistic",
+     "parent": null,
+     "created": 1791046379.492,
+     "ready": 9,
+     "approved": 9,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "pack_final",
+     "error": null
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791046361.144,
+   "user": "old man",
+   "assistant": "Here's the plan for **old man**: 9 stickers, realistic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791046379.509,
+   "user": "confirm",
+   "assistant": "Creating **old man** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791046447.298,
+   "user": "animate them",
+   "assistant": "I'll animate the 9 stickers of **Old man** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "intents": [
+    "ANIMATE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G107",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 4,
+   "ts": 1791046457.964,
+   "user": "confirm",
+   "assistant": "Animating **Old man** (about 4.5 credits). I'll show each one as it's ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 5,
+   "ts": 1791046492.307,
+   "user": "names_apply",
+   "assistant": "Renamed S6. The files and the search keep their own names; only what you read changed.",
+   "intents": [
+    "NAMES_DECIDE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 6,
+   "ts": 1791109114.472,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1791109122.623,
+   "user": "do you know my name?",
+   "assistant": "You haven't told me your name yet. Say \"my name is ...\" and I'll remember it.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G107",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 8,
+   "ts": 1791109136.105,
+   "user": "haitham",
+   "assistant": "Here's the plan for **haitham**: 9 stickers, realistic. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 9,
+   "ts": 1791111576.264,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 10,
+   "ts": 1791111581.077,
+   "user": "my name is haitham",
+   "assistant": "Nice to meet you, Haitham! I'll remember your name (Haitham). Your plan for haitham is still waiting: say \"create it\" when you're ready.",
+   "intents": [
+    "PROFILE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 11,
+   "ts": 1791111588.394,
+   "user": "what is my name?",
+   "assistant": "You're Haitham.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G107",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "old man",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046348.897
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **old man**: 9 stickers, realistic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "old man",
+     "grid": "3x3",
+     "style": "realistic",
+     "count": 9,
+     "names": [
+      "old man clapping laughing",
+      "old man crying sadness",
+      "old man shouting anger",
+      "old man looking shocked",
+      "old man jumping pride",
+      "old man hiding fear",
+      "old man sitting boredom",
+      "old man grinning mischief",
+      "old man leaning relaxed"
+     ],
+     "estimate": 2.0,
+     "balance": 3108.12,
+     "prompt": "old man",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046348.94
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046348.957
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046348.969
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "old man clapping laughing",
+       "old man crying sadness",
+       "old man shouting anger",
+       "old man looking shocked",
+       "old man jumping pride",
+       "old man hiding fear",
+       "old man sitting boredom",
+       "old man grinning mischief",
+       "old man leaning relaxed"
+      ]
+     },
+     "status": "done",
+     "ts": 1791046360.42
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046361.13
+    }
+   ],
+   "ts": 1791046348.897,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046378.975
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Creating **old man** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J050",
+     "subject": "old man",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046378.99
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046379.025
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046379.036
+    },
+    {
+     "kind": "final",
+     "label": "started · J050",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046379.492
+    }
+   ],
+   "ts": 1791046378.975,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m5",
+   "role": "assistant",
+   "text": "I looked at **Old man**. These names do not fit the picture:\nS6: \"old man hiding fear\" -> **Scared woman hiding her eyes**",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046431.417
+    },
+    {
+     "kind": "step",
+     "label": "looked at 9 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046444.848
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046444.854
+    }
+   ],
+   "ts": 1791046431.374,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Apply the new names",
+     "action": "names_apply",
+     "generation": "G107"
+    },
+    {
+     "label": "Keep my names",
+     "action": "names_keep",
+     "generation": "G107"
+    }
+   ]
+  },
+  {
+   "id": "m6",
+   "role": "user",
+   "text": "animate them",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046447.193
+  },
+  {
+   "id": "m7",
+   "role": "assistant",
+   "text": "I'll animate the 9 stickers of **Old man** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046447.211
+    },
+    {
+     "kind": "step",
+     "label": "understood: an animation",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.251
+    },
+    {
+     "kind": "step",
+     "label": "working in Old man",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.267
+    },
+    {
+     "kind": "step",
+     "label": "9 stickers ready to move",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.281
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046447.29
+    }
+   ],
+   "ts": 1791046447.193,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Animate",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m8",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046453.779
+  },
+  {
+   "id": "m9",
+   "role": "assistant",
+   "text": "Animating **Old man** (about 4.5 credits). I'll show each one as it's ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": "G107",
+     "job": "J051",
+     "subject": "old man",
+     "animating": true
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Old man",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046453.794
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046453.833
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: animate",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046453.844
+    },
+    {
+     "kind": "final",
+     "label": "animation started",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046457.942
+    }
+   ],
+   "ts": 1791046453.779,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m10",
+   "role": "user",
+   "text": "Apply the new names",
+   "cards": [],
+   "steps": [],
+   "ts": 1791046492.167
+  },
+  {
+   "id": "m11",
+   "role": "assistant",
+   "text": "Renamed S6. The files and the search keep their own names; only what you read changed.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046492.183
+    },
+    {
+     "kind": "step",
+     "label": "understood: your answer about the names",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046492.223
+    },
+    {
+     "kind": "task",
+     "label": "renaming",
+     "detail": null,
+     "status": "running",
+     "ts": 1791046492.284
+    },
+    {
+     "kind": "step",
+     "label": "renamed 1 sticker",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046492.292
+    },
+    {
+     "kind": "final",
+     "label": "recorded in each sticker's history",
+     "detail": null,
+     "status": "done",
+     "ts": 1791046492.299
+    }
+   ],
+   "ts": 1791046492.167,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m12",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1791109114.319
+  },
+  {
+   "id": "m13",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109114.335
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109114.38
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109114.405
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109114.446
+    }
+   ],
+   "ts": 1791109114.319,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m14",
+   "role": "user",
+   "text": "do you know my name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791109120.111
+  },
+  {
+   "id": "m15",
+   "role": "assistant",
+   "text": "You haven't told me your name yet. Say \"my name is ...\" and I'll remember it.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109120.132
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109120.182
+    },
+    {
+     "kind": "step",
+     "label": "working in Old man",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109122.596
+    },
+    {
+     "kind": "final",
+     "label": "answered from what you told me",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109122.609
+    }
+   ],
+   "ts": 1791109120.111,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m16",
+   "role": "user",
+   "text": "haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1791109126.651
+  },
+  {
+   "id": "m17",
+   "role": "assistant",
+   "text": "Here's the plan for **haitham**: 9 stickers, realistic. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "haitham",
+     "grid": "3x3",
+     "style": "realistic",
+     "count": 9,
+     "names": [
+      "haitham joyful jump",
+      "haitham confused sit",
+      "haitham spinning excitement",
+      "haitham brisk walk",
+      "haitham laughing sit",
+      "haitham shy crouch",
+      "haitham shocked lean",
+      "haitham proud stance",
+      "haitham scared run"
+     ],
+     "estimate": 2.0,
+     "balance": 3082.12,
+     "prompt": "haitham",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating haitham",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109126.667
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109126.716
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109126.778
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "haitham joyful jump",
+       "haitham confused sit",
+       "haitham spinning excitement",
+       "haitham brisk walk",
+       "haitham laughing sit",
+       "haitham shy crouch",
+       "haitham shocked lean",
+       "haitham proud stance",
+       "haitham scared run"
+      ]
+     },
+     "status": "done",
+     "ts": 1791109135.302
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109136.083
+    }
+   ],
+   "ts": 1791109126.651,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m18",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1791111575.86
+  },
+  {
+   "id": "m19",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111576.051
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111576.109
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111576.206
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111576.245
+    }
+   ],
+   "ts": 1791111575.86,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m20",
+   "role": "user",
+   "text": "my name is haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1791111580.787
+  },
+  {
+   "id": "m21",
+   "role": "assistant",
+   "text": "Nice to meet you, Haitham! I'll remember your name (Haitham). Your plan for haitham is still waiting: say \"create it\" when you're ready.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111580.829
+    },
+    {
+     "kind": "step",
+     "label": "understood: something about you",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111580.903
+    },
+    {
+     "kind": "task",
+     "label": "remembering what you told me",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111580.936
+    },
+    {
+     "kind": "final",
+     "label": "saved: your name (Haitham)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111581.047
+    }
+   ],
+   "ts": 1791111580.787,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m22",
+   "role": "user",
+   "text": "what is my name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791111585.637
+  },
+  {
+   "id": "m23",
+   "role": "assistant",
+   "text": "You're Haitham.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111585.669
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111585.749
+    },
+    {
+     "kind": "step",
+     "label": "working in Old man",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111588.334
+    },
+    {
+     "kind": "final",
+     "label": "answered from what you told me",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111588.377
+    }
+   ],
+   "ts": 1791111585.637,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": {
+  "type": "create",
+  "prompt": "haitham",
+  "subject": "haitham",
+  "grid": "3x3",
+  "style_id": "realistic",
+  "ai": true,
+  "estimate": 2.0,
+  "plan": {
+   "task": "haitham",
+   "task_slug": "haitham",
+   "subject": "haitham",
+   "context": "",
+   "kind": "default",
+   "grid": [
+    3,
+    3
+   ],
+   "template_id": "sheet_3x3",
+   "template_version": 3,
+   "slots": {
+    "subject_description": "A stylized cartoon character with a confident smile",
+    "style_id": "realistic",
+    "mode": "sheet_3x3",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "Haitham jumps up in pure joy with arms wide open",
+      "tags": [
+       "haitham_joyful_jump",
+       "happy",
+       "celebration",
+       "energy"
+      ],
+      "emoji": "🎉💃",
+      "motion": "Bounces vertically while flapping arms and spinning legs"
+     },
+     {
+      "pos": 2,
+      "label": "Haitham sits cross-legged looking confused with furrowed brows",
+      "tags": [
+       "haitham_confused_sit",
+       "puzzled",
+       "thinking",
+       "doubt"
+      ],
+      "emoji": "🤔😕",
+      "motion": "Gently shifts weight and tilts head side to side"
+     },
+     {
+      "pos": 3,
+      "label": "Haitham spins rapidly in a circle with arms raised high",
+      "tags": [
+       "haitham_spinning_excitement",
+       "energetic",
+       "fun",
+       "spin"
+      ],
+      "emoji": "🤸💫",
+      "motion": "Rotates 360 degrees while pumping fists and kicking feet"
+     },
+     {
+      "pos": 4,
+      "label": "Haitham walks briskly forward with a determined stride",
+      "tags": [
+       "haitham_brisk_walk",
+       "determined",
+       "active",
+       "forward"
+      ],
+      "emoji": "🚶✊",
+      "motion": "Strides confidently while pumping arms and bouncing knees"
+     },
+     {
+      "pos": 5,
+      "label": "Haitham lies on back laughing heartily with hands over mouth",
+      "tags": [
+       "haitham_laughing_sit",
+       "joyful",
+       "funny",
+       "giggles"
+      ],
+      "emoji": "😂🌊",
+      "motion": "Rolls gently side to side while giggling and waving hands"
+     },
+     {
+      "pos": 6,
+      "label": "Haitham crouches low with a shy blush and hidden eyes",
+      "tags": [
+       "haitham_shy_crouch",
+       "embarrassed",
+       "quiet",
+       "hiding"
+      ],
+      "emoji": "🙈😊",
+      "motion": "Scoots forward slowly while peeking out and hiding face"
+     },
+     {
+      "pos": 7,
+      "label": "Haitham leans back dramatically with mouth open in shock",
+      "tags": [
+       "haitham_shocked_lean",
+       "surprised",
+       "stunned",
+       "oops"
+      ],
+      "emoji": "😲🤯",
+      "motion": "Drops backward slowly while widening eyes and dropping arms"
+     },
+     {
+      "pos": 8,
+      "label": "Haitham stands tall with a proud chest puffed out",
+      "tags": [
+       "haitham_proud_stance",
+       "confident",
+       "pride",
+       "strong"
+      ],
+      "emoji": "🦸✨",
+      "motion": "Stretches upward and sways confidently from side to side"
+     },
+     {
+      "pos": 9,
+      "label": "Haitham runs in a circle looking scared with wide eyes",
+      "tags": [
+       "haitham_scared_run",
+       "fearful",
+       "anxious",
+       "panic"
+      ],
+      "emoji": "😱🏃",
+      "motion": "Darts quickly around in place while flailing arms and legs"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "haitham_joyful_jump",
+     "tags": [
+      "haitham_joyful_jump",
+      "happy",
+      "celebration",
+      "energy"
+     ],
+     "emoji": "🎉💃"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "haitham_confused_sit",
+     "tags": [
+      "haitham_confused_sit",
+      "puzzled",
+      "thinking",
+      "doubt"
+     ],
+     "emoji": "🤔😕"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "haitham_spinning_excitement",
+     "tags": [
+      "haitham_spinning_excitement",
+      "energetic",
+      "fun",
+      "spin"
+     ],
+     "emoji": "🤸💫"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "haitham_brisk_walk",
+     "tags": [
+      "haitham_brisk_walk",
+      "determined",
+      "active",
+      "forward"
+     ],
+     "emoji": "🚶✊"
+    },
+    {
+     "index": 5,
+     "id": "prompt05",
+     "key": "haitham_laughing_sit",
+     "tags": [
+      "haitham_laughing_sit",
+      "joyful",
+      "funny",
+      "giggles"
+     ],
+     "emoji": "😂🌊"
+    },
+    {
+     "index": 6,
+     "id": "prompt06",
+     "key": "haitham_shy_crouch",
+     "tags": [
+      "haitham_shy_crouch",
+      "embarrassed",
+      "quiet",
+      "hiding"
+     ],
+     "emoji": "🙈😊"
+    },
+    {
+     "index": 7,
+     "id": "prompt07",
+     "key": "haitham_shocked_lean",
+     "tags": [
+      "haitham_shocked_lean",
+      "surprised",
+      "stunned",
+      "oops"
+     ],
+     "emoji": "😲🤯"
+    },
+    {
+     "index": 8,
+     "id": "prompt08",
+     "key": "haitham_proud_stance",
+     "tags": [
+      "haitham_proud_stance",
+      "confident",
+      "pride",
+      "strong"
+     ],
+     "emoji": "🦸✨"
+    },
+    {
+     "index": 9,
+     "id": "prompt09",
+     "key": "haitham_scared_run",
+     "tags": [
+      "haitham_scared_run",
+      "fearful",
+      "anxious",
+      "panic"
+     ],
+     "emoji": "😱🏃"
+    }
+   ],
+   "expanded_by": "ai",
+   "expand_model": "qwen3.5-4b"
+  }
+ },
+ "vision_asked": true,
+ "named": [
+  "G107"
+ ]
+}

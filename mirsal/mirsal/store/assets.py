@@ -42,7 +42,8 @@ class LocalAssetStore:
 
     # ---- keys and files -------------------------------------------------------------------
     def path(self, key: str) -> Path:
-        p = (self.root / _clean(key)).resolve()
+        from ..flow.pipeline import out_path                 # a key names its batch by id (G111/...); the folder on disk may carry a label (G111-dog_as_banana-...)
+        p = out_path(self.root, _clean(key)).resolve()
         if self.root != p and self.root not in p.parents:
             raise AssetError(f"bad object key: {key!r}")
         return p
@@ -71,9 +72,8 @@ class LocalAssetStore:
                 raise AssetError(f"{key} already exists with different bytes: assets are never overwritten", 409)
         else:
             p.parent.mkdir(parents=True, exist_ok=True)
-            tmp = p.with_name(p.name + ".tmp")
-            tmp.write_bytes(data)
-            os.replace(tmp, p)
+            from ..runtime import atomic
+            atomic.write_bytes(p, data)
         return {"object_key": _clean(key), "sha256": digest, "bytes": len(data)}
 
     # ---- signed URLs ------------------------------------------------------------------------

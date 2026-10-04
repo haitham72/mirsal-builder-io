@@ -1,0 +1,2408 @@
+{
+  "generation_id": "G012",
+  "number": 12,
+  "owner": "local",
+  "created": 1790907725.559,
+  "parent": null,
+  "prompt": "superman in dubai",
+  "task": "superman in dubai",
+  "task_slug": "superman_dubai",
+  "source": {
+    "subject": "superman",
+    "subject_id": "015",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "clips": {},
+    "sheet_path": "D:\\Vscode\\mirsal-builder-io\\mirsal\\out\\jobs\\J020\\result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          682,
+          687
+        ],
+        [
+          682,
+          0,
+          676,
+          687
+        ],
+        [
+          1358,
+          0,
+          690,
+          687
+        ],
+        [
+          0,
+          687,
+          682,
+          679
+        ],
+        [
+          682,
+          687,
+          676,
+          679
+        ],
+        [
+          1358,
+          687,
+          690,
+          679
+        ],
+        [
+          0,
+          1366,
+          682,
+          682
+        ],
+        [
+          682,
+          1366,
+          676,
+          682
+        ],
+        [
+          1358,
+          1366,
+          690,
+          682
+        ]
+      ],
+      "xs": [
+        0,
+        682,
+        1358,
+        2048
+      ],
+      "ys": [
+        0,
+        687,
+        1366,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "stills_reviewed",
+  "error": null,
+  "plan_source": "task 015",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A red suit superhero with blue skin and an 'S' chest emblem..\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: Soaring above the golden skyscrapers of Dubai\nCharacter 2: Landing gracefully on a hovering hoverboard\nCharacter 3: Spinning with arms raised in victory amidst fireworks\nCharacter 4: Holding a massive stack of gold bars up high\nCharacter 5: Wearing an oversized burqa made of pure silk\nCharacter 6: Sliding down a hot air balloon tether in sand\nCharacter 7: Looking shocked by a sudden rainstorm from clouds\nCharacter 8: Laughing maniacally while throwing a punch at the sun\nCharacter 9: Sitting cross-legged on a frozen fountain in winter\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. Flapping wide wings while diving rapidly downward\n2. Rolling forward smoothly to stop the board gently\n3. Twisting quickly while spinning in a tight circle\n4. Strutting confidently with shoulders back and chest puffed\n5. Walking slowly while adjusting the heavy fabric on head\n6. Gliding horizontally across dunes with legs kicking air\n7. Freezing in place with eyes wide and hands on hips\n8. Dancing wildly with arms flailing and head thrown back\n9. Shivering vigorously while trying to warm hands together\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "A red suit superhero with blue skin and an 'S' chest emblem.",
+    "style_id": "flat_vector",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "Soaring above the golden skyscrapers of Dubai",
+        "tags": [
+          "superman_diving_wing",
+          "metropolis",
+          "sky"
+        ],
+        "emoji": "🏙️🦅",
+        "motion": "Flapping wide wings while diving rapidly downward"
+      },
+      {
+        "pos": 2,
+        "label": "Landing gracefully on a hovering hoverboard",
+        "tags": [
+          "superman_land_hoverboard",
+          "landing",
+          "tech"
+        ],
+        "emoji": "🛸⚡",
+        "motion": "Rolling forward smoothly to stop the board gently"
+      },
+      {
+        "pos": 3,
+        "label": "Spinning with arms raised in victory amidst fireworks",
+        "tags": [
+          "superman_spinning_victory",
+          "celebration",
+          "fireworks"
+        ],
+        "emoji": "🎆✌️",
+        "motion": "Twisting quickly while spinning in a tight circle"
+      },
+      {
+        "pos": 4,
+        "label": "Holding a massive stack of gold bars up high",
+        "tags": [
+          "superman_strutting_gold",
+          "wealth",
+          "showoff"
+        ],
+        "emoji": "💰👍",
+        "motion": "Strutting confidently with shoulders back and chest puffed"
+      },
+      {
+        "pos": 5,
+        "label": "Wearing an oversized burqa made of pure silk",
+        "tags": [
+          "superman_walking_burqa",
+          "culture",
+          "elegant"
+        ],
+        "emoji": "🥋✨",
+        "motion": "Walking slowly while adjusting the heavy fabric on head"
+      },
+      {
+        "pos": 6,
+        "label": "Sliding down a hot air balloon tether in sand",
+        "tags": [
+          "superman_sliding_dune",
+          "beach",
+          "glide"
+        ],
+        "emoji": "🎈🌵",
+        "motion": "Gliding horizontally across dunes with legs kicking air"
+      },
+      {
+        "pos": 7,
+        "label": "Looking shocked by a sudden rainstorm from clouds",
+        "tags": [
+          "superman_shocked_rain",
+          "weather",
+          "surprise"
+        ],
+        "emoji": "☔😲",
+        "motion": "Freezing in place with eyes wide and hands on hips"
+      },
+      {
+        "pos": 8,
+        "label": "Laughing maniacally while throwing a punch at the sun",
+        "tags": [
+          "superman_laughing_fight",
+          "funny",
+          "chaos"
+        ],
+        "emoji": "🤪☀️",
+        "motion": "Dancing wildly with arms flailing and head thrown back"
+      },
+      {
+        "pos": 9,
+        "label": "Sitting cross-legged on a frozen fountain in winter",
+        "tags": [
+          "superman_sitting_freeze",
+          "cold",
+          "relaxing"
+        ],
+        "emoji": "❄️🧘",
+        "motion": "Shivering vigorously while trying to warm hands together"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "015",
+  "name_key": "superman_dubai",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1790907697.495,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 81.4
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 246 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 246.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 21.5
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 65.4
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            682,
+            1358,
+            2048
+          ],
+          "ys": [
+            0,
+            687,
+            1366,
+            2048
+          ],
+          "ms": 57.1
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 2.4 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 2.44,
+        "limit": 12.0,
+        "data": {
+          "ms": 118.9
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "superman_diving_wing",
+      "tags": [
+        "superman_diving_wing",
+        "metropolis",
+        "sky"
+      ],
+      "emoji": "🏙️🦅",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Soaring above the golden skyscrapers of Dubai, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_diving_wing",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 101331,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 38.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 83929,
+          "limit": 400,
+          "data": {
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "26px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 26,
+          "limit": 83.929,
+          "data": {
+            "ms": 3.6
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "1 enclosed hole(s), 2.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0224,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "2 part(s); the second is 6.6% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0661,
+          "limit": 0.12,
+          "data": {
+            "parts": 2,
+            "ms": 4.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "147.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 147.9,
+          "limit": 512,
+          "data": {
+            "ms": 5.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          682,
+          687
+        ],
+        "bg": [
+          5,
+          251,
+          2
+        ],
+        "threshold": 74.1,
+        "fg_px": 101331,
+        "bbox": [
+          86,
+          80,
+          622,
+          593
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 26,
+        "chroma_risk": 0.0001,
+        "holes": 0.0224,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 147.9,
+        "format": "png",
+        "recovered_by": "threshold x0.6, despill 10px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                5,
+                251,
+                2
+              ],
+              "threshold": 123.5,
+              "fg_px": 107201,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "threshold x0.6, despill 10px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-012-superman_dubai-superman_diving_wing.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907727.952,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1790932161.495,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "superman_land_hoverboard",
+      "tags": [
+        "superman_land_hoverboard",
+        "landing",
+        "tech"
+      ],
+      "emoji": "🛸⚡",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Landing gracefully on a hovering hoverboard, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_land_hoverboard",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 98476,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 32.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 68938,
+          "limit": 400,
+          "data": {
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 68.938,
+          "data": {
+            "ms": 3.6
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.8% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0079,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 31 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 31,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "124.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 124.2,
+          "limit": 512,
+          "data": {
+            "ms": 4.9
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          682,
+          0,
+          676,
+          687
+        ],
+        "bg": [
+          5,
+          251,
+          2
+        ],
+        "threshold": 123.0,
+        "fg_px": 98476,
+        "bbox": [
+          124,
+          89,
+          556,
+          602
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0079,
+        "kb": 124.2,
+        "format": "png"
+      },
+      "png": "slices/img-012-superman_dubai-superman_land_hoverboard.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907727.959,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790932161.501,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "superman_spinning_victory",
+      "tags": [
+        "superman_spinning_victory",
+        "celebration",
+        "fireworks"
+      ],
+      "emoji": "🎆✌️",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Spinning with arms raised in victory amidst fireworks, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_spinning_victory",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 98874,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 41.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 102487,
+          "limit": 400,
+          "data": {
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 102.48700000000001,
+          "data": {
+            "ms": 3.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "6 enclosed hole(s), 1.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0117,
+          "limit": 0.01,
+          "data": {
+            "count": 6,
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 30 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 30,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "162.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 162.5,
+          "limit": 512,
+          "data": {
+            "ms": 5.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1358,
+          0,
+          690,
+          687
+        ],
+        "bg": [
+          5,
+          251,
+          2
+        ],
+        "threshold": 123.0,
+        "fg_px": 98874,
+        "bbox": [
+          63,
+          47,
+          612,
+          643
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0117,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 162.5,
+        "format": "png"
+      },
+      "png": "slices/img-012-superman_dubai-superman_spinning_victory.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907727.966,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1790932161.508,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "superman_strutting_gold",
+      "tags": [
+        "superman_strutting_gold",
+        "wealth",
+        "showoff"
+      ],
+      "emoji": "💰👍",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Holding a massive stack of gold bars up high, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_strutting_gold",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134299,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 34.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 86297,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 86.297,
+          "data": {
+            "ms": 3.5
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "3 enclosed hole(s), 2.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.022,
+          "limit": 0.01,
+          "data": {
+            "count": 3,
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "144.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 144.7,
+          "limit": 512,
+          "data": {
+            "ms": 5.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          687,
+          682,
+          679
+        ],
+        "bg": [
+          5,
+          251,
+          2
+        ],
+        "threshold": 123.0,
+        "fg_px": 134299,
+        "bbox": [
+          169,
+          47,
+          578,
+          637
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.022,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 144.7,
+        "format": "png"
+      },
+      "png": "slices/img-012-superman_dubai-superman_strutting_gold.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907727.974,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1790932161.513,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "superman_walking_burqa",
+      "tags": [
+        "superman_walking_burqa",
+        "culture",
+        "elegant"
+      ],
+      "emoji": "🥋✨",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Wearing an oversized burqa made of pure silk, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_walking_burqa",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134486,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 30.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 76802,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 76.802,
+          "data": {
+            "ms": 3.4
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "129.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 129.2,
+          "limit": 512,
+          "data": {
+            "ms": 5.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          682,
+          687,
+          676,
+          679
+        ],
+        "bg": [
+          6,
+          251,
+          2
+        ],
+        "threshold": 122.5,
+        "fg_px": 134486,
+        "bbox": [
+          170,
+          50,
+          514,
+          629
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 129.2,
+        "format": "png"
+      },
+      "png": "slices/img-012-superman_dubai-superman_walking_burqa.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "REJECTED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907727.981,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790924986.793,
+          "stage": "still",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790931027.887,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "brought back",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1790931030.92,
+          "stage": "still",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "superman_sliding_dune",
+      "tags": [
+        "superman_sliding_dune",
+        "beach",
+        "glide"
+      ],
+      "emoji": "🎈🌵",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Sliding down a hot air balloon tether in sand, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_sliding_dune",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 147542,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 38.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 102581,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 102.581,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.9% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.009,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "151.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 151.5,
+          "limit": 512,
+          "data": {
+            "ms": 6.0
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1358,
+          687,
+          690,
+          679
+        ],
+        "bg": [
+          5,
+          251,
+          2
+        ],
+        "threshold": 73.5,
+        "fg_px": 147542,
+        "bbox": [
+          58,
+          63,
+          625,
+          633
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.009,
+        "kb": 151.5,
+        "format": "png",
+        "recovered_by": "threshold x0.6, despill 10px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                5,
+                251,
+                2
+              ],
+              "threshold": 122.5,
+              "fg_px": 151753,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "threshold x0.6, despill 10px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-012-superman_dubai-superman_sliding_dune.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907727.988,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790932161.521,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "superman_shocked_rain",
+      "tags": [
+        "superman_shocked_rain",
+        "weather",
+        "surprise"
+      ],
+      "emoji": "☔😲",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Looking shocked by a sudden rainstorm from clouds, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_shocked_rain",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 123032,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 37.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 109517,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 109.517,
+          "data": {
+            "ms": 3.5
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "12 enclosed hole(s), 2.8% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0281,
+          "limit": 0.01,
+          "data": {
+            "count": 12,
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 15 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 15,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "168.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 168.9,
+          "limit": 512,
+          "data": {
+            "ms": 5.9
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1366,
+          682,
+          682
+        ],
+        "bg": [
+          5,
+          251,
+          2
+        ],
+        "threshold": 123.5,
+        "fg_px": 123032,
+        "bbox": [
+          104,
+          43,
+          623,
+          624
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0281,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 168.9,
+        "format": "png"
+      },
+      "png": "slices/img-012-superman_dubai-superman_shocked_rain.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907727.995,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        },
+        {
+          "ts": 1790932161.528,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "superman_laughing_fight",
+      "tags": [
+        "superman_laughing_fight",
+        "funny",
+        "chaos"
+      ],
+      "emoji": "🤪☀️",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Laughing maniacally while throwing a punch at the sun, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_laughing_fight",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 116299,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 40.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 78863,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 78.863,
+          "data": {
+            "ms": 3.6
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0002,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.4
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 6",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 6,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "138.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 138.9,
+          "limit": 512,
+          "data": {
+            "ms": 5.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          682,
+          1366,
+          676,
+          682
+        ],
+        "bg": [
+          5,
+          251,
+          2
+        ],
+        "threshold": 123.0,
+        "fg_px": 116299,
+        "bbox": [
+          59,
+          51,
+          627,
+          624
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0002,
+        "holes": 0.0,
+        "kb": 138.9,
+        "format": "png"
+      },
+      "png": "slices/img-012-superman_dubai-superman_laughing_fight.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907728.003,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790932161.533,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "superman_sitting_freeze",
+      "tags": [
+        "superman_sitting_freeze",
+        "cold",
+        "relaxing"
+      ],
+      "emoji": "❄️🧘",
+      "prompt": "A red suit superhero with blue skin and an 'S' chest emblem. Sitting cross-legged on a frozen fountain in winter, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-012-superman_dubai-superman_sitting_freeze",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 170614,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 39.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 108079,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 108.07900000000001,
+          "data": {
+            "ms": 3.5
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0016,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 3.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 5",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 5,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "172.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 172.8,
+          "limit": 512,
+          "data": {
+            "ms": 6.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1358,
+          1366,
+          690,
+          682
+        ],
+        "bg": [
+          5,
+          251,
+          3
+        ],
+        "threshold": 123.0,
+        "fg_px": 170614,
+        "bbox": [
+          58,
+          59,
+          634,
+          620
+        ],
+        "scale": 0.6853,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0016,
+        "kb": 172.8,
+        "format": "png"
+      },
+      "png": "slices/img-012-superman_dubai-superman_sitting_freeze.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1790907728.011,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1790932161.54,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    }
+  ],
+  "added": {
+    "0b7bedde": [
+      "static:1",
+      "static:2",
+      "static:3",
+      "static:4",
+      "static:6",
+      "static:7",
+      "static:8",
+      "static:9"
+    ]
+  }
+}

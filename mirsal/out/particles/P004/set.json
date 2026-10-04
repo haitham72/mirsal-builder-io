@@ -1,0 +1,167 @@
+{
+  "id": "P004",
+  "name": "Batman Lego · sprites (E001)",
+  "created": 1791082944.282,
+  "user": "python",
+  "elements": [
+    "bat signal",
+    "lego brick",
+    "cape piece"
+  ],
+  "source": {
+    "sticker_ids": [
+      "1e01c5a6"
+    ],
+    "kind": "stickers",
+    "effect": "E001",
+    "generation": null,
+    "particles": false,
+    "job": null,
+    "grid": null,
+    "by": null,
+    "options": []
+  },
+  "plan": {
+    "subject": "Batman Lego",
+    "style": "glossy cartoon look, bold clean shapes, vivid colours"
+  },
+  "cells": [],
+  "motion": {
+    "preset": "burst",
+    "params": {
+      "gravity": 1.0,
+      "magnitude": 1.0,
+      "vortex": 0.0,
+      "count": 28,
+      "size_min": 0.1,
+      "size_max": 0.22,
+      "spin": 1.0,
+      "lifetime": 2.2,
+      "spread": 360.0,
+      "pop": 0.25,
+      "seed": 1,
+      "fps": 30.0,
+      "duration": 3.0,
+      "size": 512,
+      "origin": [
+        0.5,
+        0.5
+      ],
+      "show_source": false
+    }
+  },
+  "saved_at": 1790983945.145,
+  "owner": [
+    {
+      "sticker_id": "1e01c5a6",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 1
+    }
+  ],
+  "renders": [
+    {
+      "id": "R001",
+      "pack_id": "20b742ee",
+      "preset": "burst",
+      "params": {
+        "gravity": 1.0,
+        "magnitude": 1.0,
+        "vortex": 0.0,
+        "count": 28,
+        "size_min": 0.1,
+        "size_max": 0.22,
+        "spin": 1.0,
+        "lifetime": 2.2,
+        "spread": 360.0,
+        "pop": 0.25,
+        "seed": 1,
+        "fps": 30.0,
+        "duration": 3.0,
+        "size": 512,
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "show_source": false
+      },
+      "source": "own",
+      "file": "renders/R001.webm",
+      "bytes": 213949,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 38,
+        "kb": 208.9,
+        "label": "1e01c5a6 burst",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.3138
+      },
+      "created": 1790983945.145,
+      "added_to": "20b742ee",
+      "added": [
+        {
+          "sticker": "d07e6962",
+          "pack": "20b742ee",
+          "of": "1e01c5a6",
+          "ts": 1791083373.501
+        }
+      ],
+      "from": "E001/R001",
+      "affirmed_in": [
+        "20b742ee"
+      ]
+    }
+  ],
+  "credits": 0.0,
+  "notes": [
+    "This set has no drawn cells yet: the burst uses the pack's own stickers (generate more to add drawn particles)."
+  ],
+  "history": [
+    {
+      "ts": 1791082944.282,
+      "actor": "python",
+      "decision": "CREATE",
+      "reason": "from E001: 0 cell(s), 1 pack(s)",
+      "detail": {
+        "effect": "E001",
+        "generation": null
+      }
+    },
+    {
+      "ts": 1791082944.286,
+      "actor": "python",
+      "decision": "ADOPT",
+      "reason": "saved as a row from the older run E001",
+      "detail": {
+        "effect": "E001"
+      }
+    },
+    {
+      "ts": 1791083373.501,
+      "actor": "local",
+      "decision": "APPROVE",
+      "reason": "1 burst(s) added to the pack",
+      "detail": {
+        "pack": "20b742ee",
+        "added": [
+          {
+            "sticker": "d07e6962",
+            "name": "Batman Lego · sprites (E001) · burst",
+            "render": "R001"
+          }
+        ]
+      }
+    }
+  ],
+  "imports": [],
+  "updated": 1791083373.501
+}

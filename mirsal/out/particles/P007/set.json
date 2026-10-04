@@ -1,0 +1,201 @@
+{
+  "id": "P007",
+  "name": "Barbie in love · AI pieces (G101)",
+  "created": 1791084066.277,
+  "user": "python",
+  "elements": [
+    "pink heart",
+    "blush",
+    "rose flower"
+  ],
+  "source": {
+    "sticker_ids": [
+      "144848e7",
+      "9bd9b0a1",
+      "8132afae",
+      "fbbc03e9",
+      "e1849e47",
+      "7e6f4e53",
+      "29210329",
+      "4991725f",
+      "d7736910"
+    ],
+    "kind": "drawn",
+    "effect": "E013",
+    "generation": "G101",
+    "particles": true,
+    "job": "J041",
+    "grid": [
+      2,
+      2
+    ],
+    "by": "vlm",
+    "options": [
+      "pink heart",
+      "blush",
+      "rose flower",
+      "heart shape",
+      "ribbon bow",
+      "sparkle star",
+      "glitter dust",
+      "love note"
+    ]
+  },
+  "plan": {
+    "subject": "Barbie doll",
+    "style": "glossy cartoon look, bold clean shapes, vivid colours"
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 1,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "pink_heart",
+      "sprite": true,
+      "w": 566,
+      "h": 512,
+      "picked": true,
+      "created": 1791084066.276,
+      "import": "E013/G101/S1"
+    },
+    {
+      "n": 2,
+      "cell": 2,
+      "file": "cells/c02.png",
+      "status": "READY",
+      "warnings": [
+        "no_spill",
+        "chroma_risk"
+      ],
+      "key": "blush",
+      "sprite": true,
+      "w": 574,
+      "h": 563,
+      "picked": true,
+      "created": 1791084066.276,
+      "import": "E013/G101/S2"
+    },
+    {
+      "n": 3,
+      "cell": 3,
+      "file": "cells/c03.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "rose_flower",
+      "sprite": true,
+      "w": 636,
+      "h": 620,
+      "picked": true,
+      "created": 1791084066.277,
+      "import": "E013/G101/S3"
+    },
+    {
+      "n": 4,
+      "cell": 4,
+      "file": "cells/c04.png",
+      "status": "READY",
+      "warnings": [
+        "duplicate_cell"
+      ],
+      "key": "pink_heart_large",
+      "sprite": true,
+      "w": 747,
+      "h": 651,
+      "picked": true,
+      "created": 1791084066.277,
+      "import": "E013/G101/S4"
+    }
+  ],
+  "motion": {},
+  "saved_at": 1790995521.134,
+  "owner": [
+    {
+      "sticker_id": "144848e7",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 1
+    },
+    {
+      "sticker_id": "9bd9b0a1",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 2
+    },
+    {
+      "sticker_id": "8132afae",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 3
+    },
+    {
+      "sticker_id": "fbbc03e9",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 4
+    },
+    {
+      "sticker_id": "e1849e47",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 5
+    },
+    {
+      "sticker_id": "7e6f4e53",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 6
+    },
+    {
+      "sticker_id": "29210329",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 7
+    },
+    {
+      "sticker_id": "4991725f",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 8
+    },
+    {
+      "sticker_id": "d7736910",
+      "pack_id": "67d29daa",
+      "generation": "G005",
+      "index": 9
+    }
+  ],
+  "renders": [],
+  "credits": 2.0,
+  "notes": [],
+  "history": [
+    {
+      "ts": 1791084066.277,
+      "actor": "python",
+      "decision": "CREATE",
+      "reason": "from E013: 4 cell(s), 1 pack(s)",
+      "detail": {
+        "effect": "E013",
+        "generation": "G101"
+      }
+    },
+    {
+      "ts": 1791084066.28,
+      "actor": "python",
+      "decision": "ADOPT",
+      "reason": "saved as a row from the drawn sheet G101 of E013",
+      "detail": {
+        "effect": "E013",
+        "generation": "G101"
+      }
+    }
+  ],
+  "imports": [
+    "E013/G101/S1",
+    "E013/G101/S2",
+    "E013/G101/S3",
+    "E013/G101/S4"
+  ],
+  "updated": 1791084066.28
+}

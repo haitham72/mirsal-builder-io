@@ -1,0 +1,36 @@
+{
+  "id": "J015",
+  "kind": "sheet",
+  "task": "011",
+  "generation": "G008",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a pair of bright red cherries with green leaves, smiling faces, joined by their stems.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: cherry couple gazing lovingly into each other's eyes\nCharacter 2: cherries blushing shyly while holding hands\nCharacter 3: cherries laughing heartily, eyes closed in joy\nCharacter 4: cherries sitting side by side, legs dangling happily\nCharacter 5: cherries running hand in hand with wide smiles\nCharacter 6: cherries spinning playfully in a circle, laughing\nCharacter 7: cherries lying down together, eyes closed peacefully\nCharacter 8: cherries reaching out to each other with hopeful smiles\nCharacter 9: cherries frowning with crossed arms, feeling jealous\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "cherries in love with green backscreen",
+    "refs": [],
+    "outline": 0
+  },
+  "status": "DONE",
+  "external_task_id": "20eaab9b-b929-45bd-bdb9-5f5b2f3c3e8d",
+  "result": {
+    "file": "jobs/J015/result.png",
+    "sha256": "38deab5ff286c247ad8c6fdf4eea943e6334853dae334b4b54a25415c75abdc6",
+    "bytes": 4441195
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790879670.186,
+  "claimed_at": 1790879671.529,
+  "completed_at": 1790879697.042,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

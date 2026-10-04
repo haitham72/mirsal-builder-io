@@ -1,0 +1,1657 @@
+{
+ "id": "S001",
+ "title": "Eid mubarak greetings",
+ "created": 1790945185.426,
+ "updated": 1790954080.522,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "creator": {
+   "on": true,
+   "scope": "video",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "eid mubarak ios style",
+   "slug": "eid_mubarak_ios_style",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J030",
+     "prompt": "eid mubarak ios style",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790948966.219,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "name": "eid mubarak ios 3d style",
+   "slug": "eid_mubarak_ios_3d_style",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J031",
+     "prompt": "eid mubarak ios 3d style",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790949106.317,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "name": "him wear a coat",
+   "slug": "him_wear_a_coat",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J032",
+     "prompt": "make him wear a coat in the winter",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790949533.349,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "name": "anime kitten",
+   "slug": "anime_kitten",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J035",
+     "prompt": "anime kitten",
+     "grid": "3x3",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1790953932.508,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1790945185.69,
+   "user": "Eid mubarak greetings",
+   "assistant": "I couldn't start that: No prepared set for that. Try: (none found)",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1790945201.659,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1790948342.304,
+   "user": "how are you",
+   "assistant": "Hi! What will you create today?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1790948935.179,
+   "user": "vision_yes",
+   "assistant": "Good: when stickers are ready I will look at them and suggest better names where one does not fit.",
+   "intents": [
+    "VISION"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 5,
+   "ts": 1790948957.683,
+   "user": "eid mubarak ios style",
+   "assistant": "Here's the plan for **eid mubarak ios style**: 9 stickers, flat vector. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 6,
+   "ts": 1790948966.256,
+   "user": "confirm",
+   "assistant": "Creating **eid mubarak ios style** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1790949092.74,
+   "user": "create it again",
+   "assistant": "Which subject would you like another set of? Tell me what to make.",
+   "intents": [
+    "ANOTHER"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 8,
+   "ts": 1790949102.768,
+   "user": "eid mubarak ios 3d style",
+   "assistant": "Here's the plan for **eid mubarak ios 3d style**: 9 stickers, flat vector. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 9,
+   "ts": 1790949106.365,
+   "user": "confirm",
+   "assistant": "Creating **eid mubarak ios 3d style** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 10,
+   "ts": 1790949151.849,
+   "user": "make him wear a coat in the winter",
+   "assistant": "Here's the plan for **him wear a coat**: 9 stickers, flat vector. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 11,
+   "ts": 1790949533.379,
+   "user": "confirm",
+   "assistant": "Creating **him wear a coat** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 12,
+   "ts": 1790953720.885,
+   "user": "anime kitten",
+   "assistant": "Creator plan for **anime kitten**: 9 stickers, then the stickers animated, then to Telegram, stopping at each approval for one click from you. Telegram is not connected yet, so I will stop before sending. Shall I run it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 13,
+   "ts": 1790953932.548,
+   "user": "confirm",
+   "assistant": "Running the creator for **anime kitten**. I will stop and tell you if anything is rejected.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 14,
+   "ts": 1790953972.104,
+   "user": "creator_go",
+   "assistant": "Continuing.",
+   "intents": [
+    "CREATOR"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "Eid mubarak greetings",
+   "cards": [],
+   "steps": [],
+   "ts": 1790945185.629
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "I couldn't start that: No prepared set for that. Try: (none found)",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating Eid mubarak greetings",
+     "detail": null,
+     "status": "running",
+     "ts": 1790945185.645
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790945185.668
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "eid mubarak greetings waving",
+       "eid mubarak greetings excited",
+       "eid mubarak greetings in love",
+       "eid mubarak greetings flexing",
+       "eid mubarak greetings eye roll",
+       "eid mubarak greetings sad",
+       "eid mubarak greetings angry",
+       "eid mubarak greetings dizzy",
+       "eid mubarak greetings scheming"
+      ]
+     },
+     "status": "done",
+     "ts": 1790945185.676
+    },
+    {
+     "kind": "final",
+     "label": "not started",
+     "detail": null,
+     "status": "error",
+     "ts": 1790945185.683
+    }
+   ],
+   "ts": 1790945185.629,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1790945201.59
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790945201.605
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1790945201.633
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1790945201.643
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1790945201.651
+    }
+   ],
+   "ts": 1790945201.59,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "how are you",
+   "cards": [],
+   "steps": [],
+   "ts": 1790948342.056
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Hi! What will you create today?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790948342.257
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948342.271
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1790948342.283
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948342.291
+    }
+   ],
+   "ts": 1790948342.056,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    },
+    {
+     "label": "Allow AI vision",
+     "action": "vision_yes"
+    },
+    {
+     "label": "Keep it off",
+     "action": "vision_no"
+    }
+   ]
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "Allow AI vision",
+   "cards": [],
+   "steps": [],
+   "ts": 1790948934.967
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "Good: when stickers are ready I will look at them and suggest better names where one does not fit.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790948935.129
+    },
+    {
+     "kind": "step",
+     "label": "understood: your answer about AI vision",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948935.144
+    },
+    {
+     "kind": "task",
+     "label": "saving your answer",
+     "detail": null,
+     "status": "running",
+     "ts": 1790948935.155
+    },
+    {
+     "kind": "step",
+     "label": "AI vision allowed",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948935.163
+    },
+    {
+     "kind": "final",
+     "label": "saved",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948935.17
+    }
+   ],
+   "ts": 1790948934.967,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "eid mubarak ios style",
+   "cards": [],
+   "steps": [],
+   "ts": 1790948956.571
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "Here's the plan for **eid mubarak ios style**: 9 stickers, flat vector. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "eid mubarak ios style",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "eid mubarak ios style blowing a kiss",
+      "eid mubarak ios style laughing",
+      "eid mubarak ios style puppy eyes",
+      "eid mubarak ios style thumbs up",
+      "eid mubarak ios style thinking",
+      "eid mubarak ios style crying",
+      "eid mubarak ios style grumpy",
+      "eid mubarak ios style scared",
+      "eid mubarak ios style cool"
+     ],
+     "estimate": 2.0,
+     "balance": 3788.12,
+     "prompt": "eid mubarak ios style",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating eid mubarak ios style",
+     "detail": null,
+     "status": "running",
+     "ts": 1790948956.614
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948956.636
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948956.647
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "eid mubarak ios style blowing a kiss",
+       "eid mubarak ios style laughing",
+       "eid mubarak ios style puppy eyes",
+       "eid mubarak ios style thumbs up",
+       "eid mubarak ios style thinking",
+       "eid mubarak ios style crying",
+       "eid mubarak ios style grumpy",
+       "eid mubarak ios style scared",
+       "eid mubarak ios style cool"
+      ]
+     },
+     "status": "done",
+     "ts": 1790948956.688
+    },
+    {
+     "kind": "note",
+     "label": "the AI could not write the ideas (The AI service refused the request (HTTP 400): No models loaded. Please load a model in the developer page or use the 'lms load' command.): I used the built-in sets",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948956.697
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948957.661
+    }
+   ],
+   "ts": 1790948956.571,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790948963.797
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "Creating **eid mubarak ios style** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J030",
+     "subject": "eid mubarak ios style",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating eid mubarak ios style",
+     "detail": null,
+     "status": "running",
+     "ts": 1790948963.819
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948963.854
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948963.866
+    },
+    {
+     "kind": "final",
+     "label": "started · J030",
+     "detail": null,
+     "status": "done",
+     "ts": 1790948966.219
+    }
+   ],
+   "ts": 1790948963.797,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "create it again",
+   "cards": [],
+   "steps": [],
+   "ts": 1790949092.56
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "Which subject would you like another set of? Tell me what to make.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790949092.7
+    },
+    {
+     "kind": "step",
+     "label": "understood: another pass",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949092.718
+    },
+    {
+     "kind": "final",
+     "label": "done",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949092.731
+    }
+   ],
+   "ts": 1790949092.56,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m15",
+   "role": "user",
+   "text": "eid mubarak ios 3d style",
+   "cards": [],
+   "steps": [],
+   "ts": 1790949101.718
+  },
+  {
+   "id": "m16",
+   "role": "assistant",
+   "text": "Here's the plan for **eid mubarak ios 3d style**: 9 stickers, flat vector. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "eid mubarak ios 3d style",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "eid mubarak ios 3d style open arms",
+      "eid mubarak ios 3d style laughing",
+      "eid mubarak ios 3d style thank you",
+      "eid mubarak ios 3d style thumbs up",
+      "eid mubarak ios 3d style eye roll",
+      "eid mubarak ios 3d style sneezing",
+      "eid mubarak ios 3d style facepalm",
+      "eid mubarak ios 3d style scared",
+      "eid mubarak ios 3d style hungry"
+     ],
+     "estimate": 2.0,
+     "balance": 3788.12,
+     "prompt": "eid mubarak ios 3d style",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating eid mubarak ios 3d style",
+     "detail": null,
+     "status": "running",
+     "ts": 1790949101.741
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949101.774
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949101.788
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "eid mubarak ios 3d style open arms",
+       "eid mubarak ios 3d style laughing",
+       "eid mubarak ios 3d style thank you",
+       "eid mubarak ios 3d style thumbs up",
+       "eid mubarak ios 3d style eye roll",
+       "eid mubarak ios 3d style sneezing",
+       "eid mubarak ios 3d style facepalm",
+       "eid mubarak ios 3d style scared",
+       "eid mubarak ios 3d style hungry"
+      ]
+     },
+     "status": "done",
+     "ts": 1790949101.818
+    },
+    {
+     "kind": "note",
+     "label": "the AI could not write the ideas (The AI service refused the request (HTTP 400): No models loaded. Please load a model in the developer page or use the 'lms load' command.): I used the built-in sets",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949101.829
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949102.737
+    }
+   ],
+   "ts": 1790949101.718,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m17",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790949105.776
+  },
+  {
+   "id": "m18",
+   "role": "assistant",
+   "text": "Creating **eid mubarak ios 3d style** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J031",
+     "subject": "eid mubarak ios 3d style",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating eid mubarak ios 3d style",
+     "detail": null,
+     "status": "running",
+     "ts": 1790949105.798
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949105.83
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949105.841
+    },
+    {
+     "kind": "final",
+     "label": "started · J031",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949106.317
+    }
+   ],
+   "ts": 1790949105.776,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m19",
+   "role": "assistant",
+   "text": "**Eid mubarak ios 3d style** has no finished stickers to look at yet.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Eid mubarak ios 3d style",
+     "detail": null,
+     "status": "running",
+     "ts": 1790949134.177
+    },
+    {
+     "kind": "step",
+     "label": "looked at 0 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949135.23
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949135.241
+    }
+   ],
+   "ts": 1790949134.137,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m20",
+   "role": "user",
+   "text": "make him wear a coat in the winter",
+   "cards": [],
+   "steps": [],
+   "ts": 1790949151.383
+  },
+  {
+   "id": "m21",
+   "role": "assistant",
+   "text": "Here's the plan for **him wear a coat**: 9 stickers, flat vector. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "him wear a coat",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "him wear coat waving",
+      "him wear coat dancing",
+      "him wear coat thank you",
+      "him wear coat thumbs up",
+      "him wear coat thinking",
+      "him wear coat sad",
+      "him wear coat facepalm",
+      "him wear coat dizzy",
+      "him wear coat yawning"
+     ],
+     "estimate": 2.0,
+     "balance": 3786.12,
+     "prompt": "make him wear a coat in the winter",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating him wear a coat in the winter",
+     "detail": null,
+     "status": "running",
+     "ts": 1790949151.404
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949151.441
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949151.455
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "him wear coat waving",
+       "him wear coat dancing",
+       "him wear coat thank you",
+       "him wear coat thumbs up",
+       "him wear coat thinking",
+       "him wear coat sad",
+       "him wear coat facepalm",
+       "him wear coat dizzy",
+       "him wear coat yawning"
+      ]
+     },
+     "status": "done",
+     "ts": 1790949151.477
+    },
+    {
+     "kind": "note",
+     "label": "the AI could not write the ideas (The AI service refused the request (HTTP 400): No models loaded. Please load a model in the developer page or use the 'lms load' command.): I used the built-in sets",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949151.488
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949151.818
+    }
+   ],
+   "ts": 1790949151.383,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m22",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790949532.684
+  },
+  {
+   "id": "m23",
+   "role": "assistant",
+   "text": "Creating **him wear a coat** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J032",
+     "subject": "him wear a coat",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating him wear a coat",
+     "detail": null,
+     "status": "running",
+     "ts": 1790949532.71
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949532.744
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949532.757
+    },
+    {
+     "kind": "final",
+     "label": "started · J032",
+     "detail": null,
+     "status": "done",
+     "ts": 1790949533.349
+    }
+   ],
+   "ts": 1790949532.684,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m24",
+   "role": "user",
+   "text": "anime kitten",
+   "cards": [],
+   "steps": [],
+   "ts": 1790953719.696
+  },
+  {
+   "id": "m25",
+   "role": "assistant",
+   "text": "Creator plan for **anime kitten**: 9 stickers, then the stickers animated, then to Telegram, stopping at each approval for one click from you. Telegram is not connected yet, so I will stop before sending. Shall I run it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "anime kitten",
+     "grid": "3x3",
+     "style": "flat vector",
+     "count": 9,
+     "names": [
+      "anime kitten blowing a kiss",
+      "anime kitten laughing",
+      "anime kitten in love",
+      "anime kitten winner",
+      "anime kitten eye roll",
+      "anime kitten sad",
+      "anime kitten angry",
+      "anime kitten mind blown",
+      "anime kitten cool"
+     ],
+     "estimate": 6.5,
+     "balance": 3779.62,
+     "prompt": "anime kitten",
+     "free": false,
+     "creator": {
+      "scope": "video",
+      "bypass": false,
+      "sheet": 2.0,
+      "video": 4.5
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating anime kitten",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953719.805
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953719.822
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953719.836
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "anime kitten blowing a kiss",
+       "anime kitten laughing",
+       "anime kitten in love",
+       "anime kitten winner",
+       "anime kitten eye roll",
+       "anime kitten sad",
+       "anime kitten angry",
+       "anime kitten mind blown",
+       "anime kitten cool"
+      ]
+     },
+     "status": "done",
+     "ts": 1790953719.865
+    },
+    {
+     "kind": "note",
+     "label": "the AI could not write the ideas (The AI service refused the request (HTTP 400): No models loaded. Please load a model in the developer page or use the 'lms load' command.): I used the built-in sets",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953719.876
+    },
+    {
+     "kind": "step",
+     "label": "creator: Draw the sheet > Cut and check > Look at the pictures > Approve the stickers > Animate > Approve the animations > Make the pack > Send to Telegram",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953720.852
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 6.5 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953720.872
+    }
+   ],
+   "ts": 1790953719.696,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create and send to Telegram",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m26",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1790953931.877
+  },
+  {
+   "id": "m27",
+   "role": "assistant",
+   "text": "Running the creator for **anime kitten**. I will stop and tell you if anything is rejected.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J035",
+     "subject": "anime kitten",
+     "parent": null,
+     "note": ""
+    },
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "creating anime kitten for Telegram",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953931.905
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953931.954
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: creator",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953931.969
+    },
+    {
+     "kind": "final",
+     "label": "started · J035",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953932.509
+    }
+   ],
+   "ts": 1790953931.877,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m28",
+   "role": "assistant",
+   "text": "**Anime kitten** has no finished stickers to look at yet.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Anime kitten",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953959.361
+    },
+    {
+     "kind": "step",
+     "label": "looked at 0 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953959.527
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953959.537
+    }
+   ],
+   "ts": 1790953959.334,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m29",
+   "role": "assistant",
+   "text": "**anime kitten**: the stickers are ready for your approval.",
+   "cards": [
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [],
+   "ts": 1790953960.646,
+   "chips": [
+    {
+     "label": "Approve and continue",
+     "action": "creator_go"
+    },
+    {
+     "label": "Stop",
+     "action": "creator_stop"
+    }
+   ]
+  },
+  {
+   "id": "m30",
+   "role": "user",
+   "text": "Approve and continue",
+   "cards": [],
+   "steps": [],
+   "ts": 1790953971.984
+  },
+  {
+   "id": "m31",
+   "role": "assistant",
+   "text": "Continuing.",
+   "cards": [
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953972.01
+    },
+    {
+     "kind": "step",
+     "label": "understood: the creator",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953972.051
+    },
+    {
+     "kind": "task",
+     "label": "continuing the creator",
+     "detail": null,
+     "status": "running",
+     "ts": 1790953972.066
+    },
+    {
+     "kind": "step",
+     "label": "approved",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953972.078
+    },
+    {
+     "kind": "final",
+     "label": "done",
+     "detail": null,
+     "status": "done",
+     "ts": 1790953972.09
+    }
+   ],
+   "ts": 1790953971.984,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m32",
+   "role": "assistant",
+   "text": "**anime kitten**: stopped, Python blocked the animation of S1, S2, S3, S4, S5, S6, S7, S8, S9 (a block is final).",
+   "cards": [
+    {
+     "type": "creator",
+     "run_id": "C953932544"
+    }
+   ],
+   "steps": [],
+   "ts": 1790954080.522,
+   "chips": [
+    {
+     "label": "Continue without S1, S2, S3, S4, S5, S6, S7, S8, S9",
+     "action": "creator_skip",
+     "indexes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    },
+    {
+     "label": "Stop",
+     "action": "creator_stop"
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "named": [
+  "G097",
+  "G099"
+ ],
+ "creator_run": {
+  "id": "C953932544",
+  "prompt": "anime kitten",
+  "subject": "anime kitten",
+  "grid": "3x3",
+  "style_id": "flat_vector",
+  "scope": "video",
+  "bypass": false,
+  "estimate": 2.0,
+  "video_estimate": 4.5,
+  "approved_credits": 6.5,
+  "step": "video",
+  "status": "stopped",
+  "generation": "G099",
+  "job": "J035",
+  "video_job": "J036",
+  "pack_id": null,
+  "skip": [],
+  "waiting": null,
+  "stop": {
+   "why": "Python blocked the animation of S1, S2, S3, S4, S5, S6, S7, S8, S9 (a block is final).",
+   "kind": "rejection",
+   "chips": [
+    {
+     "label": "Continue without S1, S2, S3, S4, S5, S6, S7, S8, S9",
+     "action": "creator_skip",
+     "indexes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    },
+    {
+     "label": "Stop",
+     "action": "creator_stop"
+    }
+   ]
+  },
+  "telegram": null,
+  "log": [
+   {
+    "ts": 1790953932.545,
+    "text": "started: the sheet is being drawn"
+   },
+   {
+    "ts": 1790953957.914,
+    "text": "the sheet arrived as G099"
+   },
+   {
+    "ts": 1790953960.442,
+    "text": "9 stickers cut and checked"
+   },
+   {
+    "ts": 1790953960.645,
+    "text": "the vision model found nothing to reject (0 looked at)"
+   },
+   {
+    "ts": 1790953960.646,
+    "text": "waiting: the stickers are ready for your approval"
+   },
+   {
+    "ts": 1790953972.066,
+    "text": "you chose: creator_go"
+   },
+   {
+    "ts": 1790953972.234,
+    "text": "approved 9 stickers"
+   },
+   {
+    "ts": 1790953976.472,
+    "text": "animation started (about 4.5 credits)"
+   },
+   {
+    "ts": 1790954080.522,
+    "text": "stopped: Python blocked the animation of S1, S2, S3, S4, S5, S6, S7, S8, S9 (a block is final)."
+   }
+  ],
+  "started": 1790953932.545,
+  "updated": 1790954080.522,
+  "said": "stopped:video",
+  "g2_ok": true
+ }
+}

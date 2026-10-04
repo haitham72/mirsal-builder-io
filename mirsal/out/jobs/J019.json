@@ -1,0 +1,37 @@
+{
+  "id": "J019",
+  "kind": "sheet",
+  "task": "014",
+  "generation": "G011",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a i need superman transformed into a watermelon: ONE single character, its whole body is a watermelon (the watermelon's own shape, colour and texture), with the i need superman's face, expression and personality on it; it is not a i need superman standing next to a watermelon, not a i need superman holding or wearing a watermelon, and not a i need superman with a watermelon pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: dancing joyfully, the whole watermelon shape swaying and wiggling side to side, eyes closed, big smile\nCharacter 2: shocked, eyes huge, mouth wide open, the watermelon body jolting upright\nCharacter 3: squashed flat like a cartoon, the watermelon shape pressed wide and short, dazed face, stars circling\nCharacter 4: blowing a kiss with a wink, a small heart floating away\nCharacter 5: hands pressed together in thanks, eyes closed, grateful smile\nCharacter 6: holding a golden trophy overhead, triumphant\nCharacter 7: rolling eyes with a bored deadpan face\nCharacter 8: sad and drooping, a single tear, slumped shoulders\nCharacter 9: furious, steaming, fists clenched, deep scowl\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "i need superman as watermelon",
+    "refs": [],
+    "outline": null,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "76dc6758-b471-47d4-b33e-ff03ee477c62",
+  "result": {
+    "file": "jobs/J019/result.png",
+    "sha256": "d542b07c51f5c65db5e330a5eb7f67c96c5b2d795644eedebb0f1d94bcf6c15f",
+    "bytes": 5517786
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790907260.28,
+  "claimed_at": 1790907261.444,
+  "completed_at": 1790907284.454,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

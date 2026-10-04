@@ -1,0 +1,183 @@
+{
+  "id": "P006",
+  "name": "Batman Lego · AI pieces (G100)",
+  "created": 1791084066.145,
+  "user": "python",
+  "elements": [
+    "bat signal",
+    "lego brick",
+    "cape piece",
+    "megaphone"
+  ],
+  "source": {
+    "sticker_ids": [
+      "1e01c5a6",
+      "3b2619d9",
+      "3b008026",
+      "5eab9cd4",
+      "cce6b857",
+      "5b331894",
+      "d0b30b39",
+      "2270fe74"
+    ],
+    "kind": "drawn",
+    "effect": "E008",
+    "generation": "G100",
+    "particles": true,
+    "job": "J040",
+    "grid": [
+      2,
+      2
+    ],
+    "by": null,
+    "options": []
+  },
+  "plan": {
+    "subject": "Batman Lego",
+    "style": "glossy cartoon look, bold clean shapes, vivid colours"
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 1,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "bat_signal",
+      "sprite": true,
+      "w": 528,
+      "h": 594,
+      "picked": true,
+      "created": 1791084066.145,
+      "import": "E008/G100/S1"
+    },
+    {
+      "n": 2,
+      "cell": 2,
+      "file": "cells/c02.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "lego_brick",
+      "sprite": true,
+      "w": 709,
+      "h": 501,
+      "picked": true,
+      "created": 1791084066.145,
+      "import": "E008/G100/S2"
+    },
+    {
+      "n": 3,
+      "cell": 3,
+      "file": "cells/c03.png",
+      "status": "READY",
+      "warnings": [
+        "holes"
+      ],
+      "key": "cape_piece",
+      "sprite": true,
+      "w": 639,
+      "h": 660,
+      "picked": true,
+      "created": 1791084066.145,
+      "import": "E008/G100/S3"
+    },
+    {
+      "n": 4,
+      "cell": 4,
+      "file": "cells/c04.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "megaphone",
+      "sprite": true,
+      "w": 626,
+      "h": 494,
+      "picked": true,
+      "created": 1791084066.145,
+      "import": "E008/G100/S4"
+    }
+  ],
+  "motion": {},
+  "saved_at": 1790991889.726,
+  "owner": [
+    {
+      "sticker_id": "1e01c5a6",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 1
+    },
+    {
+      "sticker_id": "3b2619d9",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 3
+    },
+    {
+      "sticker_id": "3b008026",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 4
+    },
+    {
+      "sticker_id": "5eab9cd4",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 5
+    },
+    {
+      "sticker_id": "cce6b857",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 6
+    },
+    {
+      "sticker_id": "5b331894",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 7
+    },
+    {
+      "sticker_id": "d0b30b39",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 8
+    },
+    {
+      "sticker_id": "2270fe74",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 9
+    }
+  ],
+  "renders": [],
+  "credits": 2.0,
+  "notes": [],
+  "history": [
+    {
+      "ts": 1791084066.146,
+      "actor": "python",
+      "decision": "CREATE",
+      "reason": "from E008: 4 cell(s), 1 pack(s)",
+      "detail": {
+        "effect": "E008",
+        "generation": "G100"
+      }
+    },
+    {
+      "ts": 1791084066.148,
+      "actor": "python",
+      "decision": "ADOPT",
+      "reason": "saved as a row from the drawn sheet G100 of E008",
+      "detail": {
+        "effect": "E008",
+        "generation": "G100"
+      }
+    }
+  ],
+  "imports": [
+    "E008/G100/S1",
+    "E008/G100/S2",
+    "E008/G100/S3",
+    "E008/G100/S4"
+  ],
+  "updated": 1791084066.148
+}

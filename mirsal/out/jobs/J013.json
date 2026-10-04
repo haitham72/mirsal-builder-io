@@ -1,0 +1,36 @@
+{
+  "id": "J013",
+  "kind": "sheet",
+  "task": "009",
+  "generation": "G006",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a pair of bright red cherries with green stems, round and shiny, always paired together.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: cherries smiling sweetly with eyes closed and leaning into each other lovingly\nCharacter 2: cherries blushing deeply with shy eyes and holding stems tightly\nCharacter 3: cherries jumping up joyfully with wide grins and stems high\nCharacter 4: cherries sitting side by side with one cherry reaching out to touch the other\nCharacter 5: cherries spinning slowly together in a loving embrace\nCharacter 6: cherries leaning backward with eyes wide in surprise and stems tangled\nCharacter 7: cherries lying down on their sides with sleepy half-closed eyes\nCharacter 8: cherries standing proud with chests out and smiling confidently\nCharacter 9: cherries looking mischievous with sly smiles and one cherry winking\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "cherries in love",
+    "refs": [],
+    "outline": 0
+  },
+  "status": "DONE",
+  "external_task_id": "220670b3-3b95-4f62-bbf7-8d14b758a841",
+  "result": {
+    "file": "jobs/J013/result.png",
+    "sha256": "be0a85f3d055f8ecd9a02bf26225d4aee660e3d93368130c595f4ae96b43bd01",
+    "bytes": 4096494
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790878708.39,
+  "claimed_at": 1790878709.66,
+  "completed_at": 1790878733.074,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

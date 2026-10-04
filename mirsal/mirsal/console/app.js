@@ -3,10 +3,13 @@
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api=async(u,o)=>{const r=await fetch(u,o);let j={};try{j=await r.json()}catch(e){}return{ok:r.ok,status:r.status,j}};
-const post=(u,b)=>api(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});
+const post=(u,b,h)=>api(u,{method:'POST',headers:{'Content-Type':'application/json',...(h||{})},body:JSON.stringify(b||{})});
+/* one key per click: a retry or a second tab with the same key is answered with the first result, never run (and paid) twice */
+const ikey=()=>(self.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
 let toastT=0;function toast(m,bad){const t=$('toast');t.textContent=m||'';t.className=(m?'on ':'')+(bad?'bad':'');clearTimeout(toastT);if(m)toastT=setTimeout(()=>t.className='',bad?6000:3500)}
 const say=t=>{const m=$('msg');if(m)m.innerHTML=t||''};   // callers escape what they pass
 const ICONS={
+ ai:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM5.5 16l.6 1.6 1.6.6-1.6.6L5.5 20l-.6-1.7-1.6-.6 1.6-.6z"/>',panel:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/>',
  gen:'<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
  lib:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
  create:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
@@ -25,12 +28,12 @@ const ICONS={
  download:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',up:'<path d="M6 15l6-6 6 6"/>',down:'<path d="M6 9l6 6 6-6"/>',back:'<path d="M15 6l-6 6 6 6"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',hist:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',folder:'<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',film:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4v16M16 4v16M3 9h5M16 9h5M3 15h5M16 15h5"/>',telegram:'<path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/><path d="M9 13l8-6"/>',play:'<path d="M8 5l11 7-11 7z"/>',photo:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
- eyeb:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',check:'<path d="M5 12l5 5 9-10"/>',first:'<path d="M6 5v14M18 6l-9 6 9 6z"/>',last:'<path d="M18 5v14M6 6l9 6-9 6z"/>',prev:'<path d="M15 6l-6 6 6 6"/>',next:'<path d="M9 6l6 6-6 6"/>'};
+ eyeb:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',check:'<path d="M5 12l5 5 9-10"/>',first:'<path d="M6 5v14M18 6l-9 6 9 6z"/>',last:'<path d="M18 5v14M6 6l9 6-9 6z"/>',prev:'<path d="M15 6l-6 6 6 6"/>',next:'<path d="M9 6l6 6-6 6"/>',users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 4.8a3.2 3.2 0 0 1 0 6.4M17.5 13.6c2.1.6 3.5 2.6 3.5 5.4"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'};
 const ic=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
 
 /* ---------- actions (event delegation: no inline handler names, which can collide with Element methods such as animate()) */
 const ACT={};
-document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=ACT[el.dataset.act];if(f){e.preventDefault();f(el,e)}});
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=ACT[el.dataset.act];if(f){e.preventDefault();if(el.closest('#col2'))document.body.classList.remove('c2open');f(el,e)}});
 
 /* ---------- dialogs */
 function dlg(html){$('dlg').innerHTML=`<div class=dbox>${html}</div>`;$('dlg').classList.add('on')}
@@ -40,6 +43,8 @@ ACT.dlgx=closeDlg;
 let ASK=null;
 function askText(title,value,cb,ok='Save'){ASK=cb;dlg(`<h2>${esc(title)}</h2><input type=text id=askv value="${esc(value)}"><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=askok>${ok}</button></div>`);const i=$('askv');i.focus();i.select();i.onkeydown=e=>{if(e.key==='Enter')ACT.askok()}}
 ACT.askok=()=>{const v=$('askv').value.trim();closeDlg();if(v&&ASK)ASK(v)};
+/* a sticker's id (G103/S2) is its own control, never part of its name: hover shows it, one click copies it (P5 of the UI/UX spec) */
+ACT.copyid=async el=>{const v=el.dataset.v||'';if(!v)return;try{await navigator.clipboard.writeText(v);toast('Copied '+v)}catch(e){toast(v+' (copy it from here)')}};
 function confirmDlg(msg,cb,ok='Delete'){ASK=cb;dlg(`<h2>${esc(msg)}</h2><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=cfok>${ok}</button></div>`)}
 ACT.cfok=()=>{closeDlg();if(ASK)ASK()};
 let PK=null;
@@ -57,19 +62,25 @@ const coverMedia=p=>{const s=p.stickers.find(x=>x.id===p.cover)||p.stickers[0];r
 const packById=id=>LIB.packs.find(p=>p.id===id);
 
 /* ---------- router */
-const SCREENS=['generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
-const RAIL=[['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
+const SCREENS=['agent','effects','generate','history','library','create','editor','pack','export','settings','animate','chat','prepare','users'],RENDER={};
+const RAIL=[['agent','ai','AI'],['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['users','users','Users'],['settings','settings','Settings']],RAILOF={effects:'create',pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
 let route_='generate',PACK_ID=null;
-function drawRail(){$('rail').innerHTML=`<div class=logo><img src=/assets/brand/mirsal-logo.png alt=Mirsal></div>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
+function drawRail(){$('c2tog').innerHTML=ic('panel');$('rail').innerHTML=`<button class=logo data-act=home title="Home: the welcome" aria-label="Mirsal home"><img src=/assets/brand/mirsal-logo.png alt=""></button>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
+/* narrow screens: the second column is a drawer (studio.css, 'the shell on narrow screens') */
+ACT.c2tog=()=>document.body.classList.toggle('c2open');
 ACT.nav=el=>{location.hash='#/'+(el.dataset.to==='generate'?'studio':el.dataset.to)};
-function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'agent',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'agent';document.body.classList.toggle('agent-view',route_==='agent');
+function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'agent',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'agent';document.body.classList.remove('c2open');
  SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCol2();if(RENDER[route_])RENDER[route_](a)}
 window.addEventListener('hashchange',route);
 
 /* ---------- second column: packs (occupies the chat-list position of the Mirsal mockup; every row is a real pack) */
 let C2Q='';
-function drawCol2(){const on=['library','pack','chat','agent'].includes(route_);document.body.classList.toggle('col2',on);if(!on)return;
+/* the second column of a section: the list that belongs to it, in the same place on every screen. Studio and Create list the earlier batches (live.js); Settings and the full-screen tools (editor, export, prepare, animate) have no list */
+const COL2=['agent','generate','library','pack','chat','create','users'];
+function drawCol2(){const on=COL2.includes(route_);document.body.classList.toggle('col2',on);if(!on)return;
+ if(route_==='generate'||route_==='create')return typeof histCol==='function'?histCol():0;
  if(route_==='chat')return chList();
+ if(route_==='users')return typeof usCol==='function'?usCol():0;
  if(route_==='agent')return typeof agList==='function'?agList():0;
  const q=C2Q.trim().toLowerCase(),cur=route_==='pack'?PACK_ID:null;
  $('col2').innerHTML=`<div class=c2h><h1>Packs</h1><button class=iconbtn data-act=newpack title="New pack">${ic('plus')}</button></div>
@@ -85,6 +96,12 @@ const selRefresh=()=>{if(route_==='pack')drawPack();else if(route_==='library')l
 ACT.lsel=el=>{const k=selKey(el.dataset.p,el.dataset.id);if(SEL.has(k))SEL.delete(k);else SEL.set(k,{pack_id:el.dataset.p,id:el.dataset.id});selRefresh()};
 ACT.lselall=()=>{(route_==='pack'?(packById(PACK_ID)||{stickers:[]}).stickers.map(s=>({pack_id:PACK_ID,id:s.id})):LCL.map(s=>({pack_id:s.pack_id,id:s.id}))).forEach(x=>SEL.set(selKey(x.pack_id,x.id),x));selRefresh()};
 ACT.lselnone=()=>{SEL.clear();selRefresh()};
+/* the whole selection into one pack in ONE request (all or nothing); the selection is cleared only when it moved */
+async function moveSelection(to){const items=[...SEL.values()];if(!items.length)return false;
+  const r=await post('/api/stickers/move',{to,items});if(!r.ok){toast(r.j.error||'Could not move',1);return false}
+  SEL.clear();await loadLib();drawCol2();selRefresh();const p=packById(to);
+  toast(`Moved ${r.j.moved} sticker${r.j.moved===1?'':'s'} to ${p?p.name:'the pack'}${r.j.skipped?` (${r.j.skipped} already there)`:''}`);return true}
+ACT.lselmove=()=>{if(SEL.size)pickPack(pid=>moveSelection(pid),`Move ${SEL.size} sticker${SEL.size===1?'':'s'} to`)};
 ACT.lseldel=()=>{const items=[...SEL.values()];if(!items.length)return;
   confirmDlg(`Delete ${items.length} sticker${items.length===1?'':'s'}? This cannot be undone.`,async()=>{const r=await post('/api/stickers/delete',{items});if(!r.ok)return toast(r.j.error,1);
     SEL.clear();await loadLib();drawCol2();selRefresh();toast(`Deleted ${r.j.deleted} sticker${r.j.deleted===1?'':'s'}`)})};
@@ -124,19 +141,21 @@ document.addEventListener('click',e=>{if(Date.now()<MQ.quiet){e.stopPropagation(
 document.addEventListener('keydown',e=>{if(!['pack','library'].includes(route_)||/input|textarea|select/i.test((document.activeElement||{}).tagName||'')||$('dlg').classList.contains('on')||$('modal').classList.contains('on'))return;
   if(e.key==='Escape'&&SEL.size){SEL.clear();selRefresh()}
   else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'&&document.querySelector('.grid.selgrid')){e.preventDefault();ACT.lselall()}});
-function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
+function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn sm" data-act=lselmove title="Move all the selected stickers into one pack (or a new one)">${ic('lib')} Move ${SEL.size} to…</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
 RENDER.library=async()=>{await loadLib();drawCol2();
- $('s-library').innerHTML=`<div style="max-width:1000px;margin:0 auto"><div class=sh>${ic('sticker')} Sticker Library</div>
-  <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
-  <div class=tabs><button class="tab ${LIBTAB==='recent'?'on':''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB==='mine'?'on':''}" data-act=libtab data-t=mine>My Stickers</button></div>
-  <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
- $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
+  $('s-library').innerHTML=`<div class=page><div class=ph><h1>Sticker Library</h1></div>
+   <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
+   <div class=tabs><button class="tab ${LIBTAB==='recent'?'on':''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB==='mine'?'on':''}" data-act=libtab data-t=mine>My Stickers</button><button class="tab ${LIBTAB==='particles'?'on':''}" data-act=libtab data-t=particles>Particles</button><button class="tab ${LIBTAB==='trending'?'on':''}" data-act=libtab data-t=trending>Trending</button></div>
+   <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
+  $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
 ACT.libtab=el=>{LIBTAB=el.dataset.t;RENDER.library()};
 ACT.seeall=el=>{if(el.dataset.k==='st'){LIBTAB='mine'}else PACKS_ALL=!PACKS_ALL;RENDER.library()};
 function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.emoji+' '+(s.pack||'')).toLowerCase().includes(q);
  const stTile=(s,i)=>`<div class=st data-act=lcopen data-i=${i} title="${esc(s.name)}">${media(s)}<span class=em>${esc(s.emoji)}</span></div>`;
- let h='';
- if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Make a pack in the Studio, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Open Studio</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
+  let h='';
+  if(LIBTAB==='particles'){h=typeof spLibHtml==='function'?spLibHtml():'';if(typeof spLibSync==='function')spLibSync()}
+  else if(LIBTAB==='trending'){h='<div id=tr-box></div>';if(typeof trLoad==='function')setTimeout(trLoad)}
+  else if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Make a pack in the Studio, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Open Studio</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
  else if(LIBTAB==='recent'){const rs=LIB.recent.filter(hit),ps=LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q)||p.stickers.some(hit)),shown=PACKS_ALL?ps:ps.slice(0,4);
   LCL=rs;
   h=`<div class=row style="justify-content:space-between;margin:6px 0"><h2>Recent</h2><button class=seeall data-act=seeall data-k=st>See all ${ic('chev')}</button></div><div class=strip>${rs.map(stTile).join('')||'<span class=mut>No matches.</span>'}</div>
@@ -149,9 +168,9 @@ ACT.openpack=el=>{location.hash='#/pack/'+el.dataset.id};
 ACT.newpack=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');
 
 /* ---------- Settings */
-RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{};
- $('s-settings').innerHTML=`<div style="max-width:760px;margin:0 auto"><h1>Settings & health</h1><div class=card style="margin-top:12px"><div class=kv>
-  <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span><span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
-  <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span></div></div>
+RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{},staff=(typeof AUV==='undefined')||AUV.staff((typeof ME==='undefined')?null:ME);
+ $('s-settings').innerHTML=`<div class=page><div class=ph><h1>Settings & health</h1></div><div class=card style="margin-top:12px"><div class=kv>
+  <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span>${staff?`<span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
+  <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span>`:''}</div></div>
   <div class=card style="margin-top:16px"><h2>AI expansion</h2>${ai.configured?`<div class=kv><span>model</span><span><b>${esc(ai.model)}</b></span></div><div class=mut>Type a subject and the AI expands it into the full set, with a key name, tags and emoji for every sticker (Studio, Prompt).</div>`:`<div class=mut>Off. Add <code>OPENAI_API_KEY=…</code> to <code>mirsal/.env</code> (git-ignored) and restart the server: the AI then expands a subject and names every sticker. Until then the built-in sets are used.</div>`}</div>
   ${tgc}<p class=mut style="margin-top:16px">Photo cutout uses the engine's chroma key for green/blue screens and OpenCV GrabCut otherwise (offline). A learned matte model is planned for Phase 3C.</p></div>`};

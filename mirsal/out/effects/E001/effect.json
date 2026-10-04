@@ -1,0 +1,155 @@
+{
+  "id": "E001",
+  "created": 1790983945.145,
+  "user": "local",
+  "pack_id": "20b742ee",
+  "pack_name": "Batman Lego",
+  "mode": "sim",
+  "grid": [
+    2,
+    2
+  ],
+  "note": "",
+  "title": "Batman Lego · effects",
+  "status": "RESULTS",
+  "stickers": [
+    {
+      "sticker_id": "1e01c5a6",
+      "name": "Batman lego ready to fight",
+      "emoji": "🦇👊",
+      "file": "G002/vid-batman_lego-ready_to_fight-batman_lego-20261001T170145-414732.webm",
+      "type": "animated",
+      "src": "src/1e01c5a6.png"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "1e01c5a6"
+      ],
+      "moods": {
+        "1e01c5a6": "excited"
+      },
+      "preset": {
+        "1e01c5a6": "burst"
+      },
+      "by": "vlm",
+      "sprites": "own"
+    }
+  ],
+  "results": [
+    {
+      "id": "R001",
+      "mode": "sim",
+      "group": "g1",
+      "sticker_id": "1e01c5a6",
+      "file": "results/R001.webm",
+      "bytes": 213949,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 38,
+        "kb": 208.9,
+        "label": "1e01c5a6 burst",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.3138
+      },
+      "params": {
+        "gravity": 1.0,
+        "magnitude": 1.0,
+        "vortex": 0.0,
+        "count": 28,
+        "size_min": 0.1,
+        "size_max": 0.22,
+        "spin": 1.0,
+        "lifetime": 2.2,
+        "spread": 360.0,
+        "pop": 0.25,
+        "seed": 1,
+        "fps": 30.0,
+        "duration": 3.0,
+        "size": 512,
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "show_source": false
+      }
+    }
+  ],
+  "video": {},
+  "history": [
+    {
+      "ts": 1790983945.145,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "1 sticker(s), sim",
+      "detail": null
+    },
+    {
+      "ts": 1790983947.5,
+      "actor": "python",
+      "decision": "ANALYSE",
+      "reason": "Batman Lego: bat signal, lego brick, cape piece",
+      "detail": {
+        "model": "qwen3.5-4b"
+      }
+    },
+    {
+      "ts": 1790984004.728,
+      "actor": "python",
+      "decision": "RENDER",
+      "reason": "1e01c5a6: READY 208 KB",
+      "detail": {
+        "result": "R001",
+        "warnings": []
+      }
+    },
+    {
+      "ts": 1791082944.283,
+      "actor": "python",
+      "decision": "SAVE",
+      "reason": "saved as particle set P004",
+      "detail": {
+        "set": "P004"
+      }
+    }
+  ],
+  "updated": 1791082944.283,
+  "per_sticker": {
+    "1e01c5a6": {
+      "subject": "Batman Lego",
+      "elements": [
+        "bat signal",
+        "lego brick",
+        "cape piece"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b"
+    }
+  },
+  "notes": [],
+  "analysed_by": "qwen3.5-4b",
+  "sets": [
+    "P004"
+  ]
+}

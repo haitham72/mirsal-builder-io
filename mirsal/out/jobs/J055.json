@@ -1,0 +1,58 @@
+{
+  "id": "J055",
+  "kind": "video",
+  "task": null,
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {},
+    "prompt": "Four small bursts play at the same time, one in each quarter, each centred in its quarter: top-left a tight fast vortex, top-right a wide gentle burst, bottom-left a slow lazy swirl and bottom-right a sharp pop that rises high. Everywhere the background is one seamless, flat, uniform, pure #00FF00 green: no texture, no shading or shadows, no pattern, no vignette. Static camera. Timeline: for the first 0.4 seconds there is only the green background. At 0.4 seconds each burst starts from the centre of its quarter: small sparkles, tiny stars and little confetti pieces, spiralling outward in a vortex and growing a little. From 1.2 seconds gravity pulls them down in arcs. From 2.6 seconds there is only the green background again until 3.0 seconds. Only the particles listed are drawn, small, never one large central angel reading. Look: glossy cartoon look, bold clean shapes, vivid colours.",
+    "t2v": true,
+    "label": "effect E016 g1",
+    "user": "local",
+    "effect": {
+      "id": "E016",
+      "group": "g1",
+      "grid": [
+        2,
+        2
+      ],
+      "template": "effect_video",
+      "version": 2,
+      "key": "green",
+      "plan": {
+        "subject": "angel reading",
+        "elements": [
+          "small sparkles",
+          "tiny stars",
+          "little confetti pieces"
+        ],
+        "style": "glossy cartoon look, bold clean shapes, vivid colours"
+      },
+      "particle_target": null
+    }
+  },
+  "status": "DONE",
+  "external_task_id": "b16dc424-22fe-4ad2-8242-e8a36f10209b",
+  "result": {
+    "file": "jobs/J055/result.mp4",
+    "sha256": "9fe51b8e8a8918a70cdf6df489d23ee000f16fa28633b16e4c67c044fb32bffb",
+    "bytes": 6571010
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1791084915.732,
+  "claimed_at": 1791084916.912,
+  "completed_at": 1791084990.945,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "downloading",
+  "waiting_pid": null
+}

@@ -1,0 +1,34 @@
+{
+  "id": "J009",
+  "kind": "video",
+  "task": "old man pixar style with glasses",
+  "generation": "G004",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {
+      "mode": "pro",
+      "duration": "3"
+    },
+    "prompt": "Animate this illustration sheet as a 3-second seamless loop. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. subtle head nod with slow blinking eyes\n2. shoulders bounce rhythmically as if chuckling\n3. slow hand movement stroking beard thoughtfully\n4. eyebrow slowly rises and lowers in suspicion\n5. head jerks back slightly as if startled\n6. cheeks glow red with slight head turning\n7. arms cross tighter as eyebrows knit in anger\n8. gentle head bobbing as if dozing off\n9. eye winks with slight head tilt and smirk\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.\nEnd on the starting pose so the clip loops.",
+    "start_image": "D:\\Vscode\\mirsal-builder-io\\mirsal\\out\\G004\\video_sheet\\A1\\sheet.png",
+    "sheet": "A1",
+    "label": "old man pixar style with glasses"
+  },
+  "status": "FAILED",
+  "external_task_id": "7891f0bc-628c-43b6-8c99-8108b4a782cb",
+  "result": null,
+  "cost": null,
+  "error": "Error: Higgsfield API error (HTTP 503). request failed with status 503 Service Unavailable",
+  "created_at": 1790875412.724,
+  "claimed_at": 1790875426.016,
+  "completed_at": 1790875522.728,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5
+}

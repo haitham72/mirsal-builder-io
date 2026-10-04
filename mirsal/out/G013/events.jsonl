@@ -1,0 +1,7 @@
+{"ts": 1790907923.193, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "5", "task_slug": "5"}}
+{"ts": 1790907923.241, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790907923.771, "stage": "sheet_picked", "status": "done", "ms": 530, "detail": {"subject": "5", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "warnings": []}}
+{"ts": 1790907923.773, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790907924.235, "stage": "keyed", "status": "done", "ms": 462, "detail": {"bg": [6, 253, 3], "threshold": [123.0, 123.0, 123.0, 124.5, 124.5, 124.5, 124.5, 124.5, 124.5], "grid": "3x3", "cut": "gutter", "xs": [0, 666, 1386, 2048], "ys": [0, 721, 1327, 2048]}}
+{"ts": 1790907924.237, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790907925.041, "stage": "sliced", "status": "done", "ms": 804, "detail": {"ready": 9, "failed": 0}}

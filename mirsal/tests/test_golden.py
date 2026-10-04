@@ -8,6 +8,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import cv2
 import numpy as np
@@ -15,6 +16,7 @@ from PIL import Image
 
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
+from mirsal.flow import pipeline as pl
 from tests import synth
 
 
@@ -43,6 +45,9 @@ def build_inputs(root: Path):
     put("blob", shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)]))
     put("quad", shape_sheet(1200, [(x, y) for y in (300, 900) for x in (300, 900)], r=110))
     put("solo", shape_sheet(1200, [(600, 600)], r=140))
+    touch = shape_sheet(1200, [(x, y) for y in (200, 600, 1000) for x in (200, 600, 1000)])         # two characters of the middle row are joined across the gutter
+    cv2.rectangle(touch, (200, 560), (600, 640), synth.YELLOW, -1)
+    put("touch", touch)
     d = root / "Images_gen" / "img-001-bad"; d.mkdir(parents=True)
     grey = np.full((1200, 1200, 3), 128, np.uint8)
     cv2.circle(grey, (600, 600), 200, synth.YELLOW, -1)
@@ -72,14 +77,25 @@ class Api(unittest.TestCase):
         except ValueError:
             return r.status, data
 
-    def wait(self, gid, pred, timeout=180):
-        end = time.time() + timeout
+    def wait(self, gid, pred, timeout=180, stuck=12):
+        """Poll until pred holds. A failure here used to cost 180 s of silence: an injected
+        AssertionError was swallowed by the broad `except Exception` in the cut path, the cell
+        stayed PROCESSING, and the timeout was the only symptom. Fail on NO PROGRESS rather than
+        on elapsed time, and always say why."""
+        end, last, since = time.time() + timeout, None, time.time()
         while time.time() < end:
             s, j = self.req("GET", f"/api/generations/{gid}")
             if pred(j) and not j["busy"]:
                 return j
+            snap = (j.get("stage"), j.get("error"),
+                    tuple(sorted((t["index"], t.get("anim_status"), t.get("anim_reason")) for t in j.get("stickers", []))))
+            if snap != last:
+                last, since = snap, time.time()
+            elif not j.get("busy") and time.time() - since > stuck:
+                self.fail(f"stuck at stage={snap[0]!r} for {stuck}s on {gid}: error={snap[1]!r}\n"
+                          + "\n".join(f"   S{i[0]} {i[1]} {i[2] or ''}" for i in snap[2]))
             time.sleep(0.25)
-        self.fail("timeout waiting for " + str(gid))
+        self.fail(f"timeout after {timeout}s on {gid}: stage={last[0]!r} error={last[1]!r}")
 
     def new(self, prompt, **kw):
         s, j = self.req("POST", "/api/generations", {"prompt": prompt, **kw})
@@ -98,7 +114,7 @@ class Api(unittest.TestCase):
         aid = j["sheet"]
         st = self.req("GET", f"/api/generations/{gid}")[1]
         e = next(v for v in st["video_sheets"] if v["id"] == aid)
-        base = self.tmp / "out" / st["generation_id"]
+        base = pl.out_path(self.tmp / "out", st["generation_id"])
         s, j = self.req("POST", f"/api/generations/{gid}/video_sheet/{aid}/video?name=v.mp4", raw=b"x")
         self.assertEqual(s, 409, j)                                        # G3 not approved yet
         self.review(gid, "video_sheet", "APPROVE", aid)
@@ -121,7 +137,7 @@ class GoldenPathTests(Api):
             self.assertEqual(s["history"][0]["actor"], "python")
         self.assertEqual((g["gate"]["active"], g["template_id"]), ("still", "sheet_3x3"))       # pressing Generate approved the plan (G1)
         self.assertEqual(g["reviews"]["plan"]["note"], "approved by pressing Generate")
-        self.assertTrue((self.tmp / "out" / g["generation_id"] / "source" / "plain" / "S5.png").exists())
+        self.assertTrue((pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "plain" / "S5.png").exists())
 
         # gate order, server side
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 409)       # no plan approval, no still decided
@@ -177,7 +193,7 @@ class GoldenPathTests(Api):
         # the final WEBMs have the outline exactly once (12 px ring, not 24)
         from mirsal.engine import ffmpeg as ff
         for i in (3, 4, 7, 8, 9):
-            a = ff.decode_alpha(self.tmp / "out" / g["generation_id"] / g["stickers"][i - 1]["webm"], 2)[0]
+            a = ff.decode_alpha(pl.out_path(self.tmp / "out", g["generation_id"]) / g["stickers"][i - 1]["webm"], 2)[0]
             opaque = a[..., 3] > 127
             subject = opaque & ~((a[..., :3].min(-1) > 235))
             dist = cv2.distanceTransform((~subject).astype(np.uint8), cv2.DIST_L2, 3)
@@ -205,9 +221,34 @@ class GoldenPathTests(Api):
         self.review(j["id"], "still", "APPROVE", 1, expect=409)                                # nobody can approve a FAILED sticker
         self.assertEqual(self.req("POST", f"/api/generations/{j['id']}/video_sheet")[0], 409)
 
+    def test_a_layout_problem_cuts_the_sheet_anyway_and_a_stopped_sheet_has_one_free_click(self):
+        """Haitham, 2026-10-02: "Python blocking the imported images is stupid, it does not let me bypass it". Two characters touching across the gutter used to throw the whole
+        sheet away (9 of 9 FAILED, no file). Now the sheet is cut, every cell is judged on its own, the problem is a warning on every sticker, and a human decides at G2. A sheet
+        with no key screen still stops, but one free click ("Cut it anyway") cuts it; a file that does not open is the only hard stop."""
+        gid, g = self.new("create a touch one")
+        sheet = next(c for c in g["verify"]["sheet"] if c["name"] == "grid_detected")
+        self.assertFalse(sheet["ok"], "the sheet really has a layout problem (the grid found is not the planned one)")
+        ready = [x for x in g["stickers"] if x["status"] == "READY"]
+        self.assertGreaterEqual(len(ready), 5, "the good cells survive")
+        self.assertFalse(any((x.get("metrics") or {}).get("sheet_blocked") for x in g["stickers"]), "nothing is thrown away")
+        issue = [h for h in ready[0]["history"] if h["stage"] == "sheet"]
+        self.assertEqual((issue[0]["decision"], issue[0]["reason"]), ("WARN", "grid_detected"), "the problem is a warning, in the sticker's own history")
+        self.assertTrue(all(x["png"] for x in ready))
+        self.review(gid, "plan", "APPROVE")
+        self.review(gid, "still", "APPROVE", ready[0]["index"])                              # and a human can decide on a cell of such a sheet like on any other
+
+        bad_id, bad = self.new("create a bad one")                                          # no key screen at all: stopped, with the click
+        self.assertEqual({x["reason"] for x in bad["stickers"]}, {"background_is_key"})
+        self.assertEqual(self.req("POST", f"/api/generations/{bad_id}/recut")[0], 202)
+        cut = self.wait(bad_id, lambda x: any((h["decision"] == "APPROVE" and h["reason"] == "cut anyway") for h in x["stickers"][0]["history"]) and x["stage"] == "sliced")
+        self.assertTrue(any(x["png"] for x in cut["stickers"]) or all(x["reason"] != "background_is_key" or not (x.get("metrics") or {}).get("sheet_blocked") for x in cut["stickers"]),
+                        "the sheet was cut: the cells are judged one by one now")
+        self.assertFalse(any((x.get("metrics") or {}).get("sheet_blocked") for x in cut["stickers"]))
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/recut")[0], 409, "a batch with decisions is not cut again behind them")
+
     def test_the_outline_is_a_choice(self):
         """The white die-cut stroke is not forced: 0 gives the plain sticker, a width gives that stroke, both are stored with the generation."""
-        alpha = lambda g, rel: np.array(Image.open(self.tmp / "out" / g["generation_id"] / rel).convert("RGBA"))[..., 3]
+        alpha = lambda g, rel: np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / rel).convert("RGBA"))[..., 3]
         opaque = lambda a: int((a > 127).sum())
         gid0, g0 = self.new("create a blob for school", outline=0)
         gid12, g12 = self.new("create a blob for school")
@@ -226,16 +267,16 @@ class GoldenPathTests(Api):
         marks animations STALE so Animate redraws them. Bad values never touch the files."""
         from mirsal.engine.render import apply_edge
         gid, g = self.new("create a blob for school")
-        before = {s["png"]: (self.tmp / "out" / g["generation_id"] / s["png"]).read_bytes() for s in g["stickers"]}
-        plain_a = np.array(Image.open(self.tmp / "out" / g["generation_id"] / "source" / "plain" / "S1.png").convert("RGBA"))[..., 3]
+        before = {s["png"]: (pl.out_path(self.tmp / "out", g["generation_id"]) / s["png"]).read_bytes() for s in g["stickers"]}
+        plain_a = np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "plain" / "S1.png").convert("RGBA"))[..., 3]
         s, j = self.req("POST", f"/api/generations/{gid}/appearance", {"erode": 2})
         self.assertEqual(s, 200, j)
         self.assertEqual((j["outline_px"], j["erode_px"], j["rerendered"]), (12, 2, 9))
         g = self.req("GET", f"/api/generations/{gid}")[1]
         self.assertEqual((g["outline_px"], g["erode_px"]), (12, 2))
-        after = np.array(Image.open(self.tmp / "out" / g["generation_id"] / g["stickers"][0]["png"]).convert("RGBA"))
+        after = np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / g["stickers"][0]["png"]).convert("RGBA"))
         ring_free = int((((after[..., :3].min(-1) < 128) & (after[..., 3] > 127)).sum()))
-        plain_rgb = np.array(Image.open(self.tmp / "out" / g["generation_id"] / "source" / "plain" / "S1.png").convert("RGBA"))[..., :3]
+        plain_rgb = np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "plain" / "S1.png").convert("RGBA"))[..., :3]
         plain_dark = int(((plain_rgb.min(-1) < 128) & (plain_a > 127)).sum())
         self.assertLess(ring_free, plain_dark)                                 # erosion trimmed fringe, what remains is mostly the ring
         solid = (plain_a > 200)
@@ -245,7 +286,7 @@ class GoldenPathTests(Api):
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"erode": 99})[0], 400)
         s, j = self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 0, "erode": 0})
         self.assertEqual(s, 200, j)
-        self.assertTrue((np.array(Image.open(self.tmp / "out" / g["generation_id"] / g["stickers"][0]["png"]).convert("RGBA"))[..., 3]
+        self.assertTrue((np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / g["stickers"][0]["png"]).convert("RGBA"))[..., 3]
                                  == plain_a).all())                                            # outline 0 + erode 0 = the plain twin
         # the subject renders exactly once through alpha, even on white: composited over white == white where transparent
         fin = apply_edge(np.full((4, 4, 3), 128.0, np.float32), np.pad(np.ones((2, 2)), 1)[..., None].reshape(4, 4) / 1.0, 4, 0)
@@ -340,6 +381,40 @@ class GoldenPathTests(Api):
         g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
         self.assertEqual((g["stickers"][0]["anim_reason"], g["stickers"][0]["anim_override"]), ("inside_slot", []))
 
+    def test_switching_a_verdict_back_swaps_the_finished_clip_and_renders_nothing(self):
+        """The clip is the same under both verdicts, only the verdict differs: the first allow renders (no clip existed), every later allow / take-back of the same cell restores the finished
+        state at once (Haitham, 2026-10-03: it "loads and renders again ... as if it was deleted and generated from scratch")."""
+        from mirsal.flow import gates as G
+        gid, g = self.new("blob")
+        self.review(gid, "still", "APPROVE", "ready")
+        aid, g = self.drive_video(gid, drift={1: (-70, 0)})
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": True})[0], 202)
+        g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+        webm = g["stickers"][0]["webm"]
+        with mock.patch.object(G, "process_video", side_effect=AssertionError("a verdict switch must not render again")):
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": False})[0], 202)
+            g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
+            s1 = g["stickers"][0]
+            self.assertEqual((s1["anim_reason"], s1["anim_override"], s1["webm"]), ("inside_slot", [], webm), "blocked again, and the clip is still there to look at")
+            self.assertEqual(s1["review"]["anim"], "BLOCKED")
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": True})[0], 202)
+            g = self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "READY")
+            s1 = g["stickers"][0]
+            self.assertEqual((s1["anim_override"], s1["webm"], s1["review"]["anim"]), (["inside_slot"], webm, "PENDING"))
+            chk = next(c for c in s1["anim_report"] if c["name"] == "inside_slot")
+            self.assertEqual((chk["ok"], chk["severity"]), (False, "WARN"))
+            human = [x for x in s1["history"] if x["actor"] == "human" and x["stage"] == "video"]
+            self.assertEqual([x["decision"] for x in human], ["APPROVE", "REJECT", "APPROVE"], "every click is still a recorded decision")
+        # a new cut of the video throws the remembered state away: the next switch renders again
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 4, "erode": 0, "reslice": True})[0], 200)
+        g = self.wait(gid, lambda x: not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]))
+        rendered = []
+        real = G.process_video
+        with mock.patch.object(G, "process_video", side_effect=lambda *a, **k: (rendered.append(1), real(*a, **k))[1]):
+            self.assertEqual(self.req("POST", f"/api/generations/{gid}/allow", {"index": 1, "allow": False})[0], 202)
+            self.wait(gid, lambda x: x["stickers"][0]["anim_status"] == "FAILED")
+        self.assertTrue(rendered, "after a re-cut nothing is remembered, so the switch renders")
+
     def test_allow_all_and_every_cell_toggles(self):
         gid, g = self.new("blob")
         self.review(gid, "still", "APPROVE", "ready")
@@ -369,8 +444,8 @@ class GoldenPathTests(Api):
         aid = j["sheet"]
         self.review(gid, "video_sheet", "APPROVE", aid)
         other = self.tmp / "other.mp4"
-        layout = json.loads((self.tmp / "out" / g["generation_id"] / "video_sheet" / aid / "layout.json").read_text())
-        synth.make_layout_video(other, np.array(Image.open(self.tmp / "out" / g["generation_id"] / "video_sheet" / aid / "sheet.png").convert("RGB"))[::-1, ::-1].copy(), layout, size=600, frames=30)
+        layout = json.loads((pl.out_path(self.tmp / "out", g["generation_id"]) / "video_sheet" / aid / "layout.json").read_text())
+        synth.make_layout_video(other, np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / "video_sheet" / aid / "sheet.png").convert("RGB"))[::-1, ::-1].copy(), layout, size=600, frames=30)
         s, j = self.req("POST", f"/api/generations/{gid}/video_sheet/{aid}/video", raw=other.read_bytes())
         self.assertEqual(s, 202)
         g = self.wait(gid, lambda x: x["video_sheets"][0]["status"] in ("SLICED", "VIDEO_BLOCKED"))

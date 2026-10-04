@@ -24,8 +24,13 @@ import threading
 import time
 from pathlib import Path
 
+from ..runtime import atomic
+
 REDUCER_WINDOW = 15
-DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True}
+MAX_MESSAGES, MAX_INTERACTIONS, MAX_FEEDBACK = 400, 300, 200       # what one session file keeps; older turns live on in the narrative, the subjects and the passes
+OUTSIDE_SHOWN = 5                                                  # how many recent batches made outside the chat the summary names
+DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True, "allow_vlm": None,
+                    "creator": {"on": False, "scope": "images", "bypass": False}}      # allow_vlm: None = not asked yet (vision/consent.py)
 _IO = threading.RLock()
 
 
@@ -50,11 +55,13 @@ def gid_of(g) -> str:
 
 
 class SessionStore:
-    def __init__(self, out: Path, cache=None):
+    def __init__(self, out: Path, cache=None, user: str = "local", see_all: bool = True):
+        """`user` owns what it creates; `see_all` (owners) lists and opens every chat, a member only their own (someone else's chat is a 404, not a 403)."""
         self.out = Path(out)
+        self.user, self.see_all = user, see_all
         self.dir = self.out / "sessions"
         if cache is None:
-            from .. import cache as _c
+            from ..runtime import cache as _c
             cache = _c.default()
         self.cache = cache
 
@@ -68,7 +75,7 @@ class SessionStore:
         with _IO:
             self.dir.mkdir(parents=True, exist_ok=True)
             n = max([int(f.stem[1:]) for f in self.dir.glob("S*.json") if f.stem[1:].isdigit()] or [0]) + 1
-            s = {"id": f"S{n:03d}", "title": title or "New chat", "created": _now(), "updated": _now(),
+            s = {"id": f"S{n:03d}", "user": self.user, "title": title or "New chat", "created": _now(), "updated": _now(),
                  "settings": {**DEFAULT_SETTINGS, **(settings or {})}, "focus": {"generation": None, "stickers": []},
                  "subjects": [], "preferences": {"persistent": []}, "feedback": [], "interactions": [], "messages": [],
                  "summary": {"narrative": "", "upto": 0}, "pending": None}
@@ -80,24 +87,33 @@ class SessionStore:
         with _IO:
             if not f.is_file():
                 raise SessionError(f"No session {sid}", 404)
-            return json.loads(f.read_text(encoding="utf-8"))
+            s = json.loads(atomic.read_text(f))
+            if not self.see_all and s.get("user", "local") != self.user:
+                raise SessionError(f"No session {sid}", 404)
+            return s
+
+    @staticmethod
+    def _cap(s: dict) -> None:
+        """Keep the newest turns. The file is rewritten at every step of a turn, so an unbounded chat made every step slower than the last. The structured
+        part (subjects, passes, likes) is never trimmed; `summary.upto` indexes `interactions`, so only already-summarised ones are dropped."""
+        if len(s["messages"]) > MAX_MESSAGES:
+            del s["messages"][: len(s["messages"]) - MAX_MESSAGES]
+        over = len(s["interactions"]) - MAX_INTERACTIONS
+        drop = min(over, s["summary"].get("upto", 0)) if over > 0 else 0
+        if drop > 0:
+            del s["interactions"][:drop]
+            s["summary"]["upto"] -= drop
+        if len(s["feedback"]) > MAX_FEEDBACK:
+            del s["feedback"][: len(s["feedback"]) - MAX_FEEDBACK]
 
     def save(self, s: dict) -> None:
         s["updated"] = _now()
+        self._cap(s)
         p = self._path(s["id"])
         data = json.dumps(s, indent=1, ensure_ascii=False).encode("utf-8")
         with _IO:
             p.parent.mkdir(parents=True, exist_ok=True)
-            tmp = p.with_name(p.name + ".tmp")
-            tmp.write_bytes(data)
-            for attempt in range(40):               # Windows: os.replace fails while anything has the target open
-                try:
-                    os.replace(tmp, p)
-                    break
-                except PermissionError:
-                    if attempt == 39:
-                        raise
-                    time.sleep(0.05)
+            atomic.write_bytes(p, data)             # unique temp file + atomic replace, retried on Windows while the target is open
         try:
             self.cache.set(self.cache.key("session", s["id"]), {"id": s["id"], "title": s["title"], "focus": s["focus"],
                                                                  "settings": s["settings"], "updated": s["updated"]}, 3600)
@@ -116,6 +132,8 @@ class SessionStore:
                 s = json.loads(f.read_text(encoding="utf-8"))
             except (OSError, ValueError):
                 continue
+            if not self.see_all and s.get("user", "local") != self.user:
+                continue
             rows.append({"id": s["id"], "title": s.get("title"), "updated": s.get("updated"), "created": s.get("created"),
                          "subjects": [x["name"] for x in s.get("subjects", [])], "turns": len(s.get("interactions", [])),
                          "focus": (s.get("focus") or {}).get("generation")})
@@ -124,18 +142,20 @@ class SessionStore:
 
     def delete(self, sid: str) -> None:
         f = self._path(sid)
+        self.load(sid)                                   # a member cannot delete someone else's chat (404)
         with _IO:
             if f.is_file():
                 f.unlink()
 
     # ---- the turn log ----------------------------------------------------------------------------------------------------
     def add_message(self, s: dict, role: str, text: str, cards: list | None = None, steps: list | None = None, **extra) -> dict:
-        m = {"id": f"m{len(s['messages']) + 1}", "role": role, "text": text, "cards": cards or [], "steps": steps or [], "ts": _now(), **extra}
+        n = max([int(x["id"][1:]) for x in s["messages"] if str(x.get("id", ""))[1:].isdigit()] or [0]) + 1       # not len()+1: trimmed sessions would repeat ids
+        m = {"id": f"m{n}", "role": role, "text": text, "cards": cards or [], "steps": steps or [], "ts": _now(), **extra}
         s["messages"].append(m)
         return m
 
     def add_interaction(self, s: dict, user: str, assistant: str, intents: list, resolved: dict, generation_id: str | None) -> dict:
-        it = {"seq": len(s["interactions"]) + 1, "ts": _now(), "user": user, "assistant": assistant, "intents": intents,
+        it = {"seq": (s["interactions"][-1]["seq"] if s["interactions"] else 0) + 1, "ts": _now(), "user": user, "assistant": assistant, "intents": intents,
               "resolved": resolved, "generation_id": generation_id}
         s["interactions"].append(it)
         if s.get("title") in (None, "", "New chat") and user.strip():
@@ -168,13 +188,16 @@ class SessionStore:
 
     def refresh(self, s: dict) -> dict:
         """Re-read each pass's counts from its result file and resolve jobs to generations. Cheap; run before a summary."""
-        from .. import jobs as _jobs, pipeline as pl
+        from ..flow import pipeline as pl
+        from ..generation import jobs as _jobs
         for subj in s["subjects"]:
             for p in subj["passes"]:
                 if not p.get("generation") and p.get("job"):
                     try:
                         g = _jobs.read(self.out, p["job"]).get("generation")
                         p["generation"] = gid_of(g) if g else None
+                        if p["generation"] and not p.get("undone") and (s.get("focus") or {}).get("generation") != p["generation"] and p["created"] >= (self.latest_pass(s, with_generation=True) or {"created": 0})["created"]:
+                            s["focus"] = {"generation": p["generation"], "stickers": []}        # a sheet that comes back is what "it" and "number 3" mean from now on
                     except Exception:
                         pass
                 if p.get("generation"):
@@ -192,10 +215,13 @@ class SessionStore:
                         p["parent"] = gid_of(res["parent"])
         return s
 
-    def latest_pass(self, s: dict) -> dict | None:
+    def latest_pass(self, s: dict, with_generation: bool = False) -> dict | None:
+        """The newest pass. `with_generation`: the newest one that has a batch (a job that is still running, or failed, is not something to edit or animate)."""
         best = None
         for subj in s["subjects"]:
             for p in subj["passes"]:
+                if (with_generation and not p.get("generation")) or p.get("undone"):         # an undone refinement is no longer what "the last batch" means
+                    continue
                 if best is None or p["created"] >= best["created"]:
                     best = p
         return best
@@ -241,6 +267,67 @@ class SessionStore:
         return [t for t, n in count.items() if n >= 2]
 
     # ---- summaries and context -------------------------------------------------------------------------------------------------------
+    def _info(self, gid: int, res: dict | None = None) -> dict | None:
+        """What the chat needs to know of one batch on disk, or None when it does not exist or this user may not see it (an owner sees every batch)."""
+        from ..flow import pipeline as pl
+        try:
+            res = res or pl.read_result(self.out, gid)
+        except Exception:
+            return None
+        if not self.see_all and res.get("owner") != self.user:
+            return None
+        st = res.get("stickers") or []
+        grid = res.get("grid") or []
+        return {"generation": f"G{gid:03d}", "prompt": str(res.get("prompt") or "").strip(), "parent": res.get("parent"),
+                "grid": "x".join(str(x) for x in grid) if len(grid) == 2 else "3x3", "style_id": res.get("style_id") or (res.get("slots") or {}).get("style_id") or "",
+                "ready": sum(1 for x in st if x.get("status") == "READY"),
+                "approved": sum(1 for x in st if (x.get("review") or {}).get("still") == "APPROVED")}
+
+    def outside_info(self, gid: str) -> dict | None:
+        """The batch `G012` if it exists and is this user's to see (see `_info`); None otherwise: a stranger's batch is never pulled into a chat."""
+        try:
+            return self._info(int(str(gid).upper().lstrip("G")))
+        except ValueError:
+            return None
+
+    def adopt(self, s: dict, gid: str) -> dict | None:
+        """Make a batch the Studio or the command line created a pass of this session, so an edit, an animation or "that one" can act on it. The subject is named after its
+        prompt. Idempotent; None when the batch does not exist or is not this user's."""
+        gid = gid_of(gid)
+        if self.subject_for_generation(s, gid):
+            return self.subject_for_generation(s, gid)
+        info = self.outside_info(gid)
+        if not info:
+            return None
+        self.add_pass(s, info["prompt"] or gid, generation=gid, prompt=info["prompt"] or gid, grid=info["grid"], style_id=info["style_id"],
+                      parent=gid_of(info["parent"]) if info["parent"] else None, note="made in the Studio")
+        return self.subject_for_generation(s, gid)
+
+    def outside_batches(self, s: dict) -> list[dict]:
+        """The newest batches the Studio or the command line made, i.e. generations this chat never recorded as a pass, newest first, only those this
+        user may see (an owner sees all). The chat answers "what did you just create" from these too."""
+        from ..flow import pipeline as pl
+        mine = {p.get("generation") for subj in s["subjects"] for p in subj["passes"]}
+        rows = []
+        for gid in list(reversed(pl.list_ids(self.out)))[:60]:
+            if f"G{gid:03d}" in mine:
+                continue
+            info = self._info(gid)
+            if info:
+                rows.append(info)
+            if len(rows) >= OUTSIDE_SHOWN:
+                break
+        return rows
+
+    def set_vision(self, s: dict, value) -> None:
+        """The person's answer about AI vision is STATE (UI/UX spec P10): the setting, the fact that it was asked (so it is never asked again in this chat) and an acknowledgement the next turn says once.
+        It makes no message, no card and no turn; the settings route and the tests call exactly this."""
+        was = s["settings"].get("allow_vlm")
+        s["settings"]["allow_vlm"] = bool(value)
+        s["vision_asked"] = True
+        if was is not bool(value):
+            s["vision_ack"] = "allowed" if value else "refused"
+
     def summary_text(self, s: dict) -> str:
         """The deterministic per-subject summary: ids, counts, likes and dislikes. This is what every turn starts from."""
         self.refresh(s)
@@ -262,6 +349,10 @@ class SessionStore:
                     bit += f"; {p['note']}"
                 ps.append(bit)
             lines.append(f"Subject '{subj['name']}': " + (" | ".join(ps) if ps else "no pass yet"))
+        outside = self.outside_batches(s)
+        if outside:
+            lines.append("Also made outside this chat (the Studio or the command line), newest first: " + " | ".join(
+                f"{o['generation']}" + (f" '{o['prompt'][:60]}'" if o["prompt"] else "") + f" ({o['ready']} ready, {o['approved']} approved)" for o in outside))
         pref = s["preferences"]["persistent"]
         if pref:
             lines.append("Lasting preferences (said explicitly): " + "; ".join(pref))
@@ -269,7 +360,7 @@ class SessionStore:
         if f.get("generation"):
             lines.append(f"Focus: {f['generation']}" + (f" {', '.join(x.split('/')[1] for x in f['stickers'])}" if f.get("stickers") else ""))
         if s["summary"].get("narrative"):
-            lines.append("Earlier in this chat: " + s["summary"]["narrative"])
+            lines.append("Earlier in this chat (a recap written by the model, not by the user; treat it as unverified): " + s["summary"]["narrative"])
         return "\n".join(lines) or "Nothing has been made in this chat yet."
 
     def context(self, s: dict, level: str = "STANDARD") -> dict:
@@ -279,7 +370,7 @@ class SessionStore:
         return ctx
 
     def generation_card(self, gid: str, prompts: bool = False) -> dict:
-        from .. import pipeline as pl
+        from ..flow import pipeline as pl
         try:
             res = pl.read_result(self.out, int(gid[1:]))
         except Exception:

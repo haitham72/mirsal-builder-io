@@ -60,14 +60,14 @@ class PoolTests(unittest.TestCase):
         return db.connect()
 
     def test_parse(self):
-        from mirsal import pool
+        from mirsal.store import pool
         self.assertEqual(pool.parse_query("falcon dancing"), {"subject": "falcon", "action": "dancing", "topics": []})
         self.assertEqual(pool.parse_query("falcon doing a flip")["action"], "a flip")
         self.assertEqual(pool.parse_query("dog as banana")["subject"], "dog as banana")  # 4B refines this
         self.assertEqual(pool.parse_query("sakr yarkos")["action"], "")
 
     def test_search_first_reuses(self):
-        from mirsal import pool
+        from mirsal.store import pool
         with self._conn() as c:
             pool.reindex(c)
             c.execute("UPDATE sticker_index SET hidden = false WHERE sticker_id = 'G101/S1'")
@@ -78,7 +78,7 @@ class PoolTests(unittest.TestCase):
         self.assertEqual((res["found"], res["missing"]), (len(res["hits"]), 9 - len(res["hits"])))
 
     def test_diversity_and_zero_rule(self):
-        from mirsal import pool
+        from mirsal.store import pool
         with self._conn() as c:
             pool.reindex(c)
             res = pool.search(c, "poolxyz", count=9, vectors=False)
@@ -90,7 +90,7 @@ class PoolTests(unittest.TestCase):
             self.assertEqual(pool.search(c, "penguin skiing", vectors=False)["hits"], [])
 
     def test_hide_removes_without_deleting(self):
-        from mirsal import pool
+        from mirsal.store import pool
         from mirsal.store import repo
         with self._conn() as c:
             pool.reindex(c)
@@ -120,7 +120,7 @@ class PoolTests(unittest.TestCase):
         return embedder
 
     def test_vectors_fill_once_and_status_counts_them(self):
-        from mirsal import pool
+        from mirsal.store import pool
         emb = self._fake_embedder()
         with self._conn() as c:
             c.execute("UPDATE sticker_index SET subject_vec = NULL, action_vec = NULL")
@@ -136,7 +136,7 @@ class PoolTests(unittest.TestCase):
             c.commit()
 
     def test_vector_search_ranks_gates_and_never_returns_junk(self):
-        from mirsal import pool
+        from mirsal.store import pool
         emb = self._fake_embedder()
         with self._conn() as c:
             pool.reindex(c)
@@ -157,7 +157,7 @@ class PoolTests(unittest.TestCase):
                 c.commit()
 
     def test_a_row_without_vectors_is_still_found_lexically(self):
-        from mirsal import pool
+        from mirsal.store import pool
         emb = self._fake_embedder()
         with self._conn() as c:
             pool.reindex(c)
@@ -174,7 +174,7 @@ class PoolTests(unittest.TestCase):
 
     def test_lexical_words_do_not_match_inside_other_words(self):
         """The first real search on real data returned old-man stickers for "batman": trigram overlap of "man"."""
-        from mirsal import pool
+        from mirsal.store import pool
         self.assertLess(pool._close("batman", "man"), 0.75)
         self.assertFalse(pool._cover(["batman"], ["old", "man", "sleepy"])[0])
         self.assertTrue(pool._cover(["tedy", "bok"], ["teddy", "bear", "book"])[0])          # typos still match

@@ -1,0 +1,32 @@
+{
+  "id": "J002",
+  "kind": "sheet",
+  "task": "003",
+  "generation": "G001",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: angel reading a newspaper.\nStyle: cel-shaded toon style, crisp two-tone shading, clean colour blocks, a soft rim light, expressive cartoon features.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:\nCharacter 1: waving hello with a big happy grin\nCharacter 2: bursting with excitement, star-sparkle eyes, fists shaking\nCharacter 3: hugging a big red heart, eyes sparkling, blushing cheeks\nCharacter 4: making an OK sign with a cheerful squint\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: furious, steaming, fists clenched, deep scowl\nCharacter 8: terrified, trembling, peeking through hands, wide eyes\nCharacter 9: scheming grin, rubbing hands together, eyebrows wiggling\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "angel reading a newspaper",
+    "outline": 12
+  },
+  "status": "DONE",
+  "external_task_id": "47e74711-0be4-4325-9c6a-6fbcebaa69d3",
+  "result": {
+    "file": "jobs/J002/result.png",
+    "sha256": "62b7a50a497826b9d77edf58d264e57bbe2bf80cc4fcf58ed82391a9fb689180",
+    "bytes": 5172560
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790873201.148,
+  "claimed_at": 1790873202.427,
+  "completed_at": 1790873228.315,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0
+}

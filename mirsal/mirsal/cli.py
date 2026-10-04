@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import os
+from pathlib import Path
 import time
 
-from . import pipeline as pl
+from .flow import pipeline as pl
 from .engine.config import EngineConfig
-from .paths import input_root, out_root
+from .runtime.paths import input_root, out_root
 
 
 def _gid(s):
@@ -54,12 +56,31 @@ def db_cmd(out, action: str, yes: bool) -> int:
         action = "migrate"
     if action == "migrate":
         try:
-            files = _db.migrate()
+            rep = _db.migrate_report()
         except Exception as e:
             print(f"migrate failed: {e}")
             return 1
-        print("migrated: " + (", ".join(files) or "nothing new"))
+        print("migrated: " + (", ".join(rep["applied_now"]) or "nothing new"))
+        for n in rep["notes"]:
+            print("NOTE    " + n)
         return 0
+    if action in ("status", "check"):
+        try:
+            r = _db.check() if action == "check" else {"status": _db.status(), "drift": [], "ok": None}
+        except Exception as e:
+            print(f"{action} failed: {e}")
+            return 1
+        st = r["status"]
+        print(f"declared {len(st['declared'])} migration file(s), applied {len(st['applied'])}")
+        for n in st["pending"]:
+            print(f"PENDING {n}: run python -m mirsal db migrate")
+        for n in st["unknown"]:
+            print(f"UNKNOWN {n}: recorded as applied but no file of this checkout declares it")
+        for line in r["drift"]:
+            print("DRIFT   " + line)
+        ok = st["ok"] and not r["drift"]
+        print("OK      the database is what the migration files declare" if (ok and action == "check") else "OK      every file is applied" if ok else "NOT OK")
+        return 0 if ok else 1
     if action == "reset":
         if not yes:
             print("refusing: `db reset` destroys the local Mirsal database; pass --yes (dev only)")
@@ -85,6 +106,7 @@ def db_cmd(out, action: str, yes: bool) -> int:
             nt = repo.import_tasks(c, out)
             nj = repo.import_jobs(c, out)               # Phase 2: claimed jobs update their task rows
             nm = repo.import_model_calls(c, out)        # Phase 2: the model-call ledger
+            repo.import_users(c, out)                   # who may call (digests only)
             ok, bad = 0, []
             for gid in pl.list_ids(out):
                 try:
@@ -100,23 +122,91 @@ def db_cmd(out, action: str, yes: bool) -> int:
     return 1
 
 
-def trace_cmd(out, args) -> int:
-    from .obs import trace
-    st = trace.status()
-    if args.action == "status":
-        print(f"trace backend: {st['backend']}" + (f", project {st['project']}, reachable: {st['reachable']}" if st["backend"] == "langsmith" else
-              " (set MIRSAL_TRACE=langsmith and LANGSMITH_API_KEY to send runs; the project is MIRSAL_LANGSMITH_PROJECT, default mirsal)"))
+def worker_cmd(out, args) -> int:
+    """`mirsal worker`: drain the durable queue. One paid call at a time across all workers (a lock under out/); Ctrl-C stops after the current job."""
+    from .generation import jobqueue
+    from .store import db
+    if not db.available():
+        print("ERROR   Postgres is not reachable: the queue lives there (python -m mirsal db up)")
+        return 1
+    wid = args.wid or jobqueue.worker_id()
+    print(f"worker {wid} on {out} (poll {args.poll}s{', once' if args.once else ''}; Ctrl-C to stop)")
+    try:
+        n = jobqueue.work(out, wid, poll=args.poll, once=args.once, kinds=[k for k in (args.kinds or "").split(",") if k] or None)
+    except KeyboardInterrupt:
+        print("stopped")
         return 0
-    if st["backend"] != "langsmith":
-        print("MIRSAL_TRACE is not langsmith: nothing to send (set it and LANGSMITH_API_KEY first)")
-        return 1
-    c = _dbc()
-    if c is None:
-        return 1
-    with c:
-        r = trace.backfill(c, out, args.since)
-    print(f"replayed {r['events']} event run(s) and {r['reviews']} gate decision(s) to project {st['project']}")
+    print(f"ran {n} job(s)")
     return 0
+
+
+def queue_cmd(out, args) -> int:
+    from .generation import jobqueue, jobs as _jobs
+    from .store import db
+    if not db.available():
+        print("ERROR   Postgres is not reachable: the queue lives there (python -m mirsal db up)")
+        return 1
+    with db.connect() as c:
+        if args.action == "status":
+            s = jobqueue.stats(c)
+            print(f"mode: {jobqueue.mode(out)}  (set MIRSAL_JOB_MODE=queue for the server to use it)")
+            print("  ".join(f"{k}={v}" for k, v in s.items()))
+            with c.cursor() as cur:
+                cur.execute("SELECT job_id, kind, status, attempts, max_attempts, locked_by, error FROM job_queue WHERE status IN ('RUNNING','FAILED','DEAD') ORDER BY enqueued_at DESC LIMIT 15")
+                for r in cur.fetchall():
+                    print(f"  {r[0]} {r[1]:<6} {r[2]:<7} attempt {r[3]}/{r[4]} {r[5] or ''} {r[6] or ''}")
+        elif args.action == "reap":
+            print(f"reaped {jobqueue.reap(c)} job(s)")
+        elif args.action == "sync":
+            print(f"enqueued {jobqueue.sync_from_files(c, out)} unfinished job file(s)")
+        else:
+            if not args.job:
+                print("which job? (mirsal jobs)")
+                return 2
+            try:
+                job = _jobs.resume(out, args.job)               # the same Higgsfield job when it has a ticket (no second charge), else requested again
+            except _jobs.JobError as e:
+                print(f"ERROR   {e}")
+                return 1
+            print(f"{job['id']}: {'queued' if jobqueue.enqueue(c, job['id'], job['kind'], (job.get('request') or {}).get('user') or 'local') else 'already on the queue'}")
+    return 0
+
+
+def user_cmd(out, args) -> int:
+    """`mirsal user ...`: accounts live in out/users.json (digests only). A token is printed ONCE, when it is made; there is no way to read it back."""
+    from .store import sync
+    from .runtime.users import UserError, UserStore
+    st = UserStore(out)
+    try:
+        if args.action == "list":
+            rows = st.list()
+            for u in rows:
+                print(f"{u['id']}  {u['name']:<24} {u['role']:<7} {'spends' if u.get('can_spend') else 'no spend':<9} {'DISABLED' if u.get('disabled') else ''}")
+            if not rows:
+                print("no users: the local sandbox is open (everyone is the owner). Add one to turn authentication on.")
+            return 0
+        if args.action == "add":
+            u, token = st.create(args.who or "", "owner" if args.owner else "member", bool(args.spend))
+            print(f"{u['id']}  {u['name']}  ({u['role']}{', may spend' if u['can_spend'] else ''})")
+            print(f"token (shown once, keep it): {token}")
+        else:
+            if not args.who:
+                print("which user id? (mirsal user list)")
+                return 2
+            if args.action == "rotate":
+                u, token = st.rotate(args.who)
+                print(f"{u['id']}  new token (shown once, the old one stopped working): {token}")
+            elif args.action in ("disable", "enable"):
+                u = st.set_disabled(args.who, args.action == "disable")
+                print(f"{u['id']}  {'disabled' if u['disabled'] else 'enabled'}")
+            else:
+                u = st.update(args.who, can_spend=args.action == "allow-spend")
+                print(f"{u['id']}  {'may spend' if u['can_spend'] else 'cannot spend'}")
+        sync.sync_users(out)
+        return 0
+    except UserError as e:
+        print(f"ERROR   {e}")
+        return 1
 
 
 def out_root_compose():
@@ -206,13 +296,13 @@ LAB_INPUTS = [  # S1 prompt lab: English, Arabic, Arabizi, occasion, green subje
 
 
 def prompt_cmd(out, args) -> int:
-    from . import tasks as _t
+    from .generation import tasks as _t
     if (args.request or "") == "lab":
         ok = 0
         for req in LAB_INPUTS:
             try:
                 plan = _t.preview(req, "3x3", args.style, ai=False)
-                from . import prompter as _pr
+                from .generation import prompter as _pr
                 _pr.validate_plan(dict(plan))
                 n, key = len(plan["stickers"]), plan["slots"]["key_colour"]
                 uniq = len({s["key"] for s in plan["stickers"]})
@@ -229,12 +319,12 @@ def prompt_cmd(out, args) -> int:
     try:
         plan = _t.preview(args.request, args.grid, args.style, ai=args.ai)
         if args.review_ai and args.ai:
-            from . import expander as _ex
+            from .generation import expander as _ex
             plan = _ex.expand(args.request, tuple(plan["grid"]), use_ai=True, review_ai=True)
     except Exception as e:
         print(f"plan failed: {e}")
         return 1
-    from . import prompter as _pr
+    from .generation import prompter as _pr
     try:
         _pr.validate_plan(dict(plan))
         lint = "lint: PASS"
@@ -266,7 +356,7 @@ def _job_line(j: dict) -> str:
 
 def jobs_cmd(out, args) -> int:
     import json as _json
-    from . import jobs as _j
+    from .generation import jobs as _j
     try:
         rows = _j.list(out, args.status)
     except Exception as e:
@@ -284,7 +374,7 @@ def jobs_cmd(out, args) -> int:
 
 def job_cmd(out, args) -> int:
     import json as _json
-    from . import jobs as _j
+    from .generation import jobs as _j
     try:
         if args.action == "show":
             j = _j.read(out, args.jid or "")
@@ -309,7 +399,7 @@ def job_cmd(out, args) -> int:
 
 
 def hf_cmd(out, args) -> int:
-    from . import higgsfield as _hf, jobs as _j
+    from .generation import higgsfield as _hf, jobs as _j
     try:
         if args.action == "status":
             a = _hf.account()
@@ -336,7 +426,7 @@ def hf_cmd(out, args) -> int:
 
 def pool_cmd(args) -> int:
     import json as _json
-    from . import pool as _pool
+    from .store import pool as _pool
     c = _dbc()
     if c is None:
         return 1
@@ -380,7 +470,7 @@ def photo_cmd(out, args, cfg) -> int:
     from pathlib import Path as _P
     import numpy as _np
     from .engine.render import bbox_of, fit_scale, render_sticker
-    from .library import LibraryError, cutout, decode_image, png_bytes, validate_render
+    from .media.library import LibraryError, cutout, decode_image, png_bytes, validate_render
     src = _P(str(args.file or ""))
     if not src.is_file():
         print(f"no such photo: {args.file}")
@@ -437,14 +527,19 @@ def main(argv=None) -> int:
         m = sub.add_parser(n); m.add_argument("gid", nargs="?")
     a = sub.add_parser("animate"); a.add_argument("gid", nargs="?"); a.add_argument("--slice", type=int)
     sub.add_parser("doctor")
+    tt = sub.add_parser("test", help="explicit test gates: fast smoke, focused regressions, mapped area; `slow` is retired and runs only when Haitham asks for it by name")
+    tt.add_argument("tier", choices=["fast", "focused", "area", "slow"]); tt.add_argument("area", nargs="?")
     rc = sub.add_parser("recheck", help="run the border check on animations made before it existed"); rc.add_argument("gid", nargs="?", default="all")
     pr = sub.add_parser("profile", help="time the animation of a generation stage by stage (nothing is saved)")
     pr.add_argument("gid", nargs="?"); pr.add_argument("--sweep", default="", help="worker counts to compare, e.g. 1,4,9")
-    s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0)
+    s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0); s.add_argument("--stdlib", action="store_true", help="the old stdlib server (kept for one release)")
+    s.add_argument("--lan", action="store_true", help="serve the office network: colleagues sign in with @nadi.ae accounts (docs/api.md, Office accounts on the LAN)")
+    s.add_argument("--no-tls", action="store_true", help="with --lan: plain HTTP (passwords cross the network unencrypted)")
     for p_ in (s, a):
         p_.add_argument("--workers", type=int, help="cells animated at the same time (default: CPU count up to 9, or MIRSAL_ANIM_WORKERS)")
-    d = sub.add_parser("db", help="Postgres: up (start mirsal-db) | migrate | reset --yes (dev only) | import (backfill out/)")
-    d.add_argument("action", choices=["up", "migrate", "reset", "import"]); d.add_argument("--yes", action="store_true")
+    d = sub.add_parser("db", help="Postgres: up (start mirsal-db) | migrate | status (applied vs pending files) | check (does the live schema match the files?) | reset --yes (dev only) | import (backfill out/)")
+    d.add_argument("action", choices=["up", "migrate", "status", "check", "reset", "import"]); d.add_argument("--yes", action="store_true")
+    sub.add_parser("metrics", help="quality and timing numbers from out/: time to the first sticker, approval rates, regeneration rate")
     li = sub.add_parser("list", help="generations in Postgres, newest first"); li.add_argument("--limit", type=int, default=50)
     sh = sub.add_parser("show", help="one generation: stickers, files, gate decisions"); sh.add_argument("gid")
     hi = sub.add_parser("history", help="every decision for one sticker, in time order"); hi.add_argument("sid")
@@ -472,23 +567,56 @@ def main(argv=None) -> int:
     jd.add_argument("--status", action="store_true", help="which model, which policy")
     mc = sub.add_parser("measure-cells", help="S4: the share of video cells that leave their slot, per slot_fill (reads result files only)")
     mc.add_argument("--json", action="store_true", dest="as_json"); mc.add_argument("--record", action="store_true", help="append to docs/measurements.md")
-    tr = sub.add_parser("trace", help="tracing: status | backfill [--since DATE] (replay Postgres rows with no trace run to LangSmith)")
-    tr.add_argument("action", choices=["status", "backfill"]); tr.add_argument("--since")
+    ms_ = sub.add_parser("measure-sharpness", help="how soft each stored animation is next to its own still (edge detail ratio and the blur it equals)")
+    ms_.add_argument("--json", action="store_true", dest="as_json"); ms_.add_argument("--record", action="store_true", help="append to docs/measurements.md")
+    oa = sub.add_parser("openapi", help="the HTTP contract: print it, or write it (--json FILE) and TypeScript types (--ts FILE)")
+    oa.add_argument("--json", dest="json_file"); oa.add_argument("--ts", dest="ts_file")
+    us = sub.add_parser("user", help="accounts for the API: add | list | disable | enable | rotate | allow-spend | deny-spend (a token is shown once)")
+    us.add_argument("action", choices=["add", "list", "disable", "enable", "rotate", "allow-spend", "deny-spend"]); us.add_argument("who", nargs="?", help="a name (add) or a user id (the rest)")
+    us.add_argument("--owner", action="store_true", help="add: an owner (sees and does everything), not a member"); us.add_argument("--spend", action="store_true", help="add: may start paid generation")
+    wk = sub.add_parser("worker", help="run provider jobs from the durable queue (needs Postgres; the server enqueues them when MIRSAL_JOB_MODE=queue)")
+    wk.add_argument("--once", action="store_true", help="run what is due now, then exit"); wk.add_argument("--poll", type=float, default=2.0, help="seconds to sleep when idle")
+    wk.add_argument("--id", dest="wid"); wk.add_argument("--kinds", help="only these kinds, comma separated (sheet,video,single)")
+    qu = sub.add_parser("queue", help="the job queue: status | retry JOB | reap | sync (enqueue unfinished job files)")
+    qu.add_argument("action", choices=["status", "retry", "reap", "sync"]); qu.add_argument("job", nargs="?")
     po = sub.add_parser("pool", help="search approved stickers first; generate only the gaps")
     po.add_argument("action", choices=["search", "reindex", "hide", "status"]); po.add_argument("query", nargs="?")
     po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
+    pa = sub.add_parser("particles", help="adopt: older effect runs that made something become saved particle rows under their stickers (idempotent, free)")
+    pa.add_argument("action", choices=["adopt"])
     ph = sub.add_parser("photo", help="a photo -> a cut-out 512 sticker (3C; on-device by default)")
     ph.add_argument("file"); ph.add_argument("--method", default="auto", choices=["auto", "matte", "grabcut"])
     ph.add_argument("--outline", type=int, default=12); ph.add_argument("--erode", type=int, default=0)
     args = ap.parse_args(argv)
+    if args.cmd == "test":
+        if args.tier == "area" and not args.area:
+            ap.error("test area requires a module path, for example engine/video")
+        if args.tier not in ("area", "focused") and args.area:
+            ap.error(f"test {args.tier} takes no module path")
+        from . import test_tiers
+        return test_tiers.run(args.tier, args.area)
     out, inp, cfg, t0 = out_root(), input_root(), EngineConfig(), time.perf_counter()
     if getattr(args, "workers", None):
         from dataclasses import replace
         cfg = replace(cfg, anim_workers=max(1, args.workers))
     if args.cmd == "doctor":
         return doctor()
-    from .writer_lock import WriterBusy, WriterLock
+    if args.cmd == "particles":
+        from .flow import particle_sets
+        from .media.library import Library
+        from .runtime.writer_lock import WriterBusy, WriterLock
+        try:
+            with WriterLock(out, "mirsal particles adopt"):      # a drawn sheet may be cut again as particles: result.json has one writer at a time
+                made = particle_sets.adopt_effects(out, Library(out), cfg=cfg)
+        except (WriterBusy, pl.PipelineError) as e:
+            print(f"ERROR   {e}")
+            return 1
+        for m in made:
+            print(f"{m['effect']} -> {m['set']} ({m['mode']}) under {', '.join(m['owners']) or 'no sticker'}")
+        print(f"{len(made)} run(s) adopted" if made else "nothing to adopt")
+        return 0
+    from .runtime.writer_lock import WriterBusy, WriterLock
     if args.cmd == "recheck":
         ids = pl.list_ids(out) if args.gid == "all" else [_gid(args.gid)]
         tot = bad = 0
@@ -508,6 +636,16 @@ def main(argv=None) -> int:
         return profile(out, _gid(args.gid), cfg, args.sweep)
     if args.cmd == "db":
         return db_cmd(out, args.action, args.yes)
+    if args.cmd == "metrics":
+        from .flow import metrics as _m
+        m = _m.collect(out)
+        t, a, r, s = m["time_to_first_sticker_s"], m["approval_rate"], m["regeneration_rate"], m["stickers"]
+        pct = lambda v: "n/a" if v is None else f"{v * 100:.0f}%"
+        print(f"{m['batches']} batch(es), {s['ready']} sticker(s) ready, {m['failed_batches']} batch(es) with none")
+        print(f"time to the first sticker: " + ("n/a" if not t["n"] else f"median {t['median']} s, p90 {t['p90']} s, max {t['max']} s ({t['n']} batches)"))
+        print(f"approved at G2 (stills): {pct(a['still'])} of the {s['approved'] + s['rejected']} decided; at G4 (animations): {pct(a['animation'])} of the {s['anim_approved'] + s['anim_rejected']} decided; {s['undecided']} still undecided")
+        print(f"redo batches: {r['redo_batches']} of {r['batches']} ({pct(r['rate'])})")
+        return 0
     if args.cmd in ("list", "show", "history", "search", "task"):
         return store_cmd(args)
     if args.cmd == "prompt":
@@ -526,7 +664,7 @@ def main(argv=None) -> int:
         if _vj.status()["provider"] == "none":
             print("No vision backend: start LM Studio (MIRSAL_LOCAL_URL) or set OPENAI_API_KEY.")
             return 1
-        from .writer_lock import WriterBusy, WriterLock
+        from .runtime.writer_lock import WriterBusy, WriterLock
         try:
             with WriterLock(out, "mirsal judge"):
                 r = _vj.judge_generation(out, _gid(args.gid) or pl.latest_id(out), "anim" if args.anim else "still", force=args.force)
@@ -541,14 +679,43 @@ def main(argv=None) -> int:
     if args.cmd == "measure-cells":
         import json as _json
         from pathlib import Path as _Path
-        from . import measure
+        from .flow import measure
         m = measure.measure(out)
         print(_json.dumps(m, ensure_ascii=False, indent=2) if args.as_json else measure.render(m))
         if args.record and m["cells"]:
             print("recorded in", measure.record(out, m, _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"))
         return 0
-    if args.cmd == "trace":
-        return trace_cmd(out, args)
+    if args.cmd == "openapi":
+        import json as _json
+        from pathlib import Path as _Path
+        from .console import openapi as _oa
+        spec = _oa.build()
+        if args.json_file:
+            _Path(args.json_file).write_text(_json.dumps(spec, indent=2), encoding="utf-8")
+        if args.ts_file:
+            _Path(args.ts_file).write_text(_oa.typescript(spec), encoding="utf-8")
+        if not (args.json_file or args.ts_file):
+            print(_json.dumps(spec, indent=2))
+        else:
+            print(f"{sum(len(v) for v in spec['paths'].values())} operations, {len(spec['components']['schemas'])} schemas")
+        return 0
+    if args.cmd == "measure-sharpness":
+        import json as _json
+        from pathlib import Path as _Path
+        from .flow import measure
+        m = measure.sharpness(out)
+        print(_json.dumps(m, ensure_ascii=False, indent=2) if args.as_json else measure.render_sharpness(m))
+        if args.record and m["cells"]:
+            f = _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"
+            import time as _t
+            with open(f, "a", encoding="utf-8") as fh:
+                fh.write("\n## measure-sharpness " + _t.strftime("%Y-%m-%d %H:%M") + "\n\n```\n" + measure.render_sharpness(m) + "\n```\n")
+            print("recorded in", f)
+        return 0
+    if args.cmd == "user":
+        return user_cmd(out, args)
+    if args.cmd in ("worker", "queue"):
+        return worker_cmd(out, args) if args.cmd == "worker" else queue_cmd(out, args)
     if args.cmd == "pool":
         return pool_cmd(args)
     if args.cmd == "photo":
@@ -556,7 +723,17 @@ def main(argv=None) -> int:
     try:
         if args.cmd == "serve":
             from .console.server import serve
-            serve(out, inp, args.port, args.pace, cfg)
+            tls = None
+            if args.lan and not args.no_tls:
+                cert = Path(os.environ.get("MIRSAL_TLS_CERT") or out / "tls" / "cert.pem")
+                key = Path(os.environ.get("MIRSAL_TLS_KEY") or out / "tls" / "key.pem")
+                if not (cert.is_file() and key.is_file()):
+                    print(f"ERROR   serve --lan uses HTTPS and needs a certificate: {cert} and {key}.\n"
+                          f"        Make it once with mkcert: see certificate-guide.md at the repository root.\n"
+                          f"        Or serve --lan --no-tls (plain HTTP: passwords cross the network unencrypted).")
+                    return 1
+                tls = {"cert": str(cert), "key": str(key)}
+            serve(out, inp, args.port, args.pace, cfg, stdlib=True if args.stdlib else None, lan=args.lan, tls=tls)
             return 0
         with WriterLock(out, f"mirsal {args.cmd}"):          # create / more / animate write result.json: one writer at a time
             if args.cmd == "create":
@@ -628,13 +805,14 @@ def doctor() -> int:
             bad += 1; print("MISSING libvpx-vp9 in any ffmpeg found (needed for WEBM alpha). Fix, easiest first: `pip install imageio-ffmpeg` (its bundled build has it; offline: pip download it on a connected PC), or a full build from gyan.dev and set MIRSAL_FFMPEG=<path to ffmpeg.exe>")
     except Exception as e:
         bad += 1; print("MISSING ffmpeg:", e, "\n        put ffmpeg.exe on PATH, or set MIRSAL_FFMPEG=<path>")
-    from . import prompter
+    from .generation import prompter
     from .engine import verify
     tpl = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt"))
     print(f"OK      verifier v{verify.VERIFY_VERSION}: {sum(len(v) for v in verify.CATALOGUE.values())} checks over {len(verify.CATALOGUE)} stages; prompt templates: {', '.join(tpl)}")
-    from . import llm
+    print("OK      slow test tier: retired (Haitham, 2026-10-03): never run or required; `mirsal test slow` exists only for an explicit request")
+    from .services import llm
     print("OK      AI expansion: " + (f"on, model {llm.model()}" if llm.configured() else f"off: add {llm.KEY_VAR} to mirsal/.env to let the AI expand a subject and name every sticker (the built-in sets are used meanwhile)"))
-    from . import higgsfield as _hf
+    from .generation import higgsfield as _hf
     if not _hf.available():
         print("NOTE    Higgsfield: CLI not installed (npm i -g @higgsfield/cli, then higgsfield auth login): live generation is off, prepared sheets still work")
     else:
@@ -645,11 +823,23 @@ def doctor() -> int:
             print(f"NOTE    Higgsfield: installed but not usable ({str(e)[:140]}): run higgsfield auth login")
     import os
     print(f"OK      animation workers: {EngineConfig().anim_workers} of {os.cpu_count()} CPUs (MIRSAL_ANIM_WORKERS or serve --workers N changes it)")
+    try:                                                  # the HTTP server: FastAPI on uvicorn (console/app.py); `serve --stdlib` keeps the old one
+        import fastapi, pydantic, uvicorn
+        print(f"OK      web: FastAPI {fastapi.__version__}, pydantic {pydantic.__version__}, uvicorn {uvicorn.__version__}"
+              + ("  (MIRSAL_SERVER=stdlib: the old server is in use)" if os.environ.get("MIRSAL_SERVER", "").lower() == "stdlib" else ""))
+    except ImportError as e:
+        bad += 1
+        print(f"MISSING web: {e.name} (pip install -r requirements.txt); `serve --stdlib` still runs the old server")
     try:
         from .store import db as _db
         if _db.available():
             print(f"OK      Postgres: reachable ({_db.url().split('@')[-1]}); write-through "
                   + ("on" if os.environ.get("MIRSAL_DB_WRITE", "") not in ("0", "no", "off", "false") and not os.environ.get("MIRSAL_OUT") else "off (MIRSAL_OUT copy or MIRSAL_DB_WRITE=0: use `db import`)"))
+            st = _db.status()
+            if st["pending"]:
+                print(f"WARN    Postgres: {len(st['pending'])} migration file(s) not applied ({', '.join(st['pending'])}): python -m mirsal db migrate (and `db check` compares the whole schema)")
+            elif st["unknown"]:
+                print(f"NOTE    Postgres: recorded as applied but not in this checkout: {', '.join(st['unknown'])}")
         else:
             print(f"NOTE    Postgres: not connected ({_db.url().split('@')[-1]}; start it: python -m mirsal db up)")
     except Exception as e:
@@ -662,13 +852,18 @@ def doctor() -> int:
     except Exception:
         pass
     try:
-        from . import cache as _cache
+        from .runtime import cache as _cache
         _c = _cache.default()
         print(f"OK      Redis: {_c.engine}" + (f" ({_c.url})" if _c.engine == 'redis' else " (not reachable: the in-memory fallback is used; start it: python -m mirsal db up)"))
     except Exception as e:
         print(f"NOTE    Redis: {e}")
     try:
-        from . import llm as _llm
+        from .generation import jobqueue as _jq
+        print(f"OK      job queue: {_jq.mode(out_root())}" + ("" if _jq.mode(out_root()) == "queue" else "  (jobs run in threads of the server; MIRSAL_JOB_MODE=queue + `python -m mirsal worker` for durable jobs)"))
+    except Exception as e:
+        print(f"NOTE    job queue: {e}")
+    try:
+        from .services import llm as _llm
         from .vision import judge as _vj
         ls = _llm.status()
         print(f"OK      language model: {ls['provider']} {ls['model'] or ''}; local server {ls['local']['url']} " + ("reachable" if ls['local']['reachable'] else "not reachable")
@@ -676,12 +871,25 @@ def doctor() -> int:
     except Exception as e:
         print(f"NOTE    language model: {e}")
     try:
-        from .obs import trace as _tr
-        st = _tr.status()
-        print(f"OK      trace backend: {st['backend']}" + (f" (reachable)" if st["reachable"] else " (unreachable)" if st["reachable"] is False else ""))
+        from .services import llm as _llm
+        ids = _llm.list_local_models(force=True)
+        rd = _llm.local_ready(force=True)                       # one tiny chat completion: the list answers while no model can
+        wish = _llm.configured_local_model()
+        if rd["ok"]:
+            via = "" if rd["model"] == wish else f" (configured {wish} is not what the server calls it, so {rd['model']} is used)"
+            print(f"OK      local model: {rd['model']} answers; the server lists {len(ids)} chat model(s){via}")
+        else:
+            print(f"NOTE    local model {rd['model']}: {rd['why']}; the server lists: {', '.join(ids) or 'nothing'}; the chat runs on "
+                  + ("the cloud model or its rules" if os.environ.get(_llm.KEY_VAR) else "its rules"))
     except Exception as e:
-        print(f"NOTE    trace: {e}")
-    from . import telegram
+        print(f"NOTE    local model: {e}")
+    try:                                                  # problems are tickets (flow/tickets.py); LangSmith is retired
+        from .flow import tickets as _tk
+        n = len(_tk.listing(out_root(), status="open"))
+        print(f"OK      tickets: {n} open" + ("  (Settings > Tickets)" if n else ""))
+    except Exception as e:
+        print(f"NOTE    tickets: {e}")
+    from .services import telegram
     try:
         import ssl
         ssl.create_default_context(); print("OK      TLS: system certificate store loads")
@@ -689,9 +897,9 @@ def doctor() -> int:
         telegram._ssl_context(); print(f"NOTE    TLS: this PC's certificate store has malformed entries ({e.reason}); Mirsal skips them, Telegram still works")
     t = telegram.status(out_root())
     print(f"OK      Telegram: connected as @{t['bot']} (user {t['user_id']})" if t["configured"] else "NOTE    Telegram: not connected (optional: Settings -> Telegram, or MIRSAL_TELEGRAM_TOKEN and MIRSAL_TELEGRAM_USER)")
-    from . import sources
+    from .flow import sources
     subs = sources.known_subjects(input_root())
-    from . import matte
+    from .media import matte
     ms, mf = matte.status(), matte.status(True)
     print(f"OK      AI matte {ms['model']} (photos), {mf['model']} (video)" if ms["ok"] else f"NOTE    AI matte off, photos use GrabCut (optional): {ms['reason']}")
     print(("OK      " if subs else "NOTE    ") + f"prepared sheets in {input_root()}  subjects: {', '.join(subs) or 'none (optional: live generation and Create work without them)'}")

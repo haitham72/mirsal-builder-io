@@ -1,0 +1,36 @@
+{
+  "id": "J011",
+  "kind": "sheet",
+  "task": "008",
+  "generation": "G005",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A pink Barbie doll with long blonde hair, wearing a heart-patterned dress, identical in every cell.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:\nCharacter 1: Barbie smiling sweetly with hearts sparkling in her eyes\nCharacter 2: Barbie blowing a kiss with puckered lips and a wink\nCharacter 3: Barbie shyly looking down with cheeks blushing deeply\nCharacter 4: Barbie with hands clasped over her heart, eyes closed in bliss\nCharacter 5: Barbie looking surprised with wide eyes and an open mouth\nCharacter 6: Barbie laughing joyfully with head tilted back and eyes closed\nCharacter 7: Barbie looking dreamy with half-closed eyes and a soft smile\nCharacter 8: Barbie wringing hands nervously with a worried frown\nCharacter 9: Barbie holding a rose close with a proud smile and confident eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "barbie in love",
+    "refs": [],
+    "outline": 12
+  },
+  "status": "DONE",
+  "external_task_id": "d7e23380-00cd-4721-a024-af3e06124a16",
+  "result": {
+    "file": "jobs/J011/result.png",
+    "sha256": "877b0eea66c6004a55941a9c1185634cb5a2dceae5b47a1c2fee42699c3c4c30",
+    "bytes": 4326016
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790876986.239,
+  "claimed_at": 1790876987.644,
+  "completed_at": 1790877010.356,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

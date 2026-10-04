@@ -1,0 +1,36 @@
+{
+  "id": "J014",
+  "kind": "sheet",
+  "task": "010",
+  "generation": "G007",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Two red cherries with green stems and leaves, smiling faces, identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: Cherries standing close, holding hands with shy smiles\nCharacter 2: Cherries blushing deeply, looking at each other with adoring eyes\nCharacter 3: Cherries jumping excitedly with arms raised and wide smiles\nCharacter 4: Cherries sitting side by side, leaning heads together tenderly\nCharacter 5: Cherries spinning slowly while holding hands, laughing joyfully\nCharacter 6: Cherries reaching out to touch each other’s cheeks with shy smiles\nCharacter 7: Cherries lying down close together, eyes closed and peaceful\nCharacter 8: Cherries dancing side by side with happy grins and swinging arms\nCharacter 9: Cherries spinning quickly apart with surprised shocked faces\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "cherries in love",
+    "refs": [],
+    "outline": 0
+  },
+  "status": "DONE",
+  "external_task_id": "86f633a9-c85e-431e-9fdf-d2926d369aa6",
+  "result": {
+    "file": "jobs/J014/result.png",
+    "sha256": "6e08ee2fd97816b335bccde532c54c661d35c7a870957d413ad44dd4837034c0",
+    "bytes": 4501220
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790879588.291,
+  "claimed_at": 1790879589.668,
+  "completed_at": 1790879615.71,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

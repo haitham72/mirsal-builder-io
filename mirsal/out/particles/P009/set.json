@@ -1,0 +1,230 @@
+{
+  "id": "P009",
+  "name": "Angel Reading Newspaper particles",
+  "created": 1791085029.459,
+  "user": "local",
+  "elements": [
+    "small sparkles",
+    "tiny stars",
+    "little confetti pieces",
+    "red hearts",
+    "pink hearts",
+    "small stars",
+    "small flames",
+    "steam puffs",
+    "tiny sparks"
+  ],
+  "source": {
+    "sticker_ids": [
+      "031868b4",
+      "a6be1731",
+      "d450042e",
+      "2689488e",
+      "5843680c",
+      "04e0be52",
+      "bc7bc82d"
+    ],
+    "kind": "video",
+    "effect": "E016",
+    "generation": null,
+    "particles": true,
+    "job": "J055",
+    "grid": null,
+    "by": null,
+    "options": [],
+    "jobs": [
+      "J055"
+    ]
+  },
+  "plan": {
+    "subject": "angel reading",
+    "style": "glossy cartoon look, bold clean shapes, vivid colours"
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 1,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "green",
+      "sprite": true,
+      "w": 492,
+      "h": 478,
+      "picked": true,
+      "created": 1791085029.399,
+      "clip": "cells/c01.webm",
+      "fps": 30,
+      "frames": 90,
+      "timeline": "cells/c01.npz",
+      "import": "E016/R001",
+      "job": "J055"
+    },
+    {
+      "n": 2,
+      "cell": 2,
+      "file": "cells/c02.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "green",
+      "sprite": true,
+      "w": 630,
+      "h": 624,
+      "picked": true,
+      "created": 1791085029.411,
+      "clip": "cells/c02.webm",
+      "fps": 30,
+      "frames": 90,
+      "timeline": "cells/c02.npz",
+      "import": "E016/R002",
+      "job": "J055"
+    },
+    {
+      "n": 3,
+      "cell": 3,
+      "file": "cells/c03.png",
+      "status": "READY",
+      "warnings": [
+        "effect_tail_faded"
+      ],
+      "key": "green",
+      "sprite": true,
+      "w": 666,
+      "h": 720,
+      "picked": true,
+      "created": 1791085029.428,
+      "clip": "cells/c03.webm",
+      "fps": 30,
+      "frames": 90,
+      "timeline": "cells/c03.npz",
+      "import": "E016/R003",
+      "job": "J055"
+    },
+    {
+      "n": 4,
+      "cell": 4,
+      "file": "cells/c04.png",
+      "status": "READY",
+      "warnings": [
+        "effect_tail_faded"
+      ],
+      "key": "green",
+      "sprite": true,
+      "w": 720,
+      "h": 720,
+      "picked": true,
+      "created": 1791085029.448,
+      "clip": "cells/c04.webm",
+      "fps": 30,
+      "frames": 90,
+      "timeline": "cells/c04.npz",
+      "import": "E016/R004",
+      "job": "J055"
+    }
+  ],
+  "motion": {},
+  "saved_at": null,
+  "owner": [
+    {
+      "sticker_id": "031868b4",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 1
+    },
+    {
+      "sticker_id": "a6be1731",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 2
+    },
+    {
+      "sticker_id": "d450042e",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 3
+    },
+    {
+      "sticker_id": "2689488e",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 4
+    },
+    {
+      "sticker_id": "5843680c",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 5
+    },
+    {
+      "sticker_id": "04e0be52",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 6
+    },
+    {
+      "sticker_id": "bc7bc82d",
+      "pack_id": "fab32429",
+      "generation": "G001",
+      "index": 7
+    },
+    {
+      "sticker_id": "7c00f84a",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 1
+    },
+    {
+      "sticker_id": "7f6ddedc",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 3
+    },
+    {
+      "sticker_id": "c9148c04",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 4
+    },
+    {
+      "sticker_id": "5e9f5412",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 5
+    },
+    {
+      "sticker_id": "eae10b30",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 6
+    },
+    {
+      "sticker_id": "a05764ac",
+      "pack_id": "7f7b2e70",
+      "generation": "G001",
+      "index": 7
+    }
+  ],
+  "renders": [],
+  "credits": 4.5,
+  "notes": [
+    "This set has no drawn cells yet: the burst uses the pack's own stickers (generate more to add drawn particles)."
+  ],
+  "history": [
+    {
+      "ts": 1791085029.461,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "from E016: 4 cell(s), 2 pack(s)",
+      "detail": {
+        "effect": "E016",
+        "generation": null
+      }
+    }
+  ],
+  "imports": [
+    "E016/R001",
+    "E016/R002",
+    "E016/R003",
+    "E016/R004"
+  ]
+}

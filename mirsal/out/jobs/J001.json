@@ -1,0 +1,23 @@
+{
+  "id": "J001",
+  "kind": "sheet",
+  "task": null,
+  "generation": null,
+  "provider": "higgsfield-mcp",
+  "model": null,
+  "request": {
+    "prompt": "angel reading a newspaper",
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "status": "REQUESTED",
+  "external_task_id": null,
+  "result": null,
+  "cost": null,
+  "error": null,
+  "created_at": 1790872405.908,
+  "claimed_at": null,
+  "completed_at": null
+}

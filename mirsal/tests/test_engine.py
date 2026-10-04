@@ -13,7 +13,7 @@ from mirsal.engine.config import EngineConfig
 from mirsal.engine.sheet import encode_static, process_sheet
 from mirsal.engine.video import close_loop, loop_seam, process_video
 from mirsal.engine.grid import detect_grid, scale_rects, split_grid
-from mirsal import prompter
+from mirsal.generation import prompter
 from tests import synth
 
 CFG = EngineConfig()
@@ -124,6 +124,24 @@ class VideoTests(unittest.TestCase):
         after = loop_seam(*[close_loop(f, 6)[i] for i in (-1, 0)])
         self.assertLess(after, before / 4)
 
+    def test_the_loop_is_closed_at_the_end_so_the_first_frames_are_never_a_dissolve(self):
+        """the old fade made the clip START on the tail's pose and dissolve into the head, the ghost on the
+        first frames (and on the thumbnail). Now the head is the source untouched and the last frames ease into frame 0."""
+        import cv2
+        n, m = 60, 6
+        f = np.zeros((n, 96, 96, 4), np.uint8)
+        for i in range(n):                                  # a disc on three quarters of a circle: no two frames alike (a dissolve would show as two discs) and it does not loop by itself
+            a = 2 * np.pi * 0.75 * i / n
+            cv2.circle(f[i], (int(48 + 30 * np.cos(a)), int(48 + 30 * np.sin(a))), 9, (240, 40, 40, 255), -1)
+        out = close_loop(f, m)
+        self.assertEqual(len(out), n - m)
+        self.assertTrue(np.array_equal(out[: n - 2 * m], f[: n - 2 * m]))        # everything before the fade is the source, bit for bit
+        self.assertTrue(np.array_equal(out[0], f[0]))                              # frame 0 (the thumbnail, the approved pose) is never blended
+        self.assertEqual(loop_seam(out[-1], out[0]), 0.0)                          # the last frame IS frame 0 ...
+        dist = [float(np.abs(out[n - 2 * m + j].astype(int) - f[0].astype(int)).mean()) for j in range(m)]
+        self.assertEqual(dist, sorted(dist, reverse=True))                         # ... reached by a steady approach, never a jump back
+        self.assertLess(loop_seam(out[-2], out[-1]), loop_seam(f[n - m - 2], f[n - m - 1]))      # and the last step is gentler than the clip's own motion
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -198,3 +216,34 @@ class SpillTests(unittest.TestCase):
         self.assertLessEqual(r.metrics["spill_px"], 20)
         self.assertGreater(r.metrics["chroma_risk"], CFG.chroma_risk_warn)
         self.assertEqual(r.metrics["warnings"], ["chroma_risk"])
+
+
+class MergeCellsTests(unittest.TestCase):
+    """P8 of the UI/UX spec: an edited slice is merged back into ONE sheet. Same layout, so the same S# by position; only the fixed cells change; the generator's separator lines inside a fixed
+    cell are gone (they were a drawing artefact of the generated image, the cut itself did nothing wrong)."""
+
+    def test_only_the_fixed_cell_changes_and_the_separator_line_in_it_is_gone(self):
+        from mirsal.engine.sheet import merge_cells
+        sheet = synth.bg(1200, 3).copy()
+        sheet[:, 596:604] = 255                                              # a white separator line the image model drew down the middle
+        sheet[596:604, :] = 255
+        rects = [(c * 600, r * 600, 600, 600) for r in range(2) for c in range(2)]
+        fix = np.zeros((512, 512, 4), np.uint8)
+        fix[156:356, 156:356] = (220, 40, 40, 255)
+        bg = tuple(int(v) for v in np.median(sheet[10:60, 10:60].reshape(-1, 3), axis=0))
+        out = merge_cells(sheet, rects, {2: fix}, {2: bg})
+        self.assertEqual((out.shape, out.dtype), (sheet.shape, np.uint8))
+        keep = np.ones(sheet.shape[:2], bool)
+        keep[0:600, 600:1200] = False
+        self.assertTrue(np.array_equal(out[keep], sheet[keep]), "every pixel outside the fixed cell is byte for byte what it was")
+        self.assertTrue((out[0:600, 600:604] != 255).any(axis=-1).all(), "the separator column that fell inside the fixed cell is gone")
+        self.assertEqual(tuple(out[300, 900]), (220, 40, 40), "the edited sticker sits in the middle of its cell")
+        self.assertEqual(tuple(out[5, 1195]), bg, "the rest of the cell is the sheet's own key background")
+
+    def test_nothing_to_merge_is_the_sheet_untouched_and_a_bad_index_is_refused(self):
+        from mirsal.engine.sheet import merge_cells
+        sheet = synth.bg(600, 1)
+        rects = [(0, 0, 300, 300), (300, 0, 300, 300)]
+        self.assertTrue(np.array_equal(merge_cells(sheet, rects, {}, {}), sheet))
+        with self.assertRaises(ValueError):
+            merge_cells(sheet, rects, {3: np.zeros((8, 8, 4), np.uint8)}, {})

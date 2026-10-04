@@ -1,6 +1,6 @@
 # Higgsfield: what it really offers (S0, measured 2026-10-01)
 
-Everything here was observed on this PC with the Higgsfield **CLI** (`higgsfield`, aliases `higgs`, `hf`; v1.1.26), the way Claude Code is meant to use it (Higgsfield's help center: Claude Code does not use the MCP connector `https://mcp.higgsfield.ai/mcp`, which is for claude.ai / Claude Desktop; Haitham confirmed the CLI). Test outputs are in `mirsal/out/s0/` (gitignored); the three calls are in `out/model_calls.jsonl`.
+Everything here was observed on this PC with the Higgsfield **CLI** (`higgsfield`, aliases `higgs`, `hf`; v1.1.26), the way Claude Code is meant to use it (Higgsfield's help center: Claude Code does not use the MCP connector `https://mcp.higgsfield.ai/mcp`, which is for claude.ai / Claude Desktop; Haitham confirmed the CLI). Test outputs are in `mirsal/out/s0/` ; the three calls are in `out/model_calls.jsonl`.
 
 ## Access
 
@@ -47,8 +47,14 @@ Prices from `generate cost`: Nano Banana 2 1k 1.5 / 2k 2 / 4k 3 credits; Kling v
 - **24 fps, 3.04 s:** Telegram needs <= 30 fps, <= 3 s. The encode step must trim to 3.0 s; resampling to 30 fps is the engine's existing path (S4 verifies).
 - **Loop:** with start image = end image the mean absolute difference between the last and first frame is 3.64, about one ordinary frame step (3.93, max 5.35), so the clip is continuous across the loop point. This was measured on one clip.
 - **The first video was made from the raw sheet, as discovery only.** Production S4 uses the normalised video sheet (`build_video_sheet`, decision 3), never raw art.
-- **Provider seam:** because the CLI is a plain subprocess that prints JSON, it can serve as a real provider behind the jobs interface (the plan assumed an MCP operator could not be called by the server). S3 decides whether `jobs.py` gets a `higgsfield-cli` fulfiller or the operator session keeps running the same commands.
+- **Provider seam:** because the CLI is a plain subprocess that prints JSON, it can serve as a real provider behind the jobs interface (the plan assumed an MCP operator could not be called by the server). S3 decides whether `generation/jobs.py` gets a `higgsfield-cli` fulfiller or the operator session keeps running the same commands.
 
 ## Other models seen, not tested
 
 Video: `veo3_1`, `seedance_2_0` (start/end image, duration, 480p-4k), `kling3_0_turbo`, `kling2_6`, `minimax_h3`, plus tools `sam_3_video` (Remove Background: could give alpha directly, S7 candidate), `topaz_video`, `bytedance_video_upscale`, `fps_boost`, `depth_anything_video`. Image: `gpt_image_2_5`, `seedream_v5_pro`, `ideogram_4_5`, `recraft_v4_1`, `flux_2`, `image_background_remover`. 34 image and 30+ video job types in total (`model list`).
+
+## Kling v3.0, text only (measured 2026-10-02, for the particle effects)
+
+`higgsfield model get kling3_0`: `prompt` is the only required parameter; `start_image` and `end_image` are optional objects. Price (`higgsfield generate cost`): **4.5 credits** pro 3 s, 3.75 std 3 s. Two real text-only clips,
+1:1 pro 3 s, no start image, a grid of burst cells on a blue screen (J037 2x2, J038 3x3; 1440x1440, 24 fps, 3.04 s, 4.6-5.7 MB, 63-84 s wall time): 2x2 every cell starts empty, the burst begins at 0.33 s and no piece
+crosses a cell; 3x3 starts empty but pieces cross cells (10-26 % of the edge strip) and none ends empty. Details and the table: `docs/effects.md` §3.

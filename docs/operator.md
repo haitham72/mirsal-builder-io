@@ -19,6 +19,17 @@ mirsal hf models --type video                  # the full Higgsfield list with p
 # or the individual steps: mirsal job claim J005 --ticket <id> ... mirsal job done J005 --file <path> --model <name> --cost <n>
 ```
 
+## Recovering a stalled job
+
+The Queue, Studio job panels and chat cards offer four actions, cheapest first: **Refresh** reads local state and reconnects generation SSE without calling Higgsfield; **Check · free** runs one `generate get`, downloads a completed result when no file is held, and attaches it by its existing ticket; **Continue · same ticket** calls `jobs.resume` and waits again without another creation; **Retry · SPENDS** shows a new price and asks for explicit confirmation before creating a replacement request. Retry is never the default. A FAILED/TIMEOUT local ticket whose provider reports completed is labelled **“Divergence, not a failure”** and its reconciliation is recorded in human history. Repeating Check does not download or log the same completed attachment twice.
+
+The API actions are `/api/jobs/{id}/check`, `/continue`, `/retry_estimate` and `/retry` (the last requires `{go: true, estimate}`). The old same-ticket meaning of the HTTP `/retry` route is now `/continue`; CLI `job requeue` and queue retry still resume tickets. A Continue without a ticket is refused in words. Both free actions retain the original external task id.
+
+## Workers and the durable queue
+
+For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` for `mirsal serve` and run `python -m mirsal worker` (any number; `--once` drains and exits, `--kinds sheet`, `--poll 2`).
+`mirsal queue status | retry J004 | reap | sync` looks after the table. A provider failure is **not** retried by a worker (it can cost credits again); retry it yourself. Details: `docs/generation.md`, "The durable queue and workers".
+
 ## Rules
 
 - **Ticket first.** `claim` stores `external_task_id` before the operator waits. A crashed
@@ -31,11 +42,24 @@ mirsal hf models --type video                  # the full Higgsfield list with p
   remaining credits, stop and tell Haitham.
 - **Retries.** Transient errors retry at most 2 times; invalid input never retries. There is
   never a "while not good" loop. A job older than `MIRSAL_JOB_TIMEOUT` (default 20 min) shows
-  TIMEOUT; a human re-queues it (`job requeue`), the operator never does.
+  TIMEOUT; a human re-queues it (`job requeue`), the operator never does. Re-queue, CLI queue retry and the UI's **Continue** wait for the SAME provider job. The UI's separate **Retry · SPENDS** explicitly buys a new request.
+- **A 5xx while waiting is not a failure (J048, 2026-10-03).** `HiggsError` carries the HTTP
+  status the CLI reported. While WAITING, a `408/425/429/5xx` is retried inside the wait
+  (`WAIT_RETRIES`, 3 tries, backoff) on the **same ticket** — it can never create a second paid
+  job. If it still fails, a job that holds a ticket goes to **TIMEOUT**, not `FAILED`: the
+  provider may still be rendering it, and `queue retry J048` / `jobs.resume` waits for the same
+  job again. Only a `4xx` (the provider refused the prompt), a crash in a check, or a failure
+  with **no ticket at all** is final `FAILED` — with no ticket nothing was created, so there is
+  nothing to resume. A failure the CLI gave no status for is **final by default**: an
+  unclassifiable error must never park forever as a retryable timeout. `TIMEOUT` counts against
+  the daily cap (`_inflight`) because the job really is still being charged for.
+  **Recovering one by hand:** `higgsfield generate get <external_task_id> --json` is read-only
+  and free; if it says `completed` while we hold no file, download `result_url` (a plain HTTPS
+  GET, no auth header) and attach it by ticket — `mirsal job done J048 --file <path> --model kling3_0 --cost 4.5`.
 - **Never open or judge media.** Judge with Python (`ffprobe`, the verifier, `measure-cells`
   when it exists, file sizes). Haitham looks at the pictures.
-- **Never write inside `inputs/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`
-  (gitignored); `job done` copies the file into `out/jobs/<J>/`.
+- **Never write inside `inputs/Images_gen|videos_gen`.** Downloads go under `mirsal/out/`;
+  `job done` copies the file into the job's folder (`out/jobs/J057/`, or the labelled `out/jobs/J058-<subject>-<kind>/` of a newer job: `jobs.job_dir`).
 - **Ledger.** Every claim/done/fail appends to `out/model_calls.jsonl` (what, parameters,
   latency, cost, output path). Postgres mirrors it as `model_calls`.
 

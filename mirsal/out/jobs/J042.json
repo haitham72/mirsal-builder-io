@@ -1,0 +1,39 @@
+{
+  "id": "J042",
+  "kind": "sheet",
+  "task": "031",
+  "generation": "G102",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a small yellow school bus.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: yellow bus driving happily down the street\nCharacter 2: yellow bus stopping suddenly to let out smoke\nCharacter 3: yellow bus tilted sideways by strong wind\nCharacter 4: yellow bus spinning in a tight circle fast\nCharacter 5: yellow bus lying flat on the grass after crash\nCharacter 6: yellow bus jumping over a giant puddle\nCharacter 7: yellow bus reaching out to touch a passing cloud\nCharacter 8: yellow bus shivering in heavy rain and snow\nCharacter 9: yellow bus dancing on the dance floor at a parade\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "school buss",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "79260cf9-ef8e-4663-bebf-ea8ab1c02080",
+  "result": {
+    "file": "jobs/J042/result.png",
+    "sha256": "0cda654d4016d6c8bbefe077059e57e8042d1ab37be936534491bcc26c3f2b93",
+    "bytes": 4401080
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791003997.083,
+  "claimed_at": 1791003998.121,
+  "completed_at": 1791004021.022,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

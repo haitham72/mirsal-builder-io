@@ -1,4 +1,5 @@
-"""The verifier catalogue: every check has a PASS fixture and a FAIL fixture (docs/engine-and-studio.md, "Rules")."""
+"""The verifier catalogue, with PASS and FAIL fixtures for the checks named here. That every one of the 44 has both is proven by the table in
+`tests/test_verify_fixtures.py`, and `tests/test_hardening.py` pins the catalogue's size, so a new check cannot be added without both being looked at."""
 import hashlib
 import tempfile
 import unittest
@@ -278,7 +279,7 @@ class SlotStageTests(unittest.TestCase):
     def test_out_of_bounds_animation_is_made_but_blocked_for_review(self):
         import tempfile
         from pathlib import Path
-        from mirsal import pipeline as pl
+        from mirsal.flow import pipeline as pl
         from mirsal.engine.video import AnimationResult
         drift = frames_of(disc_at(lambda t: 100 - t * 4.5, lambda t: 100))
         rep = verify.Report(verify.run("slot", {"cell_frames": drift}, CFG))
@@ -290,6 +291,12 @@ class SlotStageTests(unittest.TestCase):
             self.assertEqual((st["anim_status"], st["review"]["anim"]), ("READY", "BLOCKED"))
             self.assertTrue((Path(td) / st["webm"]).exists())     # kept to look at
             self.assertEqual((st["history"][-1]["decision"], st["history"][-1]["reason"]), ("BLOCK", "inside_frame"))
+            st["anim_finished"] = {"plain": {"anim_status": "FAILED"}}
+            pl.record_anim(Path(td), st, AnimationResult(1, "READY", None, rep, {}, b"webm"), "new cut")
+            self.assertNotIn("anim_finished", st, "a genuine new cut invalidates remembered verdicts of the old pixels")
+            st["anim_finished"] = {"plain": {"anim_status": "FAILED"}}
+            pl.record_anim(Path(td), st, AnimationResult(1, "READY", None, rep, {}, b"webm"), "verdict switch", preserve_finished=True)
+            self.assertIn("plain", st["anim_finished"], "the verdict-switch render keeps the other finished verdict")
 
     def test_cross_slot(self):
         self.assertTrue(ck(verify.run("slot", {"slot_frames": frames_of(disc_at(lambda t: 100, lambda t: 100))}, CFG), "cross_slot").ok)
@@ -350,6 +357,59 @@ class PackTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
+    def test_stored_animation_uses_the_same_waiver_and_keeps_hard_failures(self):
+        seam = verify.Check("loop_seam", "anim", verify.BLOCK, False, 40, 12, note="loop is open")
+        warning = verify.Check("sharpness", "anim", verify.WARN, False, note="soft")
+        metrics = {"waived": ["old"], "warnings": ["old"], "kb": 42}
+        report = verify.animation_verdict(verify.Report([seam, warning]).checks, ["loop_seam"], metrics)
+        self.assertTrue(report.ok)
+        self.assertEqual((report.get("loop_seam").ok, report.get("loop_seam").severity), (False, verify.WARN))
+        self.assertEqual(metrics, {"waived": ["loop_seam"], "warnings": ["sharpness"], "kb": 42})
+        report = verify.animation_verdict(report.checks, [], metrics)
+        self.assertEqual(report.first_failure, "loop_seam")
+        self.assertEqual(report.get("loop_seam").note, seam.note)
+        self.assertNotIn("waived", metrics)
+        hard = verify.Check("size_budget", "anim", verify.BLOCK, False)
+        crash = verify.Check("loop_seam", "anim", verify.BLOCK, False, detail={"error": "crash"}, reason="verifier_error")
+        for check in (hard, crash):
+            report = verify.animation_verdict([check.to_dict()], [check.id], {})
+            self.assertFalse(report.ok)
+            self.assertEqual(report.first_failure, check.reason or check.id)
+
+    def test_existing_clip_switches_without_slicing_or_animating(self):
+        from unittest import mock
+        from mirsal.flow import gates as G, pipeline as pl
+        seam = verify.Check("loop_seam", "anim", verify.BLOCK, False, note="loop is open")
+        for source in (("sheet", "A1"), ("prepared", None)):
+            with self.subTest(source=source), tempfile.TemporaryDirectory() as td:
+                st = {"index": 1, "anim_status": "FAILED", "anim_reason": "loop_seam", "anim_report": [seam.to_dict()],
+                      "anim_metrics": {}, "webm": "clip.webm", "review": {"anim": "BLOCKED"}, "history": []}
+                res = {"stickers": [st]}
+                clip = Path(td) / "clip.webm"
+                clip.write_bytes(b"finished clip")
+                with mock.patch.object(pl, "read_result", return_value=res), mock.patch.object(pl, "write_result"), \
+                     mock.patch.object(G, "check_allow", return_value=(st, source[1])), mock.patch.object(G, "anim_source", return_value=source), \
+                     mock.patch.object(G, "slice_video", side_effect=AssertionError("no render")), \
+                     mock.patch.object(G, "reanimate_prepared", side_effect=AssertionError("no render")):
+                    for allow, status in ((True, "READY"), (False, "FAILED"), (True, "READY")):
+                        G.allow_animations(Path(td), 1, [1], allow, CFG)
+                        self.assertEqual(st["anim_status"], status)
+                        self.assertEqual(clip.read_bytes(), b"finished clip")
+                self.assertEqual([h["actor"] for h in st["history"]], ["human"] * 3)
+
+    def test_short_slot_report_cannot_hide_a_finished_clips_loop_failure(self):
+        from mirsal.flow import gates as G
+        slot = verify.Check("inside_slot", "slot", verify.BLOCK, False)
+        seam = verify.Check("loop_seam", "anim", verify.BLOCK, False)
+        full = verify.animation_verdict([slot.to_dict(), seam.to_dict()], ["inside_slot", "loop_seam"], {})
+        st = {"webm": "clip.webm", "anim_status": "FAILED", "anim_reason": "inside_slot", "anim_report": [slot.to_dict()],
+              "anim_override": [], "anim_metrics": {}, "review": {"anim": "BLOCKED"},
+              "anim_finished": {"inside_slot,loop_seam": {"webm": "clip.webm", "anim_report": full.checks}}}
+        G._remember_anim_pair(st)
+        verdict = st["anim_finished"]["inside_slot"]
+        self.assertEqual((verdict["anim_status"], verdict["anim_reason"]), ("FAILED", "loop_seam"))
+        self.assertFalse(next(c for c in verdict["anim_report"] if c["name"] == "loop_seam")["ok"])
+
     def test_a_crashing_check_is_a_block_not_an_exception(self):
         cs = verify.run("pack", {}, CFG)                               # inputs missing: the check raises KeyError inside
         self.assertEqual((cs[0].id, cs[0].ok, cs[0].severity, cs[0].reason), ("pack_limits", False, verify.BLOCK, "verifier_error"))

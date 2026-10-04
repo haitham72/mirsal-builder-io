@@ -36,11 +36,14 @@ def detect_key(rgb: np.ndarray, border_px: int = 4, asked: str = "green", min_di
     return (best if score[best] >= min_diff else asked), score
 
 
-def calibrate(rgb: np.ndarray, chroma: str, border_px: int = 4, override: float | None = None):
-    """Sample the REAL background from the outer ring (AI tools never give a true #00FF00)."""
+def calibrate(rgb: np.ndarray, chroma: str, border_px: int = 4, override: float | None = None, validate: bool = False):
+    """Sample the REAL background from the outer ring (AI tools never give a true #00FF00).
+    validate=True: raises ValueError if the key difference is too low (wrong chroma key used)."""
     m = border_mask(rgb.shape[0], rgb.shape[1], border_px)
     bg = np.median(rgb[m], axis=0)
     med = float(np.median(key_diff(rgb, chroma)[m]))
+    if validate and med < 30.0:
+        raise ValueError(f"Background key difference too low ({med:.1f}) for chroma={chroma}: likely wrong screen colour detected")
     t = float(override) if override else max(0.5 * med, 8.0)
     return [int(v) for v in bg], t
 

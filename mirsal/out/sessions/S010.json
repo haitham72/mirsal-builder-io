@@ -1,0 +1,483 @@
+{
+ "id": "S010",
+ "user": "local",
+ "title": "hi",
+ "created": 1791104966.153,
+ "updated": 1791105721.606,
+ "settings": {
+  "grid": "2x2",
+  "style_id": "pixel_art",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "dog as banana",
+   "slug": "dog_as_banana",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J057",
+     "prompt": "my dog as a banana",
+     "grid": "2x2",
+     "style_id": "pixel_art",
+     "parent": null,
+     "created": 1791105676.873,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791104966.405,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791105666.191,
+   "user": "how are you",
+   "assistant": "Hi! What will you create today?\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791105673.821,
+   "user": "my dog as a banana",
+   "assistant": "Here's the plan for **dog as banana**: 4 stickers, pixel art. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1791105676.899,
+   "user": "confirm",
+   "assistant": "Creating **dog as banana** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1791104966.238
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Hi! What will you create today?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791104966.296
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1791104966.309
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1791104966.359
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791104966.371
+    }
+   ],
+   "ts": 1791104966.238,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "how are you",
+   "cards": [],
+   "steps": [],
+   "ts": 1791105666.051
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Hi! What will you create today?\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791105666.101
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105666.147
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1791105666.168
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105666.179
+    }
+   ],
+   "ts": 1791105666.051,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "my dog as a banana",
+   "cards": [],
+   "steps": [],
+   "ts": 1791105673.134
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Here's the plan for **dog as banana**: 4 stickers, pixel art. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "dog as banana",
+     "grid": "2x2",
+     "style": "pixel art",
+     "count": 4,
+     "names": [
+      "dog as banana dancing",
+      "dog as banana shocked",
+      "dog as banana squashed",
+      "dog as banana waving"
+     ],
+     "estimate": 2.0,
+     "balance": 3084.12,
+     "prompt": "my dog as a banana",
+     "free": false,
+     "transformation": {
+      "id": "subject_as_target",
+      "subject": "dog",
+      "target": "banana",
+      "required": [
+       "dance",
+       "shock",
+       "squash"
+      ]
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating my dog as a banana",
+     "detail": null,
+     "status": "running",
+     "ts": 1791105673.147
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105673.193
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105673.244
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "dog as banana dancing",
+       "dog as banana shocked",
+       "dog as banana squashed",
+       "dog as banana waving"
+      ]
+     },
+     "status": "done",
+     "ts": 1791105673.317
+    },
+    {
+     "kind": "note",
+     "label": "a transformation: the whole character is a banana with the dog's face; dance, shock, squash included",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105673.329
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105673.808
+    }
+   ],
+   "ts": 1791105673.134,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791105676.257
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "Creating **dog as banana** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J057",
+     "subject": "dog as banana",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating dog as banana",
+     "detail": null,
+     "status": "running",
+     "ts": 1791105676.27
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105676.314
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105676.358
+    },
+    {
+     "kind": "final",
+     "label": "started · J057",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105676.873
+    }
+   ],
+   "ts": 1791105676.257,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m9",
+   "role": "assistant",
+   "text": "I looked at all 4 stickers of **My dog as a banana**: the names fit the pictures.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at My dog as a banana",
+     "detail": null,
+     "status": "running",
+     "ts": 1791105712.932
+    },
+    {
+     "kind": "step",
+     "label": "looked at 4 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105721.578
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791105721.591
+    }
+   ],
+   "ts": 1791105712.917,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "named": [
+  "G110"
+ ]
+}

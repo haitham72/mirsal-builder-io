@@ -5,11 +5,12 @@ import tempfile
 import threading
 import time
 import unittest
+from mirsal.runtime import names
 from pathlib import Path
 
 import cv2
 
-from mirsal import pipeline as pl
+from mirsal.flow import pipeline as pl
 from mirsal.engine.config import EngineConfig
 from mirsal.console.server import serve
 from tests import synth
@@ -97,8 +98,9 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(len(ready), 8)
         self.assertEqual(g["grid"], [3, 3]); self.assertEqual(g["source"]["grid"]["method"], "gutter")
         for t in ready:
-            self.assertTrue(t["png"].startswith(f"slices/img-{gid:03d}-blob_school-blob_"), t["png"])
-            self.assertTrue((self.c.out / g["generation_id"] / t["png"]).exists())
+            self.assertTrue(t["png"].startswith("slices/img-blob_school-"), t["png"])
+            self.assertEqual(names.parse(t["png"].split("/")[1])["subject"], "blob_school")
+            self.assertTrue((pl.out_path(self.c.out, g["generation_id"]) / t["png"]).exists())
         stages = [(e["stage"], e["status"]) for e in g["events"]]
         self.assertEqual(stages, [("requested", "done")] + [(x, y) for x in ("sheet_picked", "keyed", "sliced") for y in ("start", "done")])
 
@@ -107,8 +109,8 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(s, 202)
         g = self.wait(gid, lambda j: j["stickers"][0]["anim_status"] in ("READY", "FAILED"))
         self.assertEqual(g["stickers"][0]["anim_status"], "READY", g["stickers"][0]["anim_metrics"])
-        self.assertEqual(g["stickers"][0]["webm"], f"slices/vid-{gid:03d}-blob_school-blob_with_a_book.webm")
-        self.assertEqual(len(list((self.c.out / g["generation_id"] / "slices").glob("*.webm"))), 1)
+        self.assertEqual(g["stickers"][0]["webm"], "slices/" + names.as_media(g["stickers"][0]["name"], "vid") + ".webm")
+        self.assertEqual(len(list((pl.out_path(self.c.out, g["generation_id"]) / "slices").glob("*.webm"))), 1)
         s, j = self.req("POST", f"/api/generations/{gid}/animate", {"scope": "slice", "index": 1})
         self.assertEqual((s, j["noop"]), (200, True))
         s, j = self.req("POST", f"/api/generations/{gid}/animate", {"scope": "slice", "index": 5})
@@ -209,7 +211,7 @@ class ConsoleTests(unittest.TestCase):
         first = pack["stickers"][0]
         self.assertEqual(first["type"], "animated")                                      # it took the still's position
         self.assertFalse(first["name"].startswith("img-"))                              # readable name ({subject} {action}) ...
-        self.assertRegex(first["file_name"], r"^img-\d{3}-")                             # ... and the generator's file name kept as metadata
+        self.assertTrue(names.parse(first["file_name"]) and names.parse(first["file_name"])["media"] == "img")                             # ... and the generator's file name kept as metadata
 
     def test_add_animated_next_to_the_still(self):
         r, pack, stills = self._still_then_animated_add("add")
@@ -224,17 +226,23 @@ class ConsoleTests(unittest.TestCase):
         gid = j["id"]
         g = self.wait(gid, lambda x: x["stage"] == "sliced")
         st = g["stickers"][0]
-        f = self.tmp / "out" / g["generation_id"] / st["png"]
+        f = pl.out_path(self.tmp / "out", g["generation_id"]) / st["png"]
         before = f.read_bytes()
         im = Image.open(io.BytesIO(before)).convert("RGBA"); ImageDraw.Draw(im).rectangle([200, 200, 300, 300], fill=(255, 0, 0, 255))
         buf = io.BytesIO(); im.save(buf, "PNG")
         s, r = self.req("POST", f"/api/generations/{gid}/edit", {"index": 1, "png": "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()})
         self.assertEqual(s, 200, r)
         self.assertNotEqual(f.read_bytes(), before)                                                       # saved in place, same file name
-        self.assertEqual((self.tmp / "out" / g["generation_id"] / "source" / "orig" / "S1.png").read_bytes(), before)   # the original is kept
+        self.assertEqual((pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "orig" / "S1.png").read_bytes(), before)   # the original is kept
         g2 = self.req("GET", f"/api/generations/{gid}")[1]
         self.assertEqual((g2["stickers"][0]["png"], g2["stickers"][0]["edited"]), (st["png"], True))
         self.assertEqual(g2["stickers"][0]["history"][-1]["decision"], "EDIT")
+        # P8: the edited slice is merged back into one sheet, same layout, so the same S# by position
+        self.assertEqual((g2["source"]["sheet_fixed"], g2["source"]["sheet_fixed_cells"]), ("source/sheet_fixed.png", [1]))
+        fixed = pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "sheet_fixed.png"
+        raw = pl.out_path(self.tmp / "out", g["generation_id"]) / g2["source"]["sheet_copy"]
+        self.assertEqual(Image.open(fixed).size, Image.open(raw).size, "the same sheet, not a new layout")
+        self.assertEqual([x["index"] for x in g2["stickers"]], [x["index"] for x in g["stickers"]], "every sticker keeps its S#")
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/edit", {"index": 1, "png": "data:image/png;base64,AAAA"})[0], 409)   # not a valid sticker
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 6})[1]["rerendered"], len(g["stickers"]) - sum(x["status"] != "READY" for x in g["stickers"]) - 1)   # the edited one keeps its pixels
         # Add with the names the user typed in the wizard
@@ -244,7 +252,7 @@ class ConsoleTests(unittest.TestCase):
         pack = next(x for x in self.req("GET", "/api/library")[1]["packs"] if x["id"] == pk["id"])
         first = next(x for x in pack["stickers"] if x["source"]["index"] == 1)
         self.assertEqual((first["name"], first["emoji"]), ("My own name", "🎉"))
-        self.assertRegex(first["file_name"], r"^img-\d{3}-")                                                # the generator's name stays as metadata
+        self.assertTrue(names.parse(first["file_name"]) and names.parse(first["file_name"])["media"] == "img")                                                # the generator's name stays as metadata
         other = next(x for x in pack["stickers"] if x["source"]["index"] != 1)
         self.assertFalse(other["name"].startswith("img-"))                                                  # untouched ones get the readable default
         # bulk delete: the square markers on the library
@@ -263,7 +271,7 @@ class ConsoleTests(unittest.TestCase):
         had = {t["index"]: next((c["ok"] for c in t["anim_report"] if c["name"] == "inside_frame"), None) for t in g["stickers"] if t["anim_status"] == "READY"}
         self.assertTrue(ready and all(v is not None for v in had.values()))
         # make them look like an older server made them: no verdict, nothing blocked
-        f = self.tmp / "out" / g["generation_id"] / "result.json"
+        f = pl.out_path(self.tmp / "out", g["generation_id"]) / "result.json"
         r = json.loads(f.read_text(encoding="utf-8"))
         for t in r["stickers"]:
             if t["anim_status"] == "READY":
@@ -289,7 +297,7 @@ class ConsoleTests(unittest.TestCase):
         self.req("POST", f"/api/generations/{gid}/animate", {"scope": "pack"})
         g = self.wait(gid, lambda x: all(t["anim_status"] in ("READY", "FAILED") for t in x["stickers"] if t["status"] == "READY"))
         a, b = [t["index"] for t in g["stickers"] if t["anim_status"] == "READY"][:2]
-        f = self.tmp / "out" / g["generation_id"] / "result.json"
+        f = pl.out_path(self.tmp / "out", g["generation_id"]) / "result.json"
         r = json.loads(f.read_text(encoding="utf-8"))
         for i, name, sev in ((a, "inside_frame", "WARN"), (b, "loop_seam", "BLOCK")):         # a: leaves its cell (a warning); b: a real failed check
             t = r["stickers"][i - 1]
@@ -331,7 +339,7 @@ class ConsoleTests(unittest.TestCase):
         pk = self.req("POST", "/api/packs", {"name": "Studio copies"})[1]["id"]
         self.req("POST", f"/api/packs/{pk}/stickers", {"from_generation": {"id": gid, "index": 1, "kind": "static"}})
         self.req("POST", f"/api/packs/{pk}/stickers", {"from_generation": {"id": gid, "index": 1, "kind": "animated"}})
-        base = self.tmp / "out" / g["generation_id"]
+        base = pl.out_path(self.tmp / "out", g["generation_id"])
         png0, webm0 = (base / st["png"]).read_bytes(), (base / st["webm"]).read_bytes()
         # a sticker without an animation cannot be edited as a video
         no_anim = next(t for t in g["stickers"] if t["status"] == "READY" and t["anim_status"] != "READY")
@@ -352,6 +360,7 @@ class ConsoleTests(unittest.TestCase):
         self.assertNotEqual((base / st["webm"]).read_bytes(), webm0)                    # ... and so did the animation, from the one edit
         red = np.array(Image.open(base / st["png"]).convert("RGBA"))[440:500, 20:200]
         self.assertTrue(((red[..., 0] > 200) & (red[..., 3] > 200)).mean() > 0.5)      # the layer is in the image (all layers, timing ignored)
+        self.assertEqual(r["sheet_fixed"]["cells"], [1], "the image of the edit is merged back into the sheet as well (the chat sends that sheet as its picture)")
         self.assertEqual((base / "source" / "orig" / "S1.png").read_bytes(), png0)      # originals kept: a re-edit starts from them
         g2 = self.req("GET", f"/api/generations/{gid}")[1]["stickers"][0]
         self.assertEqual((g2["edited"], g2["edit"]["project"], g2["history"][-1]["decision"]), (True, pid, "EDIT"))

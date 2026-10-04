@@ -1,0 +1,485 @@
+{
+  "id": "E016",
+  "created": 1791084908.259,
+  "user": "local",
+  "pack_id": "fab32429",
+  "pack_name": "Angel Reading Newspaper",
+  "mode": "video",
+  "grid": [
+    2,
+    2
+  ],
+  "note": "",
+  "title": "Angel Reading Newspaper · effects",
+  "status": "RESULTS",
+  "stickers": [
+    {
+      "sticker_id": "031868b4",
+      "name": "Angel reading newspaper waving",
+      "emoji": "👋",
+      "file": "G001/img-angel_reading_newspaper-waving-angel_reading_newspaper-20261001T173032-25b3fd.png",
+      "type": "static",
+      "src": "src/031868b4.png"
+    },
+    {
+      "sticker_id": "a6be1731",
+      "name": "Angel reading newspaper excited",
+      "emoji": "🤩",
+      "file": "G001/img-angel_reading_newspaper-excited-angel_reading_newspaper-20261001T173032-a1cb30.png",
+      "type": "static",
+      "src": "src/a6be1731.png"
+    },
+    {
+      "sticker_id": "d450042e",
+      "name": "Angel reading newspaper in love",
+      "emoji": "😍",
+      "file": "G001/img-angel_reading_newspaper-in_love-angel_reading_newspaper-20261001T173032-2dca58.png",
+      "type": "static",
+      "src": "src/d450042e.png"
+    },
+    {
+      "sticker_id": "2689488e",
+      "name": "Angel reading newspaper ok sign",
+      "emoji": "👌",
+      "file": "G001/img-angel_reading_newspaper-ok_sign-angel_reading_newspaper-20261001T173032-322573.png",
+      "type": "static",
+      "src": "src/2689488e.png"
+    },
+    {
+      "sticker_id": "5843680c",
+      "name": "Angel reading newspaper eye roll",
+      "emoji": "🙄",
+      "file": "G001/img-angel_reading_newspaper-eye_roll-angel_reading_newspaper-20261001T173032-fbaaa2.png",
+      "type": "static",
+      "src": "src/5843680c.png"
+    },
+    {
+      "sticker_id": "04e0be52",
+      "name": "Angel reading newspaper sad",
+      "emoji": "😞",
+      "file": "G001/img-angel_reading_newspaper-sad-angel_reading_newspaper-20261001T173032-44c10c.png",
+      "type": "static",
+      "src": "src/04e0be52.png"
+    },
+    {
+      "sticker_id": "bc7bc82d",
+      "name": "Angel reading newspaper angry",
+      "emoji": "😡",
+      "file": "G001/img-angel_reading_newspaper-angry-angel_reading_newspaper-20261001T173032-a3223e.png",
+      "type": "static",
+      "src": "src/bc7bc82d.png"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "subject": "angel reading",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "031868b4",
+        "a6be1731",
+        "2689488e",
+        "5843680c",
+        "04e0be52"
+      ],
+      "moods": {
+        "031868b4": "neutral",
+        "a6be1731": "neutral",
+        "2689488e": "neutral",
+        "5843680c": "neutral",
+        "04e0be52": "neutral"
+      },
+      "preset": {
+        "031868b4": "burst",
+        "a6be1731": "burst",
+        "2689488e": "burst",
+        "5843680c": "burst",
+        "04e0be52": "burst"
+      },
+      "by": "generic",
+      "sprites": "own"
+    },
+    {
+      "id": "g2",
+      "subject": "love",
+      "elements": [
+        "red hearts",
+        "pink hearts",
+        "small stars"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "d450042e"
+      ],
+      "moods": {
+        "d450042e": "neutral"
+      },
+      "preset": {
+        "d450042e": "burst"
+      },
+      "by": "lexicon",
+      "sprites": "own"
+    },
+    {
+      "id": "g3",
+      "subject": "angry",
+      "elements": [
+        "small flames",
+        "steam puffs",
+        "tiny sparks"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "bc7bc82d"
+      ],
+      "moods": {
+        "bc7bc82d": "neutral"
+      },
+      "preset": {
+        "bc7bc82d": "burst"
+      },
+      "by": "lexicon",
+      "sprites": "own"
+    }
+  ],
+  "results": [
+    {
+      "id": "R001",
+      "mode": "video",
+      "group": "g1",
+      "cell": 1,
+      "file": "results/R001.webm",
+      "bytes": 258378,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 46,
+        "kb": 252.3,
+        "label": "cell 1",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.0527,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0,
+        "raw_start_coverage": 0.0,
+        "tail_faded": false,
+        "head_faded": false,
+        "screen_panel_step": 2.3,
+        "screen_quarter_step": 9.9,
+        "screen_bg_std": 4.6,
+        "screen_key_diff": 95.0,
+        "screen_frames": 16,
+        "screen_seam_line": 0.2
+      },
+      "job": "J055",
+      "sprite_file": "results/sprite-g1-1.png",
+      "key": "green",
+      "timeline_file": "results/timeline-g1-1.npz",
+      "fps": 30,
+      "frames": 90
+    },
+    {
+      "id": "R002",
+      "mode": "video",
+      "group": "g1",
+      "cell": 2,
+      "file": "results/R002.webm",
+      "bytes": 235003,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 46,
+        "kb": 229.5,
+        "label": "cell 2",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.0465,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0008,
+        "raw_start_coverage": 0.0,
+        "tail_faded": false,
+        "head_faded": false,
+        "screen_panel_step": 2.3,
+        "screen_quarter_step": 9.9,
+        "screen_bg_std": 4.6,
+        "screen_key_diff": 95.0,
+        "screen_frames": 16,
+        "screen_seam_line": 0.2
+      },
+      "job": "J055",
+      "sprite_file": "results/sprite-g1-2.png",
+      "key": "green",
+      "timeline_file": "results/timeline-g1-2.npz",
+      "fps": 30,
+      "frames": 90
+    },
+    {
+      "id": "R003",
+      "mode": "video",
+      "group": "g1",
+      "cell": 3,
+      "file": "results/R003.webm",
+      "bytes": 195697,
+      "status": "READY",
+      "checks": [
+        {
+          "id": "effect_tail_faded",
+          "verdict": "WARN",
+          "detail": "the last frames still had pieces on screen, so they were faded out to end empty like a Telegram effect",
+          "value": 0.0074,
+          "limit": 0.003
+        }
+      ],
+      "warnings": [
+        "effect_tail_faded"
+      ],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 54,
+        "kb": 191.1,
+        "label": "cell 3",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.0581,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0074,
+        "raw_start_coverage": 0.0,
+        "tail_faded": true,
+        "head_faded": false,
+        "screen_panel_step": 2.3,
+        "screen_quarter_step": 9.9,
+        "screen_bg_std": 4.6,
+        "screen_key_diff": 95.0,
+        "screen_frames": 16,
+        "screen_seam_line": 0.2
+      },
+      "job": "J055",
+      "sprite_file": "results/sprite-g1-3.png",
+      "key": "green",
+      "timeline_file": "results/timeline-g1-3.npz",
+      "fps": 30,
+      "frames": 90
+    },
+    {
+      "id": "R004",
+      "mode": "video",
+      "group": "g1",
+      "cell": 4,
+      "file": "results/R004.webm",
+      "bytes": 215189,
+      "status": "READY",
+      "checks": [
+        {
+          "id": "effect_tail_faded",
+          "verdict": "WARN",
+          "detail": "the last frames still had pieces on screen, so they were faded out to end empty like a Telegram effect",
+          "value": 0.0177,
+          "limit": 0.003
+        }
+      ],
+      "warnings": [
+        "effect_tail_faded"
+      ],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 54,
+        "kb": 210.1,
+        "label": "cell 4",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.0607,
+        "key": "green",
+        "src_fps": 24.0,
+        "raw_end_coverage": 0.0177,
+        "raw_start_coverage": 0.0,
+        "tail_faded": true,
+        "head_faded": false,
+        "screen_panel_step": 2.3,
+        "screen_quarter_step": 9.9,
+        "screen_bg_std": 4.6,
+        "screen_key_diff": 95.0,
+        "screen_frames": 16,
+        "screen_seam_line": 0.2
+      },
+      "job": "J055",
+      "sprite_file": "results/sprite-g1-4.png",
+      "key": "green",
+      "timeline_file": "results/timeline-g1-4.npz",
+      "fps": 30,
+      "frames": 90
+    }
+  ],
+  "video": {
+    "g1": {
+      "job": "J055",
+      "grid": [
+        2,
+        2
+      ],
+      "key": "green",
+      "status": "DONE",
+      "cells": 4,
+      "cost": 4.5
+    }
+  },
+  "history": [
+    {
+      "ts": 1791084908.259,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "7 sticker(s), video",
+      "detail": null
+    },
+    {
+      "ts": 1791084908.261,
+      "actor": "python",
+      "decision": "ANALYSE",
+      "reason": "angel reading: small sparkles, tiny stars, little confetti pieces, love: red hearts, pink hearts, small stars, angry: small flames, steam puffs, tiny sparks",
+      "detail": {
+        "model": null
+      }
+    },
+    {
+      "ts": 1791084915.743,
+      "actor": "local",
+      "decision": "REQUEST",
+      "reason": "g1: video job J055 (2x2)",
+      "detail": {
+        "job": "J055"
+      }
+    },
+    {
+      "ts": 1791085020.389,
+      "actor": "python",
+      "decision": "CUT",
+      "reason": "g1: 4 of 4 cells are stickers",
+      "detail": {
+        "job": "J055"
+      }
+    },
+    {
+      "ts": 1791085029.461,
+      "actor": "local",
+      "decision": "SAVE",
+      "reason": "saved as particle set P009",
+      "detail": {
+        "set": "P009"
+      }
+    }
+  ],
+  "updated": 1791085029.461,
+  "per_sticker": {
+    "031868b4": {
+      "subject": "angel reading",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "mood": "neutral",
+      "by": "generic"
+    },
+    "a6be1731": {
+      "subject": "angel reading",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "mood": "neutral",
+      "by": "generic"
+    },
+    "d450042e": {
+      "subject": "love",
+      "elements": [
+        "red hearts",
+        "pink hearts",
+        "small stars"
+      ],
+      "mood": "neutral",
+      "by": "lexicon"
+    },
+    "2689488e": {
+      "subject": "angel reading",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "mood": "neutral",
+      "by": "generic"
+    },
+    "5843680c": {
+      "subject": "angel reading",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "mood": "neutral",
+      "by": "generic"
+    },
+    "04e0be52": {
+      "subject": "angel reading",
+      "elements": [
+        "small sparkles",
+        "tiny stars",
+        "little confetti pieces"
+      ],
+      "mood": "neutral",
+      "by": "generic"
+    },
+    "bc7bc82d": {
+      "subject": "angry",
+      "elements": [
+        "small flames",
+        "steam puffs",
+        "tiny sparks"
+      ],
+      "mood": "neutral",
+      "by": "lexicon"
+    }
+  },
+  "notes": [
+    "Pictures were not sent to a model (not allowed), so the built-in table chose the particles: you can edit them."
+  ],
+  "analysed_by": "table",
+  "sets": [
+    "P009"
+  ]
+}

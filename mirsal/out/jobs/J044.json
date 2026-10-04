@@ -1,0 +1,35 @@
+{
+  "id": "J044",
+  "kind": "sheet",
+  "task": "033",
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Spider-Man uniformed student.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: Happy student running to class with excitement\nCharacter 2: Confused student rubbing head in doubt\nCharacter 3: Excited student waving at teacher proudly\nCharacter 4: Tired student slouching over desk bored\nCharacter 5: Scared student cowering behind chair in fear\nCharacter 6: Angry student kicking table with frustration\nCharacter 7: Shocked student falling jaw in surprise\nCharacter 8: Embarrassed student hiding face in hands red\nCharacter 9: Mischief student grinning while hiding under desk\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "spiderman in school",
+    "refs": [],
+    "outline": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "FAILED",
+  "external_task_id": "67cd4ce2-5025-413a-aeaf-dca98202911b",
+  "result": null,
+  "cost": null,
+  "error": "Error: job 67cd4ce2-5025-413a-aeaf-dca98202911b ended with status \"nsfw\"",
+  "created_at": 1791023364.549,
+  "claimed_at": 1791023365.654,
+  "completed_at": 1791023383.916,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "working",
+  "waiting_pid": null
+}

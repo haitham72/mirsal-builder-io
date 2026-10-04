@@ -1,0 +1,174 @@
+{
+  "id": "P003",
+  "name": "Recovered particles",
+  "created": 1791081423.062,
+  "user": "local",
+  "elements": [],
+  "source": {
+    "kind": "stickers",
+    "sticker_ids": [
+      "92d5c141",
+      "676f0f1d",
+      "f58fb80b",
+      "399327a7"
+    ],
+    "recovered_stickers": [
+      "92d5c141",
+      "676f0f1d",
+      "f58fb80b",
+      "399327a7"
+    ]
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 1,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Kitten dubai jump",
+      "sprite": true,
+      "w": 363,
+      "h": 390,
+      "picked": true,
+      "created": 1791081423.065,
+      "source_sticker": "92d5c141",
+      "source_pack": "af5600ee",
+      "clip": "cells/c01.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c01.npz"
+    },
+    {
+      "n": 2,
+      "cell": 5,
+      "file": "cells/c02.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Kitten dubai spin",
+      "sprite": true,
+      "w": 360,
+      "h": 367,
+      "picked": true,
+      "created": 1791081423.629,
+      "source_sticker": "676f0f1d",
+      "source_pack": "af5600ee",
+      "clip": "cells/c02.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c02.npz"
+    },
+    {
+      "n": 3,
+      "cell": 8,
+      "file": "cells/c03.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Kitten dubai nod",
+      "sprite": true,
+      "w": 374,
+      "h": 412,
+      "picked": true,
+      "created": 1791081424.408,
+      "source_sticker": "f58fb80b",
+      "source_pack": "af5600ee",
+      "clip": "cells/c03.webm",
+      "fps": 24.0,
+      "frames": 72,
+      "timeline": "cells/c03.npz"
+    },
+    {
+      "n": 4,
+      "cell": 9,
+      "file": "cells/c04.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Kitten dubai sleep",
+      "sprite": true,
+      "w": 423,
+      "h": 352,
+      "picked": true,
+      "created": 1791081425.127,
+      "source_sticker": "399327a7",
+      "source_pack": "af5600ee",
+      "clip": "cells/c04.webm",
+      "fps": 24.0,
+      "frames": 66,
+      "timeline": "cells/c04.npz"
+    }
+  ],
+  "motion": {
+    "preset": "burst",
+    "params": {
+      "seed": 1,
+      "magnitude": 0.45,
+      "gravity": 1,
+      "vortex": 0,
+      "count": 11,
+      "spin": 1,
+      "sprite_px": 100,
+      "scale": 1
+    }
+  },
+  "owner": [
+    {
+      "sticker_id": "92d5c141",
+      "pack_id": "af5600ee",
+      "generation": "G108",
+      "index": 1
+    },
+    {
+      "sticker_id": "676f0f1d",
+      "pack_id": "af5600ee",
+      "generation": "G108",
+      "index": 5
+    },
+    {
+      "sticker_id": "f58fb80b",
+      "pack_id": "af5600ee",
+      "generation": "G108",
+      "index": 8
+    },
+    {
+      "sticker_id": "399327a7",
+      "pack_id": "af5600ee",
+      "generation": "G108",
+      "index": 9
+    }
+  ],
+  "renders": [],
+  "credits": 0.0,
+  "notes": [],
+  "history": [
+    {
+      "ts": 1791081423.062,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "a new set (stickers)",
+      "detail": null
+    },
+    {
+      "ts": 1791081425.801,
+      "actor": "local",
+      "decision": "RECOVER_STICKERS",
+      "reason": null,
+      "detail": {
+        "stickers": [
+          "92d5c141",
+          "676f0f1d",
+          "f58fb80b",
+          "399327a7"
+        ],
+        "parent_pack_id": "af5600ee"
+      }
+    },
+    {
+      "ts": 1791081452.635,
+      "actor": "local",
+      "decision": "EDIT",
+      "reason": "motion",
+      "detail": null
+    }
+  ],
+  "updated": 1791081452.635
+}

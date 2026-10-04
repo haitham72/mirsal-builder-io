@@ -11,7 +11,8 @@ import numpy as np
 from PIL import Image
 
 from mirsal.engine.config import EngineConfig
-from mirsal.library import Library, LibraryError, cutout, decode_image, png_bytes
+from mirsal.runtime import names
+from mirsal.media.library import Library, LibraryError, cutout, decode_image, png_bytes
 from tests import synth
 
 
@@ -55,7 +56,7 @@ class LibraryTests(unittest.TestCase):
             cutout(decode_image(encode(np.full((200, 200, 3), 128, np.uint8))), self.cfg)
 
     def test_cutout_matte_and_forced_methods(self):
-        from mirsal import matte
+        from mirsal.media import matte
         img = np.dstack([photo(), np.full(photo().shape[:2], 255, np.uint8)])
         with self.assertRaises(LibraryError):
             cutout(img, self.cfg, "bogus")
@@ -72,7 +73,7 @@ class LibraryTests(unittest.TestCase):
         p = self.lib.create_pack("UAE Moments")
         for i in range(4):
             s = self.lib.add_render(p["id"], self.sticker_png(i), f"Sticker {i}", "🇦🇪", self.cfg)
-        self.assertTrue(s["file"].startswith("img-004-uae_moments-sticker_3"))
+        self.assertTrue(s["file"].startswith("own/img-sticker_3-custom-uae_moments-"), s["file"])           # files born in the library live in files/own/, named by names.py
         snap = self.lib.snapshot()
         self.assertEqual(len(snap["packs"][0]["stickers"]), 4); self.assertEqual(snap["packs"][0]["cover"], snap["packs"][0]["stickers"][0]["id"])
         ids = [x["id"] for x in snap["packs"][0]["stickers"]]
@@ -84,18 +85,20 @@ class LibraryTests(unittest.TestCase):
         self.lib.delete_sticker(p["id"], ids[2])                       # deleting the cover promotes another sticker
         self.assertNotEqual(self.lib.snapshot()["packs"][0]["cover"], ids[2])
         self.lib.delete_sticker(p["id"], ids[0])
-        self.lib.delete_pack(p["id"]); self.assertEqual(self.lib.snapshot()["packs"], []); self.assertEqual(list(self.lib.files.iterdir()), [])
+        self.lib.delete_pack(p["id"]); self.assertEqual(self.lib.snapshot()["packs"], [])
+        self.assertEqual(len(list(self.lib.files.rglob("*.*"))), 2, "Delete pack is SOFT: the trashed pack keeps its two remaining files until it is purged (tests/test_purge.py)")
+        self.lib.purge_pack(p["id"]); self.assertEqual(list(self.lib.files.rglob("*.*")), [])
 
     def test_move_sticker_between_packs(self):
         a = self.lib.create_pack("Old Pack")["id"]; b = self.lib.create_pack("New Pack")["id"]
         s1 = self.lib.add_render(a, self.sticker_png(0), "One", "🙂", self.cfg)
         s2 = self.lib.add_render(a, self.sticker_png(1), "Two", "🙂", self.cfg)
         m = self.lib.move_sticker(a, s1["id"], b)
-        self.assertEqual(m["file"], "img-001-new_pack-one.webp".replace("webp", m["file"].rsplit(".", 1)[-1]))
+        self.assertEqual(m["file"], s1["file"], "a move changes the pack in the library's data, never the file or its name")
         pk = {p["id"]: p for p in self.lib.snapshot()["packs"]}
         self.assertEqual([x["id"] for x in pk[a]["stickers"]], [s2["id"]]); self.assertEqual(pk[a]["cover"], s2["id"])
         self.assertEqual([x["id"] for x in pk[b]["stickers"]], [s1["id"]]); self.assertEqual(pk[b]["cover"], s1["id"])
-        self.assertTrue((self.lib.files / m["file"]).is_file()); self.assertEqual(len(list(self.lib.files.iterdir())), 2)
+        self.assertTrue((self.lib.files / m["file"]).is_file()); self.assertEqual(len(list(self.lib.files.rglob("*.*"))), 2)
         with self.assertRaises(LibraryError):
             self.lib.move_sticker(a, s1["id"], b)                     # no longer in pack a
         with self.assertRaises(LibraryError):
@@ -116,8 +119,25 @@ class NamingTests(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
+    def test_export_zip_has_every_file_under_its_name_and_a_manifest(self):
+        with self.assertRaises(LibraryError):
+            self.lib.export_zip(self.lib.create_pack("Empty")["id"])                                  # nothing to download yet
+        pk = self.lib.create_pack("My Pack")["id"]
+        self.lib.add_bytes(pk, b"png-bytes", "png", "still one", "static", "😀", {"generation": "G001", "index": 1})
+        self.lib.add_bytes(pk, b"webm-bytes", "webm", "moving one", "animated", "🔥", {"generation": "G001", "index": 2})
+        data, stem = self.lib.export_zip(pk)
+        self.assertEqual(stem, "my_pack")
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            names = z.namelist()
+            man = json.loads(z.read("manifest.json"))
+            self.assertEqual(sorted(n.rsplit(".", 1)[-1] for n in names if n != "manifest.json"), ["png", "webm"])
+            self.assertEqual([r["type"] for r in man["stickers"]], ["static", "animated"])
+            self.assertEqual(man["count"], 2)
+            webm = next(r["file"] for r in man["stickers"] if r["type"] == "animated")
+            self.assertEqual(z.read(webm), b"webm-bytes")                                              # the file as stored, not re-encoded
+
     def test_readable_name_and_legacy_file_style_names(self):
-        from mirsal.library import readable_name
+        from mirsal.media.library import readable_name
         self.assertEqual(readable_name("generic_emojis_laughing"), "Generic emojis laughing")
         pk = self.lib.create_pack("P")["id"]
         s = self.lib.add_bytes(pk, b"x", "png", "img-027-generic_emojis-generic_emojis_laughing", "static", "😂", {"generation": "G027", "index": 2})
@@ -167,6 +187,44 @@ class AnimateTests(unittest.TestCase):
 
 
 class BulkTests(unittest.TestCase):
+    def test_move_many_stickers_at_once_all_or_nothing(self):
+        """a drop or a button moved ONE sticker and the selection stayed on the rest."""
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            lib = Library(tmp)
+            a, b, c = lib.create_pack("A")["id"], lib.create_pack("B")["id"], lib.create_pack("C")["id"]
+            sa = [lib.add_bytes(a, b"x", "png", f"a{i}") for i in range(4)]
+            sc = lib.add_bytes(c, b"x", "png", "c0")
+            items = [{"pack_id": a, "id": s["id"]} for s in sa[:3]] + [{"pack_id": c, "id": sc["id"]}]       # a selection can span packs (My Stickers)
+            r = lib.move_stickers(items, b)
+            self.assertEqual((r["moved"], r["skipped"]), (4, 0))
+            snap = {p["id"]: p for p in lib.snapshot()["packs"]}
+            self.assertEqual([s["id"] for s in snap[b]["stickers"]], [s["id"] for s in sa[:3]] + [sc["id"]])
+            self.assertEqual([s["id"] for s in snap[a]["stickers"]], [sa[3]["id"]])
+            self.assertEqual(snap[c]["stickers"], [])
+            self.assertIsNone(snap[c]["cover"])
+            self.assertEqual(snap[a]["cover"], sa[3]["id"])                         # the cover that left is replaced
+            self.assertEqual(snap[b]["cover"], sa[0]["id"])
+            names = [s["file"] for s in snap[b]["stickers"]]
+            self.assertEqual(len(set(names)), 4)
+            self.assertTrue(all(n.startswith("own/img-") for n in names), names)                   # nothing was renamed or moved on disk
+            self.assertEqual(sorted(p.relative_to(lib.files).as_posix() for p in lib.files.rglob("*.*")), sorted(names + [snap[a]["stickers"][0]["file"]]))
+            # one unknown sticker refuses the whole batch and changes nothing
+            before = json.dumps(lib.snapshot(), sort_keys=True)
+            with self.assertRaises(LibraryError) as cm:
+                lib.move_stickers([{"pack_id": a, "id": sa[3]["id"]}, {"pack_id": a, "id": "nope"}], c)
+            self.assertEqual(cm.exception.code, 404)
+            self.assertEqual(json.dumps(lib.snapshot(), sort_keys=True), before)
+            with self.assertRaises(LibraryError):
+                lib.move_stickers([{"pack_id": a, "id": sa[3]["id"]}], "no-such-pack")
+            with self.assertRaises(LibraryError):
+                lib.move_stickers([], b)                                              # nothing selected is not a move
+            # stickers already in the target are skipped, not an error
+            r = lib.move_stickers([{"pack_id": b, "id": sa[0]["id"]}, {"pack_id": a, "id": sa[3]["id"]}], b)
+            self.assertEqual((r["moved"], r["skipped"]), (1, 1))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
     def test_delete_many_stickers_at_once(self):
         tmp = Path(tempfile.mkdtemp())
         try:
@@ -180,6 +238,112 @@ class BulkTests(unittest.TestCase):
             snap = {p["id"]: p for p in lib.snapshot()["packs"]}
             self.assertEqual([s["id"] for s in snap[a]["stickers"]], [sa[2]["id"]])
             self.assertEqual(snap[a]["cover"], sa[2]["id"])                  # the cover that went is replaced
-            self.assertEqual(len(list(lib.files.iterdir())), 2)              # and the files are gone
+            self.assertEqual(len(list(lib.files.rglob("*.*"))), 2)           # and the files are gone
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+class GroupingAndMigrationTests(unittest.TestCase):
+    """2026-10-02: library files are grouped per batch and carry the one naming convention; an old flat library is regrouped once."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_a_generation_sticker_goes_to_its_batch_folder_with_a_traceable_name(self):
+        lib = Library(self.tmp)
+        pk = lib.create_pack("Gold Pack")["id"]
+        s = lib.add_bytes(pk, b"x", "png", "Diving wing", "static", "x", {"generation": "G012", "index": 1}, gen_file_name="img-012-superman_dubai-superman_diving_wing")
+        self.assertTrue(s["file"].startswith("G012/img-superman_dubai-diving_wing-gold_pack-"), s["file"])
+        p = names.parse(s["file"].split("/")[1])
+        self.assertEqual((p["media"], p["subject"], p["action"], p["pack"], p["legacy"]), ("img", "superman_dubai", "diving_wing", "gold_pack", False))
+        self.assertTrue((lib.files / s["file"]).is_file())
+        t = lib.add_bytes(pk, b"y", "webm", "Diving wing", "animated", "x", {"generation": "G012", "index": 1}, gen_file_name="img-012-superman_dubai-superman_diving_wing")
+        self.assertTrue(t["file"].startswith("G012/vid-"))
+        self.assertNotEqual(s["file"], t["file"])
+        lib.delete_sticker(pk, s["id"]); lib.delete_sticker(pk, t["id"])
+        self.assertFalse((lib.files / "G012").exists(), "a batch folder with nothing left in it is removed")
+
+    def test_the_same_sticker_added_twice_never_shares_a_file(self):
+        lib = Library(self.tmp)
+        a, b = lib.create_pack("A")["id"], lib.create_pack("B")["id"]
+        x = lib.add_bytes(a, b"x", "png", "Wave", "static", "x", {"generation": "G001", "index": 1}, gen_file_name="img-001-owl-owl_wave")
+        y = lib.add_bytes(b, b"x", "png", "Wave", "static", "x", {"generation": "G001", "index": 1}, gen_file_name="img-001-owl-owl_wave")
+        self.assertNotEqual(x["file"], y["file"])
+
+    def _flat_library(self):
+        """A library as it was before: one flat folder, counter names, a `next` per pack, no layout flag."""
+        root = self.tmp / "library"
+        (root / "files").mkdir(parents=True)
+        for f in ("img-001-gold-diving.png", "vid-002-gold-diving.webm", "img-003-gold-my_photo.png"):
+            (root / "files" / f).write_bytes(b"data-" + f.encode())
+        db = {"packs": [{"id": "p1", "name": "Gold", "slug": "gold", "cover": "s1", "next": 4, "created": 1790000000.0, "stickers": [
+            {"id": "s1", "name": "Diving", "file": "img-001-gold-diving.png", "type": "static", "emoji": "x", "kb": 1, "w": 512, "h": 512, "created": 1790000100.0,
+             "source": {"generation": "G012", "index": 1}, "file_name": "img-012-superman_dubai-superman_diving_wing"},
+            {"id": "s2", "name": "Diving", "file": "vid-002-gold-diving.webm", "type": "animated", "emoji": "x", "kb": 1, "w": 512, "h": 512, "created": 1790000200.0,
+             "source": {"generation": "G012", "index": 1}, "file_name": "img-012-superman_dubai-superman_diving_wing"},
+            {"id": "s3", "name": "My photo", "file": "img-003-gold-my_photo.png", "type": "static", "emoji": "x", "kb": 1, "w": 512, "h": 512, "created": 1790000300.0, "source": {}}]}]}
+        (root / "library.json").write_text(json.dumps(db), encoding="utf-8")
+
+    def test_a_flat_library_is_regrouped_and_renamed_once_and_nothing_is_lost(self):
+        self._flat_library()
+        lib = Library(self.tmp)
+        snap = {s["id"]: s for p in lib.snapshot()["packs"] for s in p["stickers"]}
+        self.assertTrue(snap["s1"]["file"].startswith("G012/img-superman_dubai-diving_wing-gold-20260921T"), snap["s1"]["file"])
+        self.assertTrue(snap["s2"]["file"].startswith("G012/vid-"))
+        self.assertTrue(snap["s3"]["file"].startswith("own/img-my_photo-custom-gold-"))
+        self.assertEqual((lib.files / snap["s1"]["file"]).read_bytes(), b"data-img-001-gold-diving.png")                       # same bytes, new place
+        self.assertEqual(sorted(p.name for p in lib.files.iterdir()), ["G012", "own"])                                           # the flat folder is empty of files
+        raw = json.loads(lib.db_path.read_text(encoding="utf-8"))
+        self.assertEqual(raw["layout"], 2)
+        self.assertNotIn("next", raw["packs"][0])
+        before = json.dumps(raw, sort_keys=True)
+        Library(self.tmp)                                                                                                     # opening it again moves nothing
+        self.assertEqual(json.dumps(json.loads(lib.db_path.read_text(encoding="utf-8")), sort_keys=True), before)
+        self.assertEqual(lib.migrate_layout(), 0)
+
+    def test_a_missing_file_does_not_stop_the_migration_of_the_others(self):
+        self._flat_library()
+        (self.tmp / "library" / "files" / "vid-002-gold-diving.webm").unlink()
+        lib = Library(self.tmp)
+        snap = {s["id"]: s for p in lib.snapshot()["packs"] for s in p["stickers"]}
+        self.assertEqual(snap["s2"]["file"], "vid-002-gold-diving.webm")                                                        # left as it was
+        self.assertTrue(snap["s1"]["file"].startswith("G012/"))
+
+
+
+class PackDeleteKeepsOriginals(unittest.TestCase):
+    """P3 of the UI/UX spec: deleting a pack removes only the library's copies. The batch a sticker came from (out/G###) and the pool are untouched, so the sticker stays reusable; a file two
+    packs share stays for the other pack."""
+
+    def test_the_batch_original_survives_a_pack_delete_and_a_shared_file_stays(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+        from mirsal.engine.config import EngineConfig
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        lib = Library(tmp / "out")
+        gdir = tmp / "out" / "G012" / "slices"
+        gdir.mkdir(parents=True)
+        (gdir / "S1.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"0" * 64)
+        a, b = lib.create_pack("A")["id"], lib.create_pack("B")["id"]
+        s = lib.add_bytes(a, (gdir / "S1.png").read_bytes(), "png", "Cape", "static", "🦸", source={"generation": "G012", "index": 1})
+        only = lib.add_bytes(a, b"\x89PNG\r\n\x1a\n" + b"1" * 64, "png", "Editor", "static", "🙂")
+        shared = lib.snapshot()["packs"][0]["stickers"][0]["file"]
+        with lib.lock:                                                       # the same file also sits in pack B
+            db = lib._load()
+            db["packs"][1]["stickers"].append({**s, "id": "dup"})
+            lib._save(db)
+        lib.delete_pack(a)
+        self.assertTrue((lib.files / only["file"]).is_file(), "Delete pack is SOFT: the pack's own files wait in the trash")
+        with self.assertRaises(LibraryError) as ctx:
+            lib.purge_pack(a)                                                # the shared file is refused in words until confirmed
+        self.assertEqual(ctx.exception.code, 409)
+        lib.purge_pack(a, confirm_shared=True)
+        self.assertTrue((gdir / "S1.png").is_file(), "the batch original is never touched")
+        self.assertTrue((lib.files / shared).is_file(), "a file another pack still uses stays")
+        self.assertFalse((lib.files / only["file"]).exists(), "a sticker that existed only in the purged pack goes with it")
+        self.assertEqual([p["id"] for p in lib.snapshot()["packs"]], [b])

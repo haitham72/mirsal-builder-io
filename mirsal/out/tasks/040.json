@@ -1,0 +1,190 @@
+{
+  "id": "040",
+  "number": 40,
+  "provider": "higgsfield-manual",
+  "external_task_id": "5fc9d153-ec1c-4ae6-af04-62b2e84d843b",
+  "name_key": "laughing_particles",
+  "status": "running",
+  "created": 1791078821.914,
+  "prompt": "laughing particles",
+  "grid": [
+    2,
+    2
+  ],
+  "style_id": "flat_vector",
+  "folders": {
+    "img": "img-040-laughing_particles",
+    "vid": "vid-040-laughing_particles"
+  },
+  "paths": {
+    "img": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/Images_gen/img-040-laughing_particles",
+    "vid": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/inputs/videos_gen/vid-040-laughing_particles"
+  },
+  "request": {
+    "template_id": "sheet_2x2",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "separate small particles that burst out of laughing",
+      "style_id": "flat_vector",
+      "mode": "sheet_2x2",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "brown leather vest",
+          "tags": [
+            "brown_leather_vest"
+          ],
+          "emoji": "😂👵"
+        },
+        {
+          "pos": 2,
+          "label": "white button shirt",
+          "tags": [
+            "white_button_shirt"
+          ],
+          "emoji": "😂👵"
+        },
+        {
+          "pos": 3,
+          "label": "wooden walking cane",
+          "tags": [
+            "wooden_walking_cane"
+          ],
+          "emoji": "😂👵"
+        },
+        {
+          "pos": 4,
+          "label": "grey curly hair",
+          "tags": [
+            "grey_curly_hair"
+          ],
+          "emoji": "😂👵"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "loop": false
+    },
+    "grid": [
+      2,
+      2
+    ]
+  },
+  "plan": {
+    "task": "laughing particles",
+    "task_slug": "laughing_particles",
+    "subject": "laughing particles",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      2,
+      2
+    ],
+    "template_id": "sheet_2x2",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "separate small particles that burst out of laughing",
+      "style_id": "flat_vector",
+      "mode": "sheet_2x2",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "brown leather vest",
+          "tags": [
+            "brown_leather_vest"
+          ],
+          "emoji": "😂👵"
+        },
+        {
+          "pos": 2,
+          "label": "white button shirt",
+          "tags": [
+            "white_button_shirt"
+          ],
+          "emoji": "😂👵"
+        },
+        {
+          "pos": 3,
+          "label": "wooden walking cane",
+          "tags": [
+            "wooden_walking_cane"
+          ],
+          "emoji": "😂👵"
+        },
+        {
+          "pos": 4,
+          "label": "grey curly hair",
+          "tags": [
+            "grey_curly_hair"
+          ],
+          "emoji": "😂👵"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "loop": false
+    },
+    "guidelines": {},
+    "sheet_prompt": "One illustration of 4 separate small particles, one at each position: top-left, top-right, bottom-left and bottom-right, evenly spaced.\nParticles of laughing: small things that fly out when the laughing emoji is pressed. Draw only the particles listed, never laughing itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every particle directly on the backdrop with no outline, stroke, die-cut edge or halo around it.\nEach particle is alone at its position and centred there, and differs from every other one in kind, size or angle:\nParticle 1 (top-left): brown leather vest\nParticle 2 (top-right): white button shirt\nParticle 3 (bottom-left): wooden walking cane\nParticle 4 (bottom-right): grey curly hair\nConsistency: the same drawing style, lighting and colour quality for all 4 particles.\nBackground: one seamless, flat, uniform pure #00FF00 green backdrop from edge to edge in exactly one shade, with no texture, no shading, no tint, no gradient, no vignette, no glow, no shadows, no noise, and nothing on it but the particles.\nSpacing: every particle has a generous empty margin on every side (at least 20% of its own size), and no particle touches another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. brown leather vest, with big lively expressive movement in place\n2. white button shirt, with big lively expressive movement in place\n3. wooden walking cane, with big lively expressive movement in place\n4. grey curly hair, with big lively expressive movement in place\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "separate small particles that burst out of laughing brown leather vest, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "brown_leather_vest",
+        "tags": [
+          "brown_leather_vest"
+        ],
+        "emoji": "😂👵"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "separate small particles that burst out of laughing white button shirt, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "white_button_shirt",
+        "tags": [
+          "white_button_shirt"
+        ],
+        "emoji": "😂👵"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "separate small particles that burst out of laughing wooden walking cane, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "wooden_walking_cane",
+        "tags": [
+          "wooden_walking_cane"
+        ],
+        "emoji": "😂👵"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "separate small particles that burst out of laughing grey curly hair, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "grey_curly_hair",
+        "tags": [
+          "grey_curly_hair"
+        ],
+        "emoji": "😂👵"
+      }
+    ],
+    "custom": {
+      "sheet_prompt": "One illustration of 4 separate small particles, one at each position: top-left, top-right, bottom-left and bottom-right, evenly spaced.\nParticles of laughing: small things that fly out when the laughing emoji is pressed. Draw only the particles listed, never laughing itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every particle directly on the backdrop with no outline, stroke, die-cut edge or halo around it.\nEach particle is alone at its position and centred there, and differs from every other one in kind, size or angle:\nParticle 1 (top-left): brown leather vest\nParticle 2 (top-right): white button shirt\nParticle 3 (bottom-left): wooden walking cane\nParticle 4 (bottom-right): grey curly hair\nConsistency: the same drawing style, lighting and colour quality for all 4 particles.\nBackground: one seamless, flat, uniform pure #00FF00 green backdrop from edge to edge in exactly one shade, with no texture, no shading, no tint, no gradient, no vignette, no glow, no shadows, no noise, and nothing on it but the particles.\nSpacing: every particle has a generous empty margin on every side (at least 20% of its own size), and no particle touches another."
+    },
+    "effect": {
+      "id": "E015",
+      "template": "effect_pieces",
+      "version": 2
+    }
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791078821.914,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G109"
+  ]
+}

@@ -6,8 +6,8 @@ from pathlib import Path
 
 import cv2
 
-from mirsal import pipeline as pl
-from mirsal import watch
+from mirsal.flow import pipeline as pl
+from mirsal.flow import watch
 from tests import synth
 from tests.test_golden import Api
 

@@ -1,7 +1,6 @@
 """Part B: prepared grid MP4 (3x3 / 2x2 / 1x1) -> transparent looping WEBM per cell. Same keyer as stills, same settings."""
 from __future__ import annotations
 
-import dataclasses
 import hashlib
 import json
 import math
@@ -50,6 +49,38 @@ def edge_energy(rgba: np.ndarray) -> float:
     return float(g[m].mean()) if m.any() else 0.0
 
 
+def detail_vs_ref(frames: np.ndarray, ref_rgba: np.ndarray, n: int = 3) -> float | None:
+    """How much of the approved STILL's edge detail the animation carries: mean edge energy of the first frames over the still's. The old encode-only
+    ratio (decoded / encoder input) could not see softening that happened BEFORE the encode (a 320 px source cell upscaled to 512, a cheaper video
+    model), because both sides were already soft. Measured on the real G001-G005 animations (2026-10-02): batches that were as sharp as their stills read
+    0.89 and up (above 1.0 where the video is sharper than the still), the soft G002 batch (320 px cells, Kling std) read 0.58-0.72 (mean 0.65). None when there is no still or it has no edges."""
+    if ref_rgba is None or getattr(ref_rgba, "ndim", 0) != 3 or ref_rgba.shape[2] != 4:
+        return None
+    e_ref = edge_energy(ref_rgba)
+    if e_ref <= 0:
+        return None
+    return float(np.mean([edge_energy(f) for f in frames[:n]])) / e_ref
+
+
+def soft_sigma(ref_rgba: np.ndarray, ratio: float) -> float:
+    """The Gaussian blur radius (px) that takes the still down to `ratio` of its own edge detail: 'as soft as the still blurred N px'.
+    0.0 when the animation is as sharp as the still; capped at 4 px."""
+    if ratio is None or ratio >= 1.0:
+        return 0.0
+    e0 = edge_energy(ref_rgba)
+    best, prev_s, prev_r = 4.0, 0.0, 1.0
+    for s in (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0):
+        b = ref_rgba.copy()
+        b[..., :3] = cv2.GaussianBlur(np.ascontiguousarray(ref_rgba[..., :3]), (0, 0), s)
+        r = edge_energy(b) / e0
+        if r <= ratio:
+            span = prev_r - r
+            best = prev_s + (s - prev_s) * ((prev_r - ratio) / span if span > 1e-9 else 1.0)
+            break
+        prev_s, prev_r = s, r
+    return round(best, 1)
+
+
 def support(frames: np.ndarray) -> np.ndarray:
     """The part of the frames where anything is ever opaque. Outside it both frames are transparent and a seam adds exactly 0, so the
     seam maths is the same on this crop and 2-3x cheaper."""
@@ -58,14 +89,27 @@ def support(frames: np.ndarray) -> np.ndarray:
 
 
 def close_loop(frames: np.ndarray, m: int) -> np.ndarray:
-    """Blend the tail into the head and drop the tail, so the last frame flows into the first."""
+    """Close a clip that does not loop by easing its LAST `m` frames into frame 0 (the last frame becomes frame 0 itself, so the wrap has no jump).
+    The head is never touched: the clip starts on its own first frame, the approved pose and the thumbnail. (It used to start on the tail's pose and
+    dissolve into the head, which showed as a ghost on the first frames.) The last `m` source frames are dropped to make room for the fade."""
     n = len(frames)
     if m < 1 or n < 2 * m + 2:
         return frames
     out = frames[: n - m].astype(np.float32).copy()
-    for k in range(m):
-        w = k / m               # first frame = pure tail (continues the last frame), then fade to the head
-        out[k] = (1 - w) * frames[n - m + k].astype(np.float32) + w * frames[k].astype(np.float32)
+    head = frames[0].astype(np.float32)
+    a_head = head[..., 3:4] / 255.0
+    for j in range(m):
+        t = (j + 1) / m
+        w = t * t * (3 - 2 * t)         # smoothstep: starts gently, ends on frame 0 and slows into it
+        cur = out[n - 2 * m + j]        # a view into out
+        a_tail = cur[..., 3:4] / 255.0
+        a_out = (1 - w) * a_tail + w * a_head
+        # Blend the colour PREMULTIPLIED and undo it afterwards. A straight per-channel blend drags a transparent
+        # tail frame's black towards the head's colour, so the fade passes through a semi-transparent dark frame
+        # that shows as a GREY FRAME at the wrap, once per loop (Haitham, 2026-10-03). Coverage must not colour the fade.
+        pm = (1 - w) * cur[..., :3] * a_tail + w * head[..., :3] * a_head
+        cur[..., :3] = np.where(a_out > 1e-6, pm / np.maximum(a_out, 1e-6), 0.0)
+        cur[..., 3:4] = a_out * 255.0
     return np.clip(out + 0.5, 0, 255).astype(np.uint8)
 
 
@@ -78,7 +122,7 @@ def vp9_missing(cells) -> list[AnimationResult] | None:
             for i in cells]
 
 
-CACHE_VERSION = 2      # bump when an engine change makes old cached animations wrong
+CACHE_VERSION = 4      # bump when an engine change makes old cached animations wrong (4: close_loop blends premultiplied, so a grey frame no longer appears at the wrap)
 
 
 class AnimCache:
@@ -187,7 +231,7 @@ def _run_cells(cells, fn, cfg, on_cell=None) -> list[AnimationResult]:
 def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_cell=None,
                   rects: list | None = None, sheet_wh: tuple | None = None, layout: dict | None = None, refs: dict | None = None,
                   cache: AnimCache | None = None, waive: dict | None = None) -> list[AnimationResult]:
-    """waive = {slot: {check ids}}: slot-geometry blocks (inside_slot, cross_slot) that a human has allowed for that cell; they become warnings.
+    """waive = {cell: {check ids}}: judgement blocks (inside_slot, cross_slot, loop_seam: verify.OVERRIDABLE["animation"]) that a human has allowed for that cell; they become warnings.
     rects/sheet_wh: the still's measured cell rects on the sheet; mapped onto the video (same layout, any size).
     Without them: equal thirds. layout (a video sheet's layout.json): its exact slot rectangles, plus the slot checks
     (inside_slot, cross_slot) on every frame; refs = {slot: approved still's alpha} for identity_kept."""
@@ -229,7 +273,11 @@ def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alp
     t0 = time.perf_counter()
     frames = ff.decode_cell(mp4, x, y, cw, ch, max_frames, cap_fps)   # one cell at a time
     t_dec = _ms(t0); t1 = time.perf_counter()
-    calib = calibrate(frames[0], cfg.chroma, cfg.border_px, cfg.threshold)      # sample bg ONCE
+    try:
+        calib = calibrate(frames[0], cfg.chroma, cfg.border_px, cfg.threshold, validate=True)      # sample bg ONCE, validate the key difference
+    except ValueError as e:
+        # Wrong chroma key used (e.g., green key on a blue screen) - fail immediately instead of producing a "blue screen" result
+        return AnimationResult(idx, "FAILED", "wrong_chroma_key", metrics={"error": str(e)[:200], "chroma": cfg.chroma})
     keyed = [key_image(f, cfg, calib).rgba for f in frames]
     return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1), "ms": {"decode": t_dec, "key": _ms(t1)}}, slot, ref_alpha, waive)
 
@@ -273,8 +321,8 @@ def pick_clip(formats: dict, cfg):
     return f, Path(formats[f])
 
 
-def process_clips(clips: dict, cfg, on_cell=None, cache: AnimCache | None = None) -> list[AnimationResult]:
-    """clips = {cell: {"mov": path, "webm": path}} of pre-sliced transparent clips."""
+def process_clips(clips: dict, cfg, on_cell=None, cache: AnimCache | None = None, waive: dict | None = None) -> list[AnimationResult]:
+    """clips = {cell: {"mov": path, "webm": path}} of pre-sliced transparent clips. waive = {cell: {check ids}} a human allowed (see process_video)."""
     failed = vp9_missing(list(clips))
     if failed:
         for r in failed:
@@ -291,8 +339,11 @@ def process_clips(clips: dict, cfg, on_cell=None, cache: AnimCache | None = None
         frames = ff.decode_full(path, w, h, int(math.floor(cfg.video_max_seconds * fps)), cap_fps)
         t_dec = _ms(t0); t1 = time.perf_counter()
         keyed = [_clean_clip(f, cfg) for f in frames]
-        return _finish(idx, keyed, fps, cfg, {"source": f"clip:{fmt}", "clip": path.name, "clip_size": f"{w}x{h}", "ms": {"decode": t_dec, "key": _ms(t1)}})
-    return _run_cells(clips, lambda idx: _cached(cache, cache and cache.key(cfg, "clip", _stat_id(pick_clip(clips[idx], cfg)[1])), idx, lambda: one(idx)), cfg, on_cell)
+        return _finish(idx, keyed, fps, cfg, {"source": f"clip:{fmt}", "clip": path.name, "clip_size": f"{w}x{h}", "ms": {"decode": t_dec, "key": _ms(t1)}}, waive=(waive or {}).get(idx, ()))
+    def ckey(idx):                  # what a human allowed is part of what made the clip; no permission = the key every earlier cache entry already has
+        w = sorted((waive or {}).get(idx, ()))
+        return cache.key(cfg, "clip", _stat_id(pick_clip(clips[idx], cfg)[1]), *([w] if w else []))
+    return _run_cells(clips, lambda idx: _cached(cache, cache and ckey(idx), idx, lambda: one(idx)), cfg, on_cell)
 
 
 CRF_START = 3         # ladder index every fit starts at (3 = crf 42): most clips land within a rung or two of it
@@ -342,15 +393,11 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     # A returned video sheet gets inside_slot + cross_slot; a cell of a prepared 3x3 video or a pre-sliced clip gets inside_frame (the still's inside_cell, per frame).
     if slot:
         m["subject_px_in_video"] = int(max(union[2] - union[0], union[3] - union[1]))     # metric only: no warning, no gate
-    pre = verify.run("slot", {"slot_frames" if slot else "cell_frames": keyed, "metrics": m}, cfg)
+    pre = verify.run("slot", {"slot_frames" if slot else "cell_frames": keyed, "metrics": m, "waive": waive}, cfg)      # a block a human allowed (stored on the sticker) comes back as a warning, still listed
     ms["bounds"] = _ms(t)
-    blocks = [c for c in pre if not c.ok and c.severity == verify.BLOCK]
-    if any(c.id not in waive for c in blocks):
+    if any(not c.ok and c.severity == verify.BLOCK for c in pre):
         rep = Report(pre)
         return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
-    if blocks:                       # every block was allowed by a human click (stored on the sticker): kept as a warning, still listed
-        m["waived"] = [c.id for c in blocks]
-        pre = [dataclasses.replace(c, severity=verify.WARN, note=(c.note + " (allowed by you)").strip()) if c in blocks else c for c in pre]
     scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1]))
     m["scale"] = round(scale, 4)
     t = time.perf_counter()
@@ -383,8 +430,13 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
         if len(dec) == len(out[:4]):                                    # the edge detail that survived the encode (first frames, decoded with the alpha-aware decoder)
             e_in = float(np.mean([edge_energy(f) for f in out[:len(dec)]]))
             m["sharp_kept"] = round(float(np.mean([edge_energy(f) for f in dec])) / max(e_in, 1e-6), 2) if e_in > 0 else None
+        if ref_alpha is not None and getattr(ref_alpha, "ndim", 0) == 3:                  # the approved still (RGBA): how soft is the animation next to it?
+            dv = detail_vs_ref(out, ref_alpha)
+            if dv is not None:
+                m["detail_vs_still"] = round(dv, 2)
+                m["soft_sigma"] = soft_sigma(ref_alpha, dv)
         inp = {"data": data, "info": ff.probe(path), "info_native": ff.probe(path, vp9_native=True), "alpha": dec, "metrics": m,
-               "frames_out": out, "ref_alpha": ref_alpha}
+               "frames_out": out, "ref_alpha": ref_alpha, "waive": waive}
         ms["probe"] = _ms(t); t = time.perf_counter()
         rep = Report(pre + verify.run("anim", inp, cfg))
         ms["verify"] = _ms(t)
@@ -392,7 +444,7 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     m["kb"] = round(len(data) / 1024, 1)
     if rep.ok:
         return AnimationResult(idx, "READY", None, rep, m, data)
-    return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
+    return AnimationResult(idx, "FAILED", rep.first_failure, rep, m, data)
 
 
 def check_returned_video(mp4, layout: dict, sheet_rgb: np.ndarray, cfg, on_probe=None) -> list:

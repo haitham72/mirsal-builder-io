@@ -1,0 +1,7 @@
+{"ts": 1790936145.471, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "Eid mubarak greetings", "task_slug": "eid_mubarak_greetings"}}
+{"ts": 1790936145.497, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790936145.828, "stage": "sheet_picked", "status": "done", "ms": 331, "detail": {"subject": "eid_mubarak_greetings", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "warnings": []}}
+{"ts": 1790936145.832, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790936146.162, "stage": "keyed", "status": "done", "ms": 329, "detail": {"bg": [8, 252, 2], "threshold": [122.5, 122.0, 122.0, 123.0, 123.0, 123.0, 124.5, 124.0, 123.5], "grid": "3x3", "cut": "gutter", "xs": [0, 706, 1394, 2048], "ys": [0, 699, 1362, 2048]}}
+{"ts": 1790936146.164, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790936147.085, "stage": "sliced", "status": "done", "ms": 920, "detail": {"ready": 9, "failed": 0}}

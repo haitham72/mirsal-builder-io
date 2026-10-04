@@ -1,0 +1,42 @@
+{
+  "id": "J052",
+  "kind": "sheet",
+  "task": "039",
+  "generation": "G108",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: <a cute kitten with fluffy fur>.\nStyle: 16-bit pixel art character, crisp square pixels, limited colour palette, clean dark outline, retro game sprite look.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: <the kitten jumps happily with paws in the air>\nCharacter 2: <the kitten sits calmly watching a distant object>\nCharacter 3: <the kitten runs fast across the floor quickly>\nCharacter 4: <the kitten lies down stretching all its limbs out>\nCharacter 5: <the kitten spins around in a tight circle fast>\nCharacter 6: <the kitten leans forward curiously sniffing the air>\nCharacter 7: <the kitten looks shocked with wide eyes and open mouth>\nCharacter 8: <the kitten nods its head firmly saying yes clearly>\nCharacter 9: <the kitten huddles in a tight ball sleeping deeply>\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "kitten dubai",
+    "refs": [],
+    "outline": 12,
+    "erode": null,
+    "custom_prompt": true,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "f968c82b-755b-4fed-8a3e-13487082473e",
+  "result": {
+    "file": "jobs/J052/result.png",
+    "sha256": "4ada3db5921e59c99c8442ccda99d58f655ca8aedefd60195bbab3715507b359",
+    "bytes": 3821846
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791046893.196,
+  "claimed_at": 1791046894.28,
+  "completed_at": 1791046917.197,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

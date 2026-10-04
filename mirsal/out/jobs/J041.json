@@ -1,0 +1,42 @@
+{
+  "id": "J041",
+  "kind": "sheet",
+  "task": "030",
+  "generation": "G101",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate small particles, one at each position: top-left, top-right, bottom-left and bottom-right, evenly spaced.\nParticles of Barbie doll: small things that fly out when the Barbie doll emoji is pressed. Draw only the particles listed, never Barbie doll itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every particle directly on the backdrop with no outline, stroke, die-cut edge or halo around it.\nEach particle is alone at its position and centred there, and differs from every other one in kind, size or angle:\nParticle 1 (top-left): pink heart\nParticle 2 (top-right): blush\nParticle 3 (bottom-left): rose flower\nParticle 4 (bottom-right): pink heart, large\nConsistency: the same drawing style, lighting and colour quality for all 4 particles.\nBackground: one seamless, flat, uniform pure #00FF00 green backdrop from edge to edge in exactly one shade, with no texture, no shading, no tint, no gradient, no vignette, no glow, no shadows, no noise, and nothing on it but the particles.\nSpacing: every particle has a generous empty margin on every side (at least 20% of its own size), and no particle touches another.",
+    "label": "Barbie doll particles",
+    "refs": [],
+    "outline": 0,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local",
+    "particles": {
+      "effect": "E013"
+    }
+  },
+  "status": "DONE",
+  "external_task_id": "e2e4cb8b-a461-487e-9dc6-28ff781dca1e",
+  "result": {
+    "file": "jobs/J041/result.png",
+    "sha256": "4552652343cc311dbe77635bf72f9d39f5ec136bb04cf49dd6057d514239dfac",
+    "bytes": 3953578
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790995535.767,
+  "claimed_at": 1790995536.844,
+  "completed_at": 1790995555.911,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

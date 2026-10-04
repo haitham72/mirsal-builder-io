@@ -1,0 +1,265 @@
+{
+  "task": "kitten dubai",
+  "task_slug": "kitten_dubai",
+  "subject": "kitten dubai",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    3,
+    3
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "<a cute kitten with fluffy fur>",
+    "style_id": "pixel_art",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "<the kitten jumps happily with paws in the air>",
+        "tags": [
+          "kitten_dubai_jump",
+          "playful",
+          "energy",
+          "cute"
+        ],
+        "emoji": "🐱💫",
+        "motion": "<it leaps energetically and lands softly on all fours>"
+      },
+      {
+        "pos": 2,
+        "label": "<the kitten sits calmly watching a distant object>",
+        "tags": [
+          "kitten_dubai_sit",
+          "calm",
+          "patient",
+          "relaxed"
+        ],
+        "emoji": "🛋️😌",
+        "motion": "<it blinks slowly while swaying its tail gently>"
+      },
+      {
+        "pos": 3,
+        "label": "<the kitten runs fast across the floor quickly>",
+        "tags": [
+          "kitten_dubai_run",
+          "speed",
+          "agile",
+          "busy"
+        ],
+        "emoji": "🏃‍♂️✨",
+        "motion": "<its legs move rapidly in a blur as it speeds along>"
+      },
+      {
+        "pos": 4,
+        "label": "<the kitten lies down stretching all its limbs out>",
+        "tags": [
+          "kitten_dubai_stretch",
+          "lazy",
+          "comfortable",
+          "big"
+        ],
+        "emoji": "🤸‍♀️☀️",
+        "motion": "<it extends every paw and yawns widely before settling>"
+      },
+      {
+        "pos": 5,
+        "label": "<the kitten spins around in a tight circle fast>",
+        "tags": [
+          "kitten_dubai_spin",
+          "confused",
+          "twisty",
+          "fast"
+        ],
+        "emoji": "🌀😵",
+        "motion": "<it rotates dizzily and then stops facing forward>"
+      },
+      {
+        "pos": 6,
+        "label": "<the kitten leans forward curiously sniffing the air>",
+        "tags": [
+          "kitten_dubai_lean",
+          "curious",
+          "sniffing",
+          "close"
+        ],
+        "emoji": "👃🕵️",
+        "motion": "<its head dips down low as it sniffs the breeze>"
+      },
+      {
+        "pos": 7,
+        "label": "<the kitten looks shocked with wide eyes and open mouth>",
+        "tags": [
+          "kitten_dubai_shock",
+          "surprised",
+          "screaming",
+          "wide"
+        ],
+        "emoji": "😱🤯",
+        "motion": "<its ears flatten back as it stares in stunned silence>"
+      },
+      {
+        "pos": 8,
+        "label": "<the kitten nods its head firmly saying yes clearly>",
+        "tags": [
+          "kitten_dubai_nod",
+          "affirmative",
+          "happy",
+          "agreed"
+        ],
+        "emoji": "✅👏",
+        "motion": "<it bobs up and down rapidly to agree enthusiastically>"
+      },
+      {
+        "pos": 9,
+        "label": "<the kitten huddles in a tight ball sleeping deeply>",
+        "tags": [
+          "kitten_dubai_sleep",
+          "zombie",
+          "peaceful",
+          "closed"
+        ],
+        "emoji": "💤🌙",
+        "motion": "<its breathing slows until it is completely motionless>"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: <a cute kitten with fluffy fur>.\nStyle: 16-bit pixel art character, crisp square pixels, limited colour palette, clean dark outline, retro game sprite look.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: <the kitten jumps happily with paws in the air>\nCharacter 2: <the kitten sits calmly watching a distant object>\nCharacter 3: <the kitten runs fast across the floor quickly>\nCharacter 4: <the kitten lies down stretching all its limbs out>\nCharacter 5: <the kitten spins around in a tight circle fast>\nCharacter 6: <the kitten leans forward curiously sniffing the air>\nCharacter 7: <the kitten looks shocked with wide eyes and open mouth>\nCharacter 8: <the kitten nods its head firmly saying yes clearly>\nCharacter 9: <the kitten huddles in a tight ball sleeping deeply>\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. <it leaps energetically and lands softly on all fours>\n2. <it blinks slowly while swaying its tail gently>\n3. <its legs move rapidly in a blur as it speeds along>\n4. <it extends every paw and yawns widely before settling>\n5. <it rotates dizzily and then stops facing forward>\n6. <its head dips down low as it sniffs the breeze>\n7. <its ears flatten back as it stares in stunned silence>\n8. <it bobs up and down rapidly to agree enthusiastically>\n9. <its breathing slows until it is completely motionless>\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten jumps happily with paws in the air>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_jump",
+      "tags": [
+        "kitten_dubai_jump",
+        "playful",
+        "energy",
+        "cute"
+      ],
+      "emoji": "🐱💫"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten sits calmly watching a distant object>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_sit",
+      "tags": [
+        "kitten_dubai_sit",
+        "calm",
+        "patient",
+        "relaxed"
+      ],
+      "emoji": "🛋️😌"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten runs fast across the floor quickly>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_run",
+      "tags": [
+        "kitten_dubai_run",
+        "speed",
+        "agile",
+        "busy"
+      ],
+      "emoji": "🏃‍♂️✨"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten lies down stretching all its limbs out>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_stretch",
+      "tags": [
+        "kitten_dubai_stretch",
+        "lazy",
+        "comfortable",
+        "big"
+      ],
+      "emoji": "🤸‍♀️☀️"
+    },
+    {
+      "index": 5,
+      "id": "prompt05",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten spins around in a tight circle fast>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_spin",
+      "tags": [
+        "kitten_dubai_spin",
+        "confused",
+        "twisty",
+        "fast"
+      ],
+      "emoji": "🌀😵"
+    },
+    {
+      "index": 6,
+      "id": "prompt06",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten leans forward curiously sniffing the air>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_lean",
+      "tags": [
+        "kitten_dubai_lean",
+        "curious",
+        "sniffing",
+        "close"
+      ],
+      "emoji": "👃🕵️"
+    },
+    {
+      "index": 7,
+      "id": "prompt07",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten looks shocked with wide eyes and open mouth>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_shock",
+      "tags": [
+        "kitten_dubai_shock",
+        "surprised",
+        "screaming",
+        "wide"
+      ],
+      "emoji": "😱🤯"
+    },
+    {
+      "index": 8,
+      "id": "prompt08",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten nods its head firmly saying yes clearly>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_nod",
+      "tags": [
+        "kitten_dubai_nod",
+        "affirmative",
+        "happy",
+        "agreed"
+      ],
+      "emoji": "✅👏"
+    },
+    {
+      "index": 9,
+      "id": "prompt09",
+      "prompt": "<a cute kitten with fluffy fur> <the kitten huddles in a tight ball sleeping deeply>, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "kitten_dubai_sleep",
+      "tags": [
+        "kitten_dubai_sleep",
+        "zombie",
+        "peaceful",
+        "closed"
+      ],
+      "emoji": "💤🌙"
+    }
+  ],
+  "expanded_by": "ai",
+  "expand_model": "qwen3.5-4b",
+  "previewed": true,
+  "custom": {
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: <a cute kitten with fluffy fur>.\nStyle: 16-bit pixel art character, crisp square pixels, limited colour palette, clean dark outline, retro game sprite look.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: <the kitten jumps happily with paws in the air>\nCharacter 2: <the kitten sits calmly watching a distant object>\nCharacter 3: <the kitten runs fast across the floor quickly>\nCharacter 4: <the kitten lies down stretching all its limbs out>\nCharacter 5: <the kitten spins around in a tight circle fast>\nCharacter 6: <the kitten leans forward curiously sniffing the air>\nCharacter 7: <the kitten looks shocked with wide eyes and open mouth>\nCharacter 8: <the kitten nods its head firmly saying yes clearly>\nCharacter 9: <the kitten huddles in a tight ball sleeping deeply>\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another."
+  }
+}

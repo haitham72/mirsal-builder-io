@@ -56,6 +56,7 @@ class EngineConfig:
     min_identity_iou: float = 0.5   # identity_kept: shape IoU of video frame 0 vs the approved still
     min_motion: float = 0.5         # motion_present: median frame-to-frame change
     min_sharp_kept: float = 0.8     # sharpness: share of the edge detail that survives the encode (real: 1.00-1.03 at the budget)
+    min_detail_vs_still: float = 0.75   # sharpness: the animation's edge detail over its still's (real 2026-10-02: sharp batches 0.89 and up, the soft 320 px / Kling std batch 0.58-0.72)
     max_area_cv: float = 0.35       # alpha_stable: coefficient of variation of the subject area over the frames
     slot_fill: float = 0.74         # video sheet: the largest subject's longest side is at most this share of its slot (>= 13% margin). 0.55 -> 0.66 -> 0.74: each step took a quarter off the gap between two stickers
     sheet_canvas: int = 2048        # video sheet canvas (square)

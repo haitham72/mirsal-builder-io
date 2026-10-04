@@ -1,0 +1,22 @@
+{"ts": 1791023548.308, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "superhero dubai", "task_slug": "superhero_dubai"}}
+{"ts": 1791023548.318, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023548.585, "stage": "sheet_picked", "status": "done", "ms": 266, "detail": {"subject": "superhero_dubai", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791023548.586, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023548.887, "stage": "keyed", "status": "done", "ms": 300, "detail": {"bg": [2, 253, 3], "threshold": [125.0, 124.5, 124.5, 123.5], "grid": "2x2", "cut": "gutter", "xs": [0, 913, 2048], "ys": [0, 1041, 2048]}}
+{"ts": 1791023548.887, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791023549.283, "stage": "sliced", "status": "done", "ms": 396, "detail": {"ready": 4, "failed": 0}}
+{"ts": 1791087790.397, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 1, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791087790.399, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 2, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791087790.4, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 3, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791087790.401, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 4, "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791087790.401, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791087790.814, "stage": "video_sheet_built", "status": "done", "ms": 368, "detail": {"sheet": "A1", "slots": [1, 2, 3, 4], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791087790.816, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A1", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791088001.683, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791088001.923, "stage": "video_returned", "status": "done", "ms": 240, "detail": {"sheet": "A1", "blocked": null, "flags": [], "codec": "h264", "width": 1440, "height": 1440, "fps": 24.0, "duration": 3.04}}
+{"ts": 1791088001.924, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791088003.84, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "FAILED", "reason": "inside_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791088015.967, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791088017.43, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791088017.466, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791088017.502, "stage": "video_sliced", "status": "done", "ms": 15577, "detail": {"ready": 3, "failed": 1}}

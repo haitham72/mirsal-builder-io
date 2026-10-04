@@ -1,0 +1,415 @@
+{
+  "id": "005",
+  "number": 5,
+  "provider": "higgsfield-manual",
+  "external_task_id": "94b0d25f-1cc3-43e1-a0f5-666adf9983bd",
+  "name_key": "mickey_mouse_big_golden_chain",
+  "status": "running",
+  "created": 1790874311.91,
+  "prompt": "mickey mouse with big golden chain",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "glossy_3d",
+  "folders": {
+    "img": "img-005-mickey_mouse",
+    "vid": "vid-005-mickey_mouse"
+  },
+  "paths": {
+    "img": "D:\\Vscode\\mirsal-builder-io\\Phase_01\\Images_gen\\img-005-mickey_mouse",
+    "vid": "D:\\Vscode\\mirsal-builder-io\\Phase_01\\videos_gen\\vid-005-mickey_mouse"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 2,
+    "slots": {
+      "subject_description": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "Mickey grinning widely, flashing his golden chain proudly",
+          "tags": [
+            "mickey_mouse_proud_grin",
+            "joy",
+            "pride",
+            "show_off"
+          ],
+          "emoji": "😄💎",
+          "motion": "He bounces slightly side to side while his chain sparkles with each movement"
+        },
+        {
+          "pos": 2,
+          "label": "Mickey looking surprised, eyes wide and mouth open, holding chain tight",
+          "tags": [
+            "mickey_mouse_shocked_grip",
+            "shock",
+            "surprise",
+            "fear"
+          ],
+          "emoji": "😲😳",
+          "motion": "He leans back slightly as if startled, chain swaying forward"
+        },
+        {
+          "pos": 3,
+          "label": "Mickey laughing heartily, head thrown back with eyes closed",
+          "tags": [
+            "mickey_mouse_heartfelt_laugh",
+            "joy",
+            "mischief",
+            "fun"
+          ],
+          "emoji": "😂🤣",
+          "motion": "His body shakes with laughter, chain bouncing up and down"
+        },
+        {
+          "pos": 4,
+          "label": "Mickey sad and drooping, chain hanging limply around his neck",
+          "tags": [
+            "mickey_mouse_sad_slump",
+            "sadness",
+            "disappointment",
+            "down"
+          ],
+          "emoji": "😞😢",
+          "motion": "He slowly nods his head down, chain swinging gently side to side"
+        },
+        {
+          "pos": 5,
+          "label": "Mickey angry, eyebrows furrowed, fists clenched beside his chain",
+          "tags": [
+            "mickey_mouse_angry_stomp",
+            "anger",
+            "frustration",
+            "mad"
+          ],
+          "emoji": "😠👊",
+          "motion": "He stomps lightly in place, chain rattling loudly"
+        },
+        {
+          "pos": 6,
+          "label": "Mickey blushing shyly, looking down at his golden chain",
+          "tags": [
+            "mickey_mouse_embarrassed_blush",
+            "embarrassment",
+            "shy",
+            "bashful"
+          ],
+          "emoji": "😊😳",
+          "motion": "He shifts weight nervously, chain sparkling subtly"
+        },
+        {
+          "pos": 7,
+          "label": "Mickey sleepy, eyes half-closed, chain resting quietly",
+          "tags": [
+            "mickey_mouse_sleepy_sway",
+            "sleepiness",
+            "tired",
+            "calm"
+          ],
+          "emoji": "😴😪",
+          "motion": "He slowly sways side to side as if about to nod off"
+        },
+        {
+          "pos": 8,
+          "label": "Mickey curious, tilting head with one eyebrow raised, chain gleaming",
+          "tags": [
+            "mickey_mouse_curious_tilt",
+            "doubt",
+            "interest",
+            "question"
+          ],
+          "emoji": "🤔🧐",
+          "motion": "He tilts head slowly side to side, chain glinting in light"
+        },
+        {
+          "pos": 9,
+          "label": "Mickey mischievous, smirking with one eye squinting, chain swinging slyly",
+          "tags": [
+            "mickey_mouse_mischievous_smirk",
+            "mischief",
+            "playful",
+            "sly"
+          ],
+          "emoji": "😏😈",
+          "motion": "He wiggles his hips playfully, chain jingling softly"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green"
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "mickey mouse with big golden chain",
+    "task_slug": "mickey_mouse_big_golden_chain",
+    "subject": "mickey mouse",
+    "context": "big golden chain",
+    "kind": "default",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 2,
+    "slots": {
+      "subject_description": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "Mickey grinning widely, flashing his golden chain proudly",
+          "tags": [
+            "mickey_mouse_proud_grin",
+            "joy",
+            "pride",
+            "show_off"
+          ],
+          "emoji": "😄💎",
+          "motion": "He bounces slightly side to side while his chain sparkles with each movement"
+        },
+        {
+          "pos": 2,
+          "label": "Mickey looking surprised, eyes wide and mouth open, holding chain tight",
+          "tags": [
+            "mickey_mouse_shocked_grip",
+            "shock",
+            "surprise",
+            "fear"
+          ],
+          "emoji": "😲😳",
+          "motion": "He leans back slightly as if startled, chain swaying forward"
+        },
+        {
+          "pos": 3,
+          "label": "Mickey laughing heartily, head thrown back with eyes closed",
+          "tags": [
+            "mickey_mouse_heartfelt_laugh",
+            "joy",
+            "mischief",
+            "fun"
+          ],
+          "emoji": "😂🤣",
+          "motion": "His body shakes with laughter, chain bouncing up and down"
+        },
+        {
+          "pos": 4,
+          "label": "Mickey sad and drooping, chain hanging limply around his neck",
+          "tags": [
+            "mickey_mouse_sad_slump",
+            "sadness",
+            "disappointment",
+            "down"
+          ],
+          "emoji": "😞😢",
+          "motion": "He slowly nods his head down, chain swinging gently side to side"
+        },
+        {
+          "pos": 5,
+          "label": "Mickey angry, eyebrows furrowed, fists clenched beside his chain",
+          "tags": [
+            "mickey_mouse_angry_stomp",
+            "anger",
+            "frustration",
+            "mad"
+          ],
+          "emoji": "😠👊",
+          "motion": "He stomps lightly in place, chain rattling loudly"
+        },
+        {
+          "pos": 6,
+          "label": "Mickey blushing shyly, looking down at his golden chain",
+          "tags": [
+            "mickey_mouse_embarrassed_blush",
+            "embarrassment",
+            "shy",
+            "bashful"
+          ],
+          "emoji": "😊😳",
+          "motion": "He shifts weight nervously, chain sparkling subtly"
+        },
+        {
+          "pos": 7,
+          "label": "Mickey sleepy, eyes half-closed, chain resting quietly",
+          "tags": [
+            "mickey_mouse_sleepy_sway",
+            "sleepiness",
+            "tired",
+            "calm"
+          ],
+          "emoji": "😴😪",
+          "motion": "He slowly sways side to side as if about to nod off"
+        },
+        {
+          "pos": 8,
+          "label": "Mickey curious, tilting head with one eyebrow raised, chain gleaming",
+          "tags": [
+            "mickey_mouse_curious_tilt",
+            "doubt",
+            "interest",
+            "question"
+          ],
+          "emoji": "🤔🧐",
+          "motion": "He tilts head slowly side to side, chain glinting in light"
+        },
+        {
+          "pos": 9,
+          "label": "Mickey mischievous, smirking with one eye squinting, chain swinging slyly",
+          "tags": [
+            "mickey_mouse_mischievous_smirk",
+            "mischief",
+            "playful",
+            "sly"
+          ],
+          "emoji": "😏😈",
+          "motion": "He wiggles his hips playfully, chain jingling softly"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green"
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, each character shows a clearly different, highly expressive emotion and pose:\nCharacter 1: Mickey grinning widely, flashing his golden chain proudly\nCharacter 2: Mickey looking surprised, eyes wide and mouth open, holding chain tight\nCharacter 3: Mickey laughing heartily, head thrown back with eyes closed\nCharacter 4: Mickey sad and drooping, chain hanging limply around his neck\nCharacter 5: Mickey angry, eyebrows furrowed, fists clenched beside his chain\nCharacter 6: Mickey blushing shyly, looking down at his golden chain\nCharacter 7: Mickey sleepy, eyes half-closed, chain resting quietly\nCharacter 8: Mickey curious, tilting head with one eyebrow raised, chain gleaming\nCharacter 9: Mickey mischievous, smirking with one eye squinting, chain swinging slyly\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second seamless loop. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. He bounces slightly side to side while his chain sparkles with each movement\n2. He leans back slightly as if startled, chain swaying forward\n3. His body shakes with laughter, chain bouncing up and down\n4. He slowly nods his head down, chain swinging gently side to side\n5. He stomps lightly in place, chain rattling loudly\n6. He shifts weight nervously, chain sparkling subtly\n7. He slowly sways side to side as if about to nod off\n8. He tilts head slowly side to side, chain glinting in light\n9. He wiggles his hips playfully, chain jingling softly\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.\nEnd on the starting pose so the clip loops.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey grinning widely, flashing his golden chain proudly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_proud_grin",
+        "tags": [
+          "mickey_mouse_proud_grin",
+          "joy",
+          "pride",
+          "show_off"
+        ],
+        "emoji": "😄💎"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey looking surprised, eyes wide and mouth open, holding chain tight, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_shocked_grip",
+        "tags": [
+          "mickey_mouse_shocked_grip",
+          "shock",
+          "surprise",
+          "fear"
+        ],
+        "emoji": "😲😳"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey laughing heartily, head thrown back with eyes closed, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_heartfelt_laugh",
+        "tags": [
+          "mickey_mouse_heartfelt_laugh",
+          "joy",
+          "mischief",
+          "fun"
+        ],
+        "emoji": "😂🤣"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey sad and drooping, chain hanging limply around his neck, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_sad_slump",
+        "tags": [
+          "mickey_mouse_sad_slump",
+          "sadness",
+          "disappointment",
+          "down"
+        ],
+        "emoji": "😞😢"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey angry, eyebrows furrowed, fists clenched beside his chain, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_angry_stomp",
+        "tags": [
+          "mickey_mouse_angry_stomp",
+          "anger",
+          "frustration",
+          "mad"
+        ],
+        "emoji": "😠👊"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey blushing shyly, looking down at his golden chain, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_embarrassed_blush",
+        "tags": [
+          "mickey_mouse_embarrassed_blush",
+          "embarrassment",
+          "shy",
+          "bashful"
+        ],
+        "emoji": "😊😳"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey sleepy, eyes half-closed, chain resting quietly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_sleepy_sway",
+        "tags": [
+          "mickey_mouse_sleepy_sway",
+          "sleepiness",
+          "tired",
+          "calm"
+        ],
+        "emoji": "😴😪"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey curious, tilting head with one eyebrow raised, chain gleaming, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_curious_tilt",
+        "tags": [
+          "mickey_mouse_curious_tilt",
+          "doubt",
+          "interest",
+          "question"
+        ],
+        "emoji": "🤔🧐"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "prompt": "Mickey Mouse with a big shiny golden chain around his neck, classic black ears and red shorts, consistent in every cell Mickey mischievous, smirking with one eye squinting, chain swinging slyly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "mickey_mouse_mischievous_smirk",
+        "tags": [
+          "mickey_mouse_mischievous_smirk",
+          "mischief",
+          "playful",
+          "sly"
+        ],
+        "emoji": "😏😈"
+      }
+    ],
+    "expanded_by": "ai",
+    "expand_model": "gpt-4.1-mini-2025-04-14"
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1790874311.91,
+    "note": "approved when the task was reserved"
+  },
+  "generations": []
+}

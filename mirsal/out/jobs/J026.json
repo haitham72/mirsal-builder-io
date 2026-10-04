@@ -1,0 +1,39 @@
+{
+  "id": "J026",
+  "kind": "sheet",
+  "task": "021",
+  "generation": "G093",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: barbie.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: blowing a kiss with a wink, a small heart floating away\nCharacter 2: bursting with excitement, star-sparkle eyes, fists shaking\nCharacter 3: huge shiny puppy eyes, hands clasped, begging please\nCharacter 4: holding a golden trophy overhead, triumphant\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: mid-sneeze with a tissue, watery eyes\nCharacter 7: grumpy with arms crossed, pouting, turned slightly away\nCharacter 8: dizzy with spiral eyes, wobbling on the spot\nCharacter 9: yawning widely, sleepy eyes, stretching the arms up\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "barbie in love",
+    "refs": [],
+    "outline": 0,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "3fb23fbd-cbe7-4238-a3e3-39384bafe18b",
+  "result": {
+    "file": "jobs/J026/result.png",
+    "sha256": "1945bb6441a4ff50b410959432387ddb19985c5a217ccb1fe338d1f696a2931f",
+    "bytes": 3968786
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1790921153.798,
+  "claimed_at": 1790921410.717,
+  "completed_at": 1790921414.076,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

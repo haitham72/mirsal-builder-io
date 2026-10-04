@@ -1,7 +1,7 @@
 """Phase 3A repository: save_generation() is one transaction (generation + stickers + assets +
 video sheets + reviews + events). Re-saving the same result is idempotent: generations and
 stickers upsert, reviews/events/assets insert ON CONFLICT DO NOTHING. The gate rules stay in
-pipeline.py/gates.py; the repo stores decisions, it never decides (principle 8)."""
+flow/pipeline.py/gates.py; the repo stores decisions, it never decides (principle 8)."""
 from __future__ import annotations
 
 import hashlib
@@ -101,7 +101,7 @@ def _file_asset(gd: Path, rel: str | None) -> tuple | None:
 
 def save_generation(conn, out: Path, gid: int) -> str:
     """Upsert one generation from out/G###/{result.json,prompts.json,events.jsonl}. Returns the generation id."""
-    from .. import pipeline as pl
+    from ..flow import pipeline as pl
     out, gd = Path(out), pl.gen_dir(Path(out), gid)
     res = json.loads((gd / "result.json").read_text(encoding="utf-8"))
     res = pl.normalise(res)
@@ -114,13 +114,19 @@ def save_generation(conn, out: Path, gid: int) -> str:
     grid = _grid(res)
     src = res.get("source") or {}
 
+    from ..flow import groups
+    try:
+        group_id, relation = f"G{groups.root_of(out, gid):03d}", groups.relation(res)
+    except Exception:
+        group_id, relation = gen_id, None
     with conn.cursor() as cur:
         cur.execute(
             """INSERT INTO generations (id, parent_id, grid, regen_of, verify_version, prompt, subject,
                   source, source_ref, task, task_slug, sheet_prompt, video_prompt, plan, engine_version,
-                  status, name_key, task_id, template_id, template_version, slots, outline_px, erode_px)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-               ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status, plan=EXCLUDED.plan,
+                  status, name_key, task_id, template_id, template_version, slots, outline_px, erode_px, owner, group_id, relation)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET owner=EXCLUDED.owner, status=EXCLUDED.status, plan=EXCLUDED.plan,
+                 group_id=EXCLUDED.group_id, relation=EXCLUDED.relation,
                  slots=EXCLUDED.slots, outline_px=EXCLUDED.outline_px, erode_px=EXCLUDED.erode_px,
                  task_id=EXCLUDED.task_id, name_key=EXCLUDED.name_key""",
             (gen_id, _parent_id(res.get("parent")), grid, res.get("regen_of"), str(res.get("verify_version") or ""),
@@ -131,7 +137,7 @@ def save_generation(conn, out: Path, gid: int) -> str:
              res.get("task_id"), res.get("template_id"),
              (str(res.get("template_version")) if res.get("template_version") is not None else None),
              json.dumps(res.get("slots")) if res.get("slots") is not None else None,
-             res.get("outline_px"), res.get("erode_px")))
+             res.get("outline_px"), res.get("erode_px"), str(res.get("owner") or "local"), group_id, relation))
 
         # video sheets first (stickers + assets reference them)
         vs_map: dict = {}
@@ -273,7 +279,7 @@ def _gen_review(cur, gen_id: str, gate: str, v: dict, vsid: str | None) -> None:
 def import_tasks(conn, out: Path) -> int:
     """Backfill out/tasks/*.json (1G manual tasks) as tasks rows. Idempotent. Returns rows present.
     A provider ticket that a job import already owns (same external id, any provider) is not inserted twice."""
-    from .. import tasks as _t
+    from ..generation import tasks as _t
     n = 0
     for f in sorted(_t.tasks_dir(Path(out)).glob("*.json")):
         try:
@@ -327,7 +333,7 @@ def save_job(conn, job: dict, out: Path | None = None) -> bool:
         name_key = ""
         if job.get("task") and out is not None:
             try:
-                from .. import tasks as _t
+                from ..generation import tasks as _t
                 name_key = str(_t.read_task(Path(out), str(job["task"])).get("name_key") or "")
             except Exception:
                 name_key = ""
@@ -369,7 +375,7 @@ def save_job(conn, job: dict, out: Path | None = None) -> bool:
 
 def import_jobs(conn, out: Path) -> int:
     """Every claimed job under out/jobs/ as a tasks row (see save_job). Idempotent. Returns the jobs applied."""
-    from .. import jobs as _j
+    from ..generation import jobs as _j
     n = 0
     for job in _j.list(Path(out)):
         try:
@@ -550,18 +556,38 @@ def find_task(conn, external_id: str | None = None, key_prefix: str | None = Non
         return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
+def import_users(conn, out: Path) -> int:
+    """out/users.json -> users (digests only). Idempotent. Returns the rows present."""
+    from ..runtime.users import UserStore
+    n = 0
+    path = Path(out) / "users.json"
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8")).get("users", [])
+    except (OSError, ValueError):
+        raw = []
+    for u in raw:
+        with conn.cursor() as cur:
+            cur.execute("""INSERT INTO users (id, name, role, can_spend, token_sha256, disabled, created_at) VALUES (%s,%s,%s,%s,%s,%s,%s)
+                           ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, role = EXCLUDED.role, can_spend = EXCLUDED.can_spend,
+                             token_sha256 = EXCLUDED.token_sha256, disabled = EXCLUDED.disabled""",
+                        (u["id"], u["name"], u["role"], bool(u.get("can_spend")), u.get("token_sha256", ""), bool(u.get("disabled")), _ts(u.get("created"))))
+        n += 1
+    conn.commit()
+    return n
+
+
 def save_session(conn, s: dict) -> str:
     """One chat session (out/sessions/S###.json) into sessions + interactions + feedback. Idempotent; the file stays the primary store."""
     with conn.cursor() as cur:
         cur.execute(
-            """INSERT INTO sessions (id, title, settings, focus, subjects, preferences, summary, created_at, updated_at)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-               ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, settings = EXCLUDED.settings, focus = EXCLUDED.focus,
+            """INSERT INTO sessions (id, title, settings, focus, subjects, preferences, summary, created_at, updated_at, user_id)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET user_id = EXCLUDED.user_id, title = EXCLUDED.title, settings = EXCLUDED.settings, focus = EXCLUDED.focus,
                  subjects = EXCLUDED.subjects, preferences = EXCLUDED.preferences, summary = EXCLUDED.summary,
                  updated_at = EXCLUDED.updated_at""",
             (s["id"], s.get("title") or "", json.dumps(s.get("settings") or {}), json.dumps(s.get("focus") or {}),
              json.dumps(s.get("subjects") or [], ensure_ascii=False), json.dumps(s.get("preferences") or {}, ensure_ascii=False),
-             json.dumps(s.get("summary") or {}, ensure_ascii=False), _ts(s.get("created")), _ts(s.get("updated"))))
+             json.dumps(s.get("summary") or {}, ensure_ascii=False), _ts(s.get("created")), _ts(s.get("updated")), s.get("user") or "local"))
         for it in s.get("interactions") or []:
             cur.execute(
                 """INSERT INTO interactions (session_id, seq, user_message, assistant_message, intents, resolved,
@@ -584,3 +610,20 @@ def save_session(conn, s: dict) -> str:
                     (s["id"], _ts(fb.get("ts")), sid.split("/")[0] if sid else None, sid, fb["polarity"], fb["scope"], fb.get("text") or ""))
     conn.commit()
     return s["id"]
+
+
+def save_ticket(conn, t: dict) -> None:
+    """Upsert one ticket (the whole record in `body`, the searchable fields beside it)."""
+    from datetime import datetime, timezone
+    ts = lambda v: datetime.fromtimestamp(float(v or 0), timezone.utc)
+    with conn.cursor() as cur:
+        cur.execute(
+            """INSERT INTO tickets (id, source, at, last_at, user_id, status, issue, summary, what_happened, intent, proposed_fix, fingerprint, count, fixed_by, body)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET last_at=EXCLUDED.last_at, status=EXCLUDED.status, issue=EXCLUDED.issue, summary=EXCLUDED.summary,
+                 proposed_fix=EXCLUDED.proposed_fix, count=EXCLUDED.count, fixed_by=EXCLUDED.fixed_by, body=EXCLUDED.body""",
+            (t["id"], t.get("source") or "report", ts(t.get("at")), ts(t.get("last_at") or t.get("at")), t.get("user"), t.get("status") or "open", t.get("issue") or "other",
+             t.get("summary") or "", t.get("what_happened") or "", t.get("intent") or "", t.get("proposed_fix") or "", t.get("fingerprint"), int(t.get("count") or 1),
+             t.get("fixed_by"), json.dumps(t, ensure_ascii=False)))
+    conn.commit()
+

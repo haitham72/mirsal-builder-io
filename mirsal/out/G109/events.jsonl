@@ -1,0 +1,7 @@
+{"ts": 1791078846.241, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "laughing particles", "task_slug": "laughing_particles"}}
+{"ts": 1791078846.251, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791078846.458, "stage": "sheet_picked", "status": "done", "ms": 207, "detail": {"subject": "laughing_particles", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791078846.46, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791078846.716, "stage": "keyed", "status": "done", "ms": 255, "detail": {"bg": [3, 252, 2], "threshold": [124.0, 123.5, 124.0, 123.5], "grid": "2x2", "cut": "equal", "xs": [0, 1024, 2048], "ys": [0, 1024, 2048]}}
+{"ts": 1791078846.716, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791078846.906, "stage": "sliced", "status": "done", "ms": 189, "detail": {"ready": 4, "failed": 0}}

@@ -1,0 +1,109 @@
+{
+  "task": "Batman Lego pieces",
+  "task_slug": "batman_lego_pieces",
+  "subject": "Batman Lego pieces",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    2,
+    2
+  ],
+  "template_id": "sheet_2x2",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "separate small pieces that burst out of Batman Lego",
+    "style_id": "flat_vector",
+    "mode": "sheet_2x2",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "bat signal",
+        "tags": [
+          "bat_signal"
+        ],
+        "emoji": "🦇👊"
+      },
+      {
+        "pos": 2,
+        "label": "lego brick",
+        "tags": [
+          "lego_brick"
+        ],
+        "emoji": "🦇👊"
+      },
+      {
+        "pos": 3,
+        "label": "cape piece",
+        "tags": [
+          "cape_piece"
+        ],
+        "emoji": "🦇👊"
+      },
+      {
+        "pos": 4,
+        "label": "megaphone",
+        "tags": [
+          "megaphone"
+        ],
+        "emoji": "🦇👊"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "guidelines": {},
+  "sheet_prompt": "One illustration of 4 separate small objects arranged in 2 rows of 2, evenly spaced across a single seamless background.\nTheme: pieces that burst out of Batman Lego. Draw only the pieces listed, never Batman Lego itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every piece directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nEach cell holds exactly ONE piece, isolated and centred in its own cell, a different piece or a different size and angle from every other cell:\nPiece 1 (top row, left): bat signal\nPiece 2 (top row, right): lego brick\nPiece 3 (bottom row, left): cape piece\nPiece 4 (bottom row, right): megaphone\nConsistency: the same drawing style, lighting and colour quality for all 4 pieces.\nBackground: a single, seamless, solid pure #00FF00 green background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise, and no objects other than the pieces.\nSpacing: every piece has a generous empty margin on every side (at least 20% of its own size), nothing touches the edge of its cell, and no piece touches or crosses another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. bat signal, with big lively expressive movement in place\n2. lego brick, with big lively expressive movement in place\n3. cape piece, with big lively expressive movement in place\n4. megaphone, with big lively expressive movement in place\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 2x2 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "separate small pieces that burst out of Batman Lego bat signal, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "bat_signal",
+      "tags": [
+        "bat_signal"
+      ],
+      "emoji": "🦇👊"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "prompt": "separate small pieces that burst out of Batman Lego lego brick, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "lego_brick",
+      "tags": [
+        "lego_brick"
+      ],
+      "emoji": "🦇👊"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "prompt": "separate small pieces that burst out of Batman Lego cape piece, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "cape_piece",
+      "tags": [
+        "cape_piece"
+      ],
+      "emoji": "🦇👊"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "prompt": "separate small pieces that burst out of Batman Lego megaphone, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "megaphone",
+      "tags": [
+        "megaphone"
+      ],
+      "emoji": "🦇👊"
+    }
+  ],
+  "custom": {
+    "sheet_prompt": "One illustration of 4 separate small objects arranged in 2 rows of 2, evenly spaced across a single seamless background.\nTheme: pieces that burst out of Batman Lego. Draw only the pieces listed, never Batman Lego itself and never a character, a person, a face, a hand, writing or a logo.\nStyle: glossy cartoon look, bold clean shapes, vivid colours.\nOutline: none. Draw every piece directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nEach cell holds exactly ONE piece, isolated and centred in its own cell, a different piece or a different size and angle from every other cell:\nPiece 1 (top row, left): bat signal\nPiece 2 (top row, right): lego brick\nPiece 3 (bottom row, left): cape piece\nPiece 4 (bottom row, right): megaphone\nConsistency: the same drawing style, lighting and colour quality for all 4 pieces.\nBackground: a single, seamless, solid pure #00FF00 green background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise, and no objects other than the pieces.\nSpacing: every piece has a generous empty margin on every side (at least 20% of its own size), nothing touches the edge of its cell, and no piece touches or crosses another."
+  },
+  "effect": {
+    "id": "E008",
+    "group": "g1",
+    "template": "effect_pieces",
+    "version": 1
+  }
+}

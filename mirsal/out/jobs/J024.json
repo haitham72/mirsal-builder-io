@@ -1,0 +1,33 @@
+{
+  "id": "J024",
+  "kind": "sheet",
+  "task": "019",
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: starfish kitten.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: waving hello with a big happy grin\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open\nCharacter 3: huge shiny puppy eyes, hands clasped, begging please\nCharacter 4: holding a golden trophy overhead, triumphant\nCharacter 5: shrugging with open palms and a clueless face\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: grumpy with arms crossed, pouting, turned slightly away\nCharacter 8: shocked, jaw dropped, eyes huge, hands on cheeks\nCharacter 9: fast asleep sitting up, drool bubble, snoring\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "starfish kitten",
+    "refs": [],
+    "outline": null,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "FAILED",
+  "external_task_id": "cc2b7c6a-c74c-4d53-8a07-5d703653aa3b",
+  "result": null,
+  "cost": null,
+  "error": "could not download the result: [ASN1: NOT_ENOUGH_DATA] not enough data (_ssl.c:4047)",
+  "created_at": 1790920327.343,
+  "claimed_at": 1790920711.869,
+  "completed_at": 1790920712.274,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading"
+}

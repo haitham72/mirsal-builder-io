@@ -1,0 +1,7 @@
+{"ts": 1790879697.117, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "cherries in love with green backscreen", "task_slug": "cherries_love_with_green_backscreen"}}
+{"ts": 1790879697.123, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790879697.502, "stage": "sheet_picked", "status": "done", "ms": 379, "detail": {"subject": "cherries", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "warnings": []}}
+{"ts": 1790879697.503, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790879697.851, "stage": "keyed", "status": "done", "ms": 347, "detail": {"bg": [8, 90, 254], "threshold": [82.0, 82.0, 82.0, 82.0, 82.0, 82.0, 82.0, 82.0, 82.0], "grid": "3x3", "cut": "gutter", "xs": [0, 695, 1381, 2048], "ys": [0, 675, 1357, 2048]}}
+{"ts": 1790879697.851, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1790879698.522, "stage": "sliced", "status": "done", "ms": 671, "detail": {"ready": 9, "failed": 0}}

@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from mirsal import measure
+from mirsal.flow import measure
 
 
 def _st(i, failed=(), px=300, status="READY"):

@@ -9,7 +9,7 @@ import threading
 import unittest
 from pathlib import Path
 
-from mirsal import jobs
+from mirsal.generation import jobs
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
 
@@ -37,14 +37,14 @@ class JobsTests(unittest.TestCase):
         fake.write_bytes(b"\x89PNG\r\n\x1a\n" + b"0" * 100)
         j = jobs.done(self.out, "J001", str(fake), "higgs-img-v1", cost=2.5)
         self.assertEqual(j["status"], "DONE")
-        self.assertTrue((self.out / "jobs" / "J001" / "result.png").is_file())
+        self.assertTrue((jobs.job_dir(self.out, "J001") / "result.png").is_file())
         self.assertEqual(j["result"]["sha256"], jobs.read(self.out, "J001")["result"]["sha256"])
         self.assertEqual([x["status"] for x in jobs.list(self.out)], ["DONE"])
         self.assertEqual(jobs.list(self.out, "REQUESTED"), [])
 
     def test_claim_stores_the_ticket_first(self):
         """A crashed operator re-run resumes by ticket instead of paying twice (rule 10)."""
-        from mirsal import tasks as _t
+        from mirsal.generation import tasks as _t
         t = _t.reserve(self.out, self.tmp / "in", "falcon dancing")
         j = jobs.create(self.out, "sheet", task=t["id"], request={"prompt": "falcon"})
         jobs.claim(self.out, j["id"], "higgs-999")
@@ -62,7 +62,7 @@ class JobsTests(unittest.TestCase):
 
     def test_stale_jobs_show_timeout(self):
         j = jobs.create(self.out, "sheet", request={})
-        p = self.out / "jobs" / f"{j['id']}.json"
+        p = jobs._path(self.out, j["id"])
         old = dict(json.loads(p.read_text(encoding="utf-8")))
         old["created_at"] -= jobs.timeout_s() + 10
         p.write_text(json.dumps(old), encoding="utf-8")
@@ -124,7 +124,8 @@ class JobsTests(unittest.TestCase):
         self.assertEqual(main(["prompt", ""]), 1)
 
     def test_slot_reviewer(self):
-        from mirsal import expander, llm
+        from mirsal.generation import expander
+        from mirsal.services import llm
         key, loaded = os.environ.pop("OPENAI_API_KEY", None), llm._ENV_LOADED
         prov = os.environ.get("MIRSAL_LLM_PROVIDER")
         os.environ["MIRSAL_LLM_PROVIDER"] = "openai"   # no key + openai = no backend, even when LM Studio runs here
@@ -146,6 +147,122 @@ class JobsTests(unittest.TestCase):
                 os.environ["OPENAI_API_KEY"] = key
             os.environ.pop("MIRSAL_LLM_PROVIDER", None) if prov is None else os.environ.__setitem__("MIRSAL_LLM_PROVIDER", prov)
             llm._ENV_LOADED = loaded
+
+
+class TransientProviderFailureTests(unittest.TestCase):
+    """J048, 2026-10-03: a Kling job was rendering at Higgsfield and COMPLETED, while a 503 while waiting wrote
+    status FAILED over it - the video was paid for, never downloaded, and the UI showed an error with no way
+    forward. A transient provider failure while WAITING is not a failure: the job goes to TIMEOUT, stays
+    resumable on the SAME ticket, and keeps counting against the daily cap."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp()); self.out = self.tmp / "out"
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_a_5xx_while_waiting_is_timeout_not_failed(self):
+        from mirsal.generation import higgsfield as hf
+        j = jobs.create(self.out, "video", task="048", request={"prompt": "superhero dubai", "t2v": True})
+        jobs.claim(self.out, j["id"], "81ba5956-7337-4dbc-80c1-dd4f8b1f4f8d")
+        jobs.update(self.out, j["id"], cost_estimate=4.5, model="kling3_0", kind="video")
+
+        class Fake:
+            """503 twice, then the video is there: the retry inside the wait must get it without a new job."""
+            def __init__(self): self.waits = 0; self.creates = 0
+            def cost(self, *a, **k): return 4.5
+            def create(self, *a, **k): self.creates += 1; return "a-second-ticket"
+            def wait(self, ticket, timeout_s=None):
+                self.waits += 1
+                if self.waits < 3:
+                    raise hf.HiggsError("Higgsfield API error (HTTP 503). request failed with status 503 Service Unavailable")
+                return {"result_url": "https://example.invalid/v.mp4"}
+            def download(self, url, dest):
+                Path(dest).parent.mkdir(parents=True, exist_ok=True); Path(dest).write_bytes(b"video"); return "sha", b"video"
+        fake = Fake()
+        res = jobs.fulfil(self.out, j["id"], hf=fake)
+        self.assertEqual(res["status"], "DONE", res)
+        self.assertEqual(fake.creates, 0, "a retry must never create a second paid job")
+        self.assertEqual(fake.waits, 3, "the wait is retried while the provider answers 5xx")
+        self.assertEqual(res["external_task_id"], "81ba5956-7337-4dbc-80c1-dd4f8b1f4f8d")
+
+    def test_a_503_with_no_ticket_stays_failed(self):
+        from mirsal.generation import higgsfield as hf
+        j = jobs.create(self.out, "video", task="049", request={"prompt": "superhero dubai", "t2v": True})
+        jobs.update(self.out, j["id"], kind="video", model="kling3_0")
+
+        class Fake:
+            def cost(self, *a, **k): return 4.5
+            def create(self, *a, **k): raise hf.HiggsError("Higgsfield API error (HTTP 503). request failed with status 503 Service Unavailable")
+            def wait(self, ticket, timeout_s=None): raise AssertionError("must not wait without a ticket")
+            def download(self, url, dest): raise AssertionError("must not download")
+        res = jobs.fulfil(self.out, j["id"], hf=Fake())
+        self.assertEqual(res["status"], "FAILED", "nothing was created at the provider, so there is nothing to resume")
+
+    def test_a_refused_prompt_stays_final(self):
+        from mirsal.generation import higgsfield as hf
+        j = jobs.create(self.out, "video", task="050", request={"prompt": "nope", "t2v": True})
+        jobs.claim(self.out, j["id"], "t-050"); jobs.update(self.out, j["id"], kind="video", model="kling3_0")
+
+        class Fake:
+            def cost(self, *a, **k): return 4.5
+            def wait(self, ticket, timeout_s=None):
+                raise hf.HiggsError("HTTP 400 the prompt was refused")
+            def download(self, url, dest): raise AssertionError("must not download")
+        res = jobs.fulfil(self.out, j["id"], hf=Fake())
+        self.assertEqual(res["status"], "FAILED", "a 4xx is final: it is not a hiccup to be retried forever")
+
+    def test_a_parked_timeout_still_counts_against_the_daily_cap(self):
+        j = jobs.create(self.out, "video", task="051", request={"prompt": "x", "t2v": True})
+        jobs.claim(self.out, j["id"], "t-051")
+        jobs.update(self.out, j["id"], cost_estimate=4.5, model="kling3_0", kind="video")
+        self.assertEqual(jobs._inflight(self.out), 4.5)
+        jobs.update(self.out, j["id"], status="TIMEOUT")
+        self.assertEqual(jobs._inflight(self.out), 4.5, "a TIMEOUT job is still rendering at the provider and will still be charged")
+        jobs.update(self.out, j["id"], status="FAILED")
+        self.assertEqual(jobs._inflight(self.out), 0.0, "a FAILED job is not in flight; resume() puts it back on the same ticket")
+
+    def test_error_classification(self):
+        from mirsal.generation.higgsfield import HiggsError
+        self.assertTrue(HiggsError("Higgsfield API error (HTTP 503). request failed with status 503").transient)
+        self.assertTrue(HiggsError("HTTP 429").transient)
+        self.assertFalse(HiggsError("HTTP 400 the prompt was refused").transient)
+        self.assertFalse(HiggsError("Error: invalid prompt").transient, "a failure we cannot classify stays final")
+
+
+class CloseLoopTests(unittest.TestCase):
+    """A grey frame at the wrap, once per loop (Haitham, 2026-10-03): close_loop() blended RGBA per channel, so a
+    transparent tail frame dragged the character halfway to black at partial coverage. Coverage must not colour the fade."""
+
+    def _clip(self, n=24):
+        import numpy as np
+        f = np.zeros((n, 64, 64, 4), np.uint8)
+        for i in range(n):
+            f[i, 20:40, 10 + i:26 + i, :3] = (200, 40, 40); f[i, 20:40, 10 + i:26 + i, 3] = 255
+        f[1:, 20:40, 40:, :] = 0                      # the tail is empty: the character walked off
+        return f
+
+    def test_partial_coverage_keeps_the_colour(self):
+        import numpy as np
+        from mirsal.engine.video import close_loop
+        out = close_loop(self._clip(), 6)
+        a = out[..., 3]
+        part = out[..., :3][(a > 5) & (a < 250)]
+        self.assertTrue(part.size, "the fade must produce partial coverage to be worth testing")
+        for ch, want in enumerate((200, 40, 40)):
+            self.assertAlmostEqual(float(part[:, ch].mean()), want, delta=6, msg=f"channel {ch} drifted towards black at partial coverage")
+
+    def test_the_loop_still_closes(self):
+        import numpy as np
+        from mirsal.engine.video import close_loop
+        out = close_loop(self._clip(), 6)
+        self.assertTrue(np.array_equal(out[0], out[-1]), "the last frame must still BE frame 0, or the wrap jumps")
+
+    def test_a_short_clip_is_untouched(self):
+        import numpy as np
+        from mirsal.engine.video import close_loop
+        f = self._clip(n=8)
+        self.assertTrue(np.array_equal(close_loop(f, 6), f))
 
 
 if __name__ == "__main__":

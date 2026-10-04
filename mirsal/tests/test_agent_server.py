@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from mirsal import higgsfield
+from mirsal.generation import higgsfield
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
 from tests.test_console import build_inputs
@@ -24,7 +24,7 @@ class ChatServerTests(unittest.TestCase):
         os.environ["MIRSAL_AGENT_PROVIDER"] = "openai"          # no key + openai = no model: the rules decide everything
         os.environ["MIRSAL_LLM_PROVIDER"] = "openai"
         os.environ.pop("OPENAI_API_KEY", None)
-        from mirsal import llm
+        from mirsal.services import llm
         cls._loaded = llm._ENV_LOADED
         llm._ENV_LOADED = True
         cls.patch = mock.patch.object(higgsfield, "available", lambda: False)
@@ -40,7 +40,7 @@ class ChatServerTests(unittest.TestCase):
         cls.srv.shutdown()
         cls.c.release_writer()
         cls.patch.stop()
-        from mirsal import llm
+        from mirsal.services import llm
         llm._ENV_LOADED = cls._loaded
         for k, v in cls.env.items():
             os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
@@ -65,6 +65,20 @@ class ChatServerTests(unittest.TestCase):
                 return j
             time.sleep(0.2)
         self.fail("timeout: " + json.dumps(j)[:600])
+
+    def test_the_ai_vision_switch_is_the_settings_route_and_makes_no_turn(self):
+        """P10 of the UI/UX spec through the real server: allowing or refusing AI vision writes state only (no message, no card), asked-once is remembered, and a repeat press with the same value changes nothing."""
+        s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
+        sid = sess["id"]
+        n = len(self.req("GET", f"/api/chat/sessions/{sid}")[1]["messages"])
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"allow_vlm": True})
+        self.assertEqual((s, r["settings"]["allow_vlm"]), (200, True))
+        got = self.req("GET", f"/api/chat/sessions/{sid}")[1]
+        self.assertEqual(len(got["messages"]), n, "no user message and no assistant turn")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"allow_vlm": "maybe"})
+        self.assertIs(self.req("GET", f"/api/chat/sessions/{sid}")[1]["settings"]["allow_vlm"], True, "a value that is not true or false changes nothing")
+        self.req("POST", f"/api/chat/sessions/{sid}/settings", {"allow_vlm": False})
+        self.assertIs(self.req("GET", f"/api/chat/sessions/{sid}")[1]["settings"]["allow_vlm"], False)
 
     def test_a_full_conversation(self):
         s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
@@ -113,6 +127,26 @@ class ChatServerTests(unittest.TestCase):
         self.assertIn(sid, [x["id"] for x in lst["sessions"]])
         s, again = self.req("GET", f"/api/chat/sessions/{sid}")
         self.assertEqual(len(again["interactions"]), 3)
+
+    def test_the_style_is_a_real_preset_everywhere_the_chat_touches_it(self):
+        """The AI screen shows the same style presets as the Studio (GET /api/chat/agent carries them), a style is picked through the settings route, and an unknown one is refused
+        out loud instead of being stored to fail later; the names on the plan card are the presets' own, not a list of the chat's."""
+        from mirsal.agent import graph
+        from mirsal.generation import styles
+        s, info = self.req("GET", "/api/chat/agent")
+        self.assertEqual([x["id"] for x in info["styles"]], [x["id"] for x in styles.PRESETS])
+        self.assertEqual(info["default_style"], styles.DEFAULT)
+        s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
+        sid = sess["id"]
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"style_id": "clay_3d"})
+        self.assertEqual(s, 200)
+        self.assertEqual(r["settings"]["style_id"], "clay_3d")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"style_id": "pixar_3d"})
+        self.assertEqual(s, 400, "an id that is not a preset is refused")
+        self.assertIn("unknown style", json.dumps(r))
+        s, again = self.req("GET", f"/api/chat/sessions/{sid}")
+        self.assertEqual(again["settings"]["style_id"], "clay_3d", "the refused one changed nothing")
+        self.assertEqual(set(graph.STYLE_NAMES), {x["id"] for x in styles.PRESETS}, "every preset has a name on the card, and nothing else does")
 
     def test_a_second_message_while_one_runs_gets_409(self):
         s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})

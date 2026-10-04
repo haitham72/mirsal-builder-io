@@ -1,0 +1,577 @@
+{
+  "id": "E013",
+  "created": 1790995521.134,
+  "user": "local",
+  "pack_id": "67d29daa",
+  "pack_name": "Barbie in love",
+  "mode": "sim",
+  "grid": [
+    2,
+    2
+  ],
+  "note": "",
+  "title": "Barbie in love · effects",
+  "status": "READY",
+  "stickers": [
+    {
+      "sticker_id": "144848e7",
+      "name": "Barbie sweet smile",
+      "emoji": "💕😊",
+      "file": "G005/vid-barbie_love-sweet_smile-barbie_in_love-20261001T175910-d274fa.webm",
+      "type": "animated",
+      "src": "src/144848e7.png"
+    },
+    {
+      "sticker_id": "9bd9b0a1",
+      "name": "Barbie blow kiss",
+      "emoji": "😘💖",
+      "file": "G005/vid-barbie_love-blow_kiss-barbie_in_love-20261001T175910-dd4b89.webm",
+      "type": "animated",
+      "src": "src/9bd9b0a1.png"
+    },
+    {
+      "sticker_id": "8132afae",
+      "name": "Barbie shy blush",
+      "emoji": "😊🌸",
+      "file": "G005/vid-barbie_love-shy_blush-barbie_in_love-20261001T175910-3fd0a4.webm",
+      "type": "animated",
+      "src": "src/8132afae.png"
+    },
+    {
+      "sticker_id": "fbbc03e9",
+      "name": "Barbie heartfelt",
+      "emoji": "💓😌",
+      "file": "G005/vid-barbie_love-heartfelt-barbie_in_love-20261001T175910-76a47a.webm",
+      "type": "animated",
+      "src": "src/fbbc03e9.png"
+    },
+    {
+      "sticker_id": "e1849e47",
+      "name": "Barbie love shock",
+      "emoji": "😲💘",
+      "file": "G005/vid-barbie_love-shock-barbie_in_love-20261001T175910-a20ce2.webm",
+      "type": "animated",
+      "src": "src/e1849e47.png"
+    },
+    {
+      "sticker_id": "7e6f4e53",
+      "name": "Barbie joyful laugh",
+      "emoji": "😂💞",
+      "file": "G005/vid-barbie_love-joyful_laugh-barbie_in_love-20261001T175910-063b9e.webm",
+      "type": "animated",
+      "src": "src/7e6f4e53.png"
+    },
+    {
+      "sticker_id": "29210329",
+      "name": "Barbie daydream",
+      "emoji": "😍💭",
+      "file": "G005/vid-barbie_love-daydream-barbie_in_love-20261001T175910-13d58a.webm",
+      "type": "animated",
+      "src": "src/29210329.png"
+    },
+    {
+      "sticker_id": "4991725f",
+      "name": "Barbie nervous",
+      "emoji": "😟💔",
+      "file": "G005/vid-barbie_love-nervous-barbie_in_love-20261001T175910-1fc8c7.webm",
+      "type": "animated",
+      "src": "src/4991725f.png"
+    },
+    {
+      "sticker_id": "d7736910",
+      "name": "Barbie proud love",
+      "emoji": "🌹😌",
+      "file": "G005/vid-barbie_love-proud_love-barbie_in_love-20261001T175910-1a7c40.webm",
+      "type": "animated",
+      "src": "src/d7736910.png"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g1",
+      "subject": "Barbie doll",
+      "elements": [
+        "pink dress",
+        "heart eyes",
+        "blonde hair",
+        "pink hearts",
+        "question marks",
+        "blonde hair strands"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "144848e7",
+        "e1849e47"
+      ],
+      "moods": {
+        "144848e7": "happy",
+        "e1849e47": "excited"
+      },
+      "preset": {
+        "144848e7": "burst",
+        "e1849e47": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g2",
+      "subject": "Barbie blowing a kiss",
+      "elements": [
+        "pink heart",
+        "blown air bubble",
+        "glossy lipstick",
+        "heart-shaped balloon"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "9bd9b0a1"
+      ],
+      "moods": {
+        "9bd9b0a1": "happy"
+      },
+      "preset": {
+        "9bd9b0a1": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g3",
+      "subject": "Barbie shy blush",
+      "elements": [
+        "pink heart",
+        "blush mark",
+        "heart pattern"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "8132afae"
+      ],
+      "moods": {
+        "8132afae": "happy"
+      },
+      "preset": {
+        "8132afae": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g4",
+      "subject": "Barbie heartfelt",
+      "elements": [
+        "pink hearts",
+        "closed eyes",
+        "blonde hair"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "fbbc03e9"
+      ],
+      "moods": {
+        "fbbc03e9": "happy"
+      },
+      "preset": {
+        "fbbc03e9": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g5",
+      "subject": "Barbie joyful laugh",
+      "elements": [
+        "pink hearts",
+        "sparkles",
+        "laughing mouth"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "7e6f4e53"
+      ],
+      "moods": {
+        "7e6f4e53": "happy"
+      },
+      "preset": {
+        "7e6f4e53": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g6",
+      "subject": "Barbie daydream",
+      "elements": [
+        "pink heart",
+        "sparkle star",
+        "cotton candy swirl"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "29210329"
+      ],
+      "moods": {
+        "29210329": "happy"
+      },
+      "preset": {
+        "29210329": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g7",
+      "subject": "Barbie nervous",
+      "elements": [
+        "pink question marks",
+        "closed eyes",
+        "clenched fists"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "4991725f"
+      ],
+      "moods": {
+        "4991725f": "sad"
+      },
+      "preset": {
+        "4991725f": "rain"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    {
+      "id": "g8",
+      "subject": "Barbie proud love",
+      "elements": [
+        "pink rose petals",
+        "heart shapes",
+        "sparkles"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "key": "green",
+      "stickers": [
+        "d7736910"
+      ],
+      "moods": {
+        "d7736910": "happy"
+      },
+      "preset": {
+        "d7736910": "burst"
+      },
+      "by": "vlm",
+      "sprites": {
+        "generation": 101,
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    }
+  ],
+  "results": [],
+  "video": {},
+  "history": [
+    {
+      "ts": 1790995521.134,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "9 sticker(s), sim",
+      "detail": null
+    },
+    {
+      "ts": 1790995521.152,
+      "actor": "python",
+      "decision": "ANALYSE",
+      "reason": "Barbie doll: pink dress, heart eyes, blonde hair, pink hearts, question marks, blonde hair strands, Barbie blowing a kiss: pink heart, blown air bubble, glossy lipstick, heart-shaped balloon, Barbie shy blush: pink heart, blush mark, heart pattern, Barbie heartfelt: pink hearts, closed eyes, blonde ",
+      "detail": {
+        "model": null
+      }
+    },
+    {
+      "ts": 1790995523.607,
+      "actor": "python",
+      "decision": "SUGGEST",
+      "reason": "8 candidate particles by vlm from the master sheet G005",
+      "detail": {
+        "by": "vlm",
+        "model": "qwen3.5-4b",
+        "source": {
+          "kind": "batch",
+          "generation": 5
+        }
+      }
+    },
+    {
+      "ts": 1790995535.776,
+      "actor": "local",
+      "decision": "REQUEST",
+      "reason": "particle sheet job J041 (2x2): pink heart, blush, rose flower",
+      "detail": {
+        "job": "J041"
+      }
+    },
+    {
+      "ts": 1790995555.961,
+      "actor": "python",
+      "decision": "LINK",
+      "reason": "the particles are the cells of G101",
+      "detail": {
+        "generation": "G101",
+        "job": "J041"
+      }
+    },
+    {
+      "ts": 1790995603.707,
+      "actor": "you",
+      "decision": "PICK",
+      "reason": "particles picked: cell 1, 2, 3, 4 of G101",
+      "detail": {
+        "picked": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "generation": 101
+      }
+    },
+    {
+      "ts": 1791084066.277,
+      "actor": "python",
+      "decision": "SAVE",
+      "reason": "saved as particle set P007",
+      "detail": {
+        "set": "P007"
+      }
+    }
+  ],
+  "updated": 1791084066.277,
+  "per_sticker": {
+    "144848e7": {
+      "subject": "Barbie doll",
+      "elements": [
+        "pink dress",
+        "heart eyes",
+        "blonde hair"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "9bd9b0a1": {
+      "subject": "Barbie blowing a kiss",
+      "elements": [
+        "pink heart",
+        "blown air bubble",
+        "glossy lipstick",
+        "heart-shaped balloon"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "8132afae": {
+      "subject": "Barbie shy blush",
+      "elements": [
+        "pink heart",
+        "blush mark",
+        "heart pattern"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "fbbc03e9": {
+      "subject": "Barbie heartfelt",
+      "elements": [
+        "pink hearts",
+        "closed eyes",
+        "blonde hair"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "e1849e47": {
+      "subject": "Barbie doll",
+      "elements": [
+        "pink hearts",
+        "question marks",
+        "blonde hair strands"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "excited",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "7e6f4e53": {
+      "subject": "Barbie joyful laugh",
+      "elements": [
+        "pink hearts",
+        "sparkles",
+        "laughing mouth"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "29210329": {
+      "subject": "Barbie daydream",
+      "elements": [
+        "pink heart",
+        "sparkle star",
+        "cotton candy swirl"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "4991725f": {
+      "subject": "Barbie nervous",
+      "elements": [
+        "pink question marks",
+        "closed eyes",
+        "clenched fists"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "sad",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    },
+    "d7736910": {
+      "subject": "Barbie proud love",
+      "elements": [
+        "pink rose petals",
+        "heart shapes",
+        "sparkles"
+      ],
+      "style": "glossy cartoon look, bold clean shapes, vivid colours",
+      "mood": "happy",
+      "by": "vlm",
+      "model": "qwen3.5-4b",
+      "cached": true
+    }
+  },
+  "notes": [],
+  "analysed_by": "table",
+  "set": {
+    "options": [
+      "pink heart",
+      "blush",
+      "rose flower",
+      "heart shape",
+      "ribbon bow",
+      "sparkle star",
+      "glitter dust",
+      "love note"
+    ],
+    "source": {
+      "kind": "batch",
+      "generation": 5
+    },
+    "by": "vlm",
+    "elements": [
+      "pink heart",
+      "blush",
+      "rose flower"
+    ],
+    "picked": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "grid": [
+      2,
+      2
+    ],
+    "status": "DRAWN",
+    "model": "qwen3.5-4b",
+    "job": "J041",
+    "generation": 101
+  },
+  "sets": [
+    "P007"
+  ]
+}

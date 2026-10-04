@@ -1,0 +1,1041 @@
+{
+ "id": "S008",
+ "user": "local",
+ "title": "spiderman in school",
+ "created": 1791023315.793,
+ "updated": 1791025920.094,
+ "settings": {
+  "grid": "2x2",
+  "style_id": "clay_3d",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": "G105",
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "spiderman",
+   "slug": "spiderman",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J044",
+     "prompt": "spiderman in school",
+     "grid": "3x3",
+     "style_id": "clay_3d",
+     "parent": null,
+     "created": 1791023364.559,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    },
+    {
+     "generation": null,
+     "job": "J045",
+     "prompt": "spiderman in dubai",
+     "grid": "2x2",
+     "style_id": "clay_3d",
+     "parent": null,
+     "created": 1791023450.327,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "name": "superhero dubai",
+   "slug": "superhero_dubai",
+   "passes": [
+    {
+     "generation": "G104",
+     "job": "J046",
+     "prompt": "superhero dubai",
+     "grid": "2x2",
+     "style_id": "clay_3d",
+     "parent": null,
+     "created": 1791023521.313,
+     "ready": 4,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "sliced",
+     "error": null
+    },
+    {
+     "generation": "G105",
+     "job": "J047",
+     "prompt": "superhero dubai",
+     "grid": "2x2",
+     "style_id": "clay_3d",
+     "parent": "G104",
+     "created": 1791023594.527,
+     "ready": 4,
+     "approved": 4,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "tweak: wear purple and black suite, with arab head scarf",
+     "stage": "video_sliced",
+     "error": null
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791023327.15,
+   "user": "spiderman in school",
+   "assistant": "Here's the plan for **spiderman**: 9 stickers, soft clay 3d. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791023364.576,
+   "user": "confirm",
+   "assistant": "Creating **spiderman** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791023434.846,
+   "user": "spiderman in dubai",
+   "assistant": "Here's the plan for **spiderman**: 4 stickers, soft clay 3d. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1791023450.346,
+   "user": "confirm",
+   "assistant": "Creating **spiderman** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 5,
+   "ts": 1791023496.216,
+   "user": "superhero dubai",
+   "assistant": "Here's the plan for **superhero dubai**: 4 stickers, soft clay 3d. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 6,
+   "ts": 1791023521.345,
+   "user": "confirm",
+   "assistant": "Creating **superhero dubai** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1791023584.987,
+   "user": "make him wear purple and black suite, with arab head scarf",
+   "assistant": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: wear purple and black suite, with arab head scarf. A new sheet; the original stays. Shall I create them?",
+   "intents": [
+    "EDIT_ROUTE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G104",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G104"
+  },
+  {
+   "seq": 8,
+   "ts": 1791023594.55,
+   "user": "confirm",
+   "assistant": "Creating **superhero dubai** (about 2 credits). Each one appears below as it is ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 9,
+   "ts": 1791025920.093,
+   "user": "are they all having same cloth?",
+   "assistant": "Not quite; while most are wearing a purple and black suit with an Arab headscarf, the \"superhero in dubai\" batch (G105) specifically mentions this tweak, whereas other batches like G104 or G103 do not confirm they share that exact outfit.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G105",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G105"
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "spiderman in school",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023315.918
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **spiderman**: 9 stickers, soft clay 3d. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "spiderman",
+     "grid": "3x3",
+     "style": "soft clay 3d",
+     "count": 9,
+     "names": [
+      "spiderman running jump",
+      "spiderman rub chin",
+      "spiderman wave fist",
+      "spiderman slouch yawn",
+      "spiderman cower huddle",
+      "spiderman kick table",
+      "spiderman open mouth",
+      "spiderman hide face",
+      "spiderman grin peek"
+     ],
+     "estimate": 2.0,
+     "balance": 3136.12,
+     "prompt": "spiderman in school",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating spiderman in school",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023315.935
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023315.973
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023315.988
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "spiderman running jump",
+       "spiderman rub chin",
+       "spiderman wave fist",
+       "spiderman slouch yawn",
+       "spiderman cower huddle",
+       "spiderman kick table",
+       "spiderman open mouth",
+       "spiderman hide face",
+       "spiderman grin peek"
+      ]
+     },
+     "status": "done",
+     "ts": 1791023326.473
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023327.136
+    }
+   ],
+   "ts": 1791023315.918,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023364.028
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Creating **spiderman** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J044",
+     "subject": "spiderman",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating spiderman",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023364.039
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023364.072
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023364.083
+    },
+    {
+     "kind": "final",
+     "label": "started · J044",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023364.559
+    }
+   ],
+   "ts": 1791023364.028,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "spiderman in dubai",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023417.372
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Here's the plan for **spiderman**: 4 stickers, soft clay 3d. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "spiderman",
+     "grid": "2x2",
+     "style": "soft clay 3d",
+     "count": 4,
+     "names": [
+      "spiderman celebration",
+      "spiderman commanding",
+      "spiderman terrified",
+      "spiderman exhausted"
+     ],
+     "estimate": 2.0,
+     "balance": 3136.12,
+     "prompt": "spiderman in dubai",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating spiderman in dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023417.39
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023417.429
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023417.446
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "spiderman celebration",
+       "spiderman commanding",
+       "spiderman terrified",
+       "spiderman exhausted"
+      ]
+     },
+     "status": "done",
+     "ts": 1791023433.964
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023434.832
+    }
+   ],
+   "ts": 1791023417.372,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023449.428
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "Creating **spiderman** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J045",
+     "subject": "spiderman",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating spiderman",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023449.44
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023449.478
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023449.487
+    },
+    {
+     "kind": "final",
+     "label": "started · J045",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023450.327
+    }
+   ],
+   "ts": 1791023449.428,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "superhero dubai",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023486.055
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "Here's the plan for **superhero dubai**: 4 stickers, soft clay 3d. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "superhero dubai",
+     "grid": "2x2",
+     "style": "soft clay 3d",
+     "count": 4,
+     "names": [
+      "superhero dubai victory stance",
+      "superhero dubai celebratory jump",
+      "superhero dubai worriedlean",
+      "superhero dubai defeated slump"
+     ],
+     "estimate": 2.0,
+     "balance": 3136.12,
+     "prompt": "superhero dubai",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superhero dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023486.071
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023486.107
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023486.125
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "superhero dubai victory stance",
+       "superhero dubai celebratory jump",
+       "superhero dubai worriedlean",
+       "superhero dubai defeated slump"
+      ]
+     },
+     "status": "done",
+     "ts": 1791023495.346
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023496.199
+    }
+   ],
+   "ts": 1791023486.055,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023520.696
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "Creating **superhero dubai** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J046",
+     "subject": "superhero dubai",
+     "parent": null,
+     "note": ""
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superhero dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023520.719
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023520.757
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023520.772
+    },
+    {
+     "kind": "final",
+     "label": "started · J046",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023521.313
+    }
+   ],
+   "ts": 1791023520.696,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m13",
+   "role": "assistant",
+   "text": "I looked at all 4 stickers of **Superhero dubai**: the names fit the pictures.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Superhero dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023549.968
+    },
+    {
+     "kind": "step",
+     "label": "looked at 4 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023560.706
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023560.728
+    }
+   ],
+   "ts": 1791023549.92,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m14",
+   "role": "user",
+   "text": "make him wear purple and black suite, with arab head scarf",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023584.118
+  },
+  {
+   "id": "m15",
+   "role": "assistant",
+   "text": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: wear purple and black suite, with arab head scarf. A new sheet; the original stays. Shall I create them?",
+   "cards": [
+    {
+     "type": "multi",
+     "title": "superhero dubai: change only: wear purple and black suite, with arab head scarf",
+     "grid": "2x2",
+     "estimate": 2.0,
+     "balance": 3134.12,
+     "free": false,
+     "items": [
+      {
+       "subject": "superhero dubai",
+       "count": 4,
+       "names": [
+        "superhero dubai victory stance",
+        "superhero dubai celebratory jump",
+        "superhero dubai worriedlean",
+        "superhero dubai defeated slump"
+       ],
+       "style": "soft clay 3d",
+       "changes": [
+        "change only: wear purple and black suite, with arab head scarf"
+       ]
+      }
+     ],
+     "edit": "tweak",
+     "image": true
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "changing a detail",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023584.14
+    },
+    {
+     "kind": "step",
+     "label": "understood: an edit",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023584.183
+    },
+    {
+     "kind": "step",
+     "label": "working in Superhero dubai",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023584.195
+    },
+    {
+     "kind": "step",
+     "label": "tweak: wear purple and black suite, with arab head scarf",
+     "detail": {
+      "title": "from Superhero dubai",
+      "lines": [
+       "the picture: this sheet (2048 px)"
+      ]
+     },
+     "status": "done",
+     "ts": 1791023584.681
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023584.967
+    }
+   ],
+   "ts": 1791023584.118,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create them",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m16",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791023590.541
+  },
+  {
+   "id": "m17",
+   "role": "assistant",
+   "text": "Creating **superhero dubai** (about 2 credits). Each one appears below as it is ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J047",
+     "subject": "superhero dubai",
+     "parent": "G104",
+     "note": "tweak: wear purple and black suite, with arab head scarf"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superhero dubai (tweak)",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023590.56
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023590.601
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: multi",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023590.614
+    },
+    {
+     "kind": "final",
+     "label": "started 1",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023594.527
+    }
+   ],
+   "ts": 1791023590.541,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m18",
+   "role": "assistant",
+   "text": "I looked at **Superhero dubai**. These names do not fit the picture:\nS2: \"superhero dubai celebratory jump\" -> **Happy superhero flying through the air**\nS3: \"superhero dubai worriedlean\" -> **Worried superhero clasping hands**\nS4: \"superhero dubai defeated slump\" -> **Defeated superhero kneeling**",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Superhero dubai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791023627.687
+    },
+    {
+     "kind": "step",
+     "label": "looked at 4 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023637.695
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791023637.729
+    }
+   ],
+   "ts": 1791023627.633,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Apply the new names",
+     "action": "names_apply",
+     "generation": "G105"
+    },
+    {
+     "label": "Keep my names",
+     "action": "names_keep",
+     "generation": "G105"
+    }
+   ]
+  },
+  {
+   "id": "m19",
+   "role": "user",
+   "text": "are they all having same cloth?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791025917.678
+  },
+  {
+   "id": "m20",
+   "role": "assistant",
+   "text": "Not quite; while most are wearing a purple and black suit with an Arab headscarf, the \"superhero in dubai\" batch (G105) specifically mentions this tweak, whereas other batches like G104 or G103 do not confirm they share that exact outfit.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791025917.742
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791025917.762
+    },
+    {
+     "kind": "step",
+     "label": "working in Superhero dubai",
+     "detail": null,
+     "status": "done",
+     "ts": 1791025918.573
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1791025920.078
+    }
+   ],
+   "ts": 1791025917.678,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "named": [
+  "G104",
+  "G105"
+ ]
+}

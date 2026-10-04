@@ -1,0 +1,469 @@
+{
+  "id": "013",
+  "number": 13,
+  "provider": "higgsfield-manual",
+  "external_task_id": "881c8a59-d3db-44c7-99c0-c217b1826d5f",
+  "name_key": "cat_as_banana",
+  "status": "running",
+  "created": 1790905574.477,
+  "prompt": "cat as a banana",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "glossy_3d",
+  "folders": {
+    "img": "img-013-cat_as_banana",
+    "vid": "vid-013-cat_as_banana"
+  },
+  "paths": {
+    "img": "D:\\Vscode\\mirsal-builder-io\\inputs\\Images_gen\\img-013-cat_as_banana",
+    "vid": "D:\\Vscode\\mirsal-builder-io\\inputs\\videos_gen\\vid-013-cat_as_banana"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile",
+          "tags": [
+            "cat_as_banana_dancing",
+            "cat",
+            "banana",
+            "transformation",
+            "dance"
+          ],
+          "emoji": "💃",
+          "motion": "the banana body sways and curves to a beat, the peel flaps swing, a little hop and a spin"
+        },
+        {
+          "pos": 2,
+          "label": "shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open",
+          "tags": [
+            "cat_as_banana_shocked",
+            "cat",
+            "banana",
+            "transformation",
+            "shock"
+          ],
+          "emoji": "😱",
+          "motion": "the peel flaps slip down with a jolt, the eyes pop wide, the whole banana trembles"
+        },
+        {
+          "pos": 3,
+          "label": "squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling",
+          "tags": [
+            "cat_as_banana_squashed",
+            "cat",
+            "banana",
+            "transformation",
+            "squash"
+          ],
+          "emoji": "🥴",
+          "motion": "squashes flat then springs back to its curved shape, dazed, stars orbit"
+        },
+        {
+          "pos": 4,
+          "label": "waving hello with a big happy grin",
+          "tags": [
+            "cat_as_banana_waving",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "👋",
+          "motion": "waves the raised hand in wide arcs while bouncing on tiptoes"
+        },
+        {
+          "pos": 5,
+          "label": "huge shiny puppy eyes, hands clasped, begging please",
+          "tags": [
+            "cat_as_banana_puppy_eyes",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "🥺",
+          "motion": "wrings the hands, eyes shimmer, small hopeful bounce"
+        },
+        {
+          "pos": 6,
+          "label": "flexing a muscle proudly, chest out, huge grin",
+          "tags": [
+            "cat_as_banana_flexing",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "💪",
+          "motion": "the arm flexes and pulses, chest puffs, nods"
+        },
+        {
+          "pos": 7,
+          "label": "rolling eyes with a bored deadpan face",
+          "tags": [
+            "cat_as_banana_eye_roll",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "🙄",
+          "motion": "eyes circle slowly, head tilts back with a sigh"
+        },
+        {
+          "pos": 8,
+          "label": "sad and drooping, a single tear, slumped shoulders",
+          "tags": [
+            "cat_as_banana_sad",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "😞",
+          "motion": "sighs, shoulders sag, droops slowly lower"
+        },
+        {
+          "pos": 9,
+          "label": "furious, steaming, fists clenched, deep scowl",
+          "tags": [
+            "cat_as_banana_angry",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "😡",
+          "motion": "stomps in place, steam puffs from the head, body shakes with rage"
+        }
+      ],
+      "action_guidance": "transformation",
+      "key_colour": "green",
+      "transformation": {
+        "id": "subject_as_target",
+        "version": 1,
+        "flavour": "banana",
+        "subject": "cat",
+        "target": "banana",
+        "required": [
+          "dance",
+          "shock",
+          "squash"
+        ],
+        "forbidden": [],
+        "connector": "as"
+      },
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "cat as a banana",
+    "task_slug": "cat_as_banana",
+    "subject": "cat as banana",
+    "context": "",
+    "kind": "transformation",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile",
+          "tags": [
+            "cat_as_banana_dancing",
+            "cat",
+            "banana",
+            "transformation",
+            "dance"
+          ],
+          "emoji": "💃",
+          "motion": "the banana body sways and curves to a beat, the peel flaps swing, a little hop and a spin"
+        },
+        {
+          "pos": 2,
+          "label": "shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open",
+          "tags": [
+            "cat_as_banana_shocked",
+            "cat",
+            "banana",
+            "transformation",
+            "shock"
+          ],
+          "emoji": "😱",
+          "motion": "the peel flaps slip down with a jolt, the eyes pop wide, the whole banana trembles"
+        },
+        {
+          "pos": 3,
+          "label": "squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling",
+          "tags": [
+            "cat_as_banana_squashed",
+            "cat",
+            "banana",
+            "transformation",
+            "squash"
+          ],
+          "emoji": "🥴",
+          "motion": "squashes flat then springs back to its curved shape, dazed, stars orbit"
+        },
+        {
+          "pos": 4,
+          "label": "waving hello with a big happy grin",
+          "tags": [
+            "cat_as_banana_waving",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "👋",
+          "motion": "waves the raised hand in wide arcs while bouncing on tiptoes"
+        },
+        {
+          "pos": 5,
+          "label": "huge shiny puppy eyes, hands clasped, begging please",
+          "tags": [
+            "cat_as_banana_puppy_eyes",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "🥺",
+          "motion": "wrings the hands, eyes shimmer, small hopeful bounce"
+        },
+        {
+          "pos": 6,
+          "label": "flexing a muscle proudly, chest out, huge grin",
+          "tags": [
+            "cat_as_banana_flexing",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "💪",
+          "motion": "the arm flexes and pulses, chest puffs, nods"
+        },
+        {
+          "pos": 7,
+          "label": "rolling eyes with a bored deadpan face",
+          "tags": [
+            "cat_as_banana_eye_roll",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "🙄",
+          "motion": "eyes circle slowly, head tilts back with a sigh"
+        },
+        {
+          "pos": 8,
+          "label": "sad and drooping, a single tear, slumped shoulders",
+          "tags": [
+            "cat_as_banana_sad",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "😞",
+          "motion": "sighs, shoulders sag, droops slowly lower"
+        },
+        {
+          "pos": 9,
+          "label": "furious, steaming, fists clenched, deep scowl",
+          "tags": [
+            "cat_as_banana_angry",
+            "cat",
+            "banana",
+            "transformation"
+          ],
+          "emoji": "😡",
+          "motion": "stomps in place, steam puffs from the head, body shakes with rage"
+        }
+      ],
+      "action_guidance": "transformation",
+      "key_colour": "green",
+      "transformation": {
+        "id": "subject_as_target",
+        "version": 1,
+        "flavour": "banana",
+        "subject": "cat",
+        "target": "banana",
+        "required": [
+          "dance",
+          "shock",
+          "squash"
+        ],
+        "forbidden": [],
+        "connector": "as"
+      },
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile\nCharacter 2: shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open\nCharacter 3: squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling\nCharacter 4: waving hello with a big happy grin\nCharacter 5: huge shiny puppy eyes, hands clasped, begging please\nCharacter 6: flexing a muscle proudly, chest out, huge grin\nCharacter 7: rolling eyes with a bored deadpan face\nCharacter 8: sad and drooping, a single tear, slumped shoulders\nCharacter 9: furious, steaming, fists clenched, deep scowl\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. the banana body sways and curves to a beat, the peel flaps swing, a little hop and a spin\n2. the peel flaps slip down with a jolt, the eyes pop wide, the whole banana trembles\n3. squashes flat then springs back to its curved shape, dazed, stars orbit\n4. waves the raised hand in wide arcs while bouncing on tiptoes\n5. wrings the hands, eyes shimmer, small hopeful bounce\n6. the arm flexes and pulses, chest puffs, nods\n7. eyes circle slowly, head tilts back with a sigh\n8. sighs, shoulders sag, droops slowly lower\n9. stomps in place, steam puffs from the head, body shakes with rage\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_dancing",
+        "tags": [
+          "cat_as_banana_dancing",
+          "cat",
+          "banana",
+          "transformation",
+          "dance"
+        ],
+        "emoji": "💃"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_shocked",
+        "tags": [
+          "cat_as_banana_shocked",
+          "cat",
+          "banana",
+          "transformation",
+          "shock"
+        ],
+        "emoji": "😱"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_squashed",
+        "tags": [
+          "cat_as_banana_squashed",
+          "cat",
+          "banana",
+          "transformation",
+          "squash"
+        ],
+        "emoji": "🥴"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell waving hello with a big happy grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_waving",
+        "tags": [
+          "cat_as_banana_waving",
+          "cat",
+          "banana",
+          "transformation"
+        ],
+        "emoji": "👋"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell huge shiny puppy eyes, hands clasped, begging please, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_puppy_eyes",
+        "tags": [
+          "cat_as_banana_puppy_eyes",
+          "cat",
+          "banana",
+          "transformation"
+        ],
+        "emoji": "🥺"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell flexing a muscle proudly, chest out, huge grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_flexing",
+        "tags": [
+          "cat_as_banana_flexing",
+          "cat",
+          "banana",
+          "transformation"
+        ],
+        "emoji": "💪"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell rolling eyes with a bored deadpan face, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_eye_roll",
+        "tags": [
+          "cat_as_banana_eye_roll",
+          "cat",
+          "banana",
+          "transformation"
+        ],
+        "emoji": "🙄"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell sad and drooping, a single tear, slumped shoulders, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_sad",
+        "tags": [
+          "cat_as_banana_sad",
+          "cat",
+          "banana",
+          "transformation"
+        ],
+        "emoji": "😞"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "prompt": "a cat transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the cat's face, expression and personality on it; it is not a cat standing next to a banana, not a cat holding or wearing a banana, and not a cat with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell furious, steaming, fists clenched, deep scowl, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "cat_as_banana_angry",
+        "tags": [
+          "cat_as_banana_angry",
+          "cat",
+          "banana",
+          "transformation"
+        ],
+        "emoji": "😡"
+      }
+    ],
+    "expanded_by": "transformation",
+    "transformation": {
+      "id": "subject_as_target",
+      "version": 1,
+      "flavour": "banana",
+      "subject": "cat",
+      "target": "banana",
+      "required": [
+        "dance",
+        "shock",
+        "squash"
+      ],
+      "forbidden": [],
+      "connector": "as"
+    }
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1790905574.477,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G010"
+  ]
+}
