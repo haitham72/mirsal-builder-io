@@ -9,3 +9,5 @@ langgraph>=1.0   # the chat agent's state graph (mirsal/agent/graph.py); the eng
 FastAPI
 pydantic
 uvicorn
+ffmpeg-python
+imageio-ffmpeg

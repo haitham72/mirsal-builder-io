@@ -1,73 +1,94 @@
 # Run Mirsal
 
-## Once (setup)
+Pick what you need — nothing here depends on the section above it.
 
-macOS:
+## Every day: run it
 
-```
-cd mirsal
-python3 -m venv venv
-venv/bin/pip install -r requirements.txt
-cp .env.example .env            # keys and options
+```powershell
+cd D:\Vscode\mirsal-builder-io\mirsal
+.\.venv\Scripts\python.exe -m mirsal serve
 ```
 
-Windows: `python -m venv .venv`, then `.venv\Scripts\pip install -r requirements.txt`, and use `.venv\Scripts\python` instead of `venv/bin/python` below. Always use this venv (the Anaconda base env has a broken numpy).
-
-## Every day: just you
-
-Stop any server already running (Ctrl+C in its window), then:
-
-```
-cd mirsal
-venv/bin/python -m mirsal serve
-```
-
-Open **http://127.0.0.1:8770**. You are the owner; there is no sign-in on this PC.
+Open **http://127.0.0.1:8770**. You are the owner; there is no sign-in on this PC. Leave the window open; stop with Ctrl+C in that window (that stops only this server).
 
 ## With office colleagues
 
-Make the HTTPS certificate once: [certificate-guide.md](certificate-guide.md). Then:
-
+```powershell
+cd D:\Vscode\mirsal-builder-io\mirsal
+.\.venv\Scripts\python.exe -m mirsal serve --lan
 ```
-venv/bin/python -m mirsal serve --lan
+
+You use **https://localhost:8770** (owner, no sign-in, no warning). Colleagues open **https://192.168.1.54:8770**, sign up with their `@nadi.ae` email, and wait for your approval in **Users > People** (or the Telegram card). This PC must stay on while they work. Without a certificate: `serve --lan --no-tls` (plain HTTP; passwords cross the network unencrypted).
+
+## Once: set up the venv
+
+```powershell
+cd D:\Vscode\mirsal-builder-io\mirsal
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m mirsal doctor
 ```
 
-It prints the address to share (for example `https://192.168.1.66:8770`). Colleagues sign up with their `@nadi.ae` email and wait for your approval in **Settings > People** or in Telegram. This PC must stay on while they work.
+Always invoke `.\.venv\Scripts\python.exe -m ...` (with `.exe`): bare `python`/`pip` in this shell can resolve to another interpreter and poison the venv.
 
-To try it without a certificate: `serve --lan --no-tls` (plain HTTP; it warns).
+## Once: the HTTPS certificate (for `--lan`)
+
+In an **administrator** shell:
+
+```powershell
+winget install -e --id FiloSottile.mkcert
+mkcert -install
+```
+
+Then a fresh shell, from the repository root (re-run with the new address if this PC's IP changes):
+
+```powershell
+mkdir mirsal\out\tls -Force
+mkcert -cert-file mirsal/out/tls/cert.pem -key-file mirsal/out/tls/key.pem 192.168.1.54 localhost
+```
+
+Details: [certificate-guide.md](certificate-guide.md) (including what each office machine must trust).
 
 ## Optional
 
-| what | command |
-|---|---|
-| Postgres + Redis (Docker Desktop running) | `venv/bin/python -m mirsal db up` (the app works without them) |
-| health check | `venv/bin/python -m mirsal doctor` |
-| Telegram approvals | Settings > Telegram: bot token + your user id; with `--lan` the bot sends you a card per sign-up, credit or password request |
-| another port | `serve --port 8789` |
-| the old server (one release) | `serve --stdlib` |
-| tests | `docs/testing.md` (the test budget: one narrow run per change) |
+| what                                      | command                                                                                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Postgres + Redis (Docker Desktop running) | `.\.venv\Scripts\python.exe -m mirsal db up` (the app works without them)                                                    |
+| health check                              | `.\.venv\Scripts\python.exe -m mirsal doctor`                                                                                |
+| Telegram approvals                        | Settings > Telegram: bot token + your user id; with `--lan` the bot sends you a card per sign-up, credit or password request |
+| another port                              | `serve --port 8789`                                                                                                          |
+| the old server (one release)              | `serve --stdlib`                                                                                                             |
+| tests                                     | `docs/testing.md` (the test budget: one narrow run per change)                                                               |
 
 Everything the app writes goes to `mirsal/out/`. Prepared sheets (optional) go in `inputs/Images_gen/img-NNN-<subject>/` and `inputs/videos_gen/vid-NNN-<subject>/` (folder names are final).
 
-The docs are updated, committed and pushed as `ea42b10`. A new session can now pick up without re-deriving anything:
+That's the Microsoft PostgreSQL extension's form. It has no port box on the main page, so the easiest way is the **Connection String** tab:
 
-| What the session reads | What it now finds |
-|---|---|
-| `CLAUDE.md` → `HANDOFF.md` | the rules and routing table; HANDOFF is an empty save point ("nothing in progress, v1.0 tagged") |
-| `run.md`, `certificate-guide.md` | how to run it, alone or for the office, and the HTTPS set-up |
-| `docs/engine-and-studio.md` (Layout) | a file map that includes the new server, the new modules and the new `out/` files (git-ignored ones marked), and states that pydantic is used only in the web layer, never the engine |
-| `docs/api.md` | the contract for every route, including the new ones: chat stream, office accounts, credits, Trending, tickets |
-| `docs/dev-notes.md` (session prompt) | "Built, do not redo" now lists everything up to v1.0, so nothing gets rebuilt |
-| `docs/backlog.md` | what's still open, including this round's honest gaps: |
-| | • members have no Library of their own yet |
-| | • the admin role is still undecided |
-| | • the Telegram bot has only been tested against a fake Telegram, not your real bot |
-| | • ticket drafts work only with the local model running |
-| | • the chat stream sends only the last message |
-| | • the golden tests were flaky once under heavy load |
-| `docs/testing.md` | the test budget, plus a table of which test file guards each v1.0 feature |
-| `docs/waiting-for-haitham.md` | only the decisions that need you |
+```
 
-The code is commented as it was written. Each new module (`console/app.py`, `flow/tickets.py`, `flow/trending.py`, `flow/people.py`, `services/admin_bot.py`, `runtime/net.py`) opens with a description of what it does and why.
 
-Everything is pushed on `better_ui/ux`, tagged `v1.0`. The only uncommitted folder is `docs/diagrams/`, which is waiting for the other LLM's update.
+postgresql://mirsal:PASSWORD@localhost:5434/mirsal
+```
+
+Replace `PASSWORD` with the one in the `MIRSAL_DATABASE_URL=` line of `mirsal/.env` (line 12): it's the part between `mirsal:` and `@localhost`. I'm not printing it here because it's a secret. If you never set one, it's `mirsal_local`.
+
+If you'd rather use **Parameters**, fill in:
+
+| field               | value                                                 |
+| ------------------- | ----------------------------------------------------- |
+| Server name         | `localhost`                                           |
+| Authentication Type | Password                                              |
+| User name           | `mirsal`                                              |
+| Password            | from `mirsal/.env`, as above                          |
+| Database name       | `mirsal`                                              |
+| Connection Name     | `Mirsal` (anything you like)                          |
+| **Advanced → Port** | **`5434`** (it defaults to 5432, which won't connect) |
+
+Click **Test Connection**, then **Save & Connect**. In the tree, expand **Mirsal → Databases → mirsal → Schemas → public → Tables**. Right-click **interactions** and choose "Select Top 1000" to see every chat turn. **sessions** lists the chats.
+
+If the test fails, check that Docker Desktop is running and that `mirsal-db` is up: `docker ps` should list it with `0.0.0.0:5434->5432`.
+
+## select chat
+
+select user_message, assistant_message from interactions order by created_at desc limit 20;
