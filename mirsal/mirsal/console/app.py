@@ -366,6 +366,103 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             return _uerr(request, e)
         return _j(request, 200, {"user": u, **({"password": pw} if pw else {})})
 
+    # ---------- Trending (docs/office_lan_plan.md 2.7): shared packs everyone signed in can open, like, comment on and use
+    from ..flow import trending as tr
+
+    class Comment(_BM):
+        model_config = _CD(extra="forbid")
+        text: str = _F(min_length=1, max_length=500)
+
+    async def _member(request, path):
+        """Anyone signed in and approved (a pending account is refused like everywhere)."""
+        user, err = await _who(request, path)
+        if err:
+            return None, _j(request, *err)
+        if user.get("status") == "pending":
+            return None, _j(request, 403, {"error": "waiting for approval"})
+        return user, None
+
+    def _terr(request, e):
+        return _j(request, getattr(e, "code", 400), {"error": str(e)})
+
+    @app.get("/api/trending", include_in_schema=False)
+    async def trending_list(request: Request, order: str = "trending"):
+        user, resp = await _member(request, "/api/trending")
+        if resp:
+            return resp
+        try:
+            return _j(request, 200, {"packs": await asyncio.to_thread(tr.listing, c.out, c.lib, user["id"], order), "order": order,
+                                     "can_share": user.get("role") in ("owner", "admin")})
+        except tr.TrendingError as e:
+            return _terr(request, e)
+
+    @app.get("/api/trending/{pid}", include_in_schema=False)
+    async def trending_one(request: Request, pid: str):
+        user, resp = await _member(request, f"/api/trending/{pid}")
+        if resp:
+            return resp
+        try:
+            return _j(request, 200, await asyncio.to_thread(tr.detail, c.out, c.lib, pid, user["id"]))
+        except tr.TrendingError as e:
+            return _terr(request, e)
+
+    @app.get("/api/trending/{pid}/file/{sid}", include_in_schema=False)
+    async def trending_file(request: Request, pid: str, sid: str):
+        user, resp = await _member(request, f"/api/trending/{pid}/file/{sid}")
+        if resp:
+            return resp
+        import mimetypes
+        from starlette.responses import FileResponse
+        try:
+            f = await asyncio.to_thread(tr.file_of, c.out, c.lib, pid, sid)
+        except tr.TrendingError as e:
+            return _terr(request, e)
+        return FileResponse(f, media_type=mimetypes.guess_type(f.name)[0] or "application/octet-stream", headers=_native_headers(request))
+
+    @app.post("/api/trending/{pid}/{act}", include_in_schema=False)
+    async def trending_act(request: Request, pid: str, act: str):
+        user, resp = await _member(request, f"/api/trending/{pid}/{act}")
+        if resp:
+            return resp
+        try:
+            if act in ("share", "unshare"):
+                if user.get("role") not in ("owner", "admin"):
+                    return _j(request, 403, {"error": "only the owner or an admin shares packs"})
+                if act == "share":
+                    return _j(request, 200, {"shared": await asyncio.to_thread(tr.share, c.out, c.lib, pid, user["id"])})
+                await asyncio.to_thread(tr.unshare, c.out, pid)
+                return _j(request, 200, {"ok": True})
+            if act in ("like", "unlike"):
+                return _j(request, 200, {"likes": await asyncio.to_thread(tr.like, c.out, pid, user["id"], act == "like")})
+            if act == "comments":
+                body, bad = await _body(request, Comment)
+                if bad:
+                    return _j(request, 400, {"error": bad})
+                return _j(request, 201, await asyncio.to_thread(tr.comment, c.out, pid, user["id"], user.get("name") or user["id"], body.text))
+            if act == "use":
+                if user.get("role") == "owner":
+                    return _j(request, 201, {"copied": await asyncio.to_thread(tr.copy_pack, c.out, c.lib, pid, user["id"])})
+                prompt, data, name = await asyncio.to_thread(tr.as_request, c.out, c.lib, pid)
+                try:
+                    ref = await asyncio.to_thread(c.save_ref, data, name) if data else None
+                except Exception:                        # a cover that is not a readable still: the prompt alone
+                    ref = None
+                return _j(request, 200, {"prompt": prompt, "refs": [ref] if ref else []})
+        except tr.TrendingError as e:
+            return _terr(request, e)
+        return _j(request, 404, {"error": "no such action"})
+
+    @app.post("/api/trending/{pid}/comments/{cid}/delete", include_in_schema=False)
+    async def trending_uncomment(request: Request, pid: str, cid: str):
+        user, resp = await _member(request, f"/api/trending/{pid}/comments/{cid}/delete")
+        if resp:
+            return resp
+        try:
+            await asyncio.to_thread(tr.delete_comment, c.out, pid, cid, user["id"], user.get("role"))
+            return _j(request, 200, {"ok": True})
+        except tr.TrendingError as e:
+            return _terr(request, e)
+
     # ---------- tickets (docs/tickets_plan.md): the owner sees every ticket; a member sees and answers their own
     from ..flow import tickets as tk
     from .app_models import TicketAnswer, TicketReport, TicketStatusChange

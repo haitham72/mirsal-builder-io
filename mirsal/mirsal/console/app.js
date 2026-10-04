@@ -144,7 +144,7 @@ function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} sel
 RENDER.library=async()=>{await loadLib();drawCol2();
   $('s-library').innerHTML=`<div class=page><div class=ph><h1>Sticker Library</h1></div>
    <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
-   <div class=tabs><button class="tab ${LIBTAB==='recent'?'on':''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB==='mine'?'on':''}" data-act=libtab data-t=mine>My Stickers</button><button class="tab ${LIBTAB==='particles'?'on':''}" data-act=libtab data-t=particles>Particles</button></div>
+   <div class=tabs><button class="tab ${LIBTAB==='recent'?'on':''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB==='mine'?'on':''}" data-act=libtab data-t=mine>My Stickers</button><button class="tab ${LIBTAB==='particles'?'on':''}" data-act=libtab data-t=particles>Particles</button><button class="tab ${LIBTAB==='trending'?'on':''}" data-act=libtab data-t=trending>Trending</button></div>
    <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
   $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
 ACT.libtab=el=>{LIBTAB=el.dataset.t;RENDER.library()};
@@ -153,6 +153,7 @@ function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.em
  const stTile=(s,i)=>`<div class=st data-act=lcopen data-i=${i} title="${esc(s.name)}">${media(s)}<span class=em>${esc(s.emoji)}</span></div>`;
   let h='';
   if(LIBTAB==='particles'){h=typeof spLibHtml==='function'?spLibHtml():'';if(typeof spLibSync==='function')spLibSync()}
+  else if(LIBTAB==='trending'){h='<div id=tr-box></div>';if(typeof trLoad==='function')setTimeout(trLoad)}
   else if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Make a pack in the Studio, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Open Studio</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
  else if(LIBTAB==='recent'){const rs=LIB.recent.filter(hit),ps=LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q)||p.stickers.some(hit)),shown=PACKS_ALL?ps:ps.slice(0,4);
   LCL=rs;

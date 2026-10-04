@@ -68,3 +68,4 @@ mirsal/out/auth_sessions.json
 mirsal/out/account_requests.json
 mirsal/out/tls/
 mirsal/out/tickets/
+mirsal/out/trending.json

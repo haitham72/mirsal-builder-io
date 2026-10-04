@@ -119,6 +119,10 @@ pack_complete, generation_failed`. Payload: `{event, generation_id, stage, statu
 
 **Credits per person.** An approved account starts with 10 credits (`credits_left`, `credits_spent`). Before a paid sheet or video starts, its price is checked against the person's balance (`402` in words, with *Request credits*, when it is short) and reserved (`Console.reserve`, the job's `request.reserved`); when the job ends the real cost replaces the reservation and a failed job gives everything back (`jobs._settle`, once per job). Nothing refills on its own: only Haitham's *Give credits* (Settings > People) or the bot's *Approve +10*. The owner and token accounts without a balance spend as before; rule 13 (the price shown and accepted) holds for everyone. The composer's credits pill shows a member's own balance.
 
+## Trending (native FastAPI; `flow/trending.py`)
+
+Shared packs everyone signed in can open, like, comment on and use (state in `out/trending.json`, git-ignored). `GET /api/trending?order=trending|new|liked` -> `{packs: [{pack_id, name, stickers, cover, likes, liked, comments, score, shared_at}], can_share}` (trending: the share 4, a like 3, a comment 2, each worth half after 5 days); `GET /api/trending/{pack}` -> stickers and comments; `GET /api/trending/{pack}/file/{sticker}` (only a shared pack's files); `POST /api/trending/{pack}/share | unshare` (owner, admin), `like | unlike`, `comments {text}`, `comments/{id}/delete` (its writer, an admin or the owner), `use` -> the owner gets `201 {copied: {pack_id, name}}` (a copy in the library, `source.shared_from`), anyone else `{prompt, refs}` (the pack's subject and its cover as a reference picture for the Studio). The Library's Trending tab; a member's Library is Trending; a pack page has **Share to Trending**.
+
 ## Tickets (native FastAPI; `flow/tickets.py`, docs/store-and-search.md "Tickets")
 
 * `GET /api/tickets?status=` -> `{tickets: [...]}` (the owner sees every ticket, a member their own); `GET /api/tickets/{id}` -> the whole ticket (404 for another member's).
