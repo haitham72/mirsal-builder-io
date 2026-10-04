@@ -171,12 +171,29 @@ def done(out: Path, jid: str, file: str, model: str, cost=None) -> dict:
             job["cost"] = float(cost)
         except (TypeError, ValueError):
             raise JobError("cost must be a number", 400)
+    _settle(out, job, job.get("cost"))
     _write(p, job)
     _mc.append(out, KIND_CALL[job["kind"]], job["provider"], job["model"], status="OK",
                latency_ms=int((t0 - (job.get("claimed_at") or t0)) * 1000),
                cost=job["cost"], extra={"job": job["id"], "sha256": digest, "external_task_id": job.get("external_task_id"),
                                         "task": job.get("task"), "params": job.get("params"), "output": job["result"]["file"]})
     return job
+
+
+def _settle(out: Path, job: dict, real) -> None:
+    """Credits per person (docs/office_lan_plan.md 2.5): the price was reserved from the person's balance when the job was created
+    (`request.reserved`); now the real cost replaces it (a failed job costs 0: everything goes back). Once per job (`settled`)."""
+    req = job.get("request") or {}
+    reserved, uid = req.get("reserved"), req.get("user")
+    if not reserved or not uid or job.get("settled"):
+        return
+    try:
+        from ..runtime.users import UserStore
+        real = float(reserved if real is None else real)
+        UserStore(out).charge(uid, real - float(reserved))
+        job["settled"] = {"reserved": float(reserved), "real": real}
+    except Exception:
+        pass
 
 
 def fail(out: Path, jid: str, reason: str) -> dict:
@@ -186,6 +203,7 @@ def fail(out: Path, jid: str, reason: str) -> dict:
     if job["status"] not in ("REQUESTED", "CLAIMED", "TIMEOUT"):
         raise JobError(f"{job['id']} is {job['status']}", 409)
     job.update(status="FAILED", error=str(reason or "unknown")[:500], completed_at=_now())
+    _settle(out, job, 0.0)                               # a failed job gives the person's credits back
     _write(p, job)
     _mc.append(out, KIND_CALL[job["kind"]], job["provider"], job.get("model") or "unknown",
                status="ERROR", error=job["error"], extra={"job": job["id"]})

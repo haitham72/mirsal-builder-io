@@ -426,10 +426,11 @@ class Console:
                     raise pl.PipelineError(str(e), 400)
                 prompt = t["plan"]["sheet_prompt"] + ("\n" + (clause or prompter.REFERENCE_CLAUSE) if refs else "")
                 est = higgsfield.cost(model, params, prompt, **({"image_references": [str(self.out / r) for r in refs]} if refs else {}))
+                reserved = self.reserve(who, est)
                 job = jobs.create(self.out, "sheet", task=t["id"], request={
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
                     "outline": int(body["outline"]) if body.get("outline") is not None else None, "erode": int(body["erode"]) if body.get("erode") is not None else None, "custom_prompt": bool(custom),
-                    "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"],
+                    "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"], **({"reserved": reserved} if reserved else {}),
                     **({"particles": {k: str(particles[k]) for k in ("effect", "set") if particles.get(k)}} if particles else {})})
                 if particles:                                      # before the job runs, so the page sees REQUESTED and the later link is never overwritten
                     if particles.get("effect"):
@@ -461,13 +462,33 @@ class Console:
                                        "(a sheet that already has its video sliced cannot be animated again).", 409)
             start = pl.gen_dir(self.out, gid) / entry["file"]
             est = higgsfield.cost(model, params, "x", start_image=str(start))
+            reserved = self.reserve(who, est)
             job = jobs.create(self.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
                 "model": model, "options": body.get("options") or {}, "prompt": custom or self.video_prompt_for(gid, aid, loop), "custom_prompt": bool(custom),
-                "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop, "user": who["id"]})
+                "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop, "user": who["id"], **({"reserved": reserved} if reserved else {})})
             self.fulfil_async(job["id"], after=self.attach_video_from_job)
             return {"job": job["id"], "estimate": est, "model": model, "params": params}
         except (higgsfield.HiggsError, jobs.JobError, model_catalog.CatalogError) as e:
+            self._unreserve(who, locals().get("reserved"), locals().get("job"))
             raise pl.PipelineError(str(e), getattr(e, "code", 400))
+
+    def reserve(self, who: dict, est) -> float | None:
+        """Credits per person (docs/office_lan_plan.md 2.5): an account with a balance pays from it. The price is checked BEFORE the job starts (an account
+        without enough credits is refused in words, with the way to ask for more) and reserved; `jobs._settle` replaces it with the real cost when the job ends.
+        The owner and token accounts without a balance spend as before (rule 13: the price was shown and accepted either way)."""
+        u = self.users.get(who.get("id")) or {}
+        if u.get("credits_left") is None or who.get("id") == "local":
+            return None
+        price = float(est or 0)
+        if price > float(u["credits_left"]) + 1e-9:
+            raise pl.PipelineError(f"Not enough credits: this costs {price:g}, you have {float(u['credits_left']):g} left. Ask for more in Settings (Request credits).", 402)
+        self.users.charge(who["id"], price)
+        return price
+
+    def _unreserve(self, who: dict, reserved, job) -> None:
+        """A reservation whose job was never created goes back at once (a created job settles itself in jobs._settle)."""
+        if reserved and not job:
+            self.users.charge(who["id"], -float(reserved))
 
     def idem(self, scope: str, key, fn):
         """Idempotency (Phase 5A): the same Idempotency-Key within 24 h returns the first answer and runs nothing again. The key is scoped

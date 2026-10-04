@@ -6,15 +6,11 @@ What the next session does, in order. A step is removed from this file when it i
 
 Each step: one commit (or one per sub-step), its doc updated in the same commit, the tests it earns under the test budget (`docs/testing.md`), pushed.
 
-## 1. Credits per user (office_lan_plan.md §2.5)
-
-10 on approval; reserve before a paid call, settle on the real cost, refund on failure; **Request credits** → Telegram card; nothing refills without Haitham.
-
-## 2. Trending (office_lan_plan.md §2.7)
+## 1. Trending (office_lan_plan.md §2.7)
 
 Shared packs in a Library tab, Higgsfield-style: like, comment, ordered by trending / new / most liked; **Use in my workflow** copies a shared pack into your own library for the Studio.
 
-## 3. Finish
+## 2. Finish
 
 `docs/` describes only what exists (no plan files left except the paused `deployment_plan.md` and `burst_plan.md` waiting for W27; this file and `office_lan_plan.md` are deleted); `README.md` is the index of the finished app; the trackers hold only what is still open; tag `v1.0` and push.
 

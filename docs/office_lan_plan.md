@@ -1,15 +1,8 @@
 # Office LAN: what is still open
 
-**Steps 1-2 of [`plan.md`](../plan.md).** Accounts on the LAN, sign-in, approval, Settings > People, forgot password and the Telegram admin bot exist (their contract is `api.md`, "Office accounts on the LAN"). What remains: credits per person and the Trending gallery. Read first: `runtime/users.py` (`charge`), `flow/people.py`, `services/admin_bot.py`, `generation/jobs.py`, `media/library.py`.
+**Step 1 of [`plan.md`](../plan.md).** Accounts on the LAN, sign-in, approval, Settings > People, forgot password and the Telegram admin bot exist (their contract is `api.md`, "Office accounts on the LAN"). What remains: the Trending gallery. Read first: `runtime/users.py` (`charge`), `flow/people.py`, `services/admin_bot.py`, `generation/jobs.py`, `media/library.py`.
 
 ## The design
-
-### 2.5 Credits per user
-
-- On approval a user has **10 credits**. Before any paid call the job's estimate is checked against the user's balance (the same place the daily cap is checked today, `generation/jobs.py`). The credits are **reserved** when the job starts and **settled** on the real cost when it ends; a failed job gives them back. The ledger line and Postgres `model_calls` gain the user id.
-- At 0 the paid buttons are off with one sentence and a **Request credits** button (a short reason, optional). That sends the Telegram card. **Nothing refills automatically**; only Haitham's tap (or the dashboard) adds credits.
-- Rule 13 stays absolute: the price is shown first and a paid call needs the user's yes. The shared Higgsfield balance is shown only to the owner.
-- Paid jobs from all users go through the existing queue (`jobs.paid_parallel()`, default 3 in flight), with at most one in flight per member, so one person cannot hold the queue.
 
 ### 2.7 What each person sees: own work + a Trending gallery (Haitham, 2026-10-04)
 
@@ -20,8 +13,7 @@
 
 ## Steps
 
-1. **Credits per user** (2.5). Done when a member spends from their 10 credits, the paid buttons are off at 0 with Request credits, and nothing refills without Haitham.
-2. **Trending** (2.7). Done when one colleague uses another's shared pack in their own Studio.
+1. **Trending** (2.7). Done when one colleague uses another's shared pack in their own Studio.
 
 ## Risks
 

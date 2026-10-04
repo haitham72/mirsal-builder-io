@@ -89,7 +89,7 @@ Other open items:
 - The retired History screen (`console/history.js`, `#/history`). **needs Haitham** (W34).
 - Content safety, OpenAI calls without a plan card, `out/` in git, a backup command. **needs Haitham** (W18, W29, W30, W31).
 - A native FastAPI rewrite of the legacy routes (today they run through the adapter over the original handler, byte-identical; `docs/http_route_inventory.md` is the baseline). After v1.0: it changes nothing a person sees. **open, low**.
-- The office LAN: credits per person and the Trending gallery ([`plan.md`](../plan.md), [`office_lan_plan.md`](office_lan_plan.md)). **open**.
+- The office LAN: the Trending gallery ([`plan.md`](../plan.md), [`office_lan_plan.md`](office_lan_plan.md)). **open**.
 - Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `office_lan_plan.md`). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
 ## Deployment (branch `deployment`): parked

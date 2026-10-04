@@ -50,6 +50,9 @@ function composerDraw(){if(!document.getElementById('cpwrap'))return;cpDrawRefs(
 
 /* ---------- Higgsfield credits at the top, with a drop-down: balance, today's spend, the usage log and the recent batches */
 function cpDrawTop(){const el=$('cptop');if(!el)return;const h=LIVE.hf;
+  const me=typeof ME!=='undefined'?ME:null;                 // an office member (auth.js) pays from their own balance: their credits, and the way to ask for more
+  if(me&&me.id!=='local'&&me.credits_left!=null){const n=Math.round(me.credits_left*10)/10;
+    el.innerHTML=`<button class="cp-cr${n<=0?' off':''}" data-act=aucreditask title="Your own credits (each person starts with 10). Click to ask Haitham for more."><span class=cp-coin>◈</span><b>${n}</b><small>${n<=0?'no credits: ask for more':'credits'}</small></button>`;return}
   if(!h||h.available===false){el.innerHTML=`<span class=cp-cr off title="${esc(h&&h.error||'Higgsfield is not available')}">Higgsfield off</span>`;return}
   const items=(typeof HB!=='undefined'?HB.items:[]).slice(0,8),nRun=(LIVE.q||[]).filter(j=>['REQUESTED','CLAIMED'].includes(j.status)&&Date.now()/1000-(j.created_at||0)<86400).length;
   el.innerHTML=`<button class="cp-cr ${CP.menu?'open':''}" data-act=cpmenu aria-haspopup=true aria-expanded=${CP.menu} title="Higgsfield credits left. Click for the usage and your recent batches."><span class=cp-coin>◈</span><b>${h.error?'!':fcr(Math.round(h.credits*10)/10)}</b><small>credits</small>${nRun?`<span class=cp-run title="${nRun} running">${nRun} running</span>`:''}<i></i></button>
