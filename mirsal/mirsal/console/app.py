@@ -169,7 +169,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             msg = e.errors()[0]["msg"] if isinstance(e, ValidationError) else str(e)
             return None, f"bad request: {msg}"
 
-    # ---------- office accounts (docs/api.md, Office accounts on the LAN): sign-up, sign-in, sign-out, forgot password, change password; Settings > People
+    # ---------- office accounts (docs/api.md, Office accounts on the LAN): sign-up, sign-in, sign-out, forgot password, change password; Users > People
     import time as _time
     from collections import defaultdict, deque
     from pydantic import BaseModel as _BM, ConfigDict as _CD, Field as _F
@@ -327,7 +327,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
 
     @app.post("/api/auth/credits", include_in_schema=False)
     async def auth_credits(request: Request):
-        """Request credits: a waiting request Haitham approves in Telegram or Settings > People. Nothing refills on its own."""
+        """Request credits: a waiting request Haitham approves in Telegram or Users > People. Nothing refills on its own."""
         user, err = await _who(request, "/api/auth/credits")
         if err:
             return _j(request, *err)
@@ -400,6 +400,30 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
 
     def _terr(request, e):
         return _j(request, getattr(e, "code", 400), {"error": str(e)})
+
+    from ..flow import user_report as ur
+
+    @app.get("/api/users/overview", include_in_schema=False)
+    async def users_overview(request: Request):
+        """The Users dashboard (owner, admin): every person's batches, stickers, jobs that worked / failed, spend, storage and 30-day series (flow/user_report.py)."""
+        user, resp = await _admin(request, "/api/users/overview")
+        if resp:
+            return resp
+        return _j(request, 200, await asyncio.to_thread(ur.overview, c.out, c.users.list()))
+
+    @app.get("/api/users/{uid}", include_in_schema=False)
+    async def users_one(request: Request, uid: str):
+        """One person's page: the owner and admins open anyone; a member opens only their own (`me` or their id): anyone else is a 404, never a disclosure."""
+        user, resp = await _member(request, "/api/users")
+        if resp:
+            return resp
+        target = user["id"] if uid == "me" else uid
+        if target != user["id"] and user.get("role") not in ("owner", "admin"):
+            return _j(request, 404, {"error": "not found"})
+        who = await asyncio.to_thread(c.users.get, target)
+        if not who:
+            return _j(request, 404, {"error": "not found"})
+        return _j(request, 200, await asyncio.to_thread(ur.detail, c.out, who))
 
     @app.get("/api/trending", include_in_schema=False)
     async def trending_list(request: Request, order: str = "trending"):

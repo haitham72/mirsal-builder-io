@@ -28,7 +28,7 @@ const ICONS={
  download:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',up:'<path d="M6 15l6-6 6 6"/>',down:'<path d="M6 9l6 6 6-6"/>',back:'<path d="M15 6l-6 6 6 6"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',hist:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',folder:'<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',film:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4v16M16 4v16M3 9h5M16 9h5M3 15h5M16 15h5"/>',telegram:'<path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/><path d="M9 13l8-6"/>',play:'<path d="M8 5l11 7-11 7z"/>',photo:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
- eyeb:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',check:'<path d="M5 12l5 5 9-10"/>',first:'<path d="M6 5v14M18 6l-9 6 9 6z"/>',last:'<path d="M18 5v14M6 6l9 6-9 6z"/>',prev:'<path d="M15 6l-6 6 6 6"/>',next:'<path d="M9 6l6 6-6 6"/>'};
+ eyeb:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',check:'<path d="M5 12l5 5 9-10"/>',first:'<path d="M6 5v14M18 6l-9 6 9 6z"/>',last:'<path d="M18 5v14M6 6l9 6-9 6z"/>',prev:'<path d="M15 6l-6 6 6 6"/>',next:'<path d="M9 6l6 6-6 6"/>',users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 4.8a3.2 3.2 0 0 1 0 6.4M17.5 13.6c2.1.6 3.5 2.6 3.5 5.4"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'};
 const ic=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
 
 /* ---------- actions (event delegation: no inline handler names, which can collide with Element methods such as animate()) */
@@ -62,8 +62,8 @@ const coverMedia=p=>{const s=p.stickers.find(x=>x.id===p.cover)||p.stickers[0];r
 const packById=id=>LIB.packs.find(p=>p.id===id);
 
 /* ---------- router */
-const SCREENS=['agent','effects','generate','history','library','create','editor','pack','export','settings','animate','chat','prepare'],RENDER={};
-const RAIL=[['agent','ai','AI'],['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['settings','settings','Settings']],RAILOF={effects:'create',pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
+const SCREENS=['agent','effects','generate','history','library','create','editor','pack','export','settings','animate','chat','prepare','users'],RENDER={};
+const RAIL=[['agent','ai','AI'],['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['users','users','Users'],['settings','settings','Settings']],RAILOF={effects:'create',pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
 let route_='generate',PACK_ID=null;
 function drawRail(){$('c2tog').innerHTML=ic('panel');$('rail').innerHTML=`<button class=logo data-act=home title="Home: the welcome" aria-label="Mirsal home"><img src=/assets/brand/mirsal-logo.png alt=""></button>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span></button>`).join('')}
 /* narrow screens: the second column is a drawer (studio.css, 'the shell on narrow screens') */
@@ -76,10 +76,11 @@ window.addEventListener('hashchange',route);
 /* ---------- second column: packs (occupies the chat-list position of the Mirsal mockup; every row is a real pack) */
 let C2Q='';
 /* the second column of a section: the list that belongs to it, in the same place on every screen. Studio and Create list the earlier batches (live.js); Settings and the full-screen tools (editor, export, prepare, animate) have no list */
-const COL2=['agent','generate','library','pack','chat','create'];
+const COL2=['agent','generate','library','pack','chat','create','users'];
 function drawCol2(){const on=COL2.includes(route_);document.body.classList.toggle('col2',on);if(!on)return;
  if(route_==='generate'||route_==='create')return typeof histCol==='function'?histCol():0;
  if(route_==='chat')return chList();
+ if(route_==='users')return typeof usCol==='function'?usCol():0;
  if(route_==='agent')return typeof agList==='function'?agList():0;
  const q=C2Q.trim().toLowerCase(),cur=route_==='pack'?PACK_ID:null;
  $('col2').innerHTML=`<div class=c2h><h1>Packs</h1><button class=iconbtn data-act=newpack title="New pack">${ic('plus')}</button></div>

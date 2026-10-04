@@ -3,7 +3,7 @@
 one background thread, so no public webhook or open port is needed. Only callbacks and messages from Haitham's own user id are obeyed; everything else is
 ignored. A tap edits the card to its outcome, so a second tap does nothing.
 
-`apply()` is the ONE way an account is changed, from Settings > People and from the bot alike: it changes the account and closes the requests it answers."""
+`apply()` is the ONE way an account is changed, from Users > People and from the bot alike: it changes the account and closes the requests it answers."""
 from __future__ import annotations
 
 import os

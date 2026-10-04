@@ -16,7 +16,7 @@ class JavaScriptTests(unittest.TestCase):
             self.fail("node is not installed: the escaping tests of the chat need it (set MIRSAL_SKIP_JS=1 to skip them on purpose)")
         root = Path(__file__).resolve().parent.parent
         files = sorted(str(f.relative_to(root)) for f in (root / "tests" / "js").glob("*.test.js"))
-        r = subprocess.run([node, "--test", *files], cwd=str(root), capture_output=True, text=True, timeout=120)
+        r = subprocess.run([node, "--test", *files], cwd=str(root), capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)   # node writes UTF-8; the Windows codepage cannot read a curly quote
         self.assertEqual(r.returncode, 0, r.stdout[-1500:] + r.stderr[-800:])
 
 
@@ -223,13 +223,13 @@ class ShellTests(unittest.TestCase):
     def ui():
         return Path(__file__).resolve().parent.parent / "mirsal" / "console"
 
-    def test_the_rail_declares_six_items_and_ai_is_first(self):
+    def test_the_rail_declares_seven_items_and_ai_is_first(self):
         import re
         ui = self.ui()
         app = (ui / "app.js").read_text(encoding="utf-8")
         rail = re.search(r"const RAIL=\[(.*?)\],RAILOF", app).group(1)
         items = re.findall(r"\['(\w+)','(\w+)','([^']+)'\]", rail)
-        self.assertEqual([i[2] for i in items], ["AI", "Studio", "Library", "Chat", "Create", "Settings"])
+        self.assertEqual([i[2] for i in items], ["AI", "Studio", "Library", "Chat", "Create", "Users", "Settings"])     # Users added 2026-10-04 (docs/design.md §4)
         screens = re.search(r"const SCREENS=\[(.*?)\]", app).group(1)
         html = (ui / "index.html").read_text(encoding="utf-8")
         for route, icon, _ in items:

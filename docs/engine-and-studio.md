@@ -75,7 +75,7 @@ mirsal/                                   the app
                     accounts/People and Trending), app_models.py (pydantic models of the native routes), server.py (Console + the original handler: guards, routes, `serve()`; `--stdlib` runs it alone),
                     openapi.py (the hand-written route list served as /api/openapi.json) + the screens: index.html, studio.css, agent.css, app.js (shell, Library, Settings), agent.js (the AI chat),
                     generate.js, live.js, composer.js, telegram.js, packs.js, editor.js, chat.js, prepare.js, animate.js, history.js, effects.js, particles.js, trash.js, sheet-recovery.js,
-                    job-recovery.js, welcome.js, tickets.js (Settings > Tickets, Report), auth.js (sign-in, Waiting for approval, Settings > People), trending.js (the Trending tab)
+                    job-recovery.js, welcome.js, tickets.js (Settings > Tickets, Report), auth.js (sign-in, Waiting for approval, the People builders), users.js (the Users section: roster, usage, People), trending.js (the Trending tab)
   out/G001/...      results        out/library/  library.json + files/<img|vid>-NNN-<pack>-<sticker>.<ext>        out/sessions/  chats        out/jobs/  out/tasks/  model_calls.jsonl
   out/particles/P###  out/effects/E###  out/trash/  out/tickets/T###.json*  out/trending.json*  out/users.json*  out/auth_sessions.json*  out/account_requests.json*  out/tls/*   (* git-ignored)
 ```

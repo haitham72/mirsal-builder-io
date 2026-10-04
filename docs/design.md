@@ -100,7 +100,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 1. **The rail is one fixed element in one place.** Same width, same position, same order, on all six sections. Its width is a token; it does not change
    shape per route. Keep the icon-over-label form (`app.js:65`) — it is legible at 72px.
-2. **The rail has six items and AI is one of them**, declared in `RAIL` (`app.js:63`) in this order: **AI, Studio, Library, Chat, Create, Settings.** It shows six
+2. **The rail has seven items and AI is one of them**, declared in `RAIL` (`app.js:63`) in this order: **AI, Studio, Library, Chat, Create, Users, Settings** (Users added 2026-10-04, below). It once showed six
    today only because `agent.js:37` unshifts AI in; the declaration moves into `app.js` so the navigation does not depend on script order. `RAILOF` still maps the sub-routes (`pack→library`, `editor`/`export`/`prepare`→`create`,
    `animate→library`).
 3. **A persistent second column on every screen that has a list** — Library, Chat, AI for sure, and **Studio and Create** because both have real lists
@@ -143,7 +143,13 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 - Rail and second column per §4. The conversation keeps AI's gradients and hover/selection; the header matches every other screen's header.
 
 ### Settings (built)
-- Currently a single column with no second column. Give it the standard header and the standard card treatment; it is a section like any other.
+- Currently a single column with no second column. Give it the standard header and the standard card treatment; it is a section like any other. People moved out of it to Users (2026-10-04): Settings keeps "Signed in as" and, for staff, one line that opens Users.
+
+### Users (built 2026-10-04, `users.js`)
+- **Its own section in the rail** (icon `users`), because People in Settings was a cramped list of one-liners with no usage. The **second column is the roster** (a list, so §4.3 applies): an avatar initial, the name, role · status · credits spent · batches, with two rows of filter chips (status, role); the selected person is the `.on` row, the chart icon in its header returns to everyone.
+- **The stage** shows the totals (stat tiles, two 30-day bar charts, worked-vs-failed jobs, then People management: add, requests, approve, roles, passwords, credits, Answered lately) or one person: the management card (`AUV.requests` + `AUV.person`), stat tiles, the two charts, jobs with cost against estimate (a cost over its estimate in `--run`), the ledger (folded), and their work by family with prompts (folded) and 64px thumbnails linking to the WEBM when animated.
+- **The graphs are hand-drawn SVG** (`UV.bars`, `UV.split`): one rect per day on `--pri` (spend) and `--ai` (batches), an empty day a 1px hairline, the day and value in each bar's title; worked / failed is one split bar in `--ok` / `--bad`. No chart library (rule 8). Stat tiles use the glass depth (`--glass`, `--aline`) like AI.
+- **A member** sees the same section as **My usage**: their own page only (the roster column shows just them), no management card.
 
 ---
 

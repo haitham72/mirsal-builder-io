@@ -28,16 +28,15 @@ const AUV=(()=>{
   const give=r=>{const n=+r.wanted||0,b=k=>`<button class="btn sm${k===(n||10)?' pri':''}" data-act=aupeople data-id=${esc(r.user)} data-a=credits data-n=${k}>Give ${k}</button>`;return n&&n!==10?b(n)+b(10):b(10)};
   const DONE={approved:'approved',rejected:'rejected',ignored:'ignored'};
   const answered=rs=>rs&&rs.length?`<details class=au-recent><summary>Answered lately (${rs.length})</summary>${rs.map(r=>`<div class=mut>${esc(r.name||r.email)} · ${r.kind==='credits'?`credits${r.wanted?` (asked ${+r.wanted})`:''}`:r.kind==='signup'?'sign-up':'new password'} · ${esc(DONE[r.status]||r.status)}${r.decided_by?` by ${esc(r.decided_by)}`:''}</div>`).join('')}</details>`:'';
-  const people=(list,reqs,recent)=>{const waitingIds=new Set((reqs||[]).filter(r=>r.kind!=='signup').map(r=>r.user));
-    return `<div class=row><textarea id=au-add rows=2 placeholder="name@nadi.ae, one per line" style="flex:1"></textarea><button class="btn pri" data-act=auadd>Add people</button></div>
-      ${(reqs||[]).filter(r=>r.kind!=='signup').map(r=>`<div class=au-req>${esc(r.name||r.email)} asks for ${r.kind==='credits'?(+r.wanted?`${+r.wanted} credits`:'more credits'):'a new password'}${r.reason?`: “${esc(r.reason)}”`:''}
-        ${r.kind==='credits'?give(r):`<button class="btn sm pri" data-act=aupeople data-id=${esc(r.user)} data-a=password>New password</button>`}<button class="btn sm" data-act=auignore data-id=${esc(r.user)} data-r=${esc(r.id)}>Ignore</button></div>`).join('')}
-      ${(list||[]).map(person).join('')||'<div class=mut>Nobody yet.</div>'}${answered(recent)}`};
+  const requests=reqs=>(reqs||[]).filter(r=>r.kind!=='signup').map(r=>`<div class=au-req>${esc(r.name||r.email)} asks for ${r.kind==='credits'?(+r.wanted?`${+r.wanted} credits`:'more credits'):'a new password'}${r.reason?`: “${esc(r.reason)}”`:''}
+        ${r.kind==='credits'?give(r):`<button class="btn sm pri" data-act=aupeople data-id=${esc(r.user)} data-a=password>New password</button>`}<button class="btn sm" data-act=auignore data-id=${esc(r.user)} data-r=${esc(r.id)}>Ignore</button></div>`).join('');
+  const people=(list,reqs,recent)=>`<div class=row><textarea id=au-add rows=2 placeholder="name@nadi.ae, one per line" style="flex:1"></textarea><button class="btn pri" data-act=auadd>Add people</button></div>
+      ${requests(reqs)}${(list||[]).map(person).join('')||'<div class=mut>Nobody yet.</div>'}${answered(recent)}`;
   const me=u=>u&&u.id!=='local'?`<div class=row style="justify-content:space-between"><span>Signed in as <b>${esc(u.name)}</b> <span class=mut>${esc(u.email||'')}${u.credits_left!=null?` · ${u.credits_left} credits left`:''}</span></span>
     <span class=row><button class="btn sm" data-act=aucreditask>Request credits</button><button class="btn sm" data-act=aulogout>Sign out</button></span></div>`:'';
   const reshow=(shown,mode)=>shown!==mode;   /* a background 401 must not wipe the card: re-show only a mode that is not already up (typed text and error messages survive the polls) */
   const staff=me=>!me||me.id==='local'||me.role!=='member';   /* server health rows are staff-only: a member answer carries no health, so showing them would always say "missing" */
-  return {esc,gate,waiting,change,people,person,me,reshow,staff};
+  return {esc,gate,waiting,change,people,person,requests,me,reshow,staff};
 })();
 if(typeof globalThis!=='undefined')globalThis.AUV=AUV;
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
@@ -61,8 +60,9 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   ACT.auchange=async()=>{const r=await auPost('/api/auth/password',{old:auVal('au-old'),new:auVal('au-new')});if(r.ok){toast('Password saved');auCheck()}};
   ACT.aulogout=async()=>{await post('/api/auth/logout',{});location.reload()};
   ACT.aucreditask=async()=>{const reason=prompt('How many credits, and what for? (optional, e.g. "20 for the Eid pack")');if(reason===null)return;const r=await post('/api/auth/credits',{reason});
-    toast(r.ok?'Asked: Haitham decides in Telegram or Settings':(r.j.error||'Could not ask'),!r.ok)};
-  async function auPeople(){const el=document.getElementById('au-people');if(!el)return;const r=await api('/api/people');el.innerHTML=r.ok?AUV.people(r.j.people,r.j.requests,r.j.recent):`<div class=mut>${AUV.esc(r.j.error||'')}</div>`}
+    toast(r.ok?'Asked: Haitham decides in Telegram or Users':(r.j.error||'Could not ask'),!r.ok)};
+  async function auPeople(){if(typeof route_!=='undefined'&&route_==='users'&&RENDER.users)return RENDER.users(location.hash.replace(/^#\/?/,'').split('/')[1]||'');   /* People lives in Users: redraw the page in view */
+    const el=document.getElementById('au-people');if(!el)return;const r=await api('/api/people');el.innerHTML=r.ok?AUV.people(r.j.people,r.j.requests,r.j.recent):`<div class=mut>${AUV.esc(r.j.error||'')}</div>`}
   ACT.auadd=async()=>{const emails=auVal('au-add').split(/[\s,;]+/).filter(Boolean);if(!emails.length)return;const r=await post('/api/people',{emails});if(!r.ok)return toast(r.j.error||'Could not add them',1);
     dlg(`<h2>Send these passwords yourself</h2><p class=mut>They are shown once. Each person chooses their own at the first sign-in.</p>${r.j.people.map(p=>`<div class=au-pw><b>${AUV.esc(p.email)}</b> <code>${AUV.esc(p.password)}</code></div>`).join('')}<div class=row style="justify-content:flex-end"><button class="btn pri" data-act=dlgx>Done</button></div>`);auPeople()};
   ACT.aupeople=async el=>{const r=await post('/api/people/'+el.dataset.id,{action:el.dataset.a,...(el.dataset.n?{credits:+el.dataset.n}:{}) });if(!r.ok)return toast(r.j.error||'Could not change it',1);
@@ -76,8 +76,8 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   const auOrig=RENDER.settings;
   RENDER.settings=async(...a)=>{const r=await auOrig(...a);const page=document.querySelector('#s-settings .page');
     if(page&&!document.getElementById('au-me')){const c=document.createElement('div');c.className='card';c.id='au-me';c.style.marginTop='16px';c.innerHTML=AUV.me(AU.me);if(c.innerHTML)page.insertBefore(c,page.firstChild)}
-    if(page&&!document.getElementById('au-people')&&(!AU.me||['owner','admin'].includes(AU.me.role))){const c=document.createElement('div');c.className='card';c.style.marginTop='16px';
-      c.innerHTML='<div class=row style="justify-content:space-between"><h2 style="margin:0">People</h2></div><div id=au-people></div>';page.appendChild(c);auPeople()}
+    if(page&&!document.getElementById('au-users')&&(!AU.me||['owner','admin'].includes(AU.me.role))){const c=document.createElement('div');c.className='card';c.id='au-users';c.style.marginTop='16px';   /* People moved to its own section (users.js) */
+      c.innerHTML='<div class=row style="justify-content:space-between"><span><b>People</b> <span class=mut>accounts, approvals, credits and what each person made: in Users</span></span><button class="btn sm" data-act=nav data-to=users>Open Users</button></div>';page.appendChild(c)}
     return r};
   auCheck();
 }

@@ -95,7 +95,7 @@ Other open items:
 ## Office LAN (`docs/api.md` "Office accounts on the LAN", "Trending")
 
 - **A Library of their own for members.** Today a member has private batches, chats, jobs and particles plus Trending; the Library (packs) is owner-only, so a member's *Use in my workflow* starts a batch from the pack's subject and cover instead of copying the pack. Packs need an `owner` and the library routes need per-owner filtering (`media/library.py`, `console/server.py` `_authorize`). **open**.
-- **The admin role** manages people (Settings > People, the bot's buttons via `admin_bot.apply`) and shares to Trending; everywhere else it is treated as a member. Whether an admin should also see everyone's batches is undecided. **needs Haitham**.
+- **The admin role** manages people (Users > People, the bot's buttons via `admin_bot.apply`) and shares to Trending; everywhere else it is treated as a member. Whether an admin should also see everyone's batches is undecided. **needs Haitham**.
 - The Telegram admin bot runs only with `serve --lan` and a configured bot; its cards have run against a fake Telegram only (`tests/test_accounts.py`). The first real sign-up is the live check. **needs a run**.
 - Ticket drafts use the LOCAL model only (free); with no local model every ticket keeps its preset questions. **open, low**.
 - `GET /api/chat/sessions/{id}/stream` sends the last message only; a turn that adds two messages at once is caught by the full read at `done`. **open, low**.
