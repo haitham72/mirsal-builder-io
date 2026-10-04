@@ -92,28 +92,16 @@ const CELL = (i, o = {}) => ({ index: i, key: 'cape_piece', png: `slices/S${i}.p
 const LINK = (id, pid = 'p1', pack = 'Fruits <b>') => ({ pack_id: pid, pack, sticker: { id } });
 const sec = (b, many = false) => run(`spSecBatchHtml(${JSON.stringify(b)},${many})`);
 
-test('the section shows scoped creation, existing galleries and one approval offer', () => {
- const h=sec({gid:'G012',cells:[CELL(1,{link:LINK('a1'),n:1,det:{sets:[{id:'P001'}],rows:[{id:'P001',version:1}]}}),CELL(2,{link:LINK('a2')}),CELL(3),CELL(4)]});
- assert.match(h,/data-act=spmake data-p=p1 data-s=a1>New version/);
- assert.match(h,/data-act=spmake data-p=p1 data-s=a2>Create particles/);
- assert.match(h,/<ptbody data-for=a1>/);
- assert.equal((h.match(/Approve as a pack/g)||[]).length,1);
- assert.match(h,/data-act=spapprove data-g=G012/);
- assert.doesNotMatch(h,/Add to a pack to give/);
+test('the batch section is ONE list of versions, each once, with one approval offer and no per-sticker blocks', () => {
+ const row=(id,at,o={})=>({id,version:9,label:'AI image sprites',n_sprites:4,saved:true,saved_at:at,shared_with:8,sprites:[],in_pack:[],addable:null,preview:null,credits:2,...o});
+ const det=()=>({rows:[row('P002',2),row('P001',1)],drafts:[row('P009',3,{saved:false})]});
+ const h=sec({gid:'G107',cells:[1,2,3,4,5,6,7,8,9].map(i=>CELL(i,{link:LINK('s'+i),n:3,det:det()})).concat([CELL(10)])});
+ assert.equal((h.match(/data-particle-row=P002/g)||[]).length,1,'one set owned by nine stickers is one row, not nine');
+ assert.match(h,/data-particle-row=P001>v1<[\s\S]*data-particle-row=P002>v2<[\s\S]*data-particle-row=P009>Draft</,'oldest first, numbered for the batch; drafts last');
+ assert.doesNotMatch(h,/Shared by|Uses the shared|S1 ·|data-act=spmake|<ptbody/,'no per-sticker blocks, no shared label');
+ assert.equal((h.match(/Approve as a pack/g)||[]).length,1,'a sticker not in a pack still gets the one approval offer');
+ assert.match(sec({gid:'G012',cells:[CELL(1,{link:LINK('a1')})]}),/No particles yet/);
  assert.match(sec({gid:'G012',cells:[]},true),/sp-bh/);
-});
-
-test('a set shared by several stickers of the batch is ONE row drawn once, not one per sticker', () => {
- const row={id:'P008',version:1,label:'Animated sprites',n_sprites:16,saved:true,sprites:[],in_pack:[],addable:null,preview:null,credits:0};
- const det=()=>({rows:[row],drafts:[],sets:[{id:'P008'}],created:[],saved:[]});
- const h=sec({gid:'G001',cells:[1,2,3,4,5,6,7,8,9].map(i=>CELL(i,{link:LINK('s'+i),n:1,det:det()}))});
- assert.equal((h.match(/data-particle-row=P008/g)||[]).length,1,'nine owners, one row');
- assert.match(h,/Shared by S1, S2, S3, S4, S5, S6, S7, S8, S9/);
- assert.equal((h.match(/Uses the shared particles above/g)||[]).length,9,'each sticker points at it instead of repeating it');
- assert.doesNotMatch(h,/<ptbody/,'no sticker has a row of its own here');
- const solo=sec({gid:'G001',cells:[CELL(1,{link:LINK('s1'),n:1,det:det()}),CELL(2,{link:LINK('s2')})]});
- assert.doesNotMatch(solo,/Shared by/,'a set of one sticker stays in that sticker\'s block');
- assert.match(solo,/<ptbody data-for=s1>/);
 });
 
 test('the section: the data comes from the Studio’s batches, the library and the counts; a dropped sticker is not offered', () => {

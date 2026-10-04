@@ -2,8 +2,8 @@
    1. The Particles TAB next to Stickers and Animation: a small guided flow. Pick a pack and how the particles are made (the pack's own stickers: free; drawn by an AI: credits, the price on the button;
       a Kling video: credits), then the stickers burst with them, with live sliders, and Add puts the results into the pack. It is the particle studio's own flow (effects.js: state SP here, FX there;
       every effect function is shared), only smaller; "Open in the particle studio" opens the same effect there (#/effects/E###).
-   2. The Particles SECTION under the batch (drawn into #gpart): for each sticker of the batch that is in a library pack, what was made and saved for it (the gallery of the library's sticker view),
-      and one line for the stickers that are not in a pack yet. Every particle made is stored in its effect and therefore appears here, "saved under the sticker".
+   2. The Particles SECTION under the batch (drawn into #gpart): ONE list of the particle versions made for the batch's stickers, each version once (spSecRows), and the
+      approval offer for stickers not in a pack yet.
    Nothing is decided here: the engine does it behind /api/effects and /api/packs/{id}/particles. Top-level names in this file start with SP / sp (the scripts share ONE global scope). */
 'use strict';
 const SPKINDS=[['pack','Sprites from the sticker','Free'],['drawn','AI image sprites','Credits'],['video','Kling animated · from scratch','Credits']];
@@ -136,19 +136,18 @@ ACT.spmake=el=>spOpenFor(el.dataset.p,el.dataset.s);
 
 /* ---------- the section under the batch: the particles of each of its stickers that is in a pack (pure builder + a loader) */
 const SPS={batches:{},sig:'',busy:false,html:'',el:null,loaded:false};
-const spThumb=(gid,c)=>c.png?`<img src="/out/${esc(gid)}/${esc(c.png)}" alt="" loading=lazy>`:'';
-/* b: {gid, cells: [{index, key, png, link: {pack_id, pack, sticker} | null, n: particles made + saved, det: the sticker's answer | null}]} */
-/* a particle set owned by several stickers of the batch is ONE row, drawn once above them; each sticker's block keeps only its own rows (pure) */
-function spSecShared(b){const by=new Map();for(const c of b.cells)if(c.link&&c.det)for(const r of [...(c.det.rows||[]),...(c.det.drafts||[])]){const e=by.get(r.id)||{row:r,cells:[]};if(!e.cells.includes(c))e.cells.push(c);by.set(r.id,e)}
- return [...by.values()].filter(e=>e.cells.length>1)}
-const spSecOwn=(c,shared)=>{if(!c.det)return c;const ids=new Set(shared.map(e=>e.row.id)),det={...c.det,rows:(c.det.rows||[]).filter(r=>!ids.has(r.id)),drafts:(c.det.drafts||[]).filter(r=>!ids.has(r.id)),sets:(c.det.sets||[]).filter(x=>!ids.has(x.id))};
- return {...c,det,n:typeof ptCount==='function'?ptCount(det):c.n}};
-function spSecBatchHtml(b,many){const free=b.cells.filter(c=>!c.link),shared=spSecShared(b),own=b.cells.filter(c=>c.link).map(c=>spSecOwn(c,shared));
+/* b: {gid, cells: [{index, key, png, link: {pack_id, pack, sticker} | null, n, det: the sticker's answer (rows, drafts) | null}]}
+   The batch's particles are ONE list: every saved version made for any of its stickers, once, oldest first (v1, v2...), then the drafts. A set owned by
+   several stickers is still one version (it used to be drawn once per sticker). Making a new one is the section's Create particles or a sticker's own window. */
+function spSecRows(b){const seen=new Map();
+ for(const c of b.cells)if(c.link&&c.det)for(const r of [...(c.det.rows||[]),...(c.det.drafts||[])])if(!seen.has(r.id))seen.set(r.id,{r,s:{id:c.link.sticker.id,pack_id:c.link.pack_id}});
+ const all=[...seen.values()],when=x=>x.r.saved_at||x.r.created||0,rows=all.filter(x=>x.r.saved!==false).sort((a,b)=>when(a)-when(b)),drafts=all.filter(x=>x.r.saved===false);
+ return {rows:rows.map((x,i)=>({...x,r:{...x.r,version:i+1,shared_with:0}})),drafts:drafts.map(x=>({...x,r:{...x.r,shared_with:0}}))}}
+function spSecBatchHtml(b,many){const free=b.cells.filter(c=>!c.link),{rows,drafts}=spSecRows(b);
  return `<div class=sp-bt>${many?`<div class=sp-bh><b>${esc(b.gid)}</b></div>`:''}
- ${shared.map(e=>{const c=e.cells[0];return `<div class="sp-st sp-shared"><div class=sp-sth><b>Shared by ${e.cells.map(x=>'S'+x.index).join(', ')}</b></div><div class=pk-rows>${ptRow(e.row,{id:c.link.sticker.id,pack_id:c.link.pack_id},!e.row.saved)}</div></div>`}).join('')}
- ${own.map(c=>`<div class=sp-st><div class=sp-sth><span class=sp-th>${spThumb(b.gid,c)}</span><b>S${c.index}${c.key?' · '+esc(String(c.key).replace(/_/g,' ')):''}</b><span class=mut>in <button class=link data-act=ptsaved data-id=${esc(c.link.pack_id)}>${esc(c.link.pack)}</button></span><button class="btn sm" data-act=spmake data-p=${esc(c.link.pack_id)} data-s=${esc(c.link.sticker.id)}>${c.n?'New version':'Create particles'}</button></div>${c.n?ptBody(c.det,{id:c.link.sticker.id,pack_id:c.link.pack_id}):shared.some(e=>e.cells.includes(b.cells.find(x=>x.index===c.index)))?'<span class=mut>Uses the shared particles above</span>':'<span class=mut>No particles yet</span>'}</div>`).join('')}
+ ${rows.length||drafts.length?`<div class=pk-rows>${rows.map(x=>ptRow(x.r,x.s,false)).join('')}${drafts.map(x=>ptRow(x.r,x.s,true)).join('')}</div>`:b.cells.some(c=>c.link)?'<span class=mut>No particles yet</span>':''}
  ${free.length?spApproveHtml({generation:b.gid}):''}</div>`}
-const spSecHtml=bs=>bs.length?`<section class=sp-sec><div class=sp-sech><h2>${ic('fx')} Particles</h2><span class=mut>Particles — made for each sticker of this batch. Adding a burst to the pack affirms it.</span><button class="btn sm pri" data-act=spopen>${ic('fx')} Create particles</button></div>${bs.map(b=>spSecBatchHtml(b,bs.length>1)).join('')}</section>`:'';
+const spSecHtml=bs=>bs.length?`<section class=sp-sec><div class=sp-sech><h2>${ic('fx')} Particles</h2><button class="btn sm pri" data-act=spopen>${ic('fx')} Create particles</button></div>${bs.map(b=>spSecBatchHtml(b,bs.length>1)).join('')}</section>`:'';
 function spSecData(){const out=[];for(const id of SES.gens){const g=GM.get(id);if(!g)continue;const gid=spGid(g.generation_id),ix=spLinkIndex(LIB.packs,gid),batch=SPS.batches[gid];
  out.push({gid,cells:g.stickers.filter(t=>t.status==='READY'&&t.png&&(t.review||{}).still!=='REJECTED').map(t=>{const det=batch?(batch.cells||[]).find(c=>c.index===t.index):null,l=det?det.link:ix[t.index]||null,fallback=l?PKPT.d[l.sticker.id]:null,d=det||fallback,c=l?(PKPT.c[l.pack_id]||{})[l.sticker.id]:null;
  return{index:t.index,key:t.key,png:t.png,link:l,n:d?(d.sets||[]).length+(d.created||[]).length+(d.saved||[]).length:c?c.created+c.saved:0,det:d||null}})})}return out}

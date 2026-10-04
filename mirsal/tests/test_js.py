@@ -111,7 +111,7 @@ class StudioActionTests(unittest.TestCase):
     def test_the_history_block_is_gone_and_the_batch_has_a_particles_section(self):
         """Haitham, 2026-10-03: the "History of G###" block under the open batch (every decision on its stickers, the AI captions) was useless and is removed completely: markup, state, actions,
         styles. The decisions stay in result.json and in GET /api/generations/<id>/history. What sits under the presented batch now is its Particles section (particles.js, drawn into #gpart):
-        what was made for each of its stickers that is in a pack, one line for the ones that are not."""
+        one list of the particle versions made for its stickers (each once), and the approval offer for stickers not in a pack."""
         import re
         ui, order = self.scripts()
         live = (ui / "live.js").read_text(encoding="utf-8")
@@ -130,8 +130,10 @@ class StudioActionTests(unittest.TestCase):
         for keep in ("const vlmState=", "const vlmSet=", "ACT.vlmyes=", "const VLM="):
             self.assertIn(keep, live, "the consent for AI vision is still asked once and remembered: " + keep)
         sp = (ui / "particles.js").read_text(encoding="utf-8")
-        for needs in ("function spSecBatchHtml(", "Approve as a pack", "/api/generations/${b.gid}/particles", "ptBody(", "spLinkIndex(", "data-act=spopen", "Adding a burst to the pack affirms it."):
+        for needs in ("function spSecBatchHtml(", "Approve as a pack", "/api/generations/${b.gid}/particles", "ptRow(", "spLinkIndex(", "data-act=spopen"):
             self.assertIn(needs, sp)
+        for gone in ("Shared by ", "Uses the shared particles above", "made for each sticker of this batch"):
+            self.assertNotIn(gone, sp, "the batch's particles are one list of versions, not a block per sticker: " + gone)
 
     def test_the_particles_tab_is_a_studio_step_in_its_own_file(self):
         """Haitham, 2026-10-03: a new Studio tab 'Particles' next to Stickers and Animation, in its own file (particles.js, names prefixed SP / sp). It is registered in index.html (after effects.js, whose
