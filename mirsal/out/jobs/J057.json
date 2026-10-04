@@ -1,0 +1,40 @@
+{
+  "id": "J057",
+  "kind": "sheet",
+  "task": "041",
+  "generation": "G110",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: a dog transformed into a banana: ONE single character, its whole body is one curved yellow banana (soft banana-yellow with a few brown freckles, the stem on top, a dark tip at the bottom, the peel as its skin), with the dog's face, expression and personality on it; it is not a dog standing next to a banana, not a dog holding or wearing a banana, and not a dog with a banana pattern; small cartoon arms and legs are allowed so it can act; identical in every cell.\nStyle: 16-bit pixel art character, crisp square pixels, limited colour palette, clean dark outline, retro game sprite look.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: dancing joyfully, the curved banana body swaying, peel flaps swinging like arms, eyes closed, big smile\nCharacter 2: shocked, the peel flaps slipping down in surprise, eyes huge, mouth wide open\nCharacter 3: squashed flat like a cartoon, the banana body mushed wide with soft banana squeezing out at the ends, dazed face, stars circling\nCharacter 4: waving hello with a big happy grin\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "my dog as a banana",
+    "refs": [],
+    "outline": null,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "08d188ff-8474-4784-bec8-c652f0e896ce",
+  "result": {
+    "file": "jobs/J057/result.png",
+    "sha256": "6201f8cd443888f7bb5ddddb10358255bf86a90ea7168b98622ffac2dfb7112e",
+    "bytes": 3690755
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791105676.866,
+  "claimed_at": 1791105678.258,
+  "completed_at": 1791105701.232,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

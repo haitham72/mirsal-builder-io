@@ -3,7 +3,7 @@
  "user": "local",
  "title": "old man",
  "created": 1791046348.787,
- "updated": 1791046492.312,
+ "updated": 1791111588.395,
  "settings": {
   "grid": "3x3",
   "style_id": "realistic",
@@ -34,12 +34,12 @@
      "parent": null,
      "created": 1791046379.492,
      "ready": 9,
-     "approved": 0,
+     "approved": 9,
      "rejected": 0,
      "liked": [],
      "disliked": [],
      "note": "",
-     "stage": "sliced",
+     "stage": "pack_final",
      "error": null
     }
    ]
@@ -151,6 +151,138 @@
     "positive": [],
     "negative": [],
     "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 6,
+   "ts": 1791109114.472,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1791109122.623,
+   "user": "do you know my name?",
+   "assistant": "You haven't told me your name yet. Say \"my name is ...\" and I'll remember it.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G107",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G107"
+  },
+  {
+   "seq": 8,
+   "ts": 1791109136.105,
+   "user": "haitham",
+   "assistant": "Here's the plan for **haitham**: 9 stickers, realistic. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 9,
+   "ts": 1791111576.264,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 10,
+   "ts": 1791111581.077,
+   "user": "my name is haitham",
+   "assistant": "Nice to meet you, Haitham! I'll remember your name (Haitham). Your plan for haitham is still waiting: say \"create it\" when you're ready.",
+   "intents": [
+    "PROFILE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 11,
+   "ts": 1791111588.394,
+   "user": "what is my name?",
+   "assistant": "You're Haitham.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G107",
     "references": [],
     "needs_clarification": false,
     "clarification": "",
@@ -537,13 +669,639 @@
    "ts": 1791046492.167,
    "status": "done",
    "chips": []
+  },
+  {
+   "id": "m12",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1791109114.319
+  },
+  {
+   "id": "m13",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109114.335
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109114.38
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109114.405
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109114.446
+    }
+   ],
+   "ts": 1791109114.319,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m14",
+   "role": "user",
+   "text": "do you know my name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791109120.111
+  },
+  {
+   "id": "m15",
+   "role": "assistant",
+   "text": "You haven't told me your name yet. Say \"my name is ...\" and I'll remember it.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109120.132
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109120.182
+    },
+    {
+     "kind": "step",
+     "label": "working in Old man",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109122.596
+    },
+    {
+     "kind": "final",
+     "label": "answered from what you told me",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109122.609
+    }
+   ],
+   "ts": 1791109120.111,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m16",
+   "role": "user",
+   "text": "haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1791109126.651
+  },
+  {
+   "id": "m17",
+   "role": "assistant",
+   "text": "Here's the plan for **haitham**: 9 stickers, realistic. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "haitham",
+     "grid": "3x3",
+     "style": "realistic",
+     "count": 9,
+     "names": [
+      "haitham joyful jump",
+      "haitham confused sit",
+      "haitham spinning excitement",
+      "haitham brisk walk",
+      "haitham laughing sit",
+      "haitham shy crouch",
+      "haitham shocked lean",
+      "haitham proud stance",
+      "haitham scared run"
+     ],
+     "estimate": 2.0,
+     "balance": 3082.12,
+     "prompt": "haitham",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating haitham",
+     "detail": null,
+     "status": "running",
+     "ts": 1791109126.667
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109126.716
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109126.778
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "haitham joyful jump",
+       "haitham confused sit",
+       "haitham spinning excitement",
+       "haitham brisk walk",
+       "haitham laughing sit",
+       "haitham shy crouch",
+       "haitham shocked lean",
+       "haitham proud stance",
+       "haitham scared run"
+      ]
+     },
+     "status": "done",
+     "ts": 1791109135.302
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791109136.083
+    }
+   ],
+   "ts": 1791109126.651,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m18",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1791111575.86
+  },
+  {
+   "id": "m19",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111576.051
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111576.109
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111576.206
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111576.245
+    }
+   ],
+   "ts": 1791111575.86,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m20",
+   "role": "user",
+   "text": "my name is haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1791111580.787
+  },
+  {
+   "id": "m21",
+   "role": "assistant",
+   "text": "Nice to meet you, Haitham! I'll remember your name (Haitham). Your plan for haitham is still waiting: say \"create it\" when you're ready.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111580.829
+    },
+    {
+     "kind": "step",
+     "label": "understood: something about you",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111580.903
+    },
+    {
+     "kind": "task",
+     "label": "remembering what you told me",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111580.936
+    },
+    {
+     "kind": "final",
+     "label": "saved: your name (Haitham)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111581.047
+    }
+   ],
+   "ts": 1791111580.787,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m22",
+   "role": "user",
+   "text": "what is my name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791111585.637
+  },
+  {
+   "id": "m23",
+   "role": "assistant",
+   "text": "You're Haitham.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791111585.669
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111585.749
+    },
+    {
+     "kind": "step",
+     "label": "working in Old man",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111588.334
+    },
+    {
+     "kind": "final",
+     "label": "answered from what you told me",
+     "detail": null,
+     "status": "done",
+     "ts": 1791111588.377
+    }
+   ],
+   "ts": 1791111585.637,
+   "status": "done",
+   "chips": []
   }
  ],
  "summary": {
   "narrative": "",
   "upto": 0
  },
- "pending": null,
+ "pending": {
+  "type": "create",
+  "prompt": "haitham",
+  "subject": "haitham",
+  "grid": "3x3",
+  "style_id": "realistic",
+  "ai": true,
+  "estimate": 2.0,
+  "plan": {
+   "task": "haitham",
+   "task_slug": "haitham",
+   "subject": "haitham",
+   "context": "",
+   "kind": "default",
+   "grid": [
+    3,
+    3
+   ],
+   "template_id": "sheet_3x3",
+   "template_version": 3,
+   "slots": {
+    "subject_description": "A stylized cartoon character with a confident smile",
+    "style_id": "realistic",
+    "mode": "sheet_3x3",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "Haitham jumps up in pure joy with arms wide open",
+      "tags": [
+       "haitham_joyful_jump",
+       "happy",
+       "celebration",
+       "energy"
+      ],
+      "emoji": "🎉💃",
+      "motion": "Bounces vertically while flapping arms and spinning legs"
+     },
+     {
+      "pos": 2,
+      "label": "Haitham sits cross-legged looking confused with furrowed brows",
+      "tags": [
+       "haitham_confused_sit",
+       "puzzled",
+       "thinking",
+       "doubt"
+      ],
+      "emoji": "🤔😕",
+      "motion": "Gently shifts weight and tilts head side to side"
+     },
+     {
+      "pos": 3,
+      "label": "Haitham spins rapidly in a circle with arms raised high",
+      "tags": [
+       "haitham_spinning_excitement",
+       "energetic",
+       "fun",
+       "spin"
+      ],
+      "emoji": "🤸💫",
+      "motion": "Rotates 360 degrees while pumping fists and kicking feet"
+     },
+     {
+      "pos": 4,
+      "label": "Haitham walks briskly forward with a determined stride",
+      "tags": [
+       "haitham_brisk_walk",
+       "determined",
+       "active",
+       "forward"
+      ],
+      "emoji": "🚶✊",
+      "motion": "Strides confidently while pumping arms and bouncing knees"
+     },
+     {
+      "pos": 5,
+      "label": "Haitham lies on back laughing heartily with hands over mouth",
+      "tags": [
+       "haitham_laughing_sit",
+       "joyful",
+       "funny",
+       "giggles"
+      ],
+      "emoji": "😂🌊",
+      "motion": "Rolls gently side to side while giggling and waving hands"
+     },
+     {
+      "pos": 6,
+      "label": "Haitham crouches low with a shy blush and hidden eyes",
+      "tags": [
+       "haitham_shy_crouch",
+       "embarrassed",
+       "quiet",
+       "hiding"
+      ],
+      "emoji": "🙈😊",
+      "motion": "Scoots forward slowly while peeking out and hiding face"
+     },
+     {
+      "pos": 7,
+      "label": "Haitham leans back dramatically with mouth open in shock",
+      "tags": [
+       "haitham_shocked_lean",
+       "surprised",
+       "stunned",
+       "oops"
+      ],
+      "emoji": "😲🤯",
+      "motion": "Drops backward slowly while widening eyes and dropping arms"
+     },
+     {
+      "pos": 8,
+      "label": "Haitham stands tall with a proud chest puffed out",
+      "tags": [
+       "haitham_proud_stance",
+       "confident",
+       "pride",
+       "strong"
+      ],
+      "emoji": "🦸✨",
+      "motion": "Stretches upward and sways confidently from side to side"
+     },
+     {
+      "pos": 9,
+      "label": "Haitham runs in a circle looking scared with wide eyes",
+      "tags": [
+       "haitham_scared_run",
+       "fearful",
+       "anxious",
+       "panic"
+      ],
+      "emoji": "😱🏃",
+      "motion": "Darts quickly around in place while flailing arms and legs"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "haitham_joyful_jump",
+     "tags": [
+      "haitham_joyful_jump",
+      "happy",
+      "celebration",
+      "energy"
+     ],
+     "emoji": "🎉💃"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "haitham_confused_sit",
+     "tags": [
+      "haitham_confused_sit",
+      "puzzled",
+      "thinking",
+      "doubt"
+     ],
+     "emoji": "🤔😕"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "haitham_spinning_excitement",
+     "tags": [
+      "haitham_spinning_excitement",
+      "energetic",
+      "fun",
+      "spin"
+     ],
+     "emoji": "🤸💫"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "haitham_brisk_walk",
+     "tags": [
+      "haitham_brisk_walk",
+      "determined",
+      "active",
+      "forward"
+     ],
+     "emoji": "🚶✊"
+    },
+    {
+     "index": 5,
+     "id": "prompt05",
+     "key": "haitham_laughing_sit",
+     "tags": [
+      "haitham_laughing_sit",
+      "joyful",
+      "funny",
+      "giggles"
+     ],
+     "emoji": "😂🌊"
+    },
+    {
+     "index": 6,
+     "id": "prompt06",
+     "key": "haitham_shy_crouch",
+     "tags": [
+      "haitham_shy_crouch",
+      "embarrassed",
+      "quiet",
+      "hiding"
+     ],
+     "emoji": "🙈😊"
+    },
+    {
+     "index": 7,
+     "id": "prompt07",
+     "key": "haitham_shocked_lean",
+     "tags": [
+      "haitham_shocked_lean",
+      "surprised",
+      "stunned",
+      "oops"
+     ],
+     "emoji": "😲🤯"
+    },
+    {
+     "index": 8,
+     "id": "prompt08",
+     "key": "haitham_proud_stance",
+     "tags": [
+      "haitham_proud_stance",
+      "confident",
+      "pride",
+      "strong"
+     ],
+     "emoji": "🦸✨"
+    },
+    {
+     "index": 9,
+     "id": "prompt09",
+     "key": "haitham_scared_run",
+     "tags": [
+      "haitham_scared_run",
+      "fearful",
+      "anxious",
+      "panic"
+     ],
+     "emoji": "😱🏃"
+    }
+   ],
+   "expanded_by": "ai",
+   "expand_model": "qwen3.5-4b"
+  }
+ },
  "vision_asked": true,
  "named": [
   "G107"

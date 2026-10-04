@@ -1,0 +1,724 @@
+{
+ "id": "S011",
+ "user": "U002",
+ "title": "hello from haitham",
+ "created": 1791107312.099,
+ "updated": 1791108901.492,
+ "settings": {
+  "grid": "2x2",
+  "style_id": "paper_cut",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": null,
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791107320.337,
+   "user": "hello from haitham",
+   "assistant": "Here's the plan for **hello from haitham**: 9 stickers, flat. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791107325.615,
+   "user": "what is my name?",
+   "assistant": "I don't have your name in these facts, so I can't tell you what it is!",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791107343.104,
+   "user": "it is 'haitham'",
+   "assistant": "Here's the plan for **it is haitham**: 9 stickers, flat. Shall I create it? (This replaces the plan I was holding for hello from haitham: nothing was spent on it.)",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1791108252.761,
+   "user": "do you kno wmy name?",
+   "assistant": "I don't know your name because no facts have been shared about it yet! Could you tell me what to call you?",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 5,
+   "ts": 1791108267.729,
+   "user": "haitham",
+   "assistant": "Here's the plan for **haitham**: 9 stickers, flat. Shall I create it? (This replaces the plan I was holding for it is haitham: nothing was spent on it.)",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 6,
+   "ts": 1791108653.809,
+   "user": "create camel in lamborgini",
+   "assistant": "Here's the plan for **camel**: 4 stickers, paper cut. Shall I create it? (This replaces the plan I was holding for haitham: nothing was spent on it.)",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 7,
+   "ts": 1791108901.491,
+   "user": "cancel",
+   "assistant": "No problem, nothing was spent. Tell me what to change, or what else to make.",
+   "intents": [
+    "CANCEL"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "hello from haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1791107312.196
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **hello from haitham**: 9 stickers, flat. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "hello from haitham",
+     "grid": "3x3",
+     "style": "flat",
+     "count": 9,
+     "names": [
+      "hello from haitham celebrate jump",
+      "hello from haitham sadder than thought",
+      "hello from haitham giggle fit",
+      "hello from haitham puzzled out",
+      "hello from haitham dash hard",
+      "hello from haitham angry glare",
+      "hello from haitham spin freaky",
+      "hello from haitham deep sleep",
+      "hello from haitham shocked still"
+     ],
+     "estimate": 2.0,
+     "balance": null,
+     "prompt": "hello from haitham",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating hello from haitham",
+     "detail": null,
+     "status": "running",
+     "ts": 1791107312.214
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107312.257
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107312.276
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "hello from haitham celebrate jump",
+       "hello from haitham sadder than thought",
+       "hello from haitham giggle fit",
+       "hello from haitham puzzled out",
+       "hello from haitham dash hard",
+       "hello from haitham angry glare",
+       "hello from haitham spin freaky",
+       "hello from haitham deep sleep",
+       "hello from haitham shocked still"
+      ]
+     },
+     "status": "done",
+     "ts": 1791107319.748
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107320.327
+    }
+   ],
+   "ts": 1791107312.196,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "what is my name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791107322.824
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "I don't have your name in these facts, so I can't tell you what it is!",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791107322.847
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107322.923
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107325.508
+    }
+   ],
+   "ts": 1791107322.824,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "it is 'haitham'",
+   "cards": [],
+   "steps": [],
+   "ts": 1791107335.19
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Here's the plan for **it is haitham**: 9 stickers, flat. Shall I create it? (This replaces the plan I was holding for hello from haitham: nothing was spent on it.)",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "it is haitham",
+     "grid": "3x3",
+     "style": "flat",
+     "count": 9,
+     "names": [
+      "it is haitham spinning up",
+      "it is haitham crying down",
+      "it is haitham punch angry",
+      "it is haitham jaws dropped",
+      "it is haitham grin mischievous",
+      "it is haitham scratch neck",
+      "it is haitham lean bored",
+      "it is haitham pose proud",
+      "it is haitham hug knees"
+     ],
+     "estimate": 2.0,
+     "balance": null,
+     "prompt": "it is 'haitham'",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating it is 'haitham'",
+     "detail": null,
+     "status": "running",
+     "ts": 1791107335.211
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107335.291
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107335.333
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "it is haitham spinning up",
+       "it is haitham crying down",
+       "it is haitham punch angry",
+       "it is haitham jaws dropped",
+       "it is haitham grin mischievous",
+       "it is haitham scratch neck",
+       "it is haitham lean bored",
+       "it is haitham pose proud",
+       "it is haitham hug knees"
+      ]
+     },
+     "status": "done",
+     "ts": 1791107343.06
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791107343.091
+    }
+   ],
+   "ts": 1791107335.19,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "do you kno wmy name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791108250.139
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "I don't know your name because no facts have been shared about it yet! Could you tell me what to call you?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791108250.168
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108250.214
+    },
+    {
+     "kind": "final",
+     "label": "answered",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108252.749
+    }
+   ],
+   "ts": 1791108250.139,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1791108259.524
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "Here's the plan for **haitham**: 9 stickers, flat. Shall I create it? (This replaces the plan I was holding for it is haitham: nothing was spent on it.)",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "haitham",
+     "grid": "3x3",
+     "style": "flat",
+     "count": 9,
+     "names": [
+      "haitham jump excited",
+      "haitham sad sitting",
+      "haitham run wild",
+      "haitham spin dizzy",
+      "haitham sleep deep",
+      "haitham fear hide",
+      "haitham laugh happy",
+      "haitham reach love",
+      "haitham pride stand"
+     ],
+     "estimate": 2.0,
+     "balance": null,
+     "prompt": "haitham",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating haitham",
+     "detail": null,
+     "status": "running",
+     "ts": 1791108259.539
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108259.551
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108259.599
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "haitham jump excited",
+       "haitham sad sitting",
+       "haitham run wild",
+       "haitham spin dizzy",
+       "haitham sleep deep",
+       "haitham fear hide",
+       "haitham laugh happy",
+       "haitham reach love",
+       "haitham pride stand"
+      ]
+     },
+     "status": "done",
+     "ts": 1791108267.217
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108267.706
+    }
+   ],
+   "ts": 1791108259.524,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "create camel in lamborgini",
+   "cards": [],
+   "steps": [],
+   "ts": 1791108645.604
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "Here's the plan for **camel**: 4 stickers, paper cut. Shall I create it? (This replaces the plan I was holding for haitham: nothing was spent on it.)",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "camel",
+     "grid": "2x2",
+     "style": "paper cut",
+     "count": 4,
+     "names": [
+      "camel pride stand",
+      "camel spin mischief",
+      "camel shock drop",
+      "camel run escape"
+     ],
+     "estimate": 2.0,
+     "balance": null,
+     "prompt": "create camel in lamborgini",
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating camel in lamborgini",
+     "detail": null,
+     "status": "running",
+     "ts": 1791108645.618
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108645.663
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with qwen3.5-4b (local)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108648.293
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "camel pride stand",
+       "camel spin mischief",
+       "camel shock drop",
+       "camel run escape"
+      ]
+     },
+     "status": "done",
+     "ts": 1791108653.237
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108653.795
+    }
+   ],
+   "ts": 1791108645.604,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "No",
+   "cards": [],
+   "steps": [],
+   "ts": 1791108901.301
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "No problem, nothing was spent. Tell me what to change, or what else to make.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791108901.322
+    },
+    {
+     "kind": "step",
+     "label": "understood: a change of mind",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108901.371
+    },
+    {
+     "kind": "step",
+     "label": "cancelled, nothing was spent",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108901.392
+    },
+    {
+     "kind": "final",
+     "label": "done",
+     "detail": null,
+     "status": "done",
+     "ts": 1791108901.467
+    }
+   ],
+   "ts": 1791108901.301,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true
+}
