@@ -49,3 +49,11 @@ test('a background 401 never wipes the card: re-show only a mode that is not alr
   assert.equal(A.reshow('signin', 'signup'), true, 'switching ways in still switches');
   assert.equal(A.reshow('waiting', 'signin'), true);
 });
+
+test('server health rows are staff-only (a member answer carries no health)', () => {
+  assert.equal(A.staff(null), true, 'behind the gate it does not matter');
+  assert.equal(A.staff({ id: 'local', role: 'owner' }), true);
+  assert.equal(A.staff({ id: 'U009', role: 'admin' }), true);
+  assert.equal(A.staff({ id: 'U001', role: 'member', status: 'active' }), false);
+  assert.equal(A.staff({ id: 'U002', role: 'member', status: 'pending' }), false);
+});

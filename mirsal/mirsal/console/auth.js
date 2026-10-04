@@ -32,7 +32,8 @@ const AUV=(()=>{
   const me=u=>u&&u.id!=='local'?`<div class=row style="justify-content:space-between"><span>Signed in as <b>${esc(u.name)}</b> <span class=mut>${esc(u.email||'')}${u.credits_left!=null?` · ${u.credits_left} credits left`:''}</span></span>
     <span class=row><button class="btn sm" data-act=aucreditask>Request credits</button><button class="btn sm" data-act=aulogout>Sign out</button></span></div>`:'';
   const reshow=(shown,mode)=>shown!==mode;   /* a background 401 must not wipe the card: re-show only a mode that is not already up (typed text and error messages survive the polls) */
-  return {esc,gate,waiting,change,people,person,me,reshow};
+  const staff=me=>!me||me.id==='local'||me.role!=='member';   /* server health rows are staff-only: a member answer carries no health, so showing them would always say "missing" */
+  return {esc,gate,waiting,change,people,person,me,reshow,staff};
 })();
 if(typeof globalThis!=='undefined')globalThis.AUV=AUV;
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){

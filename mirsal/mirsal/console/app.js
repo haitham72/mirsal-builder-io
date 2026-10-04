@@ -167,9 +167,9 @@ ACT.openpack=el=>{location.hash='#/pack/'+el.dataset.id};
 ACT.newpack=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');
 
 /* ---------- Settings */
-RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{};
+RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{},staff=(typeof AUV==='undefined')||AUV.staff((typeof ME==='undefined')?null:ME);
  $('s-settings').innerHTML=`<div class=page><div class=ph><h1>Settings & health</h1></div><div class=card style="margin-top:12px"><div class=kv>
-  <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span><span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
-  <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span></div></div>
+  <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span>${staff?`<span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
+  <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span>`:''}</div></div>
   <div class=card style="margin-top:16px"><h2>AI expansion</h2>${ai.configured?`<div class=kv><span>model</span><span><b>${esc(ai.model)}</b></span></div><div class=mut>Type a subject and the AI expands it into the full set, with a key name, tags and emoji for every sticker (Studio, Prompt).</div>`:`<div class=mut>Off. Add <code>OPENAI_API_KEY=…</code> to <code>mirsal/.env</code> (git-ignored) and restart the server: the AI then expands a subject and names every sticker. Until then the built-in sets are used.</div>`}</div>
   ${tgc}<p class=mut style="margin-top:16px">Photo cutout uses the engine's chroma key for green/blue screens and OpenCV GrabCut otherwise (offline). A learned matte model is planned for Phase 3C.</p></div>`};
