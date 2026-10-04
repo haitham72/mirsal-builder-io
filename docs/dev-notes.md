@@ -41,11 +41,11 @@ An entry is deleted the moment it is built and documented (history lives in git)
 
 | Decision | What it means now |
 |---|---|
-| Rate limiting, deployment and OAuth are paused | none of it is worked on, extended, turned on or deleted. `deploy/` and `deployment_plan.md` (branch `deployment`) are groundwork. `deploy/gateway/ratelimit.py` stays inert; the engine's per-minute 429 (`console/server.py` `_wait`) stays untouched. Do not raise these unless asked. The local FastAPI + pydantic migration is separately authorized after particles (2026-10-04) |
+| Public deployment and Google OAuth are paused | none of it is worked on, extended, turned on or deleted (the office LAN's sign-in throttling and the per-token limit are the rate limits in use). `deploy/` and `deployment_plan.md` (branch `deployment`) are groundwork. `deploy/gateway/ratelimit.py` stays inert; the engine's per-minute 429 (`console/server.py` `_wait`) stays untouched. Do not raise these unless asked. The local FastAPI + pydantic migration is separately authorized after particles (2026-10-04) |
 | Everything stays local for now | embeddings stay local and hardcoded (`services/embed.py` `EMBED_MODEL`, the DB is local). `gpt-4o-mini` is for greeting and routing only; the real work runs on the local server. No hosted embeddings, no swap of the embedding model |
 | Never a block a person cannot get past (2026-10-02) | every new check is a WARN with a visible "use it anyway"; only limits Telegram itself rejects (format, size, codec) or a file that does not open may stop something, and even then with words and a next step (`CLAUDE.md` rule 10). Applied: `pipeline.SHEET_PROCEED`, `recut`, `engine/effect_checks.py` |
 | Several sheets / effects are made all at once (2026-10-02) | `jobs.paid_parallel()`; `CLAUDE.md` rule 13 |
-| Tracking stays in Postgres; **LangSmith is retired** (off 2026-10-03, removed 2026-10-04: problems are tickets, `store-and-search.md` "Tickets") | `LANGSMITH_TRACING=false` and `MIRSAL_TRACE=none` in this PC's `mirsal/.env`; decisions, tasks, jobs and chats are recorded in Postgres (`MIRSAL_DB_WRITE=1`, `docs/store-and-search.md`). `obs/trace.py` stays for a machine that wants LangSmith |
+| Tracking stays in Postgres; **LangSmith is removed** (2026-10-04: problems are tickets, `store-and-search.md` "Tickets") | decisions, tasks, jobs, chats and tickets are recorded in Postgres (`MIRSAL_DB_WRITE=1`, `docs/store-and-search.md`). Old `LANGSMITH_*` / `MIRSAL_TRACE` lines in `mirsal/.env` are ignored; delete them |
 | Particle effects: both modes, video first-class, 2x2 default (2026-10-02) | the video is text-only (no start image) and starts and ends empty; 3x3 is offered but measured poor; the simulated mode has gravity / explosion / vortex sliders (`docs/effects.md`) |
 | The daily credit cap must never block the owner | decided in principle; the code change is W36 |
 
@@ -65,7 +65,7 @@ venv/bin/python -m mirsal test focused                        # approved ~22-cas
 venv/bin/python -m mirsal test area engine/video              # Tier 2: the explicit module -> test-class map in mirsal/test_tiers.py
 node --test tests/js/*.test.js && venv/bin/python -m tests.test_js   # the console scripts; the slow tier is RETIRED (never run), full `unittest discover` also RETIRED (never run or requested)
 venv/bin/python -m mirsal serve --port 8789                   # YOUR server on a spare port; MIRSAL_OUT=<copy of out/G###> keeps real data untouched
-venv/bin/python -m mirsal serve --lan                         # the office network (HTTPS: out/tls/cert.pem + key.pem from mkcert once; --no-tls for plain HTTP); colleagues sign in
+venv/bin/python -m mirsal serve --lan                         # the office network over HTTPS (certificate-guide.md); colleagues sign in
 venv/bin/python -m mirsal serve --stdlib                      # the old stdlib server (kept for one release; the default is FastAPI on uvicorn)
 ```
 

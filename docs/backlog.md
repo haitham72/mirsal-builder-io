@@ -42,7 +42,7 @@ Other open items:
 - Multi-reference: "make 5 like 2" sends sticker 2 as a reference; the other roles (pose, expression, ...) are recorded (`generation_references`) but not yet worded into prompts. **open**.
 - The 40-utterance resolver eval (>= 95% exact ids). **needs Haitham** (W15).
 - Selective regeneration as ONE sheet: several edited stickers are one 1x1 generation each (at most 4, and the reply says so); "keep 1-4 and redo 5-9 as one 2x2 / 3x3" (one paid sheet instead of N) and the `inherited_from` carry-over rows are not built. **open**.
-- The chat polls (streaming is planned after FastAPI, see API and production). There is no terminal `mirsal chat`. The reducer's model summary has only run against fakes. **open, low**.
+- There is no terminal `mirsal chat`. The reducer's model summary has only run against fakes. **open, low**.
 - A real chat -> Create run and a creator run against the real Higgsfield and a real bot. **needs a paid test** (W6).
 
 ## Engine and Studio (`docs/engine-and-studio.md`)

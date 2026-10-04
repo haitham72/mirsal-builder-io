@@ -729,9 +729,8 @@ def main(argv=None) -> int:
                 key = Path(os.environ.get("MIRSAL_TLS_KEY") or out / "tls" / "key.pem")
                 if not (cert.is_file() and key.is_file()):
                     print(f"ERROR   serve --lan uses HTTPS and needs a certificate: {cert} and {key}.\n"
-                          f"        Once, on this PC: brew install mkcert (Windows: choco install mkcert), mkcert -install, then\n"
-                          f"        mkcert -cert-file {cert} -key-file {key} <this PC's IP> localhost   (and run `mkcert -install` on each office machine)\n"
-                          f"        Or serve --lan --no-tls (plain HTTP).")
+                          f"        Make it once with mkcert: see certificate-guide.md at the repository root.\n"
+                          f"        Or serve --lan --no-tls (plain HTTP: passwords cross the network unencrypted).")
                     return 1
                 tls = {"cert": str(cert), "key": str(key)}
             serve(out, inp, args.port, args.pace, cfg, stdlib=True if args.stdlib else None, lan=args.lan, tls=tls)

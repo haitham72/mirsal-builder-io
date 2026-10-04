@@ -9,7 +9,7 @@ The app is in its **dev cycle**: architecture lives in `docs/`, open work in `do
 |---|---|
 | engine, verifier, gates, Studio, Telegram | `docs/engine-and-studio.md` — the golden path, the 5 review gates (G1–G5), the 44-check verifier, Studio screens, "Use it anyway", Telegram send |
 | live generation (prompts, Higgsfield, jobs, credits) | `docs/generation.md` — the pipeline from request through Higgsfield/Kling, `docs/higgsfield.md` — what the CLI really offers with measurements, `docs/operator.md` — how the operator loop fulfils jobs |
-| Postgres, search, the pool, photos, tracing | `docs/store-and-search.md` — schema, migrations, vector search, photo cutout, batch groups columns; LangSmith tracing is retired (dormant until the ticket logger replaces it) |
+| Postgres, search, the pool, photos, tracing | `docs/store-and-search.md` — schema, migrations, vector search, photo cutout, batch groups columns; LangSmith is removed: problems are tickets |
 | the AI chat, the agent, memory, Redis, the vision judge, events | `docs/agent-and-chat.md` — LangGraph agent, per-subject memory, vision pre-review, the agentic creator, event feed |
 | the HTTP contract | `docs/api.md` — JSON routes, SSE, idempotency, signed links, accounts, rate limits, OpenAPI |
 | the look of the screens: the shell, the rail, the palette, the tiles | `docs/design.md` — one shell and one token set for every section, the AI screen as the reference, the Earlier-batches column, §9 "every rejected picture carries its own override". **Read it before changing any CSS, the Studio's markup, or adding a screen** |

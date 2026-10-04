@@ -43,7 +43,7 @@ mirsal/mirsal/store/
                     (shown by `mirsal doctor` and GET /api/health: a failing mirror is never silent)
   assets.py         AssetStore / LocalAssetStore: object keys, append-only puts, HMAC signed expiring links
 mirsal/mirsal/store/pool.py     the sticker pool (below)        mirsal/mirsal/services/embed.py   local embeddings (below)
-mirsal/mirsal/obs/trace.py tracing (below)
+mirsal/mirsal/flow/tickets.py  tickets (below); obs/scrub.py keeps file paths out of free text
 ```
 
 ## Data mapping (file store -> rows)

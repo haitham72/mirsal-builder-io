@@ -65,7 +65,7 @@ mirsal/                                   the app
     runtime/        cache.py + events.py (Redis, disposable, and the per-generation event stream), health.py, writer_lock.py, paths.py, users.py (accounts)
     media/          library.py (packs, saved stickers, bulk move / delete), video_project.py (video / GIF projects), matte.py (optional AI cutout, onnxruntime)
     store/          Postgres: db, repo, sync (write-through), assets (AssetStore), pool.py (the sticker pool)  (docs/store-and-search.md)
-    agent/          the chat: memory, resolver, brain, tools, LangGraph graph (docs/agent-and-chat.md)       vision/   the vision judge and bounded recovery       obs/trace.py   LangSmith tracing
+    agent/          the chat: memory, resolver, brain, tools, LangGraph graph (docs/agent-and-chat.md)       vision/   the vision judge and bounded recovery       obs/scrub.py   file paths kept out of free text
     transformations/  prompts/  models/      built-in transformation templates (dog as banana) · prompt template text files · the cutout model weights
     console/        server.py (stdlib) + the screens: index.html, studio.css, agent.css, app.js (shell, Library, Settings), agent.js (the AI chat), generate.js, live.js, composer.js,
                     telegram.js, packs.js, editor.js, chat.js, prepare.js, animate.js, history.js

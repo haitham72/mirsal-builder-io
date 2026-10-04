@@ -192,7 +192,7 @@ Code, in this order: `mirsal/mirsal/engine/verify.py`, `flow/gates.py`,
 `engine/sheet.py`, `generation/jobs.py`, `console/server.py`,
 `agent/{editroute,resolver,graph,tools,memory,brain,creator}.py`,
 `vision/{judge,naming}.py`, `store/{repo,sync,assets,pool,db}.py`,
-`runtime/{cache,events,writer_lock,names}.py`, `obs/trace.py`, `services/llm.py`,
+`runtime/{cache,events,writer_lock,names}.py`, `obs/scrub.py`, `flow/tickets.py`, `services/llm.py`,
 then the JS: `console/{generate,effects,particles,packs,agent,editor,studio}.js`
 and `studio.css` / `agent.css`. Tests are in `mirsal/tests/` (Python) and
 `mirsal/tests/js/` (node) — **read a few and judge whether they test behaviour or
@@ -235,7 +235,7 @@ other to a one-liner in §6.
   (`_foreign`, `_who`, `_authorize`, `idem`, `/out/` + `/lib/` guards,
   particles/recut/allow routes), `console/openapi.py`, `runtime/cache.py`,
   `runtime/events.py`, `runtime/users.py`, `services/telegram.py`,
-  `services/llm.py`, `obs/trace.py`. Claims C9, C10, C11, C12, C26. Hunts:
+  `services/llm.py`, `obs/scrub.py`. Claims C9, C10, C11, C12, C26. Hunts:
   traversal (symlink, `..`, encoded, Windows ADS/short-name/drive),
   Host/Origin/`Sec-Fetch-Site` gaps, member isolation, concurrent-idem 409 vs
   same-answer, trace `safe()` bypasses.
@@ -305,7 +305,7 @@ exercise the API with curl. Never press Create.
 | C7 | **Append-only history**: rejection never deletes; a sticker keeps its original `S#` through every stage, **including after a slice is edited and the sheet is rebuilt as `sheet_fixed`**; history lines are only appended; `put` of different bytes under an existing key is refused | `flow/pipeline.py`, `store/assets.py`, `store/repo.py` |
 | C8 | **One writer of `result.json` per `out/`** across processes, and read-modify-write is safe inside the server | `runtime/writer_lock.py`, `pipeline._IO_LOCK`, the ~70 call sites of `read_result` / `write_result` (grep -c) — the docs admit the in-process gap: assess how real it is |
 | C9 | **A web page the owner visits cannot drive the local server** (Host/Origin guard, `Sec-Fetch-Site`, accounts and tokens; a member reaches only what they own); `/out/` and signed links cannot leave `out/` (symlinks, `..`, encoded forms, Windows paths and drive letters, alternate data streams, short names) | `console/server.py` `_foreign`, `_who`, `_authorize`, `_wait`, `runtime/users.py`, `store/assets.py`, `tests/test_hardening.py`, `tests/test_users.py` |
-| C10 | **Secrets**: the Telegram token is never returned or logged; the LLM key is never logged; tracing never sends media bytes or paths outside a generation | `services/telegram.py`, `services/llm.py`, `obs/trace.py` `safe()`, a repo-wide grep for obvious tokens in tracked files |
+| C10 | **Secrets**: the Telegram token is never returned or logged; the LLM key is never logged; a ticket never stores a file path from this machine (`obs/scrub.py`) | `services/telegram.py`, `services/llm.py`, `obs/scrub.py`, a repo-wide grep for obvious tokens in tracked files |
 | C11 | **Idempotency**: the same `Idempotency-Key` returns the first answer and runs nothing twice, including under two concurrent identical requests | `console/server.py` `Console.idem`, `runtime/cache.py` locks, tests |
 | C12 | **Redis is disposable**: killing Redis mid-run costs cache misses and short-lived state (rate-limit windows, idempotency records, session locks, SSE replay) and falls back to process memory; everything durable is in files and Postgres; the fallback has the same semantics | `runtime/cache.py`, `runtime/events.py`, `tests/test_cache.py` |
 | C13 | **Memory is structured, not the history**: every turn starts from the per-subject summary; temporary feedback shapes only the next generation; only explicit statements become lasting preferences; the reducer cannot drop ids | `agent/memory.py`, `agent/graph.py`, `tests/test_agent.py` |
