@@ -1182,6 +1182,6 @@ def summary(out: Path) -> list[dict]:
             continue
         s = r["source"]
         rows.append({"id": gid, "generation_id": r["generation_id"], "owner": r.get("owner", "local"), "prompt": r["prompt"], "stage": r["stage"],
-                     "subject": s["subject"], "variant": s["variant"], "error": r["error"],
+                     "subject": s["subject"], "variant": s["variant"], "error": r.get("error"),
                      "folder": f"img-{s.get('subject_id')}-{s['subject']}" if s.get("subject_id") else None})
     return rows

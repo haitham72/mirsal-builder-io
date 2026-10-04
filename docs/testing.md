@@ -121,6 +121,7 @@ the scope is not understood yet.
 | `tests/test_trending.py` | share, likes, comments, orders, private files, Use in my workflow, the routes |
 | `tests/test_groups.py`, `tests/test_particle_rows.py` | batch families; particle rows, adopt, drawn sheets |
 | `tests/js/tickets.test.js`, `auth.test.js`, `anim_create.test.js` | the screens' pure builders |
+| `tests/test_summary_robust.py` | the generations list tolerates a batch whose `result.json` has no `"error"` key (one old or partial batch never fails the list or the health card) |
 
 The contract suites (`test_api_contract`, `test_openapi`, `test_hardening`, `test_live`) run on FastAPI by default; `MIRSAL_SERVER=stdlib` runs them on the old server.
 

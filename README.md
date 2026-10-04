@@ -64,6 +64,7 @@ browser ── console/ (Studio, AI chat, Library, Create)  ── FastAPI on uv
 | history is append-only: rejection never deletes, a sticker keeps its `S#` | `flow/pipeline.py` `hist` |
 | a web page the owner visits cannot drive the local server; `/out/` cannot escape `out/` | `console/server.py` `_foreign` / `_authorize`, `tests/test_hardening.py` |
 | no secret ever reaches git or a response | `runtime/users.py`, `services/telegram.py`, `tests/test_hardening.py` |
+| one batch with an old or partial `result.json` never fails the generations list (or the health card that reads with it) | `flow/pipeline.py` `summary`, `tests/test_summary_robust.py` |
 
 ## How a sticker is made (the golden path)
 
