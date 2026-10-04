@@ -81,7 +81,7 @@ Other open items:
 
 ## API and production (`docs/api.md`)
 
-- Packs and the library per user, reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json`: part of the office LAN ([`office_lan_plan.md`](office_lan_plan.md) §2.7). **needs Haitham** (W50).
+- Packs and the library per user, reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json`: part of the office LAN ([`office_lan_plan.md`](office_lan_plan.md) §2.7). **open** (the office LAN, `plan.md` steps 4 and 7).
 - Per-job temp directories and retention policies; the Studio has no queue panel for DEAD rows yet (`mirsal queue status` shows them). **open**.
 - **Contract polish:** a role-dependent shape for `GET /api/generations` (an owner also gets `health`, `paths`, `stale`); `GET /api/live/cost` answers `200 {"credits": null, "error"}` when a price is unknown (by design for the page, not a status code); camelCase leaks in a snake_case API (`updatedAt` in `media/video_project.py`, `packId` in `console/server.py`: the Studio reads them); the Host check needs the port in the header; no `Deprecation` policy yet; pagination is opt-in on three lists only (`/api/library`, `/api/tasks`, `/api/usage`, `/api/watch` still return everything); `415` for a wrong `Content-Type` is not built (W35). **open**.
 - The regression suites (visual, chroma, transformation, conversation datasets) in one command. The metrics (`flow/metrics.py`) count what happened; what they mean for taste waits for the judge's calibration (W11). **open**.
@@ -91,7 +91,7 @@ Other open items:
 - The FastAPI + pydantic migration ([`plan.md`](../plan.md) step 1); the executable spec is [`fastapi_plan.md`](fastapi_plan.md), the baseline is [`http_route_inventory.md`](http_route_inventory.md). **open**.
 - Streaming chat: the agent's steps over SSE instead of polling the whole session ([`fastapi_plan.md`](fastapi_plan.md), "After the migration"). **open**, after FastAPI.
 - The ticket logger in Postgres; LangSmith retired ([`tickets_plan.md`](tickets_plan.md)). **open**, after streaming chat.
-- The office LAN: `@nadi.ae` email + password accounts, *Waiting for approval*, Settings > People, the Telegram admin bot, 10 credits per user, forgot password gated by Haitham ([`office_lan_plan.md`](office_lan_plan.md)). **open**, after the ticket logger; W49-W50 first.
+- The office LAN: `@nadi.ae` email + password accounts, *Waiting for approval*, Settings > People, the Telegram admin bot, 10 credits per user, forgot password gated by Haitham ([`office_lan_plan.md`](office_lan_plan.md)). **open**, after the ticket logger (HTTPS and the Trending gallery decided 2026-10-04).
 - Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `office_lan_plan.md`). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
 ## Deployment (branch `deployment`): parked

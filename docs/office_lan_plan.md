@@ -23,7 +23,7 @@ Read first: `CLAUDE.md`, `docs/fastapi_plan.md`, `docs/tickets_plan.md`, `runtim
 
 - `python -m mirsal serve --lan` binds `0.0.0.0` (default stays `127.0.0.1`) and prints the address to share (`http://192.168.x.y:8770`).
 - The Host allow-list gains the machine's own LAN addresses and an optional `MIRSAL_LAN_HOSTS` list; any other Host is still 403. Origin checks accept the same set. CORS stays closed (same-origin only).
-- **HTTPS on the LAN (recommended).** Passwords over plain HTTP can be read by anyone on the same Wi-Fi. `serve --lan --tls` uses a locally issued certificate (`mkcert`, installed once on each office machine), so this stays local with no CDN or cloud service. Without TLS the sign-in page shows a one-line warning. Decision: W49.
+- **HTTPS on the LAN (Haitham, 2026-10-04).** Passwords over plain HTTP can be read by anyone on the same Wi-Fi. `serve --lan --tls` uses a locally issued certificate (`mkcert`, installed once on each office machine), so this stays local with no CDN or cloud service. Without TLS the sign-in page shows a one-line warning. `--tls` is the default for `--lan`.
 - `/out/` media stays behind the existing signed-link and ownership checks; nothing becomes public by being on the LAN.
 
 ### 2.2 Accounts: email + password, two ways in
@@ -64,9 +64,12 @@ One table: name, email, role, status, credits left / spent, last seen, requests 
 
 *Forgot password* on the sign-in page takes the email and always answers the same sentence ("If this email has an account, Haitham will be asked"). It creates a reset request and the Telegram card. Haitham's tap generates the new password (§2.4). Nothing reaches the user by email; there is no SMTP.
 
-### 2.7 What each person sees (decision: W50)
+### 2.7 What each person sees: own work + a Trending gallery (Haitham, 2026-10-04)
 
-Recommendation: **their own work, plus shared packs Haitham publishes.** A member's batches, chats, jobs and particles are private to them (today's ownership checks); the library gets a *Shared* flag per pack so Haitham can give everyone a pack (the existing "packs and library per user" groundwork in `docs/backlog.md`). The alternative, one shared library for the whole office, is simpler but lets anyone delete anyone's packs.
+- A member's batches, chats, jobs and particles are **private** (today's ownership checks).
+- **Trending** (a Library tab, Higgsfield-style): packs their owners chose to **Share**. Everyone can **like** and **comment**; the gallery is ordered by recent likes and comments (a simple score with a time decay, recomputed on read), with *New* and *Most liked* as the other two orders. A comment is plain text, owner and admin can delete it.
+- **Use in my workflow**: on a shared pack, copies it into the viewer's own library as a new pack (files copied, `source.shared_from` recorded), ready for the Studio (add stickers, particles, a new batch in its style). The original stays the owner's; nothing is shared back unless they Share it.
+- Data: `shared_packs (pack_id, owner, shared_at)`, `pack_likes (pack_id, user_id, at)`, `pack_comments (id, pack_id, user_id, text, at, deleted)`; routes `POST /api/packs/{id}/share|unshare|like|unlike|comments|use`, `GET /api/trending?order=trending|new|liked`.
 
 ## 3. Data
 
@@ -79,13 +82,14 @@ Additive migrations, mirrored from `out/users.json` (the file stays the source o
 
 ## 4. Steps (each its own commit, its doc updated in the same step)
 
-1. **Accounts on the LAN** (§2.1-§2.3, §2.6): `serve --lan [--tls]`, email + password, *Waiting for approval*, Settings > People, forgot password. Done when a colleague signs in from another machine.
+1. **Accounts on the LAN** (§2.1-§2.3, §2.6, and private work §2.7): `serve --lan [--tls]`, email + password, *Waiting for approval*, Settings > People, forgot password. Done when a colleague signs in from another machine.
 2. **The Telegram admin bot** (§2.4). Done when approve / reject / role / new password work from the bot.
 3. **Credits per user** (§2.5). Done when a member spends from 10 credits and can request more.
+4. **Trending** (§2.7): Share, like, comment, the three orders, Use in my workflow. Done when one colleague uses another's shared pack in their own Studio.
 
 ## 5. Risks
 
 - **Higgsfield's terms** for one paid account used by several people (W42, now relevant for the office, not just a public launch).
-- **Plain HTTP on shared Wi-Fi** exposes passwords and session cookies (W49).
+- **Plain HTTP on shared Wi-Fi** would expose passwords and session cookies: `--lan` runs with TLS (decided 2026-10-04).
 - **The PC is the server:** if it sleeps or restarts, everyone is offline. `serve --lan` says so on start, and *Settings > People* shows who is signed in before a restart.
 - **The bot is an admin channel:** only Haitham's user id is obeyed. A leaked bot token lets someone *send* as the bot, never approve (approvals are checked against Haitham's id); revoke and replace it in Settings.

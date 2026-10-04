@@ -82,12 +82,6 @@ How a go-ahead works: a shown price plus "let's try" is that one experiment; "pu
 
 **39. Do you want the 3D text templates and the 3D parallax photos built at all?** Both are unstarted (`docs/backlog.md`, store and search 3D / 3E): CapCut-style flashing text-slot stickers with 30+ procedural starters, and photo depth with a gyroscope WebGL viewer. Recommendation: no for now; both are large and neither is on the golden path. Unblocks: deleting or scheduling two large backlog items.
 
-## G. The office LAN (`docs/office_lan_plan.md`; needed before step 5 of its order, not before FastAPI)
-
-**49. HTTPS on the office network?** Over plain HTTP anyone on the same Wi-Fi can read passwords and session cookies. Recommendation: `serve --lan --tls` with a local certificate (`mkcert`, installed once per office machine); plain HTTP only with a warning on the sign-in page. Unblocks: `office_lan_plan.md` §2.1.
-
-**50. What does each colleague see: only their own work, or one shared library?** Recommendation: their own batches, chats, jobs and particles, plus packs you mark *Shared*; one shared library is simpler but lets anyone delete anyone's packs. Unblocks: §2.7 and the per-user library groundwork.
-
 ## F. Parked: the deployment questions (`docs/deployment_plan.md` section 17; do not raise unless asked)
 
 An answer goes into `docs/deployment_plan.md` and deletes the question here.
