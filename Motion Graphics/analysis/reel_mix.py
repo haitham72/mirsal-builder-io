@@ -197,8 +197,8 @@ def take(name, k=0):
     return _cache[f]
 
 
-PEAK = {"whoosh_fast", "whoosh_soft"}
-END = {"reverse_suck", "riser"}
+PEAK = {"whoosh2", "whoosh_soft", "whoosh2"}
+END = {"reverse_suck", "riser", "riser2"}
 counter = {}
 
 
@@ -217,74 +217,86 @@ def cue(t, name, db, rate=1.0):
 
 
 fx_sfx = np.zeros(N)
-W = lambda b, db=-12: (cue(B(b) - 0.004, "impact_small", db), cue(B(b), "whoosh_fast", db - 4))  # a word card
+W = lambda b, db=-11: (cue(B(b) - 0.004, "slam", db), cue(B(b), "whoosh2", db - 5))  # a word card
 # 1. typing, the send, the bubble
 for i in range(32):
     cue(B(1) + (B(6.4) - B(1)) * i / 32, "key_click", -19 + (i % 3), rate=1 + 0.04 * ((i * 7) % 5 - 2))
 for b in (2, 3, 5):
     cue(B(b), "whoosh_soft", -18)
 W(4)
-cue(B(6) + 0.18, "mouse_click", -9); cue(B(6) + 0.19, "enter_key", -12); cue(B(6) + 0.2, "ui_blip", -14)
-cue(B(7) + 0.12, "whoosh_fast", -11)
+cue(B(6) + 0.18, "mouse_click", -9); cue(B(6) + 0.19, "enter_key", -12); cue(B(6) + 0.2, "pop2", -14)
+cue(B(6) + 0.22, "sent", -9); cue(B(7) + 0.12, "whoosh2", -11); cue(B(8), "riser2", -12)
 # 2. the drop: the chat, the orb, "Creating…"
-cue(B(8), "impact_slam", -9); cue(B(8.5), "scan_sweep", -20)
+cue(B(8), "impact2", -9); cue(B(8.5), "scan_sweep", -20)
 cue(B(10), "whoosh_soft", -16); cue(B(10) + 0.05, "spark_zip", -20)
 W(11)
 # 3. the sheet: slam, keying sweep, split, cut, pops and checks
-cue(B(12), "impact_slam", -11); cue(B(12) + 0.02, "paper_slide", -14)
+cue(B(12), "impact2", -11); cue(B(12) + 0.02, "paper_slide", -14)
 cue(B(13), "scan_sweep", -13)
 cue(B(14), "falling_pieces", -15); cue(B(14), "snip", -11)
 W(15); cue(B(15), "marker_strike", -14)
 for i in range(9):
-    cue(B(16) + i * B(0.25), "ui_tick", -13, rate=1 + 0.05 * i)
+    cue(B(16) + i * B(0.25), "pop2", -13, rate=1 + 0.05 * i)
     cue(B(16) + i * B(0.25) + 0.14, "pen_tick", -18)
-W(18); cue(B(18) + 0.05, "confirm_chime", -11)
+W(18); cue(B(18) + 0.05, "chime2", -11)
 cue(B(19), "stamp", -12)
 # 4. animated: whips every half beat
 for i in range(8):
-    cue(B(20 + i * 0.5), "whoosh_fast", -15 - (i % 2) * 3)
-    cue(B(20 + i * 0.5), "ui_blip", -21, rate=1 + 0.06 * (i % 4))
+    cue(B(20 + i * 0.5), "whoosh2", -15 - (i % 2) * 3)
+    cue(B(20 + i * 0.5), "pop2", -21, rate=1 + 0.06 * (i % 4))
 W(24); cue(B(26), "whoosh_soft", -15)
 # 5. particles
-cue(B(29), "reverse_suck", -14)
+cue(B(29), "riser2", -13)
 for b, db in [(29, -9), (30, -11), (31, -11), (32, -11), (33, -11), (34, -11), (35, -12), (35.25, -14), (35.5, -14)]:
-    cue(B(b), "spark_ignite", db); cue(B(b) + 0.03, "falling_pieces", db - 6)
+    cue(B(b), "sparkle", db); cue(B(b) + 0.03, "falling_pieces", db - 6)
 for b in (31.5, 32.5, 33.5, 34.5):
     cue(B(b), "spark_zip", -18)
 W(30)
 cue(B(36), "impact_small", -12)
 for b in (37, 37.5, 38):
-    cue(B(b), "ui_blip", -12, rate=1.2)
+    cue(B(b), "pop2", -12, rate=1.2)
 W(39)
 # 6. batching, no dead ends
 for j in range(3):
-    cue(B(40 + j * 0.5), "whoosh_fast", -14)
+    cue(B(40 + j * 0.5), "whoosh2", -14)
     for i in range(9):
-        cue(B(40 + j * 0.5) + 0.15 + i * 0.06, "ui_tick", -24, rate=1.1 + 0.03 * i)
-cue(B(41.7), "confirm_chime", -15)
+        cue(B(40 + j * 0.5) + 0.15 + i * 0.06, "pop2", -24, rate=1.1 + 0.03 * i)
+cue(B(41.7), "chime2", -15)
 W(42)
-cue(B(43), "marker_strike", -14); cue(B(44), "mouse_click", -9); cue(B(44) + 0.08, "confirm_chime", -10)
+cue(B(43), "marker_strike", -14); cue(B(44), "mouse_click", -9); cue(B(44) + 0.08, "chime2", -10)
 W(45)
 # 7. montage
 for i in range(8):
-    cue(B(46 + i * 0.25), "snip" if i % 2 else "ui_tick", -14)
+    cue(B(46 + i * 0.25), "snip" if i % 2 else "pop2", -14)
 for i in range(4):
-    cue(B(48 + i * 0.5), "spark_ignite", -11); cue(B(48 + i * 0.5), "whoosh_fast", -17)
+    cue(B(48 + i * 0.5), "sparkle", -11); cue(B(48 + i * 0.5), "whoosh2", -17)
 # 8. the words, the second request
 W(50); W(51); W(52); cue(B(52.2), "falling_pieces", -16)
 for i in range(21):
     cue(B(54) + B(0.9) * i / 21, "key_click", -20)
 cue(B(55), "enter_key", -12)
 for i in range(9):
-    cue(B(55) + i * B(0.125), "ui_tick", -17, rate=1 + 0.05 * i)
+    cue(B(55) + i * B(0.125), "pop2", -17, rate=1 + 0.05 * i)
 # 9. the logo
-cue(B(56), "whoosh_soft", -14)
-cue(B(59.5), "impact_slam", -8); cue(B(59.5), "spark_ignite", -12)
+cue(B(56), "whoosh_soft", -14); cue(B(59.5), "riser2", -11)
+cue(B(59.5), "impact2", -8); cue(B(59.5), "sparkle", -12)
 cue(B(60), "whoosh_soft", -16)
-cue(B(62), "mouse_click", -9); cue(B(62) + 0.06, "confirm_chime", -9)
+cue(B(62), "mouse_click", -9); cue(B(62) + 0.06, "chime2", -9)
+
+# ------------------------------------------------------------------ the voice (Liam, ElevenLabs): one line per word card
+VO = [(4, 1), (15, 2), (18, 3), (24, 4), (30, 5), (39, 6), (42, 7), (45, 8), (50, 9), (60, 10)]  # (beat, audio/reel-vo/voNN.mp3)
+vo = np.zeros(N)
+for b, k in VO:
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(ROOT / "audio" / "reel-vo" / f"vo{k:02d}.mp3"), "-ac", "1", "-ar", str(SR), "-f", "f32le", "-"], capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, dtype=np.float32).copy(); x /= np.abs(x).max() + 1e-9
+    env = np.convolve(np.abs(x), np.ones(480) / 480, mode="same")
+    on = int(np.argmax(env > 0.08 * env.max()))  # the first word starts on the card's beat
+    add(vo, B(b) - on / SR + 0.02, x, 1.0)
+venv = np.convolve(np.abs(vo), np.ones(S(0.12)) / S(0.12), mode="same")
+duckv = 1 - 0.45 * np.clip(venv / (venv.max() + 1e-9) * 4, 0, 1)
 
 # ------------------------------------------------------------------ mix
-mix = music * 0.55 + fx_sfx * 0.9
+mix = music * 0.55 * duckv + fx_sfx * 0.85 * (1 - 0.3 * (1 - duckv)) + vo * 0.95
 mix = mix[: S(DUR + 0.4)]
 fade = S(0.4); mix[-fade:] *= np.linspace(1, 0, fade)
 mix = np.tanh(mix * 1.1) / np.tanh(1.1)
