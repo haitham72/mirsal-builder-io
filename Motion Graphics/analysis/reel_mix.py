@@ -12,16 +12,16 @@ import numpy as np
 from scipy.signal import butter, lfilter
 
 ROOT = Path(__file__).resolve().parent.parent
-SR, BPM = 48000, 128
+SR, BPM, OFFSET = 48000, 129.75, 0.22  # the Suno track's tempo and first beat (measured)
 BEAT = 60 / BPM
-DUR = 64 * BEAT  # 30 s
+DUR = 48.125  # the Suno track
 N = int(DUR * SR) + SR  # a second of tail
-MUSIC = None  # e.g. ROOT / "audio" / "suno.mp3"
+MUSIC = ROOT / "audio" / "suno-48.mp3"  # None: the synthesised placeholder below
 rng = np.random.default_rng(7)
 
 
 def B(n):
-    return n * BEAT
+    return OFFSET + n * BEAT
 
 
 def S(t):
@@ -217,81 +217,98 @@ def cue(t, name, db, rate=1.0):
 
 
 fx_sfx = np.zeros(N)
-W = lambda b, db=-11: (cue(B(b) - 0.004, "slam", db), cue(B(b), "whoosh2", db - 5))  # a word card
-# 1. typing, the send, the bubble
+W = lambda b, db=-12: (cue(B(b) - 0.004, "slam", db), cue(B(b), "whoosh2", db - 5))  # a word card
+# A. the chat box: typing, the send, the bubble (beats 0-8)
 for i in range(32):
-    cue(B(1) + (B(6.4) - B(1)) * i / 32, "key_click", -19 + (i % 3), rate=1 + 0.04 * ((i * 7) % 5 - 2))
+    cue(B(1) + (B(6.4) - B(1)) * i / 32, "key_click", -20 + (i % 3), rate=1 + 0.04 * ((i * 7) % 5 - 2))
 for b in (2, 3, 5):
-    cue(B(b), "whoosh_soft", -18)
+    cue(B(b), "whoosh_soft", -19)
 W(4)
-cue(B(6) + 0.18, "mouse_click", -9); cue(B(6) + 0.19, "enter_key", -12); cue(B(6) + 0.2, "pop2", -14)
-cue(B(6) + 0.22, "sent", -9); cue(B(7) + 0.12, "whoosh2", -11); cue(B(8), "riser2", -12)
-# 2. the drop: the chat, the orb, "Creating…"
-cue(B(8), "impact2", -9); cue(B(8.5), "scan_sweep", -20)
-cue(B(10), "whoosh_soft", -16); cue(B(10) + 0.05, "spark_zip", -20)
+cue(B(6) + 0.18, "mouse_click", -10); cue(B(6) + 0.22, "sent", -10)
+cue(B(7) + 0.12, "whoosh2", -12); cue(B(8), "riser2", -14)
+# B. Mirsal AI at work, the sheet (beats 8-16)
+cue(B(8), "impact2", -11); cue(B(8.5), "scan_sweep", -22)
+cue(B(10), "whoosh_soft", -17); cue(B(10) + 0.05, "spark_zip", -21)
 W(11)
-# 3. the sheet: slam, keying sweep, split, cut, pops and checks
-cue(B(12), "impact2", -11); cue(B(12) + 0.02, "paper_slide", -14)
-cue(B(13), "scan_sweep", -13)
-cue(B(14), "falling_pieces", -15); cue(B(14), "snip", -11)
-W(15); cue(B(15), "marker_strike", -14)
+cue(B(12), "impact2", -12); cue(B(12) + 0.02, "paper_slide", -15)
+cue(B(13), "scan_sweep", -14)
+# C. cut, cleaned, checked (beats 16-28)
+cue(B(16), "falling_pieces", -16); cue(B(16), "snip", -12)
+W(17)
 for i in range(9):
-    cue(B(16) + i * B(0.25), "pop2", -13, rate=1 + 0.05 * i)
-    cue(B(16) + i * B(0.25) + 0.14, "pen_tick", -18)
-W(18); cue(B(18) + 0.05, "chime2", -11)
-cue(B(19), "stamp", -12)
-# 4. animated: whips every half beat
+    cue(B(18) + i * B(0.3), "pop2", -14, rate=1 + 0.05 * i)
+    cue(B(18) + i * B(0.3) + 0.14, "pen_tick", -20)
+W(21); cue(B(21) + 0.05, "chime2", -12)
+cue(B(22), "stamp", -13)
+cue(B(24), "scan_sweep", -18); cue(B(25.2), "chime2", -16)
+cue(B(26), "whoosh_soft", -18)
+# D. alive (beats 28-40)
 for i in range(8):
-    cue(B(20 + i * 0.5), "whoosh2", -15 - (i % 2) * 3)
-    cue(B(20 + i * 0.5), "pop2", -21, rate=1 + 0.06 * (i % 4))
-W(24); cue(B(26), "whoosh_soft", -15)
-# 5. particles
-cue(B(29), "riser2", -13)
-for b, db in [(29, -9), (30, -11), (31, -11), (32, -11), (33, -11), (34, -11), (35, -12), (35.25, -14), (35.5, -14)]:
-    cue(B(b), "sparkle", db); cue(B(b) + 0.03, "falling_pieces", db - 6)
-for b in (31.5, 32.5, 33.5, 34.5):
-    cue(B(b), "spark_zip", -18)
-W(30)
-cue(B(36), "impact_small", -12)
-for b in (37, 37.5, 38):
-    cue(B(b), "pop2", -12, rate=1.2)
-W(39)
-# 6. batching, no dead ends
-for j in range(3):
-    cue(B(40 + j * 0.5), "whoosh2", -14)
-    for i in range(9):
-        cue(B(40 + j * 0.5) + 0.15 + i * 0.06, "pop2", -24, rate=1.1 + 0.03 * i)
-cue(B(41.7), "chime2", -15)
-W(42)
-cue(B(43), "marker_strike", -14); cue(B(44), "mouse_click", -9); cue(B(44) + 0.08, "chime2", -10)
-W(45)
-# 7. montage
-for i in range(8):
-    cue(B(46 + i * 0.25), "snip" if i % 2 else "pop2", -14)
+    cue(B(28 + i * 0.5), "whoosh2", -16 - (i % 2) * 3)
+    cue(B(28 + i * 0.5), "pop2", -22, rate=1 + 0.06 * (i % 4))
+W(32); cue(B(34), "whoosh_soft", -16)
 for i in range(4):
-    cue(B(48 + i * 0.5), "sparkle", -11); cue(B(48 + i * 0.5), "whoosh2", -17)
-# 8. the words, the second request
-W(50); W(51); W(52); cue(B(52.2), "falling_pieces", -16)
-for i in range(21):
-    cue(B(54) + B(0.9) * i / 21, "key_click", -20)
-cue(B(55), "enter_key", -12)
+    cue(B(36 + i), "whoosh2", -17)
+# E. particles (beats 40-52)
+cue(B(41), "riser2", -15)
+for b, db in [(41, -10), (42, -12), (43, -12), (44, -12), (45, -12), (46, -12), (47, -13), (47.25, -15), (47.5, -15), (48, -12), (49, -12), (50, -12), (51, -12)]:
+    cue(B(b), "sparkle", db); cue(B(b) + 0.03, "falling_pieces", db - 7)
+W(42)
+# F. export to Mirsal, live (beats 52-60)
+cue(B(53), "mouse_click", -9); cue(B(53) + 0.12, "whoosh2", -12); cue(B(53) + 0.75, "pop2", -10, rate=0.8)
+cue(B(54), "whoosh_soft", -15); cue(B(54.4), "chime2", -10)
 for i in range(9):
-    cue(B(55) + i * B(0.125), "pop2", -17, rate=1 + 0.05 * i)
-# 9. the logo
-cue(B(56), "whoosh_soft", -14); cue(B(59.5), "riser2", -11)
-cue(B(59.5), "impact2", -8); cue(B(59.5), "sparkle", -12)
-cue(B(60), "whoosh_soft", -16)
-cue(B(62), "mouse_click", -9); cue(B(62) + 0.06, "chime2", -9)
+    cue(B(54.6) + i * B(0.125), "pop2", -17, rate=1 + 0.05 * i)
+cue(B(56), "sent", -11)
+for b in (56.6, 57, 57.4):
+    cue(B(b), "pop2", -13, rate=1.2)
+W(58)
+# G. three at once, no dead ends (beats 60-72)
+for j in range(3):
+    cue(B(60 + j * 0.5), "whoosh2", -15)
+    for i in range(9):
+        cue(B(60 + j * 0.5) + 0.15 + i * 0.08, "pop2", -25, rate=1.1 + 0.03 * i)
+cue(B(62.4), "chime2", -15)
+W(63)
+cue(B(64), "marker_strike", -15); cue(B(65.6), "mouse_click", -9); cue(B(65.6) + 0.08, "chime2", -10)
+W(67)
+for i in range(8):
+    cue(B(68 + i * 0.25), "snip" if i % 2 else "pop2", -15)
+for i in range(4):
+    cue(B(70 + i * 0.5), "sparkle", -12); cue(B(70 + i * 0.5), "whoosh2", -18)
+# H. taste, team, Trending, the words (beats 72-92)
+cue(B(72), "whoosh_soft", -14)
+for b in (72.4, 72.9, 73.4):
+    for i in range(5):
+        cue(B(b) + i * 0.05, "key_click", -23)
+cue(B(74), "pop2", -12, rate=0.9)
+cue(B(75), "whoosh2", -14)
+for j in range(5):
+    cue(B(75) + j * B(0.25), "pop2", -20, rate=1 + 0.04 * j)
+cue(B(76.8), "mouse_click", -10); cue(B(76.8) + 0.08, "chime2", -11)
+cue(B(78), "whoosh_soft", -14); cue(B(80.5), "pop2", -11, rate=1.25)
+W(84); W(85); W(86); cue(B(86.2), "falling_pieces", -17)
+for i in range(21):
+    cue(B(88) + B(1.2) * i / 21, "key_click", -21)
+cue(B(89.5), "sent", -12)
+for i in range(9):
+    cue(B(90) + i * B(0.125), "pop2", -18, rate=1 + 0.05 * i)
+# I. the logo
+cue(B(92), "whoosh_soft", -15)
+cue(B(95.5), "riser2", -12); cue(B(95.5), "impact2", -9); cue(B(95.5), "sparkle", -13)
+cue(B(96.5), "whoosh_soft", -17)
+cue(B(100), "mouse_click", -9); cue(B(100) + 0.06, "chime2", -10)
 
-# ------------------------------------------------------------------ the voice (Liam, ElevenLabs): one line per word card
-VO = [(4, 1), (15, 2), (18, 3), (24, 4), (30, 5), (39, 6), (42, 7), (45, 8), (50, 9), (60, 10)]  # (beat, audio/reel-vo/voNN.mp3)
+# ------------------------------------------------------------------ the voice (Liam, ElevenLabs): one line per section
+VO = [(None, 1), (8, 2), (16, 3), (28, 4), (40, 5), (52, 6), (60, 7), (72, 8), (96.6, 9)]  # (beat, audio/reel48-vo/lNN.mp3)
 vo = np.zeros(N)
 for b, k in VO:
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(ROOT / "audio" / "reel-vo" / f"vo{k:02d}.mp3"), "-ac", "1", "-ar", str(SR), "-f", "f32le", "-"], capture_output=True, check=True).stdout
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(ROOT / "audio" / "reel48-vo" / f"l{k:02d}.mp3"), "-ac", "1", "-ar", str(SR), "-f", "f32le", "-"], capture_output=True, check=True).stdout
     x = np.frombuffer(raw, dtype=np.float32).copy(); x /= np.abs(x).max() + 1e-9
     env = np.convolve(np.abs(x), np.ones(480) / 480, mode="same")
-    on = int(np.argmax(env > 0.08 * env.max()))  # the first word starts on the card's beat
-    add(vo, B(b) - on / SR + 0.02, x, 1.0)
+    on = int(np.argmax(env > 0.08 * env.max()))
+    t0 = 0.35 if b is None else B(b) + 0.1
+    add(vo, t0 - on / SR, x, 1.0)
 venv = np.convolve(np.abs(vo), np.ones(S(0.12)) / S(0.12), mode="same")
 duckv = 1 - 0.45 * np.clip(venv / (venv.max() + 1e-9) * 4, 0, 1)
 

@@ -1,7 +1,7 @@
-// REEL: the 30-second fast-cut ad for the Mirsal Creator (Haitham, 2026-10-04: "30 seconds, very very fast
-// cuts, amazing visuals; prioritise the chat box, the sticker being created and the particles").
-// 64 beats at 128 BPM = 30 s. Every cut sits on the beat grid (B(n)); the soundtrack is composed to the same
-// grid (analysis/reel_music.py), so the picture and the music agree by construction.
+// REEL: the 48-second fast-cut ad for the Mirsal Creator (Haitham, 2026-10-04: very fast cuts, the chat box,
+// the sticker being created, particles, one-click export to Mirsal going live, a voice that explains).
+// Cut to the beat of the Suno track (audio/suno-48.mp3, 129.75 BPM): every cut sits on B(n); Liam's lines
+// (audio/reel48-vo/) start on their sections (analysis/reel_mix.py).
 // The look is the Mirsal app's clean iOS style (README §4). Real pictures: the G103 sheet (raw, then keyed),
 // stickers from three library batches, particle sprites from P001/P009 (app/public/, not committed).
 import type * as THREE from 'three';
@@ -12,8 +12,9 @@ import { F, font, measure } from '../engine/type';
 import { clamp, ease, hash, lerp, TAU } from '../engine/util';
 import { drawOrb } from './card';
 
-export const BPM = 128, BEAT = 60 / BPM;
-const B = (n: number) => n * BEAT;
+// the Suno track (audio/suno-48.mp3): 129.75 BPM, its first beat at 0.22 s (measured)
+export const BPM = 129.75, BEAT = 60 / BPM, OFFSET = 0.22;
+const B = (n: number) => OFFSET + n * BEAT;
 const CX = 960, CY = 540;
 const BLUE = '#3B82F6', INK = '#1E293B', GREY = '#64748B', GREEN = '#10B981', ORANGE = '#F97316';
 const PASTEL = ['#DBEAFE', '#CFFAFE', '#EDE9FE', '#FCE7F3', '#FEF3C7', '#DCFCE7', '#E0F2FE', '#FFE4E6'];
@@ -169,7 +170,7 @@ export default class Reel extends Scene {
       x.save();
       x.globalAlpha = a;
       x.translate(px, py); x.rotate((h(5) - 0.5) * 9 * age);
-      if (h(6) < 0.42) {
+      if (!o.emoji && h(6) < 0.42) { // real sprites only in the full bursts; a burst given its own emoji keeps to them
         const im = this.part[Math.floor(h(7) * this.part.length)]!;
         const sc = sz / Math.max(im.width, im.height);
         x.drawImage(im, (-im.width * sc) / 2, (-im.height * sc) / 2, im.width * sc, im.height * sc);
@@ -273,14 +274,20 @@ export default class Reel extends Scene {
   buildShots(): Shot[] {
     const sh: Shot[] = [];
     const add = (b0: number, b1: number, draw: Shot['draw'], o: Partial<Shot> = {}) => sh.push({ b0, b1, draw, ...o });
+    const grid3 = (x: X, t: number, packs: HTMLImageElement[], size: number, g: number, live: number, cx = CX, cy = CY) => {
+      for (let i = 0; i < 9; i++) {
+        const c = i % 3 - 1, r = Math.floor(i / 3) - 1, px = cx + c * (size + g), py = cy + r * (size + g);
+        this.tile(x, px, py, size);
+        this.sticker(x, packs[i]!, px, py, size * 0.86, t, { kind: i, live });
+      }
+    };
 
-    // ---------- 1. the chat box: one sentence (beats 0-8, the build)
-    add(0, 2, (x, s) => {
-      const k = outExpo(sat(s.lt / 0.5));
+    // ---------- A. the chat box: one sentence (beats 0-8). "Type one sentence into Mirsal."
+    add(-1, 2, (x, s) => {
+      const k = outExpo(sat(s.t / 0.5));
       this.pill(x, CX, CY + (1 - k) * 80, 1440, 132, this.typed(s.t), s.t, { fs: 50 });
-      x.globalAlpha = 1;
     }, { enter: 'none' });
-    add(2, 3, (x, s) => { // macro on the caret
+    add(2, 3, (x, s) => {
       const fs = 50, txt = this.typed(s.t);
       const caretX = CX - 720 + 132 * 1.05 + measure(txt, F.inter(400), fs);
       const z = 2.5 + 0.25 * s.p;
@@ -288,7 +295,7 @@ export default class Reel extends Scene {
       this.pill(x, CX, CY, 1440, 132, txt, s.t, { fs });
       x.restore();
     });
-    add(3, 4, (x, s) => { // tilted, pushing in
+    add(3, 4, (x, s) => {
       x.save(); x.translate(CX, CY); x.rotate(-0.07 + 0.03 * s.p); x.scale(1.5 + 0.2 * s.p, 1.5 + 0.2 * s.p); x.translate(-CX + 260, -CY);
       this.pill(x, CX, CY, 1440, 132, this.typed(s.t), s.t, { fs: 50 });
       x.restore();
@@ -299,7 +306,7 @@ export default class Reel extends Scene {
       this.pill(x, CX, CY, 1440, 132, this.typed(s.t), s.t, { fs: 50 });
       x.restore();
     });
-    add(6, 7, (x, s) => { // the send button, pressed
+    add(6, 7, (x, s) => {
       const press = s.lt < 0.18 ? 1 : 1 - 0.14 * Math.sin(sat((s.lt - 0.18) / 0.22) * Math.PI);
       for (let i = 0; i < 3; i++) {
         const a = s.lt - 0.18 - i * 0.07;
@@ -311,7 +318,7 @@ export default class Reel extends Scene {
       x.shadowColor = 'transparent'; this.arrow(x, 190);
       x.restore();
     }, { bg: '#FFFFFF' });
-    add(7, 8, (x, s) => { // the bubble flies up
+    add(7, 8, (x, s) => {
       const k = outExpo(sat(s.lt / 0.32));
       const y = lerp(1300, CY, k), sc = lerp(0.7, 1.35, k) + 0.08 * s.p;
       const fam = F.inter(500), fs = 54, w = measure(PROMPT, fam, fs) + 90;
@@ -323,11 +330,9 @@ export default class Reel extends Scene {
       x.restore();
     });
 
-    // ---------- 2. the drop: Mirsal AI gets to work (beats 8-12)
-    add(8, 10, (x, s) => {
-      this.chat(x, s.t, { scale: 1.06 + 0.06 * s.p, bubble: PROMPT, working: 1, building: B(8.5) });
-    }, { enter: 'drop' });
-    add(10, 11, (x, s) => { // the orb, working
+    // ---------- B. Mirsal AI plans and creates the sheet (beats 8-16)
+    add(8, 10, (x, s) => this.chat(x, s.t, { scale: 1.06 + 0.06 * s.p, bubble: PROMPT, working: 1, building: B(8.5) }), { enter: 'drop' });
+    add(10, 11, (x, s) => {
       const r = 230 + 20 * s.p;
       for (let i = 0; i < 3; i++) {
         x.save(); x.strokeStyle = rgba('ember', 0.9 - i * 0.25); x.lineWidth = 12 - i * 3; x.lineCap = 'round';
@@ -343,13 +348,11 @@ export default class Reel extends Scene {
       }
     }, { bg: '#FFFFFF' });
     add(11, 12, (x, s) => this.word(x, 'Creating…', s.lt, { dot: BLUE }), { bg: '#FFFFFF' });
-
-    // ---------- 3. the sheet: generated, keyed, cut (beats 12-20)
     const SZ = 820;
-    add(12, 14, (x, s) => {
+    add(12, 16, (x, s) => {
       const k = outExpo(sat(s.lt / 0.22));
-      const sc = lerp(1.35, 1, k) + 0.05 * s.p, rot = lerp(-0.08, 0, k);
-      const sweep = sat((s.t - B(13)) / (B(14) - B(13) - 0.05));
+      const sc = lerp(1.35, 1, k) + 0.06 * s.p, rot = lerp(-0.08, 0, k);
+      const sweep = sat((s.t - B(13)) / (B(15.6) - B(13)));
       x.save(); x.translate(CX, CY); x.rotate(rot); x.scale(sc, sc);
       x.save(); x.shadowColor = 'rgba(15,23,42,0.18)'; x.shadowBlur = 60; x.shadowOffsetY = 24;
       x.fillStyle = '#fff'; rr(x, -SZ / 2 - 14, -SZ / 2 - 14, SZ + 28, SZ + 28, 40); x.fill(); x.restore();
@@ -361,33 +364,31 @@ export default class Reel extends Scene {
         this.checker(x, -SZ / 2, -SZ / 2, SZ, SZ);
         x.drawImage(this.keyed, -SZ / 2, -SZ / 2, SZ, SZ);
         x.restore();
-        if (sweep < 1) {
-          x.save(); x.shadowColor = rgba('ember', 1); x.shadowBlur = 40;
-          x.fillStyle = rgba('ember', 1); x.fillRect(-SZ / 2, yy - 3, SZ, 6); x.restore();
-        }
+        if (sweep < 1) { x.save(); x.shadowColor = rgba('ember', 1); x.shadowBlur = 40; x.fillStyle = rgba('ember', 1); x.fillRect(-SZ / 2, yy - 3, SZ, 6); x.restore(); }
       }
       x.restore();
       x.restore();
-      if (s.lt < 0.6) { x.font = font(F.inter(600), 30); x.fillStyle = GREY; x.textAlign = 'center'; x.fillText('Sheet · 3×3 · 2K', CX, CY + SZ / 2 + 80); x.textAlign = 'left'; }
+      x.font = font(F.inter(600), 30); x.fillStyle = GREY; x.textAlign = 'center';
+      x.fillText(sweep > 0 ? 'Background removed' : 'Sheet · 3×3 · 2K', CX, CY + SZ / 2 + 80); x.textAlign = 'left';
     });
-    add(14, 15, (x, s) => { // the cells split apart
+
+    // ---------- C. cut, cleaned, checked (beats 16-28)
+    add(16, 17, (x, s) => {
       const k = outBack(sat(s.lt / 0.3), 1.4), gap = 90 * k, cell = SZ / 3, src = this.keyed.width / 3;
       for (let i = 0; i < 9; i++) {
         const c = i % 3 - 1, r = Math.floor(i / 3) - 1;
-        const px = CX + c * (cell + gap), py = CY + r * (cell + gap);
-        const rot = (hash(i, 3) - 0.5) * 0.25 * k;
-        x.save(); x.translate(px, py); x.rotate(rot);
+        x.save(); x.translate(CX + c * (cell + gap), CY + r * (cell + gap)); x.rotate((hash(i, 3) - 0.5) * 0.25 * k);
         this.tile(x, 0, 0, cell - 8, '#FFFFFF');
         x.drawImage(this.keyed, (i % 3) * src, Math.floor(i / 3) * src, src, src, -cell / 2 + 6, -cell / 2 + 6, cell - 12, cell - 12);
         x.restore();
       }
     });
-    add(15, 16, (x, s) => this.word(x, 'Cut.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
-    add(16, 18, (x, s) => { // nine stickers pop in on 16ths, each checked
+    add(17, 18, (x, s) => this.word(x, 'Cut.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
+    add(18, 21, (x, s) => {
       const size = 250, g = 26;
       for (let i = 0; i < 9; i++) {
         const c = i % 3 - 1, r = Math.floor(i / 3) - 1;
-        const t0 = B(16) + i * B(0.25), pop = outBack(sat((s.t - t0) / 0.22), 2);
+        const t0 = B(18) + i * B(0.3), pop = outBack(sat((s.t - t0) / 0.22), 2);
         if (pop <= 0) continue;
         const px = CX + c * (size + g), py = CY + r * (size + g);
         x.save(); x.translate(px, py); x.scale(pop, pop); this.tile(x, 0, 0, size); x.restore();
@@ -395,10 +396,8 @@ export default class Reel extends Scene {
         this.check(x, px + size / 2 - 26, py - size / 2 + 26, 24, (s.t - t0 - 0.14) / 0.18);
       }
     });
-    add(18, 19, (x, s) => {
-      this.word(x, 'Checked.', s.lt, { col: '#FFFFFF' });
-    }, { bg: GREEN });
-    add(19, 20, (x, s) => {
+    add(21, 22, (x, s) => this.word(x, 'Checked.', s.lt, { col: '#FFFFFF' }), { bg: GREEN });
+    add(22, 24, (x, s) => {
       const z = 1 + 0.12 * s.p;
       x.save(); x.translate(CX, CY); x.scale(z, z); x.translate(-CX, -CY);
       this.tile(x, CX, CY, 760);
@@ -406,90 +405,183 @@ export default class Reel extends Scene {
       this.check(x, CX + 300, CY - 300, 62, s.lt / 0.2);
       x.restore();
     });
-
-    // ---------- 4. animated: eight half-beat cuts, then the word, then the whole sheet (beats 20-28)
-    for (let i = 0; i < 8; i++) {
-      add(20 + i * 0.5, 20.5 + i * 0.5, (x, s) => {
-        const z = 1.08 - 0.08 * s.p;
-        this.sticker(x, this.st(i * 4 + 1), CX + (i % 2 ? 1 : -1) * 40 * s.p, CY, 700 * z, s.t + i, { kind: i, live: 1 });
-      }, { bg: PASTEL[i % PASTEL.length], enter: i % 2 ? 'whip' : 'punch' });
-    }
-    add(24, 26, (x, s) => {
-      for (let i = 0; i < 8; i++) {
-        const a = (i / 8) * TAU + s.t * 1.1, rx = 700, ry = 330;
-        this.sticker(x, this.st(i * 3 + 2), CX + Math.cos(a) * rx, CY + Math.sin(a) * ry, 230, s.t, { kind: i, live: 1, pop: outBack(sat((s.lt - i * 0.03) / 0.25)) });
-      }
-      this.word(x, 'Animated.', s.lt, { dot: BLUE, size: 210 });
-    }, { bg: '#FFFFFF' });
+    add(24, 26, (x, s) => { // the edge check: a scan ring round the sticker on a transparent checkerboard
+      const size = 720;
+      x.save(); x.shadowColor = 'rgba(15,23,42,0.12)'; x.shadowBlur = 50; x.shadowOffsetY = 16;
+      x.fillStyle = '#fff'; rr(x, CX - size / 2 - 12, CY - size / 2 - 12, size + 24, size + 24, 48); x.fill(); x.restore();
+      x.save(); rr(x, CX - size / 2, CY - size / 2, size, size, 40); x.clip(); this.checker(x, CX - size / 2, CY - size / 2, size, size, 36); x.restore();
+      this.sticker(x, this.s[5]!, CX, CY, size * 0.9, s.t, { live: 0 });
+      const per = 4 * size;
+      x.save(); x.strokeStyle = BLUE; x.lineWidth = 6; x.lineCap = 'round'; x.shadowColor = 'rgba(59,130,246,0.6)'; x.shadowBlur = 18;
+      x.setLineDash([per * 0.22 * sat(s.lt / 0.2), per]); x.lineDashOffset = -s.lt * per * 0.9;
+      rr(x, CX - size / 2 + 20, CY - size / 2 + 20, size - 40, size - 40, 32); x.stroke(); x.restore();
+      x.font = font(F.inter(600), 30); x.fillStyle = GREEN; x.textAlign = 'center';
+      x.globalAlpha = sat((s.lt - 0.4) / 0.2); x.fillText('Inside its square ✓', CX, CY + size / 2 + 70); x.globalAlpha = 1; x.textAlign = 'left';
+    }, { bg: '#F7F8FA' });
     add(26, 28, (x, s) => {
-      const z = lerp(1.3, 0.95, outCubic(s.p)), size = 250, g = 26;
+      const z = lerp(1.3, 0.95, outCubic(s.p));
       x.save(); x.translate(CX, CY); x.scale(z, z); x.translate(-CX, -CY);
-      for (let i = 0; i < 9; i++) {
-        const c = i % 3 - 1, r = Math.floor(i / 3) - 1, px = CX + c * (size + g), py = CY + r * (size + g);
-        this.tile(x, px, py, size);
-        this.sticker(x, this.s[i]!, px, py, size * 0.86, s.t, { kind: i, live: 1 });
-      }
+      grid3(x, s.t, this.s, 250, 26, 0);
       x.restore();
     });
 
-    // ---------- 5. particles (beats 28-40)
-    add(28, 30, (x, s) => {
-      const t0 = B(29);
-      const squash = s.t < t0 ? 1 - 0.12 * sat((s.t - B(28.4)) / (t0 - B(28.4))) : 1 + 0.18 * Math.exp(-(s.t - t0) / 0.08);
+    // ---------- D. they come alive (beats 28-40). "Then they come alive. Every one, animated."
+    for (let i = 0; i < 8; i++) {
+      add(28 + i * 0.5, 28.5 + i * 0.5, (x, s) => {
+        this.sticker(x, this.st(i * 4 + 1), CX + (i % 2 ? 1 : -1) * 40 * s.p, CY, 700 * (1.08 - 0.08 * s.p), s.t + i, { kind: i, live: 1 });
+      }, { bg: PASTEL[i % PASTEL.length], enter: i % 2 ? 'whip' : 'punch' });
+    }
+    add(32, 34, (x, s) => {
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * TAU + s.t * 1.1;
+        this.sticker(x, this.st(i * 3 + 2), CX + Math.cos(a) * 700, CY + Math.sin(a) * 330, 230, s.t, { kind: i, live: 1, pop: outBack(sat((s.lt - i * 0.03) / 0.25)) });
+      }
+      this.word(x, 'Animated.', s.lt, { dot: BLUE, size: 210 });
+    }, { bg: '#FFFFFF' });
+    add(34, 36, (x, s) => {
+      const z = lerp(1.3, 0.95, outCubic(s.p));
+      x.save(); x.translate(CX, CY); x.scale(z, z); x.translate(-CX, -CY);
+      grid3(x, s.t, this.s, 250, 26, 1);
+      x.restore();
+    });
+    for (let i = 0; i < 4; i++) {
+      add(36 + i, 37 + i, (x, s) => {
+        const packs = [this.a, this.o, this.a, this.o];
+        grid3(x, s.t, packs[i]!, 230, 22, 1, CX + (i % 2 ? 1 : -1) * 60 * (s.p - 0.5));
+      }, { bg: PASTEL[(i + 2) % PASTEL.length], enter: 'punch' });
+    }
+
+    // ---------- E. particles (beats 40-52)
+    add(40, 42, (x, s) => {
+      const t0 = B(41);
+      const squash = s.t < t0 ? 1 - 0.12 * sat((s.t - B(40.4)) / (t0 - B(40.4))) : 1 + 0.18 * Math.exp(-(s.t - t0) / 0.08);
       this.burst(x, CX, CY, t0, s.t, { n: 60, seed: 1, power: 1.2 });
       x.save(); x.translate(CX, CY + 260); x.scale(1 / Math.sqrt(squash), squash); x.translate(-CX, -CY - 260);
       this.sticker(x, this.s[8]!, CX, CY, 600, s.t, { kind: 0, live: 0.3 });
       x.restore();
     }, { bg: '#FFFFFF' });
-    add(30, 31, (x, s) => {
-      this.burst(x, CX, CY, B(30), s.t, { n: 70, seed: 2, power: 1.5, ring: false });
+    add(42, 43, (x, s) => {
+      this.burst(x, CX, CY, B(42), s.t, { n: 70, seed: 2, power: 1.5, ring: false });
       this.word(x, 'Particles.', s.lt, { col: '#FFFFFF' });
     }, { bg: BLUE });
     for (let i = 0; i < 4; i++) {
-      add(31 + i, 32 + i, (x, s) => {
-        const t0 = B(31 + i);
+      add(43 + i, 44 + i, (x, s) => {
+        const t0 = B(43 + i);
         this.burst(x, CX, CY, t0, s.t, { n: 55, seed: 10 + i, power: 1.1 });
         this.burst(x, CX, CY, t0 + B(0.5), s.t, { n: 30, seed: 20 + i, power: 0.8, ring: false });
         this.sticker(x, this.st([2, 11, 19, 6][i]!), CX, CY, 560 * (1 + 0.15 * Math.exp(-s.lt / 0.1)), s.t, { kind: i + 1, live: 1 });
       }, { bg: i % 2 ? '#EFF6FF' : '#FFFFFF', enter: 'punch' });
     }
-    add(35, 36, (x, s) => {
-      const spots: [number, number][] = [[480, 380], [1440, 360], [960, 760]];
-      spots.forEach(([px, py], j) => {
-        const t0 = B(35) + j * B(0.25);
+    add(47, 48, (x, s) => {
+      ([[480, 380], [1440, 360], [960, 760]] as [number, number][]).forEach(([px, py], j) => {
+        const t0 = B(47) + j * B(0.25);
         this.burst(x, px, py, t0, s.t, { n: 40, seed: 30 + j, power: 0.9 });
         this.sticker(x, this.st(j * 9 + 4), px, py, 330, s.t, { kind: j, pop: outBack(sat((s.t - t0) / 0.2)) });
       });
     }, { bg: '#FFFFFF' });
-    add(36, 39, (x, s) => {
-      this.chat(x, s.t, { scale: 1.0 + 0.07 * s.p, bubble: PROMPT, sticker: this.s[2]!, stickerT: B(36), hearts: [B(37), B(37.5), B(38)] });
-    }, { enter: 'drop' });
-    add(39, 40, (x, s) => this.word(x, 'In your chat.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
+    for (let i = 0; i < 4; i++) {
+      add(48 + i, 49 + i, (x, s) => {
+        const t0 = B(48 + i);
+        this.burst(x, CX, CY, t0, s.t, { n: 50, seed: 60 + i, power: 1.3, emoji: i % 2 ? ['❤️', '💖', '💙'] : undefined });
+        this.burst(x, CX, CY, t0 + B(0.5), s.t, { n: 26, seed: 70 + i, power: 0.9, ring: false });
+        this.sticker(x, this.st(i * 7 + 8), CX, CY, 520, s.t, { kind: i, live: 1 });
+      }, { bg: i % 2 ? BLUE : '#FFFFFF', enter: 'punch' });
+    }
 
-    // ---------- 6. batching and no dead ends (beats 40-46)
-    add(40, 42, (x, s) => {
+    // ---------- F. export to Mirsal, live (beats 52-60). "Export to Mirsal in one click, and watch it go live."
+    add(52, 54, (x, s) => {
+      const tap = B(53), fly = ease.inCubic(sat((s.t - tap - 0.12) / 0.6));
+      const cw = 620, ch = 760, cx = lerp(CX, 1700, fly), cy = lerp(CY - 30, 120, fly), sc = lerp(1, 0.12, fly);
+      x.save(); x.translate(cx, cy); x.scale(sc, sc);
+      x.save(); x.shadowColor = 'rgba(15,23,42,0.13)'; x.shadowBlur = 60; x.shadowOffsetY = 20;
+      x.fillStyle = '#fff'; rr(x, -cw / 2, -ch / 2, cw, ch, 44); x.fill(); x.restore();
+      x.font = font(F.inter(700), 34); x.fillStyle = INK; x.fillText('Superhero Dubai', -cw / 2 + 40, -ch / 2 + 70);
+      x.font = font(F.inter(400), 24); x.fillStyle = GREY; x.fillText('9 stickers · animated · particles', -cw / 2 + 40, -ch / 2 + 106);
+      grid3(x, s.t, this.s, 160, 14, 1, 0, 0);
+      const press = s.t < tap ? 1 : 1 - 0.1 * Math.sin(sat((s.t - tap) / 0.2) * Math.PI);
+      x.save(); x.translate(0, ch / 2 - 80); x.scale(press, press);
+      x.fillStyle = BLUE; rr(x, -cw / 2 + 40, -40, cw - 80, 80, 40); x.fill();
+      drawOrb(x, -120, 0, 18);
+      x.font = font(F.inter(700), 32); x.fillStyle = '#fff'; x.textBaseline = 'middle'; x.fillText('Export to Mirsal', -86, 2); x.textBaseline = 'alphabetic';
+      x.restore();
+      x.restore();
+      // the Mirsal app icon the pack flies into
+      const ic = outBack(sat((s.t - tap) / 0.3));
+      if (ic > 0) {
+        x.save(); x.translate(1700, 120); x.scale(ic * (1 + 0.15 * Math.exp(-Math.max(0, s.t - tap - 0.72) / 0.1) * (s.t > tap + 0.72 ? 1 : 0)), ic);
+        x.shadowColor = 'rgba(37,99,235,0.3)'; x.shadowBlur = 30; x.shadowOffsetY = 10;
+        x.fillStyle = '#fff'; rr(x, -60, -60, 120, 120, 30); x.fill(); x.shadowColor = 'transparent';
+        drawOrb(x, 0, 0, 40);
+        x.restore();
+      }
+    }, { bg: '#F7F8FA' });
+    add(54, 56, (x, s) => { // the Mirsal sticker panel: the pack arrives, live
+      const W = 760, H = 960, sc = 1.04 + 0.04 * s.p;
+      this.chat(x, s.t, { scale: sc, bubble: undefined });
+      x.save(); x.translate(CX, CY); x.scale(sc, sc); x.translate(-W / 2, -H / 2);
+      x.save(); rr(x, 0, 0, W, H, 54); x.clip();
+      const up = outExpo(sat(s.lt / 0.35)), top = lerp(H, 330, up);
+      x.fillStyle = 'rgba(15,23,42,0.18)'; x.globalAlpha = up; x.fillRect(0, 0, W, H); x.globalAlpha = 1;
+      x.save(); x.shadowColor = 'rgba(15,23,42,0.2)'; x.shadowBlur = 40; x.fillStyle = '#fff'; rr(x, 0, top, W, H - top + 60, 40); x.fill(); x.restore();
+      x.fillStyle = '#CBD5E1'; rr(x, W / 2 - 40, top + 14, 80, 8, 4); x.fill();
+      ['Recent', 'My packs', 'Trending'].forEach((tb, j) => {
+        x.font = font(F.inter(600), 24); x.fillStyle = j === 1 ? BLUE : GREY; x.fillText(tb, 40 + j * 170, top + 72);
+      });
+      x.fillStyle = BLUE; x.fillRect(40, top + 84, 112, 4);
+      x.font = font(F.inter(700), 28); x.fillStyle = INK; x.fillText('Superhero Dubai', 40, top + 140);
+      const live = sat((s.t - B(54.5)) / 0.15);
+      if (live > 0) {
+        const pulse = 1 + 0.08 * Math.sin(s.t * 12);
+        x.save(); x.translate(320, top + 131); x.scale(live * pulse, live * pulse);
+        x.fillStyle = GREEN; rr(x, -6, -20, 96, 38, 19); x.fill();
+        x.fillStyle = '#fff'; x.beginPath(); x.arc(14, -1, 6, 0, TAU); x.fill();
+        x.font = font(F.inter(700), 20); x.fillText('LIVE', 28, 7);
+        x.restore();
+      }
+      for (let i = 0; i < 9; i++) {
+        const pop = outBack(sat((s.t - B(54.6) - i * B(0.125)) / 0.2), 2);
+        const px = 40 + 75 + (i % 4) * 170, py = top + 250 + Math.floor(i / 4) * 170;
+        if (pop > 0 && py < H - 40) { x.fillStyle = '#F1F5F9'; rr(x, px - 75, py - 75, 150, 150, 26); x.fill(); this.sticker(x, this.s[i]!, px, py, 130, s.t, { kind: i, pop }); }
+      }
+      x.restore();
+      // the toast
+      const ta = outBack(sat((s.t - B(54.4)) / 0.3));
+      if (ta > 0) {
+        x.save(); x.translate(W / 2, 40 + 30 * ta); x.globalAlpha = sat(ta);
+        x.shadowColor = 'rgba(15,23,42,0.15)'; x.shadowBlur = 30; x.fillStyle = '#fff'; rr(x, -210, -36, 420, 72, 36); x.fill(); x.shadowColor = 'transparent';
+        this.check(x, -170, 0, 20, 1);
+        x.font = font(F.inter(600), 26); x.fillStyle = INK; x.textBaseline = 'middle'; x.fillText('Added to Mirsal', -136, 2); x.textBaseline = 'alphabetic';
+        x.restore();
+      }
+      x.restore();
+    }, { bg: '#F7F8FA', enter: 'drop' });
+    add(56, 58, (x, s) => this.chat(x, s.t, { scale: 1.0 + 0.07 * s.p, bubble: 'look what I made', sticker: this.s[2]!, stickerT: B(56), hearts: [B(56.6), B(57), B(57.4)] }), { enter: 'punch' });
+    add(58, 60, (x, s) => this.word(x, 'Live in Mirsal.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
+
+    // ---------- G. three at once, no dead ends (beats 60-72)
+    add(60, 63, (x, s) => {
       const packs = [this.s, this.a, this.o], names = ['Superhero Dubai', 'Angel reading', 'Old man, Pixar'];
       for (let j = 0; j < 3; j++) {
-        const t0 = B(40) + j * B(0.5), k = outExpo(sat((s.t - t0) / 0.3));
+        const t0 = B(60) + j * B(0.5), k = outExpo(sat((s.t - t0) / 0.3));
         const cx = 360 + j * 600 + (1 - k) * 1400, cw = 520, chh = 660;
         x.save(); x.shadowColor = 'rgba(15,23,42,0.12)'; x.shadowBlur = 50; x.shadowOffsetY = 18;
         x.fillStyle = '#fff'; rr(x, cx - cw / 2, CY - chh / 2, cw, chh, 40); x.fill(); x.restore();
         for (let i = 0; i < 9; i++) {
           const ts = 140, px = cx - ts - 10 + (i % 3) * (ts + 10), py = CY - 170 + Math.floor(i / 3) * (ts + 10);
           x.fillStyle = '#F1F5F9'; rr(x, px - ts / 2, py - ts / 2, ts, ts, 22); x.fill();
-          const ready = sat((s.t - t0 - 0.15 - i * 0.06) / 0.15);
+          const ready = sat((s.t - t0 - 0.15 - i * 0.08) / 0.15);
           this.sticker(x, packs[j]![i]!, px, py, ts * 0.86, s.t, { kind: i, live: 0.6, pop: outBack(ready) });
         }
         x.font = font(F.inter(600), 28); x.fillStyle = INK; x.fillText(names[j]!, cx - cw / 2 + 36, CY + 250);
-        const bar = sat((s.t - t0) / (B(1.6)));
+        const bar = sat((s.t - t0) / B(2.2));
         x.fillStyle = '#E2E8F0'; rr(x, cx - cw / 2 + 36, CY + 280, cw - 72, 12, 6); x.fill();
         x.fillStyle = bar >= 1 ? GREEN : BLUE; rr(x, cx - cw / 2 + 36, CY + 280, (cw - 72) * bar, 12, 6); x.fill();
       }
       x.font = font(F.inter(700), 34); x.fillStyle = BLUE; x.textAlign = 'center'; x.fillText('3 in flight', CX, 120); x.textAlign = 'left';
     }, { bg: '#F7F8FA' });
-    add(42, 43, (x, s) => this.word(x, 'All at once.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
-    add(43, 45, (x, s) => {
-      const tap = B(44), allowed = sat((s.t - tap) / 0.2), size = 560;
+    add(63, 64, (x, s) => this.word(x, 'All at once.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
+    add(64, 67, (x, s) => {
+      const tap = B(65.6), allowed = sat((s.t - tap) / 0.2), size = 560;
       this.tile(x, CX, CY - 60, size);
       this.sticker(x, this.s[0]!, CX, CY - 60, size * 0.86, s.t, { kind: 2, live: allowed });
       x.save(); rr(x, CX - size / 2, CY - 60 - size / 2, size, size, size * 0.16); x.clip();
@@ -500,7 +592,6 @@ export default class Reel extends Scene {
       x.strokeStyle = allowed > 0.5 ? GREEN : ORANGE; x.lineWidth = 8; rr(x, CX - size / 2, CY - 60 - size / 2, size, size, size * 0.16); x.stroke();
       x.font = font(F.inter(500), 30); x.fillStyle = GREY; x.textAlign = 'center';
       x.fillText(allowed > 0.5 ? 'Allowed by you · Take it back' : 'The cape crosses the edge of its square.', CX, CY + 290);
-      // the button, on the picture
       const press = s.t < tap ? 1 : 1 - 0.12 * Math.sin(sat((s.t - tap) / 0.2) * Math.PI);
       x.save(); x.translate(CX, CY + 150); x.scale(press, press);
       x.fillStyle = allowed > 0.5 ? GREEN : BLUE; rr(x, -170, -38, 340, 76, 38); x.fill();
@@ -509,26 +600,109 @@ export default class Reel extends Scene {
       x.restore(); x.textAlign = 'left';
       this.check(x, CX + size / 2 - 40, CY - 60 - size / 2 + 40, 40, (s.t - tap - 0.1) / 0.2);
     }, { bg: '#FFFFFF' });
-    add(45, 46, (x, s) => this.word(x, 'No dead ends.', s.lt, { dot: BLUE }), { bg: '#FFFFFF' });
-
-    // ---------- 7. hyper montage (beats 46-50): quarter-beat flashes, then bursts
+    add(67, 68, (x, s) => this.word(x, 'No dead ends.', s.lt, { dot: BLUE }), { bg: '#FFFFFF' });
     for (let i = 0; i < 8; i++) {
-      add(46 + i * 0.25, 46.25 + i * 0.25, (x, s) => {
+      add(68 + i * 0.25, 68.25 + i * 0.25, (x, s) => {
         this.sticker(x, this.st(i * 5 + 3), CX, CY, 820, s.t, { kind: i, live: 1, rot: (i % 2 ? 1 : -1) * 0.06 });
       }, { bg: PASTEL[(i + 3) % PASTEL.length], enter: 'none' });
     }
     for (let i = 0; i < 4; i++) {
-      add(48 + i * 0.5, 48.5 + i * 0.5, (x, s) => {
-        const t0 = B(48 + i * 0.5);
-        this.burst(x, CX, CY, t0, s.t, { n: 50, seed: 60 + i, power: 1.3 });
-        this.sticker(x, this.st(i * 7 + 8), CX, CY, 520, s.t, { kind: i, live: 1 });
+      add(70 + i * 0.5, 70.5 + i * 0.5, (x, s) => {
+        this.burst(x, CX, CY, B(70 + i * 0.5), s.t, { n: 50, seed: 80 + i, power: 1.3 });
+        this.sticker(x, this.st(i * 7 + 5), CX, CY, 520, s.t, { kind: i, live: 1 });
       }, { bg: i % 2 ? BLUE : '#FFFFFF', enter: 'punch' });
     }
 
-    // ---------- 8. the words (beats 50-56)
-    add(50, 51, (x, s) => this.word(x, 'Your words.', s.lt, { dot: BLUE }), { bg: '#FFFFFF' });
-    add(51, 52, (x, s) => this.word(x, 'Your taste.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
-    add(52, 54, (x, s) => {
+    // ---------- H. the big section (beats 72-92): taste, team, Trending, the words
+    add(72, 75, (x, s) => { // "It learns your taste"
+      const w = 760, h = 820, x0 = CX - w / 2, y0 = CY - h / 2 + (1 - outExpo(sat(s.lt / 0.35))) * 200;
+      x.save(); x.shadowColor = 'rgba(15,23,42,0.13)'; x.shadowBlur = 60; x.shadowOffsetY = 20;
+      x.fillStyle = '#fff'; rr(x, x0, y0, w, h, 48); x.fill(); x.restore();
+      x.fillStyle = '#CBD5E1'; rr(x, CX - 40, y0 + 16, 80, 8, 4); x.fill();
+      x.font = font(F.inter(800), 40); x.fillStyle = INK; x.fillText('What Mirsal knows about you', x0 + 44, y0 + 96);
+      const rows: [string, string, number][] = [['Name', 'Sara', 72.4], ['City', 'Dubai', 72.9], ['Likes', 'superheroes, coffee', 73.4]];
+      rows.forEach(([k, v, b], j) => {
+        const yy = y0 + 170 + j * 92;
+        x.fillStyle = '#F8FAFC'; rr(x, x0 + 32, yy - 50, w - 64, 78, 20); x.fill();
+        x.font = font(F.inter(500), 28); x.fillStyle = GREY; x.fillText(k, x0 + 60, yy);
+        const n = Math.floor(sat((s.t - B(b)) / 0.3) * v.length);
+        x.fillStyle = INK; x.font = font(F.inter(600), 28); x.fillText(v.slice(0, n), x0 + 220, yy);
+      });
+      x.font = font(F.inter(700), 26); x.fillStyle = GREY; x.fillText('YOUR TASTE', x0 + 44, y0 + 500);
+      x.fillStyle = '#F8FAFC'; rr(x, x0 + 32, y0 + 525, w - 64, 90, 20); x.fill();
+      x.font = font(F.inter(600), 28); x.fillStyle = INK; x.fillText('Cartoonish · asked 2 times', x0 + 60, y0 + 580);
+      const chip = outBack(sat((s.t - B(74)) / 0.3));
+      if (chip > 0) {
+        x.save(); x.translate(x0 + w / 2, y0 + 690); x.scale(chip, chip);
+        x.fillStyle = '#EFF6FF'; rr(x, -260, -36, 520, 72, 36); x.fill();
+        x.font = font(F.inter(600), 26); x.fillStyle = BLUE; x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText('Use cartoonish here?', 0, 2); x.restore();
+        x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+        x.font = font(F.inter(400), 22); x.fillStyle = GREY; x.textAlign = 'center'; x.fillText('Offered, never decided for you.', CX, y0 + 775); x.textAlign = 'left';
+      }
+    }, { bg: '#F7F8FA', enter: 'drop' });
+    add(75, 78, (x, s) => { // "works for your whole team"
+      const w = 1120, h = 760, x0 = CX - w / 2, y0 = CY - h / 2;
+      x.save(); x.shadowColor = 'rgba(15,23,42,0.12)'; x.shadowBlur = 60; x.shadowOffsetY = 20;
+      x.fillStyle = '#fff'; rr(x, x0, y0, w, h, 44); x.fill(); x.restore();
+      x.font = font(F.inter(800), 44); x.fillStyle = INK; x.fillText('Team', x0 + 50, y0 + 84);
+      x.font = font(F.inter(500), 24); x.fillStyle = GREY; x.fillText('credits this month', x0 + w - 300, y0 + 84);
+      const people: [string, string, number][] = [['S', 'Sara', 0.72], ['O', 'Omar', 0.45], ['L', 'Lina', 0.88], ['Y', 'Yousef', 0.3], ['M', 'Maya', -1]];
+      people.forEach(([ini, name, lvl], j) => {
+        const yy = y0 + 170 + j * 116, k = outExpo(sat((s.t - B(75) - j * B(0.25)) / 0.3));
+        x.save(); x.globalAlpha = k; x.translate((1 - k) * 80, 0);
+        x.fillStyle = PASTEL[j]!; x.beginPath(); x.arc(x0 + 90, yy, 38, 0, TAU); x.fill();
+        x.font = font(F.inter(700), 30); x.fillStyle = INK; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(ini, x0 + 90, yy + 1);
+        x.textAlign = 'left'; x.fillText(name, x0 + 150, yy + 1); x.textBaseline = 'alphabetic';
+        if (lvl >= 0) {
+          const fill = lvl * outCubic(sat((s.t - B(75.5) - j * 0.08) / 0.6));
+          x.fillStyle = '#E2E8F0'; rr(x, x0 + 420, yy - 9, 560, 18, 9); x.fill();
+          x.fillStyle = BLUE; rr(x, x0 + 420, yy - 9, 560 * fill, 18, 9); x.fill();
+        } else {
+          const tap = B(76.8), ok = s.t > tap + 0.1;
+          const pr = s.t < tap ? 1 : 1 - 0.1 * Math.sin(sat((s.t - tap) / 0.2) * Math.PI);
+          x.font = font(F.inter(500), 24); x.fillStyle = GREY; x.fillText(ok ? '' : 'waiting for approval', x0 + 420, yy + 9);
+          x.save(); x.translate(x0 + w - 170, yy); x.scale(pr, pr);
+          x.fillStyle = ok ? GREEN : BLUE; rr(x, -110, -32, 220, 64, 32); x.fill();
+          x.font = font(F.inter(600), 26); x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(ok ? 'Approved' : 'Approve', 0, 2);
+          x.restore(); x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+        }
+        x.restore();
+      });
+    }, { bg: '#F7F8FA', enter: 'whip' });
+    add(78, 84, (x, s) => { // "shares the best packs on Trending"
+      const scroll = s.lt * 90;
+      x.font = font(F.inter(800), 64); x.fillStyle = INK; x.fillText('Trending', 160, 150);
+      const packs = [this.s, this.a, this.o, this.a, this.o, this.s, this.o, this.s, this.a];
+      const names = ['Superhero Dubai', 'Angel reading', 'Old man, Pixar', 'Angel moods', 'Grandpa says', 'Hero poses', 'Old man 2', 'Cape life', 'Halo'];
+      for (let j = 0; j < 9; j++) {
+        const col = j % 3, row = Math.floor(j / 3), cw = 500, chh = 420;
+        const cx = 160 + col * (cw + 50), cy = 220 + row * (chh + 40) - scroll;
+        if (cy > 1080 || cy + chh < 0) continue;
+        const k = outExpo(sat((s.t - B(78) - j * 0.05) / 0.35));
+        x.save(); x.globalAlpha = k; x.translate(0, (1 - k) * 60);
+        x.shadowColor = 'rgba(15,23,42,0.1)'; x.shadowBlur = 40; x.shadowOffsetY = 12;
+        x.fillStyle = '#fff'; rr(x, cx, cy, cw, chh, 36); x.fill(); x.shadowColor = 'transparent';
+        for (let i = 0; i < 4; i++) {
+          const px = cx + 70 + i * 120, py = cy + 120;
+          x.fillStyle = '#F1F5F9'; rr(x, px - 52, py - 52, 104, 104, 20); x.fill();
+          this.sticker(x, packs[j]![(i * 2 + j) % 9]!, px, py, 92, s.t, { kind: i + j, live: 1 });
+        }
+        x.font = font(F.inter(700), 30); x.fillStyle = INK; x.fillText(names[j]!, cx + 30, cy + 250);
+        const likes = Math.floor(120 + j * 37 + s.lt * (20 + j * 6));
+        const liked = j === 1 && s.t > B(80.5);
+        x.font = `${30}px "Apple Color Emoji", sans-serif`; x.fillText(liked || j % 3 === 0 ? '❤️' : '🤍', cx + 30, cy + 320);
+        x.font = font(F.inter(600), 26); x.fillStyle = GREY; x.fillText(`${likes + (liked ? 1 : 0)}`, cx + 78, cy + 318);
+        x.fillStyle = BLUE; rr(x, cx + cw - 230, cy + 290, 200, 56, 28); x.fill();
+        x.font = font(F.inter(600), 22); x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Use it', cx + cw - 130, cy + 319);
+        x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+        x.restore();
+        if (j === 1) this.burst(x, cx + 45, cy + 310, B(80.5), s.t, { n: 22, seed: 77, power: 0.4, size: 0.7, g: -0.5, emoji: ['❤️', '💖'], ring: false });
+      }
+    }, { bg: '#F7F8FA', enter: 'drop' });
+    add(84, 85, (x, s) => this.word(x, 'Your words.', s.lt, { dot: BLUE }), { bg: '#FFFFFF' });
+    add(85, 86, (x, s) => this.word(x, 'Your taste.', s.lt, { col: '#FFFFFF' }), { bg: BLUE });
+    add(86, 88, (x, s) => {
       for (let i = 0; i < 14; i++) {
         const fall = (s.lt * (500 + 300 * hash(i, 71)) + hash(i, 72) * 1300) % 1500 - 250;
         this.sticker(x, this.st(i * 2), 120 + hash(i, 73) * 1680, fall, 150 + 90 * hash(i, 74), s.t, { kind: i, rot: (hash(i, 75) - 0.5) * 1.2 });
@@ -536,41 +710,40 @@ export default class Reel extends Scene {
       x.save(); x.fillStyle = 'rgba(247,248,250,0.55)'; x.fillRect(0, 380, 1920, 320); x.restore();
       this.word(x, 'Your stickers.', s.lt, { dot: BLUE });
     }, { bg: '#FFFFFF' });
-    add(54, 56, (x, s) => { // one more request, answered at once
-      const txt = 'make me a falcon pack'.slice(0, Math.floor(sat(s.lt / B(0.9)) * 21));
-      this.pill(x, CX, 840, 1300, 120, txt, s.t, { fs: 46, working: sat((s.t - B(55)) / 0.1), press: 1 });
-      const t0 = B(55);
+    add(88, 92, (x, s) => {
+      const txt = 'make me a falcon pack'.slice(0, Math.floor(sat(s.lt / B(1.2)) * 21));
+      this.pill(x, CX, 840, 1300, 120, txt, s.t, { fs: 46, working: sat((s.t - B(89.5)) / 0.1) * (1 - sat((s.t - B(91)) / 0.2)) });
       for (let i = 0; i < 9; i++) {
-        const pop = outBack(sat((s.t - t0 - i * B(0.125)) / 0.2), 2);
-        const px = CX + ((i % 9) - 4) * 200, py = 400;
+        const pop = outBack(sat((s.t - B(90) - i * B(0.125)) / 0.2), 2);
+        const px = CX + (i - 4) * 200, py = 400;
         if (pop > 0) { x.save(); x.translate(px, py); x.scale(pop, pop); this.tile(x, 0, 0, 180); x.restore(); this.sticker(x, this.st(9 + i), px, py, 160, s.t, { kind: i, pop }); }
       }
     }, { bg: '#F7F8FA' });
 
-    // ---------- 9. the logo (beats 56-64)
-    add(56, 60, (x, s) => {
-      const pull = sat((s.t - B(58.5)) / (B(59.5) - B(58.5)));
-      const orbR = 120 * outBack(sat(s.lt / 0.4)) * (1 + 0.25 * Math.exp(-Math.max(0, s.t - B(59.5)) / 0.12) * (s.t > B(59.5) ? 1 : 0));
-      for (let i = 0; i < 12; i++) {
+    // ---------- I. the logo (beats 92 to the end). "Mirsal Creator. One sentence. One click."
+    const IMP = 95.5;
+    add(92, IMP + 1, (x, s) => {
+      const pull = sat((s.t - B(IMP - 1)) / B(1));
+      const boom = s.t > B(IMP) ? Math.exp(-(s.t - B(IMP)) / 0.12) : 0;
+      const orbR = 120 * outBack(sat(s.lt / 0.4)) * (1 + 0.25 * boom);
+      for (let i = 0; i < 12 && pull < 1; i++) {
         const a = (i / 12) * TAU + s.t * 0.9, rad = lerp(420, 0, ease.inCubic(pull));
-        if (pull >= 1) break;
         this.sticker(x, this.st(i * 2 + 1), CX + Math.cos(a) * rad * 1.5, CY + Math.sin(a) * rad, 180 * (1 - pull * 0.8), s.t, { kind: i, pop: outBack(sat((s.lt - i * 0.04) / 0.3)) });
       }
-      if (s.t > B(59.5)) this.burst(x, CX, CY, B(59.5), s.t, { n: 70, seed: 90, power: 1.3, emoji: ['✨', '💙', '⭐', '💖'], ring: false });
+      if (s.t > B(IMP)) this.burst(x, CX, CY, B(IMP), s.t, { n: 70, seed: 90, power: 1.3, emoji: ['✨', '💙', '⭐', '💖'], ring: false });
       drawOrb(x, CX, CY, orbR);
     }, { bg: '#FFFFFF' });
-    add(60, 64, (x, s) => {
+    add(IMP + 1, 120, (x, s) => {
       const k = outExpo(sat(s.lt / 0.5));
       const fam = F.inter(800), size = 150;
       x.font = font(fam, size); x.letterSpacing = `${-0.02 * size}px`;
       const w = measure('Mirsal Creator', fam, size, -0.02 * size);
-      const total = w + 220, x0 = CX - total / 2;
+      const x0 = CX - (w + 220) / 2;
       drawOrb(x, x0 + 85, CY - 70, 85 * outBack(sat(s.lt / 0.4)));
       x.fillStyle = INK; x.globalAlpha = k; x.textBaseline = 'middle';
       x.fillText('Mirsal Creator', x0 + 220 + (1 - k) * 60, CY - 70);
       x.letterSpacing = '0px'; x.globalAlpha = 1;
-      // the one button
-      const tap = B(62), press = s.t < tap ? 1 : 1 - 0.12 * Math.sin(sat((s.t - tap) / 0.22) * Math.PI);
+      const tap = B(IMP + 4.5), press = s.t < tap ? 1 : 1 - 0.12 * Math.sin(sat((s.t - tap) / 0.22) * Math.PI);
       const ba = outBack(sat((s.lt - 0.35) / 0.35));
       x.save(); x.translate(CX, CY + 150); x.scale(press * ba, press * ba);
       x.shadowColor = 'rgba(37,99,235,0.35)'; x.shadowBlur = 40; x.shadowOffsetY = 14;
@@ -579,9 +752,8 @@ export default class Reel extends Scene {
       x.font = font(F.inter(700), 40); x.fillStyle = '#fff'; x.textAlign = 'center';
       x.fillText('One click', 0, 3);
       x.restore(); x.textAlign = 'left'; x.textBaseline = 'alphabetic';
-      if (s.t > tap) this.burst(x, CX, CY + 130, tap, s.t, { n: 16, seed: 99, power: 0.35, size: 0.55, g: -0.4, emoji: ['✨'], ring: false });
-      // fade out to the stage at the very end
-      const out = sat((s.t - (B(64) - 0.45)) / 0.45);
+      if (s.t > tap) this.burst(x, CX, CY + 150, tap, s.t, { n: 16, seed: 99, power: 0.35, size: 0.55, g: -0.4, emoji: ['✨'], ring: false });
+      const end = this.ctx.end, out = sat((s.t - (end - 0.6)) / 0.6);
       if (out > 0) { x.fillStyle = `rgba(247,248,250,${out})`; x.fillRect(0, 0, 1920, 1080); }
     }, { bg: '#FFFFFF', enter: 'drop' });
     return sh;
@@ -611,7 +783,7 @@ export default class Reel extends Scene {
     const drop = (b: number) => (t >= B(b) ? Math.exp(-(t - B(b)) / 0.09) : 0);
     return {
       zoom: 1 + 0.012 * Math.exp(-lt / 0.07),
-      flash: 0.35 * drop(8) + 0.5 * drop(59.5) + 0.25 * drop(36),
+      flash: 0.35 * drop(8) + 0.5 * drop(95.5) + 0.25 * drop(56) + 0.2 * drop(72),
     };
   }
 }
