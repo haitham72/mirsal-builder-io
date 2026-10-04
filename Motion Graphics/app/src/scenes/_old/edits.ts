@@ -13,15 +13,15 @@
 // 3. "…instead of you manually moving hundreds of keyframes.": a field of 960 keyframe diamonds, a
 //    cursor dragging them one at a time; on "keyframes." the whole field drops away.
 import type * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { Layer2D } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font, measure, plain } from '../engine/type';
-import { type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../engine/util';
-import { sparkHead } from './_motifs';
-import { Cam2D, gridPass, setGrid, drawKaraoke, placeRow, w2s, setWorld, label, mixCss, lineOf, wordOf, pt, drawPen, type KWord, type Cam } from './_vo';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { Layer2D } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font, measure, plain } from '../../engine/type';
+import { type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../../engine/util';
+import { sparkHead } from '../_motifs';
+import { Cam2D, gridPass, setGrid, drawKaraoke, placeRow, w2s, setWorld, label, mixCss, lineOf, wordOf, pt, drawPen, type KWord, type Cam } from '../_vo';
 
 const ARCH = (wd: number, wt: number) => F.archivo(wd, wt);
 const PV = { x: -900, y: -300, w: 840, h: 472 }; // preview frame

@@ -12,19 +12,19 @@
 //    AFTER EFFECTS with packets running; on "not" the pen snips the first link (the halves recoil);
 //    on "MCP." the far nodes are struck out and sink; the camera dives into the CLAUDE node (→ model).
 import type * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { Layer2D, W, H } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font, layout, measure } from '../engine/type';
-import { type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../engine/util';
-import { sparkHead } from './_motifs';
-import { strokeText } from '../engine/stroke';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { Layer2D, W, H } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font, layout, measure } from '../../engine/type';
+import { type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../../engine/util';
+import { sparkHead } from '../_motifs';
+import { strokeText } from '../../engine/stroke';
 import {
   Plot, Cam2D, gridPass, setGrid, drawKaraoke, placeRow, fitRow, drawPen, w2s, setWorld, label, mixCss,
   pt, arc, rectPts, bezier, lineOf, wordOf, type P, type KWord, type Cam,
-} from './_vo';
+} from '../_vo';
 
 const ARCH = (wd: number, wt: number) => F.archivo(wd, wt);
 const WIDTHS = [62, 75, 87.5, 100, 112.5, 125];

@@ -7,14 +7,14 @@
 // 3. "and turned into a video.": the strip collapses into one frame, which becomes a player:
 //    a scrubber, the timecode, and a play triangle that fills in signal on "video".
 import type * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { Layer2D } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font } from '../engine/type';
-import { type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, lerp, prog, pulse, TAU, noise1 } from '../engine/util';
-import { Cam2D, gridPass, setGrid, drawKaraoke, placeRow, w2s, setWorld, label, mixCss, drawPen, lineOf, wordOf, pt, type KWord, type Cam } from './_vo';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { Layer2D } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font } from '../../engine/type';
+import { type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, lerp, prog, pulse, TAU, noise1 } from '../../engine/util';
+import { Cam2D, gridPass, setGrid, drawKaraoke, placeRow, w2s, setWorld, label, mixCss, drawPen, lineOf, wordOf, pt, type KWord, type Cam } from '../_vo';
 
 const ARCH = (wd: number, wt: number) => F.archivo(wd, wt);
 const expo = (u: number) => (u >= 1 ? 1 : 1 - Math.pow(2, -10 * u));

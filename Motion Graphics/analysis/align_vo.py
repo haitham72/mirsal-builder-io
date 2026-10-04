@@ -9,7 +9,7 @@ the voice actually stops, not on its last CTC spike). Display words made of seve
 
 Writes ../data/lyrics.json in the engine's format: { lines: [{ text, start, end, words: [{ w, start, end, syl? }] }] }.
 
-    python -m uv run --no-project --with onnxruntime --with numpy python analysis/align_vo.py
+    uv run --no-project --with onnxruntime --with numpy python analysis/align_vo.py
 """
 import json, re, subprocess, sys
 from pathlib import Path
@@ -25,39 +25,38 @@ FRAME = HOP / SR
 
 # The script, one entry per display line. Words are split on spaces; SPOKEN overrides the spoken form.
 SCRIPT = [
-    "What if I told you… you can create motion graphics like this without even opening After Effects?",
-    "And no — I’m not talking about an After Effects MCP.",
-    "This is Claude Opus 5.5.",
-    "Instead of controlling After Effects, you basically tell Claude what you want the animation to look like.",
-    "For example:",
-    "“Create a 15-second cinematic motion graphics sequence with kinetic typography, smooth shape transitions, 3D elements and seamless camera movement.”",
-    "And this is where it gets crazy.",
-    "Claude doesn’t actually generate an MP4 directly.",
-    "It writes the animation itself as code.",
-    "The text, shapes, positions, easing, transitions, particles — basically every visual element is defined mathematically over time.",
-    "Then that code is rendered frame by frame and turned into a video.",
-    "So instead of: After Effects → layers → keyframes → graph editor → render",
-    "you’re essentially doing: Prompt → code → render → video.",
-    "And because the animation is procedural, you can literally tell Claude:",
-    "“Make this transition smoother.”",
-    "“Change the colour.”",
-    "“Slow this section down.”",
-    "“Make the ending seamlessly loop into the beginning.”",
-    "And it can modify the underlying animation instead of you manually moving hundreds of keyframes.",
-    "Does this replace After Effects?",
-    "Not really.",
-    "But for certain types of motion graphics…",
-    "the fact that you can go from an idea to a working animation without touching a timeline is pretty insane.",
+    # hook
+    "What if one sentence could become a whole sticker pack… already moving, already in your chat?",
+    "No designer. No editing app. Just Mirsal.",
+    # creator: one click
+    "Meet the Mirsal Creator.",
+    "You say what you want, you see the price, and you press one button.",
+    "Turn on “approve for me”, and that one click runs the whole path: sheet, cut, check, approve, animate, pack — and send.",
+    # persona: it learns you
+    "And it gets to know you.",
+    "Tell it your name, where you live, what you love — and it remembers.",
+    "Ask for cartoonish twice, and next time it offers it. It never decides for you.",
+    # batch
+    "Need more than one? Ask for three packs of fruit.",
+    "It picks the subjects, plans each one, shows one price, and runs them all at once.",
+    "Nine stickers a sheet, every frame checked.",
+    # override: no dead ends
+    "And a rejection is never a dead end.",
+    "Every blocked sticker says why, in plain words, and a judgement call gets “Use it anyway” right on the picture.",
+    # users
+    "It’s made for the whole team.",
+    "Everyone signs in, gets approved, and has their own credits and their own work.",
+    "The best packs go to Trending — to like, to comment on, to make your own.",
+    # app: the Mirsal app
+    "This is the piece Mirsal has been waiting for.",
+    "The Creator is an engine with an API, built to live right inside the Mirsal app, next to your chats.",
+    # outro
+    "Your words. Your taste. Your stickers.",
+    "Mirsal Creator — one click.",
 ]
 SPOKEN = {
-    "5.5.": ["FIVE", "POINT", "FIVE"],
-    "MCP.": ["EM", "SEE", "PEE"],
-    "MP4": ["EM", "PEE", "FOUR"],
-    "15-second": ["FIFTEEN", "SECOND"],
-    "3D": ["THREE", "DEE"],
-    "→": ["TO"],
-    "colour.”": ["COLOR"],
     "—": [],  # the dash is the pause between two words
+    "API,": ["AY", "PEE", "EYE"],
 }
 
 

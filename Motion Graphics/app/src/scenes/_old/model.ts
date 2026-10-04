@@ -8,18 +8,18 @@
 //    sentence "what you want the animation to look like." is typed into it as it is said. The left
 //    column dims as the right one takes over.
 import type * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { Layer2D } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font, layout, measure, plain } from '../engine/type';
-import { Lyrics, type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../engine/util';
-import { sparkHead } from './_motifs';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { Layer2D } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font, layout, measure, plain } from '../../engine/type';
+import { Lyrics, type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../../engine/util';
+import { sparkHead } from '../_motifs';
 import {
   Plot, Cam2D, gridPass, setGrid, drawKaraoke, placeRow, fitRow, drawPen, w2s, setWorld, label, mixCss,
   pt, rectPts, lineOf, wordOf, parts, triangle, type P, type KWord, type Cam,
-} from './_vo';
+} from '../_vo';
 
 const ARCH = (wd: number, wt: number) => F.archivo(wd, wt);
 

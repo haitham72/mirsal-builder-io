@@ -7,14 +7,14 @@
 //   2. PROPOSED PROCESS — four boxes, typed the same way; on "video." the NO KEYFRAMES stamp slams.
 // A restless document camera reads along the rows.
 import type * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { FSPass, Layer2D, W, H } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { rgba } from '../engine/palette';
-import { F, font, measure } from '../engine/type';
-import { type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, mulberry32 } from '../engine/util';
-import { Plot, Cam2D, w2s, setWorld, label, mixCss, lineOf, wordOf, pt, type P, type Cam } from './_vo';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { FSPass, Layer2D, W, H } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { rgba } from '../../engine/palette';
+import { F, font, measure } from '../../engine/type';
+import { type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, mulberry32 } from '../../engine/util';
+import { Plot, Cam2D, w2s, setWorld, label, mixCss, lineOf, wordOf, pt, type P, type Cam } from '../_vo';
 
 const PAPER = /* glsl */ `
 uniform vec4 uCam; uniform vec2 uRes;

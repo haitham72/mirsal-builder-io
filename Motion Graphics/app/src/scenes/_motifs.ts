@@ -1,5 +1,5 @@
 // Shared motifs used by several plates so they look identical everywhere:
-//  - the SPARK: orange point with white-hot core, glow, and sputtering particles
+//  - the SPARK, now the Mirsal ORB: a blue halo, a cyan core, a cool white highlight and sputtering particles
 //  - the MASK: the bland "assistant smile" (bone disc, two dots, one curve)
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
@@ -39,35 +39,37 @@ export function sparkParticles(lb: LineBatch, t: number, headAt: (t: number) => 
     const k = 1 - age / lf;
     const heat = k * k;
     const col: [number, number, number] = [
-      (LIN.signal[0] + (1 - LIN.signal[0]) * heat) * 2.2 * I,
-      (LIN.signal[1] + (0.8 - LIN.signal[1]) * heat) * 2.2 * I,
-      (LIN.signal[2] + (0.5 - LIN.signal[2]) * heat) * 2.2 * I,
+      (LIN.signal[0] + (0.75 - LIN.signal[0]) * heat) * 2.6 * I,
+      (LIN.signal[1] + (0.95 - LIN.signal[1]) * heat) * 2.6 * I,
+      (LIN.signal[2] + (1 - LIN.signal[2]) * heat) * 2.6 * I,
     ];
     lb.seg2(x0, y0, x, y, (o.width ?? 1.6) * (0.5 + k * 0.7), col, Math.min(1, k * 1.4));
   }
 }
 
-/** The spark head: a white-hot core and an orange halo (draw after the line it drags). 2D LineBatch. */
+/** The pen head, the Mirsal orb: a blue halo, a cyan core, a cool white highlight (draw after the line it drags). 2D LineBatch. */
 export function sparkHead(lb: LineBatch, x: number, y: number, t: number, scale = 1, intensity = 1) {
   const flick = 0.85 + 0.15 * Math.sin(t * 91.7) * Math.sin(t * 57.3);
   const I = intensity * flick;
   // halo: a few concentric short segments (dots) with decreasing intensity
-  lb.seg2(x, y, x + 0.01, y, 26 * scale, [LIN.signal[0] * 0.5 * I, LIN.signal[1] * 0.5 * I, LIN.signal[2] * 0.5 * I], 0.35);
+  lb.seg2(x, y, x + 0.01, y, 30 * scale, [LIN.signal[0] * 1.4 * I, LIN.signal[1] * 1.4 * I, LIN.signal[2] * 1.4 * I], 0.4);
   lb.seg2(x, y, x + 0.01, y, 12 * scale, [LIN.ember[0] * 2.5 * I, LIN.ember[1] * 2.5 * I, LIN.ember[2] * 2.5 * I], 0.8);
-  lb.seg2(x, y, x + 0.01, y, 5 * scale, [6 * I, 5 * I, 4 * I], 1);
+  lb.seg2(x, y, x + 0.01, y, 5 * scale, [4 * I, 5 * I, 6 * I], 1);
+  // the logo's small highlight, low-left of the core
+  lb.seg2(x - 7 * scale, y + 7 * scale, x - 7 * scale + 0.01, y + 7 * scale, 2.4 * scale, [3 * I, 3.4 * I, 4 * I], 0.9);
   // four tiny rays
   for (let i = 0; i < 4; i++) {
     const a = i * (TAU / 4) + t * 3 + 0.4;
     const r = (9 + 5 * hash(Math.floor(t * 30), i)) * scale;
-    lb.seg2(x, y, x + Math.cos(a) * r, y + Math.sin(a) * r, 1.2 * scale, [3 * I, 1.2 * I, 0.4 * I], 0.8);
+    lb.seg2(x, y, x + Math.cos(a) * r, y + Math.sin(a) * r, 1.2 * scale, [0.5 * I, 1.6 * I, 3 * I], 0.6);
   }
 }
 
 /** Canvas2D version of the spark head (for scenes drawing in 2D layers). Use with additive-ish bloom. */
 export function sparkHead2D(c: CanvasRenderingContext2D, x: number, y: number, t: number, scale = 1) {
   const g = c.createRadialGradient(x, y, 0, x, y, 22 * scale);
-  g.addColorStop(0, 'rgba(255,250,240,1)');
-  g.addColorStop(0.18, 'rgba(255,170,90,0.95)');
+  g.addColorStop(0, 'rgba(240,250,255,1)');
+  g.addColorStop(0.18, rgba('ember', 0.95));
   g.addColorStop(0.45, rgba('signal', 0.45));
   g.addColorStop(1, rgba('signal', 0));
   c.fillStyle = g;

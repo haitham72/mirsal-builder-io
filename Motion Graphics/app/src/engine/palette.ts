@@ -1,17 +1,17 @@
 import { hexToLinear } from './util';
 
-// The whole video lives in a restrained palette: ink, bone, and one signal colour.
-// One rare accent (acid, the shrooms moment) — see docs/TREATMENT.md.
+// The Mirsal palette (README §4.1): a night-navy stage, paper white, and one signal colour,
+// Mirsal blue. AI cyan is the hot core of the orb; gold is the one rare accent.
 export const HEX = {
-  ink: '#0A0A0B', // background black (slightly warm)
-  ink2: '#151517', // raised black (panels, paper-in-the-dark)
-  graphite: '#5E5B57', // dim lines, secondary text
-  ash: '#9C978F', // mid grey
-  bone: '#EEE9DF', // paper white, primary text
-  signal: '#FF4D12', // hazard orange: the spark, the fuse, P(doom)
-  ember: '#FF8A3D', // hotter, lighter orange for cores/highlights
-  blood: '#C21D0B', // deep red-orange for shadows of signal
-  acid: '#D8FF3C', // acid: only for the shrooms moment
+  ink: '#070B16', // stage: deep night navy
+  ink2: '#111A2E', // raised navy: cards, panels, the window frame
+  graphite: '#475569', // dim lines, secondary text (Slate 600)
+  ash: '#94A3B8', // mid grey, unsaid karaoke outlines (Slate 400)
+  bone: '#F7F8FA', // paper white: primary text, light plates (the app's background)
+  signal: '#3B82F6', // Mirsal blue: the said word, the pen, the one button
+  ember: '#22D3EE', // AI cyan: the orb's core, the rolling highlight
+  blood: '#2563EB', // Primary Dark: the shadow side of signal
+  acid: '#F59E0B', // gold, at most once per plate: the falcon's beak, the price, the heart
 } as const;
 
 export type PaletteKey = keyof typeof HEX;

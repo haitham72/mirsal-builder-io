@@ -22,27 +22,29 @@ export function makeTimeline(ly: Lyrics, au: AudioData): TimelineEntry[] {
     return l.start - Math.min(0.18, Math.max(0.04, gap * 0.45));
   };
   const b = {
-    model: cut('This is Claude'),
-    prompt: cut('For example'),
-    crazy: cut('where it gets crazy'),
-    code: cut('It writes the animation'),
-    frames: cut('Then that code'),
-    pipeline: cut('So instead of'),
-    edits: cut('And because the animation'),
-    verdict: cut('Does this replace'),
+    creator: cut('Meet the Mirsal Creator'),
+    persona: cut('And it gets to know you'),
+    batch: cut('Need more than one'),
+    override: cut('a rejection is never'),
+    users: cut('made for the whole team'),
+    app: cut('Mirsal has been waiting'),
+    outro: cut('Your words'),
     end: au.duration,
   };
   const E = (id: string, file: string, start: number, end: number, extra: Partial<TimelineEntry> = {}): TimelineEntry =>
     ({ id, load: scene(file), start, end, ...extra });
+  // A plate without its own scene yet is the rough-cut card (scenes/card.ts) over its own lines. When a
+  // plate's scene is written, point its entry at that file (README §5).
+  const card = (id: string, fig: string, start: number, end: number, lines: string[]) =>
+    E(id, 'card', start, end, { params: { fig, lines } });
   return [
-    E('hook', 'hook', 0, b.model),
-    E('model', 'model', b.model, b.prompt),
-    E('prompt', 'prompt', b.prompt, b.crazy),
-    E('crazy', 'crazy', b.crazy, b.code),
-    E('code', 'code', b.code, b.frames),
-    E('frames', 'frames', b.frames, b.pipeline),
-    E('pipeline', 'pipeline', b.pipeline, b.edits),
-    E('edits', 'edits', b.edits, b.verdict),
-    E('verdict', 'verdict', b.verdict, b.end),
+    card('hook', 'P1 · hook', 0, b.creator, ['What if one sentence', 'No designer']),
+    card('creator', 'P2 · one click', b.creator, b.persona, ['Meet the Mirsal Creator', 'press one button', 'that one click runs']),
+    card('persona', 'P3 · it learns you', b.persona, b.batch, ['And it gets to know you', 'Tell it your name', 'Ask for cartoonish']),
+    card('batch', 'P4 · batching', b.batch, b.override, ['Need more than one', 'It picks the subjects', 'Nine stickers a sheet']),
+    card('override', 'P5 · no dead ends', b.override, b.users, ['a rejection is never', 'Every blocked sticker']),
+    card('users', 'P6 · the whole team', b.users, b.app, ['made for the whole team', 'Everyone signs in', 'The best packs']),
+    card('app', 'P7 · inside Mirsal', b.app, b.outro, ['Mirsal has been waiting', 'The Creator is an engine']),
+    card('outro', 'P8 · one click', b.outro, b.end, ['Your words', 'Mirsal Creator —']),
   ];
 }

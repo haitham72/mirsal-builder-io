@@ -2,7 +2,7 @@
 
 This folder is a motion-as-code kit. Every frame of the film is a deterministic function of time, written in TypeScript and rendered by three.js. The browser preview and the exported MP4 are the same pixels. This guide turns the kit into **the launch film for the Mirsal Creator**, the sticker engine this repo builds for the Mirsal app.
 
-**Where it stands (2026-10-04).** The kit still holds its first film: a 92.6 s explainer called "Motion as Code", with its own voiceover, nine plates and about 500 sound cues. Everything in it works and renders. Nothing Mirsal-specific has been made yet. The steps below replace the voiceover, the script, the palette, the plates and the sound. The engine stays.
+**Where it stands (2026-10-04).** The rough cut plays end to end: the eight plates in order, each a karaoke card (`app/src/scenes/card.ts`) over **provisional word timings** (`analysis/approx_vo.py`, about 106 s), in the Mirsal palette with the orb as the pen. The first film's plates are kept as references in `app/src/scenes/_old/`. **Still to do:** the voiceover (the Haytham voice is in the ElevenLabs account, but a free account cannot use library voices through the API: it needs a paid plan, or a read made in the ElevenLabs web app and saved as `audio/voiceover.mp3`), then the real alignment, the eight plates one by one, the sound and the render. Until then, `audio/voiceover.mp3` is still the old film's read: the preview plays it out of sync, so render drafts with `--noaudio`.
 
 Companion file: [`mirsal-ai-redesign-prompt.md`](mirsal-ai-redesign-prompt.md) holds the prompt for the new look of Mirsal AI, a full redesign of the original Mirsal chat. Plate 7 of the film shows that new look, so both pieces should agree.
 
@@ -359,7 +359,7 @@ All commands run from `Motion Graphics/`. Needed tools: bun, Google Chrome, ffmp
 
 1. **Script**: paste `SCRIPT` and `SPOKEN` (§3) into `analysis/align_vo.py`.
 2. **Voiceover**: §6, after the go-ahead. Result: `audio/voiceover.mp3`.
-3. **Align and analyse**:
+3. **Align and analyse** (before the read exists, `uv run --no-project python analysis/approx_vo.py` writes provisional timings from the same `SCRIPT`, so plates can be built first):
    ```sh
    uv run --no-project --with onnxruntime --with numpy python analysis/align_vo.py
    uv run --no-project --with numpy python analysis/audio_vo.py

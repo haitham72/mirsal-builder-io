@@ -9,15 +9,15 @@
 //    the words slam full-frame, then everything implodes into the spark inside the crop marks:
 //    the first frame of the video, so the end loops into the beginning.
 import * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { FSPass, Layer2D, W, H } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font, layout, measure } from '../engine/type';
-import { type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../engine/util';
-import { sparkHead, sparkParticles } from './_motifs';
-import { Plot, Cam2D, gridPass, setGrid, drawKaraoke, placeRow, w2s, setWorld, label, mixCss, lineOf, wordOf, pt, bezier, drawPen, type KWord, type Cam } from './_vo';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { FSPass, Layer2D, W, H } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font, layout, measure } from '../../engine/type';
+import { type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU } from '../../engine/util';
+import { sparkHead, sparkParticles } from '../_motifs';
+import { Plot, Cam2D, gridPass, setGrid, drawKaraoke, placeRow, w2s, setWorld, label, mixCss, lineOf, wordOf, pt, bezier, drawPen, type KWord, type Cam } from '../_vo';
 
 const PAPER = /* glsl */ `
 uniform vec4 uCam; uniform vec2 uRes;

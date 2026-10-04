@@ -12,18 +12,18 @@
 // to 0 (every element un-builds in reverse) and on "over time" it replays under a scrubbing
 // playhead, with the formula x(t) = x₀ + (x₁ − x₀) · e(t) set beneath in Cormorant italic.
 import type * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { Layer2D } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font, measure } from '../engine/type';
-import { type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, lerp, noise1, prog, pulse, smoothstep, TAU } from '../engine/util';
-import { sparkHead, sparkParticles } from './_motifs';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { Layer2D } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font, measure } from '../../engine/type';
+import { type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, lerp, noise1, prog, pulse, smoothstep, TAU } from '../../engine/util';
+import { sparkHead, sparkParticles } from '../_motifs';
 import {
   Plot, Cam2D, gridPass, setGrid, drawKaraoke, placeRow, drawPen, w2s, setWorld, label, mixCss,
   pt, rectPts, lineOf, wordOf, type P, type KWord, type Cam,
-} from './_vo';
+} from '../_vo';
 
 const ARCH = (wd: number, wt: number) => F.archivo(wd, wt);
 const expo = (u: number) => (u >= 1 ? 1 : 1 - Math.pow(2, -10 * u));

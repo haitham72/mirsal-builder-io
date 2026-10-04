@@ -8,16 +8,16 @@
 // wireframe solids on "3D elements", and an orbit on "seamless camera movement". ⏎ sends it, and the
 // field rushes at the camera into the next plate.
 import * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { Layer2D, W, H } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font, measure, plain } from '../engine/type';
-import { strokeText, type StrokeText } from '../engine/stroke';
-import { Lyrics, type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU, frameIdx } from '../engine/util';
-import { sparkHead, sparkParticles } from './_motifs';
-import { drawKaraoke, placeRow, lineOf, wordOf, label, triangle, returnArrow, mixCss, type KWord, type Cam } from './_vo';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { Layer2D, W, H } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font, measure, plain } from '../../engine/type';
+import { strokeText, type StrokeText } from '../../engine/stroke';
+import { Lyrics, type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU, frameIdx } from '../../engine/util';
+import { sparkHead, sparkParticles } from '../_motifs';
+import { drawKaraoke, placeRow, lineOf, wordOf, label, triangle, returnArrow, mixCss, type KWord, type Cam } from '../_vo';
 import { SPECS, type Cand } from './prompt-data';
 
 interface Tok {

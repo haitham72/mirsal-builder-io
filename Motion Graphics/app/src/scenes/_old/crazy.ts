@@ -7,17 +7,17 @@
 //    letter per spoken part; on "directly." the pen draws the real route — down to a { code } box and
 //    up to the file — and the camera dives into the code box (→ code).
 import * as THREE from 'three';
-import { Scene, type Frame, type PostOverrides } from '../engine/scene';
-import { FSPass, Layer2D, W, H } from '../engine/gl';
-import { LineBatch } from '../engine/lines';
-import { LIN, rgba } from '../engine/palette';
-import { F, font, layout, measure } from '../engine/type';
-import { type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU, frameIdx } from '../engine/util';
+import { Scene, type Frame, type PostOverrides } from '../../engine/scene';
+import { FSPass, Layer2D, W, H } from '../../engine/gl';
+import { LineBatch } from '../../engine/lines';
+import { LIN, rgba } from '../../engine/palette';
+import { F, font, layout, measure } from '../../engine/type';
+import { type Line, type Word } from '../../engine/lyrics';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, TAU, frameIdx } from '../../engine/util';
 import {
   Plot, Cam2D, gridPass, setGrid, drawKaraoke, placeRow, drawPen, w2s, setWorld, label, mixCss,
   pt, rectPts, lineOf, wordOf, parts, returnArrow, type KWord, type Cam,
-} from './_vo';
+} from '../_vo';
 
 const ARCH = (wd: number, wt: number) => F.archivo(wd, wt);
 const WIDTHS = [62, 75, 87.5, 100, 112.5, 125];
