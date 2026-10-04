@@ -38,7 +38,7 @@ export function makeTimeline(ly: Lyrics, au: AudioData): TimelineEntry[] {
   const card = (id: string, fig: string, start: number, end: number, lines: string[]) =>
     E(id, 'card', start, end, { params: { fig, lines } });
   return [
-    card('hook', 'Hook', 0, b.creator, ['What if one sentence', 'No designer']),
+    E('hook', 'hook', 0, b.creator),
     card('creator', 'One click', b.creator, b.persona, ['Meet the Mirsal Creator', 'press one button', 'that one click runs']),
     card('persona', 'It learns you', b.persona, b.batch, ['And it gets to know you', 'Tell it your name', 'Ask for cartoonish']),
     card('batch', 'Batching', b.batch, b.override, ['Need more than one', 'It picks the subjects', 'Nine stickers a sheet']),

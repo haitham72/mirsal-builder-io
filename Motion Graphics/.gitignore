@@ -6,3 +6,4 @@ __pycache__/
 .DS_Store
 # ElevenLabs takes; the chosen one is copied to audio/voiceover.mp3
 audio/takes/
+app/public/stickers/
