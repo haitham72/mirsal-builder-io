@@ -85,3 +85,16 @@ class ParticleRowsTests(SetBase):
         self.assertTrue(row["preview"], "the old burst is the row's preview")
         self.assertEqual(row["motion"]["params"]["count"], 28)
         self.assertTrue((self.out / "effects" / e["id"] / "results" / "R001.webm").is_file(), "nothing is moved or deleted")
+
+    def test_a_drawn_sheet_never_saved_becomes_a_row_and_leaves_the_batch_list(self):
+        from mirsal.flow import pipeline as pl
+        _, gn = self.drawn()
+        self.assertIn(gn, [i["id"] for i in pl.history(self.out, 0, 50)["items"]], "a particle sheet no row holds stays visible")
+        made = ps.adopt_effects(self.out, self.c.lib)
+        self.assertEqual([(m["effect"], m["mode"]) for m in made], [(self.eid, "drawn")])
+        row = self.rows()["rows"][0]
+        self.assertEqual((row["label"], row["n_sprites"]), ("AI image sprites", 4))
+        self.assertTrue(all(not c["missing"] for c in row["sprites"]))
+        self.assertNotIn(gn, [i["id"] for i in pl.history(self.out, 0, 50)["items"]], "held by a row: shown under the sticker, not as a batch")
+        self.assertTrue((self.out / f"G{gn:03d}" / "result.json").is_file(), "nothing is moved or renamed")
+        self.assertEqual(ps.adopt_effects(self.out, self.c.lib), [], "idempotent")

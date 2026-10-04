@@ -1330,11 +1330,14 @@ def save_as_new(out: Path, lib, pid: str, *, motion=None, name=None, user: str =
     return view(out, lib, v["id"])
 
 
-def adopt_effects(out: Path, lib, user: str = "python") -> list[dict]:
+def adopt_effects(out: Path, lib, user: str = "python", cfg=None) -> list[dict]:
     """One-time and idempotent: every older effect run (`E###`) that produced something and was never saved as a set becomes a saved row under the
     stickers it was made for. A Kling run's cut clips become ONE row of animated sprites (never one particle per slice); a simulated run's bursts become
-    the row's renders. Nothing is deleted or paid; the run stays where it is and points at its row (`sets`). Runs that produced nothing are left alone."""
-    from . import effects as fx
+    the row's renders. A run whose AI particle sheet was DRAWN but never saved as a set becomes a row of that sheet's cells; a sheet that an older version cut
+    as stickers is cut again as particles first (free, from the sheet it stores: `pipeline.recut_as_particles`). Nothing is deleted or paid; the run stays where it
+    is and points at its row (`sets`). Runs that produced nothing are left alone."""
+    from . import effects as fx, pipeline
+    from ..engine.config import EngineConfig
     made = []
     for p in sorted(fx.effects_dir(out).glob("E[0-9]*")):
         try:
@@ -1342,6 +1345,20 @@ def adopt_effects(out: Path, lib, user: str = "python") -> list[dict]:
         except (OSError, ValueError):
             continue
         results = [r for r in e.get("results") or [] if r.get("file") and (p / r["file"]).is_file()]
+        sheet = fx.set_of(e) or {}
+        if not e.get("sets") and not results and sheet.get("generation") is not None and sheet.get("status") == "DRAWN":
+            gn = int(sheet["generation"])
+            if pipeline.read_result(out, gn).get("kind") != "particles":
+                pipeline.recut_as_particles(out, gn, cfg or EngineConfig(), by=user)
+            v = set_from_effect(out, lib, p.name, mode="sim", user=user)
+            with _LOCK:
+                s = read(out, v["id"])
+                s["name"] = f"{e.get('pack_name') or 'Particles'} · AI pieces (G{gn:03d})"
+                s["saved_at"] = e.get("created") or s.get("created")
+                hist(s, user, "ADOPT", f"saved as a row from the drawn sheet G{gn:03d} of {p.name}", {"effect": p.name, "generation": f"G{gn:03d}"})
+                _write(out, s)
+            made.append({"effect": p.name, "set": s["id"], "mode": "drawn", "owners": [o["sticker_id"] for o in s.get("owner") or []]})
+            continue
         if e.get("sets") or not results:
             continue
         mode = "video" if any(r.get("mode") == "video" for r in results) else "sim"

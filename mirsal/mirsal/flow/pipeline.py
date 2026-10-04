@@ -1112,12 +1112,32 @@ def _grid_of(res: dict) -> tuple:
         return (3, 3)
 
 
+def _held_by_particle_rows(out: Path) -> set[int]:
+    """The batches that are AI particle sheets already held by a particle set (`out/particles/P###/set.json`: its source or a sheet drawn for it).
+    They are shown inside the sticker's particle rows; a particle sheet no set holds stays in the batch list, so nothing disappears."""
+    from ..runtime import atomic
+    held = set()
+    for f in sorted((out / "particles").glob("P[0-9]*/set.json")):
+        try:
+            s = json.loads(atomic.read_text(f))
+        except (OSError, ValueError):
+            continue
+        for g in [(s.get("source") or {}).get("generation")] + [sh.get("generation") for sh in s.get("sheets") or []]:
+            m = re.match(r"^G?(\d+)$", str(g or "").upper())
+            if m:
+                held.add(int(m.group(1)))
+    return {g for g in held if (gen_dir(out, g) / "result.json").is_file() and read_result(out, g).get("kind") == "particles"}
+
+
 def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
     """Every batch ever made, the most recently EDITED first (any change to a batch counts: a new stroke, an animation, a decision), a page at a time:
     title, times, counts and the stickers as the sheet's own grid (`grid: [rows, cols]`, `cells: [{index, row, col, png, status, animated}]`), so a card
     can draw a 3x3 or a 2x2 exactly as it was cut."""
+    held = _held_by_particle_rows(out)
     stamped = []
     for gid in list_ids(out):
+        if gid in held:                          # a particle sheet a sticker's row holds lives under that sticker, not in this list
+            continue
         try:
             stamped.append(((gen_dir(out, gid) / "result.json").stat().st_mtime, gid))
         except OSError:

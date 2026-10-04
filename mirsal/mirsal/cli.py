@@ -627,7 +627,13 @@ def main(argv=None) -> int:
     if args.cmd == "particles":
         from .flow import particle_sets
         from .media.library import Library
-        made = particle_sets.adopt_effects(out, Library(out))
+        from .runtime.writer_lock import WriterBusy, WriterLock
+        try:
+            with WriterLock(out, "mirsal particles adopt"):      # a drawn sheet may be cut again as particles: result.json has one writer at a time
+                made = particle_sets.adopt_effects(out, Library(out), cfg=cfg)
+        except (WriterBusy, pl.PipelineError) as e:
+            print(f"ERROR   {e}")
+            return 1
         for m in made:
             print(f"{m['effect']} -> {m['set']} ({m['mode']}) under {', '.join(m['owners']) or 'no sticker'}")
         print(f"{len(made)} run(s) adopted" if made else "nothing to adopt")
