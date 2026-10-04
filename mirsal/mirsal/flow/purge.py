@@ -147,6 +147,7 @@ def listing(out: Path, lib) -> dict:
             "totals": {"items": len(items), "batches": len(bs), "packs": len(ps), "stickers": sum(i["stickers"] for i in items),
                        "files": sum(i["files_total"] for i in items), "bytes": sum(i["bytes"] for i in items),
                        "needs_confirm": sum(1 for i in items if i["needs_confirm"]), "blocked": sum(1 for i in items if i["blocked"])},
+            "purge_batches": {"count": sum(1 for i in deletable if i["type"] == "batch"), "phrase": phrase(sum(1 for i in deletable if i["type"] == "batch"))},
             "purge_all": {"count": len(deletable), "phrase": phrase(len(deletable)),
                           "skipped": [{"kind": i["type"], "id": i["id"], "why": i["blocked"] or i["confirm_words"]} for i in items if i not in deletable]},
             "database": purge_rows.usable(out)[1] or "reachable", "purge": last(out), "record": ledger(out, 20)}
@@ -306,17 +307,21 @@ def purge_one(out: Path, lib, kind: str, ident: str, by: str = "human", confirm_
     return _launch(PurgeTask(out, lib, [{"kind": kind, "id": ident}], by, confirm_shared, []))
 
 
-def purge_all(out: Path, lib, confirm: str, by: str = "human", busy: bool = False) -> dict:
+def purge_all(out: Path, lib, confirm: str, by: str = "human", busy: bool = False, kind: str | None = None) -> dict:
     """Delete every item of the trash that needs no confirmation of its own. `confirm` must be the typed phrase `purge N` with N the number of items this call will delete NOW (the trash may have
-    changed since the person looked: then it is 409 and says the new count). Items that need a shared-sticker confirmation or have a job in flight are skipped and listed in `refused`, in words."""
+    changed since the person looked: then it is 409 and says the new count). Items that need a shared-sticker confirmation or have a job in flight are skipped and listed in `refused`, in words.
+    `kind="batch"` is the Earlier-batches column's "Remove all": only the removed batches (their count is `purge_batches` in the listing); trashed packs stay."""
+    if kind not in (None, "batch", "pack"):
+        raise pl.PipelineError("kind must be batch or pack", 400)
     out = Path(out)
     _guard(out, busy)
     now = listing(out, lib)
-    n = now["purge_all"]["count"]
+    skipped = {(s["kind"], s["id"]) for s in now["purge_all"]["skipped"]}
+    pool = [i for i in now["batches"] + now["packs"] if (i["type"], i["id"]) not in skipped and kind in (None, i["type"])]
+    n = len(pool)
     if not n:                                       # re-running "delete all" on a finished purge: nothing to do, and the items that need their own confirmation are listed
         return {"id": None, "status": "done", "total": 0, "done": 0, "items": [], "results": [], "refused": now["purge_all"]["skipped"], "error": None, "nothing_to_do": True}
     if " ".join(str(confirm or "").lower().split()) != phrase(n):
         raise pl.PipelineError(f"Type “{phrase(n)}” to delete {n} item{'s' if n != 1 else ''} for good. (The trash holds {n} that can be deleted now; the number you typed does not match.)", 409)
-    skipped = {(s["kind"], s["id"]) for s in now["purge_all"]["skipped"]}
-    items = [{"kind": i["type"], "id": i["id"]} for i in now["batches"] + now["packs"] if (i["type"], i["id"]) not in skipped]
+    items = [{"kind": i["type"], "id": i["id"]} for i in pool]
     return _launch(PurgeTask(out, lib, items, by, False, now["purge_all"]["skipped"]))

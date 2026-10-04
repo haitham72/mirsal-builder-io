@@ -1543,7 +1543,7 @@ def make_handler(c: Console):
                 if path == "/api/trash/purge":
                     t = purge.purge_one(c.out, c.lib, str(body.get("type") or body.get("kind") or ""), str(body.get("id", "")), by=who, confirm_shared=body.get("confirm_shared") is True, busy=c.lock.locked())
                 else:
-                    t = purge.purge_all(c.out, c.lib, str(body.get("confirm", "")), by=who, busy=c.lock.locked())
+                    t = purge.purge_all(c.out, c.lib, str(body.get("confirm", "")), by=who, busy=c.lock.locked(), kind=body.get("kind") or None)
                 return self._json(200 if t["status"] != "running" else 202, t)
             if path == "/api/plan":      # preview only: nothing is reserved
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))

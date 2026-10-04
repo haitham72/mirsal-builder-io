@@ -269,6 +269,7 @@ class PurgeFlow(Base):
         self.assertGreater(p["bytes"], 0)
         self.assertEqual(lst["totals"]["items"], 2)
         self.assertEqual(lst["purge_all"], {"count": 2, "phrase": "purge 2", "skipped": []})
+        self.assertEqual(lst["purge_batches"], {"count": 1, "phrase": "purge 1"})
 
     def test_listing_with_the_database_off_says_so_and_nothing_needs_a_confirmation(self):
         self.p2.stop()
@@ -353,6 +354,20 @@ class PurgeFlow(Base):
         lst = purge.listing(self.out, self.lib)
         self.assertEqual(lst["purge_all"]["count"], 0, "an item with a job in flight is not in delete all")
         self.assertIn("still working on it", lst["purge_all"]["skipped"][0]["why"])
+
+    def test_remove_all_from_the_batch_column_deletes_only_the_removed_batches_and_their_rows(self):
+        self.remove_batch(1); self.remove_batch(2)
+        pid, _ = self.pack_with("P", 1)
+        self.lib.delete_pack(pid)
+        self.assertEqual(purge.listing(self.out, self.lib)["purge_batches"], {"count": 2, "phrase": "purge 2"})
+        with self.assertRaises(pl.PipelineError) as cm:
+            purge.purge_all(self.out, self.lib, "purge 3", kind="batch")
+        self.assertIn("purge 2", str(cm.exception), "the count is the batches only")
+        v = wait_done(self.out, purge.purge_all(self.out, self.lib, "purge 2", kind="batch"))
+        self.assertEqual((v["status"], v["done"]), ("done", 2))
+        self.assertEqual(pl.removed_ids(self.out), [])
+        self.assertEqual(sorted(self.rows), [1, 2], "their database rows are deleted too")
+        self.assertEqual([p_["id"] for p_ in self.lib.trashed_packs()], [pid], "a trashed pack is not a batch: it stays")
 
     def test_delete_all_needs_the_typed_phrase_naming_the_count_and_compares_it_with_the_trash_now(self):
         self.remove_batch(1); self.remove_batch(2)

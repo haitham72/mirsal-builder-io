@@ -29,11 +29,13 @@ function load(over = {}) {
     api: async url => over.api ? over.api(url) : { ok: true, j: { batches: [] } },
     toast: (m, bad) => log.toasts.push([m, !!bad]),
     saveSes: () => { log.saved++; }, tick: () => { log.ticks++; }, histLoad: () => { log.hist++; },
-    document: { getElementById: () => over.el || null },
+    document: { getElementById: id => (id === 'rem-typed' ? over.typed : over.el) || null },
+    dlg: html => log.dialogs.push([html, 'dlg']), closeDlg: () => { log.closed = (log.closed || 0) + 1; },
   };
   const body = [statement(gen, 'const grmText='), statement(gen, 'ACT.grm='), statement(live, 'const REM='), statement(live, 'async function remLoad('),
-    statement(live, 'function remDraw('), statement(live, 'ACT.grestore=')].join('\n');
-  const f = new Function(...Object.keys(sb), 'const ACT={};\n' + body + '\nreturn {ACT,REM,remDraw,remLoad,grmText};')(...Object.values(sb));
+    statement(live, 'function remDraw('), statement(live, 'function remHtml('), statement(live, 'async function remPurge('), statement(live, 'ACT.gpurge='),
+    statement(live, 'ACT.gpurgeall='), statement(live, 'ACT.gpurgeallgo='), statement(live, 'ACT.grestore=')].join('\n');
+  const f = new Function(...Object.keys(sb), 'const ACT={};\n' + body + '\nreturn {ACT,REM,remDraw,remLoad,remHtml,grmText};')(...Object.values(sb));
   return { ...f, ...sb };
 }
 
@@ -87,4 +89,34 @@ test('an empty trash draws nothing (and a member, who cannot read it, sees nothi
 
 test('with no batch left the Edge strip is emptied AND loses its box styling, so no blank bar stays under the Studio', () => {
   assert.match(live, /if\(!gs\.length\)\{bar\.innerHTML='';bar\.className='';bar\.removeAttribute\('data-built'\)\}/);
+});
+
+test('each removed batch has Restore and Remove, and the list has one Remove all', () => {
+  const h = load();
+  const html = h.remHtml([{ id: 'G006', number: 6, subject: 'cat_pack', removed: 1 }, { id: 'G007', number: 7, removed: 1 }], true);
+  assert.match(html, /data-act=grestore data-n=6>Restore<\/button><button class="btn sm dng" data-act=gpurge data-id=G006>Remove<\/button>/);
+  assert.equal((html.match(/data-act=gpurge /g) || []).length, 2);
+  assert.match(html, /data-act=gpurgeall>Remove all \(2\)</);
+  assert.equal(h.remHtml([], false), '', 'nothing removed: no list at all');
+});
+
+test('Remove deletes that batch for good through the purge route after a confirm', async () => {
+  const h = load({ post: () => ({ ok: true, j: { status: 'done', done: 1 } }) });
+  h.ACT.gpurge({ dataset: { id: 'G006' } }); await h.log.pending;
+  assert.match(h.log.dialogs[0][0], /^Remove G006 for good\? Its files and database rows are deleted/);
+  assert.deepEqual(h.log.posts, [['/api/trash/purge', { type: 'batch', id: 'G006' }]]);
+  assert.deepEqual(h.log.toasts.at(-1), ['G006 removed for good', false]);
+});
+
+test('Remove all asks for the typed phrase of the batches only, then purges batches only', async () => {
+  const h = load({ api: url => url === '/api/trash' ? { ok: true, j: { purge_batches: { count: 2, phrase: 'purge 2' } } } : { ok: true, j: { batches: [] } },
+    post: () => ({ ok: true, j: { status: 'done', done: 2 } }), typed: { value: ' Purge 2 ', focus() {} } });
+  await h.ACT.gpurgeall();
+  assert.match(h.log.dialogs[0][0], /Remove all 2 removed batches for good\?[\s\S]*Type “purge 2”/);
+  await h.ACT.gpurgeallgo({ dataset: { phrase: 'purge 2' } });
+  await new Promise(r => setTimeout(r, 0));
+  assert.deepEqual(h.log.posts, [['/api/trash/purge_all', { confirm: 'purge 2', kind: 'batch' }]]);
+  const wrong = load({ api: () => ({ ok: true, j: {} }), typed: { value: 'purge 3', focus() {} } });
+  wrong.ACT.gpurgeallgo({ dataset: { phrase: 'purge 2' } });
+  assert.deepEqual(wrong.log.posts, [], 'a wrong phrase sends nothing');
 });

@@ -301,7 +301,23 @@ function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class
 const REM={items:[],tried:false};
 async function remLoad(){const r=await api('/api/generations/removed');REM.items=r.ok?r.j.batches:[];REM.tried=true;remDraw()}
 function remDraw(){const el=document.getElementById('c2rem');if(!el)return;const was=el.querySelector('details')&&el.querySelector('details').open;
-  el.innerHTML=REM.items.length?`<details ${was?'open':''}><summary>Removed batches (${REM.items.length})</summary>${REM.items.map(b=>`<div class=rrow><span><b>${esc(b.id)}</b> ${b.subject?esc(String(b.subject).replace(/_/g,' ')):''} <span class=mut>${ago(b.removed)}</span></span><button class="btn sm" data-act=grestore data-n=${b.number}>Restore</button></div>`).join('')}</details>`:''}
+  el.innerHTML=remHtml(REM.items,was)}
+/* each removed batch: Restore (back under its own number) or Remove (gone for good: files and database rows, flow/purge.py); Remove all = every removed batch, trashed packs stay */
+function remHtml(items,open){return items.length?`<details ${open?'open':''}><summary>Removed batches (${items.length})</summary>${items.map(b=>`<div class=rrow><span><b>${esc(b.id)}</b> ${b.subject?esc(String(b.subject).replace(/_/g,' ')):''} <span class=mut>${ago(b.removed)}</span></span><span class=row><button class="btn sm" data-act=grestore data-n=${b.number}>Restore</button><button class="btn sm dng" data-act=gpurge data-id=${esc(b.id)}>Remove</button></span></div>`).join('')}<div class=row style="justify-content:flex-end;padding:8px 0"><button class="btn sm dng" data-act=gpurgeall>Remove all (${items.length})</button></div></details>`:''}
+async function remPurge(url,body){const r=await post(url,body);if(!r.ok){toast(r.j.error||'Nothing was removed',1);return null}
+  let t=r.j;for(let i=0;t&&t.status==='running'&&t.id&&i<240;i++){await new Promise(res=>setTimeout(res,500));const q=await api('/api/trash/purges/'+t.id);if(q.ok)t=q.j}
+  const done=(t&&t.done)||0,refused=(t&&t.refused||[]).length;toast(t&&t.status==='failed'?(t.error||'The removal stopped'):`${done} removed for good${refused?`, ${refused} kept (they need their own decision in Settings > Trash)`:''}`,t&&t.status==='failed');
+  await remLoad();return t}
+ACT.gpurge=el=>{const id=el.dataset.id;confirmDlg(`Remove ${id} for good? Its files and database rows are deleted. This cannot be undone.`,async()=>{const r=await post('/api/trash/purge',{type:'batch',id});
+  if(!r.ok&&r.status===409&&/Confirm to go on/.test(r.j.error||''))return confirmDlg(r.j.error,()=>remPurge('/api/trash/purge',{type:'batch',id,confirm_shared:true}),'Remove anyway');
+  if(!r.ok)return toast(r.j.error||'Nothing was removed',1);let t=r.j;for(let i=0;t.status==='running'&&t.id&&i<240;i++){await new Promise(res=>setTimeout(res,500));const q=await api('/api/trash/purges/'+t.id);if(q.ok)t=q.j}
+  toast(t.status==='failed'?(t.error||'The removal stopped'):`${id} removed for good`,t.status==='failed');await remLoad()},'Remove')};
+ACT.gpurgeall=async()=>{const r=await api('/api/trash');if(!r.ok)return toast(r.j.error||'Could not read the trash',1);const pb=r.j.purge_batches||{count:0};
+  if(!pb.count)return toast('Every removed batch needs its own decision: use Remove on it',1);
+  dlg(`<h2>Remove all ${pb.count} removed batch${pb.count===1?'':'es'} for good?</h2><p>Their files and database rows are deleted. This cannot be undone. Type “${esc(pb.phrase)}” to go on.</p><input type=text id=rem-typed autocomplete=off placeholder="${esc(pb.phrase)}"><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn dng" data-act=gpurgeallgo data-phrase="${esc(pb.phrase)}">Remove all</button></div>`);
+  const i=document.getElementById('rem-typed');if(i)i.focus()};
+ACT.gpurgeallgo=el=>{const i=document.getElementById('rem-typed'),typed=i?i.value.trim().toLowerCase():'';if(typed!==el.dataset.phrase)return toast(`Type exactly “${el.dataset.phrase}” to go on.`,1);
+  closeDlg();remPurge('/api/trash/purge_all',{confirm:typed,kind:'batch'})};
 ACT.grestore=async el=>{const r=await post(`/api/generations/${el.dataset.n}/restore`,{});if(!r.ok){toast(r.j.error,1);return}toast(`${r.j.id} is back`);await remLoad();histLoad(false)};
 function histCol(){const c2=document.getElementById('col2');if(!c2)return;
   if(!c2.querySelector('#c2hist')||c2.dataset.k!=='batches'){c2.dataset.k='batches';c2.innerHTML=histColHTML();const l=document.getElementById('c2hist');
