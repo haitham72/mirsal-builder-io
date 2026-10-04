@@ -37,7 +37,12 @@ from .resolver import DESCRIBE, NAME_QUESTION, Resolution, beyond, classify, is_
 from .profile import profile_said
 from .tools import ConsoleTools, ToolError
 
-INTERRUPTED = "That turn was interrupted before it finished (the server restarted); nothing was spent. Please say it again."
+INTERRUPTED = "That turn was interrupted before it finished (the server restarted). Check the Queue for any job already started before trying again."
+
+
+def _interrupt_message(msg):
+    msg.update(status="error", text=msg.get("text") or INTERRUPTED)
+    msg.setdefault("steps", []).append({"kind": "note", "label": INTERRUPTED, "status": "done"})
 CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
 CREATION_INTENTS = {"NEW", "NEW_MULTI", "ANOTHER", "REFINE", "EDIT_STICKERS", "EDIT_ROUTE", "ANIMATE", "CONFIRM", "EFFECTS", "PARTICLES", "CREATOR", "RETRY"}
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
@@ -164,7 +169,7 @@ class Agent:
             sess = self.store.load(sid)
             for m in sess["messages"]:                           # we hold the lock, so nobody is running a turn: a "working" message is one that died with its server
                 if m.get("status") == "working":
-                    m.update(status="error", text=m.get("text") or INTERRUPTED)
+                    _interrupt_message(m)
             label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "creator_go": "Approve and continue", "creator_stop": "Stop", "creator_skip": "Continue without those", "creator_force": "Continue with them",
         "creator_force_video": "Animate at the new price", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again"}.get((action or {}).get("type"), "")
             self.store.add_message(sess, "user", label)
@@ -268,7 +273,7 @@ class Agent:
                 else:
                     t.intents, t.conf = ["REVIEW"], 0.9
             if t.conf < 0.6 and self.brain.available:
-                got = self.brain.classify(t.text, self._route_context(sess, asked))
+                got = self.brain.classify(t.text, self._route_context(sess, asked), focus=self.store.focus_context(sess))
                 if got:
                     t.intents, t.conf = got, 0.7
             if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "PROFILE", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO"):         # a question ("can you rotate him?") is an ASK until the rules read it
@@ -502,7 +507,8 @@ class Agent:
             if not run:
                 return "none"
             if run["status"] == "running":
-                creator.advance(self.tools, run, sess["settings"].get("allow_vlm") is True, self.tools.telegram_ready)
+                creator.advance(self.tools, run, sess["settings"].get("allow_vlm") is True, self.tools.telegram_ready,
+                                checkpoint=lambda current: self.store.save(sess))
             mark = f"{run['status']}:{run['step']}"
             if run["status"] in ("stopped", "waiting", "done") and run.get("said") != mark:
                 run["said"] = mark
@@ -1275,13 +1281,16 @@ class Agent:
                 sp = editroute.add_to_label(sp, "same look as " + like)
             base = (subj["name"] if subj else "sticker")
             refs, clause = [], None
+            ref_roles = []
             for r in t.res.references:
-                if r["target"] == sid and hasattr(self.tools, "reference_from_sticker"):
+                if r["target"] in (None, sid) and hasattr(self.tools, "reference_from_sticker"):
                     try:
                         refs.append(self.tools.reference_from_sticker(r["source"]))
-                        clause = editroute.reference_clause("like", "") + (f" Also apply this change: {edit}." if edit else "")
+                        ref_roles.append({"source": r["source"], "role": r["role"]})
                     except Exception:
                         pass
+            if ref_roles:
+                clause = editroute.reference_roles_clause(ref_roles, edit)
             if not refs and not fresh:                                      # the sticker as it is, to be changed (a fresh take is drawn from the prompt alone)
                 try:
                     r = self.tools.slice_reference(sid)
@@ -1873,7 +1882,7 @@ def hydrate(store: SessionStore, tools, sess: dict) -> dict:
         sess = store.load(sess["id"])                          # read again: the turn may have finished between the two reads
         for m in sess["messages"]:
             if m.get("status") == "working":
-                m.update(status="error", text=m.get("text") or INTERRUPTED)
+                _interrupt_message(m)
         store.save(sess)
     out = dict(sess)
     msgs = []

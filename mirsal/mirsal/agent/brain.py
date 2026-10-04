@@ -154,8 +154,16 @@ class Brain:
                 return None
 
     # ---- the four jobs ----------------------------------------------------------------------------------------------------------
-    def classify(self, text: str, summary: str) -> list | None:
-        d = self._json("LLM_INTENT", CLASSIFY_SYSTEM, f"What this chat has so far:\n{llm.fence('CHAT', summary)}\n\n{llm.fence('MESSAGE', text, 600)}")
+    def classify(self, text: str, summary: str, focus: dict | None = None) -> list | None:
+        compact = {k: focus.get(k) for k in ("generation", "grid", "style_id", "stickers")} if focus else {}
+        if focus:
+            compact["stickers"] = (focus.get("stickers") or [])[:3]
+            selected = set(compact["stickers"])
+            items = focus.get("items") or []
+            compact["items"] = [{"id": item.get("id"), "key": str(item.get("key") or "")[:80]}
+                                for item in ([x for x in items if x.get("id") in selected] if selected else items)[:3]]
+        context = llm.fence('FOCUS', json.dumps(compact, ensure_ascii=False), 1000) + "\n\n" if focus else ""
+        d = self._json("LLM_INTENT", CLASSIFY_SYSTEM, f"{context}What this chat has so far:\n{llm.fence('CHAT', summary)}\n\n{llm.fence('MESSAGE', text, 600)}")
         if not isinstance(d, dict):
             return None
         got = [str(i).upper() for i in (d.get("intents") or []) if str(i).upper() in INTENTS]

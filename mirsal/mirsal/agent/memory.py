@@ -17,6 +17,7 @@ Memory is STRUCTURED, never "the whole history":
 reference), HIGH (+ prompts and lineage). Never all nine images, never the full history."""
 from __future__ import annotations
 
+import copy
 import json
 import os
 import re
@@ -328,6 +329,26 @@ class SessionStore:
         if was is not bool(value):
             s["vision_ack"] = "allowed" if value else "refused"
 
+    def focus_context(self, s: dict) -> dict:
+        """The focused ids and batch metadata, independent of the capped narrative prompt."""
+        self.refresh(s)
+        focus = copy.deepcopy(s.get("focus") or {"generation": None, "stickers": []})
+        gid = focus.get("generation")
+        if gid:
+            p = next((p for subj in s["subjects"] for p in subj["passes"] if p.get("generation") == gid), {})
+            info = self.outside_info(gid) or p
+            focus.update({k: info.get(k) for k in ("grid", "style_id", "prompt")})
+            focus["items"] = [{k: item.get(k) for k in ("id", "key", "status", "still")}
+                              for item in self.generation_card(gid).get("stickers", [])]
+        return copy.deepcopy(focus)
+
+    def summary_structured(self, s: dict) -> dict:
+        """Detached, queryable memory; no model or text parsing needed."""
+        focus = self.focus_context(s)
+        latest = self.latest_pass(s, with_generation=True) or {}
+        return copy.deepcopy({"subjects": s["subjects"], "focus": focus, "preferences": s["preferences"],
+                              "traits": self.traits(s), "latest_generation": latest.get("generation")})
+
     def summary_text(self, s: dict) -> str:
         """The deterministic per-subject summary: ids, counts, likes and dislikes. This is what every turn starts from."""
         self.refresh(s)
@@ -402,4 +423,6 @@ TRAIT_PATTERNS = {
     "a wider range of emotions": r"(more|wider|different|varied|vary).{0,24}(emotion|feeling|expression|mood)|(emotion|expression).{0,24}(range|variety)",
     "bolder, more expressive faces": r"(more|bigger|bolder).{0,16}(expressive|expression|dramatic|energetic|energy)",
     "no dark outlines": r"(no|never|without).{0,12}(dark|black).{0,8}outline",
+    "an anime-inspired look": r"\b(?:more|want|prefer|use|make).{0,30}\banime\b",
+    "a less cartoony look": r"\b(?:less|not so|too)\s+(?:cartoony|cartoonish)\b",
 }

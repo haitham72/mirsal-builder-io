@@ -18,7 +18,7 @@ through `agent/tools.py`. Nothing is re-implemented.
 
 ## Files
 
-Paths are relative to the Python package `mirsal/mirsal/`.
+Paths below are relative to the repository root.
 
 | file | job |
 |---|---|
@@ -60,13 +60,15 @@ A session is `{id, title, settings, focus, subjects[], preferences, feedback[], 
   G013 (from G012): ...") and **every turn starts from that summary, never from the history**.
 - **`feedback`** is `TEMPORARY` (shapes the *next* generation only, then it is marked used; a disliked sticker's pose goes into that plan as "Avoid the poses of banana flat, banana squashed", not only into a note) or `PERSISTENT` (only when the user says so: "I never want
   dark outlines"). Nothing is inferred about feelings: "I hate 4" is a negative on S4 and nothing more.
-- **traits**: something asked for twice in the user's own words ("a wider range of emotions") becomes a note in the step trace and part of the next plan.
+- **traits**: the fixed regex table recognizes requests for a wider emotional range, bolder expressions, no dark outlines, an anime-inspired look, and a less cartoony look. A matching request must appear in at least two interactions before becoming a note in the next plan. This is a small deterministic vocabulary, not general model-based preference extraction.
 - **reducer**: every 15 interactions the older ones become a short narrative (a model call, or a deterministic digest); the structured summary is rebuilt from
   data each turn, so no id can be lost by a summariser.
 - **outside batches**: `summary_text()` also names the five newest batches the Studio or the command line made (generations this chat never recorded as a pass, only those the caller may see), so "what did you just create" has an answer. The chat can talk about them, and naming one adopts it ("Studio batches" above).
 - **bounded**: a session keeps its newest 400 messages, 300 interactions (only already-summarised ones are dropped, `summary.upto` follows) and 200 feedback entries (`memory.MAX_*`); subjects, passes and likes are never trimmed. Message and interaction ids come from the last id, not from the length, so they stay unique.
-- **a turn that died with its server** (a daemon thread has no other witness) leaves a message with `status: working` and no lock holder: `hydrate` (every poll) and the next `prepare` mark it `error` ("interrupted, nothing was spent"), so the page stops waiting and the next message goes through.
+- **a turn that died with its server** leaves a message with `status: working`. Once its session lock is free, `hydrate` or the next `prepare` marks it `error`, preserves the saved trace, and appends one interruption note directing the person to check the Queue before retrying. It makes no promise that nothing was spent: a job may already exist. With real Redis, a dead server's lock can remain until its TTL expires.
 - Postgres mirror (`migrations/004_sessions.sql`): `sessions`, `interactions`, `feedback` (one row per sticker), `generation_references` ("make 5 like 2").
+
+**Structured access and routing.** `summary_structured()` returns a detached dictionary of subjects/passes, focus, preferences, repeated traits and the latest completed generation. `focus_context()` reads focus id, selected sticker ids, grid/style and sticker keys. On a low-confidence turn, `Brain.classify` receives a separate focus fence before the chat summary: at most three selected sticker ids and three keys, capped at 1,000 characters. It carries no images or full sticker prompts. The chat summary is rendered from structured state; `llm.fence('CHAT', ...)` still caps that prose at 2,000 characters. `_route_context` already includes the profile, last question and held plan. There is no LangGraph checkpointer or automatic replay of a crashed turn.
 
 ## The step trace
 
@@ -84,7 +86,7 @@ The small queue the chat shows while the agent works (`message.steps[]`, `{kind,
 └  plan ready · about 2 credits
 ```
 
-While the agent works the last row reads "Thinking"; when it is done the trace collapses to one line ("5 steps · plan ready") that opens it again. The page polls the
+`Trace._add` saves the session after each appended step. A restart retains the steps already written; the work between saves cannot be reconstructed. While the agent works the last row reads "Thinking"; when it is done the trace collapses to one line ("5 steps · plan ready") that opens it again. The page polls the
 session while anything still moves: only the **newest** assistant message holds the live plan card (the pending Create), and a read or paint that fails is retried
 instead of ending the polling (a frame that throws must never freeze the chat on "Thinking").
 
@@ -146,7 +148,7 @@ cleared by the next success); `GET /api/chat/agent` returns it as `agent_status`
 **The person's choice: Auto / Local / Cloud (2026-10-02).** One setting for the plan expansion, the chat's brain and the vision judge: the engine pill in the chat header opens the settings, whose "AI engine" row
 saves it (`POST /api/ai/backend {backend}`, owner only, stored in `out/ai_backend.json`; `MIRSAL_AI_BACKEND` overrides; `GET /api/ai` and `GET /api/chat/agent` return the choice and what is available, with the plain reason when not).
 `local` and `cloud` are used as chosen and never fall back to the other one (a down backend says so). `auto` picks the free local model when LM Studio answers, otherwise the cloud, and then KEEPS that for 10 minutes
-(`llm.resolve`): it used to be decided again on every call from a probe that is wrong while LM Studio is busy, so it alternated; a failed call (`llm.note_failure`) moves it, and `llm.complete` retries that one call on the other backend.
+(`llm.resolve`): it used to be decided again on every call from a probe that is wrong while LM Studio is busy, so it alternated; a failed call (`llm.note_failure`) moves it. `llm.complete` retries the same call once on the other backend only when no explicit provider was passed and both the process provider and saved backend choice are Auto. With a usable cloud key, the first local attempt gets at most 15 seconds (`MIRSAL_AUTO_LOCAL_TIMEOUT`); the fallback gets only the time remaining from the caller's total timeout. Local-only calls retain their full timeout. `Brain._ask` currently passes an explicit resolved provider with a 45-second timeout: it falls back to rules on that call's failure and may change the kept backend for a later call; it does not use this same-call budget split.
 An explicit `MIRSAL_LLM_PROVIDER` / `MIRSAL_AGENT_PROVIDER` / `MIRSAL_VISION_PROVIDER` other than `auto` still wins (the test suite pins them to `none`). Embeddings are not part of this choice: their vectors only compare with vectors of the same model.
 
 **Why a plan took minutes and ended in a red "not valid JSON" (fixed).** Measured on 2026-10-02: LM Studio no longer honours `reasoning_effort: none`, `/no_think` or `enable_thinking` for `qwen3.5-4b:2`; it spent the whole 2500-token budget
@@ -179,36 +181,21 @@ and **Approve everything for me** (bypass) on/off. Stored in the session's `sett
 
 With the creator on, a request gets ONE plan card: the price of the whole run (`sheet + animation`, each from the provider's own cost call), "then straight to Telegram", and the buttons "Create and send to Telegram / Not yet". The click is the only go-ahead; after it
 the run is a state machine over the `tools` interface (the engine functions the Studio's buttons call): `sheet > cut and check > look at the pictures > approve > [animate > approve the animations] > pack > Telegram`, stored in `sess["creator_run"]` and advanced by
-`Agent.creator_tick` (the session's lock, one step at a time), which `Console.drive_creator` calls every 2.5 s in a thread of its own until the run is `done`, `stopped`, `waiting` or `failed` (one driver per chat; the poll of the chat resumes a run after a restart).
+`Agent.creator_tick` (the session's lock, advancing as many steps as are immediately possible), which `Console.drive_creator` calls every 2.5 s in a thread of its own until the run is `done`, `stopped`, `waiting` or `failed` (one driver per chat; the poll of the chat resumes a run after a restart).
 Each stop or finish is a message of its own in the chat, with the buttons for what to do next; the card shows the steps.
 
 - **Bypass on**: the person's standing approval is used at G2 (stills), G4 (animations) and G5 (pack); each is a human decision in the batch's history with the note "agentic creator: the person's standing approval". **Bypass off**: the run stops at G2 and G4 and waits for one click
   ("Approve and continue", or typing "continue").
-- **Any rejection stops the run, with or without bypass**: a cell Python blocked (a block is final: "Continue without S4" drops it, nothing forces it), a sticker the vision judge would reject (it only advises: "Continue without S2" rejects it by the person's decision, "Continue with them" keeps it),
+- **Any rejection stops the run, with or without bypass**: a cell Python blocked (judgement calls offer "Use it anyway"; Telegram limits or an empty cell offer an explanation and a way to drop it), a sticker the vision judge would reject (it only advises: "Continue without S2" rejects it by the person's decision, "Continue with them" keeps it),
   an animation Python blocked, a failed job, a sheet Python blocked (with the "Try the sheet again" button; the run follows the new sheet), a Telegram pack the platform would refuse, Telegram not connected (the pack stays in the library; "Try again" sends it). Nothing is deleted.
 
-### A rejection in the creator is never a dead end (2026-10-03, Haitham)
+### Creator overrides and recovery
 
-Reproduced with the real server: a creator run stopped on a Python-blocked cell and the chat offered only **Continue without S4** and **Stop** — no way to allow it, and the stop card carried no picture at all. Rule 10 says both are wrong: a judgement-call block must be allow-able in place, and a person cannot judge what they cannot see.
+`_stop_blocked` offers `creator_allow` for the indexes returned by `tools.allowable`, plus skip and stop. Technical blocks explain why they cannot be allowed. `resume` records pending allow/unallow actions; `_run_allows` calls the same free engine override as Studio. `_creator_say` attaches the generation card beside the run card, so the rejected picture and its override are visible. Video-sheet overrides are handled separately by `_stop_sheet`. These controls are built, not a pending creator redesign.
 
-**What is wrong today** (`agent/creator.py`):
+`advance(..., checkpoint=...)` saves before work and after each step, including changes that leave step/status unchanged, such as setting `video_job`. The console's in-process animation call tags the durable job request with `creator_run` and invokes `on_job` after writing the job file but before scheduling provider fulfilment. The callback saves the run's job pointer. If that pointer was not saved, `ConsoleTools.creator_job` can recover the same user's tagged video job on the next tick, without starting a replacement animation. These keywords are internal; HTTP bodies cannot choose a creator tag or callback.
 
-- `cut` on a Python-blocked cell (`:118-124`) stops with chips `creator_skip` / `creator_stop`. There is no allow chip, so a judgement call (a character touching its cell, a hole, `no_spill`) can only be dropped, never used — even though `gates.allow_stills` would allow exactly that and for free.
-- `video` on a blocked animation (`:166-170`) is the same: `creator_skip` / `creator_stop`, never "use it anyway", although `inside_slot`, `cross_slot` and `loop_seam` are overridable.
-- `resume` (`:195-219`) knows `creator_force`, which only clears the *vision* rejection by moving the step; it never calls the allow route.
-- The stop message (`_creator_say`, `graph.py:463-472`) attaches **only** the `creator` card. `runHTML` (`agent.js:202-207`) renders steps and the sentence, no carousel: the person is told S4 is rejected without seeing it.
-
-**What it must be** (engine first, `CLAUDE.md` rule 11; the engine half is already built and only needs exposing):
-
-1. `ConsoleTools.allow(gid, indexes, kind, allow)` -> `gates.check_allow` + `gates.allow_cells` (free, a re-cut from the stored sheet / video), the same call the Studio's tile makes. `FakeTools` records it in `calls`.
-2. The `cut` stop carries `Use it anyway` for every blocked sticker whose block is **overridable** (`gates.allowable(res, True, "still")`) and `Take it back` for the allowed ones; the same for `approve_anim` on animations (`gates.allowable(res, True, "animation")`). A **technical** block (Telegram's own limits) or a cell with no picture offers no allow and says why in words — never a dead word like "a block is final".
-3. The creator's chips become `creator_allow` / `creator_unallow` with the indexes, handled in `resume` like `creator_skip` (so the override is a recorded human decision in the sticker's history, `actor human`, and reversible).
-4. **The picture travels with the message.** `_creator_say` attaches the generation card next to the creator card, so `runHTML` is followed by the real carousel: the rejected cells are visible, marked with the locked issue colours (red = dropped or blocked, `docs/design.md` §2), with the override on each tile.
-5. **One allow block, on the card.** `ConsoleTools.generation` returns the batch's `allow` = exactly `gates.allow_info` (per kind `still` / `animation`: `can[]`, `allowed[]`, `undo[]`, `why{}`, `final{}`, index lists), the block the Studio's route sends; stickers carry only `waived`. The chat tile and the creator's bulk pair read it from the card's own data (`agent.js` `tileHTML` / `runHTML(run, allow)`): no extra request, no cache.
-6. **The AI section is always retrievable.** The vision verdict is stored, not thrown away: the stop message lists the judge's reasons per sticker (`judge.reasons[]` in plain words) whatever the run does next, and the chat keeps a way to read the full verdict later. A judge that failed to run says so instead of leaving the run as if all were approved.
-7. **One bulk control on the creator's card**: `Use all anyway (N)` / `Take all back (N)` over whatever is allow-able now, mirroring the Studio's `allowAllRow` (which today covers animations only — stills are open there too, `docs/engine-and-studio.md`).
-
-Tests: `tests/test_creator.py` gains the case that drove this — a Python-blocked cell offers allow, allowing it (`creator_allow`) puts the sticker back in the set and the run finishes to Telegram, and a *technical* block offers no allow.
+Restart driving still begins on the next chat poll, after the session lock is available. A tagged job left REQUESTED before scheduling, or a failed/timed-out ticket, may still need Queue recovery. This is a checkpoint/link fix, not a guarantee of automatic recovery at every external side effect. Ticket-first protects replay of the same job id; it does not deduplicate a newly created job id. Paid live crash validation remains outstanding.
 
 
 - **Money**: nothing is spent before the click; the run makes exactly one sheet call and, for `Full video`, one animation call. If the animation's price is more than 25% above the one shown, the run stops BEFORE sending it ("Animate for about N" is the person's new go-ahead). The server-side
@@ -230,7 +217,7 @@ The verdict is a history line with `actor = 'vlm'` at the same gate (it shows in
 parsed tolerantly, validated, repaired once, and on failure the sticker is **unjudged** (`FAIL_CLOSED`, the default; `DETERMINISTIC_ONLY` says nothing). Verdicts are cached in
 Redis by image hash + model + judge version + context; calls are limited by `VISION_CONCURRENCY` (2). `recovery.plan_recovery` turns the rejections into a
 **recommendation** (regenerate 1-2 cells as 1x1, or a new sheet after more than 2 rejected, at most 3 sheets and 2 attempts per cell; one sheet with the other key colour
-on a colour problem) and spends nothing. **Uncalibrated** until Haitham labels 30 stickers (`docs/measurements.md`).
+on a colour problem) and spends nothing. **Uncalibrated** until Haitham labels 30 stickers (`docs/measurements.md`, W11). There is no `vision/calibrate.py` or `mirsal judge calibrate` command in the current build; do not present the report's suggested command as runnable. Labels and agreement measurement remain an operator task, not a correctness defect in pre-review.
 
 **Consent.** Sending a picture to a vision model is the one thing that moves image content to a model (LM Studio locally, OpenAI when the vision provider is the cloud), so it needs the person's yes, asked **once** ("Allow AI vision of generated media?"), never per run. The rule lives where the model would be called (`vision/consent.py`: `require(allowed)`, `allowed` must be exactly `True`), not in a screen: `judge_generation` and `transcribe.captions_for` raise `ConsentRequired` before any image is read for a model, and the HTTP routes turn it into `409 {error, consent_required: true}` (`POST /api/generations/{id}/judge` and `.../captions` need `allow_vlm: true` in the body). The operator's CLI (`mirsal judge`) is an explicit command and passes it. In the chat the answer is `settings.allow_vlm` (`None` = not asked, `True`, `False`), changed by the single AI vision switch under the first answer (a settings-only press, which flips on a second press), by the pending "Allow AI vision / Not now" pair of a describe or names request, or by typing "allow AI vision" / "don't use AI vision"; the Studio keeps it in `localStorage` `mirsal.allow_vlm`.
 
@@ -375,6 +362,10 @@ Send a library sticker from the tray, its carousel, or the simulator's Test in c
 The message does not cache a set choice. There is no unrelated focused/session-set fallback; unassigned stickers return `{set:null,url:null}` and retain their ordinary heart reaction. Old local messages missing library IDs omit particle playback. Per-message request tokens and a chat-clear epoch reject late previews and pending Echo replies after clear. No preview response repaints a different screen. This path spends nothing and does not add a rendered sticker to a pack.
 
 Node regressions in `tests/js/chat_particles.test.js` cover identity preservation, current-assignment lookup, outgoing-sticker overlay, replay after changed assignment, clear/late-response handling and old-message compatibility. Endpoint and scratch-browser validation belong to the integration acceptance gate.
+
+## Reference roles in numbered edits
+
+`resolver.resolve` already records reference roles. Numbered edits now attach references whose target is the edited sticker or unspecified, and `reference_roles_clause` binds each attached image's order to its requested style, pose, expression, colour, composition, subject or motion. For example, "make 5 with the style from S2 and pose from number 7" edits S5 alone and sends two references with separate style and pose instructions. Reference-source numbers are excluded from ordinary target-number resolution. A single STYLE reference retains the existing "make 5 like 2" clause. This covers explicit supported role syntax; general natural-language role inference and visual success remain unmeasured.
 
 ## Edits by what they mean (2026-10-03, UI/UX spec P11-P13)
 

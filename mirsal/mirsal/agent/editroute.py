@@ -131,6 +131,8 @@ def classify_edit(text: str) -> dict | None:
     t = _norm(text)
     if not t or NOT_AN_EDIT.search(t):
         return None
+    if re.search(r"\b(?:style|pose|expression|face|colou?r|composition|subject|character|animation|motion)\s+(?:from|of)\s+(?:the\s+)?(?:number\s+|#|s)?(?:\d|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last)\b", t):
+        return None                                  # the numbered-reference edit node binds each image to its requested role
     ops = [name for name, rx in EDITOR if re.search(rx, t)]
     if ops:
         return {"route": "editor", "case": None, "ops": ops, "subject": None, "action": None, "delta": None}
@@ -172,6 +174,20 @@ def reference_clause(case: str, what: str, slice_: bool = False) -> str | None:
 def sends_image(case: str) -> bool:
     """(a) and (b) send the sheet; (c) sends no picture."""
     return case in ("tweak", "action")
+
+
+def reference_roles_clause(references: list[dict], change: str = "") -> str:
+    """Bind each attached image's position to the explicitly requested role."""
+    if len(references) == 1 and references[0]["role"] == "STYLE":
+        return reference_clause("like", "") + (f" Also apply this change: {change}." if change else "")
+    roles = {"STYLE": "design, colours, proportions and style", "POSE": "pose only", "EXPRESSION": "facial expression only",
+             "COLOR": "colours only", "COMPOSITION": "composition only", "SUBJECT": "character identity only", "ANIMATION": "motion only"}
+    clauses = [f"Reference image {i}: use its {roles.get(r['role'], r['role'].lower())} (from {r['source']})."
+               for i, r in enumerate(references, 1)]
+    clauses.append("Keep the other details from the prompt.")
+    if change:
+        clauses.append(f"Apply this change: {change}.")
+    return " ".join(clauses)
 
 
 def plan_for(plan: dict, case: str, *, subject: str | None = None, action: str | None = None, delta: str | None = None, said: str = "") -> dict:

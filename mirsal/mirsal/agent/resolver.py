@@ -147,7 +147,8 @@ def resolve(text: str, ctx: dict) -> Resolution:
         r.references = [{"source": f"{base}/S{m[2]}", "target": f"{base}/S{m[1]}", "role": "STYLE"}]
         r.stickers = [f"{base}/S{m[1]}"]
         r.generation, r.how = base, "make A like B"
-    for m in re.finditer(r"\b(style|pose|expression|face|colou?r|composition|subject|character|animation|motion)\s+(?:from|of)\s+(?:the\s+)?(?:number\s+|#)?(\d|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last)\b", low):
+    role_rx = r"\b(style|pose|expression|face|colou?r|composition|subject|character|animation|motion)\s+(?:from|of)\s+(?:the\s+)?(?:number\s+|#|s)?(\d|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last)\b"
+    for m in re.finditer(role_rx, low):
         num = _numbers(m[2], base_n)
         if num and base:
             r.references.append({"source": f"{base}/S{num[0]}", "target": None, "role": ROLES[m[1]]})
@@ -171,7 +172,7 @@ def resolve(text: str, ctx: dict) -> Resolution:
 
     # 4. plain numbers ("make number 3 happier", "animate 2 and 5")
     if base and not r.stickers:
-        nums = _numbers(low, base_n)
+        nums = _numbers(re.sub(role_rx, "", low), base_n)
         if nums:
             r.stickers = [f"{base}/S{i}" for i in nums]
             r.how = "number"

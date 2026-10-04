@@ -71,3 +71,7 @@ For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` 
   art), duration_s 3, last_frame_equals_first}` -> one video, attached by ticket and sliced (S4).
 - `single`: 1x1 regeneration of one rejected sticker, with the first approved sticker as reference
   when the provider supports it.
+
+## Timeout recovery is already available
+
+The Queue, Studio job panel and chat job cards share `console/job-recovery.js`. **Continue · same ticket** calls `POST /api/jobs/{id}/continue`, through `generation/recovery.continue_job`, `jobs.resume` and provider fulfilment. It waits on the stored ticket; **Retry · SPENDS** prices and confirms a new request. Do not replace Continue with an automatic paid retry. The remaining W5 check is against real Higgsfield, not a missing route or button.

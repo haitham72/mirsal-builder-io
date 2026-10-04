@@ -469,4 +469,6 @@ The "Batman Lego pieces" sheet (G100) came back from the image model with random
 a sticker batch still blocks, a particle batch cuts exact equal cells with a 2% inset that wipes the divider). The ways out are: cut it again as particles (`POST /api/generations/{id}/recut_particles`, free), allow the cell (`Use it anyway`), or open the slice
 in the editor, erase the lines and save: the batch's sheet is rebuilt with that slice fixed and keeps its S#.
 
+Separator cleanup remains an explicit recut-as-particles or editor operation. There is no automatic grey/white-line interpolation pass: colour alone cannot distinguish a divider from light artwork, and replacing whole rows would destroy valid cells.
+
 The particle entry carries the batch or library sticker scope. Approve as a pack offers the existing modal scoped to the batch and returns to particles when adding succeeds. It spends nothing.

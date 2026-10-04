@@ -26,6 +26,8 @@ short report full of reproduced facts beats a long one of opinions.
 
 ## 0. Ground rules (read twice)
 
+**Evidence order:** current code and call sites, relevant existing tests, area documentation, open trackers, then earlier reports. Distinguish `resolver.classify` (rule inputs) from `Brain.classify` (model context), structured stored memory from its rendered prompt, and saved trace steps from unfinished work. Check the existing Check/Continue/Retry UI and routes before reporting recovery as missing. Identify exact crash windows; ticket-first only protects the same job id. A fake-provider pass is not paid live validation or production-readiness evidence. W11 labels and separator cleanup are operator/design constraints; do not invent a calibration command or propose blind pixel interpolation. Confirm a cited API exists before suggesting code that calls it. Treat review snippets and line numbers as leads to verify, not specifications to copy.
+
 1. **Read-only except your report.** Update only `docs/review.md`: refresh its
    verdict, claims and findings tables in place and append the dated entry to
    its §9 log. Do not create dated copies, edit code, commit, push, install

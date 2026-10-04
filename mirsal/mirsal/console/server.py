@@ -380,7 +380,7 @@ class Console:
         except (OSError, ValueError):
             raise pl.PipelineError("That batch has no saved plan to start from", 404)
 
-    def live(self, what, body, base_plan=None, particles=None):
+    def live(self, what, body, base_plan=None, particles=None, *, creator_run=None, on_job=None):
         """Live generation through the Higgsfield CLI. `cost` estimates, `sheet` reserves a task (the G1 approval) and starts the sheet job,
         `video` starts the Kling job for a built video sheet. The job runs in the background; the page polls /api/jobs/<id>.
         `particles` ({effect, elements}, in-process only, never from HTTP) marks a sheet as the particle set of an effect: the batch is a particle batch (exact equal cells, no sticker rule blocks a
@@ -465,7 +465,10 @@ class Console:
             reserved = self.reserve(who, est)
             job = jobs.create(self.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
                 "model": model, "options": body.get("options") or {}, "prompt": custom or self.video_prompt_for(gid, aid, loop), "custom_prompt": bool(custom),
-                "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop, "user": who["id"], **({"reserved": reserved} if reserved else {})})
+                "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop, "user": who["id"],
+                **({"creator_run": creator_run} if creator_run else {}), **({"reserved": reserved} if reserved else {})})
+            if on_job:
+                on_job(job)
             self.fulfil_async(job["id"], after=self.attach_video_from_job)
             return {"job": job["id"], "estimate": est, "model": model, "params": params}
         except (higgsfield.HiggsError, jobs.JobError, model_catalog.CatalogError) as e:

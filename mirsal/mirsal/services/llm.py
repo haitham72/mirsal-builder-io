@@ -443,8 +443,19 @@ def complete(system: str, user: str, *, provider_: str | None = None, **kw) -> t
     if provider_:
         return _complete_on(provider_, system, user, **kw)
     prov = provider()
+    from ..runtime import envfile
+    auto = envfile.choice("MIRSAL_LLM_PROVIDER") == "auto" and preference() == "auto"
+    budget = float(kw.get("timeout", 60.0))
+    started = time.monotonic()
+    attempt_kw = dict(kw)
+    if auto and prov == "local" and _usable("openai"):
+        try:
+            local_budget = max(1.0, float(os.environ.get("MIRSAL_AUTO_LOCAL_TIMEOUT", "15")))
+        except ValueError:
+            local_budget = 15.0
+        attempt_kw["timeout"] = min(budget, local_budget)
     try:
-        return _complete_on(prov, system, user, **kw)
+        return _complete_on(prov, system, user, **attempt_kw)
     except LLMError:
         from ..runtime import envfile
         if prov == "none" or envfile.choice("MIRSAL_LLM_PROVIDER") != "auto" or preference() != "auto":
@@ -453,7 +464,10 @@ def complete(system: str, user: str, *, provider_: str | None = None, **kw) -> t
         other = provider()
         if other in ("none", prov):
             raise
-        return _complete_on(other, system, user, **{**kw, "model_": None, "base_url": None})
+        remaining = budget - (time.monotonic() - started)
+        if remaining <= 0:
+            raise
+        return _complete_on(other, system, user, **{**kw, "timeout": remaining, "model_": None, "base_url": None})
 
 
 def _complete_on(prov: str, system: str, user: str, *, max_tokens: int = 2500, timeout: float = 60.0, temperature: float = 0.8,

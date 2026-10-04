@@ -14,7 +14,8 @@ sticker the vision judge rejected, an animation that is blocked or out of bounds
 the next step as buttons (continue without those stickers, redo, stop). Nothing is half-sent: Telegram is the last step.
 
 The module is a state machine over the `tools` interface of `agent/tools.py` (the same engine functions the Studio's buttons call; `FakeTools` in the tests). `advance` does every
-step that is possible right now and returns; the server calls it again until the run is `done`, `stopped` or `failed` (`Console.drive_creator`). It is idempotent: a restart resumes the run."""
+step that is possible right now and returns; the server calls it again until the run is `done`, `stopped` or `failed` (`Console.drive_creator`). A checkpoint saves each step; tagged video jobs
+recover a lost run/job pointer. Restart driving begins on the next poll; other external-side-effect crash windows may still need Queue recovery."""
 from __future__ import annotations
 
 import time
@@ -120,33 +121,43 @@ def _stop_sheet(tools, run, card):
     return True
 
 
-def advance(tools, run: dict, vision_allowed: bool, telegram_ready) -> dict:
-    """Do every step that is possible right now. `telegram_ready() -> (bool, reason)`. Never raises for a normal problem: it stops the run and says why."""
+def advance(tools, run: dict, vision_allowed: bool, telegram_ready, checkpoint=None) -> dict:
+    """Advance possible steps; checkpoint(run) persists before/after work. Ordinary tool failures stop the run; persistence failures may raise."""
     for _ in range(40):                                            # a bound: one call never loops for ever
         if run["status"] in ("done", "stopped", "failed") or run["status"] == "waiting":
             return run
+        if checkpoint:
+            checkpoint(run)
         if run.get("awaiting_sheet_allow"):
             if getattr(tools, "processing", lambda: False)():
                 return run
             run.pop("awaiting_sheet_allow", None)
         if run.get("pending_allow"):                              # a permission the person gave: do it, then judge what came back
             _run_allows(tools, run)
+            if checkpoint:
+                checkpoint(run)
             if run["status"] != "running" or run.get("awaiting_sheet_allow"):
                 return run
         before = (run["step"], run["status"])
         try:
-            _step(tools, run, vision_allowed, telegram_ready)
+            _step(tools, run, vision_allowed, telegram_ready, checkpoint)
         except Exception as e:                                     # an engine error is a stop with its words, not a crash of the server
             code = getattr(e, "code", 500)
             if code < 500 and run.get("generation"):
                 try:
                     if _stop_sheet(tools, run, tools.generation(run["generation"])):
+                        if checkpoint:
+                            checkpoint(run)
                         return run
                 except Exception:
                     pass
             _stop(run, f"{e}" if code < 500 else f"something went wrong ({type(e).__name__}); nothing more was spent", [{"label": "Stop", "action": "creator_stop"}], "error")
             run["status"] = "failed" if code >= 500 else "stopped"
+            if checkpoint:
+                checkpoint(run)
             return run
+        if checkpoint:
+            checkpoint(run)
         if (run["step"], run["status"]) == before:                 # nothing moved: it is waiting for something outside (a job, an animation)
             return run
     return run
@@ -156,7 +167,7 @@ def _ready(card: dict) -> list:
     return [s for s in card["stickers"] if s["status"] == "READY"]
 
 
-def _step(tools, run, vision_allowed, telegram_ready):
+def _step(tools, run, vision_allowed, telegram_ready, checkpoint=None):
     step, gid = run["step"], run["generation"]
     if step == "sheet":
         if run["generation"]:
@@ -204,6 +215,10 @@ def _step(tools, run, vision_allowed, telegram_ready):
             tools.review(gid, "APPROVE", ready, NOTE)
         return _go(run, "video" if run["scope"] == "video" else "pack", f"approved {len(ready)} stickers")
     if step == "video":
+        if not run["video_job"]:
+            existing = getattr(tools, "creator_job", lambda rid: None)(run["id"])
+            if existing:
+                run["video_job"] = existing["id"]
         if _stop_sheet(tools, run, card):
             return
         if not run["video_job"]:
@@ -212,7 +227,12 @@ def _step(tools, run, vision_allowed, telegram_ready):
             if est is not None and budget is not None and est > budget * VIDEO_OVER + 0.5:
                 return _stop(run, f"the animation now costs about {est:g} credits, more than the {budget:g} you were shown. Nothing was spent on it.",
                              [{"label": f"Animate for about {est:g}", "action": "creator_force_video"}, {"label": "Stop", "action": "creator_stop"}], "price")
-            r = tools.animate(gid)
+            def created(job):
+                run["video_job"] = job["id"]
+                if checkpoint:
+                    checkpoint(run)
+
+            r = tools.animate(gid, creator_run=run["id"], on_job=created)
             run["video_job"] = r.get("job")
             _log(run, "animation started" + (f" (about {r['estimate']:g} credits)" if r.get("estimate") else ""))
             return

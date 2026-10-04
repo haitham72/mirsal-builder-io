@@ -298,12 +298,18 @@ class ConsoleTools:
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
 
-    def animate(self, gid: str, loop: bool = False) -> dict:
+    def creator_job(self, run_id: str) -> dict | None:
+        from ..generation import jobs
+        return next((j for j in jobs.list(self.out) if j["kind"] == "video" and
+                     (j.get("request") or {}).get("creator_run") == run_id and
+                     (j.get("request") or {}).get("user") == self.user["id"]), None)
+
+    def animate(self, gid: str, loop: bool = False, *, creator_run=None, on_job=None) -> dict:
         """One click, as the Studio's animate button: approve the kept stills, build and approve the video sheet, start Kling."""
         self._see(gid)
         self._may_spend()
         try:
-            r = self.c.live("video", {"generation": int(gid[1:]), "loop": loop})
+            r = self.c.live("video", {"generation": int(gid[1:]), "loop": loop}, creator_run=creator_run, on_job=on_job)
             return {"job": r["job"], "estimate": r.get("estimate")}
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
@@ -710,9 +716,18 @@ class FakeTools:
         self.n_gens += 1
         return {"generation": f"G{self.n_gens:03d}"}
 
-    def animate(self, gid, loop=False):
+    def creator_job(self, run_id):
+        return getattr(self, "creator_jobs", {}).get(run_id)
+
+    def animate(self, gid, loop=False, *, creator_run=None, on_job=None):
         self.calls.append(("animate", gid))
         self.n_jobs += 1
+        if creator_run:
+            if not hasattr(self, "creator_jobs"):
+                self.creator_jobs = {}
+            self.creator_jobs[creator_run] = {"id": f"J{self.n_jobs:03d}", "status": "CLAIMED"}
+        if on_job:
+            on_job({"id": f"J{self.n_jobs:03d}"})
         return {"job": f"J{self.n_jobs:03d}", "estimate": 9.0}
 
     def review(self, gid, decision, indexes, note="", gate="still"):
