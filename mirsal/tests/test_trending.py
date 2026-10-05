@@ -1,5 +1,4 @@
-"""Trending (flow/trending.py, docs/api.md, Office accounts on the LAN): the owner or an admin shares a pack; everyone signed in likes, comments and uses it; the three
-orders; an unshared pack's files stay private; Use in my workflow copies the pack for the owner and gives a member a prompt and a reference. No provider."""
+"""Personal Libraries and public packs: maker sharing, privacy, attention and free workflow copies. No provider."""
 import http.client
 import json
 import os
@@ -47,7 +46,7 @@ class TrendingEngineTests(unittest.TestCase):
         tr.unshare(self.out, self.b["id"])
         with self.assertRaises(tr.TrendingError):
             tr.file_of(self.out, self.lib, self.b["id"], self.b["cover"] or "x")
-        self.assertEqual(tr.score({"shared": {"p": {"at": 0}}, "likes": {}, "comments": {}}, "p", now=5 * 86400), 2.0, "half its weight after five days")
+        self.assertEqual(tr.score({"shared": {"p": {"at": 0}}, "likes": {}, "comments": {}, "uses": {"p": [{"at": 0}]}}, "p", now=5 * 86400), 2.0, "a use loses half its weight after five days")
 
     def test_use_copies_for_the_owner_and_gives_a_member_a_prompt_and_a_reference(self):
         tr.share(self.out, self.lib, self.a["id"], "local")
@@ -57,6 +56,39 @@ class TrendingEngineTests(unittest.TestCase):
         self.assertEqual(copy["stickers"][0]["source"]["shared_from"], self.a["id"])
         prompt, data, name = tr.as_request(self.out, self.lib, self.a["id"])
         self.assertEqual((prompt, data[:4]), ("Cats", b"\x89PNG"))
+
+    def test_owner_filter_and_views_relative_to_other_public_packs(self):
+        own = self.lib.create_pack("Member pack", owner="U1")
+        self.assertEqual([p["id"] for p in self.lib.snapshot(owner="U1")["packs"]], [own["id"]])
+        self.assertNotIn(own["id"], [p["id"] for p in self.lib.snapshot(owner="local")["packs"]])
+        from mirsal.agent.tools import ConsoleTools
+        from types import SimpleNamespace
+        c = SimpleNamespace(out=self.out, lib=self.lib)
+        self.assertNotIn(own["id"], [p["id"] for p in ConsoleTools(c).packs()])
+        for p in (self.a, self.b):
+            tr.share(self.out, self.lib, p["id"], "local")
+        with mock.patch.object(tr.time, "time", return_value=100):
+            self.assertFalse(tr.view(self.out, self.lib, self.a["id"], "local")["counted"])
+            self.assertTrue(tr.view(self.out, self.lib, self.a["id"], "U1")["counted"])
+            self.assertFalse(tr.view(self.out, self.lib, self.a["id"], "U1")["counted"])
+            rows = tr.listing(self.out, self.lib, "U1")
+            self.assertEqual(rows[0]["score"], 4.0, "twice average attention, weighted by two")
+            tr.view(self.out, self.lib, self.b["id"], "U2")
+            self.assertEqual([r["score"] for r in tr.listing(self.out, self.lib, "U1")], [2.0, 2.0])
+        with mock.patch.object(tr.time, "time", return_value=86500):
+            self.assertTrue(tr.view(self.out, self.lib, self.a["id"], "U1")["counted"])
+        cp = tr.copy_pack(self.out, self.lib, self.a["id"], "U1")
+        self.assertTrue(self.lib.owns(cp["pack_id"], "U1"))
+        self.assertEqual(tr.detail(self.out, self.lib, self.a["id"], "U1")["uses"], 1)
+
+    def test_add_creates_a_pack_for_the_caller_even_from_another_persons_batch(self):
+        from mirsal.flow import gates, pipeline as pl
+        res = {"generation_id": "G001", "owner": "U1", "reviews": {"plan": {"decision": "APPROVE"}}, "video_sheets": [],
+               "stickers": [{"index": 1, "status": "READY", "anim_status": "NOT_REQUESTED", "review": {"still": "APPROVED"}}]}
+        with mock.patch.object(pl, "read_result", return_value=res), mock.patch.object(pl, "write_result"), mock.patch.object(pl, "emit"), mock.patch.object(self.lib, "add_from_generation"):
+            added = gates.quick_add(self.out, 1, self.lib, pack_name="Caller copy", owner="local")
+        self.assertTrue(self.lib.owns(added["pack_id"], "local"))
+        self.assertEqual(self.lib.snapshot(owner="U1")["packs"], [])
 
 
 class TrendingRouteTests(unittest.TestCase):
@@ -102,19 +134,38 @@ class TrendingRouteTests(unittest.TestCase):
 
     def test_the_owner_shares_a_member_likes_comments_sees_files_and_uses_it(self):
         _, tok = self.c.users.login("m@nadi.ae", "password1")
-        self.assertEqual(self.req("POST", f"/api/trending/{self.pid}/share", cookie=tok)[0], 403, "a member does not share")
+        self.assertEqual(self.req("POST", f"/api/trending/{self.pid}/share", cookie=tok)[0], 404, "a member cannot share another maker's pack")
         self.assertEqual(self.req("GET", f"/api/trending/{self.pid}/file/{self.sid}", cookie=tok)[0], 404, "not shared: private")
         self.assertEqual(self.req("POST", f"/api/trending/{self.pid}/share", owner=True)[0], 200)
         code, j = self.req("GET", "/api/trending", cookie=tok)
-        self.assertEqual((code, [p["pack_id"] for p in j["packs"]], j["can_share"]), (200, [self.pid], False))
+        self.assertEqual((code, [p["pack_id"] for p in j["packs"]], j["can_share"]), (200, [self.pid], True))
         self.assertEqual(self.req("POST", f"/api/trending/{self.pid}/like", cookie=tok)[1], {"likes": 1})
         code, cm = self.req("POST", f"/api/trending/{self.pid}/comments", {"text": "beautiful"}, cookie=tok)
         self.assertEqual((code, cm["name"]), (201, "Mona"))
         code, data = self.req("GET", f"/api/trending/{self.pid}/file/{self.sid}", cookie=tok)
         self.assertEqual((code, bytes(data[:4])), (200, b"\x89PNG"))
         code, use = self.req("POST", f"/api/trending/{self.pid}/use", cookie=tok)
-        self.assertEqual((code, use["prompt"], len(use["refs"])), (200, "Falcons", 1), "a member: a prompt and the cover as a reference")
+        self.assertEqual((code, use["copied"]["name"]), (201, "Falcons (from Trending)"), "a member: a copy in their library")
+        self.assertNotIn(use["copied"]["pack_id"], [p["id"] for p in self.req("GET", "/api/library", owner=True)[1]["packs"]])
         code, use = self.req("POST", f"/api/trending/{self.pid}/use", owner=True)
         self.assertEqual((code, use["copied"]["name"]), (201, "Falcons (from Trending)"), "the owner: a copy in the library")
         self.assertEqual(self.req("POST", f"/api/trending/{self.pid}/comments", {"text": ""}, cookie=tok)[0], 400)
         self.assertEqual(self.req("GET", "/api/trending")[0], 401, "signed out: nothing")
+
+    def test_private_packs_files_and_member_sharing(self):
+        _, tok = self.c.users.login("m@nadi.ae", "password1")
+        code, p = self.req("POST", "/api/packs", {"name": "Mona private"}, cookie=tok)
+        self.assertEqual(code, 200)
+        self.assertEqual(p["owner"], self.c.users.by_email("m@nadi.ae")["id"])
+        s = self.c.lib.add_bytes(p["id"], sticker_png(), "png", "own", "static", "🙂")
+        self.assertEqual(self.req("GET", "/lib/" + s["file"], cookie=tok)[0], 200)
+        self.assertEqual(self.req("GET", "/lib/" + s["file"], owner=True)[0], 404)
+        self.assertEqual(self.req("POST", f"/api/packs/{p['id']}", {"name": "steal"}, owner=True)[0], 404)
+        self.assertEqual(self.req("POST", f"/api/packs/{p['id']}/merge", {"into": self.pid}, cookie=tok)[0], 404)
+        self.assertEqual(self.req("POST", f"/api/packs/{p['id']}/stickers/{s['id']}/move", {"to": self.pid}, cookie=tok)[0], 404)
+        self.assertEqual(self.req("POST", "/api/stickers/move", {"to": self.pid, "items": [{"pack_id": p["id"], "id": s["id"]}]}, cookie=tok)[0], 404)
+        self.assertEqual(self.req("GET", f"/api/packs/{p['id']}/telegram", cookie=tok)[0], 403)
+        self.assertEqual(self.req("POST", f"/api/trending/{p['id']}/share", cookie=tok)[0], 200)
+        self.assertEqual(self.req("GET", "/api/v1/trending", cookie=tok)[0], 200)
+        self.assertEqual(self.req("POST", f"/api/trending/{p['id']}/view", cookie=tok)[1]["counted"], False)
+        self.assertEqual(self.req("POST", f"/api/trending/{p['id']}/unshare", owner=True)[0], 200)

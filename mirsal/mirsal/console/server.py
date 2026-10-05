@@ -30,10 +30,10 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"studio.css": "text/css", "app.js": "text/javascript", "users.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "trash.js": "text/javascript", "tickets.js": "text/javascript", "auth.js": "text/javascript", "trending.js": "text/javascript", "sheet-recovery.js": "text/javascript", "job-recovery.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+UI_FILES = {"imports.js": "text/javascript", "studio.css": "text/css", "app.js": "text/javascript", "users.js": "text/javascript", "generate.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "live.js": "text/javascript", "composer.js": "text/javascript", "trash.js": "text/javascript", "tickets.js": "text/javascript", "auth.js": "text/javascript", "trending.js": "text/javascript", "sheet-recovery.js": "text/javascript", "job-recovery.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
 
 
-# What a `member` may reach (owners reach everything). Anything not listed here is owner-only: the library, packs, projects, Telegram, watch folders,
+# What a `member` may reach. Library packs/files are checked separately for every caller. Anything not listed here is owner-only: projects, Telegram, watch folders,
 # usage and balance, tasks, the operator's job actions and the user list. Generation paths are checked for ownership too (a stranger's batch is a 404).
 _GEN_PATH = re.compile(r"^/api/generations/(\d+)(?:/(\w+))?$")
 NO_ROUTE = "no such route"                    # what a URL the server does not serve answers (a missing batch / pack / job says so in its own words); tests/test_openapi.py probes every documented route for it
@@ -42,7 +42,7 @@ _RID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 _LOG_IDS = (re.compile(r"^/api/generations/(\d+)"), "generation_id", "G"), (re.compile(r"^/api/chat/sessions/(S\d+)"), "session_id", "")
 _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)(?:-[A-Za-z0-9_-]+)?/")
-MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck"}
+MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck", "add", "pack_add"}
 MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
 MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs"}
 MEMBER_POST = {"/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
@@ -775,7 +775,27 @@ def make_handler(c: Console):
                                         client_ip=self.client_address[0], lan=c.lan)
 
         def _authorize(self, user: dict, path: str):
-            """None = allowed, else (status, body). Owners may do everything; a member reaches the chat, search, and what they own."""
+            """None = allowed, else (status, body). Pack privacy applies to every role; members reach chat, search and their own work."""
+            # Library privacy applies to the owner too. Public media uses Trending routes.
+            if path == "/api/library" and self.command == "GET":
+                return (403, {"error": "waiting for approval"}) if user.get("status") == "pending" else None
+            parts = path.strip("/").split("/")
+            if parts[:2] == ["api", "packs"]:
+                if user.get("status") == "pending":
+                    return 403, {"error": "waiting for approval"}
+                if len(parts) == 2:
+                    return None if self.command == "POST" else (404, {"error": "not found"})
+                if len(parts) == 3 and self.command == "GET":       # no such route for any pack: the handler answers NO_ROUTE, which says nothing about the id
+                    return None
+                if not c.lib.owns(parts[2], user["id"], trash=parts[-1] == "restore"):
+                    return 404, {"error": "not found"}
+                if parts[-1] in ("telegram", "telegram.zip") and user.get("role") != "owner":
+                    return 403, {"error": "Telegram sending is available to the owner only"}
+                return None
+            if path.startswith("/lib/"):
+                return None if user.get("status") != "pending" and c.lib.owns_file(path[5:], user["id"]) else (404, {"error": "not found"})
+            if path in ("/api/stickers/move", "/api/stickers/delete") and user.get("status") != "pending":
+                return None
             if user.get("role") == "owner":
                 return None
             if user.get("status") == "pending":          # signed up, not approved yet: the page shows Waiting for approval and nothing else
@@ -1010,7 +1030,7 @@ def make_handler(c: Console):
                 ct = UI_FILES[path[4:]]
                 return self._send(200, (UI / path[4:]).read_bytes(), ct if ct.startswith("font") else ct + "; charset=utf-8")
             if path == "/api/library":
-                snap = c.lib.snapshot()
+                snap = c.lib.snapshot(owner=self.user["id"])
                 from ..flow import groups as _groups       # the Library sits the packs of one batch group together (flow/groups.pack_groups)
                 pg = _groups.pack_groups(c.out, snap["packs"])
                 leads = _groups.pack_leads(snap["packs"], pg)
@@ -1117,6 +1137,8 @@ def make_handler(c: Console):
             if path == "/api/history":              # the Studio's persistent history of batches, a page at a time
                 q = parse_qs(urlparse(self.path).query)
                 return self._json(200, pl.history(c.out, int(q.get("offset", ["0"])[0]), int(q.get("limit", ["5"])[0])))
+            if path == "/api/higgsfield/history":  # Higgsfield's own recent jobs, each marked when Mirsal already has it (free, read-only: `generate list`)
+                return self._json(200, self._hf_history(int(parse_qs(urlparse(self.path).query).get("size", ["40"])[0] or 40)))
             if path == "/api/higgsfield":          # is the CLI there, the balance, today's spend (never a credential)
                 return self._json(200, c.hf_account())
             if path == "/api/models":              # the selector: curated models + every other Higgsfield model, and the style presets
@@ -1475,14 +1497,17 @@ def make_handler(c: Console):
             if parts[:2] != ["api", "packs"]:
                 return False
             if len(parts) == 2:
-                self._json(200, lib.create_pack(self._body().get("name", "")))
+                self._json(200, lib.create_pack(self._body().get("name", ""), owner=self.user["id"]))
             elif len(parts) == 3:
                 b = self._body()
                 self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order"), b.get("lead")))
             elif len(parts) == 4 and parts[3] == "delete":      # SOFT: to the trash, restorable (GET /api/trash lists it; POST /api/trash/purge deletes for good)
                 self._json(200, lib.delete_pack(parts[2], by=self.user.get("id") or "human"))
             elif len(parts) == 4 and parts[3] == "merge":       # fold this pack into another: animated stills upgrade their twins, the rest moves, the empty pack goes to the trash
-                self._json(200, lib.merge_pack(parts[2], str(self._body().get("into") or ""), by=self.user.get("id") or "human"))
+                into = str(self._body().get("into") or "")
+                if not lib.owns(into, self.user["id"]):
+                    raise pl.PipelineError("not found", 404)
+                self._json(200, lib.merge_pack(parts[2], into, by=self.user["id"]))
             elif len(parts) == 4 and parts[3] == "restore":     # back from the trash under the same id
                 self._json(200, lib.restore_pack(parts[2]))
             elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)
@@ -1491,6 +1516,8 @@ def make_handler(c: Console):
             elif len(parts) == 4 and parts[3] == "stickers":
                 b = self._body()
                 g = b.get("from_generation") or {}
+                if not c.visible(self.user, int(g["id"])):
+                    raise pl.PipelineError("not found", 404)
                 self._json(200, lib.add_from_generation(c.out, parts[2], int(g["id"]), int(g["index"]), g.get("kind", "static")))
             elif len(parts) == 4 and parts[3] == "render":   # raw PNG body = the editor's 512x512 canvas
                 self._json(200, lib.add_render(parts[2], self._raw(), query.get("name", ["sticker"])[0], query.get("emoji", ["🙂"])[0], c.cfg,
@@ -1515,12 +1542,40 @@ def make_handler(c: Console):
                     self.end_headers()
                     self.wfile.write(data)
             elif len(parts) == 6 and parts[3] == "stickers" and parts[5] == "move":
-                self._json(200, lib.move_sticker(parts[2], parts[4], str(self._body().get("to", ""))))
+                to = str(self._body().get("to", ""))
+                if not lib.owns(to, self.user["id"]):
+                    raise pl.PipelineError("not found", 404)
+                self._json(200, lib.move_sticker(parts[2], parts[4], to))
             elif len(parts) == 6 and parts[3] == "stickers" and parts[5] == "delete":
                 lib.delete_sticker(parts[2], parts[4]); self._json(200, {"ok": True})
             else:
                 return False
             return True
+
+        def _import_bytes(self, name: str, data: bytes, q: dict, job_id: str | None = None):
+            from ..flow import imports as im
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet") if q.get(k)}
+            options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
+            try:
+                return self._json(*im.import_file(c, self.user, name, data, job_id=job_id, **options))
+            except im.ImportError as e:
+                raise pl.PipelineError(str(e), e.code)
+
+        def _hf_history(self, size: int = 40) -> dict:
+            from ..flow import imports as im
+            try:
+                return im.history(c, size)
+            except im.ImportError as e:
+                raise pl.PipelineError(str(e), e.code)
+
+        def _hf_import(self, job: str, q: dict):
+            from ..flow import imports as im
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet") if q.get(k)}
+            options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
+            try:
+                return self._json(*im.import_job(c, self.user, job, **options))
+            except im.ImportError as e:
+                raise pl.PipelineError(str(e), e.code)
 
         def _post_video(self, gid, aid, query):
             """Raw video body, attached to video sheet A<n> (not matched by filename); slicing runs as the background job."""
@@ -1547,6 +1602,12 @@ def make_handler(c: Console):
                 if self._post_library(path, parse_qs(u.query)):
                     return
                 raise pl.PipelineError(NO_ROUTE, 404)
+            if path == "/api/import":             # a sheet or video brought in by hand, never twice (flow/imports.py): raw body, ?name=&prompt= or ?generation=&sheet=
+                q = parse_qs(u.query)
+                return self._import_bytes(q.get("name", ["import.png"])[0], self._raw(MAX_UPLOAD), q)
+            if path == "/api/higgsfield/import":  # one of Higgsfield's jobs (GET /api/higgsfield/history) into Mirsal: its result is downloaded (free) and imported
+                b = self._body()
+                return self._hf_import(str(b.get("id") or ""), {k: [str(v)] for k, v in b.items() if k in ("prompt", "generation", "sheet", "retry") and v})
             if path == "/api/live/ref":          # a reference image for the next sheet (raw body, ?name=file.png)
                 return self._json(200, c.save_ref(self._raw(15 * 1024 * 1024), parse_qs(u.query).get("name", ["ref.png"])[0]))
             parts = path.strip("/").split("/")
@@ -1589,6 +1650,12 @@ def make_handler(c: Console):
                 return self._json(200, telegram.save_config(c.out, str(body.get("token", "")), str(body.get("user_id", ""))))
             if path == "/api/telegram/disconnect":
                 return self._json(200, telegram.disconnect(c.out))
+            if path in ("/api/stickers/move", "/api/stickers/delete"):
+                targets = [x.get("pack_id") for x in body.get("items", []) if isinstance(x, dict)]
+                if path.endswith("/move"):
+                    targets.append(body.get("to"))
+                if any(not c.lib.owns(str(pid or ""), self.user["id"]) for pid in targets):
+                    raise pl.PipelineError("not found", 404)
             if path == "/api/stickers/move":        # bulk move into one pack, all or nothing: {to, items: [{pack_id, id}, ...]}
                 return self._json(200, c.lib.move_stickers([x for x in body.get("items", []) if isinstance(x, dict)], str(body.get("to", ""))))
             if path == "/api/stickers/delete":      # bulk delete from the library: [{pack_id, id}, ...]
@@ -1892,12 +1959,14 @@ def make_handler(c: Console):
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     return self._json(200, gates.drop(c.out, gid, int(body["index"]), bool(body.get("dropped", True))))
+                if parts[3] in ("add", "pack_add") and body.get("pack_id") and not c.lib.owns(str(body["pack_id"]), self.user["id"]):
+                    raise pl.PipelineError("not found", 404)
                 if parts[3] == "add":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     c.commit_edge(gid, body.get("outline"), body.get("erode"), "pack")        # the edge chosen in the Studio becomes real here
                     return self._json(200, gates.quick_add(c.out, gid, c.lib, body.get("pack_id"), body.get("pack_name"), "replace" if body.get("mode") == "replace" else "add",
-                                                   {str(k): v for k, v in (body.get("names") or {}).items() if isinstance(v, dict)}))
+                                                   {str(k): v for k, v in (body.get("names") or {}).items() if isinstance(v, dict)}, owner=self.user["id"]))
                 if parts[3] == "pack_add":
                     return self._json(200, c.lib.add_final(c.out, str(body["pack_id"]), gid))
                 if parts[3] == "animate":

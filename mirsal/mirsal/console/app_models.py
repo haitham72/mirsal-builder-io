@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..flow.ticket_models import TicketAnswer, TicketDraft, TicketQuestion, TicketReport, TicketStatusChange, TicketTarget  # noqa: F401  (the ticket routes' shapes, written once in flow/)
 
@@ -22,3 +22,25 @@ class ChatDoneEvent(BaseModel):
     model_config = ConfigDict(extra="forbid")
     working: Literal[False] = False
     count: int
+
+
+class ImportOptions(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(default="import.png", max_length=200)
+    prompt: str = Field(default="", max_length=2000)
+    generation: str | int | None = None
+    sheet: str | None = None
+    retry: bool = False
+
+
+class ProviderImport(ImportOptions):
+    id: str = Field(pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
+
+class ImportResult(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    id: int | None = None
+    duplicate: bool | None = None
+    kind: Literal["sheet", "video"] | None = None
+    generation: str | None = None
+    recoverable: bool | None = None

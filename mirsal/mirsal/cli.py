@@ -650,11 +650,24 @@ def main(argv=None) -> int:
         from .flow import gates
         from .media.library import Library
         ids = pl.list_ids(out) if args.gid in (["all"], []) else [_gid(g) for g in args.gid]
-        lib, tot, copies = Library(out), 0, 0
+        lib, tot, copies, errors = Library(out), 0, 0, 0
         try:
             with WriterLock(out, "mirsal reloop"):           # the server also writes result.json and the library: one writer at a time
                 for gid in ids:
-                    r = gates.reloop(out, gid, cfg, lib)
+                    try:
+                        r = gates.reloop(out, gid, cfg, lib)
+                    except pl.PipelineError as e:
+                        if e.code == 404:
+                            print(f"G{gid:03d}: skipped: {e}", flush=True)
+                            continue
+                        errors += 1
+                        print(f"G{gid:03d}: failed: {e}", flush=True)
+                        continue
+                    if r.get("skipped"):
+                        print(f"G{gid:03d}: skipped: {r['skipped']}", flush=True)
+                    if r.get("error"):
+                        errors += 1
+                        print(f"G{gid:03d}: failed: {r['error']}", flush=True)
                     if r["animations"]:
                         tot += r["animations"]; copies += r["pack_copies"]
                         print(f"G{gid:03d}: {r['animations']} animations made again, {r['pack_copies']} pack copies refreshed", flush=True)
@@ -662,7 +675,7 @@ def main(argv=None) -> int:
             print(e)
             return 1
         print(f"{tot} animations made again with the current loop, {copies} pack copies refreshed")
-        return 0
+        return 1 if errors else 0
     if args.cmd == "profile":
         return profile(out, _gid(args.gid), cfg, args.sweep)
     if args.cmd == "db":

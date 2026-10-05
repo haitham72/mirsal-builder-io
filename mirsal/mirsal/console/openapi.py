@@ -215,7 +215,21 @@ ROUTES = [
     ("POST", "/api/assets/sign", "Files", "A signed, expiring link to one file under out/", ref("AssetSign"), ref("AssetLink"), 200),
     ("GET", "/api/assets/{token}", "Files", "Serve a signed link until it expires (403 when forged or expired)", None, None, 200),
     # --- library and packs
-    ("GET", "/api/library", "Library", "Packs, recent stickers, totals", None, OBJ, 200),
+    ("GET", "/api/library", "Library", "Only the caller's packs, recent stickers and totals; legacy packs belong to local. Every pack has owner. Another person's pack or /lib file returns 404", None, OBJ, 200),
+    ("POST", "/api/import", "Imports", "Owner only. Raw PNG/JPEG/WebP or MP4/MOV/WebM bytes, query name, prompt?, generation?, sheet?, retry?. Videos require an approved G3 sheet. 202 starts processing; 200 duplicate returns its existing job/task/generation/effect/import, status and recoverable. Retry reuses a failed import's batch. Free", None, OBJ, 202),
+    ("GET", "/api/higgsfield/history", "Imports", "Owner only. Recent image/video jobs, newest first, with known duplicate locations; size 1-100, default 40. Free, read-only", None, obj({"jobs": arr(OBJ)}), 200),
+    ("POST", "/api/higgsfield/import", "Imports", "Owner only. Download an existing completed provider job and import its result with the same deduplication and G3 checks; bounded HTTPS download, no paid generation", obj({"id": STR, "prompt": STR, "generation": STR, "sheet": STR, "retry": BOOL}, ["id"]), OBJ, 202),
+    ("GET", "/api/trending", "Trending", "Public packs for approved accounts; order trending|new|liked. Includes maker by, mine, views, uses, likes, comments and relative attention score", None, OBJ, 200),
+    ("GET", "/api/trending/{pid}", "Trending", "One public pack's stickers, maker, views, uses and comments", None, OBJ, 200),
+    ("GET", "/api/trending/{pid}/file/{sid}", "Trending", "A public pack's sticker file; private or removed packs return 404", None, None, 200),
+    ("POST", "/api/trending/{pid}/share", "Trending", "Make the caller's pack public; only its maker may share it", OBJ, OBJ, 200),
+    ("POST", "/api/trending/{pid}/unshare", "Trending", "Make a pack private; its maker, owner or admin may unshare", OBJ, OBJ, 200),
+    ("POST", "/api/trending/{pid}/view", "Trending", "Record at most one view per viewer per UTC day; never counts the maker", OBJ, OBJ, 200),
+    ("POST", "/api/trending/{pid}/use", "Trending", "Copy the public pack into the caller's own Library and count a use. No provider call", OBJ, OBJ, 201),
+    ("POST", "/api/trending/{pid}/like", "Trending", "Like a public pack", OBJ, OBJ, 200),
+    ("POST", "/api/trending/{pid}/unlike", "Trending", "Remove the caller's like", OBJ, OBJ, 200),
+    ("POST", "/api/trending/{pid}/comments", "Trending", "Comment on a public pack", obj({"text": STR}, ["text"]), OBJ, 201),
+    ("POST", "/api/trending/{pid}/comments/{cid}/delete", "Trending", "Delete a comment; its writer, owner or admin only", OBJ, OBJ, 200),
     ("POST", "/api/packs", "Library", "Create a pack", OBJ, OBJ, 200),
     ("POST", "/api/packs/{id}", "Library", "Rename, reorder or set the cover of a pack", OBJ, OBJ, 200),
     ("POST", "/api/packs/{id}/delete", "Library", "Delete a pack: SOFT, it goes to the trash with its stickers and files untouched (GET /api/trash lists it). Returns {ok, id, trashed, name, stickers}", None, OBJ, 200),
@@ -280,6 +294,14 @@ def build(server_url: str = "http://127.0.0.1:8770") -> dict:
         if req is not None:
             op["requestBody"] = {"required": True, "content": {"application/json": {"schema": req}}}
         params = _params(path)
+        if path == "/api/import":
+            op["requestBody"] = {"required": True, "content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary"}}}}
+            params += [{"name": name, "in": "query", "required": False, "schema": BOOL if name == "retry" else STR} for name in ("name", "prompt", "generation", "sheet", "retry")]
+            op["responses"]["200"] = {"description": "duplicate", "content": {"application/json": {"schema": OBJ}}}
+        if path == "/api/higgsfield/import":
+            op["responses"]["200"] = {"description": "duplicate", "content": {"application/json": {"schema": OBJ}}}
+        if path == "/api/higgsfield/history":
+            params.append({"name": "size", "in": "query", "required": False, "schema": {"type": "integer", "minimum": 1, "maximum": 100, "default": 40}})
         if method == "GET" and path in ("/api/generations", "/api/jobs", "/api/chat/sessions"):
             params += [{"name": "limit", "in": "query", "required": False, "schema": INT, "description": "1-500: page the list; the answer then adds total, limit, offset"},
                        {"name": "offset", "in": "query", "required": False, "schema": INT, "description": "how many to skip (0 or more)"}]

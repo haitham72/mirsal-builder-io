@@ -183,15 +183,19 @@ def wait(job_id: str, timeout_s: int = 1200, interval_s: int = 3) -> dict:
     return job
 
 
-def download(url: str, dest: Path) -> tuple[str, int]:
+def download(url: str, dest: Path, max_bytes: int | None = None) -> tuple[str, int]:
     """Plain HTTPS GET of the result (no credential needed); returns (sha256, bytes)."""
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     from ..services.telegram import _ssl_context  # the tolerant TLS context: one malformed entry in a Windows certificate store must not lose a result that was already paid for
     try:
         with urllib.request.urlopen(url, timeout=120, context=_ssl_context()) as r:
-            data = r.read()
-    except OSError as e:
+            if max_bytes is not None and int(r.headers.get("Content-Length") or 0) > max_bytes:
+                raise HiggsError("result file too large")
+            data = r.read() if max_bytes is None else r.read(max_bytes + 1)
+            if max_bytes is not None and len(data) > max_bytes:
+                raise HiggsError("result file too large")
+    except (OSError, ValueError) as e:
         raise HiggsError(f"could not download the result: {e}")
     dest.write_bytes(data)
     return hashlib.sha256(data).hexdigest(), len(data)

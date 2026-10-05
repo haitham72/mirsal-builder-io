@@ -270,3 +270,9 @@ P1-P13 and the particle screens were walked in a headless Chromium (Playwright f
 * **The Queue pill reserves room at the foot of every screen** (`body.hasq`), so it no longer overlaps the Create button.
 
 Still open from the walk (not fixed, all in `docs/waiting-for-haitham.md`): an empty "New chat" made by a setting click (W22), a chat edit of an animated sticker opening Prepare, "undo" with no "redo", and a bare "the last one" with no person planning a new batch (W23).
+
+## Personal packs and existing-file controls
+
+Every signed-in person sees their own Library packs, Recent and My Stickers, with Trending as a tab. The owner's Library follows the same filter. A pack page has a Public toggle; public cards and details show maker, views and uses. Members can add their batches to their own packs, download them and copy public packs; their Telegram-send button is hidden. The owner and admins can remove a public pack from Trending.
+
+The existing Studio composer adds Use my own sheet and Import from Higgsfield for the owner. The import dialog asks for a file and optional description; videos name the approved destination batch/sheet. Provider history distinguishes Import from Open existing. Interrupted imports offer a free Retry import. It uses the existing dialog, button and field styles; no new screen or palette is introduced.

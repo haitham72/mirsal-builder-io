@@ -34,7 +34,7 @@ def _read(out: Path) -> dict:
         d = json.loads(atomic.read_text(_path(out)))
     except (OSError, ValueError):
         d = {}
-    return {"shared": d.get("shared", {}), "likes": d.get("likes", {}), "comments": d.get("comments", {})}
+    return {k: d.get(k, {}) for k in ("shared", "likes", "comments", "views", "uses")}
 
 
 def _write(out: Path, d: dict) -> None:
@@ -116,20 +116,26 @@ def _w(at: float, now: float) -> float:
 
 
 def score(d: dict, pid: str, now: float | None = None) -> float:
-    now = now or time.time()
-    s = 4 * _w(d["shared"][pid]["at"], now)
+    now = time.time() if now is None else now
+    public = list(d["shared"])
+    faded = {p: sum(_w(x["at"], now) for x in d.get("views", {}).get(p, [])) for p in public}
+    average = sum(faded.values()) / len(public) if public else 0
+    s = 2 * faded.get(pid, 0) / average if average else 0
     s += sum(3 * _w(x["at"], now) for x in d["likes"].get(pid, []))
     s += sum(2 * _w(x["at"], now) for x in d["comments"].get(pid, []) if not x.get("deleted"))
+    s += sum(4 * _w(x["at"], now) for x in d.get("uses", {}).get(pid, []))
     return round(s, 4)
 
 
-def listing(out: Path, lib, viewer: str, order: str = "trending") -> list[dict]:
+def listing(out: Path, lib, viewer: str, order: str = "trending", users: list | None = None) -> list[dict]:
     if order not in ("trending", "new", "liked"):
         raise TrendingError("order must be trending, new or liked")
     d = _read(out)
     with lib.lock:
         db = lib._load()
     packs = {p["id"]: p for p in db.get("packs", [])}
+    d["shared"] = {pid: sh for pid, sh in d["shared"].items() if pid in packs}
+    names = {u["id"]: u.get("name") or u["id"] for u in users or []}
     rows = []
     for pid, sh in d["shared"].items():
         p = packs.get(pid)
@@ -137,7 +143,9 @@ def listing(out: Path, lib, viewer: str, order: str = "trending") -> list[dict]:
             continue
         likes = d["likes"].get(pid, [])
         cover = next((s for s in p["stickers"] if s["id"] == p.get("cover")), (p["stickers"] or [None])[0])
-        rows.append({"pack_id": pid, "name": p["name"], "stickers": len(p["stickers"]), "shared_at": sh["at"], "shared_by": sh["by"],
+        maker = p.get("owner", "local")
+        rows.append({"pack_id": pid, "name": p["name"], "by": names.get(maker, maker), "mine": maker == viewer,
+                     "views": len(d["views"].get(pid, [])), "uses": len(d["uses"].get(pid, [])), "stickers": len(p["stickers"]), "shared_at": sh["at"], "shared_by": sh["by"],
                      "likes": len(likes), "liked": any(x["user"] == viewer for x in likes),
                      "comments": sum(1 for c in d["comments"].get(pid, []) if not c.get("deleted")),
                      "cover": {"id": cover["id"], "type": cover.get("type")} if cover else None, "score": score(d, pid)})
@@ -145,12 +153,15 @@ def listing(out: Path, lib, viewer: str, order: str = "trending") -> list[dict]:
     return sorted(rows, key=key)
 
 
-def detail(out: Path, lib, pid: str, viewer: str) -> dict:
+def detail(out: Path, lib, pid: str, viewer: str, users: list | None = None) -> dict:
     d = _read(out)
     _shared(d, pid)
     p = _pack(lib, pid)
     likes = d["likes"].get(pid, [])
-    return {"pack_id": pid, "name": p["name"], "shared_at": d["shared"][pid]["at"], "likes": len(likes), "liked": any(x["user"] == viewer for x in likes),
+    maker = p.get("owner", "local")
+    names = {u["id"]: u.get("name") or u["id"] for u in users or []}
+    return {"pack_id": pid, "name": p["name"], "by": names.get(maker, maker), "mine": maker == viewer,
+            "views": len(d["views"].get(pid, [])), "uses": len(d["uses"].get(pid, [])), "shared_at": d["shared"][pid]["at"], "likes": len(likes), "liked": any(x["user"] == viewer for x in likes),
             "stickers": [{"id": s["id"], "name": s.get("name"), "emoji": s.get("emoji"), "type": s.get("type")} for s in p["stickers"]],
             "comments": [c for c in d["comments"].get(pid, []) if not c.get("deleted")]}
 
@@ -167,16 +178,35 @@ def file_of(out: Path, lib, pid: str, sid: str) -> Path:
 
 
 def copy_pack(out: Path, lib, pid: str, by: str) -> dict:
-    """Use in my workflow (the owner): a copy of the shared pack in the library, every file copied, the source recorded."""
+    """Use in my workflow: an owned copy of the public pack, with copied files and source provenance."""
     _shared(_read(out), pid)
     src = _pack(lib, pid)
-    new = lib.create_pack(f"{src['name']} (from Trending)")
+    new = lib.create_pack(f"{src['name']} (from Trending)", owner=by)
     for s in src["stickers"]:
         f = lib.files / s["file"]
         if f.is_file():
             lib.add_bytes(new["id"], f.read_bytes(), f.suffix.lstrip("."), s.get("name") or "sticker", s.get("type") or "static", s.get("emoji") or "🙂",
                           source={**(s.get("source") or {}), "shared_from": pid, "shared_sticker": s["id"]}, w=s.get("w") or 512, h=s.get("h") or 512)
+    with _LOCK:
+        d = _read(out)
+        d["uses"].setdefault(pid, []).append({"user": by, "at": round(time.time(), 3)})
+        _write(out, d)
     return {"pack_id": new["id"], "name": new["name"]}
+
+
+def view(out: Path, lib, pid: str, viewer: str) -> dict:
+    """One view per viewer per UTC day; the maker never counts their own view."""
+    with _LOCK:
+        d = _read(out)
+        _shared(d, pid)
+        p = _pack(lib, pid)
+        now = time.time()
+        rows = d["views"].setdefault(pid, [])
+        counted = viewer != p.get("owner", "local") and not any(x["user"] == viewer and int(x["at"] // 86400) == int(now // 86400) for x in rows)
+        if counted:
+            rows.append({"user": viewer, "at": round(now, 3)})
+            _write(out, d)
+        return {"views": len(rows), "counted": counted}
 
 
 def as_request(out: Path, lib, pid: str) -> tuple[str, bytes | None, str]:

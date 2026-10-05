@@ -310,7 +310,10 @@ class Library:
         if not self.db_path.exists():
             return {"packs": []}
         try:
-            return _legacy_names(json.loads(self.db_path.read_text(encoding="utf-8")))
+            db = _legacy_names(json.loads(self.db_path.read_text(encoding="utf-8")))
+            for p in db.get("packs", []) + db.get("trash", {}).get("packs", []):
+                p.setdefault("owner", "local")
+            return db
         except ValueError:
             shutil.copy(self.db_path, self.db_path.with_suffix(".corrupt.json"))
             return {"packs": []}
@@ -326,19 +329,33 @@ class Library:
         return p
 
     # ---- reads
-    def snapshot(self, recent: int = 30) -> dict:
+    def snapshot(self, recent: int = 30, owner: str | None = None) -> dict:
         with self.lock:
             db = self._load()
+        if owner is not None:
+            db["packs"] = [p for p in db["packs"] if p.get("owner", "local") == owner]
         allst = [dict(s, pack_id=p["id"], pack=p["name"]) for p in db["packs"] for s in p["stickers"]]
         allst.sort(key=lambda s: s["created"], reverse=True)
         return {"packs": db["packs"], "recent": allst[:recent], "total": len(allst)}
 
     # ---- packs
-    def create_pack(self, name: str) -> dict:
+    def owns(self, pid: str, owner: str, trash: bool = False) -> bool:
+        with self.lock:
+            db = self._load()
+            packs = db.get("packs", []) + (db.get("trash", {}).get("packs", []) if trash else [])
+            return any(p["id"] == pid and p.get("owner", "local") == owner for p in packs)
+
+    def owns_file(self, file: str, owner: str) -> bool:
+        target = (self.files / file).resolve()
+        if self.files.resolve() not in target.parents:
+            return False
+        return any((self.files / s["file"]).resolve() == target for p in self.snapshot(owner=owner)["packs"] for s in p["stickers"])
+
+    def create_pack(self, name: str, owner: str = "local") -> dict:
         name = (name or "").strip() or "My Pack"
         with self.lock:
             db = self._load()
-            p = {"id": uuid.uuid4().hex[:8], "name": name[:60], "slug": slug(name) or "pack", "cover": None,
+            p = {"id": uuid.uuid4().hex[:8], "name": name[:60], "slug": slug(name) or "pack", "cover": None, "owner": owner,
                  "created": time.time(), "stickers": []}
             db["packs"].append(p)
             self._save(db)

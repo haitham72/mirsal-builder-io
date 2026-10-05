@@ -768,13 +768,29 @@ def reloop(out: Path, gid: int, cfg: EngineConfig, lib=None) -> dict:
     edited = [st["index"] for st in res["stickers"] if st.get("edited") and st.get("webm")]
     if edited:                                            # text or drawing baked in the Studio: slicing again would lose it
         return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": f"edited in the Studio: {', '.join('S' + str(i) for i in edited)}"}
+    missing = [v["id"] for v in res.get("video_sheets", []) if v.get("status") == "SLICED" and v.get("video") and not (pl.gen_dir(out, gid) / v["video"]).is_file()]
+    if missing:
+        return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": "stored video is missing: " + ", ".join(missing)}
+    decisions = {s["index"]: dict(s.get("review") or {}) for s in res["stickers"]}
+    previously_ready = {s["index"] for s in res["stickers"] if s.get("anim_status") == "READY"}
+    prior_stage = res.get("stage")
     reslice(out, gid, cfg)
     res, d, copies, n = pl.read_result(out, gid), pl.gen_dir(out, gid), 0, 0
     for st in res["stickers"]:
+        for kind, decision in decisions.get(st["index"], {}).items():
+            if decision in ("APPROVED", "REJECTED"):
+                st.setdefault("review", {})[kind] = decision
         if st.get("anim_status") == "READY" and st.get("webm"):
+            # Reprocessing the same approved source is not a new human review.
+            st["review"] = decisions.get(st["index"], st["review"])
             n += 1
-            if lib is not None:
+            if lib is not None and not res.get("error"):
                 copies += lib.refresh_from_generation(out, res["generation_id"], st["index"], None, d / st["webm"])
+    if not res.get("error") and all(s.get("anim_status") == "READY" for s in res["stickers"] if s["index"] in previously_ready):
+        res["stage"] = prior_stage
+    pl.write_result(out, gid, res)
+    if res.get("error"):
+        return {"id": gid, "animations": 0, "pack_copies": 0, "error": res["error"]}
     return {"id": gid, "animations": n, "pack_copies": copies}
 
 
@@ -904,7 +920,7 @@ def quick_sheet(out: Path, gid: int, cfg: EngineConfig) -> dict:
     return {"sheet": sheet["id"]}
 
 
-def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: str | None = None, mode: str = "add", names: dict | None = None) -> dict:
+def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: str | None = None, mode: str = "add", names: dict | None = None, owner: str | None = None) -> dict:
     """'Add to pack': approve what was kept at G2 / G4, approve the final pack (G5) and add it to a Library pack.
     Animated stickers when the video was made, the stills when it was not. Anything already added to that pack is skipped.
     mode: when an animated sticker's still is already in the pack, 'add' keeps both, 'replace' puts the animated one in the still's place."""
@@ -929,7 +945,7 @@ def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: s
         kind = "static"
         if not keep:
             raise refuse("Nothing to add: every sticker was dropped or blocked.")
-    pid = pack_id or (lib.create_pack(pack_name or "My stickers")["id"])
+    pid = pack_id or (lib.create_pack(pack_name or "My stickers", owner=owner or res.get("owner", "local"))["id"])
     res = pl.read_result(out, gid)
     done = res.setdefault("added", {}).setdefault(pid, [])
     added = []

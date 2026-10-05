@@ -13,7 +13,7 @@ Mirsal Builder is a local, private app that makes animated Telegram stickers (no
 - **"Use it anyway" (allow)** — a recorded, reversible human click that lets a judgement-call block through. Only Telegram's own limits stay final.
 - **Sheet / video sheet / `sheet_fixed`** — the model-drawn grid; the video sheet rebuilt from approved stickers; `sheet_fixed` is the edited-sheet view.
 - **Particle set / burst** — a set of effect sprites linked to library stickers, and the animation rendered from it.
-- **Paused** — public deployment (`deployment_plan.md`) and Google OAuth remain parked. What comes next is `plan.md`.
+- **Paused** — public deployment (`deployment_plan.md`) and Google OAuth remain parked. What comes next is `plan.md` when one exists (none now: open work is `docs/backlog.md`).
 
 ## Where things are tracked (CLAUDE.md rule 7)
 

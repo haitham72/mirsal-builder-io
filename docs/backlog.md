@@ -83,7 +83,7 @@ Other open items:
 
 ## API and production (`docs/api.md`)
 
-- Packs and the library per user, reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json`: members have private work and the Trending gallery today; a Library of their own (packs, Use in my workflow as a copy) is the next step. **open** (the office LAN, `plan.md` steps 4 and 7).
+- Reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json` (packs and the Library are per person since 2026-10-05, `docs/api.md`). **open** (the office LAN).
 - Per-job temp directories and retention policies; the Studio has no queue panel for DEAD rows yet (`mirsal queue status` shows them). **open**.
 - **Contract polish:** a role-dependent shape for `GET /api/generations` (an owner also gets `health`, `paths`, `stale`); `GET /api/live/cost` answers `200 {"credits": null, "error"}` when a price is unknown (by design for the page, not a status code); camelCase leaks in a snake_case API (`updatedAt` in `media/video_project.py`, `packId` in `console/server.py`: the Studio reads them); the Host check needs the port in the header; no `Deprecation` policy yet; pagination is opt-in on three lists only (`/api/library`, `/api/tasks`, `/api/usage`, `/api/watch` still return everything); `415` for a wrong `Content-Type` is not built (W35). **open**.
 - The regression suites (visual, chroma, transformation, conversation datasets) in one command. The metrics (`flow/metrics.py`) count what happened; what they mean for taste waits for the judge's calibration (W11). **open**.
@@ -96,8 +96,7 @@ Other open items:
 
 ## Office LAN (`docs/api.md` "Office accounts on the LAN", "Trending")
 
-- **A Library of their own for members.** Today a member has private batches, chats, jobs and particles plus Trending; the Library (packs) is owner-only, so a member's *Use in my workflow* starts a batch from the pack's subject and cover instead of copying the pack. Packs need an `owner` and the library routes need per-owner filtering (`media/library.py`, `console/server.py` `_authorize`). **open**.
-- **The admin role** manages people (Users > People, the bot's buttons via `admin_bot.apply`) and shares to Trending; everywhere else it is treated as a member. Whether an admin should also see everyone's batches is undecided. **needs Haitham**.
+- **The admin role** manages people (Users > People, the bot's buttons via `admin_bot.apply`) and can take any pack off Trending (making a pack public is its maker's); everywhere else it is treated as a member. Whether an admin should also see everyone's batches is undecided. **needs Haitham**.
 - The Telegram admin bot runs only with `serve --lan` and a configured bot; its cards have run against a fake Telegram only (`tests/test_accounts.py`). The first real sign-up is the live check. **needs a run**.
 - Ticket drafts use the LOCAL model only (free); with no local model every ticket keeps its preset questions. **open, low**.
 - `GET /api/chat/sessions/{id}/stream` sends the last message only; a turn that adds two messages at once is caught by the full read at `done`. **open, low**.

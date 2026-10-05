@@ -95,7 +95,7 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Testing** | tiers chosen by what a change can actually break: `mirsal test fast` (9s), `focused`, `area <module>` (what that file maps to). The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Nothing maps, nothing runs. [docs/testing.md](docs/testing.md) |
 | **Particle effects** | AI image or text-only Kling animated sheets, keyed/cut sprites, one deterministic particle simulator, and ordinary animated-sticker delivery. Animated-sprite restoration is undergoing acceptance. [docs/effects.md](docs/effects.md) |
 | **Particle sets** | Sets belong to library stickers, one saved version per row (v1, v2...); three equal sources (sticker sprites, AI image sprites, Kling from scratch); animated sprites in the simulator; Save / Save as new / Add to pack; mistaken-pack recovery; soft delete and restore. [docs/particles.md](docs/particles.md) |
-| **Trending** | shared packs to like, comment on and use in your workflow (the Library's Trending tab; a member's Library). [docs/api.md](docs/api.md) |
+| **Trending** | public packs to like, comment on and copy into your own Library; maker names, views and uses, with relative attention scoring. [docs/api.md](docs/api.md) |
 | **Open work** | v1.0 is done (2026-10-04): [docs/backlog.md](docs/backlog.md) by area, [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md) for decisions. Public hosting and Google OAuth stay paused: [deployment_plan.md](docs/deployment_plan.md) |
 | **Burst creation (proposal)** | many packs from one liked sheet: reuse the image, pick actions, one queue each, async; waits for Haitham's go (W27) | [docs/burst_plan.md](docs/burst_plan.md) |
 | **Design** | one shell and one palette for every screen: the rail, the second column, the token set, the style tiles, and the Earlier-batches column. [docs/design.md](docs/design.md) |
@@ -135,3 +135,5 @@ ref/                                     the UI design reference and mockup
 
 Build only what is asked; the engine is deterministic and independently testable; never open media to judge it (validators and metrics do); no dead controls; docs are part of every
 change; never commit a token, `.env` or `opencode.json`. The full list is in [CLAUDE.md](CLAUDE.md); the open work is in [docs/backlog.md](docs/backlog.md) and [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md).
+
+**Existing files and personal Libraries:** the Studio imports an existing sheet or video with deduplication and a free Higgsfield history picker. Every person has their own packs and stickers; the maker controls public visibility in Trending. Contracts: [docs/api.md](docs/api.md).

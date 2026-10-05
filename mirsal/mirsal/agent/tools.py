@@ -379,7 +379,7 @@ class ConsoleTools:
         """Approve what was kept (G2 / G4), approve the final pack (G5) and add it to a new library pack: the Studio's "Add to a pack"."""
         self._see(gid)
         try:
-            return gates.quick_add(self.out, int(gid[1:]), self.c.lib, None, name)
+            return gates.quick_add(self.out, int(gid[1:]), self.c.lib, None, name, owner=self.user["id"])
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
 
@@ -387,7 +387,7 @@ class ConsoleTools:
         """The library's packs the person may use for effects (owner only: the effects routes are owner only)."""
         if self.member:
             return []
-        return [{"id": p["id"], "name": p["name"], "count": len(p.get("stickers") or [])} for p in self.c.lib.snapshot()["packs"]]
+        return [{"id": p["id"], "name": p["name"], "count": len(p.get("stickers") or [])} for p in self.c.lib.snapshot(owner=self.user["id"])["packs"]]
 
     # ---- particle sets (docs/particles.md): the chat's reads and free edits, and the one call that spends (a sheet) ----
     def _owner(self) -> None:
@@ -411,7 +411,7 @@ class ConsoleTools:
         """Candidate particles for a pack, free: the built-in table reads the pack's stickers (no picture leaves the machine here)."""
         self._owner()
         from ..vision import effect_plan
-        pk = next((p for p in self.c.lib.snapshot()["packs"] if p["id"] == pack_id), None)
+        pk = next((p for p in self.c.lib.snapshot(owner=self.user["id"])["packs"] if p["id"] == pack_id), None)
         if not pk:
             raise ToolError("No such pack", 404)
         r = effect_plan.suggest_options(None, kind="contact", stickers=[{"name": s.get("name"), "emoji": s.get("emoji")} for s in pk.get("stickers") or []], pack_name=pk["name"],
@@ -422,7 +422,7 @@ class ConsoleTools:
         """Resolve library stickers by explicit scope, retaining their ordered set links."""
         self._owner()
         rows = []
-        for p in self.c.lib.snapshot()['packs']:
+        for p in self.c.lib.snapshot(owner=self.user["id"])['packs']:
             for st in p.get('stickers', []):
                 src = st.get('source') or {}
                 if pack_id and p['id'] != pack_id:
