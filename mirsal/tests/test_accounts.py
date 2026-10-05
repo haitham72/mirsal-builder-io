@@ -36,6 +36,19 @@ class AccountStoreTests(unittest.TestCase):
         u, _ = self.u.decide(a["id"], "approve")
         self.assertEqual(u["credits_left"], 10, "approving twice never refills")
 
+    def test_the_allowed_domains_are_a_list_set_by_mirsal_email_domain(self):
+        with mock.patch.dict(os.environ, {"MIRSAL_EMAIL_DOMAIN": "nadi.ae, @CPD.gov.ae"}):
+            self.assertEqual(um.email_domains(), ["nadi.ae", "cpd.gov.ae"])
+            self.assertEqual(self.u.signup("Sara@cpd.gov.ae", "Sara", "longenough")["email"], "sara@cpd.gov.ae")
+            for bad in ("x@gmail.com", "x@evil-cpd.gov.ae", "x@cpd.gov.ae.evil.com"):
+                with self.assertRaises(UserError, msg=bad):
+                    self.u.signup(bad, "X", "longenough")
+        with mock.patch.dict(os.environ, {"MIRSAL_EMAIL_DOMAIN": "example.org"}):
+            with self.assertRaises(UserError):
+                self.u.signup("y@nadi.ae", "Y", "longenough")
+        with mock.patch.dict(os.environ, {"MIRSAL_EMAIL_DOMAIN": ""}):
+            self.assertEqual(self.u.signup("z@gmail.com", "Z", "longenough")["email"], "z@gmail.com", "empty: any domain")
+
     def test_login_sessions_and_the_same_words_for_a_wrong_email_or_password(self):
         a = self.u.signup("b@nadi.ae", "B", "password1")
         self.u.decide(a["id"], "approve")

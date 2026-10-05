@@ -1,4 +1,4 @@
-/* Office accounts (docs/api.md, Office accounts on the LAN): on the LAN a browser signs in with an @nadi.ae account. GET /api/auth/me decides: signed out ->
+/* Office accounts (docs/api.md, Office accounts on the LAN): on the LAN a browser signs in with an account of an allowed domain (MIRSAL_EMAIL_DOMAIN, sent as `domains` by /api/auth/me). GET /api/auth/me decides: signed out ->
    the sign-in card (Sign in / Create account / Forgot password); `pending` -> Waiting for approval; must_change_password -> a new password first. On this
    machine (not the LAN) the owner is signed in already and nothing shows. Settings gets "Signed in as" (Sign out, Request credits) and, for the owner and
    admins, People: add people (passwords shown once), approve, reject, roles, new password, credits. Top-level names start with AU / au; AUV holds the pure
@@ -7,9 +7,9 @@
 const AUV=(()=>{
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const field=(id,label,type,ac)=>`<label class=au-f><span>${label}</span><input id=${id} type=${type} autocomplete=${ac}></label>`;
-  const gate=(mode,msg)=>`<div class=au-card role=dialog aria-modal=true aria-labelledby=au-t><img class=au-logo src=/assets/brand/mirsal-logo.png alt=""><h2 id=au-t>${mode==='signup'?'Create your account':mode==='forgot'?'Forgot password':'Sign in to Mirsal'}</h2>
+  const gate=(mode,msg,doms)=>`<div class=au-card role=dialog aria-modal=true aria-labelledby=au-t><img class=au-logo src=/assets/brand/mirsal-logo.png alt=""><h2 id=au-t>${mode==='signup'?'Create your account':mode==='forgot'?'Forgot password':'Sign in to Mirsal'}</h2>
     ${msg?`<div class=au-msg>${esc(msg)}</div>`:''}
-    ${mode==='signup'?field('au-name','Name','text','name'):''}${field('au-email','Email (@nadi.ae)','email','username')}${mode==='forgot'?'':field('au-pw','Password','password',mode==='signup'?'new-password':'current-password')}
+    ${mode==='signup'?field('au-name','Name','text','name'):''}${field('au-email',`Email (${(doms&&doms.length?doms:['nadi.ae']).map(d=>'@'+esc(d)).join(' or ')})`,'email','username')}${mode==='forgot'?'':field('au-pw','Password','password',mode==='signup'?'new-password':'current-password')}
     <button class="btn pri au-go" ${mode==='signup'?'data-act=ausignup':mode==='forgot'?'data-act=auforgot':'data-act=ausignin'}>${mode==='signup'?'Create account':mode==='forgot'?'Ask for a new password':'Sign in'}</button>
     <div class=au-links>${mode!=='signin'?'<button class=link data-act=aumode data-v=signin>Sign in</button>':''}${mode!=='signup'?'<button class=link data-act=aumode data-v=signup>Create account</button>':''}${mode!=='forgot'?'<button class=link data-act=aumode data-v=forgot>Forgot password</button>':''}</div></div>`;
   const waiting=u=>`<div class=au-card role=dialog aria-modal=true><img class=au-logo src=/assets/brand/mirsal-logo.png alt=""><h2>Waiting for approval</h2>
@@ -40,24 +40,24 @@ const AUV=(()=>{
 })();
 if(typeof globalThis!=='undefined')globalThis.AUV=AUV;
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
-  const AU={me:null,mode:'signin',lan:false,shown:null};
+  const AU={me:null,mode:'signin',lan:false,shown:null,domains:null};
   const auVal=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
   const auIn=()=>{if(typeof wlAuto==='function')wlAuto()};   /* the welcome film waits until the person is in: it never plays behind a card */
   function auShow(html,key){const k=key||AU.mode;if(!AUV.reshow(AU.shown,k))return;if(typeof wlClose==='function')wlClose();let o=document.getElementById('au-gate');if(!o){o=document.createElement('div');o.id='au-gate';document.body.appendChild(o)}o.innerHTML=html;o.classList.add('on');AU.shown=k;
     const f=o.querySelector('input');if(f)f.focus()}
   function auHide(){const o=document.getElementById('au-gate');if(o)o.classList.remove('on');AU.shown=null}
   async function auCheck(){const r=await api('/api/auth/me');
-    if(r.status===401){AU.me=null;AU.lan=!!r.j.lan;return auShow(AUV.gate(AU.mode))}
+    if(r.status===401){AU.me=null;AU.lan=!!r.j.lan;AU.domains=r.j.domains||null;return auShow(AUV.gate(AU.mode,'',AU.domains))}
     if(!r.ok)return auIn();AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;
     if(AU.me.status==='pending'){auShow(AUV.waiting(AU.me),'waiting');setTimeout(auCheck,15000);return}
     if(AU.me.must_change_password)return auShow(AUV.change(AU.me),'change');
     auHide();auIn()}
   const auPost=async(u,b)=>{const r=await post(u,b);if(!r.ok){const m=r.j.error||'Something went wrong';const box=document.querySelector('#au-gate .au-card');
     if(box){let el=box.querySelector('.au-msg');if(!el){el=document.createElement('div');el.className='au-msg';box.insertBefore(el,box.querySelector('label'))}el.textContent=m}else toast(m,1)}return r};
-  ACT.aumode=el=>{AU.mode=el.dataset.v;auShow(AUV.gate(AU.mode))};
+  ACT.aumode=el=>{AU.mode=el.dataset.v;auShow(AUV.gate(AU.mode,'',AU.domains))};
   ACT.ausignin=async()=>{const r=await auPost('/api/auth/login',{email:auVal('au-email'),password:auVal('au-pw')});if(r.ok)location.reload()};
   ACT.ausignup=async()=>{const r=await auPost('/api/auth/signup',{email:auVal('au-email'),name:auVal('au-name'),password:auVal('au-pw')});if(r.ok)auCheck()};
-  ACT.auforgot=async()=>{const r=await auPost('/api/auth/forgot',{email:auVal('au-email')});if(r.ok){AU.mode='signin';auShow(AUV.gate('signin',r.j.message))}};
+  ACT.auforgot=async()=>{const r=await auPost('/api/auth/forgot',{email:auVal('au-email')});if(r.ok){AU.mode='signin';auShow(AUV.gate('signin',r.j.message,AU.domains))}};
   ACT.auchange=async()=>{const r=await auPost('/api/auth/password',{old:auVal('au-old'),new:auVal('au-new')});if(r.ok){toast('Password saved');auCheck()}};
   ACT.aulogout=async()=>{await post('/api/auth/logout',{});location.reload()};
   ACT.aucreditask=async()=>{const reason=prompt('How many credits, and what for? (optional, e.g. "20 for the Eid pack")');if(reason===null)return;const r=await post('/api/auth/credits',{reason});

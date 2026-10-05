@@ -246,6 +246,8 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
     def _uerr(request, e):
         return _j(request, getattr(e, "code", 400), {"error": str(e)})
 
+    from ..runtime import users as users_mod
+
     @app.get("/api/auth/me", include_in_schema=False)
     async def auth_me(request: Request):
         """Who this browser is: an account (with its status: `pending` waits for approval), or 401 {signed_out: true} = show the sign-in page."""
@@ -254,8 +256,8 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             return _j(request, *err)
         user, e2 = await _who(request, "/api/auth/me")
         if e2 or user is None:
-            return _j(request, 401, {"error": "not signed in", "signed_out": True, "lan": c.lan})
-        return _j(request, 200, {"user": {k: v for k, v in user.items() if k != "token_sha256"}, "lan": c.lan,
+            return _j(request, 401, {"error": "not signed in", "signed_out": True, "lan": c.lan, "domains": users_mod.email_domains()})
+        return _j(request, 200, {"user": {k: v for k, v in user.items() if k != "token_sha256"}, "lan": c.lan, "domains": users_mod.email_domains(),
                                  "requests": pp.waiting(c.out, user.get("id")) if user.get("id") != "local" else []})
 
     @app.post("/api/auth/signup", include_in_schema=False)

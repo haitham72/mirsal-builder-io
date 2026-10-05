@@ -40,6 +40,18 @@ class UserError(Exception):
         self.code = code
 
 
+EMAIL_DOMAINS = "nadi.ae,cpd.gov.ae"
+
+
+def email_domains() -> list[str]:
+    """The email domains whose people may join on the LAN: MIRSAL_EMAIL_DOMAIN in the environment or mirsal/.env, comma-separated (`nadi.ae,cpd.gov.ae`), else
+    EMAIL_DOMAINS. Set to an empty value, any domain may join. Read at every check, so a change needs only a restart, never a code change."""
+    from . import envfile
+    envfile.load()
+    raw = os.environ.get("MIRSAL_EMAIL_DOMAIN", EMAIL_DOMAINS)
+    return [d.strip().lower().lstrip("@") for d in raw.split(",") if d.strip()]
+
+
 def _digest(token: str) -> str:
     return hashlib.sha256(str(token).encode("utf-8")).hexdigest()
 
@@ -176,14 +188,13 @@ class UserStore:
         return None if u.get("disabled") else dict(u, via="gateway")
 
     # ---------- office accounts on the LAN (docs/api.md, Office accounts on the LAN): email + password, approval, sessions ----------
-    DOMAIN = os.environ.get("MIRSAL_EMAIL_DOMAIN", "nadi.ae")
-
     def _norm_email(self, email: str) -> str:
         e = str(email or "").strip().lower()
         if not re.fullmatch(r"[a-z0-9._%+-]{1,64}@[a-z0-9.-]{1,190}", e):
             raise UserError("a valid email is required")
-        if self.DOMAIN and not e.endswith("@" + self.DOMAIN):
-            raise UserError(f"only @{self.DOMAIN} accounts can join")
+        doms = email_domains()
+        if doms and e.rsplit("@", 1)[1] not in doms:
+            raise UserError("only " + " or ".join("@" + d for d in doms) + " accounts can join")
         return e
 
     @staticmethod

@@ -21,7 +21,7 @@ from ..vision import consent as vision_consent, transcribe
 from ..flow import pipeline as pl
 from ..media.library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
-from ..runtime.users import LOCAL, UserError, UserStore
+from ..runtime.users import LOCAL, UserError, UserStore, email_domains
 from ..store import idem as idem_store
 from ..media.video_project import MAX_UPLOAD, Projects, decode_overlays
 from ..runtime.writer_lock import WriterLock
@@ -1926,7 +1926,7 @@ def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, b
     print(f"Mirsal console on {scheme}://127.0.0.1:{srv.server_address[1]}  ({'stdlib' if stdlib else 'FastAPI on uvicorn'}; input: {inp}  out: {out})")
     if lan:
         names = sorted(n for n in c.lan_names if n[:1].isdigit())
-        print("Office network: " + ", ".join(f"{scheme}://{n}:{srv.server_address[1]}" for n in names) + "  (colleagues sign in with an @nadi.ae account; this PC must stay on)")
+        print("Office network: " + ", ".join(f"{scheme}://{n}:{srv.server_address[1]}" for n in names) + "  (colleagues sign in with an account of " + " or ".join("@" + d for d in email_domains()) + "; this PC must stay on)")
         if not tls:
             print("WARNING: no TLS: passwords and sign-in cookies cross the office network unencrypted (serve --lan uses HTTPS unless --no-tls)")
     try:

@@ -533,7 +533,7 @@ def main(argv=None) -> int:
     pr = sub.add_parser("profile", help="time the animation of a generation stage by stage (nothing is saved)")
     pr.add_argument("gid", nargs="?"); pr.add_argument("--sweep", default="", help="worker counts to compare, e.g. 1,4,9")
     s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0); s.add_argument("--stdlib", action="store_true", help="the old stdlib server (kept for one release)")
-    s.add_argument("--lan", action="store_true", help="serve the office network: colleagues sign in with @nadi.ae accounts (docs/api.md, Office accounts on the LAN)")
+    s.add_argument("--lan", action="store_true", help="serve the office network: colleagues sign in with an allowed email domain (MIRSAL_EMAIL_DOMAIN, default nadi.ae,cpd.gov.ae) (docs/api.md, Office accounts on the LAN)")
     s.add_argument("--no-tls", action="store_true", help="with --lan: plain HTTP (passwords cross the network unencrypted)")
     for p_ in (s, a):
         p_.add_argument("--workers", type=int, help="cells animated at the same time (default: CPU count up to 9, or MIRSAL_ANIM_WORKERS)")
