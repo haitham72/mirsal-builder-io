@@ -271,7 +271,7 @@ async function histLoad(more,quiet){if(HB.loading)return;HB.loading=true;
   const r=await api(`/api/history?offset=${more?HB.items.length:0}&limit=${HB.page}`);HB.loading=false;
   if(r.ok){
     if(more){const seen=new Set(HB.items.map(x=>x.id));HB.items=HB.items.concat(r.j.items.filter(x=>!seen.has(x.id)))}
-    else{const fresh=new Set(r.j.items.map(x=>x.id));HB.items=r.j.items.concat(HB.items.filter(x=>!fresh.has(x.id)))}
+    else{const fresh=new Set(r.j.items.flatMap(x=>[x.id,...(x.variants||[]).map(v=>v.id)]));HB.items=   /* a batch that joined a group is now a variation of a fresh row: its old row goes */r.j.items.concat(HB.items.filter(x=>!fresh.has(x.id)))}
     HB.total=r.j.total;HB.more=HB.items.length<HB.total;HB.loaded=true}
   const sig=hbSig(),same=sig===HB.sig;HB.sig=sig;
   if(!(quiet&&same)){drawHist();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()}}
@@ -303,7 +303,7 @@ function gvarsHtml(gs){if(!gs||gs.length!==1||typeof HB==='undefined')return '';
   const vs=fam?histVars(fam):[];if(vs.length<2)return '';
   return`<div class=gvars><span class=mut>Variations</span>${vs.map((v,i)=>`<span class="gvar${v.id===id?' on':''}"><button class=gvb data-act=hopen data-id=${v.id} aria-pressed=${v.id===id} title="${esc(v.generation_id)} · ${esc(titleCase(String(v.prompt||'').replace(/_/g,' ')))}">${histThumb(v)}<small>${esc(v.generation_id)}</small></button>${i?`<button class=gvx data-act=hleave data-id=${v.id} title="Take ${esc(v.generation_id)} out of this group" aria-label="Take ${esc(v.generation_id)} out of this group">×</button>`:''}</span>`).join('')}</div>`}
 async function histJoin(id,to){if(!id||!to||id===to)return;const r=await post(`/api/generations/${id}/join`,{to});if(!r.ok)return toast(r.j.error||'Could not add it to the group',1);
-  toast(`Added to ${r.j.root}'s group`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)}
+  toast(`Added to ${r.j.root}'s group`);HB.items=HB.items.filter(x=>x.id!==id);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)}
 ACT.hleave=async el=>{const r=await post(`/api/generations/${el.dataset.id}/leave`,{});if(!r.ok)return toast(r.j.error||'Could not take it out',1);toast(`${r.j.id} is on its own again`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)};
 if(typeof document!=='undefined'&&document.addEventListener){
   document.addEventListener('dragstart',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;ev.dataTransfer.setData('text/x-mirsal-batch',f.dataset.hid);ev.dataTransfer.effectAllowed='move'});
