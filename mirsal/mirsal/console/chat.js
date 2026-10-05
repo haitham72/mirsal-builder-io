@@ -2,8 +2,9 @@
    Messages live in this browser. Preview selection and rendering belong to the engine. */
 'use strict';
 if(typeof ICONS!=='undefined'){ICONS.phone='<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>';
- ICONS.desktop='<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/>'}
-const CH={msgs:[],tray:false,pk:null,typing:false,draft:'',pending:null,epoch:0,seq:0,play:{},requests:{},view:'desktop'};
+ ICONS.desktop='<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/>';
+ ICONS.clock='<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'}
+const CH={msgs:[],tray:false,pk:null,typing:false,draft:'',pending:null,epoch:0,seq:0,play:{},requests:{},view:'desktop',q:''};
 try{if(localStorage.getItem('mirsal.chat.view')==='mobile')CH.view='mobile'}catch(e){}   /* a per-browser look: the chat as on a phone, or full width */
 try{CH.msgs=JSON.parse(localStorage.getItem('mirsal.chat')||'[]')}catch(e){}
 if(!Array.isArray(CH.msgs))CH.msgs=[];
@@ -19,16 +20,33 @@ function chList(){const m=CH.msgs[CH.msgs.length-1];
 const chMsgH=m=>{const t=`<span class=tm>${hm(m.t)}${m.from==='out'?' ✓✓':''}</span>`;
  return m.kind==='sticker'?`<div class="cm c${m.from}" data-chmsg="${esc(m.id)}"><div class="bub stk">${media(m.s)}${chParticleH(m)}${chReactionH(m)}${t}</div></div>`
   :`<div class="cm c${m.from}"><div class=bub>${esc(m.text)}${chReactionH(m)}${t}</div></div>`};
-function chTrayH(){const ps=LIB.packs.filter(p=>p.stickers.length);if(!ps.length)return`<div class=chtray><span class=mut>No stickers yet.</span> <button class="btn sm" data-act=nav data-to=create>${ic('create')} Create one</button></div>`;
- const cur=ps.find(p=>p.id===CH.pk)||ps[0];CH.pk=cur.id;
- return`<div class=chtray><div class=tabs style="margin:0 0 8px">${ps.map(p=>`<button class="tab ${p.id===cur.id?'on':''}" data-act=chpack data-id=${p.id}>${esc(p.name)}</button>`).join('')}</div>
-  <div class=trgrid>${cur.stickers.map(s=>`<div class=trs data-act=chpick data-id=${s.id} title="${esc(s.name)}">${media(s)}</div>`).join('')}</div></div>`}
+/* the sticker panel, as Telegram's: a small card over the chat, above the composer. Search (name or emoji tag, across every pack), the emoji tags the
+   stickers actually carry as one-tap filters, a borderless 5-column grid, and the packs along the bottom with Recent (the stickers sent here) first */
+const chAll=()=>LIB.packs.flatMap(p=>p.stickers.map(s=>({...s,pack_id:p.id})));
+function chRecent(){const seen=new Set(),out=[];
+ for(const m of [...CH.msgs].reverse())if(m.kind==='sticker'&&m.from==='out'&&m.s&&!seen.has(m.s.id)){const p=packById(m.s.pack_id),s=p&&p.stickers.find(x=>x.id===m.s.id);if(s){seen.add(s.id);out.push({...s,pack_id:p.id})}}
+ return out.slice(0,20)}
+function chItems(){const q=CH.q.trim().toLowerCase();if(q)return chAll().filter(s=>((s.name||'')+' '+(s.emoji||'')).toLowerCase().includes(q));
+ if(CH.pk==='recent')return chRecent();const p=packById(CH.pk);return p?p.stickers.map(s=>({...s,pack_id:p.id})):[]}
+const chGridH=()=>{const it=chItems();return it.map(s=>`<button type=button class=tgs data-act=chpick data-p="${esc(s.pack_id)}" data-id="${esc(s.id)}" title="${esc(((s.emoji||'')+' '+(s.name||'')).trim())}">${media(s)}</button>`).join('')
+ ||`<div class="mut tgempty">${CH.q?'No sticker matches.':CH.pk==='recent'?'The stickers you send show here.':'No stickers in this pack.'}</div>`};
+function chTrayH(){const ps=LIB.packs.filter(p=>p.stickers.length);
+ if(!ps.length)return`<div class=tgpop role=dialog aria-label=Stickers><div class=tgtabs><span class=on>Stickers</span></div><div class="mut tgempty">No stickers yet.<br><button class="btn sm" data-act=nav data-to=create>${ic('create')} Create one</button></div></div>`;
+ if(CH.pk!=='recent'&&!ps.some(p=>p.id===CH.pk))CH.pk=chRecent().length?'recent':ps[0].id;
+ const ems=[...new Set(chAll().map(s=>s.emoji).filter(Boolean))].slice(0,8),on=k=>!CH.q&&CH.pk===k?' on':'';
+ return`<div class=tgpop role=dialog aria-label=Stickers><div class=tgtabs><span class=on>Stickers</span></div>
+  <div class=tgsearch>${ic('search')}<input type=search id=chq placeholder=Search value="${esc(CH.q)}" autocomplete=off aria-label="Search stickers"><span class=tgems>${ems.map(e=>`<button type=button class="tgem${CH.q===e?' on':''}" data-act=chem data-e="${esc(e)}" title="Stickers tagged ${esc(e)}">${esc(e)}</button>`).join('')}</span></div>
+  <div class=tggrid id=chgrid>${chGridH()}</div>
+  <div class=tgpacks><button type=button class="tgp${on('recent')}" data-act=chpack data-id=recent title=Recent aria-label=Recent>${ic('clock')}</button>${ps.map(p=>`<button type=button class="tgp${on(p.id)}" data-act=chpack data-id="${esc(p.id)}" title="${esc(p.name)}" aria-label="${esc(p.name)}">${coverMedia(p)}</button>`).join('')}</div></div>`}
 function chDraw(){if(route_!=='chat')return;const el=$('s-chat'),inp=$('chin');if(inp)CH.draft=inp.value;
  el.innerHTML=`<div class="chat${CH.view==='mobile'?' mobile':''}"><div class=chh><div class="cv chav">M</div><div style="flex:1"><b>Mirsal Echo</b><small>${CH.typing?'typing…':'online'}</small></div><button class=iconbtn data-act=chview title="${CH.view==='mobile'?'Desktop view':'Mobile view'}" aria-label="${CH.view==='mobile'?'Switch to desktop view':'Switch to mobile view'}">${ic(CH.view==='mobile'?'desktop':'phone')}</button><button class=iconbtn data-act=chclear title="Clear chat">${ic('trash')}</button></div>
   <div class=chm id=chm>${CH.msgs.map(chMsgH).join('')||'<div class="mut chempty">Say hi or send a sticker. It comes back to you and your message gets a like.</div>'}${CH.typing?'<div class="cm in"><div class="bub typing"><i></i><i></i><i></i></div></div>':''}</div>
   ${CH.tray?chTrayH():''}
   <div class=chc><button class="iconbtn ${CH.tray?'on':''}" data-act=chtray title=Stickers>${ic('sticker')}</button><input type=text id=chin placeholder="Type a message" autocomplete=off value="${esc(CH.draft)}"><button class="btn pri" data-act=chsend>${ic('chat')} Send</button></div></div>`;
- const m=$('chm');m.scrollTop=m.scrollHeight;const i=$('chin');i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.chsend()}};i.focus();i.setSelectionRange(i.value.length,i.value.length);drawCol2()}
+ const m=$('chm');m.scrollTop=m.scrollHeight;const i=$('chin');i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.chsend()}};
+ const sq=$('chq'),caret=x=>{x.focus();x.setSelectionRange(x.value.length,x.value.length)};   /* the search box filters in place (no redraw), so typing keeps its focus */
+ if(sq)sq.oninput=e=>{CH.q=e.target.value;const g=$('chgrid');if(g)g.innerHTML=chGridH();document.querySelectorAll('.tgem').forEach(b=>b.classList.toggle('on',b.dataset.e===CH.q))};
+ caret(sq&&CH.q?sq:i);drawCol2()}
 async function chPlay(id){const m=CH.msgs.find(x=>x.id===id&&x.from==='out');if(!m||m.kind!=='sticker'||!m.s||!m.s.id||!m.s.pack_id)return;
  const epoch=CH.epoch,token=(CH.requests[id]||0)+1;CH.requests[id]=token;
  delete CH.play[id];chDraw();
@@ -41,8 +59,13 @@ function chSend(m){const o={id:Date.now().toString(36)+'-'+(++CH.seq),t:Date.now
  setTimeout(()=>{if(epoch!==CH.epoch||!CH.msgs.includes(o))return;CH.typing=false;o.react=o.kind==='sticker'?'❤️':'👍';CH.msgs.push({...o,id:o.id+'e',reply_to:o.id,t:Date.now(),from:'in',react:undefined});chSave();chDraw();if(o.kind==='sticker')chPlay(o.id)},1500)}
 RENDER.chat=async()=>{await loadLib();chDraw();if(CH.pending){const s=CH.pending;CH.pending=null;chSend({kind:'sticker',s:chSticker(s)})}};
 ACT.chsend=()=>{const i=$('chin'),v=i.value.trim();if(!v)return;CH.draft='';i.value='';chSend({kind:'text',text:v})};
-ACT.chtray=()=>{CH.tray=!CH.tray;chDraw()};ACT.chpack=el=>{CH.pk=el.dataset.id;chDraw()};
-ACT.chpick=el=>{const p=packById(CH.pk),s=p&&p.stickers.find(x=>x.id===el.dataset.id);if(s)chSend({kind:'sticker',s:chSticker(s,p.id)})};
+ACT.chtray=()=>{CH.tray=!CH.tray;chDraw()};ACT.chpack=el=>{CH.pk=el.dataset.id;CH.q='';chDraw()};
+ACT.chem=el=>{CH.q=CH.q===el.dataset.e?'':el.dataset.e;chDraw()};
+/* the panel closes like Telegram's: a click outside it (not on its own button) or Esc */
+if(typeof document!=='undefined'&&document.addEventListener){
+ document.addEventListener('click',e=>{if(!CH.tray||route_!=='chat'||!e.target.closest||e.target.closest('.tgpop,[data-act=chtray]'))return;CH.tray=false;chDraw()},true);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CH.tray&&route_==='chat'){CH.tray=false;chDraw()}})}
+ACT.chpick=el=>{const p=packById(el.dataset.p||CH.pk),s=p&&p.stickers.find(x=>x.id===el.dataset.id);if(s)chSend({kind:'sticker',s:chSticker(s,p.id)})};
 ACT.chreplay=el=>chPlay(el.dataset.id);
 ACT.chview=()=>{CH.view=CH.view==='mobile'?'desktop':'mobile';try{localStorage.setItem('mirsal.chat.view',CH.view)}catch(e){}chDraw()};
 function chClear(){CH.epoch++;CH.msgs=[];CH.play={};CH.requests={};CH.typing=false;CH.pending=null;chSave();chDraw()}
