@@ -389,3 +389,41 @@ older refine flow. The classifier's table of examples is `tests/test_agent.py::E
 A one-time decision is not a creation control. The first answer of a chat on the creation path (`CREATION_INTENTS`: never a hello, a fact about the person, a question or a "not yet") shows **Create it** and, on the right, ONE switch **Allow AI vision** with a subtle rotating glow while it is undecided (no "Not yet", no "Keep it off"; a typed "no" still cancels the plan). Pressing it calls the settings route, which writes
 state only (`SessionStore.set_vision`): no message, no card, no turn. The next turn proceeds normally and acknowledges the permission once ("AI vision is on, as you allowed…" / "AI vision is off, as you chose…"); a refusal is respected by describe and names. The switch then reads the live setting
 and flips on a press; the glow rests under `prefers-reduced-motion`.
+
+## Support (Help & Support; `flow/support.py`, `flow/support_kb.py`, `flow/faq.py`, `flow/notifications.py`, `console/support.js`; 2026-10-05)
+
+Help is where a person describes a problem in their own words. The support agent answers from what is documented, and a person takes over when that is not enough. It is a deterministic loop around ONE model call. It is not LangGraph: every step can be tested with fakes.
+
+1. **The turn.** The person writes, and may attach or paste (Ctrl+V) a screenshot. A screenshot is validated (PNG, JPEG or WebP under 8 MB), re-encoded as PNG at 1600 px at most, and stored in `out/support/C###/img-N.png`. It is read by the **local** vision model (`VISION_MODEL`, else the local chat model; `VISION_BASE_URL` optional; the person's own upload is the consent). Every call is logged as `SUPPORT_SEE` in `model_calls.jsonl`. What it saw is kept on the message for staff only.
+2. **Retrieval** (`support_kb.search`):
+   - Everyone gets **published** FAQ entries first, then the repo's `docs/`.
+   - The owner and admins also get **code**, but only when the best FAQ/doc hit is under `ENOUGH` (vector 0.55, lexical 0.45).
+   - The repo is `MIRSAL_SUPPORT_REPO` in `mirsal/.env` (the repository root, or its inner `mirsal/`). When it is unset, only the FAQ is searched.
+   - `mirsal support reindex` (or POST `/api/support/reindex`) cuts `docs/**/*.md` into heading sections and `mirsal/mirsal/**`, `migrations/` into blocks. Secrets are scrubbed (`obs/scrub.scrub_secrets`). `.env`, `opencode.json`, `telegram-id.md`, `out/`, `docs/inputs/`, virtual envs and dot-folders are never read.
+   - The record is `out/support/index.json`, with a sha256 per file, so an unchanged file is never cut or embedded again.
+   - With Postgres and the **local** nomic model up, the vectors go to `support_chunks` and `faq.vec` (migration 011). Otherwise the search is lexical (idf-weighted word overlap) over the same files. There is no hosted embedding fallback, so nothing is paid.
+   - An FAQ entry is found by its question, its answer, its `screen` and its `looks_like` (what the problem looks like on screen; `faq.search_text`), so the vision model's description of a screenshot finds the entry.
+3. **The answer.** The **local** model, always local whatever the person picked (rule 13), receives the numbered sources, this person's **memory**, the screenshot's description and the last turns, all fenced as data. It answers JSON `{reply, cites, need}`.
+   - A reply is shown only when its cites point to what was retrieved. A cite to anything else, or a solution with no cite, becomes "I could not find this documented" plus Send to support. It never invents a fix.
+   - `need: clarify` (one short question) and `need: screenshot` need no cite.
+   - With the model down, the best FAQ entry or doc section is quoted word for word, but only when it is a real match. Otherwise support is offered.
+4. **Memory** (`support.memory`): the person's earlier conversations (title, how each ended, what was read) and the tickets the system holds for them, failures caught on their requests included. Only this person's, newest first, at most ten lines.
+5. **"Did this solve it?"** Yes closes the conversation. No, or **Send to support**, escalates **once**:
+   - One ticket per conversation (`tickets.open_support`, source `support`): the person's words, the transcript, what the vision model saw, what was tried, their earlier problems. It has no multiple-choice questions.
+   - One Telegram ping to the admin with a link (`admin_bot.notify_support`). The link is `MIRSAL_APP_URL`, else this machine's LAN address, then `/#/help/C###`.
+   - The ticket keeps `pinged[<event>:T###] = {ok, at, tries}`. A refused ping never loses the ticket: the admin bot's loop runs `support.retry_pings` every five minutes, up to six tries. A ping that was sent is never sent again.
+6. **The admin** (Help > Queue): Reply versus Reply and resolve.
+   - **Reply** (`support.admin_reply`) adds a thread line (a retried request with the same `client_id` adds nothing) and sets the ticket to `replied`, the conversation to `admin_replied`, plus one notification `reply:T###:n`. It never closes anything.
+   - **Resolve** closes both and notifies once per resolution (`resolved:T###:<reopenings>`). It then proposes an FAQ entry in the background (`faq.propose_from_ticket`, below).
+   - The person can write back: the ticket goes to `open` and the conversation to `awaiting_admin`. They can also **Reopen** a resolved issue, which opens the ticket and sends one more ping, `reopenN`.
+7. **Notifications** (`out/notifications/<user>.json`, mirrored): one per event key, so retries never notify twice. The rail's Help item shows a red dot while one is unread (read every 30 s). Opening the conversation marks its notifications read.
+8. **The FAQ** (`out/faq/F###.json`, mirrored with the vector of its published text):
+   - Statuses are `draft` (never an answer), `published` or `archived`.
+   - A proposal for a published entry waits as `pending`. Publishing it keeps the replaced text in `revisions`, and `provenance` lists the tickets and seed files an entry came from.
+   - `propose_from_ticket` first searches the published entries, so a known question becomes a revision, not a twin (`DUPLICATE`: vector 0.80, lexical 0.60). The local model writes the reusable solution; when it is down, the admin's own resolution words are used. Everything kept is scrubbed (`obs/scrub.scrub_personal`: e-mails, record ids, uuids, paths, secrets, the people's names).
+   - Admins review in Help > FAQ review: the published text beside the proposal, edit, publish, discard, archive.
+   - **Seed entries** are Markdown files: `faq/<category>/<slug>.md`, with a `---` header holding `title`, `question`, `category`, `tags`, `screen` and `looks_like`, and the answer as the body. `mirsal support import-faq --repo <folder>` makes each one a draft. Unchanged files are skipped; a changed file updates its draft, or proposes a revision of its published entry. `--publish` publishes them at once, but only on purpose. The prompt that writes them is `faq-seed-prompt.md` at the repository root.
+
+**Privacy and trust.** A person sees only their own conversations, notifications and tickets; anything else is a 404. A member's ticket view drops the internal fields. Staff see a conversation once it reached a ticket. Nothing a person writes, nothing retrieved and nothing the vision model says can authorize an action: the routes check roles (`docs/api.md` "Help & Support"). The stdlib server (`serve --stdlib`) has no Help routes.
+
+**Measured so far.** Only the local vision pre-review on stickers was measured (`mirsal/local_eval/`: Qwen 3.5 9B, 30 stickers, 25 parsed verdicts, about 10 s each). Answer quality, screenshot reading and retrieval precision are not measured yet (`docs/backlog.md`).

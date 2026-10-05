@@ -25,9 +25,15 @@ How a go-ahead works: a shown price plus "let's try" is that one experiment; "pu
 
 **10. Try accounts, the worker queue and transformations for real.** So far they have run on fakes and synthetic sheets only: `python -m mirsal user add Amira` then `curl -H "Authorization: Bearer <token>" localhost:8789/api/me` and `/api/openapi.json` (an account sees only its own chats and batches, 404 for a stranger's, and cannot spend unless `--spend`); `MIRSAL_JOB_MODE=queue` with `python -m mirsal worker` and one real Create (about 2 credits; never unattended); `MIRSAL_PAID_PARALLEL` (default 3) at the first real parallel use; "dog as banana" and "dog as banana, no dancing" in the chat. Recommendation: do the curl and the transformation phrases now (free), the queue and parallel runs with your first real Create (item 6). Unblocks: the queue panel for DEAD rows and the transformation lexicons (`docs/backlog.md`).
 
-## B. Calibration inputs only you can supply
+**49. Seed the FAQ and look at Help (2026-10-05).** Help & Support is built and has run on fakes, a scratch server and your local model, but you have not seen it. Steps:
+1. In `mirsal/.env`, set `MIRSAL_SUPPORT_REPO=G:\Haitham\VsCode\Mirsal-Builder` and `VISION_MODEL=qwen/qwen3.5-9b` (the model your `local_eval/` run used; without it, screenshots go to the chat model, `qwen3.5-4b`). Set `MIRSAL_APP_URL` if the office reaches the server by a name.
+2. Restart `serve --lan`, then run `python -m mirsal support reindex` (free; the local embedder).
+3. Paste `faq-seed-prompt.md` into the cheaper model, then `python -m mirsal support import-faq --repo ..\faq`, and review and publish the drafts in Help > FAQ review.
+4. Ask a question as a member (with a screenshot), say No, reply as the admin in Help > Queue, then resolve.
 
-**11. Label 30 stickers for the vision judge.** Approve / reject, with a reason when you can; then `python -m mirsal judge G### --force` on the same ones; target agreement >= 80%, else point it at OpenAI (`MIRSAL_VISION_PROVIDER=openai`). Recommendation: do it once, 30 is enough. Unblocks: calibrating the judge (`docs/measurements.md` has the first runs; the two local models disagree), the safety reasons in item 31, and any use of the judge's recommendations.
+Recommendation: do steps 1 to 3 first, so the agent has something to answer from. Unblocks: the word "verified" for Help, and the support eval in `docs/backlog.md`.
+
+## B. Calibration inputs only you can supply
 
 **12. Write the pool search queries file.** `docs/inputs/search_queries.md`: about 30 queries "{topic} doing {action}" (English, Arabic, Arabizi) with the sticker ids you consider right, plus at least 5 that must return nothing; `python -m mirsal pool search "..."` is then measured against it. Recommendation: write it from real searches you would do. Unblocks: precision@5 >= 0.8 and the Arabic / Arabizi query parser (`docs/backlog.md`, store and search).
 
@@ -66,7 +72,7 @@ How a go-ahead works: a shown price plus "let's try" is that one experiment; "pu
 
 **30. A backup command for `out/`.** Should the app get `python -m mirsal backup` (zip of `out/` minus the cache)? Recommendation: yes, small and free. Unblocks: item 29.
 
-**31. Content safety.** One batch returned a stereotyped, offensive depiction nobody asked for ("superman in dubai"); the vision judge scores quality only and the provider's filter did not catch it. Options: safety reasons in the judge (`OFFENSIVE_CONTENT`, `STEREOTYPE`, a changed judge prompt, so it needs your calibration labels from item 11), a separate moderation call before / after generation, or showing the provider's flag. Recommendation: the provider flag shown first (free), the judge reasons after item 11. Unblocks: the moderation policy any public API needs.
+**31. Content safety.** One batch returned a stereotyped, offensive depiction nobody asked for ("superman in dubai"); the vision judge scores quality only and the provider's filter did not catch it. Options: safety reasons in the judge (`OFFENSIVE_CONTENT`, `STEREOTYPE`, a changed judge prompt), a separate moderation call before / after generation, or showing the provider's flag. Recommendation: the provider flag shown first (free); any added judge reasons need an agent-prepared evaluation. Unblocks: the moderation policy any public API needs.
 
 **32. Arabic prompts.** How should Arabic / Arabizi requests be handled (detection, planner, tags)? Recommendation: detect and pass through the local model, with your examples (item 15) as the test set. Unblocks: the Arabic edit commands and Arabic query parser in `docs/backlog.md`.
 

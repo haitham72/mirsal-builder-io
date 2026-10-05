@@ -100,7 +100,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 1. **The rail is one fixed element in one place.** Same width, same position, same order, on all six sections. Its width is a token; it does not change
    shape per route. Keep the icon-over-label form (`app.js:65`) — it is legible at 72px.
-2. **The rail has seven items and AI is one of them**, declared in `RAIL` (`app.js:63`) in this order: **AI, Studio, Library, Chat, Create, Users, Settings** (Users added 2026-10-04, below). It once showed six
+2. **The rail has eight items and AI is one of them**, declared in `RAIL` (`app.js:63`) in this order: **AI, Studio, Library, Chat, Create, Users, Settings, Help** (Users added 2026-10-04, Help 2026-10-05, below). It once showed six
    today only because `agent.js:37` unshifts AI in; the declaration moves into `app.js` so the navigation does not depend on script order. `RAILOF` still maps the sub-routes (`pack→library`, `editor`/`export`/`prepare`→`create`,
    `animate→library`).
 3. **A persistent second column on every screen that has a list** — Library, Chat, AI for sure, and **Studio and Create** because both have real lists
@@ -145,6 +145,19 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 ### Settings (built)
 - Currently a single column with no second column. Give it the standard header and the standard card treatment; it is a section like any other. People moved out of it to Users (2026-10-04): Settings keeps "Signed in as" and, for staff, one line that opens Users.
+
+### Help (built 2026-10-05, `support.js`, `.su-*`)
+- **Its own section at the end of the rail** (icon `help`). A red dot (`.rdot`) shows on it while a notification is unread. Everyone has it.
+- **The second column** is the person's issues (title, a state chip, time) and, below them, their notifications. A new question is the `+` in the header. Staff get three tabs at the top: My issues, Queue and FAQ review.
+- **The stage** is one conversation: the person's messages on the right and the agent's and admin's on the left (the Chat's bubbles; an agent bubble in `--glass` / `--aline`, an admin bubble in `--pri-l`).
+  - Under an answer sit the help entries it read, as small chips; an FAQ chip opens the entry.
+  - Then one bar that says what can be done now: "Did this solve it?" Yes / No, Send to support, Attach a screenshot, Waiting for support, Support replied, or Resolved + Reopen.
+  - The box at the bottom takes text and a screenshot (📎, or Ctrl+V).
+  - The state chips are cyan (answered), amber (waiting), blue (replied) and green (resolved).
+- **Staff**:
+  - The Queue shows the ticket over the person's conversation, with the screenshots and "Vision model saw" in a wash box. Reply keeps it open; "Reply and resolve" closes it, and the line under the buttons says so.
+  - FAQ review shows the published text in a grey box above the proposal's fields, then Save edits, Discard, Publish and Archive.
+- Settings keeps one card: for a member, a link to Help; for the owner, the caught failures (Tickets) with a link to the support queue.
 
 ### Users (built 2026-10-04, `users.js`)
 - **Its own section in the rail** (icon `users`), because People in Settings was a cramped list of one-liners with no usage. The **second column is the roster** (a list, so §4.3 applies): an avatar initial, the name, role · status · credits spent · batches, with two rows of filter chips (status, role); the selected person is the `.on` row, the chart icon in its header returns to everyone.

@@ -1781,3 +1781,11 @@ The complete component shapes below are copied from the current schema definitio
 `console/app.py` handles POST `/api/import`, GET `/api/higgsfield/history`, and POST `/api/higgsfield/import` before the adapter, with pydantic request validation and owner-only access. The legacy handler delegates to the same flow functions for `serve --stdlib`. Import raw-body and duplicate/recovery contracts are in `api.md`; OpenAPI declares the binary request and query fields.
 
 GET `/api/library` filters by caller; pack creation stamps owner. Existing pack/file routes check ownership, including the owner's account, and validate merge/move destinations and batch visibility. Members may Add to their own packs but cannot use Telegram routes. Trending native routes (also versioned) support maker sharing, maker/staff unsharing, `/view` with one UTC-day view per viewer, and `/use` returning an owned copy for all accounts. OpenAPI now includes the public-pack routes and relative attention fields.
+
+## Help & Support (native, 2026-10-05)
+
+`console/app.py` serves these before the adapter, with pydantic bodies (`app_models.py` `SupportAsk`, `SupportFeedback`, `SupportText`, `SupportReopen`, `TicketResolve`, `FaqEdit`, `NotificationsRead`) and `/api/v1/` aliases:
+- for everyone signed in and approved: `/api/support/ask`, `/api/support/conversations[/{id}[/feedback|escalate|reply|reopen|images/{name}]]`, `/api/notifications[/read]`, GET `/api/faq[/{id}]`;
+- for the owner and admins (`_staff`): `/api/support/queue`, `/api/support/tickets/{id}`, `/api/tickets/{id}/reply|resolve`, POST `/api/faq/{id}/edit|publish|discard|archive`, `/api/support/status|reindex`.
+
+An unknown action on these families answers the route miss (`NO_ROUTE`). `serve --stdlib` does not serve them. The contract is in `api.md` "Help & Support"; OpenAPI describes every route.

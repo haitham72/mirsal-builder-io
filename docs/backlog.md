@@ -101,6 +101,14 @@ Other open items:
 - Ticket drafts use the LOCAL model only (free); with no local model every ticket keeps its preset questions. **open, low**.
 - `GET /api/chat/sessions/{id}/stream` sends the last message only; a turn that adds two messages at once is caught by the full read at `done`. **open, low**.
 
+## Help & Support (`docs/agent-and-chat.md` "Support")
+
+- Answer quality, retrieval precision and screenshot reading are not measured. Build a support eval like `mirsal/local_eval/`: about 30 real questions, half with screenshots, each with the FAQ entry or doc section that should answer it, scored on whether it was cited, whether it invented anything, and the latency. The thresholds (`support_kb.ENOUGH`, `faq.DUPLICATE`) are first guesses until then. **open**.
+- The FAQ is empty until the seed files exist (`docs/waiting-for-haitham.md` 49). **needs Haitham**.
+- A pending account cannot open Help (`_member` refuses it like every member route), so a person waiting for approval cannot ask why. **open, low**.
+- A Report (source `report`) shows in the staff Queue but has no conversation: the person sees the reply only as a notification and in its ticket. **open, low**.
+- `serve --stdlib` has no Help routes (the old server goes after one release). **parked**.
+
 ## Testing
 
 - `tests.test_golden` failed intermittently once under heavy load (another Python suite running at the same time): one test left the server busy (`409 busy`) for the next. It passes alone and as a suite on a quiet machine (FastAPI and stdlib alike). If it returns, make `GoldenPathTests.wait` also wait for `busy` to stay false for a moment before the next create. **watch**.
