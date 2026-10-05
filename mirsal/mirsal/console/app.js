@@ -56,6 +56,11 @@ ACT.pknew=async()=>{const r=await post('/api/packs',{name:$('npn').value});if(!r
 
 /* ---------- library cache + media helpers */
 let LIB={packs:[],recent:[],total:0},LIBQ='',LIBTAB='recent';
+/* the packs of one batch group sit together, as the Studio sits the batches (pack.group from GET /api/library, flow/groups.pack_groups): entries {pack} or
+   {group, packs} in the order the first pack of each appears (pure) */
+const packEntries=ps=>{const out=[],at={};for(const p of ps||[]){if(!p.group){out.push({pack:p});continue}
+  if(at[p.group])at[p.group].packs.push(p);else{at[p.group]={group:p.group,packs:[p]};out.push(at[p.group])}}return out};
+const PKOPEN=new Set();
 async function loadLib(){const r=await api('/api/library');if(r.ok)LIB=r.j;return LIB}
 const media=(s,cls='')=>s.type==='animated'?`<video class="${cls}" src="/lib/${encodeURIComponent(s.file)}" autoplay loop muted playsinline></video>`:`<img class="${cls}" src="/lib/${encodeURIComponent(s.file)}" loading=lazy>`;
 const coverMedia=p=>{const s=p.stickers.find(x=>x.id===p.cover)||p.stickers[0];return s?media(s):'<span class=mut>—</span>'};
@@ -85,7 +90,9 @@ function drawCol2(){const on=COL2.includes(route_);document.body.classList.toggl
  const q=C2Q.trim().toLowerCase(),cur=route_==='pack'?PACK_ID:null;
  $('col2').innerHTML=`<div class=c2h><h1>Packs</h1><button class=iconbtn data-act=newpack title="New pack">${ic('plus')}</button></div>
   <div class=c2s><input type=search id=c2q placeholder="Search packs…" value="${esc(C2Q)}"></div>
-  <div class=c2l>${LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q)).map(p=>`<div class="crow ${p.id===cur?'on':''}" data-act=openpack data-id=${p.id}><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some(s=>s.type==='animated')?'animated':''}</span></div>`).join('')||'<div class=mut style="padding:14px">No packs yet.</div>'}</div>`;
+  <div class=c2l>${packEntries(LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q))).map(e=>{const row=(p,sub)=>`<div class="crow${sub?' sub':''} ${p.id===cur?'on':''}" data-act=openpack data-id=${p.id}><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some(s=>s.type==='animated')?'animated':''}</span></div>`;
+   if(e.pack)return row(e.pack);const open=PKOPEN.has(e.group)||e.packs.some(p=>p.id===cur),f=e.packs[0];
+   return`<div class="crow pkgrp ${f.id===cur?'on':''}" data-act=openpack data-id=${f.id}><div class=cv>${coverMedia(f)}</div><div><b>${esc(f.name)}</b><small>${e.packs.length} packs · group ${esc(e.group)}</small></div><button class=iconbtn data-act=pkgrp data-g=${esc(e.group)} title="${open?'Fold the group':'Show every pack of the group'}" aria-expanded=${open}>${ic('chev')}</button></div>${open?e.packs.slice(1).map(p=>row(p,true)).join(''):''}`}).join('')||'<div class=mut style="padding:14px">No packs yet.</div>'}</div>`;
  const i=$('c2q');i.oninput=e=>{C2Q=e.target.value;const pos=e.target.selectionStart;drawCol2();const n=$('c2q');n.focus();n.setSelectionRange(pos,pos)}}
 
 /* ---------- Library (DESKTOP_01) */
@@ -149,6 +156,7 @@ RENDER.library=async()=>{await loadLib();drawCol2();
    <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
   $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
 ACT.libtab=el=>{LIBTAB=el.dataset.t;RENDER.library()};
+ACT.pkgrp=el=>{const g=el.dataset.g;PKOPEN.has(g)?PKOPEN.delete(g):PKOPEN.add(g);drawCol2()};
 ACT.seeall=el=>{if(el.dataset.k==='st'){LIBTAB='mine'}else PACKS_ALL=!PACKS_ALL;RENDER.library()};
 function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.emoji+' '+(s.pack||'')).toLowerCase().includes(q);
  const stTile=(s,i)=>`<div class=st data-act=lcopen data-i=${i} title="${esc(s.name)}">${media(s)}<span class=em>${esc(s.emoji)}</span></div>`;
@@ -156,11 +164,12 @@ function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.em
   if(LIBTAB==='particles'){h=typeof spLibHtml==='function'?spLibHtml():'';if(typeof spLibSync==='function')spLibSync()}
   else if(LIBTAB==='trending'){h='<div id=tr-box></div>';if(typeof trLoad==='function')setTimeout(trLoad)}
   else if(!LIB.total&&!LIB.packs.length)h=`<div class="card" style="text-align:center;padding:40px"><h2>Nothing here yet</h2><p class=mut>Make a pack in the Studio, or create a sticker from a photo.</p><button class="btn pri" data-act=nav data-to=generate>${ic('gen')} Open Studio</button> <button class=btn data-act=nav data-to=create>${ic('create')} Create from photo</button></div>`;
- else if(LIBTAB==='recent'){const rs=LIB.recent.filter(hit),ps=LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q)||p.stickers.some(hit)),shown=PACKS_ALL?ps:ps.slice(0,4);
+ else if(LIBTAB==='recent'){const rs=LIB.recent.filter(hit),ps=packEntries(LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q)||p.stickers.some(hit))),shown=PACKS_ALL?ps:ps.slice(0,4);
   LCL=rs;
   h=`<div class=row style="justify-content:space-between;margin:6px 0"><h2>Recent</h2><button class=seeall data-act=seeall data-k=st>See all ${ic('chev')}</button></div><div class=strip>${rs.map(stTile).join('')||'<span class=mut>No matches.</span>'}</div>
   <div class=row style="justify-content:space-between;margin:14px 0 8px"><h2>My Packs</h2>${ps.length>4?`<button class=seeall data-act=seeall data-k=pk>${PACKS_ALL?'Show less':'See all'} ${ic('chev')}</button>`:''}</div>
-  <div class=plist>${shown.map(p=>`<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${p.stickers.length} stickers</small></div>${ic('chev')}</div>`).join('')||'<div class=mut style="padding:14px">No packs.</div>'}</div>`}
+  <div class=plist>${shown.map(e=>{const row=p=>`<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${p.stickers.length} stickers</small></div>${ic('chev')}</div>`;
+   return e.pack?row(e.pack):`<div class=pkgroup><div class=pkgh>Group ${esc(e.group)} · ${e.packs.length} packs</div>${e.packs.map(row).join('')}</div>`}).join('')||'<div class=mut style="padding:14px">No packs.</div>'}</div>`}
  else{const all=LIB.packs.flatMap(p=>p.stickers.map(s=>({...s,pack_id:p.id,pack:p.name}))).filter(hit);LCL=all;
   h=`<div class=mut style="margin-bottom:8px">Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects). Then delete them together.</div>${selBarHtml(all.length)}<div class="grid selgrid ${SEL.size?'selmode':''}">${all.map((s,i)=>`<div class="cell ${SEL.has(selKey(s.pack_id,s.id))?'sel':''}" data-act=lcopen data-i=${i}><span class="selbox ${SEL.has(selKey(s.pack_id,s.id))?'on':''}" data-act=lsel data-p=${s.pack_id} data-id=${s.id} title="Select"></span>${media(s)}<div class=cap>${esc(s.emoji)} ${esc(s.name)}</div></div>`).join('')||'<span class=mut>No matches.</span>'}</div>`}
  $('libbody').innerHTML=h}

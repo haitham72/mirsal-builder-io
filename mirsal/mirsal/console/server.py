@@ -1010,7 +1010,10 @@ def make_handler(c: Console):
                 ct = UI_FILES[path[4:]]
                 return self._send(200, (UI / path[4:]).read_bytes(), ct if ct.startswith("font") else ct + "; charset=utf-8")
             if path == "/api/library":
-                return self._json(200, c.lib.snapshot())
+                snap = c.lib.snapshot()
+                from ..flow import groups as _groups       # the Library sits the packs of one batch group together (flow/groups.pack_groups)
+                pg = _groups.pack_groups(c.out, snap["packs"])
+                return self._json(200, {**snap, "packs": [dict(p, group=pg.get(p["id"])) for p in snap["packs"]]})
             if path == "/api/projects":
                 return self._json(200, {"projects": c.projects.list()})
             if path.startswith("/api/projects/"):

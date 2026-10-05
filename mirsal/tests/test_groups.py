@@ -57,6 +57,14 @@ class GroupTests(unittest.TestCase):
             groups.join(self.out, 999, 103)
         self.assertEqual(cm.exception.code, 404)
 
+    def test_the_library_sits_the_packs_of_one_group_together_and_follows_a_join(self):
+        st = lambda g: {"id": f"s{g}", "source": {"generation": f"G{g:03d}", "index": 1}}
+        packs = [{"id": "a", "stickers": [st(104)]}, {"id": "b", "stickers": [st(106), st(106), st(103)]}, {"id": "c", "stickers": [st(103)]},
+                 {"id": "d", "stickers": [st(12)]}, {"id": "e", "stickers": [{"id": "photo", "source": {}}]}]
+        self.assertEqual(groups.pack_groups(self.out, packs), {"a": "G104", "b": "G104"}, "a and b come from one family (b mostly); c, d, e have no other pack")
+        groups.join(self.out, 104, 103)
+        self.assertEqual(groups.pack_groups(self.out, packs), {"a": "G103", "b": "G103", "c": "G103"}, "a join in the Studio shows in the Library at the next read")
+
     def test_earlier_batches_lists_families_with_the_roots_title_and_every_variant(self):
         h = pl.history(self.out, 0, 50)
         self.assertEqual(h["total"], 3, "103, the 104 family and 012")

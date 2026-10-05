@@ -63,6 +63,34 @@ def families(out: Path, ids=None) -> dict[int, list[int]]:
     return {r: sorted(m, key=lambda g: (g != r, g)) for r, m in fam.items()}
 
 
+def pack_groups(out: Path, packs) -> dict[str, str]:
+    """pack id -> the batch group it belongs to (`G104`, the family root), so the Library sits the packs of one group together as the Studio sits the batches.
+    A pack follows the group most of its stickers came from (`source.generation`); a pack whose group has no other pack, or whose stickers came from no
+    batch (photos, imports), has none. A pure read: nothing is stored, so a join or leave in the Studio shows at the next read."""
+    roots: dict[int, int] = {}
+    def root(gid: int) -> int | None:
+        if gid not in roots:
+            try:
+                roots[gid] = root_of(out, gid)
+            except Exception:
+                return None
+        return roots[gid]
+    picked: dict[str, int] = {}
+    for p in packs or []:
+        votes: dict[int, int] = {}
+        for s in p.get("stickers") or []:
+            g = _num((s.get("source") or {}).get("generation"))
+            r = root(g) if g is not None else None
+            if r is not None:
+                votes[r] = votes.get(r, 0) + 1
+        if votes:
+            picked[p["id"]] = max(votes, key=lambda r: (votes[r], -r))
+    count: dict[int, int] = {}
+    for r in picked.values():
+        count[r] = count.get(r, 0) + 1
+    return {pid: f"G{r:03d}" for pid, r in picked.items() if count[r] > 1}
+
+
 def members(out: Path, gid: int) -> list[int]:
     r = root_of(out, gid)
     return families(out).get(r, [r])
