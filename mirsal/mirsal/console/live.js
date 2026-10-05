@@ -350,6 +350,7 @@ function histCol(){const c2=document.getElementById('col2');if(!c2)return;
 function drawHist(){if(['generate','create'].includes(route_))histCol();if(typeof spSecDraw==='function')spSecDraw()}
 /* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio, as does a row of the Earlier-batches column */
 ACT.hopen=el=>{const it=HB.items.flatMap(histVars).find(x=>x.id===+el.dataset.id);if(!it)return;
+  if(it.kind==='particles'&&typeof spOpenBatch==='function')setTimeout(()=>spOpenBatch(it.generation_id||it.id));     /* a particle batch opens on its set (particles.js) */
   gdHide();
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();

@@ -185,7 +185,7 @@ async function create(prompt,variant,more){
   say(`${esc(r.j.error||'Could not start')} ${r.status===404?`<button class="btn sm" data-act=ghiggs>Get the Higgsfield prompt for this</button>`:''}`);return false}
   gdHide();if(more){SES.gens.push(r.j.id)}else{SES={prompt,gens:[r.j.id],off:[],pack:''};for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear()}
   saveSes();glast='';MD=null;tick(true);return true}
-ACT.ggo=()=>{const p=$('prompt').value.trim();if(!p){say('Write what you want first, for example <b>teddy bear for school</b>.');return}create(p,0,false)};
+ACT.ggo=()=>{if(typeof ptOn==='function'&&ptOn())return spStudio();const p=$('prompt').value.trim();if(!p){say('Write what you want first, for example <b>teddy bear for school</b>.');return}create(p,0,false)};
 function openGen(id){gdHide();SES={prompt:'',gens:[id],off:[],pack:''};saveSes();glast='';MD=null;tick(true)}
 ACT.gmore=async()=>{const gs=sessionGens();if(!gs.length)return;const s=gs[0].source.subject,used=new Set(gs.map(g=>String(g.source.subject_id)));
   await loadInputs();const inp=GINP.find(x=>x.subject===s),next=inp&&inp.variants.find(v=>!used.has(String(v.folder)));
@@ -369,7 +369,7 @@ ACT.gddiscard=()=>{gdDrop();glast='';if(typeof cpDrawBar==='function')cpDrawBar(
 ACT.gdpriceretry=()=>{const {model,sel}=lsel('image');if(model)delete LIVE.est['image'+model.id+JSON.stringify(sel.options)];GDP=null;gdPaint();gdPrice()};
 /* Generate prompt: with the AI enhancer On the plan is written by the model the person chose (the same engine control as the AI screen: Auto / Local / Cloud, composer.js); a model that fails never blocks, the server answers the built-in plan with `expand_error` and the step says why */
 const gdEngineName=()=>{const g=typeof GAI!=='undefined'?GAI:null;return g&&g.provider&&g.provider!=='none'?`${g.provider==='openai'?'cloud':'local'} · ${String(g.model||'').replace(/:\d+$/,'')}`:''};
-ACT.gprompt=()=>gdPlan(typeof aiOn==='function'&&aiOn());
+ACT.gprompt=()=>typeof ptOn==='function'&&ptOn()?spStudio():gdPlan(typeof aiOn==='function'&&aiOn());     /* the Particles choice (composer.js) takes the particle route (particles.js) */
 ACT.gpromptfree=()=>gdPlan(false);          // "Use the built-in prompt instead": plans again without the model; the saved enhancer setting is not changed
 async function gdPlan(ai){const p=(($('prompt')||{}).value||'').trim();if(!p){say('Write what you want first, for example <b>teddy bear for school</b>.');return}if(GDWORK)return;
   if(typeof CP!=='undefined'&&CP.refs.some(r=>r.busy)){toast('Wait for the reference images to finish uploading',1);return}

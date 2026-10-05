@@ -387,24 +387,21 @@ ACT.psrecovergo=async el=>{const pid=$('psrecoverparent').value;if(!pid)return t
 /* ---------- the Studio's Particles choice (composer.js ptOn): "particles for lipsticks and ribbons" -> a stand-alone set (POST /api/particles {from_request}),
    its price (POST /api/particles/{id}/more {estimate}), Generate (go): the sheet is a particle batch in Earlier batches (with the particles mark) and the
    set opens in the editor, where its sprites arrive. Cancel deletes the empty set (it is in the trash, restorable). */
-const PTR={busy:false};
-async function ptStudio(){const p=$('prompt'),text=((p&&p.value)||'').trim();
- if(!text)return toast('Say which particles, for example: particles for lipsticks and ribbons',1);if(PTR.busy)return;PTR.busy=true;
+const SPPT={busy:false};
+async function spStudio(){const p=$('prompt'),text=((p&&p.value)||'').trim();
+ if(!text)return toast('Say which particles, for example: particles for lipsticks and ribbons',1);if(SPPT.busy)return;SPPT.busy=true;
  try{const r=await post('/api/particles',{from_request:text,grid:'2x2'});if(!r.ok)return toast(r.j.error||'Could not read which particles you want',1);const s=r.j;
   dlg(`<h2>Particles on their own</h2><p class=mut>A sheet of four still sprites, cut and keyed, then they fly in the simulator. No sticker owns them.</p>
    <div class=row style="flex-wrap:wrap;gap:6px">${(s.plan.elements||[]).map(e=>`<span class=fx-chip>${esc(e)}</span>`).join('')}</div>
    <div class=row style="justify-content:flex-end;margin-top:14px"><button class=btn data-act=ptcancel data-id="${esc(s.id)}">Cancel</button><button class="btn pri" id=ptgo data-act=ptgo data-id="${esc(s.id)}" disabled>Pricing…</button></div>`);
   const q=await post(`/api/particles/${encodeURIComponent(s.id)}/more`,{mode:'drawn',estimate:true}),b=$('ptgo');if(!b)return;
   if(q.ok&&q.j.credits!=null){b.disabled=false;b.textContent=`Generate · ${q.j.credits} credits`}else{b.textContent='Price unavailable';toast((q.j&&q.j.error)||'The price is unavailable: nothing was started',1)}}
- finally{PTR.busy=false}}
+ finally{SPPT.busy=false}}
 ACT.ptcancel=el=>{closeDlg();post(`/api/particles/${encodeURIComponent(el.dataset.id)}/delete`,{})};
 ACT.ptgo=async el=>{el.disabled=true;const id=el.dataset.id,r=await post(`/api/particles/${encodeURIComponent(id)}/more`,{mode:'drawn',go:true});
  if(!r.ok){el.disabled=false;return toast(r.j.error||'The sheet did not start',1)}closeDlg();toast('Drawing the particles: they arrive in the editor and in Earlier batches');
  if(typeof histReload==='function')histReload();spOpenSet(id)};
-for(const k of ['gprompt','ggo']){const f=ACT[k];if(f)ACT[k]=(...a)=>route_==='generate'&&typeof ptOn==='function'&&ptOn()?ptStudio():f(...a)}
 /* a particle batch opened in the Studio: its stand-alone set in the editor (the set that holds the batch's sheet) */
-async function ptOpenBatch(gid){const r=await api('/api/particles');if(!r.ok)return;const s=(r.j.sets||[]).find(x=>(x.sheets||[]).some(sh=>spGid(sh.generation)===spGid(gid)));if(s)spOpenSet(s.id)}
-globalThis.ptOpenBatch=ptOpenBatch;
-{const f=ACT.hopen;if(f)ACT.hopen=async el=>{const r=await f(el);const it=(typeof HB!=='undefined'?HB.items.flatMap(histVars):[]).find(x=>x.id===+el.dataset.id);
- if(it&&it.kind==='particles')ptOpenBatch(it.generation_id||it.id);return r}}     /* a particle batch from Earlier batches opens on its set */
+async function spOpenBatch(gid){const r=await api('/api/particles');if(!r.ok)return;const s=(r.j.sets||[]).find(x=>(x.sheets||[]).some(sh=>spGid(sh.generation)===spGid(gid)));if(s)spOpenSet(s.id)}
+globalThis.spOpenBatch=spOpenBatch;
 

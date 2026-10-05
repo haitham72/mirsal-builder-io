@@ -82,7 +82,7 @@ async function cpAddFiles(files){const {model}=lsel('image');if(model&&model.ref
     t.id=j.id;t.busy=false;cpDrawRefs()}}
 
 /* ---------- the bar: model, stroke, price, Generate */
-/* the Studio's Particles choice (Haitham, 2026-10-05): a per-browser switch; on, Generate prompt and Enter take the particle route (particles.js ptStudio) */
+/* the Studio's Particles choice (Haitham, 2026-10-05): a per-browser switch; on, Generate prompt and Enter take the particle route (particles.js spStudio) */
 const ptOn=()=>{try{return localStorage.getItem('mirsal.particles.on')==='1'}catch(e){return false}};
 ACT.cppart=()=>{try{localStorage.setItem('mirsal.particles.on',ptOn()?'0':'1')}catch(e){}cpDrawBar()};
 function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('image'),st=GS.outline;

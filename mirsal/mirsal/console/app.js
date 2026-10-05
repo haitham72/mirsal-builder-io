@@ -135,7 +135,7 @@ function mqEnd(commit){const m=MQ.m;if(!m)return;MQ.m=null;cancelAnimationFrame(
   if(m.moved&&commit){const res=mqResult(m,mqHits(m,mqRect(m)));SEL.clear();res.forEach((v,k)=>SEL.set(k,v));MQ.quiet=Date.now()+250;selRefresh()}
   else if(!m.moved&&commit&&m.mode==='replace'&&SEL.size){SEL.clear();selRefresh()}else if(m.moved)selRefresh()}
 document.addEventListener('mousedown',e=>{if(e.button!==0||MQ.m)return;const scr=e.target.closest('#s-pack,#s-library');if(!scr)return;
-  const grid=scr.querySelector('.grid.selgrid');if(!grid)return;
+  const grid=e.target.closest('.grid.selgrid');if(!grid)return;          /* only inside the sticker grid (its gaps, or Shift/Ctrl on a sticker): the rest of the screen keeps the mouse */
   if(e.target.closest('button,input,select,textarea,a,label,.selbox,.selbar,.hov,.cap,.phead,.tabs,.fab,.seeall'))return;
   const mod=e.shiftKey||e.ctrlKey||e.metaKey;if(e.target.closest('.cell')&&!mod)return;
   e.preventDefault();const sc=selScroller(grid);

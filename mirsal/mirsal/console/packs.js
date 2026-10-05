@@ -135,9 +135,10 @@ function ptBadge(pid,sid){const c=(PKPT.c[pid]||{})[sid];return c&&c.created+c.s
 const ptForget=()=>{PKPT.c={};PKPT.d={}};
 async function ptLoad(s){const r=await api(`/api/packs/${s.pack_id}/stickers/${s.id}/particles`);PKPT.d[s.id]=r.ok?r.j:{error:r.j.error||'Could not read the particles'};
  const cur=LCI===null?null:LCL[LCI],el=$('pk-psline');if(el&&cur&&cur.id===s.id)el.innerHTML=pkStickerLine(cur)}
-async function ptCounts(pid){const r=await api(`/api/packs/${pid}/particles`);if(!r.ok)return;
+async function ptCounts(pid){const r=await api(`/api/packs/${pid}/particles`);
+ if(!r.ok){if(PKPT.sets[pid]==null){PKPT.sets[pid]=[];PKPT.bursts[pid]=[];if(route_==='pack'&&PACK_ID===pid)drawPack()}return}     /* an error ends the wait too (it used to spin for ever) */
  const j={counts:r.j.counts||{},sets:r.j.sets||[],bursts:r.j.bursts||[]},old={counts:PKPT.c[pid]||{},sets:PKPT.sets[pid]||[],bursts:PKPT.bursts[pid]||[]};
- if(JSON.stringify(j)!==JSON.stringify(old)){PKPT.c[pid]=j.counts;PKPT.sets[pid]=j.sets;PKPT.bursts[pid]=j.bursts;if(route_==='pack'&&PACK_ID===pid)drawPack()}}
+ if(PKPT.sets[pid]==null||JSON.stringify(j)!==JSON.stringify(old)){     /* never read before: store it even when it is empty (an empty pack used to stay "Reading…" for ever) */PKPT.c[pid]=j.counts;PKPT.sets[pid]=j.sets;PKPT.bursts[pid]=j.bursts;if(route_==='pack'&&PACK_ID===pid)drawPack()}}
 /* "Make particles": in the Studio it opens the Particles tab with this sticker chosen; anywhere else the particle studio (#/effects) */
 window.ptMakeFor=(pack,sid)=>spOpenFor(pack,sid);
 ACT.ptmake=el=>{lcClose();window.ptMakeFor(el.dataset.p,el.dataset.s)};
