@@ -16,6 +16,7 @@ def make_repo(root: Path) -> Path:
     (root / "docs" / "particles.md").write_text("# Particles\n\nIntro.\n\n## Echo burst\n\nThe Echo chat plays the burst out of the heart badge when a sticker is liked.\n\n"
                                                 "## Saving\n\nSave turns a draft into the next row.\n", encoding="utf-8")
     (root / "docs" / "inputs" / "private.md").write_text("# Private\n\nnever read this\n", encoding="utf-8")
+    (root / "docs" / "backlog.md").write_text("# Backlog\n\n## Quokka\n\nThe quokka migration is open and waits for Haitham.\n", encoding="utf-8")
     code = root / "mirsal" / "mirsal" / "flow"
     code.mkdir(parents=True)
     (root / "mirsal" / "mirsal" / "__init__.py").write_text("", encoding="utf-8")
@@ -69,7 +70,8 @@ class IndexTests(unittest.TestCase):
     def test_the_index_reads_docs_and_code_never_env_files_or_inputs_and_scrubs_secrets(self):
         r = kb.reindex(self.out, self.repo, embedder=None)
         files = kb.read_index(self.out)["files"]
-        self.assertEqual(sorted(files), ["docs/particles.md", "mirsal/mirsal/__init__.py", "mirsal/mirsal/flow/uploader.py"])
+        self.assertEqual(sorted(files), ["docs/backlog.md", "docs/particles.md", "mirsal/mirsal/__init__.py", "mirsal/mirsal/flow/uploader.py"])
+        self.assertEqual(files["docs/backlog.md"]["kind"], "note", "the trackers are staff notes")
         text = json.dumps(files)
         self.assertNotIn("ABCdefGHI", text, "a token in the code is scrubbed before it is kept")
         self.assertNotIn("never read this", text)
@@ -89,6 +91,8 @@ class IndexTests(unittest.TestCase):
         self.assertTrue(doc["enough"])
         self.assertFalse(doc["code_used"], "the docs answered: the code is not read")
         self.assertEqual(doc["hits"][0]["path"], "docs/particles.md")
+        self.assertFalse(any(h["kind"] == "note" for h in kb.search(self.out, "quokka migration open", "member")["hits"]), "a member never reads the trackers")
+        self.assertEqual(kb.search(self.out, "quokka migration open", "staff")["hits"][0]["path"], "docs/backlog.md")
 
 
 class FaqTests(unittest.TestCase):

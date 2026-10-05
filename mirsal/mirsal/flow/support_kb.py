@@ -22,7 +22,11 @@ from pathlib import Path
 from ..runtime import atomic
 
 REPO_VAR = "MIRSAL_SUPPORT_REPO"
-ENOUGH = {"vector": 0.55, "lexical": 0.45}         # the best FAQ/doc hit at or above this answers; below it staff also get code
+ENOUGH = {"vector": 0.70, "lexical": 0.45}         # the best FAQ/doc hit at or above this answers; below it staff also get code (nomic scores loosely related text 0.6-0.7)
+# the trackers, plans, reviews and developer notes are for staff (kind `note`): they answer the owner and admins, never a member
+INTERNAL_DOCS = {"waiting-for-haitham.md", "backlog.md", "review.md", "dev-notes.md", "testing.md", "http_route_inventory.md", "measurements.md"}
+INDEX_VERSION = 2                                   # a new version cuts every file again (the kinds or the cut changed)
+STAFF_KINDS = ("note", "code")
 NEVER_NAMES = {".env", "opencode.json", "telegram-id.md", ".env.local"}
 NEVER_PARTS = {"out", "venv", ".venv", "__pycache__", "node_modules", "dist", ".git", "inputs", "assets", "fonts"}
 MAX_CHUNK = 1800
@@ -65,7 +69,7 @@ def _files(repo: Path) -> list[tuple[str, str, Path]]:
     found = []
     for r in docs:
         if r.is_dir():
-            found += [("doc", f) for f in sorted(r.rglob("*.md")) if _allowed(f, r)]
+            found += [("note" if f.name in INTERNAL_DOCS or f.name.endswith("_plan.md") else "doc", f) for f in sorted(r.rglob("*.md")) if _allowed(f, r)]
     for r in code:
         if r.is_dir():
             found += [("code", f) for f in sorted(r.rglob("*")) if f.suffix in (".py", ".js", ".sql") and f.is_file() and _allowed(f, r)]
@@ -165,7 +169,9 @@ def _embedder(out: Path):
 
 def _pg(out: Path) -> bool:
     try:
+        from ..services import llm
         from ..store import db, sync
+        llm._load_dotenv()                                    # MIRSAL_DB_WRITE may live in mirsal/.env: read it before deciding, whatever ran first
         return sync.enabled(out) and db.available()
     except Exception:
         return False
@@ -182,7 +188,7 @@ def reindex(out: Path, repo: Path | None = None, *, embedder="auto") -> dict:
     with _LOCK:
         idx = read_index(out)
         files = idx.get("files") or {}
-        if idx.get("repo") != str(repo):
+        if idx.get("repo") != str(repo) or idx.get("v") != INDEX_VERSION:
             files = {}
         seen, changed, embedded = set(), 0, 0
         for kind, rel, f in _files(repo):
@@ -196,7 +202,7 @@ def reindex(out: Path, repo: Path | None = None, *, embedder="auto") -> dict:
             fresh = not ent or ent.get("sha") != sha
             if fresh:
                 text = raw.decode("utf-8", "replace")
-                pieces = cut_markdown(text) if kind == "doc" else cut_code(text)
+                pieces = cut_markdown(text) if kind in ("doc", "note") else cut_code(text)
                 ent = {"sha": sha, "kind": kind, "vec_model": None,
                        "chunks": [{"id": f"{kind}:{rel}#{i}", "heading": scrub_secrets(h), "text": scrub_secrets(t)} for i, (h, t) in enumerate(pieces)]}
                 files[rel] = ent
@@ -228,7 +234,7 @@ def reindex(out: Path, repo: Path | None = None, *, embedder="auto") -> dict:
                     rp.drop_chunks(c, list(files))
             except Exception:
                 pass
-        idx = {"repo": str(repo), "at": round(time.time(), 3), "files": files}
+        idx = {"repo": str(repo), "v": INDEX_VERSION, "at": round(time.time(), 3), "files": files}
         index_path(out).parent.mkdir(parents=True, exist_ok=True)
         atomic.write_text(index_path(out), json.dumps(idx, ensure_ascii=False))
         _CORPUS["key"] = None
@@ -238,7 +244,7 @@ def reindex(out: Path, repo: Path | None = None, *, embedder="auto") -> dict:
         faq.index(out, faq.read(out, f["id"]), embedder=emb)
         faqs += 1
     return {"repo": str(repo), "files": len(files), "changed": changed, "removed": len(removed), "embedded": embedded, "faq": faqs,
-            "chunks": {k: sum(len(e["chunks"]) for e in files.values() if e["kind"] == k) for k in ("doc", "code")},
+            "chunks": {k: sum(len(e["chunks"]) for e in files.values() if e["kind"] == k) for k in ("doc", "note", "code")},
             "vectors": bool(pg and emb is not None), "postgres": pg, "embedder": getattr(emb, "model", None)}
 
 
@@ -256,7 +262,7 @@ def status(out: Path) -> dict:
     emb = _embedder(out)
     repo = repo_root()
     return {"repo": str(repo) if repo else None, "repo_var": REPO_VAR, "indexed_repo": idx.get("repo"), "indexed_at": idx.get("at"), "files": len(files),
-            "chunks": {k: sum(len(e["chunks"]) for e in files.values() if e["kind"] == k) for k in ("doc", "code")},
+            "chunks": {k: sum(len(e["chunks"]) for e in files.values() if e["kind"] == k) for k in ("doc", "note", "code")},
             "postgres": pg_counts, "embedder": getattr(emb, "model", None)}
 
 
@@ -334,7 +340,7 @@ def _vector(out: Path, qvec, kinds: set, k: int) -> list[dict]:
                 if e.get("status") == "published":                       # the file decides, never a stale row
                     hits.append({"kind": "faq", "id": fid, "title": e.get("title") or fid, "text": faq.search_text(e).split("\n", 1)[1],
                                  "path": None, "score": round(s, 3)})
-        ck = [x for x in ("doc", "code") if x in kinds]
+        ck = [x for x in ("doc", "note", "code") if x in kinds]
         if ck:
             for cid, s in rp.chunks_near(c, qvec, ck, k):
                 d = by.get(cid)
@@ -344,7 +350,7 @@ def _vector(out: Path, qvec, kinds: set, k: int) -> list[dict]:
 
 
 def search(out: Path, query: str, audience: str = "member", k: int = 5) -> dict:
-    """{mode, hits, enough, code_used}: FAQ and docs for everyone; code only for staff and only when FAQ and docs fell short."""
+    """{mode, hits, enough, code_used}: FAQ and docs for everyone (staff also the internal notes); code only for staff and only when those fell short."""
     query = str(query or "").strip()[:1000]
     if not query:
         return {"mode": "lexical", "hits": [], "enough": False, "code_used": False}
@@ -365,9 +371,10 @@ def search(out: Path, query: str, audience: str = "member", k: int = 5) -> dict:
             except Exception:
                 pass
         return _lexical(out, query, kinds, k)
-    hits = find({"faq", "doc"})
+    first = {"faq", "doc", "note"} if audience == "staff" else {"faq", "doc"}
+    hits = find(first)
     if mode == "vector" and not hits:
-        hits = _lexical(out, query, {"faq", "doc"}, k)
+        hits = _lexical(out, query, first, k)
     best = max([h["score"] for h in hits] + [0.0])
     enough = best >= ENOUGH[mode]
     code_used = False

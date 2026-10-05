@@ -460,7 +460,7 @@ def support_cmd(out, args) -> int:
             print(e)
             return 1
         print(_json.dumps(r, indent=2) if args.as_json else
-              f"{r['files']} files ({r['chunks']['doc']} doc and {r['chunks']['code']} code sections), {r['changed']} changed, {r['removed']} removed, "
+              f"{r['files']} files ({r['chunks']['doc']} doc, {r['chunks']['note']} staff-note and {r['chunks']['code']} code sections), {r['changed']} changed, {r['removed']} removed, "
               f"{r['embedded']} embedded; vectors {'on (' + str(r['embedder']) + ')' if r['vectors'] else 'off: searched lexically'}; {r['faq']} published FAQ entries")
         return 0
     s = kb.status(out)

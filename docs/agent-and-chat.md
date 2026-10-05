@@ -396,8 +396,8 @@ Help is where a person describes a problem in their own words. The support agent
 
 1. **The turn.** The person writes, and may attach or paste (Ctrl+V) a screenshot. A screenshot is validated (PNG, JPEG or WebP under 8 MB), re-encoded as PNG at 1600 px at most, and stored in `out/support/C###/img-N.png`. It is read by the **local** vision model (`VISION_MODEL`, else the local chat model; `VISION_BASE_URL` optional; the person's own upload is the consent). Every call is logged as `SUPPORT_SEE` in `model_calls.jsonl`. What it saw is kept on the message for staff only.
 2. **Retrieval** (`support_kb.search`):
-   - Everyone gets **published** FAQ entries first, then the repo's `docs/`.
-   - The owner and admins also get **code**, but only when the best FAQ/doc hit is under `ENOUGH` (vector 0.55, lexical 0.45).
+   - Everyone gets **published** FAQ entries first, then the repo's `docs/`. The trackers, plans and developer notes (`INTERNAL_DOCS`, `*_plan.md`: kind `note`) answer the owner and admins only.
+   - The owner and admins also get **code**, but only when the best FAQ/doc/note hit is under `ENOUGH` (vector 0.70, lexical 0.45; nomic scores loosely related sections 0.6-0.7, measured on this repo's index).
    - The repo is `MIRSAL_SUPPORT_REPO` in `mirsal/.env` (the repository root, or its inner `mirsal/`). When it is unset, only the FAQ is searched.
    - `mirsal support reindex` (or POST `/api/support/reindex`) cuts `docs/**/*.md` into heading sections and `mirsal/mirsal/**`, `migrations/` into blocks. Secrets are scrubbed (`obs/scrub.scrub_secrets`). `.env`, `opencode.json`, `telegram-id.md`, `out/`, `docs/inputs/`, virtual envs and dot-folders are never read.
    - The record is `out/support/index.json`, with a sha256 per file, so an unchanged file is never cut or embedded again.

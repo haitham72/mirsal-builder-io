@@ -98,7 +98,7 @@ def view(cv: dict, user: dict) -> dict:
     for m in cv.get("messages") or []:
         v = {k: m.get(k) for k in ("id", "role", "text", "ts", "need", "grounded", "by_name") if m.get(k) is not None}
         if m.get("cites"):
-            v["cites"] = [c for c in m["cites"] if staff or c.get("kind") != "code"]
+            v["cites"] = [c for c in m["cites"] if staff or c.get("kind") not in ("code", "note")]
         if m.get("image"):
             v["image"] = f"/api/support/conversations/{cv['id']}/images/{m['image']}"
         if staff:
@@ -147,7 +147,7 @@ def memory(out: Path, user: dict, current: str | None = None) -> str:
             cv = read(out, r["id"])
         except KeyError:
             continue
-        cited = sorted({c.get("title") for m in cv.get("messages") or [] for c in m.get("cites") or [] if c.get("kind") != "code"})[:3]
+        cited = sorted({c.get("title") for m in cv.get("messages") or [] for c in m.get("cites") or [] if c.get("kind") in ("faq", "doc")})[:3]
         lines.append(f"- {r['id']} \"{(cv.get('title') or '')[:80]}\": {cv.get('status')}" + (" (solved by the help)" if cv.get("solved") else "")
                      + (f", ticket {cv['ticket']}" if cv.get("ticket") else "") + (f", read: {'; '.join(cited)}" if cited else ""))
     for t in tk.listing(out, user=user.get("id"))[:5]:
@@ -237,7 +237,7 @@ def _cite(h: dict) -> dict:
 
 def _fallback(kb: dict) -> tuple[str, list[dict], bool]:
     """No model: quote the best published FAQ entry (or doc section) word for word when it is a real match; otherwise offer support."""
-    best = next((h for h in kb["hits"] if h["kind"] in ("faq", "doc")), None)
+    best = next((h for h in kb["hits"] if h["kind"] in ("faq", "doc", "note")), None)
     if best and kb["enough"]:
         body = best["text"].split("\nA: ", 1)[1] if best["kind"] == "faq" and "\nA: " in best["text"] else best["text"]
         body = body.split("\nScreen: ", 1)[0].split("\nLooks like: ", 1)[0]
