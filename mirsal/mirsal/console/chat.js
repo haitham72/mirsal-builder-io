@@ -1,14 +1,17 @@
 /* Local Echo contact: replies/reactions test the sent sticker's current assigned particle settings.
    Messages live in this browser. Preview selection and rendering belong to the engine. */
 'use strict';
-const CH={msgs:[],tray:false,pk:null,typing:false,draft:'',pending:null,epoch:0,seq:0,play:{},requests:{}};
+if(typeof ICONS!=='undefined'){ICONS.phone='<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>';
+ ICONS.desktop='<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/>'}
+const CH={msgs:[],tray:false,pk:null,typing:false,draft:'',pending:null,epoch:0,seq:0,play:{},requests:{},view:'desktop'};
+try{if(localStorage.getItem('mirsal.chat.view')==='mobile')CH.view='mobile'}catch(e){}   /* a per-browser look: the chat as on a phone, or full width */
 try{CH.msgs=JSON.parse(localStorage.getItem('mirsal.chat')||'[]')}catch(e){}
 if(!Array.isArray(CH.msgs))CH.msgs=[];
 const chSave=()=>{try{localStorage.setItem('mirsal.chat',JSON.stringify(CH.msgs.slice(-200)))}catch(e){}};
 const hm=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 const chPreview=m=>!m?'No messages yet':m.kind==='sticker'?'Sticker':esc(m.text);
 const chSticker=(s,pack_id)=>({id:s.id,pack_id:s.pack_id||pack_id,type:s.type,file:s.file,name:s.name});
-const chParticleH=m=>{const p=CH.play[m.id];return p?`<img class=ch-particle src="${esc(p.url)}" alt="" aria-hidden=true data-particle-set="${esc(p.set)}" style="position:absolute;inset:0;width:160px;height:160px;z-index:2;pointer-events:none">`:''};
+const chParticleH=m=>{const p=CH.play[m.id];return p?`<img class=ch-particle src="${esc(p.url)}" alt="" aria-hidden=true data-particle-set="${esc(p.set)}">`:''};     /* centred on the reaction badge (bottom-left), spilling over the bubble, as Telegram plays a reaction's effect (studio.css .ch-particle) */
 const chReactionH=m=>!m.react?'':m.kind==='sticker'&&m.from==='out'&&m.s&&m.s.id&&m.s.pack_id?`<button type=button class=react data-act=chreplay data-id="${esc(m.id)}" title="Replay reaction" aria-label="Replay reaction">${esc(m.react)}</button>`:`<span class=react>${esc(m.react)}</span>`;
 function chList(){const m=CH.msgs[CH.msgs.length-1];
  $('col2').innerHTML=`<div class=c2h><h1>Chats</h1></div><div class=c2s><input type=search placeholder="Search chats…" disabled></div>
@@ -21,7 +24,7 @@ function chTrayH(){const ps=LIB.packs.filter(p=>p.stickers.length);if(!ps.length
  return`<div class=chtray><div class=tabs style="margin:0 0 8px">${ps.map(p=>`<button class="tab ${p.id===cur.id?'on':''}" data-act=chpack data-id=${p.id}>${esc(p.name)}</button>`).join('')}</div>
   <div class=trgrid>${cur.stickers.map(s=>`<div class=trs data-act=chpick data-id=${s.id} title="${esc(s.name)}">${media(s)}</div>`).join('')}</div></div>`}
 function chDraw(){if(route_!=='chat')return;const el=$('s-chat'),inp=$('chin');if(inp)CH.draft=inp.value;
- el.innerHTML=`<div class=chat><div class=chh><div class="cv chav">M</div><div style="flex:1"><b>Mirsal Echo</b><small>${CH.typing?'typing…':'online'}</small></div><button class=iconbtn data-act=chclear title="Clear chat">${ic('trash')}</button></div>
+ el.innerHTML=`<div class="chat${CH.view==='mobile'?' mobile':''}"><div class=chh><div class="cv chav">M</div><div style="flex:1"><b>Mirsal Echo</b><small>${CH.typing?'typing…':'online'}</small></div><button class=iconbtn data-act=chview title="${CH.view==='mobile'?'Desktop view':'Mobile view'}" aria-label="${CH.view==='mobile'?'Switch to desktop view':'Switch to mobile view'}">${ic(CH.view==='mobile'?'desktop':'phone')}</button><button class=iconbtn data-act=chclear title="Clear chat">${ic('trash')}</button></div>
   <div class=chm id=chm>${CH.msgs.map(chMsgH).join('')||'<div class="mut chempty">Say hi or send a sticker. It comes back to you and your message gets a like.</div>'}${CH.typing?'<div class="cm in"><div class="bub typing"><i></i><i></i><i></i></div></div>':''}</div>
   ${CH.tray?chTrayH():''}
   <div class=chc><button class="iconbtn ${CH.tray?'on':''}" data-act=chtray title=Stickers>${ic('sticker')}</button><input type=text id=chin placeholder="Type a message" autocomplete=off value="${esc(CH.draft)}"><button class="btn pri" data-act=chsend>${ic('chat')} Send</button></div></div>`;
@@ -41,5 +44,6 @@ ACT.chsend=()=>{const i=$('chin'),v=i.value.trim();if(!v)return;CH.draft='';i.va
 ACT.chtray=()=>{CH.tray=!CH.tray;chDraw()};ACT.chpack=el=>{CH.pk=el.dataset.id;chDraw()};
 ACT.chpick=el=>{const p=packById(CH.pk),s=p&&p.stickers.find(x=>x.id===el.dataset.id);if(s)chSend({kind:'sticker',s:chSticker(s,p.id)})};
 ACT.chreplay=el=>chPlay(el.dataset.id);
+ACT.chview=()=>{CH.view=CH.view==='mobile'?'desktop':'mobile';try{localStorage.setItem('mirsal.chat.view',CH.view)}catch(e){}chDraw()};
 function chClear(){CH.epoch++;CH.msgs=[];CH.play={};CH.requests={};CH.typing=false;CH.pending=null;chSave();chDraw()}
 ACT.chclear=()=>confirmDlg('Clear this chat?',chClear);

@@ -1102,7 +1102,8 @@ def preview(out: Path, lib, pid: str, *, pack_id=None, preset=None, params=None,
 
 
 def preview_for_sticker(out: Path, lib, pack_id: str, sticker_id: str) -> dict:
-    """Echo reaction: this sticker's newest linked set with its saved motion. Free."""
+    """Echo reaction: this sticker's latest particles with their saved motion. Free. The latest is its newest **saved** version (the highest v# under the sticker,
+    `rows_for_sticker`'s order); only a sticker with no saved version yet falls back to its newest linked draft."""
     with lib.lock:
         pack = _lib_pack(lib, pack_id)
         sticker = next((st for st in pack.get("stickers", []) if st["id"] == sticker_id), None)
@@ -1112,6 +1113,11 @@ def preview_for_sticker(out: Path, lib, pack_id: str, sticker_id: str) -> dict:
     owned = [s for s in list_sets(out, lib) if any(o["sticker_id"] == sticker_id for o in s["owner"])]
     if not owned:
         return {"set": None, "url": None}
+    full = {s["id"]: read(out, s["id"]) for s in owned}
+    rows = [s for s in owned if saved(full[s["id"]])]
+    if rows:
+        chosen = max(rows, key=lambda s: (full[s["id"]].get("saved_at") or full[s["id"]].get("created") or 0, s["id"]))
+        return {**preview(out, lib, chosen["id"], pack_id=pack_id), "set": chosen["id"], "motion": full[chosen["id"]].get("motion") or {}}
     available = {s["id"]: s for s in owned}
     chosen = next((available[pid] for pid in reversed(ordered) if pid in available), None)
     chosen = chosen or max(owned, key=lambda s: (s.get("created", 0), s["id"]))

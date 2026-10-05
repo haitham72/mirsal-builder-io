@@ -54,7 +54,7 @@ A cut sprite is a cell **inside** its row, never a particle set of its own. The 
 
 The chat resolves an explicitly named set first; otherwise it prefers the focused sticker's newest owned set, then the focused set, then the only suitable set, then asks with chips. The explicit-name exception is intentional. Make/more preserve owner scope; linking to another sticker is free. A batch outside the library gets an approval card. The tools call the same engine functions as Studio; see [agent-and-chat.md](agent-and-chat.md).
 
-Mirsal Echo is separate from AI-chat language selection. `preview_for_sticker` chooses only a set linked to the actual sent sticker, newest link first, and uses saved defaults. Unassigned stickers get no particles. The browser retains sticker IDs, anchors the preview to the replied-to outgoing sticker, and rejects stale/cleared message requests.
+Mirsal Echo is separate from AI-chat language selection. `preview_for_sticker` chooses only a set linked to the actual sent sticker: its **latest saved version** (the highest v# under the sticker, by `saved_at`), with that version's saved motion; only a sticker with no saved version yet falls back to its newest linked draft. Unassigned stickers get no particles. The browser retains sticker IDs, rejects stale/cleared message requests, and plays the burst **centred on the reaction badge at the sticker's bottom-left**, 200 px so it spills over the bubble, as Telegram plays a reaction's effect (`studio.css` `.ch-particle`). The chat header switches between a **mobile view** (a 390 px phone frame) and the full-width desktop view; the choice is per browser (`mirsal.chat.view`).
 
 ## 6. JSON contract and compatibility
 

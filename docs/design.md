@@ -149,7 +149,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 - **Its own section in the rail** (icon `users`), because People in Settings was a cramped list of one-liners with no usage. The **second column is the roster** (a list, so §4.3 applies): an avatar initial, the name, role · status · credits spent · batches, with two rows of filter chips (status, role); the selected person is the `.on` row, the chart icon in its header returns to everyone.
 - **The stage** shows the totals (stat tiles, two 30-day bar charts, worked-vs-failed jobs, then People management: add, requests, approve, roles, passwords, credits, Answered lately) or one person: the management card (`AUV.requests` + `AUV.person`), stat tiles, the two charts, jobs with cost against estimate (a cost over its estimate in `--run`), the ledger (folded), and their work by family with prompts (folded) and 64px thumbnails linking to the WEBM when animated.
 - **The graphs are hand-drawn SVG** (`UV.bars`, `UV.split`): one rect per day on `--pri` (spend) and `--ai` (batches), an empty day a 1px hairline, the day and value in each bar's title; worked / failed is one split bar in `--ok` / `--bad`. No chart library (rule 8). Stat tiles use the glass depth (`--glass`, `--aline`) like AI.
-- **A member** sees the same section as **My usage**: their own page only (the roster column shows just them), no management card.
+- **A member** has no Users in the rail (Haitham, 2026-10-05: Users is for the owner and admins). Their own page, **My usage** (their numbers only, no management card), opens from the **My usage** button in Settings, on the "Signed in as" card.
 
 ---
 

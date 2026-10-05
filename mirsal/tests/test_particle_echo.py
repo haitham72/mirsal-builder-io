@@ -40,6 +40,14 @@ class ParticleEchoTests(unittest.TestCase):
             ps.link(self.out, self.lib, new['id'], ['s1'], unlink=True)
             self.assertEqual(ps.preview_for_sticker(self.out, self.lib, 'a', 's1')['set'], old['id'])
 
+    def test_the_newest_saved_version_beats_a_newer_draft_and_an_older_link(self):
+        v1 = ps.update(self.out, self.lib, ps.create(self.out, self.lib, owners=['s1'])['id'], save=True)
+        v2 = ps.update(self.out, self.lib, ps.create(self.out, self.lib, owners=['s1'])['id'], save=True)
+        ps.create(self.out, self.lib, owners=['s1'])                                  # a draft started after v2, never saved
+        ps.update(self.out, self.lib, v1['id'], motion={'preset': 'burst'})          # editing v1 without Save keeps it v1
+        with patch('mirsal.flow.particle_sets.preview', return_value={'url': '/preview.webp'}):
+            self.assertEqual(ps.preview_for_sticker(self.out, self.lib, 'a', 's1')['set'], v2['id'], 'Echo plays the latest saved version (v2)')
+
     def test_unassigned_sticker_never_uses_other_stickers_set(self):
         ps.create(self.out, self.lib, owners=['s2'])
         with patch('mirsal.flow.particle_sets.preview') as preview:

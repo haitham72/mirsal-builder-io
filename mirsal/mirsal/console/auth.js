@@ -33,7 +33,7 @@ const AUV=(()=>{
   const people=(list,reqs,recent)=>`<div class=row><textarea id=au-add rows=2 placeholder="name@nadi.ae, one per line" style="flex:1"></textarea><button class="btn pri" data-act=auadd>Add people</button></div>
       ${requests(reqs)}${(list||[]).map(person).join('')||'<div class=mut>Nobody yet.</div>'}${answered(recent)}`;
   const me=u=>u&&u.id!=='local'?`<div class=row style="justify-content:space-between"><span>Signed in as <b>${esc(u.name)}</b> <span class=mut>${esc(u.email||'')}${u.credits_left!=null?` · ${u.credits_left} credits left`:''}</span></span>
-    <span class=row><button class="btn sm" data-act=aucreditask>Request credits</button><button class="btn sm" data-act=aulogout>Sign out</button></span></div>`:'';
+    <span class=row>${u.role==='member'?'<button class="btn sm" data-act=nav data-to=users>My usage</button>':''}<button class="btn sm" data-act=aucreditask>Request credits</button><button class="btn sm" data-act=aulogout>Sign out</button></span></div>`:'';
   const reshow=(shown,mode)=>shown!==mode;   /* a background 401 must not wipe the card: re-show only a mode that is not already up (typed text and error messages survive the polls) */
   const staff=me=>!me||me.id==='local'||me.role!=='member';   /* server health rows are staff-only: a member answer carries no health, so showing them would always say "missing" */
   return {esc,gate,waiting,change,people,person,requests,me,reshow,staff};
@@ -48,7 +48,7 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   function auHide(){const o=document.getElementById('au-gate');if(o)o.classList.remove('on');AU.shown=null}
   async function auCheck(){const r=await api('/api/auth/me');
     if(r.status===401){AU.me=null;AU.lan=!!r.j.lan;AU.domains=r.j.domains||null;return auShow(AUV.gate(AU.mode,'',AU.domains))}
-    if(!r.ok)return auIn();AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;
+    if(!r.ok)return auIn();AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;if(typeof drawRail==='function')drawRail();   /* Users is for the owner and admins: a member's rail has no Users */
     if(AU.me.status==='pending'){auShow(AUV.waiting(AU.me),'waiting');setTimeout(auCheck,15000);return}
     if(AU.me.must_change_password&&auKept()!==AU.me.id)return auShow(AUV.change(AU.me),'change');
     auHide();auIn()}

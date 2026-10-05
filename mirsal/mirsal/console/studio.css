@@ -140,6 +140,8 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 .chat{flex:1;display:flex;flex-direction:column;min-width:0;max-width:980px;margin:0 auto;width:100%;background:var(--glass);backdrop-filter:blur(14px);border-left:1px solid var(--bd);border-right:1px solid var(--bd)}
 .chav{background:var(--pri);color:#fff;font-weight:700;border:0!important}
 .chh{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--bd)}.chh .cv{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center}.chh b{display:block}.chh small{color:var(--mut2)}
+.chat.mobile{max-width:390px;max-height:844px;margin:16px auto;border:1px solid var(--bd);border-radius:28px;overflow:hidden;box-shadow:var(--sh)}   /* the chat as on a phone (chat.js chview) */
+.chat.mobile .chm{padding:12px 10px}.chat.mobile .bub{max-width:82%}.chat.mobile .chc .btn{padding-inline:10px}
 .chm{flex:1;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:8px}.chempty{margin:auto;text-align:center;max-width:320px}
 .cm{display:flex;flex:none}.cm.cout{justify-content:flex-end}.cm.cin{justify-content:flex-start}
 .bub{position:relative;max-width:min(70%,460px);padding:8px 12px 6px;border-radius:var(--r);background:var(--sf);border:1px solid var(--bd);line-height:1.4;word-break:break-word}
@@ -147,6 +149,7 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 .bub .tm{display:block;text-align:right;font-size:var(--fs-xs);color:var(--mut2);margin-top:2px}.cm.cout .bub .tm{color:var(--pri-d)}
 .bub.stk{background:none;border:0;padding:0}.bub.stk img,.bub.stk video{width:160px;height:160px;object-fit:contain;display:block}.bub.stk .tm{padding-right:4px}
 .react{position:absolute;left:-6px;bottom:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-pill);padding:1px 6px;font-size:var(--fs-m);box-shadow:var(--sh);animation:pop .3s ease-out}.bub:not(.stk) .react{bottom:-10px}
+.ch-particle{position:absolute;width:200px;height:200px;left:-91px;bottom:-74px;z-index:3;pointer-events:none}   /* the burst's centre on the reaction badge's centre (.react: left -6px, bottom 14px, about 30x24) */
 @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
 .bub.typing{display:flex;gap:4px;padding:12px 14px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--mut2);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes blink{50%{opacity:.25}}
 .chtray{border-top:1px solid var(--bd);padding:10px 16px;background:var(--sf);max-height:250px;overflow:auto}
