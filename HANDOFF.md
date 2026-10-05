@@ -6,8 +6,5 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-**The Mirsal Creator film (`Motion Graphics/`, 2026-10-04): voiced, aligned, rough cut rendered; the real plates are next.** `Motion Graphics/README.md` "Where it stands" says what is built.
 
-- **The look is the Mirsal app's clean iOS style** (Haitham: the concept board and the dark plotter look are rejected). README §4 is the rule; every new plate follows §4.3.
-- **Voice:** Liam (ElevenLabs premade), `audio/voiceover.mp3`, 87.4 s, aligned (`data/lyrics.json`).
-- **Next:** write the plates P1 to P8 (README §5), each replacing its `card(...)` entry in `app/src/timeline.ts`, starting with P1 `hook`. Then the sound effects (§7), the cue sheet and the final render (§8).
+Nothing is in progress. (The Mirsal Creator film in `Motion Graphics/` is finished, Haitham, 2026-10-05.)

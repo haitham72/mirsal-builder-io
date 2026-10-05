@@ -264,7 +264,7 @@ def propose_from_ticket(out: Path, tid: str, by: str, complete=None) -> dict | N
     return f
 
 
-# ---------- seed entries written as Markdown files (faq/<category>/<slug>.md; faq-seed-prompt.md says how they are written)
+# ---------- seed entries written as Markdown files (faq/<category>/<slug>.md; mirsal/local_eval/faq-seed-prompt.md says how they are written)
 def parse_seed(text: str) -> dict:
     """A seed file: a `---` header of `key: value` lines (title, question, category, tags) and the answer as the body. ValueError when it is not one."""
     m = re.match(r"^\ufeff?---\s*\n(.*?)\n---\s*\n(.*)$", text.replace("\r\n", "\n"), re.S)
