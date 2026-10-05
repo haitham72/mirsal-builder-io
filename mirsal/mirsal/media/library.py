@@ -161,6 +161,31 @@ def png_bytes(rgba: np.ndarray) -> bytes:
     return buf.tobytes()
 
 
+def validate_replace(data: bytes, ext: str, cfg: EngineConfig):
+    """An edited file for a pack sticker -> (bytes, ext, kind): the Telegram limits, checked. Static (PNG/JPG/WebP):
+    the editor's rules (512 px, 512 KB). Animated: WebM only (Telegram-style), 512 px, 256 KB. Anything else is refused
+    in words."""
+    ext = str(ext or "").lower().lstrip(".")
+    if ext in ("png", "jpg", "jpeg", "webp"):
+        body, out_ext, _ = validate_render(data, cfg)
+        return body, out_ext, "static"
+    if ext == "webm":
+        if len(data) > cfg.video_max_bytes:
+            raise LibraryError(f"{len(data) // 1024}KB is over Telegram's {cfg.video_max_bytes // 1024}KB video limit; shorten it")
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as t:
+            t.write(data)
+            tmp = t.name
+        try:
+            info = ff.probe(Path(tmp), vp9_native=True)
+        finally:
+            Path(tmp).unlink(missing_ok=True)
+        if not info.get("width") or (info["width"], info["height"]) != (cfg.size, cfg.size):
+            raise LibraryError(f"animated stickers are {cfg.size}x{cfg.size}, got {info.get('width')}x{info.get('height')}")
+        return data, "webm", "animated"
+    raise LibraryError("Replace with a PNG, JPG or WebP picture (a static sticker) or a WebM clip (an animated one)")
+
+
 def validate_render(data: bytes, cfg: EngineConfig):
     """The editor's exported 512x512 canvas -> (bytes, ext, checks). Same rules as engine stickers."""
     rgba = decode_image(data)
@@ -536,20 +561,76 @@ class Library:
                            {"generation": st["generation_id"], "index": index}, gen_file_name=t.get("name") or f.stem)
         return self.set_file_name(pid, s["id"], t.get("name") or f.stem)
 
-    def replace_file(self, pid: str, sid: str, data: bytes, ext: str) -> dict:
-        """New content for an existing sticker (same id, name, emoji, position, cover). A different extension renames the file (png -> webp)."""
+    def replace_file(self, pid: str, sid: str, data: bytes, ext: str, kind: str | None = None, keep_prev: bool = False) -> dict:
+        """New content for an existing sticker (same id, name, emoji, position, cover, particle links: the id never
+        changes). A different extension renames the file (png -> webp); `kind` changes static <-> animated (the type
+        follows the file). The replaced file is kept once (`prev_file`) for one undo."""
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
             s = next((s for s in p["stickers"] if s["id"] == sid), None)
             if not s:
                 raise LibraryError("no such sticker", 404)
+            if keep_prev:
+                cur = self.files / s["file"]
+                if cur.is_file():
+                    prel = (str(Path(s["file"]).parent / (Path(s["file"]).stem + ".prev" + Path(s["file"]).suffix))).replace("\\", "/")
+                    (self.files / prel).parent.mkdir(parents=True, exist_ok=True)
+                    (self.files / prel).write_bytes(cur.read_bytes())
+                    old_prev = s.get("prev_file")
+                    s["prev_file"] = prel
+                    if old_prev and old_prev != prel:
+                        self._unlink(db, old_prev)
             fname = Path(s["file"]).with_suffix("." + ext).as_posix()
             (self.files / fname).write_bytes(data)
             if fname != s["file"]:
                 self._unlink(db, s["file"]); s["file"] = fname
+            if kind in ("static", "animated") and kind != s.get("type"):
+                s["type"] = kind
             s["kb"] = max(1, len(data) // 1024); s["edited"] = time.time()
             self._save(db)
             return s
+
+    def undo_replace(self, pid: str, sid: str) -> dict:
+        """Take back a replace: the kept previous file is the sticker again (one-shot; a second undo is refused)."""
+        with self.lock:
+            db = self._load(); p = self._pack(db, pid)
+            s = next((s for s in p["stickers"] if s["id"] == sid), None)
+            if not s:
+                raise LibraryError("no such sticker", 404)
+            prev = s.get("prev_file")
+            f = self.files / prev if prev else None
+            if not prev or not f.is_file():
+                raise LibraryError("There is no replaced file to undo.", 409)
+            data = f.read_bytes()
+            ext = Path(prev).suffix.lstrip(".") or "png"
+            fname = Path(s["file"]).with_suffix("." + ext).as_posix()
+            (self.files / fname).write_bytes(data)
+            if fname != s["file"]:
+                self._unlink(db, s["file"]); s["file"] = fname
+            s["type"] = "animated" if ext == "webm" else "static"
+            s["kb"] = max(1, len(data) // 1024); s["edited"] = time.time()
+            f.unlink(missing_ok=True)
+            s.pop("prev_file", None)
+            self._save(db)
+            return s
+
+    def copies_of(self, pid: str, sid: str) -> list[dict]:
+        """Other packs' stickers from the same batch sticker (generation + index): the offer after a replace."""
+        with self.lock:
+            db = self._load()
+            src = {}
+            for p in db["packs"]:
+                if p["id"] == pid:
+                    s = next((x for x in p["stickers"] if x["id"] == sid), None)
+                    if s:
+                        src = s.get("source") or {}
+            if not src.get("generation") or src.get("index") is None:
+                return []
+            gen, idx = src["generation"], src["index"]
+            return [{"pack_id": p["id"], "pack": p["name"], "id": x["id"], "name": x["name"]}
+                    for p in db["packs"] if p["id"] != pid
+                    for x in p["stickers"]
+                    if (x.get("source") or {}).get("generation") == gen and (x.get("source") or {}).get("index") == idx]
 
     def refresh_from_generation(self, out: Path, gen_id: str, index: int, png: Path | None, webm: Path | None) -> int:
         """A sticker edited in the Studio is the single source: every pack copy of that generation sticker takes the new file (static copies the image,

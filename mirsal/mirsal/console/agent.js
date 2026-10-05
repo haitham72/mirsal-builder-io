@@ -261,8 +261,9 @@ function tileHTML(s,gid,allow){
  const allowed=!!((rS&&rS.allowed)||(rA&&rA.allowed));
  const badge=s.still==='APPROVED'?`<span class=ag-bd title="Approved">${ic('check')}</span>`:allowed?`<span class="ag-bd is-ok" title="Allowed by you">${ic('check')}</span>`:bad?`<span class="ag-bd is-no" title="Rejected">${ic('x')}</span>`:'';
  const cap=s.wait?'':`<b>${s.index!=null?s.index:''}</b><span>${AIU.esc(String(s.title||s.key||s.name||'').replace(/_/g,' '))} ${AIU.esc(emo)}</span>`;
- const whys=[...((rS&&rS.whys)||[]),...((rA&&rA.whys)||[])].filter((w,i,arr)=>w&&arr.indexOf(w)===i);
- const btns=[rS&&rS.btn,rA&&rA.btn].filter(Boolean).join('');
+  const whys=[...((rS&&rS.whys)||[]),...((rA&&rA.whys)||[])].filter((w,i,arr)=>w&&arr.indexOf(w)===i);
+  let btns=[rS&&rS.btn,rA&&rA.btn].filter(Boolean).join('');
+  if(s.anim_from_previous&&s.webm){whys.push('the animation is from the previous picture');btns+=`<button class=ai-chip data-act=aganimal data-g="${AIU.esc(gid||'')}" data-i=${s.index}>Animate again</button>`}
  const stateWord=!bad?'':allowed?' (allowed by you)':' (rejected)';
  const albl=`S${s.index!=null?s.index:''} ${String(s.title||s.key||s.name||'').replace(/_/g,' ')}${stateWord}`;
  return `<figure class="ag-tile${A.sel.has(id)?' is-sel':''}${bad?' is-bad':''}${allowed?' is-allowed':''}${wait?' is-wait':''}" data-act=agtile data-id="${AIU.esc(id)}" tabindex="0" role="button" aria-label="${AIU.esc(albl)}"><div class=ag-ph>${media}${bad?`<span class="ag-hatch${allowed?' is-on':''}" aria-hidden=true></span>`:''}</div>${badge}<figcaption class=ag-nm>${cap}</figcaption>${id?`<button class=ag-id data-act=copyid data-v="${AIU.esc(id)}" title="${AIU.esc(id)} · click to copy the id" aria-label="Copy the id ${AIU.esc(id)}">${AIU.esc(id)}</button>`:''}
@@ -296,6 +297,7 @@ ACT.agedit=el=>{if(typeof studioEditSticker==='function')studioEditSticker(+Stri
 ACT.agsetting=async el=>{try{await saveSet(JSON.parse(el.dataset.set))}catch(e){return}paint()};          /* a one-time switch: the setting is saved and nothing is sent to the chat */
 ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
 ACT.agcut=async el=>{const r=await post(`/api/generations/${el.dataset.g}/recut`);if(!r.ok)return toast(r.j.error||'Could not cut the sheet',1);toast('Cutting the sheet…');if(A.sid)await loadSession(A.sid,true);startPoll()};
+ACT.aganimal=async el=>{const n=+String(el.dataset.g||'').replace(/\D/g,'');if(!n)return;const r=await post(`/api/generations/${n}/animate`,{scope:'slice',index:+el.dataset.i});if(!r.ok)return toast(r.j.error||'Could not animate',1);toast('Animating again');if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});
 ACT.agtrace=el=>{const k=el.dataset.m;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};
 ACT.agstep=el=>{const k=el.dataset.k;if(A.open.has(k))A.open.delete(k);else A.open.add(k);paint()};

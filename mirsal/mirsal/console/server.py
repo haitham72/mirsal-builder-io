@@ -1147,6 +1147,10 @@ def make_handler(c: Console):
                 return self._json(200, pl.history(c.out, int(q.get("offset", ["0"])[0]), int(q.get("limit", ["5"])[0])))
             if path == "/api/higgsfield/history":  # Higgsfield's own recent jobs, each marked when Mirsal already has it (free, read-only: `generate list`)
                 return self._json(200, self._hf_history(int(parse_qs(urlparse(self.path).query).get("size", ["40"])[0] or 40)))
+            if path == "/api/imports/candidates":   # "Is this the result of …?": the person's own failed jobs holding this ticket (?ticket=), newest first
+                from ..flow import imports as _im
+                ticket = parse_qs(urlparse(self.path).query).get("ticket", [""])[0]
+                return self._json(200, {"candidates": _im.candidates(c.out, ticket, self.user["id"])})
             if path == "/api/higgsfield":          # is the CLI there, the balance, today's spend (never a credential)
                 return self._json(200, c.hf_account())
             if path == "/api/models":              # the selector: curated models + every other Higgsfield model, and the style presets
@@ -1556,18 +1560,70 @@ def make_handler(c: Console):
                 self._json(200, lib.move_sticker(parts[2], parts[4], to))
             elif len(parts) == 6 and parts[3] == "stickers" and parts[5] == "delete":
                 lib.delete_sticker(parts[2], parts[4]); self._json(200, {"ok": True})
+            elif len(parts) == 6 and parts[3] == "stickers" and parts[5] == "replace":
+                # Replace with a file edited outside the app: the batch (when it still exists) and this pack take
+                # it first; copies in other packs are offered, never forced. {file: base64, name?, others?: [ids] | true, undo?}
+                import base64
+                from ..media.library import validate_replace
+                b = self._body()
+                pid, sid = parts[2], parts[4]
+                if b.get("undo"):
+                    self._json(200, {"sticker": lib.undo_replace(pid, sid), "undone": True})
+                else:
+                    raw = base64.b64decode(str(b.get("file", "")).split(",", 1)[-1] or b"")
+                    if not raw and not b.get("others_only"):
+                        raise pl.PipelineError("send the edited file as base64 in {file}", 400)
+                    ext = Path(str(b.get("name") or "file.png")).suffix.lstrip(".") or "png"
+                    if b.get("others_only"):        # copies in other packs take the same file; this pack and the batch stay as they are
+                        body, out_ext, kind = validate_replace(raw, ext, c.cfg)
+                        want = b.get("others")
+                        done_others = []
+                        for o in lib.copies_of(pid, sid):
+                            if want is True or (isinstance(want, list) and o["id"] in want):
+                                lib.replace_file(o["pack_id"], o["id"], body, out_ext, kind=kind, keep_prev=True)
+                                done_others.append(o)
+                        self._json(200, {"updated_others": done_others, "others": lib.copies_of(pid, sid)})
+                        return True
+                    body, out_ext, kind = validate_replace(raw, ext, c.cfg)
+                    _, cur = lib.sticker_path(pid, sid)
+                    src = cur.get("source") or {}
+                    batch = None
+                    if kind == "static" and src.get("generation") and src.get("index") is not None:
+                        try:
+                            gid = int(str(src["generation"]).upper().lstrip("G"))
+                            pl.replace_still(c.out, gid, int(src["index"]), body, c.cfg, lib=None)
+                            bf = pl.gen_dir(c.out, gid) / pl.read_result(c.out, gid)["stickers"][int(src["index"]) - 1]["png"]
+                            body, out_ext = bf.read_bytes(), bf.suffix.lstrip(".")
+                            batch = {"generation": f"G{gid:03d}", "index": int(src["index"])}
+                        except pl.PipelineError as e:
+                            if e.code == 404:
+                                batch = None            # the batch is gone: the pack takes the file on its own
+                            else:
+                                raise pl.PipelineError(f"{src.get('generation')}/S{src.get('index')}: {e}. Nothing was changed.", e.code)
+                    s = lib.replace_file(pid, sid, body, out_ext, kind=kind, keep_prev=True)
+                    others = lib.copies_of(pid, sid)
+                    done_others = []
+                    want = b.get("others")
+                    if want:
+                        for o in others:
+                            if want is True or (isinstance(want, list) and o["id"] in want):
+                                lib.replace_file(o["pack_id"], o["id"], body, out_ext, kind=kind, keep_prev=True)
+                                done_others.append(o)
+                    self._json(200, {"sticker": s, "batch": batch, "others": lib.copies_of(pid, sid),
+                                     "updated_others": done_others})
             else:
                 return False
             return True
 
         def _import_bytes(self, name: str, data: bytes, q: dict, job_id: str | None = None):
             from ..flow import imports as im
-            options = {k: q[k][0] for k in ("prompt", "generation", "sheet") if q.get(k)}
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job") if q.get(k)}
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
+            options["as_new"] = q.get("as_new", ["false"])[0].lower() in ("1", "true")
             try:
                 return self._json(*im.import_file(c, self.user, name, data, job_id=job_id, **options))
             except im.ImportError as e:
-                raise pl.PipelineError(str(e), e.code)
+                return self._json(e.code, {"error": str(e), **e.hint})
 
         def _hf_history(self, size: int = 40) -> dict:
             from ..flow import imports as im
@@ -1578,12 +1634,12 @@ def make_handler(c: Console):
 
         def _hf_import(self, job: str, q: dict):
             from ..flow import imports as im
-            options = {k: q[k][0] for k in ("prompt", "generation", "sheet") if q.get(k)}
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "local_job") if q.get(k)}
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
             try:
                 return self._json(*im.import_job(c, self.user, job, **options))
             except im.ImportError as e:
-                raise pl.PipelineError(str(e), e.code)
+                return self._json(e.code, {"error": str(e), **e.hint})
 
         def _post_video(self, gid, aid, query):
             """Raw video body, attached to video sheet A<n> (not matched by filename); slicing runs as the background job."""
@@ -1615,7 +1671,7 @@ def make_handler(c: Console):
                 return self._import_bytes(q.get("name", ["import.png"])[0], self._raw(MAX_UPLOAD), q)
             if path == "/api/higgsfield/import":  # one of Higgsfield's jobs (GET /api/higgsfield/history) into Mirsal: its result is downloaded (free) and imported
                 b = self._body()
-                return self._hf_import(str(b.get("id") or ""), {k: [str(v)] for k, v in b.items() if k in ("prompt", "generation", "sheet", "retry") and v})
+                return self._hf_import(str(b.get("id") or ""), {k: [str(v)] for k, v in b.items() if k in ("prompt", "generation", "sheet", "retry", "local_job") and v})
             if path == "/api/live/ref":          # a reference image for the next sheet (raw body, ?name=file.png)
                 return self._json(200, c.save_ref(self._raw(15 * 1024 * 1024), parse_qs(u.query).get("name", ["ref.png"])[0]))
             parts = path.strip("/").split("/")
@@ -1969,6 +2025,16 @@ def make_handler(c: Console):
                     import base64
                     png = base64.b64decode(str(body.get("png", "")).split(",", 1)[-1] or b"")
                     return self._json(200, pl.edit_still(c.out, gid, int(body["index"]), png, c.cfg, c.lib))
+                if parts[3] == "replace":      # Replace with a file edited outside the app (Photoshop): same S#, re-checked, the old file kept for one undo
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    import base64
+                    if body.get("undo"):
+                        return self._json(200, pl.replace_still(c.out, gid, int(body["index"]), b"", c.cfg, c.lib, undo=True))
+                    png = base64.b64decode(str(body.get("png", "")).split(",", 1)[-1] or b"")
+                    if not png:
+                        raise pl.PipelineError("send the edited file as base64 in {png}", 400)
+                    return self._json(200, pl.replace_still(c.out, gid, int(body["index"]), png, c.cfg, c.lib))
                 if parts[3] == "drop":
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)

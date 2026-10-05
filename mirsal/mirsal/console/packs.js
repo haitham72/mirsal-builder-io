@@ -38,7 +38,23 @@ ACT.stedit=el=>{const s=sOf(el.dataset.id);if(s.source&&s.source.generation)retu
 ACT.stview=el=>{const p=packById(PACK_ID);LCL=p.stickers.map(x=>({...x,pack_id:p.id,pack:p.name}));lcOpen(LCL.findIndex(x=>x.id===el.dataset.id))};
 ACT.stname=el=>{const s=sOf(el.dataset.id);dlg(`<h2>Sticker details</h2><div class=fld><label>Name</label><input type=text id=sn value="${esc(s.name)}"></div><div class=fld><label>Emoji tag (at least one is required by Telegram)</label><input type=text id=se value="${esc(s.emoji)}"></div>
   <div class=fld><label>File name${s.file_name?' (from the generator)':''}</label><input type=text readonly value="${esc(s.file_name||s.file)}" onfocus="this.select()"><div class=mut style="margin-top:3px">${s.file_name?`stored as ${esc(s.file)}`:''}</div></div>
+  <div class=fld><label>Edited outside the app (Photoshop)</label><div class=row><input id=snrep type=file accept=".png,.jpg,.jpeg,.webp,.webm"><button class=btn data-act=strep data-id=${s.id}>Replace</button>${s.prev_file?`<button class=btn data-act=strepundo data-id=${s.id}>Undo last replace</button>`:''}</div><div class=mut style="margin-top:3px">Same id, name, emoji and place (a WebM clip becomes animated). The batch takes it too when it still exists; copies in other packs are offered after.</div></div>
   <div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=stsave data-id=${s.id}>Save</button></div>`)};
+let STREP={url:null,name:null};
+ACT.strep=async el=>{const f=$('snrep').files[0];if(!f)return toast('Choose a file first',1);
+  STREP={url:await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)}),name:f.name};
+  const r=await post(`/api/packs/${PACK_ID}/stickers/${el.dataset.id}/replace`,{file:STREP.url,name:STREP.name});
+  if(!r.ok)return toast(r.j.error||'Could not replace',1);
+  await loadLib();drawPack();
+  const n=(r.j.others||[]).length;
+  if(n){const o=r.j.others.map(o=>`<div class=row style="justify-content:space-between"><span><b>${esc(o.name)}</b> <span class=mut>in ${esc(o.pack)}</span></span><button class="btn sm" data-act=strepone data-s=${el.dataset.id} data-o="${esc(o.id)}">Update</button></div>`).join('');
+    dlg(`<h2>Replaced</h2><p class=mut>${r.j.batch?`Batch ${esc(r.j.batch.generation)} and this pack have the new picture.`:'This pack has the new picture (the batch is gone).'} Also update it in:</p>${o}<div class=row><button class=btn data-act=strepall data-s=${el.dataset.id}>Update in all ${n}</button><button class="btn pri" data-act=dlgx>Done</button></div>`)}
+  else toast(r.j.batch?'Batch and pack updated':'Pack updated')};
+ACT.strepone=async el=>{const r=await post(`/api/packs/${PACK_ID}/stickers/${el.dataset.s}/replace`,{file:STREP.url,name:STREP.name,others_only:true,others:[el.dataset.o]});
+  if(!r.ok)return toast(r.j.error,1);closeDlg();await loadLib();drawPack();toast('Updated')};
+ACT.strepall=async el=>{const r=await post(`/api/packs/${PACK_ID}/stickers/${el.dataset.s}/replace`,{file:STREP.url,name:STREP.name,others_only:true,others:true});
+  if(!r.ok)return toast(r.j.error,1);closeDlg();await loadLib();drawPack();toast('Updated everywhere')};
+ACT.strepundo=async el=>{const r=await post(`/api/packs/${PACK_ID}/stickers/${el.dataset.id}/replace`,{undo:true});closeDlg();if(!r.ok)return toast(r.j.error,1);await loadLib();drawPack();toast('Taken back')};;
 ACT.stsave=async el=>{const r=await post(`/api/packs/${PACK_ID}/stickers/${el.dataset.id}`,{name:$('sn').value,emoji:$('se').value});closeDlg();if(!r.ok)return toast(r.j.error,1);await loadLib();drawPack()};
 ACT.pkpreview=()=>{const p=packById(PACK_ID);let b='chat';
  const draw=()=>{dlg(`<h2>${esc(p.name)}</h2><div class=toggles style="margin-bottom:8px">${['chat','light','dark','checker'].map(x=>`<button class="${x===b?'act':''}" data-act=pvbg data-b=${x}>${x}</button>`).join('')}</div>

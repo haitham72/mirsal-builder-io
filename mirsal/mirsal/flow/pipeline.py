@@ -890,6 +890,82 @@ def rebuild_sheet(out: Path, gid: int) -> dict | None:
         return None
 
 
+# ---------- replace a still with a file edited outside the app (Photoshop), back into the same place ----------
+def replace_still(out: Path, gid: int, index: int, png: bytes, cfg: EngineConfig, lib=None, undo: bool = False) -> dict:
+    """Replace one still with a file edited outside the app, in place: same file name, same S#. The new picture is
+    re-checked (the finished-image checks; the keying verdicts and any override stay as Python recorded them); the
+    sticker returns to waiting for approval (a cell Python blocked stays blocked). Its animation is kept, but it is
+    marked from-the-previous-picture (`anim_from_previous`) until it is animated again. The replaced file is kept
+    once (`source/orig/replaced-S#.png`) for one undo. Rejection never deletes."""
+    from ..media.library import LibraryError, decode_image, validate_render
+    res = read_result(out, gid)
+    if not 1 <= index <= len(res["stickers"]):
+        raise PipelineError(f"index 1..{len(res['stickers'])} required")
+    st = res["stickers"][index - 1]
+    d = gen_dir(out, gid)
+    prev = d / "source" / "orig" / f"replaced-S{index}.png"
+    if undo:
+        if not prev.is_file():
+            raise PipelineError(f"S{index} has no replaced file to undo.", 409)
+        body = prev.read_bytes()
+        try:
+            body, ext, _ = validate_render(body, cfg)
+        except LibraryError as e:
+            raise PipelineError(str(e), 409)
+        f = d / st["png"]
+        if ext != f.suffix.lstrip("."):
+            f.unlink(missing_ok=True)
+            st["png"] = str(Path(st["png"]).with_suffix("." + ext)).replace("\\", "/")
+            f = d / st["png"]
+        f.write_bytes(body)
+        prev.unlink()
+        st["edited"], st["edited_at"] = True, round(time.time(), 3)
+        st["metrics"]["kb"] = max(1, len(body) // 1024)
+        if st["review"]["still"] != "BLOCKED":
+            st["review"]["still"] = "PENDING"
+        hist(st, "still", "human", "UNDO", reason="replaced file taken back: the previous picture is back")
+        write_result(out, gid, res)
+        emit(out, gid, "still_edited", "done", 0, {"index": index, "undo": True}, "human", "UNDO")
+        refreshed = lib.refresh_from_generation(out, res["generation_id"], index, d / st["png"], None) if lib else 0
+        merged = rebuild_sheet(out, gid)
+        return {"index": index, "undone": True, "pack_copies": refreshed, "sheet_fixed": merged}
+    if st["status"] != "READY" or not st.get("png"):
+        raise PipelineError(f"S{index} is not a READY still.", 409)
+    try:
+        body, ext, _ = validate_render(png, cfg)
+    except LibraryError as e:
+        raise PipelineError(str(e), 409)
+    rgba = decode_image(body)
+    metrics: dict = {}
+    report = verify.run("still", {"plain": rgba[..., 3], "metrics": metrics, "img": rgba,
+                                  "render": lambda: rgba, "waive": st.get("still_override") or (),
+                                  "encode": lambda img, c: (body, ext)}, cfg, only=APPEARANCE_CHECKS)
+    block = next((c for c in report if not c.ok and c.severity == verify.BLOCK), None)
+    if block:
+        raise PipelineError(f"The edited file fails the {block.id} check ({block.note or block.limit}): fix it outside and try again.", 409)
+    f = d / st["png"]
+    prev.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(f, prev)                                        # one previous: a second replace moves it on
+    if ext != f.suffix.lstrip("."):
+        f.unlink(missing_ok=True)
+        st["png"] = str(Path(st["png"]).with_suffix("." + ext)).replace("\\", "/")
+        f = d / st["png"]
+    f.write_bytes(body)
+    st["edited"], st["edited_at"] = True, round(time.time(), 3)
+    st["metrics"]["kb"] = max(1, len(body) // 1024)
+    if st["review"]["still"] != "BLOCKED":
+        st["review"]["still"] = "PENDING"                           # back to waiting for approval; an override stays possible
+    if st.get("webm"):
+        st["anim_from_previous"] = True                             # the animation is kept: it shows the previous picture until it is made again
+    hist(st, "still", "human", "EDIT", reason="replaced with a file edited outside the app")
+    write_result(out, gid, res)
+    emit(out, gid, "still_edited", "done", 0, {"index": index, "replaced": True}, "human", "EDIT")
+    refreshed = lib.refresh_from_generation(out, res["generation_id"], index, d / st["png"], None) if lib else 0
+    merged = rebuild_sheet(out, gid)
+    return {"index": index, "edited_at": st["edited_at"], "kb": st["metrics"]["kb"], "has_animation": bool(st.get("webm")),
+            "anim_from_previous": bool(st.get("anim_from_previous")), "pack_copies": refreshed, "sheet_fixed": merged}
+
+
 # ---------- edit a still in place (the sticker editor's Save, opened from Generate) ----------
 def edit_still(out: Path, gid: int, index: int, png: bytes, cfg: EngineConfig, lib=None) -> dict:
     """Replace one still with the editor's 512x512 result, in place: same file name, same S#. The original is kept once in source/orig/ so
@@ -1121,6 +1197,9 @@ def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int |
             write_result(out, gid, res)
             waive = {i: set(res["stickers"][i - 1].get("anim_override") or []) for i in todo}          # blocks a human allowed, kept when the cell is animated again
             results = animate_cells(res, cfg, todo, on_cell, AnimCache(out / "cache" / "anim"), waive=waive)
+            for r in results:
+                if r.status == "READY":
+                    res["stickers"][r.index - 1].pop("anim_from_previous", None)    # made again after a replaced still: the animation is the current picture
             s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
             res["stage"] = "video_sliced"; write_result(out, gid, res)
     except Exception as e:

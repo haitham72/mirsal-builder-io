@@ -118,7 +118,7 @@ class ConsoleTools:
             i = s["index"]
             stickers.append({"id": f"{gid}/S{i}", "index": i, "key": s["key"], "name": s.get("name"), "emoji": s.get("emoji"),
                              "tags": s.get("tags"), "title": s.get("title"), "proposed_title": (s.get("title_proposal") or {}).get("name"), "status": s["status"], "reason": s.get("reason"), "still": s["review"]["still"],
-                             "anim": s["review"]["anim"], "anim_status": s.get("anim_status"),
+                             "anim": s["review"]["anim"], "anim_status": s.get("anim_status"), "anim_from_previous": bool(s.get("anim_from_previous")),
                              "waived": list(s.get("still_override") or []) + list(s.get("anim_override") or []),
                              "png": f"/out/{gid}/{s['png']}?e={s.get('rendered_at') or s.get('edited_at') or 0}" if s.get("png") else None,          # the edit time: an edited slice is a new url, never the cached picture
                              "webm": f"/out/{gid}/{s['webm']}" if s.get("webm") else None, "prompt": s.get("prompt")})
