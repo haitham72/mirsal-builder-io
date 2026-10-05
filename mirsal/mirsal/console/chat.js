@@ -13,12 +13,15 @@ const hm=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
 const chPreview=m=>!m?'No messages yet':m.kind==='sticker'?'Sticker':esc(m.text);
 const chSticker=(s,pack_id)=>({id:s.id,pack_id:s.pack_id||pack_id,type:s.type,file:s.file,name:s.name});
 const chParticleH=m=>{const p=CH.play[m.id];return p?`<img class=ch-particle src="${esc(p.url)}" alt="" aria-hidden=true data-particle-set="${esc(p.set)}">`:''};     /* centred on the reaction badge (bottom-left), spilling over the bubble, as Telegram plays a reaction's effect (studio.css .ch-particle) */
-const chReactionH=m=>!m.react?'':m.kind==='sticker'&&m.from==='out'&&m.s&&m.s.id&&m.s.pack_id?`<button type=button class=react data-act=chreplay data-id="${esc(m.id)}" title="Replay reaction" aria-label="Replay reaction">${esc(m.react)}</button>`:`<span class=react>${esc(m.react)}</span>`;
+const chPlayable=m=>m.kind==='sticker'&&m.s&&m.s.id&&m.s.pack_id;
+/* a reaction on a sticker replays its burst; Echo's own sticker can be liked (the heart on hover, or a double-click, as Telegram's double-tap) and then plays it too */
+const chReactionH=m=>m.react?(chPlayable(m)?`<button type=button class=react data-act=chreplay data-id="${esc(m.id)}" title="Replay reaction" aria-label="Replay reaction">${esc(m.react)}</button>`:`<span class=react>${esc(m.react)}</span>`)
+ :m.from==='in'&&chPlayable(m)?`<button type=button class="react like" data-act=chlike data-id="${esc(m.id)}" title="Like" aria-label="Like this sticker">♡</button>`:'';
 function chList(){const m=CH.msgs[CH.msgs.length-1];
  $('col2').innerHTML=`<div class=c2h><h1>Chats</h1></div><div class=c2s><input type=search placeholder="Search chats…" disabled></div>
   <div class=c2l><div class="crow on"><div class="cv chav">M</div><div style="min-width:0"><b>Mirsal Echo</b><small>${m&&m.from==='out'?'You: ':''}${chPreview(m)}</small></div><span class=meta>${m?hm(m.t):''}</span></div></div>`}
 const chMsgH=m=>{const t=`<span class=tm>${hm(m.t)}${m.from==='out'?' ✓✓':''}</span>`;
- return m.kind==='sticker'?`<div class="cm c${m.from}" data-chmsg="${esc(m.id)}"><div class="bub stk">${media(m.s)}${chParticleH(m)}${chReactionH(m)}${t}</div></div>`
+ return m.kind==='sticker'?`<div class="cm c${m.from}"><div class="bub stk" data-chmsg="${esc(m.id)}">${media(m.s)}${chParticleH(m)}${chReactionH(m)}${t}</div></div>`
   :`<div class="cm c${m.from}"><div class=bub>${esc(m.text)}${chReactionH(m)}${t}</div></div>`};
 /* the sticker panel, as Telegram's: a small card over the chat, above the composer. Search (name or emoji tag, across every pack), the emoji tags the
    stickers actually carry as one-tap filters, a borderless 5-column grid, and the packs along the bottom with Recent (the stickers sent here) first */
@@ -54,7 +57,7 @@ function chDraw(){if(route_!=='chat')return;const el=$('s-chat'),inp=$('chin');i
  const slot=$('tgslot');if(slot){const pop=chPop();slot.replaceWith(pop);pop.querySelectorAll('video').forEach(v=>{if(v.paused)v.play().catch(()=>0)})}   /* a moved video pauses: play it on */
  const sq=$('chq'),caret=x=>{x.focus();x.setSelectionRange(x.value.length,x.value.length)};
  caret(sq&&CH.q?sq:i);drawCol2()}
-async function chPlay(id){const m=CH.msgs.find(x=>x.id===id&&x.from==='out');if(!m||m.kind!=='sticker'||!m.s||!m.s.id||!m.s.pack_id)return;
+async function chPlay(id){const m=CH.msgs.find(x=>x.id===id);if(!m||!chPlayable(m))return;
  const epoch=CH.epoch,token=(CH.requests[id]||0)+1;CH.requests[id]=token;
  delete CH.play[id];chDraw();
  let r;try{r=await api(`/api/packs/${encodeURIComponent(m.s.pack_id)}/stickers/${encodeURIComponent(m.s.id)}/particle-preview`)}catch(e){return}
@@ -74,6 +77,9 @@ if(typeof document!=='undefined'&&document.addEventListener){
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CH.tray&&route_==='chat')chPopClose()})}
 ACT.chpick=el=>{const p=packById(el.dataset.p||CH.pk),s=p&&p.stickers.find(x=>x.id===el.dataset.id);if(!s)return;if(CH.tray&&typeof document!=='undefined')chPopClose();chSend({kind:'sticker',s:chSticker(s,p.id)})};     /* a pick sends and closes the panel, as Telegram does */
 ACT.chreplay=el=>chPlay(el.dataset.id);
+function chLike(id){const m=CH.msgs.find(x=>x.id===id&&x.from==='in');if(!m||!chPlayable(m))return;if(!m.react){m.react='❤️';chSave()}return chPlay(id)}
+ACT.chlike=el=>chLike(el.dataset.id);
+if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('dblclick',e=>{if(route_!=='chat'||!e.target.closest)return;const b=e.target.closest('.cm.cin [data-chmsg]');if(b){e.preventDefault();chLike(b.dataset.chmsg)}});
 ACT.chview=()=>{CH.view=CH.view==='mobile'?'desktop':'mobile';try{localStorage.setItem('mirsal.chat.view',CH.view)}catch(e){}chDraw()};
 function chClear(){CH.epoch++;CH.msgs=[];CH.play={};CH.requests={};CH.typing=false;CH.pending=null;chSave();chDraw()}
 ACT.chclear=()=>confirmDlg('Clear this chat?',chClear);

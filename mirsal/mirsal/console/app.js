@@ -136,7 +136,7 @@ function mqEnd(commit){const m=MQ.m;if(!m)return;MQ.m=null;cancelAnimationFrame(
   if(m.moved&&commit){const res=mqResult(m,mqHits(m,mqRect(m)));SEL.clear();res.forEach((v,k)=>SEL.set(k,v));MQ.quiet=Date.now()+250;selRefresh()}
   else if(!m.moved&&commit&&m.mode==='replace'&&SEL.size){SEL.clear();selRefresh()}else if(m.moved)selRefresh()}
 document.addEventListener('mousedown',e=>{if(e.button!==0||MQ.m)return;const scr=e.target.closest('#s-pack,#s-library');if(!scr)return;
-  const grid=e.target.closest('.grid.selgrid');if(!grid)return;          /* only inside the sticker grid (its gaps, or Shift/Ctrl on a sticker): the rest of the screen keeps the mouse */
+  const grid=e.target.closest('.selgrid');if(!grid)return;          /* only inside the sticker grid (My Stickers: all its pack boxes) (its gaps, or Shift/Ctrl on a sticker): the rest of the screen keeps the mouse */
   if(e.target.closest('button,input,select,textarea,a,label,.selbox,.selbar,.hov,.cap,.phead,.tabs,.fab,.seeall'))return;
   const mod=e.shiftKey||e.ctrlKey||e.metaKey;if(e.target.closest('.cell')&&!mod)return;
   e.preventDefault();const sc=selScroller(grid);
@@ -150,7 +150,7 @@ document.addEventListener('click',e=>{if(Date.now()<MQ.quiet){e.stopPropagation(
   const k=cellKey(c);if(!k)return;e.stopPropagation();e.preventDefault();if(SEL.has(k))SEL.delete(k);else SEL.set(k,cellItem(c));selRefresh()},true);
 document.addEventListener('keydown',e=>{if(!['pack','library'].includes(route_)||/input|textarea|select/i.test((document.activeElement||{}).tagName||'')||$('dlg').classList.contains('on')||$('modal').classList.contains('on'))return;
   if(e.key==='Escape'&&SEL.size){SEL.clear();selRefresh()}
-  else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'&&document.querySelector('.grid.selgrid')){e.preventDefault();ACT.lselall()}});
+  else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='a'&&document.querySelector('.selgrid')){e.preventDefault();ACT.lselall()}});
 function selBarHtml(total){return SEL.size?`<div class=selbar><b>${SEL.size} selected</b><button class=link data-act=lselall>Select all ${total}</button><button class=link data-act=lselnone>Clear</button><button class="btn sm" data-act=lselmove title="Move all the selected stickers into one pack (or a new one)">${ic('lib')} Move ${SEL.size} to…</button><button class="btn dng sm" data-act=lseldel>${ic('trash')} Delete ${SEL.size}</button></div>`:''}
 RENDER.library=async()=>{await loadLib();drawCol2();
   $('s-library').innerHTML=`<div class=page><div class=ph><h1>Sticker Library</h1></div>
@@ -165,6 +165,11 @@ ACT.pkmerge=el=>{const a=packById(el.dataset.id),b=packById(el.dataset.into);if(
     await loadLib();toast(`${r.j.upgraded} upgraded to animated, ${r.j.moved} moved into “${b.name}”`);location.hash='#/pack/'+b.id;drawCol2()},'Merge')};
 ACT.pkgrp=el=>{const g=el.dataset.g,open=el.getAttribute('aria-expanded')==='true';PKFOLD.set(g,!open);drawCol2()};
 ACT.seeall=el=>{if(el.dataset.k==='st'){LIBTAB='mine'}else PACKS_ALL=!PACKS_ALL;RENDER.library()};
+/* My Stickers, one box per pack (Haitham, 2026-10-05: stacked by pack like the Particles tab). ONE selection area over all the boxes, so a drag box
+   crosses packs; the carousel index stays the position in the whole list (LCL) */
+function libByPackHtml(all){if(!all.length)return'<span class=mut>No matches.</span>';const by=new Map();all.forEach((s,i)=>{if(!by.has(s.pack_id))by.set(s.pack_id,[]);by.get(s.pack_id).push([s,i])});
+ const cell=([s,i])=>{const on=SEL.has(selKey(s.pack_id,s.id));return`<div class="cell ${on?'sel':''}" data-act=lcopen data-i=${i}><span class="selbox ${on?'on':''}" data-act=lsel data-p=${s.pack_id} data-id=${s.id} title="Select"></span>${media(s)}<div class=cap>${esc(s.emoji)} ${esc(s.name)}</div></div>`};
+ return`<div class="selgrid lib-bypack ${SEL.size?'selmode':''}">${[...by].map(([pid,xs])=>`<section class=lib-pk><div class=lib-pkh><b>${esc(xs[0][0].pack)}</b><small class=mut>${xs.length} sticker${xs.length===1?'':'s'}</small><button class=link data-act=openpack data-id=${esc(pid)}>Open pack</button></div><div class=grid>${xs.map(cell).join('')}</div></section>`).join('')}</div>`}
 function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.emoji+' '+(s.pack||'')).toLowerCase().includes(q);
  const stTile=(s,i)=>`<div class=st data-act=lcopen data-i=${i} title="${esc(s.name)}">${media(s)}<span class=em>${esc(s.emoji)}</span></div>`;
   let h='';
@@ -178,7 +183,7 @@ function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.em
   <div class=plist>${shown.map(e=>{const row=p=>`<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${p.stickers.length} stickers</small></div>${ic('chev')}</div>`;
    return e.pack?row(e.pack):`<div class=pkgroup><div class=pkgh>Group ${esc(e.group)} · ${e.packs.length} packs</div>${e.packs.map(row).join('')}</div>`}).join('')||'<div class=mut style="padding:14px">No packs.</div>'}</div>`}
  else{const all=LIB.packs.flatMap(p=>p.stickers.map(s=>({...s,pack_id:p.id,pack:p.name}))).filter(hit);LCL=all;
-  h=`<div class=mut style="margin-bottom:8px">Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects). Then delete them together.</div>${selBarHtml(all.length)}<div class="grid selgrid ${SEL.size?'selmode':''}">${all.map((s,i)=>`<div class="cell ${SEL.has(selKey(s.pack_id,s.id))?'sel':''}" data-act=lcopen data-i=${i}><span class="selbox ${SEL.has(selKey(s.pack_id,s.id))?'on':''}" data-act=lsel data-p=${s.pack_id} data-id=${s.id} title="Select"></span>${media(s)}<div class=cap>${esc(s.emoji)} ${esc(s.name)}</div></div>`).join('')||'<span class=mut>No matches.</span>'}</div>`}
+  h=`<div class=mut style="margin-bottom:8px">Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects). Then delete them together.</div>${selBarHtml(all.length)}${libByPackHtml(all)}`}
  $('libbody').innerHTML=h}
 ACT.openpack=el=>{location.hash='#/pack/'+el.dataset.id};
 ACT.newpack=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');

@@ -166,13 +166,13 @@ const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:nul
 const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null};
 const spCredits=n=>n==null||+n===0?'nothing spent yet':`about ${+n} credit${+n===1?'':'s'} spent`;
 function spSetCard(s){const cells=s.cells||[],picked=cells.filter(c=>c.picked),strip=picked.slice(0,8),used=s.used_in||[],open=SPL.open===s.id;
- return `<div class=ps-card data-ps=${esc(s.id)}>
-  <div class=ps-strip>${strip.map(c=>`<span class=ps-cell title="${esc(c.key||('cell '+c.n))}">${spCellMedia(c)}</span>`).join('')||'<span class=mut>No cells yet</span>'}${picked.length>8?`<span class=ps-more>+${picked.length-8}</span>`:''}</div>
+ return `<div class="ps-card${open?' open':''}" data-ps=${esc(s.id)}>
+  <div class=ps-hit data-act=psopen data-id=${esc(s.id)} aria-expanded=${open} title="${open?'Close':'Open'} ${esc(s.name||s.id)}"><div class=ps-strip>${strip.map(c=>`<span class=ps-cell title="${esc(c.key||('cell '+c.n))}">${spCellMedia(c)}</span>`).join('')||'<span class=mut>No cells yet</span>'}${picked.length>8?`<span class=ps-more>+${picked.length-8}</span>`:''}</div>
   <div class=ps-main><b>${esc(s.name||s.id)}</b><small class=mut>${esc(s.id)} · ${s.n_cells} cell${s.n_cells===1?'':'s'} · ${picked.length} picked${s.kind?' · '+esc(spKindChip(s)):''}</small>
   <div class=ps-used>${(s.owner||[]).length?`made for ${(s.owner||[]).length} sticker${s.owner.length===1?'':'s'}`:'Detached · attach to a sticker'}</div>
   <div class=ps-cost>${esc(spCredits(s.credits))}${(s.source||{}).job?' · '+esc(s.source.job):''}</div>
-  <div class=ps-act><button class="btn sm" data-act=psopen data-id=${esc(s.id)}>${open?'Close':'Open'}</button><button class="btn sm" data-act=psassign data-id=${esc(s.id)}>Attach to stickers</button><button class="btn sm" data-act=psdup data-id=${esc(s.id)}>Duplicate</button><button class="btn sm" data-act=psrename data-id=${esc(s.id)}>Rename</button><button class="btn sm dng" data-act=psdel data-id=${esc(s.id)}>Delete</button></div>
-  ${open?spSetDetail(s):''}</div></div>`}
+  <div class=ps-act><button class="btn sm" data-act=psassign data-id=${esc(s.id)}>Attach to stickers</button><button class="btn sm" data-act=psdup data-id=${esc(s.id)}>Duplicate</button><button class="btn sm" data-act=psrename data-id=${esc(s.id)}>Rename</button><button class="btn sm dng" data-act=psdel data-id=${esc(s.id)}>Delete</button></div></div></div>
+  ${open?spSetDetail(s):''}</div>`}
 function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=full.cells||[],els=full.elements||[],mo=full.motion||{},src=full.source||{},pick=SPL.pick[s.id]||null;
  return `<div class=ps-det>
   ${els.length?`<div class=ps-els>${els.map(x=>`<span class=fx-chip>${esc(x)}</span>`).join('')}</div>`:''}

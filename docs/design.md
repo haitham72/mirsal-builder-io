@@ -121,6 +121,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 - **Change:** it stops being a special case. Its tokens move to `:root` (3.1) and its rail becomes the standard rail (4). Its second column stays.
 
 ### Library (built)
+- **Particles tab:** each set is a box card in a grid (`.ps-lib`), and a click on the card itself opens or closes it (`.ps-hit`, pointer cursor; no Open button); the opened card spans the row. **My Stickers** is one box per pack (`.lib-pk`, the pack's name, count and Open pack) inside one selection area, so a drag box still crosses packs. **Trending** cards keep the like and comment count on the card's bottom-left, whatever the name's wrap (`.tr-meta` `margin-top:auto`). (Haitham, 2026-10-05.)
 - **Rail:** identical to AI's, same scaling, same persistent position — this is the explicit ask.
 - **Sticker library gets the same glow background as AI** so the two screens read as one app.
 - Keep the rail's fonts, backgrounds, hovers and selection states **character-identical** to AI's. If a value differs between the two, AI wins.

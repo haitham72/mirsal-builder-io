@@ -82,3 +82,13 @@ test('old messages without identity and text reactions never ask for a particle 
   assert.equal(h.calls.length,0);
   assert.doesNotMatch(h.run('chMsgH({...CH.msgs[0],react:"❤️"})'),/chreplay|ch-particle/);
 });
+
+test("Echo's own sticker can be liked, and the like plays its burst",async()=>{
+  const h=harness();h.run("CH.msgs=[{id:'m1e',from:'in',kind:'sticker',s:{id:'s1',pack_id:'p1'}},{id:'t1',from:'in',kind:'text',text:'Hi'}]");
+  assert.match(h.run('chMsgH(CH.msgs[0])'),/data-act=chlike data-id="m1e"/);
+  assert.doesNotMatch(h.run('chMsgH(CH.msgs[1])'),/chlike/,'text has no like');
+  h.replies.push(setReply('P001'));await h.run("ACT.chlike({dataset:{id:'m1e'}})");
+  assert.equal(h.run('CH.msgs[0].react'),'❤️');
+  assert.deepEqual(h.calls,['/api/packs/p1/stickers/s1/particle-preview']);
+  assert.match(h.run('chMsgH(CH.msgs[0])'),/ch-particle.*data-act=chreplay/s);
+});

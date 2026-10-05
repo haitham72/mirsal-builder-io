@@ -172,6 +172,8 @@ test('a set card: the picked cells as a strip, the name, where it is used, what 
   assert.equal((h.match(/class=ps-cell/g) || []).length, 3, 'the strip is the picked cells only');
   assert.match(h, /\/out\/particles\/P001\/cells\/c01\.png/);
   for (const a of ['psopen', 'psassign', 'psdup', 'psrename', 'psdel']) assert.match(h, new RegExp(`data-act=${a} data-id=P001`), `${a} is on the card`);
+  assert.match(h, /class=ps-hit data-act=psopen/, 'a click on the card itself opens it (Haitham, 2026-10-05)');
+  assert.doesNotMatch(h, />Open<\/button>/, 'no Open button');
   const lone = run(`spSetCard(${JSON.stringify(SET({ id: 'P002', name: 'Lone', packs: [], owner: [], used_in: [], credits: 0 }))})`);
   assert.match(lone, /Detached · attach to a sticker/);
   assert.match(lone, /nothing spent yet/);
