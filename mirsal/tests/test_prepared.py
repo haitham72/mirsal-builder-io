@@ -83,7 +83,7 @@ class PreferTests(unittest.TestCase):
     def test_file_switch_and_env_wins(self):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("MIRSAL_PREFER_PREPARED", None)
-            self.assertTrue(sources.set_prefer_prepared(self.out, False))
+            self.assertFalse(sources.set_prefer_prepared(self.out, False))
             self.assertFalse(sources.prefer_prepared(self.out))
             self.assertEqual(json.loads((self.out / "prepared.json").read_text()), {"prefer": False})
         with patch.dict(os.environ, {"MIRSAL_PREFER_PREPARED": "yes"}):

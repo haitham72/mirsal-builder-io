@@ -26,9 +26,10 @@ _LOCK = threading.RLock()
 
 
 class ImportError(Exception):
-    def __init__(self, message: str, code: int = 400):
+    def __init__(self, message: str, code: int = 400, hint: dict | None = None):
         super().__init__(message)
         self.code = code
+        self.hint = hint or {}          # extra answer fields (the import dialog's "Is this the result of …?" candidates)
 
 
 def job_id_of(name: str) -> str | None:
@@ -129,6 +130,56 @@ def generation_id(value) -> int:
     return int(str(value).upper().removeprefix("G"))
 
 
+def job_id(value) -> str:
+    """A local job number (J023), as the import dialog's explicit choice carries it."""
+    if not re.fullmatch(r"J?0*[1-9][0-9]*", str(value or ""), re.I):
+        raise ImportError("job must be a job number, such as J023")
+    return "J" + str(int(str(value).upper().removeprefix("J"))).zfill(3)
+
+
+def own_failed_jobs(out: Path, ticket: str | None, user_id: str | None) -> list[dict]:
+    """The person's own FAILED/TIMEOUT jobs holding this provider ticket, newest first. A job belongs to the
+    person who paid for it (`request.user`); a job before users is everyone's (`local`)."""
+    from ..generation import jobs
+    if not ticket:
+        return []
+    rows = []
+    for j in jobs.list(out):
+        if j.get("status") not in ("FAILED", "TIMEOUT"):
+            continue
+        if str(j.get("external_task_id") or "").lower() != str(ticket).lower():
+            continue
+        who = str((j.get("request") or {}).get("user") or "local")
+        if who != str(user_id or "local") and who != "local":
+            continue
+        rows.append(j)
+    rows.sort(key=lambda j: j.get("created_at") or 0, reverse=True)
+    return rows
+
+
+def candidates(out: Path, ticket: str | None, user_id: str | None) -> list[dict]:
+    """What the import dialog offers as "Is this the result of …?": the person's own failed jobs holding this
+    ticket, newest first, with the prompt, the time and a thumbnail (the destination batch's sheet for a video
+    job; a sheet job has no picture yet, so the dialog shows the file being imported)."""
+    from . import pipeline as pl
+    rows = []
+    for j in own_failed_jobs(out, ticket, user_id):
+        req = j.get("request") or {}
+        thumb = None
+        if j.get("generation"):
+            try:
+                res = pl.read_result(Path(out), int(str(j["generation"]).upper().lstrip("G")))
+                rel = (res.get("source") or {}).get("sheet_copy")
+                if rel:
+                    thumb = f"/out/{j['generation']}/{rel}"
+            except Exception:
+                pass
+        rows.append({"job": j["id"], "kind": j.get("kind"), "prompt": req.get("label") or req.get("prompt") or "",
+                     "at": j.get("created_at"), "generation": j.get("generation"), "task": j.get("task"),
+                     "status": j.get("status"), "thumb": thumb})
+    return rows
+
+
 def destination(c, generation, sheet=None):
     from . import pipeline as pl, gates
     gid = generation_id(generation)
@@ -142,11 +193,140 @@ def destination(c, generation, sheet=None):
     return gid, aid
 
 
-def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generation=None, sheet=None, job_id=None, retry=False) -> tuple[int, dict]:
+def _linkable(out: Path, user: dict, ticket: str | None, jid: str, name: str) -> dict:
+    """The failed job an explicit dialog choice (or the single automatic match) completes: FAILED/TIMEOUT,
+    holding a provider ticket (this file's, when the file names one), a sheet or a video job."""
+    from ..generation import jobs
+    try:
+        lj = jobs.read(out, job_id(jid))
+    except jobs.JobError as e:
+        raise ImportError(str(e), getattr(e, "code", 404))
+    if lj.get("status") not in ("FAILED", "TIMEOUT"):
+        raise ImportError(f"{lj['id']} is {lj['status']}: only a failed job is completed by a manual download.", 409)
+    if not lj.get("external_task_id"):
+        raise ImportError(f"{lj['id']} holds no provider ticket: nothing links it to this file.", 409)
+    if ticket and str(ticket).lower() != str(lj["external_task_id"]).lower():
+        raise ImportError(f"{lj['id']} is waiting for a different provider job.", 409)
+    if lj.get("kind") not in ("sheet", "video", "single"):
+        raise ImportError(f"{lj['id']} is a {lj.get('kind')} job: a manual download completes a sheet or a video job.", 409)
+    return lj
+
+
+def _recover(c, user: dict, name: str, data: bytes, lj: dict, prompt: str = "") -> tuple[int, dict]:
+    """A manual download completes the failed job holding its ticket (`recovered_by: "manual import"`), with no
+    second charge. A sheet job's batch is built from the job's own saved plan and carries its external task id;
+    a video job attaches to the job's own destination batch and sheet, without asking for them. The existing
+    recovery actions (`generation/recovery.py`) stay for when the provider itself can still download."""
+    from . import pipeline as pl, gates, sources
+    from ..generation import jobs, tasks
+    from ..media.video_project import MAX_UPLOAD
+    ticket = str(lj.get("external_task_id") or "")
+    if not data or len(data) > MAX_UPLOAD:
+        raise ImportError("empty upload" if not data else "file too large", 400 if not data else 413)
+    ext = Path(name).suffix.lower()
+    if ext not in IMAGE + VIDEO:
+        raise ImportError("Import a PNG, JPEG, WebP, MP4, MOV or WebM file")
+    want_video = lj.get("kind") == "video"
+    if want_video and ext not in VIDEO:
+        raise ImportError(f"{lj['id']} is a video job: import the video file, not {ext or 'this'}.", 409)
+    if not want_video and ext not in IMAGE:
+        raise ImportError(f"{lj['id']} is a sheet job: import the sheet picture, not {ext or 'this'}.", 409)
+    task = None
+    if want_video:
+        if not lj.get("generation"):
+            raise ImportError(f"{lj['id']} has no batch yet: it cannot take a video.", 409)
+    else:
+        if not lj.get("task"):
+            raise ImportError(f"{lj['id']} has no saved plan: import the sheet by hand instead.", 409)
+        try:
+            task = tasks.read_task(c.out, str(lj["task"]))
+        except Exception:
+            raise ImportError(f"The plan of {lj['id']} is gone: import the sheet by hand instead.", 409)
+        if not task.get("plan"):
+            raise ImportError(f"The plan of {lj['id']} is gone: import the sheet by hand instead.", 409)
+    if not c.lock.acquire(blocking=False):
+        raise ImportError("busy: a job is running, wait for it to finish", 409)
+    handed_off, row, gid, aid, pick = False, None, None, None, None
+    try:
+        dest = jobs.job_dir(c.out, lj["id"]) / ("recovered" + ext)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        atomic.write_bytes(dest, data)
+        if want_video:
+            from ..engine.ffmpeg import probe
+            try:
+                info = probe(dest)
+                if not info.get("codec") or not info.get("width") or not info.get("height"):
+                    raise ValueError("no video stream")
+            except Exception as e:
+                dest.unlink(missing_ok=True)
+                raise ImportError("This video cannot be opened; choose a valid MP4, MOV or WebM") from e
+            gid, aid = destination(c, lj["generation"], (lj.get("request") or {}).get("sheet"))
+        else:
+            try:
+                pl.load_rgb(dest)
+            except Exception as e:
+                dest.unlink(missing_ok=True)
+                raise ImportError("This image cannot be opened; choose a valid PNG, JPEG or WebP") from e
+        digest = hashlib.sha256(data).hexdigest()
+        jobs.update(c.out, lj["id"], status="DONE", error=None, completed_at=round(time.time(), 3),
+                    recovered_by="manual import",
+                    result={"file": str(dest.relative_to(c.out)).replace("\\", "/"), "sha256": digest, "bytes": len(data)})
+        if want_video:
+            gates.attach_video(c.out, gid, aid, data, name, custom=True)
+            pl.emit(c.out, gid, "video_returned", "done", 0, {"recovered": lj["id"], "ticket": ticket}, "human", "RECOVERED")
+            work = lambda: gates.slice_video(c.out, gid, aid, c.cfg, c.pace)
+        else:
+            pick = sources.Pick(subject=tasks.subject_of(task["plan"]), subject_id=str(task.get("id") or lj["id"]),
+                                variant=1, n_variants=1, sheet=dest, video=None)
+            tok = pl.OWNER.set(user["id"])
+            try:
+                gid = pl.start(task.get("prompt") or prompt or pick.subject.replace("_", " "), c.out, c.inp, pick=pick, task=task)
+            finally:
+                pl.OWNER.reset(tok)
+            tasks.link_generation(c.out, str(task["id"]), gid)
+            jobs.attach_generation(c.out, lj["id"], gid)
+            res = pl.read_result(c.out, gid)
+            for st in res["stickers"]:
+                pl.hist(st, "sheet", "human", "RECOVERED", f"recovered from a manual download of task {ticket}")
+            pl.write_result(c.out, gid, res)
+            work = lambda: pl.run_stills(c.out, gid, c.cfg, c.pace)
+        row = record(c.out, name, data, f"G{gid:03d}", user["id"], ticket)
+        _update(c.out, row["id"], status="PROCESSING", file=str(dest), kind="video" if want_video else "sheet",
+                **({"sheet": aid} if want_video else {}))
+        ctx = contextvars.copy_context()
+        ctx.run(pl.OWNER.set, user["id"])
+
+        def run():
+            try:
+                work()
+                res = pl.read_result(c.out, gid)
+                _update(c.out, row["id"], status="FAILED" if res.get("error") else "READY", error=res.get("error"))
+            except Exception as e:
+                _update(c.out, row["id"], status="FAILED", error=str(e)[:300])
+            finally:
+                c.lock.release()
+        threading.Thread(target=ctx.run, args=(run,), daemon=True).start()
+        handed_off = True
+        out = {"id": gid, "kind": "video" if want_video else "sheet", "import": row["id"], "job": lj["id"], "recovered": True}
+        if want_video:
+            out["sheet"] = aid
+        else:
+            out["subject"] = pick.subject
+        return 202, out
+    finally:
+        if not handed_off:
+            c.lock.release()
+
+
+def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generation=None, sheet=None, job_id=None, retry=False, job=None, as_new=False) -> tuple[int, dict]:
     """One serialized import lifecycle. Console holds the cross-process writer lock.
 
     The ledger reserves bytes before mutation, records the batch before background
     work, and makes failures addressable. An explicit retry reuses that batch.
+
+    `job` (a local J id, the dialog's explicit choice) or exactly one of the person's own failed jobs
+    holding this file's ticket completes that job instead (`_recover`): no new batch, no second charge.
+    `as_new` imports as an unrelated batch even when a failed job matches.
     """
     from . import pipeline as pl, gates, sources
     from ..media.video_project import MAX_UPLOAD
@@ -156,7 +336,17 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
     if ext not in IMAGE + VIDEO:
         raise ImportError("Import a PNG, JPEG, WebP, MP4, MOV or WebM file")
     with _LOCK:
-        hit = known(c.out, name, data, job_id)
+        if job:
+            return _recover(c, user, name, data, _linkable(c.out, user, job_id or job_id_of(name), job, name), prompt)
+        ticket = job_id or job_id_of(name)
+        if ticket and not as_new and generation is None and sheet is None and not retry:
+            cands = own_failed_jobs(c.out, ticket, user["id"])
+            if len(cands) > 1:
+                raise ImportError(f"This file names provider job {ticket}, which matches {len(cands)} of your failed jobs. Choose which one it completes.",
+                                  409, hint={"candidates": candidates(c.out, ticket, user["id"])})
+            if len(cands) == 1:
+                return _recover(c, user, name, data, cands[0], prompt)
+        hit = known(c.out, "" if as_new else name, data, None if as_new else job_id)      # as new: only the same bytes are a duplicate, not the failed job's id
         if hit and not (retry and hit.get("import") and hit.get("recoverable")):
             return 200, {"duplicate": True, **hit}
         if not c.lock.acquire(blocking=False):
@@ -285,8 +475,9 @@ def import_job(c, user: dict, job: str, **options) -> tuple[int, dict]:
     import tempfile
     if not JOB_ID.fullmatch(job or ""):
         raise ImportError("id must be a Higgsfield job id")
+    local_job = options.pop("local_job", None)
     hit = known(c.out, job_id=job)
-    if hit and not options.get("retry"):
+    if hit and not options.get("retry") and not local_job:
         return 200, {"duplicate": True, **hit}
     try:
         g = hf._json(["generate", "get", job, "--json"], timeout=60)
@@ -302,7 +493,7 @@ def import_job(c, user: dict, job: str, **options) -> tuple[int, dict]:
         ext = Path(parsed.path).suffix.lower()
         if ext not in IMAGE + VIDEO:
             raise ImportError("Higgsfield result must be a supported image or video", 400)
-        if ext in VIDEO and not (hit and options.get("retry") and hit.get("import")):
+        if ext in VIDEO and not local_job and not (hit and options.get("retry") and hit.get("import")):
             destination(c, options.get("generation"), options.get("sheet"))
         with tempfile.TemporaryDirectory(prefix="mirsal-hf-import-") as tmp:
             f = Path(tmp) / ("result" + ext)
@@ -310,6 +501,8 @@ def import_job(c, user: dict, job: str, **options) -> tuple[int, dict]:
             data = f.read_bytes()
     except hf.HiggsError as e:
         raise ImportError(str(e), 413 if "too large" in str(e) else 502) from e
+    if local_job:
+        options["job"] = local_job
     return import_file(c, user, f"hf_{job}{ext}", data, job_id=job, **options)
 
 
