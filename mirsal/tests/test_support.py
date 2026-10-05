@@ -159,5 +159,98 @@ class SupportTests(unittest.TestCase):
         self.assertEqual(len(sp.queue(self.out, "all")), 1)
 
 
+class SupportRouteTests(unittest.TestCase):
+    """The native routes: privacy (a stranger's conversation is a 404), staff-only actions, members never see internal ticket fields, notifications read on open."""
+
+    @classmethod
+    def setUpClass(cls):
+        import os
+        import threading
+        from mirsal.runtime import users as um
+        from mirsal.console.server import serve
+        cls.tmp = Path(tempfile.mkdtemp())
+        cls.env = mock.patch.dict(os.environ, {"MIRSAL_API_TOKEN": "owner-token-for-the-test"})
+        cls.loop = mock.patch.object(um, "LOOPBACK", ())
+        cls.ping = mock.patch.object(sp, "_ping_later", lambda *a: None)
+        cls.env.start(); cls.loop.start(); cls.ping.start()
+        cls.srv, cls.c = serve(cls.tmp / "out", cls.tmp / "in", 0, block=False, stdlib=False)
+        cls.c.lan = True
+        cls.port = cls.srv.server_address[1]
+        threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
+        for email, name in (("m@nadi.ae", "Mona"), ("s@nadi.ae", "Sam")):
+            a = cls.c.users.signup(email, name, "password1")
+            cls.c.users.decide(a["id"], "approve")
+        cls.mona = cls.c.users.login("m@nadi.ae", "password1")[1]
+        cls.sam = cls.c.users.login("s@nadi.ae", "password1")[1]
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.srv.shutdown()
+        cls.c.release_writer()
+        cls.ping.stop(); cls.loop.stop(); cls.env.stop()
+        shutil.rmtree(cls.tmp, ignore_errors=True)
+
+    def req(self, method, path, body=None, cookie=None, owner=False):
+        import http.client
+        h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)
+        hd = {"Content-Type": "application/json"}
+        if cookie:
+            hd["Cookie"] = f"mirsal_session={cookie}"
+        if owner:
+            hd["Authorization"] = "Bearer owner-token-for-the-test"
+        h.request(method, path, json.dumps(body) if body is not None else None, hd)
+        r = h.getresponse()
+        raw = r.read()
+        h.close()
+        try:
+            return r.status, json.loads(raw)
+        except ValueError:
+            return r.status, raw
+
+    def test_a_member_asks_escalates_and_hears_back_and_nobody_else_sees_it(self):
+        code, cv = self.req("POST", "/api/support/ask", {"text": "my uploads vanish"}, cookie=self.mona)
+        self.assertEqual(code, 200, cv)
+        self.assertEqual(cv["messages"][-1]["role"], "agent")
+        self.assertNotIn("mode", cv["messages"][-1], "internal fields stay with staff")
+        cid = cv["id"]
+        self.assertEqual(self.req("GET", f"/api/support/conversations/{cid}", cookie=self.sam)[0], 404)
+        self.assertEqual(self.req("GET", f"/api/support/conversations/{cid}", owner=True)[0], 404, "staff see a conversation once it reached a ticket")
+        self.assertEqual(self.req("GET", "/api/support/queue", cookie=self.sam)[0], 403)
+        code, cv = self.req("POST", f"/api/support/conversations/{cid}/escalate", {}, cookie=self.mona)
+        self.assertEqual((code, cv["status"]), (200, "awaiting_admin"))
+        tid = cv["ticket"]
+        self.assertEqual(self.req("POST", f"/api/support/conversations/{cid}/escalate", {}, cookie=self.mona)[1]["ticket"], tid)
+        self.assertEqual([t["id"] for t in self.req("GET", "/api/support/queue", owner=True)[1]["tickets"]], [tid])
+        code, both = self.req("GET", f"/api/support/tickets/{tid}", owner=True)
+        self.assertEqual((code, both["conversation"]["id"]), (200, cid))
+        self.assertEqual(self.req("POST", f"/api/tickets/{tid}/reply", {"text": "Which browser?"}, cookie=self.sam)[0], 403)
+        code, t = self.req("POST", f"/api/tickets/{tid}/reply", {"text": "Which browser?"}, owner=True)
+        self.assertEqual((code, t["status"]), (200, "replied"))
+        self.assertEqual(self.req("GET", "/api/notifications", cookie=self.mona)[1]["unread"], 1)
+        self.assertEqual(self.req("GET", "/api/notifications", cookie=self.sam)[1]["unread"], 0)
+        self.assertEqual(self.req("GET", f"/api/support/conversations/{cid}", cookie=self.mona)[1]["status"], "admin_replied")
+        self.assertEqual(self.req("GET", "/api/notifications", cookie=self.mona)[1]["unread"], 0, "opening the conversation reads its notifications")
+        self.assertEqual(self.req("POST", f"/api/support/conversations/{cid}/reply", {"text": "Firefox"}, cookie=self.mona)[1]["status"], "awaiting_admin")
+        with mock.patch.object(sp, "_propose", lambda *a: None):
+            code, t = self.req("POST", f"/api/tickets/{tid}/resolve", {"text": "Fixed: uploads over 8 MB were refused."}, owner=True)
+        self.assertEqual((code, t["status"]), (200, "fixed"))
+        code, mine = self.req("GET", f"/api/tickets/{tid}", cookie=self.mona)
+        self.assertEqual(code, 200)
+        self.assertNotIn("context", mine, "a member never sees the ticket's internal fields")
+        self.assertNotIn("fingerprint", mine)
+        self.assertEqual(self.req("GET", f"/api/tickets/{tid}", cookie=self.sam)[0], 404)
+
+    def test_the_faq_a_member_reads_is_only_ever_published_text(self):
+        f = faq.propose(self.c.out, title="Empty library", question="Why is my library empty?", answer="Packs are per person: sign in with your account.", by="local")
+        self.assertEqual(self.req("GET", f"/api/faq/{f['id']}", cookie=self.mona)[0], 404, "a draft is not readable")
+        self.assertEqual(self.req("POST", f"/api/faq/{f['id']}/publish", {}, cookie=self.mona)[0], 403)
+        self.assertEqual(self.req("GET", "/api/faq?status=pending", owner=True)[1]["faq"][0]["id"], f["id"])
+        code, p = self.req("POST", f"/api/faq/{f['id']}/publish", {}, owner=True)
+        self.assertEqual((code, p["status"]), (200, "published"))
+        code, pub = self.req("GET", f"/api/faq/{f['id']}", cookie=self.mona)
+        self.assertEqual((code, sorted(pub)), (200, ["answer", "id", "question", "revision", "title", "updated"]))
+        self.assertEqual([x["id"] for x in self.req("GET", "/api/faq?status=all", cookie=self.mona)[1]["faq"]], [f["id"]], "a member's list is the published one")
+
+
 if __name__ == "__main__":
     unittest.main()
