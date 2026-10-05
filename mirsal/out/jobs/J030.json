@@ -24,5 +24,9 @@
   "error": "the daily credit cap (15) would be exceeded by this 2-credit call",
   "created_at": 1790948966.203,
   "claimed_at": null,
-  "completed_at": 1790948966.661
+  "completed_at": 1790948966.661,
+  "dismissed": {
+    "at": 1791187009.071,
+    "by": "local"
+  }
 }

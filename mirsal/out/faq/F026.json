@@ -1,0 +1,37 @@
+{
+  "id": "F026",
+  "status": "draft",
+  "title": "Should I use the AI chat or Studio",
+  "question": "Should I use the AI chat or Studio?",
+  "answer": "Use the AI chat to describe what you want in everyday words and refine it in conversation. Use Studio when you want explicit controls for the prompt and sticker settings.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "getting-started/two-ways.md"
+    }
+  ],
+  "created": 1791192285.742,
+  "history": [
+    {
+      "ts": 1791192285.742,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "getting-started/two-ways.md"
+    }
+  ],
+  "updated": 1791192285.757,
+  "seed": {
+    "path": "getting-started/two-ways.md",
+    "sha": "f7d55a0a57fc5b95ac2850e52531cc538da76d85b3756eca8f5cbd0cbfd22b89"
+  },
+  "category": "getting-started",
+  "tags": [
+    "getting-started",
+    "two",
+    "ways"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

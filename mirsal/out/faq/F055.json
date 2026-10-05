@@ -1,0 +1,37 @@
+{
+  "id": "F055",
+  "status": "draft",
+  "title": "What limits apply to a static Telegram sticker",
+  "question": "What limits apply to a static Telegram sticker?",
+  "answer": "Static stickers use PNG or WEBP with transparency and must fit within 512 KB. Mirsal makes the final sticker on a 512 by 512 pixel canvas.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "telegram/static-limits.md"
+    }
+  ],
+  "created": 1791192286.609,
+  "history": [
+    {
+      "ts": 1791192286.609,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "telegram/static-limits.md"
+    }
+  ],
+  "updated": 1791192286.623,
+  "seed": {
+    "path": "telegram/static-limits.md",
+    "sha": "3186636cb6d2a8cc11009f70ad73868a3b46e1d2e8398c5a93c1898df7d96537"
+  },
+  "category": "telegram",
+  "tags": [
+    "telegram",
+    "static",
+    "limits"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

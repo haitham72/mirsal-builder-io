@@ -1,0 +1,37 @@
+{
+  "id": "F074",
+  "status": "draft",
+  "title": "Why can I not see the sheet import controls",
+  "question": "Why can I not see the sheet import controls?",
+  "answer": "Use my own sheet and Import from Higgsfield are available to the owner account. They are not member controls. After signing in and approval, ask in Help if you need an admin’s assistance with access, rather than assuming the controls are broken.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "imports/member-controls.md"
+    }
+  ],
+  "created": 1791193752.824,
+  "history": [
+    {
+      "ts": 1791193752.824,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "imports/member-controls.md"
+    }
+  ],
+  "updated": 1791193752.841,
+  "seed": {
+    "path": "imports/member-controls.md",
+    "sha": "ee20a73a413fa00d41e9808c68e1c772f71cd588494831586b72249bb6edff5e"
+  },
+  "category": "imports",
+  "tags": [
+    "imports",
+    "member",
+    "controls"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

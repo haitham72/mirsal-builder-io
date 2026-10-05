@@ -279,7 +279,7 @@
               "4": 0.992
             },
             "bad": [],
-            "ms": 78.3
+            "ms": 59.6
           }
         },
         {
@@ -587,18 +587,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 124.5,
+        "threshold": 123.5,
         "ms": {
-          "decode": 659,
-          "key": 967,
-          "bounds": 345,
-          "render": 1279,
-          "seam": 779,
-          "encode": 9787,
+          "decode": 788,
+          "key": 1148,
+          "bounds": 379,
+          "render": 1672,
+          "seam": 799,
+          "encode": 3955,
           "encodes": 4,
-          "probe": 250,
-          "verify": 15,
-          "finish": 12458
+          "probe": 197,
+          "verify": 16,
+          "finish": 7021
         },
         "frames": 72,
         "fps": 24.0,
@@ -612,15 +612,17 @@
         "subject_px_in_video": 652,
         "scale": 0.6086,
         "motion": 12.81,
-        "loop_seam_before": 130.05,
+        "loop_seam_before": 130.01,
+        "loop_cut": 6,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 37.89,
-        "frames_out": 66,
+        "loop_limit": 28.35,
+        "frames_out": 60,
         "crf": 34,
         "sharp_kept": 1.0,
         "detail_vs_still": 0.99,
         "soft_sigma": 0.1,
-        "kb": 252.3
+        "kb": 229.4
       },
       "webm": "slices/vid-superhero_dubai-victory_stance-20261003T103346-b2b948.webm",
       "review": {
@@ -703,6 +705,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183708.402,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -726,7 +739,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 11,
-            "ms": 111.5
+            "ms": 119.9
           }
         },
         {
@@ -740,16 +753,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 103.9
+            "ms": 133.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "252KB @crf34",
+          "detail": "229KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 252,
+          "value": 229,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -794,10 +807,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.5",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.5,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -842,11 +855,11 @@
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 37.89",
+          "detail": "0.0 <= 28.35",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 37.89,
+          "limit": 28.35,
           "data": {
             "ms": 0.0
           }
@@ -860,7 +873,7 @@
           "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 3.2
+            "ms": 1.8
           }
         },
         {
@@ -884,7 +897,7 @@
           "value": 0.016,
           "limit": 0.35,
           "data": {
-            "ms": 11.4
+            "ms": 13.8
           }
         },
         {
@@ -899,7 +912,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 2,
@@ -1093,18 +1107,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 124.5,
+        "threshold": 123.5,
         "ms": {
-          "decode": 213,
-          "key": 683,
-          "bounds": 292,
-          "render": 1542,
-          "seam": 637,
-          "encode": 1558,
-          "encodes": 2,
-          "probe": 210,
-          "verify": 11,
-          "finish": 4254
+          "decode": 780,
+          "key": 1132,
+          "bounds": 373,
+          "render": 2070,
+          "seam": 939,
+          "encode": 2676,
+          "encodes": 3,
+          "probe": 209,
+          "verify": 14,
+          "finish": 6285
         },
         "frames": 72,
         "fps": 24.0,
@@ -1122,14 +1136,16 @@
         "scale": 0.5685,
         "motion": 10.05,
         "loop_seam_before": 207.65,
+        "loop_cut": 12,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 58.36,
-        "frames_out": 66,
-        "crf": 42,
+        "loop_limit": 66.86,
+        "frames_out": 54,
+        "crf": 38,
         "sharp_kept": 1.02,
         "detail_vs_still": 1.03,
         "soft_sigma": 0.0,
-        "kb": 204.5
+        "kb": 225.6
       },
       "webm": "slices/vid-superhero_dubai-celebratory_jump-20261003T103346-0be1ef.webm",
       "review": {
@@ -1271,6 +1287,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183707.61,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -1299,7 +1326,7 @@
             "frame": 12,
             "over_px": 11,
             "edge_px": 11,
-            "ms": 106.3
+            "ms": 120.7
           }
         },
         {
@@ -1313,16 +1340,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 65.8
+            "ms": 125.7
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "204KB @crf42",
+          "detail": "225KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 204,
+          "value": 225,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1367,10 +1394,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.25",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.25,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -1409,17 +1436,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 58.36",
+          "detail": "0.0 <= 66.86",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 58.36,
+          "limit": 66.86,
           "data": {
             "ms": 0.0
           }
@@ -1433,7 +1460,7 @@
           "value": 0.976,
           "limit": 0.5,
           "data": {
-            "ms": 2.9
+            "ms": 1.7
           }
         },
         {
@@ -1451,13 +1478,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 7% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.065,
+          "value": 0.063,
           "limit": 0.35,
           "data": {
-            "ms": 8.3
+            "ms": 11.6
           }
         },
         {
@@ -1476,471 +1503,7 @@
       "anim_override": [
         "inside_slot"
       ],
-      "anim_finished": {
-        "inside_slot": {
-          "anim_status": "READY",
-          "anim_reason": null,
-          "anim_metrics": {
-            "source": "video sheet",
-            "threshold": 124.5,
-            "ms": {
-              "decode": 213,
-              "key": 683,
-              "bounds": 292,
-              "render": 1542,
-              "seam": 637,
-              "encode": 1558,
-              "encodes": 2,
-              "probe": 210,
-              "verify": 11,
-              "finish": 4254
-            },
-            "frames": 72,
-            "fps": 24.0,
-            "bbox": [
-              78,
-              0,
-              720,
-              698
-            ],
-            "edge_touch_frames": 6,
-            "subject_px_in_video": 698,
-            "waived": [
-              "inside_slot"
-            ],
-            "scale": 0.5685,
-            "motion": 10.05,
-            "loop_seam_before": 207.65,
-            "loop_seam": 0.0,
-            "loop_limit": 58.36,
-            "frames_out": 66,
-            "crf": 42,
-            "sharp_kept": 1.02,
-            "detail_vs_still": 1.03,
-            "soft_sigma": 0.0,
-            "kb": 204.5
-          },
-          "anim_report": [
-            {
-              "name": "inside_slot",
-              "ok": false,
-              "detail": "frame 12, 11px over the 11px edge band (allowed by you)",
-              "severity": "WARN",
-              "stage": "slot",
-              "value": 11,
-              "limit": 0,
-              "data": {
-                "frame": 12,
-                "over_px": 11,
-                "edge_px": 11,
-                "ms": 106.3
-              }
-            },
-            {
-              "name": "cross_slot",
-              "ok": true,
-              "detail": "gutter clean",
-              "severity": "BLOCK",
-              "stage": "slot",
-              "value": 0,
-              "limit": 0,
-              "data": {
-                "frame": null,
-                "px": 0,
-                "ms": 65.8
-              }
-            },
-            {
-              "name": "size_budget",
-              "ok": true,
-              "detail": "204KB @crf42",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 204,
-              "limit": 256,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "codec_vp9",
-              "ok": true,
-              "detail": "vp9",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "vp9",
-              "limit": "vp9",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "dimensions",
-              "ok": true,
-              "detail": "512x512",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "512x512",
-              "limit": "512x512",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "fps",
-              "ok": true,
-              "detail": "24.0",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 24.0,
-              "limit": 30.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "duration",
-              "ok": true,
-              "detail": "2.75",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 2.75,
-              "limit": 3.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "no_audio",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_mode_tag",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_decoded",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.6
-              }
-            },
-            {
-              "name": "loop_seam",
-              "ok": true,
-              "detail": "0.0 <= 58.36",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 0.0,
-              "limit": 58.36,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "identity_kept",
-              "ok": true,
-              "detail": "first frame matches the still at IoU 0.98",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.976,
-              "limit": 0.5,
-              "data": {
-                "ms": 2.9
-              }
-            },
-            {
-              "name": "motion_present",
-              "ok": true,
-              "detail": "median frame-to-frame change 10.05",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 10.05,
-              "limit": 0.5,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_stable",
-              "ok": true,
-              "detail": "subject area varies by 7% over the frames",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.065,
-              "limit": 0.35,
-              "data": {
-                "ms": 8.3
-              }
-            },
-            {
-              "name": "sharpness",
-              "ok": true,
-              "detail": "1.02x of the edge detail survives the encode",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 1.02,
-              "limit": 0.8,
-              "data": {
-                "ms": 0.0
-              }
-            }
-          ],
-          "webm": "slices/vid-superhero_dubai-celebratory_jump-20261003T103346-0be1ef.webm",
-          "review": "PENDING"
-        },
-        "plain": {
-          "anim_status": "FAILED",
-          "anim_reason": "inside_slot",
-          "anim_metrics": {
-            "source": "video sheet",
-            "threshold": 124.5,
-            "ms": {
-              "decode": 213,
-              "key": 683,
-              "bounds": 292,
-              "render": 1542,
-              "seam": 637,
-              "encode": 1558,
-              "encodes": 2,
-              "probe": 210,
-              "verify": 11,
-              "finish": 4254
-            },
-            "frames": 72,
-            "fps": 24.0,
-            "bbox": [
-              78,
-              0,
-              720,
-              698
-            ],
-            "edge_touch_frames": 6,
-            "subject_px_in_video": 698,
-            "scale": 0.5685,
-            "motion": 10.05,
-            "loop_seam_before": 207.65,
-            "loop_seam": 0.0,
-            "loop_limit": 58.36,
-            "frames_out": 66,
-            "crf": 42,
-            "sharp_kept": 1.02,
-            "detail_vs_still": 1.03,
-            "soft_sigma": 0.0,
-            "kb": 204.5
-          },
-          "anim_report": [
-            {
-              "name": "inside_slot",
-              "ok": false,
-              "detail": "frame 12, 11px over the 11px edge band",
-              "severity": "BLOCK",
-              "stage": "slot",
-              "value": 11,
-              "limit": 0,
-              "data": {
-                "frame": 12,
-                "over_px": 11,
-                "edge_px": 11,
-                "ms": 106.3
-              }
-            },
-            {
-              "name": "cross_slot",
-              "ok": true,
-              "detail": "gutter clean",
-              "severity": "BLOCK",
-              "stage": "slot",
-              "value": 0,
-              "limit": 0,
-              "data": {
-                "frame": null,
-                "px": 0,
-                "ms": 65.8
-              }
-            },
-            {
-              "name": "size_budget",
-              "ok": true,
-              "detail": "204KB @crf42",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 204,
-              "limit": 256,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "codec_vp9",
-              "ok": true,
-              "detail": "vp9",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "vp9",
-              "limit": "vp9",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "dimensions",
-              "ok": true,
-              "detail": "512x512",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "512x512",
-              "limit": "512x512",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "fps",
-              "ok": true,
-              "detail": "24.0",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 24.0,
-              "limit": 30.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "duration",
-              "ok": true,
-              "detail": "2.75",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 2.75,
-              "limit": 3.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "no_audio",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_mode_tag",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_decoded",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.6
-              }
-            },
-            {
-              "name": "loop_seam",
-              "ok": true,
-              "detail": "0.0 <= 58.36",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 0.0,
-              "limit": 58.36,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "identity_kept",
-              "ok": true,
-              "detail": "first frame matches the still at IoU 0.98",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.976,
-              "limit": 0.5,
-              "data": {
-                "ms": 2.9
-              }
-            },
-            {
-              "name": "motion_present",
-              "ok": true,
-              "detail": "median frame-to-frame change 10.05",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 10.05,
-              "limit": 0.5,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_stable",
-              "ok": true,
-              "detail": "subject area varies by 7% over the frames",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.065,
-              "limit": 0.35,
-              "data": {
-                "ms": 8.3
-              }
-            },
-            {
-              "name": "sharpness",
-              "ok": true,
-              "detail": "1.02x of the edge detail survives the encode",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 1.02,
-              "limit": 0.8,
-              "data": {
-                "ms": 0.0
-              }
-            }
-          ],
-          "webm": "slices/vid-superhero_dubai-celebratory_jump-20261003T103346-0be1ef.webm",
-          "review": "BLOCKED"
-        }
-      }
+      "anim_verdict_stale": true
     },
     {
       "index": 3,
@@ -2134,18 +1697,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 124.5,
+        "threshold": 123.5,
         "ms": {
-          "decode": 524,
-          "key": 1092,
-          "bounds": 340,
-          "render": 1350,
-          "seam": 800,
-          "encode": 9389,
-          "encodes": 3,
-          "probe": 238,
+          "decode": 783,
+          "key": 1158,
+          "bounds": 379,
+          "render": 1818,
+          "seam": 872,
+          "encode": 3653,
+          "encodes": 4,
+          "probe": 214,
           "verify": 17,
-          "finish": 12137
+          "finish": 6957
         },
         "frames": 72,
         "fps": 24.0,
@@ -2158,16 +1721,18 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 656,
         "scale": 0.6049,
-        "motion": 10.47,
-        "loop_seam_before": 137.24,
+        "motion": 10.46,
+        "loop_seam_before": 137.21,
+        "loop_cut": 12,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 26.29,
-        "frames_out": 66,
-        "crf": 38,
+        "loop_limit": 26.27,
+        "frames_out": 54,
+        "crf": 34,
         "sharp_kept": 1.0,
         "detail_vs_still": 0.99,
         "soft_sigma": 0.2,
-        "kb": 211.1
+        "kb": 226.5
       },
       "webm": "slices/vid-superhero_dubai-worriedlean-20261003T103346-8c1b28.webm",
       "review": {
@@ -2250,6 +1815,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183708.309,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -2278,7 +1854,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 11,
-            "ms": 108.4
+            "ms": 121.0
           }
         },
         {
@@ -2292,19 +1868,19 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 102.2
+            "ms": 131.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "211KB @crf38",
+          "detail": "226KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 211,
+          "value": 226,
           "limit": 256,
           "data": {
-            "ms": 0.1
+            "ms": 0.0
           }
         },
         {
@@ -2346,10 +1922,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.25",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.25,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2388,17 +1964,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.0
+            "ms": 2.9
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 26.29",
+          "detail": "0.0 <= 26.27",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 26.29,
+          "limit": 26.27,
           "data": {
             "ms": 0.0
           }
@@ -2412,16 +1988,16 @@
           "value": 0.953,
           "limit": 0.5,
           "data": {
-            "ms": 3.9
+            "ms": 2.8
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 10.47",
+          "detail": "median frame-to-frame change 10.46",
           "severity": "WARN",
           "stage": "anim",
-          "value": 10.47,
+          "value": 10.46,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2433,10 +2009,10 @@
           "detail": "subject area varies by 3% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.025,
+          "value": 0.03,
           "limit": 0.35,
           "data": {
-            "ms": 12.6
+            "ms": 12.1
           }
         },
         {
@@ -2451,7 +2027,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 4,
@@ -2645,18 +2222,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 124.5,
+        "threshold": 123.5,
         "ms": {
-          "decode": 657,
-          "key": 956,
-          "bounds": 322,
-          "render": 1353,
-          "seam": 895,
-          "encode": 10238,
+          "decode": 762,
+          "key": 1146,
+          "bounds": 358,
+          "render": 1817,
+          "seam": 897,
+          "encode": 3574,
           "encodes": 4,
-          "probe": 233,
+          "probe": 196,
           "verify": 13,
-          "finish": 13057
+          "finish": 6860
         },
         "frames": 72,
         "fps": 24.0,
@@ -2669,16 +2246,18 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 616,
         "scale": 0.6442,
-        "motion": 7.93,
-        "loop_seam_before": 241.95,
+        "motion": 7.91,
+        "loop_seam_before": 241.98,
+        "loop_cut": 13,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 22.77,
-        "frames_out": 66,
-        "crf": 34,
+        "loop_limit": 24.03,
+        "frames_out": 53,
+        "crf": 30,
         "sharp_kept": 1.0,
         "detail_vs_still": 0.95,
         "soft_sigma": 0.5,
-        "kb": 236.5
+        "kb": 250.8
       },
       "webm": "slices/vid-superhero_dubai-defeated_slump-20261003T103346-31fcee.webm",
       "review": {
@@ -2770,6 +2349,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183708.179,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -2798,7 +2388,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 11,
-            "ms": 103.9
+            "ms": 111.9
           }
         },
         {
@@ -2812,16 +2402,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 90.3
+            "ms": 125.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "236KB @crf34",
+          "detail": "250KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 236,
+          "value": 250,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2866,10 +2456,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.21",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.21,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2908,17 +2498,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 0.8
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 22.77",
+          "detail": "0.0 <= 24.03",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 22.77,
+          "limit": 24.03,
           "data": {
             "ms": 0.0
           }
@@ -2932,16 +2522,16 @@
           "value": 0.993,
           "limit": 0.5,
           "data": {
-            "ms": 3.1
+            "ms": 1.9
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 7.93",
+          "detail": "median frame-to-frame change 7.91",
           "severity": "WARN",
           "stage": "anim",
-          "value": 7.93,
+          "value": 7.91,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2950,13 +2540,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 8% over the frames",
+          "detail": "subject area varies by 4% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.077,
+          "value": 0.039,
           "limit": 0.35,
           "data": {
-            "ms": 9.9
+            "ms": 11.3
           }
         },
         {
@@ -2971,7 +2561,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     }
   ],
   "sheet_issues": [],

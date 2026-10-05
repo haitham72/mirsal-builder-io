@@ -1,0 +1,37 @@
+{
+  "id": "F084",
+  "status": "draft",
+  "title": "Can Help check what happened to my generation job",
+  "question": "Can Help check what happened to my generation job?",
+  "answer": "Ask Help about your own job and include its job number if you have it. Help can use your activity to explain the current status, the provider task and the related batch when available. A usual duration comes from previous completed jobs, rather than being a promise that this one will finish at that time.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/job-progress.md"
+    }
+  ],
+  "created": 1791193753.177,
+  "history": [
+    {
+      "ts": 1791193753.177,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/job-progress.md"
+    }
+  ],
+  "updated": 1791193753.194,
+  "seed": {
+    "path": "troubleshooting/job-progress.md",
+    "sha": "3e556d4d45568a51b3ba06a09d6219171f9baa76b66cb4eccad8ddae3995cca3"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "job",
+    "progress"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

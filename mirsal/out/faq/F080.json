@@ -1,0 +1,38 @@
+{
+  "id": "F080",
+  "status": "draft",
+  "title": "Can I download a whole sticker pack as a zip directly from Studio",
+  "question": "Can I download a whole sticker pack as a zip directly from Studio?",
+  "answer": "The whole-pack Download .zip control is on the pack page in Library. Studio does not currently offer that whole-pack zip control. If you want it in Studio, describe that request in Help and choose Request this feature when offered.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/zip-from-studio.md"
+    }
+  ],
+  "created": 1791193753.037,
+  "history": [
+    {
+      "ts": 1791193753.037,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/zip-from-studio.md"
+    }
+  ],
+  "updated": 1791193753.053,
+  "seed": {
+    "path": "studio/zip-from-studio.md",
+    "sha": "9a211ba86bc262f1220cca75e792b011ef6ce1f7e039f25c6ead781662a4af1c"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "zip",
+    "from",
+    "studio"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

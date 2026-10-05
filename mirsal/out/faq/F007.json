@@ -1,0 +1,37 @@
+{
+  "id": "F007",
+  "status": "draft",
+  "title": "How can I make a preference apply beyond the next generation",
+  "question": "How can I make a preference apply beyond the next generation?",
+  "answer": "Ordinary feedback shapes the next generation. State a lasting preference explicitly, such as saying that you never want dark outlines, to make it persistent.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-chat/persistent-feedback.md"
+    }
+  ],
+  "created": 1791192285.161,
+  "history": [
+    {
+      "ts": 1791192285.161,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-chat/persistent-feedback.md"
+    }
+  ],
+  "updated": 1791192285.176,
+  "seed": {
+    "path": "ai-chat/persistent-feedback.md",
+    "sha": "a2ea9a5e016d679ed3a01ec9e502f718703e9e2f30e60ee135d1b1bbdc963ecc"
+  },
+  "category": "ai-chat",
+  "tags": [
+    "ai-chat",
+    "persistent",
+    "feedback"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

@@ -1,0 +1,37 @@
+{
+  "id": "F033",
+  "status": "draft",
+  "title": "What does the Library search match",
+  "question": "What does the Library search match?",
+  "answer": "The Library filter matches sticker names, emoji and pack names. A filter with no matching results can leave the Recent section showing No matches. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "library/search-library.md"
+    }
+  ],
+  "created": 1791192285.951,
+  "history": [
+    {
+      "ts": 1791192285.951,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "library/search-library.md"
+    }
+  ],
+  "updated": 1791192285.964,
+  "seed": {
+    "path": "library/search-library.md",
+    "sha": "d1bd1edf7c0f34fa6a30b2d8d98a142ad9a707809c032813628b0b46dd826984"
+  },
+  "category": "library",
+  "tags": [
+    "library",
+    "search",
+    "library"
+  ],
+  "screen": "Library",
+  "looks_like": "Recent can show No matches when the filter has no results."
+}

@@ -1,0 +1,37 @@
+{
+  "id": "F032",
+  "status": "draft",
+  "title": "Where can I see all my stickers grouped by pack",
+  "question": "Where can I see all my stickers grouped by pack?",
+  "answer": "Open Library and choose My Stickers. It groups the stickers under their pack names, with Open pack beside each group. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "library/my-stickers.md"
+    }
+  ],
+  "created": 1791192285.921,
+  "history": [
+    {
+      "ts": 1791192285.921,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "library/my-stickers.md"
+    }
+  ],
+  "updated": 1791192285.937,
+  "seed": {
+    "path": "library/my-stickers.md",
+    "sha": "a7dd72da2480184ac7a2eb1e53f6ae86eb9a9ad31d8a1719dab83c96d66eb8f3"
+  },
+  "category": "library",
+  "tags": [
+    "library",
+    "my",
+    "stickers"
+  ],
+  "screen": "Library",
+  "looks_like": "My Stickers shows pack headings and Open pack buttons."
+}

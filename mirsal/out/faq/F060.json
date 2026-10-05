@@ -1,0 +1,37 @@
+{
+  "id": "F060",
+  "status": "draft",
+  "title": "How can I change the ordering of public packs",
+  "question": "How can I change the ordering of public packs?",
+  "answer": "Use the Trending, New and Most liked tabs in Library > Trending. Each tab selects a different ordering of the public packs. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "trending/sort-public.md"
+    }
+  ],
+  "created": 1791192286.757,
+  "history": [
+    {
+      "ts": 1791192286.757,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "trending/sort-public.md"
+    }
+  ],
+  "updated": 1791192286.772,
+  "seed": {
+    "path": "trending/sort-public.md",
+    "sha": "ec7fb274c5ac8e32914574b0a48becc6877e10574891423f34e576fb801b5d5a"
+  },
+  "category": "trending",
+  "tags": [
+    "trending",
+    "sort",
+    "public"
+  ],
+  "screen": "Library > Trending",
+  "looks_like": "The public-pack list has Trending, New and Most liked tabs."
+}

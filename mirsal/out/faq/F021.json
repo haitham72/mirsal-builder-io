@@ -1,0 +1,37 @@
+{
+  "id": "F021",
+  "status": "draft",
+  "title": "Why is an animation out of bounds",
+  "question": "Why is an animation out of bounds?",
+  "answer": "The character leaves its own slot or reaches into a neighbouring slot on the animation sheet. It is off by default, but a judgement-call boundary warning can be allowed with the visible override. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "animation/outside-slot.md"
+    }
+  ],
+  "created": 1791192285.591,
+  "history": [
+    {
+      "ts": 1791192285.591,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "animation/outside-slot.md"
+    }
+  ],
+  "updated": 1791192285.606,
+  "seed": {
+    "path": "animation/outside-slot.md",
+    "sha": "ea8f30c553a6dcd2c3335d02ed7de64f46c004fc82e015a8e0426e415ecdd851"
+  },
+  "category": "animation",
+  "tags": [
+    "animation",
+    "outside",
+    "slot"
+  ],
+  "screen": "Studio > Animation",
+  "looks_like": "Animation shows out of bounds (off), and the tile can offer Include anyway."
+}

@@ -1,0 +1,37 @@
+{
+  "id": "F017",
+  "status": "draft",
+  "title": "Why does an animation show Bad loop",
+  "question": "Why does an animation show Bad loop?",
+  "answer": "The end of the animation does not join cleanly to its beginning. Loop quality is a judgement call that can be allowed where the tile offers Use it anyway. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "animation/bad-loop.md"
+    }
+  ],
+  "created": 1791192285.475,
+  "history": [
+    {
+      "ts": 1791192285.475,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "animation/bad-loop.md"
+    }
+  ],
+  "updated": 1791192285.49,
+  "seed": {
+    "path": "animation/bad-loop.md",
+    "sha": "b75e704743918155caecbe03082f84f1c0e4cce5c8a4f4aaff4860fd18cc16d9"
+  },
+  "category": "animation",
+  "tags": [
+    "animation",
+    "bad",
+    "loop"
+  ],
+  "screen": "Studio > Animation",
+  "looks_like": "The problem category says Bad loop and the reason says the loop does not close."
+}

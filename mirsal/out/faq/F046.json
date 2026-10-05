@@ -1,0 +1,37 @@
+{
+  "id": "F046",
+  "status": "draft",
+  "title": "Will editing a Studio sticker update its pack copy",
+  "question": "Will editing a Studio sticker update its pack copy?",
+  "answer": "An edit saved to a sticker from a Studio batch refreshes the copies of that sticker in its packs. Its name, emoji and order stay the same.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/edit-copy.md"
+    }
+  ],
+  "created": 1791192286.344,
+  "history": [
+    {
+      "ts": 1791192286.344,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/edit-copy.md"
+    }
+  ],
+  "updated": 1791192286.358,
+  "seed": {
+    "path": "studio/edit-copy.md",
+    "sha": "4d1e8241e780ac9f9562c2f87c363f0df3c203a5eef10eeba4e115693be54bc8"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "edit",
+    "copy"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

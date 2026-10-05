@@ -1,0 +1,37 @@
+{
+  "id": "F001",
+  "status": "draft",
+  "title": "Why am I asked to choose my own password",
+  "question": "Why am I asked to choose my own password?",
+  "answer": "Your account was given a starting password. Enter a new password of at least eight characters and press Save; Keep the given password for now postpones the change until a later sign-in. If this does not match what you see, send a screenshot in Help once you are in the app.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "accounts/choose-password.md"
+    }
+  ],
+  "created": 1791192284.833,
+  "history": [
+    {
+      "ts": 1791192284.833,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "accounts/choose-password.md"
+    }
+  ],
+  "updated": 1791192284.989,
+  "seed": {
+    "path": "accounts/choose-password.md",
+    "sha": "88f85ee27d4ccbbe3cc0127b7c934e775f8439d4941244668569ee656d99d082"
+  },
+  "category": "accounts",
+  "tags": [
+    "accounts",
+    "choose",
+    "password"
+  ],
+  "screen": "Sign in",
+  "looks_like": "Choose your own password shows Your new password (8 characters or more), Save and Keep the given password for now."
+}

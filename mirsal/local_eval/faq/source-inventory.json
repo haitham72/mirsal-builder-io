@@ -1,0 +1,542 @@
+[
+  {
+    "path": "README.md",
+    "sha256": "1e710a91e3b2597bb2fb9298d98e4d91cc2c2685f673d1bedfb53165e75c8323",
+    "headings": [
+      "# Mirsal Builder",
+      "## Overview and glossary",
+      "## Start",
+      "## Architecture",
+      "## How a sticker is made (the golden path)",
+      "## What is in it",
+      "## Services, ports and models",
+      "## Folders",
+      "## Rules in one breath"
+    ]
+  },
+  {
+    "path": "run.md",
+    "sha256": "65729cf572eb798170352a87c160b218a700b726a520d3131cabe4d1dedc46d1",
+    "headings": [
+      "# Run Mirsal",
+      "## New PC (once)",
+      "### HTTPS for colleagues (once)",
+      "## Every day",
+      "## Settings (`mirsal\\.env`, restart after)",
+      "## Database"
+    ]
+  },
+  {
+    "path": "CLAUDE.md",
+    "sha256": "0fa464ed175b9305e168608a476d454926959f2e6435fc21bfcfe4e574f2e3ed",
+    "headings": [
+      "# CLAUDE.md — Mirsal Builder (rules + routing)",
+      "## Structure",
+      "## Rules"
+    ]
+  },
+  {
+    "path": "docs/agent-and-chat.md",
+    "sha256": "4a054f81f2aea5bf46c5917ff3a7e5d2e1ec9a61ffb129109e124a41d8965cfa",
+    "headings": [
+      "# The agent and the chat: how it is built",
+      "## Files",
+      "## One turn",
+      "## Memory",
+      "## The step trace",
+      "## The screen (`#/agent`, the landing page of the Studio shell)",
+      "## Models (`services/llm.py`)",
+      "## The agentic creator (`agent/creator.py`, 2026-10-02)",
+      "### Creator overrides and recovery",
+      "## Prompt separation",
+      "## The vision judge (`mirsal/vision/`)",
+      "## Redis (disposable; `mirsal-redis`, port 6380)",
+      "## Events and SSE",
+      "## Tests",
+      "## Conversation quality pass (2026-10-02, from the six reviews)",
+      "## Person references, edits that reuse the parent prompt, undo (2026-10-03)",
+      "## Several subjects, per-subject feedback, taste (2026-10-03)",
+      "## The bar under the chat box (2026-10-03)",
+      "## Particle sets in the chat (2026-10-04)",
+      "### Mirsal Echo: testing assigned particle settings",
+      "## Reference roles in numbered edits",
+      "## Edits by what they mean (2026-10-03, UI/UX spec P11-P13)",
+      "## The AI vision switch (2026-10-03, UI/UX spec P9-P10)",
+      "## Support (Help & Support; `flow/support.py`, `flow/support_kb.py`, `flow/faq.py`, `flow/notifications.py`, `console/support.js`; 2026-10-05)"
+    ]
+  },
+  {
+    "path": "docs/api.md",
+    "sha256": "bfdf263cbf4960da82f0a0d6bf473199e34dce1065b1a9fad3a533346952622c",
+    "headings": [
+      "# HTTP API",
+      "## Safety on every request",
+      "## Accounts (`runtime/users.py`, `console/server.py` `_who` / `_authorize`)",
+      "## Contract",
+      "## Chat (docs/agent-and-chat.md)",
+      "## Generations, gates and animation (docs/engine-and-studio.md, docs/generation.md)",
+      "### Job recovery",
+      "## Events (SSE)",
+      "## Files",
+      "## Library, packs, Telegram, projects, search, health",
+      "## Office accounts on the LAN (native FastAPI, `console/app.py`; `runtime/users.py`, `flow/people.py`, `services/admin_bot.py`)",
+      "## Trending (native FastAPI; `flow/trending.py`)",
+      "## Tickets (native FastAPI; `flow/tickets.py`, docs/store-and-search.md \"Tickets\")",
+      "## Help & Support (native FastAPI; `flow/support.py`, `flow/faq.py`, `flow/notifications.py`; docs/agent-and-chat.md \"Support\")",
+      "## Not built yet",
+      "## Hosted mode (branch `deployment`)",
+      "## Trash and purge (owner only; `flow/purge.py`, `store/purge_rows.py`, `media/library.py`, `flow/batches.py`)",
+      "## Particle effects (`/api/effects`, `docs/effects.md`)",
+      "## Particle sets (`/api/particles`, `docs/particles.md`)",
+      "## Edits and the AI (2026-10-03, UI/UX spec P8-P13)",
+      "## Import an existing sheet or video (native FastAPI)"
+    ]
+  },
+  {
+    "path": "docs/backlog.md",
+    "sha256": "26d1d9575c345c2aef7c58029dc8490a15896e2294da8c20cf439814e80bfe94",
+    "headings": [
+      "# Backlog: what is still open to build, by area",
+      "## Visual design (`docs/design.md`)",
+      "## Particles and the welcome modal (`docs/effects.md` section 8, `docs/particles.md`, `docs/onboarding.md`)",
+      "## Chat and the agent (`docs/agent-and-chat.md`)",
+      "## Engine and Studio (`docs/engine-and-studio.md`)",
+      "## Live generation (`docs/generation.md`, `docs/higgsfield.md`, `docs/operator.md`)",
+      "## Batch groups (`docs/engine-and-studio.md`, \"Batch groups\")",
+      "## Store and search (`docs/store-and-search.md`)",
+      "## API and production (`docs/api.md`)",
+      "## Office LAN (`docs/api.md` \"Office accounts on the LAN\", \"Trending\")",
+      "## Help & Support (`docs/agent-and-chat.md` \"Support\")",
+      "## Testing",
+      "## Deployment (branch `deployment`): parked"
+    ]
+  },
+  {
+    "path": "docs/burst_plan.md",
+    "sha256": "76f33a8869fe43a825258923bbdddba561bad108263a6ae8b59f4988eba6f84f",
+    "headings": [
+      "# Burst creation: many packs from one liked sheet — PROPOSAL (nothing is built)",
+      "## 1. What the person does",
+      "## 2. The model: a Burst of lanes (a \"queue\" is one lane)",
+      "## 3. The name: `{subject}_{action}_{queue}_{datetime}` against rule 9 and `runtime/names.py`",
+      "## 4. What it reuses (so the build is small)",
+      "## 5. Risks stated up front",
+      "## 6. Questions for Haitham (answers go here, each answer deletes its question)",
+      "## 7. Open: what happens next (former `plan.md` 16.3, P14)"
+    ]
+  },
+  {
+    "path": "docs/deployment_plan.md",
+    "sha256": "b1e03d2676d45ed468d0c8e5c6ec8d190b47754bc57054182e53cae2d123c124",
+    "headings": [
+      "# Deployment plan: putting Mirsal Builder online (PAUSED)",
+      "## Glossary (the words this file keeps using)",
+      "## 0. Builds on",
+      "## 1. The seven asks",
+      "## 2. Shape of the deployed app",
+      "## 3. Phase 0 — FastAPI and \"hostable\" (the enabler; everything else depends on it)",
+      "### 3.1 What the code looks like today",
+      "### 3.2 The migration, step by step",
+      "### 3.3 Making the state survivable",
+      "### 3.4 Container and config",
+      "### 3.5 Definition of done for phase 0",
+      "## 4. The two new tables",
+      "## 5. Google OAuth",
+      "## 6. Hosting: the two options, and one better one",
+      "## 7. Higgsfield: 10 test credits per user, one private API",
+      "## 8. Going public: the scrub runbook (write it before the launch, run it once)",
+      "## 9. Telegram: never export the same pack twice",
+      "## 10. Privacy, before the analysis table exists",
+      "## 11. Per-user agent session and persistent LangGraph memory",
+      "## 12. Phases, in order, each ending in tests and docs",
+      "## 13. Risks",
+      "## 15. What must not change",
+      "## 17. Open questions for Haitham (numbered in `docs/waiting-for-haitham.md`; an answer goes into this file and deletes its question there and here)"
+    ]
+  },
+  {
+    "path": "docs/design.md",
+    "sha256": "27dc8c96882dc20a8b0c0d849c37a3580f285157a82f7bcf91e680d4d3bb05be",
+    "headings": [
+      "# docs/design.md — the look of Mirsal: one shell, one palette",
+      "## 1. The one problem behind every item on the list",
+      "## 2. Non-negotiables (breaking these breaks the app, not just the look)",
+      "## 3. Foundations",
+      "### 3.1 One token set",
+      "### 3.2 Type, spacing, motion",
+      "## 4. The shell — rules that hold on every screen",
+      "## 5. Per screen",
+      "### AI (`agent.js`, `agent.css`) — the reference, keep its character (built; styles added under the box)",
+      "### Library (built)",
+      "### Studio — \"this is where it becomes dirty\" (built)",
+      "### Chat (built)",
+      "### Settings (built)",
+      "### Help (built 2026-10-05, `support.js`, `.su-*`)",
+      "### Users (built 2026-10-04, `users.js`)",
+      "## 6. Earlier batches — the redesign (built 2026-10-02)",
+      "## 7. What \"done\" means for this work",
+      "## 8. Order of work (done steps are marked)",
+      "## 9. Every rejected picture carries its own override (2026-10-03)",
+      "## 10. The welcome modal and the particles gallery (2026-10-03)",
+      "## UI/UX pass of 2026-10-03 (what a click means)",
+      "## Browser look of 2026-10-03 (what Claude fixed, and what is still Haitham's eyes)",
+      "## Personal packs and existing-file controls"
+    ]
+  },
+  {
+    "path": "docs/dev-notes.md",
+    "sha256": "c983f922b01676ffbe35323a15502512516ca9784b724c9487e14462b86426a5",
+    "headings": [
+      "# Dev notes: glossary, guardrails, how to run this checkout, quirks",
+      "## Glossary (the words the docs keep using)",
+      "## Where things are tracked (CLAUDE.md rule 7)",
+      "## Guardrails",
+      "## This checkout and how to run",
+      "## Looking at the app in a browser",
+      "## Quirks that cost time",
+      "## Starting a session (the prompt for the next LLM)"
+    ]
+  },
+  {
+    "path": "docs/diagrams/01-overview.excalidraw",
+    "sha256": "2fa076da85935703f93726498f01fc231850200f9c311001c6f80bdb3a2f2b16",
+    "headings": []
+  },
+  {
+    "path": "docs/diagrams/02-golden-path.excalidraw",
+    "sha256": "5e3f40fa1ab81a8a889e9f77a13db7700589fb5658d03754e94be1dd2f481fba",
+    "headings": []
+  },
+  {
+    "path": "docs/diagrams/03-ai-chat-turn.excalidraw",
+    "sha256": "0c93bfd6838419807b9bc8ced97eb6bd0b5cf5dcd9ef22dbed94752640387623",
+    "headings": []
+  },
+  {
+    "path": "docs/diagrams/04-paid-generation.excalidraw",
+    "sha256": "0b0a2ac117523858536f1fb1c30355a105c26333552d0d2ccb1f914d765ad47d",
+    "headings": []
+  },
+  {
+    "path": "docs/diagrams/05-particles.excalidraw",
+    "sha256": "6f27ff8943e051b0b9807e1e83c5dd1a456ab41e6e2b9f3ca261ff43af81891e",
+    "headings": []
+  },
+  {
+    "path": "docs/diagrams/06-data.excalidraw",
+    "sha256": "19d20968e87667374805a168aee5a00e8c7fec3e7c85c7463f36831f6e3debe9",
+    "headings": []
+  },
+  {
+    "path": "docs/diagrams/07-office.excalidraw",
+    "sha256": "8eac6a39b2e581141de8356849140792dbf3e99e67b6d1d2018ae6af53a0b0d6",
+    "headings": []
+  },
+  {
+    "path": "docs/diagrams/build.py",
+    "sha256": "e98994ae1a72c6fb8368aac00f93e330c42132214ecfde2855457e4401e08ef4",
+    "headings": [
+      "#!/usr/bin/env python3"
+    ]
+  },
+  {
+    "path": "docs/diagrams/diagram-prompt.md",
+    "sha256": "74750fd0791226867c9be099e0f7db3da5c3a6c25574b700d6b888d926d67e64",
+    "headings": [
+      "# Prompt: draw Mirsal Builder as Excalidraw diagrams",
+      "## 1. Read first (facts come only from these; never invent a component)",
+      "## 2. The diagrams (one `.excalidraw` file each, in `docs/diagrams/`)",
+      "## 3. The look (apply to every file)",
+      "## 4. The file format (Excalidraw JSON, version 2: get this exactly right)",
+      "## 5. Check before you hand it over"
+    ]
+  },
+  {
+    "path": "docs/diagrams/README.md",
+    "sha256": "6bf44fef99943545ebb95a31f8fb08e3045a4ebaf3cd30ca26bb01f49197e3b0",
+    "headings": [
+      "# Diagrams"
+    ]
+  },
+  {
+    "path": "docs/effects.md",
+    "sha256": "af6b70b34248a3e7a667237e137c4df82633e9cf6669f554410e73da66293d63",
+    "headings": [
+      "# Particle effects: sprites, simulation and Kling",
+      "## 1. What an effect is",
+      "## 2. Sprite sources, one simulator",
+      "## 3. Video from scratch: what was measured (real Kling, 2026-10-02)",
+      "## 4. What is enforced and what is only said",
+      "## 5. Money and concurrency",
+      "## 6. Code map",
+      "## 7. The contract (built: `flow/effects.py`, `console/server.py` `_effects`, `docs/api.md`)",
+      "## 8. Screens and remaining acceptance",
+      "## Particles are particles, not stickers (2026-10-03, UI/UX spec P6)"
+    ]
+  },
+  {
+    "path": "docs/engine-and-studio.md",
+    "sha256": "a53a36d95cf12ec2580f87d4b9e9e1c8b1ba38b9c3a7cc77de70b94873202aa0",
+    "headings": [
+      "# The engine, the verifier, the gates, the Studio and Telegram: how it is built",
+      "## How to run it",
+      "## Other commands (Windows / macOS / Linux)",
+      "## Restricted network / library policy",
+      "## Layout",
+      "## Input pairing",
+      "## Naming convention (outputs; changed 2026-10-02 at Haitham's request)",
+      "## Prompter contract (`prompts.json`, plain JSON; the AI expansion plugs in through `generation/expander.py`)",
+      "## Lifecycle (`flow/pipeline.py`, one line per transition in `out/G00N/events.jsonl`)",
+      "## Engine",
+      "## Clip formats (measured on the teddy clips; metadata + alpha statistics only)",
+      "## Keyers: ready-made options (for photos / non-green input; Phase 3C and 5)",
+      "## Console API (seed of the Phase 5 API)",
+      "## Desktop Sticker Builder",
+      "## Video / GIF projects (checkpoint 1E, spec section 21)",
+      "## The verifier (`engine/verify.py`, checkpoint 1F)",
+      "## The golden path (`flow/gates.py`, checkpoint 1F)",
+      "## Prompter: templates, slots, tags (`generation/prompter.py`)",
+      "## The Studio: the simple flow (`console/generate.js`; 1G, redone 2026-10-01, renamed Studio the same day)",
+      "## Issue colours, Include anyway, the gate counts, the sticker detail and Edge (`console/generate.js`, 2026-10-01)",
+      "## Editing a created sticker: Studio edits (`pipeline.studio_edit_*`, `edit_still`, `console/prepare.js`)",
+      "## Animation: speed, the result cache, diagnostics (`engine/video.py`, `cli.py profile`)",
+      "## Remove batch and Removed batches (`flow/batches.py`, 2026-10-03, \"like remove pack\")",
+      "## Batch groups: variations of one idea are one family (`flow/groups.py`, 2026-10-04)",
+      "## Emptying the trash: the purge of batches and packs (`flow/purge.py`, 2026-10-03)",
+      "## History: the watch folders, with Remove (`flow/watch.py`, `console/history.js`)",
+      "## A sheet Python blocked, in words (`flow/explain.py`, 2026-10-02)",
+      "## Send to Telegram (`services/telegram.py`, `console/telegram.js`; checkpoint 1H)",
+      "## Verified",
+      "## Decisions that shaped the build (as planned vs as built)",
+      "## Sheet-level problems are cut anyway (2026-10-02)",
+      "## \"Use it anyway\" — every judgement-call block can be allowed, on every surface (2026-10-03)",
+      "### The engine side (built 2026-10-03)",
+      "## One control per cell, one decision (2026-10-03, UI/UX spec P1-P4)",
+      "## Separator lines in a generated sheet are a generator artefact, not a cut bug (known cause, 2026-10-03)",
+      "## Existing-sheet imports"
+    ]
+  },
+  {
+    "path": "docs/generation.md",
+    "sha256": "e5984999858bf61a40b89117267ef18be0faf33aa9a1d3044496cd8d76945553",
+    "headings": [
+      "# Live generation: how it is built",
+      "## Prompts (`generation/prompter.py`, `generation/emotions.py`, `generation/styles.py`, `prompts/templates/`)",
+      "## The Higgsfield CLI (`generation/higgsfield.py`, `generation/model_catalog.py`)",
+      "## Video quality, the gap, Loop and the edge (measured on G002, 2026-10-01)",
+      "## Files and names",
+      "## The screen colour (blue key)",
+      "## The queue (`GET /api/jobs`, `live.js`)",
+      "## Allow anyway (a human override, `gates.allow_animation`)",
+      "## Jobs (`generation/jobs.py`)",
+      "### The durable queue and workers (`generation/jobqueue.py`, migration `007_job_queue`)",
+      "## Credits and usage (`generation/usage.py`, `out/model_calls.jsonl`)",
+      "## API (all JSON, addressable by id)",
+      "## The Studio (additive; every control calls one of the endpoints above)",
+      "## Commands",
+      "## Tests (`tests/test_live.py`, `test_jobs.py`, `test_expander.py`; fake CLI, no credits)",
+      "## Not built",
+      "## The Prompt tab writes the prompts (2026-10-02)",
+      "## Several paid jobs at once, and text-only video (2026-10-02)"
+    ]
+  },
+  {
+    "path": "docs/higgsfield.md",
+    "sha256": "4280e81238ac6328aa4653d5ef2ce4f22f23065fe25637225c08ee90a54ae341",
+    "headings": [
+      "# Higgsfield: what it really offers (S0, measured 2026-10-01)",
+      "## Access",
+      "## Interface (all non-interactive, scriptable, `--json`)",
+      "## Standing choices (Haitham, 2026-10-01)",
+      "## What was run",
+      "## What it means for Mirsal (numbers, not looks; nobody opened the media)",
+      "## Other models seen, not tested",
+      "## Kling v3.0, text only (measured 2026-10-02, for the particle effects)"
+    ]
+  },
+  {
+    "path": "docs/http_route_inventory.md",
+    "sha256": "eb8dd4b12ae4a6aa36e2bf24172b516d307c6da66fee8ff7c06d4d52e3e5c0a7",
+    "headings": [
+      "# HTTP route inventory: stdlib migration baseline",
+      "## Shared transport contract",
+      "## Idempotency and streaming",
+      "## Operation table",
+      "## Operation details from the existing schema table",
+      "## Static/source routes outside the OpenAPI operation table",
+      "## Durable particles and exact override contracts",
+      "## Spec conflicts and migration risks requiring an explicit compatibility decision",
+      "## Schema appendix (existing hand-written reference, not additional validation)",
+      "### Error",
+      "### Settings",
+      "### Step",
+      "### Sticker",
+      "### GenerationCard",
+      "### Card",
+      "### Chip",
+      "### Message",
+      "### SessionSummary",
+      "### Session",
+      "### ChatSend",
+      "### Accepted",
+      "### GenerationCreate",
+      "### GenerationCreated",
+      "### Review",
+      "### Judge",
+      "### Event",
+      "### AssetSign",
+      "### AssetLink",
+      "### Health",
+      "### Job",
+      "### LiveSheet",
+      "### LiveJob",
+      "### User",
+      "### UserCreate",
+      "### UserUpdate",
+      "### UserWithToken",
+      "### Me",
+      "### PoolHit",
+      "## Native imports and per-person packs (2026-10-05)",
+      "## Help & Support (native, 2026-10-05)"
+    ]
+  },
+  {
+    "path": "docs/measurements.md",
+    "sha256": "fe9c1bb5050919234dd8c0912abada550d173e4e31c8459e9b91f4102dd85ba3",
+    "headings": [
+      "# Measurements",
+      "## Video cells that leave their slot (`measure-cells`, 2026-10-02, 36 cells in 4 video sheets of the real G00x batches)",
+      "## Pool search (3B), first real run (2026-10-02, 45 approved stickers of G001-G005, local embeddings)",
+      "## Vision judge (S6), first live runs (2026-10-02, G002 Batman Lego, 9 stickers, a COPY of out/)",
+      "## Vision judge: local Qwen 9B evaluation (2026-10-05)",
+      "## Photo cutout (3C), test photo `ref/upload.jpeg` (2026-10-02)",
+      "## Sharpness (the reworked `sharpness` check, 2026-10-02)",
+      "## measure-sharpness 2026-10-02 05:12",
+      "## Particle effects: Kling text-only clips (2026-10-02)"
+    ]
+  },
+  {
+    "path": "docs/onboarding.md",
+    "sha256": "ac98188f337c6871ae996dc084e19ed82c7c3b291fb1979ecd89fc8c25aeb7e0",
+    "headings": [
+      "# The welcome modal (onboarding), 2026-10-03",
+      "## How the media were made (two approved runs, Haitham, 2026-10-03: about 188 + 105 credits)",
+      "## Checked with numbers, not eyes (rule 9)",
+      "## The prompts"
+    ]
+  },
+  {
+    "path": "docs/operator.md",
+    "sha256": "0ac5e707350b5cdd28ae2468fc76d66d31f41bb245b3992db8a8f3f7c7ab6abf",
+    "headings": [
+      "# Operator loop: fulfilling Mirsal jobs with the Higgsfield CLI",
+      "## The server does this itself",
+      "# or the individual steps: mirsal job claim J005 --ticket <id> ... mirsal job done J005 --file <path> --model <name> --cost <n>",
+      "## Recovering a stalled job",
+      "## Workers and the durable queue",
+      "## Rules",
+      "## Job kinds",
+      "## Timeout recovery is already available"
+    ]
+  },
+  {
+    "path": "docs/particles.md",
+    "sha256": "8879d0b11c95b51feb371155e5544b3d5382188613aa1e9ea5550cb35c341b4d",
+    "headings": [
+      "# Particle sets and bursts",
+      "## 1. Ownership and vocabulary",
+      "## 2. Storage, migration and deletion",
+      "## 3. One scoped editor",
+      "## 4. Animated sprites and recovery",
+      "## 5. Galleries and chat",
+      "## 6. JSON contract and compatibility",
+      "## 8. Particles on their own: from a request to Telegram (2026-10-05)",
+      "## 7. How it is tested, and what is open"
+    ]
+  },
+  {
+    "path": "docs/review.md",
+    "sha256": "43e63b4befcb4dd06eba3be1c4a790883588221e3457d0cde599f8962fbdde74",
+    "headings": [
+      "# Seeded review of Mirsal Builder (single baseline; latest audit 2026-10-04, `fix/review-gaps` @ `6fd4d06`, dirty)",
+      "## 1. Verdict",
+      "## 2. What was run",
+      "## 3. Claims C0-C26 (live contract; re-verify every audit)",
+      "## 4. Findings (most severe first; cap 25)",
+      "### N1 — Particle/effect double-spend: no Idempotency-Key [BLOCKER, READ]",
+      "### N2 — Crash between `hf.create` and `claim` loses a paid ticket [HIGH, READ]",
+      "### N3 — Shown price can drift before the charge; only Retry pinned [HIGH, READ]",
+      "### N4 — `allow_animations` unserialized; concurrent allows lose one [HIGH, READ]",
+      "### N5 — `build_sheet` / `slice_video` / `reanimate_prepared` unserialized [HIGH, READ]",
+      "### N6 — `n_confirm` clears pending before success; failed non-create loses plan [HIGH, READ]",
+      "### N7 — `sheet_fixed` is write-only; later recut silently reverts edits [MEDIUM, READ]",
+      "### N8 — `SessionStore.context()` has zero callers; HIGH path never runs [MEDIUM, RAN]",
+      "### N9 — Creator `waiting` card carries no picture [MEDIUM, READ]",
+      "### N10 — Engine boundary test would not catch a violation [MEDIUM, READ+RAN]",
+      "### N11 — OVERRIDABLE third key undocumented; C0 claim stale [MEDIUM, READ]",
+      "### N12 — `holes` registered WARN but returns BLOCK [MEDIUM, READ]",
+      "### N13 — Ticket fingerprint folds unrelated failures [MEDIUM, READ]",
+      "### N14 — Migration 005 upgrade wipes stored vectors [MEDIUM, READ]",
+      "### N15 — Tracing/ticket sinks bypass `safe()` [MEDIUM, READ]",
+      "### N16 — Concurrent identical Idempotency-Keys get 409, not the first answer [MEDIUM, READ]",
+      "### N17 — `_inflight` undercounts the daily cap [MEDIUM, READ]",
+      "### N18 — `_slot` semaphore is per-process; queue workers exceed `paid_parallel` [MEDIUM, READ+INFER]",
+      "### N19 — Docs contradict code on sheet-cell open [MEDIUM, READ]",
+      "### N20 — Permanent dead search input in chat [MEDIUM, READ]",
+      "### N21 — Polling/video element leaks [MEDIUM, READ]",
+      "## 5. What is solid (protect from \"cleanups\")",
+      "## 6. Missing: tests, docs, features a v1 needs that nobody listed",
+      "## 7. Decisions challenged (standing; do not re-raise until asked)",
+      "## 8. The ten changes first, in order",
+      "## Appendix A — 2026-10-02 triage ledger (preserved; statuses resolved 10-03)",
+      "## 9. Audit log (append a dated entry per audit; never rewrite history)"
+    ]
+  },
+  {
+    "path": "docs/store-and-search.md",
+    "sha256": "9bdcd15dd87c581a78d47f079b2ae6e2bb38b7ca56e3bded186d025a3dc8efda",
+    "headings": [
+      "# Postgres, search, the pool, photos and tracing: how it is built",
+      "## Run it",
+      "## Where things live",
+      "## Data mapping (file store -> rows)",
+      "## Search",
+      "## Photo cutout (`mirsal photo`)",
+      "## Tickets (`flow/tickets.py`, `migrations/010_tickets.sql`)",
+      "## Help & Support records (`migrations/011_support.sql`; `docs/agent-and-chat.md` \"Support\")",
+      "## Verified",
+      "## Principles that held (the rules the code follows)"
+    ]
+  },
+  {
+    "path": "docs/testing.md",
+    "sha256": "0755420ea473a27b7fc6c8c5f4e150c951b2aaef1a15b6e1613d22d369176768",
+    "headings": [
+      "# Testing: which tier, and when",
+      "## The test budget (Haitham, 2026-10-04: overrides anything below that asks for more)",
+      "## The map has two layers, and the difference matters",
+      "## The rule",
+      "## The tiers",
+      "## Which run a change earns (one, per the budget above)",
+      "## The rule that ends a change",
+      "## Test files added on 2026-10-03 (mapped/named modules; node files in `tests/js`)",
+      "## Test files added for v1.0 (2026-10-04)",
+      "## Worked scenarios",
+      "## What is NOT verified by watching the app work",
+      "## Reporting"
+    ]
+  },
+  {
+    "path": "docs/waiting-for-haitham.md",
+    "sha256": "b7b2a490ec2387435dee0b1f2497d6bb33884c92f3b4a40d749ebd5e89e937ab",
+    "headings": [
+      "# Waiting for Haitham: the only list that needs a person",
+      "## A. Eyes and money: things only a person can verify",
+      "## B. Calibration inputs only you can supply",
+      "## C. Product decisions in the Studio and the chat",
+      "## D. Particle verdicts (nothing is built on a guess)",
+      "## E. Repo, safety and housekeeping decisions (held questions: do not re-raise unless asked)",
+      "## F. Parked: the deployment questions (`docs/deployment_plan.md` section 17; do not raise unless asked)"
+    ]
+  }
+]

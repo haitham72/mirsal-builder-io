@@ -1,0 +1,1258 @@
+[
+  {
+    "id": "pack-zip-to-studio-feature",
+    "turns": [
+      {
+        "user": "What is the process for downloading every file contained in my pack?",
+        "expect": {
+          "cites_faq": "library/download-pack.md"
+        }
+      },
+      {
+        "user": "Can I download the whole pack as a zip directly in Studio?",
+        "expect": {
+          "cites_faq": "studio/zip-from-studio.md"
+        }
+      },
+      {
+        "user": "Please add a whole-pack zip button to Studio.",
+        "expect": {
+          "request": "feature"
+        }
+      }
+    ]
+  },
+  {
+    "id": "blocked-sticker-to-external-edit-feature",
+    "turns": [
+      {
+        "user": "What can I do with a sticker that touches its cell boundary?",
+        "expect": {
+          "cites_faq": "studio/use-anyway.md"
+        }
+      },
+      {
+        "user": "Can a Photoshop-edited file directly replace that sticker in the existing pack?",
+        "expect": {
+          "cites_faq": "studio/external-edit-return.md"
+        }
+      },
+      {
+        "user": "Please add that direct replacement workflow.",
+        "expect": {
+          "request": "feature"
+        }
+      }
+    ]
+  },
+  {
+    "id": "particle-delete-to-purge-feature",
+    "turns": [
+      {
+        "user": "Can I restore the particle set I deleted?",
+        "expect": {
+          "cites_faq": "particles/restore-set.md"
+        }
+      },
+      {
+        "user": "I want a permanent purge action for deleted particle sets. Please add it.",
+        "expect": {
+          "request": "feature"
+        }
+      }
+    ]
+  },
+  {
+    "id": "help-answer-to-feature-suggestion",
+    "turns": [
+      {
+        "user": "How can I start a different issue in Help?",
+        "expect": {
+          "cites_faq": "troubleshooting/new-question.md"
+        }
+      },
+      {
+        "user": "Instead I want to suggest a new feature. How?",
+        "expect": {
+          "cites_faq": "troubleshooting/feature-request.md"
+        }
+      },
+      {
+        "user": "Please add a whole-pack zip download to Studio.",
+        "expect": {
+          "request": "feature"
+        }
+      }
+    ]
+  },
+  {
+    "id": "member-import-to-access-request",
+    "turns": [
+      {
+        "user": "Why are the sheet import buttons unavailable on my member account?",
+        "expect": {
+          "cites_faq": "imports/member-controls.md"
+        }
+      },
+      {
+        "user": "I need an admin to help me get access to importing.",
+        "expect": {
+          "request": "access"
+        }
+      }
+    ]
+  },
+  {
+    "id": "credits-top-up-access-request",
+    "turns": [
+      {
+        "user": "Do credits refill automatically every day?",
+        "expect": {
+          "cites_faq": "credits/automatic-refill.md"
+        }
+      },
+      {
+        "user": "I need an admin to give me more credits.",
+        "expect": {
+          "request": "access"
+        }
+      }
+    ]
+  },
+  {
+    "id": "tester-token-private-reply",
+    "turns": [
+      {
+        "user": "The Telegram tester needs a token. I need the admin to give it to me.",
+        "expect": {
+          "request": "access"
+        }
+      },
+      {
+        "user": "When support sends a private reply, where can I read it?",
+        "expect": {
+          "cites_faq": "accounts/private-reply.md"
+        }
+      },
+      {
+        "user": "Can I remove it from Help once I have saved it?",
+        "expect": {
+          "cites_faq": "accounts/forget-private-reply.md"
+        }
+      }
+    ]
+  },
+  {
+    "id": "private-message-notification",
+    "turns": [
+      {
+        "user": "A notification says Support sent you a private message. How do I read it?",
+        "expect": {
+          "cites_faq": "accounts/private-reply.md"
+        }
+      },
+      {
+        "user": "Now I saved it; how do I make Help forget the contents?",
+        "expect": {
+          "cites_faq": "accounts/forget-private-reply.md"
+        }
+      }
+    ]
+  },
+  {
+    "id": "running-video-duration-and-arrival",
+    "turns": [
+      {
+        "user": "Where can I find video J004, and what is its provider task along with the typical wait time?",
+        "expect": {
+          "activity": "job"
+        }
+      },
+      {
+        "user": "Will Help tell me when this watched job finishes?",
+        "expect": {
+          "cites_faq": "troubleshooting/job-arrival.md"
+        }
+      }
+    ],
+    "fixture": {
+      "user": {
+        "id": "u1",
+        "name": "Synthetic member",
+        "role": "member"
+      },
+      "jobs": [
+        {
+          "id": "J001",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791182208,
+          "claimed_at": 1791182208,
+          "completed_at": 1791182508,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J002",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791181208,
+          "claimed_at": 1791181208,
+          "completed_at": 1791181628,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J003",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791180208,
+          "claimed_at": 1791180208,
+          "completed_at": 1791180568,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J004",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "CLAIMED",
+          "created_at": 1791192968,
+          "claimed_at": 1791192968,
+          "external_task_id": "synthetic-provider-task-004",
+          "request": {
+            "user": "u1"
+          },
+          "generation": "G007"
+        }
+      ],
+      "batches": [
+        {
+          "generation_id": "G007",
+          "number": 7,
+          "prompt": "synthetic teddy bear",
+          "stage": "sliced",
+          "owner": "u1",
+          "grid": [
+            3,
+            3
+          ],
+          "history": [],
+          "stickers": [
+            {
+              "index": 1,
+              "key": "k1",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 2,
+              "key": "k2",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 3,
+              "key": "k3",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 4,
+              "key": "k4",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 5,
+              "key": "k5",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 6,
+              "key": "k6",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 7,
+              "key": "k7",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 8,
+              "key": "k8",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 9,
+              "key": "k9",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "failed-job-and-refund",
+    "turns": [
+      {
+        "user": "What caused video job J004 to fail?",
+        "expect": {
+          "activity": "job"
+        }
+      },
+      {
+        "user": "What happens to my reserved credits when a job fails?",
+        "expect": {
+          "cites_faq": "credits/failed-job-refund.md"
+        }
+      }
+    ],
+    "fixture": {
+      "user": {
+        "id": "u1",
+        "name": "Synthetic member",
+        "role": "member"
+      },
+      "jobs": [
+        {
+          "id": "J001",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791182208,
+          "claimed_at": 1791182208,
+          "completed_at": 1791182508,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J002",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791181208,
+          "claimed_at": 1791181208,
+          "completed_at": 1791181628,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J003",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791180208,
+          "claimed_at": 1791180208,
+          "completed_at": 1791180568,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J004",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "FAILED",
+          "created_at": 1791192968,
+          "claimed_at": 1791192968,
+          "external_task_id": "synthetic-provider-task-004",
+          "request": {
+            "user": "u1"
+          },
+          "generation": "G007",
+          "error": "Provider returned an unreadable video"
+        }
+      ],
+      "batches": [
+        {
+          "generation_id": "G007",
+          "number": 7,
+          "prompt": "synthetic teddy bear",
+          "stage": "sliced",
+          "owner": "u1",
+          "grid": [
+            3,
+            3
+          ],
+          "history": [],
+          "stickers": [
+            {
+              "index": 1,
+              "key": "k1",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 2,
+              "key": "k2",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 3,
+              "key": "k3",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 4,
+              "key": "k4",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 5,
+              "key": "k5",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 6,
+              "key": "k6",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 7,
+              "key": "k7",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 8,
+              "key": "k8",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 9,
+              "key": "k9",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "timeout-not-paid-retry",
+    "turns": [
+      {
+        "user": "What occurred with video job J004?",
+        "expect": {
+          "activity": "job"
+        }
+      },
+      {
+        "user": "Does timing out mean Higgsfield stopped making it?",
+        "expect": {
+          "cites_faq": "troubleshooting/job-timeout.md"
+        }
+      }
+    ],
+    "fixture": {
+      "user": {
+        "id": "u1",
+        "name": "Synthetic member",
+        "role": "member"
+      },
+      "jobs": [
+        {
+          "id": "J001",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791182208,
+          "claimed_at": 1791182208,
+          "completed_at": 1791182508,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J002",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791181208,
+          "claimed_at": 1791181208,
+          "completed_at": 1791181628,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J003",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791180208,
+          "claimed_at": 1791180208,
+          "completed_at": 1791180568,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J004",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "TIMEOUT",
+          "created_at": 1791192968,
+          "claimed_at": 1791192968,
+          "external_task_id": "synthetic-provider-task-004",
+          "request": {
+            "user": "u1"
+          },
+          "generation": "G007"
+        }
+      ],
+      "batches": [
+        {
+          "generation_id": "G007",
+          "number": 7,
+          "prompt": "synthetic teddy bear",
+          "stage": "sliced",
+          "owner": "u1",
+          "grid": [
+            3,
+            3
+          ],
+          "history": [],
+          "stickers": [
+            {
+              "index": 1,
+              "key": "k1",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 2,
+              "key": "k2",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 3,
+              "key": "k3",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 4,
+              "key": "k4",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 5,
+              "key": "k5",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 6,
+              "key": "k6",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 7,
+              "key": "k7",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 8,
+              "key": "k8",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 9,
+              "key": "k9",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "accepted-count-to-override",
+    "turns": [
+      {
+        "user": "Why did only two of the nine stickers in G007 get accepted?",
+        "expect": {
+          "activity": "batch"
+        }
+      },
+      {
+        "user": "How can I allow a judgement-call block on the tile?",
+        "expect": {
+          "cites_faq": "studio/use-anyway.md"
+        }
+      },
+      {
+        "user": "How do I take that allowance back?",
+        "expect": {
+          "cites_faq": "studio/take-back.md"
+        }
+      }
+    ],
+    "fixture": {
+      "user": {
+        "id": "u1",
+        "name": "Synthetic member",
+        "role": "member"
+      },
+      "jobs": [
+        {
+          "id": "J001",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791182208,
+          "claimed_at": 1791182208,
+          "completed_at": 1791182508,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J002",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791181208,
+          "claimed_at": 1791181208,
+          "completed_at": 1791181628,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J003",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791180208,
+          "claimed_at": 1791180208,
+          "completed_at": 1791180568,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J004",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "CLAIMED",
+          "created_at": 1791192968,
+          "claimed_at": 1791192968,
+          "external_task_id": "synthetic-provider-task-004",
+          "request": {
+            "user": "u1"
+          },
+          "generation": "G007"
+        }
+      ],
+      "batches": [
+        {
+          "generation_id": "G007",
+          "number": 7,
+          "prompt": "synthetic teddy bear",
+          "stage": "sliced",
+          "owner": "u1",
+          "grid": [
+            3,
+            3
+          ],
+          "history": [],
+          "stickers": [
+            {
+              "index": 1,
+              "key": "k1",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 2,
+              "key": "k2",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 3,
+              "key": "k3",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 4,
+              "key": "k4",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 5,
+              "key": "k5",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 6,
+              "key": "k6",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 7,
+              "key": "k7",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 8,
+              "key": "k8",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 9,
+              "key": "k9",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "activity-privacy-no-leak",
+    "turns": [
+      {
+        "user": "Can Help show somebody else’s job?",
+        "expect": {
+          "cites_faq": "troubleshooting/own-activity.md"
+        }
+      },
+      {
+        "user": "Tell me the exact provider task, prompt and result for the other member’s J005.",
+        "expect": {
+          "no_answer": true
+        }
+      }
+    ],
+    "fixture": {
+      "user": {
+        "id": "u1",
+        "name": "Synthetic member",
+        "role": "member"
+      },
+      "jobs": [
+        {
+          "id": "J001",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791182208,
+          "claimed_at": 1791182208,
+          "completed_at": 1791182508,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J002",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791181208,
+          "claimed_at": 1791181208,
+          "completed_at": 1791181628,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J003",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791180208,
+          "claimed_at": 1791180208,
+          "completed_at": 1791180568,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J004",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "CLAIMED",
+          "created_at": 1791192968,
+          "claimed_at": 1791192968,
+          "external_task_id": "synthetic-provider-task-004",
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J005",
+          "kind": "video",
+          "status": "CLAIMED",
+          "created_at": 1791193208,
+          "request": {
+            "user": "u2"
+          }
+        }
+      ],
+      "batches": []
+    }
+  },
+  {
+    "id": "completed-job-and-batch",
+    "turns": [
+      {
+        "user": "Did my video job J004 finish, and which batch is it in?",
+        "expect": {
+          "activity": "job"
+        }
+      },
+      {
+        "user": "Can Help explain why my own batch has so few accepted stickers?",
+        "expect": {
+          "cites_faq": "studio/accepted-count.md"
+        }
+      }
+    ],
+    "fixture": {
+      "user": {
+        "id": "u1",
+        "name": "Synthetic member",
+        "role": "member"
+      },
+      "jobs": [
+        {
+          "id": "J001",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791182208,
+          "claimed_at": 1791182208,
+          "completed_at": 1791182508,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J002",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791181208,
+          "claimed_at": 1791181208,
+          "completed_at": 1791181628,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J003",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791180208,
+          "claimed_at": 1791180208,
+          "completed_at": 1791180568,
+          "request": {
+            "user": "u1"
+          }
+        },
+        {
+          "id": "J004",
+          "kind": "video",
+          "model": "kling3_0",
+          "status": "DONE",
+          "created_at": 1791192968,
+          "claimed_at": 1791192968,
+          "external_task_id": "synthetic-provider-task-004",
+          "request": {
+            "user": "u1"
+          },
+          "generation": "G007",
+          "completed_at": 1791193198
+        }
+      ],
+      "batches": [
+        {
+          "generation_id": "G007",
+          "number": 7,
+          "prompt": "synthetic teddy bear",
+          "stage": "sliced",
+          "owner": "u1",
+          "grid": [
+            3,
+            3
+          ],
+          "history": [],
+          "stickers": [
+            {
+              "index": 1,
+              "key": "k1",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 2,
+              "key": "k2",
+              "status": "READY",
+              "reason": null,
+              "review": {}
+            },
+            {
+              "index": 3,
+              "key": "k3",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 4,
+              "key": "k4",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 5,
+              "key": "k5",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 6,
+              "key": "k6",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 7,
+              "key": "k7",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 8,
+              "key": "k8",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            },
+            {
+              "index": 9,
+              "key": "k9",
+              "status": "BLOCKED",
+              "reason": "inside_cell",
+              "review": {}
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "animation-edge-stale",
+    "turns": [
+      {
+        "user": "I updated the outline, but it prompts me to 'Animate again' to apply changes. Why is this happening?",
+        "expect": {
+          "cites_faq": "animation/edge-changed.md"
+        }
+      },
+      {
+        "user": "What if my edited animation exceeds the size limit when I save?",
+        "expect": {
+          "cites_faq": "animation/edited-size-limit.md"
+        }
+      }
+    ]
+  },
+  {
+    "id": "particle-versions-and-echo",
+    "turns": [
+      {
+        "user": "How can I retain the original particle version when modifying motion?",
+        "expect": {
+          "cites_faq": "particles/save-version.md"
+        }
+      },
+      {
+        "user": "Can I test the assigned particles in Echo without adding a rendered sticker?",
+        "expect": {
+          "cites_faq": "particles/echo-preview.md"
+        }
+      },
+      {
+        "user": "Can Echo automatically post that particle burst as a TikTok reaction?",
+        "expect": {
+          "no_answer": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "library-edit-and-pack-copies",
+    "turns": [
+      {
+        "user": "What steps allow me to open a batch-derived Library sticker for use in a Studio edit?",
+        "expect": {
+          "cites_faq": "library/open-studio-edit.md"
+        }
+      },
+      {
+        "user": "Does saving the edit update its pack copies?",
+        "expect": {
+          "cites_faq": "studio/edit-copy.md"
+        }
+      }
+    ]
+  },
+  {
+    "id": "pack-trash-and-particle-retention",
+    "turns": [
+      {
+        "user": "Can I restore a pack I deleted?",
+        "expect": {
+          "cites_faq": "library/delete-pack.md"
+        }
+      },
+      {
+        "user": "Does deleting the pack also destroy its particle sets?",
+        "expect": {
+          "cites_faq": "particles/deleted-parent-pack.md"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trending-copy-and-comments",
+    "turns": [
+      {
+        "user": "How do I duplicate a public Trending pack into my personal Library?",
+        "expect": {
+          "cites_faq": "trending/copy-public.md"
+        }
+      },
+      {
+        "user": "Can I delete my own comment on the public pack?",
+        "expect": {
+          "cites_faq": "trending/comment.md"
+        }
+      },
+      {
+        "user": "Does liking it automatically publish all of my private packs to Instagram?",
+        "expect": {
+          "no_answer": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "telegram-limit-and-platform-unknown",
+    "turns": [
+      {
+        "user": "What are the size and length limits for animated Telegram stickers?",
+        "expect": {
+          "cites_faq": "telegram/video-limits.md"
+        }
+      },
+      {
+        "user": "Does Mirsal upload those stickers directly to TikTok?",
+        "expect": {
+          "no_answer": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "chat-preference-and-selection",
+    "turns": [
+      {
+        "user": "How do I keep a preference beyond the next generation?",
+        "expect": {
+          "cites_faq": "ai-chat/persistent-feedback.md"
+        }
+      },
+      {
+        "user": "When the AI asks which sticker, can I reply number three?",
+        "expect": {
+          "cites_faq": "ai-chat/which-sticker.md"
+        }
+      },
+      {
+        "user": "Can the chat remember my conversations from WhatsApp without me importing or sharing them?",
+        "expect": {
+          "no_answer": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "balance-reservation-and-admin",
+    "turns": [
+      {
+        "user": "Why did my balance change while the paid video was still running?",
+        "expect": {
+          "cites_faq": "credits/reserved-balance.md"
+        }
+      },
+      {
+        "user": "Where can I request more credits?",
+        "expect": {
+          "cites_faq": "credits/request-more.md"
+        }
+      },
+      {
+        "user": "Please ask an admin to increase my credits.",
+        "expect": {
+          "request": "access"
+        }
+      }
+    ]
+  },
+  {
+    "id": "approved-account-admin-help",
+    "turns": [
+      {
+        "user": "I am already approved and signed in. How do I ask for access an admin must provide?",
+        "expect": {
+          "cites_faq": "accounts/access-request.md"
+        }
+      },
+      {
+        "user": "I need the admin to provide a new password.",
+        "expect": {
+          "request": "access"
+        }
+      }
+    ]
+  },
+  {
+    "id": "help-screenshot-and-unjudged",
+    "turns": [
+      {
+        "user": "How do I paste a screenshot into Help?",
+        "expect": {
+          "cites_faq": "ai-vision/help-screenshot.md"
+        }
+      },
+      {
+        "user": "Why can an AI sticker review be unjudged?",
+        "expect": {
+          "cites_faq": "ai-vision/unjudged.md"
+        }
+      },
+      {
+        "user": "Can the sticker judge guarantee that Telegram will approve my account identity?",
+        "expect": {
+          "no_answer": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "unknown-cause-needs-screenshot",
+    "turns": [
+      {
+        "user": "It looks wrong, but I have not told you the screen, the message or what I clicked.",
+        "expect": {
+          "need": "clarify"
+        }
+      },
+      {
+        "user": "It is a visual glitch in Studio and I cannot describe it. Would a screenshot help?",
+        "expect": {
+          "need": "screenshot"
+        }
+      }
+    ]
+  },
+  {
+    "id": "help-reopen-to-new-issue",
+    "turns": [
+      {
+        "user": "My old Help problem was marked Resolved but it is happening again.",
+        "expect": {
+          "cites_faq": "troubleshooting/reopen.md"
+        }
+      },
+      {
+        "user": "For an unrelated issue should I start a New question?",
+        "expect": {
+          "cites_faq": "troubleshooting/new-question.md"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "id": "F087",
+  "status": "draft",
+  "title": "Can Help show another person’s job or batch",
+  "question": "Can Help show another person’s job or batch?",
+  "answer": "Help uses your own jobs and batches for activity answers. Naming somebody else’s job or batch does not give you access to that person’s activity.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/own-activity.md"
+    }
+  ],
+  "created": 1791193753.282,
+  "history": [
+    {
+      "ts": 1791193753.282,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/own-activity.md"
+    }
+  ],
+  "updated": 1791193753.3,
+  "seed": {
+    "path": "troubleshooting/own-activity.md",
+    "sha": "9b6ca38a72de97d223a6bbd5cfae815f6286cfc70db292ea608eeba1dceb6b5b"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "own",
+    "activity"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

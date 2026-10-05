@@ -1,0 +1,38 @@
+{
+  "id": "F070",
+  "status": "draft",
+  "title": "Why can saving an edited animation be refused",
+  "question": "Why can saving an edited animation be refused?",
+  "answer": "An edited animation still has to fit Telegram’s 256 KB limit. If Save to sticker refuses the edited result because of its size, adjust the edit so the output fits; a technical file limit cannot be bypassed with Use it anyway.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "animation/edited-size-limit.md"
+    }
+  ],
+  "created": 1791193752.69,
+  "history": [
+    {
+      "ts": 1791193752.69,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "animation/edited-size-limit.md"
+    }
+  ],
+  "updated": 1791193752.706,
+  "seed": {
+    "path": "animation/edited-size-limit.md",
+    "sha": "be6390476da289fcfcd4d517171755c3b0df390c547bf7bfa0fe9638b46f98b4"
+  },
+  "category": "animation",
+  "tags": [
+    "animation",
+    "edited",
+    "size",
+    "limit"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

@@ -2255,5 +2255,15 @@
         }
       ]
     }
+  ],
+  "group": "G110",
+  "group_history": [
+    {
+      "ts": 1791171860.022,
+      "actor": "local",
+      "decision": "JOIN",
+      "to": "G110",
+      "via": "G009"
+    }
   ]
 }

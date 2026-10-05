@@ -1,0 +1,1278 @@
+{
+  "folder": "G:\\Haitham\\VsCode\\Mirsal-Builder\\faq",
+  "files": 66,
+  "visual": 45,
+  "isolation": {
+    "MIRSAL_DB_WRITE": "0",
+    "MIRSAL_SUPPORT_REPO": "",
+    "LLM_PROVIDER": "none",
+    "VISION_PROVIDER": "none"
+  },
+  "imports": {
+    "first": {
+      "created": [
+        "F001",
+        "F002",
+        "F003",
+        "F004",
+        "F005",
+        "F006",
+        "F007",
+        "F008",
+        "F009",
+        "F010",
+        "F011",
+        "F012",
+        "F013",
+        "F014",
+        "F015",
+        "F016",
+        "F017",
+        "F018",
+        "F019",
+        "F020",
+        "F021",
+        "F022",
+        "F023",
+        "F024",
+        "F025",
+        "F026",
+        "F027",
+        "F028",
+        "F029",
+        "F030",
+        "F031",
+        "F032",
+        "F033",
+        "F034",
+        "F035",
+        "F036",
+        "F037",
+        "F038",
+        "F039",
+        "F040",
+        "F041",
+        "F042",
+        "F043",
+        "F044",
+        "F045",
+        "F046",
+        "F047",
+        "F048",
+        "F049",
+        "F050",
+        "F051",
+        "F052",
+        "F053",
+        "F054",
+        "F055",
+        "F056",
+        "F057",
+        "F058",
+        "F059",
+        "F060",
+        "F061",
+        "F062",
+        "F063",
+        "F064",
+        "F065",
+        "F066"
+      ],
+      "updated": [],
+      "unchanged": 0,
+      "skipped": [],
+      "published": false
+    },
+    "second": {
+      "created": [],
+      "updated": [],
+      "unchanged": 66,
+      "skipped": [],
+      "published": false
+    },
+    "temporary_publish": {
+      "created": [
+        "F001",
+        "F002",
+        "F003",
+        "F004",
+        "F005",
+        "F006",
+        "F007",
+        "F008",
+        "F009",
+        "F010",
+        "F011",
+        "F012",
+        "F013",
+        "F014",
+        "F015",
+        "F016",
+        "F017",
+        "F018",
+        "F019",
+        "F020",
+        "F021",
+        "F022",
+        "F023",
+        "F024",
+        "F025",
+        "F026",
+        "F027",
+        "F028",
+        "F029",
+        "F030",
+        "F031",
+        "F032",
+        "F033",
+        "F034",
+        "F035",
+        "F036",
+        "F037",
+        "F038",
+        "F039",
+        "F040",
+        "F041",
+        "F042",
+        "F043",
+        "F044",
+        "F045",
+        "F046",
+        "F047",
+        "F048",
+        "F049",
+        "F050",
+        "F051",
+        "F052",
+        "F053",
+        "F054",
+        "F055",
+        "F056",
+        "F057",
+        "F058",
+        "F059",
+        "F060",
+        "F061",
+        "F062",
+        "F063",
+        "F064",
+        "F065",
+        "F066"
+      ],
+      "updated": [],
+      "unchanged": 0,
+      "skipped": [],
+      "published": true
+    }
+  },
+  "retrieval": [
+    {
+      "kind": "question",
+      "expected_path": "accounts/waiting-approval.md",
+      "query": "Why does my account say Waiting for approval?",
+      "expected_id": "F005",
+      "first_id": "F005",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F005",
+          "title": "Why does my account say Waiting for approval",
+          "score": 1.0
+        },
+        {
+          "id": "F002",
+          "title": "How do I create an office account",
+          "score": 0.502
+        },
+        {
+          "id": "F066",
+          "title": "What does Waiting for support mean",
+          "score": 0.324
+        },
+        {
+          "id": "F010",
+          "title": "What are AI captions for my stickers",
+          "score": 0.253
+        },
+        {
+          "id": "F027",
+          "title": "How can I watch the welcome introduction again",
+          "score": 0.253
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "accounts/forgot-password.md",
+      "query": "How do I reset a forgotten password?",
+      "expected_id": "F003",
+      "first_id": "F003",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F003",
+          "title": "How do I reset a forgotten password",
+          "score": 1.0
+        },
+        {
+          "id": "F001",
+          "title": "Why am I asked to choose my own password",
+          "score": 0.322
+        },
+        {
+          "id": "F002",
+          "title": "How do I create an office account",
+          "score": 0.289
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "accounts/choose-password.md",
+      "query": "Why am I asked to choose my own password?",
+      "expected_id": "F001",
+      "first_id": "F001",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F001",
+          "title": "Why am I asked to choose my own password",
+          "score": 1.0
+        },
+        {
+          "id": "F003",
+          "title": "How do I reset a forgotten password",
+          "score": 0.493
+        },
+        {
+          "id": "F002",
+          "title": "How do I create an office account",
+          "score": 0.468
+        },
+        {
+          "id": "F009",
+          "title": "How do I answer when the AI asks which sticker I mean",
+          "score": 0.288
+        },
+        {
+          "id": "F058",
+          "title": "How do I use a public pack in my own work",
+          "score": 0.269
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "studio/use-anyway.md",
+      "query": "What does Use it anyway do on a blocked sticker?",
+      "expected_id": "F052",
+      "first_id": "F052",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F052",
+          "title": "What does Use it anyway do on a blocked sticker",
+          "score": 1.0
+        },
+        {
+          "id": "F051",
+          "title": "How do I undo allowing a blocked sticker",
+          "score": 0.564
+        },
+        {
+          "id": "F017",
+          "title": "Why does an animation show Bad loop",
+          "score": 0.486
+        },
+        {
+          "id": "F044",
+          "title": "Can I allow several judgement-call blocks together",
+          "score": 0.486
+        },
+        {
+          "id": "F026",
+          "title": "Should I use the AI chat or Studio",
+          "score": 0.348
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "studio/remove-batch.md",
+      "query": "Will removing a batch remove stickers already in my packs?",
+      "expected_id": "F049",
+      "first_id": "F049",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F049",
+          "title": "Will removing a batch remove stickers already in my packs",
+          "score": 1.0
+        },
+        {
+          "id": "F050",
+          "title": "How do I restore a removed batch",
+          "score": 0.348
+        },
+        {
+          "id": "F046",
+          "title": "Will editing a Studio sticker update its pack copy",
+          "score": 0.283
+        },
+        {
+          "id": "F024",
+          "title": "What is the difference between a batch and a sheet",
+          "score": 0.26
+        },
+        {
+          "id": "F031",
+          "title": "Why does my Library say Nothing here yet",
+          "score": 0.243
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "studio/restore-batch.md",
+      "query": "How do I restore a removed batch?",
+      "expected_id": "F050",
+      "first_id": "F050",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F050",
+          "title": "How do I restore a removed batch",
+          "score": 1.0
+        },
+        {
+          "id": "F049",
+          "title": "Will removing a batch remove stickers already in my packs",
+          "score": 0.669
+        },
+        {
+          "id": "F029",
+          "title": "Can I restore a deleted pack",
+          "score": 0.397
+        },
+        {
+          "id": "F024",
+          "title": "What is the difference between a batch and a sheet",
+          "score": 0.305
+        },
+        {
+          "id": "F044",
+          "title": "Can I allow several judgement-call blocks together",
+          "score": 0.272
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "animation/edge-changed.md",
+      "query": "Why must I animate again after changing the edge?",
+      "expected_id": "F018",
+      "first_id": "F018",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F018",
+          "title": "Why must I animate again after changing the edge",
+          "score": 1.0
+        },
+        {
+          "id": "F027",
+          "title": "How can I watch the welcome introduction again",
+          "score": 0.296
+        },
+        {
+          "id": "F065",
+          "title": "Why does Help reject my screenshot as too large",
+          "score": 0.28
+        },
+        {
+          "id": "F005",
+          "title": "Why does my account say Waiting for approval",
+          "score": 0.144
+        },
+        {
+          "id": "F055",
+          "title": "What limits apply to a static Telegram sticker",
+          "score": 0.144
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "animation/bad-loop.md",
+      "query": "Why does an animation show Bad loop?",
+      "expected_id": "F017",
+      "first_id": "F017",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F017",
+          "title": "Why does an animation show Bad loop",
+          "score": 1.0
+        },
+        {
+          "id": "F019",
+          "title": "What does the app check while animating",
+          "score": 0.47
+        },
+        {
+          "id": "F023",
+          "title": "Will the AI start spending without asking me",
+          "score": 0.228
+        },
+        {
+          "id": "F031",
+          "title": "Why does my Library say Nothing here yet",
+          "score": 0.228
+        },
+        {
+          "id": "F033",
+          "title": "What does the Library search match",
+          "score": 0.228
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "library/empty-library.md",
+      "query": "Why does my Library say Nothing here yet?",
+      "expected_id": "F031",
+      "first_id": "F031",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F031",
+          "title": "Why does my Library say Nothing here yet",
+          "score": 1.0
+        },
+        {
+          "id": "F059",
+          "title": "Why does Trending say Nothing public yet",
+          "score": 0.803
+        },
+        {
+          "id": "F062",
+          "title": "What do I do when Help has no answer",
+          "score": 0.427
+        },
+        {
+          "id": "F020",
+          "title": "Why does a sticker say Not animated yet",
+          "score": 0.425
+        },
+        {
+          "id": "F005",
+          "title": "Why does my account say Waiting for approval",
+          "score": 0.405
+        }
+      ]
+    },
+    {
+      "kind": "question",
+      "expected_path": "library/my-stickers.md",
+      "query": "Where can I see all my stickers grouped by pack?",
+      "expected_id": "F032",
+      "first_id": "F032",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F032",
+          "title": "Where can I see all my stickers grouped by pack",
+          "score": 1.0
+        },
+        {
+          "id": "F049",
+          "title": "Will removing a batch remove stickers already in my packs",
+          "score": 0.675
+        },
+        {
+          "id": "F035",
+          "title": "Can I test particles in chat without rendering a pack sticker",
+          "score": 0.431
+        },
+        {
+          "id": "F031",
+          "title": "Why does my Library say Nothing here yet",
+          "score": 0.411
+        },
+        {
+          "id": "F004",
+          "title": "Where can I sign out",
+          "score": 0.349
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "troubleshooting/no-answer.md",
+      "query": "In Help, below the reply there is a Send to support button and the message Nothing in the help answers this yet.",
+      "expected_id": "F062",
+      "first_id": "F062",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F062",
+          "title": "What do I do when Help has no answer",
+          "score": 0.608
+        },
+        {
+          "id": "F066",
+          "title": "What does Waiting for support mean",
+          "score": 0.394
+        },
+        {
+          "id": "F031",
+          "title": "Why does my Library say Nothing here yet",
+          "score": 0.305
+        },
+        {
+          "id": "F059",
+          "title": "Why does Trending say Nothing public yet",
+          "score": 0.305
+        },
+        {
+          "id": "F063",
+          "title": "Where do I find a reply from support",
+          "score": 0.287
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "troubleshooting/answer-wrong.md",
+      "query": "A Help answer ends with Did this solve it? I can choose Yes, solved or No, send to support.",
+      "expected_id": "F061",
+      "first_id": "F061",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F061",
+          "title": "What if the Help answer did not solve my issue",
+          "score": 0.85
+        },
+        {
+          "id": "F062",
+          "title": "What do I do when Help has no answer",
+          "score": 0.299
+        },
+        {
+          "id": "F066",
+          "title": "What does Waiting for support mean",
+          "score": 0.288
+        },
+        {
+          "id": "F003",
+          "title": "How do I reset a forgotten password",
+          "score": 0.265
+        },
+        {
+          "id": "F012",
+          "title": "How can I send a screenshot to Help",
+          "score": 0.191
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "troubleshooting/waiting-support.md",
+      "query": "My Help conversation has a Waiting for support label. It says a person will answer here and I get a notification.",
+      "expected_id": "F066",
+      "first_id": "F066",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F066",
+          "title": "What does Waiting for support mean",
+          "score": 0.812
+        },
+        {
+          "id": "F062",
+          "title": "What do I do when Help has no answer",
+          "score": 0.548
+        },
+        {
+          "id": "F063",
+          "title": "Where do I find a reply from support",
+          "score": 0.285
+        },
+        {
+          "id": "F061",
+          "title": "What if the Help answer did not solve my issue",
+          "score": 0.202
+        },
+        {
+          "id": "F064",
+          "title": "How do I reopen a support issue marked Resolved",
+          "score": 0.189
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "troubleshooting/notification.md",
+      "query": "The left column of Help has Notifications with a Support answered item. Where is the reply?",
+      "expected_id": "F063",
+      "first_id": "F063",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F063",
+          "title": "Where do I find a reply from support",
+          "score": 0.593
+        },
+        {
+          "id": "F062",
+          "title": "What do I do when Help has no answer",
+          "score": 0.219
+        },
+        {
+          "id": "F066",
+          "title": "What does Waiting for support mean",
+          "score": 0.219
+        },
+        {
+          "id": "F022",
+          "title": "How can I ask for more credits",
+          "score": 0.162
+        },
+        {
+          "id": "F004",
+          "title": "Where can I sign out",
+          "score": 0.135
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "troubleshooting/reopen.md",
+      "query": "This Help conversation is marked Resolved. At the bottom I see Not fixed after all? and a Reopen button.",
+      "expected_id": "F064",
+      "first_id": "F064",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F064",
+          "title": "How do I reopen a support issue marked Resolved",
+          "score": 0.78
+        },
+        {
+          "id": "F063",
+          "title": "Where do I find a reply from support",
+          "score": 0.27
+        },
+        {
+          "id": "F005",
+          "title": "Why does my account say Waiting for approval",
+          "score": 0.258
+        },
+        {
+          "id": "F047",
+          "title": "What is the Fixed sheet view",
+          "score": 0.193
+        },
+        {
+          "id": "F018",
+          "title": "Why must I animate again after changing the edge",
+          "score": 0.175
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "troubleshooting/screenshot-large.md",
+      "query": "When attaching an image in Help a notice says A screenshot must be under 8 MB.",
+      "expected_id": "F065",
+      "first_id": "F065",
+      "passed": true,
+      "mode": "lexical",
+      "enough": false,
+      "hits": [
+        {
+          "id": "F065",
+          "title": "Why does Help reject my screenshot as too large",
+          "score": 0.363
+        },
+        {
+          "id": "F018",
+          "title": "Why must I animate again after changing the edge",
+          "score": 0.331
+        },
+        {
+          "id": "F012",
+          "title": "How can I send a screenshot to Help",
+          "score": 0.256
+        },
+        {
+          "id": "F034",
+          "title": "Does Add more replace my existing particle sprites",
+          "score": 0.231
+        },
+        {
+          "id": "F038",
+          "title": "Which particle sources use credits",
+          "score": 0.231
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "particles/save-version.md",
+      "query": "In the particle editor I opened a saved version. There are Save and Save as new buttons; I want to keep the original version.",
+      "expected_id": "F040",
+      "first_id": "F040",
+      "passed": true,
+      "mode": "lexical",
+      "enough": false,
+      "hits": [
+        {
+          "id": "F040",
+          "title": "How do I save a new particle version",
+          "score": 0.438
+        },
+        {
+          "id": "F037",
+          "title": "Why does entering Particles start a new version",
+          "score": 0.35
+        },
+        {
+          "id": "F001",
+          "title": "Why am I asked to choose my own password",
+          "score": 0.244
+        },
+        {
+          "id": "F023",
+          "title": "Will the AI start spending without asking me",
+          "score": 0.172
+        },
+        {
+          "id": "F035",
+          "title": "Can I test particles in chat without rendering a pack sticker",
+          "score": 0.15
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "particles/open-version.md",
+      "query": "I see particle version rows labelled v1 and v2 with Open buttons. How do I edit an old version?",
+      "expected_id": "F037",
+      "first_id": "F037",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F037",
+          "title": "Why does entering Particles start a new version",
+          "score": 0.747
+        },
+        {
+          "id": "F040",
+          "title": "How do I save a new particle version",
+          "score": 0.405
+        },
+        {
+          "id": "F032",
+          "title": "Where can I see all my stickers grouped by pack",
+          "score": 0.237
+        },
+        {
+          "id": "F034",
+          "title": "Does Add more replace my existing particle sprites",
+          "score": 0.205
+        },
+        {
+          "id": "F053",
+          "title": "Why does every sticker need an emoji tag",
+          "score": 0.179
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "particles/size-sharpness.md",
+      "query": "The particle simulator has Energy, Float, Swirl and Size sliders. Which one makes the particles bigger?",
+      "expected_id": "F041",
+      "first_id": "F041",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F041",
+          "title": "How do I make the particles look larger",
+          "score": 0.597
+        },
+        {
+          "id": "F034",
+          "title": "Does Add more replace my existing particle sprites",
+          "score": 0.147
+        },
+        {
+          "id": "F035",
+          "title": "Can I test particles in chat without rendering a pack sticker",
+          "score": 0.147
+        },
+        {
+          "id": "F038",
+          "title": "Which particle sources use credits",
+          "score": 0.147
+        },
+        {
+          "id": "F039",
+          "title": "How do I add a particle burst to a pack",
+          "score": 0.147
+        }
+      ]
+    },
+    {
+      "kind": "screenshot-description",
+      "expected_path": "trending/copy-public.md",
+      "query": "A public pack in Library Trending has a Use in my workflow button. Does it copy the pack?",
+      "expected_id": "F058",
+      "first_id": "F058",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F058",
+          "title": "How do I use a public pack in my own work",
+          "score": 0.907
+        },
+        {
+          "id": "F057",
+          "title": "How do I comment on a public pack",
+          "score": 0.597
+        },
+        {
+          "id": "F060",
+          "title": "How can I change the ordering of public packs",
+          "score": 0.533
+        },
+        {
+          "id": "F059",
+          "title": "Why does Trending say Nothing public yet",
+          "score": 0.467
+        },
+        {
+          "id": "F046",
+          "title": "Will editing a Studio sticker update its pack copy",
+          "score": 0.275
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "getting-started/stickers-not-emoji.md",
+      "query": "Can I create stickers or custom emoji with Mirsal?",
+      "expected_id": "F025",
+      "first_id": "F025",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F025",
+          "title": "Does Mirsal make stickers or custom emoji",
+          "score": 0.857
+        },
+        {
+          "id": "F053",
+          "title": "Why does every sticker need an emoji tag",
+          "score": 0.471
+        },
+        {
+          "id": "F002",
+          "title": "How do I create an office account",
+          "score": 0.437
+        },
+        {
+          "id": "F031",
+          "title": "Why does my Library say Nothing here yet",
+          "score": 0.355
+        },
+        {
+          "id": "F055",
+          "title": "What limits apply to a static Telegram sticker",
+          "score": 0.325
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "getting-started/batch-and-sheet.md",
+      "query": "What distinguishes a batch from a sheet?",
+      "expected_id": "F024",
+      "first_id": "F024",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F024",
+          "title": "What is the difference between a batch and a sheet",
+          "score": 0.62
+        },
+        {
+          "id": "F047",
+          "title": "What is the Fixed sheet view",
+          "score": 0.587
+        },
+        {
+          "id": "F021",
+          "title": "Why is an animation out of bounds",
+          "score": 0.304
+        },
+        {
+          "id": "F049",
+          "title": "Will removing a batch remove stickers already in my packs",
+          "score": 0.282
+        },
+        {
+          "id": "F050",
+          "title": "How do I restore a removed batch",
+          "score": 0.282
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "telegram/video-limits.md",
+      "query": "Are there specific limits for animated Telegram stickers?",
+      "expected_id": "F056",
+      "first_id": "F056",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F056",
+          "title": "What limits apply to an animated Telegram sticker",
+          "score": 0.744
+        },
+        {
+          "id": "F055",
+          "title": "What limits apply to a static Telegram sticker",
+          "score": 0.557
+        },
+        {
+          "id": "F025",
+          "title": "Does Mirsal make stickers or custom emoji",
+          "score": 0.49
+        },
+        {
+          "id": "F048",
+          "title": "Why can I not override a file or Telegram limit",
+          "score": 0.411
+        },
+        {
+          "id": "F054",
+          "title": "Why can I not see Send to Telegram in my pack",
+          "score": 0.196
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "telegram/member-send.md",
+      "query": "Why is the Send to Telegram option missing from my pack?",
+      "expected_id": "F054",
+      "first_id": "F054",
+      "passed": true,
+      "mode": "lexical",
+      "enough": false,
+      "hits": [
+        {
+          "id": "F054",
+          "title": "Why can I not see Send to Telegram in my pack",
+          "score": 0.426
+        },
+        {
+          "id": "F048",
+          "title": "Why can I not override a file or Telegram limit",
+          "score": 0.263
+        },
+        {
+          "id": "F029",
+          "title": "Can I restore a deleted pack",
+          "score": 0.209
+        },
+        {
+          "id": "F030",
+          "title": "Can I download all sticker files in a pack together",
+          "score": 0.209
+        },
+        {
+          "id": "F032",
+          "title": "Where can I see all my stickers grouped by pack",
+          "score": 0.209
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "ai-chat/persistent-feedback.md",
+      "query": "How do I ensure a preference persists beyond the next generation?",
+      "expected_id": "F007",
+      "first_id": "F007",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F007",
+          "title": "How can I make a preference apply beyond the next generation",
+          "score": 0.663
+        },
+        {
+          "id": "F040",
+          "title": "How do I save a new particle version",
+          "score": 0.138
+        },
+        {
+          "id": "F044",
+          "title": "Can I allow several judgement-call blocks together",
+          "score": 0.138
+        },
+        {
+          "id": "F006",
+          "title": "How do I postpone a proposed generation",
+          "score": 0.136
+        },
+        {
+          "id": "F023",
+          "title": "Will the AI start spending without asking me",
+          "score": 0.119
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "ai-chat/which-sticker.md",
+      "query": "What should I do when the AI asks me to specify a sticker?",
+      "expected_id": "F009",
+      "first_id": "F009",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F009",
+          "title": "How do I answer when the AI asks which sticker I mean",
+          "score": 0.578
+        },
+        {
+          "id": "F011",
+          "title": "Why does the app ask me to allow AI vision",
+          "score": 0.364
+        },
+        {
+          "id": "F015",
+          "title": "Why can the AI leave a sticker unjudged",
+          "score": 0.18
+        },
+        {
+          "id": "F020",
+          "title": "Why does a sticker say Not animated yet",
+          "score": 0.18
+        },
+        {
+          "id": "F030",
+          "title": "Can I download all sticker files in a pack together",
+          "score": 0.18
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "ai-vision/review-not-approval.md",
+      "query": "Does the AI automatically approve stickers during pre-review?",
+      "expected_id": "F013",
+      "first_id": "F013",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F013",
+          "title": "Does the AI pre-review approve stickers for me",
+          "score": 0.658
+        },
+        {
+          "id": "F014",
+          "title": "How long does the local AI pre-review take",
+          "score": 0.45
+        },
+        {
+          "id": "F024",
+          "title": "What is the difference between a batch and a sheet",
+          "score": 0.242
+        },
+        {
+          "id": "F023",
+          "title": "Will the AI start spending without asking me",
+          "score": 0.175
+        },
+        {
+          "id": "F027",
+          "title": "How can I watch the welcome introduction again",
+          "score": 0.175
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "ai-vision/unjudged.md",
+      "query": "Why might the AI leave a sticker unjudged?",
+      "expected_id": "F015",
+      "first_id": "F015",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F015",
+          "title": "Why can the AI leave a sticker unjudged",
+          "score": 0.72
+        },
+        {
+          "id": "F033",
+          "title": "What does the Library search match",
+          "score": 0.348
+        },
+        {
+          "id": "F004",
+          "title": "Where can I sign out",
+          "score": 0.241
+        },
+        {
+          "id": "F009",
+          "title": "How do I answer when the AI asks which sticker I mean",
+          "score": 0.132
+        },
+        {
+          "id": "F020",
+          "title": "Why does a sticker say Not animated yet",
+          "score": 0.132
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "ai-vision/review-time.md",
+      "query": "How much time does the local AI pre-review process take?",
+      "expected_id": "F014",
+      "first_id": "F014",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F014",
+          "title": "How long does the local AI pre-review take",
+          "score": 0.695
+        },
+        {
+          "id": "F013",
+          "title": "Does the AI pre-review approve stickers for me",
+          "score": 0.278
+        },
+        {
+          "id": "F015",
+          "title": "Why can the AI leave a sticker unjudged",
+          "score": 0.237
+        },
+        {
+          "id": "F012",
+          "title": "How can I send a screenshot to Help",
+          "score": 0.123
+        },
+        {
+          "id": "F024",
+          "title": "What is the difference between a batch and a sheet",
+          "score": 0.114
+        }
+      ]
+    },
+    {
+      "kind": "local-qwen-paraphrase",
+      "expected_path": "particles/add-more.md",
+      "query": "Does adding more particles replace my existing sprites?",
+      "expected_id": "F034",
+      "first_id": "F034",
+      "passed": true,
+      "mode": "lexical",
+      "enough": true,
+      "hits": [
+        {
+          "id": "F034",
+          "title": "Does Add more replace my existing particle sprites",
+          "score": 0.824
+        },
+        {
+          "id": "F036",
+          "title": "Can I make particles without spending credits",
+          "score": 0.549
+        },
+        {
+          "id": "F038",
+          "title": "Which particle sources use credits",
+          "score": 0.319
+        },
+        {
+          "id": "F022",
+          "title": "How can I ask for more credits",
+          "score": 0.236
+        },
+        {
+          "id": "F042",
+          "title": "What is the difference between sprites and a burst",
+          "score": 0.197
+        }
+      ]
+    }
+  ],
+  "draft_search": {
+    "mode": "lexical",
+    "hits": [],
+    "enough": false,
+    "code_used": false
+  },
+  "passed": 30,
+  "total": 30
+}

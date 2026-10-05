@@ -1,0 +1,37 @@
+{
+  "id": "F006",
+  "status": "draft",
+  "title": "How do I postpone a proposed generation",
+  "question": "How do I postpone a proposed generation?",
+  "answer": "Choose Not yet on the plan card instead of accepting it. With Ask before spending enabled, the plan shows the price and waits for your go-ahead.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-chat/not-yet.md"
+    }
+  ],
+  "created": 1791192285.133,
+  "history": [
+    {
+      "ts": 1791192285.133,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-chat/not-yet.md"
+    }
+  ],
+  "updated": 1791192285.148,
+  "seed": {
+    "path": "ai-chat/not-yet.md",
+    "sha": "18a54040bb0d35301d974d9ad1477546873a57f824330989d92c5887277cf47b"
+  },
+  "category": "ai-chat",
+  "tags": [
+    "ai-chat",
+    "not",
+    "yet"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

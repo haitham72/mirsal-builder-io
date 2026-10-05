@@ -1,0 +1,36 @@
+{
+  "id": "F064",
+  "status": "draft",
+  "title": "How do I reopen a support issue marked Resolved",
+  "question": "How do I reopen a support issue marked Resolved?",
+  "answer": "Open the resolved conversation and press Reopen under Not fixed after all? Continue in that conversation so your previous explanation remains available. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/reopen.md"
+    }
+  ],
+  "created": 1791192286.88,
+  "history": [
+    {
+      "ts": 1791192286.88,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/reopen.md"
+    }
+  ],
+  "updated": 1791192286.894,
+  "seed": {
+    "path": "troubleshooting/reopen.md",
+    "sha": "b1df191c85cb598bacb3a2dd894cfb9af31f5ec303a7413ebed6afdd08db46b4"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "reopen"
+  ],
+  "screen": "Help",
+  "looks_like": "Resolved appears with Not fixed after all? and Reopen."
+}

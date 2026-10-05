@@ -1,0 +1,38 @@
+{
+  "id": "F025",
+  "status": "draft",
+  "title": "Does Mirsal make stickers or custom emoji",
+  "question": "Does Mirsal make stickers or custom emoji?",
+  "answer": "Mirsal makes Telegram stickers, including animated stickers. The emoji attached to a sticker is its tag, not a custom emoji output.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "getting-started/stickers-not-emoji.md"
+    }
+  ],
+  "created": 1791192285.711,
+  "history": [
+    {
+      "ts": 1791192285.711,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "getting-started/stickers-not-emoji.md"
+    }
+  ],
+  "updated": 1791192285.726,
+  "seed": {
+    "path": "getting-started/stickers-not-emoji.md",
+    "sha": "f83ea06cd7977034ee38676596e72630607ac3f29371fd32dfe3a5eee1c9007f"
+  },
+  "category": "getting-started",
+  "tags": [
+    "getting-started",
+    "stickers",
+    "not",
+    "emoji"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

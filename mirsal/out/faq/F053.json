@@ -1,0 +1,37 @@
+{
+  "id": "F053",
+  "status": "draft",
+  "title": "Why does every sticker need an emoji tag",
+  "question": "Why does every sticker need an emoji tag?",
+  "answer": "Telegram requires at least one emoji tag per sticker. Open Sticker details to edit its Emoji tag; the tag does not turn the sticker into a custom emoji.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "telegram/emoji-tag.md"
+    }
+  ],
+  "created": 1791192286.549,
+  "history": [
+    {
+      "ts": 1791192286.549,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "telegram/emoji-tag.md"
+    }
+  ],
+  "updated": 1791192286.565,
+  "seed": {
+    "path": "telegram/emoji-tag.md",
+    "sha": "cb91f1f125ce962500f99e4c8a1fdc62dbd9ca90d084894e0feae9af6429bb03"
+  },
+  "category": "telegram",
+  "tags": [
+    "telegram",
+    "emoji",
+    "tag"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

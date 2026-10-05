@@ -1,0 +1,38 @@
+{
+  "id": "F013",
+  "status": "draft",
+  "title": "Does the AI pre-review approve stickers for me",
+  "question": "Does the AI pre-review approve stickers for me?",
+  "answer": "No, the vision model only pre-reviews the pictures. Human review still decides whether to approve or reject them.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-vision/review-not-approval.md"
+    }
+  ],
+  "created": 1791192285.348,
+  "history": [
+    {
+      "ts": 1791192285.348,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-vision/review-not-approval.md"
+    }
+  ],
+  "updated": 1791192285.364,
+  "seed": {
+    "path": "ai-vision/review-not-approval.md",
+    "sha": "2c24e19b1847d69cb6c5079cf540f1762248bc0888b0f4d2ef596faea9144a4a"
+  },
+  "category": "ai-vision",
+  "tags": [
+    "ai-vision",
+    "review",
+    "not",
+    "approval"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

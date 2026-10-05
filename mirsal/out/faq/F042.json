@@ -1,0 +1,37 @@
+{
+  "id": "F042",
+  "status": "draft",
+  "title": "What is the difference between sprites and a burst",
+  "question": "What is the difference between sprites and a burst?",
+  "answer": "Sprites are the individual still or animated pieces of artwork. A burst is the composition made from selected sprites and their motion settings.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/sprites-burst.md"
+    }
+  ],
+  "created": 1791192286.219,
+  "history": [
+    {
+      "ts": 1791192286.219,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/sprites-burst.md"
+    }
+  ],
+  "updated": 1791192286.234,
+  "seed": {
+    "path": "particles/sprites-burst.md",
+    "sha": "795a7ed59dd2a5efc4e49d918c512cf3e5c3aa7fb825e4025792ae0c7ce423af"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "sprites",
+    "burst"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

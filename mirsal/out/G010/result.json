@@ -410,7 +410,7 @@
               "9": 0.984
             },
             "bad": [],
-            "ms": 66.6
+            "ms": 72.7
           }
         },
         {
@@ -735,16 +735,16 @@
         "source": "video sheet",
         "threshold": 121.5,
         "ms": {
-          "decode": 872,
-          "key": 945,
-          "bounds": 235,
-          "render": 2397,
-          "seam": 1063,
-          "encode": 3778,
-          "encodes": 3,
-          "probe": 200,
-          "verify": 63,
-          "finish": 7739
+          "decode": 673,
+          "key": 603,
+          "bounds": 154,
+          "render": 1618,
+          "seam": 1050,
+          "encode": 4037,
+          "encodes": 4,
+          "probe": 257,
+          "verify": 22,
+          "finish": 7142
         },
         "frames": 72,
         "fps": 24.0,
@@ -763,14 +763,16 @@
         "scale": 0.8267,
         "motion": 94.09,
         "loop_seam_before": 189.41,
-        "loop_seam": 139.3,
-        "loop_limit": 143.69,
-        "frames_out": 66,
-        "crf": 38,
-        "sharp_kept": 1.07,
-        "detail_vs_still": 0.96,
-        "soft_sigma": 0.9,
-        "kb": 221.7
+        "loop_cut": 11,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 80.25,
+        "frames_out": 55,
+        "crf": 34,
+        "sharp_kept": 1.02,
+        "detail_vs_still": 1.11,
+        "soft_sigma": 0.0,
+        "kb": 211.1
       },
       "webm": "slices/vid-010-cat_as_banana-cat_as_banana_dancing.webm",
       "review": {
@@ -913,6 +915,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183652.992,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906315.899,
@@ -929,7 +942,7 @@
             "frame": 32,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 59.6
+            "ms": 43.2
           }
         },
         {
@@ -943,16 +956,16 @@
           "data": {
             "frame": 0,
             "px": 564,
-            "ms": 103.5
+            "ms": 68.6
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "221KB @crf38",
+          "detail": "211KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 221,
+          "value": 211,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -997,10 +1010,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.29",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.29,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -1039,17 +1052,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.4
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "139.3 <= 143.69",
+          "detail": "0.0 <= 80.25",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 139.3,
-          "limit": 143.69,
+          "value": 0.0,
+          "limit": 80.25,
           "data": {
             "ms": 0.0
           }
@@ -1057,13 +1070,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.73",
+          "detail": "first frame matches the still at IoU 0.95",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.727,
+          "value": 0.952,
           "limit": 0.5,
           "data": {
-            "ms": 3.0
+            "ms": 1.9
           }
         },
         {
@@ -1081,23 +1094,23 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 7% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.07,
+          "value": 0.056,
           "limit": 0.35,
           "data": {
-            "ms": 59.1
+            "ms": 19.9
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.96x of the still's edge detail (as soft as the still blurred 0.9 px)",
+          "detail": "1.02x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.96,
-          "limit": 0.75,
+          "value": 1.02,
+          "limit": 0.8,
           "data": {
             "ms": 0.0
           }
@@ -1106,7 +1119,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 2,
@@ -1317,16 +1331,16 @@
         "source": "video sheet",
         "threshold": 120.0,
         "ms": {
-          "decode": 848,
-          "key": 957,
-          "bounds": 237,
-          "render": 2573,
-          "seam": 1253,
-          "encode": 4893,
+          "decode": 651,
+          "key": 611,
+          "bounds": 143,
+          "render": 1710,
+          "seam": 1194,
+          "encode": 3618,
           "encodes": 4,
-          "probe": 290,
-          "verify": 40,
-          "finish": 9290
+          "probe": 225,
+          "verify": 57,
+          "finish": 6952
         },
         "frames": 72,
         "fps": 24.0,
@@ -1345,14 +1359,16 @@
         "scale": 0.8937,
         "motion": 9.2,
         "loop_seam_before": 168.03,
-        "loop_seam": 1.07,
-        "loop_limit": 32.02,
-        "frames_out": 66,
+        "loop_cut": 17,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 36.96,
+        "frames_out": 49,
         "crf": 30,
-        "sharp_kept": 1.05,
-        "detail_vs_still": 1.23,
+        "sharp_kept": 1.01,
+        "detail_vs_still": 1.04,
         "soft_sigma": 0.0,
-        "kb": 222.4
+        "kb": 172.6
       },
       "webm": "slices/vid-010-cat_as_banana-cat_as_banana_shocked.webm",
       "review": {
@@ -1495,6 +1511,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183652.279,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906315.931,
@@ -1511,7 +1538,7 @@
             "frame": 20,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 60.3
+            "ms": 41.6
           }
         },
         {
@@ -1525,16 +1552,16 @@
           "data": {
             "frame": 20,
             "px": 2077,
-            "ms": 100.6
+            "ms": 54.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "222KB @crf30",
+          "detail": "172KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 222,
+          "value": 172,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1579,10 +1606,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.04",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.04,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -1621,17 +1648,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.2
+            "ms": 1.5
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "1.07 <= 32.02",
+          "detail": "0.0 <= 36.96",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 1.07,
-          "limit": 32.02,
+          "value": 0.0,
+          "limit": 36.96,
           "data": {
             "ms": 0.0
           }
@@ -1639,13 +1666,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.75",
+          "detail": "first frame matches the still at IoU 0.98",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.752,
+          "value": 0.984,
           "limit": 0.5,
           "data": {
-            "ms": 2.8
+            "ms": 9.1
           }
         },
         {
@@ -1663,22 +1690,22 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 3% over the frames",
+          "detail": "subject area varies by 4% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.033,
+          "value": 0.036,
           "limit": 0.35,
           "data": {
-            "ms": 36.5
+            "ms": 46.8
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.05x of the edge detail survives the encode",
+          "detail": "1.01x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.05,
+          "value": 1.01,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -1688,7 +1715,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 3,
@@ -1899,16 +1927,16 @@
         "source": "video sheet",
         "threshold": 121.5,
         "ms": {
-          "decode": 871,
-          "key": 946,
-          "bounds": 248,
-          "render": 2412,
-          "seam": 1047,
-          "encode": 4649,
+          "decode": 651,
+          "key": 612,
+          "bounds": 164,
+          "render": 1603,
+          "seam": 1136,
+          "encode": 3909,
           "encodes": 4,
-          "probe": 211,
-          "verify": 132,
-          "finish": 8702
+          "probe": 300,
+          "verify": 16,
+          "finish": 7133
         },
         "frames": 72,
         "fps": 24.0,
@@ -1927,17 +1955,16 @@
         "scale": 0.8267,
         "motion": 12.32,
         "loop_seam_before": 307.11,
-        "loop_seam": 8.41,
-        "loop_limit": 21.47,
-        "frames_out": 66,
+        "loop_cut": 7,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 24.73,
+        "frames_out": 59,
         "crf": 30,
-        "sharp_kept": 1.07,
-        "detail_vs_still": 1.04,
+        "sharp_kept": 1.01,
+        "detail_vs_still": 1.07,
         "soft_sigma": 0.0,
-        "warnings": [
-          "identity_kept"
-        ],
-        "kb": 231.6
+        "kb": 209.9
       },
       "webm": "slices/vid-010-cat_as_banana-cat_as_banana_squashed.webm",
       "review": {
@@ -2084,6 +2111,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183652.721,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906315.957,
@@ -2100,7 +2138,7 @@
             "frame": 20,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 63.1
+            "ms": 42.4
           }
         },
         {
@@ -2114,16 +2152,16 @@
           "data": {
             "frame": 45,
             "px": 700,
-            "ms": 111.5
+            "ms": 75.0
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "231KB @crf30",
+          "detail": "209KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 231,
+          "value": 209,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2168,10 +2206,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.46",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.46,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2210,31 +2248,31 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 4.3
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "8.41 <= 21.47",
+          "detail": "0.0 <= 24.73",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 8.41,
-          "limit": 21.47,
+          "value": 0.0,
+          "limit": 24.73,
           "data": {
             "ms": 0.0
           }
         },
         {
           "name": "identity_kept",
-          "ok": false,
-          "detail": "first frame matches the still at IoU 0.34",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.97",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.342,
+          "value": 0.973,
           "limit": 0.5,
           "data": {
-            "ms": 9.5
+            "ms": 1.6
           }
         },
         {
@@ -2255,20 +2293,20 @@
           "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.06,
+          "value": 0.064,
           "limit": 0.35,
           "data": {
-            "ms": 119.0
+            "ms": 14.3
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.04x of the still's edge detail (as soft as the still blurred 0.0 px)",
+          "detail": "1.01x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.04,
-          "limit": 0.75,
+          "value": 1.01,
+          "limit": 0.8,
           "data": {
             "ms": 0.0
           }
@@ -2277,7 +2315,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 4,
@@ -2487,16 +2526,16 @@
         "source": "video sheet",
         "threshold": 120.0,
         "ms": {
-          "decode": 870,
-          "key": 946,
-          "bounds": 232,
-          "render": 2364,
-          "seam": 1083,
-          "encode": 3779,
-          "encodes": 3,
-          "probe": 185,
-          "verify": 36,
-          "finish": 7685
+          "decode": 671,
+          "key": 597,
+          "bounds": 145,
+          "render": 1583,
+          "seam": 1043,
+          "encode": 3504,
+          "encodes": 4,
+          "probe": 206,
+          "verify": 11,
+          "finish": 6498
         },
         "frames": 72,
         "fps": 24.0,
@@ -2515,14 +2554,16 @@
         "scale": 0.9059,
         "motion": 62.06,
         "loop_seam_before": 208.37,
-        "loop_seam": 64.47,
-        "loop_limit": 103.38,
-        "frames_out": 66,
-        "crf": 38,
-        "sharp_kept": 1.06,
-        "detail_vs_still": 1.0,
+        "loop_cut": 20,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 55.16,
+        "frames_out": 46,
+        "crf": 30,
+        "sharp_kept": 1.01,
+        "detail_vs_still": 1.05,
         "soft_sigma": 0.0,
-        "kb": 218.7
+        "kb": 192.7
       },
       "webm": "slices/vid-010-cat_as_banana-cat_as_banana_waving.webm",
       "review": {
@@ -2665,6 +2706,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183651.809,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906315.983,
@@ -2681,7 +2733,7 @@
             "frame": 34,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 62.3
+            "ms": 44.1
           }
         },
         {
@@ -2695,16 +2747,16 @@
           "data": {
             "frame": 34,
             "px": 620,
-            "ms": 97.0
+            "ms": 56.4
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "218KB @crf38",
+          "detail": "192KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 218,
+          "value": 192,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2749,10 +2801,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.92",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.92,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2791,17 +2843,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.8
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "64.47 <= 103.38",
+          "detail": "0.0 <= 55.16",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 64.47,
-          "limit": 103.38,
+          "value": 0.0,
+          "limit": 55.16,
           "data": {
             "ms": 0.0
           }
@@ -2809,13 +2861,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.51",
+          "detail": "first frame matches the still at IoU 0.98",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.507,
+          "value": 0.979,
           "limit": 0.5,
           "data": {
-            "ms": 2.7
+            "ms": 1.4
           }
         },
         {
@@ -2839,17 +2891,17 @@
           "value": 0.028,
           "limit": 0.35,
           "data": {
-            "ms": 31.8
+            "ms": 9.5
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.00x of the still's edge detail (as soft as the still blurred 0.0 px)",
+          "detail": "1.01x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.0,
-          "limit": 0.75,
+          "value": 1.01,
+          "limit": 0.8,
           "data": {
             "ms": 0.0
           }
@@ -2858,7 +2910,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 5,
@@ -3068,16 +3121,16 @@
         "source": "video sheet",
         "threshold": 120.0,
         "ms": {
-          "decode": 890,
-          "key": 935,
-          "bounds": 232,
-          "render": 2118,
-          "seam": 801,
-          "encode": 4692,
+          "decode": 650,
+          "key": 611,
+          "bounds": 147,
+          "render": 1375,
+          "seam": 872,
+          "encode": 4285,
           "encodes": 4,
-          "probe": 186,
-          "verify": 70,
-          "finish": 8103
+          "probe": 229,
+          "verify": 65,
+          "finish": 6992
         },
         "frames": 72,
         "fps": 24.0,
@@ -3095,14 +3148,16 @@
         "scale": 0.9101,
         "motion": 33.74,
         "loop_seam_before": 77.03,
-        "loop_seam": 33.74,
-        "loop_limit": 70.68,
-        "frames_out": 66,
+        "loop_cut": 2,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 55.93,
+        "frames_out": 64,
         "crf": 30,
-        "sharp_kept": 1.03,
-        "detail_vs_still": 1.1,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.0,
         "soft_sigma": 0.0,
-        "kb": 252.5
+        "kb": 221.7
       },
       "webm": "slices/vid-010-cat_as_banana-cat_as_banana_puppy_eyes.webm",
       "review": {
@@ -3244,6 +3299,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183652.463,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906316.014,
@@ -3260,7 +3326,7 @@
             "frame": 38,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 64.0
+            "ms": 42.8
           }
         },
         {
@@ -3274,16 +3340,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 95.3
+            "ms": 57.3
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "252KB @crf30",
+          "detail": "221KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 252,
+          "value": 221,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3328,10 +3394,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.67",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.67,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -3370,17 +3436,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.7
+            "ms": 1.2
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "33.74 <= 70.68",
+          "detail": "0.0 <= 55.93",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 33.74,
-          "limit": 70.68,
+          "value": 0.0,
+          "limit": 55.93,
           "data": {
             "ms": 0.0
           }
@@ -3388,13 +3454,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.86",
+          "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.861,
+          "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 3.0
+            "ms": 8.2
           }
         },
         {
@@ -3415,20 +3481,20 @@
           "detail": "subject area varies by 4% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.041,
+          "value": 0.04,
           "limit": 0.35,
           "data": {
-            "ms": 65.8
+            "ms": 55.9
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.03x of the edge detail survives the encode",
+          "detail": "1.00x of the still's edge detail (as soft as the still blurred 0.0 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.03,
-          "limit": 0.8,
+          "value": 1.0,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
@@ -3436,7 +3502,8 @@
       ],
       "anim_override": [
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 6,
@@ -3640,22 +3707,22 @@
         "erode_px": 2
       },
       "png": "slices/img-010-cat_as_banana-cat_as_banana_flexing.png",
-      "anim_status": "FAILED",
-      "anim_reason": "loop_seam",
+      "anim_status": "READY",
+      "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
         "threshold": 121.5,
         "ms": {
-          "decode": 911,
-          "key": 932,
-          "bounds": 242,
-          "render": 2520,
-          "seam": 1246,
-          "encode": 5268,
+          "decode": 608,
+          "key": 647,
+          "bounds": 149,
+          "render": 1679,
+          "seam": 1262,
+          "encode": 4283,
           "encodes": 4,
-          "probe": 166,
+          "probe": 227,
           "verify": 41,
-          "finish": 9487
+          "finish": 7652
         },
         "frames": 72,
         "fps": 24.0,
@@ -3670,16 +3737,18 @@
         "scale": 0.9538,
         "motion": 19.83,
         "loop_seam_before": 167.37,
-        "loop_seam": 48.2,
-        "loop_limit": 43.4,
-        "frames_out": 66,
+        "loop_cut": 5,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 33.19,
+        "frames_out": 61,
         "crf": 34,
-        "sharp_kept": 1.05,
-        "detail_vs_still": 1.03,
-        "soft_sigma": 0.0,
-        "kb": 243.7
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.99,
+        "soft_sigma": 0.2,
+        "kb": 211.1
       },
-      "webm": null,
+      "webm": "slices/vid-010-cat_as_banana-cat_as_banana_flexing.webm",
       "review": {
         "still": "APPROVED",
         "anim": "BLOCKED"
@@ -3780,6 +3849,17 @@
               "ms": 0.0
             }
           }
+        },
+        {
+          "ts": 1791183653.145,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906316.037,
@@ -3796,7 +3876,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 69.8
+            "ms": 43.2
           }
         },
         {
@@ -3810,16 +3890,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 96.5
+            "ms": 55.5
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "243KB @crf34",
+          "detail": "211KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 243,
+          "value": 211,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3864,10 +3944,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.54",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.54,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -3906,17 +3986,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.7
+            "ms": 1.0
           }
         },
         {
           "name": "loop_seam",
-          "ok": false,
-          "detail": "48.2 <= 43.4",
+          "ok": true,
+          "detail": "0.0 <= 33.19",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 48.2,
-          "limit": 43.4,
+          "value": 0.0,
+          "limit": 33.19,
           "data": {
             "ms": 0.0
           }
@@ -3924,13 +4004,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.64",
+          "detail": "first frame matches the still at IoU 0.96",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.639,
+          "value": 0.961,
           "limit": 0.5,
           "data": {
-            "ms": 3.2
+            "ms": 5.2
           }
         },
         {
@@ -3951,19 +4031,19 @@
           "detail": "subject area varies by 7% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.069,
+          "value": 0.074,
           "limit": 0.35,
           "data": {
-            "ms": 36.4
+            "ms": 35.4
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.03x of the still's edge detail (as soft as the still blurred 0.0 px)",
+          "detail": "0.99x of the still's edge detail (as soft as the still blurred 0.2 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.03,
+          "value": 0.99,
           "limit": 0.75,
           "data": {
             "ms": 0.0
@@ -4179,16 +4259,16 @@
         "source": "video sheet",
         "threshold": 121.5,
         "ms": {
-          "decode": 361,
-          "key": 1099,
-          "bounds": 272,
-          "render": 1485,
-          "seam": 620,
-          "encode": 3227,
+          "decode": 304,
+          "key": 578,
+          "bounds": 198,
+          "render": 1075,
+          "seam": 785,
+          "encode": 3311,
           "encodes": 4,
-          "probe": 105,
-          "verify": 24,
-          "finish": 5737
+          "probe": 190,
+          "verify": 17,
+          "finish": 5579
         },
         "frames": 72,
         "fps": 24.0,
@@ -4203,14 +4283,16 @@
         "scale": 1.0071,
         "motion": 3.08,
         "loop_seam_before": 119.4,
-        "loop_seam": 3.15,
+        "loop_cut": 1,
+        "loop_faded": true,
+        "loop_seam": 0.0,
         "loop_limit": 12.0,
-        "frames_out": 66,
+        "frames_out": 65,
         "crf": 30,
-        "sharp_kept": 1.04,
-        "detail_vs_still": 0.99,
-        "soft_sigma": 0.2,
-        "kb": 156.3
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.96,
+        "soft_sigma": 0.6,
+        "kb": 145.8
       },
       "webm": "slices/vid-010-cat_as_banana-cat_as_banana_eye_roll.webm",
       "review": {
@@ -4319,6 +4401,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183658.476,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906316.057,
@@ -4335,7 +4428,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 65.3
+            "ms": 51.0
           }
         },
         {
@@ -4349,16 +4442,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 105.8
+            "ms": 50.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "156KB @crf30",
+          "detail": "145KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 156,
+          "value": 145,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4403,10 +4496,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.71",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.71,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -4445,16 +4538,16 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 0.8
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "3.15 <= 12.0",
+          "detail": "0.0 <= 12.0",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 3.15,
+          "value": 0.0,
           "limit": 12.0,
           "data": {
             "ms": 0.0
@@ -4463,13 +4556,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.75",
+          "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.752,
+          "value": 0.991,
           "limit": 0.5,
           "data": {
-            "ms": 1.5
+            "ms": 1.8
           }
         },
         {
@@ -4490,25 +4583,26 @@
           "detail": "subject area varies by 1% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.013,
+          "value": 0.014,
           "limit": 0.35,
           "data": {
-            "ms": 21.8
+            "ms": 15.0
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the still's edge detail (as soft as the still blurred 0.2 px)",
+          "detail": "0.96x of the still's edge detail (as soft as the still blurred 0.6 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
+          "value": 0.96,
           "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 8,
@@ -4718,16 +4812,16 @@
         "source": "video sheet",
         "threshold": 121.5,
         "ms": {
-          "decode": 333,
-          "key": 941,
-          "bounds": 184,
-          "render": 1389,
-          "seam": 602,
-          "encode": 3147,
+          "decode": 246,
+          "key": 524,
+          "bounds": 131,
+          "render": 1029,
+          "seam": 625,
+          "encode": 2546,
           "encodes": 4,
-          "probe": 107,
-          "verify": 15,
-          "finish": 5447
+          "probe": 203,
+          "verify": 11,
+          "finish": 4548
         },
         "frames": 72,
         "fps": 24.0,
@@ -4742,14 +4836,16 @@
         "scale": 0.9871,
         "motion": 1.95,
         "loop_seam_before": 119.53,
-        "loop_seam": 0.98,
+        "loop_cut": 22,
+        "loop_faded": true,
+        "loop_seam": 0.0,
         "loop_limit": 12.0,
-        "frames_out": 66,
+        "frames_out": 44,
         "crf": 30,
-        "sharp_kept": 1.05,
-        "detail_vs_still": 0.99,
-        "soft_sigma": 0.2,
-        "kb": 156.3
+        "sharp_kept": 1.01,
+        "detail_vs_still": 0.96,
+        "soft_sigma": 0.6,
+        "kb": 86.7
       },
       "webm": "slices/vid-010-cat_as_banana-cat_as_banana_sad.webm",
       "review": {
@@ -4858,6 +4954,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183657.795,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906316.076,
@@ -4874,7 +4981,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 49.1
+            "ms": 40.4
           }
         },
         {
@@ -4888,16 +4995,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 64.3
+            "ms": 45.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "156KB @crf30",
+          "detail": "86KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 156,
+          "value": 86,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4942,10 +5049,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.83",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.83,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -4984,16 +5091,16 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.98 <= 12.0",
+          "detail": "0.0 <= 12.0",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 0.98,
+          "value": 0.0,
           "limit": 12.0,
           "data": {
             "ms": 0.0
@@ -5002,13 +5109,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.82",
+          "detail": "first frame matches the still at IoU 0.98",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.819,
+          "value": 0.984,
           "limit": 0.5,
           "data": {
-            "ms": 1.6
+            "ms": 1.3
           }
         },
         {
@@ -5026,28 +5133,29 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 3% over the frames",
+          "detail": "subject area varies by 1% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.026,
+          "value": 0.006,
           "limit": 0.35,
           "data": {
-            "ms": 12.9
+            "ms": 9.0
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the still's edge detail (as soft as the still blurred 0.2 px)",
+          "detail": "0.96x of the still's edge detail (as soft as the still blurred 0.6 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
+          "value": 0.96,
           "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 9,
@@ -5251,22 +5359,22 @@
         "erode_px": 2
       },
       "png": "slices/img-010-cat_as_banana-cat_as_banana_angry.png",
-      "anim_status": "FAILED",
-      "anim_reason": "loop_seam",
+      "anim_status": "READY",
+      "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
         "threshold": 121.5,
         "ms": {
-          "decode": 352,
-          "key": 693,
-          "bounds": 201,
-          "render": 1834,
-          "seam": 741,
-          "encode": 1911,
-          "encodes": 2,
-          "probe": 116,
-          "verify": 17,
-          "finish": 4824
+          "decode": 257,
+          "key": 396,
+          "bounds": 129,
+          "render": 1485,
+          "seam": 750,
+          "encode": 3144,
+          "encodes": 4,
+          "probe": 175,
+          "verify": 12,
+          "finish": 5698
         },
         "frames": 72,
         "fps": 24.0,
@@ -5284,17 +5392,18 @@
         "scale": 0.9678,
         "motion": 57.03,
         "loop_seam_before": 183.13,
-        "loop_seam": 117.08,
-        "loop_limit": 87.1,
-        "frames_out": 66,
-        "crf": 42,
-        "sharp_kept": 1.07,
-        "detail_vs_still": 1.15,
-        "soft_sigma": 0.0,
-        "kb": 208.5,
-        "cache": "hit"
+        "loop_cut": 16,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 45.03,
+        "frames_out": 50,
+        "crf": 34,
+        "sharp_kept": 1.01,
+        "detail_vs_still": 0.99,
+        "soft_sigma": 0.3,
+        "kb": 208.8
       },
-      "webm": null,
+      "webm": "slices/vid-010-cat_as_banana-cat_as_banana_angry.webm",
       "review": {
         "still": "APPROVED",
         "anim": "BLOCKED"
@@ -5551,6 +5660,17 @@
               "ms": 0.0
             }
           }
+        },
+        {
+          "ts": 1791183659.087,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790906316.102,
@@ -5567,7 +5687,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 60.0
+            "ms": 39.1
           }
         },
         {
@@ -5581,13 +5701,13 @@
           "data": {
             "frame": 32,
             "px": 2076,
-            "ms": 79.0
+            "ms": 49.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "208KB @crf42",
+          "detail": "208KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 208,
@@ -5635,10 +5755,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.08",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.08,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -5677,17 +5797,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.9
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
-          "ok": false,
-          "detail": "117.08 <= 87.1",
+          "ok": true,
+          "detail": "0.0 <= 45.03",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 117.08,
-          "limit": 87.1,
+          "value": 0.0,
+          "limit": 45.03,
           "data": {
             "ms": 0.0
           }
@@ -5695,13 +5815,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.69",
+          "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.693,
+          "value": 0.988,
           "limit": 0.5,
           "data": {
-            "ms": 1.8
+            "ms": 1.7
           }
         },
         {
@@ -5719,23 +5839,23 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 3% over the frames",
+          "detail": "subject area varies by 4% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.033,
+          "value": 0.038,
           "limit": 0.35,
           "data": {
-            "ms": 14.8
+            "ms": 9.7
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.07x of the edge detail survives the encode",
+          "detail": "0.99x of the still's edge detail (as soft as the still blurred 0.3 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.07,
-          "limit": 0.8,
+          "value": 0.99,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }

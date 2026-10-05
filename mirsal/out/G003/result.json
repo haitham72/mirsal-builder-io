@@ -375,7 +375,7 @@
               "9": 0.984
             },
             "bad": [],
-            "ms": 60.5
+            "ms": 57.9
           }
         },
         {
@@ -398,7 +398,8 @@
         "height": 1440,
         "fps": 24.0,
         "duration": 3.04
-      }
+      },
+      "preview": "video_sheet/A1/preview.mp4"
     }
   ],
   "verify": {
@@ -698,16 +699,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 587,
-          "key": 591,
-          "bounds": 128,
-          "render": 1625,
-          "seam": 279,
-          "encode": 2662,
-          "encodes": 2,
-          "probe": 113,
-          "verify": 31,
-          "finish": 4844
+          "decode": 584,
+          "key": 799,
+          "bounds": 190,
+          "render": 1649,
+          "seam": 252,
+          "encode": 4608,
+          "encodes": 3,
+          "probe": 263,
+          "verify": 28,
+          "finish": 7002
         },
         "frames": 72,
         "fps": 24.0,
@@ -727,6 +728,8 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.99,
+        "soft_sigma": 0.1,
         "kb": 214.6
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_proud.webm",
@@ -877,6 +880,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183428.096,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876051.898,
@@ -893,7 +907,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 36.6
+            "ms": 50.2
           }
         },
         {
@@ -907,7 +921,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 47.1
+            "ms": 75.4
           }
         },
         {
@@ -1003,7 +1017,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.4
+            "ms": 1.1
           }
         },
         {
@@ -1027,7 +1041,7 @@
           "value": 0.993,
           "limit": 0.5,
           "data": {
-            "ms": 3.1
+            "ms": 3.6
           }
         },
         {
@@ -1051,22 +1065,23 @@
           "value": 0.013,
           "limit": 0.35,
           "data": {
-            "ms": 27.2
+            "ms": 23.7
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "detail": "0.99x of the still's edge detail (as soft as the still blurred 0.1 px)",
           "severity": "WARN",
           "stage": "anim",
           "value": 0.99,
-          "limit": 0.8,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 2,
@@ -1276,16 +1291,16 @@
         "source": "video sheet",
         "threshold": 121.5,
         "ms": {
-          "decode": 650,
-          "key": 540,
-          "bounds": 125,
-          "render": 1518,
-          "seam": 207,
-          "encode": 2652,
-          "encodes": 2,
-          "probe": 128,
-          "verify": 38,
-          "finish": 4671
+          "decode": 627,
+          "key": 763,
+          "bounds": 184,
+          "render": 1533,
+          "seam": 211,
+          "encode": 4537,
+          "encodes": 3,
+          "probe": 227,
+          "verify": 24,
+          "finish": 6721
         },
         "frames": 72,
         "fps": 24.0,
@@ -1305,6 +1320,8 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 0.99,
+        "detail_vs_still": 1.04,
+        "soft_sigma": 0.0,
         "kb": 251.8
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_shy.webm",
@@ -1455,6 +1472,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183427.512,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876051.92,
@@ -1471,7 +1499,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 36.2
+            "ms": 49.8
           }
         },
         {
@@ -1485,7 +1513,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 48.4
+            "ms": 73.2
           }
         },
         {
@@ -1581,7 +1609,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.4
+            "ms": 0.7
           }
         },
         {
@@ -1605,7 +1633,7 @@
           "value": 0.983,
           "limit": 0.5,
           "data": {
-            "ms": 2.9
+            "ms": 2.7
           }
         },
         {
@@ -1629,7 +1657,7 @@
           "value": 0.027,
           "limit": 0.35,
           "data": {
-            "ms": 33.8
+            "ms": 21.4
           }
         },
         {
@@ -1644,7 +1672,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 3,
@@ -1854,16 +1883,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 634,
-          "key": 550,
-          "bounds": 128,
-          "render": 1588,
-          "seam": 225,
-          "encode": 3686,
-          "encodes": 3,
-          "probe": 152,
-          "verify": 25,
-          "finish": 5809
+          "decode": 675,
+          "key": 723,
+          "bounds": 175,
+          "render": 1584,
+          "seam": 226,
+          "encode": 5849,
+          "encodes": 4,
+          "probe": 237,
+          "verify": 26,
+          "finish": 8101
         },
         "frames": 72,
         "fps": 24.0,
@@ -1883,6 +1912,8 @@
         "frames_out": 72,
         "crf": 34,
         "sharp_kept": 0.99,
+        "detail_vs_still": 1.01,
+        "soft_sigma": 0.0,
         "kb": 216.6
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_laughing.webm",
@@ -2033,6 +2064,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183428.834,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876051.941,
@@ -2049,7 +2091,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 38.3
+            "ms": 51.1
           }
         },
         {
@@ -2063,7 +2105,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 47.4
+            "ms": 67.4
           }
         },
         {
@@ -2159,7 +2201,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.0
+            "ms": 0.7
           }
         },
         {
@@ -2183,7 +2225,7 @@
           "value": 0.993,
           "limit": 0.5,
           "data": {
-            "ms": 2.4
+            "ms": 3.7
           }
         },
         {
@@ -2207,7 +2249,7 @@
           "value": 0.019,
           "limit": 0.35,
           "data": {
-            "ms": 21.8
+            "ms": 22.2
           }
         },
         {
@@ -2222,7 +2264,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 4,
@@ -2435,16 +2478,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 635,
-          "key": 550,
-          "bounds": 127,
-          "render": 1636,
-          "seam": 285,
-          "encode": 2665,
-          "encodes": 2,
-          "probe": 110,
-          "verify": 43,
-          "finish": 4869
+          "decode": 655,
+          "key": 734,
+          "bounds": 181,
+          "render": 1609,
+          "seam": 218,
+          "encode": 4679,
+          "encodes": 3,
+          "probe": 268,
+          "verify": 27,
+          "finish": 6986
         },
         "frames": 72,
         "fps": 24.0,
@@ -2464,6 +2507,8 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.98,
+        "soft_sigma": 0.3,
         "kb": 195.3
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_angry.webm",
@@ -2616,6 +2661,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183427.738,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876051.963,
@@ -2632,7 +2688,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 38.4
+            "ms": 49.3
           }
         },
         {
@@ -2646,7 +2702,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 46.6
+            "ms": 71.0
           }
         },
         {
@@ -2742,7 +2798,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 1.6
           }
         },
         {
@@ -2766,7 +2822,7 @@
           "value": 0.988,
           "limit": 0.5,
           "data": {
-            "ms": 3.0
+            "ms": 2.9
           }
         },
         {
@@ -2790,22 +2846,23 @@
           "value": 0.004,
           "limit": 0.35,
           "data": {
-            "ms": 39.3
+            "ms": 23.4
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "detail": "0.98x of the still's edge detail (as soft as the still blurred 0.3 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
-          "limit": 0.8,
+          "value": 0.98,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 5,
@@ -3018,16 +3075,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 648,
-          "key": 540,
-          "bounds": 128,
-          "render": 1566,
-          "seam": 214,
-          "encode": 2576,
+          "decode": 665,
+          "key": 722,
+          "bounds": 176,
+          "render": 1572,
+          "seam": 213,
+          "encode": 3084,
           "encodes": 2,
-          "probe": 143,
-          "verify": 56,
-          "finish": 4687
+          "probe": 265,
+          "verify": 28,
+          "finish": 5342
         },
         "frames": 72,
         "fps": 24.0,
@@ -3046,7 +3103,9 @@
         "loop_limit": 49.28,
         "frames_out": 72,
         "crf": 42,
-        "sharp_kept": 0.98,
+        "sharp_kept": 0.99,
+        "detail_vs_still": 1.06,
+        "soft_sigma": 0.0,
         "kb": 201.0
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_shocked.webm",
@@ -3199,6 +3258,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183426.054,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876051.987,
@@ -3215,7 +3285,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 37.0
+            "ms": 47.6
           }
         },
         {
@@ -3229,7 +3299,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 49.4
+            "ms": 66.9
           }
         },
         {
@@ -3325,7 +3395,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.3
+            "ms": 1.2
           }
         },
         {
@@ -3349,7 +3419,7 @@
           "value": 0.989,
           "limit": 0.5,
           "data": {
-            "ms": 3.0
+            "ms": 3.5
           }
         },
         {
@@ -3373,22 +3443,23 @@
           "value": 0.033,
           "limit": 0.35,
           "data": {
-            "ms": 52.3
+            "ms": 23.2
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.98x of the edge detail survives the encode",
+          "detail": "0.99x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.98,
+          "value": 0.99,
           "limit": 0.8,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 6,
@@ -3601,16 +3672,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 658,
-          "key": 535,
-          "bounds": 126,
-          "render": 1613,
-          "seam": 261,
-          "encode": 3764,
-          "encodes": 3,
-          "probe": 117,
-          "verify": 20,
-          "finish": 5905
+          "decode": 684,
+          "key": 719,
+          "bounds": 181,
+          "render": 1618,
+          "seam": 232,
+          "encode": 5899,
+          "encodes": 4,
+          "probe": 262,
+          "verify": 22,
+          "finish": 8219
         },
         "frames": 72,
         "fps": 24.0,
@@ -3630,6 +3701,8 @@
         "frames_out": 72,
         "crf": 34,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.99,
+        "soft_sigma": 0.2,
         "kb": 231.9
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_dreamy.webm",
@@ -3782,6 +3855,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183429.032,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876052.009,
@@ -3798,7 +3882,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 36.9
+            "ms": 52.4
           }
         },
         {
@@ -3812,7 +3896,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 48.5
+            "ms": 72.9
           }
         },
         {
@@ -3908,7 +3992,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 1.2
           }
         },
         {
@@ -3932,7 +4016,7 @@
           "value": 0.995,
           "limit": 0.5,
           "data": {
-            "ms": 3.4
+            "ms": 2.6
           }
         },
         {
@@ -3956,22 +4040,23 @@
           "value": 0.004,
           "limit": 0.35,
           "data": {
-            "ms": 16.7
+            "ms": 18.9
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "detail": "0.99x of the still's edge detail (as soft as the still blurred 0.2 px)",
           "severity": "WARN",
           "stage": "anim",
           "value": 0.99,
-          "limit": 0.8,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 7,
@@ -4181,16 +4266,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 219,
-          "key": 716,
-          "bounds": 140,
-          "render": 1387,
-          "seam": 198,
-          "encode": 2543,
-          "encodes": 2,
-          "probe": 124,
-          "verify": 19,
-          "finish": 4414
+          "decode": 314,
+          "key": 455,
+          "bounds": 145,
+          "render": 1815,
+          "seam": 228,
+          "encode": 3346,
+          "encodes": 3,
+          "probe": 204,
+          "verify": 17,
+          "finish": 5759
         },
         "frames": 72,
         "fps": 24.0,
@@ -4210,6 +4295,8 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 0.99,
+        "detail_vs_still": 1.0,
+        "soft_sigma": 0.0,
         "kb": 195.1
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_fearful.webm",
@@ -4360,6 +4447,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183432.863,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876052.032,
@@ -4376,7 +4474,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 48.5
+            "ms": 38.1
           }
         },
         {
@@ -4390,7 +4488,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 45.4
+            "ms": 63.9
           }
         },
         {
@@ -4486,7 +4584,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 0.7
           }
         },
         {
@@ -4510,7 +4608,7 @@
           "value": 0.991,
           "limit": 0.5,
           "data": {
-            "ms": 2.2
+            "ms": 2.0
           }
         },
         {
@@ -4534,7 +4632,7 @@
           "value": 0.004,
           "limit": 0.35,
           "data": {
-            "ms": 16.3
+            "ms": 14.6
           }
         },
         {
@@ -4549,7 +4647,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 8,
@@ -4759,16 +4858,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 233,
-          "key": 606,
-          "bounds": 135,
-          "render": 1386,
-          "seam": 261,
-          "encode": 2457,
-          "encodes": 2,
-          "probe": 124,
-          "verify": 40,
-          "finish": 4405
+          "decode": 325,
+          "key": 566,
+          "bounds": 166,
+          "render": 1395,
+          "seam": 190,
+          "encode": 3206,
+          "encodes": 3,
+          "probe": 197,
+          "verify": 18,
+          "finish": 5175
         },
         "frames": 72,
         "fps": 24.0,
@@ -4788,6 +4887,8 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 0.99,
+        "detail_vs_still": 1.0,
+        "soft_sigma": 0.0,
         "kb": 197.6
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_sleepy.webm",
@@ -4938,6 +5039,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183433.819,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876052.055,
@@ -4954,7 +5066,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 45.1
+            "ms": 52.4
           }
         },
         {
@@ -4968,7 +5080,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 45.3
+            "ms": 59.6
           }
         },
         {
@@ -5064,7 +5176,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.3
+            "ms": 0.7
           }
         },
         {
@@ -5088,7 +5200,7 @@
           "value": 0.993,
           "limit": 0.5,
           "data": {
-            "ms": 3.5
+            "ms": 2.3
           }
         },
         {
@@ -5112,7 +5224,7 @@
           "value": 0.014,
           "limit": 0.35,
           "data": {
-            "ms": 35.1
+            "ms": 15.3
           }
         },
         {
@@ -5127,7 +5239,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 9,
@@ -5340,16 +5453,16 @@
         "source": "video sheet",
         "threshold": 122.5,
         "ms": {
-          "decode": 247,
-          "key": 434,
-          "bounds": 150,
-          "render": 1396,
-          "seam": 376,
-          "encode": 2532,
-          "encodes": 2,
-          "probe": 102,
+          "decode": 302,
+          "key": 488,
+          "bounds": 171,
+          "render": 1344,
+          "seam": 174,
+          "encode": 3267,
+          "encodes": 3,
+          "probe": 192,
           "verify": 17,
-          "finish": 4576
+          "finish": 5170
         },
         "frames": 72,
         "fps": 24.0,
@@ -5369,6 +5482,8 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.99,
+        "soft_sigma": 0.1,
         "kb": 220.5
       },
       "webm": "slices/vid-003-mouse_big_golden_chain-mouse_mischievous.webm",
@@ -5521,6 +5636,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183434.069,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "rendered_at": 1790876052.077,
@@ -5537,7 +5663,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 48.2
+            "ms": 46.9
           }
         },
         {
@@ -5551,7 +5677,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 52.4
+            "ms": 63.2
           }
         },
         {
@@ -5647,7 +5773,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 1.1
           }
         },
         {
@@ -5671,7 +5797,7 @@
           "value": 0.965,
           "limit": 0.5,
           "data": {
-            "ms": 2.1
+            "ms": 2.3
           }
         },
         {
@@ -5701,16 +5827,17 @@
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "detail": "0.99x of the still's edge detail (as soft as the still blurred 0.1 px)",
           "severity": "WARN",
           "stage": "anim",
           "value": 0.99,
-          "limit": 0.8,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     }
   ]
 }

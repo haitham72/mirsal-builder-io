@@ -1,0 +1,9 @@
+---
+title: 'Can I test particles in chat without rendering a pack sticker'
+question: 'Can I test particles in chat without rendering a pack sticker?'
+category: 'particles'
+tags: 'particles, echo, preview'
+screen: 'Library > Particles'
+looks_like: 'The particle controls include Assign to stickers and Test in chat.'
+---
+Use Assign to stickers followed by Test in chat. Echo plays the assigned set using its saved settings, without requiring a rendered pack sticker. If this does not match what you see, send a screenshot in Help.

@@ -1,0 +1,37 @@
+{
+  "id": "F049",
+  "status": "draft",
+  "title": "Will removing a batch remove stickers already in my packs",
+  "question": "Will removing a batch remove stickers already in my packs?",
+  "answer": "Remove batch moves the batch to the trash, where it can be restored. Stickers already added to a pack stay in their packs. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/remove-batch.md"
+    }
+  ],
+  "created": 1791192286.433,
+  "history": [
+    {
+      "ts": 1791192286.433,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/remove-batch.md"
+    }
+  ],
+  "updated": 1791192286.448,
+  "seed": {
+    "path": "studio/remove-batch.md",
+    "sha": "25e9784bba81713d268c38a2800c1cd3a5dce7f339b912abebcd0ad3c7118aac"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "remove",
+    "batch"
+  ],
+  "screen": "Studio",
+  "looks_like": "Remove batch is available, and Removed batches appears under Earlier batches."
+}

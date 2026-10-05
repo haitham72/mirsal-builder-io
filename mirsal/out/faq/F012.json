@@ -1,0 +1,37 @@
+{
+  "id": "F012",
+  "status": "draft",
+  "title": "How can I send a screenshot to Help",
+  "question": "How can I send a screenshot to Help?",
+  "answer": "Open Help, describe the problem and use Attach a screenshot, or paste an image with Ctrl+V. The local vision model reads the support screenshot on the office machine; that support reading does not send it to a cloud model. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-vision/help-screenshot.md"
+    }
+  ],
+  "created": 1791192285.313,
+  "history": [
+    {
+      "ts": 1791192285.313,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-vision/help-screenshot.md"
+    }
+  ],
+  "updated": 1791192285.33,
+  "seed": {
+    "path": "ai-vision/help-screenshot.md",
+    "sha": "ae5e1e5ad0005f80469acfd001fcfc8c51aac819247bb2b0e7d90647e77379b1"
+  },
+  "category": "ai-vision",
+  "tags": [
+    "ai-vision",
+    "help",
+    "screenshot"
+  ],
+  "screen": "Help",
+  "looks_like": "Help has Attach a screenshot and Paste a screenshot with Ctrl+V; the local AI reads it."
+}

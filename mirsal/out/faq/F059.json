@@ -1,0 +1,37 @@
+{
+  "id": "F059",
+  "status": "draft",
+  "title": "Why does Trending say Nothing public yet",
+  "question": "Why does Trending say Nothing public yet?",
+  "answer": "Trending shows packs that have been made public. If none are available, it shows Nothing public yet rather than your private Library packs. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "trending/no-public.md"
+    }
+  ],
+  "created": 1791192286.726,
+  "history": [
+    {
+      "ts": 1791192286.726,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "trending/no-public.md"
+    }
+  ],
+  "updated": 1791192286.741,
+  "seed": {
+    "path": "trending/no-public.md",
+    "sha": "52cf85dafda2d21af1329c236f1b7c08f70f8a5dfb53e01e4bcd34d61e8a6a97"
+  },
+  "category": "trending",
+  "tags": [
+    "trending",
+    "no",
+    "public"
+  ],
+  "screen": "Library > Trending",
+  "looks_like": "Trending says Nothing public yet. Make a pack public from its page."
+}

@@ -174,17 +174,32 @@ class ConsoleTools:
         data = (pl.gen_dir(self.out, int(gid[1:])) / st["png"]).read_bytes()
         return self.c.save_ref(data, f"{sid.replace('/', '_')}.png")["id"]
 
+    def prepared_match(self, prompt: str) -> str | None:
+        """The prepared subject this request names, when serving it from the watch folder is preferred (else None:
+        the request goes live). Free: no provider call, no credits."""
+        if not self.live():
+            return None
+        from ..flow import sources
+        try:
+            return sources.match_subject(self.c.inp, prompt) if sources.prefer_prepared(self.out) else None
+        except Exception:
+            return None
+
     # ---- writes (these can spend) -----------------------------------------------------------------------------------------------------
     def create(self, prompt: str, grid: str = "3x3", style_id: str = "flat_vector", ai: bool = True, parent: str | None = None,
                regen_of: str | None = None, refs: list | None = None, base_plan: dict | None = None, ref_clause: str | None = None,
-               outline: int | None = None, erode: int | None = None) -> dict:
-        """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); otherwise the prepared-sheet lookup, exactly as the page does. `base_plan` is the plan the person
+               outline: int | None = None, erode: int | None = None, force_live: bool = False) -> dict:
+        """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); a request that names a prepared
+        subject -> that prepared set (0 credits, the same gates), unless `force_live` ("Make a new one");
+        otherwise the prepared-sheet lookup, exactly as the page does. `base_plan` is the plan the person
         approved on the card: it is what is sent (the cells, tags and slots of the card), never planned a second time."""
-        self._may_spend()
+        match = None if force_live else self.prepared_match(prompt)
+        if not match:
+            self._may_spend()
         if parent:
             self._see(parent)
         try:
-            if self.live():
+            if self.live() and not match:
                 body = {"prompt": prompt, "grid": grid, "style_id": style_id, "ai": ai, "refs": refs or []}
                 if ref_clause and refs:
                     body["ref_clause"] = ref_clause                 # what the attached picture is for (editroute.REF_CLAUSES), instead of the default "change only the expression and the pose"
@@ -203,7 +218,8 @@ class ConsoleTools:
             gid = pl.start(prompt, self.out, self.c.inp)
             pl.approve_plan(self.out, gid, "approved from the chat")
             self.c.submit(lambda: pl.run_stills(self.out, gid, self.c.cfg, self.c.pace))
-            return {"job": None, "task": None, "estimate": None, "generation": f"G{gid:03d}", "live": False}
+            return {"job": None, "task": None, "estimate": 0 if match else None, "generation": f"G{gid:03d}",
+                    "live": False, **({"prepared": True} if match else {})}
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
 
@@ -699,7 +715,10 @@ class FakeTools:
     def edge_of(self, gid):
         return dict(getattr(self, "edges", {}).get(gid) or {})
 
-    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None, outline=None, erode=None):
+    def prepared_match(self, prompt):
+        return None
+
+    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None, outline=None, erode=None, force_live=False):
         if getattr(self, "fail_next_create", False):
             self.fail_next_create = False
             raise ToolError("the provider refused it; try again in a minute", 503)

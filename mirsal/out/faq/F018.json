@@ -1,0 +1,37 @@
+{
+  "id": "F018",
+  "status": "draft",
+  "title": "Why must I animate again after changing the edge",
+  "question": "Why must I animate again after changing the edge?",
+  "answer": "Changing the outline or rim trim makes animations created with the previous edge stale. Animate again to apply the new edge to those animations. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "animation/edge-changed.md"
+    }
+  ],
+  "created": 1791192285.505,
+  "history": [
+    {
+      "ts": 1791192285.505,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "animation/edge-changed.md"
+    }
+  ],
+  "updated": 1791192285.518,
+  "seed": {
+    "path": "animation/edge-changed.md",
+    "sha": "9dbb0198224f235f07fb67e6cfd1beef1de3a4a9fe8d443fe53efa4a8fcecb37"
+  },
+  "category": "animation",
+  "tags": [
+    "animation",
+    "edge",
+    "changed"
+  ],
+  "screen": "Studio > Animation",
+  "looks_like": "The tile says edge changed: Animate again to apply it."
+}

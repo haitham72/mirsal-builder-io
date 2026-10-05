@@ -1,0 +1,37 @@
+{
+  "id": "F041",
+  "status": "draft",
+  "title": "How do I make the particles look larger",
+  "question": "How do I make the particles look larger?",
+  "answer": "Change Size to alter how large the particles appear. Sprite resolution changes sharpness rather than their apparent size. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/size-sharpness.md"
+    }
+  ],
+  "created": 1791192286.189,
+  "history": [
+    {
+      "ts": 1791192286.189,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/size-sharpness.md"
+    }
+  ],
+  "updated": 1791192286.204,
+  "seed": {
+    "path": "particles/size-sharpness.md",
+    "sha": "5e28ea673b3b34a7ad8f39ce3c19c3c142841b4ed4ef2a484a79e278b9a9da42"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "size",
+    "sharpness"
+  ],
+  "screen": "Library > Particles",
+  "looks_like": "The simulator controls include Energy, Float, Swirl and Size."
+}

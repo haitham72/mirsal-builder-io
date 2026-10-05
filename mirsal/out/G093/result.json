@@ -2577,5 +2577,15 @@
         }
       ]
     }
+  ],
+  "group": "G005",
+  "group_history": [
+    {
+      "ts": 1791171816.62,
+      "actor": "local",
+      "decision": "JOIN",
+      "to": "G005",
+      "via": "G093"
+    }
   ]
 }

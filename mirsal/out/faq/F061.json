@@ -1,0 +1,37 @@
+{
+  "id": "F061",
+  "status": "draft",
+  "title": "What if the Help answer did not solve my issue",
+  "question": "What if the Help answer did not solve my issue?",
+  "answer": "Press No, send to support beneath Did this solve it? to escalate the issue. If the answer did work, choose Yes, solved instead. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/answer-wrong.md"
+    }
+  ],
+  "created": 1791192286.787,
+  "history": [
+    {
+      "ts": 1791192286.787,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/answer-wrong.md"
+    }
+  ],
+  "updated": 1791192286.803,
+  "seed": {
+    "path": "troubleshooting/answer-wrong.md",
+    "sha": "d7d75b2dc1352008a94865589869586f8e3e1b7129b7729a730f6c7c1df13c46"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "answer",
+    "wrong"
+  ],
+  "screen": "Help",
+  "looks_like": "Did this solve it? has Yes, solved and No, send to support."
+}

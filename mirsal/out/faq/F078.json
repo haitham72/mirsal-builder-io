@@ -1,0 +1,37 @@
+{
+  "id": "F078",
+  "status": "draft",
+  "title": "How can I find out why my batch has so few accepted stickers",
+  "question": "How can I find out why my batch has so few accepted stickers?",
+  "answer": "Ask Help about your own batch. It can read the accepted count and each excluded sticker’s recorded reason, and offer a button to open the batch in Studio. A judgement-call block may have Use it anyway on the tile, while technical file limits still need to be met.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/accepted-count.md"
+    }
+  ],
+  "created": 1791193752.969,
+  "history": [
+    {
+      "ts": 1791193752.969,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/accepted-count.md"
+    }
+  ],
+  "updated": 1791193752.987,
+  "seed": {
+    "path": "studio/accepted-count.md",
+    "sha": "d02e27973c932cb1af7c3183ea0752ee4b94e4ff471b6306d316688de9499f33"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "accepted",
+    "count"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

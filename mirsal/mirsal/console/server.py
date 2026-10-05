@@ -44,7 +44,8 @@ _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)(?:-[A-Za-z0-9_-]+)?/")
 MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck", "add", "pack_add"}
 MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
-MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs"}
+MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs",
+              "/api/prepared/match"}
 MEMBER_POST = {"/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
 RATE_DEFAULTS = {"r": 3000, "w": 240}                 # requests per minute per token holder (MIRSAL_RATE_READ / MIRSAL_RATE_WRITE; 0 = off)
 
@@ -1114,6 +1115,13 @@ def make_handler(c: Console):
                 return self._json(200, {"results": [r for r in gates.search(c.out, q) if see(r["generation"])], "via": "files"})
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
+            if path == "/api/prepared/match":       # which prepared subject a request names (whole signature words), and whether prepared is preferred
+                q = parse_qs(urlparse(self.path).query).get("prompt", [""])[0]
+                subject = sources.match_subject(c.inp, q)
+                n = len(sources.scan(c.inp).get(subject, [])) if subject else 0
+                return self._json(200, {"subject": subject, "variants": n, "prefer": sources.prefer_prepared(c.out)})
+            if path == "/api/prepared/setting":     # the owner's prefer-prepared switch (MIRSAL_PREFER_PREPARED wins when set)
+                return self._json(200, {"prefer": sources.prefer_prepared(c.out)})
             if path.startswith("/api/generations/") and path.endswith("/files"):         # where this batch's files are
                 gid = int(path.split("/")[3])
                 return self._json(200, {"stickers": str(pl.gen_dir(c.out, gid) / "slices"), "batch": str(pl.gen_dir(c.out, gid))})
@@ -1720,6 +1728,12 @@ def make_handler(c: Console):
                 if what in ("sheet", "video"):          # these spend credits: the same Idempotency-Key answers with the first job instead of starting (and paying for) another
                     return self._json(200, c.idem(f"live:{what}:{self.user['id']}", self.headers.get("Idempotency-Key"), lambda: self._live(what, body)))
                 return self._json(200, self._live(what, body))
+            if path == "/api/prepared/setting":     # the owner's prefer-prepared switch (rule 6: read by every prepared decision)
+                if self.user.get("role") != "owner":
+                    raise pl.PipelineError("this account cannot do that (owner only)", 403)
+                if not isinstance(body.get("prefer"), bool):
+                    raise pl.PipelineError("prefer must be true or false", 400)
+                return self._json(200, {"prefer": sources.set_prefer_prepared(c.out, body["prefer"])})
             if path == "/api/jobs":      # S2: the Generate page creates a sheet job ("Generate it"), the operator fulfils it
                 try:
                     return self._json(200, jobs.create(c.out, str(body.get("kind", "sheet")),

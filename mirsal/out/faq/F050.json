@@ -1,0 +1,37 @@
+{
+  "id": "F050",
+  "status": "draft",
+  "title": "How do I restore a removed batch",
+  "question": "How do I restore a removed batch?",
+  "answer": "Open Removed batches under Earlier batches and press Restore beside the batch. Restore brings it back; the Remove button in that list is a permanent-removal action. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/restore-batch.md"
+    }
+  ],
+  "created": 1791192286.463,
+  "history": [
+    {
+      "ts": 1791192286.463,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/restore-batch.md"
+    }
+  ],
+  "updated": 1791192286.476,
+  "seed": {
+    "path": "studio/restore-batch.md",
+    "sha": "a799bfd015bd3894db1be5a3b2cce347136a1d4dac7a83c75ae68db8b4f818c4"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "restore",
+    "batch"
+  ],
+  "screen": "Studio",
+  "looks_like": "Removed batches lists Restore and Remove beside each batch."
+}

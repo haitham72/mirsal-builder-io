@@ -1,0 +1,37 @@
+{
+  "id": "F005",
+  "status": "draft",
+  "title": "Why does my account say Waiting for approval",
+  "question": "Why does my account say Waiting for approval?",
+  "answer": "Your account has not been approved yet. Keep the waiting page open; it opens the app by itself after approval. Help opens only after approval, so if this page does not change, ask an admin of your office's Mirsal to approve you.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "accounts/waiting-approval.md"
+    }
+  ],
+  "created": 1791192285.099,
+  "history": [
+    {
+      "ts": 1791192285.099,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "accounts/waiting-approval.md"
+    }
+  ],
+  "updated": 1791192285.116,
+  "seed": {
+    "path": "accounts/waiting-approval.md",
+    "sha": "443be255be65143747a115b0e4c536b9948624dd2bad857fefa0bb306123e4fb"
+  },
+  "category": "accounts",
+  "tags": [
+    "accounts",
+    "waiting",
+    "approval"
+  ],
+  "screen": "Sign in",
+  "looks_like": "Waiting for approval appears with a Sign out button."
+}

@@ -380,7 +380,7 @@
               "9": 0.987
             },
             "bad": [],
-            "ms": 45.4
+            "ms": 64.3
           }
         },
         {
@@ -690,18 +690,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.5,
+        "threshold": 118.5,
         "ms": {
-          "decode": 446,
-          "key": 403,
-          "bounds": 158,
-          "render": 1172,
-          "seam": 1433,
-          "encode": 25997,
-          "encodes": 2,
-          "probe": 260,
-          "verify": 18,
-          "finish": 29041
+          "decode": 663,
+          "key": 573,
+          "bounds": 155,
+          "render": 1743,
+          "seam": 983,
+          "encode": 3704,
+          "encodes": 4,
+          "probe": 225,
+          "verify": 52,
+          "finish": 6865
         },
         "frames": 72,
         "fps": 24.0,
@@ -720,14 +720,16 @@
         "scale": 0.9493,
         "motion": 31.61,
         "loop_seam_before": 182.31,
+        "loop_cut": 22,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 47.62,
-        "frames_out": 66,
-        "crf": 42,
+        "loop_limit": 51.55,
+        "frames_out": 44,
+        "crf": 34,
         "sharp_kept": 1.01,
         "detail_vs_still": 1.07,
         "soft_sigma": 0.0,
-        "kb": 199.3
+        "kb": 227.3
       },
       "webm": "slices/vid-anime_kitten-blowing_a_kiss-20261002T151237-4f7308.webm",
       "review": {
@@ -817,6 +819,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183682.565,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -843,7 +856,7 @@
             "frame": 8,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 49.0
+            "ms": 39.1
           }
         },
         {
@@ -857,16 +870,16 @@
           "data": {
             "frame": 2,
             "px": 7944,
-            "ms": 52.9
+            "ms": 53.9
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "199KB @crf42",
+          "detail": "227KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 199,
+          "value": 227,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -911,10 +924,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.83",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.83,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -953,17 +966,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 0.8
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 47.62",
+          "detail": "0.0 <= 51.55",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 47.62,
+          "limit": 51.55,
           "data": {
             "ms": 0.0
           }
@@ -977,7 +990,7 @@
           "value": 0.955,
           "limit": 0.5,
           "data": {
-            "ms": 3.9
+            "ms": 12.7
           }
         },
         {
@@ -995,13 +1008,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 7% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.073,
+          "value": 0.061,
           "limit": 0.35,
           "data": {
-            "ms": 13.6
+            "ms": 38.7
           }
         },
         {
@@ -1020,7 +1033,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 2,
@@ -1214,18 +1228,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.5,
+        "threshold": 118.5,
         "ms": {
-          "decode": 463,
-          "key": 393,
-          "bounds": 182,
-          "render": 1062,
-          "seam": 1207,
-          "encode": 24843,
-          "encodes": 2,
-          "probe": 234,
-          "verify": 25,
-          "finish": 27557
+          "decode": 637,
+          "key": 591,
+          "bounds": 164,
+          "render": 1663,
+          "seam": 1029,
+          "encode": 3126,
+          "encodes": 3,
+          "probe": 232,
+          "verify": 15,
+          "finish": 6233
         },
         "frames": 72,
         "fps": 24.0,
@@ -1241,16 +1255,18 @@
           "cross_slot"
         ],
         "scale": 1.0842,
-        "motion": 64.83,
-        "loop_seam_before": 173.64,
+        "motion": 64.79,
+        "loop_seam_before": 173.67,
+        "loop_cut": 20,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 112.6,
-        "frames_out": 66,
-        "crf": 46,
+        "loop_limit": 107.5,
+        "frames_out": 46,
+        "crf": 38,
         "sharp_kept": 1.0,
         "detail_vs_still": 1.08,
         "soft_sigma": 0.0,
-        "kb": 229.2
+        "kb": 242.1
       },
       "webm": "slices/vid-anime_kitten-laughing-20261002T151237-cc2946.webm",
       "review": {
@@ -1338,6 +1354,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183681.692,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -1364,30 +1391,30 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 48.8
+            "ms": 40.2
           }
         },
         {
           "name": "cross_slot",
           "ok": false,
-          "detail": "434px of foreign foreground, first at frame 0 (allowed by you)",
+          "detail": "432px of foreign foreground, first at frame 0 (allowed by you)",
           "severity": "WARN",
           "stage": "slot",
-          "value": 434,
+          "value": 432,
           "limit": 0,
           "data": {
             "frame": 0,
-            "px": 434,
-            "ms": 77.7
+            "px": 432,
+            "ms": 59.8
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "229KB @crf46",
+          "detail": "242KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 229,
+          "value": 242,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1432,10 +1459,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.92",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.92,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -1474,17 +1501,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 1.2
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 112.6",
+          "detail": "0.0 <= 107.5",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 112.6,
+          "limit": 107.5,
           "data": {
             "ms": 0.0
           }
@@ -1495,19 +1522,19 @@
           "detail": "first frame matches the still at IoU 0.98",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.979,
+          "value": 0.978,
           "limit": 0.5,
           "data": {
-            "ms": 5.7
+            "ms": 3.4
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 64.83",
+          "detail": "median frame-to-frame change 64.79",
           "severity": "WARN",
           "stage": "anim",
-          "value": 64.83,
+          "value": 64.79,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -1516,13 +1543,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 9% over the frames",
+          "detail": "subject area varies by 8% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.089,
+          "value": 0.084,
           "limit": 0.35,
           "data": {
-            "ms": 18.6
+            "ms": 10.6
           }
         },
         {
@@ -1540,7 +1567,8 @@
       ],
       "anim_override": [
         "cross_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 3,
@@ -1734,18 +1762,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.5,
+        "threshold": 118.5,
         "ms": {
-          "decode": 449,
-          "key": 384,
-          "bounds": 161,
-          "render": 1210,
-          "seam": 608,
-          "encode": 4931,
-          "encodes": 2,
-          "probe": 239,
-          "verify": 13,
-          "finish": 7166
+          "decode": 662,
+          "key": 573,
+          "bounds": 154,
+          "render": 1659,
+          "seam": 1114,
+          "encode": 3606,
+          "encodes": 3,
+          "probe": 223,
+          "verify": 71,
+          "finish": 6831
         },
         "frames": 72,
         "fps": 24.0,
@@ -1758,16 +1786,18 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 334,
         "scale": 1.188,
-        "motion": 22.85,
-        "loop_seam_before": 92.21,
+        "motion": 22.81,
+        "loop_seam_before": 92.2,
+        "loop_cut": 6,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 34.55,
-        "frames_out": 66,
-        "crf": 42,
+        "loop_limit": 33.89,
+        "frames_out": 60,
+        "crf": 38,
         "sharp_kept": 0.99,
         "detail_vs_still": 1.01,
         "soft_sigma": 0.0,
-        "kb": 199.0
+        "kb": 238.9
       },
       "webm": "slices/vid-anime_kitten-in_love-20261002T151237-396599.webm",
       "review": {
@@ -1823,6 +1853,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183682.343,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -1849,7 +1890,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 49.5
+            "ms": 40.0
           }
         },
         {
@@ -1863,16 +1904,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 54.5
+            "ms": 51.4
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "198KB @crf42",
+          "detail": "238KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 198,
+          "value": 238,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1917,10 +1958,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.5",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.5,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -1959,17 +2000,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 1.0
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 34.55",
+          "detail": "0.0 <= 33.89",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 34.55,
+          "limit": 33.89,
           "data": {
             "ms": 0.0
           }
@@ -1983,16 +2024,16 @@
           "value": 0.991,
           "limit": 0.5,
           "data": {
-            "ms": 3.3
+            "ms": 6.8
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 22.85",
+          "detail": "median frame-to-frame change 22.81",
           "severity": "WARN",
           "stage": "anim",
-          "value": 22.85,
+          "value": 22.81,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2001,13 +2042,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 1% over the frames",
+          "detail": "subject area varies by 2% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.014,
+          "value": 0.015,
           "limit": 0.35,
           "data": {
-            "ms": 9.4
+            "ms": 63.4
           }
         },
         {
@@ -2022,7 +2063,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 4,
@@ -2216,18 +2258,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.5,
+        "threshold": 118.5,
         "ms": {
-          "decode": 449,
-          "key": 400,
-          "bounds": 161,
-          "render": 1128,
-          "seam": 1211,
-          "encode": 29962,
+          "decode": 652,
+          "key": 582,
+          "bounds": 158,
+          "render": 1683,
+          "seam": 605,
+          "encode": 3475,
           "encodes": 3,
-          "probe": 214,
-          "verify": 25,
-          "finish": 32704
+          "probe": 208,
+          "verify": 17,
+          "finish": 6149
         },
         "frames": 72,
         "fps": 24.0,
@@ -2244,16 +2286,17 @@
           "cross_slot"
         ],
         "scale": 0.8267,
-        "motion": 89.45,
-        "loop_seam_before": 263.93,
-        "loop_seam": 0.0,
-        "loop_limit": 101.53,
-        "frames_out": 66,
+        "motion": 89.43,
+        "loop_seam_before": 263.99,
+        "loop_cut": 8,
+        "loop_seam": 79.02,
+        "loop_limit": 109.78,
+        "frames_out": 64,
         "crf": 38,
         "sharp_kept": 0.99,
         "detail_vs_still": 1.2,
         "soft_sigma": 0.0,
-        "kb": 232.7
+        "kb": 220.8
       },
       "webm": "slices/vid-anime_kitten-winner-20261002T151237-1c4288.webm",
       "review": {
@@ -2343,6 +2386,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183681.527,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -2369,7 +2423,7 @@
             "frame": 24,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 49.9
+            "ms": 41.5
           }
         },
         {
@@ -2383,16 +2437,16 @@
           "data": {
             "frame": 24,
             "px": 1840,
-            "ms": 54.6
+            "ms": 54.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "232KB @crf38",
+          "detail": "220KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 232,
+          "value": 220,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2437,10 +2491,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.67",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.67,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2479,17 +2533,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 0.8
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 101.53",
+          "detail": "79.02 <= 109.78",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 0.0,
-          "limit": 101.53,
+          "value": 79.02,
+          "limit": 109.78,
           "data": {
             "ms": 0.0
           }
@@ -2503,16 +2557,16 @@
           "value": 0.965,
           "limit": 0.5,
           "data": {
-            "ms": 3.9
+            "ms": 2.0
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 89.45",
+          "detail": "median frame-to-frame change 89.43",
           "severity": "WARN",
           "stage": "anim",
-          "value": 89.45,
+          "value": 89.43,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2521,13 +2575,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 7% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.069,
+          "value": 0.065,
           "limit": 0.35,
           "data": {
-            "ms": 20.4
+            "ms": 14.5
           }
         },
         {
@@ -2546,7 +2600,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 5,
@@ -2740,18 +2795,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 486,
-          "key": 370,
-          "bounds": 156,
-          "render": 1030,
-          "seam": 727,
-          "encode": 30590,
+          "decode": 677,
+          "key": 572,
+          "bounds": 145,
+          "render": 1572,
+          "seam": 1031,
+          "encode": 4272,
           "encodes": 4,
-          "probe": 214,
-          "verify": 12,
-          "finish": 32731
+          "probe": 310,
+          "verify": 20,
+          "finish": 7356
         },
         "frames": 72,
         "fps": 24.0,
@@ -2768,16 +2823,18 @@
           "cross_slot"
         ],
         "scale": 0.9538,
-        "motion": 10.76,
-        "loop_seam_before": 148.64,
+        "motion": 10.75,
+        "loop_seam_before": 148.65,
+        "loop_cut": 3,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 16.17,
-        "frames_out": 66,
+        "loop_limit": 16.27,
+        "frames_out": 63,
         "crf": 30,
         "sharp_kept": 0.99,
         "detail_vs_still": 1.12,
         "soft_sigma": 0.0,
-        "kb": 240.4
+        "kb": 227.5
       },
       "webm": "slices/vid-anime_kitten-eye_roll-20261002T151237-3a5b38.webm",
       "review": {
@@ -2867,6 +2924,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183682.76,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -2893,30 +2961,30 @@
             "frame": 59,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 48.3
+            "ms": 39.9
           }
         },
         {
           "name": "cross_slot",
           "ok": false,
-          "detail": "635px of foreign foreground, first at frame 59 (allowed by you)",
+          "detail": "636px of foreign foreground, first at frame 59 (allowed by you)",
           "severity": "WARN",
           "stage": "slot",
-          "value": 635,
+          "value": 636,
           "limit": 0,
           "data": {
             "frame": 59,
-            "px": 635,
+            "px": 636,
             "ms": 52.3
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "240KB @crf30",
+          "detail": "227KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 240,
+          "value": 227,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2961,10 +3029,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.63",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.63,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -3003,17 +3071,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 1.1
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 16.17",
+          "detail": "0.0 <= 16.27",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 16.17,
+          "limit": 16.27,
           "data": {
             "ms": 0.0
           }
@@ -3027,16 +3095,16 @@
           "value": 0.978,
           "limit": 0.5,
           "data": {
-            "ms": 3.1
+            "ms": 2.9
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 10.76",
+          "detail": "median frame-to-frame change 10.75",
           "severity": "WARN",
           "stage": "anim",
-          "value": 10.76,
+          "value": 10.75,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -3045,13 +3113,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 4% over the frames",
+          "detail": "subject area varies by 3% over the frames",
           "severity": "WARN",
           "stage": "anim",
           "value": 0.035,
           "limit": 0.35,
           "data": {
-            "ms": 8.5
+            "ms": 16.5
           }
         },
         {
@@ -3070,7 +3138,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 6,
@@ -3264,18 +3333,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.5,
         "ms": {
-          "decode": 438,
-          "key": 382,
-          "bounds": 158,
-          "render": 1234,
-          "seam": 665,
-          "encode": 8391,
+          "decode": 675,
+          "key": 575,
+          "bounds": 142,
+          "render": 1684,
+          "seam": 982,
+          "encode": 3655,
           "encodes": 4,
-          "probe": 216,
-          "verify": 12,
-          "finish": 10679
+          "probe": 250,
+          "verify": 48,
+          "finish": 6765
         },
         "frames": 72,
         "fps": 24.0,
@@ -3288,16 +3357,18 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 336,
         "scale": 1.181,
-        "motion": 2.73,
-        "loop_seam_before": 233.49,
+        "motion": 2.72,
+        "loop_seam_before": 233.6,
+        "loop_cut": 22,
+        "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
-        "frames_out": 66,
+        "frames_out": 44,
         "crf": 30,
         "sharp_kept": 0.99,
         "detail_vs_still": 1.01,
         "soft_sigma": 0.0,
-        "kb": 236.0
+        "kb": 99.4
       },
       "webm": "slices/vid-anime_kitten-sad-20261002T151237-212b79.webm",
       "review": {
@@ -3353,6 +3424,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183682.163,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -3379,7 +3461,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 48.8
+            "ms": 38.9
           }
         },
         {
@@ -3393,16 +3475,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 51.5
+            "ms": 51.0
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "235KB @crf30",
+          "detail": "99KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 235,
+          "value": 99,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3447,10 +3529,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.83",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.83,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -3489,7 +3571,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 4.7
           }
         },
         {
@@ -3510,19 +3592,19 @@
           "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.989,
+          "value": 0.988,
           "limit": 0.5,
           "data": {
-            "ms": 3.5
+            "ms": 8.7
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 2.73",
+          "detail": "median frame-to-frame change 2.72",
           "severity": "WARN",
           "stage": "anim",
-          "value": 2.73,
+          "value": 2.72,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -3531,13 +3613,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 6% over the frames",
+          "detail": "subject area varies by 0% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.056,
+          "value": 0.003,
           "limit": 0.35,
           "data": {
-            "ms": 8.1
+            "ms": 35.2
           }
         },
         {
@@ -3552,7 +3634,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 7,
@@ -3746,18 +3829,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.5,
+        "threshold": 118.5,
         "ms": {
-          "decode": 437,
-          "key": 407,
-          "bounds": 170,
-          "render": 1188,
-          "seam": 1317,
-          "encode": 26157,
-          "encodes": 2,
-          "probe": 231,
-          "verify": 18,
-          "finish": 29084
+          "decode": 269,
+          "key": 696,
+          "bounds": 193,
+          "render": 1532,
+          "seam": 914,
+          "encode": 2566,
+          "encodes": 3,
+          "probe": 180,
+          "verify": 13,
+          "finish": 5402
         },
         "frames": 72,
         "fps": 24.0,
@@ -3774,16 +3857,18 @@
           "cross_slot"
         ],
         "scale": 0.8857,
-        "motion": 61.04,
-        "loop_seam_before": 155.71,
+        "motion": 61.06,
+        "loop_seam_before": 155.68,
+        "loop_cut": 13,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 84.71,
-        "frames_out": 66,
-        "crf": 42,
+        "loop_limit": 68.83,
+        "frames_out": 53,
+        "crf": 38,
         "sharp_kept": 1.0,
         "detail_vs_still": 1.16,
         "soft_sigma": 0.0,
-        "kb": 245.2
+        "kb": 243.2
       },
       "webm": "slices/vid-anime_kitten-angry-20261002T151237-2b2450.webm",
       "review": {
@@ -3873,6 +3958,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183688.073,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -3899,30 +3995,30 @@
             "frame": 24,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 51.3
+            "ms": 68.6
           }
         },
         {
           "name": "cross_slot",
           "ok": false,
-          "detail": "10340px of foreign foreground, first at frame 3 (allowed by you)",
+          "detail": "10336px of foreign foreground, first at frame 3 (allowed by you)",
           "severity": "WARN",
           "stage": "slot",
-          "value": 10340,
+          "value": 10336,
           "limit": 0,
           "data": {
             "frame": 3,
-            "px": 10340,
-            "ms": 62.6
+            "px": 10336,
+            "ms": 57.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "245KB @crf42",
+          "detail": "243KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 245,
+          "value": 243,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3967,10 +4063,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.21",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.21,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -4015,11 +4111,11 @@
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 84.71",
+          "detail": "0.0 <= 68.83",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 84.71,
+          "limit": 68.83,
           "data": {
             "ms": 0.0
           }
@@ -4033,16 +4129,16 @@
           "value": 0.948,
           "limit": 0.5,
           "data": {
-            "ms": 3.8
+            "ms": 1.9
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 61.04",
+          "detail": "median frame-to-frame change 61.06",
           "severity": "WARN",
           "stage": "anim",
-          "value": 61.04,
+          "value": 61.06,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -4054,10 +4150,10 @@
           "detail": "subject area varies by 11% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.107,
+          "value": 0.112,
           "limit": 0.35,
           "data": {
-            "ms": 14.4
+            "ms": 10.5
           }
         },
         {
@@ -4076,7 +4172,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 8,
@@ -4270,18 +4367,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.5,
+        "threshold": 118.5,
         "ms": {
-          "decode": 445,
-          "key": 395,
-          "bounds": 164,
-          "render": 1131,
-          "seam": 1332,
-          "encode": 29893,
-          "encodes": 3,
-          "probe": 216,
-          "verify": 13,
-          "finish": 32754
+          "decode": 296,
+          "key": 581,
+          "bounds": 139,
+          "render": 1452,
+          "seam": 792,
+          "encode": 2952,
+          "encodes": 4,
+          "probe": 181,
+          "verify": 12,
+          "finish": 5533
         },
         "frames": 72,
         "fps": 24.0,
@@ -4298,16 +4395,18 @@
           "cross_slot"
         ],
         "scale": 0.8897,
-        "motion": 39.06,
-        "loop_seam_before": 243.33,
+        "motion": 39.07,
+        "loop_seam_before": 243.36,
+        "loop_cut": 17,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 55.83,
-        "frames_out": 66,
-        "crf": 38,
+        "loop_limit": 49.99,
+        "frames_out": 49,
+        "crf": 30,
         "sharp_kept": 1.0,
-        "detail_vs_still": 1.16,
+        "detail_vs_still": 1.15,
         "soft_sigma": 0.0,
-        "kb": 241.4
+        "kb": 249.4
       },
       "webm": "slices/vid-anime_kitten-mind_blown-20261002T151237-94123f.webm",
       "review": {
@@ -4397,6 +4496,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183688.37,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -4423,7 +4533,7 @@
             "frame": 57,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 50.0
+            "ms": 42.2
           }
         },
         {
@@ -4437,16 +4547,16 @@
           "data": {
             "frame": 54,
             "px": 1212,
-            "ms": 59.7
+            "ms": 49.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "241KB @crf38",
+          "detail": "249KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 241,
+          "value": 249,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4491,10 +4601,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.04",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.04,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -4533,17 +4643,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 55.83",
+          "detail": "0.0 <= 49.99",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 55.83,
+          "limit": 49.99,
           "data": {
             "ms": 0.0
           }
@@ -4557,16 +4667,16 @@
           "value": 0.983,
           "limit": 0.5,
           "data": {
-            "ms": 2.7
+            "ms": 1.8
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 39.06",
+          "detail": "median frame-to-frame change 39.07",
           "severity": "WARN",
           "stage": "anim",
-          "value": 39.06,
+          "value": 39.07,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -4575,13 +4685,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 13% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.134,
+          "value": 0.061,
           "limit": 0.35,
           "data": {
-            "ms": 10.2
+            "ms": 10.4
           }
         },
         {
@@ -4600,7 +4710,8 @@
       "anim_override": [
         "cross_slot",
         "inside_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 9,
@@ -4794,18 +4905,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.5,
+        "threshold": 118.5,
         "ms": {
-          "decode": 247,
-          "key": 253,
-          "bounds": 153,
-          "render": 996,
-          "seam": 706,
-          "encode": 7764,
+          "decode": 305,
+          "key": 397,
+          "bounds": 121,
+          "render": 1331,
+          "seam": 936,
+          "encode": 3432,
           "encodes": 4,
-          "probe": 264,
-          "verify": 11,
-          "finish": 9898
+          "probe": 174,
+          "verify": 15,
+          "finish": 6013
         },
         "frames": 72,
         "fps": 24.0,
@@ -4818,8 +4929,9 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 348,
         "scale": 1.1402,
-        "motion": 0.88,
-        "loop_seam_before": 33.61,
+        "motion": 0.92,
+        "loop_seam_before": 33.65,
+        "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
         "frames_out": 66,
@@ -4827,7 +4939,7 @@
         "sharp_kept": 0.99,
         "detail_vs_still": 1.03,
         "soft_sigma": 0.0,
-        "kb": 182.5
+        "kb": 177.8
       },
       "webm": "slices/vid-anime_kitten-cool-20261002T151237-69eea9.webm",
       "review": {
@@ -4883,6 +4995,17 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183689.074,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "judge": {
@@ -4909,7 +5032,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 48.5
+            "ms": 37.1
           }
         },
         {
@@ -4923,16 +5046,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 45.8
+            "ms": 42.0
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "182KB @crf30",
+          "detail": "177KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 182,
+          "value": 177,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -5019,7 +5142,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 0.7
           }
         },
         {
@@ -5043,16 +5166,16 @@
           "value": 0.987,
           "limit": 0.5,
           "data": {
-            "ms": 3.0
+            "ms": 1.8
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 0.88",
+          "detail": "median frame-to-frame change 0.92",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.88,
+          "value": 0.92,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -5067,7 +5190,7 @@
           "value": 0.019,
           "limit": 0.35,
           "data": {
-            "ms": 8.3
+            "ms": 13.1
           }
         },
         {
@@ -5082,7 +5205,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     }
   ]
 }

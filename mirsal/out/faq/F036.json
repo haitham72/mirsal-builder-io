@@ -1,0 +1,37 @@
+{
+  "id": "F036",
+  "status": "draft",
+  "title": "Can I make particles without spending credits",
+  "question": "Can I make particles without spending credits?",
+  "answer": "Choose Sprites from the sticker and select existing artwork. Use selected · free reuses those sprites without a paid generation. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/free-source.md"
+    }
+  ],
+  "created": 1791192286.042,
+  "history": [
+    {
+      "ts": 1791192286.042,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/free-source.md"
+    }
+  ],
+  "updated": 1791192286.056,
+  "seed": {
+    "path": "particles/free-source.md",
+    "sha": "87258862526e1edc796c68d4fdedf8e1fc526e453690e3364946afb44025c11f"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "free",
+    "source"
+  ],
+  "screen": "Library > Particles",
+  "looks_like": "The source card says Sprites from the sticker and Use selected · free."
+}

@@ -71,3 +71,8 @@ mirsal/out/tickets/
 mirsal/out/trending.json
 # what the chat knows about each person (name, place, age, likes): personal, never committed (agent/profile.py)
 mirsal/out/profile/
+
+# runtime temp (Haitham, 2026-10-05: commit the media and batch data, never the temp)
+mirsal/out/cache/
+mirsal/out/reloop-backups/
+mirsal/out/support/index.json

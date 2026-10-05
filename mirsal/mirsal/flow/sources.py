@@ -11,6 +11,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import os
+
 IMG_EXT = {".jpg", ".jpeg", ".png", ".webp"}
 VID_EXT = {".mp4", ".mov", ".webm", ".mkv"}
 CLIP_EXT = {".mov": "mov", ".webm": "webm", ".mp4": "mp4"}
@@ -110,14 +112,70 @@ def scan(root: Path) -> dict[str, list[Pick]]:
 
 
 def find(root: Path, prompt: str, variant: int = 1) -> Pick | None:
-    words = set(re.findall(r"[a-z0-9]+", prompt.lower()))
-    words |= {w.rstrip("s") for w in words}
+    subject = match_subject(root, prompt)
+    if not subject:
+        return None
+    picks = scan(root)[subject]
+    return picks[min(max(variant, 1), len(picks)) - 1]
+
+
+STOPWORDS = {"generic"}         # words of a folder name that never match on their own ("generic emojis" is matched by "emoji")
+
+
+def words_of(text: str) -> set[str]:
+    """Whole singularised words of a request or a folder name (`emojis` and `emoji` are the same word)."""
+    out = set()
+    for w in re.findall(r"[a-z0-9]+", str(text or "").lower()):
+        out.add(w)
+        if len(w) > 3 and w.endswith("s") and not w.endswith("ss"):
+            out.add(w[:-1])
+    return out
+
+
+def match_subject(root: Path, prompt: str) -> str | None:
+    """The prepared subject a request names, or None. A whole signature word of the folder name (not a shared
+    filler word) must appear as a whole word of the request: "teddy bear", "teddy" and "emoji"/"emojis" all match,
+    and so do the near-misses "bear in a teddy costume" and "emoji keyboard" (Haitham, 2026-10-05: whole-word
+    signature match). Best (most shared words) wins; ties keep scan order."""
+    want = words_of(prompt)
     best, best_score = None, 0
-    for subject, picks in scan(root).items():
-        score = len(set(subject.split("_")) & words)
-        if picks and score > best_score:
-            best, best_score = picks, score
-    return best[min(max(variant, 1), len(best)) - 1] if best else None
+    for subject in scan(root):
+        sig = {w for w in words_of(subject.replace("_", " ")) if w not in STOPWORDS}
+        score = len(sig & want)
+        if score > best_score:
+            best, best_score = subject, score
+    return best
+
+
+def _pref_file(out: Path) -> Path:
+    return Path(out) / "prepared.json"
+
+
+def prefer_prepared(out: Path) -> bool:
+    """Serve a matching request from the watch folder instead of a paid call (default on). `MIRSAL_PREFER_PREPARED`
+    wins when it is set (0/no/off/false = off, anything else = on); else the owner's Settings switch
+    (`out/prepared.json`, written by POST /api/prepared/setting); else on."""
+    raw = str(os.environ.get("MIRSAL_PREFER_PREPARED") or "").strip().lower()
+    if raw:
+        return raw not in ("0", "no", "off", "false")
+    try:
+        import json
+        d = json.loads((_pref_file(out)).read_text(encoding="utf-8"))
+        if isinstance(d, dict) and isinstance(d.get("prefer"), bool):
+            return d["prefer"]
+    except (OSError, ValueError):
+        pass
+    return True
+
+
+def set_prefer_prepared(out: Path, prefer: bool) -> bool:
+    """The owner's Settings switch (rule 6: it is read by every prepared decision). Returns what was stored."""
+    import json
+    from ..runtime import atomic
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    atomic.write_text(_pref_file(out), json.dumps({"prefer": bool(prefer)}))
+    return bool(prefer)
 
 
 def variant_of(root: Path, subject: str, variant: int) -> Pick | None:

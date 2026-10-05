@@ -166,42 +166,6 @@
       "pack_id": "fab32429",
       "generation": "G001",
       "index": 7
-    },
-    {
-      "sticker_id": "7c00f84a",
-      "pack_id": "7f7b2e70",
-      "generation": "G001",
-      "index": 1
-    },
-    {
-      "sticker_id": "7f6ddedc",
-      "pack_id": "7f7b2e70",
-      "generation": "G001",
-      "index": 3
-    },
-    {
-      "sticker_id": "c9148c04",
-      "pack_id": "7f7b2e70",
-      "generation": "G001",
-      "index": 4
-    },
-    {
-      "sticker_id": "5e9f5412",
-      "pack_id": "7f7b2e70",
-      "generation": "G001",
-      "index": 5
-    },
-    {
-      "sticker_id": "eae10b30",
-      "pack_id": "7f7b2e70",
-      "generation": "G001",
-      "index": 6
-    },
-    {
-      "sticker_id": "a05764ac",
-      "pack_id": "7f7b2e70",
-      "generation": "G001",
-      "index": 7
     }
   ],
   "renders": [],
@@ -226,5 +190,6 @@
     "E016/R002",
     "E016/R003",
     "E016/R004"
-  ]
+  ],
+  "updated": 1791180010.837
 }

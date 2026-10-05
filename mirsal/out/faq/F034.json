@@ -1,0 +1,37 @@
+{
+  "id": "F034",
+  "status": "draft",
+  "title": "Does Add more replace my existing particle sprites",
+  "question": "Does Add more replace my existing particle sprites?",
+  "answer": "Add more appends sprites to the set you have open. Existing sprites are preserved, and a set can contain both image and video sources. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/add-more.md"
+    }
+  ],
+  "created": 1791192285.979,
+  "history": [
+    {
+      "ts": 1791192285.979,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/add-more.md"
+    }
+  ],
+  "updated": 1791192285.994,
+  "seed": {
+    "path": "particles/add-more.md",
+    "sha": "76c0bbeb2b9e32dc748a6c041bb8dd25a50be540792872fa6732e7bd3335af72"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "add",
+    "more"
+  ],
+  "screen": "Library > Particles",
+  "looks_like": "The open particle set offers Add more."
+}

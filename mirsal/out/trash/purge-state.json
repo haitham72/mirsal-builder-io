@@ -1,149 +1,43 @@
 {
-  "id": "PG001",
+  "id": "PG002",
   "status": "done",
-  "total": 6,
-  "done": 6,
+  "total": 2,
+  "done": 2,
   "items": [
     {
-      "kind": "batch",
-      "id": "G006"
-    },
-    {
-      "kind": "batch",
-      "id": "G007"
-    },
-    {
-      "kind": "batch",
-      "id": "G011"
-    },
-    {
-      "kind": "batch",
-      "id": "G094"
-    },
-    {
-      "kind": "batch",
-      "id": "G098"
+      "kind": "pack",
+      "id": "7f7b2e70"
     },
     {
       "kind": "pack",
-      "id": "111a98d8"
+      "id": "49468197"
     }
   ],
   "results": [
     {
-      "kind": "batch",
-      "id": "G006",
-      "number": 6,
-      "files": 5,
-      "bytes": 8912229,
-      "database": {
-        "available": true,
-        "indexed": 0,
-        "assets": 0,
-        "events": 0,
-        "stickers_deleted": 0,
-        "stickers_tombstoned": 0,
-        "video_sheets_deleted": 0,
-        "generation_deleted": false,
-        "generation_tombstoned": false,
-        "reviews_kept": 0
-      },
-      "ok": true
-    },
-    {
-      "kind": "batch",
-      "id": "G007",
-      "number": 7,
-      "files": 5,
-      "bytes": 9822899,
-      "database": {
-        "available": true,
-        "indexed": 0,
-        "assets": 0,
-        "events": 0,
-        "stickers_deleted": 0,
-        "stickers_tombstoned": 0,
-        "video_sheets_deleted": 0,
-        "generation_deleted": false,
-        "generation_tombstoned": false,
-        "reviews_kept": 0
-      },
-      "ok": true
-    },
-    {
-      "kind": "batch",
-      "id": "G011",
-      "number": 11,
-      "files": 5,
-      "bytes": 10067392,
-      "database": {
-        "available": true,
-        "indexed": 0,
-        "assets": 0,
-        "events": 0,
-        "stickers_deleted": 0,
-        "stickers_tombstoned": 0,
-        "video_sheets_deleted": 0,
-        "generation_deleted": false,
-        "generation_tombstoned": false,
-        "reviews_kept": 0
-      },
-      "ok": true
-    },
-    {
-      "kind": "batch",
-      "id": "G094",
-      "number": 94,
-      "files": 4,
-      "bytes": 4347952,
-      "database": {
-        "available": true,
-        "indexed": 0,
-        "assets": 0,
-        "events": 0,
-        "stickers_deleted": 0,
-        "stickers_tombstoned": 0,
-        "video_sheets_deleted": 0,
-        "generation_deleted": false,
-        "generation_tombstoned": false,
-        "reviews_kept": 0
-      },
-      "ok": true
-    },
-    {
-      "kind": "batch",
-      "id": "G098",
-      "number": 98,
-      "files": 4,
-      "bytes": 4180122,
-      "database": {
-        "available": true,
-        "indexed": 0,
-        "assets": 0,
-        "events": 0,
-        "stickers_deleted": 0,
-        "stickers_tombstoned": 0,
-        "video_sheets_deleted": 0,
-        "generation_deleted": false,
-        "generation_tombstoned": false,
-        "reviews_kept": 0
-      },
-      "ok": true
-    },
-    {
       "kind": "pack",
-      "id": "111a98d8",
-      "name": "Barbie Doll Particles",
+      "id": "7f7b2e70",
+      "name": "Angel Reading Newspaper 2",
       "stickers": 0,
       "bytes": 0,
       "kept_shared": [],
       "files": 0,
+      "ok": true
+    },
+    {
+      "kind": "pack",
+      "id": "49468197",
+      "name": "Superhero Dubai 2",
+      "stickers": 4,
+      "bytes": 926181,
+      "kept_shared": [],
+      "files": 4,
       "ok": true
     }
   ],
   "refused": [],
   "error": null,
   "by": "local",
-  "started": 1791085026.558,
-  "finished": 1791085026.618
+  "started": 1791187027.148,
+  "finished": 1791187027.196
 }

@@ -1,0 +1,37 @@
+{
+  "id": "F052",
+  "status": "draft",
+  "title": "What does Use it anyway do on a blocked sticker",
+  "question": "What does Use it anyway do on a blocked sticker?",
+  "answer": "Use it anyway lets you allow a judgement-call block, such as the picture touching its cell boundary. The warning remains as allowed by you, and you can undo that choice with Take it back. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/use-anyway.md"
+    }
+  ],
+  "created": 1791192286.52,
+  "history": [
+    {
+      "ts": 1791192286.52,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/use-anyway.md"
+    }
+  ],
+  "updated": 1791192286.534,
+  "seed": {
+    "path": "studio/use-anyway.md",
+    "sha": "c37b228bd33c77d4f69c8f31a40285509fede324ab896ef28e87599f3a16feb5"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "use",
+    "anyway"
+  ],
+  "screen": "Studio",
+  "looks_like": "A blocked sticker shows its picture, a reason and Use it anyway."
+}

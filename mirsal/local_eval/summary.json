@@ -1,0 +1,17 @@
+{
+  "model": "qwen/qwen3.5-9b",
+  "endpoint": "http://localhost:1234/api/v1/chat",
+  "prepared": 30,
+  "completed": 30,
+  "decisions": {
+    "APPROVE": 24,
+    "UNJUDGED": 5,
+    "REJECT": 1
+  },
+  "valid_json": 25,
+  "human_labelled_cases": 0,
+  "labelled_cases_run": 0,
+  "human_agreement": null,
+  "quality_calibrated": false,
+  "median_seconds": 10.437
+}

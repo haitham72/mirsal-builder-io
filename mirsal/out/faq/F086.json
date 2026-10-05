@@ -1,0 +1,37 @@
+{
+  "id": "F086",
+  "status": "draft",
+  "title": "How do I start a separate issue in Help",
+  "question": "How do I start a separate issue in Help?",
+  "answer": "Use the New question button in Help to start a separate conversation. Describe what you did, what you expected and what happened; keep follow-up details about an existing problem in its original conversation. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/new-question.md"
+    }
+  ],
+  "created": 1791193753.249,
+  "history": [
+    {
+      "ts": 1791193753.249,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/new-question.md"
+    }
+  ],
+  "updated": 1791193753.265,
+  "seed": {
+    "path": "troubleshooting/new-question.md",
+    "sha": "ab3ae0e970518b6788a8dc00d5f41ef6c5440c850ffb541f201f4f908b3c4d96"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "new",
+    "question"
+  ],
+  "screen": "Help",
+  "looks_like": "Help has a New question button; a fresh conversation is headed How can we help?"
+}

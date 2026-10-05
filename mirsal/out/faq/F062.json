@@ -1,0 +1,37 @@
+{
+  "id": "F062",
+  "status": "draft",
+  "title": "What do I do when Help has no answer",
+  "question": "What do I do when Help has no answer?",
+  "answer": "Press Send to support when Help says it has no answer. This raises the issue for a person, and their reply appears in the conversation with a notification. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/no-answer.md"
+    }
+  ],
+  "created": 1791192286.818,
+  "history": [
+    {
+      "ts": 1791192286.818,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/no-answer.md"
+    }
+  ],
+  "updated": 1791192286.834,
+  "seed": {
+    "path": "troubleshooting/no-answer.md",
+    "sha": "b201106c7d013d02fb11b7fdde691b6291c79caf97be792b2def13c072fd2bb5"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "no",
+    "answer"
+  ],
+  "screen": "Help",
+  "looks_like": "Nothing in the help answers this yet. appears beside Send to support."
+}

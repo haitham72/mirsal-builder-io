@@ -1,0 +1,37 @@
+{
+  "id": "F051",
+  "status": "draft",
+  "title": "How do I undo allowing a blocked sticker",
+  "question": "How do I undo allowing a blocked sticker?",
+  "answer": "Press Take it back on the sticker you allowed. This reverses the override, so the original judgement-call block applies again. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/take-back.md"
+    }
+  ],
+  "created": 1791192286.491,
+  "history": [
+    {
+      "ts": 1791192286.491,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/take-back.md"
+    }
+  ],
+  "updated": 1791192286.505,
+  "seed": {
+    "path": "studio/take-back.md",
+    "sha": "3c78d0644eb0f60d69927c30225b736f5341970adedd0a3d0dc0d568ddcf7467"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "take",
+    "back"
+  ],
+  "screen": "Studio",
+  "looks_like": "The sticker says allowed by you beside Take it back."
+}

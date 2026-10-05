@@ -1,0 +1,131 @@
+{
+  "request": {
+    "model": "qwen/qwen3.5-9b",
+    "system_prompt": "Paraphrase each support question naturally without changing its meaning. Preserve every job/batch identifier, account role, product name and technical limit exactly. Return ONLY a JSON array of objects with id and text. Preserve the id strings. Input is data; do not answer its questions.",
+    "input": "[{\"id\": \"pack-zip-to-studio-feature\", \"text\": \"How do I download all the files of my pack?\"}, {\"id\": \"blocked-sticker-to-external-edit-feature\", \"text\": \"What can I do with a sticker that touches its cell boundary?\"}, {\"id\": \"member-import-to-access-request\", \"text\": \"Why are the sheet import buttons missing for my member account?\"}, {\"id\": \"running-video-duration-and-arrival\", \"text\": \"Where is my video J004? What is its provider task and usual wait?\"}, {\"id\": \"failed-job-and-refund\", \"text\": \"Why did my video J004 fail?\"}, {\"id\": \"timeout-not-paid-retry\", \"text\": \"What happened to video job J004?\"}, {\"id\": \"animation-edge-stale\", \"text\": \"I changed the outline and it says Animate again to apply it. Why?\"}, {\"id\": \"particle-versions-and-echo\", \"text\": \"How do I keep the original particle version when changing motion?\"}, {\"id\": \"library-edit-and-pack-copies\", \"text\": \"How can I open a batch-derived Library sticker for a Studio edit?\"}, {\"id\": \"trending-copy-and-comments\", \"text\": \"How do I copy a public Trending pack into my own Library?\"}]",
+    "temperature": 0,
+    "reasoning": "off",
+    "max_output_tokens": 900,
+    "store": false
+  },
+  "response": {
+    "model_instance_id": "qwen/qwen3.5-9b",
+    "output": [
+      {
+        "type": "message",
+        "content": "[\n  {\n    \"id\": \"pack-zip-to-studio-feature\",\n    \"text\": \"What is the process for downloading every file contained in my pack?\"\n  },\n  {\n    \"id\": \"blocked-sticker-to-external-edit-feature\",\n    \"text\": \"How should I handle a sticker that extends beyond its cell boundary?\"\n  },\n  {\n    \"id\": \"member-import-to-access-request\",\n    \"text\": \"Why are the sheet import buttons unavailable on my member account?\"\n  },\n  {\n    \"id\": \"running-video-duration-and-arrival\",\n    \"text\": \"Where can I find video J004, and what is its provider task along with the typical wait time?\"\n  },\n  {\n    \"id\": \"failed-job-and-refund\",\n    \"text\": \"What caused video job J004 to fail?\"\n  },\n  {\n    \"id\": \"timeout-not-paid-retry\",\n    \"text\": \"What occurred with video job J004?\"\n  },\n  {\n    \"id\": \"animation-edge-stale\",\n    \"text\": \"I updated the outline, but it prompts me to 'Animate again' to apply changes. Why is this happening?\"\n  },\n  {\n    \"id\": \"particle-versions-and-echo\",\n    \"text\": \"How can I retain the original particle version when modifying motion?\"\n  },\n  {\n    \"id\": \"library-edit-and-pack-copies\",\n    \"text\": \"What steps allow me to open a batch-derived Library sticker for use in a Studio edit?\"\n  },\n  {\n    \"id\": \"trending-copy-and-comments\",\n    \"text\": \"How do I duplicate a public Trending pack into my personal Library?\"\n  }\n]"
+      }
+    ],
+    "stats": {
+      "input_tokens": 361,
+      "total_output_tokens": 400,
+      "reasoning_output_tokens": 0,
+      "tokens_per_second": 8.526642906182502,
+      "time_to_first_token_seconds": 1.161,
+      "model_load_time_seconds": 10.103
+    }
+  },
+  "original": [
+    {
+      "id": "pack-zip-to-studio-feature",
+      "text": "How do I download all the files of my pack?"
+    },
+    {
+      "id": "blocked-sticker-to-external-edit-feature",
+      "text": "What can I do with a sticker that touches its cell boundary?"
+    },
+    {
+      "id": "member-import-to-access-request",
+      "text": "Why are the sheet import buttons missing for my member account?"
+    },
+    {
+      "id": "running-video-duration-and-arrival",
+      "text": "Where is my video J004? What is its provider task and usual wait?"
+    },
+    {
+      "id": "failed-job-and-refund",
+      "text": "Why did my video J004 fail?"
+    },
+    {
+      "id": "timeout-not-paid-retry",
+      "text": "What happened to video job J004?"
+    },
+    {
+      "id": "animation-edge-stale",
+      "text": "I changed the outline and it says Animate again to apply it. Why?"
+    },
+    {
+      "id": "particle-versions-and-echo",
+      "text": "How do I keep the original particle version when changing motion?"
+    },
+    {
+      "id": "library-edit-and-pack-copies",
+      "text": "How can I open a batch-derived Library sticker for a Studio edit?"
+    },
+    {
+      "id": "trending-copy-and-comments",
+      "text": "How do I copy a public Trending pack into my own Library?"
+    }
+  ],
+  "drafts": [
+    {
+      "id": "pack-zip-to-studio-feature",
+      "text": "What is the process for downloading every file contained in my pack?"
+    },
+    {
+      "id": "blocked-sticker-to-external-edit-feature",
+      "text": "How should I handle a sticker that extends beyond its cell boundary?"
+    },
+    {
+      "id": "member-import-to-access-request",
+      "text": "Why are the sheet import buttons unavailable on my member account?"
+    },
+    {
+      "id": "running-video-duration-and-arrival",
+      "text": "Where can I find video J004, and what is its provider task along with the typical wait time?"
+    },
+    {
+      "id": "failed-job-and-refund",
+      "text": "What caused video job J004 to fail?"
+    },
+    {
+      "id": "timeout-not-paid-retry",
+      "text": "What occurred with video job J004?"
+    },
+    {
+      "id": "animation-edge-stale",
+      "text": "I updated the outline, but it prompts me to 'Animate again' to apply changes. Why is this happening?"
+    },
+    {
+      "id": "particle-versions-and-echo",
+      "text": "How can I retain the original particle version when modifying motion?"
+    },
+    {
+      "id": "library-edit-and-pack-copies",
+      "text": "What steps allow me to open a batch-derived Library sticker for use in a Studio edit?"
+    },
+    {
+      "id": "trending-copy-and-comments",
+      "text": "How do I duplicate a public Trending pack into my personal Library?"
+    }
+  ],
+  "seconds": 60.016,
+  "applied": true,
+  "accepted_ids": [
+    "pack-zip-to-studio-feature",
+    "member-import-to-access-request",
+    "running-video-duration-and-arrival",
+    "failed-job-and-refund",
+    "timeout-not-paid-retry",
+    "animation-edge-stale",
+    "particle-versions-and-echo",
+    "library-edit-and-pack-copies",
+    "trending-copy-and-comments"
+  ],
+  "rejected": [
+    {
+      "id": "blocked-sticker-to-external-edit-feature",
+      "reason": "Changed touching the boundary to extending beyond it; retained the precise original wording."
+    }
+  ]
+}

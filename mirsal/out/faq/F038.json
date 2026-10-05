@@ -1,0 +1,37 @@
+{
+  "id": "F038",
+  "status": "draft",
+  "title": "Which particle sources use credits",
+  "question": "Which particle sources use credits?",
+  "answer": "AI image sprites and Kling animated · from scratch create new artwork using credits. Check the quoted price before choosing Generate. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/paid-sources.md"
+    }
+  ],
+  "created": 1791192286.1,
+  "history": [
+    {
+      "ts": 1791192286.1,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/paid-sources.md"
+    }
+  ],
+  "updated": 1791192286.115,
+  "seed": {
+    "path": "particles/paid-sources.md",
+    "sha": "d1cefd81de762d3258d768eba47b28e6fa5d6b44b25b0185627e84c3fcb5b728"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "paid",
+    "sources"
+  ],
+  "screen": "Library > Particles",
+  "looks_like": "The source choices include AI image sprites and Kling animated · from scratch."
+}

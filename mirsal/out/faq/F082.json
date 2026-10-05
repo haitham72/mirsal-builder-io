@@ -1,0 +1,37 @@
+{
+  "id": "F082",
+  "status": "draft",
+  "title": "Will Help tell me when the job I asked about finishes",
+  "question": "Will Help tell me when the job I asked about finishes?",
+  "answer": "When an answer cites your running job, Help watches it. Once the app checks again and finds it finished, the conversation reports the result, offers the related batch when available, and resolves; you also get an update notification. This is tied to the job you asked about, not a guarantee of provider completion.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/job-arrival.md"
+    }
+  ],
+  "created": 1791193753.109,
+  "history": [
+    {
+      "ts": 1791193753.109,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/job-arrival.md"
+    }
+  ],
+  "updated": 1791193753.126,
+  "seed": {
+    "path": "troubleshooting/job-arrival.md",
+    "sha": "6ecadeb412e03517e86b46649b9eca8475fe6bd6bdb55e2627e0212d85f1a934"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "job",
+    "arrival"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

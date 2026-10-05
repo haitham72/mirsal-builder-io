@@ -1,0 +1,38 @@
+{
+  "id": "F076",
+  "status": "draft",
+  "title": "Does deleting a sticker pack destroy its particle sets",
+  "question": "Does deleting a sticker pack destroy its particle sets?",
+  "answer": "Deleting the pack does not destroy its particle sets. The sets stay in the Library, and a permanent pack removal detaches ownership links while retaining those sets.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/deleted-parent-pack.md"
+    }
+  ],
+  "created": 1791193752.898,
+  "history": [
+    {
+      "ts": 1791193752.898,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/deleted-parent-pack.md"
+    }
+  ],
+  "updated": 1791193752.915,
+  "seed": {
+    "path": "particles/deleted-parent-pack.md",
+    "sha": "0e9188d600662630a21f4df497250bf1e43e35bbeb0397e196fa0f7039e4be5d"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "deleted",
+    "parent",
+    "pack"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

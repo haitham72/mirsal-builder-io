@@ -1,0 +1,51 @@
+{
+ "id": "62fd639fdb",
+ "name": "Recovered particles · burst",
+ "type": "animated",
+ "version": 1,
+ "source": {
+  "file": "source.webm",
+  "kind": "video",
+  "w": 512,
+  "h": 512,
+  "aspect": 1.0,
+  "duration": 3.0,
+  "fps": 30.0,
+  "previewFps": 12.0,
+  "frames": 36,
+  "frameExt": "png",
+  "hasAlpha": true
+ },
+ "canvas": {
+  "size": 512,
+  "fit": "contain"
+ },
+ "video": {
+  "trimStartMs": 0,
+  "trimEndMs": 3000,
+  "currentTimeMs": 0,
+  "fps": 15
+ },
+ "gif": {
+  "enabled": false,
+  "loop": true,
+  "quality": 256
+ },
+ "videoBackgroundRemoval": {
+  "enabled": false,
+  "status": "UNAVAILABLE",
+  "provider": null,
+  "chroma": null,
+  "model": null,
+  "reason": "The clip already has transparency."
+ },
+ "layers": [],
+ "packId": null,
+ "export": {
+  "format": "webm",
+  "name": "",
+  "emoji": "🙂"
+ },
+ "createdAt": "2026-10-05T09:21:53",
+ "updatedAt": "2026-10-05T09:21:53"
+}

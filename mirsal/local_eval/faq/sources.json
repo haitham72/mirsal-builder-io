@@ -1,0 +1,948 @@
+[
+  {
+    "path": "getting-started/stickers-not-emoji.md",
+    "title": "Does Mirsal make stickers or custom emoji",
+    "question": "Does Mirsal make stickers or custom emoji?",
+    "category": "getting-started",
+    "tags": "getting-started, stickers, not, emoji",
+    "answer": "Mirsal makes Telegram stickers, including animated stickers. The emoji attached to a sticker is its tag, not a custom emoji output.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "README.md: Overview and Console",
+      "docs/onboarding.md: The welcome modal"
+    ]
+  },
+  {
+    "path": "getting-started/welcome-again.md",
+    "title": "How can I watch the welcome introduction again",
+    "question": "How can I watch the welcome introduction again?",
+    "category": "getting-started",
+    "tags": "getting-started, welcome, again",
+    "answer": "Press the Mirsal logo to open the welcome introduction again. It also opens automatically once per browser session after sign-in and approval.",
+    "screen": "Studio",
+    "looks_like": "The Mirsal logo opens the welcome introduction.",
+    "sources": [
+      "README.md: Overview and Console",
+      "docs/onboarding.md: The welcome modal"
+    ]
+  },
+  {
+    "path": "getting-started/two-ways.md",
+    "title": "Should I use the AI chat or Studio",
+    "question": "Should I use the AI chat or Studio?",
+    "category": "getting-started",
+    "tags": "getting-started, two, ways",
+    "answer": "Use the AI chat to describe what you want in everyday words and refine it in conversation. Use Studio when you want explicit controls for the prompt and sticker settings.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "README.md: Overview and Console",
+      "docs/onboarding.md: The welcome modal"
+    ]
+  },
+  {
+    "path": "getting-started/batch-and-sheet.md",
+    "title": "What is the difference between a batch and a sheet",
+    "question": "What is the difference between a batch and a sheet?",
+    "category": "getting-started",
+    "tags": "getting-started, batch, and, sheet",
+    "answer": "A batch is one generation of stickers. Its sheet contains the individual pictures arranged in cells; each sticker keeps its original cell number through review and animation.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "README.md: Overview and Console",
+      "docs/onboarding.md: The welcome modal"
+    ]
+  },
+  {
+    "path": "accounts/create-account.md",
+    "title": "How do I create an office account",
+    "question": "How do I create an office account?",
+    "category": "accounts",
+    "tags": "accounts, create, account",
+    "answer": "Choose Create account on the sign-in screen and enter your name, an email from an allowed office domain, and a password. A new account waits for approval before the app opens.",
+    "screen": "Sign in",
+    "looks_like": "Sign in to Mirsal has Create account and Forgot password links.",
+    "sources": [
+      "docs/api.md: Office accounts on the LAN",
+      "mirsal/mirsal/console/auth.js: gate, waiting, change, me"
+    ]
+  },
+  {
+    "path": "accounts/waiting-approval.md",
+    "title": "Why does my account say Waiting for approval",
+    "question": "Why does my account say Waiting for approval?",
+    "category": "accounts",
+    "tags": "accounts, waiting, approval",
+    "answer": "Your account has not been approved yet. Keep the waiting page open; it opens the app by itself after approval.",
+    "screen": "Sign in",
+    "looks_like": "Waiting for approval appears with a Sign out button.",
+    "sources": [
+      "docs/api.md: Office accounts on the LAN",
+      "mirsal/mirsal/console/auth.js: gate, waiting, change, me"
+    ]
+  },
+  {
+    "path": "accounts/forgot-password.md",
+    "title": "How do I reset a forgotten password",
+    "question": "How do I reset a forgotten password?",
+    "category": "accounts",
+    "tags": "accounts, forgot, password",
+    "answer": "Choose Forgot password, enter your account email, and press Ask for a new password. This requests a new password from support staff; it is not an automatic email reset.",
+    "screen": "Sign in",
+    "looks_like": "Forgot password has an Ask for a new password button.",
+    "sources": [
+      "docs/api.md: Office accounts on the LAN",
+      "mirsal/mirsal/console/auth.js: gate, waiting, change, me"
+    ]
+  },
+  {
+    "path": "accounts/choose-password.md",
+    "title": "Why am I asked to choose my own password",
+    "question": "Why am I asked to choose my own password?",
+    "category": "accounts",
+    "tags": "accounts, choose, password",
+    "answer": "Your account was given a starting password. Enter a new password of at least eight characters and press Save; Keep the given password for now postpones the change until a later sign-in.",
+    "screen": "Sign in",
+    "looks_like": "Choose your own password shows Your new password (8 characters or more), Save and Keep the given password for now.",
+    "sources": [
+      "docs/api.md: Office accounts on the LAN",
+      "mirsal/mirsal/console/auth.js: gate, waiting, change, me"
+    ]
+  },
+  {
+    "path": "accounts/sign-out.md",
+    "title": "Where can I sign out",
+    "question": "Where can I sign out?",
+    "category": "accounts",
+    "tags": "accounts, sign, out",
+    "answer": "Open Settings and find Signed in as. Press Sign out to leave the account.",
+    "screen": "Sign in",
+    "looks_like": "Signed in as appears beside Sign out and Request credits.",
+    "sources": [
+      "docs/api.md: Office accounts on the LAN",
+      "mirsal/mirsal/console/auth.js: gate, waiting, change, me"
+    ]
+  },
+  {
+    "path": "studio/drop-sticker.md",
+    "title": "Does dropping a sticker delete it",
+    "question": "Does dropping a sticker delete it?",
+    "category": "studio",
+    "tags": "studio, drop, sticker",
+    "answer": "Dropping a sticker excludes it from the set without deleting its picture. Use Bring back to include it again when the sticker is eligible.",
+    "screen": "Studio",
+    "looks_like": "A sticker tile says Dropped and offers Bring back.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/use-anyway.md",
+    "title": "What does Use it anyway do on a blocked sticker",
+    "question": "What does Use it anyway do on a blocked sticker?",
+    "category": "studio",
+    "tags": "studio, use, anyway",
+    "answer": "Use it anyway lets you allow a judgement-call block, such as the picture touching its cell boundary. The warning remains as allowed by you, and you can undo that choice with Take it back.",
+    "screen": "Studio",
+    "looks_like": "A blocked sticker shows its picture, a reason and Use it anyway.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/take-back.md",
+    "title": "How do I undo allowing a blocked sticker",
+    "question": "How do I undo allowing a blocked sticker?",
+    "category": "studio",
+    "tags": "studio, take, back",
+    "answer": "Press Take it back on the sticker you allowed. This reverses the override, so the original judgement-call block applies again.",
+    "screen": "Studio",
+    "looks_like": "The sticker says allowed by you beside Take it back.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/bulk-allow.md",
+    "title": "Can I allow several judgement-call blocks together",
+    "question": "Can I allow several judgement-call blocks together?",
+    "category": "studio",
+    "tags": "studio, bulk, allow",
+    "answer": "Use all anyway applies to the currently allow-able stickers in that batch. Its number counts eligible overrides, and Take all back reverses those allowances.",
+    "screen": "Studio",
+    "looks_like": "Use all anyway has a count next to the button; Take all back is the reverse control.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/hard-limit.md",
+    "title": "Why can I not override a file or Telegram limit",
+    "question": "Why can I not override a file or Telegram limit?",
+    "category": "studio",
+    "tags": "studio, hard, limit",
+    "answer": "A judgement-call warning can be allowed, but a file that Telegram would reject still has to meet its technical limits. An empty cell with no picture also cannot become a usable sticker through an override.",
+    "screen": "Studio",
+    "looks_like": "The check category says File or Telegram limit.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/remove-batch.md",
+    "title": "Will removing a batch remove stickers already in my packs",
+    "question": "Will removing a batch remove stickers already in my packs?",
+    "category": "studio",
+    "tags": "studio, remove, batch",
+    "answer": "Remove batch moves the batch to the trash, where it can be restored. Stickers already added to a pack stay in their packs.",
+    "screen": "Studio",
+    "looks_like": "Remove batch is available, and Removed batches appears under Earlier batches.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/restore-batch.md",
+    "title": "How do I restore a removed batch",
+    "question": "How do I restore a removed batch?",
+    "category": "studio",
+    "tags": "studio, restore, batch",
+    "answer": "Open Removed batches under Earlier batches and press Restore beside the batch. Restore brings it back; the Remove button in that list is a permanent-removal action.",
+    "screen": "Studio",
+    "looks_like": "Removed batches lists Restore and Remove beside each batch.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/edit-copy.md",
+    "title": "Will editing a Studio sticker update its pack copy",
+    "question": "Will editing a Studio sticker update its pack copy?",
+    "category": "studio",
+    "tags": "studio, edit, copy",
+    "answer": "An edit saved to a sticker from a Studio batch refreshes the copies of that sticker in its packs. Its name, emoji and order stay the same.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "studio/fixed-sheet.md",
+    "title": "What is the Fixed sheet view",
+    "question": "What is the Fixed sheet view?",
+    "category": "studio",
+    "tags": "studio, fixed, sheet",
+    "answer": "Fixed shows the batch sheet with edited cells replaced by their current pictures. The original layout and cell numbers are preserved.",
+    "screen": "Studio",
+    "looks_like": "The sheet panel has a Fixed view with edited cell numbers.",
+    "sources": [
+      "docs/engine-and-studio.md: The golden path; Use it anyway; Editing a created sticker",
+      "mirsal/mirsal/console/generate.js: cellVerb, tileHtml, grmText",
+      "mirsal/mirsal/console/live.js: remHtml"
+    ]
+  },
+  {
+    "path": "animation/not-animated.md",
+    "title": "Why does a sticker say Not animated yet",
+    "question": "Why does a sticker say Not animated yet?",
+    "category": "animation",
+    "tags": "animation, not, animated",
+    "answer": "The still picture is ready but does not have an animation yet. Animation needs the prepared video, and the Animation stage reports when no video is prepared.",
+    "screen": "Studio > Animation",
+    "looks_like": "A sticker tile says Not animated yet; the Animation stage can say No video prepared.",
+    "sources": [
+      "docs/engine-and-studio.md: Animation; Edge; The golden path",
+      "mirsal/mirsal/console/generate.js: ANIMWHY, tileHtml, gate counts"
+    ]
+  },
+  {
+    "path": "animation/outside-slot.md",
+    "title": "Why is an animation out of bounds",
+    "question": "Why is an animation out of bounds?",
+    "category": "animation",
+    "tags": "animation, outside, slot",
+    "answer": "The character leaves its own slot or reaches into a neighbouring slot on the animation sheet. It is off by default, but a judgement-call boundary warning can be allowed with the visible override.",
+    "screen": "Studio > Animation",
+    "looks_like": "Animation shows out of bounds (off), and the tile can offer Include anyway.",
+    "sources": [
+      "docs/engine-and-studio.md: Animation; Edge; The golden path",
+      "mirsal/mirsal/console/generate.js: ANIMWHY, tileHtml, gate counts"
+    ]
+  },
+  {
+    "path": "animation/bad-loop.md",
+    "title": "Why does an animation show Bad loop",
+    "question": "Why does an animation show Bad loop?",
+    "category": "animation",
+    "tags": "animation, bad, loop",
+    "answer": "The end of the animation does not join cleanly to its beginning. Loop quality is a judgement call that can be allowed where the tile offers Use it anyway.",
+    "screen": "Studio > Animation",
+    "looks_like": "The problem category says Bad loop and the reason says the loop does not close.",
+    "sources": [
+      "docs/engine-and-studio.md: Animation; Edge; The golden path",
+      "mirsal/mirsal/console/generate.js: ANIMWHY, tileHtml, gate counts"
+    ]
+  },
+  {
+    "path": "animation/edge-changed.md",
+    "title": "Why must I animate again after changing the edge",
+    "question": "Why must I animate again after changing the edge?",
+    "category": "animation",
+    "tags": "animation, edge, changed",
+    "answer": "Changing the outline or rim trim makes animations created with the previous edge stale. Animate again to apply the new edge to those animations.",
+    "screen": "Studio > Animation",
+    "looks_like": "The tile says edge changed: Animate again to apply it.",
+    "sources": [
+      "docs/engine-and-studio.md: Animation; Edge; The golden path",
+      "mirsal/mirsal/console/generate.js: ANIMWHY, tileHtml, gate counts"
+    ]
+  },
+  {
+    "path": "animation/frame-checks.md",
+    "title": "What does the app check while animating",
+    "question": "What does the app check while animating?",
+    "category": "animation",
+    "tags": "animation, frame, checks",
+    "answer": "It checks each animation frame by frame, including file size, the loop and whether the character stays within its cell. Finished animations appear as they become ready.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/engine-and-studio.md: Animation; Edge; The golden path",
+      "mirsal/mirsal/console/generate.js: ANIMWHY, tileHtml, gate counts"
+    ]
+  },
+  {
+    "path": "particles/sprites-burst.md",
+    "title": "What is the difference between sprites and a burst",
+    "question": "What is the difference between sprites and a burst?",
+    "category": "particles",
+    "tags": "particles, sprites, burst",
+    "answer": "Sprites are the individual still or animated pieces of artwork. A burst is the composition made from selected sprites and their motion settings.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/free-source.md",
+    "title": "Can I make particles without spending credits",
+    "question": "Can I make particles without spending credits?",
+    "category": "particles",
+    "tags": "particles, free, source",
+    "answer": "Choose Sprites from the sticker and select existing artwork. Use selected · free reuses those sprites without a paid generation.",
+    "screen": "Library > Particles",
+    "looks_like": "The source card says Sprites from the sticker and Use selected · free.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/paid-sources.md",
+    "title": "Which particle sources use credits",
+    "question": "Which particle sources use credits?",
+    "category": "particles",
+    "tags": "particles, paid, sources",
+    "answer": "AI image sprites and Kling animated · from scratch create new artwork using credits. Check the quoted price before choosing Generate.",
+    "screen": "Library > Particles",
+    "looks_like": "The source choices include AI image sprites and Kling animated · from scratch.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/save-version.md",
+    "title": "How do I save a new particle version",
+    "question": "How do I save a new particle version?",
+    "category": "particles",
+    "tags": "particles, save, version",
+    "answer": "Save turns a draft into the next saved version. When editing a saved row, Save replaces that row, while Save as new preserves the old row and creates a new one with the changed settings.",
+    "screen": "Library > Particles",
+    "looks_like": "A saved particle version offers Save and Save as new.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/open-version.md",
+    "title": "Why does entering Particles start a new version",
+    "question": "Why does entering Particles start a new version?",
+    "category": "particles",
+    "tags": "particles, open, version",
+    "answer": "Entering Particles starts a new draft rather than reopening an old saved set automatically. To edit a particular saved version, press Open on that version row.",
+    "screen": "Library > Particles",
+    "looks_like": "Saved version rows have Open buttons and version numbers.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/add-more.md",
+    "title": "Does Add more replace my existing particle sprites",
+    "question": "Does Add more replace my existing particle sprites?",
+    "category": "particles",
+    "tags": "particles, add, more",
+    "answer": "Add more appends sprites to the set you have open. Existing sprites are preserved, and a set can contain both image and video sources.",
+    "screen": "Library > Particles",
+    "looks_like": "The open particle set offers Add more.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/size-sharpness.md",
+    "title": "How do I make the particles look larger",
+    "question": "How do I make the particles look larger?",
+    "category": "particles",
+    "tags": "particles, size, sharpness",
+    "answer": "Change Size to alter how large the particles appear. Sprite resolution changes sharpness rather than their apparent size.",
+    "screen": "Library > Particles",
+    "looks_like": "The simulator controls include Energy, Float, Swirl and Size.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/put-in-pack.md",
+    "title": "How do I add a particle burst to a pack",
+    "question": "How do I add a particle burst to a pack?",
+    "category": "particles",
+    "tags": "particles, put, in, pack",
+    "answer": "Render the burst, then use Add to pack on its row. In pack ✓ indicates that the burst has been added as an animated pack sticker.",
+    "screen": "Library > Particles",
+    "looks_like": "The row offers Add to pack or shows In pack ✓.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/echo-preview.md",
+    "title": "Can I test particles in chat without rendering a pack sticker",
+    "question": "Can I test particles in chat without rendering a pack sticker?",
+    "category": "particles",
+    "tags": "particles, echo, preview",
+    "answer": "Use Assign to stickers followed by Test in chat. Echo plays the assigned set using its saved settings, without requiring a rendered pack sticker.",
+    "screen": "Library > Particles",
+    "looks_like": "The particle controls include Assign to stickers and Test in chat.",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "particles/standalone.md",
+    "title": "Can a particle set exist without a parent sticker",
+    "question": "Can a particle set exist without a parent sticker?",
+    "category": "particles",
+    "tags": "particles, standalone",
+    "answer": "Yes, a stand-alone particle set is usable without a sticker owner. You can preview it, render it, download it or make a pack from it.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/particles.md: Ownership; One scoped editor; Animated sprites and recovery; Galleries and chat"
+    ]
+  },
+  {
+    "path": "library/empty-library.md",
+    "title": "Why does my Library say Nothing here yet",
+    "question": "Why does my Library say Nothing here yet?",
+    "category": "library",
+    "tags": "library, empty, library",
+    "answer": "Your Library has no packs or stickers to show yet. Use Open Studio to make a pack, or Create from photo to create a sticker from a photo.",
+    "screen": "Library",
+    "looks_like": "Nothing here yet appears with Open Studio and Create from photo.",
+    "sources": [
+      "mirsal/mirsal/console/app.js: libBody, libByPackHtml",
+      "mirsal/mirsal/console/packs.js: pack header, delete confirmation, carousel",
+      "mirsal/mirsal/console/trash.js: Trash panel"
+    ]
+  },
+  {
+    "path": "library/my-stickers.md",
+    "title": "Where can I see all my stickers grouped by pack",
+    "question": "Where can I see all my stickers grouped by pack?",
+    "category": "library",
+    "tags": "library, my, stickers",
+    "answer": "Open Library and choose My Stickers. It groups the stickers under their pack names, with Open pack beside each group.",
+    "screen": "Library",
+    "looks_like": "My Stickers shows pack headings and Open pack buttons.",
+    "sources": [
+      "mirsal/mirsal/console/app.js: libBody, libByPackHtml",
+      "mirsal/mirsal/console/packs.js: pack header, delete confirmation, carousel",
+      "mirsal/mirsal/console/trash.js: Trash panel"
+    ]
+  },
+  {
+    "path": "library/search-library.md",
+    "title": "What does the Library search match",
+    "question": "What does the Library search match?",
+    "category": "library",
+    "tags": "library, search, library",
+    "answer": "The Library filter matches sticker names, emoji and pack names. A filter with no matching results can leave the Recent section showing No matches.",
+    "screen": "Library",
+    "looks_like": "Recent can show No matches when the filter has no results.",
+    "sources": [
+      "mirsal/mirsal/console/app.js: libBody, libByPackHtml",
+      "mirsal/mirsal/console/packs.js: pack header, delete confirmation, carousel",
+      "mirsal/mirsal/console/trash.js: Trash panel"
+    ]
+  },
+  {
+    "path": "library/bulk-select.md",
+    "title": "How can I select multiple Library stickers",
+    "question": "How can I select multiple Library stickers?",
+    "category": "library",
+    "tags": "library, bulk, select",
+    "answer": "Tick the square selection markers or drag a box over the stickers. Shift adds to the selection and Ctrl un-selects, so you can delete selected stickers together.",
+    "screen": "Library",
+    "looks_like": "My Stickers says Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects).",
+    "sources": [
+      "mirsal/mirsal/console/app.js: libBody, libByPackHtml",
+      "mirsal/mirsal/console/packs.js: pack header, delete confirmation, carousel",
+      "mirsal/mirsal/console/trash.js: Trash panel"
+    ]
+  },
+  {
+    "path": "library/delete-pack.md",
+    "title": "Can I restore a deleted pack",
+    "question": "Can I restore a deleted pack?",
+    "category": "library",
+    "tags": "library, delete, pack",
+    "answer": "Delete pack moves it to the trash with its sticker files intact. Use Settings > Trash to restore it or explicitly delete it for good; copies that came from batches stay in those batches.",
+    "screen": "Library",
+    "looks_like": "The pack has Delete pack; Settings has Trash and Restore.",
+    "sources": [
+      "mirsal/mirsal/console/app.js: libBody, libByPackHtml",
+      "mirsal/mirsal/console/packs.js: pack header, delete confirmation, carousel",
+      "mirsal/mirsal/console/trash.js: Trash panel"
+    ]
+  },
+  {
+    "path": "library/download-pack.md",
+    "title": "Can I download all sticker files in a pack together",
+    "question": "Can I download all sticker files in a pack together?",
+    "category": "library",
+    "tags": "library, download, pack",
+    "answer": "Open the pack in Library and press Download .zip. The download contains its animated and static sticker files together.",
+    "screen": "Library",
+    "looks_like": "The pack header offers Download .zip.",
+    "sources": [
+      "mirsal/mirsal/console/app.js: libBody, libByPackHtml",
+      "mirsal/mirsal/console/packs.js: pack header, delete confirmation, carousel",
+      "mirsal/mirsal/console/trash.js: Trash panel"
+    ]
+  },
+  {
+    "path": "trending/copy-public.md",
+    "title": "How do I use a public pack in my own work",
+    "question": "How do I use a public pack in my own work?",
+    "category": "trending",
+    "tags": "trending, copy, public",
+    "answer": "Open the public pack in Trending and press Use in my workflow. This makes a copy in your own Library rather than editing the original public pack.",
+    "screen": "Library > Trending",
+    "looks_like": "A public pack has Use in my workflow.",
+    "sources": [
+      "mirsal/mirsal/console/trending.js: list, detail, ORDERS",
+      "docs/api.md: Trending"
+    ]
+  },
+  {
+    "path": "trending/no-public.md",
+    "title": "Why does Trending say Nothing public yet",
+    "question": "Why does Trending say Nothing public yet?",
+    "category": "trending",
+    "tags": "trending, no, public",
+    "answer": "Trending shows packs that have been made public. If none are available, it shows Nothing public yet rather than your private Library packs.",
+    "screen": "Library > Trending",
+    "looks_like": "Trending says Nothing public yet. Make a pack public from its page.",
+    "sources": [
+      "mirsal/mirsal/console/trending.js: list, detail, ORDERS",
+      "docs/api.md: Trending"
+    ]
+  },
+  {
+    "path": "trending/sort-public.md",
+    "title": "How can I change the ordering of public packs",
+    "question": "How can I change the ordering of public packs?",
+    "category": "trending",
+    "tags": "trending, sort, public",
+    "answer": "Use the Trending, New and Most liked tabs in Library > Trending. Each tab selects a different ordering of the public packs.",
+    "screen": "Library > Trending",
+    "looks_like": "The public-pack list has Trending, New and Most liked tabs.",
+    "sources": [
+      "mirsal/mirsal/console/trending.js: list, detail, ORDERS",
+      "docs/api.md: Trending"
+    ]
+  },
+  {
+    "path": "trending/comment.md",
+    "title": "How do I comment on a public pack",
+    "question": "How do I comment on a public pack?",
+    "category": "trending",
+    "tags": "trending, comment",
+    "answer": "Open the public pack, write in Say something about this pack, and press Comment. You can delete your own comment using its delete control.",
+    "screen": "Library > Trending",
+    "looks_like": "The public pack has Say something about this pack and a Comment button.",
+    "sources": [
+      "mirsal/mirsal/console/trending.js: list, detail, ORDERS",
+      "docs/api.md: Trending"
+    ]
+  },
+  {
+    "path": "telegram/video-limits.md",
+    "title": "What limits apply to an animated Telegram sticker",
+    "question": "What limits apply to an animated Telegram sticker?",
+    "category": "telegram",
+    "tags": "telegram, video, limits",
+    "answer": "Animated stickers use transparent WEBM video and must fit within 256 KB. Mirsal targets 512 by 512 pixels, at most three seconds and 30 frames per second, with no audio.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/engine-and-studio.md: Telegram limits",
+      "mirsal/mirsal/engine/config.py: EngineConfig",
+      "mirsal/mirsal/engine/verify.py: no_audio",
+      "mirsal/mirsal/console/packs.js: owner send control, sticker details"
+    ]
+  },
+  {
+    "path": "telegram/static-limits.md",
+    "title": "What limits apply to a static Telegram sticker",
+    "question": "What limits apply to a static Telegram sticker?",
+    "category": "telegram",
+    "tags": "telegram, static, limits",
+    "answer": "Static stickers use PNG or WEBP with transparency and must fit within 512 KB. Mirsal makes the final sticker on a 512 by 512 pixel canvas.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/engine-and-studio.md: Telegram limits",
+      "mirsal/mirsal/engine/config.py: EngineConfig",
+      "mirsal/mirsal/engine/verify.py: no_audio",
+      "mirsal/mirsal/console/packs.js: owner send control, sticker details"
+    ]
+  },
+  {
+    "path": "telegram/emoji-tag.md",
+    "title": "Why does every sticker need an emoji tag",
+    "question": "Why does every sticker need an emoji tag?",
+    "category": "telegram",
+    "tags": "telegram, emoji, tag",
+    "answer": "Telegram requires at least one emoji tag per sticker. Open Sticker details to edit its Emoji tag; the tag does not turn the sticker into a custom emoji.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/engine-and-studio.md: Telegram limits",
+      "mirsal/mirsal/engine/config.py: EngineConfig",
+      "mirsal/mirsal/engine/verify.py: no_audio",
+      "mirsal/mirsal/console/packs.js: owner send control, sticker details"
+    ]
+  },
+  {
+    "path": "telegram/member-send.md",
+    "title": "Why can I not see Send to Telegram in my pack",
+    "question": "Why can I not see Send to Telegram in my pack?",
+    "category": "telegram",
+    "tags": "telegram, member, send",
+    "answer": "Sending a pack to Telegram is available to the owner account. Members can still work with their packs and use Download .zip to download the sticker files.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/engine-and-studio.md: Telegram limits",
+      "mirsal/mirsal/engine/config.py: EngineConfig",
+      "mirsal/mirsal/engine/verify.py: no_audio",
+      "mirsal/mirsal/console/packs.js: owner send control, sticker details"
+    ]
+  },
+  {
+    "path": "ai-chat/remember-subject.md",
+    "title": "What does the AI chat remember about my stickers",
+    "question": "What does the AI chat remember about my stickers?",
+    "category": "ai-chat",
+    "tags": "ai-chat, remember, subject",
+    "answer": "Within a conversation, the chat keeps each subject and its generations, together with what you liked or disliked. This context helps it interpret follow-up requests about the same subject.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: Spending; Memory; Questions and their answers",
+      "mirsal/mirsal/console/agent.js: settings popover"
+    ]
+  },
+  {
+    "path": "ai-chat/persistent-feedback.md",
+    "title": "How can I make a preference apply beyond the next generation",
+    "question": "How can I make a preference apply beyond the next generation?",
+    "category": "ai-chat",
+    "tags": "ai-chat, persistent, feedback",
+    "answer": "Ordinary feedback shapes the next generation. State a lasting preference explicitly, such as saying that you never want dark outlines, to make it persistent.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: Spending; Memory; Questions and their answers",
+      "mirsal/mirsal/console/agent.js: settings popover"
+    ]
+  },
+  {
+    "path": "ai-chat/which-sticker.md",
+    "title": "How do I answer when the AI asks which sticker I mean",
+    "question": "How do I answer when the AI asks which sticker I mean?",
+    "category": "ai-chat",
+    "tags": "ai-chat, which, sticker",
+    "answer": "Reply with the sticker number, an ordinal such as number three, or select the sticker and say this one. The chat uses that answer to continue the request it just asked about.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: Spending; Memory; Questions and their answers",
+      "mirsal/mirsal/console/agent.js: settings popover"
+    ]
+  },
+  {
+    "path": "ai-chat/not-yet.md",
+    "title": "How do I postpone a proposed generation",
+    "question": "How do I postpone a proposed generation?",
+    "category": "ai-chat",
+    "tags": "ai-chat, not, yet",
+    "answer": "Choose Not yet on the plan card instead of accepting it. With Ask before spending enabled, the plan shows the price and waits for your go-ahead.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: Spending; Memory; Questions and their answers",
+      "mirsal/mirsal/console/agent.js: settings popover"
+    ]
+  },
+  {
+    "path": "credits/spend-confirmation.md",
+    "title": "Will the AI start spending without asking me",
+    "question": "Will the AI start spending without asking me?",
+    "category": "credits",
+    "tags": "credits, spend, confirmation",
+    "answer": "With Ask before spending enabled, a plan shows the price and waits for confirmation. Turning it off lets the chat start generation immediately, so keep it on if you want to approve each spend.",
+    "screen": "AI > settings",
+    "looks_like": "The AI settings have Ask before spending and Show the price and wait for your go-ahead.",
+    "sources": [
+      "docs/agent-and-chat.md: Spending",
+      "mirsal/mirsal/console/agent.js: Ask before spending",
+      "mirsal/mirsal/console/auth.js: me"
+    ]
+  },
+  {
+    "path": "credits/request-more.md",
+    "title": "How can I ask for more credits",
+    "question": "How can I ask for more credits?",
+    "category": "credits",
+    "tags": "credits, request, more",
+    "answer": "Open Settings and press Request credits beside Signed in as. This sends a request rather than immediately adding credits to your balance.",
+    "screen": "Settings",
+    "looks_like": "Signed in as shows credits left and Request credits.",
+    "sources": [
+      "docs/agent-and-chat.md: Spending",
+      "mirsal/mirsal/console/agent.js: Ask before spending",
+      "mirsal/mirsal/console/auth.js: me"
+    ]
+  },
+  {
+    "path": "ai-vision/review-not-approval.md",
+    "title": "Does the AI pre-review approve stickers for me",
+    "question": "Does the AI pre-review approve stickers for me?",
+    "category": "ai-vision",
+    "tags": "ai-vision, review, not, approval",
+    "answer": "No, the vision model only pre-reviews the pictures. Human review still decides whether to approve or reject them.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: The vision judge; Consent; Per-frame captions; Support",
+      "mirsal/local_eval/results.md",
+      "mirsal/mirsal/console/support.js: screenshot composer"
+    ]
+  },
+  {
+    "path": "ai-vision/unjudged.md",
+    "title": "Why can the AI leave a sticker unjudged",
+    "question": "Why can the AI leave a sticker unjudged?",
+    "category": "ai-vision",
+    "tags": "ai-vision, unjudged",
+    "answer": "A model answer that cannot be accepted leaves the sticker unjudged rather than pretending the review succeeded. In one local test, five of thirty answers used unsupported reasons; that is one measurement, not a guarantee about future reviews.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: The vision judge; Consent; Per-frame captions; Support",
+      "mirsal/local_eval/results.md",
+      "mirsal/mirsal/console/support.js: screenshot composer"
+    ]
+  },
+  {
+    "path": "ai-vision/review-time.md",
+    "title": "How long does the local AI pre-review take",
+    "question": "How long does the local AI pre-review take?",
+    "category": "ai-vision",
+    "tags": "ai-vision, review, time",
+    "answer": "One test of thirty stickers measured about ten seconds per sticker with the local model. Actual time depends on the model and workload, so that measurement is not a promised wait time.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: The vision judge; Consent; Per-frame captions; Support",
+      "mirsal/local_eval/results.md",
+      "mirsal/mirsal/console/support.js: screenshot composer"
+    ]
+  },
+  {
+    "path": "ai-vision/consent.md",
+    "title": "Why does the app ask me to allow AI vision",
+    "question": "Why does the app ask me to allow AI vision?",
+    "category": "ai-vision",
+    "tags": "ai-vision, consent",
+    "answer": "The app asks for permission before sending generated pictures to a vision model. Allow AI vision permits the requested look; Not now declines it, and the chat also has an AI vision switch.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: The vision judge; Consent; Per-frame captions; Support",
+      "mirsal/local_eval/results.md",
+      "mirsal/mirsal/console/support.js: screenshot composer"
+    ]
+  },
+  {
+    "path": "ai-vision/captions.md",
+    "title": "What are AI captions for my stickers",
+    "question": "What are AI captions for my stickers?",
+    "category": "ai-vision",
+    "tags": "ai-vision, captions",
+    "answer": "AI captions describe what each ready sticker shows, including visible text. They do not change your approval or rejection decisions, and stored captions are reused until the picture changes.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: The vision judge; Consent; Per-frame captions; Support",
+      "mirsal/local_eval/results.md",
+      "mirsal/mirsal/console/support.js: screenshot composer"
+    ]
+  },
+  {
+    "path": "ai-vision/help-screenshot.md",
+    "title": "How can I send a screenshot to Help",
+    "question": "How can I send a screenshot to Help?",
+    "category": "ai-vision",
+    "tags": "ai-vision, help, screenshot",
+    "answer": "Open Help, describe the problem and use Attach a screenshot, or paste an image with Ctrl+V. The local vision model reads the support screenshot on the office machine; that support reading does not send it to a cloud model.",
+    "screen": "Help",
+    "looks_like": "Help has Attach a screenshot and Paste a screenshot with Ctrl+V; the local AI reads it.",
+    "sources": [
+      "docs/agent-and-chat.md: The vision judge; Consent; Per-frame captions; Support",
+      "mirsal/local_eval/results.md",
+      "mirsal/mirsal/console/support.js: screenshot composer"
+    ]
+  },
+  {
+    "path": "ai-vision/useful-screenshot.md",
+    "title": "What should I include in a useful support screenshot",
+    "question": "What should I include in a useful support screenshot?",
+    "category": "ai-vision",
+    "tags": "ai-vision, useful, screenshot",
+    "answer": "Capture the app window with the relevant screen, controls and error message visible. Add what you did, what you expected and what happened so Help has both the picture and your explanation.",
+    "screen": "",
+    "looks_like": "",
+    "sources": [
+      "docs/agent-and-chat.md: The vision judge; Consent; Per-frame captions; Support",
+      "mirsal/local_eval/results.md",
+      "mirsal/mirsal/console/support.js: screenshot composer"
+    ]
+  },
+  {
+    "path": "troubleshooting/no-answer.md",
+    "title": "What do I do when Help has no answer",
+    "question": "What do I do when Help has no answer?",
+    "category": "troubleshooting",
+    "tags": "troubleshooting, no, answer",
+    "answer": "Press Send to support when Help says it has no answer. This raises the issue for a person, and their reply appears in the conversation with a notification.",
+    "screen": "Help",
+    "looks_like": "Nothing in the help answers this yet. appears beside Send to support.",
+    "sources": [
+      "mirsal/mirsal/console/support.js: next, fresh, noteRow, suOpen, suFile",
+      "docs/api.md: Help & Support"
+    ]
+  },
+  {
+    "path": "troubleshooting/answer-wrong.md",
+    "title": "What if the Help answer did not solve my issue",
+    "question": "What if the Help answer did not solve my issue?",
+    "category": "troubleshooting",
+    "tags": "troubleshooting, answer, wrong",
+    "answer": "Press No, send to support beneath Did this solve it? to escalate the issue. If the answer did work, choose Yes, solved instead.",
+    "screen": "Help",
+    "looks_like": "Did this solve it? has Yes, solved and No, send to support.",
+    "sources": [
+      "mirsal/mirsal/console/support.js: next, fresh, noteRow, suOpen, suFile",
+      "docs/api.md: Help & Support"
+    ]
+  },
+  {
+    "path": "troubleshooting/waiting-support.md",
+    "title": "What does Waiting for support mean",
+    "question": "What does Waiting for support mean?",
+    "category": "troubleshooting",
+    "tags": "troubleshooting, waiting, support",
+    "answer": "Your question has been sent to a person for a reply. You can add details in the same conversation, and a notification arrives when support answers.",
+    "screen": "Help",
+    "looks_like": "Waiting for support appears with A person will answer here; you get a notification.",
+    "sources": [
+      "mirsal/mirsal/console/support.js: next, fresh, noteRow, suOpen, suFile",
+      "docs/api.md: Help & Support"
+    ]
+  },
+  {
+    "path": "troubleshooting/notification.md",
+    "title": "Where do I find a reply from support",
+    "question": "Where do I find a reply from support?",
+    "category": "troubleshooting",
+    "tags": "troubleshooting, notification",
+    "answer": "Open Help and look under Notifications for Support answered or Resolved. Selecting a notification opens the related conversation and marks its notifications read.",
+    "screen": "Help",
+    "looks_like": "Notifications lists Support answered or Resolved.",
+    "sources": [
+      "mirsal/mirsal/console/support.js: next, fresh, noteRow, suOpen, suFile",
+      "docs/api.md: Help & Support"
+    ]
+  },
+  {
+    "path": "troubleshooting/reopen.md",
+    "title": "How do I reopen a support issue marked Resolved",
+    "question": "How do I reopen a support issue marked Resolved?",
+    "category": "troubleshooting",
+    "tags": "troubleshooting, reopen",
+    "answer": "Open the resolved conversation and press Reopen under Not fixed after all? Continue in that conversation so your previous explanation remains available.",
+    "screen": "Help",
+    "looks_like": "Resolved appears with Not fixed after all? and Reopen.",
+    "sources": [
+      "mirsal/mirsal/console/support.js: next, fresh, noteRow, suOpen, suFile",
+      "docs/api.md: Help & Support"
+    ]
+  },
+  {
+    "path": "troubleshooting/screenshot-large.md",
+    "title": "Why does Help reject my screenshot as too large",
+    "question": "Why does Help reject my screenshot as too large?",
+    "category": "troubleshooting",
+    "tags": "troubleshooting, screenshot, large",
+    "answer": "The message A screenshot must be under 8 MB means the attachment exceeds the size limit. Use a smaller screenshot and attach it again.",
+    "screen": "Help",
+    "looks_like": "Help shows A screenshot must be under 8 MB.",
+    "sources": [
+      "mirsal/mirsal/console/support.js: next, fresh, noteRow, suOpen, suFile",
+      "docs/api.md: Help & Support"
+    ]
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "id": "F039",
+  "status": "draft",
+  "title": "How do I add a particle burst to a pack",
+  "question": "How do I add a particle burst to a pack?",
+  "answer": "Render the burst, then use Add to pack on its row. In pack ✓ indicates that the burst has been added as an animated pack sticker. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/put-in-pack.md"
+    }
+  ],
+  "created": 1791192286.131,
+  "history": [
+    {
+      "ts": 1791192286.131,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/put-in-pack.md"
+    }
+  ],
+  "updated": 1791192286.145,
+  "seed": {
+    "path": "particles/put-in-pack.md",
+    "sha": "35dd26c4b2e9d125ae4895a73c34743f9f5233d319ef2b222c7a0a0b07dda955"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "put",
+    "in",
+    "pack"
+  ],
+  "screen": "Library > Particles",
+  "looks_like": "The row offers Add to pack or shows In pack ✓."
+}

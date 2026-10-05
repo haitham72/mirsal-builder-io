@@ -1,0 +1,152 @@
+[
+  {
+    "kind": "question",
+    "expected_path": "accounts/waiting-approval.md",
+    "query": "Why does my account say Waiting for approval?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "accounts/forgot-password.md",
+    "query": "How do I reset a forgotten password?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "accounts/choose-password.md",
+    "query": "Why am I asked to choose my own password?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "studio/use-anyway.md",
+    "query": "What does Use it anyway do on a blocked sticker?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "studio/remove-batch.md",
+    "query": "Will removing a batch remove stickers already in my packs?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "studio/restore-batch.md",
+    "query": "How do I restore a removed batch?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "animation/edge-changed.md",
+    "query": "Why must I animate again after changing the edge?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "animation/bad-loop.md",
+    "query": "Why does an animation show Bad loop?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "library/empty-library.md",
+    "query": "Why does my Library say Nothing here yet?"
+  },
+  {
+    "kind": "question",
+    "expected_path": "library/my-stickers.md",
+    "query": "Where can I see all my stickers grouped by pack?"
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "troubleshooting/no-answer.md",
+    "query": "In Help, below the reply there is a Send to support button and the message Nothing in the help answers this yet."
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "troubleshooting/answer-wrong.md",
+    "query": "A Help answer ends with Did this solve it? I can choose Yes, solved or No, send to support."
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "troubleshooting/waiting-support.md",
+    "query": "My Help conversation has a Waiting for support label. It says a person will answer here and I get a notification."
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "troubleshooting/notification.md",
+    "query": "The left column of Help has Notifications with a Support answered item. Where is the reply?"
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "troubleshooting/reopen.md",
+    "query": "This Help conversation is marked Resolved. At the bottom I see Not fixed after all? and a Reopen button."
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "troubleshooting/screenshot-large.md",
+    "query": "When attaching an image in Help a notice says A screenshot must be under 8 MB."
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "particles/save-version.md",
+    "query": "In the particle editor I opened a saved version. There are Save and Save as new buttons; I want to keep the original version."
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "particles/open-version.md",
+    "query": "I see particle version rows labelled v1 and v2 with Open buttons. How do I edit an old version?"
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "particles/size-sharpness.md",
+    "query": "The particle simulator has Energy, Float, Swirl and Size sliders. Which one makes the particles bigger?"
+  },
+  {
+    "kind": "screenshot-description",
+    "expected_path": "trending/copy-public.md",
+    "query": "A public pack in Library Trending has a Use in my workflow button. Does it copy the pack?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "getting-started/stickers-not-emoji.md",
+    "query": "Can I create stickers or custom emoji with Mirsal?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "getting-started/batch-and-sheet.md",
+    "query": "What distinguishes a batch from a sheet?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "telegram/video-limits.md",
+    "query": "Are there specific limits for animated Telegram stickers?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "telegram/member-send.md",
+    "query": "Why is the Send to Telegram option missing from my pack?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "ai-chat/persistent-feedback.md",
+    "query": "How do I ensure a preference persists beyond the next generation?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "ai-chat/which-sticker.md",
+    "query": "What should I do when the AI asks me to specify a sticker?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "ai-vision/review-not-approval.md",
+    "query": "Does the AI automatically approve stickers during pre-review?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "ai-vision/unjudged.md",
+    "query": "Why might the AI leave a sticker unjudged?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "ai-vision/review-time.md",
+    "query": "How much time does the local AI pre-review process take?"
+  },
+  {
+    "kind": "local-qwen-paraphrase",
+    "expected_path": "particles/add-more.md",
+    "query": "Does adding more particles replace my existing sprites?"
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "id": "F029",
+  "status": "draft",
+  "title": "Can I restore a deleted pack",
+  "question": "Can I restore a deleted pack?",
+  "answer": "Delete pack moves it to the trash with its sticker files intact. Use Settings > Trash to restore it or explicitly delete it for good; copies that came from batches stay in those batches. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "library/delete-pack.md"
+    }
+  ],
+  "created": 1791192285.83,
+  "history": [
+    {
+      "ts": 1791192285.83,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "library/delete-pack.md"
+    }
+  ],
+  "updated": 1791192285.846,
+  "seed": {
+    "path": "library/delete-pack.md",
+    "sha": "46e457c5b6e328ab3ceba37304af37f84f61a0de80ef9da035cbc5215794423b"
+  },
+  "category": "library",
+  "tags": [
+    "library",
+    "delete",
+    "pack"
+  ],
+  "screen": "Library",
+  "looks_like": "The pack has Delete pack; Settings has Trash and Restore."
+}

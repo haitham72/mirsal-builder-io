@@ -26,5 +26,9 @@
   "error": "Error: Higgsfield API error (HTTP 503). request failed with status 503 Service Unavailable",
   "created_at": 1790949573.361,
   "claimed_at": null,
-  "completed_at": 1790949580.163
+  "completed_at": 1790949580.163,
+  "dismissed": {
+    "at": 1791187008.896,
+    "by": "local"
+  }
 }

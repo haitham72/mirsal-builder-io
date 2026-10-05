@@ -212,10 +212,11 @@ function tileHtml(g,t,mode){const base=`/out/${g.generation_id}/`,anim=mode==='a
     ${canX?`<button class=gx ${cellAct(g,t,stg)} title="${cellTitle(op,t)}">${['allow','include'].includes(op.op)?ic('plus'):ic('x')}</button>`:''}
     <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" ${cellAct(g,t,stg)}>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${allowedNow?`<div class=gwarn style="color:var(--pri-d)">allowed by you${ALW(g,kind).undo.includes(t.index)?` · <button class=link ${cellAct(g,t,stg)}>Take it back</button>`:''}</div>`:''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
 function batchHtml(g,k,total,mode){
-  const inc=!SES.off.includes(g.number),s=g.source;
+  const inc=!SES.off.includes(g.number),s=g.source,staff=(typeof ME==='undefined'||!ME||['owner','admin'].includes(ME.role));
   const head=`<div class=gbhead>${total>1?`<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc?'checked':''}> <b>Batch ${k+1}</b></label>`:`<b>Batch ${k+1}</b>`}
     <span class=mut>sheet ${s.subject_id} · ${g.generation_id}${hasVid(g)?'':' · no video prepared'}</span>
     ${g.key_colour==='blue'?`<span class=keychip title="This sheet has a blue screen, so it was keyed as blue (and the video sheet is blue too). Nothing to do.">Blue key</span>`:''}
+    ${s.prepared&&staff?`<span class=keychip title="Served from a prepared sheet in the watch folder: 0 credits, no provider call.">Prepared</span>`:''}
     <span class=gbact>${s.has_video||making(g)||(typeof liveReadyNow==='function'&&liveReadyNow())?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
     <button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
     ${total>1?`<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>`:''}</span></div>`;
@@ -244,8 +245,9 @@ function gview(){
   if(gdOn())return gdView();
   const gs=sessionGens();if(!gs.length)return'';
   const s=gstats(gs),{pk,allAdded,n}=s;
-  return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}</div></div>
+  return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}${gs[0].source.prepared?' · prepared sheet, 0 credits':''}</div></div>
     <button class="btn" data-act=gmore ${s.ready&&!s.busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
+    ${gs.length===1&&gs[0].source.prepared&&(typeof liveReadyNow==='function'&&liveReadyNow())?`<button class="btn" data-act=gnewlive title="Draw a fresh sheet with Higgsfield at the normal price instead of the prepared one">Make a new one</button>`:''}
     ${gs.length===1?`<button class=btn data-act=ggroup title="Put this batch in the group of another batch: that batch becomes its parent">Add to group</button>`:''}
     ${gs.length===1&&s.ready?`<a class=btn href="/api/generations/${gs[0].number}/export.zip" download title="Download the accepted stickers (animated where ready) as one .zip">${ic('download')} Download .zip</a>`:''}
     ${gs.length===1?`<button class="btn" data-act=tkreport data-k=generation data-id=${esc(gs[0].generation_id)} title="Something wrong with this batch? Send a report">Report</button>`:''}

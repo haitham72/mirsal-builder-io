@@ -1,0 +1,38 @@
+{
+  "id": "F072",
+  "status": "draft",
+  "title": "What happens to reserved credits when a generation fails",
+  "question": "What happens to reserved credits when a generation fails?",
+  "answer": "A failed job returns its reserved credits when the failure is settled. If your balance does not look right, ask Help about that job instead of assuming a new paid generation is necessary.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "credits/failed-job-refund.md"
+    }
+  ],
+  "created": 1791193752.756,
+  "history": [
+    {
+      "ts": 1791193752.756,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "credits/failed-job-refund.md"
+    }
+  ],
+  "updated": 1791193752.772,
+  "seed": {
+    "path": "credits/failed-job-refund.md",
+    "sha": "c33e35b1729325d464bab0cab1cde903188cebc80fa2a8654114c31d237f5a3d"
+  },
+  "category": "credits",
+  "tags": [
+    "credits",
+    "failed",
+    "job",
+    "refund"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

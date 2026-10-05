@@ -1,0 +1,287 @@
+[
+  {
+    "path": "troubleshooting/feature-request.md",
+    "question": "How do I ask for a feature the app does not have?",
+    "title": "How do I ask for a feature the app does not have",
+    "answer": "Describe the feature in Help. When the answer offers Request this feature, choose it to send a feature request; an answered question also has Suggest a feature instead. Sending a request does not mean the feature has been built or guarantee when it will arrive.",
+    "sources": [
+      "docs/agent-and-chat.md: The real cases",
+      "docs/api.md: Help & Support",
+      "mirsal/mirsal/console/support.js: next, priv"
+    ],
+    "category": "troubleshooting",
+    "screen": "Help",
+    "looks_like": "This is not in the app yet. appears with Request this feature; an answered question can offer Suggest a feature instead."
+  },
+  {
+    "path": "accounts/access-request.md",
+    "question": "How do I request something only an admin can provide?",
+    "title": "How do I request something only an admin can provide",
+    "answer": "After signing in and being approved, describe the access, credits or credentials you need in Help. Choose Ask the admin when it is offered; the request goes to an admin, who decides what can be provided. The request does not grant access automatically.",
+    "sources": [
+      "docs/agent-and-chat.md: The real cases",
+      "docs/api.md: Help & Support",
+      "mirsal/mirsal/console/support.js: next, priv"
+    ],
+    "category": "accounts",
+    "screen": "Help",
+    "looks_like": "Only an admin can give this. appears above Ask the admin."
+  },
+  {
+    "path": "accounts/private-reply.md",
+    "question": "How do I read a private reply from support?",
+    "title": "How do I read a private reply from support",
+    "answer": "Open your Help conversation when support sends a private reply. The message is masked: Reveal shows it and Copy copies it, so keep the contents private. Notifications tell you that a private message arrived without including its contents.",
+    "sources": [
+      "docs/agent-and-chat.md: The real cases",
+      "docs/api.md: Help & Support",
+      "mirsal/mirsal/console/support.js: next, priv"
+    ],
+    "category": "accounts",
+    "screen": "Help",
+    "looks_like": "A private message for you appears with a masked value, Reveal, Copy and I saved it, forget it."
+  },
+  {
+    "path": "accounts/forget-private-reply.md",
+    "question": "How do I remove a private reply after saving it?",
+    "title": "How do I remove a private reply after saving it",
+    "answer": "After saving the information somewhere appropriate, choose I saved it, forget it in your Help conversation. This erases the private message text from the conversation record; the screen then shows that it was forgotten. It does not erase information you already copied elsewhere.",
+    "sources": [
+      "docs/agent-and-chat.md: The real cases",
+      "docs/api.md: Help & Support",
+      "mirsal/mirsal/console/support.js: next, priv"
+    ],
+    "category": "accounts",
+    "screen": "Help",
+    "looks_like": "I saved it, forget it is available on the private message; afterward the message says A private message (you saved it and it was forgotten)."
+  },
+  {
+    "path": "troubleshooting/job-progress.md",
+    "question": "Can Help check what happened to my generation job?",
+    "title": "Can Help check what happened to my generation job",
+    "answer": "Ask Help about your own job and include its job number if you have it. Help can use your activity to explain the current status, the provider task and the related batch when available. A usual duration comes from previous completed jobs, rather than being a promise that this one will finish at that time.",
+    "sources": [
+      "docs/agent-and-chat.md: Your activity as sources; Watches",
+      "mirsal/mirsal/flow/support.py: activity, check_watches"
+    ],
+    "category": "troubleshooting",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "troubleshooting/job-arrival.md",
+    "question": "Will Help tell me when the job I asked about finishes?",
+    "title": "Will Help tell me when the job I asked about finishes",
+    "answer": "When an answer cites your running job, Help watches it. Once the app checks again and finds it finished, the conversation reports the result, offers the related batch when available, and resolves; you also get an update notification. This is tied to the job you asked about, not a guarantee of provider completion.",
+    "sources": [
+      "docs/agent-and-chat.md: Your activity as sources; Watches",
+      "mirsal/mirsal/flow/support.py: activity, check_watches"
+    ],
+    "category": "troubleshooting",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "troubleshooting/job-timeout.md",
+    "question": "Does a timed-out job mean the provider has stopped making my video?",
+    "title": "Does a timed-out job mean the provider has stopped making my video",
+    "answer": "A timeout means the app stopped waiting, and the task may still finish at Higgsfield. Ask Help to check your own job status; the existing task can be checked again without paying for a new generation. Do not treat a timeout alone as a reason to start another paid job.",
+    "sources": [
+      "docs/agent-and-chat.md: Your activity as sources; Watches",
+      "mirsal/mirsal/flow/support.py: activity, check_watches"
+    ],
+    "category": "troubleshooting",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "troubleshooting/job-failure.md",
+    "question": "Can Help explain a failed generation?",
+    "title": "Can Help explain a failed generation",
+    "answer": "Ask about the failed job and include its number if available. Help can read the failure reason recorded in your activity, but it should not invent a cause or repair when that record does not explain one.",
+    "sources": [
+      "docs/agent-and-chat.md: Your activity as sources; Watches",
+      "mirsal/mirsal/flow/support.py: activity, check_watches"
+    ],
+    "category": "troubleshooting",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "troubleshooting/own-activity.md",
+    "question": "Can Help show another person’s job or batch?",
+    "title": "Can Help show another person’s job or batch",
+    "answer": "Help uses your own jobs and batches for activity answers. Naming somebody else’s job or batch does not give you access to that person’s activity.",
+    "sources": [
+      "docs/agent-and-chat.md: Your activity as sources; Watches",
+      "mirsal/mirsal/flow/support.py: activity, check_watches"
+    ],
+    "category": "troubleshooting",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "studio/accepted-count.md",
+    "question": "How can I find out why my batch has so few accepted stickers?",
+    "title": "How can I find out why my batch has so few accepted stickers",
+    "answer": "Ask Help about your own batch. It can read the accepted count and each excluded sticker’s recorded reason, and offer a button to open the batch in Studio. A judgement-call block may have Use it anyway on the tile, while technical file limits still need to be met.",
+    "sources": [
+      "docs/agent-and-chat.md: Your activity as sources; Watches",
+      "mirsal/mirsal/flow/support.py: activity, check_watches",
+      "docs/engine-and-studio.md: Use it anyway"
+    ],
+    "category": "studio",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "studio/zip-from-studio.md",
+    "question": "Can I download a whole sticker pack as a zip directly from Studio?",
+    "title": "Can I download a whole sticker pack as a zip directly from Studio",
+    "answer": "The whole-pack Download .zip control is on the pack page in Library. Studio does not currently offer that whole-pack zip control. If you want it in Studio, describe that request in Help and choose Request this feature when offered.",
+    "sources": [
+      "mirsal/mirsal/console/packs.js: pack header",
+      "mirsal/mirsal/console/generate.js: Studio controls",
+      "docs/api.md: pack export.zip",
+      "docs/agent-and-chat.md: Request kinds"
+    ],
+    "category": "studio",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "studio/external-edit-return.md",
+    "question": "Can I import a Photoshop-edited file straight into its existing pack sticker?",
+    "title": "Can I import a Photoshop-edited file straight into its existing pack sticker",
+    "answer": "The current sheet and video imports do not provide a direct replacement of an existing pack sticker with an externally edited file. Edits made through Edit in Studio can be saved to the sticker and refresh its pack copies. Ask in Help for a direct external-file replacement workflow and choose Request this feature when offered.",
+    "sources": [
+      "docs/api.md: Import an existing sheet or video",
+      "docs/engine-and-studio.md: Editing a created sticker",
+      "mirsal/mirsal/console/imports.js: import controls",
+      "mirsal/mirsal/console/prepare.js: Save to sticker"
+    ],
+    "category": "studio",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "credits/reserved-balance.md",
+    "question": "Why does my credit balance change before a job finishes?",
+    "title": "Why does my credit balance change before a job finishes",
+    "answer": "Before a paid sheet or video job starts, the quoted cost is reserved against your balance. When the job ends, the real cost replaces that reservation. Help can check your job’s recorded status if you are unsure whether it has finished.",
+    "sources": [
+      "docs/api.md: Credits per person",
+      "mirsal/mirsal/flow/jobs.py: _settle"
+    ],
+    "category": "credits",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "credits/failed-job-refund.md",
+    "question": "What happens to reserved credits when a generation fails?",
+    "title": "What happens to reserved credits when a generation fails",
+    "answer": "A failed job returns its reserved credits when the failure is settled. If your balance does not look right, ask Help about that job instead of assuming a new paid generation is necessary.",
+    "sources": [
+      "docs/api.md: Credits per person",
+      "mirsal/mirsal/flow/jobs.py: _settle"
+    ],
+    "category": "credits",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "credits/automatic-refill.md",
+    "question": "Do my office credits refill automatically?",
+    "title": "Do my office credits refill automatically",
+    "answer": "Office credits do not refill automatically. Use Request credits in Settings, or ask in Help and choose Ask the admin when offered; adding credits requires an admin’s decision.",
+    "sources": [
+      "docs/api.md: Credits per person",
+      "mirsal/mirsal/flow/jobs.py: _settle",
+      "docs/agent-and-chat.md: The real cases",
+      "docs/api.md: Help & Support",
+      "mirsal/mirsal/console/support.js: next, priv"
+    ],
+    "category": "credits",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "imports/member-controls.md",
+    "question": "Why can I not see the sheet import controls?",
+    "title": "Why can I not see the sheet import controls",
+    "answer": "Use my own sheet and Import from Higgsfield are available to the owner account. They are not member controls. After signing in and approval, ask in Help if you need an admin’s assistance with access, rather than assuming the controls are broken.",
+    "sources": [
+      "docs/api.md: Import an existing sheet or video",
+      "mirsal/mirsal/console/imports.js: owner, impButtons",
+      "docs/agent-and-chat.md: Request kinds"
+    ],
+    "category": "imports",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "particles/restore-set.md",
+    "question": "Can I restore a particle set I deleted?",
+    "title": "Can I restore a particle set I deleted",
+    "answer": "Deleting a particle set moves it to the trash instead of destroying it. Use Restore to bring it back with its ownership retained.",
+    "sources": [
+      "docs/particles.md: Storage, migration and deletion",
+      "mirsal/mirsal/console/particles.js: deletion, spTrashHtml"
+    ],
+    "category": "particles",
+    "screen": "Library > Particles",
+    "looks_like": "The deleted-set notice says it is in the trash, nothing is destroyed, and offers Restore."
+  },
+  {
+    "path": "particles/deleted-parent-pack.md",
+    "question": "Does deleting a sticker pack destroy its particle sets?",
+    "title": "Does deleting a sticker pack destroy its particle sets",
+    "answer": "Deleting the pack does not destroy its particle sets. The sets stay in the Library, and a permanent pack removal detaches ownership links while retaining those sets.",
+    "sources": [
+      "docs/particles.md: Storage, migration and deletion",
+      "mirsal/mirsal/console/packs.js: delete confirmation"
+    ],
+    "category": "particles",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "animation/edited-size-limit.md",
+    "question": "Why can saving an edited animation be refused?",
+    "title": "Why can saving an edited animation be refused",
+    "answer": "An edited animation still has to fit Telegram’s 256 KB limit. If Save to sticker refuses the edited result because of its size, adjust the edit so the output fits; a technical file limit cannot be bypassed with Use it anyway.",
+    "sources": [
+      "docs/engine-and-studio.md: Editing a created sticker",
+      "mirsal/mirsal/console/prepare.js: Save to sticker",
+      "mirsal/mirsal/engine/verify.py: TECHNICAL"
+    ],
+    "category": "animation",
+    "screen": "",
+    "looks_like": ""
+  },
+  {
+    "path": "troubleshooting/new-question.md",
+    "question": "How do I start a separate issue in Help?",
+    "title": "How do I start a separate issue in Help",
+    "answer": "Use the New question button in Help to start a separate conversation. Describe what you did, what you expected and what happened; keep follow-up details about an existing problem in its original conversation.",
+    "sources": [
+      "mirsal/mirsal/console/support.js: suCol, ACT.sunew, composer"
+    ],
+    "category": "troubleshooting",
+    "screen": "Help",
+    "looks_like": "Help has a New question button; a fresh conversation is headed How can we help?"
+  },
+  {
+    "path": "library/open-studio-edit.md",
+    "question": "How do I open a Library sticker for editing in Studio?",
+    "title": "How do I open a Library sticker for editing in Studio",
+    "answer": "For a sticker that came from a Studio batch, choose Edit in Studio to edit it or Open in Studio to view its batch. Saving the Studio edit updates that sticker and its copies in packs, rather than creating an unrelated batch.",
+    "sources": [
+      "docs/engine-and-studio.md: Editing a created sticker"
+    ],
+    "category": "library",
+    "screen": "Library > a sticker",
+    "looks_like": "A batch-derived Library sticker offers Edit in Studio and Open in Studio."
+  }
+]

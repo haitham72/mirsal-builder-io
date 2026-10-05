@@ -1,0 +1,37 @@
+{
+  "id": "F014",
+  "status": "draft",
+  "title": "How long does the local AI pre-review take",
+  "question": "How long does the local AI pre-review take?",
+  "answer": "One test of thirty stickers measured about ten seconds per sticker with the local model. Actual time depends on the model and workload, so that measurement is not a promised wait time.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-vision/review-time.md"
+    }
+  ],
+  "created": 1791192285.382,
+  "history": [
+    {
+      "ts": 1791192285.382,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-vision/review-time.md"
+    }
+  ],
+  "updated": 1791192285.399,
+  "seed": {
+    "path": "ai-vision/review-time.md",
+    "sha": "0d947b8e8ec878187f4a75dcc0929e7ca748c793281c648883fbdd3205bdd261"
+  },
+  "category": "ai-vision",
+  "tags": [
+    "ai-vision",
+    "review",
+    "time"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

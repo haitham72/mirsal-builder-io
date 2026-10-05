@@ -77,7 +77,8 @@
       "elements": [
         "small sparkles",
         "tiny stars",
-        "little confetti pieces"
+        "little confetti pieces",
+        "red hearts"
       ],
       "style": "glossy cartoon look, bold clean shapes, vivid colours",
       "key": "green",
@@ -102,7 +103,7 @@
         "5843680c": "burst",
         "04e0be52": "burst"
       },
-      "by": "generic",
+      "by": "you",
       "sprites": "own"
     },
     {
@@ -400,9 +401,16 @@
       "detail": {
         "set": "P009"
       }
+    },
+    {
+      "ts": 1791177901.155,
+      "actor": "local",
+      "decision": "EDIT",
+      "reason": "g1: small sparkles, tiny stars, little confetti pieces, red hearts",
+      "detail": null
     }
   ],
-  "updated": 1791085029.461,
+  "updated": 1791177901.155,
   "per_sticker": {
     "031868b4": {
       "subject": "angel reading",

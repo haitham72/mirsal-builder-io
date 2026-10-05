@@ -1,0 +1,37 @@
+{
+  "id": "F058",
+  "status": "draft",
+  "title": "How do I use a public pack in my own work",
+  "question": "How do I use a public pack in my own work?",
+  "answer": "Open the public pack in Trending and press Use in my workflow. This makes a copy in your own Library rather than editing the original public pack. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "trending/copy-public.md"
+    }
+  ],
+  "created": 1791192286.696,
+  "history": [
+    {
+      "ts": 1791192286.696,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "trending/copy-public.md"
+    }
+  ],
+  "updated": 1791192286.711,
+  "seed": {
+    "path": "trending/copy-public.md",
+    "sha": "b7f3435879e4d7da07e716763f26a3ea87cd7abb4f737e826ad11373053415e9"
+  },
+  "category": "trending",
+  "tags": [
+    "trending",
+    "copy",
+    "public"
+  ],
+  "screen": "Library > Trending",
+  "looks_like": "A public pack has Use in my workflow."
+}

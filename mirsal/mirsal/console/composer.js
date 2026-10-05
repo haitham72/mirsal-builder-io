@@ -122,14 +122,24 @@ function cpDrawStyles(){const el=$('cpstyles');if(!el||!LIVE.m)return;
   if(!CP.styles){el.innerHTML='';return}
   el.innerHTML=LIVE.m.styles.map(s=>`<button class="cp-style ${LIVE.style===s.id?'on':''}" data-act=cpstylepick data-id="${esc(s.id)}" aria-pressed=${LIVE.style===s.id}><img src="/assets/styles/${esc(s.id)}" alt="" loading=lazy><span><b>${esc(s.label)}</b><em>${esc(s.hint)}</em></span></button>`).join('')}
 
-/* ---------- Generate: a NEW sheet with Higgsfield (after the price is confirmed), else the prepared-sheet lookup */
+/* ---------- Generate: a prepared set when the request names one (free, same gates), else a NEW sheet with Higgsfield (after the price is confirmed) */
 const _ggo=ACT.ggo;
-ACT.ggo=()=>{const p=(($('prompt')||{}).value||'').trim();
+ACT.ggo=async()=>{const p=(($('prompt')||{}).value||'').trim();
   if(!p){say('Write what you want first, for example <b>an angel reading a newspaper</b>.');return}
+  if(liveReady()&&!CP.refs.some(r=>r.busy)){
+    try{const r=await api('/api/prepared/match?prompt='+encodeURIComponent(p));
+      if(r.ok&&r.j.subject&&r.j.prefer){say('');return _ggo()}}catch(e){}
+  }
   if(liveReady()){say('');
     if(CP.refs.some(r=>r.busy)){toast('Wait for the reference images to finish uploading',1);return}
     if(CP.go)return;CP.go=true;const b=$('go');if(b)b.disabled=true;
     gdHide();liveStart('sheet',{prompt:p,ai:aiOn(),refs:CP.refs.filter(r=>r.id).map(r=>r.id)}).finally(()=>{CP.go=false;cpDrawBar()});return}
   if(CP.refs.length){say('Reference images need Higgsfield, which is not available right now.');return}
   return _ggo()};
+/* A fresh provider sheet for a request that would otherwise be served prepared ("Make a new one"): the normal live price, no prepared lookup. */
+ACT.gnewlive=()=>{const p=(($('prompt')||{}).value||'').trim()||(typeof SES!=='undefined'&&SES.prompt)||'';
+  if(!p){say('Write what you want first.');return}
+  if(!liveReady()){toast('Higgsfield is not connected.',1);return}
+  say('');if(CP.go)return;CP.go=true;
+  gdHide();liveStart('sheet',{prompt:p,ai:aiOn(),refs:[]}).finally(()=>{CP.go=false;if(typeof cpDrawBar==='function')cpDrawBar()})};
 ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');_ggo()};      // a prepared-sheet chip uses the prepared sheet, never a new generation

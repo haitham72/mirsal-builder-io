@@ -27,5 +27,9 @@
     "aspect_ratio": "1:1",
     "resolution": "2k"
   },
-  "cost_estimate": 2.0
+  "cost_estimate": 2.0,
+  "dismissed": {
+    "at": 1791187010.019,
+    "by": "local"
+  }
 }

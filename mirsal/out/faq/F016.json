@@ -1,0 +1,37 @@
+{
+  "id": "F016",
+  "status": "draft",
+  "title": "What should I include in a useful support screenshot",
+  "question": "What should I include in a useful support screenshot?",
+  "answer": "Capture the app window with the relevant screen, controls and error message visible. Add what you did, what you expected and what happened so Help has both the picture and your explanation.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-vision/useful-screenshot.md"
+    }
+  ],
+  "created": 1791192285.444,
+  "history": [
+    {
+      "ts": 1791192285.444,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-vision/useful-screenshot.md"
+    }
+  ],
+  "updated": 1791192285.46,
+  "seed": {
+    "path": "ai-vision/useful-screenshot.md",
+    "sha": "f3f101df17063fda723170b1229ecdd8106e801e85142ca12139c1284e5eeb31"
+  },
+  "category": "ai-vision",
+  "tags": [
+    "ai-vision",
+    "useful",
+    "screenshot"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

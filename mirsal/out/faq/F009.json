@@ -1,0 +1,37 @@
+{
+  "id": "F009",
+  "status": "draft",
+  "title": "How do I answer when the AI asks which sticker I mean",
+  "question": "How do I answer when the AI asks which sticker I mean?",
+  "answer": "Reply with the sticker number, an ordinal such as number three, or select the sticker and say this one. The chat uses that answer to continue the request it just asked about.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-chat/which-sticker.md"
+    }
+  ],
+  "created": 1791192285.221,
+  "history": [
+    {
+      "ts": 1791192285.221,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-chat/which-sticker.md"
+    }
+  ],
+  "updated": 1791192285.237,
+  "seed": {
+    "path": "ai-chat/which-sticker.md",
+    "sha": "59c7109748f996461a4a4158a15cecda7dfab89f79c4baf112a8e0198b618cba"
+  },
+  "category": "ai-chat",
+  "tags": [
+    "ai-chat",
+    "which",
+    "sticker"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

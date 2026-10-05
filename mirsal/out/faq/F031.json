@@ -1,0 +1,37 @@
+{
+  "id": "F031",
+  "status": "draft",
+  "title": "Why does my Library say Nothing here yet",
+  "question": "Why does my Library say Nothing here yet?",
+  "answer": "Your Library has no packs or stickers to show yet. Use Open Studio to make a pack, or Create from photo to create a sticker from a photo. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "library/empty-library.md"
+    }
+  ],
+  "created": 1791192285.893,
+  "history": [
+    {
+      "ts": 1791192285.893,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "library/empty-library.md"
+    }
+  ],
+  "updated": 1791192285.907,
+  "seed": {
+    "path": "library/empty-library.md",
+    "sha": "24fda3500e0bc14d420654b1e4195468f6cb7c4c5e2e10c185b04251758780e9"
+  },
+  "category": "library",
+  "tags": [
+    "library",
+    "empty",
+    "library"
+  ],
+  "screen": "Library",
+  "looks_like": "Nothing here yet appears with Open Studio and Create from photo."
+}

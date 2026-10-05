@@ -1,0 +1,37 @@
+{
+  "id": "F054",
+  "status": "draft",
+  "title": "Why can I not see Send to Telegram in my pack",
+  "question": "Why can I not see Send to Telegram in my pack?",
+  "answer": "Sending a pack to Telegram is available to the owner account. Members can still work with their packs and use Download .zip to download the sticker files.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "telegram/member-send.md"
+    }
+  ],
+  "created": 1791192286.58,
+  "history": [
+    {
+      "ts": 1791192286.58,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "telegram/member-send.md"
+    }
+  ],
+  "updated": 1791192286.594,
+  "seed": {
+    "path": "telegram/member-send.md",
+    "sha": "662350632882dd2bc5bed8cac5fea1fd1d87115a24cbfd45143bfefdbbeb5603"
+  },
+  "category": "telegram",
+  "tags": [
+    "telegram",
+    "member",
+    "send"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

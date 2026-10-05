@@ -386,9 +386,9 @@
           "data": {
             "ious": {
               "1": 0.98,
-              "2": 0.978,
+              "2": 0.977,
               "3": 0.976,
-              "4": 0.978,
+              "4": 0.977,
               "5": 0.974,
               "6": 0.984,
               "7": 0.981,
@@ -396,7 +396,7 @@
               "9": 0.979
             },
             "bad": [],
-            "ms": 55.3
+            "ms": 55.9
           }
         },
         {
@@ -720,18 +720,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 480,
-          "key": 628,
-          "bounds": 194,
-          "render": 725,
-          "seam": 170,
-          "encode": 20881,
+          "decode": 612,
+          "key": 598,
+          "bounds": 146,
+          "render": 1079,
+          "seam": 166,
+          "encode": 2417,
           "encodes": 2,
-          "probe": 248,
-          "verify": 23,
-          "finish": 22243
+          "probe": 242,
+          "verify": 26,
+          "finish": 4079
         },
         "frames": 72,
         "fps": 24.0,
@@ -744,10 +744,10 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 398,
         "scale": 0.997,
-        "motion": 132.88,
-        "loop_seam_before": 172.71,
-        "loop_seam": 172.71,
-        "loop_limit": 199.33,
+        "motion": 132.99,
+        "loop_seam_before": 172.79,
+        "loop_seam": 172.79,
+        "loop_limit": 199.48,
         "frames_out": 72,
         "crf": 42,
         "sharp_kept": 1.0,
@@ -756,7 +756,7 @@
         "warnings": [
           "sharpness"
         ],
-        "kb": 213.0
+        "kb": 213.4
       },
       "webm": "slices/vid-old_man-clapping_laughing-20261003T165322-c486c4.webm",
       "review": {
@@ -855,6 +855,19 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183714.564,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "caption": {
@@ -878,7 +891,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 72.6
+            "ms": 37.0
           }
         },
         {
@@ -892,16 +905,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 59.3
+            "ms": 63.3
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "212KB @crf42",
+          "detail": "213KB @crf42",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 212,
+          "value": 213,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -988,17 +1001,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 1.0
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "172.71 <= 199.33",
+          "detail": "172.79 <= 199.48",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 172.71,
-          "limit": 199.33,
+          "value": 172.79,
+          "limit": 199.48,
           "data": {
             "ms": 0.0
           }
@@ -1012,16 +1025,16 @@
           "value": 0.972,
           "limit": 0.5,
           "data": {
-            "ms": 3.7
+            "ms": 1.4
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 132.88",
+          "detail": "median frame-to-frame change 132.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 132.88,
+          "value": 132.99,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -1036,7 +1049,7 @@
           "value": 0.047,
           "limit": 0.35,
           "data": {
-            "ms": 18.7
+            "ms": 23.5
           }
         },
         {
@@ -1264,18 +1277,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 480,
-          "key": 629,
-          "bounds": 199,
-          "render": 647,
-          "seam": 905,
-          "encode": 43369,
+          "decode": 646,
+          "key": 572,
+          "bounds": 142,
+          "render": 958,
+          "seam": 713,
+          "encode": 3700,
           "encodes": 4,
-          "probe": 240,
-          "verify": 19,
-          "finish": 45383
+          "probe": 237,
+          "verify": 16,
+          "finish": 5771
         },
         "frames": 72,
         "fps": 24.0,
@@ -1293,15 +1306,17 @@
         ],
         "scale": 0.9358,
         "motion": 28.57,
-        "loop_seam_before": 164.51,
+        "loop_seam_before": 164.62,
+        "loop_cut": 10,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 43.9,
-        "frames_out": 66,
+        "loop_limit": 44.47,
+        "frames_out": 56,
         "crf": 30,
         "sharp_kept": 0.98,
         "detail_vs_still": 0.92,
         "soft_sigma": 0.5,
-        "kb": 244.8
+        "kb": 213.1
       },
       "webm": "slices/vid-old_man-crying_sadness-20261003T165322-1a3d6f.webm",
       "review": {
@@ -1434,6 +1449,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183716.265,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -1457,30 +1483,30 @@
             "frame": 42,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 69.2
+            "ms": 36.3
           }
         },
         {
           "name": "cross_slot",
           "ok": false,
-          "detail": "238px of foreign foreground, first at frame 42 (allowed by you)",
+          "detail": "236px of foreign foreground, first at frame 42 (allowed by you)",
           "severity": "WARN",
           "stage": "slot",
-          "value": 238,
+          "value": 236,
           "limit": 0,
           "data": {
             "frame": 42,
-            "px": 238,
-            "ms": 62.2
+            "px": 236,
+            "ms": 63.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "244KB @crf30",
+          "detail": "213KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 244,
+          "value": 213,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1525,10 +1551,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.33",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.33,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -1573,11 +1599,11 @@
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 43.9",
+          "detail": "0.0 <= 44.47",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 43.9,
+          "limit": 44.47,
           "data": {
             "ms": 0.0
           }
@@ -1585,13 +1611,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 0.92",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.985,
+          "value": 0.917,
           "limit": 0.5,
           "data": {
-            "ms": 5.7
+            "ms": 1.6
           }
         },
         {
@@ -1609,13 +1635,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 4% over the frames",
+          "detail": "subject area varies by 5% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.043,
+          "value": 0.048,
           "limit": 0.35,
           "data": {
-            "ms": 12.9
+            "ms": 14.2
           }
         },
         {
@@ -1847,18 +1873,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 493,
-          "key": 625,
-          "bounds": 196,
-          "render": 1005,
-          "seam": 1053,
-          "encode": 33975,
-          "encodes": 3,
-          "probe": 285,
-          "verify": 27,
-          "finish": 36544
+          "decode": 670,
+          "key": 565,
+          "bounds": 159,
+          "render": 1344,
+          "seam": 831,
+          "encode": 3501,
+          "encodes": 4,
+          "probe": 244,
+          "verify": 46,
+          "finish": 6133
         },
         "frames": 72,
         "fps": 24.0,
@@ -1874,16 +1900,18 @@
           "cross_slot"
         ],
         "scale": 0.9538,
-        "motion": 48.65,
-        "loop_seam_before": 196.0,
+        "motion": 48.68,
+        "loop_seam_before": 196.11,
+        "loop_cut": 21,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 83.23,
-        "frames_out": 66,
-        "crf": 38,
+        "loop_limit": 113.81,
+        "frames_out": 45,
+        "crf": 34,
         "sharp_kept": 1.0,
         "detail_vs_still": 0.76,
         "soft_sigma": 1.0,
-        "kb": 237.5
+        "kb": 234.1
       },
       "webm": "slices/vid-old_man-shouting_anger-20261003T165322-2a21e4.webm",
       "review": {
@@ -2014,6 +2042,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183716.65,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -2037,30 +2076,30 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 72.9
+            "ms": 47.2
           }
         },
         {
           "name": "cross_slot",
           "ok": false,
-          "detail": "282px of foreign foreground, first at frame 14 (allowed by you)",
+          "detail": "280px of foreign foreground, first at frame 14 (allowed by you)",
           "severity": "WARN",
           "stage": "slot",
-          "value": 282,
+          "value": 280,
           "limit": 0,
           "data": {
             "frame": 14,
-            "px": 282,
-            "ms": 63.5
+            "px": 280,
+            "ms": 71.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "237KB @crf38",
+          "detail": "234KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 237,
+          "value": 234,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2105,10 +2144,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.88",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.88,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2147,17 +2186,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 1.6
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 83.23",
+          "detail": "0.0 <= 113.81",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 83.23,
+          "limit": 113.81,
           "data": {
             "ms": 0.0
           }
@@ -2168,19 +2207,19 @@
           "detail": "first frame matches the still at IoU 0.89",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.892,
+          "value": 0.893,
           "limit": 0.5,
           "data": {
-            "ms": 3.5
+            "ms": 4.6
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 48.65",
+          "detail": "median frame-to-frame change 48.68",
           "severity": "WARN",
           "stage": "anim",
-          "value": 48.65,
+          "value": 48.68,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2189,13 +2228,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 5% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.052,
+          "value": 0.06,
           "limit": 0.35,
           "data": {
-            "ms": 22.9
+            "ms": 40.1
           }
         },
         {
@@ -2423,18 +2462,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 479,
-          "key": 625,
-          "bounds": 193,
-          "render": 671,
-          "seam": 1028,
-          "encode": 34057,
-          "encodes": 3,
-          "probe": 242,
-          "verify": 18,
-          "finish": 36212
+          "decode": 670,
+          "key": 565,
+          "bounds": 152,
+          "render": 1092,
+          "seam": 871,
+          "encode": 4044,
+          "encodes": 4,
+          "probe": 244,
+          "verify": 33,
+          "finish": 6441
         },
         "frames": 72,
         "fps": 24.0,
@@ -2448,15 +2487,17 @@
         "subject_px_in_video": 352,
         "scale": 1.1273,
         "motion": 21.21,
-        "loop_seam_before": 200.84,
+        "loop_seam_before": 200.93,
+        "loop_cut": 5,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 32.92,
-        "frames_out": 66,
-        "crf": 38,
+        "loop_limit": 33.26,
+        "frames_out": 61,
+        "crf": 34,
         "sharp_kept": 0.99,
         "detail_vs_still": 0.81,
         "soft_sigma": 0.8,
-        "kb": 211.7
+        "kb": 252.5
       },
       "webm": "slices/vid-old_man-looking_shocked-20261003T165322-325c85.webm",
       "review": {
@@ -2553,6 +2594,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183717.062,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -2576,7 +2628,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 75.2
+            "ms": 44.4
           }
         },
         {
@@ -2590,16 +2642,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 59.0
+            "ms": 67.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "211KB @crf38",
+          "detail": "252KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 211,
+          "value": 252,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2644,10 +2696,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.54",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.54,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2686,17 +2738,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.9
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 32.92",
+          "detail": "0.0 <= 33.26",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 32.92,
+          "limit": 33.26,
           "data": {
             "ms": 0.0
           }
@@ -2710,7 +2762,7 @@
           "value": 0.921,
           "limit": 0.5,
           "data": {
-            "ms": 3.3
+            "ms": 1.8
           }
         },
         {
@@ -2728,13 +2780,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 6% over the frames",
+          "detail": "subject area varies by 7% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.064,
+          "value": 0.066,
           "limit": 0.35,
           "data": {
-            "ms": 14.5
+            "ms": 31.2
           }
         },
         {
@@ -2959,18 +3011,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 478,
-          "key": 632,
-          "bounds": 204,
-          "render": 793,
-          "seam": 1146,
-          "encode": 23191,
+          "decode": 651,
+          "key": 564,
+          "bounds": 154,
+          "render": 1218,
+          "seam": 585,
+          "encode": 2314,
           "encodes": 2,
-          "probe": 252,
-          "verify": 23,
-          "finish": 25614
+          "probe": 309,
+          "verify": 29,
+          "finish": 4614
         },
         "frames": 72,
         "fps": 24.0,
@@ -2987,16 +3039,17 @@
           "cross_slot"
         ],
         "scale": 0.8857,
-        "motion": 155.31,
-        "loop_seam_before": 268.31,
-        "loop_seam": 0.0,
-        "loop_limit": 200.99,
-        "frames_out": 66,
-        "crf": 42,
+        "motion": 155.49,
+        "loop_seam_before": 268.5,
+        "loop_cut": 3,
+        "loop_seam": 214.5,
+        "loop_limit": 229.65,
+        "frames_out": 69,
+        "crf": 46,
         "sharp_kept": 1.01,
         "detail_vs_still": 0.75,
         "soft_sigma": 1.0,
-        "kb": 246.5
+        "kb": 201.3
       },
       "webm": "slices/vid-old_man-jumping_pride-20261003T165322-cbb85c.webm",
       "review": {
@@ -3127,6 +3180,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183715.105,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -3150,7 +3214,7 @@
             "frame": 41,
             "over_px": 7,
             "edge_px": 7,
-            "ms": 70.4
+            "ms": 42.8
           }
         },
         {
@@ -3164,16 +3228,16 @@
           "data": {
             "frame": 10,
             "px": 176,
-            "ms": 59.9
+            "ms": 65.9
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "246KB @crf42",
+          "detail": "201KB @crf46",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 246,
+          "value": 201,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3218,10 +3282,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.88",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.88,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -3260,17 +3324,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 10.5
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 200.99",
+          "detail": "214.5 <= 229.65",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 0.0,
-          "limit": 200.99,
+          "value": 214.5,
+          "limit": 229.65,
           "data": {
             "ms": 0.0
           }
@@ -3284,16 +3348,16 @@
           "value": 0.979,
           "limit": 0.5,
           "data": {
-            "ms": 4.1
+            "ms": 1.7
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 155.31",
+          "detail": "median frame-to-frame change 155.49",
           "severity": "WARN",
           "stage": "anim",
-          "value": 155.31,
+          "value": 155.49,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -3302,13 +3366,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 8% over the frames",
+          "detail": "subject area varies by 7% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.077,
+          "value": 0.068,
           "limit": 0.35,
           "data": {
-            "ms": 18.2
+            "ms": 17.2
           }
         },
         {
@@ -3537,18 +3601,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 499,
-          "key": 586,
-          "bounds": 196,
-          "render": 651,
-          "seam": 1099,
-          "encode": 43511,
+          "decode": 644,
+          "key": 572,
+          "bounds": 150,
+          "render": 1034,
+          "seam": 861,
+          "encode": 4015,
           "encodes": 4,
-          "probe": 245,
-          "verify": 18,
-          "finish": 45724
+          "probe": 315,
+          "verify": 20,
+          "finish": 6399
         },
         "frames": 72,
         "fps": 24.0,
@@ -3562,15 +3626,17 @@
         "subject_px_in_video": 344,
         "scale": 1.1535,
         "motion": 17.25,
-        "loop_seam_before": 211.15,
+        "loop_seam_before": 211.16,
+        "loop_cut": 8,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 26.64,
-        "frames_out": 66,
+        "loop_limit": 26.67,
+        "frames_out": 58,
         "crf": 34,
         "sharp_kept": 0.98,
         "detail_vs_still": 0.84,
         "soft_sigma": 0.7,
-        "kb": 246.4
+        "kb": 222.4
       },
       "webm": "slices/vid-old_man-hiding_fear-20261003T165322-f7979a.webm",
       "review": {
@@ -3679,6 +3745,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183716.896,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -3703,7 +3780,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 73.2
+            "ms": 38.7
           }
         },
         {
@@ -3717,16 +3794,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 63.5
+            "ms": 68.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "246KB @crf34",
+          "detail": "222KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 246,
+          "value": 222,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3771,10 +3848,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.42",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.42,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -3813,17 +3890,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 26.64",
+          "detail": "0.0 <= 26.67",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 26.64,
+          "limit": 26.67,
           "data": {
             "ms": 0.0
           }
@@ -3834,10 +3911,10 @@
           "detail": "first frame matches the still at IoU 0.94",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.936,
+          "value": 0.937,
           "limit": 0.5,
           "data": {
-            "ms": 3.7
+            "ms": 1.6
           }
         },
         {
@@ -3858,10 +3935,10 @@
           "detail": "subject area varies by 8% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.08,
+          "value": 0.082,
           "limit": 0.35,
           "data": {
-            "ms": 14.2
+            "ms": 18.3
           }
         },
         {
@@ -4086,18 +4163,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 275,
-          "key": 404,
-          "bounds": 264,
-          "render": 857,
-          "seam": 800,
-          "encode": 26415,
+          "decode": 285,
+          "key": 520,
+          "bounds": 131,
+          "render": 1161,
+          "seam": 832,
+          "encode": 3618,
           "encodes": 4,
-          "probe": 233,
-          "verify": 17,
-          "finish": 28589
+          "probe": 202,
+          "verify": 16,
+          "finish": 5965
         },
         "frames": 72,
         "fps": 24.0,
@@ -4110,16 +4187,17 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 342,
         "scale": 1.1602,
-        "motion": 8.41,
-        "loop_seam_before": 195.48,
+        "motion": 8.4,
+        "loop_seam_before": 195.55,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 14.53,
+        "loop_limit": 14.5,
         "frames_out": 66,
         "crf": 34,
         "sharp_kept": 0.98,
         "detail_vs_still": 0.83,
         "soft_sigma": 0.8,
-        "kb": 221.6
+        "kb": 220.5
       },
       "webm": "slices/vid-old_man-sitting_boredom-20261003T165322-eba9a8.webm",
       "review": {
@@ -4216,6 +4294,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183721.527,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -4239,7 +4328,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 76.2
+            "ms": 45.8
           }
         },
         {
@@ -4253,16 +4342,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 99.0
+            "ms": 45.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "221KB @crf34",
+          "detail": "220KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 221,
+          "value": 220,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4355,11 +4444,11 @@
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 14.53",
+          "detail": "0.0 <= 14.5",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 14.53,
+          "limit": 14.5,
           "data": {
             "ms": 0.0
           }
@@ -4367,22 +4456,22 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 0.95",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.989,
+          "value": 0.948,
           "limit": 0.5,
           "data": {
-            "ms": 3.2
+            "ms": 1.7
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 8.41",
+          "detail": "median frame-to-frame change 8.4",
           "severity": "WARN",
           "stage": "anim",
-          "value": 8.41,
+          "value": 8.4,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -4397,7 +4486,7 @@
           "value": 0.034,
           "limit": 0.35,
           "data": {
-            "ms": 13.2
+            "ms": 13.8
           }
         },
         {
@@ -4625,18 +4714,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 256,
-          "key": 457,
-          "bounds": 232,
-          "render": 947,
-          "seam": 878,
-          "encode": 22741,
-          "encodes": 3,
-          "probe": 228,
-          "verify": 15,
-          "finish": 25045
+          "decode": 274,
+          "key": 431,
+          "bounds": 141,
+          "render": 1227,
+          "seam": 736,
+          "encode": 3046,
+          "encodes": 4,
+          "probe": 190,
+          "verify": 16,
+          "finish": 5360
         },
         "frames": 72,
         "fps": 24.0,
@@ -4650,15 +4739,17 @@
         "subject_px_in_video": 350,
         "scale": 1.1337,
         "motion": 21.82,
-        "loop_seam_before": 228.43,
+        "loop_seam_before": 228.55,
+        "loop_cut": 20,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 36.41,
-        "frames_out": 66,
-        "crf": 38,
-        "sharp_kept": 0.98,
+        "loop_limit": 60.67,
+        "frames_out": 46,
+        "crf": 34,
+        "sharp_kept": 0.99,
         "detail_vs_still": 0.83,
         "soft_sigma": 0.7,
-        "kb": 254.2
+        "kb": 238.1
       },
       "webm": "slices/vid-old_man-grinning_mischief-20261003T165322-049aed.webm",
       "review": {
@@ -4757,6 +4848,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183721.37,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -4780,7 +4882,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 72.2
+            "ms": 49.8
           }
         },
         {
@@ -4794,16 +4896,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 71.0
+            "ms": 48.7
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "254KB @crf38",
+          "detail": "238KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 254,
+          "value": 238,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4848,10 +4950,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.92",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.92,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -4890,17 +4992,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 36.41",
+          "detail": "0.0 <= 60.67",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 36.41,
+          "limit": 60.67,
           "data": {
             "ms": 0.0
           }
@@ -4914,7 +5016,7 @@
           "value": 0.926,
           "limit": 0.5,
           "data": {
-            "ms": 2.6
+            "ms": 1.3
           }
         },
         {
@@ -4932,13 +5034,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 5% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.051,
+          "value": 0.055,
           "limit": 0.35,
           "data": {
-            "ms": 11.7
+            "ms": 14.5
           }
         },
         {
@@ -5163,18 +5265,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 119.0,
+        "threshold": 118.0,
         "ms": {
-          "decode": 254,
-          "key": 405,
-          "bounds": 230,
-          "render": 702,
-          "seam": 723,
-          "encode": 14235,
+          "decode": 298,
+          "key": 462,
+          "bounds": 120,
+          "render": 816,
+          "seam": 593,
+          "encode": 2846,
           "encodes": 4,
-          "probe": 223,
-          "verify": 12,
-          "finish": 16130
+          "probe": 182,
+          "verify": 10,
+          "finish": 4573
         },
         "frames": 72,
         "fps": 24.0,
@@ -5187,16 +5289,18 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 342,
         "scale": 1.1602,
-        "motion": 9.02,
-        "loop_seam_before": 252.81,
+        "motion": 9.0,
+        "loop_seam_before": 252.94,
+        "loop_cut": 19,
+        "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 17.48,
-        "frames_out": 66,
-        "crf": 34,
+        "loop_limit": 28.57,
+        "frames_out": 47,
+        "crf": 30,
         "sharp_kept": 0.98,
         "detail_vs_still": 0.84,
         "soft_sigma": 0.7,
-        "kb": 251.2
+        "kb": 243.0
       },
       "webm": "slices/vid-old_man-leaning_relaxed-20261003T165322-9ab483.webm",
       "review": {
@@ -5293,6 +5397,17 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183721.82,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -5316,7 +5431,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 68.1
+            "ms": 33.9
           }
         },
         {
@@ -5330,16 +5445,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 79.9
+            "ms": 49.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "251KB @crf34",
+          "detail": "243KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 251,
+          "value": 243,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -5384,10 +5499,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "1.96",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 1.96,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -5432,11 +5547,11 @@
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 17.48",
+          "detail": "0.0 <= 28.57",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 17.48,
+          "limit": 28.57,
           "data": {
             "ms": 0.0
           }
@@ -5450,16 +5565,16 @@
           "value": 0.971,
           "limit": 0.5,
           "data": {
-            "ms": 2.5
+            "ms": 1.3
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 9.02",
+          "detail": "median frame-to-frame change 9.0",
           "severity": "WARN",
           "stage": "anim",
-          "value": 9.02,
+          "value": 9.0,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -5471,10 +5586,10 @@
           "detail": "subject area varies by 5% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.047,
+          "value": 0.053,
           "limit": 0.35,
           "data": {
-            "ms": 9.2
+            "ms": 8.9
           }
         },
         {

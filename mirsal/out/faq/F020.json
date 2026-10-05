@@ -1,0 +1,37 @@
+{
+  "id": "F020",
+  "status": "draft",
+  "title": "Why does a sticker say Not animated yet",
+  "question": "Why does a sticker say Not animated yet?",
+  "answer": "The still picture is ready but does not have an animation yet. Animation needs the prepared video, and the Animation stage reports when no video is prepared. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "animation/not-animated.md"
+    }
+  ],
+  "created": 1791192285.561,
+  "history": [
+    {
+      "ts": 1791192285.561,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "animation/not-animated.md"
+    }
+  ],
+  "updated": 1791192285.576,
+  "seed": {
+    "path": "animation/not-animated.md",
+    "sha": "6a70ac67f29463ca2774134b726631c38ddd2837f22a06193d35dacd7d98f3ea"
+  },
+  "category": "animation",
+  "tags": [
+    "animation",
+    "not",
+    "animated"
+  ],
+  "screen": "Studio > Animation",
+  "looks_like": "A sticker tile says Not animated yet; the Animation stage can say No video prepared."
+}

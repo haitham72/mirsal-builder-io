@@ -1,0 +1,37 @@
+{
+  "id": "F048",
+  "status": "draft",
+  "title": "Why can I not override a file or Telegram limit",
+  "question": "Why can I not override a file or Telegram limit?",
+  "answer": "A judgement-call warning can be allowed, but a file that Telegram would reject still has to meet its technical limits. An empty cell with no picture also cannot become a usable sticker through an override. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/hard-limit.md"
+    }
+  ],
+  "created": 1791192286.404,
+  "history": [
+    {
+      "ts": 1791192286.404,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/hard-limit.md"
+    }
+  ],
+  "updated": 1791192286.418,
+  "seed": {
+    "path": "studio/hard-limit.md",
+    "sha": "b3d9d46f979e586aa7a7f98c159254a07b5d3250be5b8461e39014d24c3ad212"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "hard",
+    "limit"
+  ],
+  "screen": "Studio",
+  "looks_like": "The check category says File or Telegram limit."
+}

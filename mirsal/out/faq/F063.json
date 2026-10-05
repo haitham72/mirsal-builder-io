@@ -1,0 +1,36 @@
+{
+  "id": "F063",
+  "status": "draft",
+  "title": "Where do I find a reply from support",
+  "question": "Where do I find a reply from support?",
+  "answer": "Open Help and look under Notifications for Support answered or Resolved. Selecting a notification opens the related conversation and marks its notifications read. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/notification.md"
+    }
+  ],
+  "created": 1791192286.85,
+  "history": [
+    {
+      "ts": 1791192286.85,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/notification.md"
+    }
+  ],
+  "updated": 1791192286.864,
+  "seed": {
+    "path": "troubleshooting/notification.md",
+    "sha": "08595aa93d7b1d9fba1750609bf7f5b999bf0aa26ef98040d814f6f6f61e5c61"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "notification"
+  ],
+  "screen": "Help",
+  "looks_like": "Notifications lists Support answered or Resolved."
+}

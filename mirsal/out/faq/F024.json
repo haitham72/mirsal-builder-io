@@ -1,0 +1,38 @@
+{
+  "id": "F024",
+  "status": "draft",
+  "title": "What is the difference between a batch and a sheet",
+  "question": "What is the difference between a batch and a sheet?",
+  "answer": "A batch is one generation of stickers. Its sheet contains the individual pictures arranged in cells; each sticker keeps its original cell number through review and animation.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "getting-started/batch-and-sheet.md"
+    }
+  ],
+  "created": 1791192285.682,
+  "history": [
+    {
+      "ts": 1791192285.682,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "getting-started/batch-and-sheet.md"
+    }
+  ],
+  "updated": 1791192285.696,
+  "seed": {
+    "path": "getting-started/batch-and-sheet.md",
+    "sha": "151a05075d1302ef6afd2e8e0805c5c752d7fc8f6a2368548cbe37fa5e30ca54"
+  },
+  "category": "getting-started",
+  "tags": [
+    "getting-started",
+    "batch",
+    "and",
+    "sheet"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

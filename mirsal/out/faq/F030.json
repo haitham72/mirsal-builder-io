@@ -1,0 +1,37 @@
+{
+  "id": "F030",
+  "status": "draft",
+  "title": "Can I download all sticker files in a pack together",
+  "question": "Can I download all sticker files in a pack together?",
+  "answer": "Open the pack in Library and press Download .zip. The download contains its animated and static sticker files together. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "library/download-pack.md"
+    }
+  ],
+  "created": 1791192285.863,
+  "history": [
+    {
+      "ts": 1791192285.863,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "library/download-pack.md"
+    }
+  ],
+  "updated": 1791192285.879,
+  "seed": {
+    "path": "library/download-pack.md",
+    "sha": "8991ddcd4c0eeb1ca3116ba083cee651a91f35844893016a814b1b0f019a9f72"
+  },
+  "category": "library",
+  "tags": [
+    "library",
+    "download",
+    "pack"
+  ],
+  "screen": "Library",
+  "looks_like": "The pack header offers Download .zip."
+}

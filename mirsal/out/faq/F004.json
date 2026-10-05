@@ -1,0 +1,37 @@
+{
+  "id": "F004",
+  "status": "draft",
+  "title": "Where can I sign out",
+  "question": "Where can I sign out?",
+  "answer": "Open Settings and find Signed in as. Press Sign out to leave the account. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "accounts/sign-out.md"
+    }
+  ],
+  "created": 1791192285.069,
+  "history": [
+    {
+      "ts": 1791192285.069,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "accounts/sign-out.md"
+    }
+  ],
+  "updated": 1791192285.083,
+  "seed": {
+    "path": "accounts/sign-out.md",
+    "sha": "8d95d40ca8a9c468bab966d29180bdefc7532f2adfc38f77853ce0cd43310e0d"
+  },
+  "category": "accounts",
+  "tags": [
+    "accounts",
+    "sign",
+    "out"
+  ],
+  "screen": "Sign in",
+  "looks_like": "Signed in as appears beside Sign out and Request credits."
+}

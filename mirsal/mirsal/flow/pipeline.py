@@ -301,10 +301,12 @@ def _allocate(out: Path, task_slug: str, created: float) -> tuple[int, Path]:
 
 def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: sources.Pick | None = None, parent: int | None = None,
           grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None,
-          outline: int | None = None, erode: int | None = None, kind: str | None = None) -> int:
+          outline: int | None = None, erode: int | None = None, kind: str | None = None, prepared: bool | None = None) -> int:
     """Synchronous part: match source, run the prompter, allocate G00N. Returns the id fast.
     grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters.
-    kind: "particles" marks the batch as a particle sheet (docs/effects.md): its layout is the plan's, it is cut into EXACT equal cells and no sticker rule can stop a cell (verify.PARTICLE_KEEP)."""
+    kind: "particles" marks the batch as a particle sheet (docs/effects.md): its layout is the plan's, it is cut into EXACT equal cells and no sticker rule can stop a cell (verify.PARTICLE_KEEP).
+    prepared: this batch serves a prepared watch-folder set (its real source, recorded in result.json, 0 credits, no job or ledger line).
+    None (the default) detects it: the sheet lives under the watch folder. A live provider sheet and a hand import do not."""
     if kind not in (None, "particles"):
         raise PipelineError("kind must be 'particles' or left out")
     if outline is not None and not 0 <= int(outline) <= 40:
@@ -318,6 +320,11 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
             pick = picks[min(max(variant or 1, 1), len(picks)) - 1]      # explicit folder, else the first: it never advances by itself
     if not pick:
         raise PipelineError(f"No prepared set for that. Try: {', '.join(sources.known_subjects(inp)) or '(none found)'}", 404)
+    if prepared is None:
+        try:                                        # a live provider sheet and a hand import live under out/, never under the watch folder
+            prepared = Path(pick.sheet).resolve().is_relative_to(Path(inp).resolve())
+        except (OSError, ValueError):
+            prepared = False
     if regen_plan:  # 1x1 regeneration of one sticker: the plan is that sticker's own (key, tags, emoji) in a single-cell template
         plan = regen_plan
     elif task and task.get("plan"):   # a task reserved in the Inbox: its saved plan (template + slots) is the plan
@@ -340,6 +347,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         "source": {"subject": pick.subject, "subject_id": pick.subject_id, "variant": pick.variant,
                    "n_variants": pick.n_variants, "sheet": pick.sheet.name, "video": pick.video.name if pick.video else None,
                    "has_video": pick.has_video, "pairing": pick.pairing, "clips_dup_of": pick.clips_dup_of,
+                   "prepared": bool(prepared),
                    "clips": {str(n): {f: str(p) for f, p in d.items()} for n, d in pick.clips.items()}, "sheet_path": str(pick.sheet),
                    "video_path": str(pick.video) if pick.video else None},
         "grid": plan["grid"], "stage": "requested", "error": None, "plan_source": "task " + task["id"] if task else pick.plan.name if pick.plan else "stub (generation/prompter.py)",

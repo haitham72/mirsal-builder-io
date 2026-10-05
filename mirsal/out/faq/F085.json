@@ -1,0 +1,37 @@
+{
+  "id": "F085",
+  "status": "draft",
+  "title": "Does a timed-out job mean the provider has stopped making my video",
+  "question": "Does a timed-out job mean the provider has stopped making my video?",
+  "answer": "A timeout means the app stopped waiting, and the task may still finish at Higgsfield. Ask Help to check your own job status; the existing task can be checked again without paying for a new generation. Do not treat a timeout alone as a reason to start another paid job.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/job-timeout.md"
+    }
+  ],
+  "created": 1791193753.214,
+  "history": [
+    {
+      "ts": 1791193753.214,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/job-timeout.md"
+    }
+  ],
+  "updated": 1791193753.231,
+  "seed": {
+    "path": "troubleshooting/job-timeout.md",
+    "sha": "ef9f4c0d015dbb122bc874524bde6887ea51ac47f58f37d26aeef4db071db44c"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "job",
+    "timeout"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

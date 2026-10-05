@@ -1,0 +1,37 @@
+{
+  "id": "F067",
+  "status": "draft",
+  "title": "How do I request something only an admin can provide",
+  "question": "How do I request something only an admin can provide?",
+  "answer": "After signing in and being approved, describe the access, credits or credentials you need in Help. Choose Ask the admin when it is offered; the request goes to an admin, who decides what can be provided. The request does not grant access automatically. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "accounts/access-request.md"
+    }
+  ],
+  "created": 1791193752.423,
+  "history": [
+    {
+      "ts": 1791193752.423,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "accounts/access-request.md"
+    }
+  ],
+  "updated": 1791193752.597,
+  "seed": {
+    "path": "accounts/access-request.md",
+    "sha": "418c80ba11f12330fc159c66991a9ef2eac21b47e69a5197657d8e9bd206ed41"
+  },
+  "category": "accounts",
+  "tags": [
+    "accounts",
+    "access",
+    "request"
+  ],
+  "screen": "Help",
+  "looks_like": "Only an admin can give this. appears above Ask the admin."
+}

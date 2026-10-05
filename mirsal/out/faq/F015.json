@@ -1,0 +1,36 @@
+{
+  "id": "F015",
+  "status": "draft",
+  "title": "Why can the AI leave a sticker unjudged",
+  "question": "Why can the AI leave a sticker unjudged?",
+  "answer": "A model answer that cannot be accepted leaves the sticker unjudged rather than pretending the review succeeded. In one local test, five of thirty answers used unsupported reasons; that is one measurement, not a guarantee about future reviews.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-vision/unjudged.md"
+    }
+  ],
+  "created": 1791192285.415,
+  "history": [
+    {
+      "ts": 1791192285.415,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-vision/unjudged.md"
+    }
+  ],
+  "updated": 1791192285.428,
+  "seed": {
+    "path": "ai-vision/unjudged.md",
+    "sha": "c58d3d3decfca420ed561b8ae06031b40a2db32562f494294920467c26f57569"
+  },
+  "category": "ai-vision",
+  "tags": [
+    "ai-vision",
+    "unjudged"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

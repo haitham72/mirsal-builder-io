@@ -244,7 +244,7 @@ class Agent:
         has_gen = bool((sess.get("focus") or {}).get("generation") or self.store.latest_pass(sess) or self._named_batches(sess, t.text))
         asked = sess.pop("awaiting", None)                     # a question I asked last turn lives for exactly one answer
         answered = False
-        if t.action and t.action.get("type") in ("confirm", "cancel"):
+        if t.action and t.action.get("type") in ("confirm", "confirm_new", "cancel"):
             t.intents, t.conf = [t.action["type"].upper()], 1.0
         elif t.action and t.action.get("type") == "retry_sheet":
             t.intents, t.conf = ["RETRY"], 1.0
@@ -294,7 +294,7 @@ class Agent:
                  "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "PROFILE": "something about you", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
-        order = {"CONFIRM": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
+        order = {"CONFIRM": "confirm", "CONFIRM_NEW": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                  "EDIT_STICKERS": "edit", "UNDO": "undo", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
                  "SMALLTALK": "smalltalk", "PROFILE": "profile", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
@@ -414,9 +414,11 @@ class Agent:
                          + (f"; left out as you asked: {', '.join(tr['forbidden'])}" if tr.get("forbidden") else ""))
         subject = (plan.get("described") if plan.get("scene") else None) or plan.get("subject") or guess         # the normalised request ("camel in Lamborghini"), never the bare character
         t.res.generation = None
-        est = self.tools.estimate("image") if self.tools.live() else None
+        pm = self.tools.prepared_match(prompt) if self.tools.live() else None
+        est = 0 if pm else (self.tools.estimate("image") if self.tools.live() else None)
         card = {"type": "plan", "subject": subject, "grid": st["grid"], "style": STYLE_NAMES.get(sid, sid),
                 "count": len(names), "names": names, "estimate": est, "balance": self.tools.credits(), "prompt": prompt,
+                "prepared": bool(pm),
                 "free": not self.tools.live(), **({"transformation": {k: tr[k] for k in ("id", "subject", "target", "required")}} if tr else {})}
         spend = self.tools.live()
         cs = creator.settings_of(sess)
@@ -426,8 +428,8 @@ class Agent:
             sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid,
                                "ai": bool(st.get("ai", True)), "estimate": est, "plan": compact_plan(plan)}
             t.cards.append(card)
-            t.reply = f"Here's the plan for **{subject}**: {len(names)} stickers, {STYLE_NAMES.get(st['style_id'], st['style_id'])}. Shall I create it?"
-            t.chips = [{"label": "Create it", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.reply = f"Here's the plan for **{subject}**: {len(names)} stickers, {STYLE_NAMES.get(st['style_id'], st['style_id'])}" + (" (I have this prepared: 0 credits)" if pm else "") + ". Shall I create it?"
+            t.chips = ([{"label": "Create it", "action": "confirm"}] + ([{"label": "Make a new one (paid)", "action": "confirm_new"}] if pm else []) + [{"label": "Not yet", "action": "cancel"}])
             t.trace.end(f"plan ready · {_credits(est)}")
             return {}
         self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "plan": compact_plan(plan)}, card)
@@ -538,7 +540,8 @@ class Agent:
                       refs: list | None = None, note: str = "") -> bool:
         """Start a batch from an approved plan (`p["plan"]` is sent as it is: the card and the batch are the same). True when it started; False leaves the reply explaining why."""
         try:
-            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"), ref_clause=p.get("ref_clause"), **_edge_kw(p))
+            force_live = (t.action or {}).get("type") == "confirm_new"      # "Make a new one": a fresh provider sheet at the normal price, never the prepared set
+            r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"), ref_clause=p.get("ref_clause"), **_edge_kw(p), force_live=force_live)
         except ToolError as e:
             t.reply = f"I couldn't start that: {e}"
             t.trace.end("not started", ok=False)

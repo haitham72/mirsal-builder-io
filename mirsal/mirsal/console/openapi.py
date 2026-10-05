@@ -177,6 +177,9 @@ ROUTES = [
     ("POST", "/api/generations/{id}/reveal", "Generations", "Open the batch's folder in the file manager", None, obj({"opened": STR}), 200),
     ("GET", "/api/history", "Generations", "Every batch FAMILY (a batch, its edits and redos, and the batches added to it: flow/groups.py), the most recently edited first, a page at a time (?offset, ?limit); an item is the family root with variants[] (each batch of the family in the same item shape, root first) and relation (joined | redo | edit | null): {items: [{id, generation_id, prompt, created, edited, stage, error, ready, animated, grid: [rows, cols], cells: [{index, row, col, png, status, animated}], outline_px}], more, total}. The grid is the sheet's own (2x2 or 3x3, read from result.json) so a card can draw it as it was cut", None, OBJ, 200),
     ("GET", "/api/inputs", "Generations", "The prepared sheets found in the watch folders", None, OBJ, 200),
+    ("GET", "/api/prepared/match", "Generations", "Which prepared subject a request names (?prompt=): {subject, variants, prefer}. Whole signature words only; free", None, OBJ, 200),
+    ("GET", "/api/prepared/setting", "Generations", "Whether matching requests are served from the watch folder instead of a paid call {prefer}", None, OBJ, 200),
+    ("POST", "/api/prepared/setting", "Generations", "Owner only: serve matching requests from the watch folder {prefer: bool} (MIRSAL_PREFER_PREPARED wins when set)", OBJ, OBJ, 200),
     # --- live generation
     ("POST", "/api/live/cost", "Live generation", "Price one call of a model (a quote, free)", OBJ, OBJ, 200),
     ("POST", "/api/live/sheet", "Live generation", "Reserve a task (the G1 approval) and start the sheet job; spends credits. Idempotency-Key supported", ref("LiveSheet"), ref("LiveJob"), 200),

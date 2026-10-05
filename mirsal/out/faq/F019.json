@@ -1,0 +1,37 @@
+{
+  "id": "F019",
+  "status": "draft",
+  "title": "What does the app check while animating",
+  "question": "What does the app check while animating?",
+  "answer": "It checks each animation frame by frame, including file size, the loop and whether the character stays within its cell. Finished animations appear as they become ready.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "animation/frame-checks.md"
+    }
+  ],
+  "created": 1791192285.534,
+  "history": [
+    {
+      "ts": 1791192285.534,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "animation/frame-checks.md"
+    }
+  ],
+  "updated": 1791192285.548,
+  "seed": {
+    "path": "animation/frame-checks.md",
+    "sha": "9327ae0c351614fcf2f7b131fad674fee91db65fd2774dc5122460656bd9814a"
+  },
+  "category": "animation",
+  "tags": [
+    "animation",
+    "frame",
+    "checks"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

@@ -1,0 +1,37 @@
+{
+  "id": "F071",
+  "status": "draft",
+  "title": "Do my office credits refill automatically",
+  "question": "Do my office credits refill automatically?",
+  "answer": "Office credits do not refill automatically. Use Request credits in Settings, or ask in Help and choose Ask the admin when offered; adding credits requires an admin’s decision.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "credits/automatic-refill.md"
+    }
+  ],
+  "created": 1791193752.724,
+  "history": [
+    {
+      "ts": 1791193752.724,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "credits/automatic-refill.md"
+    }
+  ],
+  "updated": 1791193752.739,
+  "seed": {
+    "path": "credits/automatic-refill.md",
+    "sha": "2c7876d0670a4f774690ff07f0e29b353678de021e8edb3dd6131142d7c5f01e"
+  },
+  "category": "credits",
+  "tags": [
+    "credits",
+    "automatic",
+    "refill"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

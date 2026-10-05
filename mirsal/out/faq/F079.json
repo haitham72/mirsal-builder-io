@@ -1,0 +1,38 @@
+{
+  "id": "F079",
+  "status": "draft",
+  "title": "Can I import a Photoshop-edited file straight into its existing pack sticker",
+  "question": "Can I import a Photoshop-edited file straight into its existing pack sticker?",
+  "answer": "The current sheet and video imports do not provide a direct replacement of an existing pack sticker with an externally edited file. Edits made through Edit in Studio can be saved to the sticker and refresh its pack copies. Ask in Help for a direct external-file replacement workflow and choose Request this feature when offered.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "studio/external-edit-return.md"
+    }
+  ],
+  "created": 1791193753.003,
+  "history": [
+    {
+      "ts": 1791193753.003,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "studio/external-edit-return.md"
+    }
+  ],
+  "updated": 1791193753.019,
+  "seed": {
+    "path": "studio/external-edit-return.md",
+    "sha": "f0d186dd5115d4ec4bca8b76ce6b2fae452704a86e891bda27d02220f31dcccd"
+  },
+  "category": "studio",
+  "tags": [
+    "studio",
+    "external",
+    "edit",
+    "return"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

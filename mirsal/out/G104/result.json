@@ -72,7 +72,7 @@
     2,
     2
   ],
-  "stage": "video_sliced",
+  "stage": "pack_final",
   "error": null,
   "plan_source": "task 035",
   "sheet_prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: a bold red caped figure with a yellow emblem on the chest.\nStyle: soft 3D clay render, chunky rounded forms, matte material, gentle studio lighting, charming handmade feel.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: standing tall with arms crossed in proud victory pose\nCharacter 2: jumping high with cape flowing behind in pure joy\nCharacter 3: leaning forward with hands clasped in deep concern\nCharacter 4: falling to knees with head down in total defeat\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -159,7 +159,17 @@
         "note": "approved by Make a video"
       }
     },
-    "pack": null
+    "pack": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791171768.382,
+      "note": "approved by Add",
+      "stickers": [
+        1,
+        3,
+        4
+      ]
+    }
   },
   "video_sheets": [
     {
@@ -268,7 +278,7 @@
               "4": 0.99
             },
             "bad": [],
-            "ms": 42.1
+            "ms": 55.7
           }
         },
         {
@@ -576,18 +586,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 123.0,
+        "threshold": 122.5,
         "ms": {
-          "decode": 645,
-          "key": 755,
-          "bounds": 303,
-          "render": 1184,
-          "seam": 702,
-          "encode": 9965,
+          "decode": 802,
+          "key": 1231,
+          "bounds": 361,
+          "render": 1527,
+          "seam": 709,
+          "encode": 3237,
           "encodes": 4,
-          "probe": 237,
-          "verify": 17,
-          "finish": 12412
+          "probe": 184,
+          "verify": 12,
+          "finish": 6033
         },
         "frames": 72,
         "fps": 24.0,
@@ -600,21 +610,23 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 612,
         "scale": 0.6484,
-        "motion": 5.31,
-        "loop_seam_before": 149.03,
+        "motion": 5.32,
+        "loop_seam_before": 149.0,
+        "loop_cut": 15,
+        "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
-        "frames_out": 66,
+        "frames_out": 51,
         "crf": 30,
         "sharp_kept": 1.0,
         "detail_vs_still": 1.02,
         "soft_sigma": 0.0,
-        "kb": 223.4
+        "kb": 168.2
       },
       "webm": "slices/vid-superhero_dubai-victory_stance-20261003T103228-3b94b6.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -665,6 +677,35 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791171768.348,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791171768.382,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791183697.961,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -688,7 +729,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 11,
-            "ms": 102.1
+            "ms": 109.2
           }
         },
         {
@@ -702,16 +743,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 85.0
+            "ms": 139.8
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "223KB @crf30",
+          "detail": "168KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 223,
+          "value": 168,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -756,10 +797,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.13",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.13,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -798,7 +839,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.9
+            "ms": 0.7
           }
         },
         {
@@ -822,16 +863,16 @@
           "value": 0.986,
           "limit": 0.5,
           "data": {
-            "ms": 3.5
+            "ms": 1.7
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 5.31",
+          "detail": "median frame-to-frame change 5.32",
           "severity": "WARN",
           "stage": "anim",
-          "value": 5.31,
+          "value": 5.32,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -840,13 +881,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 3% over the frames",
+          "detail": "subject area varies by 4% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.035,
+          "value": 0.036,
           "limit": 0.35,
           "data": {
-            "ms": 12.6
+            "ms": 10.1
           }
         },
         {
@@ -861,7 +902,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 2,
@@ -1055,11 +1097,11 @@
       "anim_reason": "inside_slot",
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 122.0,
+        "threshold": 121.5,
         "ms": {
-          "decode": 637,
-          "key": 755,
-          "bounds": 311
+          "decode": 804,
+          "key": 1210,
+          "bounds": 351
         },
         "frames": 72,
         "fps": 24.0,
@@ -1135,6 +1177,26 @@
               "ms": 104.7
             }
           }
+        },
+        {
+          "ts": 1791183692.255,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 11,
+            "limit": 0,
+            "note": "frame 32, 11px over the 11px edge band",
+            "data": {
+              "frame": 32,
+              "over_px": 11,
+              "edge_px": 11,
+              "ms": 109.1
+            }
+          }
         }
       ],
       "caption": {
@@ -1158,7 +1220,7 @@
             "frame": 32,
             "over_px": 11,
             "edge_px": 11,
-            "ms": 104.7
+            "ms": 109.1
           }
         },
         {
@@ -1172,7 +1234,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 90.5
+            "ms": 128.1
           }
         }
       ]
@@ -1369,18 +1431,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 123.0,
+        "threshold": 122.5,
         "ms": {
-          "decode": 698,
-          "key": 699,
-          "bounds": 310,
-          "render": 1231,
-          "seam": 731,
-          "encode": 11360,
+          "decode": 799,
+          "key": 1214,
+          "bounds": 349,
+          "render": 1624,
+          "seam": 928,
+          "encode": 3624,
           "encodes": 4,
-          "probe": 220,
-          "verify": 12,
-          "finish": 13867
+          "probe": 173,
+          "verify": 14,
+          "finish": 6717
         },
         "frames": 72,
         "fps": 24.0,
@@ -1394,20 +1456,22 @@
         "subject_px_in_video": 618,
         "scale": 0.6421,
         "motion": 4.87,
-        "loop_seam_before": 155.0,
+        "loop_seam_before": 154.97,
+        "loop_cut": 1,
+        "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
-        "frames_out": 66,
+        "frames_out": 65,
         "crf": 30,
         "sharp_kept": 1.0,
         "detail_vs_still": 1.04,
         "soft_sigma": 0.0,
-        "kb": 245.9
+        "kb": 243.6
       },
       "webm": "slices/vid-superhero_dubai-worriedlean-20261003T103228-d1eac8.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1458,6 +1522,35 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791171768.35,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791171768.382,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791183698.626,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -1481,7 +1574,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 11,
-            "ms": 104.4
+            "ms": 109.9
           }
         },
         {
@@ -1495,16 +1588,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 90.7
+            "ms": 125.8
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "245KB @crf30",
+          "detail": "243KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 245,
+          "value": 243,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1549,10 +1642,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.71",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.71,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -1591,7 +1684,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 0.7
           }
         },
         {
@@ -1615,7 +1708,7 @@
           "value": 0.99,
           "limit": 0.5,
           "data": {
-            "ms": 2.8
+            "ms": 1.7
           }
         },
         {
@@ -1639,7 +1732,7 @@
           "value": 0.03,
           "limit": 0.35,
           "data": {
-            "ms": 8.3
+            "ms": 12.3
           }
         },
         {
@@ -1654,7 +1747,8 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 4,
@@ -1848,18 +1942,18 @@
       "anim_reason": null,
       "anim_metrics": {
         "source": "video sheet",
-        "threshold": 123.0,
+        "threshold": 122.5,
         "ms": {
-          "decode": 635,
-          "key": 759,
-          "bounds": 300,
-          "render": 1304,
-          "seam": 857,
-          "encode": 11221,
+          "decode": 805,
+          "key": 1227,
+          "bounds": 353,
+          "render": 1675,
+          "seam": 874,
+          "encode": 3273,
           "encodes": 4,
-          "probe": 211,
-          "verify": 12,
-          "finish": 13907
+          "probe": 176,
+          "verify": 13,
+          "finish": 6367
         },
         "frames": 72,
         "fps": 24.0,
@@ -1873,20 +1967,22 @@
         "subject_px_in_video": 572,
         "scale": 0.6937,
         "motion": 5.66,
-        "loop_seam_before": 259.97,
+        "loop_seam_before": 260.0,
+        "loop_cut": 12,
+        "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
-        "frames_out": 66,
+        "frames_out": 54,
         "crf": 30,
-        "sharp_kept": 1.01,
+        "sharp_kept": 1.02,
         "detail_vs_still": 0.99,
         "soft_sigma": 0.3,
-        "kb": 239.5
+        "kb": 194.1
       },
       "webm": "slices/vid-superhero_dubai-defeated_slump-20261003T103228-6f0e0c.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1937,6 +2033,35 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791171768.352,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791171768.382,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791183698.295,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "caption": {
@@ -1960,7 +2085,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 11,
-            "ms": 102.1
+            "ms": 108.2
           }
         },
         {
@@ -1974,16 +2099,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 85.2
+            "ms": 135.9
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "239KB @crf30",
+          "detail": "194KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 239,
+          "value": 194,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2028,10 +2153,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.75",
+          "detail": "2.25",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.75,
+          "value": 2.25,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2070,7 +2195,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 0.7
           }
         },
         {
@@ -2094,7 +2219,7 @@
           "value": 0.996,
           "limit": 0.5,
           "data": {
-            "ms": 2.8
+            "ms": 1.8
           }
         },
         {
@@ -2115,10 +2240,10 @@
           "detail": "subject area varies by 5% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.047,
+          "value": 0.046,
           "limit": 0.35,
           "data": {
-            "ms": 8.7
+            "ms": 10.7
           }
         },
         {
@@ -2133,8 +2258,16 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "anim_verdict_stale": true
     }
   ],
-  "sheet_issues": []
+  "sheet_issues": [],
+  "added": {
+    "28e90254": [
+      "animated:1",
+      "animated:3",
+      "animated:4"
+    ]
+  }
 }

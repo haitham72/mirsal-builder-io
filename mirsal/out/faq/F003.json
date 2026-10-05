@@ -1,0 +1,37 @@
+{
+  "id": "F003",
+  "status": "draft",
+  "title": "How do I reset a forgotten password",
+  "question": "How do I reset a forgotten password?",
+  "answer": "Choose Forgot password, enter your account email, and press Ask for a new password. This requests a new password from support staff; it is not an automatic email reset. Help opens only after you are signed in, so if no new password reaches you, ask an admin of your office's Mirsal.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "accounts/forgot-password.md"
+    }
+  ],
+  "created": 1791192285.035,
+  "history": [
+    {
+      "ts": 1791192285.035,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "accounts/forgot-password.md"
+    }
+  ],
+  "updated": 1791192285.052,
+  "seed": {
+    "path": "accounts/forgot-password.md",
+    "sha": "00e11af55a04027506ae2ac5f4c83682317347c12d44fa94a868436cbd44775b"
+  },
+  "category": "accounts",
+  "tags": [
+    "accounts",
+    "forgot",
+    "password"
+  ],
+  "screen": "Sign in",
+  "looks_like": "Forgot password has an Ask for a new password button."
+}

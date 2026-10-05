@@ -1,0 +1,37 @@
+{
+  "id": "F008",
+  "status": "draft",
+  "title": "What does the AI chat remember about my stickers",
+  "question": "What does the AI chat remember about my stickers?",
+  "answer": "Within a conversation, the chat keeps each subject and its generations, together with what you liked or disliked. This context helps it interpret follow-up requests about the same subject.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-chat/remember-subject.md"
+    }
+  ],
+  "created": 1791192285.191,
+  "history": [
+    {
+      "ts": 1791192285.191,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-chat/remember-subject.md"
+    }
+  ],
+  "updated": 1791192285.205,
+  "seed": {
+    "path": "ai-chat/remember-subject.md",
+    "sha": "080ec5ab1d4eaa5e27dd0e80461f6a63e964d79c0a33995779cd65cbf95d5d3e"
+  },
+  "category": "ai-chat",
+  "tags": [
+    "ai-chat",
+    "remember",
+    "subject"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

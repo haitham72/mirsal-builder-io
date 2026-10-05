@@ -372,7 +372,7 @@
               "9": 0.972
             },
             "bad": [],
-            "ms": 27.2
+            "ms": 29.9
           }
         },
         {
@@ -696,16 +696,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 319,
-          "key": 175,
-          "bounds": 62,
-          "render": 1157,
-          "seam": 265,
-          "encode": 2616,
+          "decode": 345,
+          "key": 209,
+          "bounds": 87,
+          "render": 1120,
+          "seam": 254,
+          "encode": 2618,
           "encodes": 2,
-          "probe": 129,
-          "verify": 38,
-          "finish": 4287
+          "probe": 282,
+          "verify": 26,
+          "finish": 4391
         },
         "frames": 72,
         "fps": 24.0,
@@ -725,6 +725,11 @@
         "frames_out": 72,
         "crf": 42,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.7,
+        "soft_sigma": 1.1,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 248.0
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_ready_to_fight.webm",
@@ -858,6 +863,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183413.507,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -873,7 +891,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 16.1
+            "ms": 22.9
           }
         },
         {
@@ -887,7 +905,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 27.3
+            "ms": 30.9
           }
         },
         {
@@ -983,7 +1001,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.2
+            "ms": 6.5
           }
         },
         {
@@ -1007,7 +1025,7 @@
           "value": 0.974,
           "limit": 0.5,
           "data": {
-            "ms": 17.6
+            "ms": 2.7
           }
         },
         {
@@ -1031,23 +1049,24 @@
           "value": 0.035,
           "limit": 0.35,
           "data": {
-            "ms": 19.3
+            "ms": 16.9
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.70x of the still's edge detail (as soft as the still blurred 1.1 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
-          "limit": 0.8,
+          "value": 0.7,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.701
+      "rendered_at": 1790875007.701,
+      "anim_verdict_stale": true
     },
     {
       "index": 2,
@@ -1257,16 +1276,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 138,
-          "key": 137,
-          "bounds": 50,
-          "render": 710,
-          "seam": 154,
-          "encode": 2977,
+          "decode": 326,
+          "key": 211,
+          "bounds": 90,
+          "render": 978,
+          "seam": 207,
+          "encode": 3740,
           "encodes": 3,
-          "probe": 190,
-          "verify": 27,
-          "finish": 4113
+          "probe": 353,
+          "verify": 22,
+          "finish": 5395
         },
         "frames": 72,
         "fps": 24.0,
@@ -1464,6 +1483,17 @@
           "reason": "brought back",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791183414.172,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -1479,7 +1509,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 14.7
+            "ms": 22.6
           }
         },
         {
@@ -1493,7 +1523,7 @@
           "data": {
             "frame": 8,
             "px": 780,
-            "ms": 16.9
+            "ms": 31.3
           }
         },
         {
@@ -1589,7 +1619,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 1.1
           }
         },
         {
@@ -1613,7 +1643,7 @@
           "value": 0.946,
           "limit": 0.5,
           "data": {
-            "ms": 2.0
+            "ms": 1.6
           }
         },
         {
@@ -1637,7 +1667,7 @@
           "value": 0.056,
           "limit": 0.35,
           "data": {
-            "ms": 25.2
+            "ms": 19.6
           }
         },
         {
@@ -1656,7 +1686,8 @@
       "rendered_at": 1790875007.718,
       "anim_override": [
         "cross_slot"
-      ]
+      ],
+      "anim_verdict_stale": true
     },
     {
       "index": 3,
@@ -1866,16 +1897,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 333,
-          "key": 170,
-          "bounds": 62,
-          "render": 1163,
-          "seam": 251,
-          "encode": 3948,
+          "decode": 336,
+          "key": 206,
+          "bounds": 89,
+          "render": 1116,
+          "seam": 253,
+          "encode": 4093,
           "encodes": 3,
-          "probe": 99,
+          "probe": 246,
           "verify": 21,
-          "finish": 5547
+          "finish": 5821
         },
         "frames": 72,
         "fps": 24.0,
@@ -1895,6 +1926,11 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 1.0,
+        "detail_vs_still": 0.61,
+        "soft_sigma": 1.5,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 243.3
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_listening_carefully.webm",
@@ -2028,6 +2064,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183414.638,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -2043,7 +2092,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 16.7
+            "ms": 22.7
           }
         },
         {
@@ -2057,7 +2106,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 27.1
+            "ms": 30.8
           }
         },
         {
@@ -2153,7 +2202,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 0.7
           }
         },
         {
@@ -2177,7 +2226,7 @@
           "value": 0.971,
           "limit": 0.5,
           "data": {
-            "ms": 1.5
+            "ms": 1.7
           }
         },
         {
@@ -2201,23 +2250,24 @@
           "value": 0.02,
           "limit": 0.35,
           "data": {
-            "ms": 19.0
+            "ms": 18.6
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "1.00x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.61x of the still's edge detail (as soft as the still blurred 1.5 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.0,
-          "limit": 0.8,
+          "value": 0.61,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.733
+      "rendered_at": 1790875007.733,
+      "anim_verdict_stale": true
     },
     {
       "index": 4,
@@ -2427,16 +2477,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 333,
-          "key": 167,
-          "bounds": 62,
-          "render": 1138,
-          "seam": 245,
-          "encode": 2622,
+          "decode": 314,
+          "key": 222,
+          "bounds": 93,
+          "render": 1107,
+          "seam": 234,
+          "encode": 2597,
           "encodes": 2,
-          "probe": 136,
-          "verify": 30,
-          "finish": 4237
+          "probe": 271,
+          "verify": 19,
+          "finish": 4325
         },
         "frames": 72,
         "fps": 24.0,
@@ -2456,6 +2506,11 @@
         "frames_out": 72,
         "crf": 42,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.7,
+        "soft_sigma": 1.1,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 246.1
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_on_the_move.webm",
@@ -2589,6 +2644,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183413.102,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -2604,7 +2672,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 16.4
+            "ms": 23.2
           }
         },
         {
@@ -2618,7 +2686,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 28.0
+            "ms": 30.6
           }
         },
         {
@@ -2738,7 +2806,7 @@
           "value": 0.951,
           "limit": 0.5,
           "data": {
-            "ms": 7.7
+            "ms": 1.7
           }
         },
         {
@@ -2762,23 +2830,24 @@
           "value": 0.043,
           "limit": 0.35,
           "data": {
-            "ms": 22.2
+            "ms": 16.5
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.70x of the still's edge detail (as soft as the still blurred 1.1 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
-          "limit": 0.8,
+          "value": 0.7,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.75
+      "rendered_at": 1790875007.75,
+      "anim_verdict_stale": true
     },
     {
       "index": 5,
@@ -2988,16 +3057,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 332,
-          "key": 168,
-          "bounds": 63,
-          "render": 1042,
-          "seam": 208,
-          "encode": 2726,
+          "decode": 302,
+          "key": 229,
+          "bounds": 97,
+          "render": 1017,
+          "seam": 218,
+          "encode": 2738,
           "encodes": 2,
-          "probe": 141,
+          "probe": 286,
           "verify": 22,
-          "finish": 4207
+          "finish": 4385
         },
         "frames": 72,
         "fps": 24.0,
@@ -3017,6 +3086,11 @@
         "frames_out": 72,
         "crf": 42,
         "sharp_kept": 1.0,
+        "detail_vs_still": 0.71,
+        "soft_sigma": 1.1,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 235.0
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_victory_pose.webm",
@@ -3150,6 +3224,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183413.288,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -3165,7 +3252,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 17.2
+            "ms": 24.6
           }
         },
         {
@@ -3179,7 +3266,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 27.7
+            "ms": 30.4
           }
         },
         {
@@ -3275,7 +3362,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.0
+            "ms": 0.7
           }
         },
         {
@@ -3299,7 +3386,7 @@
           "value": 0.968,
           "limit": 0.5,
           "data": {
-            "ms": 2.5
+            "ms": 1.9
           }
         },
         {
@@ -3323,23 +3410,24 @@
           "value": 0.011,
           "limit": 0.35,
           "data": {
-            "ms": 18.7
+            "ms": 20.0
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "1.00x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.71x of the still's edge detail (as soft as the still blurred 1.1 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.0,
-          "limit": 0.8,
+          "value": 0.71,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.767
+      "rendered_at": 1790875007.767,
+      "anim_verdict_stale": true
     },
     {
       "index": 6,
@@ -3549,16 +3637,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 318,
-          "key": 174,
-          "bounds": 62,
-          "render": 1139,
-          "seam": 221,
-          "encode": 3868,
+          "decode": 332,
+          "key": 207,
+          "bounds": 90,
+          "render": 1091,
+          "seam": 227,
+          "encode": 4012,
           "encodes": 3,
-          "probe": 104,
-          "verify": 20,
-          "finish": 5418
+          "probe": 244,
+          "verify": 21,
+          "finish": 5689
         },
         "frames": 72,
         "fps": 24.0,
@@ -3578,6 +3666,11 @@
         "frames_out": 72,
         "crf": 38,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.62,
+        "soft_sigma": 1.4,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 224.3
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_detective_thinking.webm",
@@ -3711,6 +3804,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183414.47,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -3726,7 +3832,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 16.0
+            "ms": 21.9
           }
         },
         {
@@ -3740,7 +3846,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 28.2
+            "ms": 30.0
           }
         },
         {
@@ -3836,7 +3942,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 0.7
           }
         },
         {
@@ -3860,7 +3966,7 @@
           "value": 0.932,
           "limit": 0.5,
           "data": {
-            "ms": 1.6
+            "ms": 2.0
           }
         },
         {
@@ -3884,23 +3990,24 @@
           "value": 0.017,
           "limit": 0.35,
           "data": {
-            "ms": 18.2
+            "ms": 19.2
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.62x of the still's edge detail (as soft as the still blurred 1.4 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
-          "limit": 0.8,
+          "value": 0.62,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.782
+      "rendered_at": 1790875007.782,
+      "anim_verdict_stale": true
     },
     {
       "index": 7,
@@ -4110,16 +4217,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 132,
-          "key": 160,
-          "bounds": 79,
-          "render": 1153,
-          "seam": 222,
-          "encode": 2624,
+          "decode": 151,
+          "key": 163,
+          "bounds": 112,
+          "render": 1081,
+          "seam": 174,
+          "encode": 2077,
           "encodes": 2,
-          "probe": 129,
-          "verify": 47,
-          "finish": 4257
+          "probe": 201,
+          "verify": 21,
+          "finish": 3671
         },
         "frames": 72,
         "fps": 24.0,
@@ -4139,6 +4246,11 @@
         "frames_out": 72,
         "crf": 42,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.68,
+        "soft_sigma": 1.3,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 248.3
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_gliding_in_air.webm",
@@ -4272,6 +4384,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183417.288,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -4287,7 +4412,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 22.8
+            "ms": 21.4
           }
         },
         {
@@ -4301,7 +4426,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 29.3
+            "ms": 29.5
           }
         },
         {
@@ -4397,7 +4522,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.0
+            "ms": 0.8
           }
         },
         {
@@ -4421,7 +4546,7 @@
           "value": 0.975,
           "limit": 0.5,
           "data": {
-            "ms": 12.0
+            "ms": 2.8
           }
         },
         {
@@ -4445,23 +4570,24 @@
           "value": 0.046,
           "limit": 0.35,
           "data": {
-            "ms": 34.2
+            "ms": 18.2
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.68x of the still's edge detail (as soft as the still blurred 1.3 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
-          "limit": 0.8,
+          "value": 0.68,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.799
+      "rendered_at": 1790875007.799,
+      "anim_verdict_stale": true
     },
     {
       "index": 8,
@@ -4671,16 +4797,16 @@
         "source": "video sheet",
         "threshold": 115.0,
         "ms": {
-          "decode": 127,
-          "key": 151,
-          "bounds": 127,
-          "render": 903,
-          "seam": 155,
-          "encode": 2204,
+          "decode": 167,
+          "key": 175,
+          "bounds": 132,
+          "render": 967,
+          "seam": 158,
+          "encode": 2090,
           "encodes": 2,
-          "probe": 117,
-          "verify": 19,
-          "finish": 3528
+          "probe": 219,
+          "verify": 18,
+          "finish": 3588
         },
         "frames": 72,
         "fps": 24.0,
@@ -4700,6 +4826,11 @@
         "frames_out": 72,
         "crf": 42,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.67,
+        "soft_sigma": 1.3,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 252.6
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_surprised_reaction.webm",
@@ -4833,6 +4964,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183417.453,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -4848,7 +4992,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 42.9
+            "ms": 18.6
           }
         },
         {
@@ -4862,7 +5006,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 30.7
+            "ms": 40.5
           }
         },
         {
@@ -4958,7 +5102,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 1.1
           }
         },
         {
@@ -4982,7 +5126,7 @@
           "value": 0.955,
           "limit": 0.5,
           "data": {
-            "ms": 1.8
+            "ms": 2.2
           }
         },
         {
@@ -5006,23 +5150,24 @@
           "value": 0.043,
           "limit": 0.35,
           "data": {
-            "ms": 16.6
+            "ms": 15.2
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.67x of the still's edge detail (as soft as the still blurred 1.3 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
-          "limit": 0.8,
+          "value": 0.67,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.815
+      "rendered_at": 1790875007.815,
+      "anim_verdict_stale": true
     },
     {
       "index": 9,
@@ -5235,16 +5380,16 @@
         "source": "video sheet",
         "threshold": 116.0,
         "ms": {
-          "decode": 149,
-          "key": 146,
-          "bounds": 69,
-          "render": 1062,
-          "seam": 187,
-          "encode": 2305,
+          "decode": 186,
+          "key": 184,
+          "bounds": 90,
+          "render": 1090,
+          "seam": 174,
+          "encode": 2058,
           "encodes": 2,
-          "probe": 112,
-          "verify": 23,
-          "finish": 3762
+          "probe": 197,
+          "verify": 16,
+          "finish": 3628
         },
         "frames": 72,
         "fps": 24.0,
@@ -5264,6 +5409,11 @@
         "frames_out": 72,
         "crf": 42,
         "sharp_kept": 0.99,
+        "detail_vs_still": 0.59,
+        "soft_sigma": 1.6,
+        "warnings": [
+          "sharpness"
+        ],
         "kb": 227.0
       },
       "webm": "slices/vid-002-batman_lego-batman_lego_calling_for_help.webm",
@@ -5399,6 +5549,19 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791183417.762,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
         }
       ],
       "anim_report": [
@@ -5414,7 +5577,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 5,
-            "ms": 21.6
+            "ms": 25.9
           }
         },
         {
@@ -5428,7 +5591,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 26.2
+            "ms": 41.1
           }
         },
         {
@@ -5524,7 +5687,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.2
+            "ms": 0.7
           }
         },
         {
@@ -5548,7 +5711,7 @@
           "value": 0.971,
           "limit": 0.5,
           "data": {
-            "ms": 2.0
+            "ms": 1.8
           }
         },
         {
@@ -5572,23 +5735,24 @@
           "value": 0.006,
           "limit": 0.35,
           "data": {
-            "ms": 20.5
+            "ms": 13.8
           }
         },
         {
           "name": "sharpness",
-          "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "ok": false,
+          "detail": "0.59x of the still's edge detail (as soft as the still blurred 1.6 px)",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
-          "limit": 0.8,
+          "value": 0.59,
+          "limit": 0.75,
           "data": {
             "ms": 0.0
           }
         }
       ],
-      "rendered_at": 1790875007.832
+      "rendered_at": 1790875007.832,
+      "anim_verdict_stale": true
     }
   ],
   "added": {

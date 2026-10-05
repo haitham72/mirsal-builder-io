@@ -1,0 +1,37 @@
+{
+  "id": "F028",
+  "status": "draft",
+  "title": "How can I select multiple Library stickers",
+  "question": "How can I select multiple Library stickers?",
+  "answer": "Tick the square selection markers or drag a box over the stickers. Shift adds to the selection and Ctrl un-selects, so you can delete selected stickers together. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "library/bulk-select.md"
+    }
+  ],
+  "created": 1791192285.8,
+  "history": [
+    {
+      "ts": 1791192285.8,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "library/bulk-select.md"
+    }
+  ],
+  "updated": 1791192285.814,
+  "seed": {
+    "path": "library/bulk-select.md",
+    "sha": "b35a9bb855c2ab147c6ed42a36d3168b2c45f89cc9e2c31620ac194e1ab5f669"
+  },
+  "category": "library",
+  "tags": [
+    "library",
+    "bulk",
+    "select"
+  ],
+  "screen": "Library",
+  "looks_like": "My Stickers says Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects)."
+}

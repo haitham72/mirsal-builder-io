@@ -1,0 +1,37 @@
+{
+  "id": "F083",
+  "status": "draft",
+  "title": "Can Help explain a failed generation",
+  "question": "Can Help explain a failed generation?",
+  "answer": "Ask about the failed job and include its number if available. Help can read the failure reason recorded in your activity, but it should not invent a cause or repair when that record does not explain one.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "troubleshooting/job-failure.md"
+    }
+  ],
+  "created": 1791193753.142,
+  "history": [
+    {
+      "ts": 1791193753.142,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "troubleshooting/job-failure.md"
+    }
+  ],
+  "updated": 1791193753.16,
+  "seed": {
+    "path": "troubleshooting/job-failure.md",
+    "sha": "4dbab1324bc31290a32adc126b2dacb224454b612277576b476a055faf0d3205"
+  },
+  "category": "troubleshooting",
+  "tags": [
+    "troubleshooting",
+    "job",
+    "failure"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

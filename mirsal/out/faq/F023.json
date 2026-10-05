@@ -1,0 +1,37 @@
+{
+  "id": "F023",
+  "status": "draft",
+  "title": "Will the AI start spending without asking me",
+  "question": "Will the AI start spending without asking me?",
+  "answer": "With Ask before spending enabled, a plan shows the price and waits for confirmation. Turning it off lets the chat start generation immediately, so keep it on if you want to approve each spend. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "credits/spend-confirmation.md"
+    }
+  ],
+  "created": 1791192285.649,
+  "history": [
+    {
+      "ts": 1791192285.649,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "credits/spend-confirmation.md"
+    }
+  ],
+  "updated": 1791192285.665,
+  "seed": {
+    "path": "credits/spend-confirmation.md",
+    "sha": "a522ece4423a32acb88ab0f80ee1ff93e215452c60d13e1a2fd9ee9e0f9772ff"
+  },
+  "category": "credits",
+  "tags": [
+    "credits",
+    "spend",
+    "confirmation"
+  ],
+  "screen": "AI > settings",
+  "looks_like": "The AI settings have Ask before spending and Show the price and wait for your go-ahead."
+}

@@ -1,0 +1,36 @@
+{
+  "id": "F043",
+  "status": "draft",
+  "title": "Can a particle set exist without a parent sticker",
+  "question": "Can a particle set exist without a parent sticker?",
+  "answer": "Yes, a stand-alone particle set is usable without a sticker owner. You can preview it, render it, download it or make a pack from it.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "particles/standalone.md"
+    }
+  ],
+  "created": 1791192286.248,
+  "history": [
+    {
+      "ts": 1791192286.248,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "particles/standalone.md"
+    }
+  ],
+  "updated": 1791192286.263,
+  "seed": {
+    "path": "particles/standalone.md",
+    "sha": "6b59292ed1204bade839038c68480ae46d14bf5ee005de909c649950bc92abb8"
+  },
+  "category": "particles",
+  "tags": [
+    "particles",
+    "standalone"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

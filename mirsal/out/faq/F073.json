@@ -1,0 +1,37 @@
+{
+  "id": "F073",
+  "status": "draft",
+  "title": "Why does my credit balance change before a job finishes",
+  "question": "Why does my credit balance change before a job finishes?",
+  "answer": "Before a paid sheet or video job starts, the quoted cost is reserved against your balance. When the job ends, the real cost replaces that reservation. Help can check your job’s recorded status if you are unsure whether it has finished.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "credits/reserved-balance.md"
+    }
+  ],
+  "created": 1791193752.79,
+  "history": [
+    {
+      "ts": 1791193752.79,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "credits/reserved-balance.md"
+    }
+  ],
+  "updated": 1791193752.806,
+  "seed": {
+    "path": "credits/reserved-balance.md",
+    "sha": "f949c8ae03adea62b13fb87dbf12d87b2396e049011161c05f22b6f32168ab89"
+  },
+  "category": "credits",
+  "tags": [
+    "credits",
+    "reserved",
+    "balance"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

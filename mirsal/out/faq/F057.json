@@ -1,0 +1,36 @@
+{
+  "id": "F057",
+  "status": "draft",
+  "title": "How do I comment on a public pack",
+  "question": "How do I comment on a public pack?",
+  "answer": "Open the public pack, write in Say something about this pack, and press Comment. You can delete your own comment using its delete control. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "trending/comment.md"
+    }
+  ],
+  "created": 1791192286.667,
+  "history": [
+    {
+      "ts": 1791192286.667,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "trending/comment.md"
+    }
+  ],
+  "updated": 1791192286.68,
+  "seed": {
+    "path": "trending/comment.md",
+    "sha": "dd41299766ff423e0471941ff0844b545811181ca4e26bc80c6902d8803d18fd"
+  },
+  "category": "trending",
+  "tags": [
+    "trending",
+    "comment"
+  ],
+  "screen": "Library > Trending",
+  "looks_like": "The public pack has Say something about this pack and a Comment button."
+}

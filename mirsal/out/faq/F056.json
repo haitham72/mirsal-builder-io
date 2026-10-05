@@ -1,0 +1,37 @@
+{
+  "id": "F056",
+  "status": "draft",
+  "title": "What limits apply to an animated Telegram sticker",
+  "question": "What limits apply to an animated Telegram sticker?",
+  "answer": "Animated stickers use transparent WEBM video and must fit within 256 KB. Mirsal targets 512 by 512 pixels, at most three seconds and 30 frames per second, with no audio.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "telegram/video-limits.md"
+    }
+  ],
+  "created": 1791192286.638,
+  "history": [
+    {
+      "ts": 1791192286.638,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "telegram/video-limits.md"
+    }
+  ],
+  "updated": 1791192286.652,
+  "seed": {
+    "path": "telegram/video-limits.md",
+    "sha": "fcc8f9777d51c488bbb5c2c59319067008ca56c366b832bd166c9fc6afc49ca2"
+  },
+  "category": "telegram",
+  "tags": [
+    "telegram",
+    "video",
+    "limits"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

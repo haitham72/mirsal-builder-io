@@ -2404,5 +2404,15 @@
       "static:8",
       "static:9"
     ]
-  }
+  },
+  "group": "G104",
+  "group_history": [
+    {
+      "ts": 1791171810.313,
+      "actor": "local",
+      "decision": "JOIN",
+      "to": "G104",
+      "via": "G012"
+    }
+  ]
 }

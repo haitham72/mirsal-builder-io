@@ -1,0 +1,37 @@
+{
+  "id": "F069",
+  "status": "draft",
+  "title": "How do I read a private reply from support",
+  "question": "How do I read a private reply from support?",
+  "answer": "Open your Help conversation when support sends a private reply. The message is masked: Reveal shows it and Copy copies it, so keep the contents private. Notifications tell you that a private message arrived without including its contents. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "accounts/private-reply.md"
+    }
+  ],
+  "created": 1791193752.651,
+  "history": [
+    {
+      "ts": 1791193752.651,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "accounts/private-reply.md"
+    }
+  ],
+  "updated": 1791193752.669,
+  "seed": {
+    "path": "accounts/private-reply.md",
+    "sha": "e069af4b55defaa583a128d2ab3e14103c01486ddca92b86cf6cc194781d6f1d"
+  },
+  "category": "accounts",
+  "tags": [
+    "accounts",
+    "private",
+    "reply"
+  ],
+  "screen": "Help",
+  "looks_like": "A private message for you appears with a masked value, Reveal, Copy and I saved it, forget it."
+}

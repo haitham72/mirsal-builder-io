@@ -1,0 +1,19 @@
+{
+  "answer": "My favorite hue is pure and bright,\nA shade of blue that shines so light.\nLike ocean waves or summer sky,\nIt's where my digital dreams fly.",
+  "response": {
+    "model_instance_id": "qwen/qwen3.5-9b",
+    "output": [
+      {
+        "type": "message",
+        "content": "My favorite hue is pure and bright,\nA shade of blue that shines so light.\nLike ocean waves or summer sky,\nIt's where my digital dreams fly."
+      }
+    ],
+    "stats": {
+      "input_tokens": 30,
+      "total_output_tokens": 36,
+      "reasoning_output_tokens": 0,
+      "tokens_per_second": 14.357054195008178,
+      "time_to_first_token_seconds": 0.607
+    }
+  }
+}

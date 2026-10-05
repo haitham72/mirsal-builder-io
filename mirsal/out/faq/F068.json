@@ -1,0 +1,38 @@
+{
+  "id": "F068",
+  "status": "draft",
+  "title": "How do I remove a private reply after saving it",
+  "question": "How do I remove a private reply after saving it?",
+  "answer": "After saving the information somewhere appropriate, choose I saved it, forget it in your Help conversation. This erases the private message text from the conversation record; the screen then shows that it was forgotten. It does not erase information you already copied elsewhere. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "accounts/forget-private-reply.md"
+    }
+  ],
+  "created": 1791193752.617,
+  "history": [
+    {
+      "ts": 1791193752.617,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "accounts/forget-private-reply.md"
+    }
+  ],
+  "updated": 1791193752.634,
+  "seed": {
+    "path": "accounts/forget-private-reply.md",
+    "sha": "c73cb928cb5e50c2efa3571bf11c535f23425179494de3c31fc246e9b85a04ed"
+  },
+  "category": "accounts",
+  "tags": [
+    "accounts",
+    "forget",
+    "private",
+    "reply"
+  ],
+  "screen": "Help",
+  "looks_like": "I saved it, forget it is available on the private message; afterward the message says A private message (you saved it and it was forgotten)."
+}

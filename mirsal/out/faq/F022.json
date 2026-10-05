@@ -1,0 +1,37 @@
+{
+  "id": "F022",
+  "status": "draft",
+  "title": "How can I ask for more credits",
+  "question": "How can I ask for more credits?",
+  "answer": "Open Settings and press Request credits beside Signed in as. This sends a request rather than immediately adding credits to your balance. If this does not match what you see, send a screenshot in Help.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "credits/request-more.md"
+    }
+  ],
+  "created": 1791192285.62,
+  "history": [
+    {
+      "ts": 1791192285.62,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "credits/request-more.md"
+    }
+  ],
+  "updated": 1791192285.634,
+  "seed": {
+    "path": "credits/request-more.md",
+    "sha": "9b908ee19125da12696e952fb07a5a86e9bd443ee2429f0f6bb67da8f0f022f1"
+  },
+  "category": "credits",
+  "tags": [
+    "credits",
+    "request",
+    "more"
+  ],
+  "screen": "Settings",
+  "looks_like": "Signed in as shows credits left and Request credits."
+}

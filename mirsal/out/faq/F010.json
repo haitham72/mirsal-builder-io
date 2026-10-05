@@ -1,0 +1,36 @@
+{
+  "id": "F010",
+  "status": "draft",
+  "title": "What are AI captions for my stickers",
+  "question": "What are AI captions for my stickers?",
+  "answer": "AI captions describe what each ready sticker shows, including visible text. They do not change your approval or rejection decisions, and stored captions are reused until the picture changes.",
+  "revision": 0,
+  "revisions": [],
+  "pending": null,
+  "provenance": [
+    {
+      "seed": "ai-vision/captions.md"
+    }
+  ],
+  "created": 1791192285.252,
+  "history": [
+    {
+      "ts": 1791192285.252,
+      "actor": "local",
+      "decision": "PROPOSE",
+      "seed": "ai-vision/captions.md"
+    }
+  ],
+  "updated": 1791192285.267,
+  "seed": {
+    "path": "ai-vision/captions.md",
+    "sha": "f0e9e2f8dd5765ea30092ace13b4b2c74e302204b269e7867f96a47ff73aa39e"
+  },
+  "category": "ai-vision",
+  "tags": [
+    "ai-vision",
+    "captions"
+  ],
+  "screen": "",
+  "looks_like": ""
+}

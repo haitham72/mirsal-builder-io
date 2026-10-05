@@ -66,3 +66,16 @@
 {"ts": 1790913796.017, "stage": "pack_final", "status": "done", "ms": 0, "detail": {"note": "reopened: a sticker was changed"}, "actor": "human", "decision": "REJECT"}
 {"ts": 1790913796.048, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "anim", "index": 2, "note": "dropped from the set"}, "actor": "human", "decision": "REJECT"}
 {"ts": 1790989212.057, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "anim", "index": 2, "note": "brought back"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791183407.693, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791183408.023, "stage": "video_returned", "status": "done", "ms": 330, "detail": {"sheet": "A1", "blocked": null, "flags": [], "codec": "h264", "width": 960, "height": 960, "fps": 24.0, "duration": 3.04}}
+{"ts": 1791183408.025, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791183413.285, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183413.503, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183413.748, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183414.386, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183414.636, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183414.824, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183417.45, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183417.603, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183417.894, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791183418.038, "stage": "video_sliced", "status": "done", "ms": 10012, "detail": {"ready": 9, "failed": 0}}
