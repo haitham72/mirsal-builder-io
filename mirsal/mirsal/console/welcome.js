@@ -75,5 +75,6 @@ document.addEventListener('click',e=>{if(WL.open&&e.target.id==='welcome')wlClos
 const wlUnlock=e=>{if(!WL.open||!WL.needTap||!WL.muted||WL.i!==0)return;if(e.target&&e.target.closest&&e.target.closest('[data-act=wlsound],[data-act=wlclose],.wl-x'))return;
  const v=$('wl-v');if(!v)return;WL.muted=false;WL.needTap=false;v.muted=false;if(v.paused)v.play().catch(()=>0);wlPP()};
 document.addEventListener('pointerdown',wlUnlock,true);document.addEventListener('keydown',wlUnlock,true);
-/* the first open of a browser session (not when the person asked not to see it at start) */
-window.addEventListener('load',()=>{if(wlGet(sessionStorage,WL_SEEN)!=='1'&&wlGet(localStorage,WL_OFF)!=='1')setTimeout(wlOpen,450)});
+/* the first open of a browser session (not when the person asked not to see it at start). auth.js calls it once the person is in (signed in, or the owner on this machine):
+   on the LAN the film never plays, with its sound, behind the sign-in or waiting card */
+function wlAuto(){if(!WL.open&&wlGet(sessionStorage,WL_SEEN)!=='1'&&wlGet(localStorage,WL_OFF)!=='1')setTimeout(()=>{if(!document.querySelector('#au-gate.on'))wlOpen()},450)}

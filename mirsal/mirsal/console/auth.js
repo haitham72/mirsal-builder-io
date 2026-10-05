@@ -42,15 +42,16 @@ if(typeof globalThis!=='undefined')globalThis.AUV=AUV;
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   const AU={me:null,mode:'signin',lan:false,shown:null};
   const auVal=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
-  function auShow(html,key){const k=key||AU.mode;if(!AUV.reshow(AU.shown,k))return;let o=document.getElementById('au-gate');if(!o){o=document.createElement('div');o.id='au-gate';document.body.appendChild(o)}o.innerHTML=html;o.classList.add('on');AU.shown=k;
+  const auIn=()=>{if(typeof wlAuto==='function')wlAuto()};   /* the welcome film waits until the person is in: it never plays behind a card */
+  function auShow(html,key){const k=key||AU.mode;if(!AUV.reshow(AU.shown,k))return;if(typeof wlClose==='function')wlClose();let o=document.getElementById('au-gate');if(!o){o=document.createElement('div');o.id='au-gate';document.body.appendChild(o)}o.innerHTML=html;o.classList.add('on');AU.shown=k;
     const f=o.querySelector('input');if(f)f.focus()}
   function auHide(){const o=document.getElementById('au-gate');if(o)o.classList.remove('on');AU.shown=null}
   async function auCheck(){const r=await api('/api/auth/me');
     if(r.status===401){AU.me=null;AU.lan=!!r.j.lan;return auShow(AUV.gate(AU.mode))}
-    if(!r.ok)return;AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;
+    if(!r.ok)return auIn();AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;
     if(AU.me.status==='pending'){auShow(AUV.waiting(AU.me),'waiting');setTimeout(auCheck,15000);return}
     if(AU.me.must_change_password)return auShow(AUV.change(AU.me),'change');
-    auHide()}
+    auHide();auIn()}
   const auPost=async(u,b)=>{const r=await post(u,b);if(!r.ok){const m=r.j.error||'Something went wrong';const box=document.querySelector('#au-gate .au-card');
     if(box){let el=box.querySelector('.au-msg');if(!el){el=document.createElement('div');el.className='au-msg';box.insertBefore(el,box.querySelector('label'))}el.textContent=m}else toast(m,1)}return r};
   ACT.aumode=el=>{AU.mode=el.dataset.v;auShow(AUV.gate(AU.mode))};
