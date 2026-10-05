@@ -442,6 +442,17 @@ def support_cmd(out, args) -> int:
     vectors only from the local model), `status` says what is indexed."""
     import json as _json
     from .flow import support_kb as kb
+    if args.action == "import-faq":
+        from .flow import faq as _faq
+        try:
+            r = _faq.import_seeds(out, Path(args.repo or "faq"), "local", publish=args.publish)
+        except _faq.FAQError as e:
+            print(e)
+            return 1
+        print(_json.dumps(r, indent=2) if args.as_json else f"{len(r['created'])} new, {len(r['updated'])} updated, {r['unchanged']} unchanged"
+              + (", published" if r["published"] else " (drafts: review and publish them in Help > FAQ review)")
+              + (f"; skipped {len(r['skipped'])}: " + "; ".join(r["skipped"][:5]) if r["skipped"] else ""))
+        return 1 if r["skipped"] and not (r["created"] or r["updated"] or r["unchanged"]) else 0
     if args.action == "reindex":
         try:
             r = kb.reindex(out, Path(args.repo) if args.repo else None, embedder=None if args.no_vectors else "auto")
@@ -621,7 +632,8 @@ def main(argv=None) -> int:
     po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
     su = sub.add_parser("support", help="Help & Support: index docs/ and the code of MIRSAL_SUPPORT_REPO for the support agent (free)")
-    su.add_argument("action", choices=["reindex", "status"]); su.add_argument("--repo", help="index this folder instead of MIRSAL_SUPPORT_REPO")
+    su.add_argument("action", choices=["reindex", "status", "import-faq"]); su.add_argument("--repo", help="reindex: this folder instead of MIRSAL_SUPPORT_REPO; import-faq: the seed folder (default faq/)")
+    su.add_argument("--publish", action="store_true", help="import-faq: publish the imported entries at once (default: drafts to review)")
     su.add_argument("--no-vectors", action="store_true", help="reindex: the lexical index only (no embedding calls)"); su.add_argument("--json", action="store_true", dest="as_json")
     pa = sub.add_parser("particles", help="adopt: older effect runs that made something become saved particle rows under their stickers (idempotent, free)")
     pa.add_argument("action", choices=["adopt"])

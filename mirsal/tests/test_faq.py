@@ -148,5 +148,39 @@ class FaqTests(unittest.TestCase):
         self.assertIn("per person", f["answer"])
 
 
+class SeedTests(unittest.TestCase):
+    def setUp(self):
+        self.out = Path(tempfile.mkdtemp())
+        self.seeds = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        shutil.rmtree(self.out, ignore_errors=True)
+        shutil.rmtree(self.seeds, ignore_errors=True)
+
+    def write(self, rel, text):
+        p = self.seeds / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text, encoding="utf-8")
+
+    def test_seed_files_become_drafts_once_and_a_changed_file_is_a_revision(self):
+        self.write("telegram/send-fails.md", "---\ntitle: Telegram refuses a pack\nquestion: Why does Telegram refuse my pack?\ntags: telegram, size\n---\nFiles over 256 KB are refused.\n")
+        self.write("library/empty.md", "---\nquestion: Why is my library empty?\n---\nPacks are per person.\n")
+        self.write("broken.md", "no header here")
+        r = faq.import_seeds(self.out, self.seeds)
+        self.assertEqual((len(r["created"]), len(r["skipped"])), (2, 1))
+        f = faq.read(self.out, r["created"][1])
+        self.assertEqual((f["status"], f["category"], f["tags"]), ("draft", "telegram", ["telegram", "size"]))
+        self.assertEqual(faq.import_seeds(self.out, self.seeds)["unchanged"], 2, "an unchanged file changes nothing")
+        faq.publish(self.out, f["id"], "local")
+        self.write("telegram/send-fails.md", "---\nquestion: Why does Telegram refuse my pack?\n---\nFiles over 256 KB are refused: re-export.\n")
+        r2 = faq.import_seeds(self.out, self.seeds)
+        self.assertEqual(r2["updated"], [f["id"]])
+        g = faq.read(self.out, f["id"])
+        self.assertTrue(g["pending"], "a published entry gets a proposal, never a silent change")
+        self.assertEqual(g["answer"], "Files over 256 KB are refused.")
+        r3 = faq.import_seeds(self.out, self.seeds, publish=True)
+        self.assertEqual(r3["unchanged"], 2)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -83,6 +83,21 @@ class SupportTests(unittest.TestCase):
         with self.assertRaises(sp.SupportError):
             sp.ask(self.out, ME, "x", image=b"not a picture")
 
+    def test_a_screenshot_finds_the_entry_by_what_the_problem_looks_like(self):
+        f = faq.propose(self.out, title="Blocked sticker", question="Why can I not approve this sticker?", answer="Click Use it anyway on the tile.", by="a1")
+        with faq._LOCK:
+            e = faq.read(self.out, f["id"])
+            e["looks_like"] = "a sticker tile with a red Blocked label and a reason under it, next to a Use it anyway button"
+            faq._write(self.out, e)
+        faq.publish(self.out, f["id"], "a1")
+        vision = lambda s, u, images: ("A grid of stickers; one tile has a red Blocked label with a reason and a Use it anyway button.", {})
+        down = lambda s, u: (_ for _ in ()).throw(RuntimeError("no text model"))
+        cv = sp.ask(self.out, ME, "what is this", image=png(), complete=down, vision=vision)
+        a = cv["messages"][-1]
+        self.assertEqual(a["cites"][0]["id"], f["id"], "the vision model's words matched the entry's looks_like")
+        self.assertIn("Use it anyway on the tile", a["text"])
+        self.assertNotIn("Looks like", a["text"], "only the answer is quoted")
+
     def test_a_strangers_conversation_does_not_exist_and_staff_see_only_escalated_ones(self):
         cv = sp.ask(self.out, ME, "help", complete=answer("Which screen?", need="clarify"))
         with self.assertRaises(KeyError):
@@ -248,7 +263,7 @@ class SupportRouteTests(unittest.TestCase):
         code, p = self.req("POST", f"/api/faq/{f['id']}/publish", {}, owner=True)
         self.assertEqual((code, p["status"]), (200, "published"))
         code, pub = self.req("GET", f"/api/faq/{f['id']}", cookie=self.mona)
-        self.assertEqual((code, sorted(pub)), (200, ["answer", "id", "question", "revision", "title", "updated"]))
+        self.assertEqual((code, sorted(pub)), (200, ["answer", "id", "looks_like", "question", "revision", "screen", "title", "updated"]))
         self.assertEqual([x["id"] for x in self.req("GET", "/api/faq?status=all", cookie=self.mona)[1]["faq"]], [f["id"]], "a member's list is the published one")
 
 

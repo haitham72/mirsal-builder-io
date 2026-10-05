@@ -274,7 +274,7 @@ def _faq_docs(out: Path) -> list[dict]:
     rows = []
     for f in faq.listing(out, status="published"):
         e = faq.read(out, f["id"])
-        rows.append({"kind": "faq", "id": e["id"], "title": e.get("title") or e.get("question") or e["id"], "text": f"Q: {e.get('question') or ''}\nA: {e.get('answer') or ''}",
+        rows.append({"kind": "faq", "id": e["id"], "title": e.get("title") or e.get("question") or e["id"], "text": faq.search_text(e).split("\n", 1)[1],
                      "path": None})
     return rows
 
@@ -332,7 +332,7 @@ def _vector(out: Path, qvec, kinds: set, k: int) -> list[dict]:
                 except KeyError:
                     continue
                 if e.get("status") == "published":                       # the file decides, never a stale row
-                    hits.append({"kind": "faq", "id": fid, "title": e.get("title") or fid, "text": f"Q: {e.get('question') or ''}\nA: {e.get('answer') or ''}",
+                    hits.append({"kind": "faq", "id": fid, "title": e.get("title") or fid, "text": faq.search_text(e).split("\n", 1)[1],
                                  "path": None, "score": round(s, 3)})
         ck = [x for x in ("doc", "code") if x in kinds]
         if ck:

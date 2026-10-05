@@ -240,6 +240,7 @@ def _fallback(kb: dict) -> tuple[str, list[dict], bool]:
     best = next((h for h in kb["hits"] if h["kind"] in ("faq", "doc")), None)
     if best and kb["enough"]:
         body = best["text"].split("\nA: ", 1)[1] if best["kind"] == "faq" and "\nA: " in best["text"] else best["text"]
+        body = body.split("\nScreen: ", 1)[0].split("\nLooks like: ", 1)[0]
         return f"Here is what the help says about this ({best['title']}):\n\n{body.strip()[:900]}", [_cite(best)], True
     return NO_ANSWER, [], False
 

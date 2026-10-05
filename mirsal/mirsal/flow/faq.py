@@ -81,12 +81,23 @@ def index(out: Path, f: dict, embedder="auto") -> bool:
         emb = support_kb._embedder(out) if embedder == "auto" else embedder
         if emb is not None:
             try:
-                vec = emb([f"{f.get('title') or ''}\n{f.get('question') or ''}\n{f.get('answer') or ''}"], "document")[0]
+                vec = emb([search_text(f)], "document")[0]
                 model = getattr(emb, "model", "local")
             except Exception:
                 vec = None
     _mirror(out, f, vec, model)
     return vec is not None
+
+
+def search_text(f: dict) -> str:
+    """What an entry is found by: its question and answer, and where it happens and what it looks like on screen (so the vision model's description of a
+    person's screenshot finds the entry even when the person cannot name the problem)."""
+    parts = [f.get("title") or "", f"Q: {f.get('question') or ''}", f"A: {f.get('answer') or ''}"]
+    if f.get("screen"):
+        parts.append(f"Screen: {f['screen']}")
+    if f.get("looks_like"):
+        parts.append(f"Looks like: {f['looks_like']}")
+    return "\n".join(parts)
 
 
 def _clean(text, limit: int, names=()) -> str:
@@ -98,7 +109,7 @@ def public(f: dict) -> dict:
     """What anyone may read: the published text only (a draft or a pending proposal never leaves the admin's screen)."""
     if f.get("status") != "published":
         raise KeyError(f"no FAQ entry {f.get('id')}")
-    return {k: f.get(k) for k in ("id", "title", "question", "answer", "revision", "updated")}
+    return {k: f.get(k) for k in ("id", "title", "question", "answer", "screen", "looks_like", "revision", "updated")}
 
 
 def listing(out: Path, status: str | None = None) -> list[dict]:
@@ -113,7 +124,7 @@ def listing(out: Path, status: str | None = None) -> list[dict]:
                 continue
         elif status and f.get("status") != status:
             continue
-        rows.append({k: f.get(k) for k in ("id", "status", "title", "question", "revision", "updated")} | {"pending": bool(f.get("pending")),
+        rows.append({k: f.get(k) for k in ("id", "status", "title", "question", "revision", "updated", "category")} | {"pending": bool(f.get("pending")),
                                                                                                          "provenance": f.get("provenance") or []})
     return rows
 
@@ -251,3 +262,66 @@ def propose_from_ticket(out: Path, tid: str, by: str, complete=None) -> dict | N
                 provenance={"ticket": t["id"], "conversation": t.get("conversation")})
     tk.patch(out, tid, by, "FAQ_PROPOSED", faq=f["id"])
     return f
+
+
+# ---------- seed entries written as Markdown files (faq/<category>/<slug>.md; faq-seed-prompt.md says how they are written)
+def parse_seed(text: str) -> dict:
+    """A seed file: a `---` header of `key: value` lines (title, question, category, tags) and the answer as the body. ValueError when it is not one."""
+    m = re.match(r"^\ufeff?---\s*\n(.*?)\n---\s*\n(.*)$", text.replace("\r\n", "\n"), re.S)
+    if not m:
+        raise ValueError("no --- header")
+    head = {}
+    for line in m.group(1).splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            head[k.strip().lower()] = v.strip().strip('"').strip("'")
+    answer = m.group(2).strip()
+    if not head.get("question") or not answer:
+        raise ValueError("a seed needs a question and an answer")
+    return {"title": head.get("title") or head["question"][:80], "question": head["question"], "answer": answer,
+            "category": head.get("category") or "", "tags": [t.strip() for t in head.get("tags", "").strip("[]").split(",") if t.strip()],
+            "screen": head.get("screen") or "", "looks_like": head.get("looks_like") or ""}
+
+
+def import_seeds(out: Path, folder: Path, by: str = "local", publish: bool = False) -> dict:
+    """Every `*.md` under `folder` becomes a draft (or, with `publish`, the owner's explicit choice, a published entry). Run again: an unchanged
+    file changes nothing, a changed one updates its draft or proposes a revision of its published entry. Each entry remembers its seed path."""
+    import hashlib
+    folder = Path(folder)
+    if not folder.is_dir():
+        raise FAQError(f"no folder {folder}")
+    by_seed = {}
+    for row in listing(out):
+        f = read(out, row["id"])
+        if f.get("seed"):
+            by_seed[f["seed"]["path"]] = f
+    made, changed, same, bad = [], [], 0, []
+    for p in sorted(folder.rglob("*.md")):
+        rel = p.relative_to(folder).as_posix()
+        raw = p.read_bytes()
+        sha = hashlib.sha256(raw).hexdigest()
+        try:
+            s = parse_seed(raw.decode("utf-8", "replace"))
+        except ValueError as e:
+            bad.append(f"{rel}: {e}")
+            continue
+        s["category"] = s["category"] or (rel.rsplit("/", 1)[0] if "/" in rel else "")
+        old = by_seed.get(rel)
+        if old and old["seed"].get("sha") == sha:
+            same += 1
+            continue
+        if old and old.get("status") != "archived":
+            f = propose(out, title=s["title"], question=s["question"], answer=s["answer"], by=by, target=old["id"], provenance={"seed": rel})                 if old.get("status") == "published" else edit(out, old["id"], by, title=s["title"], question=s["question"], answer=s["answer"])
+            changed.append(f["id"])
+        else:
+            f = propose(out, title=s["title"], question=s["question"], answer=s["answer"], by=by, provenance={"seed": rel})
+            made.append(f["id"])
+        with _LOCK:
+            f = read(out, f["id"])
+            f["seed"], f["category"], f["tags"] = {"path": rel, "sha": sha}, s["category"], s["tags"]
+            f["screen"], f["looks_like"] = _clean(s["screen"], 120), _clean(s["looks_like"], 600)       # what the problem LOOKS like: matched against a screenshot's description
+            _write(out, f)
+        if publish:
+            publish_ = globals()["publish"]
+            publish_(out, f["id"], by)
+    return {"created": made, "updated": changed, "unchanged": same, "skipped": bad, "published": bool(publish)}
