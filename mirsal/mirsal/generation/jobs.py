@@ -309,6 +309,17 @@ def update(out: Path, jid: str, **fields) -> dict:
     return _write(p, job)
 
 
+def dismiss(out: Path, jid: str, by: str = "local") -> dict:
+    """Take a finished or failed job off the queue for good, for every browser and every person (`dismissed: {at, by}` on the job). The job itself stays:
+    its file, its ticket, its cost and the Users page keep it. A job still running cannot be dismissed (409): it would vanish while it can still spend."""
+    p = _path(out, jid)
+    job = json.loads(p.read_text(encoding="utf-8"))
+    if job["status"] in ("REQUESTED", "CLAIMED"):
+        raise JobError(f"{job['id']} is still {job['status']}: wait for it to finish before removing it", 409)
+    job.setdefault("dismissed", {"at": _now(), "by": str(by or "local")})
+    return _write(p, job)
+
+
 def attach_generation(out: Path, jid: str, gid: int) -> dict:
     return update(out, jid, generation=f"G{int(gid):03d}")
 

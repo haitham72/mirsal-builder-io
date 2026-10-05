@@ -124,7 +124,7 @@ const QACTIVE=['REQUESTED','CLAIMED'];
 const mmss=sec=>{sec=Math.max(0,Math.round(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')};
 const hhmm=ts=>new Date(ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 function qRows(){const now=Date.now()/1000;
-  return(LIVE.q||[]).filter(j=>!LIVE.dis.includes(j.id)&&(QACTIVE.includes(j.status)||(j.completed_at||0)>now-900||['FAILED','TIMEOUT'].includes(j.status)))
+  return(LIVE.q||[]).filter(j=>!j.dismissed&&!LIVE.dis.includes(j.id)&&(QACTIVE.includes(j.status)||(j.completed_at||0)>now-900||['FAILED','TIMEOUT'].includes(j.status)))
     .sort((a,b)=>(b.created_at||0)-(a.created_at||0))}
 function qState(j){const now=Date.now()/1000,typ=(LIVE.typ||{})[(j.kind==='video'?'video:':'image:')+j.model],started=j.claimed_at||j.created_at,el=(j.completed_at||now)-started,
     num=j.generation?+String(j.generation).replace(/\D/g,''):null,g=num?GM.get(num):null;
@@ -159,10 +159,14 @@ function drawLive(){const el=ensureQueue(),rows=qRows();
   el.className='on'+(QO?' open':'');
   el.innerHTML=`<button class=lv-qhead data-act=qtoggle aria-expanded=${QO}>${head}<i class=lv-caret></i></button>${QO?`<div class=lv-qlist>${rows.map(qRow).join('')}</div>`:''}`}
 ACT.qtoggle=()=>{QO=!QO;try{localStorage.setItem('mirsal.qopen',QO?'1':'0')}catch(e){}drawLive()};
-async function qRefresh(){const r=await api('/api/jobs');if(r.ok){LIVE.q=r.j.jobs;LIVE.typ=r.j.typical||{}}drawLive();if(typeof cpDrawTop==='function')cpDrawTop()}
+async function qRefresh(){const r=await api('/api/jobs');if(r.ok){LIVE.q=r.j.jobs;LIVE.typ=r.j.typical||{};
+    /* a × clicked before dismissal was kept on the server lived only in this browser: send it once, so it holds in every browser from now on */
+    for(const j of LIVE.q)if(!j.dismissed&&LIVE.dis.includes(j.id)&&!QACTIVE.includes(j.status)&&/^J\d+$/.test(j.id))post(`/api/jobs/${j.id}/dismiss`,{}).then(x=>{if(x.ok)j.dismissed=x.j.dismissed})}
+  drawLive();if(typeof cpDrawTop==='function')cpDrawTop()}
 ACT.qretry=el=>ACT.jrcontinue(el); // old saved markup uses the same-ticket action
 ACT.qcopy=async el=>{try{await navigator.clipboard.writeText(el.dataset.t);toast('Higgsfield job id copied')}catch(e){toast('Copy failed',1)}};
-ACT.ljdismiss=el=>{LIVE.dis.push(el.dataset.id);LIVE.jobs=LIVE.jobs.filter(j=>j.id!==el.dataset.id);lsave();drawLive()};
+ACT.ljdismiss=async el=>{const id=el.dataset.id;LIVE.dis.push(id);LIVE.jobs=LIVE.jobs.filter(j=>j.id!==id);lsave();drawLive();   /* hidden at once here; the server keeps it off for good, in every browser */
+  if(/^J\d+$/.test(id)){const r=await post(`/api/jobs/${id}/dismiss`,{});if(!r.ok)toast(r.j.error||'Could not remove it for good',1);else{const q=(LIVE.q||[]).find(j=>j.id===id);if(q)q.dismissed=r.j.dismissed}}};
 let LTB=false;
 async function liveTick(){if(LTB)return;LTB=true;try{
   for(const j of [...LIVE.jobs]){if(j.error)continue;const r=await api('/api/jobs/'+j.id);if(!r.ok){if(r.status===404){LIVE.jobs=LIVE.jobs.filter(x=>x.id!==j.id)}continue}

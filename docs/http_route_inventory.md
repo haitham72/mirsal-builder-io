@@ -128,6 +128,7 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `POST /api/jobs/{id}/requeue` | none / see operation detail | 200 Job | owner | no |
 | `POST /api/jobs/{id}/check` | none / see operation detail | 200 Job | owner / own requested job | no |
 | `POST /api/jobs/{id}/continue` | none / see operation detail | 200 Job | owner / own requested job | no |
+| `POST /api/jobs/{id}/dismiss` | none | 200 Job | owner / own requested job | no |
 | `POST /api/jobs/{id}/retry_estimate` | none / see operation detail | 200 {credits?:number, message?:string} | owner / own requested job | no |
 | `POST /api/jobs/{id}/retry` | {go:boolean, estimate:number} | 200 Job | owner / own requested job | no |
 | `GET /api/models` | — | 200 object (open; operation detail) | owner | no |
@@ -291,6 +292,7 @@ Table: 158 documented operations. Additional static/source routes are enumerated
 - **`POST /api/jobs/{id}/requeue`** — Operator (owner only): a TIMEOUT / FAILED job asks again; a job that holds a provider ticket waits for the same provider job (no second charge)
 - **`POST /api/jobs/{id}/check`** — One free read-only provider get; completed results are downloaded and reconciled by the same ticket. Human history records DIVERGENCE when local FAILED/TIMEOUT disagrees
 - **`POST /api/jobs/{id}/continue`** — Continue a stalled job on its stored ticket via jobs.resume; never creates a paid request. 409 without a ticket or while already waiting
+- **`POST /api/jobs/{id}/dismiss`** — Take a finished or failed job off the queue for good, for every browser (dismissed: {at, by}); the job itself stays. 409 while it is still running
 - **`POST /api/jobs/{id}/retry_estimate`** — Quote a new paid Retry; {credits, message}. Creates no provider request
 - **`POST /api/jobs/{id}/retry`** — Explicit PAID re-request of a FAILED/TIMEOUT job; requires a current quoted estimate and go: true. Repeated requests return the same replacement job
 - **`GET /api/models`** — Curated models, every other Higgsfield model, and the style presets

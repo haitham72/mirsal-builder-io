@@ -799,7 +799,7 @@ def make_handler(c: Console):
             if (path in MEMBER_POST) if post else (path in MEMBER_GET):
                 return None
             parts = path.strip("/").split("/")
-            if post and len(parts) == 4 and parts[:2] == ["api", "jobs"] and parts[3] in ("check", "continue", "retry_estimate", "retry"):
+            if post and len(parts) == 4 and parts[:2] == ["api", "jobs"] and parts[3] in ("check", "continue", "retry_estimate", "retry", "dismiss"):
                 try:
                     return None if (jobs.read(c.out, parts[2]).get("request") or {}).get("user") == user["id"] else gone
                 except jobs.JobError:
@@ -1667,6 +1667,8 @@ def make_handler(c: Console):
                         return self._json(200, jobs.fail(c.out, jp[2], str(body.get("reason", ""))))
                     if act == "requeue":
                         return self._json(200, jobs.requeue(c.out, jp[2]))
+                    if act == "dismiss":         # off the queue for good, in every browser (the job itself stays)
+                        return self._json(200, jobs.dismiss(c.out, jp[2], by=self.user["id"]))
                     if act in ("check", "continue", "retry_estimate", "retry"):
                         from ..generation import recovery
                         job = jobs.read(c.out, jp[2])

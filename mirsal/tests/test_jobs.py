@@ -60,6 +60,18 @@ class JobsTests(unittest.TestCase):
         with self.assertRaises(jobs.JobError):  # nothing to re-queue
             jobs.requeue(self.out, j["id"])
 
+    def test_a_dismissed_failed_job_stays_off_the_queue_and_a_running_one_cannot_be(self):
+        j = jobs.create(self.out, "sheet", request={})
+        with self.assertRaises(jobs.JobError) as cm:
+            jobs.dismiss(self.out, j["id"], by="U1")
+        self.assertEqual(cm.exception.code, 409, "a job that can still spend never vanishes")
+        jobs.fail(self.out, j["id"], "provider 500")
+        d = jobs.dismiss(self.out, j["id"], by="U1")["dismissed"]
+        self.assertEqual(d["by"], "U1")
+        self.assertEqual(jobs.dismiss(self.out, j["id"], by="U2")["dismissed"], d, "the first click is the record")
+        listed = next(x for x in jobs.list(self.out) if x["id"] == j["id"])
+        self.assertEqual((listed["status"], listed["dismissed"]["by"]), ("FAILED", "U1"), "the job stays; the queue reads `dismissed`")
+
     def test_stale_jobs_show_timeout(self):
         j = jobs.create(self.out, "sheet", request={})
         p = jobs._path(self.out, j["id"])
