@@ -425,6 +425,22 @@ Help is where a person describes a problem in their own words. The support agent
    - Admins review in Help > FAQ review: the published text beside the proposal, edit, publish, discard, archive.
    - **Seed entries** are Markdown files: `faq/<category>/<slug>.md`, with a `---` header holding `title`, `question`, `category`, `tags`, `screen` and `looks_like`, and the answer as the body. `mirsal support import-faq --repo <folder>` makes each one a draft. Unchanged files are skipped; a changed file updates its draft, or proposes a revision of its published entry. `--publish` publishes them at once, but only on purpose. The prompt that writes them is `mirsal/local_eval/faq-seed-prompt.md`.
 
+**The real cases (Haitham, 2026-10-05).**
+- **Your activity as sources** (`support.activity`): the person's own newest jobs (and any of theirs named in the text, like J058 or G104) and batches are numbered sources beside the FAQ and docs, marked `(activity)`. Another person's ids are ignored.
+  - A job is described as: kind, model, how long ago, "still being made at Higgsfield" / finished / failed (the error) / timed out (still checkable for free), its Higgsfield task id, its batch, and "usually takes about N minutes" (the median of the last 20 finished jobs of that kind, by model when there are 3 or more: `typical_minutes`).
+  - A batch is described as: how many stickers were accepted, each blocked one with its reason, and that a judgement block has its own "Use it anyway" on the tile.
+- **Action buttons** come from what an answer cited, never from the model's words (`support._actions`): "Open G104 in the Studio".
+- **Watches**: an answer that cites a running job watches it. `support.check_watches` runs whenever the person's notifications are read (every 30 s) or a conversation opens, so no background thread is needed. It then:
+  - says once that the job finished ("it is in batch G104", with the button) or did not (with Send to support);
+  - notifies `update:C###:J###`;
+  - resolves the conversation when the job simply arrived.
+- **Request kinds**: the model may set `request: feature` (the app cannot do it yet) or `access` (only an admin can give it: a token, a password, credits).
+  - The person then gets **Request this feature** or **Ask the admin** instead of Send to support. A grounded answer also offers "Suggest a feature instead".
+  - `escalate(kind)` files the ticket with issue `feature` / `access` (`flow/ticket_models.ISSUES`), its own message to the person, its own ping text ("asks for a feature") and a chip in the Queue.
+- **Private replies** (`admin_reply(private=True)`; the Queue's "Private" checkbox): a token or a password lives only in the person's conversation file.
+  - The ticket thread, the Postgres copy (`support._redacted`), the notification ("Support sent you a private message"), the ping, every model's input and the FAQ proposal get `[a private message]`. Staff see that it was sent, not what.
+  - The person sees it masked, with Reveal, Copy and "I saved it, forget it", which erases the text from the record (`support.forget`).
+
 **Privacy and trust.** A person sees only their own conversations, notifications and tickets; anything else is a 404. A member's ticket view drops the internal fields. Staff see a conversation once it reached a ticket. Nothing a person writes, nothing retrieved and nothing the vision model says can authorize an action: the routes check roles (`docs/api.md` "Help & Support"). The stdlib server (`serve --stdlib`) has no Help routes.
 
 **Measured so far.** The local vision pre-review on stickers (`mirsal/local_eval/`: Qwen 3.5 9B, 30 stickers, 25 parsed verdicts, about 10 s each). One live check of support on a scratch copy (2026-10-05):

@@ -748,5 +748,7 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
 .su-in{display:flex;flex-direction:column;gap:8px}.su-in textarea{width:100%;resize:vertical}
 .su-att{display:flex;align-items:center;gap:10px}.su-att img{max-height:72px;border-radius:var(--r-s);box-shadow:inset 0 0 0 1px var(--bd)}
 .su-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--fs-s);color:var(--ink2)}
+.su-priv{display:flex;flex-direction:column;gap:6px}.su-sec{font-family:ui-monospace,Consolas,monospace;background:var(--fill);border-radius:var(--r-s);padding:6px 8px;word-break:break-all;user-select:all}
+.su-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.su-pchk{display:flex;align-items:center;gap:8px;font-size:var(--fs-s);color:var(--ink2)}
 .su-was{padding:10px 14px;border-radius:var(--r-m);background:var(--fill);font-size:var(--fs-s);display:flex;flex-direction:column;gap:4px}
 .su-conv label{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-s);font-weight:600;color:var(--ink2)}.su-conv label input,.su-conv label textarea{font-weight:400}.su-conv label input{font:inherit;font-weight:400;font-size:var(--fs-m);padding:9px 12px;border:0;border-radius:var(--r-m);background:var(--fill);color:var(--tx)}

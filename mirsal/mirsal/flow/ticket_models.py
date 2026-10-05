@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-ISSUES = ("wrong_result", "crash", "stuck_job", "duplicate", "ui", "slow", "spend", "other")
+ISSUES = ("wrong_result", "crash", "stuck_job", "duplicate", "ui", "slow", "spend", "feature", "access", "other")     # feature / access: Help & Support requests
 Issue = Literal["wrong_result", "crash", "stuck_job", "duplicate", "ui", "slow", "spend", "other"]
 Status = Literal["open", "answered", "fixed", "wont_fix"]
 

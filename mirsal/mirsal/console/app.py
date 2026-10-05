@@ -655,7 +655,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
     # ---------- Help & Support (flow/support.py; docs/api.md "Help & Support"): every person their own conversations and notifications,
     # the owner and admins the queue, the replies, resolving and the FAQ. Nothing a person or a retrieved text writes can authorize anything: roles are checked here.
     from ..flow import faq as fq, notifications as nt, support as sup, support_kb as skb
-    from .app_models import FaqEdit, NotificationsRead, SupportAsk, SupportFeedback, SupportReopen, SupportText, TicketResolve
+    from .app_models import FaqEdit, NotificationsRead, SupportAsk, SupportEscalate, SupportFeedback, SupportForget, SupportReopen, SupportText, TicketResolve
     from .server import NO_ROUTE as _NO_ROUTE
 
     def _serr(request, e):
@@ -714,6 +714,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         if resp:
             return resp
         try:
+            await asyncio.to_thread(sup.check_watches, c.out, user)                          # a job asked about here may have finished
             cv = await asyncio.to_thread(sup.mine, c.out, user, cid)
         except KeyError as e:
             return _serr(request, e)
@@ -738,12 +739,12 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
     @app.post("/api/support/conversations/{cid}/{act}", include_in_schema=False)
     @app.post("/api/v1/support/conversations/{cid}/{act}", include_in_schema=False)
     async def support_act(request: Request, cid: str, act: str):
-        if act not in ("feedback", "escalate", "reply", "reopen"):
+        if act not in ("feedback", "escalate", "reply", "reopen", "forget"):
             return _j(request, 404, {"error": _NO_ROUTE})
         user, resp = await _member(request, f"/api/support/conversations/{cid}/{act}")
         if resp:
             return resp
-        model = {"feedback": SupportFeedback, "reply": SupportText, "reopen": SupportReopen}.get(act)
+        model = {"feedback": SupportFeedback, "reply": SupportText, "reopen": SupportReopen, "escalate": SupportEscalate, "forget": SupportForget}.get(act)
         body = None
         if model:
             body, bad = await _body(request, model)
@@ -753,7 +754,9 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             if act == "feedback":
                 cv = await asyncio.to_thread(sup.feedback, c.out, user, cid, body.solved)
             elif act == "escalate":
-                cv = await asyncio.to_thread(sup.escalate, c.out, user, cid)
+                cv = await asyncio.to_thread(sup.escalate, c.out, user, cid, body.kind)
+            elif act == "forget":
+                cv = await asyncio.to_thread(sup.forget, c.out, user, cid, body.message)
             elif act == "reply":
                 cv = await asyncio.to_thread(sup.reply_user, c.out, user, cid, body.text, body.client_id)
             else:
@@ -768,6 +771,10 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         user, resp = await _member(request, "/api/notifications")
         if resp:
             return resp
+        try:
+            await asyncio.to_thread(sup.check_watches, c.out, user)                          # read every 30 s by the page: a finished job notifies here
+        except Exception:
+            pass
         return _j(request, 200, await asyncio.to_thread(nt.listing, c.out, user.get("id")))
 
     @app.post("/api/notifications/read", include_in_schema=False)
@@ -818,7 +825,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             t = await asyncio.to_thread(tk.read, c.out, tid)
             if not _can_see(user, t):
                 return _j(request, 404, {"error": "not found"})
-            return _j(request, 200, await asyncio.to_thread(sup.admin_reply, c.out, user, tid, body.text, body.client_id))
+            return _j(request, 200, await asyncio.to_thread(sup.admin_reply, c.out, user, tid, body.text, body.client_id, body.private))
         except (sup.SupportError, KeyError, ValueError) as e:
             return _serr(request, e)
 

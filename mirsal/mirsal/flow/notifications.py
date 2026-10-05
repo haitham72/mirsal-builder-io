@@ -14,7 +14,7 @@ from pathlib import Path
 from ..runtime import atomic
 
 _LOCK = threading.RLock()
-KINDS = ("reply", "resolved")
+KINDS = ("reply", "resolved", "update")      # update: a job the person asked about in Help has finished (support.check_watches)
 KEEP = 200                                  # the newest 200 per person
 
 

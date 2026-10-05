@@ -62,9 +62,21 @@ class SupportFeedback(BaseModel):
 
 
 class SupportText(BaseModel):
+    """`private` (an admin's reply only): a token or a password, shown to that person alone and kept out of the ticket, Postgres, notifications and the FAQ."""
     model_config = ConfigDict(extra="forbid")
     text: str = Field(min_length=1, max_length=4000)
     client_id: str | None = Field(default=None, max_length=80)
+    private: bool = False
+
+
+class SupportEscalate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    kind: Literal["problem", "feature", "access"] = "problem"
+
+
+class SupportForget(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    message: str = Field(min_length=1, max_length=20)
 
 
 class SupportReopen(BaseModel):

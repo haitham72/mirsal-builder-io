@@ -186,6 +186,105 @@ class SupportTests(unittest.TestCase):
         self.assertEqual(len(sp.queue(self.out, "all")), 1)
 
 
+def cite_activity(ident, reply, request="none"):
+    """A fake model that cites the (activity) source naming `ident`, wherever it was numbered."""
+    import re as _re
+    def run(s, u):
+        n = next(int(m.group(1)) for m in _re.finditer(r"\[(\d+)\] \(activity\) ([^\n]+)", u) if ident in m.group(2))
+        return json.dumps({"reply": reply, "cites": [n], "need": "none", "request": request}), {}
+    return run
+
+
+class SupportCaseTests(unittest.TestCase):
+    """The real cases (Haitham, 2026-10-05): where is my video (the person's own jobs, a watch that says when it finished), why only 2 of 9
+    (the batch's blocked stickers, a button to open it), a feature request, and a token sent as a private message."""
+
+    def setUp(self):
+        self.out = Path(tempfile.mkdtemp())
+        (self.out / "jobs").mkdir()
+        now = __import__("time").time()
+        for i, (st, made, took) in enumerate([("DONE", 9000, 300), ("DONE", 8000, 420), ("DONE", 7000, 360)], 1):
+            (self.out / "jobs" / f"J00{i}.json").write_text(json.dumps({"id": f"J00{i}", "kind": "video", "model": "kling3_0", "status": st, "created_at": now - made,
+                                                                          "claimed_at": now - made, "completed_at": now - made + took, "request": {"user": "u1"}}), encoding="utf-8")
+        (self.out / "jobs" / "J004.json").write_text(json.dumps({"id": "J004", "kind": "video", "model": "kling3_0", "status": "CLAIMED", "created_at": now - 240,
+                                                                   "claimed_at": now - 240, "external_task_id": "0f3c6a2e-1111-2222-3333-444455556666",
+                                                                   "generation": "G007", "request": {"user": "u1"}}), encoding="utf-8")
+        (self.out / "jobs" / "J005.json").write_text(json.dumps({"id": "J005", "kind": "video", "status": "CLAIMED", "created_at": now, "request": {"user": "u2"}}), encoding="utf-8")
+        d = self.out / "G007"
+        (d / "slices").mkdir(parents=True)
+        sts = [{"index": i, "key": f"k{i}", "status": "READY" if i <= 2 else "BLOCKED", "reason": None if i <= 2 else "inside_cell", "review": {}} for i in range(1, 10)]
+        (d / "result.json").write_text(json.dumps({"generation_id": "G007", "number": 7, "prompt": "teddy bear", "stage": "sliced", "owner": "u1", "grid": [3, 3],
+                                                   "stickers": sts, "history": []}), encoding="utf-8")
+        self.pings = []
+        self.p1 = mock.patch.object(sp, "_ping_later", lambda out, tid, reason: sp.ping(out, tid, reason))
+        self.p2 = mock.patch("mirsal.services.admin_bot.notify_support", lambda out, text: self.pings.append(text) or True)
+        self.p1.start(); self.p2.start()
+
+    def tearDown(self):
+        self.p1.stop(); self.p2.stop()
+        shutil.rmtree(self.out, ignore_errors=True)
+
+    def test_where_is_my_video_names_the_job_and_says_when_it_finishes(self):
+        acts = sp.activity(self.out, ME, "my video J004")
+        j = next(h for h in acts if h["id"] == "J004")
+        self.assertIn("still being made at Higgsfield", j["text"])
+        self.assertIn("0f3c6a2e-1111-2222-3333-444455556666", j["text"])
+        self.assertIn("usually takes about 6.0 minutes", j["text"], "the median of the person's finished video jobs")
+        self.assertFalse(any(h["id"] == "J005" for h in acts), "another person's job is never a source")
+        cv = sp.ask(self.out, ME, "I keep asking for a video and it never arrives", complete=cite_activity("J004", "Your video J004 is still rendering at Higgsfield."))
+        a = cv["messages"][-1]
+        self.assertEqual(a["actions"][0], {"kind": "open_batch", "id": "G007", "label": "Open G007 in the Studio"})
+        self.assertEqual(sp.read(self.out, cv["id"])["watch"], ["J004"])
+        self.assertEqual(sp.check_watches(self.out, ME), 0, "still running: nothing to say")
+        p = self.out / "jobs" / "J004.json"
+        jj = json.loads(p.read_text(encoding="utf-8")); jj["status"] = "DONE"; p.write_text(json.dumps(jj), encoding="utf-8")
+        self.assertEqual(sp.check_watches(self.out, ME), 1)
+        self.assertEqual(sp.check_watches(self.out, ME), 0, "said once")
+        after = sp.read(self.out, cv["id"])
+        self.assertIn("has finished: it is in batch G007", after["messages"][-1]["text"])
+        self.assertEqual(after["status"], "resolved")
+        self.assertEqual([n["kind"] for n in nt.listing(self.out, "u1")["notifications"]], ["update"])
+
+    def test_only_two_of_nine_explains_the_blocked_stickers_and_offers_the_batch(self):
+        b = next(h for h in sp.activity(self.out, ME, "G007") if h["id"] == "G007")
+        self.assertIn("2 of 9 stickers accepted", b["text"])
+        self.assertIn("S3: inside cell", b["text"])
+        self.assertIn("Use it anyway", b["text"])
+        self.assertEqual(sp.activity(self.out, OTHER, "G007"), [h for h in sp.activity(self.out, OTHER, "G007") if h["id"] != "G007"], "never another person's batch")
+
+    def test_a_feature_request_is_its_own_kind_of_ticket(self):
+        cv = sp.ask(self.out, ME, "Can I import my Photoshop edit back into the same pack?",
+                    complete=lambda s, u: (json.dumps({"reply": "That is not possible yet.", "cites": [], "need": "none", "request": "feature"}), {}))
+        self.assertEqual(cv["messages"][-1]["request"], "feature")
+        e = sp.escalate(self.out, ME, cv["id"], "feature")
+        t = tk.read(self.out, e["ticket"])
+        self.assertEqual((t["issue"], t["context"]["kind"]), ("feature", "feature"))
+        self.assertIn("feature request", e["messages"][-1]["text"])
+        self.assertIn("asks for a feature", self.pings[0])
+        self.assertEqual(sp.queue(self.out)[0]["kind"], "feature")
+        with self.assertRaises(sp.SupportError):
+            sp.escalate(self.out, ME, cv["id"], "gossip")
+
+    def test_a_token_is_a_private_message_only_its_person_sees(self):
+        cv = sp.escalate(self.out, ME, sp.ask(self.out, ME, "the Telegram tester needs a token", complete=answer("Ask the admin.", need="clarify"))["id"], "access")
+        tid = cv["ticket"]
+        sp.admin_reply(self.out, ADMIN, tid, "123456789:AAEFsecretsecretsecretsecretsecret", private=True)
+        t = tk.read(self.out, tid)
+        self.assertNotIn("AAEF", json.dumps(t), "the ticket never holds the secret")
+        self.assertNotIn("AAEF", json.dumps(nt.listing(self.out, "u1")), "nor the notification")
+        self.assertNotIn("AAEF", json.dumps(sp._redacted(sp.read(self.out, cv["id"]))), "nor the Postgres copy")
+        mine = sp.view(sp.read(self.out, cv["id"]), ME)["messages"][-1]
+        self.assertEqual((mine["private"], mine["text"][:13]), (True, "123456789:AAE"))
+        self.assertNotIn("AAEF", json.dumps(sp.view(sp.read(self.out, cv["id"]), ADMIN)), "staff see that it was sent, not what")
+        seen = {}
+        sp.ask(self.out, ME, "thanks, and one more thing", cid=None, complete=lambda s, u: seen.setdefault("u", u) and (json.dumps({"reply": "Which?", "need": "clarify"}), {}))
+        self.assertNotIn("AAEF", seen["u"], "no model ever reads it")
+        sp.forget(self.out, ME, cv["id"], mine["id"])
+        self.assertNotIn("AAEF", (self.out / "support" / f"{cv['id']}.json").read_text(encoding="utf-8"), "forgotten means erased from the record")
+        with self.assertRaises(sp.SupportError):
+            sp.forget(self.out, ADMIN, cv["id"], mine["id"])          # only its person can forget it
+
+
 class SupportRouteTests(unittest.TestCase):
     """The native routes: privacy (a stranger's conversation is a 404), staff-only actions, members never see internal ticket fields, notifications read on open."""
 

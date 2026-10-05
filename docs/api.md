@@ -146,14 +146,17 @@ Every route also answers under `/api/v1/`. A body that does not match answers `4
 * `GET /api/support/conversations/{id}` -> the conversation, and marks its notifications read. Members never see `seen` (what the vision model saw), `mode` or code cites.
 * `GET /api/support/conversations/{id}/images/{img-N.png}` -> the screenshot.
 * `POST /api/support/conversations/{id}/feedback {solved}`: true closes it, false escalates.
-* `POST /api/support/conversations/{id}/escalate`: one ticket and one ping, however often it is called.
+* `POST /api/support/conversations/{id}/escalate {kind?: problem | feature | access}`: one ticket and one ping, however often it is called. The ticket's issue is `feature` / `access` for those kinds.
+* `POST /api/support/conversations/{id}/forget {message}`: the person erases a private message's text (a token they saved).
+* An agent message may carry `request` (`feature | access`), `actions [{kind: open_batch, id, label}]` (from what it cited), and cites of `kind: activity` (the person's own jobs and batches). A private admin message carries `private: true`; anyone other than its person gets the text `[a private message]`.
+* Reading `GET /api/notifications` or a conversation first runs the person's job watches: a finished job adds a message and an `update` notification.
 * `POST /api/support/conversations/{id}/reply {text, client_id?}`: to the admin, after escalation.
 * `POST /api/support/conversations/{id}/reopen {text?}`.
 * `GET /api/notifications` -> `{notifications: [{id, key, kind: reply | resolved, at, text, ticket, conversation, read}], unread}`; `POST /api/notifications/read {ids? | conversation? | {}}`.
 * Staff:
   - `GET /api/support/queue?status=active | all | <status>` -> `{tickets: [... name, title, conversation, messages, faq, pinged]}`.
   - `GET /api/support/tickets/{id}` -> `{ticket, conversation}`.
-  - `POST /api/tickets/{id}/reply {text, client_id?}`: the ticket stays open (`replied`).
+  - `POST /api/tickets/{id}/reply {text, client_id?, private?}`: the ticket stays open (`replied`). `private` keeps the text in the person's conversation only (never in the ticket, Postgres, the notification or the FAQ).
   - `POST /api/tickets/{id}/resolve {text?, client_id?}`: closes, notifies once, proposes an FAQ entry.
 * `GET /api/faq` -> the published entries. Staff can add `?status=pending | draft | archived | all`.
 * `GET /api/faq/{id}` -> for everyone, the published text only (404 while it is a draft); for staff, the whole record.

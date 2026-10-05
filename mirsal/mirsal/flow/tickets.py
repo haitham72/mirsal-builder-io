@@ -132,11 +132,11 @@ def report(out: Path, *, user: str, text: str, target: dict | None = None, draft
     return t
 
 
-def open_support(out: Path, *, user: str, text: str, context: dict, draft: bool = True) -> dict:
+def open_support(out: Path, *, user: str, text: str, context: dict, draft: bool = True, issue: str = "other") -> dict:
     """The ticket of one support conversation (flow/support.py, which pings the admin itself, once): the person's words, the transcript and their
     recent problems as context, no multiple-choice questions (the conversation already asked them)."""
     with _LOCK:
-        t = _new(out, source="support", issue="other", what=text, intent=text, context=context, user=user, fp=None)
+        t = _new(out, source="support", issue=issue, what=text, intent=text, context=context, user=user, fp=None)
         t["questions"], t["conversation"], t["thread"] = [], context.get("conversation"), []
         t = _write(out, t)
     if draft:

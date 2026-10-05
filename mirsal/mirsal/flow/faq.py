@@ -236,7 +236,7 @@ def propose_from_ticket(out: Path, tid: str, by: str, complete=None) -> dict | N
             conv = json.loads(atomic.read_text(p))
     lines = []
     if conv:
-        lines += [f"{m.get('role')}: {m.get('text')}" for m in conv.get("messages") or [] if m.get("text")]
+        lines += [f"{m.get('role')}: {m.get('text')}" for m in conv.get("messages") or [] if m.get("text") and not m.get("private")]
     lines += [f"{m.get('role')}: {m.get('text')}" for m in t.get("thread") or [] if m.get("text")]
     resolution = next((m.get("text") for m in reversed(t.get("thread") or []) if m.get("role") == "admin" and m.get("text")), "") or ""
     question = (conv and next((m.get("text") for m in conv.get("messages") or [] if m.get("role") == "user"), None)) or t.get("intent") or t.get("summary") or ""

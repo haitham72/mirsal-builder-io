@@ -38,3 +38,15 @@ test('the staff views: a ticket offers reply and resolve, an FAQ proposal shows 
  assert.match(f,/Published now \(revision 2\)/);assert.match(f,/value="New q"/);assert.match(f,/data-act=sufpub/);assert.match(f,/From T004/);
  assert.doesNotMatch(S.faqEdit({id:'F003',status:'archived',question:'q',answer:'a'}),/data-act=sufpub/,'an archived entry cannot be published');
 });
+
+test('a private message is masked until revealed, and an action opens the batch it cited',()=>{
+ const m={id:'m4',role:'admin',private:true,text:'123:SECRET'};
+ const hidden=S.msg(m,false,false),shown=S.msg(m,false,true);
+ assert.doesNotMatch(hidden,/SECRET/);assert.match(hidden,/data-act=supriv/);assert.match(hidden,/I saved it, forget it/);
+ assert.match(shown,/123:SECRET/);
+ assert.match(S.msg({...m,text:'[a private message]'},true,false),/A private message for the person/,'staff see that it was sent');
+ assert.match(S.msg({role:'agent',text:'x',actions:[{kind:'open_batch',id:'G007',label:'Open G007 in the Studio'}]},false),/data-act=sugo data-g="G007">Open G007 in the Studio/);
+ const feat={id:'C9',title:'t',status:'answered',messages:[{role:'agent',text:'not yet',request:'feature'}]};
+ assert.match(S.conv(feat,false,false,null),/data-act=sureq data-k=feature/);
+ assert.match(S.conv({...feat,messages:[{role:'agent',text:'ask',request:'access'}]},false,false,null),/Ask the admin/);
+});

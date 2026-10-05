@@ -8,17 +8,22 @@ const SUV=(()=>{
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const when=t=>t?new Date(t*1000).toLocaleString([],{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
   const STATE={answered:'Answered',awaiting_admin:'Waiting for support',admin_replied:'Support replied',resolved:'Resolved',searching:'Looking for an answer…',
-    open:'Open',replied:'Replied',fixed:'Resolved',wont_fix:'Closed',pending:'Waiting for review',draft:'Draft',published:'Published',archived:'Archived'};
+    open:'Open',replied:'Replied',fixed:'Resolved',wont_fix:'Closed',pending:'Waiting for review',draft:'Draft',published:'Published',archived:'Archived',
+    problem:'Problem',feature:'Feature request',access:'Access request',report:'Report'};
   const chip=s=>`<span class="su-st ${esc(s)}">${esc(STATE[s]||s)}</span>`;
   const convRow=(c,on)=>`<div class="crow${on?' on':''}" data-act=suopen data-id="${esc(c.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(c.title||'Question')}</b><small>${chip(c.status)} ${esc(when(c.updated))}</small></div></div>`;
-  const noteRow=n=>`<div class="crow su-note${n.read?'':' unread'}" data-act=sunote data-c="${esc(n.conversation||'')}" data-t="${esc(n.ticket||'')}"><div style="min-width:0"><b>${n.kind==='resolved'?'Resolved':'Support answered'}</b><small>${esc(n.text)}</small></div><span class=meta>${esc(when(n.at))}</span></div>`;
+  const noteRow=n=>`<div class="crow su-note${n.read?'':' unread'}" data-act=sunote data-c="${esc(n.conversation||'')}" data-t="${esc(n.ticket||'')}"><div style="min-width:0"><b>${n.kind==='resolved'?'Resolved':n.kind==='update'?'Update':'Support answered'}</b><small>${esc(n.text)}</small></div><span class=meta>${esc(when(n.at))}</span></div>`;
   const short=c=>{const t=String(c.title||'').split(' › ').pop().replace(/\s*\([^)]*`[^)]*\)/g,'').replace(/`/g,'').trim();return t||c.title};
   const cites=m=>(m.cites||[]).length?`<div class=su-cites><span class=mut>From the help:</span>${m.cites.map(c=>c.kind==='faq'?`<button class=su-cite data-act=sucite data-id="${esc(c.id)}">${esc(c.title)}</button>`
     :`<span class="su-cite${c.kind==='code'?' code':''}" title="${esc(c.title)}">${c.kind==='code'?'code: ':''}${esc(short(c))}</span>`).join('')}</div>`:'';
-  const msg=(m,staff)=>{const who=m.role==='user'?'out':'in';
-    return`<div class="cm c${who}"><div class="bub su-b ${esc(m.role)}">${m.role==='admin'?`<b class=su-who>${esc(m.by_name||'Support')}</b>`:''}<div class=su-x>${esc(m.text)}</div>
+  const priv=(m,rev)=>m.forgotten?`<div class="su-x mut">🔒 A private message (you saved it and it was forgotten)</div>`:m.text==='[a private message]'?`<div class="su-x mut">🔒 A private message for the person</div>`
+    :`<div class=su-priv>🔒 <b>A private message for you</b> (a token or a password: do not share it)<code class=su-sec>${rev?esc(m.text):'••••••••••••'}</code>
+      <span class=row><button class="btn sm" data-act=supriv data-id="${esc(m.id)}">${rev?'Hide':'Reveal'}</button><button class="btn sm" data-act=sucopy data-id="${esc(m.id)}">Copy</button><button class=link data-act=suforget data-id="${esc(m.id)}">I saved it, forget it</button></span></div>`;
+  const acts=m=>(m.actions||[]).length?`<div class=su-acts>${m.actions.map(a=>`<button class="btn sm" data-act=sugo data-g="${esc(a.id)}">${esc(a.label)}</button>`).join('')}</div>`:'';
+  const msg=(m,staff,rev)=>{const who=m.role==='user'?'out':'in';
+    return`<div class="cm c${who}"><div class="bub su-b ${esc(m.role)}">${m.role==='admin'?`<b class=su-who>${esc(m.by_name||'Support')}</b>`:''}${m.private?priv(m,rev):`<div class=su-x>${esc(m.text)}</div>`}
       ${m.image?`<a href="${esc(m.image)}" target=_blank rel=noopener><img class=su-img src="${esc(m.image)}" alt="Screenshot"></a>`:''}${staff&&m.seen?`<div class=su-seen><b>Vision model saw:</b> ${esc(m.seen)}</div>`:''}
-      ${cites(m)}<span class=tm>${esc(when(m.ts))}${staff&&m.mode?` · ${esc(m.mode)}${m.code_used?' · code':''}`:''}</span></div></div>`};
+      ${cites(m)}${acts(m)}<span class=tm>${esc(when(m.ts))}${staff&&m.mode?` · ${esc(m.mode)}${m.code_used?' · code':''}`:''}</span></div></div>`};
   /* what the person can do now, from the conversation's state and the agent's last answer */
   const next=(cv,busy)=>{if(busy)return`<div class="su-bar"><span class=spin></span> Looking for an answer…</div>`;
     const last=[...(cv.messages||[])].reverse().find(m=>m.role!=='user')||{};
@@ -27,21 +32,24 @@ const SUV=(()=>{
     if(cv.status==='admin_replied')return`<div class=su-bar>${chip('admin_replied')}<span class=mut>Write back below.</span></div>`;
     if(last.need==='screenshot')return`<div class=su-bar><span class=mut>A screenshot would help.</span><button class="btn pri" data-act=sushot>Attach a screenshot</button><button class=link data-act=suesc>Send to support instead</button></div>`;
     if(last.need==='clarify')return'';
-    if(last.grounded)return`<div class=su-bar><b>Did this solve it?</b><button class="btn pri" data-act=susolved>Yes, solved</button><button class=btn data-act=suunsolved>No, send to support</button></div>`;
+    if(last.request==='feature')return`<div class=su-bar><span class=mut>This is not in the app yet.</span><button class="btn pri" data-act=sureq data-k=feature>Request this feature</button><button class=link data-act=suesc>Send it as a problem instead</button></div>`;
+    if(last.request==='access')return`<div class=su-bar><span class=mut>Only an admin can give this.</span><button class="btn pri" data-act=sureq data-k=access>Ask the admin</button></div>`;
+    if(last.grounded)return`<div class=su-bar><b>Did this solve it?</b><button class="btn pri" data-act=susolved>Yes, solved</button><button class=btn data-act=suunsolved>No, send to support</button><button class=link data-act=sureq data-k=feature>Suggest a feature instead</button></div>`;
     return`<div class=su-bar><span class=mut>Nothing in the help answers this yet.</span><button class="btn pri" data-act=suesc>Send to support</button></div>`};
   const composer=(cv,img)=>`<div class=su-in>${img?`<div class=su-att><img src="${esc(img)}" alt=""><button class=link data-act=sushotx>remove</button></div>`:''}
     <textarea id=su-text rows=${cv?2:5} placeholder="${cv?(cv.ticket&&cv.status!=='resolved'?'Write to support…':'Add a detail or ask again…'):'Describe the problem in your own words: what you did, what you expected, what happened.'}"></textarea>
     <div class=row><button class="btn sm" data-act=sushot title="Attach a screenshot (or paste one with Ctrl+V)">📎 Screenshot</button><span class=mut style="flex:1">${cv?'':'Paste a screenshot with Ctrl+V; the local AI reads it.'}</span><button class="btn pri" data-act=suask>${cv?'Send':'Ask'}</button></div></div>`;
   const conv=(cv,staff,busy,img)=>`<div class=su-conv><div class=su-head><h2>${esc(cv.title||'Question')}</h2>${chip(busy?'searching':cv.status)}</div>
-    <div class=su-msgs id=su-msgs>${(cv.messages||[]).map(m=>msg(m,staff)).join('')}</div>${next(cv,busy)}${composer(cv,img)}</div>`;
+    <div class=su-msgs id=su-msgs>${(cv.messages||[]).map(m=>msg(m,staff,(cv._rev||{})[m.id])).join('')}</div>${next(cv,busy)}${composer(cv,img)}</div>`;
   const fresh=(img,busy,pending)=>`<div class=su-conv><div class=su-head><h2>How can we help?</h2></div><p class=mut>The help answers first; if it does not know, a person takes over and you are notified here.</p>${pending?`<div class=su-msgs>${msg({role:'user',text:pending},false)}</div>`:''}${busy?`<div class=su-bar><span class=spin></span> Looking for an answer…</div>`:''}${busy?'':composer(null,img)}</div>`;
   /* staff */
-  const queueRow=(t,on)=>`<div class="crow${on?' on':''}" data-act=suq data-id="${esc(t.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(t.title||t.summary||t.id)}</b><small>${chip(t.status==='answered'?'open':t.status)} ${esc(t.name||t.user||'')} · ${esc(t.id)}${t.pinged?'':' · not pinged yet'}</small></div></div>`;
+  const queueRow=(t,on)=>`<div class="crow${on?' on':''}" data-act=suq data-id="${esc(t.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(t.title||t.summary||t.id)}</b><small>${chip(t.status==='answered'?'open':t.status)}${t.kind&&t.kind!=='problem'?chip(t.kind):''} ${esc(t.name||t.user||'')} · ${esc(t.id)}${t.pinged?'':' · not pinged yet'}</small></div></div>`;
   const ticket=(d)=>{const t=d.ticket,cv=d.conversation;
-    return`<div class=su-conv><div class=su-head><h2>${esc(t.summary||t.intent||t.id)}</h2>${chip(t.status==='answered'?'open':t.status)}</div>
+    const kind=(t.context||{}).kind;
+    return`<div class=su-conv><div class=su-head><h2>${esc(t.summary||t.intent||t.id)}</h2>${chip(t.status==='answered'?'open':t.status)}${kind&&kind!=='problem'?chip(kind):''}</div>
       <div class=su-meta><span>${esc(t.id)}</span>${t.proposed_fix?`<span><b>Suggested fix:</b> ${esc(t.proposed_fix)}</span>`:''}${t.faq?`<button class=link data-act=sufaq data-id="${esc(t.faq)}">FAQ proposal ${esc(t.faq)}</button>`:''}</div>
       <div class=su-msgs>${cv?(cv.messages||[]).map(m=>msg(m,true)).join(''):`<div class=mut>${esc(t.intent||t.what_happened||'')}</div>${(t.thread||[]).map(m=>msg({...m,by_name:m.by},true)).join('')}`}</div>
-      <div class=su-in><textarea id=su-reply rows=3 placeholder="Your answer to the person"></textarea>
+      <div class=su-in><textarea id=su-reply rows=3 placeholder="Your answer to the person"></textarea><label class=su-pchk><input type=checkbox id=su-private> Private: a token or a password (only this person sees it; never in the ticket, the notification or the FAQ)</label>
       <div class=row style="justify-content:flex-end"><button class=btn data-act=sureply data-id="${esc(t.id)}">Reply</button><button class="btn pri" data-act=suresolve data-id="${esc(t.id)}">${t.status==='fixed'?'Resolved':'Reply and resolve'}</button></div>
       <small class=mut>Reply keeps the issue open. Resolve closes it, notifies the person and proposes an FAQ entry for review.</small></div></div>`};
   const faqRow=(f,on)=>`<div class="crow${on?' on':''}" data-act=sufaq data-id="${esc(f.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(f.title||f.question)}</b><small>${chip(f.pending?'pending':f.status)} ${esc(f.category||'')} ${esc(f.id)}</small></div></div>`;
@@ -52,7 +60,7 @@ const SUV=(()=>{
       <label>Answer<textarea id=su-fa rows=7>${esc(src.answer||'')}</textarea></label>
       ${f.looks_like?`<div class=mut><b>Looks like:</b> ${esc(f.looks_like)}</div>`:''}<div class=mut>From ${(f.provenance||[]).map(x=>esc(x.ticket||x.seed||'')).filter(Boolean).join(', ')||'an admin'}</div>
       <div class=row style="justify-content:flex-end">${f.status==='archived'?'':`<button class=btn data-act=sufsave data-id="${esc(f.id)}">Save edits</button>${p||f.status==='draft'?`<button class=btn data-act=sufdisc data-id="${esc(f.id)}">Discard</button><button class="btn pri" data-act=sufpub data-id="${esc(f.id)}">Publish</button>`:''}<button class="btn dng" data-act=sufarch data-id="${esc(f.id)}">Archive</button>`}</div></div>`};
-  return {esc,chip,convRow,noteRow,msg,next,conv,fresh,queueRow,ticket,faqRow,faqEdit,STATE};
+  return {esc,chip,convRow,noteRow,msg,next,conv,fresh,queueRow,ticket,faqRow,faqEdit,STATE,priv,acts};
 })();
 if(typeof globalThis!=='undefined')globalThis.SUV=SUV;
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
@@ -102,6 +110,12 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
     SU.pending=text||'(a screenshot)';SU.busy=true;suDraw();const r=await post('/api/support/ask',body);SU.busy=false;SU.pending=null;
     if(!r.ok){suDraw();const t2=$('su-text');if(t2)t2.value=text;return toast(r.j.error||'Could not send it',1)}SU.img=null;SU.cv=r.j;await suLoad();if(location.hash!=='#/help/'+r.j.id)history.replaceState(null,'','#/help/'+r.j.id);suDraw();suCol();suWatch()};
   const suAct=async(path,body,msg)=>{const r=await post(`/api/support/conversations/${SU.cv.id}/${path}`,body||{});if(!r.ok)return toast(r.j.error||'Could not do that',1);SU.cv=r.j;await suLoad();suDraw();suCol();suWatch();if(msg)toast(msg)};
+  ACT.sureq=el=>suAct('escalate',{kind:el.dataset.k},el.dataset.k==='feature'?'Sent as a feature request':'Asked the admin');
+  ACT.supriv=el=>{SU.cv._rev=SU.cv._rev||{};SU.cv._rev[el.dataset.id]=!SU.cv._rev[el.dataset.id];suDraw()};
+  ACT.sucopy=async el=>{const m=(SU.cv.messages||[]).find(x=>x.id===el.dataset.id);if(!m)return;try{await navigator.clipboard.writeText(m.text);toast('Copied')}catch(e){toast('Copy is blocked here: reveal it and copy by hand',1)}};
+  ACT.suforget=el=>confirmDlg('Forget this private message? Save it somewhere safe first: it is erased from Help for good.',()=>suAct('forget',{message:el.dataset.id},'Forgotten'),'Forget it');
+  ACT.sugo=async el=>{const n=+String(el.dataset.g).replace(/\D/g,'');const r=await api('/api/generations/'+n);if(!r.ok)return toast(r.j.error||'Could not open that batch',1);
+    GM.set(n,r.j);SES={prompt:r.j.prompt||'',gens:[n],off:[],pack:''};saveSes();location.hash='#/studio'};
   ACT.susolved=()=>suAct('feedback',{solved:true},'Glad it is solved');
   ACT.suunsolved=()=>suAct('feedback',{solved:false},'Sent to support: you will be notified here');
   ACT.suesc=()=>suAct('escalate',{},'Sent to support: you will be notified here');
@@ -111,7 +125,7 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   ACT.suq=el=>{location.hash='#/help/queue/'+el.dataset.id};
   const suTk=async id=>{const r=await api('/api/support/tickets/'+id);SU.tk=r.ok?r.j:null;await suQueue();suDraw();suCol()};
   ACT.sureply=async el=>{const t=$('su-reply'),text=t?t.value.trim():'';if(!text)return toast('Write the answer first',1);
-    const r=await post(`/api/tickets/${el.dataset.id}/reply`,{text,client_id:'r'+Date.now().toString(36)});if(!r.ok)return toast(r.j.error||'Could not reply',1);toast('Sent: the person is notified');suTk(el.dataset.id)};
+    const pv=!!($('su-private')||{}).checked;const r=await post(`/api/tickets/${el.dataset.id}/reply`,{text,client_id:'r'+Date.now().toString(36),private:pv});if(!r.ok)return toast(r.j.error||'Could not reply',1);toast(pv?'Sent privately: only the person can see it':'Sent: the person is notified');suTk(el.dataset.id)};
   ACT.suresolve=async el=>{const t=$('su-reply'),text=t?t.value.trim():'';const r=await post(`/api/tickets/${el.dataset.id}/resolve`,{text:text||null,client_id:text?'s'+Date.now().toString(36):null});
     if(!r.ok)return toast(r.j.error||'Could not resolve it',1);toast('Resolved: an FAQ proposal follows in FAQ review');suTk(el.dataset.id)};
   ACT.sufaq=el=>{location.hash='#/help/faq/'+el.dataset.id};
