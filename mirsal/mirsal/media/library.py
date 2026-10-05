@@ -344,9 +344,12 @@ class Library:
             self._save(db)
             return p
 
-    def update_pack(self, pid: str, name=None, cover=None, order=None) -> dict:
+    def update_pack(self, pid: str, name=None, cover=None, order=None, lead=None) -> dict:
+        """`lead: true` is the Studio's *Assign as parent*: this pack leads its batch group in the Library (flow/groups.pack_groups); the newest wins."""
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
+            if lead:
+                p["lead_at"] = round(time.time(), 3)
             if name is not None and name.strip():
                 p["name"] = name.strip()[:60]
             if cover is not None:

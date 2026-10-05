@@ -344,7 +344,7 @@ class ShellTests(unittest.TestCase):
         app = (ui / "app.js").read_text(encoding="utf-8")
         self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("effects:'create'", app, "the rail keeps Create lit on the effects screen")
-        self.assertIn("data-act=fxopen", (ui / "editor.js").read_text(encoding="utf-8"), "a tool of Create")
+        self.assertNotIn("data-act=fxopen", (ui / "editor.js").read_text(encoding="utf-8"), "Create no longer offers Particle effects: particles start in the Studio (Haitham, 2026-10-05)")
         for route in ("/api/effects", "/estimate", "/video", "/add", "/plan"):
             self.assertIn(route, fx)
         # docs/particles.md section 4: the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes

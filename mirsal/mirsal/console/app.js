@@ -59,8 +59,10 @@ let LIB={packs:[],recent:[],total:0},LIBQ='',LIBTAB='recent';
 /* the packs of one batch group sit together, as the Studio sits the batches (pack.group from GET /api/library, flow/groups.pack_groups): entries {pack} or
    {group, packs} in the order the first pack of each appears (pure) */
 const packEntries=ps=>{const out=[],at={};for(const p of ps||[]){if(!p.group){out.push({pack:p});continue}
-  if(at[p.group])at[p.group].packs.push(p);else{at[p.group]={group:p.group,packs:[p]};out.push(at[p.group])}}return out};
-const PKOPEN=new Set();
+  if(at[p.group])at[p.group].packs.push(p);else{at[p.group]={group:p.group,packs:[p]};out.push(at[p.group])}}
+  for(const e of out)if(e.packs)e.packs.sort((a,b)=>(b.lead?1:0)-(a.lead?1:0));     /* the parent (Assign as parent in the Studio) leads its group */
+  return out};
+const PKFOLD=new Map();      /* group -> open (true) / closed (false) as the person left it; untouched, a group is open while the pack in view is in it */
 async function loadLib(){const r=await api('/api/library');if(r.ok)LIB=r.j;return LIB}
 const media=(s,cls='')=>s.type==='animated'?`<video class="${cls}" src="/lib/${encodeURIComponent(s.file)}" autoplay loop muted playsinline></video>`:`<img class="${cls}" src="/lib/${encodeURIComponent(s.file)}" loading=lazy>`;
 const coverMedia=p=>{const s=p.stickers.find(x=>x.id===p.cover)||p.stickers[0];return s?media(s):'<span class=mut>—</span>'};
@@ -91,7 +93,7 @@ function drawCol2(){const on=COL2.includes(route_);document.body.classList.toggl
  $('col2').innerHTML=`<div class=c2h><h1>Packs</h1><button class=iconbtn data-act=newpack title="New pack">${ic('plus')}</button></div>
   <div class=c2s><input type=search id=c2q placeholder="Search packs…" value="${esc(C2Q)}"></div>
   <div class=c2l>${packEntries(LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q))).map(e=>{const row=(p,sub)=>`<div class="crow${sub?' sub':''} ${p.id===cur?'on':''}" data-act=openpack data-id=${p.id}><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some(s=>s.type==='animated')?'animated':''}</span></div>`;
-   if(e.pack)return row(e.pack);const open=PKOPEN.has(e.group)||e.packs.some(p=>p.id===cur),f=e.packs[0];
+   if(e.pack)return row(e.pack);const open=PKFOLD.has(e.group)?PKFOLD.get(e.group):e.packs.some(p=>p.id===cur),f=e.packs[0];
    return`<div class="crow pkgrp ${f.id===cur?'on':''}" data-act=openpack data-id=${f.id}><div class=cv>${coverMedia(f)}</div><div><b>${esc(f.name)}</b><small>${e.packs.length} packs · group ${esc(e.group)}</small></div><button class=iconbtn data-act=pkgrp data-g=${esc(e.group)} title="${open?'Fold the group':'Show every pack of the group'}" aria-expanded=${open}>${ic('chev')}</button></div>${open?e.packs.slice(1).map(p=>row(p,true)).join(''):''}`}).join('')||'<div class=mut style="padding:14px">No packs yet.</div>'}</div>`;
  const i=$('c2q');i.oninput=e=>{C2Q=e.target.value;const pos=e.target.selectionStart;drawCol2();const n=$('c2q');n.focus();n.setSelectionRange(pos,pos)}}
 
@@ -156,7 +158,7 @@ RENDER.library=async()=>{await loadLib();drawCol2();
    <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
   $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
 ACT.libtab=el=>{LIBTAB=el.dataset.t;RENDER.library()};
-ACT.pkgrp=el=>{const g=el.dataset.g;PKOPEN.has(g)?PKOPEN.delete(g):PKOPEN.add(g);drawCol2()};
+ACT.pkgrp=el=>{const g=el.dataset.g,open=el.getAttribute('aria-expanded')==='true';PKFOLD.set(g,!open);drawCol2()};
 ACT.seeall=el=>{if(el.dataset.k==='st'){LIBTAB='mine'}else PACKS_ALL=!PACKS_ALL;RENDER.library()};
 function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.emoji+' '+(s.pack||'')).toLowerCase().includes(q);
  const stTile=(s,i)=>`<div class=st data-act=lcopen data-i=${i} title="${esc(s.name)}">${media(s)}<span class=em>${esc(s.emoji)}</span></div>`;

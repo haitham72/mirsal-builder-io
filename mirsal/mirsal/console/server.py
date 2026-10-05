@@ -1013,7 +1013,8 @@ def make_handler(c: Console):
                 snap = c.lib.snapshot()
                 from ..flow import groups as _groups       # the Library sits the packs of one batch group together (flow/groups.pack_groups)
                 pg = _groups.pack_groups(c.out, snap["packs"])
-                return self._json(200, {**snap, "packs": [dict(p, group=pg.get(p["id"])) for p in snap["packs"]]})
+                leads = _groups.pack_leads(snap["packs"], pg)
+                return self._json(200, {**snap, "packs": [dict(p, group=pg.get(p["id"]), lead=p["id"] in leads) for p in snap["packs"]]})
             if path == "/api/projects":
                 return self._json(200, {"projects": c.projects.list()})
             if path.startswith("/api/projects/"):
@@ -1208,6 +1209,9 @@ def make_handler(c: Console):
                         return self._json(201, ps.set_from_effect(c.out, c.lib, str(body["from_video"]), mode="video", target=body.get("target"), owners=body.get("owners"), name=body.get("name"), picked=body.get("picked"), user=self.user["id"]))
                     if body.get("from_slices"):
                         return self._json(201, ps.set_from_slices(c.out, c.lib, body["from_slices"], owners=body.get("owners"), name=body.get("name"), target=body.get("target"), user=self.user["id"]))
+                    if body.get("from_request"):                   # "particles for lipsticks and ribbons": a stand-alone set (no sticker) with its plan; the sheet is /more
+                        return self._json(201, ps.from_request(c.out, c.lib, str(body["from_request"]), grid=body.get("grid") or "2x2", kind=str(body.get("kind") or "drawn"),
+                                                               user=self.user["id"]))
                     if body.get("from_effect"):
                         return self._json(201, ps.set_from_effect(c.out, c.lib, str(body["from_effect"]), target=body.get("target"), name=body.get("name"), owners=body.get("owners"), packs=body.get("packs"),
                                                                        picked=body.get("picked"), user=self.user["id"]))
@@ -1474,7 +1478,7 @@ def make_handler(c: Console):
                 self._json(200, lib.create_pack(self._body().get("name", "")))
             elif len(parts) == 3:
                 b = self._body()
-                self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order")))
+                self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order"), b.get("lead")))
             elif len(parts) == 4 and parts[3] == "delete":      # SOFT: to the trash, restorable (GET /api/trash lists it; POST /api/trash/purge deletes for good)
                 self._json(200, lib.delete_pack(parts[2], by=self.user.get("id") or "human"))
             elif len(parts) == 4 and parts[3] == "restore":     # back from the trash under the same id

@@ -91,6 +91,18 @@ def pack_groups(out: Path, packs) -> dict[str, str]:
     return {pid: f"G{r:03d}" for pid, r in picked.items() if count[r] > 1}
 
 
+def pack_leads(packs, groups_of: dict[str, str]) -> set[str]:
+    """The parent pack of each group: the one most recently *Assigned as parent* in the Studio (`lead_at`), else the group's first pack."""
+    best: dict[str, tuple] = {}
+    for i, p in enumerate(packs or []):
+        g = groups_of.get(p["id"])
+        if g:
+            key = (float(p.get("lead_at") or 0), -i)
+            if g not in best or key > best[g][0]:
+                best[g] = (key, p["id"])
+    return {pid for _, pid in best.values()}
+
+
 def members(out: Path, gid: int) -> list[int]:
     r = root_of(out, gid)
     return families(out).get(r, [r])

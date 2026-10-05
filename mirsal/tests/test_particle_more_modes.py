@@ -47,6 +47,19 @@ class ParticleMoreModes(unittest.TestCase):
         self.assertIn('price is unavailable', body['error'])
         self.assertEqual(before, len([c for c in self.cli.calls if c[:2] == ['generate', 'create']]))
 
+    def test_a_plain_request_makes_a_stand_alone_set_that_prices_its_own_sheet(self):
+        status, s = self.req('POST', '/api/particles', {'from_request': 'create particles for lipsticks and ribbons'})
+        self.assertEqual(status, 201, s)
+        self.assertEqual((s['plan']['elements'], s['grid']), (['lipstick', 'ribbon'], '2x2'))
+        self.assertFalse(ps.read(self.c.out, s['id'])['owner'], 'no sticker owns it: a stand-alone set')
+        before = len([c for c in self.cli.calls if c[:2] == ['generate', 'create']])
+        status, quote = self.req('POST', f"/api/particles/{s['id']}/more", {'mode': 'drawn', 'estimate': True})
+        self.assertEqual((status, quote.get('kind')), (200, 'particles'), quote)
+        self.assertIn('lipstick', str(quote).lower(), 'the sheet is drawn from the request, not from a pack')
+        self.assertEqual(before, len([c for c in self.cli.calls if c[:2] == ['generate', 'create']]), 'a price spends nothing')
+        status, bad = self.req('POST', '/api/particles', {'from_request': 'create particles'})
+        self.assertEqual(status, 400, 'a request that names nothing asks for the particles')
+
 
 if __name__ == '__main__':
     unittest.main()

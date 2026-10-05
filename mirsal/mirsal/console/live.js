@@ -301,7 +301,7 @@ const histThumb=it=>{const c=(it.cells||[]).find(x=>x.png);return`<span class=lv
    batch, above its workflow steps (gvarsHtml), not in this column (Haitham, 2026-10-04). */
 const histVars=it=>(it.variants&&it.variants.length?it.variants:[it]);
 const histRow=it=>{const vs=histVars(it),cur=vs.find(v=>SES.gens.includes(v.id)),on=!!cur,shown=cur||vs[vs.length-1];
-  return`<div class=lv-hfam draggable=true data-hid=${it.id}><button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${shown.id} aria-pressed=${on} title="Show ${esc(shown.generation_id)} in the Studio">${histThumb(shown)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(shown)}${vs.length>1?` · ${vs.length} variations`:''}</small></span></button></div>`};
+  return`<div class=lv-hfam draggable=true data-hid=${it.id}><button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${shown.id} aria-pressed=${on} title="Show ${esc(shown.generation_id)} in the Studio">${histThumb(shown)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(shown)}${vs.length>1?` · ${vs.length} variations`:''}</small></span>${shown.kind==='particles'?`<span class=lv-pbadge title="Particles: no sticker owns them. Use, render and export them as they are">${ic('fx')}</span>`:''}</button></div>`};
 /* the variations strip of the batch the Studio presents: one thumbnail per batch of its family, the one in view outlined, × to take a non-root one out (pure) */
 function gvarsHtml(gs){if(!gs||gs.length!==1||typeof HB==='undefined')return '';const id=gs[0].number,fam=HB.items.find(it=>histVars(it).some(v=>v.id===id));
   const vs=fam?histVars(fam):[];if(vs.length<2)return '';

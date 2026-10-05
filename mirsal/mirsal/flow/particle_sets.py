@@ -9,6 +9,7 @@ simulator. Delete is reversible; parent purge detaches without deleting sets.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import threading
 import time
@@ -799,6 +800,67 @@ OPEN_SHEETS = ("REQUESTED", "DRAWN")
 
 def drawing(s: dict) -> bool:
     return any(sh.get("status") in OPEN_SHEETS for sh in s.get("sheets") or [])
+
+
+_REQ_LEAD = re.compile(r"^\s*(?:please\s+)?(?:(?:can|could|would)\s+you\s+)?(?:create|make|generate|draw|give\s+me|i\s+want|i\s+need|build|do)?\s*"
+                       r"(?:me\s+)?(?:some\s+|a\s+set\s+of\s+|a\s+|an\s+)?(?:new\s+)?(?:particle\s+effects?|particle\s+sets?|particles?|bursts?)?\s*(?:for|of|with|from|showing|:)?\s*", re.I)
+_REQ_SPLIT = re.compile(r"\s*(?:,|;|&|\+|/|\band\b|\bplus\b|\bwith\b)\s*", re.I)
+
+
+def _singular(word: str) -> str:
+    w = word.lower()
+    if len(w) > 4 and w.endswith("ies"):
+        return w[:-3] + "y"
+    if len(w) > 4 and w.endswith(("ches", "shes", "xes", "sses")):
+        return w[:-2]
+    if len(w) > 3 and w.endswith("s") and not w.endswith(("ss", "us", "is")):
+        return w[:-1]
+    return w
+
+
+def request_elements(text: str, limit: int) -> list[str]:
+    """The particles a plain request names: "create particles for lipsticks and ribbons" -> ["lipstick", "ribbon"]. The lead-in ("create particles
+    for") goes, the rest splits on commas, "and", "&", "+", "/"; each is singular (a sprite is one thing), at most MAX_WORDS words, at most `limit`
+    (the sheet's cells). Deterministic: no model is asked, so the same words always give the same set."""
+    from ..generation import effect_prompts as ep
+    t = _REQ_LEAD.sub("", " ".join(str(text or "").split()))
+    t = re.sub(r"\b(?:particle\s+effects?|particles?)\b", " ", t, flags=re.I)
+    out: list[str] = []
+    for part in _REQ_SPLIT.split(t):
+        words = re.sub(r"[^\w\s'-]", " ", part).split()
+        words = [w for w in words if w.lower() not in ("some", "a", "an", "the", "of", "little", "tiny", "small", "please")][: ep.MAX_WORDS]
+        if not words:
+            continue
+        name = " ".join(words[:-1] + [_singular(words[-1])]).lower()
+        if name not in out:
+            out.append(name)
+    return out[: max(1, int(limit))]
+
+
+def from_request(out: Path, lib, text: str, grid="2x2", kind: str = "drawn", user: str = "local") -> dict:
+    """A stand-alone particle set from a plain request (the Studio's Particles choice, the chat's "particles on their own"): the elements it names,
+    no sticker owns it (`owner: []`), and its `plan` is what its sheet is drawn from. Free: the sheet is priced and made by `more` (estimate, then go)."""
+    from . import effects as fx
+    from ..generation import effect_prompts as ep
+    try:
+        rows, cols = fx._grid_of(grid)
+    except fx.EffectError as ex:
+        raise SetError(str(ex))
+    els = request_elements(text, rows * cols)
+    if not els:
+        raise SetError("name the particles, for example: particles for lipsticks and ribbons")
+    try:
+        plan = ep.lint_plan({"subject": " and ".join(els), "elements": els, "style": None})
+    except ValueError as ex:
+        raise SetError(str(ex))
+    v = create(out, lib, name=", ".join(e.title() for e in plan["elements"]) + " particles", elements=plan["elements"], kind=kind, user=user)
+    with _LOCK:
+        s = read(out, v["id"])
+        s["plan"] = plan
+        s["request"] = " ".join(str(text or "").split())[:300]
+        hist(s, user, "PLAN", f"from the request: {', '.join(plan['elements'])}", {"grid": f"{rows}x{cols}"})
+        _write(out, s)
+    return {**view(out, lib, v["id"]), "plan": plan, "grid": f"{rows}x{cols}"}
 
 
 def _subject_style(out: Path, lib, s: dict) -> tuple[str, str | None]:

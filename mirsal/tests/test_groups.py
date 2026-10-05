@@ -64,6 +64,10 @@ class GroupTests(unittest.TestCase):
         self.assertEqual(groups.pack_groups(self.out, packs), {"a": "G104", "b": "G104"}, "a and b come from one family (b mostly); c, d, e have no other pack")
         groups.join(self.out, 104, 103)
         self.assertEqual(groups.pack_groups(self.out, packs), {"a": "G103", "b": "G103", "c": "G103"}, "a join in the Studio shows in the Library at the next read")
+        pg = groups.pack_groups(self.out, packs)
+        self.assertEqual(groups.pack_leads(packs, pg), {"a"}, "no parent assigned: the group's first pack leads")
+        packs[2]["lead_at"] = 5.0
+        self.assertEqual(groups.pack_leads(packs, pg), {"c"}, "Assign as parent in the Studio: that pack leads its group")
 
     def test_earlier_batches_lists_families_with_the_roots_title_and_every_variant(self):
         h = pl.history(self.out, 0, 50)

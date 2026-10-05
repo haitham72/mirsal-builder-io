@@ -42,7 +42,6 @@ FX.root=()=>$('s-effects');FX.alive=()=>route_==='effects';FX.draw=()=>fxDraw();
 RENDER.effects=async arg=>{await loadLib();clearTimeout(FX.timer);
  if(arg&&/^E\d+$/i.test(arg)){if(FX.eid!==arg.toUpperCase())fxReset(FX);FX.eid=arg.toUpperCase();await fxLoad(FX)}else{FX.eid='';FX.rec=null;const r=await api('/api/effects');FX.past=r.ok?r.j.effects.slice(-8).reverse():[]}
  fxDraw()};
-ACT.fxopen=()=>{location.hash='#/effects'};
 ACT.fxback=()=>{FX.eid='';FX.rec=null;location.hash='#/effects'};
 /* a state forgets everything about the effect it was showing (the pack and the mode stay) */
 function fxReset(X){clearTimeout(X.timer);Object.assign(X,{rec:null,set:null,est:{},pick:new Set(),pvT:{},busy:{},gen:{},sig:{},last:'',dr:fxNew(X.who).dr})}

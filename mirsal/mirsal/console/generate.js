@@ -429,7 +429,9 @@ const PWBG=[['chat','Chat'],['light','Light'],['dark','Dark'],['checker','Transp
 ACT.gadd=async el=>{await loadLib();const inc=el&&el.dataset.g?included().filter(g=>spGid(g.generation_id)===spGid(el.dataset.g)):included(),rows=[];
   for(const g of inc)for(const t of keptOf(g))rows.push({g:g.number,gen:g.generation_id,i:t.index,anim:animPhase(g),src:`/out/${g.generation_id}/${animPhase(g)?t.webm:t.png}`,name:rname(t.key),emoji:t.emoji,file:t.name});
   if(!rows.length)return;
-  const ps=LIB.packs,def=SES.pack&&packById(SES.pack)?SES.pack:'',base=titleCase(inc[0].source.subject);
+  const ps=LIB.packs,gids=inc.map(g=>spGid(g.generation_id)),held=p=>p.stickers.filter(s=>gids.includes(spGid((s.source||{}).generation))).length,
+    home=ps.filter(held).sort((a,b)=>(b.lead?1:0)-(a.lead?1:0)||held(b)-held(a))[0],     /* the pack this batch already lives in: its stills, upgraded, not a second pack */
+    def=home?home.id:SES.pack&&packById(SES.pack)?SES.pack:'',base=titleCase(inc[0].source.subject);
   let name=base,k=2;while(ps.some(p=>p.name.toLowerCase()===name.toLowerCase()))name=`${base} ${k++}`;
   PW={rows,anim:rows.some(r=>r.anim)};
   const prev=r=>r.anim?`<video src="${r.src}" autoplay loop muted playsinline></video>`:`<img src="${r.src}">`;
@@ -440,6 +442,7 @@ ACT.gadd=async el=>{await loadLib();const inc=el&&el.dataset.g?included().filter
     <div class=fld><input type=text id=gpname value="${esc(name)}" maxlength=60 placeholder="Pack name" autocomplete=off></div>
     ${ps.length?`<label class=radio><input type=radio name=gp value=old ${def?'checked':''}> <b>An existing pack</b></label>
     <div class=fld><select id=gpold>${ps.map(p=>`<option value="${p.id}" ${p.id===def?'selected':''}>${esc(p.name)} (${p.stickers.length})</option>`).join('')}</select></div>`:''}
+    <label class=pwlead title="This pack leads its group in the Library: its name and cover show for the group, the other packs fold under it"><input type=checkbox id=pwlead checked> <b>Assign as parent</b></label>
     <div id=pwtwins></div>
     <div class=pwstep style="margin-top:16px"><span class=pwn>2</span><b>How it looks</b><select id=pwbg style="width:auto;margin-left:auto;padding:4px 10px">${PWBG.map(([k,l])=>`<option value=${k}>${l}</option>`).join('')}</select></div>
     <div id=pwprev class="pwprev bg-chat">${rows.map(r=>`<div title="${esc(r.name)}">${prev(r)}<span>${esc(r.emoji)}</span></div>`).join('')}</div>
@@ -466,7 +469,8 @@ ACT.pwgo=async()=>{const p=pwPack();let pid;
   if(p.old)pid=p.id;else{if(!p.name){toast('Give the pack a name',1);return}const r=await post('/api/packs',{name:p.name});if(!r.ok)return toast(r.j.error,1);pid=r.j.id}
   const mode=(document.querySelector('input[name=pwmode]:checked')||{}).value==='add'?'add':'replace',names={};
   document.querySelectorAll('.pwrows input').forEach(i=>{const r=PW.rows[+i.dataset.r];(names[r.g]=names[r.g]||{})[r.i]=Object.assign(names[r.g][r.i]||{},{[i.dataset.k]:i.value.trim()})});
-   closeDlg();await gaddrun(pid,mode,names)};
+   const lead=$('pwlead')&&$('pwlead').checked;closeDlg();await gaddrun(pid,mode,names);
+  if(lead){const r=await post('/api/packs/'+pid,{lead:true});if(r.ok)await loadLib()}};
 /* the wizard's own rows decide what is added (the included batches of the session) */
 async function gaddrun(pid,mode,names){let added=0,replaced=0,err='';const edge=typeof egDirty==='function'&&egDirty()?{outline:egVals().o,erode:egVals().e}:{},
   gens=[...new Set(PW.rows.map(r=>r.g))].map(n=>GM.get(n)).filter(Boolean);
