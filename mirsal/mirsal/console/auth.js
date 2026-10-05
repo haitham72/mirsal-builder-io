@@ -48,7 +48,7 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   function auHide(){const o=document.getElementById('au-gate');if(o)o.classList.remove('on');AU.shown=null}
   async function auCheck(){const r=await api('/api/auth/me');
     if(r.status===401){AU.me=null;AU.lan=!!r.j.lan;AU.domains=r.j.domains||null;return auShow(AUV.gate(AU.mode,'',AU.domains))}
-    if(!r.ok)return auIn();AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;if(typeof drawRail==='function')drawRail();   /* Users is for the owner and admins: a member's rail has no Users */
+    if(!r.ok)return auIn();AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;if(typeof drawRail==='function')drawRail();if(typeof drawCol2==='function')drawCol2();   /* the column may depend on the role too (Help's staff tabs, Users) */   /* Users is for the owner and admins: a member's rail has no Users */
     if(AU.me.status==='pending'){auShow(AUV.waiting(AU.me),'waiting');setTimeout(auCheck,15000);return}
     if(AU.me.must_change_password&&auKept()!==AU.me.id)return auShow(AUV.change(AU.me),'change');
     auHide();auIn()}

@@ -558,7 +558,8 @@ def resolve(out: Path, staff: dict, tid: str, text: str | None = None, client_id
             _write(out, cv)
         n = int(t.get("reopened") or 0)
     if t.get("user"):
-        nt.add(out, t["user"], f"resolved:{tid}:{n}", "resolved", f"Your issue was resolved: {(t.get('summary') or '')[:140]}", ticket=tid,
+        said = (cv or {}).get("title") or t.get("intent") or ""                 # the person's own words, never the ticket's internal summary
+        nt.add(out, t["user"], f"resolved:{tid}:{n}", "resolved", f"Your issue was resolved: {said[:140]}", ticket=tid,
                conversation=t.get("conversation"))
     if propose:
         threading.Thread(target=lambda: _safe(_propose, out, tid, staff.get("id")), daemon=True, name=f"faq-{tid}").start()

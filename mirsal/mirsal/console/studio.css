@@ -730,9 +730,9 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 
 /* Help & Support (support.js; docs/design.md §5 Help): one conversation on the stage, the person's issues and notifications in the column */
 .rbtn{position:relative}.rdot{position:absolute;top:7px;right:18px;width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px #fff}
-.su-tabs{margin:6px 16px 4px}.su-t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.su-sh{padding:14px 16px 4px;font-size:var(--fs-s);font-weight:600;color:var(--mut)}
+.su-tabs{margin:6px 16px 4px;flex-wrap:nowrap}.su-tabs .tab{white-space:nowrap;padding:6px 12px;font-size:var(--fs-s)}.su-t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.su-sh{padding:14px 16px 4px;font-size:var(--fs-s);font-weight:600;color:var(--mut)}
 .su-dot{display:inline-block;min-width:18px;padding:0 5px;border-radius:var(--r-pill);background:var(--bad);color:#fff;font-size:var(--fs-xs);text-align:center}
-.su-note.unread b{color:var(--pri-d)}.su-note small{white-space:normal}
+.su-note.unread b{color:var(--pri-d)}.su-note small{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .su-st{display:inline-block;padding:1px 9px;border-radius:var(--r-pill);font-size:var(--fs-xs);font-weight:600;background:var(--fill);color:var(--mut);margin-right:4px}
 .su-st.answered,.su-st.searching{background:var(--wash);color:var(--aid)}.su-st.awaiting_admin,.su-st.open,.su-st.pending,.su-st.draft{background:#FFF7E6;color:#9A5B00}
 .su-st.admin_replied,.su-st.replied{background:var(--pri-l);color:var(--pri-d)}.su-st.resolved,.su-st.fixed,.su-st.published{background:var(--ok-l);color:#047857}
@@ -749,4 +749,4 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
 .su-att{display:flex;align-items:center;gap:10px}.su-att img{max-height:72px;border-radius:var(--r-s);box-shadow:inset 0 0 0 1px var(--bd)}
 .su-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--fs-s);color:var(--ink2)}
 .su-was{padding:10px 14px;border-radius:var(--r-m);background:var(--fill);font-size:var(--fs-s);display:flex;flex-direction:column;gap:4px}
-.su-conv label{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-s);font-weight:600;color:var(--ink2)}.su-conv label input,.su-conv label textarea{font-weight:400}
+.su-conv label{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-s);font-weight:600;color:var(--ink2)}.su-conv label input,.su-conv label textarea{font-weight:400}.su-conv label input{font:inherit;font-weight:400;font-size:var(--fs-m);padding:9px 12px;border:0;border-radius:var(--r-m);background:var(--fill);color:var(--tx)}

@@ -158,6 +158,10 @@ class SupportTests(unittest.TestCase):
         self.assertEqual(sp.read(self.out, cv["id"])["status"], "resolved")
         kinds = [n["kind"] for n in nt.listing(self.out, "u1")["notifications"]]
         self.assertEqual(kinds.count("resolved"), 1, "resolving twice notifies once")
+        tk.patch(self.out, tid, "python", "TEST", summary="internal: the 8 MB guard in _save_image refuses it")
+        done = next(n for n in nt.listing(self.out, "u1")["notifications"] if n["kind"] == "resolved")
+        self.assertIn("uploads fail", done["text"], "the notification repeats the person's own words")
+        self.assertNotIn("internal", done["text"])
         with self.assertRaises(sp.SupportError):
             sp.admin_reply(self.out, ME, tid, "I resolve my own ticket")
 

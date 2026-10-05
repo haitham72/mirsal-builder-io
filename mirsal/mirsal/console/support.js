@@ -12,8 +12,9 @@ const SUV=(()=>{
   const chip=s=>`<span class="su-st ${esc(s)}">${esc(STATE[s]||s)}</span>`;
   const convRow=(c,on)=>`<div class="crow${on?' on':''}" data-act=suopen data-id="${esc(c.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(c.title||'Question')}</b><small>${chip(c.status)} ${esc(when(c.updated))}</small></div></div>`;
   const noteRow=n=>`<div class="crow su-note${n.read?'':' unread'}" data-act=sunote data-c="${esc(n.conversation||'')}" data-t="${esc(n.ticket||'')}"><div style="min-width:0"><b>${n.kind==='resolved'?'Resolved':'Support answered'}</b><small>${esc(n.text)}</small></div><span class=meta>${esc(when(n.at))}</span></div>`;
+  const short=c=>{const t=String(c.title||'').split(' › ').pop().replace(/\s*\([^)]*`[^)]*\)/g,'').replace(/`/g,'').trim();return t||c.title};
   const cites=m=>(m.cites||[]).length?`<div class=su-cites><span class=mut>From the help:</span>${m.cites.map(c=>c.kind==='faq'?`<button class=su-cite data-act=sucite data-id="${esc(c.id)}">${esc(c.title)}</button>`
-    :`<span class="su-cite${c.kind==='code'?' code':''}" title="${esc(c.path||'')}">${c.kind==='code'?'code: ':''}${esc(c.title)}</span>`).join('')}</div>`:'';
+    :`<span class="su-cite${c.kind==='code'?' code':''}" title="${esc(c.title)}">${c.kind==='code'?'code: ':''}${esc(short(c))}</span>`).join('')}</div>`:'';
   const msg=(m,staff)=>{const who=m.role==='user'?'out':'in';
     return`<div class="cm c${who}"><div class="bub su-b ${esc(m.role)}">${m.role==='admin'?`<b class=su-who>${esc(m.by_name||'Support')}</b>`:''}<div class=su-x>${esc(m.text)}</div>
       ${m.image?`<a href="${esc(m.image)}" target=_blank rel=noopener><img class=su-img src="${esc(m.image)}" alt="Screenshot"></a>`:''}${staff&&m.seen?`<div class=su-seen><b>Vision model saw:</b> ${esc(m.seen)}</div>`:''}
@@ -30,10 +31,10 @@ const SUV=(()=>{
     return`<div class=su-bar><span class=mut>Nothing in the help answers this yet.</span><button class="btn pri" data-act=suesc>Send to support</button></div>`};
   const composer=(cv,img)=>`<div class=su-in>${img?`<div class=su-att><img src="${esc(img)}" alt=""><button class=link data-act=sushotx>remove</button></div>`:''}
     <textarea id=su-text rows=${cv?2:5} placeholder="${cv?(cv.ticket&&cv.status!=='resolved'?'Write to support…':'Add a detail or ask again…'):'Describe the problem in your own words: what you did, what you expected, what happened.'}"></textarea>
-    <div class=row><button class=iconbtn data-act=sushot title="Attach a screenshot (or paste one)" aria-label="Attach a screenshot">📎</button><span class=mut style="flex:1">${cv?'':'Paste a screenshot with Ctrl+V; the local AI reads it.'}</span><button class="btn pri" data-act=suask>${cv?'Send':'Ask'}</button></div></div>`;
+    <div class=row><button class="btn sm" data-act=sushot title="Attach a screenshot (or paste one with Ctrl+V)">📎 Screenshot</button><span class=mut style="flex:1">${cv?'':'Paste a screenshot with Ctrl+V; the local AI reads it.'}</span><button class="btn pri" data-act=suask>${cv?'Send':'Ask'}</button></div></div>`;
   const conv=(cv,staff,busy,img)=>`<div class=su-conv><div class=su-head><h2>${esc(cv.title||'Question')}</h2>${chip(busy?'searching':cv.status)}</div>
     <div class=su-msgs id=su-msgs>${(cv.messages||[]).map(m=>msg(m,staff)).join('')}</div>${next(cv,busy)}${composer(cv,img)}</div>`;
-  const fresh=(img,busy)=>`<div class=su-conv><div class=su-head><h2>How can we help?</h2></div><p class=mut>The help answers first; if it does not know, a person takes over and you are notified here.</p>${busy?`<div class=su-bar><span class=spin></span> Looking for an answer…</div>`:''}${composer(null,img)}</div>`;
+  const fresh=(img,busy,pending)=>`<div class=su-conv><div class=su-head><h2>How can we help?</h2></div><p class=mut>The help answers first; if it does not know, a person takes over and you are notified here.</p>${pending?`<div class=su-msgs>${msg({role:'user',text:pending},false)}</div>`:''}${busy?`<div class=su-bar><span class=spin></span> Looking for an answer…</div>`:''}${busy?'':composer(null,img)}</div>`;
   /* staff */
   const queueRow=(t,on)=>`<div class="crow${on?' on':''}" data-act=suq data-id="${esc(t.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(t.title||t.summary||t.id)}</b><small>${chip(t.status==='answered'?'open':t.status)} ${esc(t.name||t.user||'')} · ${esc(t.id)}${t.pinged?'':' · not pinged yet'}</small></div></div>`;
   const ticket=(d)=>{const t=d.ticket,cv=d.conversation;
@@ -73,7 +74,7 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
     let h;
     if(SU.tab==='queue')h=SU.tk?SUV.ticket(SU.tk):'<div class=su-conv><h2>Queue</h2><p class=mut>Pick an issue on the left.</p></div>';
     else if(SU.tab==='faq')h=SU.fq?SUV.faqEdit(SU.fq):'<div class=su-conv><h2>FAQ review</h2><p class=mut>Proposals from resolved issues and imported entries wait here. Nothing answers people until it is published.</p></div>';
-    else h=SU.cv?SUV.conv(SU.cv,suStaff(),SU.busy,SU.img):SUV.fresh(SU.img,SU.busy);
+    else h=SU.cv?SUV.conv(SU.cv,suStaff(),SU.busy,SU.img):SUV.fresh(SU.img,SU.busy,SU.busy?SU.pending:null);
     st.innerHTML=`<div class=page>${h}</div>`;const m=$('su-msgs');if(m)m.scrollTop=m.scrollHeight;
     const t=$('su-text');if(t){t.onkeydown=e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();ACT.suask()}};t.onpaste=e=>{const f=[...(e.clipboardData||{}).items||[]].find(i=>i.type&&i.type.startsWith('image/'));if(f){e.preventDefault();suFile(f.getAsFile())}}}}
   function suFile(f){if(!f)return;if(f.size>8*1024*1024)return toast('A screenshot must be under 8 MB',1);const r=new FileReader();r.onload=()=>{SU.img=String(r.result);suDraw()};r.readAsDataURL(f)}
@@ -98,8 +99,8 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   ACT.suask=async()=>{const t=$('su-text'),text=t?t.value.trim():'';if(!text&&!SU.img)return toast('Describe the problem first',1);if(SU.busy)return;
     const cid=SU.cv?SU.cv.id:null,body={text,conversation:cid,client_id:Date.now().toString(36)+Math.random().toString(36).slice(2,6)};if(SU.img)body.image=SU.img;
     if(SU.cv)SU.cv={...SU.cv,messages:[...SU.cv.messages,{role:'user',text:text||'(a screenshot)',ts:Date.now()/1000}]};
-    SU.busy=true;suDraw();const r=await post('/api/support/ask',body);SU.busy=false;
-    if(!r.ok){suDraw();return toast(r.j.error||'Could not send it',1)}SU.img=null;SU.cv=r.j;await suLoad();if(location.hash!=='#/help/'+r.j.id)history.replaceState(null,'','#/help/'+r.j.id);suDraw();suCol();suWatch()};
+    SU.pending=text||'(a screenshot)';SU.busy=true;suDraw();const r=await post('/api/support/ask',body);SU.busy=false;SU.pending=null;
+    if(!r.ok){suDraw();const t2=$('su-text');if(t2)t2.value=text;return toast(r.j.error||'Could not send it',1)}SU.img=null;SU.cv=r.j;await suLoad();if(location.hash!=='#/help/'+r.j.id)history.replaceState(null,'','#/help/'+r.j.id);suDraw();suCol();suWatch()};
   const suAct=async(path,body,msg)=>{const r=await post(`/api/support/conversations/${SU.cv.id}/${path}`,body||{});if(!r.ok)return toast(r.j.error||'Could not do that',1);SU.cv=r.j;await suLoad();suDraw();suCol();suWatch();if(msg)toast(msg)};
   ACT.susolved=()=>suAct('feedback',{solved:true},'Glad it is solved');
   ACT.suunsolved=()=>suAct('feedback',{solved:false},'Sent to support: you will be notified here');
