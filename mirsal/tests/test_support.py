@@ -56,6 +56,14 @@ class SupportTests(unittest.TestCase):
         ask = sp.ask(self.out, ME, "it is broken", complete=answer("Which screen are you on?", need="clarify"))
         self.assertEqual(ask["messages"][-1]["need"], "clarify", "a short question needs no cite")
 
+    def test_a_plain_text_answer_with_markers_counts_its_markers_as_cites(self):
+        plain = lambda s, u: ("Re-export the pack: files over 256 KB are refused [1].", {})
+        a = sp.ask(self.out, ME, "Telegram refuses my sticker pack", complete=plain)["messages"][-1]
+        self.assertTrue(a["grounded"])
+        self.assertEqual(a["text"], "Re-export the pack: files over 256 KB are refused.")
+        self.assertEqual(sp._parse("Which screen were you on?")["need"], "clarify")
+        self.assertEqual(sp._parse("Could you send a screenshot of it?")["need"], "screenshot")
+
     def test_without_a_model_the_matching_faq_is_quoted_word_for_word_and_nothing_else_is_guessed(self):
         down = lambda s, u: (_ for _ in ()).throw(RuntimeError("LM Studio is down"))
         cv = sp.ask(self.out, ME, "Why does Telegram refuse my sticker pack", complete=down)

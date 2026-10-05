@@ -403,10 +403,11 @@ Help is where a person describes a problem in their own words. The support agent
    - The record is `out/support/index.json`, with a sha256 per file, so an unchanged file is never cut or embedded again.
    - With Postgres and the **local** nomic model up, the vectors go to `support_chunks` and `faq.vec` (migration 011). Otherwise the search is lexical (idf-weighted word overlap) over the same files. There is no hosted embedding fallback, so nothing is paid.
    - An FAQ entry is found by its question, its answer, its `screen` and its `looks_like` (what the problem looks like on screen; `faq.search_text`), so the vision model's description of a screenshot finds the entry.
-3. **The answer.** The **local** model, always local whatever the person picked (rule 13), receives the numbered sources, this person's **memory**, the screenshot's description and the last turns, all fenced as data. It answers JSON `{reply, cites, need}`.
+3. **The answer.** The **local** model (`MIRSAL_SUPPORT_MODEL`, else the local chat model), always local whatever the person picked (rule 13), receives the numbered sources, this person's **memory**, the screenshot's description and the last turns, all fenced as data. It answers JSON `{reply, cites, need}`.
    - A reply is shown only when its cites point to what was retrieved. A cite to anything else, or a solution with no cite, becomes "I could not find this documented" plus Send to support. It never invents a fix.
    - `need: clarify` (one short question) and `need: screenshot` need no cite.
-   - With the model down, the best FAQ entry or doc section is quoted word for word, but only when it is a real match. Otherwise support is offered.
+   - A small model that ignores the JSON format and writes plain text ending in `[1] [2]` is read as that text with those cites (`support._parse`).
+   - With the model down, the best FAQ entry is quoted word for word, but only when it is a real match. Doc sections are written for developers and are never quoted raw. Otherwise support is offered.
 4. **Memory** (`support.memory`): the person's earlier conversations (title, how each ended, what was read) and the tickets the system holds for them, failures caught on their requests included. Only this person's, newest first, at most ten lines.
 5. **"Did this solve it?"** Yes closes the conversation. No, or **Send to support**, escalates **once**:
    - One ticket per conversation (`tickets.open_support`, source `support`): the person's words, the transcript, what the vision model saw, what was tried, their earlier problems. It has no multiple-choice questions.
@@ -426,4 +427,9 @@ Help is where a person describes a problem in their own words. The support agent
 
 **Privacy and trust.** A person sees only their own conversations, notifications and tickets; anything else is a 404. A member's ticket view drops the internal fields. Staff see a conversation once it reached a ticket. Nothing a person writes, nothing retrieved and nothing the vision model says can authorize an action: the routes check roles (`docs/api.md` "Help & Support"). The stdlib server (`serve --stdlib`) has no Help routes.
 
-**Measured so far.** Only the local vision pre-review on stickers was measured (`mirsal/local_eval/`: Qwen 3.5 9B, 30 stickers, 25 parsed verdicts, about 10 s each). Answer quality, screenshot reading and retrieval precision are not measured yet (`docs/backlog.md`).
+**Measured so far.** The local vision pre-review on stickers (`mirsal/local_eval/`: Qwen 3.5 9B, 30 stickers, 25 parsed verdicts, about 10 s each). One live check of support on a scratch copy (2026-10-05):
+- The index is 172 files: 305 doc, 193 staff-note and 1,273 code sections, all embedded by the local nomic model, with searches at 2-3 s.
+- `qwen3.5-4b` ignored the JSON format (hence `_parse`) and gave one wrong cause for the grey loop frame.
+- `qwen/qwen3.5-9b` answered "make a pack public" correctly in 10.5 s, read a screenshot of the welcome slide and matched it to the welcome modal in 27.7 s, but answered the loop seam from the verifier section instead of the reloop fix.
+
+Developer docs alone answer poorly, so the FAQ seeds matter. Answer quality and retrieval precision are not measured beyond this (`docs/backlog.md`).
