@@ -82,6 +82,9 @@ async function cpAddFiles(files){const {model}=lsel('image');if(model&&model.ref
     t.id=j.id;t.busy=false;cpDrawRefs()}}
 
 /* ---------- the bar: model, stroke, price, Generate */
+/* the Studio's Particles choice (Haitham, 2026-10-05): a per-browser switch; on, Generate prompt and Enter take the particle route (particles.js ptStudio) */
+const ptOn=()=>{try{return localStorage.getItem('mirsal.particles.on')==='1'}catch(e){return false}};
+ACT.cppart=()=>{try{localStorage.setItem('mirsal.particles.on',ptOn()?'0':'1')}catch(e){}cpDrawBar()};
 function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('image'),st=GS.outline;
   const sty=(LIVE.m&&LIVE.m.styles||[]).find(x=>x.id===LIVE.style);
   el.innerHTML=`<button class=cp-chip data-act=lmodels title="Choose the image model">${logoHtml(model)}<span><b>${esc(model?model.label:'Model')}</b><em>${esc(optSummary(model,sel))}</em></span></button>
@@ -89,6 +92,7 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    <div class=cp-pw><button class="cp-chip ${CP.pop==='stroke'?'open':''}" data-act=cpstroke aria-haspopup=true aria-expanded=${CP.pop==='stroke'}>${glyph(st)}<span><b>Stroke</b><em>${strokeName(st)}</em></span></button>
     ${CP.pop==='stroke'?`<div class=cp-pop role=menu>${STROKES.map(([px,n])=>`<button role=menuitemradio aria-checked=${px===st} class="${px===st?'on':''}" data-act=cpstrokeset data-px=${px}>${glyph(px)}<span><b>${n}</b><em>${px?px+' px':'no border'}</em></span></button>`).join('')}</div>`:''}</div>
    <button class="cp-chip cp-ai ${LIVE.loop?'on':''}" data-act=cploop aria-pressed=${!!LIVE.loop} title="Off: the animation plays once through and Mirsal closes the loop itself. On: the video prompt asks for a loop and Kling ends on its first pose. A loop wording makes the stickers bounce several times in the 3 seconds."><span class=cp-sw><i></i></span><span><b>Loop</b><em>${LIVE.loop?'On':'Off'}</em></span></button>
+   <button class="cp-chip cp-ai ${ptOn()?'on':''}" data-act=cppart aria-pressed=${ptOn()} title="On: the prompt asks for particles on their own (for example: particles for lipsticks and ribbons). No sticker owns them; preview, render, download them or make a pack of them."><span class=cp-sw><i></i></span><span><b>Particles</b><em>${ptOn()?'On':'Off'}</em></span></button>
    <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${esc(aiChipTitle())}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
    <span class=cp-gap></span>
    ${GD&&!gdOn()?'<button class="btn sm" data-act=gdtab data-t=plan title="Return to the prompt you were editing">Prompt draft</button>':''}

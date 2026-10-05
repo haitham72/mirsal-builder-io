@@ -1192,7 +1192,7 @@ def render(out: Path, lib, pid: str, cfg, *, pack_id=None, preset=None, params=N
     from . import effects as fx
     from ..engine import effect_video as ev, particles
     s = read(out, pid)
-    pack = _pick_pack(s, lib, pack_id, required=True)
+    pack = _pick_pack(s, lib, pack_id, required=bool(_derived(s).get("packs")) or (s.get("source") or {}).get("kind") == "stickers")   # a stand-alone set renders on its own
     name, px, sc, p = _burst(s, preset, params)
     pcs, source = sprites_of(out, lib, s, pack, sprite_px=max(1, round(px * sc)))
     r = ev.encode_and_check(particles.simulate(fx._fit(pcs, px, sc), p), cfg, label=f"{s['id']} burst")
@@ -1225,7 +1225,7 @@ def _pack_emoji(lib, pack_id: str) -> str:
     return "".join(e for e, _ in c.most_common(MAX_EMOJI)) or "🙂"
 
 
-def add(out: Path, lib, pid: str, renders=None, pack_id=None, sticker_id=None, user: str = "local") -> dict:
+def add(out: Path, lib, pid: str, renders=None, pack_id=None, sticker_id=None, user: str = "local", new_pack: str | None = None) -> dict:
     """Put rendered bursts into a pack as animated stickers tagged with the pack's emoji. This click is the person's approval of the burst (history `APPROVE`). Without `renders` it takes every READY
     burst rendered for that pack that is not in a pack yet. A FAILED render (a Telegram limit is broken) cannot be added; a warning never stops it. The same burst is not put in the same pack
     twice by accident (409): render another to have a second."""
@@ -1235,7 +1235,10 @@ def add(out: Path, lib, pid: str, renders=None, pack_id=None, sticker_id=None, u
         if renders is not None and (not isinstance(renders, list) or any(not isinstance(x, str) for x in renders)):
             raise SetError("renders must be a list of burst ids")
         first = by_id.get(renders[0]) if renders else None
-        pack = _pick_pack(s, lib, pack_id or (first or {}).get("pack_id"), required=True)
+        fresh = None
+        if new_pack and not pack_id:                    # "Make a pack of it": a stand-alone set's bursts start a pack of their own (then Send to Telegram as any pack)
+            fresh = lib.create_pack(str(new_pack))["id"]
+        pack = fresh or _pick_pack(s, lib, pack_id or (first or {}).get("pack_id"), required=True)
         if renders:
             missing = [x for x in renders if x not in by_id]
             if missing:
@@ -1253,7 +1256,7 @@ def add(out: Path, lib, pid: str, renders=None, pack_id=None, sticker_id=None, u
             raise SetError(f"{', '.join(twice)} is already in that pack: render another to add a second", 409)
         owners = [o["sticker_id"] for o in s.get("owner") or []]
         parent = str(sticker_id) if sticker_id and str(sticker_id) in owners else (owners[0] if owners else None)
-        emoji, d, added = _pack_emoji(lib, pack), _dir(out, pid), []
+        emoji, d, added = ("✨" if fresh else _pack_emoji(lib, pack)), _dir(out, pid), []
         for r in chosen:
             st = lib.add_bytes(pack, (d / r["file"]).read_bytes(), "webm", f"{s.get('name') or s['id']} · {r['preset']}"[:60], "animated", emoji,
                                source={"kind": (s.get("source") or {}).get("kind"), "particle_set": s["id"], "render": r["id"], "preset": r["preset"], "source_pack": r.get("pack_id"),

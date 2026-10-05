@@ -92,7 +92,8 @@ function spRunHtml(e){if(e.status==='NEW')return '<div class=fx-job><span class=
  return `<div class=fx-price>${est&&est.credits!=null?est.credits+' credits':est?'Price unavailable':'Getting price…'}</div>${est&&est.credits==null?'<button class=link data-act=spprice>Retry price</button>':''}<button class="btn pri" data-act=fxddraw ${est&&est.credits!=null&&d.chosen.length?'':'disabled'}>Generate image sprites</button>`}
 function spEditorCells(s){const pick=SPL.pick[s.id];return `<div class=ps-cells>${(s.cells||[]).map(c=>{const on=pick?pick.has(c.n):!!c.picked;return `<div class=sp-sprite><button class="ps-pick${on?' on':''}" data-act=pspickcell data-id=${esc(s.id)} data-n=${c.n} aria-pressed=${on} title="${esc(c.key||'Sprite '+c.n)}">${spCellMedia(c)}<span class=ps-tick>${on?'✓':''}</span></button>${(c.warnings||[]).map(w=>`<small class=fx-w>${esc(fxWords(w))}</small>`).join('')}</div>`}).join('')}</div>${pick?`<button class="btn sm pri" data-act=pspicksave data-id=${esc(s.id)}>Use selected${(s.cells||[]).some(c=>pick.has(c.n)&&(c.warnings||[]).length)?' anyway':''}</button>`:''}`}
 function spBody(gs){if(!SP.scope)return spScopePicker();if(SP.scope.generation&&!spScopeStickers(SP.scope,LIB.packs).length)return spApproveHtml(SP.scope);
- const rows=spScopeStickers(SP.scope,LIB.packs),heading=`<div class=sp-h><h2>Particles</h2><span class=sp-target>${rows.slice(0,4).map(r=>media(r.sticker)).join('')}<b>${rows.length===1?esc(rows[0].sticker.name):rows.length+' stickers'}</b></span></div>`;
+ const rows=spScopeStickers(SP.scope,LIB.packs),heading=SP.scope.set?`<div class=sp-h><h2>Particles</h2><span class=sp-target><b>${esc((SP.set&&SP.set.name)||SP.scope.set)}</b><span class=mut>on their own</span></span></div>`
+  :`<div class=sp-h><h2>Particles</h2><span class=sp-target>${rows.slice(0,4).map(r=>media(r.sticker)).join('')}<b>${rows.length===1?esc(rows[0].sticker.name):rows.length+' stickers'}</b></span></div>`;
  if(SP.set&&!SP.eid){const s=SP.set;return `${heading}<div class=row><span class=fx-chip>${spKindChip(s)}</span><span class=mut>${spSaved(s)?'Saved row':'Draft · not saved yet'}</span><button class=link data-act=spfresh>New version</button></div>${spEditorCells(s)}<details class=sp-add data-spadd ${SP.addOpen?'open':''}><summary>Add more</summary>${spMoreHtml(s)}</details>${spBurstHtml(s)}`}
  return heading+(SP.importError?`<div class=warn>${esc(SP.importError)}<button class=btn data-act=spimportretry>Retry</button></div>`:'')+(SP.eid?(SP.rec?spHead(SP.rec)+spRunHtml(SP.rec):'<div class=fx-job><span class=spin></span> Loading…</div>'):spSetup(gs))}
 document.addEventListener('toggle',ev=>{if(ev.target&&ev.target.dataset&&ev.target.dataset.spadd!==undefined)SP.addOpen=ev.target.open},true);
@@ -299,12 +300,20 @@ function spBurstCard(s,b,r){const ok=r.status==='READY'&&!!r.url,ws=(r.warnings|
  return `<div class="ps-br${ok?'':' bad'}" data-psr=${esc(r.id)}><div class=pk-pt-m>${r.url?`<video src="${esc(r.url)}" autoplay loop muted playsinline preload=metadata></video>`:'<span class=mut>no file</span>'}</div>
   <div class=pk-pt-id><b>${esc(r.id)} · ${esc(r.preset||'')}</b><small>${Math.round((r.bytes||0)/1024)} KB · ${esc(String(r.status||'').toLowerCase())}</small></div>
   ${bl.map(w=>`<span class="fx-w bad">${esc(w)}</span>`).join('')}${ws.map(w=>`<span class=fx-w>${esc(w)}</span>`).join('')}
-  ${r.added_to?`<small class=mut>In pack ✓</small>`:ok?`<button class="btn sm pri" data-act=psbadd data-id=${esc(s.id)} data-r=${esc(r.id)} data-p=${esc(b.pack)}>${ws.length?'Use it anyway · Add':'Add to pack'}</button>`:''}</div>`}
+  ${ok?`<a class="btn sm" href="${esc(r.url)}" download="${esc((s.name||s.id)+' '+r.id)}.webm" title="The burst as a transparent WebM (512 px, Telegram's video sticker format)">Download</a>`:''}
+  ${r.added_to?`<small class=mut>In pack ✓</small>`:!ok?'':b.pack?`<button class="btn sm pri" data-act=psbadd data-id=${esc(s.id)} data-r=${esc(r.id)} data-p=${esc(b.pack)}>${ws.length?'Use it anyway · Add':'Add to pack'}</button>`
+   :`<button class="btn sm pri" data-act=psbnewpack data-id=${esc(s.id)} data-r=${esc(r.id)} title="A new pack holding this burst as an animated sticker; send it to Telegram like any pack">${ws.length?'Use it anyway · ':''}Make a pack of it</button>`}</div>`}
+ACT.psbnewpack=async el=>{const s=SPBS[el.dataset.id]||{},r=await post(`/api/particles/${encodeURIComponent(el.dataset.id)}/add`,{renders:[el.dataset.r],new_pack:s.name||el.dataset.id});
+ if(!r.ok)return toast(r.j.error||'Could not make the pack',1);if(typeof loadLib==='function')await loadLib();toast(`A pack “${(packById(r.j.pack_id)||{}).name||''}” holds the burst`);location.hash='#/pack/'+r.j.pack_id};
+/* the editor opened on one stand-alone set (the Studio's Particles choice, a particle batch, the chat): no sticker scope, the set itself */
+async function spOpenSet(id){const r=await api('/api/particles/'+encodeURIComponent(id));if(!r.ok)return toast(r.j.error||'Could not open the particles',1);
+ spEnter({set:id});SP.entry=(SP.entry||0)+1;SP.set=r.j;SP.target=id;SP.eid='';SPL.detail[id]=r.j;spDraw();spBurstPreview(id)}
+globalThis.spOpenSet=spOpenSet;
 function spBurstHtml(s){SPBS[s.id]=s;const b=spBurstState(s,spHint()),own=s.packs||[],kind=(s.source||{}).kind,has=(s.n_picked||0)>0||kind==='stickers',id=esc(s.id);
  const head=`<div class=ps-genh><b>Motion</b></div>`;
  if(!has)return `<div class=ps-burst data-psb=${id}>${head}<div class=mut>Add sprites to preview.</div></div>`;
- const choose=own.length===1?`<b>for ${esc(spPackName(s,own[0]))}</b>`:`<label class=row><span class=mut>for</span><select data-psbpack=${id} aria-label="The pack this burst is for">${b.pack?'':'<option value="" selected>Choose a pack…</option>'}${(own.length?own:((typeof LIB!=='undefined'&&LIB.packs)||[]).map(p=>p.id)).map(pid=>`<option value="${esc(pid)}"${pid===b.pack?' selected':''}>${esc(spPackName(s,pid))}</option>`).join('')}</select></label>`;
- const rs=(Array.isArray(s.renders)?s.renders:[]).filter(r=>r.pack_id===b.pack).slice().reverse();
+ const choose=own.length===1?`<b>for ${esc(spPackName(s,own[0]))}</b>`:`<label class=row><span class=mut>for</span><select data-psbpack=${id} aria-label="The pack this burst is for">${b.pack?(own.length?'':'<option value="">On their own</option>'):`<option value="" selected>${own.length?'Choose a pack…':'On their own'}</option>`}${(own.length?own:((typeof LIB!=='undefined'&&LIB.packs)||[]).map(p=>p.id)).map(pid=>`<option value="${esc(pid)}"${pid===b.pack?' selected':''}>${esc(spPackName(s,pid))}</option>`).join('')}</select></label>`;
+ const rs=(Array.isArray(s.renders)?s.renders:[]).filter(r=>(r.pack_id||'')===(b.pack||'')).slice().reverse();
  return `<div class=ps-burst data-psb=${id}>${head}
   <div class=row>${choose}${kind==='stickers'&&!(s.n_cells>0)?'<span class=mut>the pack’s own stickers fly out as the particles</span>':''}</div>
   <div class=ps-sim><div class=fx-pvbox><img id=psbpv-${id} ${b.pv?`src="${esc(b.pv)}"`:''} alt="">${b.pv?'':'<span class=spin></span>'}<small>${esc(s.name||s.id)}</small></div>
@@ -373,3 +382,28 @@ document.addEventListener('change',ev=>{const t=ev.target;if(!t||!t.dataset||t.d
 ACT.psrecovergo=async el=>{const pid=$('psrecoverparent').value;if(!pid)return toast('Select the parent pack',1);const source=(LIB.packs||[]).find(p=>p.id===el.dataset.p),ids=$('psrecoverall').checked?(source.stickers||[]).map(st=>st.id):[el.dataset.s],owners=[...document.querySelectorAll('[data-psrecoverowner]')].filter(c=>c.checked).map(c=>({pack_id:pid,sticker_id:c.dataset.psrecoverowner}));if(!owners.length)return toast('Select a target sticker',1);
  const parent=packById(pid),links=owners.map(o=>((parent.stickers.find(st=>st.id===o.sticker_id)||{}).particles||[]).slice(-1)[0]),target=links.every(Boolean)&&new Set(links).size===1?links[0]:undefined;el.disabled=true;
  const r=await post('/api/particles',{from_stickers:ids,parent_pack_id:pid,owners,target,...(!target?{name:(source.name||'Recovered')+' particles'}:{})});el.disabled=false;if(!r.ok)return toast(r.j.error,1);closeDlg();if(typeof lcClose==='function')lcClose();await loadLib();spSetsForget();spEnter({pack_id:pid,sticker_ids:owners.map(o=>o.sticker_id)});SP.entry=(SP.entry||0)+1;SP.set=r.j;SP.target=r.j.id;SP.eid='';SPL.detail[r.j.id]=r.j;spDraw();spBurstPreview(r.j.id)};
+
+/* ---------- the Studio's Particles choice (composer.js ptOn): "particles for lipsticks and ribbons" -> a stand-alone set (POST /api/particles {from_request}),
+   its price (POST /api/particles/{id}/more {estimate}), Generate (go): the sheet is a particle batch in Earlier batches (with the particles mark) and the
+   set opens in the editor, where its sprites arrive. Cancel deletes the empty set (it is in the trash, restorable). */
+const PTR={busy:false};
+async function ptStudio(){const p=$('prompt'),text=((p&&p.value)||'').trim();
+ if(!text)return toast('Say which particles, for example: particles for lipsticks and ribbons',1);if(PTR.busy)return;PTR.busy=true;
+ try{const r=await post('/api/particles',{from_request:text,grid:'2x2'});if(!r.ok)return toast(r.j.error||'Could not read which particles you want',1);const s=r.j;
+  dlg(`<h2>Particles on their own</h2><p class=mut>A sheet of four still sprites, cut and keyed, then they fly in the simulator. No sticker owns them.</p>
+   <div class=row style="flex-wrap:wrap;gap:6px">${(s.plan.elements||[]).map(e=>`<span class=fx-chip>${esc(e)}</span>`).join('')}</div>
+   <div class=row style="justify-content:flex-end;margin-top:14px"><button class=btn data-act=ptcancel data-id="${esc(s.id)}">Cancel</button><button class="btn pri" id=ptgo data-act=ptgo data-id="${esc(s.id)}" disabled>Pricing…</button></div>`);
+  const q=await post(`/api/particles/${encodeURIComponent(s.id)}/more`,{mode:'drawn',estimate:true}),b=$('ptgo');if(!b)return;
+  if(q.ok&&q.j.credits!=null){b.disabled=false;b.textContent=`Generate · ${q.j.credits} credits`}else{b.textContent='Price unavailable';toast((q.j&&q.j.error)||'The price is unavailable: nothing was started',1)}}
+ finally{PTR.busy=false}}
+ACT.ptcancel=el=>{closeDlg();post(`/api/particles/${encodeURIComponent(el.dataset.id)}/delete`,{})};
+ACT.ptgo=async el=>{el.disabled=true;const id=el.dataset.id,r=await post(`/api/particles/${encodeURIComponent(id)}/more`,{mode:'drawn',go:true});
+ if(!r.ok){el.disabled=false;return toast(r.j.error||'The sheet did not start',1)}closeDlg();toast('Drawing the particles: they arrive in the editor and in Earlier batches');
+ if(typeof histReload==='function')histReload();spOpenSet(id)};
+for(const k of ['gprompt','ggo']){const f=ACT[k];if(f)ACT[k]=(...a)=>route_==='generate'&&typeof ptOn==='function'&&ptOn()?ptStudio():f(...a)}
+/* a particle batch opened in the Studio: its stand-alone set in the editor (the set that holds the batch's sheet) */
+async function ptOpenBatch(gid){const r=await api('/api/particles');if(!r.ok)return;const s=(r.j.sets||[]).find(x=>(x.sheets||[]).some(sh=>spGid(sh.generation)===spGid(gid)));if(s)spOpenSet(s.id)}
+globalThis.ptOpenBatch=ptOpenBatch;
+{const f=ACT.hopen;if(f)ACT.hopen=async el=>{const r=await f(el);const it=(typeof HB!=='undefined'?HB.items.flatMap(histVars):[]).find(x=>x.id===+el.dataset.id);
+ if(it&&it.kind==='particles')ptOpenBatch(it.generation_id||it.id);return r}}     /* a particle batch from Earlier batches opens on its set */
+

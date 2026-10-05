@@ -1248,7 +1248,7 @@ def make_handler(c: Console):
                 if act == "render":                                # the final 512 px WebM for a pack, judged and stored under renders/ (only Telegram's own limits make it FAILED)
                     return self._json(200, ps.render(c.out, c.lib, pid, c.cfg, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, user=self.user["id"]))
                 if act == "add":                                   # rendered bursts into the pack as animated stickers tagged with the pack's emoji
-                    return self._json(200, ps.add(c.out, c.lib, pid, body.get("renders"), body.get("pack_id"), body.get("sticker_id"), self.user["id"]))
+                    return self._json(200, ps.add(c.out, c.lib, pid, body.get("renders"), body.get("pack_id"), body.get("sticker_id"), self.user["id"], new_pack=body.get("new_pack")))
                 if act == "more":                                  # Generate more: the price first (409 until go), then an ordinary sheet job whose cut cells are APPENDED to the set
                     saved = ps.migrate(c.out, c.lib, pid)
                     mode = body.get("mode") or saved.get("source", {}).get("kind") or "drawn"

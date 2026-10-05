@@ -202,6 +202,22 @@ class DurableTemporalTests(unittest.TestCase):
         self.assertEqual(rendered['status'], 'READY')
         self.assertTrue((captured[0][25, ..., 2] > captured[0][25, ..., 0]).any())
 
+    def test_a_stand_alone_set_renders_on_its_own_and_can_start_a_pack_of_its_own(self):
+        s = self.import_effect(self.effect())
+        raw = ps.read(self.out, s['id']); raw['owner'] = []; ps._write(self.out, raw)          # no sticker owns it (the Studio's Particles choice)
+        ok = lambda frames, cfg, **kw: {'data': b'fake render', 'status': 'READY', 'checks': [], 'blocks': [], 'warnings': [], 'metrics': {}}
+        with patch('mirsal.engine.effect_video.encode_and_check', side_effect=ok):
+            r = ps.render(self.out, self.lib, s['id'], object(), params={'count': 2})
+        self.assertEqual((r['status'], r['pack_id']), ('READY', None), 'no pack is needed for a stand-alone set')
+        made = []
+        def create_pack(name):
+            p = {'id': 'new', 'name': name, 'stickers': []}; self.lib.db['packs'].append(p); return p
+        def add_bytes(pid, data, ext, name, kind, emoji, source=None, **kw):
+            st = {'id': f'b{len(made)}', 'name': name, 'emoji': emoji, 'type': kind, 'source': source}; made.append((pid, st)); return st
+        self.lib.create_pack, self.lib.add_bytes = create_pack, add_bytes
+        out = ps.add(self.out, self.lib, s['id'], [r['id']], new_pack='Lipstick particles')
+        self.assertEqual((out['pack_id'], made[0][0], made[0][1]['emoji']), ('new', 'new', '✨'), '"Make a pack of it": a new pack holds the burst')
+
     def test_recovery_preserves_animation_sources_and_explicit_owners(self):
         st = self.lib.db['packs'][0]['stickers'][0]
         st.update(file='original.webm', type='animated', name='Fire')
