@@ -7,4 +7,4 @@ When a session stops mid-step, write: the step being worked on, the files touche
 ## In progress
 
 
-Nothing is in progress. (The Mirsal Creator film in `Motion Graphics/` is finished, Haitham, 2026-10-05.)
+Nothing is in progress. (Prepared stickers Part 2 done and pushed 2026-10-05: prefer-prepared, manual-download recovery, replace-with-edited-file, docs; brief file removed.)
