@@ -204,10 +204,13 @@ def draft(out: Path, tid: str) -> dict:
         t.update(issue=d.issue, summary=d.summary, proposed_fix=d.proposed_fix, drafted_by=meta.get("model") or "local")
         if t.get("source") == "support":
             pass                                                     # a support ticket keeps its conversation, not questions
-        elif d.questions and not t["answers"]:
-            t["questions"] = [q.model_dump() for q in d.questions]
         elif not t["answers"]:
-            t["questions"] = _preset(d.issue)
+            new = [q.model_dump() for q in d.questions] if d.questions else _preset(d.issue)
+            if [q["text"] for q in new] != [q["text"] for q in t["questions"]]:
+                # the page may already show the preset questions: keep them answerable (a click on what was shown always counts)
+                seen = {q["text"] for q in t.get("superseded_questions") or []}
+                t["superseded_questions"] = (t.get("superseded_questions") or []) + [q for q in t["questions"] if q["text"] not in seen]
+            t["questions"] = new
         t.pop("draft_error", None)
         return _write(out, t)
 
@@ -232,21 +235,39 @@ def _safe(fn, *a):
         pass
 
 
-def answer(out: Path, tid: str, question: int, choice: str | None = None, text: str | None = None, user: str = "local") -> dict:
+CHANGED = "the questions changed while you were reading (the AI wrote new ones): they are shown again"
+
+
+def answer(out: Path, tid: str, question: int, choice: str | None = None, text: str | None = None, user: str = "local",
+           question_text: str | None = None) -> dict:
+    """One question answered. `question_text` (what the page showed) wins over the index: the local model's draft may replace the preset questions
+    while the page is open, and an answer to a question that was shown is kept (against its own text) instead of refused."""
     with _LOCK:
         t = read(out, tid)
-        if not 0 <= question < len(t["questions"]):
-            raise ValueError(f"no question {question} on {t['id']}")
-        q = t["questions"][question]
+        qs, q, idx = t["questions"], None, question
+        if question_text:
+            i = next((i for i, x in enumerate(qs) if x["text"] == question_text), None)
+            if i is not None:
+                q, idx = qs[i], i
+            else:
+                q = next((x for x in t.get("superseded_questions") or [] if x["text"] == question_text), None)
+                idx = None
+                if q is None:
+                    raise ValueError(CHANGED)
+        if q is None:
+            if not 0 <= question < len(qs):
+                raise ValueError(f"no question {question} on {t['id']}")
+            q = qs[question]
         if choice is not None and choice not in q["choices"]:
-            raise ValueError("that is not one of the choices")
+            raise ValueError(CHANGED if question_text is None else "that is not one of the choices")
         if choice is None and not (text or "").strip():
             raise ValueError("choose an answer or write one")
-        t["answers"] = [a for a in t["answers"] if a["question"] != question] + [{"question": question, "choice": choice, "text": (text or "").strip() or None, "by": user,
-                                                                               "ts": round(time.time(), 3)}]
-        if t["status"] == "open" and len(t["answers"]) >= len(t["questions"]):
+        t["answers"] = [a for a in t["answers"] if (a.get("question_text") or (qs[a["question"]]["text"] if isinstance(a.get("question"), int) and a["question"] < len(qs) else None)) != q["text"]] + [
+            {"question": idx, "question_text": q["text"], "choice": choice, "text": (text or "").strip() or None, "by": user, "ts": round(time.time(), 3)}]
+        answered = {a.get("question_text") for a in t["answers"]}
+        if t["status"] == "open" and all(x["text"] in answered for x in qs):
             t["status"] = "answered"
-        t["history"].append({"ts": round(time.time(), 3), "actor": user, "decision": "ANSWER", "question": question})
+        t["history"].append({"ts": round(time.time(), 3), "actor": user, "decision": "ANSWER", "question": idx, "question_text": q["text"]})
         return _write(out, t)
 
 

@@ -55,6 +55,7 @@ class TicketAnswer(BaseModel):
     question: int = Field(ge=0, le=9)
     choice: str | None = Field(default=None, max_length=80)
     text: str | None = Field(default=None, max_length=1000)
+    question_text: str | None = Field(default=None, max_length=300)       # the question as the page showed it (it wins over the index)
 
 
 class TicketStatusChange(BaseModel):

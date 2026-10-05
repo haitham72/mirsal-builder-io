@@ -55,6 +55,26 @@ class TicketEngineTests(unittest.TestCase):
         self.assertEqual([r["id"] for r in tk.listing(self.out, user="U1")], [t["id"]])
         self.assertEqual(tk.listing(self.out, user="U2"), [])
 
+    def test_an_answer_to_the_shown_preset_counts_after_the_draft_replaced_the_questions(self):
+        """Haitham's live T001 (2026-10-05): the page showed the preset "How bad is it?", the local model's draft replaced the questions a moment later,
+        and the click was refused with "that is not one of the choices". The answer now names its question and is kept against it."""
+        from mirsal.services import llm
+        t = tk.report(self.out, user="local", text="most of them are rejected by python", draft=False)
+        shown = t["questions"][0]
+        good = json.dumps({"issue": "wrong_result", "summary": "Most stickers rejected", "proposed_fix": "Check the cut",
+                           "questions": [{"text": "Which check rejected them?", "choices": ["the cut", "the size"]}]})
+        with mock.patch.object(llm, "provider", lambda: "local"), mock.patch.object(llm, "complete", lambda *a, **k: (good, {"model": "fake-local"})):
+            tk.draft(self.out, t["id"])
+        a = tk.answer(self.out, t["id"], 0, shown["choices"][0], user="local", question_text=shown["text"])
+        self.assertEqual(a["answers"][0]["question_text"], shown["text"], "kept against the question that was shown")
+        self.assertEqual(a["answers"][0]["choice"], shown["choices"][0])
+        self.assertEqual(a["status"], "open", "the model's own question is still unanswered")
+        b = tk.answer(self.out, t["id"], 0, "the cut", user="local", question_text="Which check rejected them?")
+        self.assertEqual(b["status"], "answered")
+        with self.assertRaises(ValueError) as e:
+            tk.answer(self.out, t["id"], 0, shown["choices"][0], user="local")      # an old page that does not send the question text
+        self.assertIn("changed while you were reading", str(e.exception))
+
     def test_the_local_models_draft_is_validated_and_a_bad_one_keeps_the_presets(self):
         from mirsal.services import llm
         good = json.dumps({"issue": "slow", "summary": "Animating takes minutes", "proposed_fix": "Cache the keyed frames",

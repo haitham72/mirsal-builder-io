@@ -630,7 +630,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             t = await asyncio.to_thread(tk.read, c.out, tid)
             if not _can_see(user, t):
                 return _j(request, 404, {"error": "not found"})
-            return _j(request, 200, await asyncio.to_thread(tk.answer, c.out, tid, body.question, body.choice, body.text, user.get("id")))
+            return _j(request, 200, await asyncio.to_thread(tk.answer, c.out, tid, body.question, body.choice, body.text, user.get("id"), body.question_text))
         except KeyError:
             return _j(request, 404, {"error": "not found"})
         except ValueError as e:

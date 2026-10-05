@@ -25,9 +25,9 @@ test('an open ticket shows the person\'s words, what happened, the fix, and its 
   const h = T.detail(FULL, true);
   assert.match(h, /<b>You said<\/b><div>it never finished<\/div>/);
   assert.match(h, /resume the same provider job/);
-  assert.match(h, /data-act=tkans data-id=T001 data-q=0 data-c="the spinner never ended" aria-pressed=false/);
-  assert.match(h, /class="ganew-chip on" data-act=tkans data-id=T001 data-q=0 data-c="it said failed" aria-pressed=true/, 'the chosen answer is lit');
-  assert.match(h, /data-act=tkother data-id=T001 data-q=0>something else…/);
+  assert.match(h, /data-act=tkans data-id=T001 data-q=0 data-qt="What did you see\?" data-c="the spinner never ended" aria-pressed=false/);
+  assert.match(h, /class="ganew-chip on" data-act=tkans data-id=T001 data-q=0 data-qt="What did you see\?" data-c="it said failed" aria-pressed=true/, 'the chosen answer is lit');
+  assert.match(h, /data-act=tkother data-id=T001 data-q=0 data-qt="What did you see\?">something else…/);
   assert.match(h, /data-act=tkstatus data-id=T001 data-s=fixed>Fixed/);
   assert.doesNotMatch(T.detail(FULL, false), /data-act=tkstatus/, 'a member answers but does not close tickets');
 });
