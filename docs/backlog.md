@@ -103,8 +103,14 @@ Other open items:
 
 ## Help & Support (`docs/agent-and-chat.md` "Support")
 
-- Answer quality, retrieval precision and screenshot reading are not measured. Build a support eval like `mirsal/local_eval/`: about 30 real questions, half with screenshots, each with the FAQ entry or doc section that should answer it, scored on whether it was cited, whether it invented anything, and the latency. The thresholds (`support_kb.ENOUGH`, `faq.DUPLICATE`) are first guesses until then. **open**.
-- The FAQ is empty until the seed files exist (`docs/waiting-for-haitham.md` 49). **needs Haitham**.
+- FAQ retrieval is measured on the seeds only (`docs/agent-and-chat.md` "Measured so far"). Still unmeasured, all agent-runnable on a scratch copy with the local 9B:
+  - answers end to end: cited, nothing invented, latency;
+  - real screenshots read by the vision model (the 30-case set has ten text descriptions, not images);
+  - ranking over the combined FAQ + docs + notes corpus;
+  - vector ranking through Postgres (the in-process check used the same embedder, not the HNSW index).
+  **open**.
+- On-topic questions the help does not cover ("Does Mirsal upload stickers to TikTok?", "print on a t-shirt") score 0.77-0.83 in vector mode, above `ENOUGH` 0.70 and above the lowest correct match (0.78), so no threshold separates them. The model step guards (it must cite, or say "not yet" with a feature request), but the no-model fallback (`support._fallback`) could quote a near-miss entry. Gate the fallback (for example the lexical and vector top hits must agree) and keep these as regression queries. **open**.
+- Lexical mode (no Postgres or no embedder) ranks the right entry first on all 30 cases but is below `ENOUGH` 0.45 on three long, noisy queries: the 8 MB screenshot (0.363), Save vs Save as new (0.438), a member's missing Send to Telegram (0.426). Vector mode scores them 0.83-0.86. The threshold stays; this matters only when vector search is down. **open, low**.
 - A pending account cannot open Help (`_member` refuses it like every member route), so a person waiting for approval cannot ask why. **open, low**.
 - A Report (source `report`) shows in the staff Queue but has no conversation: the person sees the reply only as a notification and in its ticket. **open, low**.
 - `serve --stdlib` has no Help routes (the old server goes after one release). **parked**.

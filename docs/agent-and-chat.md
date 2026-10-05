@@ -448,4 +448,13 @@ Help is where a person describes a problem in their own words. The support agent
 - `qwen3.5-4b` ignored the JSON format (hence `_parse`) and gave one wrong cause for the grey loop frame.
 - `qwen/qwen3.5-9b` answered "make a pack public" correctly in 10.5 s, read a screenshot of the welcome slide and matched it to the welcome modal in 27.7 s, but answered the loop seam from the verifier section instead of the reloop fix.
 
-Developer docs alone answer poorly, so the FAQ seeds matter. Answer quality and retrieval precision are not measured beyond this (`docs/backlog.md`).
+Developer docs alone answer poorly, so the FAQ seeds matter.
+
+**The seed FAQ (2026-10-05).** 66 entries in 12 categories (`faq/`; 45 with `screen` / `looks_like`), written and source-checked by a second model from `docs/` and the code. Its handoff, with every entry's sources, is `mirsal/local_eval/faq-handoff.md`; the 30 cases are `mirsal/local_eval/faq/questions.json` (ten direct questions, ten screenshot descriptions, ten paraphrases from the local 9B).
+- Import is idempotent: 66 created, then 66 unchanged.
+- A draft never answers.
+- On a temp copy with the entries published (FAQ only, Postgres off):
+  - **lexical**: the right entry first 30/30, confident 27/30;
+  - **semantic** (the local nomic embedder, cosine in-process, no database): right first and confident 30/30, lowest correct score 0.781.
+- Ten unrelated questions: none confident lexically, but 2/10 confident in vector mode (TikTok 0.825, t-shirt printing 0.768). Those are on-topic questions the help does not answer (`mirsal/local_eval/faq/semantic-check.json`; open items in `docs/backlog.md`).
+- The 66 are in the real app as drafts, waiting for review (`docs/waiting-for-haitham.md` 49).

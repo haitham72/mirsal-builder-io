@@ -25,13 +25,12 @@ How a go-ahead works: a shown price plus "let's try" is that one experiment; "pu
 
 **10. Try accounts, the worker queue and transformations for real.** So far they have run on fakes and synthetic sheets only: `python -m mirsal user add Amira` then `curl -H "Authorization: Bearer <token>" localhost:8789/api/me` and `/api/openapi.json` (an account sees only its own chats and batches, 404 for a stranger's, and cannot spend unless `--spend`); `MIRSAL_JOB_MODE=queue` with `python -m mirsal worker` and one real Create (about 2 credits; never unattended); `MIRSAL_PAID_PARALLEL` (default 3) at the first real parallel use; "dog as banana" and "dog as banana, no dancing" in the chat. Recommendation: do the curl and the transformation phrases now (free), the queue and parallel runs with your first real Create (item 6). Unblocks: the queue panel for DEAD rows and the transformation lexicons (`docs/backlog.md`).
 
-**49. Seed the FAQ and look at Help (2026-10-05).** Help & Support is built and has run on fakes, a scratch server and your local model, but you have not seen it. Steps:
-1. Done (Claude, 2026-10-05): `mirsal/.env` has `MIRSAL_SUPPORT_REPO`, `VISION_MODEL` and `MIRSAL_SUPPORT_MODEL` (`qwen/qwen3.5-9b`); add `MIRSAL_APP_URL` if the office reaches the server by a name.
-2. Restart `serve --lan`, then run `python -m mirsal support reindex` (free; the local embedder).
-3. Paste `mirsal/local_eval/faq-seed-prompt.md` into the cheaper model, then `python -m mirsal support import-faq --repo ..\faq`, and review and publish the drafts in Help > FAQ review.
-4. Ask a question as a member (with a screenshot), say No, reply as the admin in Help > Queue, then resolve.
+**49. Review and publish the FAQ, then look at Help (2026-10-05).** The 66 seed entries (`faq/`, 12 categories) are imported into the app as **drafts**. None is published, so the support agent does not answer from them yet: only you decide what the help says.
+1. Start `serve --lan` (it is not running now). It loads the current code.
+2. Read each draft in Help > FAQ review, edit it where needed, and Publish (or Discard). A published entry answers people at once and is embedded for vector search.
+3. Optionally, look at Help yourself: a member's question with a screenshot, No, a reply from Help > Queue (try Private once), Resolve.
 
-Recommendation: do steps 1 to 3 first, so the agent has something to answer from. Unblocks: the word "verified" for Help, and the support eval in `docs/backlog.md`.
+Recommendation: publish the accounts, telegram and troubleshooting entries first; they answer the commonest questions. Unblocks: a support agent that answers from reviewed help; the word "verified" for Help.
 
 ## B. Calibration inputs only you can supply
 
