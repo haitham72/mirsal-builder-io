@@ -89,6 +89,11 @@ def notify_ticket(out: Path, t: dict) -> None:
         pass
 
 
+def notify_support(out: Path, text: str) -> bool:
+    """A support escalation (flow/support.py): True only when Telegram took the message, so a failure is retried and never lost."""
+    return bool(_send(out, text))
+
+
 # ---------- the loop: Haitham's taps and commands ----------
 def handle_update(c, upd: dict) -> None:
     """One update from getUpdates. Only Haitham's user id is obeyed."""
@@ -175,8 +180,15 @@ def start(c) -> None:
         return
 
     def loop():
-        offset = 0
+        offset, retried = 0, 0.0
         while not _POLL.get("stop"):
+            if time.time() - retried > 300:                              # support pings that Telegram refused earlier go out again
+                retried = time.time()
+                try:
+                    from ..flow import support
+                    support.retry_pings(c.out)
+                except Exception:
+                    pass
             cfg = _cfg(c.out)
             if not cfg:
                 time.sleep(30)
