@@ -42,11 +42,13 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   ACT.tksend=async el=>{const i=document.getElementById('tk-text'),text=i?i.value.trim():'';if(!text)return toast('Say what went wrong first',1);
     const k=el.dataset.k,id=el.dataset.id||null,sticker=el.dataset.s||null;el.disabled=true;
     const r=await post('/api/tickets',{text,target:{kind:k,id,...(sticker?{sticker}:{})}});el.disabled=false;
-    if(!r.ok)return toast(r.j.error||'Could not send the report',1);closeDlg();toast(`Reported as ${r.j.id}: a few questions wait in Settings > Tickets`)};
+    if(!r.ok)return toast(r.j.error||'Could not send the report',1);closeDlg();toast(`Reported as ${r.j.id}: the support team sees it`)};
   ACT.tkrefresh=()=>tkLoad();
   const tkOrig=RENDER.settings;
   RENDER.settings=async(...a)=>{const r=await tkOrig(...a);const page=document.querySelector('#s-settings .page');
-    if(page&&!document.getElementById('tk-box')){const c=document.createElement('div');c.className='card';c.style.marginTop='16px';
-      c.innerHTML='<div class=row style="justify-content:space-between"><h2 style="margin:0">Tickets</h2><button class="btn sm" data-act=tkrefresh>Refresh</button></div><div id=tk-box></div>';page.appendChild(c);tkLoad()}
+    if(page&&!document.getElementById('tk-box')){const c=document.createElement('div');c.className='card';c.style.marginTop='16px';     /* support lives in Help; the owner keeps the failures the server caught here */
+      c.innerHTML=tkOwner()?'<div class=row style="justify-content:space-between"><h2 style="margin:0">Tickets</h2><span><button class="btn sm" data-act=nav data-to="help/queue">Support queue</button> <button class="btn sm" data-act=tkrefresh>Refresh</button></span></div><p class=mut>Failures the server caught and Reports. People ask for help in Help.</p><div id=tk-box></div>'
+        :'<div class=row style="justify-content:space-between"><h2 style="margin:0">Help & Support</h2><button class="btn sm pri" data-act=nav data-to=help>Open Help</button></div><p class=mut>Describe a problem in Help: the help answers first, and a person takes over when it cannot.</p>';
+      page.appendChild(c);if(tkOwner())tkLoad()}
     return r};
 }

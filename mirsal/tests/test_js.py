@@ -223,13 +223,13 @@ class ShellTests(unittest.TestCase):
     def ui():
         return Path(__file__).resolve().parent.parent / "mirsal" / "console"
 
-    def test_the_rail_declares_seven_items_and_ai_is_first(self):
+    def test_the_rail_declares_eight_items_and_ai_is_first(self):
         import re
         ui = self.ui()
         app = (ui / "app.js").read_text(encoding="utf-8")
         rail = re.search(r"const RAIL=\[(.*?)\],RAILOF", app).group(1)
         items = re.findall(r"\['(\w+)','(\w+)','([^']+)'\]", rail)
-        self.assertEqual([i[2] for i in items], ["AI", "Studio", "Library", "Chat", "Create", "Users", "Settings"])     # Users added 2026-10-04 (docs/design.md §4)
+        self.assertEqual([i[2] for i in items], ["AI", "Studio", "Library", "Chat", "Create", "Users", "Settings", "Help"])     # Users added 2026-10-04, Help 2026-10-05 (docs/design.md §4)
         screens = re.search(r"const SCREENS=\[(.*?)\]", app).group(1)
         html = (ui / "index.html").read_text(encoding="utf-8")
         for route, icon, _ in items:
