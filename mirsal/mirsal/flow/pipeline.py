@@ -921,6 +921,7 @@ def replace_still(out: Path, gid: int, index: int, png: bytes, cfg: EngineConfig
         prev.unlink()
         st["edited"], st["edited_at"] = True, round(time.time(), 3)
         st["metrics"]["kb"] = max(1, len(body) // 1024)
+        st.pop("anim_from_previous", None)                              # the picture is the original again, so is the animation
         if st["review"]["still"] != "BLOCKED":
             st["review"]["still"] = "PENDING"
         hist(st, "still", "human", "UNDO", reason="replaced file taken back: the previous picture is back")
@@ -1164,7 +1165,7 @@ def run_animate(out: Path, gid: int, cfg: EngineConfig, scope: str, index: int |
     cfg = cfg_for(res, cfg)
     d = gen_dir(out, gid)
     wanted = [index] if scope == "slice" else [s["index"] for s in res["stickers"] if s["status"] == "READY" and s["review"]["still"] != "REJECTED"]
-    todo = [i for i in wanted if res["stickers"][i - 1]["anim_status"] != "READY"]
+    todo = [i for i in wanted if res["stickers"][i - 1]["anim_status"] != "READY" or res["stickers"][i - 1].get("anim_from_previous")]
     emit(out, gid, "video_requested", "done", 0, {"scope": scope if scope == "pack" else f"slice S{index}", "cells": todo})
     if not todo:
         return {"noop": True, "message": "Already animated."}

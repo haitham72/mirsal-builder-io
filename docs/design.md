@@ -122,11 +122,13 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 ### Library (built)
 - **Particles tab:** each set is a box card in a grid (`.ps-lib`), and a click on the card itself opens or closes it (`.ps-hit`, pointer cursor; no Open button); the opened card spans the row. **My Stickers** is one box per pack (`.lib-pk`, the pack's name, count and Open pack) inside one selection area, so a drag box still crosses packs. **Trending** cards keep the like and comment count on the card's bottom-left, whatever the name's wrap (`.tr-meta` `margin-top:auto`). (Haitham, 2026-10-05.)
+- **Sticker details** gains one field: **Edited outside the app** (file picker + Replace, Undo when there is a previous file): same dialog, existing `.fld`/`.row`/`.btn` classes, no new styles.
 - **Rail:** identical to AI's, same scaling, same persistent position — this is the explicit ask.
 - **Sticker library gets the same glow background as AI** so the two screens read as one app.
 - Keep the rail's fonts, backgrounds, hovers and selection states **character-identical** to AI's. If a value differs between the two, AI wins.
 
 ### Studio — "this is where it becomes dirty" (built)
+- **Prepared batches** wear a small `keychip` ("Prepared", owner/admin only) beside the Blue key chip; the header says "prepared sheet, 0 credits" with a **Make a new one** button (live price) next to Create more. A sticker whose animation predates its picture says so on its tile with an **Animate again** button; the open view has **Replace file** / **Take back** beside Edit. All existing classes (`.keychip`, `.btn`, `.gwarn`), no new styles.
 - **The composer panel loses the dark navy** and takes the shared surface (3.1). This is the single biggest visual defect in the app.
 - **Style tiles: fewer sizes, more choices.**
   - Today: `.cp-styles` (`studio.css:324`) is a horizontal scroller and each `.cp-style` (325) is `flex:1 0 150px; max-width:250px`, `aspect-ratio:3/4` —
@@ -144,7 +146,7 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 - Rail and second column per §4. The conversation keeps AI's gradients and hover/selection; the header matches every other screen's header.
 
 ### Settings (built)
-- Currently a single column with no second column. Give it the standard header and the standard card treatment; it is a section like any other. People moved out of it to Users (2026-10-04): Settings keeps "Signed in as" and, for staff, one line that opens Users.
+- Currently a single column with no second column. Give it the standard header and the standard card treatment; it is a section like any other. People moved out of it to Users (2026-10-04): Settings keeps "Signed in as" and, for staff, one line that opens Users. Staff also get a **Prepared sheets** card (Turn on/off; `MIRSAL_PREFER_PREPARED` in `.env` wins when set).
 
 ### Help (built 2026-10-05, `support.js`, `.su-*`)
 - **Its own section at the end of the rail** (icon `help`). A red dot (`.rdot`) shows on it while a notification is unread. Everyone has it.
@@ -290,4 +292,4 @@ Still open from the walk (not fixed, all in `docs/waiting-for-haitham.md`): an e
 
 Every signed-in person sees their own Library packs, Recent and My Stickers, with Trending as a tab. The owner's Library follows the same filter. A pack page has a Public toggle; public cards and details show maker, views and uses. Members can add their batches to their own packs, download them and copy public packs; their Telegram-send button is hidden. The owner and admins can remove a public pack from Trending.
 
-The existing Studio composer adds Use my own sheet and Import from Higgsfield for the owner. The import dialog asks for a file and optional description; videos name the approved destination batch/sheet. Provider history distinguishes Import from Open existing. Interrupted imports offer a free Retry import. It uses the existing dialog, button and field styles; no new screen or palette is introduced.
+The existing Studio composer adds Use my own sheet and Import from Higgsfield for the owner. The import dialog asks for a file and optional description; videos name the approved destination batch/sheet. Provider history distinguishes Import from Open existing. Interrupted imports offer a free Retry import. A file that names a failed provider job offers "Is this the result of …?" (the person's own failed jobs, prompt + time + thumbnail, or Import as a new batch). A replaced pack sticker offers Update in the other packs that hold the same batch sticker. It uses the existing dialog, button and field styles; no new screen or palette is introduced.

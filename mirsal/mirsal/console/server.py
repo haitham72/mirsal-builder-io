@@ -2054,7 +2054,7 @@ def make_handler(c: Console):
                     index = int(index) if index is not None else None
                     res = pl.check_animate(c.out, gid, scope, index)
                     wanted = [index] if scope == "slice" else [s["index"] for s in res["stickers"] if s["status"] == "READY" and s["review"]["still"] != "REJECTED"]
-                    if all(res["stickers"][i - 1]["anim_status"] == "READY" for i in wanted):
+                    if all(res["stickers"][i - 1]["anim_status"] == "READY" and not res["stickers"][i - 1].get("anim_from_previous") for i in wanted):
                         return self._json(200, {"noop": True, "message": "Already animated."})
                     c.submit(lambda: pl.run_animate(c.out, gid, c.cfg, scope, index, c.pace))
                     return self._json(202, {"id": gid, "noop": False})

@@ -148,6 +148,29 @@ Workers add durability and isolation, **not paid concurrency**: the paid-call lo
 Every paid or model call is a ledger line (what, model, params, cost, latency, Higgsfield id, output). `usage.summary` rolls it up by model, by kind, by request (job → task → generation)
 and per call; `spent_today` feeds the cap. Estimates match the balance exactly (checked: 7.75 estimated, 7.75 spent). `GET /api/higgsfield` gives the live balance (cached 6 s).
 
+## Prepared instead of paid (`flow/sources.py`)
+
+When Higgsfield is connected, a request that names a prepared subject is served from the watch folder instead of a paid call. The signature rule is one sentence: a request is served from the watch folder when one whole word of a prepared subject's folder name, singularised and ignoring generic, appears as a whole word of the request.
+
+| request | served from |
+|---|---|
+| teddy bear for school | teddy_bear |
+| teddy | teddy_bear |
+| bear in a teddy costume | teddy_bear |
+| bear | teddy_bear |
+| emoji keyboard | generic_emojis |
+| generic emojis laughing | generic_emojis |
+| emojis | generic_emojis |
+| emoji | generic_emojis |
+| a dragon dancing | Higgsfield (no signature word) |
+| school stickers | Higgsfield (no signature word) |
+
+Preferring prepared is a setting, default on: `MIRSAL_PREFER_PREPARED` in `mirsal/.env` (wins when set), else the owner's switch in Settings (`out/prepared.json`, `POST /api/prepared/setting`; `GET /api/prepared/match?prompt=` says which subject matches). A prepared batch runs the same golden path and gates with the same screens; it records its real source (the watch folder, folder number, file names, `source.prepared: true`), costs 0 credits, and creates no job, task or ledger line. A fresh request starts at variant 1 again; Create more walks the remaining variants; **Make a new one** (the Studio header, the chat plan card's chip) draws a fresh provider sheet at the normal price. The batch carries a small Prepared chip for owner/admin only. Decided with Haitham, 2026-10-05: whole-word signature match (both near-misses match), variant 1 again, the chip for staff only.
+
+## A manual download completes its failed job (`flow/imports.py`)
+
+When a provider download fails after the ticket was paid (J022-J025: the certificate store), the downloaded-by-hand file completes that job instead of starting an unrelated batch. The file links by its provider id (`hf_<date>_<time>_<uuid>`, `imports.job_id_of`), the job picked in Import from Higgsfield, or the dialog's explicit choice ("Is this the result of …?": the person's own failed jobs only, prompt, time and thumbnail; exactly one match links automatically, several ask, import-as-new skips the link). Completing a job sets it `DONE` (`recovered_by: "manual import"`, no second charge): a sheet job's batch is built from the job's own saved plan and carries its external task id (cells, tags, emoji as approved, one human history line "recovered from a manual download of task \<uuid\>"); a video job attaches to the job's own destination batch and sheet. The existing recovery actions (`generation/recovery.py` Check / Continue / Retry) stay for when the provider itself can still download.
+
 ## API (all JSON, addressable by id)
 
 `GET /api/higgsfield`, `/api/models`, `/api/usage`, `/assets/{styles,vendors,brand}/…`; `POST /api/live/cost`, `/api/live/ref` (raw image), `/api/live/sheet`, `/api/live/video`;

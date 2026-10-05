@@ -49,7 +49,8 @@ Paths below are relative to the repository root.
 
 **Spending.** Nothing costs credits until the user says so: a plan card shows the price with **Create / Not yet**, a typed "yes" works too. With
 "Ask before spending" off (the settings popover, or "don't ask me") the agent creates at once. Without a provider (no Higgsfield CLI) generation is free and
-starts immediately. A second message while a turn runs gets **409** (one turn per session, a Redis `SET NX` lock).
+starts immediately. A request that names a prepared subject is served from the watch folder (docs/generation.md "Prepared instead of paid"): the plan card
+says so ("I have this prepared: 0 credits") with a third chip **Make a new one (paid)** for a fresh provider sheet (`confirm_new`, `tools.create(force_live=True)`). A second message while a turn runs gets **409** (one turn per session, a Redis `SET NX` lock).
 
 ## Memory
 

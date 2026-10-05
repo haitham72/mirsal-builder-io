@@ -107,6 +107,7 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `POST /api/generations/{id}/reslice` | none / see operation detail | 202 {id?:integer} | owner / own batch | no |
 | `POST /api/generations/{id}/recheck` | none / see operation detail | 200 boundary report object | owner / own batch | no |
 | `POST /api/generations/{id}/edit` | {index,png:base64 or data URL} | 200 object (open; operation detail) | owner | no |
+| `POST /api/generations/{id}/replace` | {index,png:base64 or data URL} or {index,undo:true} | 200 object (open; operation detail) | owner | no |
 | `POST /api/generations/{id}/studio_edit` | {index,action?:"commit",overlays?} | 200 object (open; operation detail) | owner | no |
 | `POST /api/generations/{id}/add` | {pack_id?,pack_name?,mode?,outline?,erode?,names?:{index:{name?,emoji?}}} | 200 object (open; operation detail) | owner | no |
 | `POST /api/generations/{id}/pack_add` | {pack_id} | 200 object (open; operation detail) | owner | no |
@@ -115,6 +116,10 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `POST /api/generations/{id}/reveal` | none / see operation detail | 200 {opened?:string} | owner | no |
 | `GET /api/history` | ?offset=0&limit=5 | 200 object (open; operation detail) | owner | no |
 | `GET /api/inputs` | — | 200 object (open; operation detail) | owner | no |
+| `GET /api/prepared/match` | ?prompt= | 200 {subject?,variants,prefer} | authenticated member | no |
+| `GET /api/prepared/setting` | — | 200 {prefer} | authenticated member | no |
+| `POST /api/prepared/setting` | {prefer:boolean} | 200 {prefer} | owner | no |
+| `GET /api/imports/candidates` | ?ticket= | 200 {candidates:[{job,kind,prompt,at,generation,task,status,thumb}]} | owner | no |
 | `POST /api/live/cost` | {kind?,model?,options?,grid?,...} -> Console.live("cost", body) | 200 object (open; operation detail) | authenticated member | no |
 | `POST /api/live/sheet` | LiveSheet | 200 LiveJob | authenticated member | no |
 | `POST /api/live/video` | {generation,sheet?,model?,options?,loop?,video_prompt?,outline?,erode?,slot_fill?} -> Console.live("video", body) | 200 object (open; operation detail) | authenticated member | no |
@@ -155,6 +160,7 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `POST /api/packs/{id}/stickers` | {from_generation:{id,index,kind?="static"}} | 200 object (open; operation detail) | owner | no |
 | `POST /api/packs/{id}/render` | raw PNG bytes, <=40 MiB; ?name=sticker&emoji=🙂 | 200 object (open; operation detail) | owner | no |
 | `POST /api/packs/{id}/stickers/{sid}` | {name?, emoji?} | 200 object (open; operation detail) | owner | no |
+| `POST /api/packs/{id}/stickers/{sid}/replace` | {file:base64,name?,others?:[ids]\|true,others_only?,undo?} | 200 {sticker,batch?,others,updated_others} | owner | no |
 | `POST /api/packs/{id}/stickers/{sid}/animate` | {start?=0,end?=3,fps?=12,format?="webm",loop?=true,save?,name?} | 200 library result when save, otherwise encoded media + X-Animate | owner | no |
 | `POST /api/packs/{id}/stickers/{sid}/move` | {to} | 200 object (open; operation detail) | owner | no |
 | `POST /api/stickers/move` | {to,items:[{pack_id,id}]} | 200 object (open; operation detail) | owner | no |
@@ -271,6 +277,7 @@ Table: 158 documented operations. Additional static/source routes are enumerated
 - **`POST /api/generations/{id}/reslice`** — Re-cut the animations from the stored video with the current edge
 - **`POST /api/generations/{id}/recheck`** — Run the border check on animations made before it existed
 - **`POST /api/generations/{id}/edit`** — Save an edited still in place
+- **`POST /api/generations/{id}/replace`** — Replace a still with a file edited outside the app (same S#, re-checked, back to approval, animation kept but marked from-the-previous-picture, old file kept for one undo; undo takes it back)
 - **`POST /api/generations/{id}/studio_edit`** — Layered edit of a sticker and its animation (open / commit)
 - **`POST /api/generations/{id}/add`** — Add the approved stickers to a pack
 - **`POST /api/generations/{id}/pack_add`** — Add chosen stickers to a pack
@@ -279,6 +286,10 @@ Table: 158 documented operations. Additional static/source routes are enumerated
 - **`POST /api/generations/{id}/reveal`** — Open the batch's folder in the file manager
 - **`GET /api/history`** — Every batch, the most recently edited first, a page at a time (?offset, ?limit): {items: [{id, generation_id, prompt, created, edited, stage, error, ready, animated, grid: [rows, cols], cells: [{index, row, col, png, status, animated}], outline_px}], more, total}. The grid is the sheet's own (2x2 or 3x3, read from result.json) so a card can draw it as it was cut
 - **`GET /api/inputs`** — The prepared sheets found in the watch folders
+- **`GET /api/prepared/match`** — Which prepared subject a request names (?prompt=): {subject, variants, prefer}
+- **`GET /api/prepared/setting`** — Whether matching requests are served prepared
+- **`POST /api/prepared/setting`** — Owner only: flip the prefer-prepared switch {prefer} (MIRSAL_PREFER_PREPARED wins when set)
+- **`GET /api/imports/candidates`** — Owner only: the person's own failed jobs holding ?ticket= (prompt, time, thumbnail)
 - **`POST /api/live/cost`** — Price one call of a model (a quote, free)
 - **`POST /api/live/sheet`** — Reserve a task (the G1 approval) and start the sheet job; spends credits. Idempotency-Key supported
 - **`POST /api/live/video`** — Start the Kling job for a built video sheet; spends credits. Idempotency-Key supported. Optional video_prompt (max 6000) is sent verbatim
@@ -319,6 +330,7 @@ Table: 158 documented operations. Additional static/source routes are enumerated
 - **`POST /api/packs/{id}/stickers`** — Add a sticker to a pack
 - **`POST /api/packs/{id}/render`** — Save the editor's 512x512 canvas as a sticker (raw PNG body)
 - **`POST /api/packs/{id}/stickers/{sid}`** — Update a sticker
+- **`POST /api/packs/{id}/stickers/{sid}/replace`** — Replace with a file edited outside the app (same id, type follows the file; the batch and this pack take it, copies in other packs are offered; one undo)
 - **`POST /api/packs/{id}/stickers/{sid}/animate`** — Animate a library sticker
 - **`POST /api/packs/{id}/stickers/{sid}/move`** — Move one sticker into another pack: {to}
 - **`POST /api/stickers/move`** — Bulk move into one pack, all or nothing: {to, items: [{pack_id, id}]} -> {moved, skipped, to}

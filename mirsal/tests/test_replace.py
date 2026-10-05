@@ -60,6 +60,25 @@ class BatchReplaceTests(unittest.TestCase):
         self.assertEqual((res["stickers"][0]["webm"], res["stickers"][0]["anim_status"]), ("slices/fake.webm", "READY"))
         self.assertTrue(fake.is_file())                                  # the animation file is untouched
 
+    def test_reanimate_clears_the_flag(self):
+        from unittest.mock import patch
+        from mirsal.engine.video import AnimationResult
+        res = pl.read_result(self.out, self.gid)
+        res["source"]["has_video"] = True                                   # pretend a video was prepared: the cut itself is faked below
+        res["stickers"][0].update(webm="slices/fake.webm", anim_status="READY", anim_from_previous=True)
+        pl.write_result(self.out, self.gid, res)
+
+        def fake_cells(res_, cfg, cells, on_cell=None, cache=None, waive=None):
+            out = [AnimationResult(1, "READY", "prepared video")]
+            for r in out:
+                on_cell and on_cell(r)
+            return out
+
+        with patch.object(pl, "animate_cells", side_effect=fake_cells):
+            pl.run_animate(self.out, self.gid, self.cfg, "slice", 1)
+        st = pl.read_result(self.out, self.gid)["stickers"][0]
+        self.assertNotIn("anim_from_previous", st)
+
     def test_replace_keeps_an_override_and_a_block(self):
         res = pl.read_result(self.out, self.gid)
         res["stickers"][0].update(still_override=["inside_cell"], review={"still": "BLOCKED", "anim": "NONE"})
@@ -77,10 +96,17 @@ class BatchReplaceTests(unittest.TestCase):
         self.assertEqual((pl.gen_dir(self.out, self.gid) / st["png"]).read_bytes(), self.png)
 
     def test_undo_restores_the_previous_file(self):
+        res = pl.read_result(self.out, self.gid)
+        (pl.gen_dir(self.out, self.gid) / "slices" / "fake.webm").write_bytes(b"webm")
+        res["stickers"][0].update(webm="slices/fake.webm", anim_status="READY")
+        pl.write_result(self.out, self.gid, res)
         pl.replace_still(self.out, self.gid, 1, flip(self.png), self.cfg)
+        self.assertTrue(pl.read_result(self.out, self.gid)["stickers"][0]["anim_from_previous"])
         r = pl.replace_still(self.out, self.gid, 1, b"", self.cfg, undo=True)
         self.assertTrue(r["undone"])
-        self.assertEqual((pl.gen_dir(self.out, self.gid) / pl.read_result(self.out, self.gid)["stickers"][0]["png"]).read_bytes(), self.png)
+        st = pl.read_result(self.out, self.gid)["stickers"][0]
+        self.assertEqual((pl.gen_dir(self.out, self.gid) / st["png"]).read_bytes(), self.png)
+        self.assertNotIn("anim_from_previous", st)                     # the picture is the original again
         with self.assertRaises(pl.PipelineError):
             pl.replace_still(self.out, self.gid, 1, b"", self.cfg, undo=True)   # one-shot
 
