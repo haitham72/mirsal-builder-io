@@ -168,3 +168,20 @@ def sync_profile(out, user: str, facts: dict) -> bool:
     except Exception as e:
         _note("failed", e)
         return False
+
+
+def sync_support(out, kind: str, *args) -> bool:
+    """The Postgres copy of a Help & Support record (`kind`: faq, conversation, notification; repo.save_<kind>); best effort, the file stays the record."""
+    try:
+        if not enabled(out):
+            return False
+        if not db.available():
+            _note("skipped")
+            return False
+        with db.connect() as c:
+            getattr(repo, "save_" + kind)(c, *args)
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False

@@ -627,3 +627,85 @@ def save_ticket(conn, t: dict) -> None:
              t.get("fixed_by"), json.dumps(t, ensure_ascii=False)))
     conn.commit()
 
+
+
+# ---------- Help & Support (migration 011; flow/faq.py, flow/support_kb.py, flow/support.py, flow/notifications.py)
+def _vec(v) -> str | None:
+    return None if v is None else "[" + ",".join(f"{float(x):.6f}" for x in v) + "]"
+
+
+def save_faq(conn, f: dict, vec=None, model: str | None = None) -> None:
+    """Upsert one FAQ entry. `vec` is the PUBLISHED text's vector (None keeps the stored one when the text did not change, clears it when not published)."""
+    from datetime import datetime, timezone
+    pub = f.get("status") == "published"
+    with conn.cursor() as cur:
+        cur.execute(
+            """INSERT INTO faq (id, status, title, question, answer, revision, updated, vec, embed_model, body)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s::vector,%s,%s)
+               ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status, title=EXCLUDED.title, question=EXCLUDED.question, answer=EXCLUDED.answer,
+                 revision=EXCLUDED.revision, updated=EXCLUDED.updated, body=EXCLUDED.body,
+                 vec=CASE WHEN NOT %s THEN NULL WHEN EXCLUDED.vec IS NULL THEN faq.vec ELSE EXCLUDED.vec END,
+                 embed_model=CASE WHEN NOT %s THEN NULL WHEN EXCLUDED.vec IS NULL THEN faq.embed_model ELSE EXCLUDED.embed_model END""",
+            (f["id"], f.get("status") or "draft", f.get("title") or "", f.get("question") or "", f.get("answer") or "", int(f.get("revision") or 0),
+             datetime.fromtimestamp(float(f.get("updated") or time.time()), timezone.utc), _vec(vec) if pub else None, model if pub else None,
+             json.dumps(f, ensure_ascii=False), pub, pub))
+    conn.commit()
+
+
+def faq_near(conn, vec, k: int = 5) -> list[tuple[str, float]]:
+    """(id, cosine similarity) of the nearest PUBLISHED entries."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT id, 1 - (vec <=> %s::vector) FROM faq WHERE status = 'published' AND vec IS NOT NULL ORDER BY vec <=> %s::vector LIMIT %s",
+                    (_vec(vec), _vec(vec), k))
+        return [(r[0], float(r[1])) for r in cur.fetchall()]
+
+
+def replace_chunks(conn, path: str, rows: list[dict], vecs: list | None, model: str | None) -> None:
+    """One file's chunks, all replaced in one transaction (a changed file never leaves half its old chunks behind)."""
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM support_chunks WHERE path = %s", (path,))
+        for i, r in enumerate(rows):
+            cur.execute("INSERT INTO support_chunks (id, kind, path, heading, text, sha, vec, embed_model) VALUES (%s,%s,%s,%s,%s,%s,%s::vector,%s)",
+                        (r["id"], r["kind"], path, r.get("heading") or "", r["text"], r["sha"], _vec(vecs[i]) if vecs else None, model if vecs else None))
+    conn.commit()
+
+
+def drop_chunks(conn, keep_paths: list[str]) -> int:
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM support_chunks WHERE NOT (path = ANY(%s))", (list(keep_paths),))
+        n = cur.rowcount
+    conn.commit()
+    return n
+
+
+def chunks_near(conn, vec, kinds: list[str], k: int = 6) -> list[tuple[str, float]]:
+    with conn.cursor() as cur:
+        cur.execute("SELECT id, 1 - (vec <=> %s::vector) FROM support_chunks WHERE kind = ANY(%s) AND vec IS NOT NULL ORDER BY vec <=> %s::vector LIMIT %s",
+                    (_vec(vec), list(kinds), _vec(vec), k))
+        return [(r[0], float(r[1])) for r in cur.fetchall()]
+
+
+def chunk_count(conn) -> dict:
+    with conn.cursor() as cur:
+        cur.execute("SELECT kind, count(*), count(vec) FROM support_chunks GROUP BY kind")
+        return {r[0]: {"chunks": int(r[1]), "vectors": int(r[2])} for r in cur.fetchall()}
+
+
+def save_conversation(conn, cv: dict) -> None:
+    from datetime import datetime, timezone
+    with conn.cursor() as cur:
+        cur.execute("""INSERT INTO support_conversations (id, user_id, status, ticket, updated, body) VALUES (%s,%s,%s,%s,%s,%s)
+                       ON CONFLICT (id) DO UPDATE SET status=EXCLUDED.status, ticket=EXCLUDED.ticket, updated=EXCLUDED.updated, body=EXCLUDED.body""",
+                    (cv["id"], cv.get("user") or "", cv.get("status") or "answered", cv.get("ticket"),
+                     datetime.fromtimestamp(float(cv.get("updated") or time.time()), timezone.utc), json.dumps(cv, ensure_ascii=False)))
+    conn.commit()
+
+
+def save_notification(conn, user: str, n: dict) -> None:
+    from datetime import datetime, timezone
+    with conn.cursor() as cur:
+        cur.execute("""INSERT INTO notifications (id, user_id, at, kind, read, body) VALUES (%s,%s,%s,%s,%s,%s)
+                       ON CONFLICT (id) DO UPDATE SET read=EXCLUDED.read, body=EXCLUDED.body""",
+                    (f"{user}:{n['key']}", user, datetime.fromtimestamp(float(n.get("at") or time.time()), timezone.utc), n.get("kind") or "reply",
+                     bool(n.get("read")), json.dumps(n, ensure_ascii=False)))
+    conn.commit()

@@ -19,7 +19,7 @@ from ..runtime import atomic
 from .ticket_models import ISSUES, TicketDraft, TicketQuestion
 
 _LOCK = threading.RLock()
-STATUSES = ("open", "answered", "fixed", "wont_fix")
+STATUSES = ("open", "answered", "replied", "fixed", "wont_fix")      # replied: an admin answered a support ticket and waits for the person (flow/support.py)
 
 PRESET = {
     "wrong_result": [("What was wrong with the result?", ["the picture", "the animation", "the wrong sticker or batch", "the text or names"]),
@@ -132,6 +132,18 @@ def report(out: Path, *, user: str, text: str, target: dict | None = None, draft
     return t
 
 
+def open_support(out: Path, *, user: str, text: str, context: dict, draft: bool = True) -> dict:
+    """The ticket of one support conversation (flow/support.py, which pings the admin itself, once): the person's words, the transcript and their
+    recent problems as context, no multiple-choice questions (the conversation already asked them)."""
+    with _LOCK:
+        t = _new(out, source="support", issue="other", what=text, intent=text, context=context, user=user, fp=None)
+        t["questions"], t["conversation"], t["thread"] = [], context.get("conversation"), []
+        t = _write(out, t)
+    if draft:
+        _draft_later(out, t["id"])
+    return t
+
+
 def gather(out: Path, target: dict) -> dict:
     """What happened around the target, read from the file store (never a provider)."""
     out, kind, ident = Path(out), target.get("kind"), str(target.get("id") or "")
@@ -190,7 +202,9 @@ def draft(out: Path, tid: str) -> dict:
     with _LOCK:
         t = read(out, tid)
         t.update(issue=d.issue, summary=d.summary, proposed_fix=d.proposed_fix, drafted_by=meta.get("model") or "local")
-        if d.questions and not t["answers"]:
+        if t.get("source") == "support":
+            pass                                                     # a support ticket keeps its conversation, not questions
+        elif d.questions and not t["answers"]:
             t["questions"] = [q.model_dump() for q in d.questions]
         elif not t["answers"]:
             t["questions"] = _preset(d.issue)
@@ -261,3 +275,32 @@ def listing(out: Path, *, status: str | None = None, user: str | None = None) ->
         rows.append({k: t.get(k) for k in ("id", "source", "at", "last_at", "user", "status", "issue", "summary", "count", "fixed_by")}
                     | {"open_questions": max(0, len(t.get("questions") or []) - len(t.get("answers") or []))})
     return rows
+
+
+def patch(out: Path, tid: str, by: str, decision: str, **fields) -> dict:
+    """Set a few fields and record why, in one locked write (the support flow's links: conversation, faq, pinged)."""
+    with _LOCK:
+        t = read(out, tid)
+        t.update(fields)
+        t["history"].append({"ts": round(time.time(), 3), "actor": by, "decision": decision, **{k: v for k, v in fields.items() if isinstance(v, (str, int, bool)) or v is None}})
+        return _write(out, t)
+
+
+def add_message(out: Path, tid: str, role: str, by: str, text: str, client_id: str | None = None) -> tuple[dict, dict]:
+    """One line of the ticket's thread (`role`: admin or user). A retried request with the same `client_id` adds nothing and returns the first line."""
+    if role not in ("admin", "user"):
+        raise ValueError("role must be admin or user")
+    text = str(text or "").strip()
+    if not text:
+        raise ValueError("write something first")
+    with _LOCK:
+        t = read(out, tid)
+        thread = t.setdefault("thread", [])
+        if client_id:
+            old = next((m for m in thread if m.get("client_id") == client_id), None)
+            if old:
+                return t, old
+        m = {"n": len(thread) + 1, "role": role, "by": by, "text": text[:4000], "ts": round(time.time(), 3), "client_id": client_id}
+        thread.append(m)
+        t["history"].append({"ts": m["ts"], "actor": by, "decision": "REPLY" if role == "admin" else "USER_REPLY", "n": m["n"]})
+        return _write(out, t), m

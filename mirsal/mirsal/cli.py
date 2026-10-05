@@ -437,6 +437,29 @@ def hf_cmd(out, args) -> int:
         return 1
 
 
+def support_cmd(out, args) -> int:
+    """Help & Support's index (flow/support_kb.py): `reindex` cuts docs/ and the code of MIRSAL_SUPPORT_REPO again (free: unchanged files are skipped,
+    vectors only from the local model), `status` says what is indexed."""
+    import json as _json
+    from .flow import support_kb as kb
+    if args.action == "reindex":
+        try:
+            r = kb.reindex(out, Path(args.repo) if args.repo else None, embedder=None if args.no_vectors else "auto")
+        except kb.KBError as e:
+            print(e)
+            return 1
+        print(_json.dumps(r, indent=2) if args.as_json else
+              f"{r['files']} files ({r['chunks']['doc']} doc and {r['chunks']['code']} code sections), {r['changed']} changed, {r['removed']} removed, "
+              f"{r['embedded']} embedded; vectors {'on (' + str(r['embedder']) + ')' if r['vectors'] else 'off: searched lexically'}; {r['faq']} published FAQ entries")
+        return 0
+    s = kb.status(out)
+    print(_json.dumps(s, indent=2) if args.as_json else
+          f"repo {s['repo'] or 'not set (' + s['repo_var'] + ' in mirsal/.env): FAQ only'}; indexed {s['files']} files "
+          f"({s['chunks']['doc']} doc, {s['chunks']['code']} code sections); Postgres {s['postgres'] if s['postgres'] is not None else 'off'}; "
+          f"embedder {s['embedder'] or 'off (local model down): lexical search'}")
+    return 0
+
+
 def pool_cmd(args) -> int:
     import json as _json
     from .store import pool as _pool
@@ -597,6 +620,9 @@ def main(argv=None) -> int:
     po.add_argument("action", choices=["search", "reindex", "hide", "status"]); po.add_argument("query", nargs="?")
     po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
+    su = sub.add_parser("support", help="Help & Support: index docs/ and the code of MIRSAL_SUPPORT_REPO for the support agent (free)")
+    su.add_argument("action", choices=["reindex", "status"]); su.add_argument("--repo", help="index this folder instead of MIRSAL_SUPPORT_REPO")
+    su.add_argument("--no-vectors", action="store_true", help="reindex: the lexical index only (no embedding calls)"); su.add_argument("--json", action="store_true", dest="as_json")
     pa = sub.add_parser("particles", help="adopt: older effect runs that made something become saved particle rows under their stickers (idempotent, free)")
     pa.add_argument("action", choices=["adopt"])
     ph = sub.add_parser("photo", help="a photo -> a cut-out 512 sticker (3C; on-device by default)")
@@ -762,6 +788,8 @@ def main(argv=None) -> int:
         return worker_cmd(out, args) if args.cmd == "worker" else queue_cmd(out, args)
     if args.cmd == "pool":
         return pool_cmd(args)
+    if args.cmd == "support":
+        return support_cmd(out, args)
     if args.cmd == "photo":
         return photo_cmd(out, args, cfg)
     try:
@@ -888,6 +916,14 @@ def doctor() -> int:
             print(f"NOTE    Postgres: not connected ({_db.url().split('@')[-1]}; start it: python -m mirsal db up)")
     except Exception as e:
         print(f"NOTE    Postgres: store unavailable ({e}; pip install -r requirements.txt)")
+    try:                                                  # Help & Support (flow/support_kb.py): which repo the agent reads and what is indexed
+        from .flow import support_kb as _kb
+        from .runtime.paths import out_root as _or
+        _s = _kb.status(_or())
+        print(("OK      support: repo " + _s["repo"] + f", {_s['files']} files indexed ({_s['chunks']['doc']} doc, {_s['chunks']['code']} code sections; `support reindex` refreshes)")
+              if _s["repo"] else f"NOTE    support: {_s['repo_var']} is not set in mirsal/.env: the support agent answers from the FAQ only")
+    except Exception as e:
+        print(f"NOTE    support: index unavailable ({str(e)[:120]})")
     try:
         from .store import sync as _sync
         ws = _sync.status()
