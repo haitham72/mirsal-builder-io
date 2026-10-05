@@ -139,3 +139,35 @@ def purge_files(out: Path, gid: int) -> dict:
         shutil.rmtree(d)
     meta.unlink(missing_ok=True)
     return {"files": len(files), "bytes": sum(b for _, b in files), "already": not files and not d.exists()}
+
+
+def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
+    """One batch as a download from the Studio (the pack's Download .zip, for a batch): every sticker that is READY and not rejected, as its animation
+    when that is ready and not rejected, otherwise its still, under the engine's file names, plus a `manifest.json` (batch, prompt, and per sticker
+    its S#, key, emoji, tags, kind and size). Nothing is changed. Returns (zip bytes, a safe file stem)."""
+    import io
+    import json
+    import re
+    import zipfile
+    from . import pipeline
+    r = pipeline.read_result(out, int(gid))
+    d = pipeline.gen_dir(out, int(gid))
+    rows, buf = [], io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:                     # webm / png are already compressed
+        for s in r.get("stickers") or []:
+            rev = s.get("review") or {}
+            if s.get("status") != "READY" or rev.get("still") == "REJECTED" or not s.get("png"):
+                continue
+            animated = s.get("anim_status") == "READY" and s.get("webm") and rev.get("anim") != "REJECTED" and (d / s["webm"]).is_file()
+            f = d / (s["webm"] if animated else s["png"])
+            if not f.is_file():
+                continue
+            z.write(f, f.name)
+            rows.append({"file": f.name, "sticker": f"S{s.get('index')}", "key": s.get("key"), "name": s.get("name"), "emoji": s.get("emoji"),
+                         "tags": s.get("tags"), "type": "animated" if animated else "static", "kb": round(f.stat().st_size / 1024, 1)})
+        if not rows:
+            raise ValueError("this batch has no accepted sticker yet")
+        z.writestr("manifest.json", json.dumps({"batch": r.get("generation_id"), "prompt": r.get("prompt"), "count": len(rows), "stickers": rows},
+                                               indent=2, ensure_ascii=False))
+    stem = re.sub(r"[^a-z0-9]+", "-", f"{r.get('generation_id') or gid}-{r.get('task_slug') or 'stickers'}".lower()).strip("-")
+    return buf.getvalue(), stem or "batch"

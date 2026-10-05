@@ -652,6 +652,26 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         except KeyError:
             return _j(request, 404, {"error": "not found"})
 
+    @app.get("/api/generations/{gid}/export.zip", include_in_schema=False)
+    @app.get("/api/v1/generations/{gid}/export.zip", include_in_schema=False)
+    async def generation_zip(request: Request, gid: str):
+        """The Studio's Download .zip: the batch's accepted stickers (animated where ready) and a manifest. The owner, or the batch's own person; a stranger's is a 404."""
+        user, err = await _who(request, f"/api/generations/{gid}/export.zip")
+        if err:
+            return _j(request, *err)
+        from starlette.responses import Response
+        from ..flow import batches as _batches
+        from ..flow.pipeline import PipelineError
+        try:
+            n = int(str(gid).upper().lstrip("G"))
+            if not c.visible(user, n):
+                raise KeyError(gid)
+            data, stem = await asyncio.to_thread(_batches.export_zip, c.out, n)
+        except (KeyError, ValueError, FileNotFoundError, PipelineError) as e:                # PipelineError: no such batch
+            missing = isinstance(e, (KeyError, FileNotFoundError, PipelineError)) or "invalid literal" in str(e)
+            return _j(request, 404 if missing else 409, {"error": "not found" if missing else str(e)})
+        return Response(data, media_type="application/zip", headers={**_native_headers(request), "Content-Disposition": f'attachment; filename="{stem}.zip"'})
+
     # ---------- Help & Support (flow/support.py; docs/api.md "Help & Support"): every person their own conversations and notifications,
     # the owner and admins the queue, the replies, resolving and the FAQ. Nothing a person or a retrieved text writes can authorize anything: roles are checked here.
     from ..flow import faq as fq, notifications as nt, support as sup, support_kb as skb
