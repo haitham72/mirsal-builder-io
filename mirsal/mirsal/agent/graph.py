@@ -850,9 +850,41 @@ class Agent:
         t.trace.end("asked which set")
         return {}
 
+    _ALONE = re.compile(r"\b(?:on (?:their|its) own|alone|stand-?alone|no pack|without (?:a |any )?(?:pack|sticker)s?)\b", re.I)
+
+    def _particles_alone(self, t: Turn, why: str = "") -> dict:
+        """Particles on their own (Haitham, 2026-10-05): no sticker owns them; the set is made from the request when the price is confirmed."""
+        from ..flow import particle_sets as ps
+        els = ps.request_elements(self._ALONE.sub(" ", t.text), 4)
+        if not els:
+            t.reply = "Which particles? For example: particles for lipsticks and ribbons."
+            return {}
+        if not self.tools.live():
+            t.reply = "Drawing particles needs the Higgsfield CLI, and it is not available here. Nothing was started."
+            t.trace.end("no provider", ok=False)
+            return {}
+        spec = {"type": "particles", "op": "alone", "request": t.text, "pack": None, "pack_name": None, "set": None, "set_name": None, "grid": "2x2", "elements": els,
+                "estimate": self.tools.estimate("image")}
+        return self._offer_particles(t, spec, (why or "") + f"I'll draw {len(els)} particles on their own: {', '.join(els)}. No sticker owns them; you can preview, render and download them, or make a pack of them")
+
     def _particles_make(self, t: Turn) -> dict:
         packs = [p for p in self.tools.packs() if p["count"]]
         owners, gen, ids = self._particle_scope(t)
+        if self._ALONE.search(t.text):
+            return self._particles_alone(t)
+        from ..flow import particle_sets as _ps
+        hit0 = self._named(t.text, packs) if packs else []
+        named = [] if hit0 else _ps.request_elements(t.text, 4)
+        if named and not owners and not gen:                 # "create particles for lipsticks and ribbons": which pack, or on their own?
+            if not packs:
+                return self._particles_alone(t, "You have no packs yet, so ")
+            last = packs[-1]
+            t.reply = f"Sure: {', '.join(named)}. For which pack, or on their own?"
+            t.chips = ([{"label": p["name"], "text": f"make particles for my {p['name']} pack"} for p in packs[-3:][::-1] if p is not last]
+                       + [{"label": f"The last pack, {last['name']}", "text": f"make particles for my {last['name']} pack"},
+                          {"label": "On their own", "text": f"create particles on their own for {' and '.join(named)}"}])
+            t.trace.end("asked which pack")
+            return {}
         if gen and not owners:
             t.cards.append({'type':'particles_approve', 'generation':gen})
             t.reply = 'Approve this batch as a pack first, so the particles have a sticker to live in.'
@@ -918,6 +950,21 @@ class Agent:
         return {}
 
     def _do_particles(self, t: Turn, p: dict) -> None:
+        if p["op"] == "alone":
+            t.trace.retitle("drawing particles")
+            try:
+                r = self.tools.particles_alone(p["request"], p["grid"])
+            except ToolError as e:
+                t.sess["pending"] = p
+                t.reply = f"I couldn't start the sheet: {e}. I kept the plan: press Draw them to try again, or Not yet to drop it."
+                t.chips = [{"label": "Draw them", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+                t.trace.end("not started", ok=False)
+                return
+            t.sess["particles"] = {"set": r["set"], "pack": None}
+            t.cards.append({"type": "particles", "set": r["set"], "name": r.get("name") or r["set"], "pack_id": None, "job": r["job"], "estimate": r.get("estimate"), "drawing": True})
+            t.reply = f"Drawing {len(p['elements'])} particles on their own" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". When the sheet is cut they arrive in the set; open it to preview, render and download them, or make a pack of them."
+            t.trace.end("sheet started")
+            return
         if p["op"] == "delete":
             try:
                 self.tools.particles_delete(p["set"], True)

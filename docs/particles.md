@@ -8,7 +8,7 @@ A durable particle set (`P###`) belongs to its library stickers, never to a pack
 
 A **sprite** is reusable still or animated artwork. A **burst** is the composition rendered from selected sprites and motion settings. `E###` is a working generation session, not an owner. Adding a burst as an ordinary animated sticker **affirms** its set in the destination pack: `in the pack ✓`. Neither rendering nor adding changes set ownership.
 
-Unresolvable owners leave a **detached set**, retained visibly in Library > Particles with **Attach to a sticker**. There is no standalone particle pack.
+Unresolvable owners leave a **detached set**, retained visibly in Library > Particles with **Attach to a sticker**. **Stand-alone sets (Haitham, 2026-10-05).** A set may also stand on its own: no sticker owns it (`owner: []`), and it is fully usable: preview, render, download, or make a pack of it. This replaces the earlier rule that there is no stand-alone particle pack. It comes from a plain request ("create particles for lipsticks and ribbons"), through the Studio's **Particles** choice or the chat; see section 8.
 
 ## 2. Storage, migration and deletion
 
@@ -77,6 +77,18 @@ The authoritative shapes and errors are in [api.md](api.md) and the OpenAPI docu
 | `POST /api/particles/{id}/duplicate`, `/delete`, `/restore` | Independent copy; soft delete; restoration |
 
 Legacy `/api/effects/*`, `packs` input and `/assign`/`unassign` remain for one release. Pack input maps to its library stickers. It does not restore pack ownership. Member reads preserve their authorization boundaries; writes remain owner-only.
+
+## 8. Particles on their own: from a request to Telegram (2026-10-05)
+
+**The request.** `particle_sets.from_request(text, grid, kind)` reads the particles a sentence names, deterministically (no model): the lead-in ("create particles for", "particles on their own for") goes, the rest splits on commas, "and", "&", "+", "/"; each name is singular (a sprite is one thing), at most five words, at most the sheet's cells (four for 2x2). The names pass `effect_prompts.lint_plan` (no text, logos, people). The set is created with `plan {subject, elements, style}` and `request`; a sentence that names nothing is a 400 that asks for the particles. `POST /api/particles {from_request, grid?, kind?}` is the route.
+
+**The Studio.** The composer has a **Particles** switch before the AI enhancer (`composer.js` `ptOn`, per browser). On, **Generate prompt** and Enter take the particle route (`particles.js` `ptStudio`): the request becomes a stand-alone set, its sheet is priced (`/more {mode: drawn, estimate}`), **Generate · N credits** starts it (`/more {go}`), Cancel deletes the empty set (trash, restorable). The sheet is a particle batch (`G###`, `kind: particles`) that shows in Earlier batches with the **particles mark** top-right (`live.js` `histRow`, `.lv-pbadge`); opening it opens its set (`ptOpenBatch`). The editor opens on the set itself (`spOpenSet`, scope `{set}`), headed by its name, "on their own". Only **still sprites** (Nano Banana) are offered on their own: the Kling animated path builds an effect from a pack's stickers and still needs a sticker (open, `docs/backlog.md`).
+
+**Render, download, a pack.** A stand-alone set renders with no pack (`render` asks for a pack only when the set has packs or its particles are a pack's own stickers); its bursts are listed under **On their own**. Every READY burst has **Download** (the transparent 512 px WebM). **Make a pack of it** (`POST /api/particles/{id}/add {renders, new_pack: <name>}`) creates a pack named after the set and adds the burst as an animated sticker tagged ✨ (an empty pack has no emoji to borrow).
+
+**Telegram.** The Bot API has no particle format: Telegram's own reaction effects are drawn by the apps, and a bot cannot make them. What a bot can upload is a **video sticker** (`createNewStickerSet` / `addStickerToSet`, `format: video`): WEBM, VP9 with alpha, 512 px on one side, at most 3 s, at most 30 fps, at most 256 KB, no audio, and at least one emoji. A rendered burst already is exactly that (the same checks as every animated sticker, `engine/effect_video.TECHNICAL`). So particles reach Telegram as a pack of bursts: **Make a pack of it** (or **Add to pack** into an existing pack), then the pack's normal **Send to Telegram**. Custom emoji (100x100) stay out (the product is stickers, CLAUDE.md).
+
+**The chat.** "create particles for lipsticks and ribbons" with no pack named and no batch in focus asks: "Sure: lipstick, ribbon. For which pack, or on their own?" with chips for the recent packs, **The last pack, {name}**, and **On their own**; with no packs at all it offers them on their own. "... on their own" (or alone, no pack, without a sticker) shows the priced plan card ("Particles · on their own"); the go-ahead calls `tools.particles_alone`, which makes the set and starts its sheet; the started card has **Open the particles** (`agpopen`). A request that starts with "particles" needs no verb (`resolver.particles_intent`). Tests: `tests/test_particle_chat_owner.py` `ParticlesOnTheirOwn`, `tests/test_particle_more_modes.py`, `tests/test_particle_animated.py`.
 
 ## 7. How it is tested, and what is open
 

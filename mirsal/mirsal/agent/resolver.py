@@ -456,6 +456,8 @@ def particles_intent(text: str, has_set: bool) -> str | None:
         return "more"
     if word and re.search(r"\b(?:make|create|draw|generate|give|build|i want|i need|i'd like)\b", t):
         return "make"
+    if word and (re.match(r"\s*(?:some\s+|new\s+)?particles\b", t) or re.search(r"\bparticles\s+(?:for|of|with|on (?:their|its) own)\b", t)):
+        return "make"                                       # "particles on their own for lipsticks and ribbons", "particles for my Barbie pack": no verb needed
     return None
 
 

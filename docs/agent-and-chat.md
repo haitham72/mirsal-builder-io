@@ -345,6 +345,7 @@ Set choice is centralized in `_focus_set`: **an explicit set name overrides; oth
 | Request | Behavior |
 | --- | --- |
 | "make particles for my Barbie pack" | Resolve its stickers, reuse their common current set or create one; quote an AI sheet before confirmation |
+| "create particles for lipsticks and ribbons" | No pack named, none in focus: "For which pack, or on their own?" with the recent packs, The last pack, On their own; "... on their own" quotes a stand-alone set and `particles_alone` starts it after the go-ahead (docs/particles.md section 8) |
 | "more particles for sticker 3" | Choose S3's newest owned set; append without overwriting |
 | A request naming another set | Use the explicitly named set |
 | "use them for the next sticker" | Free link edit, preserving the set |

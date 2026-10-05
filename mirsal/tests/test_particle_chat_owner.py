@@ -53,3 +53,34 @@ class ParticleChatOwner(Base):
 
 
 if __name__=='__main__': unittest.main()
+
+
+class ParticlesOnTheirOwn(Base):
+    """Haitham, 2026-10-05: "create particles for lipsticks and ribbons" asks which pack, or on their own; on their own makes a set no sticker owns."""
+
+    def setUp(self):
+        super().setUp()
+        self.tools.pack_list = [{'id': 'a', 'name': 'Princess', 'count': 9}, {'id': 'b', 'name': 'Barbie', 'count': 4}]
+        self.tools.owner_rows, self.tools.sets = [], []
+
+    def spent(self):
+        return [c for c in self.tools.calls if c[0] in ('particles_start', 'particles_alone')]
+
+    def test_a_request_naming_particles_but_no_pack_asks_which_pack_or_on_their_own(self):
+        m = self.say('create particles for lipsticks and ribbons')
+        self.assertIn('which pack', m['text'].lower())
+        labels = [c['label'] for c in m['chips']]
+        self.assertIn('The last pack, Barbie', labels)
+        self.assertIn('On their own', labels)
+        self.assertEqual(self.spent(), [], 'a question spends nothing')
+
+    def test_on_their_own_shows_the_plan_then_the_go_ahead_starts_it(self):
+        m = self.say('particles on their own for lipsticks and ribbons')
+        card = m['cards'][0]
+        self.assertEqual((card['type'], card['op'], card['elements']), ('particles_plan', 'alone', ['lipstick', 'ribbon']))
+        self.assertEqual(self.spent(), [], 'no sheet before the go-ahead')
+        m = self.say('yes')
+        (c,) = self.spent()
+        self.assertEqual(c[0], 'particles_alone')
+        self.assertEqual((m['cards'][0]['type'], m['cards'][0]['pack_id']), ('particles', None))
+

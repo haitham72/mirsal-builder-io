@@ -155,6 +155,8 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 ## 6. Earlier batches — the redesign (built 2026-10-02)
 
+**Marks and choices (2026-10-05).** A particle batch (`kind: particles`) carries the **particles mark** top-right of its row (`.lv-pbadge`): particles no sticker owns, still usable and exportable. The composer has a **Particles** switch before the AI enhancer (docs/particles.md section 8). The Library's Packs column shows a batch group as one row led by its **parent pack** (Add to a pack > **Assign as parent**, `lead_at`; else the group's first pack) with a fold that stays as the person leaves it; Add to a pack preselects the pack that already holds the batch, so animations upgrade it instead of making a second pack.
+
 **Built, then simplified the same day (Haitham: showing several batches at once in the Studio is not good).** `live.js` (`histCol`, `histRow`, `drawHist`, `ACT.hopen`), `app.js` (`COL2`, `drawCol2`), `studio.css` (`.lv-hrow`, `.c2n`). Where it differs from the plan below:
 
 - The column lists the batches on **Studio and Create** (both are list-bearing; the list is the same in the same place). Library, Pack, Chat and AI keep their own lists; Settings and the full-screen tools (editor, export, prepare, animate) have no column, because they have no list.

@@ -485,6 +485,21 @@ class ConsoleTools:
             raise ToolError(str(e), e.code)
         return {"set": plan["id"], "job": r["job"], "estimate": r.get("estimate"), "grid": plan["grid"]}
 
+    def particles_alone(self, request: str, grid: str = "2x2") -> dict:
+        """SPENDS after the caller's quoted confirmation. Particles on their own (no sticker owns them): the set the request names (`particle_sets.from_request`),
+        then its sheet, exactly as the Studio's Particles choice."""
+        self._owner()
+        self._may_spend()
+        from ..flow import particle_sets as ps
+        if not self.live():
+            raise ToolError("Drawing particles needs the Higgsfield CLI (it is not installed or not logged in).", 503)
+        try:
+            s = ps.from_request(self.out, self.c.lib, request, grid=grid, user=self.user['id'])
+        except ps.SetError as e:
+            raise ToolError(str(e), e.code)
+        r = self.particles_start(set_id=s["id"], grid=grid, elements=s["plan"]["elements"])
+        return {**r, "name": s["name"]}
+
     def particles_delete(self, set_id: str, confirm: bool = False) -> dict:
         self._owner()
         from ..flow import particle_sets as ps
@@ -807,6 +822,11 @@ class FakeTools:
         self.calls.append(("particles_start", set_id, pack_id, grid, list(elements or [])))
         self.n_jobs += 1
         return {"set": set_id or "S9", "job": f"J{self.n_jobs:03d}", "estimate": 2.0, "grid": [2, 2]}
+
+    def particles_alone(self, request, grid="2x2"):
+        self.calls.append(("particles_alone", request, grid))
+        self.n_jobs += 1
+        return {"set": "S8", "job": f"J{self.n_jobs:03d}", "estimate": 2.0, "grid": [2, 2], "name": "Lipstick, Ribbon particles"}
 
     def particles_delete(self, set_id, confirm=False):
         self.calls.append(("particles_delete", set_id, confirm))

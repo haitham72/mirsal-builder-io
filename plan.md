@@ -1,18 +1,6 @@
-# Plan (Haitham, 2026-10-05): A. particles on their own, then B. packs per person + Trending
+# Plan (Haitham, 2026-10-05): packs per person + Trending
 
-## A. Particles from a request, without a sticker (first)
-
-Haitham: Create's "Particle effects" is broken: remove it. The Studio gets a **Particles** choice before the AI enhancer; "create particles for lipsticks and ribbons" routes to particles and brings particles back on their own: a set with no sticker (a stand-alone set, `owner: []`), fully usable and exportable.
-
-A1. **Engine.** `particle_sets.from_request(text, grid, mode)`: the elements named in the request (deterministic: "for/of X, Y and Z", singular, at most the grid's cells; `effect_prompts.lint_plan` rules), a stand-alone set with `plan {subject, elements, style}`; `POST /api/particles/from-request`. Price and sheet through the existing `/more` (estimate, then go), so the sheet is a particle batch `G###` (`kind: particles`) feeding the set.
-A2. **Studio.** A **Particles** chip before the AI enhancer: on, the prompt is a particle request; Generate prompt shows the elements and the price, Generate makes the sheet. The particle batch opens on its set: sprites, simulator, render, download, Add to pack.
-A3. **Earlier batches.** A particle badge, top-right, on particle batches (`kind: particles`).
-A4. **Create.** Remove the "Particle effects" button (old E### effects stay readable).
-A5. **Telegram.** A burst is a video sticker (WEBM VP9 alpha, 512 px, <= 3 s, <= 256 KB); a stand-alone set's bursts go to Telegram as a pack of bursts ("Make a pack of these bursts"), or into an existing pack. Document what Telegram accepts (no particle format exists in the Bot API).
-A6. **AI chat.** "particles for X" with no target: the agent asks "for which pack?" with chips (the packs, "the last pack {name}", "on their own"), and on their own runs A1.
-A7. Docs: `docs/particles.md` (stand-alone sets reverse "There is no standalone particle pack"), `docs/api.md`, `docs/agent-and-chat.md`, `docs/design.md`; tests.
-
-## B. Packs per person, public packs, Trending by attention
+## Packs per person, public packs, Trending by attention
 
 Closes `docs/backlog.md` "A Library of their own for members". Decisions (Haitham, 2026-10-05): each person's Library shows only their own packs (the owner too); a pack's maker makes it public or private, the owner and admins can also take any pack off Trending; members do not send to Telegram yet; views count by attention relative to the other public packs.
 
