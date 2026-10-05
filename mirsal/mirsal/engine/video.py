@@ -88,6 +88,22 @@ def support(frames: np.ndarray) -> np.ndarray:
     return frames[:, ys.min():ys.max() + 1, xs.min():xs.max() + 1] if len(ys) else frames
 
 
+def loop_end(frames: np.ndarray, limit: float, keep: float = 0.7) -> tuple[int, float]:
+    """Where to END the clip so its wrap back to frame 0 is a normal step, not a jump (Haitham, 2026-10-05: the grey seam). Looks only in the last
+    (1 - keep) of the clip, so at least `keep` of it stays. Returns (end, seam): the latest end whose wrap is within `limit` (the clip's own motion);
+    else the end with the smallest wrap. A cut never blends anything, so nothing turns see-through: the cross-fade (close_loop) is only for what is left."""
+    n = len(frames)
+    if n < 8:
+        return n, float("inf")
+    s = support(frames)
+    seams = {e: loop_seam(s[e - 1], s[0]) for e in range(max(2, int(n * keep)), n + 1)}
+    ok = [e for e, v in seams.items() if v <= limit]
+    e = max(ok) if ok else min(seams, key=lambda k: (seams[k], -k))
+    if ok and seams[e] < 0.2 * limit and e - 1 in seams:
+        e -= 1                       # its last frame IS frame 0 again: drop the copy, or the pose would show twice at the wrap (a stall)
+    return e, seams[e]
+
+
 def close_loop(frames: np.ndarray, m: int) -> np.ndarray:
     """Close a clip that does not loop by easing its LAST `m` frames into frame 0 (the last frame becomes frame 0 itself, so the wrap has no jump).
     The head is never touched: the clip starts on its own first frame, the approved pose and the thumbnail. (It used to start on the tail's pose and
@@ -122,7 +138,7 @@ def vp9_missing(cells) -> list[AnimationResult] | None:
             for i in cells]
 
 
-CACHE_VERSION = 4      # bump when an engine change makes old cached animations wrong (4: close_loop blends premultiplied, so a grey frame no longer appears at the wrap)
+CACHE_VERSION = 5      # bump when an engine change makes old cached animations wrong (4: close_loop blends premultiplied; 5: the loop is closed by ending on the matching frame first, a fade only for what is left)
 
 
 class AnimCache:
@@ -413,8 +429,14 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     m["motion"] = round(mo, 2)
     m["loop_seam_before"] = round(seam(out), 2)
     if m["loop_seam_before"] > limit(mo):
-        out = close_loop(out, cfg.loop_fade_frames)
-        mo = motion(out)             # the faded frames change the clip's own motion
+        end, _ = loop_end(out, limit(mo))          # first: END on the frame that leads back to frame 0 (no blend, nothing see-through)
+        if end < len(out):
+            m["loop_cut"] = len(out) - end
+            out = out[:end]
+        if seam(out) > limit(motion(out)):            # still a jump: cross-fade only what is left (it used to fade every clip, a grey ghost at each wrap)
+            out = close_loop(out, cfg.loop_fade_frames)
+            m["loop_faded"] = True
+        mo = motion(out)             # the cut and the faded frames change the clip's own motion
     m["loop_seam"] = round(seam(out), 2)
     m["loop_limit"] = round(limit(mo), 2)
     m["frames_out"] = len(out)

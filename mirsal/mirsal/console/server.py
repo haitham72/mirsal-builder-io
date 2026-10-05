@@ -1481,6 +1481,8 @@ def make_handler(c: Console):
                 self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order"), b.get("lead")))
             elif len(parts) == 4 and parts[3] == "delete":      # SOFT: to the trash, restorable (GET /api/trash lists it; POST /api/trash/purge deletes for good)
                 self._json(200, lib.delete_pack(parts[2], by=self.user.get("id") or "human"))
+            elif len(parts) == 4 and parts[3] == "merge":       # fold this pack into another: animated stills upgrade their twins, the rest moves, the empty pack goes to the trash
+                self._json(200, lib.merge_pack(parts[2], str(self._body().get("into") or ""), by=self.user.get("id") or "human"))
             elif len(parts) == 4 and parts[3] == "restore":     # back from the trash under the same id
                 self._json(200, lib.restore_pack(parts[2]))
             elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)

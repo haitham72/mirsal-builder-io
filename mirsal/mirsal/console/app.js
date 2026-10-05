@@ -94,7 +94,8 @@ function drawCol2(){const on=COL2.includes(route_);document.body.classList.toggl
   <div class=c2s><input type=search id=c2q placeholder="Search packs…" value="${esc(C2Q)}"></div>
   <div class=c2l>${packEntries(LIB.packs.filter(p=>!q||p.name.toLowerCase().includes(q))).map(e=>{const row=(p,sub)=>`<div class="crow${sub?' sub':''} ${p.id===cur?'on':''}" data-act=openpack data-id=${p.id}><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some(s=>s.type==='animated')?'animated':''}</span></div>`;
    if(e.pack)return row(e.pack);const open=PKFOLD.has(e.group)?PKFOLD.get(e.group):e.packs.some(p=>p.id===cur),f=e.packs[0];
-   return`<div class="crow pkgrp ${f.id===cur?'on':''}" data-act=openpack data-id=${f.id}><div class=cv>${coverMedia(f)}</div><div><b>${esc(f.name)}</b><small>${e.packs.length} packs · group ${esc(e.group)}</small></div><button class=iconbtn data-act=pkgrp data-g=${esc(e.group)} title="${open?'Fold the group':'Show every pack of the group'}" aria-expanded=${open}>${ic('chev')}</button></div>${open?e.packs.slice(1).map(p=>row(p,true)).join(''):''}`}).join('')||'<div class=mut style="padding:14px">No packs yet.</div>'}</div>`;
+   const sub=p=>row(p,true).replace(/<\/div>$/,`<button class="link pkmerge" data-act=pkmerge data-id=${p.id} data-into=${f.id} title="One pack: its animated stickers replace their stills in ${esc(f.name)}, the rest moves there, and this pack goes to the trash">Merge into parent</button></div>`);
+   return`<div class="crow pkgrp ${f.id===cur?'on':''}" data-act=openpack data-id=${f.id}><div class=cv>${coverMedia(f)}</div><div><b>${esc(f.name)}</b><small>${e.packs.length} packs · group ${esc(e.group)}</small></div><button class=iconbtn data-act=pkgrp data-g=${esc(e.group)} title="${open?'Fold the group':'Show every pack of the group'}" aria-expanded=${open}>${ic('chev')}</button></div>${open?e.packs.slice(1).map(sub).join(''):''}`}).join('')||'<div class=mut style="padding:14px">No packs yet.</div>'}</div>`;
  const i=$('c2q');i.oninput=e=>{C2Q=e.target.value;const pos=e.target.selectionStart;drawCol2();const n=$('c2q');n.focus();n.setSelectionRange(pos,pos)}}
 
 /* ---------- Library (DESKTOP_01) */
@@ -158,6 +159,10 @@ RENDER.library=async()=>{await loadLib();drawCol2();
    <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
   $('libq').oninput=e=>{LIBQ=e.target.value;libBody()};libBody()};
 ACT.libtab=el=>{LIBTAB=el.dataset.t;RENDER.library()};
+ACT.pkmerge=el=>{const a=packById(el.dataset.id),b=packById(el.dataset.into);if(!a||!b)return;
+  confirmDlg(`Merge “${a.name}” into “${b.name}”? Its animated stickers replace their stills there (names, emoji and particles stay), the others move over, and “${a.name}” goes to the trash (you can restore it).`,async()=>{
+    const r=await post(`/api/packs/${a.id}/merge`,{into:b.id});if(!r.ok)return toast(r.j.error||'Could not merge',1);
+    await loadLib();toast(`${r.j.upgraded} upgraded to animated, ${r.j.moved} moved into “${b.name}”`);location.hash='#/pack/'+b.id;drawCol2()},'Merge')};
 ACT.pkgrp=el=>{const g=el.dataset.g,open=el.getAttribute('aria-expanded')==='true';PKFOLD.set(g,!open);drawCol2()};
 ACT.seeall=el=>{if(el.dataset.k==='st'){LIBTAB='mine'}else PACKS_ALL=!PACKS_ALL;RENDER.library()};
 function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.emoji+' '+(s.pack||'')).toLowerCase().includes(q);

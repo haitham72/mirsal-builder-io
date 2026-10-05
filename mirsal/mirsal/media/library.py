@@ -653,6 +653,42 @@ class Library:
             self._save(db)
             return s
 
+    MEDIA_KEYS = ("file", "file_name", "type", "w", "h", "kb", "dur", "fps", "frames")
+
+    def merge_pack(self, src: str, into: str, by: str = "human") -> dict:
+        """Fold pack `src` into `into` (Haitham, 2026-10-05: "it should be 1 pack with its own animation, not 2 packs nested"). An animated sticker whose
+        still twin (the same batch cell) is in `into` UPGRADES that still: the still keeps its id, name, emoji, place and particle links (sets point at it)
+        and takes the animated file; nothing is deleted from disk. Every other sticker moves over as it is. The emptied pack goes to the trash (Restore)."""
+        cell = lambda s: ((s.get("source") or {}).get("generation"), (s.get("source") or {}).get("index"))
+        with self.lock:
+            db = self._load(); a = self._pack(db, src); b = self._pack(db, into)
+            if a is b:
+                raise LibraryError("a pack cannot be merged into itself")
+            upgraded = moved = 0
+            for st in list(a["stickers"]):
+                twin = next((x for x in b["stickers"] if x.get("type") == "static" and cell(x) == cell(st)), None) \
+                    if st.get("type") == "animated" and cell(st)[0] and cell(st)[1] else None
+                a["stickers"].remove(st)
+                if twin:
+                    for k in self.MEDIA_KEYS:
+                        if k in st:
+                            twin[k] = st[k]
+                        else:
+                            twin.pop(k, None)
+                    twin["particles"] = list(dict.fromkeys((twin.get("particles") or []) + (st.get("particles") or [])))
+                    twin["merged_from"] = {"pack": src, "sticker": st["id"], "at": round(time.time(), 3)}
+                    upgraded += 1
+                else:
+                    b["stickers"].append(st); moved += 1
+                    if not b.get("cover"):
+                        b["cover"] = st["id"]
+            a["cover"] = None
+            self._save(db)
+        trashed = False
+        if not a["stickers"]:
+            self.delete_pack(src, by=by); trashed = True
+        return {"into": into, "upgraded": upgraded, "moved": moved, "trashed": trashed}
+
     def move_stickers(self, items: list[dict], to: str) -> dict:
         """Bulk move: items = [{pack_id, id}, ...] (a selection may span packs) into pack `to`, ALL OR NOTHING: everything is checked first (an unknown pack or sticker refuses the
         whole batch with nothing changed); stickers already in `to` are skipped. Only library.json changes (one load, one save): no file is renamed or moved."""

@@ -543,6 +543,7 @@ def main(argv=None) -> int:
     tt = sub.add_parser("test", help="explicit test gates: fast smoke, focused regressions, mapped area; `slow` is retired and runs only when Haitham asks for it by name")
     tt.add_argument("tier", choices=["fast", "focused", "area", "slow"]); tt.add_argument("area", nargs="?")
     rc = sub.add_parser("recheck", help="run the border check on animations made before it existed"); rc.add_argument("gid", nargs="?", default="all")
+    rl = sub.add_parser("reloop", help="make the animations again from the stored videos with the current loop (free), and refresh the pack copies"); rl.add_argument("gid", nargs="*", default=["all"])
     pr = sub.add_parser("profile", help="time the animation of a generation stage by stage (nothing is saved)")
     pr.add_argument("gid", nargs="?"); pr.add_argument("--sweep", default="", help="worker counts to compare, e.g. 1,4,9")
     s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0); s.add_argument("--stdlib", action="store_true", help="the old stdlib server (kept for one release)")
@@ -644,6 +645,23 @@ def main(argv=None) -> int:
             print(e)
             return 1
         print(f"{tot} animations checked, {bad} leave their cell and are now blocked for review")
+        return 0
+    if args.cmd == "reloop":
+        from .flow import gates
+        from .media.library import Library
+        ids = pl.list_ids(out) if args.gid in (["all"], []) else [_gid(g) for g in args.gid]
+        lib, tot, copies = Library(out), 0, 0
+        try:
+            with WriterLock(out, "mirsal reloop"):           # the server also writes result.json and the library: one writer at a time
+                for gid in ids:
+                    r = gates.reloop(out, gid, cfg, lib)
+                    if r["animations"]:
+                        tot += r["animations"]; copies += r["pack_copies"]
+                        print(f"G{gid:03d}: {r['animations']} animations made again, {r['pack_copies']} pack copies refreshed", flush=True)
+        except WriterBusy as e:
+            print(e)
+            return 1
+        print(f"{tot} animations made again with the current loop, {copies} pack copies refreshed")
         return 0
     if args.cmd == "profile":
         return profile(out, _gid(args.gid), cfg, args.sweep)

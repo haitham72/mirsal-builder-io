@@ -72,7 +72,7 @@ ACT.chem=el=>{CH.q=CH.q===el.dataset.e?'':el.dataset.e;chPopFill()};
 if(typeof document!=='undefined'&&document.addEventListener){
  document.addEventListener('click',e=>{if(!CH.tray||route_!=='chat'||!e.target.closest||e.target.closest('.tgpop,[data-act=chtray]'))return;chPopClose()},true);
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CH.tray&&route_==='chat')chPopClose()})}
-ACT.chpick=el=>{const p=packById(el.dataset.p||CH.pk),s=p&&p.stickers.find(x=>x.id===el.dataset.id);if(s)chSend({kind:'sticker',s:chSticker(s,p.id)})};
+ACT.chpick=el=>{const p=packById(el.dataset.p||CH.pk),s=p&&p.stickers.find(x=>x.id===el.dataset.id);if(!s)return;if(CH.tray&&typeof document!=='undefined')chPopClose();chSend({kind:'sticker',s:chSticker(s,p.id)})};     /* a pick sends and closes the panel, as Telegram does */
 ACT.chreplay=el=>chPlay(el.dataset.id);
 ACT.chview=()=>{CH.view=CH.view==='mobile'?'desktop':'mobile';try{localStorage.setItem('mirsal.chat.view',CH.view)}catch(e){}chDraw()};
 function chClear(){CH.epoch++;CH.msgs=[];CH.play={};CH.requests={};CH.typing=false;CH.pending=null;chSave();chDraw()}

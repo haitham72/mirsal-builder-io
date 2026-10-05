@@ -759,6 +759,25 @@ def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
             slice_video(out, gid, v["id"], cfg, pace)
 
 
+def reloop(out: Path, gid: int, cfg: EngineConfig, lib=None) -> dict:
+    """Make a batch's animations again from its stored videos with the current engine (Haitham, 2026-10-05: the grey seam came back on every
+    sticker made before the loop fix), then refresh the copies in the packs. Free: no new video, no credits; every S# and review stays."""
+    res = pl.read_result(out, gid)
+    if not any(v["status"] == "SLICED" and v.get("video") for v in res.get("video_sheets") or []):
+        return {"id": gid, "animations": 0, "pack_copies": 0}
+    edited = [st["index"] for st in res["stickers"] if st.get("edited") and st.get("webm")]
+    if edited:                                            # text or drawing baked in the Studio: slicing again would lose it
+        return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": f"edited in the Studio: {', '.join('S' + str(i) for i in edited)}"}
+    reslice(out, gid, cfg)
+    res, d, copies, n = pl.read_result(out, gid), pl.gen_dir(out, gid), 0, 0
+    for st in res["stickers"]:
+        if st.get("anim_status") == "READY" and st.get("webm"):
+            n += 1
+            if lib is not None:
+                copies += lib.refresh_from_generation(out, res["generation_id"], st["index"], None, d / st["webm"])
+    return {"id": gid, "animations": n, "pack_copies": copies}
+
+
 def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "video.mp4", sent_prompt: str | None = None, custom: bool = False) -> dict:
     """Synchronous part: validate the gate order and store the upload next to the sheet it belongs to. Slicing is slice_video().
     `sent_prompt` is the text the video model was really given (kept on the sheet, `video_prompt_custom` when the user wrote it)."""

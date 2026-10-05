@@ -69,6 +69,23 @@ class LibraryTests(unittest.TestCase):
             with self.assertRaises(LibraryError):
                 cutout(img, self.cfg, "matte")
 
+    def test_merging_a_pack_upgrades_its_parents_stills_and_keeps_their_particles(self):
+        a = self.lib.create_pack("Angel")["id"]; b = self.lib.create_pack("Angel 2")["id"]
+        still = self.lib.add_bytes(a, b"png-bytes", "png", "Happy", "static", "😀", {"generation": "G001", "index": 1})
+        db = self.lib._load(); db["packs"][0]["stickers"][0]["particles"] = ["P008"]; self.lib._save(db)       # a particle set points at the still
+        anim = self.lib.add_bytes(b, b"webm-bytes", "webm", "Happy anim", "animated", "🙂", {"generation": "G001", "index": 1})
+        extra = self.lib.add_bytes(b, b"webm-two", "webm", "Burst", "animated", "✨", {"particle_set": "P009"})
+        r = self.lib.merge_pack(b, a)
+        self.assertEqual((r["upgraded"], r["moved"], r["trashed"]), (1, 1, True))
+        p = self.lib._pack(self.lib._load(), a)
+        up = next(s for s in p["stickers"] if s["id"] == still["id"])
+        self.assertEqual((up["type"], up["file"], up["name"], up["emoji"], up["particles"]), ("animated", anim["file"], "Happy", "😀", ["P008"]),
+                         "the still keeps its id, name, emoji and particles and takes the animated file")
+        self.assertIn(extra["id"], [s["id"] for s in p["stickers"]], "a sticker with no twin moves over")
+        self.assertNotIn(b, [x["id"] for x in self.lib._load()["packs"]], "the emptied pack is in the trash")
+        with self.assertRaises(LibraryError):
+            self.lib.merge_pack(a, a)
+
     def test_packs_stickers_and_export(self):
         p = self.lib.create_pack("UAE Moments")
         for i in range(4):

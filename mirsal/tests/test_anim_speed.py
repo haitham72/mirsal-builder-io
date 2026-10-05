@@ -50,6 +50,17 @@ class SameValuesTests(unittest.TestCase):
         z = np.zeros((64, 64), np.float32)
         self.assertTrue(np.array_equal(apply_edge_v1(np.zeros((64, 64, 3), np.float32), z, 12, 0), render.apply_edge(np.zeros((64, 64, 3), np.float32), z, 12, 0)))
 
+    def test_the_loop_ends_on_the_frame_that_leads_back_to_frame_0_without_a_see_through_fade(self):
+        import numpy as np
+        from mirsal.engine import video
+        n, f = 30, np.zeros((30, 64, 64, 4), np.uint8)
+        for i in range(n):                                   # a dot that goes right and comes back to its start at frame 24, then wanders off again
+            x = 10 + (i if i <= 12 else 24 - i if i <= 24 else (i - 24) * 3)
+            f[i, 20:30, x:x + 10] = (200, 40, 40, 255)
+        end, seam = video.loop_end(f, limit=40.0)
+        self.assertEqual(end, 24, "the clip ends just before the frame that matches frame 0: the wrap is one normal step")
+        self.assertTrue(set(np.unique(f[:end][..., 3])) <= {0, 255}, "a cut blends nothing: no half-transparent frame at the wrap")
+
     def test_loop_seam_is_the_same_on_the_crop_where_the_sticker_exists(self):
         rng = np.random.default_rng(3)
         frames = np.zeros((6, 200, 200, 4), np.uint8)
