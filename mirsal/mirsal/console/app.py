@@ -193,7 +193,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
 
     class NewPassword(_BM):
         model_config = _CD(extra="forbid")
-        old: str = _F(max_length=200)
+        old: str = _F(default="", max_length=200)      # may be left out while the account still has the password it was given
         new: str = _F(max_length=200)
 
     class AddPeople(_BM):

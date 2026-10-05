@@ -25,7 +25,8 @@ test('the sign-in card has the three ways in, and each form only the fields it n
 
 test('a pending account waits; a given password is changed first', () => {
   assert.match(A.waiting({ name: 'Amira', email: 'a@nadi.ae' }), /Waiting for approval[\s\S]*Thanks, Amira[\s\S]*data-act=aulogout/);
-  assert.match(A.change({ email: 'a@nadi.ae' }), /au-old[\s\S]*au-new[\s\S]*data-act=auchange/);
+  assert.match(A.change({ email: 'a@nadi.ae' }), /au-new[\s\S]*data-act=auchange[\s\S]*data-act=aukeep/);
+  assert.doesNotMatch(A.change({ email: 'a@nadi.ae' }), /au-old/, 'the given password is never asked again');
 });
 
 test('People: a waiting sign-up has Approve and Reject; an active member has roles, password, credits, disable; the owner row has no buttons', () => {

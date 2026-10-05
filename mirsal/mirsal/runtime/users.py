@@ -314,11 +314,14 @@ class UserStore:
         return self.public(u), new_pw
 
     def change_password(self, uid: str, old: str, new: str) -> dict:
+        """A new password. The current one is asked for, except while the account still has the password it was given (`must_change_password`): the person
+        has just signed in with it, so asking again is only a chore."""
         self._check_new_password(new)
         with _LOCK:
             users = self._read()
             u = next((x for x in users if x["id"] == uid), None)
-            if not u or not self.check_password(old, u.get("password_hash", "")):
+            given = bool(u and u.get("must_change_password") and not old)
+            if not u or not (given or self.check_password(old, u.get("password_hash", ""))):
                 raise UserError("the current password is wrong", 403)
             u.update(password_hash=self.hash_password(new), must_change_password=False)
             self._write(users)

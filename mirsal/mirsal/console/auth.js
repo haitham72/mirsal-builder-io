@@ -1,5 +1,5 @@
 /* Office accounts (docs/api.md, Office accounts on the LAN): on the LAN a browser signs in with an account of an allowed domain (MIRSAL_EMAIL_DOMAIN, sent as `domains` by /api/auth/me). GET /api/auth/me decides: signed out ->
-   the sign-in card (Sign in / Create account / Forgot password); `pending` -> Waiting for approval; must_change_password -> a new password first. On this
+   the sign-in card (Sign in / Create account / Forgot password); `pending` -> Waiting for approval; must_change_password -> a new password first (only the new one: the given one was just used to sign in; 'Keep the given password for now' asks again at the next sign-in). On this
    machine (not the LAN) the owner is signed in already and nothing shows. Settings gets "Signed in as" (Sign out, Request credits) and, for the owner and
    admins, People: add people (passwords shown once), approve, reject, roles, new password, credits. Top-level names start with AU / au; AUV holds the pure
    builders for node. */
@@ -15,8 +15,8 @@ const AUV=(()=>{
   const waiting=u=>`<div class=au-card role=dialog aria-modal=true><img class=au-logo src=/assets/brand/mirsal-logo.png alt=""><h2>Waiting for approval</h2>
     <p class=mut>Thanks, ${esc(u.name||u.email)}. Haitham will approve your account; this page opens by itself once he has.</p><button class=btn data-act=aulogout>Sign out</button></div>`;
   const change=u=>`<div class=au-card role=dialog aria-modal=true><h2>Choose your own password</h2><p class=mut>${esc(u.email)} was given a password to start with.</p>
-    ${field('au-old','The password you were given','password','current-password')}${field('au-new','Your new password (8 characters or more)','password','new-password')}
-    <button class="btn pri au-go" data-act=auchange>Save</button></div>`;
+    ${field('au-new','Your new password (8 characters or more)','password','new-password')}
+    <button class="btn pri au-go" data-act=auchange>Save</button><div class=au-links><button class=link data-act=aukeep>Keep the given password for now</button></div></div>`;
   const STATUS={pending:'Waiting',active:'Active',rejected:'Rejected',disabled:'Disabled'};
   const person=p=>{const pend=p.status==='pending';
     return `<div class=au-p data-uid=${esc(p.id)}><div><b>${esc(p.name)}</b><small class=mut>${esc(p.email||p.id)} · ${esc(p.role)} · ${esc(STATUS[p.status]||p.status||'token')}${p.credits_left!=null?` · ${p.credits_left} credits left, ${p.credits_spent||0} spent`:''}</small></div>
@@ -50,7 +50,7 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
     if(r.status===401){AU.me=null;AU.lan=!!r.j.lan;AU.domains=r.j.domains||null;return auShow(AUV.gate(AU.mode,'',AU.domains))}
     if(!r.ok)return auIn();AU.me=r.j.user;AU.lan=!!r.j.lan;globalThis.ME=AU.me;
     if(AU.me.status==='pending'){auShow(AUV.waiting(AU.me),'waiting');setTimeout(auCheck,15000);return}
-    if(AU.me.must_change_password)return auShow(AUV.change(AU.me),'change');
+    if(AU.me.must_change_password&&auKept()!==AU.me.id)return auShow(AUV.change(AU.me),'change');
     auHide();auIn()}
   const auPost=async(u,b)=>{const r=await post(u,b);if(!r.ok){const m=r.j.error||'Something went wrong';const box=document.querySelector('#au-gate .au-card');
     if(box){let el=box.querySelector('.au-msg');if(!el){el=document.createElement('div');el.className='au-msg';box.insertBefore(el,box.querySelector('label'))}el.textContent=m}else toast(m,1)}return r};
@@ -58,8 +58,11 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
   ACT.ausignin=async()=>{const r=await auPost('/api/auth/login',{email:auVal('au-email'),password:auVal('au-pw')});if(r.ok)location.reload()};
   ACT.ausignup=async()=>{const r=await auPost('/api/auth/signup',{email:auVal('au-email'),name:auVal('au-name'),password:auVal('au-pw')});if(r.ok)auCheck()};
   ACT.auforgot=async()=>{const r=await auPost('/api/auth/forgot',{email:auVal('au-email')});if(r.ok){AU.mode='signin';auShow(AUV.gate('signin',r.j.message,AU.domains))}};
-  ACT.auchange=async()=>{const r=await auPost('/api/auth/password',{old:auVal('au-old'),new:auVal('au-new')});if(r.ok){toast('Password saved');auCheck()}};
-  ACT.aulogout=async()=>{await post('/api/auth/logout',{});location.reload()};
+  ACT.auchange=async()=>{const r=await auPost('/api/auth/password',{new:auVal('au-new')});if(r.ok){toast('Password saved');auCheck()}};
+  /* "for now": this browser session only (a sign-out clears it); the next sign-in asks again */
+  const AU_KEEP='mirsal.auth.kept',auKept=()=>{try{return sessionStorage.getItem(AU_KEEP)}catch(e){return null}};
+  ACT.aukeep=()=>{try{sessionStorage.setItem(AU_KEEP,AU.me&&AU.me.id||'')}catch(e){}auHide();auIn()};
+  ACT.aulogout=async()=>{try{sessionStorage.removeItem('mirsal.auth.kept')}catch(e){}await post('/api/auth/logout',{});location.reload()};
   ACT.aucreditask=async()=>{const reason=prompt('How many credits, and what for? (optional, e.g. "20 for the Eid pack")');if(reason===null)return;const r=await post('/api/auth/credits',{reason});
     toast(r.ok?'Asked: Haitham decides in Telegram or Users':(r.j.error||'Could not ask'),!r.ok)};
   async function auPeople(){if(typeof route_!=='undefined'&&route_==='users'&&RENDER.users)return RENDER.users(location.hash.replace(/^#\/?/,'').split('/')[1]||'');   /* People lives in Users: redraw the page in view */

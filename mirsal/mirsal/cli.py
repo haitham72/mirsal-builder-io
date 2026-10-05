@@ -41,10 +41,23 @@ def db_cmd(out, action: str, yes: bool) -> int:
     if action == "up":
         import subprocess
         yml = out_root_compose()
-        r = subprocess.run(["docker", "compose", "-f", str(yml), "up", "-d"], capture_output=True, text=True)
-        print((r.stdout or "") + (r.stderr or ""))
-        if r.returncode:
+        # a container that already exists is started by its name, whoever made it (a mirsal-db made by hand holds its data in its own volume, and a
+        # compose "up" would only fail on the name, leaving mirsal-redis created and never started); compose creates only the missing ones
+        services = {"db": "mirsal-db", "redis": "mirsal-redis"}
+        ls = subprocess.run(["docker", "ps", "-a", "--format", "{{.Names}}"], capture_output=True, text=True)
+        if ls.returncode:
+            print((ls.stdout or "") + (ls.stderr or "") + "Docker is not answering: start Docker Desktop first")
             return 1
+        have = set(ls.stdout.split())
+        steps = [["docker", "start", *[n for n in services.values() if n in have]],
+                 ["docker", "compose", "-f", str(yml), "up", "-d", *[s for s, n in services.items() if n not in have]]]
+        for cmd in steps:
+            if cmd[-1] in ("start", "-d"):
+                continue                                   # nothing to start / nothing to create
+            r = subprocess.run(cmd, capture_output=True, text=True)
+            print((r.stdout or "") + (r.stderr or ""))
+            if r.returncode:
+                return 1
         for _ in range(30):
             _db.reset_cache()
             if _db.available():

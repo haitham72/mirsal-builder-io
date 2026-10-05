@@ -9,7 +9,7 @@ Postgres mirrors it, so history and search survive a restart and a conversation 
 ```
 cd mirsal
 pip install -r requirements.txt            # psycopg[binary], redis, langgraph; the engine never imports them
-python -m mirsal db up                     # docker compose up -d (mirsal-db on 5434, mirsal-redis on 6380), then migrate
+python -m mirsal db up                     # starts mirsal-db (5434) and mirsal-redis (6380) by name when they exist (even made by hand: its data volume stays), docker compose creates only the missing ones; then migrate
 python -m mirsal db migrate                # apply migrations/*.sql in order (every file is re-runnable); notes what it cleared (a vector dimension change empties the vectors: `pool reindex` refills them)
 python -m mirsal db status                 # schema_migrations read back: declared / applied / pending / unknown files
 python -m mirsal db check                  # does the LIVE schema match the files? builds every file in a throwaway schema inside a transaction it rolls back and diffs columns, constraints and indexes

@@ -66,8 +66,11 @@ class AccountStoreTests(unittest.TestCase):
         pw = made[0]["password"]
         self.assertTrue(made[0]["must_change_password"])
         u, _ = self.u.login("c@nadi.ae", pw)
-        u = self.u.change_password(u["id"], pw, "mine-now-1")
-        self.assertFalse(u["must_change_password"])
+        u = self.u.change_password(u["id"], "", "mine-now-1")
+        self.assertFalse(u["must_change_password"], "the given password is not asked again")
+        with self.assertRaises(UserError):
+            self.u.change_password(u["id"], "", "mine-now-2")      # once it is their own, the current one is needed
+        self.assertFalse(self.u.change_password(u["id"], "mine-now-1", "mine-now-2")["must_change_password"])
 
     def test_on_the_lan_another_machine_is_never_the_owner_by_loading_the_page(self):
         self.u.signup("d@nadi.ae", "D", "password1")
