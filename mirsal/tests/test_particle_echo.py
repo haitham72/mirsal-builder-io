@@ -27,7 +27,7 @@ class ParticleEchoTests(unittest.TestCase):
             reply = ps.preview_for_sticker(self.out, self.lib, 'a', 's2')
         self.assertEqual(reply['set'], branch['id'])
         self.assertEqual(reply['motion'], motion)
-        preview.assert_called_once_with(self.out, self.lib, branch['id'], pack_id='a')
+        preview.assert_called_once_with(self.out, self.lib, branch['id'], pack_id='a', size=ps.ECHO_PX)
         preset, px, scale, params = ps._burst(ps.read(self.out, branch['id']), None, {})
         self.assertEqual((preset, px, scale, params.magnitude), ('fountain', 128, 2, 1.7))
 

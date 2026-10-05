@@ -90,5 +90,7 @@ test("Echo's own sticker can be liked, and the like plays its burst",async()=>{
   h.replies.push(setReply('P001'));await h.run("ACT.chlike({dataset:{id:'m1e'}})");
   assert.equal(h.run('CH.msgs[0].react'),'❤️');
   assert.deepEqual(h.calls,['/api/packs/p1/stickers/s1/particle-preview']);
-  assert.match(h.run('chMsgH(CH.msgs[0])'),/ch-particle.*data-act=chreplay/s);
+  assert.match(h.run('chMsgH(CH.msgs[0])'),/data-act=chreplay[^>]*>❤️<img class=ch-particle/,'the burst is drawn inside the heart badge');
+  assert.match(h.run('chParticleH(CH.msgs[0])'),/translate\(-50\.0%,-50\.0%\)/,'a centred origin sits on the heart');
+  h.run("CH.play.m1e.origin=[0.5,0.8]");assert.match(h.run('chParticleH(CH.msgs[0])'),/translate\(-50\.0%,-80\.0%\)/,'a fountain starts from the heart too');
 });

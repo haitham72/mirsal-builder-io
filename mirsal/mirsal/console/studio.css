@@ -149,7 +149,7 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 .bub .tm{display:block;text-align:right;font-size:var(--fs-xs);color:var(--mut2);margin-top:2px}.cm.cout .bub .tm{color:var(--pri-d)}
 .bub.stk{background:none;border:0;padding:0}.bub.stk img,.bub.stk video{width:160px;height:160px;object-fit:contain;display:block}.bub.stk .tm{padding-right:4px}
 .react{position:absolute;left:-6px;bottom:14px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-pill);padding:1px 6px;font-size:var(--fs-m);box-shadow:var(--sh);animation:pop .3s ease-out}.bub:not(.stk) .react{bottom:-10px}
-.ch-particle{position:absolute;width:80px;height:80px;left:-31px;bottom:-14px;z-index:3;pointer-events:none}   /* 80px (Haitham, 2026-10-05: 60% smaller than 200), its centre on the reaction badge's centre (.react: left -6px, bottom 14px, about 30x24) */
+.bub .react .ch-particle{position:absolute;width:80px;height:80px;left:50%;top:50%;z-index:3;pointer-events:none;max-width:none;display:block}   /* (beats .bub.stk img, which made it 160px) inside .react: 80px (Haitham, 2026-10-05: 60% smaller than 200); chat.js translates it so the burst's origin sits on the heart */
 .react.like{cursor:pointer;color:var(--mut);opacity:0;transition:opacity .15s;animation:none}.cm:hover .react.like,.react.like:focus-visible{opacity:1}
 @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
 .bub.typing{display:flex;gap:4px;padding:12px 14px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--mut2);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}@keyframes blink{50%{opacity:.25}}

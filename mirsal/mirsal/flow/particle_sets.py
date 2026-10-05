@@ -1163,6 +1163,9 @@ def preview(out: Path, lib, pid: str, *, pack_id=None, preset=None, params=None,
             "sprites": len(pcs), "source": source, "pack_id": pack}
 
 
+ECHO_PX = 160   # Echo shows the burst at 80 CSS px (studio.css .ch-particle): twice that stays sharp on a 2x screen and is a ~2.5x lighter file than 256
+
+
 def preview_for_sticker(out: Path, lib, pack_id: str, sticker_id: str) -> dict:
     """Echo reaction: this sticker's latest particles with their saved motion. Free. The latest is its newest **saved** version (the highest v# under the sticker,
     `rows_for_sticker`'s order); only a sticker with no saved version yet falls back to its newest linked draft."""
@@ -1179,11 +1182,11 @@ def preview_for_sticker(out: Path, lib, pack_id: str, sticker_id: str) -> dict:
     rows = [s for s in owned if saved(full[s["id"]])]
     if rows:
         chosen = max(rows, key=lambda s: (full[s["id"]].get("saved_at") or full[s["id"]].get("created") or 0, s["id"]))
-        return {**preview(out, lib, chosen["id"], pack_id=pack_id), "set": chosen["id"], "motion": full[chosen["id"]].get("motion") or {}}
+        return {**preview(out, lib, chosen["id"], pack_id=pack_id, size=ECHO_PX), "set": chosen["id"], "motion": full[chosen["id"]].get("motion") or {}}
     available = {s["id"]: s for s in owned}
     chosen = next((available[pid] for pid in reversed(ordered) if pid in available), None)
     chosen = chosen or max(owned, key=lambda s: (s.get("created", 0), s["id"]))
-    return {**preview(out, lib, chosen["id"], pack_id=pack_id), "set": chosen["id"], "motion": chosen.get("motion") or {}}
+    return {**preview(out, lib, chosen["id"], pack_id=pack_id, size=ECHO_PX), "set": chosen["id"], "motion": chosen.get("motion") or {}}
 
 
 def render(out: Path, lib, pid: str, cfg, *, pack_id=None, preset=None, params=None, user: str = "local") -> dict:

@@ -12,16 +12,19 @@ const chSave=()=>{try{localStorage.setItem('mirsal.chat',JSON.stringify(CH.msgs.
 const hm=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 const chPreview=m=>!m?'No messages yet':m.kind==='sticker'?'Sticker':esc(m.text);
 const chSticker=(s,pack_id)=>({id:s.id,pack_id:s.pack_id||pack_id,type:s.type,file:s.file,name:s.name});
-const chParticleH=m=>{const p=CH.play[m.id];return p?`<img class=ch-particle src="${esc(p.url)}" alt="" aria-hidden=true data-particle-set="${esc(p.set)}">`:''};     /* centred on the reaction badge (bottom-left), spilling over the bubble, as Telegram plays a reaction's effect (studio.css .ch-particle) */
+/* drawn INSIDE the reaction badge with the burst's own origin (a preset's, e.g. a fountain's low start) on the badge's centre, so it comes out of the heart
+   whatever the badge's size, as Telegram plays a reaction's effect (studio.css .ch-particle) */
+const chParticleH=m=>{const p=CH.play[m.id];if(!p)return'';const o=Array.isArray(p.origin)&&p.origin.length===2&&p.origin.every(Number.isFinite)?p.origin.map(v=>Math.min(1,Math.max(0,v))):[0.5,0.5];
+ return`<img class=ch-particle src="${esc(p.url)}" alt="" aria-hidden=true data-particle-set="${esc(p.set)}" style="transform:translate(${(-o[0]*100).toFixed(1)}%,${(-o[1]*100).toFixed(1)}%)">`};
 const chPlayable=m=>m.kind==='sticker'&&m.s&&m.s.id&&m.s.pack_id;
 /* a reaction on a sticker replays its burst; Echo's own sticker can be liked (the heart on hover, or a double-click, as Telegram's double-tap) and then plays it too */
-const chReactionH=m=>m.react?(chPlayable(m)?`<button type=button class=react data-act=chreplay data-id="${esc(m.id)}" title="Replay reaction" aria-label="Replay reaction">${esc(m.react)}</button>`:`<span class=react>${esc(m.react)}</span>`)
+const chReactionH=m=>m.react?(chPlayable(m)?`<button type=button class=react data-act=chreplay data-id="${esc(m.id)}" title="Replay reaction" aria-label="Replay reaction">${esc(m.react)}${chParticleH(m)}</button>`:`<span class=react>${esc(m.react)}</span>`)
  :m.from==='in'&&chPlayable(m)?`<button type=button class="react like" data-act=chlike data-id="${esc(m.id)}" title="Like" aria-label="Like this sticker">♡</button>`:'';
 function chList(){const m=CH.msgs[CH.msgs.length-1];
  $('col2').innerHTML=`<div class=c2h><h1>Chats</h1></div><div class=c2s><input type=search placeholder="Search chats…" disabled></div>
   <div class=c2l><div class="crow on"><div class="cv chav">M</div><div style="min-width:0"><b>Mirsal Echo</b><small>${m&&m.from==='out'?'You: ':''}${chPreview(m)}</small></div><span class=meta>${m?hm(m.t):''}</span></div></div>`}
 const chMsgH=m=>{const t=`<span class=tm>${hm(m.t)}${m.from==='out'?' ✓✓':''}</span>`;
- return m.kind==='sticker'?`<div class="cm c${m.from}"><div class="bub stk" data-chmsg="${esc(m.id)}">${media(m.s)}${chParticleH(m)}${chReactionH(m)}${t}</div></div>`
+ return m.kind==='sticker'?`<div class="cm c${m.from}"><div class="bub stk" data-chmsg="${esc(m.id)}">${media(m.s)}${chReactionH(m)}${t}</div></div>`
   :`<div class="cm c${m.from}"><div class=bub>${esc(m.text)}${chReactionH(m)}${t}</div></div>`};
 /* the sticker panel, as Telegram's: a small card over the chat, above the composer. Search (name or emoji tag, across every pack), the emoji tags the
    stickers actually carry as one-tap filters, a borderless 5-column grid, and the packs along the bottom with Recent (the stickers sent here) first */
@@ -62,7 +65,7 @@ async function chPlay(id){const m=CH.msgs.find(x=>x.id===id);if(!m||!chPlayable(
  delete CH.play[id];chDraw();
  let r;try{r=await api(`/api/packs/${encodeURIComponent(m.s.pack_id)}/stickers/${encodeURIComponent(m.s.id)}/particle-preview`)}catch(e){return}
  if(epoch!==CH.epoch||CH.requests[id]!==token||!CH.msgs.includes(m)||route_!=='chat'||!r.ok||!r.j.set||!r.j.url)return;
- const url=String(r.j.url),sep=url.includes('?')?'&':'?';CH.play[id]={set:r.j.set,url:url+sep+'echo='+encodeURIComponent(id+'-'+token)};chDraw();
+ const url=String(r.j.url),sep=url.includes('?')?'&':'?';CH.play[id]={set:r.j.set,url:url+sep+'echo='+encodeURIComponent(id+'-'+token),origin:(r.j.params||{}).origin};chDraw();
  setTimeout(()=>{if(epoch===CH.epoch&&CH.requests[id]===token){delete CH.play[id];chDraw()}},3200)}
 function chSend(m){const o={id:Date.now().toString(36)+'-'+(++CH.seq),t:Date.now(),from:'out',...m},epoch=CH.epoch;CH.msgs.push(o);chSave();chDraw();
  setTimeout(()=>{if(epoch!==CH.epoch||!CH.msgs.includes(o))return;CH.typing=true;chDraw()},450);
