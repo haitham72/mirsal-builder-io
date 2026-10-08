@@ -188,7 +188,8 @@ function libBody(){const q=LIBQ.trim().toLowerCase(),hit=s=>!q||(s.name+' '+s.em
   h=`<div class=mut style="margin-bottom:8px">Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects). Then delete them together.</div>${selBarHtml(all.length)}${libByPackHtml(all)}`}
  $('libbody').innerHTML=h}
 ACT.openpack=el=>{location.hash='#/pack/'+el.dataset.id};
-ACT.newpack=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');
+ACT.newpack=()=>ACT.impackopen&&(typeof ME==='undefined'||!ME||ME.role==='owner')?dlg(`<h2>Add a pack</h2><div class=row><button class="btn pri" data-act=newpackname>New pack</button><button class=btn data-act=impackopen title="Upload a sticker sheet or its animated video: it is cut into stickers and waits in the Studio">Import pack</button></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button></div>`):ACT.newpackname();
+ACT.newpackname=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');
 
 /* ---------- Settings */
 RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{},staff=(typeof AUV==='undefined')||AUV.staff((typeof ME==='undefined')?null:ME),prep=await api('/api/prepared/setting'),pp=prep.ok&&prep.j.prefer;

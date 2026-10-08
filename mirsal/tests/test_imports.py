@@ -93,9 +93,23 @@ class ImportTests(unittest.TestCase):
 
     def test_video_gate_is_checked_before_downloading(self):
         with patch.object(hf, "_json", return_value={"status": "completed", "result_url": "https://example.invalid/video.mp4"}), patch.object(hf, "download") as download:
-            with self.assertRaises(im.ImportError):
-                im.import_job(self.c, self.user, TICKET)
+            with self.assertRaises((im.ImportError, pl.PipelineError)):
+                im.import_job(self.c, self.user, TICKET, generation="G001")
             download.assert_not_called()
+
+    def test_a_video_alone_becomes_its_own_batch(self):
+        """Library > + > Import pack: no destination, so the first frame is the sheet and the video animates it."""
+        vid = self.out / "src.mp4"
+        synth.make_video(vid)
+        code, got = im.import_file(self.c, self.user, "emojis.mp4", vid.read_bytes())
+        self.wait()
+        self.assertEqual((code, got["kind"]), (202, "video"))
+        self.assertNotIn("sheet", got)
+        res = pl.read_result(self.out, got["id"])
+        self.assertTrue(res["source"]["sheet_path"].endswith("-frame0.png"))
+        self.assertTrue(res["source"]["has_video"])
+        self.assertTrue(any(s["anim_status"] in ("READY", "FAILED") for s in res["stickers"]))
+        self.assertEqual(im.known(self.out, data=vid.read_bytes())["status"], "READY")
 
     def test_provider_errors_and_response_validation(self):
         with patch.object(hf, "_json", return_value={"status": "completed", "result_url": "https://example.invalid/sheet.png"}), patch.object(hf, "download", side_effect=hf.HiggsError("download failed")):

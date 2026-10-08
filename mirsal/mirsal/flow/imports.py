@@ -193,6 +193,17 @@ def destination(c, generation, sheet=None):
     return gid, aid
 
 
+def first_frame(video: Path) -> Path:
+    """The first frame of an imported video as a PNG beside it: the sheet of a video imported on its own (an animated sheet starts on its still)."""
+    from ..engine import ffmpeg as ff
+    png = video.with_name(video.stem + "-frame0.png")
+    pre = ["-c:v", "libvpx-vp9"] if video.suffix.lower() == ".webm" else []
+    p = ff._run(["-y", "-loglevel", "error", *pre, "-i", str(video), "-frames:v", "1", "-an", str(png)])
+    if p.returncode != 0 or not png.is_file():
+        raise ImportError("The first frame of this video cannot be read; choose a valid MP4, MOV or WebM")
+    return png
+
+
 def _linkable(out: Path, user: dict, ticket: str | None, jid: str, name: str) -> dict:
     """The failed job an explicit dialog choice (or the single automatic match) completes: FAILED/TIMEOUT,
     holding a provider ticket (this file's, when the file names one), a sheet or a video job."""
@@ -359,7 +370,12 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                 raise ImportError("not found", 404)
             is_video = ext in VIDEO
             resume_video = False
-            if is_video and old and old.get("generation"):
+            # a video with no destination is a pack of its own: its first frame is the sheet, the video animates it (Library > + > Import pack)
+            if old and old.get("generation"):
+                alone = is_video and not old.get("sheet")
+            else:
+                alone = is_video and generation is None and sheet is None
+            if is_video and not alone and old and old.get("generation"):
                 gid, aid = generation_id(old["generation"]), old.get("sheet")
                 res = pl.read_result(c.out, gid)
                 status = gates.sheet_of(res, aid).get("status")
@@ -369,10 +385,10 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                 resume_video = status == "VIDEO_RETURNED"
                 if not resume_video:
                     gid, aid = destination(c, gid, aid)
-            if is_video and not resume_video:
+            if is_video and not alone and not resume_video:
                 if not old or not old.get("generation"):
                     gid, aid = destination(c, generation, sheet)
-            elif not is_video:
+            elif not is_video or alone:
                 gid, aid = None, None
             f = Path(old["file"]) if old and old.get("file") and Path(old["file"]).is_file() else save(c.out, name, data)
             if is_video:
@@ -391,7 +407,7 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                     raise ImportError("This image cannot be opened; choose a valid PNG, JPEG or WebP") from e
             row = old or record(c.out, name, data, None, user["id"], job_id)
             _update(c.out, row["id"], status="PREPARING", file=str(f), kind="video" if is_video else "sheet", sheet=aid)
-            if is_video:
+            if is_video and not alone:
                 _update(c.out, row["id"], generation=f"G{gid:03d}")
                 if not resume_video:
                     gates.attach_video(c.out, gid, aid, data, name, custom=True)
@@ -408,19 +424,24 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                             if e.code == 404:
                                 continue
                             raise
-                        if saved.get("source", {}).get("sheet_path") == old["file"]:
+                        if old["file"] in (saved.get("source", {}).get("sheet_path"), saved.get("source", {}).get("video_path")):
                             previous = f"G{n:03d}"
                             break
                 if previous:
                     gid = generation_id(previous)
                 else:
-                    pick = sources.Pick(subject=re.sub(r"\W+", "_", subject.lower()).strip("_")[:40] or "import", subject_id="import", variant=1, n_variants=1, sheet=f, video=None)
+                    pick = sources.Pick(subject=re.sub(r"\W+", "_", subject.lower()).strip("_")[:40] or "import", subject_id="import", variant=1, n_variants=1,
+                                        sheet=first_frame(f) if alone else f, video=f if alone else None)
                     tok = pl.OWNER.set(user["id"])
                     try:
                         gid = pl.start(subject, c.out, c.inp, pick=pick)
                     finally:
                         pl.OWNER.reset(tok)
-                work = lambda: pl.run_stills(c.out, gid, c.cfg, c.pace)
+
+                def work():
+                    pl.run_stills(c.out, gid, c.cfg, c.pace)
+                    if alone and not pl.read_result(c.out, gid).get("error"):      # the stills are cut: animate them from the same video, then wait for the person
+                        pl.run_animate(c.out, gid, c.cfg, "pack", None, c.pace)
             _update(c.out, row["id"], generation=f"G{gid:03d}", status="PROCESSING")
             ctx = contextvars.copy_context()
             ctx.run(pl.OWNER.set, user["id"])
@@ -436,7 +457,7 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                     c.lock.release()
             threading.Thread(target=ctx.run, args=(run,), daemon=True).start()
             handed_off = True
-            return 202, {"id": gid, "kind": "video" if is_video else "sheet", "import": row["id"], **({"sheet": aid} if is_video else {"subject": subject})}
+            return 202, {"id": gid, "kind": "video" if is_video else "sheet", "import": row["id"], **({"sheet": aid} if is_video and not alone else {"subject": subject})}
         except Exception as e:
             if row:
                 _update(c.out, row["id"], status="FAILED", error=str(e)[:300])
@@ -493,7 +514,7 @@ def import_job(c, user: dict, job: str, **options) -> tuple[int, dict]:
         ext = Path(parsed.path).suffix.lower()
         if ext not in IMAGE + VIDEO:
             raise ImportError("Higgsfield result must be a supported image or video", 400)
-        if ext in VIDEO and not local_job and not (hit and options.get("retry") and hit.get("import")):
+        if ext in VIDEO and not local_job and not (hit and options.get("retry") and hit.get("import")) and (options.get("generation") or options.get("sheet")):
             destination(c, options.get("generation"), options.get("sheet"))
         with tempfile.TemporaryDirectory(prefix="mirsal-hf-import-") as tmp:
             f = Path(tmp) / ("result" + ext)
