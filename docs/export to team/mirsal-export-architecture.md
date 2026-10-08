@@ -174,7 +174,7 @@ How `"generate sticker pack for {subject}"`, `generate more`, regenerate-as-vers
 
 ### 10.1 Request claims the next preset grid (always 3×3)
 
-`"generate sticker pack for falcon"` (chat or Studio) is a pack intent: a new pack record (`slug: falcon`, title) plus a claim queue — the four preset grids in order (`core-v1`, `social-v1`, `reactions-v1`, `daily-v1`), 36 actions total. The first request claims the first **unclaimed** grid: the pack record gains `groups[] += {preset_key, status: CLAIMED, generation: null}`, and the sheet job is built from the preset's nine stored actions (prompts, emoji defaults, tags) — never guessed labels.
+`"generate sticker pack for falcon"` (chat or Studio) is a pack intent: a new pack session (`pack-falcon`) plus a claim queue — the four preset grids in order (`core-v1`, `social-v1`, `reactions-v1`, `daily-v1`), 36 actions total. The first request claims the first **unclaimed** grid, and the sheet job is built from the preset's nine stored actions (prompts, emoji defaults, tags) — never guessed labels. Storage, ids and states are §10.7 (session file + claim rows, not the pack record).
 
 **Built 2026-10-08 (preset engine, no claim queue yet):** `actions.PRESETS` + `FACE_SENTENCES` + `preset_cells`, and `expand(..., preset=)` — an explicit grid name wins (preset words stripped from the subject, preset implies face), otherwise a face-mode 3×3 takes `core-v1`, so `generic emojis` now claims happy → thanks in bank order with bank emoji. Cell keys are `{subject}_{token}`, tags carry token + aliases. What is still open is the pack-record claim ledger itself: every emoji request still takes `core-v1` (nothing remembers the pack's claimed grids yet), and `generate more` does not advance the queue.
 
@@ -201,6 +201,34 @@ Haitham's question — should the id be one per pack or several per pack? **Seve
 ### 10.6 Build order (when it gets a go)
 
 1. Claim ledger on the pack record (`groups[]`) + preset-queue resolver (chat intent + Studio entry); all-claimed answer with next-step choices. (Preset engine already built: §10.1.)
+
+### 10.7 Claim ledger: files, tables, state machine (DESIGNED 2026-10-08, not built)
+
+How `"generate sticker pack for {subject}"`, `generate more` and regenerate are stored. File store leads, Postgres mirrors (store-and-search.md); nothing here changes a paid path, so no spend rules are involved.
+
+**Entities (user words → system).** Three levels, each with a file record and a mirror row:
+
+| Level | File (primary) | Postgres (mirror) | Id |
+|---|---|---|---|
+| Pack session `{pack_subject_name}` | `out/pack_sessions/<slug>.json` | `pack_sessions(slug PK, subject, title, owner, pack_id, created)` | `pack-<slug>` (e.g. `pack-falcon`) |
+| Claim (one preset grid for one session) | inside the session file: `claims[]` | `claims(id PK, session FK → pack_sessions, preset, grid, status, plan jsonb, created)` | `C###` global sequence (e.g. `C008`) |
+| Generation (one sheet run) | `out/G###/result.json` (as today) | `generations` (as today) + `claim_generations(claim_id, generation_id, revision, ts)` | `G###` internal, public code later |
+
+The session also opens a row in the **`tasks` table** (kind `'sheet'`, `external_task_id = <claim id>`, `name_key = <subject>`) at claim time — no constraint change needed: a claim *is* a sheet task, and the external id is unique by construction. That is the visibility the task table gives today (`mirsal task`, the Queue) for free.
+
+**Why not fewer tables.** `tasks.generation_id` is singular, but regenerate means N generations per claim — hence `claim_generations` (append-only lineage) instead of altering `generations`. Claims do not reuse `out/tasks/NNN.json`: that number space belongs to watch folders (`tasks.next_number` counts them), so claims live under the session file and `out/claims/` never exists as a competing namespace. Reviews stay append-only; a regenerated generation gets its own reviews, never an edit of the old ones.
+
+**Claim state machine.** `UNCLAIMED` (a preset with no row — implicit, never stored) → `CLAIMED` (row written synchronously under the writer lock, **before** any paid call; two simultaneous `generate more` clicks serialize here: the loser reads the winner's row) → `PLANNED` (prompt + plan stored on the claim, = today's plan-card content) → `REQUESTED` (job file created) → `DONE` (generation linked, `claim_generations += (claim, G, revision)`) → re-`REQUESTED` on regenerate. A claim never goes backwards and never deletes: rejection only adds rows.
+
+**The five flows.**
+
+1. **New session** `"generate sticker pack for falcon"`: create `pack-falcon` (session file + row + first claim, all in one lock hold) → answer names the session, the claimed grid (`core-v1`, 3×3), and the price before anything is spent.
+2. **Current claim 2×2 or 3×3**: the claim stores `grid`. Presets hold 9 actions: 3×3 takes all nine, 2×2 takes the first four (fixed slicing rule, never reordered). Grid is chosen at claim time (user's choice, default 3×3) and frozen with the prompt.
+3. **Prompt per claim**: built from the preset's nine stored actions through the existing templates (face v4 for emoji packs) — no new prompt machinery. Stored on the claim file + task `request` jsonb, exactly like `tasks.reserve` stores `plan` today.
+4. **Regenerate → same claim, newer id**: new job → new generation (`G###`, plus public code when §10.4 lands) → appended as the next `revision` on the same claim. Old generations stay (rejection never deletes); *current* = latest `DONE` generation, export ships its latest approved stickers. Coarse lineage lives here; sticker-level `versions[]` (§10.3) is the finer layer later — both point the same way and never conflict.
+5. **Generate more → next claim**: first preset with no claim row for this session → new `C###` → flows 2–3 again under the same session. All four claimed → the pack is complete (36 stickers): answer says so in words with choices (custom 9-pick from the bank, or a new pack) — never a silent repeat, never a dead end.
+
+**Backfill & import.** `db import` reads `out/pack_sessions/` like `import_tasks` reads `out/tasks/` (idempotent re-import). Existing batches predate claims and get none: their `claim_generations` rows arrive only if a later regenerate links them. Migration number is the next free one at build time (`012_*`); per the frozen-constraint procedure it only adds tables, never alters live ones.
 2. Preset prompt builder (nine stored actions → sheet/video prompts through the existing templates).
 3. In-batch `versions[]` (+ `normalise` default, write-through, Studio version switcher, export uses latest approved).
 4. Code allocator (registry + retry, claim-time allocation, lazy backfill at export, `export_names` id field becomes the code, manifest carries both ids).
