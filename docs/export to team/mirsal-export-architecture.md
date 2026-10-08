@@ -176,6 +176,8 @@ How `"generate sticker pack for {subject}"`, `generate more`, regenerate-as-vers
 
 `"generate sticker pack for falcon"` (chat or Studio) is a pack intent: a new pack record (`slug: falcon`, title) plus a claim queue — the four preset grids in order (`core-v1`, `social-v1`, `reactions-v1`, `daily-v1`), 36 actions total. The first request claims the first **unclaimed** grid: the pack record gains `groups[] += {preset_key, status: CLAIMED, generation: null}`, and the sheet job is built from the preset's nine stored actions (prompts, emoji defaults, tags) — never guessed labels.
 
+**Built 2026-10-08 (preset engine, no claim queue yet):** `actions.PRESETS` + `FACE_SENTENCES` + `preset_cells`, and `expand(..., preset=)` — an explicit grid name wins (preset words stripped from the subject, preset implies face), otherwise a face-mode 3×3 takes `core-v1`, so `generic emojis` now claims happy → thanks in bank order with bank emoji. Cell keys are `{subject}_{token}`, tags carry token + aliases. What is still open is the pack-record claim ledger itself: every emoji request still takes `core-v1` (nothing remembers the pack's claimed grids yet), and `generate more` does not advance the queue.
+
 Neither the auto expander nor the AI enhancer chooses 2×2 vs 3×3 here: a preset grid is nine slots by definition, so preset packs are always 3×3. The expander fills the deterministic plan, the enhancer only improves wording. 2×2 stays for the freeform flows only.
 
 Claim state lives in the pack record (`library.json`, file-primary, under the library lock): an unclaimed grid is a preset with no group entry. The claim is written synchronously **before** any paid call, so two simultaneous `generate more` clicks serialize: the second sees the first's `CLAIMED` entry and takes the next grid. When the sheet returns, the batch is cut and reviewed exactly as today, and the group entry becomes `{status: READY, generation: G###, export_code}`.
@@ -198,7 +200,7 @@ Haitham's question — should the id be one per pack or several per pack? **Seve
 
 ### 10.6 Build order (when it gets a go)
 
-1. Claim ledger on the pack record (`groups[]`) + preset-queue resolver (chat intent + Studio entry); all-claimed answer with next-step choices.
+1. Claim ledger on the pack record (`groups[]`) + preset-queue resolver (chat intent + Studio entry); all-claimed answer with next-step choices. (Preset engine already built: §10.1.)
 2. Preset prompt builder (nine stored actions → sheet/video prompts through the existing templates).
 3. In-batch `versions[]` (+ `normalise` default, write-through, Studio version switcher, export uses latest approved).
 4. Code allocator (registry + retry, claim-time allocation, lazy backfill at export, `export_names` id field becomes the code, manifest carries both ids).

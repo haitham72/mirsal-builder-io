@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from . import emotions, spelling, styles
+from . import actions, emotions, spelling, styles
 
 TEMPLATES = Path(__file__).resolve().parent.parent / "prompts" / "templates"
 MARGIN = ("full body, centred, generous empty margin on every side (at least 20% of the cell), "
@@ -148,13 +148,20 @@ def clean_custom(text, what: str) -> str | None:
 TEMPLATE_GRID = {"sheet_3x3": (3, 3), "sheet_2x2": (2, 2), "single_1x1": (1, 1)}
 
 
-def expand(task: str, grid: tuple = (3, 3), face: bool | None = None) -> dict:
+def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: str | None = None) -> dict:
     """`face` (emoji-style: faces only, never bodies) auto-detects from the request (`generic emojis`, `an emoji pack`,
-    ...) and stays on the plan, so recuts and rebuilds keep it. Template v4 carries the face wording; v1-v3 are untouched."""
+    ...) and stays on the plan, so recuts and rebuilds keep it. `preset` (a saved nine-slot grid from the canonical
+    bank) names the nine directly; a face-mode sheet without one takes `core-v1`. Template v4 carries the face
+    wording; v1-v3 are untouched."""
     rows, cols = grid
     words = re.findall(r"[a-z0-9]+", task.lower())
     if face is None:
         face = bool(set(words) & EMOJI_WORDS)
+    if preset is None:
+        preset = actions.preset_name(task)
+    if preset:
+        words = [w for w in words if w not in {"core", "social", "reactions", "daily", "v1"}]
+        face = True                    # a preset grid is nine bank faces; its sentences are face-only
     body = " ".join(w for w in words if w not in VERBS or words.index(w) > 2)
     parts = SPLIT.split(body, maxsplit=1)
     subject = spelling.fix_text(parts[0].strip()) or "sticker"
@@ -168,17 +175,24 @@ def expand(task: str, grid: tuple = (3, 3), face: bool | None = None) -> dict:
     task_slug = subject_slug + (f"_{ctx_slug}" if ctx_slug else "")
     ctx_tags = [w for w in ctx_words if len(w) > 2][:1]
     cells, stickers = [], []
-    if face or not ACTIONS[kind]:
+    if preset is None and face and grid == (3, 3):
+        preset = "core-v1"                    # an emoji pack with no grid named starts at the first grid; `generate more` claims the next
+    if preset:
+        entries = [(tok, *rest) for tok, *rest in actions.preset_cells(preset, rows * cols)]
+    elif face or not ACTIONS[kind]:
         entries = emotions.pick(rows * cols, subject_slug, face=face)      # face mode always draws from the mood bank: a context bank's props need hands
     else:
         entries = ACTIONS[kind][: rows * cols]
     for i, (suffix, phrase, emoji, motion) in enumerate(entries, 1):
         key = f"{subject_slug}_{suffix}"                  # searchable action name; also the file name tail
-        words = [w for w in re.findall(r"[a-z0-9]+", phrase) if len(w) > 2 and w not in STOP and w not in {"with", "holding", "wearing"}]
-        tags = clean_tags(key, words[:3] + ctx_tags)
+        if preset:
+            seed = [suffix, *actions.ACTION_BANK[suffix]["aliases"]] + ctx_tags
+        else:
+            seed = [w for w in re.findall(r"[a-z0-9]+", phrase) if len(w) > 2 and w not in STOP and w not in {"with", "holding", "wearing"}][:3] + ctx_tags
+        tags = clean_tags(key, seed)
         cells.append({"pos": i, "label": phrase, "tags": tags, "emoji": emoji, "motion": motion})      # every cell prompt starts with the subject description, scene included
     slots = {"subject_description": described, "style_id": "flat_vector", "mode": TEMPLATE_OF[(rows, cols)], "cells": cells,
-             "action_guidance": kind, "key_colour": "green", "face": bool(face)}
+             "action_guidance": kind, "key_colour": "green", "face": bool(face), "preset": preset}
     tid = TEMPLATE_OF[(rows, cols)]
     version = 4 if face else TEMPLATE_VERSION
     built = render_plan(slots, tid, version)

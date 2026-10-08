@@ -39,6 +39,13 @@ class FaceModeTests(unittest.TestCase):
         for group in emotions.FACE_GROUPS.values():
             for suffix, label, emoji, motion in group:
                 self.assertEqual(limbs(label + " " + motion), [], suffix)
+        from mirsal.generation import actions
+        self.assertEqual(len(actions.PRESETS), 4)
+        for preset, toks in actions.PRESETS.items():
+            self.assertEqual(len(toks), 9, preset)
+            for tok in toks:
+                label, motion = actions.FACE_SENTENCES[tok]
+                self.assertEqual(limbs(label + " " + motion), [], f"{preset}/{tok}")
 
     def test_v4_files_exist_and_v1_v3_are_untouched(self):
         for name in ("sheet_3x3_v4", "sheet_2x2_v4", "single_1x1_v4", "video_v4"):
@@ -54,6 +61,27 @@ class FaceModeTests(unittest.TestCase):
         self.assertEqual((again["template_version"], "Faces only" in again["sheet_prompt"]), (4, True))
         self.assertEqual([c["label"] for c in p["slots"]["cells"]],
                          [c["label"] for c in prompter.expand("generic emojis", (2, 2))["slots"]["cells"]])
+
+    def test_face_sheets_claim_the_preset_grid_in_order(self):
+        from mirsal.generation import actions
+        p = prompter.expand("generic emojis", (3, 3))
+        self.assertEqual(p["slots"].get("preset"), "core-v1")
+        self.assertEqual([s["key"] for s in p["stickers"]],
+                         [f"generic_emojis_{t}" for t in actions.PRESETS["core-v1"]])
+        self.assertEqual([s["emoji"] for s in p["stickers"]],
+                         [actions.ACTION_BANK[t]["emoji"] for t in actions.PRESETS["core-v1"]])
+        first = p["stickers"][0]
+        self.assertEqual(first["tags"][:3], [first["key"], "happy", "smile"])
+        for s in p["stickers"]:
+            self.assertEqual(limbs(" ".join(s["tags"])), [])
+
+    def test_an_explicit_preset_wins_and_other_flows_are_untouched(self):
+        p = prompter.expand("social-v1 falcon", (3, 3))
+        self.assertEqual(([s["key"] for s in p["stickers"]][0], p["slots"].get("preset")), ("falcon_hello", "social-v1"))
+        q = prompter.expand("teddy bear", (3, 3))
+        self.assertIsNone(q["slots"].get("preset"))
+        r = prompter.expand("generic emojis", (2, 2))
+        self.assertEqual((r["template_version"], len(r["stickers"])), (4, 4))
 
 
 if __name__ == "__main__":

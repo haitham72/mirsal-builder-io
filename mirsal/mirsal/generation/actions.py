@@ -106,3 +106,74 @@ def fallback_tag(key: str | None = None, tags: list | tuple | None = None, exclu
             seen.add(w)
             out.append(w)
     return "_".join(out or plain) or "sticker"
+
+
+# Saved nine-slot preset grids (row-major token order). A preset pack claims them in order: the first request takes
+# the first unclaimed grid, `generate more` the next (`docs/export to team/mirsal-export-architecture.md` §10).
+PRESETS = {
+    "core-v1": ["happy", "laugh", "love", "cry", "sad", "angry", "surprised", "scared", "thanks"],
+    "social-v1": ["hello", "hug", "kiss", "wink", "shy", "celebrate", "clap", "approve", "disapprove"],
+    "reactions-v1": ["think", "confused", "eye-roll", "facepalm", "shrug", "bored", "cool", "flex", "scheme"],
+    "daily-v1": ["sleep", "sick", "sneeze", "dance", "plead", "salute", "cheers", "gift", "star-struck"],
+}
+
+# Face-only image/video sentences per bank token (emoji-style packs draw faces, never bodies). Same keys and emoji
+# as ACTION_BANK; every sentence stays clear of `emotions.LIMB_WORDS`.
+FACE_SENTENCES = {
+    "happy": ("pure happiness with a bright beaming smile and joyful eyes", "beams brightly, eyes shine with joy, happy sway"),
+    "laugh": ("laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut", "the face shakes with laughter, tears fly, the mouth opens wide"),
+    "cry": ("bawling with big streaming tears and a trembling lip", "tears stream in two arcs, the lip quivers, the face crumples"),
+    "sad": ("sad and drooping face with a single tear", "sighs, a tear slides down, the face droops lower"),
+    "love": ("lovestruck with sparkling eyes, blushing cheeks and a dreamy smile", "eyes sparkle, cheeks flush deeper, dreamy sway"),
+    "angry": ("furious and steaming with a deep scowl and flared nostrils", "steam puffs from the head, the face shakes with rage, the scowl deepens"),
+    "wink": ("playful wink with one eye closed and a cheeky grin", "winks, the grin tilts, the cheek lifts"),
+    "kiss": ("blowing a kiss with a wink, a small heart floating free", "lips purse, a wink, the heart pulses"),
+    "surprised": ("surprised with wide round eyes and a small o-shaped mouth", "eyes widen, the mouth forms a small o, quick gasp"),
+    "scared": ("terrified and trembling with wide darting eyes", "shivers fast, eyes dart, the face pales"),
+    "confused": ("confused with a tilted head, crooked brow and sideways glance", "the head tilts, one brow lifts, eyes glance aside"),
+    "think": ("thinking hard, eyes glancing up and to the side, one eyebrow raised", "eyes glance up, the brow furrows then lifts, a slow nod"),
+    "eye-roll": ("rolling eyes with a bored deadpan face", "eyes circle slowly, head tilts back with a sigh"),
+    "sleep": ("fast asleep with a drool bubble, snoring softly", "eyes stay shut, the bubble inflates and shrinks, gentle drift"),
+    "cool": ("wearing sunglasses, smirking, ultra cool", "slow confident head nod, the sunglasses glint"),
+    "shy": ("shy with a bashful smile and downcast glancing eyes", "smiles bashfully, eyes glance down and away"),
+    "sick": ("sickly with a greenish tint, droopy eyes and a weak frown", "the face pales greenish, eyes droop, weak shiver"),
+    "sneeze": ("mid-sneeze with squeezed eyes and a drippy nose", "the face scrunches, bursts into the sneeze, sniffles"),
+    "celebrate": ("celebrating with sparkling joyful eyes and a huge party grin", "eyes sparkle, the grin stretches wide, joyful tremble"),
+    "clap": ("cheering with a huge congratulatory grin and sparkling eyes", "grins widely, nods along, joyful sway"),
+    "approve": ("confident wink with a proud grin", "winks twice, the grin widens, proud nod"),
+    "disapprove": ("stern disapproval with a tight frown and narrowed eyes", "frowns firmly, eyes narrow, slow disapproving shake of the head"),
+    "thanks": ("grateful smile with eyes closed in thanks and glowing cheeks", "the head bows gently, the smile widens, warm glow"),
+    "hello": ("friendly hello with a warm open smile and bright welcoming eyes", "smiles warmly, eyes light up, cheerful tilt"),
+    "hug": ("warm loving smile with happy squinted eyes and glowing cheeks", "the face glows, happy squint, gentle tilt side to side"),
+    "flex": ("proud smug grin with a confident raised brow", "the smug grin spreads, the brow lifts, confident nod"),
+    "scheme": ("scheming grin with wiggling eyebrows", "eyebrows wiggle, the grin widens, sneaky giggle"),
+    "facepalm": ("disbelief with squeezed-shut eyes and a deep sigh", "eyes squeeze shut, the head shakes slowly, deep sigh"),
+    "shrug": ("clueless sideways glance with a crooked half-smile", "glances side to side, the half-smile tilts, head tilts"),
+    "bored": ("bored with half-lowered eyelids and a flat unimpressed mouth", "eyelids droop, the mouth stays flat, slow exhale"),
+    "dance": ("pure joy, eyes closed, huge blissful smile, jiggling cheeks", "the face bobs to a beat, cheeks jiggle, blissful sway"),
+    "plead": ("huge shiny puppy eyes with a trembling lip, begging please", "eyes shimmer and widen, the lip trembles, hopeful tilt"),
+    "salute": ("respectful attention with a chin-up nod and focused eyes", "the chin lifts, eyes lock forward, firm respectful nod"),
+    "cheers": ("cheerful toast with a clinking grin and merry crinkled eyes", "grins broadly, eyes crinkle merrily, joyful nod"),
+    "gift": ("delighted with wide sparkling eyes and a joyful gasp", "eyes widen and sparkle, happy gasp"),
+    "star-struck": ("star-struck with huge starry eyes and an awestruck open smile", "eyes turn starry, the mouth opens in awe"),
+}
+
+
+def preset_name(text: str | None) -> str | None:
+    """`core-v1` when the request names it (`core v1`, `core-v1`, …), else None."""
+    flat = re.sub(r"[^a-z0-9]+", "", str(text or "").lower())
+    for key in PRESETS:
+        if re.sub(r"[^a-z0-9]+", "", key) in flat:
+            return key
+    return None
+
+
+def preset_cells(preset: str, n: int) -> list[tuple]:
+    """The first `n` cells of a preset grid as `(token, face label, emoji, motion)`."""
+    if preset not in PRESETS:
+        raise ValueError(f"unknown preset {preset}: {sorted(PRESETS)}")
+    out = []
+    for tok in PRESETS[preset][:n]:
+        label, motion = FACE_SENTENCES[tok]
+        out.append((tok, label, ACTION_BANK[tok]["emoji"], motion))
+    return out
