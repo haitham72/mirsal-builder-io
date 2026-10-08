@@ -7,12 +7,8 @@ Source of truth for each phase is `docs/export to team/mirsal-export-architectur
 
 Backend is built and tested (`docs/engine-and-studio.md` "Batches, generations, regenerate"); the screens are not.
 
-1. **Stickers view header.** Title `Batch 1`, `Batch 2` … (no `sheet 044 · G119`; the G### goes in a tooltip). Under it ONE row `generation 01 … n` from
-   `GET /api/generations/{id}/family` (fetched when the batch view changes and after a regenerate, never on every poll): click = view it; on each chip
-   **pick** (`POST …/pick`, one per batch, the picked one marked), **remove** (the existing trash route, confirm first), **report** (`data-act=tkreport
-   data-k=generation data-id=G###`). Animate / Add act on each batch's PICKED generation. Replace the old Variations strip (`gvarsHtml` in live.js and its
-   lines in `tests/js/history_card.test.js`) with this row.
-2. **Animation view: the same, adapted.** Under the batch title the picked generation, then `animation 01 … n` = its video sheets that have a video:
+1. Built 2026-10-08: the Batch k header with the generations row (Make main / Delete / Report), the one frame with view tabs and the one control row.
+2. **Animation view: the animations row.** In the frame's Video view, `animation 1 … n` = the picked generation's video sheets that have a video:
    pick (`POST …/pick_video`), remove (`POST …/remove_video`), report (`data-k=animation data-id=G###/A2`). Regenerate (video) is already one button.
 3. **Import inside a batch** (Haitham: "import in Stickers and in Animation, proper naming"). Stickers: an imported image becomes the next generation of
    THIS batch (the batch's plan/cells and naming, `parent` + `regen_of`, like Regenerate) — extend `flow/imports.import_file` with the batch. Animation: an

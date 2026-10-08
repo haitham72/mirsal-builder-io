@@ -156,7 +156,14 @@ const sheetOf=g=>[...g.video_sheets].reverse().find(v=>v.status!=='REJECTED');
 const cutOf=g=>[...g.video_sheets].reverse().find(v=>['SLICED','SUPERSEDED'].includes(v.status)&&v.video)||sheetOf(g);
 const hasVid=g=>!!(g.source.has_video||(cutOf(g)&&cutOf(g).video));
 const sessionGens=()=>SES.gens.map(id=>GM.get(id)).filter(Boolean);
-const included=()=>sessionGens().filter(g=>!SES.off.includes(g.number));
+/* A batch is a family of generations (gen 1 … n); ONE is the main (Haitham, 2026-10-08: "this generation is the main image/video generation now, the others
+   are backups"). SES.gens is what is IN VIEW per batch; FAM holds each batch's family (loaded once per batch, again after Regenerate / Make main / Delete),
+   and Animate / Add act on each batch's MAIN generation even while a backup is in view. */
+const FAM=new Map();
+const famSet=f=>{for(const m of f.members||[])FAM.set(m.id,f);return f};
+async function famLoad(id){const r=await api(`/api/generations/${id}/family`);return r.ok?famSet(r.j):null}
+const mainNum=g=>{const f=FAM.get(g.number);return f?+String(f.picked).replace(/\D/g,''):g.number};
+const included=()=>sessionGens().filter(g=>!SES.off.includes(g.number)).map(g=>GM.get(mainNum(g))||g);
 const nAdded=(g,pid)=>keptOf(g).filter(t=>((g.added||{})[pid]||[]).includes(`${animPhase(g)?'animated':'static'}:${t.index}`)).length;
 
 /* ---------- the screen */
@@ -229,10 +236,25 @@ async function grepSend(e){const f=e.target.files[0];e.target.value='';if(!f)ret
   const r=await postWait(`/api/generations/${GREP.g}/replace`,{index:GREP.i,png:du},'Replacing the sticker…');if(!r.ok){toast(r.j.error,1);return}
   toast(r.j.anim_from_previous?'Replaced; the animation still shows the previous picture':'Replaced');glast='';tick(true)}
 ACT.grepundo=async el=>{const r=await post(`/api/generations/${el.dataset.g}/replace`,{index:+el.dataset.i,undo:true});if(!r.ok){toast(r.j.error,1);return}toast('Taken back');glast='';tick(true)};
+/* the generations row of a batch: gen 1 … n (★ = the main), click = view it; the one in view carries Make main / Delete / Report */
+function gensHtml(g){const f=FAM.get(g.number),ms=f&&f.members&&f.members.length?f.members:[{id:g.number,generation_id:g.generation_id,n:1}],main=f?f.picked:g.generation_id;
+  return`<span class=ggens>${ms.map(m=>`<button class="ggen${m.id===g.number?' on':''}${m.generation_id===main?' main':''}" data-act=ggen data-g=${g.number} data-to=${m.id} aria-pressed=${m.id===g.number} title="${esc(m.generation_id)}${m.generation_id===main?' · the main generation':' · a backup'}${m.sheet_model?' · '+esc(m.sheet_model):''}">${m.generation_id===main?'★ ':''}gen ${m.n}</button>`).join('')}</span>
+   <span class=ggact>${g.generation_id===main?`<span class=keychip title="Animate and Add to pack use this generation">Main</span>`:`<button class="btn sm" data-act=gmain data-g=${g.number} title="Make this the batch's main generation; the others stay as backups">Make main</button>`}
+    <button class="btn sm" data-act=gdel data-g=${g.number} title="Move this generation to the trash (restorable)">Delete</button><button class="btn sm" data-act=tkreport data-k=generation data-id=${g.generation_id}>Report</button></span>`}
+ACT.ggen=el=>{const from=+el.dataset.g,to=+el.dataset.to;if(from===to)return;SES.gens=SES.gens.map(x=>x===from?to:x);SES.off=SES.off.map(x=>x===from?to:x);saveSes();glast='';tick(true)};
+ACT.gmain=async el=>{const n=+el.dataset.g,r=await post(`/api/generations/${n}/pick`,{});if(!r.ok)return toast(r.j.error||'Could not make it the main generation',1);
+  famSet(r.j);const m=r.j.members.find(x=>x.id===n);toast(`gen ${m?m.n:''} is the main generation now; the others stay as backups`);glast='';tick(true)};
+ACT.gdel=el=>{const n=+el.dataset.g,g=GM.get(n),f=FAM.get(n),m=f&&f.members.find(x=>x.id===n);if(!g)return;
+  confirmDlg(`Delete gen ${m?m.n:1} (${g.generation_id})? It moves to the trash and you can restore it from “Removed batches”. Stickers already in a pack stay there.`,async()=>{
+    const r=await post(`/api/generations/${n}/remove`,{});if(!r.ok)return toast(r.j.error,1);
+    GM.delete(n);FAM.delete(n);const left=r.j.batch&&r.j.batch.members||[];
+    if(!left.length){SES.gens=SES.gens.filter(x=>x!==n);SES.off=SES.off.filter(x=>x!==n)}
+    else{const nf=await famLoad(+String(left[0]).replace(/\D/g,''));const to=nf?+String(nf.picked).replace(/\D/g,''):+String(left[0]).replace(/\D/g,'');SES.gens=SES.gens.map(x=>x===n?to:x)}
+    saveSes();histLoad(false);glast='';tick(true)},'Delete')};
 function batchHtml(g,k,total,mode){
   const inc=!SES.off.includes(g.number),s=g.source,staff=(typeof ME==='undefined'||!ME||['owner','admin'].includes(ME.role));
   const head=`<div class=gbhead>${total>1?`<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc?'checked':''}> <b>Batch ${k+1}</b></label>`:`<b>Batch ${k+1}</b>`}
-    <span class=mut>sheet ${s.subject_id} · ${g.generation_id}${hasVid(g)?'':' · no video prepared'}</span>
+    ${gensHtml(g)}
     ${g.key_colour==='blue'?`<span class=keychip title="This sheet has a blue screen, so it was keyed as blue (and the video sheet is blue too). Nothing to do.">Blue key</span>`:''}
     ${s.prepared&&staff?`<span class=keychip title="Served from a prepared sheet in the watch folder: 0 credits, no provider call.">Prepared</span>`:''}
     <span class=gbact>${s.has_video||making(g)||(typeof liveReadyNow==='function'&&liveReadyNow())?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
@@ -245,7 +267,7 @@ function batchHtml(g,k,total,mode){
      ${p?`<div class=mut>${esc(p.fix)}</div>${p.received?`<div class=mut>The sheet was received${p.received.job?' ('+esc(p.received.job)+')':''}${p.received.cost?' and paid for ('+p.received.cost+' credits)':''}: nothing is lost, this batch just has no stickers. It stays in History.</div>`:''}
      ${p.cut_anyway?`<button class="btn pri" data-act=gcutany data-g=${g.number} title="Cut the sheet that was received, as it is, for free: you decide on every cell yourself">Cut it anyway</button>`:''}
      <button class="btn${p.cut_anyway?'':' pri'}" data-act=gretrysheet data-g=${g.number}>Try the sheet again</button>`:''}</div></section>`}
-  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?`<div class=gleft>${videoPanel(g)}${sheetPanel(g)}</div>`:sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div>${mode!=='anim'&&typeof liveReadyNow==='function'&&liveReadyNow()&&g.sheet_prompt?`<div class=gredo>${copyBox('Sheet prompt (the one sent; edit it, then regenerate)',pdText(g,'sheet'),'rs'+g.number,8,{kind:'sheet',g:g.number,foot:pdFoot(g,'sheet')})}</div>`:''}${mode==='anim'&&!g.source.has_video&&(g.video_sheets||[]).some(v=>v.video)?`<div class=gredo>${copyBox('Video prompt (the one sent last; edit it, then regenerate)',pdText(g,'video'),'rp'+g.number,6,{kind:'video',g:g.number,foot:pdFoot(g,'video')})}</div>`:''}</section>`}
+  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${sheetPanel(g,mode==='anim'?'anim':'still')}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
 /* what a set of batches stands at right now: the counts the header and the bottom bar read. One implementation, used by the header and the bottom bar. */
 function gstats(gs){const inc=gs.filter(g=>!SES.off.includes(g.number)),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
   const todoAnim=inc.filter(g=>g.source.has_video&&(!animPhase(g)||g.stickers.some(t=>t.anim_status==='STALE'))&&!processing(g)&&!ANIM.has(g.number)&&keptStills(g).length);
@@ -272,7 +294,6 @@ function gview(){
     <button class="btn dng" data-act=grm title="Move ${gs.length===1?'this batch':'these batches'} to the trash. You can restore ${gs.length===1?'it':'them'} from Removed batches under Earlier batches.">${ic('trash')} Remove batch</button>
     <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
-   ${typeof gvarsHtml==='function'?gvarsHtml(gs):''}
    ${stepsHtml(s)}
    ${gbodyHtml(s.gs,{inc:s.inc,todoAnim:s.todoAnim,busyAnim:s.busyAnim,n:s.n})}
    <div class=gbar>${barHtml(s)}</div>`}
@@ -290,16 +311,15 @@ function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);   // a pre
    ${hasVid?`<button class="btn pri gbig" data-act=ganimate ${c.todoAnim.length?'':'disabled'}>${ic('play')} Animate</button>`:''}</section>`}
 
 /* The Animation tab before any animation exists (Haitham, 2026-10-04: it said "nothing to see here" while the controls lived on Stickers). Per batch: the video sheet
-   that would be sent (the server's preview of the kept stickers), the model and price with Generate (vgenBox, inside the sheet panel), the editable video prompt with the
+   that would be sent (the frame's "To send" view, with the model, the price and Generate in its control row), the editable video prompt with the
    same footer as the Prompt tab (Generate video with my prompt), and each kept sticker with motion suggestions that add a phrase to the prompt. Nothing here spends
    without the price shown on the button (rule 13). Pure, except the two live.js helpers it reads when they exist. */
 const ANIM_MOTIONS=['bounces','waves','nods','jumps','spins','laughs','leans in','sparkles appear'];
 function animCreate(gs){return gs.map(g=>{const kept=keptStills(g),live=typeof liveReadyNow==='function'&&liveReadyNow(),base=`/out/${g.generation_id}/`;
-  const prev=kept.length&&typeof previewUrl==='function'&&typeof fillNow==='function'?`<figure class=ganew-prev><img src="${esc(previewUrl(g,fillNow()))}" alt="The video sheet that will be animated" loading=lazy><figcaption class=mut>The video sheet that will be sent: your ${kept.length} kept sticker${kept.length===1?'':'s'}</figcaption></figure>`:'';
   return`<section class=gbatch><div class=gbhead><b>${esc(g.generation_id)}</b><span class=mut>${kept.length?`${kept.length} kept sticker${kept.length===1?'':'s'} to animate`:'Keep at least one sticker on the Stickers view first'}</span>
     ${live?'':`<span class=gbact><button class="btn sm" data-act=gvideo data-g=${g.number} ${kept.length?'':'disabled'} title="Higgsfield is not connected: make the video from the sheet in your own tool">${ic('film')} Make a video…</button></span>`}</div>
-   <div class=ganew><div class=ganew-l>${prev}${typeof sheetPanel==='function'?sheetPanel(g):''}</div>
-    <div class=ganew-r>${copyBox('Video prompt',pdText(g,'video'),'ap'+g.number,6,{kind:'video',g:g.number,foot:pdFoot(g,'video')})}
+   <div class=ganew><div class=ganew-l>${typeof sheetPanel==='function'?sheetPanel(g,'anim',{noPrompt:true}):''}</div>
+    <div class=ganew-r>${copyBox('Video prompt',pdText(g,'video'),'ap'+g.number,6,{kind:'video',g:g.number,foot:`<div class=pdfoot><button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=video>Reset</button><small class=mut>Sent exactly as written when you press Generate.</small></div>`})}
      <div class=ganew-sts>${kept.map(t=>`<div class=ganew-st>${t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" alt="" loading=lazy>`:''}<div><b>S${t.index} · ${esc(String(t.key||'').replace(/_/g,' '))}</b>
        <div class=ganew-mo>${ANIM_MOTIONS.map(m=>`<button class=ganew-chip data-act=ganmo data-g=${g.number} data-m="${esc('S'+t.index+' '+m)}">${esc(m)}</button>`).join('')}</div></div></div>`).join('')}</div></div></div></section>`}).join('')}
 /* a motion suggestion adds "S3 waves" to the batch's video prompt draft (the same draft the Prompt tab edits), so the person sees and can change what is sent */
@@ -377,7 +397,7 @@ function resheetFoot(g,live){const why=!live?'Higgsfield is not connected':'';
 ACT.pgresheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'sheet')||'').trim();
   if(!text){toast('Write a sheet prompt first',1);return}
   if(typeof lcached==='function'&&lcached('image')==null){toast('The price is not known yet: wait for it, then regenerate',1);return}
-  el.disabled=true;const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,parent:g.generation_id,regen_of:g.generation_id,
+  el.disabled=true;const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,parent:(FAM.get(g.number)||{}).root||g.generation_id,regen_of:g.generation_id,
     sheet_prompt:pdCustom(g,'sheet')?text:undefined,mode:'regen',batch:g.number});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};
 ACT.pgredo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'video')||'').trim();
@@ -580,15 +600,12 @@ function videoBox(g,k){const sz=g.source.sheet_size,v=cutOf(g);
   if(v)return SR.picture(g,v);
   return`<div class="gbadmsg mut" style="padding:26px 10px">These animations come from pre-sliced clips, so there is no single video sheet for this batch.</div>`}
 function videoPanel(g){const s=g.source,vs=cutOf(g),vi=Object.assign({},vs&&vs.video_info||{},s.video_info||{}),a=animStats(g),bad=a.oob.length+a.fail.length;
-  return`<aside class=gsheet><div class=gshead><b>Video sheet</b><span class=gspace></span><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?`, ${a.oob.length} out`:''}</span></div>
-   ${videoBox(g,2)}
+  return`${videoBox(g,2)}
    ${SR.bulk(g)}
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'anim')).join('')}</div>
     ${allowAllRow(g,'animation')}
-   <div class="kv vkv"><span>source</span><span>${esc(vi.mode||(s.video_path?'3x3 mp4':vs&&vs.video?'video sheet':'clips'))}${vi.size?' · '+esc(vi.size):vi.width?' · '+vi.width+'×'+vi.height:''}${vi.fps?' · '+vi.fps+' fps':''}</span>
-    <span>out of bounds</span><span>${a.oob.length?a.oob.map(t=>'S'+t.index).join(', '):'none'}</span><span>no animation</span><span>${a.fail.length?a.fail.map(t=>'S'+t.index).join(', '):'none'}</span>
-    <span>size</span><span>${a.done?`${a.avg} KB average, ${a.max} KB largest`:'-'}</span><span>work</span><span>${a.done?`${(a.ms/1000).toFixed(1)} s${a.cached?` · ${a.cached} from the cache`:''}`:'-'}</span></div>
-   <div class=gsfoot><span class=mut>blue = cuts</span><button class="link" data-act=gvsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'anim')}</aside>`}
+   <div class=gsfoot><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?` · ${a.oob.map(t=>'S'+t.index).join(', ')} out`:''}${a.fail.length?` · ${a.fail.map(t=>'S'+t.index).join(', ')} not animated`:''}</span>
+    <span class=mut>${esc(vi.mode||(s.video_path?'3x3 mp4':vs&&vs.video?'video sheet':'clips'))}${vi.width?' · '+vi.width+'×'+vi.height:''}${a.done?` · ${a.avg} KB avg`:''}</span><button class="link" data-act=gvsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'anim')}`}
 const AV={g:null};
 ACT.gvsheet=el=>{AV.g=+el.dataset.g;animDlg()};
 ACT.gaclose=()=>{AV.g=null;closeDlg()};
@@ -609,16 +626,53 @@ const SHK=new Map();      // batch number -> the sheet view the person chose: 'k
 const sheetViews=g=>{const s=g.source,v=[{id:'raw',file:s.sheet_copy,label:'Raw'}];if(s.keyed)v.push({id:'keyed',file:s.keyed,label:'Keyed'});
   if(s.sheet_fixed)v.push({id:'fixed',file:s.sheet_fixed,label:`Fixed (${(s.sheet_fixed_cells||[]).map(i=>'S'+i).join(', ')})`});return v};
 const sheetView=g=>{const vs=sheetViews(g);return vs.find(v=>v.id===SHK.get(g.number))||vs[0]};
-function sheetPanel(g){const s=g.source,size=s.sheet_size;if(!size||!s.sheet_copy)return'';
-  const cur=sheetView(g),keyed=cur.id==='keyed',base=`/out/${g.generation_id}/`,G=s.grid,[W,H]=size;
+/* The batch's ONE frame (Haitham, 2026-10-08: "merge them in one image/video … fit everything minimally"): view tabs Raw · Keyed (· Fixed) · To send · Video
+   over one picture, the cell controls of that view ON it (rule 10, design §9: still controls on the sheet views, animation controls on the video), one caption
+   line, then ONE control row (genRow). "To send" is the video sheet that will be sent, at the Gap (the only view with the Gap slider). The Stickers view
+   opens on Raw, the Animation view on Video (else To send); each view remembers its own choice per batch (SHK / AVK). */
+const AVK=new Map();
+const vidOf=g=>!!(g.source.video_path||(cutOf(g)&&cutOf(g).video));
+const canSend=g=>!g.source.has_video&&keptStills(g).length>0&&typeof previewUrl==='function'&&typeof fillNow==='function';
+function mediaView(g,mode){const k=(mode==='anim'?AVK:SHK).get(g.number);
+  if(k==='video'&&vidOf(g))return'video';if(k==='send'&&canSend(g))return'send';
+  if(sheetViews(g).some(v=>v.id===k))return k;
+  return mode==='anim'?(vidOf(g)?'video':canSend(g)?'send':'raw'):'raw'}
+function sheetPanel(g,mode,opt){const s=g.source,size=s.sheet_size;if(!size||!s.sheet_copy)return'';mode=mode==='anim'?'anim':'still';
+  const view=mediaView(g,mode),cur=sheetViews(g).find(v=>v.id===view)||{id:view},keyed=cur.id==='keyed',base=`/out/${g.generation_id}/`,G=s.grid,[W,H]=size;
   const cut=G?`<span class="gcut ${G.method==='gutter'||G.method==='single'?'ok':'warn'}">${G.method==='gutter'?'cut at gutters':'cut: '+esc(G.method)}</span>`:'';
-  return`<aside class=gsheet><div class=gshead><b>${g.key_colour==='blue'?'Blue':'Green'} screen</b><span class=gspace></span><div class=tabs>
-    ${sheetViews(g).map(v=>`<button class="tab ${v.id===cur.id?'on':''}" data-act=gshk data-g=${g.number} data-k=${v.id}>${esc(v.label)}</button>`).join('')}</div></div>
-   <div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+cur.file}" alt="${esc(cur.label)}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
+  const tab=(id,label)=>`<button class="tab ${id===cur.id?'on':''}" data-act=gshk data-g=${g.number} data-k=${id}>${label}</button>`;
+  const tabs=`<div class=tabs>${sheetViews(g).map(v=>`<button class="tab ${v.id===cur.id?'on':''}" data-act=gshk data-g=${g.number} data-k=${v.id}>${esc(v.label)}</button>`).join('')}${canSend(g)?tab('send','To send'):''}${vidOf(g)?tab('video','Video'):''}</div>`;
+  let body;
+  if(view==='video')body=videoPanel(g);
+  else if(view==='send'){const f=fillNow();
+    body=`<div class=sbox><img data-lvprev src="${esc(previewUrl(g,f))}" alt="The video sheet that will be sent" loading=lazy></div>
+     <label class=lv-gap title="Space between the stickers on the video sheet that is sent: smaller gap = bigger stickers, bigger gap = safer">Gap <input type=range min=8 max=50 step=1 value="${gapPct(f)}" data-lvgap data-g=${g.number}><output>${gapPct(f)}%</output></label>
+     <div class=gsfoot><span class=mut>What the video model gets: your ${keptStills(g).length} kept sticker${keptStills(g).length===1?'':'s'} at this gap</span></div>`}
+  else body=`<div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+cur.file}" alt="${esc(cur.label)}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'still')).join('')}</div>
     ${allowAllRow(g,'still')}
-   <div class=gsfoot>${cut}<span class=mut>blue = cuts, yellow = sticker edge</span><button class="link" data-act=gsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'still')}${typeof vgenBox==='function'?vgenBox(g):''}</aside>`}
-ACT.gshk=el=>{const n=+el.dataset.g;if(el.dataset.k==='raw')SHK.delete(n);else SHK.set(n,el.dataset.k);glast='';tick(true)};
+   <div class=gsfoot>${cut}<span class=mut>blue = cuts, yellow = sticker edge</span><button class="link" data-act=gsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'still')}`;
+  return`<aside class=gsheet><div class=gshead>${tabs}</div>${body}${genRow(g,mode,opt)}</aside>`}
+/* The ONE control row under the frame: the model (a plain drop-down, "made with X →" once something exists), the settings that have a choice, Loop for a
+   video, the button with its price, and a Prompt toggle that opens the text that will be sent (edited in place, Reset to the template). Stickers: Regenerate
+   = a new generation of this batch. Animation: Generate the first time, then Regenerate = a new animation of this generation, at the Gap of "To send". */
+const PO=new Set();
+function genRow(g,mode,opt){if(typeof liveReadyNow!=='function'||!liveReadyNow()||making(g))return'';
+  const kind=mode==='anim'?'video':'image',pk=kind==='video'?'video':'sheet';
+  if(kind==='video'){if(g.source.has_video)return'';
+    const stalled=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&JR.stalled(j));if(stalled)return JR.controls(stalled);
+    const run=videoRun(g);if(run)return`<div class="lv-vgen run"><div class=spin></div><span>Animating with ${esc(run.model)}…<small data-lvt="${run.t0}">${Math.round((Date.now()-run.t0)/1000)}s</small></span></div>`;
+    if((g.video_sheets||[]).some(v=>v.status==='VIDEO_RETURNED')||processing(g))return`<div class="lv-vgen run"><div class=spin></div><span>Cutting the video into animations…</span></div>`}
+  const again=kind==='image'||(g.video_sheets||[]).some(v=>v.video),kept=keptStills(g).length;
+  const made=kind==='video'?(cutOf(g)||{}).model:g.sheet_model;
+  const act=kind==='image'?'pgresheet':again?'pgredo':'pgvideo',off=kind==='video'&&!kept;
+  const open=PO.has(g.number+':'+pk)&&!(opt&&opt.noPrompt);
+  return`<div class=gctl>${modelPick(kind,made)}${kind==='video'?`<label class=lv-chk title="On: the video model is told to loop and end on its first pose. Off: Mirsal closes the loop itself"><input type=checkbox data-lvloop ${LIVE.loop?'checked':''}> Loop</label>`:''}
+   <span class=gspace></span>${opt&&opt.noPrompt?'':`<button class="btn sm" data-act=gptog data-g=${g.number} data-k=${pk} aria-expanded=${open}>Prompt</button>`}
+   <button class="btn sm pri" data-act=${act} data-g=${g.number} ${off?'disabled title="Keep at least one sticker first"':''}>${again?'Regenerate':'Generate'}<span class=lv-vp data-lvprice=${kind}></span></button></div>
+   ${open?`<div class=gprompt>${copyBox(kind==='image'?'Sheet prompt':'Video prompt',pdText(g,pk),'gp'+pk+g.number,kind==='image'?8:6,{kind:pk,g:g.number,foot:`<div class=pdfoot><button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=${pk}>Reset</button><small class=mut>Sent exactly as written.</small></div>`})}</div>`:''}`}
+ACT.gptog=el=>{const k=el.dataset.g+':'+el.dataset.k;PO.has(k)?PO.delete(k):PO.add(k);glast='';tick(true)};
+ACT.gshk=el=>{const n=+el.dataset.g,M=GS.tab==='anim'?AVK:SHK;if(el.dataset.k==='raw'&&M===SHK)SHK.delete(n);else M.set(n,el.dataset.k);glast='';tick(true)};
 ACT.gsheet=el=>{SV.g=+el.dataset.g;SV.view='raw';SV.lines=true;SV.boxes=true;sheetDlg()};
 function sheetDlg(){const g=GM.get(SV.g);if(!g)return;const s=g.source,base=`/out/${g.generation_id}/`,size=s.sheet_size,G=s.grid;if(!size||!s.sheet_copy)return toast('This sheet has not been read yet',1);
   const [W,H]=size,keyedEv=[...g.events].reverse().find(e=>e.stage==='keyed'&&e.status==='done'),kd=(keyedEv&&keyedEv.detail)||{},th=(kd.threshold||[]).slice().sort((a,b)=>a-b);
@@ -724,6 +778,9 @@ async function tick(force){try{
   const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health;GSTALE=!!(h.ok&&h.j.stale);
   const hh=$('ghealth');if(hh)hh.innerHTML=(GSTALE?'<div class=warn><b>This server is running older code than the files on disk.</b> New buttons may say “not found” and fixes will not apply until you restart it: press Ctrl+C in its terminal, then run <code>python -m mirsal serve</code> from the <code>mirsal</code> folder.</div>':'')+(GHEALTH&&GHEALTH.vp9===false?'<div class=warn>This ffmpeg cannot encode VP9, so animations will fail. Run <code>python -m mirsal doctor</code>.</div>':'');
   let key='';for(const id of SES.gens){const r=await api('/api/generations/'+id);if(r.ok){GM.set(id,r.j);key+=JSON.stringify(r.j);autoRecheck(r.j)}else if(r.status===404){SES.gens=SES.gens.filter(x=>x!==id);saveSes()}}
+  for(const id of SES.gens){if(!FAM.has(id))await famLoad(id);const f=FAM.get(id),mn=f?+String(f.picked).replace(/\D/g,''):id;
+    if(mn!==id){const r=await api('/api/generations/'+mn);if(r.ok)GM.set(mn,r.j)}}
+  key+=SES.gens.map(id=>JSON.stringify(FAM.get(id)||'')).join();
   for(const id of [...ANIM]){const g=GM.get(id);if(g&&animPhase(g)&&!processing(g))ANIM.delete(id)}
   key+=bg+SES.off.join()+SES.pack+[...ANIM].join()+(LIB.packs||[]).length+JSON.stringify(GD);
   const typing=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.pd!==undefined;

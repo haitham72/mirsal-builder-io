@@ -27,7 +27,7 @@ function load({ live = true } = {}) {
     esc: s => String(s == null ? '' : s), ic: n => `<svg data-i=${n}></svg>`,
     keptStills: g => g.stickers.filter(t => t.status === 'READY' && t.review.still !== 'REJECTED'),
     liveReadyNow: () => live, previewUrl: (g, f) => `/api/generations/${g.number}/sheet_preview?fill=${f}`, fillNow: () => 0.5,
-    sheetPanel: g => `<sheetpanel ${g.generation_id}>`,
+    sheetPanel: (g, mode, opt) => `<sheetpanel ${g.generation_id} ${mode} ${opt && opt.noPrompt ? 'noprompt' : ''}>`,
     pdKey: (g, k) => `${g}:${k}`, pdText: (g, k) => PD[`${g.number}:${k}`] !== undefined ? PD[`${g.number}:${k}`] : 'Animate this sheet.',
     pdFoot: (g, k) => `<pdfoot ${k}>`,
     copyBox: (title, text, id, rows, edit) => `<box ${title}|${id}|${edit.kind}>${text}</box>${edit.foot}`,
@@ -38,13 +38,13 @@ function load({ live = true } = {}) {
   return { ...f, ...sb, G };
 }
 
-test('the Animation tab shows the whole create flow: the video sheet preview, the sheet panel, the editable video prompt and each kept sticker', () => {
+test('the Animation tab shows the whole create flow: the frame (To send, Generate), the editable video prompt and each kept sticker', () => {
   const h = load();
   const html = h.animCreate([h.G]);
   assert.match(html, /1 kept sticker to animate/);
-  assert.match(html, /<img src="\/api\/generations\/104\/sheet_preview\?fill=0.5"/, 'the video sheet that will be sent');
-  assert.match(html, /<sheetpanel G104>/, 'the sheet panel carries the model, the price and Generate');
-  assert.match(html, /<box Video prompt\|ap104\|video>Animate this sheet\.<\/box><pdfoot video>/, 'the same prompt and footer as the Prompt tab');
+  assert.match(html, /<sheetpanel G104 anim noprompt>/, 'the one frame (its To send view and its control row: model, price, Generate); the prompt is beside it, not toggled');
+  assert.doesNotMatch(html, /sheet_preview/, 'no second preview: the frame has it');
+  assert.match(html, /<box Video prompt\|ap104\|video>Animate this sheet\.<\/box><div class=pdfoot><button class="btn sm" data-act=pgreset data-g=104 data-kind=video>Reset/, 'the prompt with Reset only: Generate is under the frame');
   assert.equal((html.match(/class=ganew-st>/g) || []).length, 1, 'only the kept stickers, not the rejected one');
   assert.match(html, /S1 · victory stance/);
   assert.match(html, /data-act=ganmo data-g=104 data-m="S1 waves">waves</);

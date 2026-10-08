@@ -40,5 +40,6 @@ test('the chosen view is remembered per batch and falls back to raw when it is n
 
 test('the panel draws the tabs from the views and the handler sets the view', () => {
   assert.match(src, /sheetViews\(g\)\.map\(v=>`<button class="tab \$\{v\.id===cur\.id\?'on':''\}" data-act=gshk data-g=\$\{g\.number\} data-k=\$\{v\.id\}>/);
-  assert.match(src, /ACT\.gshk=el=>\{const n=\+el\.dataset\.g;/);
+  assert.match(src, /ACT\.gshk=el=>\{const n=\+el\.dataset\.g,M=GS\.tab==='anim'\?AVK:SHK;/, 'each view (Stickers, Animation) remembers its own tab');
+  assert.match(src, /canSend\(g\)\?tab\('send','To send'\):''\}\$\{vidOf\(g\)\?tab\('video','Video'\):''\}/, 'one frame: the sheet views, then To send and Video');
 });

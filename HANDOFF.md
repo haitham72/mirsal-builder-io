@@ -14,7 +14,9 @@ batch (family) with `groups.family` / `groups.pick`; Next batch (`tasks.next_bat
 `video_sheets[].model` recorded; the Studio's footers are one Regenerate with the model folded as {current} -> {next}; "Create more" is "Next batch";
 the Prepared-sheets chip row is gone. An in-place sheet resheet was built and then removed the same day (Haitham chose generations in a row instead).
 
-**Next:** `plan.md` "Next": the Batch/generation rows on Stickers and Animation (pick/remove/report), then Import inside a batch.
+**Also built (last commit):** the Studio's Batch k header with the generations row (★ main, Make main / Delete / Report; Delete keeps the batch one family), the one frame (Raw · Keyed · To send · Video) with one control row (model drop-down, settings, Loop, Generate/Regenerate, Prompt toggle, Gap only on To send). Not yet looked at in a browser by Haitham.
+
+**Next:** `plan.md` "Next" step 2 (the animations row in the Video view: pick / remove / report; the routes exist), then step 3 (Import inside a batch).
 
 **Still open:**
 1. `tests.test_batches.RemoveRoutes` Windows file-lock flake in teardown (pre-existing).

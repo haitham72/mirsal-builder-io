@@ -1889,7 +1889,10 @@ def make_handler(c: Console):
                 if parts[3] == "remove":         # to the trash, never straight to nothing (flow/batches.py); stickers already in packs stay in their packs
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
-                    return self._json(200, batches.remove(c.out, gid, by=self.user.get("id") or "human"))
+                    plan_ = groups.hand_over_plan(c.out, gid)                       # the other generations of its batch stay ONE batch (flow/groups.hand_over)
+                    gone_ = batches.remove(c.out, gid, by=self.user.get("id") or "human")
+                    kept_ = groups.hand_over(c.out, plan_, by=self.user.get("id") or "human")
+                    return self._json(200, {**gone_, **({"batch": kept_} if kept_ else {})})
                 if parts[3] == "restore":
                     return self._json(200, batches.restore(c.out, gid))
                 if parts[3] == "join":           # Add to group / drag onto a batch: this batch's family goes under the family of `to` (the target is the parent; flow/groups.py)

@@ -44,8 +44,8 @@ function load(route = 'library') {
     histCol: () => { sandbox.calls.col++; },
     spSecDraw: () => { sandbox.calls.sec++; },
   };
-  const body = ['const histTitle=', 'const histInfo=', 'const histThumb=', 'const histVars=', 'const histRow=', 'function gvarsHtml(', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
-  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histThumb,histRow,gvarsHtml,histColHTML,drawHist};')(...Object.values(sandbox));
+  const body = ['const histTitle=', 'const histInfo=', 'const histThumb=', 'const histVars=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
+  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histThumb,histRow,histColHTML,drawHist};')(...Object.values(sandbox));
   return { ...sandbox, ...api, env: sandbox };          // env: the globals the statements closed over (mutate them, not the copy)
 }
 
@@ -113,7 +113,7 @@ test('drawHist redraws the column on the Studio and Create, and always the batch
   assert.ok(!/ghist|hxBatch|History of/.test(statement('function drawHist')), 'nothing about the old per-sticker history');
 });
 
-test('a family is ONE plain entry in Earlier batches (no strip); its variations sit in the Studio above the steps, the one in view outlined, x only on non-root ones', () => {
+test('a family is ONE plain entry in Earlier batches (no strip); its generations are the generations row in the Studio', () => {
   const hx = load();
   const root = { ...BATCH([2, 2]), id: 104, generation_id: 'G104', prompt: 'superhero dubai' };
   const edit = { ...BATCH([2, 2]), id: 105, generation_id: 'G105', prompt: 'superhero dubai' };
@@ -124,12 +124,4 @@ test('a family is ONE plain entry in Earlier batches (no strip); its variations 
   assert.match(row, /<b>Superhero Dubai<\/b>/, 'the parent\'s title');
   assert.match(row, /· 2 variations<\/small>/);
   assert.doesNotMatch(row, /lv-hvar|gvar|data-act=hleave|›/, 'no strip in the column');
-  hx.env.HB.items = [fam];
-  const strip = hx.gvarsHtml([{ number: 105 }]);
-  assert.match(strip, /^<div class=gvars><span class=mut>Variations<\/span>/);
-  assert.match(strip, /<span class="gvar"><button class=gvb data-act=hopen data-id=104 aria-pressed=false/);
-  assert.match(strip, /<span class="gvar on"><button class=gvb data-act=hopen data-id=105 aria-pressed=true/);
-  assert.equal((strip.match(/data-act=hleave/g) || []).length, 1, 'the root has no x');
-  assert.equal(hx.gvarsHtml([{ number: 103 }]), '', 'a batch alone has no strip');
-  assert.equal(hx.gvarsHtml([{ number: 104 }, { number: 105 }]), '', 'two batches presented together: no strip');
 });

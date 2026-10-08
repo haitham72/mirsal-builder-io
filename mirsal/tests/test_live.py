@@ -1042,6 +1042,15 @@ class LiveConsoleTests(Base):
         s, fam = self.req("POST", f"/api/generations/{gid}/pick", {})
         self.assertEqual((s, fam["picked"]), (200, g1))
         self.assertEqual(self.req("GET", f"/api/generations/{int(g2[1:])}/family")[1]["picked"], g1)    # one pick per batch, kept on the root
+        # gen 3, then Delete gen 1 (the root, and the main): gen 2 and gen 3 stay ONE batch and the main moves to a survivor
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "from_generation": gid, "parent": g1, "regen_of": g1})
+        g3 = self.until(lambda: (lambda x: x if x.get("generation") and x["status"] == "DONE" else None)(self.req("GET", "/api/jobs/" + j["job"])[1]), "sheet job 3")["generation"]
+        self._idle(int(g3[1:]))
+        s, r = self.req("POST", f"/api/generations/{gid}/remove", {})
+        self.assertEqual(s, 200, r)
+        self.assertEqual(r["batch"]["members"], [g2, g3])
+        fam = self.req("GET", f"/api/generations/{int(g3[1:])}/family")[1]
+        self.assertEqual((fam["root"], [m["generation_id"] for m in fam["members"]], fam["picked"]), (g2, [g2, g3], g3))
 
     def test_next_batch_plans_the_next_unused_actions_and_spends_nothing(self):
         gid = self._stills_ready("blob")

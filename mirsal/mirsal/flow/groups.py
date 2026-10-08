@@ -181,3 +181,37 @@ def pick(out: Path, gid: int, by: str = "human") -> dict:
     res.setdefault("pick_history", []).append({"ts": round(time.time(), 3), "actor": by, "decision": "PICK", "generation": f"G{gid:03d}"})
     pl.write_result(out, r, res)
     return family(out, gid)
+
+
+def hand_over_plan(out: Path, gid: int) -> dict | None:
+    """Before generation `gid` leaves (Delete moves it to the trash): how its batch stays ONE batch. Every other generation is pointed at the surviving
+    root, so a removed root or a removed middle parent never splits the family; when the root itself leaves, the oldest survivor becomes the root (gen numbers stay
+    in order) and the main pick moves there (the old main, else the newest). None for a generation alone. Read only: `hand_over` applies it once the removal really happened."""
+    gid = int(gid)
+    others = [m for m in members(out, gid) if m != gid]
+    if not others:
+        return None
+    r = root_of(out, gid)
+    picked = _picked_stored(out, r)
+    new_root = r if r != gid else min(others)                # the oldest survivor: gen numbers stay in order
+    main = picked if picked in others else (None if r != gid else max(others))
+    return {"gone": gid, "root": new_root, "others": others, "main": main, "root_left": r == gid}
+
+
+@pl.serialized
+def hand_over(out: Path, plan: dict | None, by: str = "human") -> dict | None:
+    """Apply `hand_over_plan` after the generation went to the trash. Returns {root, members} of the batch that stays."""
+    if not plan:
+        return None
+    now, new_root = round(time.time(), 3), plan["root"]
+    for m in plan["others"]:
+        if not _alive(out, m):
+            continue
+        res = pl.read_result(out, m)
+        if _num(res.get("group")) != new_root:
+            res["group"] = f"G{new_root:03d}"
+            res.setdefault("group_history", []).append({"ts": now, "actor": by, "decision": "JOIN", "to": f"G{new_root:03d}", "via": f"G{plan['gone']:03d} removed"})
+        if m == new_root and plan["root_left"] and plan["main"]:
+            res["picked"] = f"G{plan['main']:03d}"
+        pl.write_result(out, m, res)
+    return {"root": f"G{new_root:03d}", "members": [f"G{m:03d}" for m in plan["others"]]}

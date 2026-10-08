@@ -67,7 +67,7 @@ ACT.lmpick=el=>{const key=el.dataset.k==='image'?'img':'vid';LIVE[key]={id:el.da
 ACT.lmdone=()=>{drawPanel();if(typeof composerDraw==='function')composerDraw();closeDlg()};
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvvid){LIVE.vid={id:t.value,options:{}};lsave();lsel('video');glast='';if(typeof tick==='function')tick(true);return}
   if(t.dataset&&t.dataset.lvimg){LIVE.img={id:t.value,options:{}};lsave();lsel('image');glast='';if(typeof tick==='function')tick(true);return}
-  if(t.dataset&&t.dataset.lvopt){const [k,n]=t.dataset.lvopt.split('|'),key=k==='image'?'img':'vid';LIVE[key].options[n]=t.value;lsave();lcost(k).then(()=>{fillPrices();if(t.closest('.lv-mpick')){glast='';if(typeof tick==='function')tick(true)}})}
+  if(t.dataset&&t.dataset.lvopt){const [k,n]=t.dataset.lvopt.split('|'),key=k==='image'?'img':'vid';LIVE[key].options[n]=t.value;lsave();lcost(k).then(()=>fillPrices())}
   if(t.dataset&&t.dataset.lvmore&&t.value){const key=t.dataset.lvmore==='image'?'img':'vid';LIVE[key]={id:t.value,options:{}};lsave();drawModels()}});
 async function lcost(kind,quiet){const {model,sel}=lsel(kind);if(!model)return null;const key=kind+model.id+JSON.stringify(sel.options);
   if(LIVE.est[key]===undefined){const r=await post('/api/live/cost',{kind,model:model.id,options:sel.options});LIVE.est[key]=r.ok?r.j.credits:null}
@@ -97,30 +97,16 @@ function videoRun(g){const qj=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.ge
 /* The model picker folded into one line (Haitham, 2026-10-08: "models collapsed"; the flow is {current model} -> {next model}): the summary says what made the current
    result (`current`, from the batch), then the next model, its settings and the price; opening it shows
    the curated models and the settings that have a choice. The choice is the same one the Models dialog writes (LIVE.img / LIVE.vid), so it sticks. */
-function modelPick(kind,current){if(!LIVE.m)return'';const cur=current?(lfind(kind,current)||{label:current}):null,{model,sel}=lsel(kind),c=lcached(kind),attr=kind==='image'?'data-lvimg':'data-lvvid';if(c===undefined)lcost(kind,true).then(fillPrices);
-  return`<details class=lv-mpick><summary>${cur?`<span class=mut title="What made the current one">${esc(cur.label)} →</span> `:''}${logoHtml(model,'sm')} <b>${esc(model?model.label:'?')}</b> <span class=mut>${esc(optSummary(model,sel))}</span> <span class=lv-vp data-lvprice=${kind}>${c==null?(c===undefined?'…':''):'◈ '+fcr(c)}</span></summary>
-   <div class=lv-mopts><select ${attr} aria-label="${kind==='image'?'Image':'Animation'} model">${LIVE.m[kind].map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)}</option>`).join('')}</select>
-    ${model?model.options.filter(o=>o.choices.length>1).map(o=>`<label>${esc(o.label)} <select data-lvopt="${kind}|${esc(o.name)}">${o.choices.map(x=>`<option value="${esc(x)}" ${sel.options[o.name]===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`).join(''):''}
-    ${model&&model.note?`<small class=mut>${esc(model.note)}</small>`:''}</div></details>`}
+function modelPick(kind,current){if(!LIVE.m)return'';const cur=current?(lfind(kind,current)||{label:current}):null,{model,sel}=lsel(kind),attr=kind==='image'?'data-lvimg':'data-lvvid';
+  const c=lcached(kind);if(c===undefined)lcost(kind,true).then(fillPrices);
+  return`<span class=lv-mrow>${cur&&model&&cur.id!==model.id?`<span class=mut title="What made the current one">${esc(cur.label)} →</span>`:''}<select ${attr} aria-label="${kind==='image'?'Image':'Animation'} model" title="${esc(model&&model.note||'')}">${LIVE.m[kind].map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)}</option>`).join('')}</select>
+   ${model?model.options.filter(o=>o.choices.length>1).map(o=>`<select data-lvopt="${kind}|${esc(o.name)}" aria-label="${esc(o.label)}" title="${esc(o.label)}">${o.choices.map(x=>`<option value="${esc(x)}" ${sel.options[o.name]===x?'selected':''}>${esc(o.name==='duration'?x+' s':x)}</option>`).join('')}</select>`).join(''):''}</span>`}
 
 /* ---------- the animation box under the green screen: a model drop-down and one priced button (no dialog, no confirmation) */
 const lcached=kind=>{const {model,sel}=lsel(kind);return model?LIVE.est[kind+model.id+JSON.stringify(sel.options)]:undefined};
 const fillNow=()=>LIVE.fill!=null?LIVE.fill:(LIVE.m&&LIVE.m.slot_fill)||0.74;
 const gapPct=f=>Math.round((1-f)*100);
 const previewUrl=(g,f)=>`/api/generations/${g.number}/sheet_preview?fill=${f.toFixed(3)}&px=520&k=${typeof keptStills==='function'?keptStills(g).map(t=>t.index).join(''):''}`;
-function vgenBox(g){const vs=typeof sheetOf==='function'?sheetOf(g):null;
-  const stalled=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&JR.stalled(j));
-  if(stalled)return JR.controls(stalled);
-  if(vs&&['VIDEO_RETURNED','SLICED'].includes(vs.status))return`<div class="lv-vgen done"><span>${vs.status==='SLICED'?'Animated':'Video received'}${vs.video_info&&vs.video_info.width?` · ${vs.video_info.width}×${vs.video_info.height}`:''}</span></div>`;
-  if(!liveReadyNow()||g.source.has_video||making(g))return'';
-  const run=videoRun(g);
-  if(run)return`<div class="lv-vgen run"><div class=spin></div><span>Animating with ${esc(run.model)}…<small data-lvt="${run.t0}">${Math.round((Date.now()-run.t0)/1000)}s</small></span></div>`;
-  const {model,sel}=lsel('video'),c=lcached('video'),f=fillNow();if(c===undefined)lcost('video',true).then(fillPrices);
-  return`<div class=lv-vgen><select class=lv-vsel data-lvvid aria-label="Animation model">${LIVE.m.video.map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)}</option>`).join('')}</select>
-   <button class="btn pri lv-vgo" data-act=lvgen data-g=${g.number} ${keptStills(g).length?'':'disabled'}>Generate<span class=lv-vp data-lvprice=video>${c==null?(c===undefined?'…':''):'◈ '+fcr(c)}</span></button></div>
-   <label class=lv-gap title="Space between the stickers on the sheet that is sent. Set for you; slide it to make the stickers bigger (smaller gap) or safer (bigger gap)">Gap <input type=range min=8 max=50 step=1 value="${gapPct(f)}" data-lvgap data-g=${g.number}><output>${gapPct(f)}%</output></label>
-   <img class=lv-vprev data-lvprev src="${previewUrl(g,f)}" alt="The sheet that will be sent" loading=lazy>
-   <div class=lv-vnote><label class=lv-chk title="Off: the clip plays once, and Mirsal closes the loop itself. On: the video model is told to loop and to end on its first pose."><input type=checkbox data-lvloop ${LIVE.loop?'checked':''}> Loop</label> · ${esc(optSummary(model,sel))} · <button class=link data-act=gvideo data-g=${g.number}>use my own tool</button></div>`}
 let GPT=null;
 document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset.lvgap!==undefined))return;
   LIVE.fill=1-(+t.value)/100;t.nextElementSibling.textContent=t.value+'%';clearTimeout(GPT);
@@ -128,7 +114,6 @@ document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvgap!==undefined)lsave();
   if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw()}});
 function fillPrices(){for(const kind of ['video','image']){const c=lcached(kind);document.querySelectorAll(`[data-lvprice=${kind}]`).forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c));if(c===undefined&&document.querySelector(`[data-lvprice=${kind}]`))lcost(kind,true).then(()=>fillPrices())}}
-ACT.lvgen=async el=>{el.disabled=true;const ok=await liveStart('video',{g:+el.dataset.g});if(!ok)el.disabled=false;glast='';if(typeof tick==='function')tick(true)};
 
 /* ---------- running jobs */
 /* The queue: every job the server knows, with its real state, so a long video can be followed (and survives a reload). Typical durations come from the ledger. */
@@ -312,15 +297,11 @@ const histInfo=it=>`${esc(it.generation_id)} · ${it.ready} sticker${it.ready===
 const histThumb=it=>{const c=(it.cells||[]).find(x=>x.png);return`<span class=lv-hth>${c?`<img src="/out/${esc(it.generation_id)}/${esc(c.png)}" loading=lazy alt="" title="S${c.index}${c.animated?' · animated':''}">`:`<span class=lv-hnoimg title="${esc(String(((it.cells||[])[0]||{}).status||it.stage||'').toLowerCase())}"></span>`}</span>`};
 /* one entry of the column: a click presents the batch in the Studio. `on` = it is the batch the Studio presents now. */
 /* a family (flow/groups.py: a batch, its edits, redos and the batches added to it) is ONE entry here: the root's title and the variation in view (else the newest).
-   Any entry can be dragged onto another: the one dropped on is the parent (POST /api/generations/{id}/join). The variations themselves are chosen in the Studio's view of the
-   batch, above its workflow steps (gvarsHtml), not in this column (Haitham, 2026-10-04). */
+   Any entry can be dragged onto another: the one dropped on is the parent (POST /api/generations/{id}/join). The generations themselves are chosen in the Studio, in each batch's
+   generations row (generate.js gensHtml), not in this column (Haitham, 2026-10-08). */
 const histVars=it=>(it.variants&&it.variants.length?it.variants:[it]);
 const histRow=it=>{const vs=histVars(it),cur=vs.find(v=>SES.gens.includes(v.id)),on=!!cur,shown=cur||vs[vs.length-1];
   return`<div class=lv-hfam draggable=true data-hid=${it.id}><button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${shown.id} aria-pressed=${on} title="Show ${esc(shown.generation_id)} in the Studio">${histThumb(shown)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(shown)}${vs.length>1?` · ${vs.length} variations`:''}</small></span>${shown.kind==='particles'?`<span class=lv-pbadge title="Particles: no sticker owns them. Use, render and export them as they are">${ic('fx')}</span>`:''}</button></div>`};
-/* the variations strip of the batch the Studio presents: one thumbnail per batch of its family, the one in view outlined, × to take a non-root one out (pure) */
-function gvarsHtml(gs){if(!gs||gs.length!==1||typeof HB==='undefined')return '';const id=gs[0].number,fam=HB.items.find(it=>histVars(it).some(v=>v.id===id));
-  const vs=fam?histVars(fam):[];if(vs.length<2)return '';
-  return`<div class=gvars><span class=mut>Variations</span>${vs.map((v,i)=>`<span class="gvar${v.id===id?' on':''}"><button class=gvb data-act=hopen data-id=${v.id} aria-pressed=${v.id===id} title="${esc(v.generation_id)} · ${esc(titleCase(String(v.prompt||'').replace(/_/g,' ')))}">${histThumb(v)}<small>${esc(v.generation_id)}</small></button>${i?`<button class=gvx data-act=hleave data-id=${v.id} title="Take ${esc(v.generation_id)} out of this group" aria-label="Take ${esc(v.generation_id)} out of this group">×</button>`:''}</span>`).join('')}</div>`}
 async function histJoin(id,to){if(!id||!to||id===to)return;const r=await post(`/api/generations/${id}/join`,{to});if(!r.ok)return toast(r.j.error||'Could not add it to the group',1);
   toast(`Added to ${r.j.root}'s group`);HB.items=HB.items.filter(x=>x.id!==id);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)}
 ACT.hleave=async el=>{const r=await post(`/api/generations/${el.dataset.id}/leave`,{});if(!r.ok)return toast(r.j.error||'Could not take it out',1);toast(`${r.j.id} is on its own again`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)};
