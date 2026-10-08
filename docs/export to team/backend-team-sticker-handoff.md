@@ -9,7 +9,7 @@ Every file arrives named as below. Operators fill in **nothing** — all six fie
 ```
 
 ```text
-🤣-falcon-laugh_rofl_lmao-s08-G112-20261008.webm
+🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008.webm
 😍-falcon-love_heart_loving-s05-G112-20261008.png
 ```
 

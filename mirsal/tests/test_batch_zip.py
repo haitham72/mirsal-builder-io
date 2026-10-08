@@ -1,5 +1,5 @@
 """The Studio's Download .zip (flow/batches.export_zip, GET /api/generations/{id}/export.zip): the accepted stickers only, the animation where it is
-ready, a manifest, 409 with nothing accepted, a stranger's batch is a 404. Isolated out/, no provider."""
+ready, renamed to the export contract, a manifest v1, 409 with nothing accepted, a stranger's batch is a 404. Isolated out/, no provider."""
 import http.client
 import io
 import json
@@ -11,6 +11,7 @@ import zipfile
 from pathlib import Path
 
 from mirsal.flow import batches
+from mirsal.media import export_names as xn
 
 
 def make_batch(out: Path, n: int, owner: str = "local") -> None:
@@ -40,9 +41,21 @@ class BatchZipTests(unittest.TestCase):
         make_batch(self.out, 1)
         data, stem = batches.export_zip(self.out, 1)
         z = zipfile.ZipFile(io.BytesIO(data))
-        self.assertEqual(sorted(z.namelist()), ["img-2.png", "manifest.json", "vid-1.webm"], "the rejected and the blocked stickers stay out")
+        names = sorted(z.namelist())
+        self.assertIn("manifest.json", names)
+        files = [n for n in names if n != "manifest.json"]
+        self.assertEqual(len(files), 2, "the rejected and the blocked stickers stay out")
+        for n in files:
+            p = xn.parse(n)
+            self.assertIsNotNone(p, f"{n} follows the export contract")
+            self.assertEqual((p["emoji"], p["slug"], p["tag"], p["gid"]), ("🐱", "cat", "cat", 1))
+        by_cell = {xn.parse(n)["index"]: n for n in files}
+        self.assertTrue(by_cell[1].endswith(".webm") and by_cell[2].endswith(".png"), "the animation where ready, else the still")
         m = json.loads(z.read("manifest.json"))
-        self.assertEqual([(s["sticker"], s["type"]) for s in m["stickers"]], [("S1", "animated"), ("S2", "static")])
+        self.assertEqual(m["schema_version"], 1)
+        self.assertEqual([(a["source_cell"], a["media"]) for a in m["assets"]], [("S1", "video"), ("S2", "static")])
+        self.assertEqual(sorted(a["filename"] for a in m["assets"]), sorted(files))
+        self.assertTrue(all(len(a["sha256"]) == 64 for a in m["assets"]))
         self.assertEqual(stem, "g001-cat")
 
     def test_a_batch_with_nothing_accepted_says_so(self):

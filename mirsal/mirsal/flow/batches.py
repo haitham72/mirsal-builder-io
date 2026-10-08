@@ -144,17 +144,29 @@ def purge_files(out: Path, gid: int) -> dict:
 
 
 def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
-    """One batch as a download from the Studio (the pack's Download .zip, for a batch): every sticker that is READY and not rejected, as its animation
-    when that is ready and not rejected, otherwise its still, under the engine's file names, plus a `manifest.json` (batch, prompt, and per sticker
-    its S#, key, emoji, tags, kind and size). Nothing is changed. Returns (zip bytes, a safe file stem)."""
+    """One batch as a download from the Studio (Export as .zip): every sticker that is READY and not rejected, as its animation
+    when that is ready and not rejected, otherwise its still, renamed to the export contract
+    `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), plus a `manifest.json`
+    (schema version 1: pack, assets with filename, sha256, tags and source cell). Nothing on disk is changed.
+    Returns (zip bytes, a safe file stem)."""
+    import hashlib
     import io
     import json
     import re
     import zipfile
     from . import pipeline
-    r = pipeline.read_result(out, int(gid))
-    d = pipeline.gen_dir(out, int(gid))
-    rows, buf = [], io.BytesIO()
+    from ..media import export_names as xn
+    gid = int(gid)
+    r = pipeline.read_result(out, gid)
+    d = pipeline.gen_dir(out, gid)
+    try:
+        created = float(r.get("created") or (d / "result.json").stat().st_mtime)
+    except (TypeError, ValueError, OSError):
+        import time
+        created = time.time()
+    date = xn.datestamp(created)
+    slug = xn.slug_hyphen(r.get("task_slug") or ((r.get("source") or {}).get("subject"))) or "pack"
+    rows, buf, used = [], io.BytesIO(), set()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:                     # webm / png are already compressed
         for s in r.get("stickers") or []:
             rev = s.get("review") or {}
@@ -164,12 +176,28 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
             f = d / (s["webm"] if animated else s["png"])
             if not f.is_file():
                 continue
-            z.write(f, f.name)
-            rows.append({"file": f.name, "sticker": f"S{s.get('index')}", "key": s.get("key"), "name": s.get("name"), "emoji": s.get("emoji"),
-                         "tags": s.get("tags"), "type": "animated" if animated else "static", "kb": round(f.stat().st_size / 1024, 1)})
+            desc = xn.describe(emoji=s.get("emoji"), key=s.get("key"), tags=s.get("tags"),
+                               slug=slug, index=s.get("index") or 0, gid=gid, date=date)
+            name = desc["stem"] + f.suffix.lower()
+            if name in used:                                                     # never overwrite one entry in the zip
+                base, n = name, 2
+                while name in used:
+                    name = re.sub(r"(\.[a-z0-9]+)$", f"-{n}\\1", base)
+                    n += 1
+            used.add(name)
+            data = f.read_bytes()
+            z.write(f, name)
+            media = "video" if animated else "static"
+            rows.append({"sticker_id": f"G{gid:03d}/S{s.get('index')}", "source_generation": f"G{gid:03d}",
+                         "source_cell": f"S{s.get('index')}", "action": desc["action"], "emoji": desc["emoji"],
+                         "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]], "media": media,
+                         "revision": 1, "export_date": date, "filename": name,
+                         "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
+                         **({"unresolved": True} if desc["unresolved"] else {})})
         if not rows:
             raise ValueError("this batch has no accepted sticker yet")
-        z.writestr("manifest.json", json.dumps({"batch": r.get("generation_id"), "prompt": r.get("prompt"), "count": len(rows), "stickers": rows},
-                                               indent=2, ensure_ascii=False))
+        z.writestr("manifest.json", json.dumps({"schema_version": 1,
+                         "pack": {"slug": slug, "title": r.get("prompt"), "generations": [f"G{gid:03d}"]},
+                         "assets": rows}, indent=2, ensure_ascii=False))
     stem = re.sub(r"[^a-z0-9]+", "-", f"{r.get('generation_id') or gid}-{r.get('task_slug') or 'stickers'}".lower()).strip("-")
     return buf.getvalue(), stem or "batch"

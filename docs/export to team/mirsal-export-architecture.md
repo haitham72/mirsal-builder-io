@@ -23,9 +23,9 @@ Every sticker file exported in a ZIP is renamed (inside the ZIP only — source 
 Examples:
 
 ```text
-🤣-falcon-laugh_rofl_lmao-s08-G112-20261008.webm
+🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008.webm
 😍-falcon-love_heart_loving-s05-G112-20261008.png
-👌-royal-falcon-approve_okay_yes-s06-G113-20261009.webm
+👌-royal-falcon-approve_okay_yes_thumbsup-s06-G113-20261009.webm
 ```
 
 **Each Generate run is one group.** A generation batch holds one 3×3 sheet, so the generation id already scopes the group: there is no separate `gNN` field. A pack spanning several generations has files with different ids, grouped by `pack_slug` (and by the manifest's pack record).
@@ -67,7 +67,7 @@ Suggested constraints: unique pack `slug` per owner; unique `(source_generation,
 
 1. Use an approved `G###` batch / pack; existing gates, Telegram size/format validation and human approvals are unchanged.
 2. Resolve the pack slug; enumerate source cells left-to-right/top-to-bottom as S1–S9. Skipped or rejected slots keep their numbers.
-3. Resolve each cell's canonical action + aliases from the bank (§6). A cell with no mapping stays **unresolved** until the exporter picks from the bank (one click, saved on the sticker) — never silently defaulted.
+3. Resolve each cell's canonical action + full alias set from the bank (§6). A cell with no mapping exports on a deterministic fallback tag (key/tags words) and is flagged `unresolved: true` in the manifest — the exporter's bank picker UI is still open, so nothing is silently called an action.
 4. Build one filename per asset from the six fields; write files into the ZIP under these names (sources untouched) with a UTF-8 `manifest.json` (schema version 1, §7).
 5. Register filename, revision, hash and date in `out/` and mirror to Postgres. Re-exporting an unchanged version returns identical names and bytes.
 
@@ -78,7 +78,7 @@ Haitham, 2026-10-08: the bank grows from 30 to 36 (rows 31–36 are new). Defaul
 | # | Canonical token | Primary emoji | Aliases |
 |---|---|---|---|
 | 1 | `happy` | 😀 | smile, joy |
-| 2 | `laugh` | 🤣 | laughing, lol, rofl, lmao |
+| 2 | `laugh` | 🤣 | laughing, lol, rofl, lmao, lmfao |
 | 3 | `cry` | 😭 | crying, sobbing, tears |
 | 4 | `sad` | 😔 | unhappy, disappointed |
 | 5 | `love` | 😍 | heart, loving |
@@ -130,11 +130,11 @@ Suggested preset grids (Mirsal presets, not a Telegram vocabulary): `core-v1` = 
       "action": "laugh",
       "emoji": "🤣",
       "emojis": ["🤣", "😂"],
-      "tags": ["laugh", "rofl", "lmao", "🤣"],
+      "tags": ["laugh", "laughing", "lol", "rofl", "lmao", "lmfao", "🤣"],
       "media": "video",
       "revision": 1,
       "export_date": "20261008",
-      "filename": "🤣-falcon-laugh_rofl_lmao-s08-G112-20261008.webm",
+      "filename": "🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008.webm",
       "sha256": "<actual-file-hash>"
     }
   ]
@@ -146,7 +146,7 @@ Suggested preset grids (Mirsal presets, not a Telegram vocabulary): `core-v1` = 
 - Emoji leads every filename as a literal glyph; pack slug, tag, `sNN`, `G###`, date follow in order.
 - The whole pack shares `pack_slug`; each file's `id` is its source generation.
 - `sNN`, generation and exact asset identities survive rejects, edits, and re-exports; duplicate actions are supported.
-- Unmapped cells never export on a guessed action; the exporter picks from the bank.
+- Unmapped cells export on a deterministic fallback tag and carry `unresolved: true`; the exporter bank picker UI is still open.
 - Unicode filenames and multi-code-point emoji round-trip through ZIP download/import byte-identical.
 - Re-exporting an unchanged version returns identical names and bytes; an edited sticker becomes a new revision under a stable filename, told apart by the manifest.
 - Postgres sync cannot silently replace prior asset versions.
@@ -156,11 +156,10 @@ Suggested preset grids (Mirsal presets, not a Telegram vocabulary): `core-v1` = 
 
 Engine functions + JSON contract first, screens second (rule 11); stdlib-first, `pathlib` only (rule 8).
 
-1. **Bank module** — new `generation/actions.py`: `ACTION_BANK` (the 36 rows: token → primary emoji + aliases), `normalize_tag()` (§2 rule), `canonical_for(key, tags)` → `(token, aliases)` or `None` when unmapped. Pure; no `psycopg`/`redis`/`langgraph` import (rule 3).
-2. **Filename builder** — new `media/export_names.py`: `build(emoji, slug, tags, index, gid, date)` → stem; `parse(stem)` right-to-left on the `sNN` / `G###` / date anchors, manifest-authoritative; `first_emoji()` grapheme splitter (ZWJ `U+200D`, VS16 `U+FE0F`, skin-tone modifiers kept with their base). Pure + round-trip tests.
-3. **Unresolved-action flow** — batch sticker gains optional `action` (+ `pipeline.normalise` default, mirrored by `store/sync.py`); the Studio export dialog offers the bank per unmapped cell (one recorded human pick, reversible). No guessing.
-4. **Persist the fields** — `date` = generation `created` (UTC `YYYYMMDD`), frozen at first export; `slug` = pack slug (add-or-derive on the library pack record); library rows already carry `source {generation, index}`.
-5. **Both `export_zip`s** (`flow/batches.py`, `media/library.py`) rename inside the ZIP only (sources untouched, rule 9) and write manifest v1 (`ensure_ascii=False`); ZIP via Python `zipfile`, never a shell (PowerShell mangles non-ASCII).
-6. **Validation** — existing Telegram checks unchanged; plus filename checks (NFC, no separators, sane length).
-7. **Tests** (budget: narrowest) — new `tests/test_export_names.py`: build/parse round-trip, alias normalization (`thank_you` → `thankyou`), unresolved `None`, emoji splitter (skin tone, VS16, ZWJ), export-twice byte-identical. Run by name.
-8. **Out of scope** — in-app tag/emoji search UI (the tap-emoji and multi-choice search are receiving-app behaviors; the manifest `tags`/`emojis` arrays enable them; pool search stays semantic); pack-merge vs generation-scoped ids; the Telegram upload path (files as-is).
+**Built 2026-10-08 (export-to-zip scope):** steps 1, 2, 4 (date/slug; sticker `action` persistence not needed — the tag resolves at export time), 5, 7 (`generation/actions.py`, `media/export_names.py` with `describe`, both `export_zip`s renamed-in-ZIP + manifest v1, `tests/test_export_names.py`). Unmapped cells take the deterministic key/tags fallback with `unresolved: true` in the manifest.
+
+Still open:
+
+1. **Exporter bank picker UI** — the Studio export dialog offers the bank per `unresolved` cell (one recorded human pick, reversible); until then the fallback stands.
+2. **Validation** — existing Telegram checks unchanged; plus filename checks (NFC, no separators, sane length).
+3. **Out of scope** — in-app tag/emoji search UI (the tap-emoji and multi-choice search are receiving-app behaviors; the manifest `tags`/`emojis` arrays enable them; pool search stays semantic); pack-merge vs generation-scoped ids; the Telegram upload path (files as-is).

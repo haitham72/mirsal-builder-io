@@ -830,25 +830,71 @@ class Library:
             return s
 
     def export_zip(self, pid: str) -> tuple[bytes, str]:
-        """The pack as one downloadable zip: every sticker file as stored (`.webm` for the animated ones, `.png` / `.webp` for the static ones, under the engine's file names)
-        and a `manifest.json` (pack name, and per sticker its file, name, emoji, kind, size in KB and the batch it came from). Returns (zip bytes, a safe file stem)."""
+        """The pack as one downloadable zip (Export as .zip): every sticker file as stored (`.webm` for the animated ones,
+        `.png` / `.webp` for the static ones), renamed to the export contract
+        `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
+        (schema version 1: pack, assets with filename, sha256, tags and source cell). Nothing on disk is changed.
+        Returns (zip bytes, a safe file stem)."""
+        import hashlib
+        from . import export_names as xn
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
         if not p["stickers"]:
             raise LibraryError("this pack has no stickers yet", 409)
-        buf, rows, used = io.BytesIO(), [], set()
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:             # webm / png / webp are already compressed
-            for s in p["stickers"]:
+        out = self.root.parent
+        pslug = xn.slug_hyphen(p.get("slug") or p["name"]) or "pack"
+        rows, buf, used, gens = [], io.BytesIO(), set(), set()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:             # webm / png are already compressed
+            for ordinal, s in enumerate(p["stickers"], 1):
                 f = self.files / s["file"]
                 if not f.is_file():
                     raise LibraryError(f"the file of '{s['name']}' is missing from the library", 404)
-                name = Path(s["file"]).name
-                if name in used:                                              # two stickers can never share a file in the library, but never overwrite one in the zip either
-                    name = f"{len(used) + 1:02d}-{name}"
+                data = f.read_bytes()
+                src = s.get("source") or {}
+                g = self.group_of(src)                                       # "G012" or "own"
+                key, tags, created, bemojis = None, None, None, None
+                try:
+                    idx = int(src.get("index") or 0)
+                except (TypeError, ValueError):
+                    idx = 0
+                index = idx if 1 <= idx <= 99 else ordinal
+                if g != "own":
+                    gens.add(g)
+                    try:
+                        st = pl.read_result(out, int(g[1:]))
+                        cells = st.get("stickers") or []
+                        t = cells[index - 1] if 1 <= index <= len(cells) else None
+                        if t:
+                            key, tags, bemojis = t.get("key"), t.get("tags"), t.get("emoji")
+                            created = st.get("created")
+                    except Exception:
+                        pass
+                gid = int(g[1:]) if g != "own" else 0
+                try:
+                    date = xn.datestamp(created or f.stat().st_mtime)
+                except OSError:
+                    date = xn.datestamp()
+                desc = xn.describe(emoji=s.get("emoji") or bemojis, key=key, tags=tags or [s.get("name")],
+                                   slug=pslug, index=index, gid=gid, date=date)
+                name = desc["stem"] + f.suffix.lower()
+                if name in used:                                              # never overwrite one entry in the zip
+                    base, n = name, 2
+                    while name in used:
+                        name = re.sub(r"(\.[a-z0-9]+)$", f"-{n}\\1", base)
+                        n += 1
                 used.add(name)
-                z.write(f, name)
-                rows.append({"file": name, "name": s["name"], "emoji": s.get("emoji"), "type": s["type"], "kb": s.get("kb"), "source": s.get("source")})
-            z.writestr("manifest.json", json.dumps({"pack": p["name"], "id": p["id"], "count": len(rows), "stickers": rows}, indent=2, ensure_ascii=False))
+                z.writestr(name, data)
+                media = "video" if s["type"] == "animated" else "static"
+                rows.append({"sticker_id": s["id"], "source_generation": f"G{gid:03d}",
+                             "source_cell": f"S{index}" if g != "own" else None, "action": desc["action"],
+                             "emoji": desc["emoji"], "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]],
+                             "media": media, "revision": 1, "export_date": date, "filename": name,
+                             "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
+                             **({"unresolved": True} if desc["unresolved"] else {})})
+            z.writestr("manifest.json", json.dumps({"schema_version": 1,
+                             "pack": {"id": p["id"], "slug": pslug, "title": p["name"],
+                                      "generations": sorted(gens)},
+                             "assets": rows}, indent=2, ensure_ascii=False))
         return buf.getvalue(), slug(p["name"]) or "pack"
 
     def sticker_path(self, pid: str, sid: str) -> tuple[Path, dict]:

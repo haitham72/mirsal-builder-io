@@ -137,6 +137,7 @@ class NamingTests(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def test_export_zip_has_every_file_under_its_name_and_a_manifest(self):
+        from mirsal.media import export_names as xn
         with self.assertRaises(LibraryError):
             self.lib.export_zip(self.lib.create_pack("Empty")["id"])                                  # nothing to download yet
         pk = self.lib.create_pack("My Pack")["id"]
@@ -148,9 +149,15 @@ class NamingTests(unittest.TestCase):
             names = z.namelist()
             man = json.loads(z.read("manifest.json"))
             self.assertEqual(sorted(n.rsplit(".", 1)[-1] for n in names if n != "manifest.json"), ["png", "webm"])
-            self.assertEqual([r["type"] for r in man["stickers"]], ["static", "animated"])
-            self.assertEqual(man["count"], 2)
-            webm = next(r["file"] for r in man["stickers"] if r["type"] == "animated")
+            self.assertEqual(man["schema_version"], 1)
+            self.assertEqual(man["pack"]["generations"], ["G001"])
+            for n in names:
+                if n == "manifest.json":
+                    continue
+                p = xn.parse(n)
+                self.assertIsNotNone(p, f"{n} follows the export contract")
+            self.assertEqual([(a["media"], a.get("unresolved")) for a in man["assets"]], [("static", True), ("video", True)])
+            webm = next(a["filename"] for a in man["assets"] if a["media"] == "video")
             self.assertEqual(z.read(webm), b"webm-bytes")                                              # the file as stored, not re-encoded
 
     def test_readable_name_and_legacy_file_style_names(self):
