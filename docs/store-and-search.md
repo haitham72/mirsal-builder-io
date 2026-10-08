@@ -36,10 +36,11 @@ mirsal/migrations/
   005_vectors.sql   sticker_index.subject_vec / action_vec as vector(768) + cosine HNSW (re-runnable: never wipes vectors)
   009_groups.sql    generations.group_id (the family root, flow/groups.py) and relation (joined | redo | edit), written by every save_generation
   011_user_profiles.sql  user_profiles (user_id, facts jsonb, updated_at): the copy of out/profile/<user>.json facts (agent/profile.py, sync.sync_profile; the file is the record)
+  012_pack_claims.sql    pack_sessions, claims, claim_generations: the copy of out/pack_sessions/<slug>.json (generation/claims.py, sync.sync_pack_session; the file is the record)
 mirsal/mirsal/store/
   db.py             connect (2 s timeout), cached available(), migrate(), reset(confirm='yes')
   repo.py           save_generation() in ONE transaction (idempotent re-import); import_tasks / save_job / import_jobs / save_model_call /
-                    import_model_calls; save_session; list / show / history / search / find_task
+                    import_model_calls; save_session; save_pack_session / import_pack_sessions; list / show / history / search / find_task
   sync.py           best-effort write-through (generations, jobs, ledger lines, sessions); counts ok / failed / skipped and keeps the last error
                     (shown by `mirsal doctor` and GET /api/health: a failing mirror is never silent)
   assets.py         AssetStore / LocalAssetStore: object keys, append-only puts, HMAC signed expiring links
@@ -58,6 +59,7 @@ mirsal/mirsal/flow/tickets.py  tickets (below); obs/scrub.py keeps file paths ou
 - **`tasks`** is the join with the provider: `UNIQUE (provider, external_task_id)`. `out/tasks/*.json` (the typed task, mirrored with the Higgsfield job id at claim) and
   `out/jobs/J###.json` (from CLAIMED on) land in the **same row** (the job updates it: status, result, cost in credits, links to the generation and the video sheet); one `prepared`
   row per generation stands in for the provider when none ran.
+- `out/pack_sessions/<slug>.json` (the pack claim ledger, `docs/export to team/mirsal-export-architecture.md` §10.7) -> `pack_sessions` + `claims` (one per preset grid, `C###`) + `claim_generations` (append-only revisions) + one `tasks` row per claim (provider `mirsal-pack`, `external_task_id` = the claim id, kind `sheet`).
 - `out/model_calls.jsonl` -> `model_calls`, keyed by the sha256 of the line (re-import adds nothing); `cost_credits` is Higgsfield credits, never dollars.
 - `out/sessions/S###.json` -> `sessions`, `interactions`, `feedback` (one row per sticker), `generation_references`.
 - `Idempotency-Key` answers (no file): `idempotency_keys` (`store/idem.py`, migration 008): `scope`, the key's sha256, the first answer as `jsonb`; kept 24 h, pruned on write, only for the real `out/`.

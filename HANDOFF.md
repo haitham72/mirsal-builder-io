@@ -6,21 +6,17 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-Session of 2026-10-08 (Muse Spark), all work committed and pushed through `c0a6d55`. Nothing half-written; everything below is built or planned-only.
+Session of 2026-10-08 (second), all work committed and pushed. Nothing half-written.
 
-**Just finished implementing (all on `main`, all pushed):**
-- Export-as-ZIP follows the final filename contract + manifest v1 in both ZIPs (`2b2ebd4`: `generation/actions.py` 36-bank, `media/export_names.py` builder/parser, both `export_zip`s, `tests/test_export_names.py`).
-- Snake_case slugs + clean fallback tags (`bc89279`): `-` separates identifiers, `_` joins inside; fallback strips subject words, collapses repeats, flags `unresolved`. Verified on real G112 (S7 now `grumpy_arms_crossed`).
-- Face-only emoji prompts (`162c6e3`): template v4 files + `emotions.FACE_GROUPS` + `EMOJI_WORDS` auto-detect + limb-word guard test. v1–v3 byte-identical.
-- Preset grids drive emoji sheets (`1349c7a`): `actions.PRESETS` + `FACE_SENTENCES`, `expand(..., preset=)`, faceless-emoji 3×3 defaults `core-v1`.
-- Claim-ledger DB design (`c0a6d55`): `docs/export to team/mirsal-export-architecture.md` §10.7 — pack sessions, `C###` claims, regenerate lineage. Design only, zero code.
+**Just finished:** plan Phase 1, the claim ledger core — `generation/claims.py`, `migrations/012_pack_claims.sql` (applied to the local database, `db check` clean),
+`store/repo.save_pack_session` / `import_pack_sessions`, `store/sync.sync_pack_session`, `db import` hookup, `tests/test_claims.py` (11 green; `test_store` + `test_migrations` green).
+Proven once on the real local Postgres in a rolled-back transaction. Nothing calls the ledger yet.
 
-**Stuck / still open (not started or blocked):**
-1. `tests.test_batches.RemoveRoutes` fails on a Windows file-lock in teardown — fails identically on the clean tree (verified via `git stash`), pre-existing environment flake, not from this work.
-2. Exports still emit `G###` — the short-code allocator (§10.4) is designed, not built.
-3. Claim ledger (§10.7), exporter bank picker UI, in-batch versions, preset claim queue: designed/planned in `plan.md`, not built. Needs Haitham's go + a W number.
-4. Paid proof pending (needs Haitham's explicit yes, ~2 credits): one face-preset sheet to prove the model draws faces without limbs; one pack at the default gap if the sheet passes.
-5. Particles ordering (Studio step 5 after Animation, section only when versions exist): investigated (`particles.js` `spSteps`/`spSecHtml`, tests in `tests/js/particles.test.js`), not implemented. Next bench item after the go-ahead in `plan.md`.
-6. Still true from the previous session: Import-pack browser check never happened (restart `serve --lan` first — the open server predates that code); `batch_import_inputs.py` at repo root does not run (`pl.Config.default()` does not exist); Haitham's open questions (original-emojis mapping, copying sheets into `inputs/`) unanswered.
+**Still open (unchanged from the previous session unless noted):**
+1. `tests.test_batches.RemoveRoutes` Windows file-lock flake in teardown (pre-existing, not from this work).
+2. Next: plan Phase 2 (resolver + chat wiring); it carries one question for Haitham (per-owner vs shared pack sessions).
+3. Paid proof (plan Phase 6) needs Haitham's explicit yes (~2 credits).
+4. Particles ordering (Studio step 5) investigated, not implemented; `mirsal/mirsal/console/particles.js` and `mirsal/tests/js/particles.test.js` have uncommitted edits in the working tree that predate this session (not mine; left untouched).
+5. Import-pack browser check never happened (restart `serve --lan` first); `batch_import_inputs.py` at repo root does not run; Haitham's questions (original-emojis mapping, copying sheets into `inputs/`) unanswered.
 
-**Resume:** read this file, then `plan.md` (phases in build order), then `docs/export to team/mirsal-export-architecture.md` §9–§10.7. Windows checkout, venv `mirsal/.venv`, branch `main` (in sync with origin). Test budget (`docs/testing.md`): one narrowest run per change, never re-run green suites, slow tier + full discovery retired.
+**Resume:** `plan.md` Phase 2, with `docs/export to team/mirsal-export-architecture.md` §10.7. Windows checkout, venv `mirsal/.venv`, branch `main`.

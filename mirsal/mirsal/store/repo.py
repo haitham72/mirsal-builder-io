@@ -302,6 +302,60 @@ def import_tasks(conn, out: Path) -> int:
     return n
 
 
+CLAIM_PROVIDER = "mirsal-pack"
+
+
+def save_pack_session(conn, s: dict) -> int:
+    """One out/pack_sessions/<slug>.json as rows: the session, its claims, their lineage, and one `tasks` row per claim (kind 'sheet',
+    external_task_id = the claim id, name_key = the session slug). Idempotent: rows upsert, lineage inserts ON CONFLICT DO NOTHING. Returns the claims written."""
+    slug = str(s["slug"])
+    with conn.cursor() as cur:
+        cur.execute(
+            """INSERT INTO pack_sessions (slug, subject, title, owner, pack_id, created) VALUES (%s,%s,%s,%s,%s,%s)
+               ON CONFLICT (slug) DO UPDATE SET subject = EXCLUDED.subject, title = EXCLUDED.title, owner = EXCLUDED.owner, pack_id = EXCLUDED.pack_id""",
+            (slug, str(s.get("subject") or slug), s.get("title"), s.get("owner"), s.get("pack_id"), _ts(s.get("created") or time.time())))
+        n = 0
+        for c in s.get("claims", []):
+            cid, status = str(c["id"]), str(c.get("status") or "CLAIMED")
+            grid = "x".join(str(x) for x in (c.get("grid") or [3, 3]))
+            plan = json.dumps(c["plan"]) if c.get("plan") is not None else None
+            cur.execute(
+                """INSERT INTO claims (id, session, preset, grid, status, plan, created) VALUES (%s,%s,%s,%s,%s,%s,%s)
+                   ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status, plan = EXCLUDED.plan""",
+                (cid, slug, str(c.get("preset")), grid, status, plan, _ts(c.get("created") or time.time())))
+            for g in c.get("generations", []):
+                cur.execute("""INSERT INTO claim_generations (claim_id, generation_id, revision, ts) VALUES (%s,%s,%s,%s)
+                               ON CONFLICT (claim_id, revision) DO NOTHING""", (cid, str(g["generation"]), int(g["revision"]), _ts(g.get("ts") or time.time())))
+            gens = c.get("generations") or []
+            gid = _gen_exists(cur, gens[-1]["generation"]) if gens else None
+            request = json.dumps({"session": f"pack-{slug}", "preset": c.get("preset"), "grid": c.get("grid"), "jobs": c.get("jobs", []), "plan": c.get("plan")})
+            cur.execute("SELECT id FROM tasks WHERE provider = %s AND external_task_id = %s", (CLAIM_PROVIDER, cid))
+            row = cur.fetchone()
+            if row:
+                cur.execute("UPDATE tasks SET status = %s, request = %s, generation_id = COALESCE(%s, generation_id) WHERE id = %s",
+                            (status, request, gid, row[0]))
+            else:
+                cur.execute("""INSERT INTO tasks (provider, external_task_id, kind, name_key, generation_id, status, request, created_at)
+                               VALUES (%s,%s,'sheet',%s,%s,%s,%s,%s)""",
+                            (CLAIM_PROVIDER, cid, slug, gid, status, request, _ts(c.get("created") or time.time())))
+            n += 1
+    conn.commit()
+    return n
+
+
+def import_pack_sessions(conn, out: Path) -> int:
+    """Every out/pack_sessions/*.json (see save_pack_session). Idempotent re-import, one bad file never poisons the rest. Returns the sessions applied."""
+    from ..generation import claims as _c
+    n = 0
+    for s in _c.list_sessions(Path(out)):
+        try:
+            save_pack_session(conn, s)
+            n += 1
+        except Exception:
+            conn.rollback()
+    return n
+
+
 JOB_STATUS = {"CLAIMED": "RUNNING", "DONE": "DONE", "FAILED": "FAILED", "TIMEOUT": "TIMEOUT"}
 
 

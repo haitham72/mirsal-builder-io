@@ -164,7 +164,7 @@ def reset(confirm: str = "") -> None:
     """DEV ONLY: drop all Mirsal tables. The caller must pass confirm='yes'."""
     if confirm != "yes":
         raise RuntimeError("refusing: pass confirm='yes' (dev only, destroys the local Mirsal database)")
-    tables = ["user_profiles", "idempotency_keys", "job_queue", "users", "generation_references", "feedback", "interactions", "sessions", "sticker_index", "model_calls", "search_log", "tasks", "generation_events", "reviews", "assets",
+    tables = ["claim_generations", "claims", "pack_sessions", "user_profiles", "idempotency_keys", "job_queue", "users", "generation_references", "feedback", "interactions", "sessions", "sticker_index", "model_calls", "search_log", "tasks", "generation_events", "reviews", "assets",
               "video_sheets", "stickers", "generations", "schema_migrations"]
     with connect() as c:
         with c.cursor() as cur:

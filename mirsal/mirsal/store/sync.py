@@ -118,6 +118,21 @@ def sync_session(out, sess: dict) -> bool:
         return False
 
 
+def sync_pack_session(out, s: dict) -> bool:
+    """A pack session's claim ledger changed (generation/claims.py): mirror it. Best effort, never raises."""
+    try:
+        if not enabled(out) or not db.available():
+            _note("skipped")
+            return False
+        with db.connect() as c:
+            repo.save_pack_session(c, s)
+        _note("ok")
+        return True
+    except Exception as e:
+        _note("failed", e)
+        return False
+
+
 def sync_result(out, gid: int, res: dict) -> bool:
     try:
         if not enabled(out):

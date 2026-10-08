@@ -120,6 +120,7 @@ def db_cmd(out, action: str, yes: bool) -> int:
             nj = repo.import_jobs(c, out)               # Phase 2: claimed jobs update their task rows
             nm = repo.import_model_calls(c, out)        # Phase 2: the model-call ledger
             repo.import_users(c, out)                   # who may call (digests only)
+            ns = repo.import_pack_sessions(c, out)       # the pack claim ledger (out/pack_sessions/)
             ok, bad = 0, []
             for gid in pl.list_ids(out):
                 try:
@@ -128,7 +129,7 @@ def db_cmd(out, action: str, yes: bool) -> int:
                 except Exception as e:
                     c.rollback()  # one bad generation must not poison the rest of the import
                     bad.append(f"G{gid:03d}: {e}")
-        print(f"imported {ok} generation(s), {nt} task file(s), {nj} job(s), {nm} new model call(s)")
+        print(f"imported {ok} generation(s), {nt} task file(s), {nj} job(s), {nm} new model call(s), {ns} pack session(s)")
         for b in bad:
             print("FAILED " + b)
         return 1 if bad else 0

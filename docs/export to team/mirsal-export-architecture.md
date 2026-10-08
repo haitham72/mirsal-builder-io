@@ -176,11 +176,11 @@ How `"generate sticker pack for {subject}"`, `generate more`, regenerate-as-vers
 
 `"generate sticker pack for falcon"` (chat or Studio) is a pack intent: a new pack session (`pack-falcon`) plus a claim queue — the four preset grids in order (`core-v1`, `social-v1`, `reactions-v1`, `daily-v1`), 36 actions total. The first request claims the first **unclaimed** grid, and the sheet job is built from the preset's nine stored actions (prompts, emoji defaults, tags) — never guessed labels. Storage, ids and states are §10.7 (session file + claim rows, not the pack record).
 
-**Built 2026-10-08 (preset engine, no claim queue yet):** `actions.PRESETS` + `FACE_SENTENCES` + `preset_cells`, and `expand(..., preset=)` — an explicit grid name wins (preset words stripped from the subject, preset implies face), otherwise a face-mode 3×3 takes `core-v1`, so `generic emojis` now claims happy → thanks in bank order with bank emoji. Cell keys are `{subject}_{token}`, tags carry token + aliases. What is still open is the pack-record claim ledger itself: every emoji request still takes `core-v1` (nothing remembers the pack's claimed grids yet), and `generate more` does not advance the queue.
+**Built 2026-10-08 (preset engine, no claim queue yet):** `actions.PRESETS` + `FACE_SENTENCES` + `preset_cells`, and `expand(..., preset=)` — an explicit grid name wins (preset words stripped from the subject, preset implies face), otherwise a face-mode 3×3 takes `core-v1`, so `generic emojis` now claims happy → thanks in bank order with bank emoji. Cell keys are `{subject}_{token}`, tags carry token + aliases. The claim ledger core is built (§10.7); what is still open is the wiring: every emoji request still takes `core-v1` because no chat or Studio path calls the ledger yet, and `generate more` does not advance the queue.
 
 Neither the auto expander nor the AI enhancer chooses 2×2 vs 3×3 here: a preset grid is nine slots by definition, so preset packs are always 3×3. The expander fills the deterministic plan, the enhancer only improves wording. 2×2 stays for the freeform flows only.
 
-Claim state lives in the pack record (`library.json`, file-primary, under the library lock): an unclaimed grid is a preset with no group entry. The claim is written synchronously **before** any paid call, so two simultaneous `generate more` clicks serialize: the second sees the first's `CLAIMED` entry and takes the next grid. When the sheet returns, the batch is cut and reviewed exactly as today, and the group entry becomes `{status: READY, generation: G###, export_code}`.
+Claim state lives in the session file `out/pack_sessions/<slug>.json`, not the library pack record (§10.7): an unclaimed grid is a preset with no claim row. The claim is written synchronously **before** any paid call, so two simultaneous `generate more` clicks serialize: the second sees the first's `CLAIMED` row and takes the next grid. When the sheet returns, the batch is cut and reviewed exactly as today, and the claim becomes `DONE` with the generation linked.
 
 ### 10.2 `generate more` claims the next grid in the same pack
 
@@ -200,9 +200,16 @@ Haitham's question — should the id be one per pack or several per pack? **Seve
 
 ### 10.6 Build order (when it gets a go)
 
-1. Claim ledger on the pack record (`groups[]`) + preset-queue resolver (chat intent + Studio entry); all-claimed answer with next-step choices. (Preset engine already built: §10.1.)
+1. Claim ledger core (§10.7, **built**) + preset-queue resolver (chat intent + Studio entry, open); all-claimed answer with next-step choices. (Preset engine already built: §10.1.)
+2. Preset prompt builder (nine stored actions → sheet/video prompts through the existing templates) — **built**: a claim's plan is `prompter.expand(subject, grid, face=True, preset=…)`.
+3. In-batch `versions[]` (+ `normalise` default, write-through, Studio version switcher, export uses latest approved).
+4. Code allocator (registry + retry, claim-time allocation, lazy backfill at export, `export_names` id field becomes the code, manifest carries both ids).
+5. Postgres mirror column + numbered migration; chat-side references stay `G###`.
+6. Custom 9-pick presets from the bank (after the fixed four prove out).
 
-### 10.7 Claim ledger: files, tables, state machine (DESIGNED 2026-10-08, not built)
+### 10.7 Claim ledger: files, tables, state machine (core BUILT 2026-10-08; resolver and chat wiring open)
+
+**Built (plan Phase 1):** `generation/claims.py` (`claim_next` opens the session and claims the next preset in one lock hold, `plan_claim`, `mark_requested`, `link_generation`, `current`, `find_claim`, `list_sessions`; `ClaimError` in words with an HTTP code), `migrations/012_pack_claims.sql` (the three tables, `UNIQUE (session, preset)`, no CHECK on status, no FK on `claim_generations.generation_id` so the mirror may see a claim before its generation), `store/repo.save_pack_session` / `import_pack_sessions` (the claim's `tasks` row has provider `mirsal-pack`, `name_key` = the session slug, `request` = session, preset, grid, jobs, plan; `generation_id` = the current generation once it is in the database), `store/sync.sync_pack_session` (write-through on every ledger write, real `out/` only), `db import` hookup. The lock is in-process plus `out/.claims.lock` across processes (waited for, never refused). A failed job may be requested again (`REQUESTED -> REQUESTED`, the job list grows); the same job or the same generation twice is one event. Tests: `tests/test_claims.py`. Nothing calls the ledger yet: the resolver and chat wiring are plan Phase 2.
 
 How `"generate sticker pack for {subject}"`, `generate more` and regenerate are stored. File store leads, Postgres mirrors (store-and-search.md); nothing here changes a paid path, so no spend rules are involved.
 
@@ -229,8 +236,3 @@ The session also opens a row in the **`tasks` table** (kind `'sheet'`, `external
 5. **Generate more → next claim**: first preset with no claim row for this session → new `C###` → flows 2–3 again under the same session. All four claimed → the pack is complete (36 stickers): answer says so in words with choices (custom 9-pick from the bank, or a new pack) — never a silent repeat, never a dead end.
 
 **Backfill & import.** `db import` reads `out/pack_sessions/` like `import_tasks` reads `out/tasks/` (idempotent re-import). Existing batches predate claims and get none: their `claim_generations` rows arrive only if a later regenerate links them. Migration number is the next free one at build time (`012_*`); per the frozen-constraint procedure it only adds tables, never alters live ones.
-2. Preset prompt builder (nine stored actions → sheet/video prompts through the existing templates).
-3. In-batch `versions[]` (+ `normalise` default, write-through, Studio version switcher, export uses latest approved).
-4. Code allocator (registry + retry, claim-time allocation, lazy backfill at export, `export_names` id field becomes the code, manifest carries both ids).
-5. Postgres mirror column + numbered migration; chat-side references stay `G###`.
-6. Custom 9-pick presets from the bank (after the fixed four prove out).

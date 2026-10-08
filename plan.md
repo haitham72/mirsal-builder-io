@@ -1,20 +1,14 @@
-# plan.md — next build: claim ledger, short codes, picker, versions (designed, not built)
+# plan.md — next build: pack resolver, short codes, picker, versions (ledger core built)
 
 Source of truth for each phase is `docs/export to team/mirsal-export-architecture.md` §9–§10.7. Build in order; each phase ends green
 (one narrowest test run per change, `docs/testing.md`) before the next starts. No paid call without Haitham's explicit yes (rule 13).
-
-## Phase 1 — claim ledger core (files + tables + import, no UI)
-
-- New `generation/claims.py`: session file `out/pack_sessions/<slug>.json` read/write (`claims[]`, claim rows `C###`), task-table row per claim
-  (kind `'sheet'`, external id = claim id), `claim_generations` append on regenerate. Creation under the writer lock.
-- Migration `012_*`: `pack_sessions`, `claims`, `claim_generations` tables only (never alter live ones). `store/repo.py` save/import fns,
-  `db import` hookup for `out/pack_sessions/`.
-- Tests: temp dirs + recording-fake connection (pattern: `tests/test_purge.py`). Run by name, then `mirsal test area` for what the map says.
 
 ## Phase 2 — resolver + chat wiring (pack intent, generate more)
 
 - Pack intent (`"generate sticker pack for {subject}"`) → new session + first claim; `generate more` → next unclaimed preset, same session;
   all-claimed → "pack complete" with choices (custom 9-pick / new pack), in words. Loser of a double-click reads the winner's row.
+- Call the built ledger (`generation/claims.py`): `claim_next` for both intents, `mark_requested` when the sheet job is created, `link_generation` when its batch exists (the job's DONE path), `ClaimError` text as the answer.
+- Decide before coding: a second person asking for `falcon` lands in the same `pack-falcon` (the slug is the key, `owner` is only recorded). Per-owner sessions or a shared one is Haitham's call (rule: each Library shows only its caller's packs) — ask, do not guess.
 - Tests: resolver/agent tests by name. Needs Haitham's eyes on the reply wording once (W1-style browser look, not a test gate).
 
 ## Phase 3 — short codes (exports stop emitting `G###`)
