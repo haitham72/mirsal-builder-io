@@ -123,6 +123,82 @@ def next_gid(out: Path) -> int:
     return max([0, *list_ids(out), *removed_ids(out), *purged_ids(out)]) + 1
 
 
+def _batch_dirs(out: Path) -> list[tuple[int, Path]]:
+    """Every live G### folder (bare `G110/` or labelled `G111-<slug>-<time>/`) as (number, path)."""
+    from ..runtime import names
+    out = Path(out)
+    if not out.is_dir():
+        return []
+    rows = []
+    for x in out.iterdir():
+        if not x.is_dir():
+            continue
+        i = names.folder_id(x.name)
+        if i and i[0] == "G":
+            try:
+                rows.append((int(i[1:]), x))
+            except ValueError:
+                continue
+    return sorted(rows)
+
+
+def orphan_batches(out: Path) -> list[dict]:
+    """Live G### folders with no `result.json`: never a batch (Remove refuses them, the Studio skips them).
+
+    A zero-file one is stale clutter (an allocation or a loop that left empty dirs behind); one WITH files
+    but no result is an interrupted start: it is reported here and never auto-removed."""
+    rows = []
+    for gid, d in _batch_dirs(Path(out)):
+        if (d / "result.json").is_file():
+            continue
+        try:
+            files = sum(1 for _ in d.rglob("*") if _.is_file())
+        except OSError:
+            files = 0
+        rows.append({"id": f"G{gid:03d}", "number": gid, "path": str(d), "files": files})
+    return rows
+
+
+def prune_orphans(out: Path) -> dict:
+    """Delete the zero-file orphan batch folders (they hold no paid work, no result, and no database rows to purge).
+
+    A folder that holds files but no `result.json` is KEPT and reported (an interrupted start: a human decides).
+    A folder named by an open job (REQUESTED/CLAIMED) is kept too. Idempotent: re-running finds nothing.
+    Returns {removed: [ids], kept: [{id, why}]}."""
+    from ..generation import jobs as _jobs
+    out = Path(out)
+    open_gids = set()
+    try:
+        for j in _jobs.list(out):
+            if j.get("status") in ("REQUESTED", "CLAIMED"):
+                g = j.get("generation")
+                try:
+                    open_gids.add(int(str(g).lstrip("Gg")) if g not in (None, "") else -1)
+                except ValueError:
+                    continue
+    except Exception:
+        pass
+    removed, kept = [], []
+    for row in orphan_batches(out):
+        gid, d, files = row["number"], Path(row["path"]), row["files"]
+        if gid in open_gids:
+            kept.append({"id": row["id"], "why": "an open job still names it; wait for the job, then prune again"})
+            continue
+        if files:
+            kept.append({"id": row["id"], "why": f"it holds {files} file(s) but no result.json (an interrupted start); decide by hand, it never auto-deletes"})
+            continue
+        try:
+            shutil.rmtree(d, ignore_errors=True)
+            for k, v in list(_DIRS.items()):
+                if v == d or (isinstance(v, Path) and str(v) == str(d)):
+                    _DIRS.pop(k, None)
+        except OSError as e:
+            kept.append({"id": row["id"], "why": str(e)[:200]})
+            continue
+        removed.append(row["id"])
+    return {"removed": removed, "kept": kept}
+
+
 import contextvars
 
 OWNER = contextvars.ContextVar("mirsal_owner", default="local")     # who is acting: the request's user, copied into the threads it starts

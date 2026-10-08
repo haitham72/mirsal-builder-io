@@ -588,6 +588,8 @@ def main(argv=None) -> int:
     d = sub.add_parser("db", help="Postgres: up (start mirsal-db) | migrate | status (applied vs pending files) | check (does the live schema match the files?) | reset --yes (dev only) | import (backfill out/)")
     d.add_argument("action", choices=["up", "migrate", "status", "check", "reset", "import"]); d.add_argument("--yes", action="store_true")
     sub.add_parser("metrics", help="quality and timing numbers from out/: time to the first sticker, approval rates, regeneration rate")
+    po_ = sub.add_parser("prune-orphans", help="delete empty stale batch folders (G### with no result.json and no files); lists without --apply")
+    po_.add_argument("--apply", action="store_true", help="delete the empty folders (default: list only)")
     li = sub.add_parser("list", help="generations in Postgres, newest first"); li.add_argument("--limit", type=int, default=50)
     sh = sub.add_parser("show", help="one generation: stickers, files, gate decisions"); sh.add_argument("gid")
     hi = sub.add_parser("history", help="every decision for one sticker, in time order"); hi.add_argument("sid")
@@ -654,6 +656,23 @@ def main(argv=None) -> int:
         cfg = replace(cfg, anim_workers=max(1, args.workers))
     if args.cmd == "doctor":
         return doctor()
+    if args.cmd == "prune-orphans":
+        orphans = pl.orphan_batches(out)
+        if not orphans:
+            print("no orphan batch folders (every G### has its result.json)")
+            return 0
+        if not args.apply:
+            for r in orphans:
+                print(f"{r['id']}  {r['files']} file(s)  {r['path']}")
+            print(f"{len(orphans)} orphan folder(s); re-run with --apply to delete the empty ones (folders with files are kept and reported)")
+            return 0
+        res = pl.prune_orphans(out)
+        for i in res["removed"]:
+            print(f"removed {i}")
+        for k in res["kept"]:
+            print(f"kept {k['id']}: {k['why']}")
+        print(f"{len(res['removed'])} removed, {len(res['kept'])} kept")
+        return 0
     if args.cmd == "particles":
         from .flow import particle_sets
         from .media.library import Library
@@ -1004,5 +1023,15 @@ def doctor() -> int:
                       + ("" if p.video else " (none: no animation)"))
         if any(p.pairing == "order" for p in picks):
             print(f"WARN    {subject}: image/video pairing is GUESSED by order (folder numbers or take numbers don't match).")
+    try:
+        from .flow import pipeline as _pl
+        orphans = _pl.orphan_batches(out_root())
+        empty = sum(1 for r in orphans if not r["files"])
+        if not orphans:
+            print("OK      batch folders: every G### has its result.json")
+        else:
+            print(f"NOTE    batch folders: {len(orphans)} G### folder(s) with no result.json ({empty} empty): `python -m mirsal prune-orphans --apply` deletes the empty ones")
+    except Exception as e:
+        print(f"NOTE    batch folders: {e}")
     print("ready" if not bad else f"{bad} problem(s)")
     return 1 if bad else 0

@@ -31,6 +31,8 @@ def remove(out: Path, gid: int, by: str = "human") -> dict:
     out = Path(out)
     src = pl.gen_dir(out, gid)
     if not (src / "result.json").is_file():
+        if src.is_dir():
+            raise pl.PipelineError(f"No generation G{gid:03d}: that folder holds no batch data (no result.json). It is not removed through the trash: clear it with `python -m mirsal prune-orphans --apply`.", 404)
         raise pl.PipelineError(f"No generation G{gid:03d}", 404)
     busy = [j["id"] for j in jobs.list(out) if j.get("status") in OPEN_JOBS and _gid(j) == gid]
     if busy:
