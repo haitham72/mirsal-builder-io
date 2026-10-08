@@ -42,7 +42,7 @@ class FakeCLI:
         if args[:2] == ["generate", "create"]:
             self.n += 1
             jid = f"fake-job-{self.n}"
-            self.kind_of[jid] = "mp4" if args[2] in ("kling3_0", "grok_video_v15") else "png"
+            self.kind_of[jid] = "mp4" if args[2] in ("kling3_0", "grok_video_v15", "grok_video_v15_lite") else "png"
             return 0, json.dumps([jid]), ""
         if args[:2] == ["generate", "wait"]:
             if self.wait_hook:
@@ -318,6 +318,9 @@ class FulfilTests(Base):
         self.assertEqual(model_catalog.resolve("video", None, {}), ("kling3_0", {"aspect_ratio": "1:1", "sound": "off", "mode": "pro", "duration": "3"}))
         self.assertEqual(model_catalog.resolve("image", "gpt_image_2_5", {"variant": "sunburst"})[1]["variant"], "sunburst")
         self.assertEqual(model_catalog.resolve("video", "grok_video_v15", {"resolution": "1080p"})[1]["resolution"], "1080p")
+        self.assertEqual(model_catalog.resolve("video", "grok_video_v15_lite", {"duration": "5"}), ("grok_video_v15_lite", {"aspect_ratio": "1:1", "resolution": "1080p", "duration": "5"}))
+        with self.assertRaises(model_catalog.CatalogError):
+            model_catalog.resolve("video", "grok_video_v15_lite", {"resolution": "720p"})          # animation is always 1080 or more
         ids = {m["id"] for m in model_catalog.IMAGE}
         self.assertTrue({"nano_banana_flash", "nano_banana_pro", "nano_banana_2_lite", "gpt_image_2", "gpt_image_2_5",
                          "seedream_v5_pro", "seedream_5_0_flash", "seedream_v5_lite"} <= ids)
@@ -523,7 +526,7 @@ class LiveConsoleTests(Base):
         s, j = self.req("GET", "/api/models")
         self.assertEqual(s, 200)
         self.assertEqual((j["defaults"], j["default_style"]), ({"image": "nano_banana_flash", "video": "kling3_0"}, "flat_vector"))
-        self.assertEqual([m["id"] for m in j["video"]], ["kling3_0", "grok_video_v15"])
+        self.assertEqual([m["id"] for m in j["video"]], ["kling3_0", "grok_video_v15", "grok_video_v15_lite"])
         self.assertEqual([s["id"] for s in j["styles"]], [s["id"] for s in styles.PRESETS])      # the page gets exactly the presets, however many there are
         s, j = self.req("GET", "/api/higgsfield")
         self.assertEqual((s, j["available"], j["credits"], j["plan"]), (200, True, 100.5, "creator"))

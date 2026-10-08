@@ -52,6 +52,11 @@ VIDEO = [
      "fixed": {},
      "options": [_opt("resolution", "Resolution", ["1080p"], "1080p"),
                  _opt("duration", "Seconds", [3, 5], 3)]},
+    {"id": "grok_video_v15_lite", "label": "Grok Imagine 1.5 Lite", "logo": "xai", "end_image": False,
+     "note": "Haitham's pick (2026-10-08). Starts from the sheet; no end image, so the loop is not guaranteed. Half the price of Grok Video 1.5 (12 credits for 3 s at 1080p), still more than Kling.",
+     "fixed": {"aspect_ratio": "1:1"},
+     "options": [_opt("resolution", "Resolution", ["1080p"], "1080p"),
+                 _opt("duration", "Seconds", [3, 5], 3)]},
 ]
 
 for _m in IMAGE:

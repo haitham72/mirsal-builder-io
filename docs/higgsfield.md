@@ -26,7 +26,7 @@ Everything here was observed on this PC with the Higgsfield **CLI** (`higgsfield
 ## Standing choices (Haitham, 2026-10-01)
 
 - **Images: Nano Banana 2 (`nano_banana_flash`) at 2k.** 2 credits, about 22 s.
-- **Video: Kling v3.0 (`kling3_0`). Never use its `4k` mode** (18 credits for 3 s; Haitham's rule). Always `pro` (`std` returns 960 px for a square sheet and looked pixelated); Grok always 1080p.
+- **Video: Kling v3.0 (`kling3_0`). Never use its `4k` mode** (18 credits for 3 s; Haitham's rule). Always `pro` (`std` returns 960 px for a square sheet and looked pixelated); Grok Video 1.5 and Grok Imagine 1.5 Lite (`grok_video_v15_lite`) always 1080p.
 
 ## What was run
 
@@ -37,7 +37,7 @@ Everything here was observed on this PC with the Higgsfield **CLI** (`higgsfield
 | **video, std** | **Kling v3.0 (`kling3_0`)** | 1:1, duration 3, mode std, sound off, `--start-image` = `--end-image` = the NB2 sheet, template `video_v1` prompt | 82.4 s | 3.75 | MP4 H.264 yuv420p **960x960, 24 fps, 3.04 s (73 frames)**, 3.2 MB, no audio stream |
 | **video, pro** | Kling v3.0 (`kling3_0`) | same, mode **pro** | 166.6 s | 4.5 | MP4 H.264 yuv420p **1440x1440, 24 fps, 3.04 s (73 frames)**, 5.5 MB; first-vs-last frame diff 2.34 (mean step 5.48), so also a continuous loop |
 
-Prices from `generate cost`: Nano Banana 2 1k 1.5 / 2k 2 / 4k 3 credits; Kling v3.0 3 s std 3.75 / pro 4.5 (4k exists, 18 credits, **not to be used**); Kling 3.0 Turbo 3 s 4.5. Balance after S0: 3992.87 (spent 12.25 = 2 + 2 + 3.75 + 4.5).
+Prices from `generate cost`: Nano Banana 2 1k 1.5 / 2k 2 / 4k 3 credits; Kling v3.0 3 s std 3.75 / pro 4.5 (4k exists, 18 credits, **not to be used**); Kling 3.0 Turbo 3 s 4.5. Grok at 1080p (quoted 2026-10-08): Grok Imagine 1.5 Lite 3 s 12 / 5 s 20 (1:1); Grok Video 1.5 3 s 24 / 5 s 40. Balance after S0: 3992.87 (spent 12.25 = 2 + 2 + 3.75 + 4.5).
 
 ## What it means for Mirsal (numbers, not looks; nobody opened the media)
 

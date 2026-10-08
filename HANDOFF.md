@@ -14,7 +14,7 @@ Proven once on the real local Postgres in a rolled-back transaction. Nothing cal
 
 **Still open (unchanged from the previous session unless noted):**
 1. `tests.test_batches.RemoveRoutes` Windows file-lock flake in teardown (pre-existing, not from this work).
-2. Next: plan Phase 2 (resolver + chat wiring); it carries one question for Haitham (per-owner vs shared pack sessions).
+2. Next: plan Phase 2 (resolver + chat wiring). Per-owner vs shared pack sessions: Haitham said ignore it for now (2026-10-08); sessions stay keyed by slug.
 3. Paid proof (plan Phase 6) needs Haitham's explicit yes (~2 credits).
 4. Particles ordering (Studio step 5) investigated, not implemented; `mirsal/mirsal/console/particles.js` and `mirsal/tests/js/particles.test.js` have uncommitted edits in the working tree that predate this session (not mine; left untouched).
 5. Import-pack browser check never happened (restart `serve --lan` first); `batch_import_inputs.py` at repo root does not run; Haitham's questions (original-emojis mapping, copying sheets into `inputs/`) unanswered.

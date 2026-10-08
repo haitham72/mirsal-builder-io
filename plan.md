@@ -8,7 +8,6 @@ Source of truth for each phase is `docs/export to team/mirsal-export-architectur
 - Pack intent (`"generate sticker pack for {subject}"`) → new session + first claim; `generate more` → next unclaimed preset, same session;
   all-claimed → "pack complete" with choices (custom 9-pick / new pack), in words. Loser of a double-click reads the winner's row.
 - Call the built ledger (`generation/claims.py`): `claim_next` for both intents, `mark_requested` when the sheet job is created, `link_generation` when its batch exists (the job's DONE path), `ClaimError` text as the answer.
-- Decide before coding: a second person asking for `falcon` lands in the same `pack-falcon` (the slug is the key, `owner` is only recorded). Per-owner sessions or a shared one is Haitham's call (rule: each Library shows only its caller's packs) — ask, do not guess.
 - Tests: resolver/agent tests by name. Needs Haitham's eyes on the reply wording once (W1-style browser look, not a test gate).
 
 ## Phase 3 — short codes (exports stop emitting `G###`)
