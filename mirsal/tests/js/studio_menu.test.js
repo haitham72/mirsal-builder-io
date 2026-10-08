@@ -14,7 +14,9 @@ test('the empty-state line that leaked a watch-folder path is gone', () => {
     assert.doesNotMatch(src, /No prepared sheets found/, name);
     assert.doesNotMatch(src, /inputs\/Images_gen/, `${name} must not print a watch-folder name (rule 9)`);
   }
-  assert.match(gen, /GINP\.length\?`<span class=mut>Prepared sheets:<\/span>`[\s\S]*?:''\}/, 'with no sheets the row is empty, with sheets it still offers the chips');
+  for (const [name, src] of [['generate.js', gen], ['composer.js', composer]]) {
+    assert.doesNotMatch(src, /Prepared sheets:|data-act=gsug/, `${name}: the prepared-sheets chip row is gone (Haitham, 2026-10-08)`);
+  }
 });
 
 test('the Prompt preview block and everything that fed it are gone', () => {

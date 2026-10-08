@@ -139,3 +139,45 @@ def leave(out: Path, gid: int, by: str = "human") -> dict:
     res.setdefault("group_history", []).append({"ts": round(time.time(), 3), "actor": by, "decision": "LEAVE", "from": f"G{root:03d}"})
     pl.write_result(out, gid, res)
     return {"id": f"G{gid:03d}", "root": f"G{gid:03d}", "left": f"G{root:03d}", "members": [f"G{g:03d}" for g in members(out, gid)]}
+
+
+def _picked_stored(out: Path, root: int) -> int | None:
+    try:
+        return _num(pl.read_result(out, root).get("picked"))
+    except Exception:
+        return None
+
+
+def family(out: Path, gid: int) -> dict:
+    """The batch a generation belongs to, as the Studio's row shows it (Haitham, 2026-10-08: "Batch 1" -> "generation 01 … n"): the root, every
+    generation of the family in order (root first, then by number) with its number in the row, and the ONE picked generation: the stored pick
+    when it is still a member, else the newest. {root, picked, members: [{id, generation_id, n, relation, stage, ready, sheet_model, created}]}."""
+    r = root_of(out, int(gid))
+    ids = members(out, r)
+    rows = []
+    for k, g in enumerate(ids, 1):
+        try:
+            res = pl.read_result(out, g)
+        except Exception:
+            continue
+        rows.append({"id": g, "generation_id": res["generation_id"], "n": k, "relation": relation(res), "stage": res.get("stage"),
+                     "ready": sum(1 for s in res["stickers"] if s.get("status") == "READY"), "sheet_model": res.get("sheet_model"), "created": res.get("created")})
+    alive = [m["id"] for m in rows]
+    p = _picked_stored(out, r)
+    picked = p if p in alive else (max(alive) if alive else r)
+    return {"root": f"G{r:03d}", "picked": f"G{picked:03d}", "members": rows}
+
+
+@pl.serialized
+def pick(out: Path, gid: int, by: str = "human") -> dict:
+    """Pick this generation for its batch: the one the batch is animated and packed from. One pick per batch, stored on the family root
+    (`picked`, with `pick_history`); a recorded, reversible click (pick another one to change it). Free."""
+    gid = int(gid)
+    if not _alive(out, gid):
+        raise pl.PipelineError(f"G{gid:03d} is not a batch on disk", 404)
+    r = root_of(out, gid)
+    res = pl.read_result(out, r)
+    res["picked"] = f"G{gid:03d}"
+    res.setdefault("pick_history", []).append({"ts": round(time.time(), 3), "actor": by, "decision": "PICK", "generation": f"G{gid:03d}"})
+    pl.write_result(out, r, res)
+    return family(out, gid)

@@ -332,3 +332,57 @@ def pick_for_task(inp: Path, task: dict, take: int = 0):
     if not ps:
         raise sources_error(f"The sheet has not arrived yet: put it in {task['paths']['img']}", 409)
     return ps[min(max(take, 0), len(ps) - 1)]
+
+
+def next_batch(out: Path, gens, style_id: str = "flat_vector", loop: bool = False) -> dict:
+    """"Next batch" (Haitham, 2026-10-08): the plan of the next UNCLAIMED batch of this session, as a prompt to read before anything is spent
+    (the same shape as `preview`, plus `prompt` and `next`). The session is the batches the Studio shows (`gens`, any generation of each batch);
+    every generation of their families counts as used. A preset emoji pack takes the next preset grid nobody used (core-v1 -> social-v1 ->
+    reactions-v1 -> daily-v1); any other request takes the next bank actions none of them drew yet (bank order). When nothing is left the answer
+    is {complete: true, message} in words, never a silent repeat."""
+    from ..flow import groups, pipeline as pl
+    from . import actions, spelling
+    seen, results = set(), []
+    for g in gens or []:
+        try:
+            gid = int(str(g).upper().lstrip("G"))
+            for m in groups.members(out, gid):
+                if m not in seen:
+                    seen.add(m)
+                    results.append(pl.read_result(out, m))
+        except Exception:
+            continue
+    if not results:
+        raise sources_error("Open a batch first: Next batch continues the batches on screen", 409)
+    first = min(results, key=lambda r: r.get("number") or 0)
+    request = str(first.get("prompt") or "").strip() or str((first.get("source") or {}).get("subject", "")).replace("_", " ")
+    rows, cols = (first.get("grid") or [3, 3])[:2]
+    used_presets = {(r.get("slots") or {}).get("preset") for r in results} - {None}
+    if used_presets:
+        free = [p for p in actions.PRESETS if p not in used_presets]
+        if not free:
+            return {"complete": True, "message": f"All {len(actions.PRESETS)} preset grids of this pack are made ({9 * len(actions.PRESETS)} stickers). Start a new pack, or regenerate a batch you want better."}
+        text = f"{request} {free[0]}"
+        plan = preview(text, "3x3", style_id, False, loop)
+        return {**plan, "prompt": text, "next": {"kind": "preset", "preset": free[0], "left": len(free) - 1}}
+    if expander.expand(spelling.fix_text(request), (rows, cols)).get("expanded_by") == "transformation":
+        return {"complete": True, "message": "This request is one transformed character, so there are no other actions to draw: regenerate it for another take."}
+    used = set()
+    for r in results:
+        for s in r["stickers"]:
+            hit = actions.canonical_for(s.get("key"), s.get("tags"))
+            if hit:
+                used.add(hit[0])
+    face = any((r.get("slots") or {}).get("face") for r in results)
+    tokens = actions.next_tokens(used, rows * cols)
+    if len(tokens) < rows * cols:
+        return {"complete": True, "message": f"Every action of the {len(actions.ACTION_BANK)}-action bank is already in these batches. Start a new request, or regenerate a batch you want better."}
+    plan = prompter.expand(spelling.fix_text(request), (rows, cols), face=face, tokens=tokens)
+    plan["expanded_by"] = "deterministic"
+    plan["slots"]["style_id"] = style_id
+    plan["slots"]["loop"] = bool(loop)
+    built = prompter.render_plan(plan["slots"], plan["template_id"], plan["template_version"])
+    plan["sheet_prompt"], plan["video_prompt"] = built["sheet_prompt"], built["video_prompt"]
+    for s in plan["stickers"]:
+        s["prompt"] = built["prompts"][s["index"]]
+    return {**plan, "prompt": request, "next": {"kind": "actions", "tokens": tokens, "left": len(actions.next_tokens(used | set(tokens), 99))}}

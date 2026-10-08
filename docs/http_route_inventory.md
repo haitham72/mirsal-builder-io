@@ -145,6 +145,11 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `GET /api/llm/models` | — | 200 object (open; operation detail) | authenticated member | no |
 | `GET /api/vision` | — | 200 object (open; operation detail) | owner | no |
 | `POST /api/plan` | {prompt?,grid?="3x3",style_id?="flat_vector",ai?,loop?} | 200 object (open; operation detail) | owner | no |
+| `POST /api/plan/next` | {gens, style_id?, loop?} | 200 plan + {prompt, next} or {complete, message}; 409 no batch | owner | no |
+| `GET /api/generations/{id}/family` | — | 200 {root, picked, members} | visible batch | no |
+| `POST /api/generations/{id}/pick` | {} | 200 family | visible batch | no |
+| `POST /api/generations/{id}/pick_video` | {sheet} | 200 {picked, changed, was}; 409 while cutting | visible batch | no |
+| `POST /api/generations/{id}/remove_video` | {sheet} | 200 {removed}; 409 the one in use | visible batch | no |
 | `GET /api/tasks` | — | 200 object (open; operation detail) | owner | no |
 | `POST /api/tasks` | {prompt?,grid?="3x3",style_id?="flat_vector",ai?,loop?} | 200 object (open; operation detail) | owner | no |
 | `GET /api/tasks/{id}` | — | 200 object (open; operation detail) | owner | no |

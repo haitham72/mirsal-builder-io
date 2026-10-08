@@ -54,7 +54,8 @@ def active_sheet(res: dict):
 def cut_sheet(res: dict, index=None):
     """The video sheet the stickers' animations are cut from now: the latest one with a sliced video (holding `index` when given). A sheet retired by
     redo_video stays the source until the new sheet's video is sliced, so the stickers never lose their animation while the new video is made."""
-    return next((v for v in reversed(res.get("video_sheets") or []) if v.get("status") in CUT and v.get("video") and (index is None or int(index) in v["slots"])), None)
+    has = [v for v in reversed(res.get("video_sheets") or []) if v.get("video") and (index is None or int(index) in v["slots"])]
+    return next((v for v in has if v.get("status") == "SLICED"), None) or next((v for v in has if v.get("status") == "SUPERSEDED"), None)     # the picked one first
 
 
 def sheet_of(res: dict, aid: str) -> dict:
@@ -916,6 +917,59 @@ def _approve_stills(out: Path, gid: int, res: dict, note: str) -> None:
     review(out, gid, "still", "APPROVE", "ready", note)
 
 
+def _keep_clips(res: dict, d: Path, v: dict, now: float) -> None:
+    """Copy each sticker's current clip (cut from sheet `v`) to slices/versions/<name>-<sheet>.webm and list it in `anim_versions`: nothing is overwritten unkept."""
+    for i in v["slots"]:
+        st = res["stickers"][i - 1]
+        if st.get("webm") and (d / st["webm"]).is_file():
+            keep = Path("slices") / "versions" / f"{Path(st['webm']).stem}-{v['id']}.webm"
+            (d / keep).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(d / st["webm"], d / keep)
+            st.setdefault("anim_versions", []).append({"sheet": v["id"], "webm": keep.as_posix(), "review": (st.get("review") or {}).get("anim"), "ts": now})
+
+
+@pl.serialized
+def pick_video(out: Path, gid: int, aid: str, by: str = "human") -> dict:
+    """Pick animation `aid` (an earlier video of this generation) as the one the stickers are cut from: the current one becomes SUPERSEDED (its clips
+    kept as versions), `aid` becomes SLICED again; the caller then re-cuts `aid` from its stored video (slice_video: free, no new video). G4 asks again."""
+    res = pl.read_result(out, gid)
+    v = sheet_of(res, aid)
+    cur = cut_sheet(res)
+    if not v.get("video") or v["status"] not in CUT:
+        raise refuse(f"{aid} has no animations to pick (it is {v['status'].lower()}).")
+    if any(x.get("status") == "VIDEO_RETURNED" for x in res["video_sheets"]) or any(s.get("anim_status") == "PROCESSING" for s in res["stickers"]):
+        raise refuse("A video is being cut into animations: wait for it to finish, then pick.")
+    if cur and cur["id"] == aid:
+        return {"picked": aid, "changed": False}
+    now = round(time.time(), 3)
+    if cur:
+        _keep_clips(res, pl.gen_dir(out, gid), cur, now)
+        cur["status"] = "SUPERSEDED"
+    v["status"] = "SLICED"
+    res["reviews"]["video_sheet"][aid] = _stamp("APPROVE", by, "picked again", picked=True)
+    for i in v["slots"]:
+        pl.hist(res["stickers"][i - 1], "video_sheet", by, "APPROVE", "picked", aid)
+    pl.write_result(out, gid, res)
+    return {"picked": aid, "changed": True, "was": cur["id"] if cur else None}
+
+
+@pl.serialized
+def remove_video(out: Path, gid: int, aid: str, by: str = "human") -> dict:
+    """Take animation `aid` out of the row: REJECTED (a recorded click), its sheet and video stay on disk. The animation the stickers come from now
+    cannot be removed: pick another one first."""
+    res = pl.read_result(out, gid)
+    v = sheet_of(res, aid)
+    cur = cut_sheet(res)
+    if cur and cur["id"] == aid:
+        raise refuse(f"{aid} is the animation in use: pick another one first.")
+    if v["status"] == "VIDEO_RETURNED":
+        raise refuse(f"{aid} is being cut into animations: wait for it to finish.")
+    v["status"], v["removed_at"] = "REJECTED", round(time.time(), 3)
+    res["reviews"]["video_sheet"][aid] = _stamp("REJECT", by, "removed from the animations")
+    pl.write_result(out, gid, res)
+    return {"removed": aid}
+
+
 @pl.serialized
 def redo_video(out: Path, gid: int, by: str = "human", note: str | None = None) -> dict:
     """"Regenerate video" in the SAME batch (Haitham, 2026-10-08): the current video sheet is retired (SUPERSEDED, a recorded human decision; its sheet, video
@@ -930,14 +984,10 @@ def redo_video(out: Path, gid: int, by: str = "human", note: str | None = None) 
         raise refuse("The video is still being cut into animations: wait for it to finish, then regenerate.")
     d, now = pl.gen_dir(out, gid), round(time.time(), 3)
     cut = v["status"] == "SLICED"              # a VIDEO_BLOCKED sheet never produced clips: it is simply rejected, and the stickers' clips are not its own
+    if cut:
+        _keep_clips(res, d, v, now)
     for i in v["slots"]:
-        st = res["stickers"][i - 1]
-        if cut and st.get("webm") and (d / st["webm"]).is_file():
-            keep = Path("slices") / "versions" / f"{Path(st['webm']).stem}-{v['id']}.webm"
-            (d / keep).parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(d / st["webm"], d / keep)
-            st.setdefault("anim_versions", []).append({"sheet": v["id"], "webm": keep.as_posix(), "review": (st.get("review") or {}).get("anim"), "ts": now})
-        pl.hist(st, "video_sheet", by, "REJECT", "regenerate", v["id"], {"note": note or "replaced by a new video in the same batch"})
+        pl.hist(res["stickers"][i - 1], "video_sheet", by, "REJECT", "regenerate", v["id"], {"note": note or "replaced by a new video in the same batch"})
     v["status"] = "SUPERSEDED" if cut else "REJECTED"
     v["superseded_at"] = now
     res["reviews"]["video_sheet"][v["id"]] = _stamp("REJECT", by, note or "regenerate: a new video in the same batch", superseded=cut)

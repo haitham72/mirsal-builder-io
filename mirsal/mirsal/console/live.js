@@ -80,12 +80,12 @@ function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{pr
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
   const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:ctx.style_id||LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:ctx.loop===undefined?!!LIVE.loop:!!ctx.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
-      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.redo?{redo:true}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{}),...(ctx.plan?{plan:ctx.plan}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
+      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.parent?{parent:ctx.parent}:{}),...(ctx.regen_of?{regen_of:ctx.regen_of}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{}),...(ctx.plan?{plan:ctx.plan}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
     :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(ctx.video_prompt?{video_prompt:ctx.video_prompt}:{}),...(ctx.redo?{redo:true}:{}),...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…',{'Idempotency-Key':ikey()});
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
-  LIVE.jobs.push({id:r.j.job,kind:isSheet?'sheet':'video',label:isSheet?ctx.prompt:`Batch ${ctx.g}`,model:m?m.label:r.j.model,est:r.j.estimate,t0:Date.now(),gen:isSheet?null:ctx.g,ai:r.j.expanded_by==='ai'});
+  LIVE.jobs.push({...(ctx.mode?{mode:ctx.mode,batch:ctx.batch||null}:{}),id:r.j.job,kind:isSheet?'sheet':'video',label:isSheet?ctx.prompt:`Batch ${ctx.g}`,model:m?m.label:r.j.model,est:r.j.estimate,t0:Date.now(),gen:isSheet?null:ctx.g,ai:r.j.expanded_by==='ai'});
   if(isSheet&&ctx.ai&&r.j.expanded_by==='transformation')toast('Transformation: the built-in template wrote the cells, so the AI enhancer was not asked');
   else if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
   if(!isSheet&&egDirty())egClear();
@@ -124,7 +124,7 @@ function vgenBox(g){const vs=typeof sheetOf==='function'?sheetOf(g):null;
 let GPT=null;
 document.addEventListener('input',e=>{const t=e.target;if(!(t.dataset&&t.dataset.lvgap!==undefined))return;
   LIVE.fill=1-(+t.value)/100;t.nextElementSibling.textContent=t.value+'%';clearTimeout(GPT);
-  GPT=setTimeout(()=>{const g=GM.get(+t.dataset.g),img=t.closest('.gsheet')&&t.closest('.gsheet').querySelector('[data-lvprev]');if(g&&img)img.src=previewUrl(g,LIVE.fill)},120)});
+  GPT=setTimeout(()=>{const g=GM.get(+t.dataset.g),box=t.closest('.gsheet,.pdfoot'),img=box&&box.querySelector('[data-lvprev]');if(g&&img)img.src=previewUrl(g,LIVE.fill)},120)});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvgap!==undefined)lsave();
   if(t.dataset&&t.dataset.lvloop!==undefined){LIVE.loop=t.checked;lsave();if(typeof composerDraw==='function')composerDraw()}});
 function fillPrices(){for(const kind of ['video','image']){const c=lcached(kind);document.querySelectorAll(`[data-lvprice=${kind}]`).forEach(e=>e.textContent=c==null?'':'◈ '+fcr(c));if(c===undefined&&document.querySelector(`[data-lvprice=${kind}]`))lcost(kind,true).then(()=>fillPrices())}}
@@ -187,7 +187,10 @@ async function liveTick(){if(LTB)return;LTB=true;try{
     else if(s.status==='DONE'&&(j.kind==='video'||s.generation)){
       LIVE.jobs=LIVE.jobs.filter(x=>x.id!==j.id);await refreshHf();
       toast(`${j.kind==='sheet'?'Sheet':'Animation'} ready: ${fcr(s.cost)} credits used${LIVE.hf&&LIVE.hf.credits!=null?`, ${fcr(LIVE.hf.credits)} left`:''}`);
-      if(j.kind==='sheet'){SES={prompt:j.label,gens:[+String(s.generation).replace(/\D/g,'')],off:[],pack:''};saveSes();GS.tab='stickers';glast='';
+      const nid=+String(s.generation||'').replace(/\D/g,'');
+      if(j.kind==='sheet'&&j.mode==='regen'&&SES.gens.includes(j.batch)){SES.gens=SES.gens.map(x=>x===j.batch?nid:x);saveSes();GS.tab='stickers';glast='';histReload()}       // a regeneration takes its batch's place in view: the new generation of the same batch
+      else if(j.kind==='sheet'&&j.mode==='next'&&SES.gens.length){if(!SES.gens.includes(nid))SES.gens.push(nid);saveSes();GS.tab='stickers';glast='';histReload()}          // Next batch: one more batch of this session
+      else if(j.kind==='sheet'){SES={prompt:j.label,gens:[nid],off:[],pack:''};saveSes();GS.tab='stickers';glast='';
         for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();location.hash='#/studio';histReload()}
       else{GS.tab='anim';glast=''}
       if(typeof tick==='function')tick(true)}}

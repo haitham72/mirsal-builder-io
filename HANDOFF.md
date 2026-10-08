@@ -6,17 +6,21 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-Session of 2026-10-08 (second), all work committed and pushed. Nothing half-written.
+Session of 2026-10-08 (second), all work committed and pushed. Nothing half-written in the files; the next UI step is planned, not started.
 
-**Just finished:** plan Phase 1, the claim ledger core — `generation/claims.py`, `migrations/012_pack_claims.sql` (applied to the local database, `db check` clean),
-`store/repo.save_pack_session` / `import_pack_sessions`, `store/sync.sync_pack_session`, `db import` hookup, `tests/test_claims.py` (11 green; `test_store` + `test_migrations` green).
-Proven once on the real local Postgres in a rolled-back transaction. Nothing calls the ledger yet.
+**Built this session:** claim ledger core (`generation/claims.py`, `012_pack_claims.sql`, applied locally); Grok Imagine 1.5 Lite in the video models;
+regenerate video inside a generation (`gates.redo_video`, `SUPERSEDED`, `cut_sheet`, `pick_video`, `remove_video`); regenerate sheet = a new generation of the
+batch (family) with `groups.family` / `groups.pick`; Next batch (`tasks.next_batch`, `POST /api/plan/next`, `actions.BODY_SENTENCES`); `sheet_model` and
+`video_sheets[].model` recorded; the Studio's footers are one Regenerate with the model folded as {current} -> {next}; "Create more" is "Next batch";
+the Prepared-sheets chip row is gone. An in-place sheet resheet was built and then removed the same day (Haitham chose generations in a row instead).
 
-**Still open (unchanged from the previous session unless noted):**
-1. `tests.test_batches.RemoveRoutes` Windows file-lock flake in teardown (pre-existing, not from this work).
-2. Next: plan Phase 2 (resolver + chat wiring). Per-owner vs shared pack sessions: Haitham said ignore it for now (2026-10-08); sessions stay keyed by slug.
-3. Paid proof (plan Phase 6) needs Haitham's explicit yes (~2 credits).
-4. Particles ordering (Studio step 5) investigated, not implemented; `mirsal/mirsal/console/particles.js` and `mirsal/tests/js/particles.test.js` have uncommitted edits in the working tree that predate this session (not mine; left untouched).
-5. Import-pack browser check never happened (restart `serve --lan` first); `batch_import_inputs.py` at repo root does not run; Haitham's questions (original-emojis mapping, copying sheets into `inputs/`) unanswered.
+**Next:** `plan.md` "Next": the Batch/generation rows on Stickers and Animation (pick/remove/report), then Import inside a batch.
 
-**Resume:** `plan.md` Phase 2, with `docs/export to team/mirsal-export-architecture.md` §10.7. Windows checkout, venv `mirsal/.venv`, branch `main`.
+**Still open:**
+1. `tests.test_batches.RemoveRoutes` Windows file-lock flake in teardown (pre-existing).
+2. Nothing was tried against real Higgsfield; the first real regenerate costs the price on its button. Restart `serve --lan` before looking.
+3. `mirsal/mirsal/console/particles.js` and `mirsal/tests/js/particles.test.js` have uncommitted edits from before this session (not mine; left untouched).
+4. Paid proof (plan Phase 6) needs Haitham's yes; Import-pack browser check never happened; `batch_import_inputs.py` at repo root does not run.
+
+**Resume:** `plan.md` "Next" step 1. Windows checkout, venv `mirsal/.venv`, branch `main`. Tests that cover this: `tests.test_live` (the regenerate, family,
+next-batch and animation-row tests), `tests/js/prompt_tab.test.js`.

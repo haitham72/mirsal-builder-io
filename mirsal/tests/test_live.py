@@ -980,7 +980,7 @@ class LiveConsoleTests(Base):
         self.assertTrue(old)
         mine = "every blob spins once in place, no camera move"
         s, j = self.req("POST", "/api/live/video", {"generation": gid, "redo": True, "video_prompt": mine,
-                                                    "model": "grok_video_v15_lite", "options": {"duration": "5"}})
+                                                    "model": "grok_video_v15_lite", "options": {"duration": "5"}, "slot_fill": 0.6})
         self.assertEqual(s, 200, j)
         create = self.until(lambda: next(iter(self._creates("grok_video_v15_lite")), None), "the Grok Lite create call")
         self.assertEqual(create[create.index("--prompt") + 1], mine)                      # what the person read is what is sent
@@ -989,6 +989,7 @@ class LiveConsoleTests(Base):
         sheets = {v["id"]: v for v in after["video_sheets"]}
         self.assertEqual((sheets["A1"]["status"], sheets["A2"]["status"]), ("SUPERSEDED", "SLICED"))
         self.assertEqual(sheets["A2"]["slots"], sheets["A1"]["slots"])                       # the same kept stickers, the same S#
+        self.assertAlmostEqual(sheets["A2"]["slot_fill"], 0.6)                                # the gap chosen before re-animating is the one sent
         self.assertTrue((d / sheets["A1"]["video"]).is_file())                               # the retired video stays on disk
         self.assertEqual(sheets["A2"]["video_prompt_sent"], mine)
         self.assertEqual((after.get("sheet_model"), sheets["A1"].get("model"), sheets["A2"].get("model")),
@@ -1002,52 +1003,61 @@ class LiveConsoleTests(Base):
                 self.assertEqual((d / ver["webm"]).read_bytes(), old[t["index"]])            # the earlier clip is kept as a version
             if t["anim_status"] == "READY":
                 self.assertEqual(t["review"]["anim"], "PENDING")                             # G4 asks again for the new animation
+        # the animation row: pick A1 back (re-cut from its stored video, free), the one in use cannot be removed, another one can
+        jobs_before = len(self.req("GET", "/api/jobs")[1]["jobs"])
+        s, r = self.req("POST", f"/api/generations/{gid}/pick_video", {"sheet": "A1"})
+        self.assertEqual((s, r["changed"], r["was"]), (200, True, "A2"), r)
+        back = self._sliced(gid, "A1")
+        sheets = {v["id"]: v for v in back["video_sheets"]}
+        self.assertEqual((sheets["A1"]["status"], sheets["A2"]["status"]), ("SLICED", "SUPERSEDED"))
+        self.assertEqual(len(self.req("GET", "/api/jobs")[1]["jobs"]), jobs_before)                       # no new video, no credits
+        self.assertEqual(self.req("POST", f"/api/generations/{gid}/remove_video", {"sheet": "A1"})[0], 409)   # in use: pick another one first
+        s, r = self.req("POST", f"/api/generations/{gid}/remove_video", {"sheet": "A2"})
+        self.assertEqual((s, r["removed"]), (200, "A2"))
+        self.assertEqual(next(v for v in self.req("GET", f"/api/generations/{gid}")[1]["video_sheets"] if v["id"] == "A2")["status"], "REJECTED")
         # while a returned video is being cut, regenerating is refused in words (never two cuts at once)
         from mirsal.flow import gates
         res = pl.read_result(self.out, gid)
-        next(v for v in res["video_sheets"] if v["id"] == "A2")["status"] = "VIDEO_RETURNED"
+        next(v for v in res["video_sheets"] if v["id"] == "A1")["status"] = "VIDEO_RETURNED"
         pl.write_result(self.out, gid, res)
         with self.assertRaises(pl.PipelineError) as e:
             gates.redo_video(self.out, gid)
         self.assertIn("being cut", str(e.exception))
 
-    def test_regenerate_sheet_in_the_same_batch_keeps_everything_as_a_version(self):
+    def test_regenerate_is_the_next_generation_of_the_same_batch_and_one_is_picked(self):
         gid = self._stills_ready("blob")
-        self._video_for_the_sheet_being_sent(gid)
-        self.assertEqual(self.req("POST", "/api/live/video", {"generation": gid})[0], 200)
-        first = self._sliced(gid, "A1")
-        self.cli.wait_hook = None                                    # the next job is a sheet: the fake answers with its PNG
-        d = pl.gen_dir(self.out, gid)
-        old_png = {t["index"]: (d / t["png"]).read_bytes() for t in first["stickers"] if t.get("png")}
-        old_webm = {t["index"]: (d / t["webm"]).read_bytes() for t in first["stickers"] if t.get("webm")}
-        mine = "nine blobs, each one a different mood, flat colours"
-        s, j = self.req("POST", "/api/live/sheet", {"prompt": first["prompt"], "from_generation": gid, "redo": True, "sheet_prompt": mine, "model": "nano_banana_pro"})
+        g1 = f"G{gid:03d}"
+        fam = self.req("GET", f"/api/generations/{gid}/family")[1]
+        self.assertEqual((fam["root"], fam["picked"], [m["n"] for m in fam["members"]]), (g1, g1, [1]))
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "from_generation": gid, "parent": g1, "regen_of": g1, "model": "nano_banana_pro"})
         self.assertEqual(s, 200, j)
         job = self.until(lambda: (lambda x: x if x.get("generation") and x["status"] == "DONE" else None)(self.req("GET", "/api/jobs/" + j["job"])[1]), "sheet job")
-        self.assertEqual(job["generation"], first["generation_id"])                                  # the same batch, no new G###
-        create = next(iter(self._creates("nano_banana_pro")))
-        self.assertEqual(create[create.index("--prompt") + 1], mine)
-        after = self.until(lambda: (lambda x: x if x["stage"] == "sliced" and not x["busy"] and x.get("sheet_versions") else None)(self.req("GET", f"/api/generations/{gid}")[1]), "the new stills")
-        self.assertEqual((after["sheet_model"], after["sheet_prompt"]), ("nano_banana_pro", mine))
-        v1 = after["sheet_versions"][0]
-        self.assertEqual(v1["version"], 1)
-        self.assertEqual(v1["model"], "nano_banana_flash")
-        self.assertTrue((d / v1["sheet"]).is_file())
-        for i, data in old_png.items():
-            self.assertEqual((d / v1["stickers"][str(i)]["png"]).read_bytes(), data)                 # every earlier still is kept
-        for i, data in old_webm.items():
-            self.assertEqual((d / v1["stickers"][str(i)]["webm"]).read_bytes(), data)                # and every earlier animation
-        a1 = next(v for v in after["video_sheets"] if v["id"] == "A1")
-        self.assertEqual((a1["status"], a1["retired_by_sheet"]), ("REJECTED", 1))                    # its stills are gone: never re-cut onto the new ones
-        self.assertTrue(all(t["review"]["anim"] == "NONE" and t["anim_status"] == "NOT_REQUESTED" for t in after["stickers"]))
-        self.assertTrue(any(t["status"] == "READY" and t["review"]["still"] == "PENDING" for t in after["stickers"]))     # G2 asks again
-        self.assertTrue(all(any(h.get("reason") == "regenerate" for h in t["history"]) for t in after["stickers"]))          # the click is on every sticker's history
-        # a batch whose sheet is still being cut is refused before anything is spent
-        res = pl.read_result(self.out, gid); res["stage"] = "keyed"; pl.write_result(self.out, gid, res)
+        g2 = job["generation"]
+        self.assertNotEqual(g2, g1)                                                                      # a new generation...
+        fam = self.req("GET", f"/api/generations/{int(g2[1:])}/family")[1]
+        self.assertEqual(fam["root"], g1)                                                               # ...of the same batch
+        self.assertEqual([(m["generation_id"], m["n"], m["relation"]) for m in fam["members"]], [(g1, 1, None), (g2, 2, "redo")])
+        self.assertEqual(fam["picked"], g2)                                                             # the newest is picked until someone picks
+        self.assertEqual(self.req("GET", f"/api/generations/{int(g2[1:])}")[1].get("sheet_model"), "nano_banana_pro")
+        s, fam = self.req("POST", f"/api/generations/{gid}/pick", {})
+        self.assertEqual((s, fam["picked"]), (200, g1))
+        self.assertEqual(self.req("GET", f"/api/generations/{int(g2[1:])}/family")[1]["picked"], g1)    # one pick per batch, kept on the root
+
+    def test_next_batch_plans_the_next_unused_actions_and_spends_nothing(self):
+        gid = self._stills_ready("blob")
+        res = pl.read_result(self.out, gid)
         n = len(self.cli.calls)
-        s, j = self.req("POST", "/api/live/sheet", {"prompt": first["prompt"], "from_generation": gid, "redo": True})
-        self.assertEqual(s, 409, j)
-        self.assertFalse([c for c in self.cli.calls[n:] if c[:2] == ["generate", "create"]])
+        s, nb = self.req("POST", "/api/plan/next", {"gens": [gid]})
+        self.assertEqual(s, 200, nb)
+        self.assertFalse(nb.get("complete"), nb)
+        self.assertEqual((nb["next"]["kind"], len(nb["next"]["tokens"]), len(nb["stickers"])), ("actions", 9, 9))
+        from mirsal.generation import actions
+        used = {h[0] for st in res["stickers"] if (h := actions.canonical_for(st.get("key"), st.get("tags")))}
+        self.assertFalse(used & set(nb["next"]["tokens"]), "nothing this batch already drew")
+        self.assertEqual(list(nb["next"]["tokens"]), actions.next_tokens(used))
+        self.assertTrue(nb["sheet_prompt"])
+        self.assertFalse([c for c in self.cli.calls[n:] if c[:2] == ["generate", "create"]])              # a prompt to read, nothing spent
+        self.assertEqual(self.req("POST", "/api/plan/next", {"gens": []})[0], 409)
 
     def test_an_empty_or_absurd_hand_written_prompt_is_refused_and_starts_nothing(self):
         for body in ({"prompt": "blob", "sheet_prompt": "   "}, {"prompt": "blob", "sheet_prompt": ""},

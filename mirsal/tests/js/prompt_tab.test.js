@@ -38,8 +38,8 @@ test('without a draft the box shows the template and nothing is custom', () => {
   const g = batch();
   assert.equal(h.pdText(g, 'sheet'), 'SHEET TEMPLATE');
   assert.equal(h.pdCustom(g, 'sheet'), false);
-  assert.match(h.pdFoot(g, 'sheet'), /data-act=pgresheet[^>]*>Regenerate sheet in this batch<span/, 'the first choice regenerates in this batch');
-  assert.match(h.pdFoot(g, 'sheet'), /data-act=pgsheet[^>]*>A new batch instead/, 'a new batch stays the second choice');
+  assert.match(h.pdFoot(g, 'sheet'), /data-act=pgresheet[^>]*>Regenerate<span/, 'one plain Regenerate');
+  assert.doesNotMatch(h.pdFoot(g, 'sheet'), /data-act=pgsheet|A new batch/, 'a new batch is Next batch, not a second choice here');
   assert.match(h.pdFoot(g, 'sheet'), /data-act=pgreset[^>]* hidden/, 'nothing to reset');
 });
 
@@ -67,7 +67,7 @@ test('the video box shows the prompt that was actually sent once there is one', 
   const g = batch({ video_sheets: [{ id: 'A1', status: 'SLICED', video_prompt_sent: 'WHAT WAS SENT' }] });
   assert.equal(h.pdText(g, 'video'), 'WHAT WAS SENT');
   assert.doesNotMatch(h.pdFoot(g, 'video'), /pgvideo/, 'a sliced sheet is never animated twice');
-  assert.match(h.pdFoot(g, 'video'), /data-act=pgredo data-g=5[^>]*>Regenerate video in this batch/, 'it is regenerated in the same batch instead');
+  assert.match(h.pdFoot(g, 'video'), /data-act=pgredo data-g=5[^>]*>Regenerate</, 'it is regenerated in the same batch instead');
   assert.doesNotMatch(h.pdFoot(g, 'video'), /pgredo[^>]* disabled/);
 });
 
@@ -75,16 +75,13 @@ test('regenerating waits while a returned video is being cut, and a retired shee
   const h = load();
   assert.match(h.pdFoot(batch({ video_sheets: [{ id: 'A1', status: 'SUPERSEDED' }, { id: 'A2', status: 'VIDEO_RETURNED' }] }), 'video'), /pgredo[^>]* disabled/);
   assert.doesNotMatch(h.pdFoot(batch({ video_sheets: [{ id: 'A1', status: 'SUPERSEDED' }, { id: 'A2', status: 'APPROVED' }] }), 'video'), /pgredo[^>]* disabled/, 'a failed redo can be tried again');
-  assert.match(h.pdFoot(batch({ video_sheets: [{ id: 'A1', status: 'VIDEO_RETURNED' }] }), 'sheet'), /pgresheet[^>]* disabled/, 'no new sheet while the video is cut');
 });
 
 test('the buttons are off without Higgsfield and the video needs a kept sticker', () => {
   const off = load({ live: false });
-  assert.match(off.pdFoot(batch(), 'sheet'), /pgsheet[^>]* disabled/);
   assert.match(off.pdFoot(batch(), 'sheet'), /pgresheet[^>]* disabled/);
   assert.match(off.pdFoot(batch(), 'video'), /pgvideo[^>]* disabled/);
   const on = load();
-  assert.doesNotMatch(on.pdFoot(batch(), 'sheet'), /pgsheet[^>]* disabled/);
   assert.doesNotMatch(on.pdFoot(batch(), 'sheet'), /pgresheet[^>]* disabled/);
   assert.doesNotMatch(on.pdFoot(batch(), 'video'), /pgvideo[^>]* disabled/);
   assert.match(on.pdFoot(batch({ stickers: [{ status: 'FAILED' }] }), 'video'), /pgvideo[^>]* disabled/);

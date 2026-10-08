@@ -165,19 +165,16 @@ RENDER.generate=async()=>{
    <div class=sh>${ic('gen')} Studio</div>
    <div class=gform>${ic('search')}<input id=prompt type=text placeholder="Describe the stickers, for example: teddy bear for school" autocomplete=off><button id=go class="btn pri gbig" data-act=gprompt>Generate prompt</button></div>
    <div class=gopts><span class=mut>White outline</span><div class=tabs id=opills></div><span class=mut id=ohint></span></div>
-   <div id=gsug class=gsug></div><div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
+   <div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
   $('prompt').value=gdOn()?GD.prompt:SES.prompt||'';$('prompt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ACT.ggo()}};
   document.documentElement.style.setProperty('--tile',GS.tile+'px');
-  drawOutline();glast='';await loadInputs();drawSug();tick(true)};
+  drawOutline();glast='';await loadInputs();tick(true)};
 function drawOutline(){const on=GS.outline>0;$('opills').innerHTML=[[12,'On'],[0,'Off']].map(([px,l])=>`<button class="tab ${(on?12:0)===px?'on':''}" data-act=goutline data-px=${px}>${l}</button>`).join('');
   $('ohint').textContent=on?'white border around each sticker, also on the animation':'stickers are cut out with no border'}
 ACT.goutline=el=>{GS.outline=+el.dataset.px;gstore('mirsal.outline',GS.outline);drawOutline();glast='';tick(true)};
 /* /api/ai: which engine the AI enhancer would use and what is available (never the key); asked again after the person changes the engine (AIENG, agent.js) */
 async function aiRefresh(){const a=await api('/api/ai');if(a.ok){GAI=a.j;if(typeof cpDrawBar==='function')cpDrawBar()}return GAI}          // the chip and the engine control read GAI: redraw when it arrives (the composer can be drawn first)
 async function loadInputs(){const r=await api('/api/inputs');if(r.ok)GINP=r.j.inputs;await aiRefresh();const h=await api('/api/generations');if(h.ok)GHEALTH=h.j.health}
-function drawSug(){const el=$('gsug');if(!el)return;
-  el.innerHTML=GINP.length?`<span class=mut>Prepared sheets:</span>`+GINP.map(s=>`<button class=chip2 data-act=gsug data-s="${esc(s.subject)}">${esc(s.subject.replace(/_/g,' '))} <small>${s.variants.length} ${s.variants.length>1?'sheets':'sheet'}</small></button>`).join(''):''}
-ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');ACT.ggo()};
 
 /* a new request starts a session with Batch 1; "Create more" adds the next batch */
 async function create(prompt,variant,more){
@@ -193,6 +190,18 @@ ACT.gmore=async()=>{const gs=sessionGens();if(!gs.length)return;const s=gs[0].so
   await loadInputs();const inp=GINP.find(x=>x.subject===s),next=inp&&inp.variants.find(v=>!used.has(String(v.folder)));
   if(!next){toast(`That is every prepared sheet of “${s.replace(/_/g,' ')}”. Put another in Images_gen, or get the Higgsfield prompt to make a new one.`,1);return}
   create(SES.prompt||s.replace(/_/g,' '),next.variant,true)};
+/* Next batch (Haitham, 2026-10-08, was "Create more"): POST /api/plan/next with the batches on screen answers the next UNCLAIMED batch (a preset pack's next
+   grid, else the next bank actions none of them drew) as a prompt draft: the request box changes to it, the Prompt step shows it, nothing is spent until
+   Generate sheet. The finished sheet joins this session as the next batch. Without Higgsfield it is the next prepared sheet of the subject, as before. */
+ACT.gnext=async()=>{const gs=sessionGens();if(!gs.length)return;
+  if(typeof liveReadyNow!=='function'||!liveReadyNow())return ACT.gmore();
+  const style=typeof LIVE!=='undefined'?LIVE.style:'flat_vector',loop=!!(typeof LIVE!=='undefined'&&LIVE.loop);
+  const r=await post('/api/plan/next',{gens:SES.gens,style_id:style,loop});if(!r.ok)return toast(r.j.error||'Could not plan the next batch',1);
+  if(r.j.complete){say(esc(r.j.message));return}
+  delete PD['draft:sheet'];delete PD['draft:video'];$('prompt').value=r.j.prompt;
+  const what=r.j.next&&r.j.next.kind==='preset'?`the ${r.j.next.preset} grid`:'the next actions of the bank';
+  GD={...r.j,number:'draft',plan_source:`Next batch: ${what}`,video_sheets:[],reviews:{},active:true,tab:'plan',gens:SES.gens.join(),style,loop,refs:[],next:true};
+  say('');gdSave();glast='';await tick(true);gdPrice()};
 ACT.gbdrop=el=>{const id=+el.dataset.g;SES.gens=SES.gens.filter(x=>x!==id);SES.off=SES.off.filter(x=>x!==id);saveSes();glast='';tick(true)};
 ACT.ginc=el=>{const id=+el.dataset.g;SES.off=el.checked?SES.off.filter(x=>x!==id):SES.off.concat(id);saveSes();glast='';tick(true)};
 document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('ginc'))ACT.ginc(e.target);
@@ -255,7 +264,7 @@ function gview(){
   const gs=sessionGens();if(!gs.length)return'';
   const s=gstats(gs),{pk,allAdded,n}=s;
   return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}${gs[0].source.prepared?' · prepared sheet, 0 credits':''}</div></div>
-    <button class="btn" data-act=gmore ${s.ready&&!s.busyAnim?'':'disabled'} title="Create another sheet of the same subject">${ic('plus')} Create more</button>
+    <button class="btn" data-act=gnext ${s.ready&&!s.busyAnim?'':'disabled'} title="The next batch of this request that has not been made yet, as a prompt you read before anything is spent">${ic('plus')} Next batch</button>
     ${gs.length===1&&gs[0].source.prepared&&(typeof liveReadyNow==='function'&&liveReadyNow())?`<button class="btn" data-act=gnewlive title="Draw a fresh sheet with Higgsfield at the normal price instead of the prepared one">Make a new one</button>`:''}
     ${gs.length===1?`<button class=btn data-act=ggroup title="Put this batch in the group of another batch: that batch becomes its parent">Add to group</button>`:''}
     ${gs.length===1&&s.ready?`<a class=btn href="/api/generations/${gs[0].number}/export.zip" download title="Download the accepted stickers (animated where ready) as one .zip">${ic('download')} Download .zip</a>`:''}
@@ -343,7 +352,7 @@ function pdFoot(g,kind){const custom=pdCustom(g,kind),live=typeof liveReadyNow==
   if(g.number==='draft')return gdFoot(g,kind);
   const kept=typeof keptStills==='function'?keptStills(g).length:0,sent=(g.video_sheets||[]).some(v=>['VIDEO_RETURNED','SLICED','SUPERSEDED'].includes(v.status));
   if(kind==='video'&&sent)return redoFoot(g,live,kept);
-  if(kind==='sheet'&&!making(g))return resheetFoot(g,live,custom);
+  if(kind==='sheet'&&!making(g))return resheetFoot(g,live);
   const go=kind==='sheet'
     ?`<button class="btn sm pri" data-act=pgsheet data-g=${g.number} ${live?'':'disabled'} title="${live?'Make a NEW sheet from this batch\'s own cells and tags, with this prompt':'Higgsfield is not connected'}">Generate sheet${custom?' with my prompt':''}<span class=lv-vp data-lvprice=image></span></button>`
     :`<button class="btn sm pri" data-act=pgvideo data-g=${g.number} ${live&&kept&&!sent?'':'disabled'} title="${!live?'Higgsfield is not connected':sent?'This sheet already has its video; the engine does not animate a sliced sheet twice. Make a new sheet first.':kept?'Animate the kept stickers with this prompt':'Keep at least one sticker first'}">Generate video${custom?' with my prompt':''}<span class=lv-vp data-lvprice=video></span></button>`;
@@ -353,25 +362,23 @@ function pdFoot(g,kind){const custom=pdCustom(g,kind),live=typeof liveReadyNow==
    their current animations until the new ones are cut, then G4 asks again. Nothing else changes: same G###, same S#. */
 function redoFoot(g,live,kept){const run=typeof videoRun==='function'?videoRun(g):null,cutting=(g.video_sheets||[]).some(v=>v.status==='VIDEO_RETURNED')||processing(g);
   const why=!live?'Higgsfield is not connected':run?'A video is being made for this batch':cutting?'The video is being cut into animations: wait for it to finish':!kept?'Keep at least one sticker first':'';
-  return`<div class=pdfoot data-pdfoot=video>${typeof modelPick==='function'&&live?modelPick('video',(cutOf(g)||{}).model):''}
+  const f=typeof fillNow==='function'?fillNow():null,gap=f!=null&&typeof previewUrl==='function'&&live&&!run&&kept?`<div class=lv-regap><label class=lv-gap title="Space between the stickers on the video sheet that is sent: smaller gap = bigger stickers, bigger gap = safer. The new video sheet is built at this gap">Gap <input type=range min=8 max=50 step=1 value="${gapPct(f)}" data-lvgap data-g=${g.number}><output>${gapPct(f)}%</output></label>
+   <img class=lv-vprev data-lvprev src="${previewUrl(g,f)}" alt="The video sheet that will be sent" loading=lazy></div>`:'';
+  return`<div class=pdfoot data-pdfoot=video>${gap}${typeof modelPick==='function'&&live?modelPick('video',(cutOf(g)||{}).model):''}
    ${run?`<div class="lv-vgen run"><div class=spin></div><span>Animating with ${esc(run.model)}…<small data-lvt="${run.t0}">${Math.round((Date.now()-run.t0)/1000)}s</small></span></div>`
-     :`<button class="btn sm pri" data-act=pgredo data-g=${g.number} ${why?'disabled':''} title="${esc(why||'A new video from the same kept stickers, in this batch, with the prompt above. Your current animations stay until the new ones are cut.')}">Regenerate video in this batch<span class=lv-vp data-lvprice=video></span></button>`}
-   <button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=video ${PD[pdKey(g.number,'video')]!==undefined?'':'hidden'}>Reset</button>
-   <small class=mut>The text above is sent exactly as written. Same batch, same stickers: the current animations are kept as a version.</small></div>`}
-/* Regenerate sheet in the SAME batch: the image model folded as {current} -> {next}, the text above is sent as written. The server keeps the current sheet,
-   stills and clips as a version (versions/v<n>/), retires the video sheets and cuts this batch again from the new sheet: same G###, same S#, G2 asks again.
-   "A new batch instead" is the old behaviour (a new G### from this batch's cells), kept as the secondary choice. */
-function resheetFoot(g,live,custom){const busy=(g.video_sheets||[]).some(v=>v.status==='VIDEO_RETURNED')||processing(g);
-  const why=!live?'Higgsfield is not connected':busy?'A video is being cut into animations: wait for it to finish':'';
+     :`<button class="btn sm pri" data-act=pgredo data-g=${g.number} ${why?'disabled':''} title="${esc(why||'A new animation of this generation from the same kept stickers, with the prompt above')}">Regenerate<span class=lv-vp data-lvprice=video></span></button>`}
+   <button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=video ${PD[pdKey(g.number,'video')]!==undefined?'':'hidden'}>Reset</button></div>`}
+/* Regenerate (Haitham, 2026-10-08): ONE button. A new generation of this batch from the text above (sent as written) and the model folded above it
+   ({current} -> {next}); it joins the batch's row as the next generation (parent + regen_of: the batch's family) and becomes the picked one. */
+function resheetFoot(g,live){const why=!live?'Higgsfield is not connected':'';
   return`<div class=pdfoot data-pdfoot=sheet>${typeof modelPick==='function'&&live?modelPick('image',g.sheet_model):''}
-   <button class="btn sm pri" data-act=pgresheet data-g=${g.number} ${why?'disabled':''} title="${esc(why||'A new sheet with the prompt above, in this batch. The current sheet, stickers and animations are kept as a version; the stickers are reviewed again.')}">Regenerate sheet in this batch<span class=lv-vp data-lvprice=image></span></button>
-   <button class="btn sm" data-act=pgsheet data-g=${g.number} ${live?'':'disabled'} title="Make a NEW batch from this batch's own cells and tags, with this prompt">A new batch instead</button>
-   <button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=sheet ${PD[pdKey(g.number,'sheet')]!==undefined?'':'hidden'}>Reset</button>
-   <small class=mut>The text above is sent exactly as written. Same batch, same stickers: the current sheet, stickers and animations are kept as a version, and you review the new stickers again.</small></div>`}
+   <button class="btn sm pri" data-act=pgresheet data-g=${g.number} ${why?'disabled':''} title="${esc(why||'A new generation of this batch with the prompt above')}">Regenerate<span class=lv-vp data-lvprice=image></span></button>
+   <button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=sheet ${PD[pdKey(g.number,'sheet')]!==undefined?'':'hidden'}>Reset</button></div>`}
 ACT.pgresheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'sheet')||'').trim();
   if(!text){toast('Write a sheet prompt first',1);return}
   if(typeof lcached==='function'&&lcached('image')==null){toast('The price is not known yet: wait for it, then regenerate',1);return}
-  el.disabled=true;const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,sheet_prompt:text,redo:true});
+  el.disabled=true;const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,parent:g.generation_id,regen_of:g.generation_id,
+    sheet_prompt:pdCustom(g,'sheet')?text:undefined,mode:'regen',batch:g.number});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};
 ACT.pgredo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'video')||'').trim();
   if(!text){toast('Write a video prompt first',1);return}
@@ -437,7 +444,7 @@ ACT.gdsheet=async el=>{if(!gdOn()||GDWORK)return;const g=GD,text=(pdText(g,'shee
   if(typeof liveReadyNow!=='function'||!liveReadyNow()){toast('Connect Higgsfield first',1);return}
   if(!gdPriceLine().ok){toast('The Higgsfield price is not known yet: wait for it or retry it, then generate',1);return}       // never spend against a price the person has not been shown
   GDWORK=true;el.disabled=true;
-  try{const ok=await liveStart('sheet',{prompt:g.prompt,ai:false,refs:g.refs||[],style_id:g.style,loop:g.loop,sheet_prompt:(pdCustom(g,'sheet')||g.expanded_by==='ai')?pdText(g,'sheet'):undefined,
+  try{const ok=await liveStart('sheet',{prompt:g.prompt,ai:false,refs:g.refs||[],style_id:g.style,loop:g.loop,...(g.next?{mode:'next'}:{}),sheet_prompt:(pdCustom(g,'sheet')||g.expanded_by==='ai')?pdText(g,'sheet'):undefined,
     plan:g.slots?{template_id:g.template_id,expanded_by:g.expanded_by,expand_model:g.expand_model,slots:{subject_description:g.slots.subject_description,key_colour:g.slots.key_colour,cells:g.slots.cells}}:undefined});     // the previewed plan goes with the click: the server validates it and builds the batch from the cells the person saw (ai:false: the enhancer is never asked a second time)
     if(ok){gdDrop();glast='';await tick(true)}}
   finally{GDWORK=false;if(GD){gdSave();gdPaint()}if(typeof cpDrawBar==='function')cpDrawBar()}};

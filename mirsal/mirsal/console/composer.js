@@ -142,4 +142,3 @@ ACT.gnewlive=()=>{const p=(($('prompt')||{}).value||'').trim()||(typeof SES!=='u
   if(!liveReady()){toast('Higgsfield is not connected.',1);return}
   say('');if(CP.go)return;CP.go=true;
   gdHide();liveStart('sheet',{prompt:p,ai:aiOn(),refs:[]}).finally(()=>{CP.go=false;if(typeof cpDrawBar==='function')cpDrawBar()})};
-ACT.gsug=el=>{$('prompt').value=el.dataset.s.replace(/_/g,' ');_ggo()};      // a prepared-sheet chip uses the prepared sheet, never a new generation

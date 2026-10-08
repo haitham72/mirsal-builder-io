@@ -250,13 +250,6 @@ class Console:
         parent = req.get("parent")                         # a chat edit: the new batch is a child of the one it improves (lineage, never a copy)
         parts = req.get("particles") or req.get("pieces")  # the sheet is the particle set of an effect (`pieces` is what older jobs called it) or *Generate more* of a saved set: a particle batch
         parts = parts if isinstance(parts, dict) and (parts.get("effect") or parts.get("set")) else None
-        if req.get("redo_of"):                             # "Regenerate sheet" in the same batch: archive the current sheet as a version, re-cut this batch from the new one
-            gid = int(str(req["redo_of"]).lstrip("G"))
-            pl.resheet(self.out, gid, sheet, by=req.get("user") or "human", model=job.get("model") or req.get("model"), prompt=req.get("prompt"), custom=bool(req.get("custom_prompt")))
-            tasks.link_generation(self.out, t["id"], gid)
-            jobs.attach_generation(self.out, job["id"], gid)
-            self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
-            return
         tok = pl.OWNER.set(req.get("user") or "local")     # the batch belongs to whoever asked for the sheet
         try:
             gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None, erode=int(req["erode"]) if req.get("erode") is not None else None,
@@ -427,14 +420,6 @@ class Console:
                 refs = self.ref_files(body.get("refs"))
                 if refs and not model_catalog.find("image", model).get("refs"):
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
-                redo_of = None
-                if body.get("redo"):                       # "Regenerate sheet" in the SAME batch: checked before anything is spent, the batch is re-cut when the sheet arrives
-                    if not body.get("from_generation") or base_plan or particles:
-                        raise pl.PipelineError("Regenerating in the same batch needs from_generation (the batch to regenerate)", 400)
-                    redo_of = int(str(body["from_generation"]).lstrip("G"))
-                    if not self.visible(who, redo_of):
-                        raise pl.PipelineError("No such batch", 404)
-                    pl.resheet_check(self.out, redo_of)
                 base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else previewed)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
                 t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
@@ -449,7 +434,6 @@ class Console:
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
                     "outline": int(body["outline"]) if body.get("outline") is not None else None, "erode": int(body["erode"]) if body.get("erode") is not None else None, "custom_prompt": bool(custom),
                     "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"], **({"reserved": reserved} if reserved else {}),
-                    **({"redo_of": f"G{redo_of:03d}"} if redo_of else {}),
                     **({"particles": {k: str(particles[k]) for k in ("effect", "set") if particles.get(k)}} if particles else {})})
                 if particles:                                      # before the job runs, so the page sees REQUESTED and the later link is never overwritten
                     if particles.get("effect"):
@@ -1154,6 +1138,8 @@ def make_handler(c: Console):
                 fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))
                 png = gates.preview_sheet(c.out, int(path.split("/")[3]), c.cfg, fill, int(q.get("px", ["420"])[0]))
                 return self._send(200, png, "image/png")
+            if path.startswith("/api/generations/") and path.endswith("/family"):             # the batch this generation is in: its generations in order and the one picked
+                return self._json(200, groups.family(c.out, int(path.split("/")[3])))
             if path.startswith("/api/generations/") and path.endswith("/history"):            # every sticker's decisions of one batch, grouped by stage (the Studio's folded history)
                 gid = int(path.split("/")[3])
                 idx = parse_qs(urlparse(self.path).query).get("index")
@@ -1757,6 +1743,8 @@ def make_handler(c: Console):
                 else:
                     t = purge.purge_all(c.out, c.lib, str(body.get("confirm", "")), by=who, busy=c.lock.locked(), kind=body.get("kind") or None)
                 return self._json(200 if t["status"] != "running" else 202, t)
+            if path == "/api/plan/next":  # "Next batch": the next unclaimed batch of the batches on screen, as a prompt to read first (nothing is reserved or spent)
+                return self._json(200, tasks.next_batch(c.out, body.get("gens") or [], body.get("style_id", "flat_vector"), bool(body.get("loop"))))
             if path == "/api/plan":      # preview only: nothing is reserved
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
@@ -1908,6 +1896,19 @@ def make_handler(c: Console):
                     return self._json(200, groups.join(c.out, gid, int(str(body.get("to") or "0").upper().lstrip("G") or 0), by=self.user.get("id") or "human"))
                 if parts[3] == "leave":          # out of its family again: its own root
                     return self._json(200, groups.leave(c.out, gid, by=self.user.get("id") or "human"))
+                if parts[3] == "pick":           # the ONE generation its batch is animated and packed from (flow/groups.pick)
+                    return self._json(200, groups.pick(c.out, gid, by=self.user.get("id") or "human"))
+                if parts[3] in ("pick_video", "remove_video"):      # the animation row: pick an earlier video (re-cut, free) or take one out (kept on disk)
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    aid = str(body.get("sheet") or "")
+                    who_ = self.user.get("id") or "human"
+                    if parts[3] == "remove_video":
+                        return self._json(200, gates.remove_video(c.out, gid, aid, by=who_))
+                    r_ = gates.pick_video(c.out, gid, aid, by=who_)
+                    if r_["changed"]:
+                        c.submit(lambda: gates.slice_video(c.out, gid, aid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
+                    return self._json(200, r_)
                 if parts[3] == "more":
                     if c.lock.locked():
                         raise pl.PipelineError("busy", 409)

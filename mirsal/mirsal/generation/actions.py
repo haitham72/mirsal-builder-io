@@ -159,6 +159,60 @@ FACE_SENTENCES = {
 }
 
 
+# Whole-character image/video sentences per bank token, for subjects that are not faces ("teddy bear for school"): "Next batch" takes the next nine
+# tokens a session has not used yet, in bank order (`next_tokens`). Same keys and emoji as ACTION_BANK.
+BODY_SENTENCES = {
+    "happy": ("beaming with happiness, bouncing on the spot with a huge smile", "bounces happily, the smile widens, a little hop"),
+    "laugh": ("laughing so hard tears of joy fly out, holding the belly", "doubles over laughing, shoulders shake, wipes a tear"),
+    "cry": ("bawling with big streaming tears, rubbing the eyes", "tears stream in two arcs, the body shakes with sobs"),
+    "sad": ("sad and slumped, head hanging low, a single tear", "sighs, the shoulders drop, a tear slides down"),
+    "love": ("hugging a big red heart, eyes sparkling, blushing", "squeezes the heart, it pulses, sways side to side"),
+    "angry": ("furious and stomping, steam puffing from the head, fists clenched", "stomps twice, steam puffs, the scowl deepens"),
+    "wink": ("winking playfully with a finger-gun and a cheeky grin", "winks, the finger-gun pops, the grin tilts"),
+    "kiss": ("blowing a kiss from the hand, a small heart floating away", "kisses the hand, the heart floats off, a wink"),
+    "surprised": ("jumping back in surprise, wide eyes and an open mouth", "jolts back, eyes widen, a quick gasp"),
+    "scared": ("terrified and trembling, hiding behind the hands", "shivers fast, peeks between the fingers"),
+    "confused": ("confused, scratching the head with a tilted look", "scratches the head, tilts, a question mark pops"),
+    "think": ("thinking hard, chin on the hand, eyes glancing up", "taps the chin, eyes glance up, a slow nod"),
+    "eye-roll": ("rolling the eyes with crossed arms, unimpressed", "eyes circle, the head tilts back with a sigh"),
+    "sleep": ("fast asleep curled up with a drool bubble", "breathes slowly, the bubble inflates and shrinks"),
+    "cool": ("wearing sunglasses, leaning back with crossed arms, ultra cool", "slow confident nod, the sunglasses glint"),
+    "shy": ("shy, twisting a foot, hands behind the back, blushing", "sways bashfully, glances down, the cheeks flush"),
+    "sick": ("sick under a blanket with a thermometer in the mouth", "shivers, the thermometer wobbles, a weak cough"),
+    "sneeze": ("mid-sneeze holding a tissue, eyes squeezed shut", "winds up, bursts into the sneeze, sniffles"),
+    "celebrate": ("celebrating with a party hat and a popping party popper", "the popper bursts, confetti flies, jumps for joy"),
+    "clap": ("clapping enthusiastically with a big proud grin", "claps fast, bounces, the grin widens"),
+    "approve": ("giving a confident thumbs up with a wink", "the thumb jabs forward twice, a wink, chest puffs"),
+    "disapprove": ("giving a firm thumbs down with a frown", "the thumb points down, the head shakes slowly"),
+    "thanks": ("hands pressed together in thanks, a small bow", "bows gently, the smile widens, a warm glow"),
+    "hello": ("waving hello with a big friendly smile", "waves the raised hand in wide arcs, a happy bounce"),
+    "hug": ("arms wide open, ready for a big warm hug", "opens the arms, squeezes an invisible hug, rocks"),
+    "flex": ("flexing a muscle proudly, chest out, huge grin", "the arm flexes and pulses, the chest puffs, a nod"),
+    "scheme": ("rubbing the hands together with a scheming grin", "rubs the hands, eyebrows wiggle, a sneaky giggle"),
+    "facepalm": ("facepalming in disbelief, one hand over the face", "the hand slaps the face, the head shakes slowly"),
+    "shrug": ("shrugging with both palms up and a crooked smile", "the shoulders lift and drop, the palms turn up"),
+    "bored": ("bored, slumped with the chin on the hand, half-closed eyes", "eyelids droop, a slow exhale, a tiny yawn"),
+    "dance": ("dancing with joyful moves, arms in the air", "shimmies the hips, the arms swing, spins once"),
+    "plead": ("pleading with clasped hands and huge shiny puppy eyes", "wrings the hands, eyes shimmer, a hopeful bounce"),
+    "salute": ("standing tall and giving a crisp salute", "snaps into the salute, chin up, a firm nod"),
+    "cheers": ("raising a glass for a cheerful toast", "lifts the glass, it clinks, a merry nod"),
+    "gift": ("holding out a wrapped gift box with a bow, delighted", "offers the box, the bow bounces, a happy gasp"),
+    "star-struck": ("star-struck with huge starry eyes, hands on the cheeks", "eyes turn starry, the body wiggles with awe"),
+}
+
+
+def next_tokens(used, n: int = 9) -> list[str]:
+    """The first `n` bank tokens (bank order) not in `used`; fewer when the bank runs out (the caller says the bank is complete)."""
+    used = set(used or ())
+    return [t for t in ACTION_BANK if t not in used][:n]
+
+
+def token_cells(tokens, face: bool) -> list[tuple]:
+    """`(token, label, emoji, motion)` for explicit tokens: face sentences for an emoji-style subject, whole-character sentences otherwise."""
+    bank = FACE_SENTENCES if face else BODY_SENTENCES
+    return [(t, *bank[t][:1], ACTION_BANK[t]["emoji"], bank[t][1]) for t in tokens]
+
+
 def preset_name(text: str | None) -> str | None:
     """`core-v1` when the request names it (`core v1`, `core-v1`, …), else None."""
     flat = re.sub(r"[^a-z0-9]+", "", str(text or "").lower())

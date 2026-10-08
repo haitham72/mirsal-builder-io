@@ -148,10 +148,11 @@ def clean_custom(text, what: str) -> str | None:
 TEMPLATE_GRID = {"sheet_3x3": (3, 3), "sheet_2x2": (2, 2), "single_1x1": (1, 1)}
 
 
-def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: str | None = None) -> dict:
+def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: str | None = None, tokens: list | None = None) -> dict:
     """`face` (emoji-style: faces only, never bodies) auto-detects from the request (`generic emojis`, `an emoji pack`,
     ...) and stays on the plan, so recuts and rebuilds keep it. `preset` (a saved nine-slot grid from the canonical
-    bank) names the nine directly; a face-mode sheet without one takes `core-v1`. Template v4 carries the face
+    bank) names the nine directly; a face-mode sheet without one takes `core-v1`. `tokens` (explicit bank tokens, "Next batch" on a
+    non-preset request) names the cells from the bank's face or whole-character sentences. Template v4 carries the face
     wording; v1-v3 are untouched."""
     rows, cols = grid
     words = re.findall(r"[a-z0-9]+", task.lower())
@@ -175,9 +176,11 @@ def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: st
     task_slug = subject_slug + (f"_{ctx_slug}" if ctx_slug else "")
     ctx_tags = [w for w in ctx_words if len(w) > 2][:1]
     cells, stickers = [], []
-    if preset is None and face and grid == (3, 3):
+    if preset is None and face and grid == (3, 3) and not tokens:
         preset = "core-v1"                    # an emoji pack with no grid named starts at the first grid; `generate more` claims the next
-    if preset:
+    if tokens:
+        entries = actions.token_cells(list(tokens)[: rows * cols], bool(face))
+    elif preset:
         entries = [(tok, *rest) for tok, *rest in actions.preset_cells(preset, rows * cols)]
     elif face or not ACTIONS[kind]:
         entries = emotions.pick(rows * cols, subject_slug, face=face)      # face mode always draws from the mood bank: a context bank's props need hands
@@ -185,7 +188,7 @@ def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: st
         entries = ACTIONS[kind][: rows * cols]
     for i, (suffix, phrase, emoji, motion) in enumerate(entries, 1):
         key = f"{subject_slug}_{suffix}"                  # searchable action name; also the file name tail
-        if preset:
+        if preset or tokens:
             seed = [suffix, *actions.ACTION_BANK[suffix]["aliases"]] + ctx_tags
         else:
             seed = [w for w in re.findall(r"[a-z0-9]+", phrase) if len(w) > 2 and w not in STOP and w not in {"with", "holding", "wearing"}][:3] + ctx_tags
