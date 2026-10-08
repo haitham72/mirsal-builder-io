@@ -21,6 +21,7 @@ request ─(prompt template v3 + style + stroke [+ AI enhancer] [+ references])�
   in `console/assets/styles/<id>.(png|jpg|webp|svg)`; without one a generated placeholder is served.
 - **Emotions** (`generation/emotions.py`): a bank of ~35 expressive entries (label = expression + body language, emoji, motion) in nine mood groups; `pick(n, seed)` chooses one per group,
   deterministically per request, so a sheet never repeats a mood. The built-in school and birthday sets carry motions too.
+- **Face-only emoji mode (2026-10-08).** A request naming emoji (`generic emojis`, `an emoji pack`, …) renders template **v4** with the face bank (`emotions.FACE_GROUPS`, same moods/keys/emoji, labels and motions mention only the face and head): a real emoji is a face, never a body. `expand` auto-detects it (`EMOJI_WORDS`), stores `slots.face`, and old plans rebuild to their own version as before. A limb-word list (`emotions.LIMB_WORDS`) guards it in `tests/test_face_mode.py`: the only limb words a v4 prompt may carry are its own "Faces only: never …" negations.
 - **Motion per character.** Every cell has a `motion` sentence; `video_v2` lists them as numbered lines, so Kling animates each character differently.
   `Console.video_prompt_for` rebuilds the video prompt for the slots actually approved (empty slots get no motion).
 - **References.** Up to 4 images, stored by `POST /api/live/ref` as `out/refs/R###.<ext>`, listed on the job (`request.refs`), sent as repeated `--image-references`, and

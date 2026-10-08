@@ -34,7 +34,7 @@ class TemplateTests(unittest.TestCase):
         self.assertIn("3x3 sticker sheet", prompter.validate_plan(json.loads(json.dumps(v1)))["sheet_prompt"])
         with self.assertRaises(ValueError):
             prompter.render_plan(p["slots"], "sheet_3x3", 99)
-        for name in ("sheet_3x3_v1", "sheet_2x2_v1", "single_1x1_v1", "video_v1", "sheet_3x3_v2", "sheet_2x2_v2", "single_1x1_v2", "video_v2", "sheet_3x3_v3", "sheet_2x2_v3", "single_1x1_v3", "video_v3"):
+        for name in ("sheet_3x3_v1", "sheet_2x2_v1", "single_1x1_v1", "video_v1", "sheet_3x3_v2", "sheet_2x2_v2", "single_1x1_v2", "video_v2", "sheet_3x3_v3", "sheet_2x2_v3", "single_1x1_v3", "video_v3", "sheet_3x3_v4", "sheet_2x2_v4", "single_1x1_v4", "video_v4"):
             self.assertTrue((prompter.TEMPLATES / f"{name}.txt").is_file(), name)
 
     def test_old_prompts_files_without_tags_still_load(self):

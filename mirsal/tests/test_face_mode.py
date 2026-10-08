@@ -1,0 +1,60 @@
+"""Face-only emoji mode (Haitham, 2026-10-08: a real emoji is a face, never a body): `expand` detects emoji requests,
+renders template v4 with the face-only bank, and v1-v3 stay byte-identical. No provider, no files outside the repo."""
+import re
+import unittest
+
+from mirsal.generation import emotions, prompter
+
+LIMB = re.compile(r"\b(" + "|".join(re.escape(w) for w in emotions.LIMB_WORDS) + r")\b", re.IGNORECASE)
+
+
+def limbs(text: str) -> list[str]:
+    return sorted(set(LIMB.findall(text or "")))
+
+
+class FaceModeTests(unittest.TestCase):
+    def test_ordinary_requests_are_untouched_v3(self):
+        p = prompter.expand("teddy bear")
+        self.assertEqual((p["template_version"], p["slots"].get("face")), (prompter.TEMPLATE_VERSION, False))
+        self.assertIn("full body", p["sheet_prompt"])
+        self.assertIn(prompter.MARGIN.split(",")[0], p["stickers"][0]["prompt"])
+
+    def test_emoji_requests_render_face_v4(self):
+        for task in ("generic emojis", "an emoji pack", "cat emoticons", "my dog as a smiley"):
+            p = prompter.expand(task, (3, 3))
+            self.assertEqual((p["template_version"], p["slots"].get("face")), (4, True), task)
+            self.assertIn("Faces only", p["sheet_prompt"])
+            self.assertIn("face and head alone", p["stickers"][0]["prompt"])
+
+    def test_no_limb_word_anywhere_in_face_prompts(self):
+        p = prompter.expand("generic emojis", (3, 3))
+        self.assertIn("Faces only: never a body", p["sheet_prompt"])          # the template's own negation steers the model…
+        self.assertIn("Faces only: no bodies", p["video_prompt"])
+        texts = [p["sheet_prompt"], p["video_prompt"]] + [s["prompt"] for s in p["stickers"]]
+        texts += [c["label"] for c in p["slots"]["cells"]]
+        texts = [t.replace("Faces only: never a body, arms, hands, legs, feet, ears, tails or props.", "")
+                  .replace("Faces only: no bodies, no hands, no ears, no tails, no props.", "") for t in texts]  # …everywhere else a limb word is a bug
+        for t in texts:
+            self.assertEqual(limbs(t), [], t[:120])
+        for group in emotions.FACE_GROUPS.values():
+            for suffix, label, emoji, motion in group:
+                self.assertEqual(limbs(label + " " + motion), [], suffix)
+
+    def test_v4_files_exist_and_v1_v3_are_untouched(self):
+        for name in ("sheet_3x3_v4", "sheet_2x2_v4", "single_1x1_v4", "video_v4"):
+            self.assertTrue((prompter.TEMPLATES / f"{name}.txt").is_file(), name)
+        v3 = (prompter.TEMPLATES / "sheet_3x3_v3.txt").read_text(encoding="utf-8")
+        self.assertIn("full body", v3)
+        self.assertNotIn("Faces only", v3)
+
+    def test_a_saved_v4_plan_rebuilds_to_v4(self):
+        import json
+        p = prompter.expand("generic emojis", (2, 2))
+        again = prompter.validate_plan(json.loads(json.dumps(p)))
+        self.assertEqual((again["template_version"], "Faces only" in again["sheet_prompt"]), (4, True))
+        self.assertEqual([c["label"] for c in p["slots"]["cells"]],
+                         [c["label"] for c in prompter.expand("generic emojis", (2, 2))["slots"]["cells"]])
+
+
+if __name__ == "__main__":
+    unittest.main()
