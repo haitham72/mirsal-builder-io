@@ -1,16 +1,26 @@
 # HANDOFF: the save point
 
-This file holds only what a session was in the middle of when it stopped (it got stuck, the context ran out, something went wrong). Nothing else lives here: the next steps are `plan.md` when there is one (none after v1.0), what exists is in `README.md` and `docs/`, what is open is in `docs/backlog.md` and `docs/waiting-for-haitham.md`.
+This file holds only what a session was in the middle of when it stopped (it got stuck, the context ran out, something went wrong). Nothing else lives here: the next steps are `plan.md`, what exists is in `README.md` and `docs/`, what is open is in `docs/backlog.md` and `docs/waiting-for-haitham.md`.
 
 When a session stops mid-step, write: the step being worked on, the files touched, what is half-done, how to resume. The session that resumes deletes it.
 
 ## In progress
 
+Session of 2026-10-08 (Muse Spark), all work committed and pushed through `c0a6d55`. Nothing half-written; everything below is built or planned-only.
 
-Session of 2026-10-08 (Claude Opus 5.5), stopped to switch LLM. Code is committed and pushed (`88e99ae`); what is left is checking and two answers from Haitham.
+**Just finished implementing (all on `main`, all pushed):**
+- Export-as-ZIP follows the final filename contract + manifest v1 in both ZIPs (`2b2ebd4`: `generation/actions.py` 36-bank, `media/export_names.py` builder/parser, both `export_zip`s, `tests/test_export_names.py`).
+- Snake_case slugs + clean fallback tags (`bc89279`): `-` separates identifiers, `_` joins inside; fallback strips subject words, collapses repeats, flags `unresolved`. Verified on real G112 (S7 now `grumpy_arms_crossed`).
+- Face-only emoji prompts (`162c6e3`): template v4 files + `emotions.FACE_GROUPS` + `EMOJI_WORDS` auto-detect + limb-word guard test. v1–v3 byte-identical.
+- Preset grids drive emoji sheets (`1349c7a`): `actions.PRESETS` + `FACE_SENTENCES`, `expand(..., preset=)`, faceless-emoji 3×3 defaults `core-v1`.
+- Claim-ledger DB design (`c0a6d55`): `docs/export to team/mirsal-export-architecture.md` §10.7 — pack sessions, `C###` claims, regenerate lineage. Design only, zero code.
 
-1. **Built, not yet seen in a browser:** Library > Packs > **+** asks *New pack* / *Import pack* (`console/app.js` `ACT.newpack`, `console/imports.js` `ACT.impackopen`); a video imported with no destination is its own batch (`flow/imports.py` `first_frame`: frame 0 is the sheet, then `run_stills` + `run_animate`). Docs updated (api.md, design.md, engine-and-studio.md, W1(e)). Tests: `mirsal test area flow/imports` PASS (20), `node --test tests/js/imports_trending.test.js` PASS. **Resume:** restart `serve --lan` (the running server, started before this change, still has the old import code), then try + > Import pack with one PNG sheet and one MP4 sheet in the browser.
-2. **Generic emoji packs made from the watch folders** (free, prepared): img-005..010 -> G112..G117, animated; *Add* put only the clean animations into packs *Generic Emojis 005..009* (1/2/7/6/3 stickers). The rest are soft-blocked (`inside_frame` WARN: the character leaves its cell; `gates.soft_block`), so including them is Haitham's click (Approve on the animation, then Add). G117 (img-010) has no pack yet: all 9 are soft-blocked. Do not approve them for him.
-3. **Open questions to Haitham** (asked in chat, not answered): should a request saying "original emojis" map to the `generic_emojis` subject (it became its own subject `original_emojis`, paid sheet G111 / J058 / task 042)? Should a generated sheet ever be copied into `inputs/Images_gen` (that would change rule 9's "the app never writes in the watch folders"; recommendation: no)?
-4. **Untracked/runtime, left as is:** `mirsal/out/` changes (G111-G117, J058, task 042, library.json, 48 particle files moved to `out/trash/particles/` by the app) are runtime artifacts, never committed. `batch_import_inputs.py` at the repo root (commit 8c9c2b4) calls `pl.Config.default()` / `pl.Pace.default()`, which do not exist, so it does not run; the Studio (type "generic emojis", Create more) or `POST /api/generations {prompt, variant}` does the same job. Delete or fix it on Haitham's word.
-5. `plan.md` (extra local-vLLM judge tests) is untouched by this session and still the next planned work.
+**Stuck / still open (not started or blocked):**
+1. `tests.test_batches.RemoveRoutes` fails on a Windows file-lock in teardown — fails identically on the clean tree (verified via `git stash`), pre-existing environment flake, not from this work.
+2. Exports still emit `G###` — the short-code allocator (§10.4) is designed, not built.
+3. Claim ledger (§10.7), exporter bank picker UI, in-batch versions, preset claim queue: designed/planned in `plan.md`, not built. Needs Haitham's go + a W number.
+4. Paid proof pending (needs Haitham's explicit yes, ~2 credits): one face-preset sheet to prove the model draws faces without limbs; one pack at the default gap if the sheet passes.
+5. Particles ordering (Studio step 5 after Animation, section only when versions exist): investigated (`particles.js` `spSteps`/`spSecHtml`, tests in `tests/js/particles.test.js`), not implemented. Next bench item after the go-ahead in `plan.md`.
+6. Still true from the previous session: Import-pack browser check never happened (restart `serve --lan` first — the open server predates that code); `batch_import_inputs.py` at repo root does not run (`pl.Config.default()` does not exist); Haitham's open questions (original-emojis mapping, copying sheets into `inputs/`) unanswered.
+
+**Resume:** read this file, then `plan.md` (phases in build order), then `docs/export to team/mirsal-export-architecture.md` §9–§10.7. Windows checkout, venv `mirsal/.venv`, branch `main` (in sync with origin). Test budget (`docs/testing.md`): one narrowest run per change, never re-run green suites, slow tier + full discovery retired.

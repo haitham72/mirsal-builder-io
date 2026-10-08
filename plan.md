@@ -1,4 +1,48 @@
+# plan.md — next build: claim ledger, short codes, picker, versions (designed, not built)
+
+Source of truth for each phase is `docs/export to team/mirsal-export-architecture.md` §9–§10.7. Build in order; each phase ends green
+(one narrowest test run per change, `docs/testing.md`) before the next starts. No paid call without Haitham's explicit yes (rule 13).
+
+## Phase 1 — claim ledger core (files + tables + import, no UI)
+
+- New `generation/claims.py`: session file `out/pack_sessions/<slug>.json` read/write (`claims[]`, claim rows `C###`), task-table row per claim
+  (kind `'sheet'`, external id = claim id), `claim_generations` append on regenerate. Creation under the writer lock.
+- Migration `012_*`: `pack_sessions`, `claims`, `claim_generations` tables only (never alter live ones). `store/repo.py` save/import fns,
+  `db import` hookup for `out/pack_sessions/`.
+- Tests: temp dirs + recording-fake connection (pattern: `tests/test_purge.py`). Run by name, then `mirsal test area` for what the map says.
+
+## Phase 2 — resolver + chat wiring (pack intent, generate more)
+
+- Pack intent (`"generate sticker pack for {subject}"`) → new session + first claim; `generate more` → next unclaimed preset, same session;
+  all-claimed → "pack complete" with choices (custom 9-pick / new pack), in words. Loser of a double-click reads the winner's row.
+- Tests: resolver/agent tests by name. Needs Haitham's eyes on the reply wording once (W1-style browser look, not a test gate).
+
+## Phase 3 — short codes (exports stop emitting `G###`)
+
+- Registry `out/export_codes.json` + allocator (random 4, check, retry) at claim time; lazy backfill at first export for old batches;
+  `export_names` id field becomes the code, manifest carries both ids; Postgres mirror column + migration.
+- Tests: allocator collisions on a fake registry, export output with codes, re-export stability.
+
+## Phase 4 — exporter bank picker UI (Studio export dialog)
+
+- Per-`unresolved` cell bank choice (recorded human pick, reversible, saved on the sticker); fallback stays until picked.
+- Tests: `tests/js` builder test for the dialog + route test by name; one browser look at the end.
+
+## Phase 5 — in-batch versions
+
+- `sticker.versions[]` (+ `normalise` default, write-through), Studio version switcher, export ships latest approved; old versions kept.
+- Non-preset batches keep new-batch regen until unified (open decision, do not mix into this phase).
+
+## Phase 6 — paid proof (Haitham's yes first, ~2 credits + one pack later)
+
+- One face-preset sheet (`generic emojis`, v4 + core-v1): measure keying/cut only, never open the media. If limbs persist, tighten the
+  v4 clause once (new `_v5` files, never edit v4 after use) and retry once. Then one pack at the default gap.
+
+---
+
 # plan.md — extra local-vLLM judge tests (no human labels)
+
+(Kept from before, untouched. Runs after or between the phases above; it needs no code changes.)
 
 Haitham, 2026-10-07: no labeling, ever, in this track. Everything below runs
 on the free local server against the 30 prepared cases; no Postgres, no paid
@@ -10,7 +54,7 @@ human accuracy is never claimed (`local_eval/WORKFLOW.md:35`).
 - `mirsal/local_eval/` runner (`prepare | run | smoke | summary`,
   options `--limit/--timeout/--max-seconds`) + `dataset.json` (30 cases).
 - 2026-10-05 Qwen 9B: 25/30 usable verdicts (83.3% usable-response, not
-  accuracy), median ~10 s/sticker, 5 UNJUDGED on unsupported reason codes.
+  accuracy), median ~10 s/sticker, UNJUDGED on unsupported reason codes.
   Results in `results.md` / `summary.json`.
 
 ## Steps
