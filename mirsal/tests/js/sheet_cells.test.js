@@ -25,7 +25,7 @@ function load() {
   const sandbox = { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) };
   const body = ['const animPhase=', 'const CAT=', 'const CATORDER=', 'const CATOF=', 'const WARNWHY=', 'const plainWarn=', 'const ANIMWHY=', 'const ALW=', 'const whyOf=',
     'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'function cellOp(', 'const cellVerb=', 'const cellTitle=', 'const cellLabel=', 'const cellAct=', 'const isOob=', 'const oobNote=', 'const cellState=', 'const CELLTXT=',
-    'function issuesOf(', 'function mark(', 'function chip(', 'const sheetOf=', 'const LAY=', 'const layoutOfCell=', 'function issueSvg(', 'const processing=', 'const ALWBUSY=', 'const alwBusy=', 'function allowAllRow('].map(statement).join('\n');
+    'function issuesOf(', 'function mark(', 'function chip(', 'const sheetOf=', 'const cutOf=', 'const LAY=', 'const layoutOfCell=', 'function issueSvg(', 'const processing=', 'const ALWBUSY=', 'const alwBusy=', 'function allowAllRow('].map(statement).join('\n');
   return new Function(...Object.keys(sandbox), body + '\nreturn {issueSvg,allowAllRow,chip,ALW,LAY,ALWBUSY};')(...Object.values(sandbox));
 }
 

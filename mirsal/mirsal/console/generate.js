@@ -152,7 +152,9 @@ function issueSvg(g,stage,k=1){const W=g.source.sheet_size?g.source.sheet_size[0
 const keptAnim=g=>g.stickers.filter(t=>t.anim_status==='READY'&&t.review.still!=='REJECTED'&&!['REJECTED','BLOCKED'].includes(t.review.anim));
 const keptOf=g=>animPhase(g)?keptAnim(g):keptStills(g);
 const sheetOf=g=>[...g.video_sheets].reverse().find(v=>v.status!=='REJECTED');
-const hasVid=g=>!!(g.source.has_video||(sheetOf(g)&&sheetOf(g).video));
+/* the sheet the animations are cut from now: a sheet retired by Regenerate video (SUPERSEDED) stays it until the new video is sliced (gates.cut_sheet) */
+const cutOf=g=>[...g.video_sheets].reverse().find(v=>['SLICED','SUPERSEDED'].includes(v.status)&&v.video)||sheetOf(g);
+const hasVid=g=>!!(g.source.has_video||(cutOf(g)&&cutOf(g).video));
 const sessionGens=()=>SES.gens.map(id=>GM.get(id)).filter(Boolean);
 const included=()=>sessionGens().filter(g=>!SES.off.includes(g.number));
 const nAdded=(g,pid)=>keptOf(g).filter(t=>((g.added||{})[pid]||[]).includes(`${animPhase(g)?'animated':'static'}:${t.index}`)).length;
@@ -234,7 +236,7 @@ function batchHtml(g,k,total,mode){
      ${p?`<div class=mut>${esc(p.fix)}</div>${p.received?`<div class=mut>The sheet was received${p.received.job?' ('+esc(p.received.job)+')':''}${p.received.cost?' and paid for ('+p.received.cost+' credits)':''}: nothing is lost, this batch just has no stickers. It stays in History.</div>`:''}
      ${p.cut_anyway?`<button class="btn pri" data-act=gcutany data-g=${g.number} title="Cut the sheet that was received, as it is, for free: you decide on every cell yourself">Cut it anyway</button>`:''}
      <button class="btn${p.cut_anyway?'':' pri'}" data-act=gretrysheet data-g=${g.number}>Try the sheet again</button>`:''}</div></section>`}
-  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?`<div class=gleft>${videoPanel(g)}${sheetPanel(g)}</div>`:sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
+  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${mode==='anim'?`<div class=gleft>${videoPanel(g)}${sheetPanel(g)}</div>`:sheetPanel(g)}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div>${mode!=='anim'&&typeof liveReadyNow==='function'&&liveReadyNow()&&g.sheet_prompt?`<div class=gredo>${copyBox('Sheet prompt (the one sent; edit it, then regenerate)',pdText(g,'sheet'),'rs'+g.number,8,{kind:'sheet',g:g.number,foot:pdFoot(g,'sheet')})}</div>`:''}${mode==='anim'&&!g.source.has_video&&(g.video_sheets||[]).some(v=>v.video)?`<div class=gredo>${copyBox('Video prompt (the one sent last; edit it, then regenerate)',pdText(g,'video'),'rp'+g.number,6,{kind:'video',g:g.number,foot:pdFoot(g,'video')})}</div>`:''}</section>`}
 /* what a set of batches stands at right now: the counts the header and the bottom bar read. One implementation, used by the header and the bottom bar. */
 function gstats(gs){const inc=gs.filter(g=>!SES.off.includes(g.number)),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
   const todoAnim=inc.filter(g=>g.source.has_video&&(!animPhase(g)||g.stickers.some(t=>t.anim_status==='STALE'))&&!processing(g)&&!ANIM.has(g.number)&&keptStills(g).length);
@@ -339,11 +341,43 @@ const pdBase=(g,kind)=>kind==='sheet'?g.sheet_prompt:(sentVideoPrompt(g)||g.vide
 const pdCustom=(g,kind)=>{const d=PD[pdKey(g.number,kind)];return d!==undefined&&d.trim()!==''&&d!==pdBase(g,kind)};
 function pdFoot(g,kind){const custom=pdCustom(g,kind),live=typeof liveReadyNow==='function'&&liveReadyNow();
   if(g.number==='draft')return gdFoot(g,kind);
-  const kept=typeof keptStills==='function'?keptStills(g).length:0,sent=(g.video_sheets||[]).some(v=>['VIDEO_RETURNED','SLICED'].includes(v.status));
+  const kept=typeof keptStills==='function'?keptStills(g).length:0,sent=(g.video_sheets||[]).some(v=>['VIDEO_RETURNED','SLICED','SUPERSEDED'].includes(v.status));
+  if(kind==='video'&&sent)return redoFoot(g,live,kept);
+  if(kind==='sheet'&&!making(g))return resheetFoot(g,live,custom);
   const go=kind==='sheet'
     ?`<button class="btn sm pri" data-act=pgsheet data-g=${g.number} ${live?'':'disabled'} title="${live?'Make a NEW sheet from this batch\'s own cells and tags, with this prompt':'Higgsfield is not connected'}">Generate sheet${custom?' with my prompt':''}<span class=lv-vp data-lvprice=image></span></button>`
     :`<button class="btn sm pri" data-act=pgvideo data-g=${g.number} ${live&&kept&&!sent?'':'disabled'} title="${!live?'Higgsfield is not connected':sent?'This sheet already has its video; the engine does not animate a sliced sheet twice. Make a new sheet first.':kept?'Animate the kept stickers with this prompt':'Keep at least one sticker first'}">Generate video${custom?' with my prompt':''}<span class=lv-vp data-lvprice=video></span></button>`;
   return`<div class=pdfoot data-pdfoot=${kind}>${go}<button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=${kind} ${PD[pdKey(g.number,kind)]!==undefined?'':'hidden'}>Reset</button><small class=mut>${custom?'Your text is sent exactly as written.':'This is the template\'s text; edit it to send your own.'} The templates stay as they are.</small></div>`}
+/* Regenerate video in the SAME batch (Haitham, 2026-10-08): the text in the box is exactly what is sent, the model is folded above the button, the price is on it.
+   The server retires the current video sheet (kept, each clip kept as a version), builds the next one from the same kept stickers and sends it; the stickers keep
+   their current animations until the new ones are cut, then G4 asks again. Nothing else changes: same G###, same S#. */
+function redoFoot(g,live,kept){const run=typeof videoRun==='function'?videoRun(g):null,cutting=(g.video_sheets||[]).some(v=>v.status==='VIDEO_RETURNED')||processing(g);
+  const why=!live?'Higgsfield is not connected':run?'A video is being made for this batch':cutting?'The video is being cut into animations: wait for it to finish':!kept?'Keep at least one sticker first':'';
+  return`<div class=pdfoot data-pdfoot=video>${typeof modelPick==='function'&&live?modelPick('video',(cutOf(g)||{}).model):''}
+   ${run?`<div class="lv-vgen run"><div class=spin></div><span>Animating with ${esc(run.model)}…<small data-lvt="${run.t0}">${Math.round((Date.now()-run.t0)/1000)}s</small></span></div>`
+     :`<button class="btn sm pri" data-act=pgredo data-g=${g.number} ${why?'disabled':''} title="${esc(why||'A new video from the same kept stickers, in this batch, with the prompt above. Your current animations stay until the new ones are cut.')}">Regenerate video in this batch<span class=lv-vp data-lvprice=video></span></button>`}
+   <button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=video ${PD[pdKey(g.number,'video')]!==undefined?'':'hidden'}>Reset</button>
+   <small class=mut>The text above is sent exactly as written. Same batch, same stickers: the current animations are kept as a version.</small></div>`}
+/* Regenerate sheet in the SAME batch: the image model folded as {current} -> {next}, the text above is sent as written. The server keeps the current sheet,
+   stills and clips as a version (versions/v<n>/), retires the video sheets and cuts this batch again from the new sheet: same G###, same S#, G2 asks again.
+   "A new batch instead" is the old behaviour (a new G### from this batch's cells), kept as the secondary choice. */
+function resheetFoot(g,live,custom){const busy=(g.video_sheets||[]).some(v=>v.status==='VIDEO_RETURNED')||processing(g);
+  const why=!live?'Higgsfield is not connected':busy?'A video is being cut into animations: wait for it to finish':'';
+  return`<div class=pdfoot data-pdfoot=sheet>${typeof modelPick==='function'&&live?modelPick('image',g.sheet_model):''}
+   <button class="btn sm pri" data-act=pgresheet data-g=${g.number} ${why?'disabled':''} title="${esc(why||'A new sheet with the prompt above, in this batch. The current sheet, stickers and animations are kept as a version; the stickers are reviewed again.')}">Regenerate sheet in this batch<span class=lv-vp data-lvprice=image></span></button>
+   <button class="btn sm" data-act=pgsheet data-g=${g.number} ${live?'':'disabled'} title="Make a NEW batch from this batch's own cells and tags, with this prompt">A new batch instead</button>
+   <button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=sheet ${PD[pdKey(g.number,'sheet')]!==undefined?'':'hidden'}>Reset</button>
+   <small class=mut>The text above is sent exactly as written. Same batch, same stickers: the current sheet, stickers and animations are kept as a version, and you review the new stickers again.</small></div>`}
+ACT.pgresheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'sheet')||'').trim();
+  if(!text){toast('Write a sheet prompt first',1);return}
+  if(typeof lcached==='function'&&lcached('image')==null){toast('The price is not known yet: wait for it, then regenerate',1);return}
+  el.disabled=true;const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,sheet_prompt:text,redo:true});
+  if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};
+ACT.pgredo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'video')||'').trim();
+  if(!text){toast('Write a video prompt first',1);return}
+  if(typeof lcached==='function'&&lcached('video')==null){toast('The price is not known yet: wait for it, then regenerate',1);return}       // never spend against a price the person has not been shown
+  el.disabled=true;const ok=await liveStart('video',{g:g.number,video_prompt:text,redo:true});
+  if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'video')];glast='';tick(true)};
 function planView(g){const pl=g.reviews&&g.reviews.plan,sv=sentVideoPrompt(g);
   return`<section class=gplan><div class=pcols><div>${copyBox('Sheet prompt',pdText(g,'sheet'),'pp1',11,{kind:'sheet',g:g.number,foot:pdFoot(g,'sheet')})}${copyBox(sv&&PD[pdKey(g.number,'video')]===undefined?'Video prompt (the one sent)':'Video prompt',pdText(g,'video'),'pp2',6,{kind:'video',g:g.number,foot:pdFoot(g,'video')})}
    <p class=mut>Template <b>${esc(g.template_id||'hand-written plan')}</b>${g.template_version?' v'+g.template_version:''} · plan from ${esc(g.plan_source||'')}${pl?` · ${esc(pl.decision.toLowerCase())}d by ${esc(pl.by)}`:''}</p></div>
@@ -531,14 +565,14 @@ function animStats(g){const S=g.stickers.filter(t=>t.status==='READY'),A=S.filte
 const LAY=new Map();      // a video sheet's layout.json, fetched once
 function layoutOf(g,v){const k=g.number+v.id;if(LAY.has(k))return LAY.get(k);LAY.set(k,null);
   fetch(`/out/${g.generation_id}/${v.layout}`).then(r=>r.json()).then(j=>{LAY.set(k,j);glast='';tick(true)}).catch(()=>{});return null}
-function videoBox(g,k){const sz=g.source.sheet_size,v=sheetOf(g);
+function videoBox(g,k){const sz=g.source.sheet_size,v=cutOf(g);
   if(g.source.video_path&&sz)return`<div class=sbox style="background:#111"><video src="/src/${g.number}/video" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${sz[0]}/${sz[1]};object-fit:fill"></video><svg viewBox="0 0 ${sz[0]} ${sz[1]}" preserveAspectRatio="none">${vcutSvg(g,k)}</svg></div>`;
   if(v&&v.video){const [W,H]=v.canvas||[1,1],lay=layoutOf(g,v),sw=Math.max(2,W/450)*k;
     const rects=lay?lay.slots.map(sl=>`<rect x="${sl.rect[0]}" y="${sl.rect[1]}" width="${sl.rect[2]}" height="${sl.rect[3]}" fill="none" stroke="#2563eb" stroke-width="${sw}" stroke-dasharray="${W/50} ${W/90}" opacity="${sl.sticker?1:.35}"/>`).join(''):'';
     return`<div class=sbox style="background:#111"><video src="/out/${g.generation_id}/${v.preview||v.video}" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${W}/${H};object-fit:fill"></video><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${rects}${issueSvg(g,'anim',k)}</svg>${SR.controls(g,v)}</div>`}
   if(v)return SR.picture(g,v);
   return`<div class="gbadmsg mut" style="padding:26px 10px">These animations come from pre-sliced clips, so there is no single video sheet for this batch.</div>`}
-function videoPanel(g){const s=g.source,vs=sheetOf(g),vi=Object.assign({},vs&&vs.video_info||{},s.video_info||{}),a=animStats(g),bad=a.oob.length+a.fail.length;
+function videoPanel(g){const s=g.source,vs=cutOf(g),vi=Object.assign({},vs&&vs.video_info||{},s.video_info||{}),a=animStats(g),bad=a.oob.length+a.fail.length;
   return`<aside class=gsheet><div class=gshead><b>Video sheet</b><span class=gspace></span><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?`, ${a.oob.length} out`:''}</span></div>
    ${videoBox(g,2)}
    ${SR.bulk(g)}
@@ -690,7 +724,7 @@ async function tick(force){try{
 }catch(e){const m=$('msg');if(m)m.textContent='Something went wrong: '+e.message}}
 setInterval(tick,700);loadLib();
 
-const layoutOfCell=(g,i)=>{const v=sheetOf(g),lay=v&&LAY.get(g.number+v.id);const sl=lay&&lay.slots.find(x=>x.slot===i);return sl?sl.rect:null};
+const layoutOfCell=(g,i)=>{const v=cutOf(g),lay=v&&LAY.get(g.number+v.id);const sl=lay&&lay.slots.find(x=>x.slot===i);return sl?sl.rect:null};
 /* "Use it anyway" / "Take it back": POST .../allow {kind, index, allow}. An animation (the default kind) is cut again from the stored video, a still from the stored sheet: free, a few seconds. */
 async function allowCall(g,t,kind,allow){const r=await postWait(`/api/generations/${g.number}/allow`,{kind,index:t.index,allow},'Finishing the previous step…');
   if(!r.ok)return toast(r.j.error||'Could not change it',1);

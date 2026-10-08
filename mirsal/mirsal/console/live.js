@@ -66,7 +66,8 @@ function drawModels(){if(!LIVE.m)return;
 ACT.lmpick=el=>{const key=el.dataset.k==='image'?'img':'vid';LIVE[key]={id:el.dataset.id,options:{}};lsave();drawModels()};
 ACT.lmdone=()=>{drawPanel();if(typeof composerDraw==='function')composerDraw();closeDlg()};
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvvid){LIVE.vid={id:t.value,options:{}};lsave();lsel('video');glast='';if(typeof tick==='function')tick(true);return}
-  if(t.dataset&&t.dataset.lvopt){const [k,n]=t.dataset.lvopt.split('|'),key=k==='image'?'img':'vid';LIVE[key].options[n]=t.value;lsave();lcost(k)}
+  if(t.dataset&&t.dataset.lvimg){LIVE.img={id:t.value,options:{}};lsave();lsel('image');glast='';if(typeof tick==='function')tick(true);return}
+  if(t.dataset&&t.dataset.lvopt){const [k,n]=t.dataset.lvopt.split('|'),key=k==='image'?'img':'vid';LIVE[key].options[n]=t.value;lsave();lcost(k).then(()=>{fillPrices();if(t.closest('.lv-mpick')){glast='';if(typeof tick==='function')tick(true)}})}
   if(t.dataset&&t.dataset.lvmore&&t.value){const key=t.dataset.lvmore==='image'?'img':'vid';LIVE[key]={id:t.value,options:{}};lsave();drawModels()}});
 async function lcost(kind,quiet){const {model,sel}=lsel(kind);if(!model)return null;const key=kind+model.id+JSON.stringify(sel.options);
   if(LIVE.est[key]===undefined){const r=await post('/api/live/cost',{kind,model:model.id,options:sel.options});LIVE.est[key]=r.ok?r.j.credits:null}
@@ -79,8 +80,8 @@ function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{pr
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
   const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:ctx.style_id||LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:ctx.loop===undefined?!!LIVE.loop:!!ctx.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
-      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{}),...(ctx.plan?{plan:ctx.plan}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
-    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(ctx.video_prompt?{video_prompt:ctx.video_prompt}:{}),...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
+      ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.redo?{redo:true}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{}),...(ctx.plan?{plan:ctx.plan}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
+    :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(ctx.video_prompt?{video_prompt:ctx.video_prompt}:{}),...(ctx.redo?{redo:true}:{}),...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…',{'Idempotency-Key':ikey()});
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
@@ -89,6 +90,18 @@ async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image')
   else if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
   if(!isSheet&&egDirty())egClear();
   lsave();say('');drawLive();liveTick();refreshHf();return true}
+
+/* the video job running for a batch right now (this page's own, or one the server's queue knows), else null */
+function videoRun(g){const qj=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&QACTIVE.includes(j.status));
+  return LIVE.jobs.find(j=>j.kind==='video'&&j.gen===g.number&&!j.error)||(qj&&{model:(lfind('video',qj.model)||{label:qj.model||'the model'}).label,t0:(qj.claimed_at||qj.created_at)*1000})||null}
+/* The model picker folded into one line (Haitham, 2026-10-08: "models collapsed"; the flow is {current model} -> {next model}): the summary says what made the current
+   result (`current`, from the batch), then the next model, its settings and the price; opening it shows
+   the curated models and the settings that have a choice. The choice is the same one the Models dialog writes (LIVE.img / LIVE.vid), so it sticks. */
+function modelPick(kind,current){if(!LIVE.m)return'';const cur=current?(lfind(kind,current)||{label:current}):null,{model,sel}=lsel(kind),c=lcached(kind),attr=kind==='image'?'data-lvimg':'data-lvvid';if(c===undefined)lcost(kind,true).then(fillPrices);
+  return`<details class=lv-mpick><summary>${cur?`<span class=mut title="What made the current one">${esc(cur.label)} →</span> `:''}${logoHtml(model,'sm')} <b>${esc(model?model.label:'?')}</b> <span class=mut>${esc(optSummary(model,sel))}</span> <span class=lv-vp data-lvprice=${kind}>${c==null?(c===undefined?'…':''):'◈ '+fcr(c)}</span></summary>
+   <div class=lv-mopts><select ${attr} aria-label="${kind==='image'?'Image':'Animation'} model">${LIVE.m[kind].map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)}</option>`).join('')}</select>
+    ${model?model.options.filter(o=>o.choices.length>1).map(o=>`<label>${esc(o.label)} <select data-lvopt="${kind}|${esc(o.name)}">${o.choices.map(x=>`<option value="${esc(x)}" ${sel.options[o.name]===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`).join(''):''}
+    ${model&&model.note?`<small class=mut>${esc(model.note)}</small>`:''}</div></details>`}
 
 /* ---------- the animation box under the green screen: a model drop-down and one priced button (no dialog, no confirmation) */
 const lcached=kind=>{const {model,sel}=lsel(kind);return model?LIVE.est[kind+model.id+JSON.stringify(sel.options)]:undefined};
@@ -100,8 +113,7 @@ function vgenBox(g){const vs=typeof sheetOf==='function'?sheetOf(g):null;
   if(stalled)return JR.controls(stalled);
   if(vs&&['VIDEO_RETURNED','SLICED'].includes(vs.status))return`<div class="lv-vgen done"><span>${vs.status==='SLICED'?'Animated':'Video received'}${vs.video_info&&vs.video_info.width?` · ${vs.video_info.width}×${vs.video_info.height}`:''}</span></div>`;
   if(!liveReadyNow()||g.source.has_video||making(g))return'';
-  const qj=(LIVE.q||[]).find(j=>j.kind==='video'&&String(j.generation)===g.generation_id&&QACTIVE.includes(j.status)),
-    run=LIVE.jobs.find(j=>j.kind==='video'&&j.gen===g.number&&!j.error)||(qj&&{model:(lfind('video',qj.model)||{label:qj.model||'the model'}).label,t0:(qj.claimed_at||qj.created_at)*1000});
+  const run=videoRun(g);
   if(run)return`<div class="lv-vgen run"><div class=spin></div><span>Animating with ${esc(run.model)}…<small data-lvt="${run.t0}">${Math.round((Date.now()-run.t0)/1000)}s</small></span></div>`;
   const {model,sel}=lsel('video'),c=lcached('video'),f=fillNow();if(c===undefined)lcost('video',true).then(fillPrices);
   return`<div class=lv-vgen><select class=lv-vsel data-lvvid aria-label="Animation model">${LIVE.m.video.map(m=>`<option value="${esc(m.id)}" ${model&&m.id===model.id?'selected':''}>${esc(m.label)}</option>`).join('')}</select>

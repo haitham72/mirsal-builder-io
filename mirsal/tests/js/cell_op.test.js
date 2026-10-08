@@ -32,7 +32,7 @@ function load() {
   };
   const body = ['let glast="",MD=null;', 'const animPhase=', 'const CAT=', 'const CATORDER=', 'const CATOF=', 'const WARNWHY=', 'const plainWarn=', 'const ANIMWHY=', 'const ALW=', 'const whyOf=',
     'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'function cellOp(', 'const cellVerb=', 'const cellTitle=', 'const cellLabel=', 'const cellAct=', 'const isOob=', 'const oobNote=', 'const cellState=', 'const CELLTXT=', 'function issuesOf(', 'function mark(', 'function chip(',
-    'const sheetOf=', 'const LAY=', 'const layoutOfCell=', 'async function allowCall(', 'async function dropCall(', 'function cellRun(', 'ACT.gcell=',
+    'const sheetOf=', 'const cutOf=', 'const LAY=', 'const layoutOfCell=', 'async function allowCall(', 'async function dropCall(', 'function cellRun(', 'ACT.gcell=',
     'function blockedBox(', 'function blockedAnimOverlay(', 'function issueSvg(', 'function tileHtml('].map(s => s.startsWith('let ') ? s : statement(s)).join('\n');
   const f = new Function(...Object.keys(sandbox), body + '\nreturn {cellOp,cellLabel,cellRun,issueSvg,tileHtml,blockedBox,chip,ACT,LAY,mark};')(...Object.values(sandbox));
   return { ...f, posts, toasts, GM };

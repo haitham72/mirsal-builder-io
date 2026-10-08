@@ -250,10 +250,18 @@ class Console:
         parent = req.get("parent")                         # a chat edit: the new batch is a child of the one it improves (lineage, never a copy)
         parts = req.get("particles") or req.get("pieces")  # the sheet is the particle set of an effect (`pieces` is what older jobs called it) or *Generate more* of a saved set: a particle batch
         parts = parts if isinstance(parts, dict) and (parts.get("effect") or parts.get("set")) else None
+        if req.get("redo_of"):                             # "Regenerate sheet" in the same batch: archive the current sheet as a version, re-cut this batch from the new one
+            gid = int(str(req["redo_of"]).lstrip("G"))
+            pl.resheet(self.out, gid, sheet, by=req.get("user") or "human", model=job.get("model") or req.get("model"), prompt=req.get("prompt"), custom=bool(req.get("custom_prompt")))
+            tasks.link_generation(self.out, t["id"], gid)
+            jobs.attach_generation(self.out, job["id"], gid)
+            self._submit_when_free(lambda: pl.run_stills(self.out, gid, self.cfg, self.pace))
+            return
         tok = pl.OWNER.set(req.get("user") or "local")     # the batch belongs to whoever asked for the sheet
         try:
             gid = pl.start(t["prompt"], self.out, self.inp, pick=pick, task=t, outline=int(outline) if outline is not None else None, erode=int(req["erode"]) if req.get("erode") is not None else None,
-                           parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None, kind="particles" if parts else None)
+                           parent=int(str(parent).lstrip("G")) if parent else None, regen_of=req.get("regen_of") or None, kind="particles" if parts else None,
+                           sheet_model=job.get("model") or req.get("model"))
         finally:
             pl.OWNER.reset(tok)
         tasks.link_generation(self.out, t["id"], gid)
@@ -325,7 +333,7 @@ class Console:
         res["edge_history"] = hist + [{"outline": o, "erode": e, "ts": round(time.time(), 3), "via": via}]
         pl.write_result(self.out, gid, res)
         cfg = pl.cfg_for(res, self.cfg)
-        if any(v["status"] == "SLICED" and v.get("video") for v in res["video_sheets"]):
+        if gates.cut_sheet(res):
             gates.reslice(self.out, gid, cfg, self.pace)
         elif res["source"].get("has_video") and any(st.get("anim_status") == "STALE" for st in res["stickers"]):
             pl.run_animate(self.out, gid, cfg, "pack", None, self.pace)
@@ -365,7 +373,8 @@ class Console:
         req = job.get("request") or {}
         gid = int(str(job["generation"]).lstrip("G"))
         data = (self.out / job["result"]["file"]).read_bytes()
-        gates.attach_video(self.out, gid, req["sheet"], data, f"{job['id']}.mp4", sent_prompt=req.get("prompt"), custom=bool(req.get("custom_prompt")))
+        gates.attach_video(self.out, gid, req["sheet"], data, f"{job['id']}.mp4", sent_prompt=req.get("prompt"), custom=bool(req.get("custom_prompt")),
+                           model=job.get("model") or req.get("model"))
         self._submit_when_free(lambda: gates.slice_video(self.out, gid, req["sheet"], self.cfg, self.pace))
 
     def plan_of(self, who: dict, ref) -> dict:
@@ -418,6 +427,14 @@ class Console:
                 refs = self.ref_files(body.get("refs"))
                 if refs and not model_catalog.find("image", model).get("refs"):
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
+                redo_of = None
+                if body.get("redo"):                       # "Regenerate sheet" in the SAME batch: checked before anything is spent, the batch is re-cut when the sheet arrives
+                    if not body.get("from_generation") or base_plan or particles:
+                        raise pl.PipelineError("Regenerating in the same batch needs from_generation (the batch to regenerate)", 400)
+                    redo_of = int(str(body["from_generation"]).lstrip("G"))
+                    if not self.visible(who, redo_of):
+                        raise pl.PipelineError("No such batch", 404)
+                    pl.resheet_check(self.out, redo_of)
                 base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else previewed)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
                 t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
@@ -432,6 +449,7 @@ class Console:
                     "model": model, "options": body.get("options") or {}, "prompt": prompt, "label": t["prompt"], "refs": refs,
                     "outline": int(body["outline"]) if body.get("outline") is not None else None, "erode": int(body["erode"]) if body.get("erode") is not None else None, "custom_prompt": bool(custom),
                     "parent": body.get("parent") or None, "regen_of": body.get("regen_of") or None, "user": who["id"], **({"reserved": reserved} if reserved else {}),
+                    **({"redo_of": f"G{redo_of:03d}"} if redo_of else {}),
                     **({"particles": {k: str(particles[k]) for k in ("effect", "set") if particles.get(k)}} if particles else {})})
                 if particles:                                      # before the job runs, so the page sees REQUESTED and the later link is never overwritten
                     if particles.get("effect"):
@@ -451,6 +469,8 @@ class Console:
                     raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                 from dataclasses import replace as _replace
                 cfg_v = self.cfg if fill is None else _replace(self.cfg, slot_fill=fill)
+                if body.get("redo"):          # "Regenerate video" in the same batch: retire the sliced sheet (kept, its clips kept as versions), then build the next one below
+                    gates.redo_video(self.out, gid, who.get("id") or "human")
                 cur = gates.active_sheet(pl.read_result(self.out, gid))
                 if cur and cur["status"] in ("BUILT", "APPROVED") and not cur.get("video") and fill is not None \
                         and abs(float(cur.get("slot_fill") or self.cfg.slot_fill) - fill) > 0.004:      # the gap was changed: a new sheet, the old one is rejected (never deleted)
@@ -1905,7 +1925,7 @@ def make_handler(c: Console):
                         c.out, gid, c.cfg,
                         int(body["outline"]) if body.get("outline") is not None else None,
                         int(body["erode"]) if body.get("erode") is not None else None)
-                    if body.get("reslice") and any(v["status"] == "SLICED" and v.get("video") for v in pl.read_result(c.out, gid)["video_sheets"]):
+                    if body.get("reslice") and gates.cut_sheet(pl.read_result(c.out, gid)):
                         c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
                         res_["resliced"] = True
                     return self._json(200, res_)

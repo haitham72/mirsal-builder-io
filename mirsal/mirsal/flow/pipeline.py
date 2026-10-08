@@ -377,7 +377,7 @@ def _allocate(out: Path, task_slug: str, created: float) -> tuple[int, Path]:
 
 def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: sources.Pick | None = None, parent: int | None = None,
           grid: tuple | None = None, task: dict | None = None, regen_of: str | None = None, regen_plan: dict | None = None,
-          outline: int | None = None, erode: int | None = None, kind: str | None = None, prepared: bool | None = None) -> int:
+          outline: int | None = None, erode: int | None = None, kind: str | None = None, prepared: bool | None = None, sheet_model: str | None = None) -> int:
     """Synchronous part: match source, run the prompter, allocate G00N. Returns the id fast.
     grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters.
     kind: "particles" marks the batch as a particle sheet (docs/effects.md): its layout is the plan's, it is cut into EXACT equal cells and no sticker rule can stop a cell (verify.PARTICLE_KEEP).
@@ -431,6 +431,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
         "template_id": plan.get("template_id"), "template_version": plan.get("template_version"), "slots": plan.get("slots"),
         "task_id": task["id"] if task else None, "name_key": plan["task_slug"], "regen_of": regen_of,
         **({"kind": kind} if kind else {}),                # only a particle sheet says so: every other batch is written exactly as before
+        **({"sheet_model": sheet_model} if sheet_model else {}),     # the image model that drew the sheet (a live job); the Studio shows it as "current", next to the picker for the next one
         "verify_version": verify.VERIFY_VERSION,
         "outline_px": int(outline) if outline is not None else EngineConfig().outline_px,    # the white die-cut stroke is a choice, kept with the generation
         "erode_px": int(erode) if erode is not None else EngineConfig().erode_px,          # fringe trim, kept with the generation; 0 = none
@@ -642,6 +643,73 @@ def recut(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, by: str = "
         hist(st, "sheet", by, "APPROVE", "cut anyway", detail={"override": True})
     write_result(out, gid, res)
     run_stills(out, gid, cfg, pace)
+
+
+CUTTING = ("requested", "sheet_picked", "keyed")
+
+
+def resheet_check(out: Path, gid: int) -> dict:
+    """The refusals of `resheet`, raised before anything is spent: the batch must be cut and idle (no sheet, video or animation being cut)."""
+    res = read_result(out, gid)
+    if res.get("stage") in CUTTING and not res.get("error"):
+        raise PipelineError("This batch's sheet is still being cut: wait for it to finish, then regenerate.", 409)
+    if any(v.get("status") == "VIDEO_RETURNED" for v in res.get("video_sheets") or []) or any(st.get("anim_status") == "PROCESSING" for st in res["stickers"]):
+        raise PipelineError("A video is being cut into animations: wait for it to finish, then regenerate.", 409)
+    return res
+
+
+@serialized
+def resheet(out: Path, gid: int, sheet: Path, by: str = "human", model: str | None = None, prompt: str | None = None, custom: bool = False) -> dict:
+    """"Regenerate sheet" in the SAME batch (Haitham, 2026-10-08): a new sheet replaces this batch's sheet, same G###, same S#, same keys and tags.
+    Nothing is deleted: the current sheet, keyed sheet, stills, plain twins and clips are copied to versions/v<n>/ and listed in `sheet_versions` with every
+    sticker's status and decisions at that moment; every video sheet is retired (its stills are gone; REJECTED, `retired_by_sheet`), the pack decision
+    is cleared, the stickers start again at G2, and each sticker's history keeps every line. The caller then runs `run_stills` on the new sheet. Free by itself."""
+    res = resheet_check(out, gid)
+    d, now = gen_dir(out, gid), round(time.time(), 3)
+    n = len(res.get("sheet_versions") or []) + 1
+    vdir = Path("versions") / f"v{n}"
+    (d / vdir).mkdir(parents=True, exist_ok=True)
+
+    def keep(rel):
+        if rel and (d / rel).is_file():
+            dest = vdir / Path(rel).as_posix().replace("/", "_")
+            shutil.copyfile(d / rel, d / dest)
+            return dest.as_posix()
+        return None
+    snap = {"version": n, "ts": now, "by": by, "sheet": keep(res["source"].get("sheet_copy")), "keyed": keep(res["source"].get("keyed")),
+            "model": res.get("sheet_model"), "sheet_prompt": res.get("sheet_prompt"), "stage": res.get("stage"), "pack_review": (res.get("reviews") or {}).get("pack"),
+            "video_sheets": [v["id"] for v in res.get("video_sheets") or [] if v.get("status") != "REJECTED"], "stickers": {}}
+    for st in res["stickers"]:
+        snap["stickers"][str(st["index"])] = {"status": st.get("status"), "review": dict(st.get("review") or {}), "png": keep(st.get("png")), "webm": keep(st.get("webm")),
+                                              "plain": keep(f"source/plain/S{st['index']}.png"), "anim_status": st.get("anim_status")}
+        hist(st, "sheet", by, "REJECT", "regenerate", detail={"note": "replaced by a new sheet in the same batch", "version": n})
+        for k in ("still_override", "anim_override", "anim_finished", "anim_verdict_stale", "edited", "edited_at", "rendered_at"):
+            st.pop(k, None)
+        st.update(status="PENDING", reason=None, report=[], metrics={}, png=None, anim_status="NOT_REQUESTED", anim_reason=None, anim_metrics={}, webm=None,
+                  review={"still": "PENDING", "anim": "NONE"})
+    for v in res.get("video_sheets") or []:
+        if v.get("status") != "REJECTED":
+            v["status"], v["retired_by_sheet"] = "REJECTED", n
+            res["reviews"]["video_sheet"][v["id"]] = {"decision": "REJECT", "by": by, "ts": now, "note": "a new sheet was made in this batch", "superseded": True}
+    res.setdefault("sheet_versions", []).append(snap)
+    res["reviews"]["pack"] = None
+    src = res["source"]
+    if src.get("has_video") or src.get("video_path") or src.get("clips"):       # a prepared video belongs to the old sheet: kept in the version, not reused
+        snap["prepared_video"] = {"video_path": src.get("video_path"), "clips": src.get("clips")}
+        src.update(has_video=False, video_path=None, clips={})
+    src["sheet_path"] = str(sheet)
+    for k in ("cut_anyway", "sheet_issues", "error"):
+        res.pop(k, None)
+    if model:
+        res["sheet_model"] = model
+    if prompt:
+        res["sheet_prompt"] = prompt
+        if custom:
+            res["custom_prompts"] = sorted(set(res.get("custom_prompts") or []) | {"sheet_prompt"})
+    res["stage"] = "requested"
+    write_result(out, gid, res)
+    emit(out, gid, "requested", "done", 0, {"regenerate": True, "version": n + 1}, by)
+    return {"id": gid, "archived": f"v{n}"}
 
 
 def recut_as_particles(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, by: str = "human") -> None:

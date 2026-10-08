@@ -954,6 +954,101 @@ class LiveConsoleTests(Base):
         sheet = next(v for v in st["video_sheets"] if v["id"] == "A1")
         self.assertEqual((sheet["video_prompt_sent"], sheet["video_prompt_custom"]), (mine, True))
 
+    def _video_for_the_sheet_being_sent(self, gid):
+        """The fake provider answers with a video drawn from the sheet that was just sent (the latest approved one), so slicing really happens."""
+        def hook(_jid):
+            res = pl.read_result(self.out, gid)
+            v = next(x for x in reversed(res["video_sheets"]) if x["status"] == "APPROVED")
+            d, mp4 = pl.gen_dir(self.out, gid), self.tmp / f"{v['id']}.mp4"
+            synth.make_layout_video(mp4, np.array(Image.open(d / v["file"]).convert("RGB")), json.loads((d / v["layout"]).read_text()), size=600, frames=45)
+            self.files["mp4"] = mp4.read_bytes()
+        self.cli.wait_hook = hook
+
+    def _sliced(self, gid, aid):
+        return self.until(lambda: (lambda x: x if next((v for v in x["video_sheets"] if v["id"] == aid), {}).get("status") in ("SLICED", "VIDEO_BLOCKED") and not x["busy"]
+                                   and not any(t["anim_status"] == "PROCESSING" for t in x["stickers"]) else None)(self.req("GET", f"/api/generations/{gid}")[1]), f"{aid} sliced")
+
+    def test_regenerate_video_in_the_same_batch_with_another_model_and_my_prompt(self):
+        gid = self._stills_ready("blob")
+        self._video_for_the_sheet_being_sent(gid)
+        s, j = self.req("POST", "/api/live/video", {"generation": gid})
+        self.assertEqual(s, 200, j)
+        first = self._sliced(gid, "A1")
+        self.assertEqual(next(v for v in first["video_sheets"] if v["id"] == "A1")["status"], "SLICED")
+        d = pl.gen_dir(self.out, gid)
+        old = {t["index"]: (d / t["webm"]).read_bytes() for t in first["stickers"] if t["anim_status"] == "READY"}
+        self.assertTrue(old)
+        mine = "every blob spins once in place, no camera move"
+        s, j = self.req("POST", "/api/live/video", {"generation": gid, "redo": True, "video_prompt": mine,
+                                                    "model": "grok_video_v15_lite", "options": {"duration": "5"}})
+        self.assertEqual(s, 200, j)
+        create = self.until(lambda: next(iter(self._creates("grok_video_v15_lite")), None), "the Grok Lite create call")
+        self.assertEqual(create[create.index("--prompt") + 1], mine)                      # what the person read is what is sent
+        self.assertIn("1080p", create)
+        after = self._sliced(gid, "A2")
+        sheets = {v["id"]: v for v in after["video_sheets"]}
+        self.assertEqual((sheets["A1"]["status"], sheets["A2"]["status"]), ("SUPERSEDED", "SLICED"))
+        self.assertEqual(sheets["A2"]["slots"], sheets["A1"]["slots"])                       # the same kept stickers, the same S#
+        self.assertTrue((d / sheets["A1"]["video"]).is_file())                               # the retired video stays on disk
+        self.assertEqual(sheets["A2"]["video_prompt_sent"], mine)
+        self.assertEqual((after.get("sheet_model"), sheets["A1"].get("model"), sheets["A2"].get("model")),
+                         ("nano_banana_flash", "kling3_0", "grok_video_v15_lite"))       # {current model} -> {next model}, both recorded
+        self.assertEqual(after["generation_id"], first["generation_id"])                     # same batch, no new G###
+        self.assertTrue(after["reviews"]["video_sheet"]["A1"]["superseded"])
+        for t in after["stickers"]:
+            if t["index"] in old:
+                ver = t["anim_versions"][-1]
+                self.assertEqual(ver["sheet"], "A1")
+                self.assertEqual((d / ver["webm"]).read_bytes(), old[t["index"]])            # the earlier clip is kept as a version
+            if t["anim_status"] == "READY":
+                self.assertEqual(t["review"]["anim"], "PENDING")                             # G4 asks again for the new animation
+        # while a returned video is being cut, regenerating is refused in words (never two cuts at once)
+        from mirsal.flow import gates
+        res = pl.read_result(self.out, gid)
+        next(v for v in res["video_sheets"] if v["id"] == "A2")["status"] = "VIDEO_RETURNED"
+        pl.write_result(self.out, gid, res)
+        with self.assertRaises(pl.PipelineError) as e:
+            gates.redo_video(self.out, gid)
+        self.assertIn("being cut", str(e.exception))
+
+    def test_regenerate_sheet_in_the_same_batch_keeps_everything_as_a_version(self):
+        gid = self._stills_ready("blob")
+        self._video_for_the_sheet_being_sent(gid)
+        self.assertEqual(self.req("POST", "/api/live/video", {"generation": gid})[0], 200)
+        first = self._sliced(gid, "A1")
+        self.cli.wait_hook = None                                    # the next job is a sheet: the fake answers with its PNG
+        d = pl.gen_dir(self.out, gid)
+        old_png = {t["index"]: (d / t["png"]).read_bytes() for t in first["stickers"] if t.get("png")}
+        old_webm = {t["index"]: (d / t["webm"]).read_bytes() for t in first["stickers"] if t.get("webm")}
+        mine = "nine blobs, each one a different mood, flat colours"
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": first["prompt"], "from_generation": gid, "redo": True, "sheet_prompt": mine, "model": "nano_banana_pro"})
+        self.assertEqual(s, 200, j)
+        job = self.until(lambda: (lambda x: x if x.get("generation") and x["status"] == "DONE" else None)(self.req("GET", "/api/jobs/" + j["job"])[1]), "sheet job")
+        self.assertEqual(job["generation"], first["generation_id"])                                  # the same batch, no new G###
+        create = next(iter(self._creates("nano_banana_pro")))
+        self.assertEqual(create[create.index("--prompt") + 1], mine)
+        after = self.until(lambda: (lambda x: x if x["stage"] == "sliced" and not x["busy"] and x.get("sheet_versions") else None)(self.req("GET", f"/api/generations/{gid}")[1]), "the new stills")
+        self.assertEqual((after["sheet_model"], after["sheet_prompt"]), ("nano_banana_pro", mine))
+        v1 = after["sheet_versions"][0]
+        self.assertEqual(v1["version"], 1)
+        self.assertEqual(v1["model"], "nano_banana_flash")
+        self.assertTrue((d / v1["sheet"]).is_file())
+        for i, data in old_png.items():
+            self.assertEqual((d / v1["stickers"][str(i)]["png"]).read_bytes(), data)                 # every earlier still is kept
+        for i, data in old_webm.items():
+            self.assertEqual((d / v1["stickers"][str(i)]["webm"]).read_bytes(), data)                # and every earlier animation
+        a1 = next(v for v in after["video_sheets"] if v["id"] == "A1")
+        self.assertEqual((a1["status"], a1["retired_by_sheet"]), ("REJECTED", 1))                    # its stills are gone: never re-cut onto the new ones
+        self.assertTrue(all(t["review"]["anim"] == "NONE" and t["anim_status"] == "NOT_REQUESTED" for t in after["stickers"]))
+        self.assertTrue(any(t["status"] == "READY" and t["review"]["still"] == "PENDING" for t in after["stickers"]))     # G2 asks again
+        self.assertTrue(all(any(h.get("reason") == "regenerate" for h in t["history"]) for t in after["stickers"]))          # the click is on every sticker's history
+        # a batch whose sheet is still being cut is refused before anything is spent
+        res = pl.read_result(self.out, gid); res["stage"] = "keyed"; pl.write_result(self.out, gid, res)
+        n = len(self.cli.calls)
+        s, j = self.req("POST", "/api/live/sheet", {"prompt": first["prompt"], "from_generation": gid, "redo": True})
+        self.assertEqual(s, 409, j)
+        self.assertFalse([c for c in self.cli.calls[n:] if c[:2] == ["generate", "create"]])
+
     def test_an_empty_or_absurd_hand_written_prompt_is_refused_and_starts_nothing(self):
         for body in ({"prompt": "blob", "sheet_prompt": "   "}, {"prompt": "blob", "sheet_prompt": ""},
                      {"prompt": "blob", "sheet_prompt": 7}, {"prompt": "blob", "sheet_prompt": "x" * (prompter.MAX_PROMPT + 1)}):

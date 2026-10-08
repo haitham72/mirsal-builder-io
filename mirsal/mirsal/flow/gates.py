@@ -12,6 +12,7 @@ from __future__ import annotations
 import copy
 import json
 import re
+import shutil
 import time
 from pathlib import Path
 
@@ -30,6 +31,7 @@ GATES = ("plan", "still", "video_sheet", "anim", "pack")
 VIDEO_EXT = {".mp4", ".mov", ".webm", ".mkv", ".m4v"}
 VIDEO_BLOCKS = ("video_decodes", "video_specs", "layout_match")      # a returned video that fails these is not the video of this sheet
 ACTIVE = ("BUILT", "APPROVED", "VIDEO_RETURNED", "VIDEO_BLOCKED", "SLICED")
+CUT = ("SLICED", "SUPERSEDED")        # a sheet whose video was sliced; SUPERSEDED = retired by "Regenerate video" (redo_video), kept with its files, never deleted
 
 
 def refuse(msg: str):
@@ -47,6 +49,12 @@ def _stage(res: dict, stage: str) -> None:
 def active_sheet(res: dict):
     """The video sheet the stills decisions are locked to: the latest one that was not rejected."""
     return next((v for v in reversed(res["video_sheets"]) if v["status"] in ACTIVE), None)
+
+
+def cut_sheet(res: dict, index=None):
+    """The video sheet the stickers' animations are cut from now: the latest one with a sliced video (holding `index` when given). A sheet retired by
+    redo_video stays the source until the new sheet's video is sliced, so the stickers never lose their animation while the new video is made."""
+    return next((v for v in reversed(res.get("video_sheets") or []) if v.get("status") in CUT and v.get("video") and (index is None or int(index) in v["slots"])), None)
 
 
 def sheet_of(res: dict, aid: str) -> dict:
@@ -371,7 +379,7 @@ def anim_source(res: dict, index: int):
     """Where an animation was cut from: ('sheet', video sheet id) for a returned video, ('prepared', None) for a prepared 3x3 video or pre-sliced clips, None when it has no source."""
     st = res["stickers"][int(index) - 1]
     how = str((st.get("anim_metrics") or {}).get("source") or "")
-    v = next((x for x in reversed(res["video_sheets"]) if x["status"] == "SLICED" and x.get("video") and int(index) in x["slots"]), None)
+    v = cut_sheet(res, index)
     if v and how in ("", "video sheet"):
         return "sheet", v["id"]
     src = res.get("source") or {}
@@ -745,30 +753,30 @@ def reanimate_prepared(out: Path, gid: int, indexes: list, cfg: EngineConfig, pa
 
 
 def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
-    """Apply the batch's CURRENT stroke and trim to the animations of every sliced video sheet, from the video that is already stored: no new video,
+    """Apply the batch's CURRENT stroke and trim to the animations of the sliced video sheet they come from (cut_sheet), from the video that is already stored: no new video,
     no credits. Repeated settings come back from the animation cache at once."""
     res = pl.read_result(out, gid)
-    for v in res["video_sheets"]:
-        if v["status"] == "SLICED" and v.get("video"):
-            if not v.get("preview"):                         # a video stored before the light preview existed: make it now
-                pv = _make_preview(pl.gen_dir(out, gid) / v["video"])
-                if pv:
-                    r2 = pl.read_result(out, gid)
-                    next(x for x in r2["video_sheets"] if x["id"] == v["id"])["preview"] = f"video_sheet/{v['id']}/{pv}"
-                    pl.write_result(out, gid, r2)
-            slice_video(out, gid, v["id"], cfg, pace)
+    v = cut_sheet(res)                     # only the sheet the animations come from (a superseded one while its successor is being made)
+    if v:
+        if not v.get("preview"):                         # a video stored before the light preview existed: make it now
+            pv = _make_preview(pl.gen_dir(out, gid) / v["video"])
+            if pv:
+                r2 = pl.read_result(out, gid)
+                next(x for x in r2["video_sheets"] if x["id"] == v["id"])["preview"] = f"video_sheet/{v['id']}/{pv}"
+                pl.write_result(out, gid, r2)
+        slice_video(out, gid, v["id"], cfg, pace)
 
 
 def reloop(out: Path, gid: int, cfg: EngineConfig, lib=None) -> dict:
     """Make a batch's animations again from its stored videos with the current engine (Haitham, 2026-10-05: the grey seam came back on every
     sticker made before the loop fix), then refresh the copies in the packs. Free: no new video, no credits; every S# and review stays."""
     res = pl.read_result(out, gid)
-    if not any(v["status"] == "SLICED" and v.get("video") for v in res.get("video_sheets") or []):
+    if not cut_sheet(res):
         return {"id": gid, "animations": 0, "pack_copies": 0}
     edited = [st["index"] for st in res["stickers"] if st.get("edited") and st.get("webm")]
     if edited:                                            # text or drawing baked in the Studio: slicing again would lose it
         return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": f"edited in the Studio: {', '.join('S' + str(i) for i in edited)}"}
-    missing = [v["id"] for v in res.get("video_sheets", []) if v.get("status") == "SLICED" and v.get("video") and not (pl.gen_dir(out, gid) / v["video"]).is_file()]
+    missing = [v["id"] for v in [cut_sheet(res)] if not (pl.gen_dir(out, gid) / v["video"]).is_file()]
     if missing:
         return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": "stored video is missing: " + ", ".join(missing)}
     decisions = {s["index"]: dict(s.get("review") or {}) for s in res["stickers"]}
@@ -794,7 +802,8 @@ def reloop(out: Path, gid: int, cfg: EngineConfig, lib=None) -> dict:
     return {"id": gid, "animations": n, "pack_copies": copies}
 
 
-def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "video.mp4", sent_prompt: str | None = None, custom: bool = False) -> dict:
+def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "video.mp4", sent_prompt: str | None = None, custom: bool = False,
+                 model: str | None = None) -> dict:
     """Synchronous part: validate the gate order and store the upload next to the sheet it belongs to. Slicing is slice_video().
     `sent_prompt` is the text the video model was really given (kept on the sheet, `video_prompt_custom` when the user wrote it)."""
     res = pl.read_result(out, gid)
@@ -816,6 +825,8 @@ def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "vi
              preview=f"video_sheet/{aid}/{pv}" if pv else None)
     if sent_prompt:
         v.update(video_prompt_sent=sent_prompt, video_prompt_custom=bool(custom))
+    if model:
+        v["model"] = model                    # the video model that made this sheet's video: the Studio's "current", next to the picker for the next one
     _stage(res, "video_returned")
     pl.write_result(out, gid, res)
     return {"sheet": aid, "bytes": len(data)}
@@ -880,7 +891,7 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
             pl.write_result(out, gid, res)
             waive = {i: set(res["stickers"][i - 1].get("anim_override") or []) for i in todo}          # slot blocks a human allowed, kept across every re-slice
             results = process_video(mp4, cfg, cells=todo, on_cell=on_cell, layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"), waive=waive)
-            v["status"] = "SLICED"
+            v["status"] = "SUPERSEDED" if v["status"] == "SUPERSEDED" else "SLICED"       # re-cutting a retired sheet's video (an edge change) never brings it back
             s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
             _stage(res, "video_sliced"); pl.write_result(out, gid, res)
     except Exception as e:
@@ -903,6 +914,36 @@ def _approve_stills(out: Path, gid: int, res: dict, note: str) -> None:
     if active_sheet(res) or not any(s["status"] == "READY" and s["review"]["still"] == "PENDING" for s in res["stickers"]):
         return
     review(out, gid, "still", "APPROVE", "ready", note)
+
+
+@pl.serialized
+def redo_video(out: Path, gid: int, by: str = "human", note: str | None = None) -> dict:
+    """"Regenerate video" in the SAME batch (Haitham, 2026-10-08): the current video sheet is retired (SUPERSEDED, a recorded human decision; its sheet, video
+    and layout stay on disk) and each sticker's current clip is kept as a version (slices/versions/<name>-<sheet>.webm, `anim_versions`). The caller then
+    builds the next sheet (quick_sheet: A2 from the same kept stills, same S#) and sends it with the prompt and model the person chose; until that video is
+    sliced the stickers keep the retired sheet's animations (cut_sheet). A sheet still waiting for its video is reused, nothing is retired. Free by itself."""
+    res = pl.read_result(out, gid)
+    v = active_sheet(res)
+    if not v or v["status"] in ("BUILT", "APPROVED"):
+        return {"retired": None}
+    if v["status"] == "VIDEO_RETURNED":
+        raise refuse("The video is still being cut into animations: wait for it to finish, then regenerate.")
+    d, now = pl.gen_dir(out, gid), round(time.time(), 3)
+    cut = v["status"] == "SLICED"              # a VIDEO_BLOCKED sheet never produced clips: it is simply rejected, and the stickers' clips are not its own
+    for i in v["slots"]:
+        st = res["stickers"][i - 1]
+        if cut and st.get("webm") and (d / st["webm"]).is_file():
+            keep = Path("slices") / "versions" / f"{Path(st['webm']).stem}-{v['id']}.webm"
+            (d / keep).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(d / st["webm"], d / keep)
+            st.setdefault("anim_versions", []).append({"sheet": v["id"], "webm": keep.as_posix(), "review": (st.get("review") or {}).get("anim"), "ts": now})
+        pl.hist(st, "video_sheet", by, "REJECT", "regenerate", v["id"], {"note": note or "replaced by a new video in the same batch"})
+    v["status"] = "SUPERSEDED" if cut else "REJECTED"
+    v["superseded_at"] = now
+    res["reviews"]["video_sheet"][v["id"]] = _stamp("REJECT", by, note or "regenerate: a new video in the same batch", superseded=cut)
+    pl.write_result(out, gid, res)
+    pl.emit(out, gid, "video_sheet_reviewed", "done", 0, {"sheet": v["id"], "note": "regenerate"}, by, "REJECT")
+    return {"retired": v["id"]}
 
 
 def quick_sheet(out: Path, gid: int, cfg: EngineConfig) -> dict:

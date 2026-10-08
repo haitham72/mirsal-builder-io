@@ -184,7 +184,7 @@ ROUTES = [
     # --- live generation
     ("POST", "/api/live/cost", "Live generation", "Price one call of a model (a quote, free)", OBJ, OBJ, 200),
     ("POST", "/api/live/sheet", "Live generation", "Reserve a task (the G1 approval) and start the sheet job; spends credits. Idempotency-Key supported", ref("LiveSheet"), ref("LiveJob"), 200),
-    ("POST", "/api/live/video", "Live generation", "Start the Kling job for a built video sheet; spends credits. Idempotency-Key supported. Optional video_prompt (max 6000) is sent verbatim", OBJ, OBJ, 200),
+    ("POST", "/api/live/video", "Live generation", "Start the video job (Kling, Grok…) for a built video sheet; spends credits. Idempotency-Key supported. Optional video_prompt (max 6000) is sent verbatim; redo: true regenerates the video in the same batch (the sliced sheet is retired as SUPERSEDED, its clips kept as anim_versions, the next sheet is built from the same kept stickers); redo: true with from_generation regenerates the sheet in that SAME batch (the current sheet, stills and clips are kept under versions/v<n>/, sheet_versions; the stickers start again at G2)", OBJ, OBJ, 200),
     ("POST", "/api/live/ref", "Live generation", "Store a reference image (raw body, ?name=)", None, OBJ, 200),
     ("GET", "/api/jobs", "Live generation", "Jobs for the operator, newest first", None, obj({"jobs": arr(ref("Job"))}), 200),
     ("POST", "/api/jobs", "Live generation", "Create a job file", OBJ, ref("Job"), 200),

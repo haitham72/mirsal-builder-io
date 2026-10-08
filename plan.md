@@ -23,7 +23,7 @@ Source of truth for each phase is `docs/export to team/mirsal-export-architectur
 
 ## Phase 5 — in-batch versions
 
-- `sticker.versions[]` (+ `normalise` default, write-through), Studio version switcher, export ships latest approved; old versions kept.
+- Built 2026-10-08: regenerate in the same batch keeps every earlier result (`sheet_versions[]` + `versions/v<n>/`, `stickers[].anim_versions[]`), see `docs/engine-and-studio.md` "Regenerate in the same batch". Still open: a Studio switcher to look at / go back to an earlier version (reversible, recorded), the Postgres mirror of the versions, and export naming per version (`revision` in the manifest).
 - Non-preset batches keep new-batch regen until unified (open decision, do not mix into this phase).
 
 ## Phase 6 — paid proof (Haitham's yes first, ~2 credits + one pack later)
