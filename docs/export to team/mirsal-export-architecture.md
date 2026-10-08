@@ -1,6 +1,6 @@
 # Mirsal Sticker Export — Internal Architecture
 
-**Audience:** Mirsal Builder / API maintainers. **Status:** FINAL filename format decided by Haitham 2026-10-08; implement against existing schema rather than replacing it. The old `AH43`-pack-code scheme is retired: the pack identity in an export is the source generation id.
+**Audience:** Mirsal Builder / API maintainers. **Status:** filename format FINAL (Haitham 2026-10-08); export-to-ZIP built the same day. The pack-generation workflow (§10) and short generation codes are DECIDED 2026-10-08, implementation open. The old `AH43`-pack-code scheme is retired.
 
 ## 1. Canonical file name
 
@@ -13,22 +13,24 @@ Every sticker file exported in a ZIP is renamed (inside the ZIP only — source 
 | # | Field | Rule |
 |---|---|---|
 | 1 | `emoji` | The sticker's primary emoji as a **literal Unicode glyph**, first field (e.g. `🤣`). First grapheme cluster of the saved emoji value; never an alias like `:rofl:`. |
-| 2 | `pack_slug` | Pack/menu name, lowercase ASCII words separated by hyphens (e.g. `falcon`, `royal-falcon`). Identifies the pack in the menu. |
+| 2 | `pack_slug` | Pack/menu name, lowercase snake_case ASCII (e.g. `falcon`, `royal_falcon`). Identifies the pack in the menu. `-` separates identifiers, so a slug never contains one; `_` connects words inside it. |
 | 3 | `multi_action_tag` | Canonical bank token first, then aliases, joined with `_` (e.g. `laugh_rofl_lmao`). Multi-choice: searching `laugh` OR `lmao` finds the same sticker by its tag. |
 | 4 | `position` | Source cell as `sNN`, zero-padded (`s01`–`s09`); never renumber rejected cells. Locates the sticker inside its sheet for faster review. |
-| 5 | `id` | Source generation batch id (`G###`, e.g. `G112`): the pack identity for the export, mapped to the Postgres `generations` row. Never reused. |
+| 5 | `id` | Source generation's public code: 4 lowercase alphanumerics `0000`–`zzzz` (e.g. `7k2q`, illustrative), allocated once per generation (§10). Never reused. The internal batch id (`G###`) stays the address inside the app; the manifest carries both. |
 | 6 | `date` | Generation creation date, UTC `YYYYMMDD`, frozen on first export; re-downloading does not change it. |
 | `ext` | Encoder | Actual encoding: `.png` / `.webp` = static image, `.webm` = video. The media kind is read from the extension; there is no separate media field. |
 
 Examples:
 
 ```text
-🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008.webm
-😍-falcon-love_heart_loving-s05-G112-20261008.png
-👌-royal-falcon-approve_okay_yes_thumbsup-s06-G113-20261009.webm
+🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-7k2q-20261008.webm
+😍-falcon-love_heart_loving-s05-7k2q-20261008.png
+👌-royal_falcon-approve_okay_yes_thumbsup-s06-9f3a-20261009.webm
 ```
 
-**Each Generate run is one group.** A generation batch holds one 3×3 sheet, so the generation id already scopes the group: there is no separate `gNN` field. A pack spanning several generations has files with different ids, grouped by `pack_slug` (and by the manifest's pack record).
+(`7k2q`, `9f3a` are illustrative public codes of the source generations; inside the app those batches are still addressed as `G###`.)
+
+**Each Generate run is one group.** A generation batch holds one 3×3 sheet, so its public code already scopes the group: there is no separate `gNN` field. A pack spanning several generations has files with different codes, grouped by `pack_slug` (and by the manifest's pack record).
 
 **Important:** the whole pack shares `pack_slug`, never one id per sticker. Static and video assets of the same logical sticker share action, emoji and cell, and differ only in extension. Reusing an action or emoji across stickers is allowed.
 
@@ -36,7 +38,7 @@ Examples:
 
 `multi_action_tag` is built as: lowercase canonical token, then alias tokens, joined with single `_`. Alias tokens are normalized before joining so the separator is unambiguous: **inner underscores, hyphens and spaces are removed** (`thank_you` → `thankyou`, `eye_roll` → `eyeroll`, `open_arms` → `openarms`, `thumbs_up` → `thumbsup`, `face_palm` → `facepalm`). Empty tokens are dropped; a sticker with no alias still carries its canonical token alone.
 
-Filenames use hyphens as field delimiters while `pack_slug` (`royal-falcon`) and actions (`eye-roll`) may contain hyphens, so a filename is **parsed right-to-left** (`date`, `G###`, `sNN` are fixed shapes) and the manifest stays authoritative — never fixed-index splitting, never alphabetical-order inference. An emoji may contain several Unicode code points (variation selectors, ZWJ sequences, skin tones): handle it as one grapheme string, never one character.
+Filenames use hyphens as field delimiters and no field contains one (slugs are snake_case; the `eye-roll` / `star-struck` bank tokens are stored whole and split right-to-left: `date`, code, `sNN` are fixed shapes), so a filename splits back into its six fields; the manifest still stays authoritative — never alphabetical-order inference. An emoji may contain several Unicode code points (variation selectors, ZWJ sequences, skin tones): handle it as one grapheme string, never one character.
 
 ## 3. Dashboard / receiving app mapping
 
@@ -57,11 +59,12 @@ The existing identifiers remain intact: `G###` = generation batch, `S#` = origin
 
 | Record | Responsibility |
 |---|---|
-| Pack | Internal id (8-hex, as today), `slug`, title, owner, member source generations. No separate pack-code system. |
+| Pack | Internal id (8-hex, as today), `slug`, title, owner, member source generations (each with its public code). No separate pack-code system. |
+| Generation | Internal batch id (`G###`, the address everywhere inside the app) + one public `export_code` (`0000`–`zzzz`, §10), stored on `result.json` and mirrored to Postgres. One code per generation, never reused. |
 | Sticker (library row) | Internal id (8-hex `sid`, as today), pack FK, `source {generation, index}`, name, emoji, file. Gains an optional saved canonical `action` + alias list once chosen at export. |
-| Asset (export row) | Sticker id, `source_generation`, `source_cell`, action, emoji(s), tags, media (derived from ext), revision, export date, filename, checksum. |
+| Asset (export row) | Sticker id, public `export_code` + source `G###`, `source_cell`, action, emoji(s), tags, media (derived from ext), revision, export date, filename, checksum. |
 
-Suggested constraints: unique pack `slug` per owner; unique `(source_generation, source_cell, media, revision)` per asset. Multiple revisions on one date can share a display filename: keep each as a separate stored asset/export snapshot, disambiguated by `asset`/manifest row + checksum. Never reuse a retired id; ids survive renames, re-exports, restarts and restores. Sanitize everything user-supplied before it touches a path (no traversal).
+Suggested constraints: unique pack `slug` per owner; unique `export_code` across generations; unique `(export_code, source_cell, media, revision)` per asset. Multiple revisions on one date can share a display filename: keep each as a separate stored asset/export snapshot, disambiguated by the manifest row + checksum. Never reuse a retired code; codes survive renames, re-exports, restarts and restores. Sanitize everything user-supplied before it touches a path (no traversal).
 
 ## 5. Export pipeline
 
@@ -125,6 +128,7 @@ Suggested preset grids (Mirsal presets, not a Telegram vocabulary): `core-v1` = 
   "assets": [
     {
       "sticker_id": "<library-sid>",
+      "export_code": "7k2q",
       "source_generation": "G112",
       "source_cell": "S8",
       "action": "laugh",
@@ -134,7 +138,7 @@ Suggested preset grids (Mirsal presets, not a Telegram vocabulary): `core-v1` = 
       "media": "video",
       "revision": 1,
       "export_date": "20261008",
-      "filename": "🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008.webm",
+      "filename": "🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-7k2q-20261008.webm",
       "sha256": "<actual-file-hash>"
     }
   ]
@@ -143,8 +147,8 @@ Suggested preset grids (Mirsal presets, not a Telegram vocabulary): `core-v1` = 
 
 ## 8. Acceptance rules
 
-- Emoji leads every filename as a literal glyph; pack slug, tag, `sNN`, `G###`, date follow in order.
-- The whole pack shares `pack_slug`; each file's `id` is its source generation.
+- Emoji leads every filename as a literal glyph; pack slug, tag, `sNN`, public code, date follow in order.
+- The whole pack shares `pack_slug`; each file's code is its source generation's public code (one code per generation, §10).
 - `sNN`, generation and exact asset identities survive rejects, edits, and re-exports; duplicate actions are supported.
 - Unmapped cells export on a deterministic fallback tag and carry `unresolved: true`; the exporter bank picker UI is still open.
 - Unicode filenames and multi-code-point emoji round-trip through ZIP download/import byte-identical.
@@ -163,3 +167,40 @@ Still open:
 1. **Exporter bank picker UI** — the Studio export dialog offers the bank per `unresolved` cell (one recorded human pick, reversible); until then the fallback stands.
 2. **Validation** — existing Telegram checks unchanged; plus filename checks (NFC, no separators, sane length).
 3. **Out of scope** — in-app tag/emoji search UI (the tap-emoji and multi-choice search are receiving-app behaviors; the manifest `tags`/`emojis` arrays enable them; pool search stays semantic); pack-merge vs generation-scoped ids; the Telegram upload path (files as-is).
+
+## 10. Pack generation workflow (DECIDED 2026-10-08, implementation open)
+
+How `"generate sticker pack for {subject}"`, `generate more`, regenerate-as-versions, and the public generation codes work. Nothing below is built yet; it reuses the golden path (request → plan → sheet → stills → video → animations → pack) unchanged.
+
+### 10.1 Request claims the next preset grid (always 3×3)
+
+`"generate sticker pack for falcon"` (chat or Studio) is a pack intent: a new pack record (`slug: falcon`, title) plus a claim queue — the four preset grids in order (`core-v1`, `social-v1`, `reactions-v1`, `daily-v1`), 36 actions total. The first request claims the first **unclaimed** grid: the pack record gains `groups[] += {preset_key, status: CLAIMED, generation: null}`, and the sheet job is built from the preset's nine stored actions (prompts, emoji defaults, tags) — never guessed labels.
+
+Neither the auto expander nor the AI enhancer chooses 2×2 vs 3×3 here: a preset grid is nine slots by definition, so preset packs are always 3×3. The expander fills the deterministic plan, the enhancer only improves wording. 2×2 stays for the freeform flows only.
+
+Claim state lives in the pack record (`library.json`, file-primary, under the library lock): an unclaimed grid is a preset with no group entry. The claim is written synchronously **before** any paid call, so two simultaneous `generate more` clicks serialize: the second sees the first's `CLAIMED` entry and takes the next grid. When the sheet returns, the batch is cut and reviewed exactly as today, and the group entry becomes `{status: READY, generation: G###, export_code}`.
+
+### 10.2 `generate more` claims the next grid in the same pack
+
+`"generate more"` (chat) or Create more (Studio) on an open pack claims the next unclaimed preset for **that pack**: a new group, a new generation, same `pack_slug`. When all four grids are claimed the pack is complete (36 stickers): the app says so in words and offers the next step (a custom 9-pick from the bank, or a new pack) — never a silent repeat, never a dead end.
+
+### 10.3 Regenerate stays in the same batch as versions
+
+Regenerating a preset-pack sticker does **not** open a new batch (today's 1×1 regen does). The new take is appended as a version of the same sticker in the same batch: `sticker.versions[] += {revision, files, report, ts, by, reason}`. S#, bank action, emoji and generation code never change; each version is reviewed on its own (approve → becomes current, reversible); old versions are kept for undo and audit, never deleted. Export always ships the latest approved version; the manifest `revision` tells versions apart under a stable filename. Freeform (non-preset) batches keep today's new-batch regen until unified.
+
+### 10.4 Public generation codes (`0000`–`zzzz`)
+
+Each generation gets one public code: 4 lowercase alphanumerics (`36^4 = 1,679,616` values), compared case-insensitively, no exclusions. `G###` stays the internal address everywhere (rule 9: folders, API, URLs, asset keys, chat, Postgres) — the code is the **public** face used in export filenames, the manifest, and a new Postgres mirror column. The mapping lives in `result.json` (`export_code`) plus a file registry `out/export_codes.json` (`{code: "G###"}`) written under the writer lock, so allocation works offline; the Postgres `UNIQUE` is the backstop (needs a numbered migration). Allocation is random-pick + registry-check + retry, at preset-claim time; existing batches get their codes lazily at first export (persisted the same way). `G###` is never shown in an export again.
+
+### 10.5 One code per generation, not one per pack (recommendation: multiple ids)
+
+Haitham's question — should the id be one per pack or several per pack? **Several: one code per generation.** The stated goal is tracing generation versions, and a single pack-wide id erases exactly that: which generation (which sheet, which paid job, which spend) made which sticker, and which version of a regenerated sticker is which. Per-generation codes keep the lineage (`7k2q` = the second sheet of Falcon, v3 of its S4 is still `7k2q` + revision 3); the pack identity is already carried by `pack_slug` plus the manifest pack record, so nothing is lost. A single pack id would push version tracing into side channels and break the money trail (tasks/jobs link by generation). Cost of per-generation codes: one allocation per claim — negligible.
+
+### 10.6 Build order (when it gets a go)
+
+1. Claim ledger on the pack record (`groups[]`) + preset-queue resolver (chat intent + Studio entry); all-claimed answer with next-step choices.
+2. Preset prompt builder (nine stored actions → sheet/video prompts through the existing templates).
+3. In-batch `versions[]` (+ `normalise` default, write-through, Studio version switcher, export uses latest approved).
+4. Code allocator (registry + retry, claim-time allocation, lazy backfill at export, `export_names` id field becomes the code, manifest carries both ids).
+5. Postgres mirror column + numbered migration; chat-side references stay `G###`.
+6. Custom 9-pick presets from the bank (after the fixed four prove out).

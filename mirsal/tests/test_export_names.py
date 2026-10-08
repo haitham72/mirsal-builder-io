@@ -25,6 +25,9 @@ class BankTests(unittest.TestCase):
         self.assertIsNone(actions.canonical_for("batman_lego_gliding", ["gotham"]))
         self.assertEqual(actions.fallback_tag("Laughing Falcon"), "laughing_falcon")
         self.assertEqual(actions.fallback_tag("cat_1", ["cat"]), "cat")
+        self.assertEqual(actions.fallback_tag("generic_emojis_grumpy", ["generic_emojis_grumpy", "grumpy", "arms", "crossed"],
+                                              exclude=["generic", "emojis"]),
+                         "grumpy_arms_crossed")
 
 
 class NameTests(unittest.TestCase):
@@ -33,10 +36,14 @@ class NameTests(unittest.TestCase):
         self.assertEqual(stem, "🤣-falcon-laugh_rofl_lmao-s08-G112-20261008")
 
     def test_parse_round_trips_including_hyphenated_slugs(self):
-        stem = "👌-royal-falcon-approve_okay_yes-s06-G113-20261009"
+        stem = "👌-royal_falcon-approve_okay_yes_thumbsup-s06-G113-20261009"
         p = xn.parse(stem + ".webm")
         self.assertEqual((p["emoji"], p["slug"], p["tag"], p["index"], p["gid"], p["date"]),
-                         ("👌", "royal-falcon", "approve_okay_yes", 6, 113, "20261009"))
+                         ("👌", "royal_falcon", "approve_okay_yes_thumbsup", 6, 113, "20261009"))
+
+    def test_parse_reads_older_hyphenated_slugs_best_effort(self):
+        p = xn.parse("👌-royal-falcon-approve_okay-s06-G113-20261009.webm")
+        self.assertEqual((p["slug"], p["tag"]), ("royal-falcon", "approve_okay"))
 
     def test_parse_rejects_garbage(self):
         self.assertIsNone(xn.parse("img-001-cat.png"))
@@ -54,6 +61,8 @@ class NameTests(unittest.TestCase):
                          ("🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008", "laugh", False, ["🤣", "😂"]))
         miss = xn.describe(emoji="", key="cat_1", tags=["cat"], slug="cat", index=2, gid=1, date="20261008")
         self.assertEqual((miss["stem"], miss["action"], miss["unresolved"]), ("🙂-cat-cat-s02-G001-20261008", "cat", True))
+        hyph = xn.describe(emoji="🙄", key="eye_roll", tags=["eyeroll"], slug="falcon", index=3, gid=112, date="20261008")
+        self.assertEqual((hyph["tag"], hyph["action"]), ("eyeroll", "eye-roll"))
 
 
 if __name__ == "__main__":

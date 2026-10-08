@@ -842,7 +842,7 @@ class Library:
         if not p["stickers"]:
             raise LibraryError("this pack has no stickers yet", 409)
         out = self.root.parent
-        pslug = xn.slug_hyphen(p.get("slug") or p["name"]) or "pack"
+        pslug = xn.slug_snake(p.get("slug") or p["name"]) or "pack"
         rows, buf, used, gens = [], io.BytesIO(), set(), set()
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:             # webm / png are already compressed
             for ordinal, s in enumerate(p["stickers"], 1):
@@ -875,7 +875,7 @@ class Library:
                 except OSError:
                     date = xn.datestamp()
                 desc = xn.describe(emoji=s.get("emoji") or bemojis, key=key, tags=tags or [s.get("name")],
-                                   slug=pslug, index=index, gid=gid, date=date)
+                                   slug=pslug, index=index, gid=gid, date=date, exclude=pslug.split("_"))
                 name = desc["stem"] + f.suffix.lower()
                 if name in used:                                              # never overwrite one entry in the zip
                     base, n = name, 2

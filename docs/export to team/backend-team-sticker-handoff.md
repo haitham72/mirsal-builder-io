@@ -9,8 +9,8 @@ Every file arrives named as below. Operators fill in **nothing** — all six fie
 ```
 
 ```text
-🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008.webm
-😍-falcon-love_heart_loving-s05-G112-20261008.png
+🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-7k2q-20261008.webm
+😍-falcon-love_heart_loving-s05-7k2q-20261008.png
 ```
 
 | Field | Example | Use in receiving app |
@@ -19,11 +19,11 @@ Every file arrives named as below. Operators fill in **nothing** — all six fie
 | `pack_slug` | `falcon` | Pack/menu identity: resolve the pack/category for the **Assign to emoji** flow. |
 | `multi_action_tag` | `laugh_rofl_lmao` | **Multi-choice search:** searching `laugh` OR `lmao` shows every sticker carrying that token. Set **Title** from the first token (`laugh`). |
 | `position` | `s08` | Source cell inside the sheet (`s01`–`s09`, never renumbered): locate the sticker for faster review. |
-| `id` | `G112` | Source generation: traceability into Mirsal's database (the `G###` batch row). |
+| `id` | `7k2q` | Source generation's public code (one per generation, several per pack): traceability into Mirsal's database. |
 | `date` | `20261008` | Generation date (UTC `YYYYMMDD`); stable across re-downloads. |
 | `ext` | `.webm` / `.png` / `.webp` | Media kind: `.webm` = video, `.png`/`.webp` = static image. |
 
-**Tags:** the tag segment already joins canonical action + aliases with `_`. Index every token separately AND the literal emoji glyph, e.g. `laugh`, `rofl`, `lmao`, `🤣`. Support both text and Unicode emoji queries. A filename alone never replaces the manifest: prefer `manifest.json` (`schema_version` 1) over splitting filenames — `pack_slug` may contain hyphens (`royal-falcon`) and emoji may span several code points.
+**Tags:** the tag segment already joins canonical action + aliases with `_`. Index every token separately AND the literal emoji glyph, e.g. `laugh`, `rofl`, `lmao`, `🤣`. Support both text and Unicode emoji queries. A filename alone never replaces the manifest: prefer `manifest.json` (`schema_version` 1) over splitting filenames — emoji may span several code points.
 
 ## Deliverable / acceptance checklist
 

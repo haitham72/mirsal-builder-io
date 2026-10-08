@@ -86,10 +86,23 @@ def canonical_for(key: str | None, tags: list | tuple | None = None) -> tuple[st
     return None
 
 
-def fallback_tag(key: str | None = None, tags: list | tuple | None = None) -> str:
+def fallback_tag(key: str | None = None, tags: list | tuple | None = None, exclude: list | tuple | None = None) -> str:
     """A deterministic tag segment when nothing maps: the tags joined (they are the curated search words),
-    else the key's words, else `sticker`. Each word is lowercase alphanumerics, joined with `_`."""
+    else the key's words, else `sticker`. Subject/pack words (`exclude`) are stripped and repeats collapsed, so
+    `generic_emojis_grumpy` + `[grumpy, arms, crossed]` becomes `grumpy_arms_crossed`, never
+    `generic_emojis_grumpy_grumpy_arms_crossed`. Each word is lowercase alphanumerics, joined with `_`."""
     words = []
     for t in (list(tags) if tags else [key]):
         words.extend(w for w in re.split(r"[^a-z0-9]+", str(t or "").lower()) if w)
-    return "_".join(words) or "sticker"
+    banned: set[str] = set()
+    for t in (list(exclude) if exclude else []):
+        banned.update(w for w in re.split(r"[^a-z0-9]+", str(t or "").lower()) if w)
+    seen, out, plain, pseen = set(), [], [], set()
+    for w in words:
+        if w not in pseen:
+            pseen.add(w)
+            plain.append(w)
+        if w not in banned and w not in seen:
+            seen.add(w)
+            out.append(w)
+    return "_".join(out or plain) or "sticker"

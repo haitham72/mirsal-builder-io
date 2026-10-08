@@ -165,7 +165,8 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
         import time
         created = time.time()
     date = xn.datestamp(created)
-    slug = xn.slug_hyphen(r.get("task_slug") or ((r.get("source") or {}).get("subject"))) or "pack"
+    slug = xn.slug_snake(r.get("task_slug") or ((r.get("source") or {}).get("subject"))) or "pack"
+    exclude = slug.split("_")
     rows, buf, used = [], io.BytesIO(), set()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:                     # webm / png are already compressed
         for s in r.get("stickers") or []:
@@ -177,7 +178,7 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
             if not f.is_file():
                 continue
             desc = xn.describe(emoji=s.get("emoji"), key=s.get("key"), tags=s.get("tags"),
-                               slug=slug, index=s.get("index") or 0, gid=gid, date=date)
+                               slug=slug, index=s.get("index") or 0, gid=gid, date=date, exclude=exclude)
             name = desc["stem"] + f.suffix.lower()
             if name in used:                                                     # never overwrite one entry in the zip
                 base, n = name, 2
