@@ -6,8 +6,8 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-`plan.md` Step 3 (Steps 0–2 built and committed). Step 3 next: batch 01 first and the Regenerate · Batch 02 · 03 · 04 follow-up card.
+Nothing: the chat's stage selector and batch follow-up (`plan.md` Steps 0–3) are built and `plan.md` is deleted. Haitham's browser look is item 1 of `docs/waiting-for-haitham.md`.
 
-Still unknown: `tests.test_js` has 4 Studio failures + 1 error that fail the same way without these changes (Earlier batches / green-screen / action-registration checks); not chased.
+Still unknown: `tests.test_js` has 3 Studio failures + 1 error, and `mirsal test area agent/graph` 3 failures (video-prompt wording x2, history-card `KeyError: 'G002'`); all fail the same way without these changes, not chased.
 
 Not mine, do not commit: the AddCollection URL change (`docs/Api/`, `mirsal/.env.example`, `services/collection.py`) and `mirsal/out/` runtime files.
