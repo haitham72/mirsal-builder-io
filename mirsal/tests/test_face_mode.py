@@ -33,7 +33,8 @@ class FaceModeTests(unittest.TestCase):
         texts = [p["sheet_prompt"], p["video_prompt"]] + [s["prompt"] for s in p["stickers"]]
         texts += [c["label"] for c in p["slots"]["cells"]]
         texts = [t.replace("Faces only: never a body, arms, hands, legs, feet, ears, tails or props.", "")
-                  .replace("Faces only: no bodies, no hands, no ears, no tails, no props.", "") for t in texts]  # …everywhere else a limb word is a bug
+                  .replace("Faces only: no bodies, no hands, no ears, no tails, no props.", "")
+                  .replace("Faces only: no bodies, no hands.", "") for t in texts]      # the short video prompt's negation (video_short_v1)  # …everywhere else a limb word is a bug
         for t in texts:
             self.assertEqual(limbs(t), [], t[:120])
         for group in emotions.FACE_GROUPS.values():

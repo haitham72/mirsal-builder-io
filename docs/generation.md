@@ -23,7 +23,7 @@ request ─(prompt template v3 + style + stroke [+ AI enhancer] [+ references])�
   deterministically per request, so a sheet never repeats a mood. The built-in school and birthday sets carry motions too.
 - **Face-only emoji mode (2026-10-08).** A request naming emoji (`generic emojis`, `an emoji pack`, …) renders template **v4** with the face bank (`emotions.FACE_GROUPS`, same moods/keys/emoji, labels and motions mention only the face and head): a real emoji is a face, never a body. `expand` auto-detects it (`EMOJI_WORDS`), stores `slots.face`, and old plans rebuild to their own version as before. A limb-word list (`emotions.LIMB_WORDS`) guards it in `tests/test_face_mode.py`: the only limb words a v4 prompt may carry are its own "Faces only: never …" negations.
 - **Preset grids (2026-10-08).** The canonical bank drives the nine directly (`generation/actions.py`: `PRESETS` core/social/reactions/daily-v1, `FACE_SENTENCES` face-only label + motion per token, `preset_cells`). `expand(..., preset=)` names one explicitly (preset words are stripped from the subject; a preset implies face mode); a faceless-emoji 3×3 with no grid named takes `core-v1`, so the first sheet of an emoji pack is happy → thanks in bank order with bank emoji. Cell keys are `{subject}_{token}`, tags carry token + aliases. The claim queue itself (`generate more` takes the next unclaimed grid into the same pack) is still open (`docs/export to team/mirsal-export-architecture.md` §10).
-- **Motion per character.** Every cell has a `motion` sentence; `video_v2` lists them as numbered lines, so Kling animates each character differently.
+- **Motion per character.** Every cell has a `motion` sentence; the video prompt lists them as numbered lines, so the model animates each character differently.
   `Console.video_prompt_for` rebuilds the video prompt for the slots actually approved (empty slots get no motion).
 - **References.** Up to 4 images, stored by `POST /api/live/ref` as `out/refs/R###.<ext>`, listed on the job (`request.refs`), sent as repeated `--image-references`, and
   explained to the model by `prompter.REFERENCE_CLAUSE` ("change only the expression and the pose"; never edited, it is the default) or by the `ref_clause` the caller sends (`agent/editroute.REF_CLAUSES`: `tweak`, `action`, and `like`, the clause of an edit that must be allowed to add a hat). A model that does not take references refuses them.
@@ -81,7 +81,11 @@ request ─(prompt template v3 + style + stroke [+ AI enhancer] [+ references])�
   ones), and a batch with a Kling video counts as having a video everywhere in the UI.
 - **Warnings in plain words.** A kept-with-a-check sticker says what Python noticed and what to do (for example "looks almost the same as S1: the same pose drawn twice? Kept: drop one with the
   x"), not a check name.
-- `video_v2` also asks for "a wide range of emotions" and "highly expressive faces and bodies".
+- **One short video prompt for every plan** (Haitham, 2026-10-09: "short, direct and minimal", a long one missed the point on a 3x3): `prompter.VIDEO_TEMPLATE`
+  = `video_short_v1`, whatever the plan's version (the `video_v1`-`v4` files stay as they were, unused): the sheet and its length, Haitham's line
+  (`prompter.EXPRESSIVE`: "Create a very expressive animation of each emoji|character, each having its own personality with a wide range of emotions."),
+  one numbered motion line per kept cell, then "each one moves only inside its own cell, empty cells stay empty, static camera, keep the background and the
+  designs" (and "Faces only: no bodies, no hands." in face mode). About 10-15 lines.
 
 ## Files and names
 
@@ -211,7 +215,7 @@ leftovers of the original planner design that wait for Haitham's word (UAE conte
 
 The Studio's Prompt tab (a batch's own, and the same tab inside an Earlier-batches card) is editable: what is typed is what is SENT. Server side: `POST /api/live/sheet {prompt, from_generation?, sheet_prompt?}` starts a NEW sheet from that
 batch's own plan (same cells, same tags) with the person's text in place of the template's sheet prompt (`prompter.apply_custom` / `clean_custom`, at most 6000 characters, empty or non-text is a 400; the text lives in the new task's `plan.custom` and on the
-batch as `custom_prompts: ["sheet_prompt"]`, and survives a rebuild of the plan); `POST /api/live/video {generation, video_prompt?}` sends the person's video prompt verbatim and keeps what was sent on the video sheet (`video_prompt_sent`, `video_prompt_custom`).
+batch as `custom_prompts: ["sheet_prompt"]`, and survives a rebuild of the plan); `POST /api/live/video {generation, video_prompt?}` sends the person's video prompt as written, plus Haitham's expressive line once when it is not in it (`prompter.with_expressive`), and keeps what was sent on the video sheet (`video_prompt_sent`, `video_prompt_custom`).
 Both are recorded on the job (`request.custom_prompt`) and stay under the Idempotency-Key. A member can only start from a batch they own (404 otherwise). Client side (`generate.js`): drafts live per batch and kind (`PD`), so a refresh while a batch works never loses what was
 typed (and the poll does not re-render while a box has the focus); the buttons say "with my prompt" only when the text really differs from the template's, show the live price, and are off without Higgsfield; "Generate video" needs a kept sticker and a sheet that has no returned video
 (the engine does not animate a sliced sheet twice); Reset puts the template back. The templates themselves are never edited (`_v4`, never edit one that was used).

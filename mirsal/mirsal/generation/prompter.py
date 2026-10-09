@@ -111,11 +111,29 @@ def render_plan(slots: dict, template_id: str, version: int = TEMPLATE_VERSION) 
                   clip="seamless loop" if slots.get("loop") else "clip",           # v2 video: the word "loop" is only there when the user chose Loop (the engine closes loops itself)
                   ending="End on the starting pose so the clip loops." if slots.get("loop") else "")
     sheet = load_template(template_id, version).format(**common).strip()
-    video = load_template("video", version).format(seconds=3, motion=GUIDELINES["motion"].split(", seamless")[0], **common).strip()
+    face = bool(slots.get("face"))
+    video = load_template(*VIDEO_TEMPLATE).format(seconds=3, units="emojis" if face else "characters", unit="emoji" if face else "character",
+                                                  expressive=expressive(face), faces=" Faces only: no bodies, no hands." if face else "",
+                                                  **{**common, "motions": "\n".join(f"{c['pos']}. {c.get('motion') or c['label']}" for c in cells)}).strip()
+    video = re.sub(r"\n{2,}", "\n", video)
     return {"sheet_prompt": sheet, "video_prompt": video, "prompts": {c["pos"]: cell_prompt(slots, c) for c in cells}}
 
 
 CUSTOM_PROMPTS = ("sheet_prompt", "video_prompt")
+VIDEO_TEMPLATE = ("video_short", 1)      # every video prompt, whatever the plan's version (Haitham, 2026-10-09: "short, direct and minimal": a long one misses the point on a 3x3)
+EXPRESSIVE = "Create a very expressive animation of each {unit}, each having its own personality with a wide range of emotions."     # Haitham's line, in every video prompt
+
+
+def expressive(face: bool) -> str:
+    return EXPRESSIVE.format(unit="emoji" if face else "character")
+
+
+def with_expressive(prompt: str, face: bool = False) -> str:
+    """A video prompt the person wrote keeps their text and gets the expressive line once, at the end, when it does not say it already."""
+    p = str(prompt or "").strip()
+    return p if "very expressive animation of each" in p.lower() else (p + "\n" + expressive(face)).strip()
+
+
 MAX_PROMPT = 6000
 
 

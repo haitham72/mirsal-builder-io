@@ -669,8 +669,8 @@ class LiveConsoleTests(Base):
         create = self.until(lambda: next((c for c in self.cli.calls if c[:3] == ["generate", "create", "kling3_0"]), None), "the Kling create call")   # sent by the job thread
         self.assertEqual(create[create.index("--mode") + 1], "pro")                          # always pro: 1440 px, never std
         prompt = create[create.index("--prompt") + 1]
-        self.assertIn("wide range of emotions", prompt)
-        self.assertIn("highly expressive", prompt)
+        self.assertIn("Create a very expressive animation of each character, each having its own personality with a wide range of emotions.", prompt)   # Haitham's line, in every video prompt
+        self.assertLess(len(prompt), 1200, "short, direct and minimal")
         self.assertEqual(self.req("POST", "/api/live/cost", {"kind": "video", "model": "kling3_0", "options": {"mode": "std"}})[0], 400)   # std is not offered any more
 
     def _stills_ready(self, prompt="blob"):

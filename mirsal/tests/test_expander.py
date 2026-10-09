@@ -127,6 +127,17 @@ class FenceTests(unittest.TestCase):
 
 
 class MotionTests(unittest.TestCase):
+    def test_every_video_prompt_is_short_and_carries_the_expressive_line(self):
+        from mirsal.generation import prompter
+        for req, unit in (("generic emojis", "emoji"), ("teddy bear for school", "character")):
+            v = prompter.expand(req)["video_prompt"]
+            self.assertIn(f"Create a very expressive animation of each {unit}, each having its own personality with a wide range of emotions.", v)
+            self.assertLess(len(v.splitlines()), 16, "one line per cell plus a few: short, direct and minimal")
+            self.assertNotIn("squash and stretch", v)
+        mine = prompter.with_expressive("make them dance", face=True)
+        self.assertEqual(mine, "make them dance\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.")
+        self.assertEqual(prompter.with_expressive(mine), mine, "never twice")
+
     def test_motion_lines_from_the_model_reach_the_video_prompt(self):
         answer = json.dumps({"subject_description": "a small cartoon owl", "cells": [
             {"label": f"owl pose number {i} with a huge expression", "motion": f"the owl does move number {i} with a bounce", "key": f"pose_{i}", "tags": [], "emoji": ["🦉"]}

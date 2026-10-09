@@ -360,7 +360,8 @@ class Console:
                 return prompter.render_plan(slots, plan["template_id"], plan.get("template_version", 2))["video_prompt"]
         except (OSError, ValueError, KeyError):
             pass
-        return entry.get("video_prompt") or res.get("video_prompt") or ""
+        from ..generation import prompter
+        return prompter.with_expressive(entry.get("video_prompt") or res.get("video_prompt") or "", bool((res.get("slots") or {}).get("face")))     # a batch without a plan file: its stored text, with Haitham's expressive line
 
     def attach_video_from_job(self, job: dict) -> None:
         req = job.get("request") or {}
@@ -469,7 +470,7 @@ class Console:
             est = higgsfield.cost(model, params, "x", start_image=str(start))
             reserved = self.reserve(who, est)
             job = jobs.create(self.out, "video", task=res.get("task"), generation=f"G{gid:03d}", request={
-                "model": model, "options": body.get("options") or {}, "prompt": custom or self.video_prompt_for(gid, aid, loop), "custom_prompt": bool(custom),
+                "model": model, "options": body.get("options") or {}, "prompt": prompter.with_expressive(custom, bool((res.get("slots") or {}).get("face"))) if custom else self.video_prompt_for(gid, aid, loop), "custom_prompt": bool(custom),
                 "start_image": str(start), "sheet": aid, "label": res.get("prompt", ""), "loop": loop, "user": who["id"],
                 **({"creator_run": creator_run} if creator_run else {}), **({"reserved": reserved} if reserved else {})})
             if on_job:
