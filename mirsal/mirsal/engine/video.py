@@ -138,7 +138,7 @@ def vp9_missing(cells) -> list[AnimationResult] | None:
             for i in cells]
 
 
-CACHE_VERSION = 5      # bump when an engine change makes old cached animations wrong (4: close_loop blends premultiplied; 5: the loop is closed by ending on the matching frame first, a fade only for what is left)
+CACHE_VERSION = 6      # bump when an engine change makes old cached animations wrong (4: close_loop blends premultiplied; 5: the loop is closed by ending on the matching frame first, a fade only for what is left; 6: the video's colour is interpolated when decoded, ffmpeg.SWS_CHROMA)
 
 
 class AnimCache:

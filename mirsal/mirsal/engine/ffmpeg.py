@@ -77,8 +77,16 @@ def probe(path, vp9_native: bool = False) -> dict:
     return info
 
 
+SWS_CHROMA = "bicubic+full_chroma_int+accurate_rnd"
+"""How a provider's H.264 (yuv420p: colour at HALF resolution) becomes RGB: the colour is INTERPOLATED to every pixel. ffmpeg's default fast path copies each
+colour sample to a 2x2 block, so the green-screen key (a colour difference) cut the subject's edge in 2-pixel steps, which the ~1.3x enlargement of a
+returned video sheet made visible as a pixelated outline. Measured on synthetic H.264 (2026-10-09): edge error after the enlargement 0.086-0.092 -> 0.041-0.067."""
+
+
 def decode_cell(path, x: int, y: int, w: int, h: int, max_frames: int, cap_fps: float | None) -> np.ndarray:
-    vf = f"crop={w}:{h}:{x}:{y}" + (f",fps={cap_fps}" if cap_fps else "")
+    """One cell of a green-screen video as RGB frames. Converted to RGB with interpolated colour (SWS_CHROMA) BEFORE the crop: a crop of yuv420p snaps to
+    even pixels, which could shift a cell by one against its layout rectangle."""
+    vf = (f"fps={cap_fps}," if cap_fps else "") + f"scale=flags={SWS_CHROMA},format=rgb24,crop={w}:{h}:{x}:{y}"
     p = _run(["-loglevel", "error", "-i", str(path), "-vf", vf, "-frames:v", str(max_frames),
               "-f", "rawvideo", "-pix_fmt", "rgb24", "-an", "-"])
     n = len(p.stdout) // (w * h * 3)

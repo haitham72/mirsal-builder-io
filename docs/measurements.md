@@ -108,3 +108,19 @@ G005            9         1.17        1.02           0.0        0
 Two clips for the strawberry burst (`docs/effects.md` §3 has the method and the table), judged by `alpha / background coverage per cell and frame`, never by eye: 2x2 (J037) 4 of 4 cells empty at the start, burst from
 0.33 s, edge crossing <= 0.24 %, 1 of 4 empty at the end (0.7 % covered on the others), engine output 4 READY stickers of 199-237 KB; 3x3 (J038) 9 of 9 empty at the start, edge crossing 10-26 %, 0 of 9 empty at the
 end. Particle simulator: 90 frames x 30 particles in 0.53 s at 512 px, 0.15 s at 256 px; the five presets encode to 201-245 KB WebM (crf 38-46).
+
+## The pixelated outline of returned video sheets (2026-10-09)
+
+Metrics only, no media viewed. Video-sheet batches G121/G122: the provider returns **1440x1440** (Kling 3.0) / **1424x1424** (Grok Imagine 1.5 Lite) for a
+2048 px sheet; at `slot_fill` 0.59-0.62 each character is **296-368 px** in the video (`subject_px_in_video`) and is **enlarged 1.08-1.34x** (`scale`) to
+fit 512; prepared-video batches G116/G117 were reduced (0.79-1.14). The encode is not the cause: `sharp_kept` 1.00-1.02 at crf 30-38.
+Cause: ffmpeg's default yuv420p -> RGB copies each half-resolution colour sample to 2x2 pixels, so the colour-difference key cuts the edge in 2-pixel steps.
+Synthetic H.264 (crf 18, 480 px, five subject colours on green), mean |alpha - truth| in the edge band:
+
+| decode | native | after the 1.3x enlargement |
+|---|---|---|
+| default (copied colour) | 0.060-0.081 | 0.070-0.092 |
+| `scale=flags=bicubic+full_chroma_int+accurate_rnd` (adopted, `ffmpeg.SWS_CHROMA`) | 0.030-0.056 | 0.041-0.067 |
+
+Rejected: a guided filter on the mask with luma as guide (4x worse on an orange subject, whose luma equals the green's), keying after enlarging the RGB
+(worse once the colour is interpolated). Test: `tests/test_video_decode.py`.
