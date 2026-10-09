@@ -1623,7 +1623,7 @@ def make_handler(c: Console):
 
         def _import_bytes(self, name: str, data: bytes, q: dict, job_id: str | None = None):
             from ..flow import imports as im
-            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job") if q.get(k)}
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job", "batch") if q.get(k)}
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
             options["as_new"] = q.get("as_new", ["false"])[0].lower() in ("1", "true")
             try:
@@ -1640,7 +1640,7 @@ def make_handler(c: Console):
 
         def _hf_import(self, job: str, q: dict):
             from ..flow import imports as im
-            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "local_job") if q.get(k)}
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "local_job", "batch") if q.get(k)}
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
             try:
                 return self._json(*im.import_job(c, self.user, job, **options))
@@ -1677,7 +1677,7 @@ def make_handler(c: Console):
                 return self._import_bytes(q.get("name", ["import.png"])[0], self._raw(MAX_UPLOAD), q)
             if path == "/api/higgsfield/import":  # one of Higgsfield's jobs (GET /api/higgsfield/history) into Mirsal: its result is downloaded (free) and imported
                 b = self._body()
-                return self._hf_import(str(b.get("id") or ""), {k: [str(v)] for k, v in b.items() if k in ("prompt", "generation", "sheet", "retry", "local_job") and v})
+                return self._hf_import(str(b.get("id") or ""), {k: [str(v)] for k, v in b.items() if k in ("prompt", "generation", "sheet", "retry", "local_job", "batch") and v})
             if path == "/api/live/ref":          # a reference image for the next sheet (raw body, ?name=file.png)
                 return self._json(200, c.save_ref(self._raw(15 * 1024 * 1024), parse_qs(u.query).get("name", ["ref.png"])[0]))
             parts = path.strip("/").split("/")

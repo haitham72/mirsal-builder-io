@@ -258,6 +258,7 @@ function batchHtml(g,k,total,mode){
     ${g.key_colour==='blue'?`<span class=keychip title="This sheet has a blue screen, so it was keyed as blue (and the video sheet is blue too). Nothing to do.">Blue key</span>`:''}
     ${s.prepared&&staff?`<span class=keychip title="Served from a prepared sheet in the watch folder: 0 credits, no provider call.">Prepared</span>`:''}
     <span class=gbact>${s.has_video||making(g)||(typeof liveReadyNow==='function'&&liveReadyNow())?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
+    ${typeof impBatchBtn==='function'?impBatchBtn(g,mode):''}
     <button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
     ${total>1?`<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>`:''}</span></div>`;
   if(making(g))return`<section class=gbatch>${head}<div class=gwork><div class=spin></div><b>Making your stickers…</b><div class=mut>${g.stage==='requested'?'Reading the sheet':g.stage==='sheet_picked'?'Removing the background':'Cutting and checking each sticker'}</div></div></section>`;
@@ -317,7 +318,7 @@ function animEmpty(gs,c){const hasVid=gs.some(g=>g.source.has_video);   // a pre
 const ANIM_MOTIONS=['bounces','waves','nods','jumps','spins','laughs','leans in','sparkles appear'];
 function animCreate(gs){return gs.map(g=>{const kept=keptStills(g),live=typeof liveReadyNow==='function'&&liveReadyNow(),base=`/out/${g.generation_id}/`;
   return`<section class=gbatch><div class=gbhead><b>${esc(g.generation_id)}</b><span class=mut>${kept.length?`${kept.length} kept sticker${kept.length===1?'':'s'} to animate`:'Keep at least one sticker on the Stickers view first'}</span>
-    ${live?'':`<span class=gbact><button class="btn sm" data-act=gvideo data-g=${g.number} ${kept.length?'':'disabled'} title="Higgsfield is not connected: make the video from the sheet in your own tool">${ic('film')} Make a video…</button></span>`}</div>
+    <span class=gbact>${typeof impBatchBtn==='function'?impBatchBtn(g,'anim'):''}${live?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${kept.length?'':'disabled'} title="Higgsfield is not connected: make the video from the sheet in your own tool">${ic('film')} Make a video…</button>`}</span></div>
    <div class=ganew><div class=ganew-l>${typeof sheetPanel==='function'?sheetPanel(g,'anim',{noPrompt:true}):''}</div>
     <div class=ganew-r>${copyBox('Video prompt',pdText(g,'video'),'ap'+g.number,6,{kind:'video',g:g.number,foot:`<div class=pdfoot><button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=video>Reset</button><small class=mut>Sent exactly as written when you press Generate.</small></div>`})}
      <div class=ganew-sts>${kept.map(t=>`<div class=ganew-st>${t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" alt="" loading=lazy>`:''}<div><b>S${t.index} · ${esc(String(t.key||'').replace(/_/g,' '))}</b>
@@ -599,8 +600,21 @@ function videoBox(g,k){const sz=g.source.sheet_size,v=cutOf(g);
     return`<div class=sbox style="background:#111"><video src="/out/${g.generation_id}/${v.preview||v.video}" autoplay loop muted playsinline style="display:block;width:100%;aspect-ratio:${W}/${H};object-fit:fill"></video><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${rects}${issueSvg(g,'anim',k)}</svg>${SR.controls(g,v)}</div>`}
   if(v)return SR.picture(g,v);
   return`<div class="gbadmsg mut" style="padding:26px 10px">These animations come from pre-sliced clips, so there is no single video sheet for this batch.</div>`}
+/* The animations row (Haitham, 2026-10-08): animation 1 … n = this generation's video sheets that have a video (a removed one leaves the row, its files stay).
+   ★ = the one the stickers are cut from now. Click another = pick it (re-cut from its stored video: free, no new video, G4 asks again); x = take it out of
+   the row (never the one in use); Report = a ticket on the one in use (data-k=animation data-id=G###/A#). */
+const animsOf=g=>(g.video_sheets||[]).filter(v=>v.video&&['SLICED','SUPERSEDED'].includes(v.status));
+function animRow(g){const as=animsOf(g),cur=cutOf(g);if(!as.length||g.source.video_path)return'';
+  const busy=processing(g)||(g.video_sheets||[]).some(v=>v.status==='VIDEO_RETURNED'),n=v=>+String(v.id).replace(/\D/g,'');
+  return`<div class=ganims><span class=mut>Animations</span>${as.map(v=>{const on=cur&&cur.id===v.id;
+    return`<span class="ganim${on?' on':''}"><button class=ggen ${on?'':'data-act=gapick '}data-g=${g.number} data-a=${v.id} ${busy&&!on?'disabled':''} aria-pressed=${!!on} title="${esc(v.id)}${v.model?' · '+esc(v.model):''}${on?' · in use: the stickers are cut from this one':' · click to use this one again (re-cut, free)'}">${on?'★ ':''}animation ${n(v)}</button>${on?'':`<button class=gx2 data-act=garm data-g=${g.number} data-a=${v.id} ${busy?'disabled':''} title="Take ${esc(v.id)} out of the row (its files stay on disk)">${ic('x')}</button>`}</span>`}).join('')}
+   ${cur?`<button class="btn sm" data-act=tkreport data-k=animation data-id=${g.generation_id}/${cur.id} title="Something wrong with this animation? Send a report">Report</button>`:''}</div>`}
+ACT.gapick=async el=>{const r=await postWait(`/api/generations/${el.dataset.g}/pick_video`,{sheet:el.dataset.a},'Waiting for the previous step…');if(!r.ok)return toast(r.j.error||'Could not pick it',1);
+  toast(r.j.changed?`Using animation ${String(el.dataset.a).replace(/\D/g,'')} again: cutting it into the stickers (free)…`:'That animation is already in use');glast='';tick(true)};
+ACT.garm=el=>{const a=el.dataset.a;confirmDlg(`Take animation ${a.replace(/\D/g,'')} (${a}) out of the row? Its video and clips stay on disk.`,async()=>{
+  const r=await post(`/api/generations/${el.dataset.g}/remove_video`,{sheet:a});if(!r.ok)return toast(r.j.error||'Could not remove it',1);toast(`Animation ${a.replace(/\D/g,'')} taken out of the row`);glast='';tick(true)},'Remove')};
 function videoPanel(g){const s=g.source,vs=cutOf(g),vi=Object.assign({},vs&&vs.video_info||{},s.video_info||{}),a=animStats(g),bad=a.oob.length+a.fail.length;
-  return`${videoBox(g,2)}
+  return`${animRow(g)}${videoBox(g,2)}
    ${SR.bulk(g)}
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'anim')).join('')}</div>
     ${allowAllRow(g,'animation')}

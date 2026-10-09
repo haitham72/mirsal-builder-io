@@ -329,7 +329,170 @@ def _recover(c, user: dict, name: str, data: bytes, lj: dict, prompt: str = "") 
             c.lock.release()
 
 
-def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generation=None, sheet=None, job_id=None, retry=False, job=None, as_new=False) -> tuple[int, dict]:
+def _likeness(a: Path, b: Path) -> float:
+    """How far apart two pictures look (0 = the same): both shrunk to 48x48, the mean absolute difference per channel, 0..255. Layout decides it: an
+    image sheet and a video sheet of the same stickers put them in different places and at different sizes."""
+    import cv2
+    import numpy as np
+    from . import pipeline as pl
+    x, y = (cv2.resize(pl.load_rgb(p), (48, 48), interpolation=cv2.INTER_AREA).astype(np.float32) for p in (a, b))
+    return float(np.abs(x - y).mean())
+
+
+def sheet_match(res: dict, d: Path, frame: Path) -> dict:
+    """Which sheet of generation `res` an imported video was animated from: its first frame against the image sheet and against every video sheet the
+    generation still shows (not removed). The closest wins. {sheet: "image" | "A#", distance, distances: {...}}."""
+    cands = {}
+    src = res.get("source") or {}
+    img = d / src["sheet_copy"] if src.get("sheet_copy") else Path(src.get("sheet_path") or "")
+    if img.is_file():
+        cands["image"] = img
+    for v in res.get("video_sheets") or []:
+        if v.get("status") != "REJECTED" and v.get("file") and (d / v["file"]).is_file():
+            cands[v["id"]] = d / v["file"]
+    if not cands:
+        raise ImportError("This batch has no sheet to match the video against yet", 409)
+    dist = {k: round(_likeness(frame, p), 2) for k, p in cands.items()}
+    best = min(dist, key=lambda k: (dist[k], k != "image"))
+    return {"sheet": best, "distance": dist[best], "distances": dist}
+
+
+def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "") -> tuple[int, dict]:
+    """Import INSIDE a batch (Haitham, 2026-10-08: "import in Stickers and in Animation, proper naming").
+    - A picture becomes the NEXT GENERATION of this batch, like Regenerate: the batch's own plan (cells, tags, emoji) and naming, `parent` = the batch's root,
+      `regen_of` = its main generation; the stills are cut from the picture.
+    - A video attaches to the batch's MAIN generation. Which sheet it was animated from is read from its first frame (`sheet_match`), no question asked:
+      the image sheet -> it is the batch's prepared 3x3 video and animates the kept stickers (the earlier clips kept as versions); a video sheet -> attached
+      as the next animation (a sheet that already has a video is retired first with `redo_video`, and a new one is built at the same gap).
+    The answer says which one was used. Free: nothing here calls a provider. Never twice: the same bytes answer where they already are."""
+    from . import pipeline as pl, gates, groups, sources
+    from ..generation import prompter
+    ext = Path(name).suffix.lower()
+    gid0 = generation_id(batch)
+    fam = groups.family(c.out, gid0)
+    main = generation_id(fam["picked"])
+    res = pl.read_result(c.out, main)
+    if res.get("kind") == "particles":
+        raise ImportError("This batch is a particle sheet: import into a sticker batch", 409)
+    hit = known(c.out, "", data)
+    if hit:
+        return 200, {"duplicate": True, **hit}
+    if not c.lock.acquire(blocking=False):
+        raise ImportError("busy: a job is running, wait for it to finish", 409)
+    handed_off, row = False, None
+    try:
+        f = save(c.out, name, data)
+        info: dict = {"batch": fam["root"], "main": fam["picked"]}
+        if ext in IMAGE:
+            try:
+                pl.load_rgb(f)
+            except Exception as e:
+                f.unlink(missing_ok=True)
+                raise ImportError("This image cannot be opened; choose a valid PNG, JPEG or WebP") from e
+            try:
+                plan = prompter.validate_plan(json.loads((pl.gen_dir(c.out, main) / "prompts.json").read_text(encoding="utf-8")))
+            except (OSError, ValueError) as e:
+                raise ImportError(f"{res['generation_id']} has no saved plan to cut this picture with", 409) from e
+            src = res.get("source") or {}
+            pick = sources.Pick(subject=src.get("subject") or res["task_slug"], subject_id=str(src.get("subject_id") or "import"), variant=1, n_variants=1, sheet=f, video=None)
+            tok = pl.OWNER.set(user["id"])
+            try:
+                gid = pl.start(res.get("prompt") or prompt or res["task"], c.out, c.inp, pick=pick, parent=generation_id(fam["root"]), regen_of=res["generation_id"],
+                               regen_plan=plan, outline=res.get("outline_px"), erode=res.get("erode_px"), prepared=False)
+            finally:
+                pl.OWNER.reset(tok)
+            new = pl.read_result(c.out, gid)
+            new["plan_source"] = f"the plan of {res['generation_id']} (imported picture)"
+            new["imported"] = {"name": str(name)[:200], "into": fam["root"]}
+            for st in new["stickers"]:
+                pl.hist(st, "sheet", "human", "IMPORT", f"imported {Path(name).name} into the batch of {fam['root']}")
+            pl.write_result(c.out, gid, new)
+            work = lambda: pl.run_stills(c.out, gid, c.cfg, c.pace)
+            kind, info["generation"] = "sheet", f"G{gid:03d}"
+            said = f"Imported as the next generation of {fam['root']} ({new['generation_id']}), cut with the batch's own cells and tags."
+        else:
+            from ..engine.ffmpeg import probe
+            try:
+                vi = probe(f)
+                if not vi.get("codec") or not vi.get("width") or not vi.get("height"):
+                    raise ValueError("no video stream")
+            except Exception as e:
+                f.unlink(missing_ok=True)
+                raise ImportError("This video cannot be opened; choose a valid MP4, MOV or WebM") from e
+            if pl.STAGES.index(res["stage"]) < pl.SLICED or res.get("error"):
+                raise ImportError(f"The stickers of {res['generation_id']} are not cut yet: import the video once they are", 409)
+            if any(s.get("anim_status") == "PROCESSING" for s in res["stickers"]) or any(v.get("status") == "VIDEO_RETURNED" for v in res["video_sheets"]):
+                raise ImportError("A video is being cut into animations in this batch: wait for it to finish", 409)
+            gid, d = main, pl.gen_dir(c.out, main)
+            m = sheet_match(res, d, first_frame(f))
+            info["match"] = m
+            if m["sheet"] == "image":
+                gates.redo_video(c.out, gid, user["id"], note="replaced by an imported video of the image sheet")      # a sliced video sheet is retired, its clips kept
+                res = pl.read_result(c.out, gid)
+                now = round(time.time(), 3)
+                for st in res["stickers"]:              # clips from an earlier prepared video are kept as versions too, never overwritten unkept
+                    if st.get("anim_status") == "READY" and st.get("webm") and (d / st["webm"]).is_file():
+                        keep = Path("slices") / "versions" / f"{Path(st['webm']).stem}-import{int(now)}.webm"
+                        if not any(x.get("webm") == keep.as_posix() for x in st.get("anim_versions") or []):
+                            (d / keep).parent.mkdir(parents=True, exist_ok=True)
+                            (d / keep).write_bytes((d / st["webm"]).read_bytes())
+                            st.setdefault("anim_versions", []).append({"sheet": "prepared", "webm": keep.as_posix(), "review": (st.get("review") or {}).get("anim"), "ts": now})
+                    if st.get("status") == "READY" and st["review"].get("still") != "REJECTED":
+                        st["anim_status"] = "NOT_REQUESTED"
+                    pl.hist(st, "video", "human", "IMPORT", f"imported {Path(name).name}: the batch's 3x3 video (matched the image sheet)")
+                res["source"].update(video_path=str(f), video=f.name, has_video=True)
+                pl.write_result(c.out, gid, res)
+                work = lambda: pl.run_animate(c.out, gid, c.cfg, "pack", None, c.pace)
+                aid = None
+                said = f"The video matched {res['generation_id']}'s image sheet: it is cut as the batch's 3x3 video into the kept stickers."
+            else:
+                v = gates.sheet_of(res, m["sheet"])
+                if v["status"] in gates.CUT:      # that sheet already has its video: retire the one in use, build the next at the same gap
+                    gates.redo_video(c.out, gid, user["id"], note="replaced by an imported video")
+                    from dataclasses import replace as _replace
+                    fill = float(v.get("slot_fill") or c.cfg.slot_fill)
+                    cur = gates.active_sheet(pl.read_result(c.out, gid))
+                    if cur and cur["status"] in ("BUILT", "APPROVED") and abs(float(cur.get("slot_fill") or c.cfg.slot_fill) - fill) > 0.004:
+                        gates.review(c.out, gid, "video_sheet", "REJECT", cur["id"], "another gap: an imported video")
+                    aid = gates.quick_sheet(c.out, gid, _replace(c.cfg, slot_fill=fill))["sheet"]
+                else:
+                    aid = v["id"]
+                    if v["status"] == "BUILT":
+                        gates.quick_sheet(c.out, gid, c.cfg)
+                gates.attach_video(c.out, gid, aid, data, name, custom=True)
+                work = lambda: gates.slice_video(c.out, gid, aid, c.cfg, c.pace)
+                said = (f"The video matched {res['generation_id']}'s video sheet {m['sheet']}: attached as animation {aid[1:]}"
+                        + (f" (built again from {m['sheet']} at the same gap)" if aid != m["sheet"] else "") + ".")
+            kind, info["generation"], info["sheet"] = "video", res["generation_id"], aid
+        row = record(c.out, name, data, info["generation"], user["id"])
+        _update(c.out, row["id"], status="PROCESSING", file=str(f), kind=kind, sheet=info.get("sheet"), batch=fam["root"])
+        ctx = contextvars.copy_context()
+        ctx.run(pl.OWNER.set, user["id"])
+
+        def run():
+            try:
+                work()
+                r = pl.read_result(c.out, gid)
+                _update(c.out, row["id"], status="FAILED" if r.get("error") else "READY", error=r.get("error"))
+            except Exception as e:
+                _update(c.out, row["id"], status="FAILED", error=str(e)[:300])
+            finally:
+                c.lock.release()
+        threading.Thread(target=ctx.run, args=(run,), daemon=True).start()
+        handed_off = True
+        return 202, {"id": gid, "kind": kind, "import": row["id"], "message": said, **info}
+    except Exception as e:
+        if row:
+            _update(c.out, row["id"], status="FAILED", error=str(e)[:300])
+        raise
+    finally:
+        if not handed_off:
+            c.lock.release()
+
+
+
+def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generation=None, sheet=None, job_id=None, retry=False, job=None, as_new=False,
+                batch=None) -> tuple[int, dict]:
     """One serialized import lifecycle. Console holds the cross-process writer lock.
 
     The ledger reserves bytes before mutation, records the batch before background
@@ -338,6 +501,7 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
     `job` (a local J id, the dialog's explicit choice) or exactly one of the person's own failed jobs
     holding this file's ticket completes that job instead (`_recover`): no new batch, no second charge.
     `as_new` imports as an unrelated batch even when a failed job matches.
+    `batch` (any G### of a batch) imports INSIDE that batch (`_into_batch`): a picture is its next generation, a video its next animation.
     """
     from . import pipeline as pl, gates, sources
     from ..media.video_project import MAX_UPLOAD
@@ -347,6 +511,8 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
     if ext not in IMAGE + VIDEO:
         raise ImportError("Import a PNG, JPEG, WebP, MP4, MOV or WebM file")
     with _LOCK:
+        if batch is not None and str(batch).strip():
+            return _into_batch(c, user, name, data, batch, prompt)
         if job:
             return _recover(c, user, name, data, _linkable(c.out, user, job_id or job_id_of(name), job, name), prompt)
         ticket = job_id or job_id_of(name)

@@ -37,7 +37,7 @@ class TicketDraft(BaseModel):
 
 class TicketTarget(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    kind: Literal["generation", "sticker", "particle_set", "chat", "pack", "other"] = "other"
+    kind: Literal["generation", "sticker", "animation", "particle_set", "chat", "pack", "other"] = "other"
     id: str | None = Field(default=None, max_length=64)
     sticker: str | None = Field(default=None, max_length=64)
 

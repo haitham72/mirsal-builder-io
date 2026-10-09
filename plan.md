@@ -9,19 +9,9 @@ Source of truth for each phase is `docs/export to team/mirsal-export-architectur
 
 **Scope:** Backend route (`POST /api/packs/{id}/export-collection`), UI buttons, multipart/form-data construction with ordered media + metadata, external API call with Basic auth, tests. No changes to existing export flows (ZIP downloads).
 
-## Next (Haitham, 2026-10-08): the Studio's batch -> generation rows, then Import inside a batch
+## Next: the claim ledger behind Next batch
 
-Backend is built and tested (`docs/engine-and-studio.md` "Batches, generations, regenerate"); the screens are not.
-
-1. Built 2026-10-08: the Batch k header with the generations row (Make main / Delete / Report), the one frame with view tabs and the one control row.
-2. **Animation view: the animations row.** In the frame's Video view, `animation 1 … n` = the picked generation's video sheets that have a video:
-   pick (`POST …/pick_video`), remove (`POST …/remove_video`), report (`data-k=animation data-id=G###/A2`). Regenerate (video) is already one button.
-3. **Import inside a batch** (Haitham: "import in Stickers and in Animation, proper naming"). Stickers: an imported image becomes the next generation of
-   THIS batch (the batch's plan/cells and naming, `parent` + `regen_of`, like Regenerate) — extend `flow/imports.import_file` with the batch. Animation: an
-   imported video attaches to THIS batch's picked generation; which sheet it was animated from is decided by comparing its first frame with the image sheet
-   and with the generation's video sheet (the closer one wins: image sheet -> sliced as a prepared 3x3 video; video sheet -> `quick_sheet` + attach as the
-   next animation, after `redo_video` when one exists). No question to the person; the answer says which one was used.
-4. Then plan Phase 2 below (the claim ledger behind Next batch: today "unclaimed" is derived from the batches on screen, not from `claims.py`).
+Today "unclaimed" is derived from the batches on screen, not from `claims.py`; Phase 2 below wires the ledger in.
 
 ## Phase 2 — resolver + chat wiring (pack intent, generate more)
 

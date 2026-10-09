@@ -31,10 +31,14 @@ class ImportOptions(BaseModel):
     generation: str | int | None = None
     sheet: str | None = None
     retry: bool = False
+    job: str | None = Field(default=None, max_length=16)          # the failed local job (J023) this file completes, the "Is this the result of …?" choice
+    as_new: bool = False                                          # import as a new batch even when a failed job holds this file's ticket
+    batch: str | int | None = None                                # import INSIDE this batch (any G### of it): a picture = its next generation, a video = its next animation
 
 
 class ProviderImport(ImportOptions):
     id: str = Field(pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+    local_job: str | None = Field(default=None, max_length=16)    # the failed local job this provider result completes
 
 
 class ImportResult(BaseModel):

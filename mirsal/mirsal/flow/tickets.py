@@ -149,7 +149,8 @@ def gather(out: Path, target: dict) -> dict:
     out, kind, ident = Path(out), target.get("kind"), str(target.get("id") or "")
     ctx: dict = {}
     try:
-        if kind in ("generation", "sticker") and ident:
+        if kind in ("generation", "sticker", "animation") and ident:
+            ident, _, aid = ident.partition("/")          # an animation is G###/A# (the Studio's animations row)
             gid = int(ident.upper().lstrip("G"))
             from . import pipeline
             r = pipeline.read_result(out, gid)
@@ -157,6 +158,11 @@ def gather(out: Path, target: dict) -> dict:
             ev = pipeline.gen_dir(out, gid) / "events.jsonl"
             if ev.is_file():
                 ctx["last_events"] = [json.loads(x) for x in ev.read_text(encoding="utf-8").splitlines()[-12:] if x.strip()]
+            if kind == "animation" and aid:
+                v = next((x for x in r.get("video_sheets") or [] if x.get("id") == aid.upper()), None)
+                if v:
+                    ctx["animation"] = {k: v.get(k) for k in ("id", "status", "model", "slots", "video_prompt_sent")}
+                    ctx["_what"] = f"{r['generation_id']}/{v['id']}: {v.get('status')}"
             if kind == "sticker" and target.get("sticker"):
                 i = int(str(target["sticker"]).upper().lstrip("S"))
                 st = next((s for s in r["stickers"] if s["index"] == i), None)

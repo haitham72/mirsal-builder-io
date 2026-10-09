@@ -38,4 +38,15 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
  ACT.impretry=()=>send(true);
    ACT.imphistory=async()=>{IMP={file:null,job:null,options:null,busy:false,localJob:null,asNew:false};dlg('<h2>Higgsfield history</h2><p>Loading completed jobs…</p>');const r=await api('/api/higgsfield/history');if(!r.ok)return dlg(`<h2>Higgsfield history</h2><p>${esc(r.j.error||'Could not load history')}</p><button class=btn data-act=dlgx>Close</button>`);dlg(`<h2>Higgsfield history</h2><p class=mut>Importing downloads an existing result. No credits are spent.</p>${form()}${IMPV.rows(r.j.jobs)}<button class=btn data-act=dlgx>Close</button>`)};
  ACT.imphf=el=>{IMP.job=el.dataset.id;IMP.options=options();send()};
+ /* Import INSIDE a batch (flow/imports._into_batch): on Stickers a picture becomes the batch's next generation (its own cells, tags and naming), on Animation
+    a video becomes its next animation; the server reads which sheet the video was animated from (image sheet or video sheet) and says which one it used */
+ globalThis.impBatchBtn=(g,mode)=>owner()&&!making(g)&&g.kind!=='particles'?`<button class="btn sm" data-act=impbatch data-g=${g.number} data-m=${mode==='anim'?'anim':'still'} title="${mode==='anim'?'Import a video made from this batch: it becomes the next animation':'Import a picture: it becomes the next generation of this batch, cut with its own cells and tags'}">${ic('plus')} Import ${mode==='anim'?'video':'picture'}</button>`:'';
+ ACT.impbatch=el=>{const n=+el.dataset.g,anim=el.dataset.m==='anim',f=document.createElement('input');f.type='file';f.hidden=true;f.accept=anim?'.mp4,.mov,.webm':'.png,.jpg,.jpeg,.webp';
+  f.onchange=async()=>{const file=f.files[0];f.remove();if(!file)return;const g=GM.get(n);if(!g)return;toast('Importing…');
+   const r=await api(`/api/import?name=${encodeURIComponent(file.name)}&batch=${encodeURIComponent(g.generation_id)}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file});
+   if(!r.ok)return toast(r.j.error||'Import failed',1);
+   if(r.j.duplicate)return toast(`Already imported${r.j.generation?' as '+r.j.generation:''}: nothing was made`,1);
+   if(r.j.kind==='sheet'&&r.j.id){FAM.clear();SES.gens=SES.gens.map(x=>x===n?r.j.id:x);saveSes()}
+   GS.tab=r.j.kind==='video'?'anim':'stickers';toast(r.j.message||'Imported');glast='';tick(true)};
+  document.body.appendChild(f);f.click()};
 }

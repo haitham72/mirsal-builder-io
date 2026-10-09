@@ -201,7 +201,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         except ValidationError as e:
             return _j(request, 400, {"error": "bad request: " + e.errors()[0]["msg"]})
         except (im.ImportError, pl.PipelineError) as e:
-            return _j(request, e.code, {"error": str(e)})
+            return _j(request, e.code, {"error": str(e), **getattr(e, "hint", {})})
 
     @app.get("/api/higgsfield/history", include_in_schema=False)
     @app.get("/api/v1/higgsfield/history", include_in_schema=False)
@@ -226,12 +226,12 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         if bad:
             return _j(request, 400, {"error": bad})
         try:
-            options = body.model_dump(exclude={"id", "name"})
+            options = body.model_dump(exclude={"id", "name", "job", "as_new"}, exclude_none=True)
             status, result = await asyncio.to_thread(im.import_job, c, user, body.id, **options)
             ImportResult.model_validate(result)
             return _j(request, status, result)
         except (im.ImportError, pl.PipelineError) as e:
-            return _j(request, e.code, {"error": str(e)})
+            return _j(request, e.code, {"error": str(e), **getattr(e, "hint", {})})
 
     import time as _time
     from collections import defaultdict, deque

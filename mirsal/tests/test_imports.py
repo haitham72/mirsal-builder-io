@@ -111,6 +111,48 @@ class ImportTests(unittest.TestCase):
         self.assertTrue(any(s["anim_status"] in ("READY", "FAILED") for s in res["stickers"]))
         self.assertEqual(im.known(self.out, data=vid.read_bytes())["status"], "READY")
 
+    def test_import_inside_a_batch_picture_is_the_next_generation_video_matches_its_sheet(self):
+        """Import inside a batch: a picture is the batch's next generation (its plan and naming, parent + regen_of); a video attaches to the main
+        generation, and its first frame decides which sheet it came from (image sheet -> the batch's 3x3 video; video sheet -> the next animation)."""
+        import numpy as np
+        from PIL import Image
+        from mirsal.flow import gates, groups
+        im.import_file(self.c, self.user, "sheet.png", self.data)
+        self.wait()
+        other = cv2.imencode(".png", cv2.cvtColor(synth.make_sheet(seed=1), cv2.COLOR_RGB2BGR))[1].tobytes()
+        code, got = im.import_file(self.c, self.user, "mine.png", other, batch="G001")
+        self.wait()
+        self.assertEqual((code, got["kind"], got["batch"], got["generation"]), (202, "sheet", "G001", "G002"))
+        two, one = pl.read_result(self.out, 2), pl.read_result(self.out, 1)
+        self.assertEqual((two["regen_of"], two["parent"], two["task_slug"]), ("G001", 1, one["task_slug"]))        # the batch's own naming
+        self.assertEqual([s["key"] for s in two["stickers"]], [s["key"] for s in one["stickers"]])               # the batch's own cells and tags
+        self.assertEqual([m["id"] for m in groups.family(self.out, 1)["members"]], [1, 2])
+        self.assertEqual(im.import_file(self.c, self.user, "again.png", other, batch="G001")[1]["duplicate"], True)   # never twice
+        # a video drawn from the image sheet: the main generation (G002, the newest) gets it as its 3x3 video
+        vid = self.out / "src.mp4"
+        synth.make_video(vid)
+        code, got = im.import_file(self.c, self.user, "anim.mp4", vid.read_bytes(), batch="G001")
+        self.wait()
+        self.assertEqual((code, got["kind"], got["generation"], got["match"]["sheet"]), (202, "video", "G002", "image"))
+        self.assertIn("image sheet", got["message"])
+        two = pl.read_result(self.out, 2)
+        self.assertTrue(two["source"]["has_video"])
+        self.assertTrue(any(s["anim_status"] == "READY" for s in two["stickers"]))
+        # a video drawn from G001's video sheet: G001 is made the main, the video is attached to A1 and cut
+        groups.pick(self.out, 1)
+        gates.quick_sheet(self.out, 1, self.c.cfg)
+        d = pl.gen_dir(self.out, 1)
+        v = pl.read_result(self.out, 1)["video_sheets"][0]
+        lay = self.out / "lay.mp4"
+        synth.make_layout_video(lay, np.array(Image.open(d / v["file"]).convert("RGB")), json.loads((d / v["layout"]).read_text()), size=600, frames=30)
+        code, got = im.import_file(self.c, self.user, "lay.mp4", lay.read_bytes(), batch="G002")
+        self.wait()
+        self.assertEqual((code, got["generation"], got["match"]["sheet"], got["sheet"]), (202, "G001", "A1", "A1"), got)
+        self.assertLess(got["match"]["distances"]["A1"], got["match"]["distances"]["image"])
+        one = pl.read_result(self.out, 1)
+        self.assertEqual(one["video_sheets"][0]["status"], "SLICED")
+        self.assertTrue(any(s["anim_status"] == "READY" for s in one["stickers"]))
+
     def test_provider_errors_and_response_validation(self):
         with patch.object(hf, "_json", return_value={"status": "completed", "result_url": "https://example.invalid/sheet.png"}), patch.object(hf, "download", side_effect=hf.HiggsError("download failed")):
             with self.assertRaises(im.ImportError) as got:
