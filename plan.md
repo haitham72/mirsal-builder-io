@@ -9,7 +9,7 @@ run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when
 Haitham: "I still don't see a slider from 'prompt' all the way to 'export to API' at all." Three gaps between what he expects and what was built:
 
 1. **Nothing visible yet.** The pill lives only on the AI screen (`#/agent`), inside the chat box, left of Send (`agent.js` `drawStage`, `#ag-stage`). A server
-   started before `2dba73f` serves the old `agent.js`: restart `python -m mirsal serve` from `mirsal/.venv` (Windows) and hard-reload (Ctrl+F5). Check it is
+   started before `2dba73f` serves the old `agent.js`: restart it (Haitham runs `.\.venv\Scripts\python.exe -m mirsal serve --lan` from `mirsal/`, HTTPS on the LAN) and hard-reload (Ctrl+F5). Check it is
    there first; if it still is not, debug `drawStage` (is `#ag-stage` in the markup, is `drawBar` reached on the AI screen) before anything else.
 2. **A pill is not a slider.** The plan said "a picker like Claude / ChatGPT's reasoning level", and a dropdown pill was built. Haitham expects a **visible
    slider / stepper**: Prompt -> Emojis -> Animation -> Export, every stage on screen at once, the current one marked, one click (or drag, or arrow keys)
