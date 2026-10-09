@@ -369,6 +369,7 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .lv-vgen{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
 /* Regenerate in the same batch (generate.js redoFoot / live.js modelPick): the prompt under an animated batch, the model folded to one line */
 .lv-regap{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}.lv-regap .lv-vprev{max-width:260px;border-radius:var(--r-m)}/* the generations row of a batch (generate.js gensHtml): gen 1 … n, the main starred, the one in view filled */
+.gdnb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 6px}.gdnb .tab{padding:4px 12px}
 .ganims{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.ganim{display:inline-flex;align-items:center;gap:2px}.ganim.on .ggen{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:600;cursor:default}.gx2{border:0;background:none;color:var(--mut);padding:2px;cursor:pointer;display:inline-flex}.gx2:hover{color:var(--bad)}.gx2 svg{width:14px;height:14px}
 .ggens{display:inline-flex;flex-wrap:wrap;gap:4px;margin-left:8px}.ggen{border:1px solid var(--bd);background:var(--sf);border-radius:999px;padding:3px 10px;font-size:var(--fs-s);cursor:pointer}.ggen.on{background:var(--pri);border-color:var(--pri);color:#fff}.ggen.main{font-weight:600}.ggact{display:inline-flex;gap:4px;margin-left:8px;align-items:center}
 /* the one control row under the batch frame (generate.js genRow / live.js modelPick) */

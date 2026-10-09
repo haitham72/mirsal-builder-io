@@ -11,7 +11,7 @@ let GD=null,GDWORK=false,GDP=null;        // GD: the browser-only pre-batch plan
 try{const d=JSON.parse(localStorage.getItem('mirsal.prompt-draft')||'null');if(d&&d.number==='draft'&&Array.isArray(d.stickers))GD=d}catch(e){}
 const ANIM=new Set();                     // batches the user pressed Animate on, until the server reports them animating
 try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.outline=[0,4,8,12,16].includes(+o)?+o:(+o>0?12:0);const t=+localStorage.getItem('mirsal.tile');if(t>=130&&t<=420)GS.tile=t;
-  const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens.filter(g=>Number.isInteger(g)&&g>0),off:s.off||[],pack:s.pack||''}}catch(e){}      // a saved [null] / NaN (the old hopen clash) must not fire a 400 at every load
+  const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens.filter(g=>Number.isInteger(g)&&g>0),off:s.off||[],pack:s.pack||'',...(s.run?{run:s.run}:{})}}catch(e){}      // a saved [null] / NaN (the old hopen clash) must not fire a 400 at every load
 const gstore=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const saveSes=()=>gstore('mirsal.session',JSON.stringify(SES));
 const wait=ms=>new Promise(f=>setTimeout(f,ms));
@@ -427,8 +427,13 @@ function gdPriceLine(){if(typeof liveReadyNow!=='function'||!liveReadyNow())retu
   return GDP.c==null?{t:'Higgsfield sheet price: unavailable',ok:false,retry:true}:{t:`Higgsfield sheet price: ◈ ${fcr(GDP.c)} credits`,ok:true}}
 function gdFoot(g,kind){const reset=`<button class="btn sm" data-act=pgreset data-g=draft data-kind=${kind} ${PD[pdKey('draft',kind)]!==undefined?'':'hidden'}>Reset</button>`;
   if(kind==='video')return`<div class=pdfoot data-pdfoot=video>${reset}<small class=mut>This video prompt is for later: the animation is made after the sheet and its stickers exist.</small></div>`;
-  const P=gdPriceLine(),custom=pdCustom(g,'sheet');
-  return`<div class=pdfoot data-pdfoot=sheet><div class=mut id=gdprice>${P.t}</div>${P.retry?'<button class="btn sm" data-act=gdpriceretry>Retry the price</button>':''}<button class="btn sm pri" data-act=gdsheet ${P.ok&&!GDWORK?'':'disabled'} title="Spends the Higgsfield credits shown above">Generate sheet${custom?' with my prompt':''}</button>${reset}<small class=mut>${custom?'Your text is sent exactly as written.':g.expanded_by==='ai'?'The AI enhancer\'s text is sent exactly as shown.':'This is the template\'s text; edit it to send your own.'} Generating the prompt spent no Higgsfield credits; this click is what spends.</small></div>`}
+  const P=gdPriceLine(),custom=pdCustom(g,'sheet'),mx=Math.max(1,+g.batches_max||1),nb=gdNb(g);
+  const pick=mx>1?`<div class=gdnb><span class=mut>Batches</span>${Array.from({length:mx},(_,i)=>i+1).map(k=>`<button class="tab${k===nb?' on':''}" data-act=gdnb data-n=${k} aria-pressed=${k===nb} title="${k===1?'Only this batch':`This batch and the next ${k-1}: ${9*k} stickers, every one a different action`}">${k}</button>`).join('')}${nb>1&&GDP&&GDP.c!=null?`<span class=mut>${nb} sheets · ◈ ${fcr(GDP.c*nb)} credits in all</span>`:''}</div>`:'';
+  return`<div class=pdfoot data-pdfoot=sheet>${pick}<div class=mut id=gdprice>${P.t}</div>${P.retry?'<button class="btn sm" data-act=gdpriceretry>Retry the price</button>':''}<button class="btn sm pri" data-act=gdsheet ${P.ok&&!GDWORK?'':'disabled'} title="Spends the Higgsfield credits shown above">${nb>1?`Generate ${nb} sheets`:'Generate sheet'}${custom?' with my prompt':''}</button>${reset}<small class=mut>${custom?'Your text is sent exactly as written.':g.expanded_by==='ai'?'The AI enhancer\'s text is sent exactly as shown.':'This is the template\'s text; edit it to send your own.'} Generating the prompt spent no Higgsfield credits; this click is what spends.</small></div>`}
+/* Batches (Haitham, 2026-10-09: "1 batch, 2 batches, n batches"): one Generate makes this batch and the next ones of the pack (the next preset grids of an
+   emoji pack, else the next unused actions of the bank), each its own sheet with its own price; the total is on the button. GD.nb is the choice. */
+const gdNb=g=>Math.min(Math.max(1,+g.batches_max||1),Math.max(1,+g.nb||1));
+ACT.gdnb=el=>{if(!GD)return;GD.nb=+el.dataset.n;gdSave();gdPaint()};
 function gdPaint(){const foot=document.querySelector('[data-pdfoot=sheet]');if(!gdOn()||!foot||!foot.querySelector('[data-act=gdsheet]'))return;const tmp=document.createElement('div');tmp.innerHTML=gdFoot(GD,'sheet');foot.replaceWith(tmp.firstChild)}
 async function gdPrice(){if(!gdOn()||typeof liveReadyNow!=='function'||!liveReadyNow())return;const key=gdKey();if(GDP&&GDP.key===key)return gdPaint();      // the price is known: still repaint, the button was drawn disabled while Generate prompt was busy
   const c=await lcost('image',true);GDP={key,c};gdPaint()}
@@ -465,10 +470,21 @@ ACT.gdsheet=async el=>{if(!gdOn()||GDWORK)return;const g=GD,text=(pdText(g,'shee
   if(typeof liveReadyNow!=='function'||!liveReadyNow()){toast('Connect Higgsfield first',1);return}
   if(!gdPriceLine().ok){toast('The Higgsfield price is not known yet: wait for it or retry it, then generate',1);return}       // never spend against a price the person has not been shown
   GDWORK=true;el.disabled=true;
-  try{const ok=await liveStart('sheet',{prompt:g.prompt,ai:false,refs:g.refs||[],style_id:g.style,loop:g.loop,...(g.next?{mode:'next'}:{}),sheet_prompt:(pdCustom(g,'sheet')||g.expanded_by==='ai')?pdText(g,'sheet'):undefined,
+  const run=g.next?{mode:'next'}:gdNb(g)>1?{mode:'pack',run:'R'+Date.now().toString(36)}:{};
+  try{const ok=await liveStart('sheet',{prompt:g.prompt,ai:false,refs:g.refs||[],style_id:g.style,loop:g.loop,...run,sheet_prompt:(pdCustom(g,'sheet')||g.expanded_by==='ai')?pdText(g,'sheet'):undefined,
     plan:g.slots?{template_id:g.template_id,expanded_by:g.expanded_by,expand_model:g.expand_model,slots:{subject_description:g.slots.subject_description,key_colour:g.slots.key_colour,cells:g.slots.cells}}:undefined});     // the previewed plan goes with the click: the server validates it and builds the batch from the cells the person saw (ai:false: the enhancer is never asked a second time)
+    if(ok&&gdNb(g)>1)await gdMore(g,run);
     if(ok){gdDrop();glast='';await tick(true)}}
   finally{GDWORK=false;if(GD){gdSave();gdPaint()}if(typeof cpDrawBar==='function')cpDrawBar()}};
+/* the batches after the first: their plans come from the server (POST /api/plan/more: the next preset grids or bank actions), each is started like the
+   first, and every finished sheet joins the same session (mode pack, one run key; a Next-batch draft keeps adding to the session on screen) */
+async function gdMore(g,run){const r=await post('/api/plan/more',{prompt:g.prompt,n:gdNb(g)-1,style_id:g.style,loop:g.loop,
+    plan:{slots:g.slots,grid:g.grid,expanded_by:g.expanded_by,stickers:(g.stickers||[]).map(t=>({key:t.key,tags:t.tags}))}});
+  if(!r.ok)return toast(r.j.error||'Could not plan the other batches',1);
+  let n=1;for(const p of r.j.plans){const ok=await liveStart('sheet',{prompt:p.prompt,ai:false,refs:g.refs||[],style_id:g.style,loop:g.loop,...run,
+    plan:{template_id:p.template_id,expanded_by:p.expanded_by,slots:{subject_description:p.slots.subject_description,key_colour:p.slots.key_colour,cells:p.slots.cells}}});
+    if(!ok)break;n++}
+  toast(`${n} sheet${n===1?'':'s'} started: each batch joins this session when it is ready`)}
 ACT.pgsheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
   const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,sheet_prompt:pdCustom(g,'sheet')?PD[pdKey(g.number,'sheet')]:undefined});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};

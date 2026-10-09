@@ -85,7 +85,7 @@ async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image')
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…',{'Idempotency-Key':ikey()});
   if(!r.ok){toast(r.j.error||'Could not start',1);return false}
   const m=lfind(isSheet?'image':'video',r.j.model);
-  LIVE.jobs.push({...(ctx.mode?{mode:ctx.mode,batch:ctx.batch||null}:{}),id:r.j.job,kind:isSheet?'sheet':'video',label:isSheet?ctx.prompt:`Batch ${ctx.g}`,model:m?m.label:r.j.model,est:r.j.estimate,t0:Date.now(),gen:isSheet?null:ctx.g,ai:r.j.expanded_by==='ai'});
+  LIVE.jobs.push({...(ctx.mode?{mode:ctx.mode,batch:ctx.batch||null,run:ctx.run||null}:{}),id:r.j.job,kind:isSheet?'sheet':'video',label:isSheet?ctx.prompt:`Batch ${ctx.g}`,model:m?m.label:r.j.model,est:r.j.estimate,t0:Date.now(),gen:isSheet?null:ctx.g,ai:r.j.expanded_by==='ai'});
   if(isSheet&&ctx.ai&&r.j.expanded_by==='transformation')toast('Transformation: the built-in template wrote the cells, so the AI enhancer was not asked');
   else if(isSheet&&ctx.ai&&r.j.expanded_by!=='ai')toast(`The AI enhancer could not be used (${r.j.expand_error||'no answer'}): the built-in prompt was sent instead`,1);
   if(!isSheet&&egDirty())egClear();
@@ -174,8 +174,9 @@ async function liveTick(){if(LTB)return;LTB=true;try{
       toast(`${j.kind==='sheet'?'Sheet':'Animation'} ready: ${fcr(s.cost)} credits used${LIVE.hf&&LIVE.hf.credits!=null?`, ${fcr(LIVE.hf.credits)} left`:''}`);
       const nid=+String(s.generation||'').replace(/\D/g,'');
       if(j.kind==='sheet'&&j.mode==='regen'&&SES.gens.includes(j.batch)){SES.gens=SES.gens.map(x=>x===j.batch?nid:x);saveSes();GS.tab='stickers';glast='';histReload()}       // a regeneration takes its batch's place in view: the new generation of the same batch
+      else if(j.kind==='sheet'&&j.mode==='pack'&&SES.run===j.run&&SES.gens.length){if(!SES.gens.includes(nid))SES.gens.push(nid);saveSes();GS.tab='stickers';glast='';histReload()}       // a multi-batch Generate: the 2nd .. nth sheet joins the session the first one opened
       else if(j.kind==='sheet'&&j.mode==='next'&&SES.gens.length){if(!SES.gens.includes(nid))SES.gens.push(nid);saveSes();GS.tab='stickers';glast='';histReload()}          // Next batch: one more batch of this session
-      else if(j.kind==='sheet'){SES={prompt:j.label,gens:[nid],off:[],pack:''};saveSes();GS.tab='stickers';glast='';
+      else if(j.kind==='sheet'){SES={prompt:j.label,gens:[nid],off:[],pack:'',...(j.run?{run:j.run}:{})};saveSes();GS.tab='stickers';glast='';
         for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();location.hash='#/studio';histReload()}
       else{GS.tab='anim';glast=''}
       if(typeof tick==='function')tick(true)}}

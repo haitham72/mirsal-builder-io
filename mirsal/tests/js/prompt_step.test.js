@@ -56,6 +56,7 @@ function load({ stored = null, connected = true, price = 12.5, ai = false, planO
         else j.expanded_by = 'deterministic';
         return { ok: true, j };
       }
+      if (url === '/api/plan/more') return { ok: true, j: { max: 4, plans: Array.from({ length: body.n }, (_, i) => ({ ...JSON.parse(JSON.stringify(PLAN)), prompt: `bear more ${i + 1}` })) } };
       return { ok: true, j: { job: 'J1', model: 'nano', estimate: 12.5, expanded_by: null } };
     },
     postWait: async (url, body) => sb.post(url, body),
@@ -75,8 +76,8 @@ function load({ stored = null, connected = true, price = 12.5, ai = false, planO
     statement(gen, 'const pdKey='), statement(gen, 'const sentVideoPrompt='), statement(gen, 'const pdText='), statement(gen, 'const pdBase='), statement(gen, 'const pdCustom='),
     statement(gen, 'const copyBox='), statement(gen, 'function pdFoot(g,kind)'), statement(gen, 'function planView(g)'),
     statement(gen, 'const gdOn='), statement(gen, 'function gdSave('), statement(gen, 'function gdHide('), statement(gen, 'function gdDrop('), statement(gen, 'const gdKey='),
-    statement(gen, 'function gdPriceLine('), statement(gen, 'function gdFoot('), statement(gen, 'function gdPaint('), statement(gen, 'async function gdPrice('), statement(gen, 'function gdView('),
-    statement(gen, 'ACT.gdtab='), statement(gen, 'ACT.gddiscard='), statement(gen, 'ACT.gdpriceretry='), statement(gen, 'const gdEngineName='), statement(gen, 'ACT.gprompt='), statement(gen, 'ACT.gpromptfree='), statement(gen, 'async function gdPlan('), statement(gen, 'function gdNote('), statement(gen, 'ACT.gdsheet='),
+    statement(gen, 'const gdNb='), statement(gen, 'ACT.gdnb='), statement(gen, 'function gdPriceLine('), statement(gen, 'function gdFoot('), statement(gen, 'function gdPaint('), statement(gen, 'async function gdPrice('), statement(gen, 'function gdView('),
+    statement(gen, 'ACT.gdtab='), statement(gen, 'ACT.gddiscard='), statement(gen, 'ACT.gdpriceretry='), statement(gen, 'const gdEngineName='), statement(gen, 'ACT.gprompt='), statement(gen, 'ACT.gpromptfree='), statement(gen, 'async function gdPlan('), statement(gen, 'function gdNote('), statement(gen, 'ACT.gdsheet='), statement(gen, 'async function gdMore('),
     statement(live, 'async function liveStart('),
   ].join('\n');
   const f = new Function(...Object.keys(sb), 'const ACT={};\n' + body + '\nreturn {ACT,PD,pdText,pdCustom,gdOn,gdView,gdFoot,gdSave,gdPrice,gdNote,liveStart,get GD(){return GD},get GDP(){return GDP}};')(...Object.values(sb));
@@ -185,6 +186,38 @@ test('without Higgsfield the sheet button is off and says why', async () => {
   assert.match(foot, /data-act=gdsheet disabled/);
   await h.api.ACT.gdsheet({ disabled: false });
   assert.equal(sheetPosts(h).length, 0);
+});
+
+test('Batches: one Generate makes this batch and the next ones, each its own sheet, all joining one session', async () => {
+  const h = load();
+  await h.api.ACT.gprompt();
+  await flush();
+  h.api.GD.batches_max = 4;
+  assert.match(h.api.gdFoot(h.api.GD, 'sheet'), /data-act=gdnb data-n=4/);
+  assert.match(h.api.gdFoot(h.api.GD, 'sheet'), />Generate sheet</);
+  h.api.ACT.gdnb({ dataset: { n: '3' } });
+  const foot = h.api.gdFoot(h.api.GD, 'sheet');
+  assert.match(foot, />Generate 3 sheets</);
+  assert.match(foot, /3 sheets · ◈ 37.5 credits in all/, 'the total is shown before the click');
+  await h.api.ACT.gdsheet({ disabled: false });
+  const more = h.log.posts.find(([u]) => u === '/api/plan/more');
+  assert.equal(more[1].n, 2);
+  const sheets = sheetPosts(h);
+  assert.equal(sheets.length, 3);
+  assert.deepEqual(sheets.map(([, b]) => b.prompt), ['spiderman in dubai', 'bear more 1', 'bear more 2']);
+  const runs = h.LIVE.jobs.map(j => [j.mode, j.run]);
+  assert.equal(new Set(runs.map(r => r[1])).size, 1, 'one run key');
+  assert.ok(runs.every(r => r[0] === 'pack' && r[1]));
+});
+
+test('one batch stays exactly as before: no plan/more call, no run key', async () => {
+  const h = load();
+  await h.api.ACT.gprompt();
+  await flush();
+  await h.api.ACT.gdsheet({ disabled: false });
+  assert.equal(h.log.posts.filter(([u]) => u === '/api/plan/more').length, 0);
+  assert.equal(sheetPosts(h).length, 1);
+  assert.equal(h.LIVE.jobs[0].mode, undefined);
 });
 
 test('only the Generate sheet click spends, and it forwards the edited text as sheet_prompt to the live sheet route', async () => {

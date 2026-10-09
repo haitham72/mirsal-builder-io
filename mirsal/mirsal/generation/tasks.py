@@ -93,6 +93,7 @@ def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat
     plan["sheet_prompt"], plan["video_prompt"] = built["sheet_prompt"], built["video_prompt"]
     for s in plan["stickers"]:
         s["prompt"] = built["prompts"][s["index"]]
+    plan["batches_max"] = batches_max(plan)          # the Prompt step offers 1 .. this many batches in one Generate
     return plan
 
 
@@ -377,7 +378,14 @@ def next_batch(out: Path, gens, style_id: str = "flat_vector", loop: bool = Fals
     tokens = actions.next_tokens(used, rows * cols)
     if len(tokens) < rows * cols:
         return {"complete": True, "message": f"Every action of the {len(actions.ACTION_BANK)}-action bank is already in these batches. Start a new request, or regenerate a batch you want better."}
-    plan = prompter.expand(spelling.fix_text(request), (rows, cols), face=face, tokens=tokens)
+    plan = _token_plan(request, (rows, cols), face, tokens, style_id, loop)
+    return {**plan, "prompt": request, "next": {"kind": "actions", "tokens": tokens, "left": len(actions.next_tokens(used | set(tokens), 99))}}
+
+
+def _token_plan(request: str, grid: tuple, face: bool, tokens: list, style_id: str, loop: bool) -> dict:
+    """The plan of one batch drawn from these bank actions (Next batch, and the batches after the first of a multi-batch Generate)."""
+    from . import spelling
+    plan = prompter.expand(spelling.fix_text(request), tuple(grid), face=face, tokens=tokens)
     plan["expanded_by"] = "deterministic"
     plan["slots"]["style_id"] = style_id
     plan["slots"]["loop"] = bool(loop)
@@ -385,4 +393,49 @@ def next_batch(out: Path, gens, style_id: str = "flat_vector", loop: bool = Fals
     plan["sheet_prompt"], plan["video_prompt"] = built["sheet_prompt"], built["video_prompt"]
     for s in plan["stickers"]:
         s["prompt"] = built["prompts"][s["index"]]
-    return {**plan, "prompt": request, "next": {"kind": "actions", "tokens": tokens, "left": len(actions.next_tokens(used | set(tokens), 99))}}
+    return plan
+
+
+MAX_BATCHES = 4          # one Generate makes at most this many batches (a preset emoji pack has 4 grids = 36 actions)
+
+
+def batches_max(plan: dict) -> int:
+    """How many batches one Generate may make from this previewed plan, the first included: an emoji pack's preset grids from this one on, a bank request
+    as many full grids as the bank still has (capped at MAX_BATCHES), a transformation (one character changed) or a 1x1 only itself."""
+    from . import actions
+    slots, grid = plan.get("slots") or {}, plan.get("grid") or [3, 3]
+    if plan.get("expanded_by") == "transformation" or list(grid)[:2] == [1, 1]:
+        return 1
+    if slots.get("preset") in actions.PRESETS:
+        return min(MAX_BATCHES, len(actions.PRESETS))
+    used = {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+    n = int(grid[0]) * int(grid[1])
+    return max(1, min(MAX_BATCHES, 1 + len(actions.next_tokens(used, 999)) // n))
+
+
+def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector", loop: bool = False) -> list[dict]:
+    """The `k` batches that follow a previewed plan in ONE Generate (Haitham, 2026-10-09: "1 batch, 2 batches, n batches"): an emoji pack's next preset
+    grids (core-v1 -> social-v1 -> reactions-v1 -> daily-v1, the one shown skipped), any other request the next unused bank actions, 9 at a time. Each
+    comes back with its own `prompt`; nothing is reserved or spent here (each sheet is priced and started on its own)."""
+    from . import actions
+    k = max(0, min(int(k), batches_max(plan) - 1))
+    if not k:
+        return []
+    request = str(request or "").strip()
+    slots, grid = plan.get("slots") or {}, tuple((plan.get("grid") or [3, 3])[:2])
+    if slots.get("preset") in actions.PRESETS:
+        base = re.sub(r"\s*(?<![\w-])(?:" + "|".join(map(re.escape, actions.PRESETS)) + r")(?![\w-])", "", request).strip() or request
+        out = []
+        for p in [x for x in actions.PRESETS if x != slots["preset"]][:k]:
+            text = f"{base} {p}"
+            out.append({**preview(text, "3x3", style_id, False, loop), "prompt": text})
+        return out
+    used = {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+    out = []
+    for _ in range(k):
+        tokens = actions.next_tokens(used, grid[0] * grid[1])
+        if len(tokens) < grid[0] * grid[1]:
+            break
+        used |= set(tokens)
+        out.append({**_token_plan(request, grid, bool(slots.get("face")), tokens, style_id, loop), "prompt": request})
+    return out
