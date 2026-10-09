@@ -76,7 +76,8 @@ def items_from_zip(data: bytes) -> tuple[dict, list[dict]]:
             ext = Path(name).suffix.lower()
             if ext not in MIME:
                 raise CollectionError(f"{name}: only .webm, .png and .webp stickers can be sent", 409)
-            items.append({"filename": name, "mime": MIME[ext], "data": z.read(name), "emoji_utf": a.get("emoji") or "🙂", "tags": tags_of(a)})
+            items.append({"filename": name, "mime": MIME[ext], "data": z.read(name), "emoji_utf": a.get("emoji") or "🙂",
+                          "tags": tags_of(a) or tags_of({"tags": [a.get("action")]}) or "sticker"})      # never an empty tags string
     if not items:
         raise CollectionError("nothing to send: no accepted sticker", 409)
     return man.get("pack") or {}, items
@@ -137,12 +138,28 @@ def _log(out: Path, row: dict) -> None:
     atomic.write_text(p, old + json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def reason(status: int, res) -> str:
+    """The refusal in words: the CMS's `message`, else an ASP.NET validation answer (`title` + each field's errors), else its text, else the status."""
+    if isinstance(res, dict):
+        if res.get("message"):
+            return str(res["message"])[:500]
+        errs = res.get("errors")
+        if isinstance(errs, dict) and errs:
+            parts = [f"{k}: {' '.join(map(str, v)) if isinstance(v, list) else v}" for k, v in errs.items()]
+            return (str(res.get("title") or "Validation failed") + " " + "; ".join(parts))[:500]
+        if res.get("title") or res.get("detail"):
+            return " ".join(str(res[k]) for k in ("title", "detail") if res.get(k))[:500]
+    if isinstance(res, str) and res.strip() and not res.lstrip().startswith("<"):
+        return res.strip()[:500]
+    return f"The collection API answered {status}"
+
+
 def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: str = "", by: str = "human") -> dict:
     """Export the stickers of a Download .zip (`what`: `pack P…` or `G###`) as one collection. The answer:
     {ok, status, collection, count, response, error?}; a refusal by the CMS is an answer (ok false, its message), not an exception."""
     pack, items = items_from_zip(zip_bytes)
     title = " ".join(str(name or pack.get("title") or pack.get("slug") or "Mirsal stickers").split())[:120]
-    desc = " ".join(str(description or "").split())[:2000]
+    desc = " ".join(str(description or "").split())[:2000] or title      # the CMS may require a description: an empty one is the collection's name
     row = {"at": round(time.time(), 3), "by": by, "what": what, "collection": title, "count": len(items), "url": base_url()}
     try:
         r = post(title, desc, items)
@@ -150,6 +167,6 @@ def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: 
         _log(out, {**row, "ok": False, "error": str(e)})
         raise
     res = r["response"]
-    err = None if r["ok"] else (res.get("message") if isinstance(res, dict) and res.get("message") else f"The collection API answered {r['status']}")
-    _log(out, {**row, "ok": r["ok"], "status": r["status"], **({"error": err} if err else {})})
+    err = None if r["ok"] else reason(r["status"], res)
+    _log(out, {**row, "ok": r["ok"], "status": r["status"], **({"error": err, "response": res if isinstance(res, dict) else str(res)[:1000]} if err else {})})
     return {"ok": r["ok"], "status": r["status"], "collection": title, "count": len(items), "response": res, **({"error": err} if err else {})}

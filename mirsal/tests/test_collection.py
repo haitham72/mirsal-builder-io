@@ -97,6 +97,8 @@ class CollectionTests(unittest.TestCase):
         media = [(f, t, v) for n, f, t, v in parts if n == "Media"]
         meta = json.loads(fields["MediaMetadata"].decode())
         self.assertEqual((fields["CollectionName"].decode(), fields["Description"].decode()), ("Blob pack", "made in Mirsal"))
+        self.req(f"/api/generations/{g}/export-collection", {"name": "No words"})
+        self.assertEqual({n: v for n, f, _, v in form(FakeCMS.seen[-1]) if f is None}["Description"].decode(), "No words")    # never an empty description
         self.assertEqual(len(media), len(meta))
         self.assertEqual(j["count"], len(media))
         zdata, _ = batches.export_zip(self.c.out, self.gid)                 # the same stickers, the same order, the same bytes as Download .zip
@@ -130,6 +132,11 @@ class CollectionTests(unittest.TestCase):
         FakeCMS.answer = (400, b'{"message": "MediaMetadata count does not match"}', "application/json")
         s, j = self.req(f"/api/generations/{g}/export-collection", {})
         self.assertEqual((s, j["ok"], j["status"], j["error"]), (200, False, 400, "MediaMetadata count does not match"))
+        FakeCMS.answer = (400, b'{"title": "One or more validation errors occurred.", "errors": {"Description": ["The Description field is required."]}}', "application/problem+json")
+        s, j = self.req(f"/api/generations/{g}/export-collection", {})
+        self.assertIn("Description: The Description field is required.", j["error"])
+        log = json.loads((self.c.out / "collection_exports.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+        self.assertIn("errors", log["response"])                                                     # the refusal is kept to read later
         FakeCMS.answer = (502, b"<html>bad gateway</html>", "text/html")
         s, j = self.req(f"/api/generations/{g}/export-collection", {})
         self.assertEqual((j["ok"], j["status"], j["response"]), (False, 502, "<html>bad gateway</html>"))
