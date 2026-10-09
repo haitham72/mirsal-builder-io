@@ -65,8 +65,8 @@ function drawModels(){if(!LIVE.m)return;
   for(const k of ['image','video'])lcost(k)}
 ACT.lmpick=el=>{const key=el.dataset.k==='image'?'img':'vid';LIVE[key]={id:el.dataset.id,options:{}};lsave();drawModels()};
 ACT.lmdone=()=>{drawPanel();if(typeof composerDraw==='function')composerDraw();closeDlg()};
-document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvvid){LIVE.vid={id:t.value,options:{}};lsave();lsel('video');glast='';if(typeof tick==='function')tick(true);return}
-  if(t.dataset&&t.dataset.lvimg){LIVE.img={id:t.value,options:{}};lsave();lsel('image');glast='';if(typeof tick==='function')tick(true);return}
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.lvvid!==undefined){      /* the marker has no value (data-lvvid=""): test that it is there, not that it is truthy */LIVE.vid={id:t.value,options:{}};lsave();lsel('video');glast='';if(typeof tick==='function')tick(true);return}
+  if(t.dataset&&t.dataset.lvimg!==undefined){LIVE.img={id:t.value,options:{}};lsave();lsel('image');glast='';if(typeof tick==='function')tick(true);return}
   if(t.dataset&&t.dataset.lvopt){const [k,n]=t.dataset.lvopt.split('|'),key=k==='image'?'img':'vid';LIVE[key].options[n]=t.value;lsave();lcost(k).then(()=>fillPrices())}
   if(t.dataset&&t.dataset.lvmore&&t.value){const key=t.dataset.lvmore==='image'?'img':'vid';LIVE[key]={id:t.value,options:{}};lsave();drawModels()}});
 async function lcost(kind,quiet){const {model,sel}=lsel(kind);if(!model)return null;const key=kind+model.id+JSON.stringify(sel.options);
