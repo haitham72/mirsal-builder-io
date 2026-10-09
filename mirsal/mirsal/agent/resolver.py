@@ -521,6 +521,14 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         intents, conf = ["SEARCH"], 0.75
     elif re.search(r"\b(another|more of|again|new batch|different (?:set|batch|ones)|try again)\b", t) and has_generation:
         intents, conf = ["ANOTHER"], 0.8
+    elif has_generation and re.search(r"\b(videos?|animated?|animations?|export(?:s|ed|ing)?|telegram)\b|\bsend (?:it|them|this|that|these|those|to telegram)\b|\bpack (?:it|them|and send)\b", t) \
+            and not re.search(r"\bpack of\b|\bset of\b", t):
+        # a continuation of the open batch, never a new subject: "create video and export" holds "create" but means the batch in focus.
+        # Video words animate it; export words pack and send it (n_export animates first when nothing moves yet).
+        if re.search(r"\bexport(?:s|ed|ing)?\b|\btelegram\b|\bsend (?:it|them|this|that|these|those|to telegram)\b|\bpack (?:it|them|and send)\b", t):
+            intents, conf = ["EXPORT"], 0.9
+        else:
+            intents, conf = ["ANIMATE"], 0.9
     elif has_generation and (refs or concept_edit) and re.search(r"\b(make|redo|regenerate|change|fix|replace|swap|improve|less|more|bigger|smaller|happier|sadder|funnier|cuter|different|give|put|add|remove|let|get|turn)\b", t):
         intents, conf = ["EDIT_STICKERS"], 0.8
         if re.search(rf"\b{POS}\b|\b{NEG}\b", t) and re.search(r"\b(i|but)\b", t) and re.search(r"\b(like|love|hate|dislike|keep)\b", t):

@@ -134,7 +134,7 @@ class Agent:
         from langgraph.graph import END, StateGraph
         g = StateGraph(State)
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "particles": self.n_particles, "editroute": self.n_editroute, "unsupported": self.n_unsupported, "refine": self.n_refine, "another": self.n_another,
-                 "edit": self.n_edit, "undo": self.n_undo, "animate": self.n_animate, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
+                  "edit": self.n_edit, "undo": self.n_undo, "animate": self.n_animate, "export": self.n_export, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
                  "smalltalk": self.n_smalltalk, "profile": self.n_profile, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
         for k, fn in nodes.items():
@@ -276,7 +276,7 @@ class Agent:
                 got = self.brain.classify(t.text, self._route_context(sess, asked), focus=self.store.focus_context(sess))
                 if got:
                     t.intents, t.conf = got, 0.7
-            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "PROFILE", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO"):         # a question ("can you rotate him?") is an ASK until the rules read it
+            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "PROFILE", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO", "EXPORT"):         # a question ("can you rotate him?") is an ASK until the rules read it
                 if editroute.unsupported(t.text):
                     t.intents, t.conf = ["UNSUPPORTED"], 0.9
                 else:
@@ -289,13 +289,13 @@ class Agent:
                 refine_it = self._wants_refine(t, has_gen)
                 if refine_it:
                     t.intents, t.conf = ["REFINE"], 0.9
-        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "PARTICLES": "particles", "EDIT_ROUTE": "an edit", "UNSUPPORTED": "something I cannot do yet", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "UNDO": "an undo", "ANIMATE": "an animation", "FEEDBACK": "feedback",
+        names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "PARTICLES": "particles", "EDIT_ROUTE": "an edit", "UNSUPPORTED": "something I cannot do yet", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "UNDO": "an undo", "ANIMATE": "an animation", "EXPORT": "an export", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
                  "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "PROFILE": "something about you", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CONFIRM_NEW": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
-                 "EDIT_STICKERS": "edit", "UNDO": "undo", "ANIMATE": "animate", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
+                  "EDIT_STICKERS": "edit", "UNDO": "undo", "ANIMATE": "animate", "EXPORT": "export", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
                  "SMALLTALK": "smalltalk", "PROFILE": "profile", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
@@ -595,16 +595,39 @@ class Agent:
                 r = self.tools.animate(p["generation"], p.get("loop", False))
                 t.generation = p["generation"]
                 t.cards.append({"type": "generation", "generation": p["generation"], "job": r["job"], "subject": p.get("subject", ""), "animating": True})
-                t.reply = f"Animating **{self._nm(t.sess, p['generation'])}**" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". I'll show each one as it's ready."
+                t.reply = f"Animating **{self._nm(t.sess, p['generation'])}**" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". I'll show each one as it's ready." \
+                    + (" Once they're moving, say \"export\" and I'll pack and send them." if p.get("then") == "pack_send" else "")
                 t.trace.end("animation started")
             except ToolError as e:
                 t.reply = f"I couldn't start the animation: {e}"
                 t.trace.end("not started", ok=False)
+        elif p["type"] == "pack_send":
+            t.trace.retitle(f"sending {self._nm(t.sess, p['generation'])} to Telegram")
+            try:
+                pack = self.tools.pack_add(p["generation"], p.get("subject") or self._nm(t.sess, p["generation"]))
+                rep = self.tools.telegram_send(pack["pack_id"])
+            except ToolError as e:
+                t.sess["pending"] = p
+                t.reply = f"I couldn't send it: {e} Nothing was packed."
+                t.chips = [{"label": "Pack and send", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+                t.trace.end("not sent", ok=False)
+                return {}
+            links = " ".join(s["link"] for s in rep.get("sets", []))
+            t.reply = f"Done: **{self._nm(t.sess, p['generation'])}** is on Telegram. {links}".strip()
+            t.trace.end("sent")
         elif p["type"] == "names":                          # the same consent, asked because the person wanted names looked at
+            if self._ready_now(p["generation"]) == []:      # nothing cut yet: no vision call, one calm sentence, the pending goes
+                t.reply = f"{self._nm(t.sess, p['generation'])} has no finished stickers yet — I'll look at them once they're cut."
+                t.trace.end("nothing to look at yet")
+                return {}
             t.sess["settings"]["allow_vlm"] = True
             t.trace.retitle(f"looking at {self._nm(t.sess, p['generation'])}")
             self._run_names(t, p["generation"])
         elif p["type"] == "describe":                       # "Allow AI vision of generated media?" answered yes: asked once, remembered in the session
+            if self._ready_now(p["generation"]) == []:
+                t.reply = f"{self._nm(t.sess, p['generation'])} has no finished stickers yet — I'll look at them once they're cut."
+                t.trace.end("nothing to look at yet")
+                return {}
             t.sess["settings"]["allow_vlm"] = True
             t.trace.retitle(f"looking at {self._nm(t.sess, p['generation'])}")
             self._run_describe(t, p["generation"], p.get("only") or [])
@@ -1435,6 +1458,52 @@ class Agent:
             t.sess["pending"] = spec
             t.reply = f"I'll animate the {len(ready)} stickers of **{self._nm(t.sess, gen)}** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?"
             t.chips = [{"label": "Animate", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end("ready")
+        else:
+            t.sess["pending"] = spec
+            self.n_confirm({"turn": _with_pending(t, spec)})
+        return {}
+
+    def _ready_now(self, gen: str) -> list | None:
+        """ready_indexes, or None when the batch cannot be read (the caller then runs the existing path, which says so in words)."""
+        try:
+            return self.tools.ready_indexes(gen)
+        except Exception:
+            return None
+
+    def n_export(self, state: State) -> dict:
+        """Pack the open batch and send it to Telegram. Nothing moves yet: the animation goes first (its own go-ahead); a batch that already
+        moves is packed and sent after one confirmation, because sending is outward."""
+        t: Turn = state["turn"]
+        gen = t.res.generation or (t.sess.get("focus") or {}).get("generation") or (self.store.latest_pass(t.sess, with_generation=True) or {}).get("generation")
+        if not gen:
+            t.reply = "There is nothing to send yet. Let's make some stickers first."
+            t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
+            return {}
+        name = self._nm(t.sess, gen)
+        subj = self.store.subject_for_generation(t.sess, gen)
+        subject = (subj or {}).get("name") or ""
+        t.trace.retitle(f"sending {name} to Telegram")
+        try:
+            animated = [s["index"] for s in self.tools.generation(gen)["stickers"] if s.get("anim_status") == "READY"]
+        except ToolError:
+            animated = []
+        if not animated:
+            spec = {"type": "animate", "generation": gen, "subject": subject, "loop": False, "then": "pack_send"}
+            if self.tools.live() and t.sess["settings"].get("ask_before_spending", True):
+                t.sess["pending"] = spec
+                t.reply = f"I'll animate **{name}** first (the price is shown when it is sent), then pack it and send it to Telegram. Go ahead?"
+                t.chips = [{"label": "Animate", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+                t.trace.end("ready")
+            else:
+                t.sess["pending"] = spec
+                self.n_confirm({"turn": _with_pending(t, spec)})
+            return {}
+        spec = {"type": "pack_send", "generation": gen, "subject": subject}
+        if self.tools.live() and t.sess["settings"].get("ask_before_spending", True):
+            t.sess["pending"] = spec
+            t.reply = f"Pack **{name}** ({len(animated)} animated) and send it to Telegram?"
+            t.chips = [{"label": "Pack and send", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end("ready")
         else:
             t.sess["pending"] = spec

@@ -120,6 +120,15 @@ class IntentTests(unittest.TestCase):
         self.assertEqual(self.intent("this is bad", gen=False), ["AMBIGUOUS"])            # with nothing on screen it is no opinion, and a statement is never a subject to draw: I ask
         self.assertEqual(self.intent("make it not blurry"), ["NEW"])                      # a request keeps being a request
 
+    def test_video_and_export_continue_the_open_batch(self):
+        self.assertEqual(self.intent("create video and export"), ["EXPORT"])               # holds "create" but means the batch in focus, never a subject called "video and export"
+        for text in ("export it", "export", "send it to telegram", "send to telegram", "pack it and send"):
+            self.assertEqual(self.intent(text), ["EXPORT"], text)
+        for text in ("make a video", "video it", "create a video"):
+            self.assertEqual(self.intent(text), ["ANIMATE"], text)
+        self.assertEqual(self.intent("create video and export", gen=False), ["NEW"])      # with nothing open it is a request like any other
+        self.assertEqual(self.intent("make me a dog pack"), ["NEW"])                      # "pack" inside a new request stays a request
+
 
 class FollowUpHelpers(unittest.TestCase):
     def test_polarity_of_a_whole_message(self):
