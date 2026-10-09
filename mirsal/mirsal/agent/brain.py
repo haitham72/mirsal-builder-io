@@ -62,6 +62,9 @@ def target() -> dict:
     llm._load_dotenv()
     from ..runtime import envfile
     want = envfile.choice("MIRSAL_AGENT_PROVIDER")
+    f = llm.forced()
+    if f and want != "none":                                    # this chat pinned its AI model (a Telegram chat: gpt-4o)
+        return {"provider": "openai" if os.environ.get(llm.KEY_VAR) else "none", "model": f["model"]}
     if want == "auto":
         want = llm.resolve()                                    # the person's choice (auto / local / cloud) in one place, the same for the plan, the chat and the vision judge
     model = os.environ.get("MIRSAL_AGENT_MODEL") or (llm.local_model() if want == "local" else os.environ.get("MIRSAL_LLM_MODEL", llm.DEFAULT_MODEL))

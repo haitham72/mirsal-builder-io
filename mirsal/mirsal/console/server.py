@@ -524,21 +524,38 @@ class Console:
             raise pl.PipelineError("a request with this Idempotency-Key is still running", 409)
 
     # ---------- the agentic chat (Phase 4): sessions with memory, the graph over this same engine ----------
-    def chat_parts(self, user: dict | None = None):
-        """The chat of one user: an owner sees every chat, a member only their own (a stranger's chat is a 404)."""
+    def chat_parts(self, user: dict | None = None, sid: str | None = None):
+        """The chat of one user: an owner sees every chat, a member only their own (a stranger's chat is a 404). With `sid`, the tools use that session's own
+        models (`settings.models` {image, video, ai}: a Telegram chat's /model) instead of the server's defaults."""
         from ..agent import graph as ag
         from ..agent.brain import Brain
         from ..agent.memory import SessionStore
         from ..agent.tools import ConsoleTools
         user = user or LOCAL
         store = SessionStore(self.out, user=user["id"], see_all=user.get("role") == "owner")
-        tools = ConsoleTools(self, user)
+        tools = ConsoleTools(self, user, models=self.chat_models(store, sid))
         return store, tools, ag.Agent(store, tools, Brain(out=self.out)), ag
+
+    @staticmethod
+    def chat_models(store, sid: str | None) -> dict:
+        if not sid:
+            return {}
+        try:
+            return dict((store.load(sid).get("settings") or {}).get("models") or {})
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _pin_ai(ctx, models: dict) -> None:
+        """A session that chose its AI model runs its turn (and its creator) on it (services/llm.FORCE)."""
+        if models.get("ai"):
+            from ..services import llm as _llm
+            ctx.run(_llm.FORCE.set, {"model": str(models["ai"])})
 
     def chat_send(self, sid: str, body: dict, user: dict | None = None) -> dict:
         """Start one turn in the background and answer at once: the page polls the session and sees the steps as they are written."""
         user = user or LOCAL
-        store, tools, agent, _ = self.chat_parts(user)
+        store, tools, agent, _ = self.chat_parts(user, sid)
         text = str(body.get("text") or "")
         action = body.get("action") if isinstance(body.get("action"), dict) else None
         if not text.strip() and not action:
@@ -546,6 +563,7 @@ class Console:
         turn = agent.prepare(sid, text, [str(x) for x in (body.get("selected") or [])], action)      # 409 when the last message is still running
         ctx = contextvars.copy_context()                    # the turn runs in a thread: it must act as this user (batches it starts are theirs)
         ctx.run(pl.OWNER.set, user["id"])
+        self._pin_ai(ctx, tools.models)
         def run_turn():
             agent.execute(turn)
             self.drive_creator(user, sid)                 # a turn that started (or answered) a creator run hands it to the driver
@@ -561,9 +579,10 @@ class Console:
         if sid in drivers:
             return
         drivers.add(sid)
-        _, _, agent, _ = self.chat_parts(user)
+        _, tools, agent, _ = self.chat_parts(user, sid)
         ctx = contextvars.copy_context()
         ctx.run(pl.OWNER.set, user["id"])
+        self._pin_ai(ctx, tools.models)
 
         def loop():
             try:
@@ -598,9 +617,10 @@ class Console:
                 if not gid or gid in named or (sess["id"], gid) in busy or not p.get("ready"):
                     continue
                 busy.add((sess["id"], gid))
-                _, _, agent, _ = self.chat_parts(user)
+                _, tools_, agent, _ = self.chat_parts(user, sess["id"])
                 ctx = contextvars.copy_context()
                 ctx.run(pl.OWNER.set, user["id"])
+                self._pin_ai(ctx, tools_.models)
 
                 def run(agent=agent, sid=sess["id"], gid=gid):
                     try:

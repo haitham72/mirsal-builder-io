@@ -15,6 +15,7 @@ multimodal (the judge, the annotator): PNG / JPEG / WEBP bytes are sent as base6
 from __future__ import annotations
 
 import base64
+import contextvars
 import json
 import os
 import re
@@ -341,6 +342,16 @@ def note_failure(prov: str) -> None:
     _sticky.update(prov=other if _usable(other) else prov, until=time.time() + STICKY_S)
 
 
+FORCE: contextvars.ContextVar = contextvars.ContextVar("mirsal_llm_force", default=None)
+"""A cloud model pinned for the code running in this context ({"model": "gpt-4o"}): a chat whose session chose its AI model (the Telegram chat starts on gpt-4o).
+It never overrides MIRSAL_LLM_PROVIDER=none, and without an OpenAI key the pin answers `none` (it never silently uses another model)."""
+
+
+def forced() -> dict | None:
+    f = FORCE.get()
+    return f if isinstance(f, dict) and f.get("model") else None
+
+
 def provider() -> str:
     """The backend `complete` will use: openai | local | none."""
     _load_dotenv()
@@ -348,6 +359,8 @@ def provider() -> str:
     p = envfile.choice("MIRSAL_LLM_PROVIDER")
     if p == "none":                            # switched off: no model of any kind is asked (the test suite pins this, tests/__init__.py)
         return "none"
+    if forced():
+        return "openai" if os.environ.get(KEY_VAR) else "none"
     if p == "local":
         return "local"
     if p == "openai":
@@ -363,7 +376,7 @@ def model() -> str:
     _load_dotenv()
     if provider() == "local":
         return local_model()
-    return os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL)
+    return (forced() or {}).get("model") or os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL)
 
 
 def status(probe: bool = True) -> dict:
@@ -485,7 +498,7 @@ def _complete_on(prov: str, system: str, user: str, *, max_tokens: int = 2500, t
     key = os.environ.get(KEY_VAR) if prov == "openai" else None
     if prov == "openai" and not key:
         raise LLMError(f"No AI key: add {KEY_VAR} to mirsal/.env (or the environment).")
-    m = model_ or (local_model() if prov == "local" else os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL))
+    m = model_ or (local_model() if prov == "local" else (forced() or {}).get("model") or os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL))
     url = (base_url.rstrip("/") + "/chat/completions") if base_url else (API if prov == "openai" else local_url() + "/chat/completions")
     content = user
     if images:

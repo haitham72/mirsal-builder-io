@@ -20,10 +20,11 @@ class ToolError(Exception):
 
 
 class ConsoleTools:
-    def __init__(self, c, user: dict | None = None):
+    def __init__(self, c, user: dict | None = None, models: dict | None = None):
         self.c = c
         self.out = Path(c.out)
         self.user = user or {"id": "local", "role": "owner", "can_spend": True}
+        self.models = models or {}          # the session's own picks {image, video, ai} (a Telegram chat: /model); none = the server's defaults
 
     @property
     def member(self) -> bool:
@@ -94,14 +95,14 @@ class ConsoleTools:
         memo = getattr(self.c, "_estimates", None)
         if memo is None:
             memo = self.c._estimates = {}
-        hit = memo.get(kind)
+        hit = memo.get(kind + str(self.models.get(kind) or ""))
         if hit and time.time() - hit[0] < 60:                    # the card polls every second; a price does not change that fast
             return hit[1]
         try:
-            v = self.c.live("cost", {"kind": kind}).get("credits")
+            v = self.c.live("cost", {"kind": kind, **({"model": self.models[kind]} if self.models.get(kind) else {})}).get("credits")
         except Exception:
             return None
-        memo[kind] = (time.time(), v)
+        memo[kind + str(self.models.get(kind) or "")] = (time.time(), v)
         return v
 
     def generation(self, gid: str) -> dict:
@@ -200,7 +201,7 @@ class ConsoleTools:
             self._see(parent)
         try:
             if self.live() and not match:
-                body = {"prompt": prompt, "grid": grid, "style_id": style_id, "ai": ai, "refs": refs or []}
+                body = {"prompt": prompt, "grid": grid, "style_id": style_id, "ai": ai, "refs": refs or [], **({"model": self.models["image"]} if self.models.get("image") else {})}
                 if ref_clause and refs:
                     body["ref_clause"] = ref_clause                 # what the attached picture is for (editroute.REF_CLAUSES), instead of the default "change only the expression and the pose"
                 if outline is not None:
@@ -325,7 +326,8 @@ class ConsoleTools:
         self._see(gid)
         self._may_spend()
         try:
-            r = self.c.live("video", {"generation": int(gid[1:]), "loop": loop}, creator_run=creator_run, on_job=on_job)
+            r = self.c.live("video", {"generation": int(gid[1:]), "loop": loop, **({"model": self.models["video"]} if self.models.get("video") else {})},
+                            creator_run=creator_run, on_job=on_job)
             return {"job": r["job"], "estimate": r.get("estimate")}
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)

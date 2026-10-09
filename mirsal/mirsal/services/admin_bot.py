@@ -96,19 +96,27 @@ def notify_support(out: Path, text: str) -> bool:
 
 # ---------- the loop: Haitham's taps and commands ----------
 def handle_update(c, upd: dict) -> None:
-    """One update from getUpdates. Only Haitham's user id is obeyed."""
+    """One update from getUpdates. The admin cards and commands (/people, /user, a tap on a request or person card) obey only Haitham's user id; every
+    other message and every chat button, from anyone, is the AI chat (services/tg_chat.py)."""
     cfg = _cfg(c.out)
     if not cfg:
         return
+    from . import tg_chat
     cq = upd.get("callback_query")
     msg = upd.get("message")
     sender = str(((cq or msg or {}).get("from") or {}).get("id") or "")
-    if sender != str(cfg["user_id"]):
-        return
+    admin = sender == str(cfg["user_id"])
     if cq:
-        _on_tap(c, cfg, cq)
-    elif msg and str(msg.get("text") or "").startswith("/"):
-        _on_command(c, cfg, str(msg["text"]).strip())
+        if str(cq.get("data") or "").startswith("c:"):
+            tg_chat.on_tap(c, cfg, cq)
+        elif admin:
+            _on_tap(c, cfg, cq)
+    elif msg:
+        text = str(msg.get("text") or "").strip()
+        if admin and text.split(" ")[0].split("@")[0] in ("/people", "/user"):
+            _on_command(c, cfg, text)
+        elif (msg.get("chat") or {}).get("type", "private") == "private":     # the chat answers people one to one, never in a group
+            tg_chat.on_message(c, cfg, msg)
 
 
 def _on_tap(c, cfg: dict, cq: dict) -> None:
@@ -171,7 +179,7 @@ def _on_command(c, cfg: dict, text: str) -> None:
               _kb([[("Make admin", f"u:{p['id']}:admin"), ("Make member", f"u:{p['id']}:member")],
                    [("Disable", f"u:{p['id']}:disable"), ("Enable", f"u:{p['id']}:enable"), ("New password", f"u:{p['id']}:password")]]))
     else:
-        _send(c.out, "/people: what is waiting · /user name@nadi.ae: one person")
+        _send(c.out, "/people: what is waiting · /user name@nadi.ae: one person · anything else: the AI chat")
 
 
 def start(c) -> None:
