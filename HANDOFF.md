@@ -6,23 +6,22 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-Session of 2026-10-08 (second), all work committed and pushed. Nothing half-written in the files; the next UI step is planned, not started.
+Session of 2026-10-09, all work committed and pushed. Nothing half-written in the files.
 
-**Built this session:** claim ledger core (`generation/claims.py`, `012_pack_claims.sql`, applied locally); Grok Imagine 1.5 Lite in the video models;
-regenerate video inside a generation (`gates.redo_video`, `SUPERSEDED`, `cut_sheet`, `pick_video`, `remove_video`); regenerate sheet = a new generation of the
-batch (family) with `groups.family` / `groups.pick`; Next batch (`tasks.next_batch`, `POST /api/plan/next`, `actions.BODY_SENTENCES`); `sheet_model` and
-`video_sheets[].model` recorded; the Studio's footers are one Regenerate with the model folded as {current} -> {next}; "Create more" is "Next batch";
-the Prepared-sheets chip row is gone. An in-place sheet resheet was built and then removed the same day (Haitham chose generations in a row instead).
+**Built this session:** the animations row in the Video view (pick / remove / Report on `G###/A#`); Import inside a batch (picture = the batch's next
+generation, video = the main generation's next animation, the sheet it came from read from its first frame); Export to collection (the AddCollection API,
+`services/collection.py`). Not yet looked at in a browser by Haitham. Restart `serve --lan` before looking.
 
-**Also built (last commit):** the Studio's Batch k header with the generations row (★ main, Make main / Delete / Report; Delete keeps the batch one family), the one frame (Raw · Keyed · To send · Video) with one control row (model drop-down, settings, Loop, Generate/Regenerate, Prompt toggle, Gap only on To send). Not yet looked at in a browser by Haitham.
-
-**Next:** `plan.md` "Next" step 2 (the animations row in the Video view: pick / remove / report; the routes exist), then step 3 (Import inside a batch).
+**Next:** `plan.md` "Next" (Phase 2: the claim ledger behind Next batch).
 
 **Still open:**
-1. `tests.test_batches.RemoveRoutes` Windows file-lock flake in teardown (pre-existing).
-2. Nothing was tried against real Higgsfield; the first real regenerate costs the price on its button. Restart `serve --lan` before looking.
-3. `mirsal/mirsal/console/particles.js` and `mirsal/tests/js/particles.test.js` have uncommitted edits from before this session (not mine; left untouched).
-4. Paid proof (plan Phase 6) needs Haitham's yes; Import-pack browser check never happened; `batch_import_inputs.py` at repo root does not run.
+1. The AddCollection credential that was pasted in `docs/Api/AddCollection-API .md` is in git history (commit dd17f61, pushed): rotate that password,
+   then put the new one in `mirsal/.env` as `MIRSAL_COLLECTION_API_CREDENTIALS`. Export to collection was never tried against the real CMS.
+2. `tests.test_batches.RemoveRoutes` Windows file-lock flake in teardown (pre-existing).
+3. Nothing was tried against real Higgsfield; the first real regenerate costs the price on its button.
+4. Paid proof (plan Phase 6) needs Haitham's yes; Import-pack browser check never happened.
+5. `batch_import_inputs.py` at repo root does not run (calls `pl.Config.default()` / `pl.Pace.default()`, which do not exist, prints characters cp1252
+   cannot encode, ignores its arguments and would import a folder twice). Do not run it against the real `out/` until it is fixed.
 
-**Resume:** `plan.md` "Next" step 1. Windows checkout, venv `mirsal/.venv`, branch `main`. Tests that cover this: `tests.test_live` (the regenerate, family,
-next-batch and animation-row tests), `tests/js/prompt_tab.test.js`.
+**Resume:** `plan.md`. Windows checkout, venv `mirsal/.venv`, branch `main`. Tests that cover this session: `tests.test_imports`, `tests.test_collection`,
+`tests/js/anim_row.test.js`.
