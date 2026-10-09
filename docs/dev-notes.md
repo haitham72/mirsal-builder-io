@@ -77,6 +77,11 @@ venv/bin/python -m mirsal serve --stdlib                      # the old stdlib s
 
 The tests pin `MIRSAL_NO_REAL_CLI=1` and `MIRSAL_LLM_PROVIDER` / `MIRSAL_AGENT_PROVIDER` / `MIRSAL_VISION_PROVIDER` = `none`, `MIRSAL_DB_WRITE=0`, `MIRSAL_TRACE=none` and LangSmith off (`tests/__init__.py`): no test reaches Higgsfield, OpenAI, LM Studio, the real Postgres or LangSmith; a test that needs an answer passes a fake. The node tests (`tests/test_js.py`) fail without node (`MIRSAL_SKIP_JS=1` skips them on purpose).
 
+**The server's terminal** (`runtime/activity.py`) prints one short line per thing that happened, never per request: a paid job generating /
+received (model, credits, seconds) / failed, a batch's stickers or animations cut, added to a pack, any step that failed (`ERROR`), an import, an Export
+to collection (ok or refused with the reason), a Telegram send. `MIRSAL_ACTIVITY=0` turns it off (the test suite does). `MIRSAL_ACCESS_LOG=1` is a
+different thing: one JSON line per request (very verbose, the Studio polls every second); leave it off unless you are debugging requests.
+
 ## Looking at the app in a browser
 
 Playwright is installed in `mirsal/venv` and a headless Chromium works (Claude walked P1-P13 and the particle screens this way on 2026-10-03; the earlier note that a browser could not be opened is obsolete). Never use Haitham's live data or server (:8770). Recipe:

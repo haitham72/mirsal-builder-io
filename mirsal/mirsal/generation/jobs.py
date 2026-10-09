@@ -106,8 +106,13 @@ def _label(out: Path, kind: str, task: str | None, generation: str | None, reque
 
 
 def _write(p: Path, job: dict) -> dict:
-    from ..runtime import atomic
+    from ..runtime import activity, atomic
+    try:
+        old = json.loads(p.read_text(encoding="utf-8")).get("status") if p.is_file() else None
+    except (OSError, ValueError):
+        old = None
     atomic.write_text(p, json.dumps(job, indent=2, ensure_ascii=False))
+    activity.job(old, job)            # one line in the terminal when the status changed: generating / received / failed
     try:  # Phase 3A write-through: a claimed job is a provider task row; best effort, never raises
         from ..store import sync
         sync.sync_job(p.parent.parent, job)

@@ -1532,7 +1532,14 @@ def make_handler(c: Console):
                 self._json(200, lib.restore_pack(parts[2]))
             elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)
                 body = self._body()
-                self._json(200, telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once")))
+                from ..runtime import activity
+                try:
+                    sent = telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once"))
+                except Exception as e:
+                    activity.say(f"Telegram send of pack {parts[2]} failed: {e}", error=True)
+                    raise
+                activity.say(f"sent pack {parts[2]} to Telegram" + (f" ({sent.get('name') or sent.get('url') or ''})" if isinstance(sent, dict) else ""))
+                self._json(200, sent)
             elif len(parts) == 4 and parts[3] == "stickers":
                 b = self._body()
                 g = b.get("from_generation") or {}

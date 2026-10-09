@@ -164,9 +164,13 @@ def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: 
     try:
         r = post(title, desc, items)
     except CollectionError as e:
+        from ..runtime import activity
+        activity.say(f'export "{title}" ({what}) failed: {e}', error=True)
         _log(out, {**row, "ok": False, "error": str(e)})
         raise
     res = r["response"]
     err = None if r["ok"] else reason(r["status"], res)
+    from ..runtime import activity
+    activity.say(f'exported "{title}" ({what}): {len(items)} stickers' if r["ok"] else f'export "{title}" ({what}) refused {r["status"]}: {err}', error=not r["ok"])
     _log(out, {**row, "ok": r["ok"], "status": r["status"], **({"error": err, "response": res if isinstance(res, dict) else str(res)[:1000]} if err else {})})
     return {"ok": r["ok"], "status": r["status"], "collection": title, "count": len(items), "response": res, **({"error": err} if err else {})}

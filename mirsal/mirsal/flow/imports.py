@@ -480,6 +480,8 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "") 
                 c.lock.release()
         threading.Thread(target=ctx.run, args=(run,), daemon=True).start()
         handed_off = True
+        from ..runtime import activity
+        activity.say(f"imported {Path(name).name} into {fam['root']}: {said}")
         return 202, {"id": gid, "kind": kind, "import": row["id"], "message": said, **info}
     except Exception as e:
         if row:
@@ -623,6 +625,8 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                     c.lock.release()
             threading.Thread(target=ctx.run, args=(run,), daemon=True).start()
             handed_off = True
+            from ..runtime import activity
+            activity.say(f"imported {Path(name).name} as G{gid:03d} ({'video' if is_video else 'sheet'})")
             return 202, {"id": gid, "kind": "video" if is_video else "sheet", "import": row["id"], **({"sheet": aid} if is_video and not alone else {"subject": subject})}
         except Exception as e:
             if row:

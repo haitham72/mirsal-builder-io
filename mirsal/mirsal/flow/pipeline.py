@@ -274,6 +274,11 @@ def emit(out: Path, gid: int, stage: str, status: str, ms: int = 0, detail=None,
     line = json.dumps(ev, ensure_ascii=False)
     with open(gen_dir(out, gid) / "events.jsonl", "a", encoding="utf-8") as f:
         f.write(line + "\n")
+    try:                                       # one line in the terminal for a result or a failure (runtime/activity.py)
+        from ..runtime import activity as _activity
+        _activity.event(gid, ev)
+    except Exception:
+        pass
     try:                                       # the same event on the Redis stream (Phase 5 names); events.jsonl stays the record
         from ..runtime import events as _events
         _events.publish(out, gid, ev)
