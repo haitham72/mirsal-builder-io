@@ -35,20 +35,31 @@ def settings_of(sess: dict) -> dict:
     return c
 
 
-def new_run(*, prompt: str, subject: str, grid: str, style_id: str, scope: str, bypass: bool, estimate: float | None, video_estimate: float | None) -> dict:
+def new_run(*, prompt: str, subject: str, grid: str, style_id: str, scope: str, bypass: bool, estimate: float | None, video_estimate: float | None,
+            end: str = "export") -> dict:
+    """`end` (the chat's stage, agent/stages.py): 'export' runs to the Telegram send; 'animation' ends after the animations are approved (G4), with no
+    pack and no Telegram."""
     total = round((estimate or 0) + ((video_estimate or 0) if scope == "video" else 0), 2)
-    return {"id": f"C{int(time.time() * 1000) % 10**9}", "prompt": prompt, "subject": subject, "grid": grid, "style_id": style_id, "scope": scope, "bypass": bool(bypass),
+    end = "animation" if end == "animation" and scope == "video" else "export"
+    return {"id": f"C{int(time.time() * 1000) % 10**9}", "prompt": prompt, "subject": subject, "grid": grid, "style_id": style_id, "scope": scope, "bypass": bool(bypass), "end": end,
             "estimate": estimate, "video_estimate": video_estimate if scope == "video" else None, "approved_credits": total or None,
             "step": "sheet", "status": "running", "generation": None, "job": None, "video_job": None, "pack_id": None, "skip": [], "waiting": None, "stop": None,
             "telegram": None, "log": [], "started": round(time.time(), 3), "updated": round(time.time(), 3)}
 
 
+def steps_of(run: dict) -> list:
+    """The steps this run goes through: a run that ends at the animation has no pack and no Telegram step."""
+    steps = STEPS[run["scope"]]
+    return [s for s in steps if s[0] not in ("pack", "telegram")] if run.get("end") == "animation" else steps
+
+
 def labels(run: dict) -> list:
     """[{id, label, state: done | now | todo}] for the card."""
-    order = [k for k, _ in STEPS[run["scope"]]]
+    steps = steps_of(run)
+    order = [k for k, _ in steps]
     cur = order.index(run["step"]) if run["step"] in order else len(order)
     done = run["status"] == "done"
-    return [{"id": k, "label": lab, "state": "done" if done or i < cur else "now" if i == cur else "todo"} for i, (k, lab) in enumerate(STEPS[run["scope"]])]
+    return [{"id": k, "label": lab, "state": "done" if done or i < cur else "now" if i == cur else "todo"} for i, (k, lab) in enumerate(steps)]
 
 
 def _log(run: dict, text: str) -> None:
@@ -254,6 +265,10 @@ def _step(tools, run, vision_allowed, telegram_ready, checkpoint=None):
             tools.review(gid, "APPROVE", ready, NOTE, gate="anim")
         return _go(run, "pack", f"approved {len(ready)} animations")
     if step == "pack":
+        if run.get("end") == "animation":                          # the chat's stage is Animation: the run ends here, nothing is packed or sent
+            run.update(status="done", step="done", updated=round(time.time(), 3))
+            _log(run, "done: the animations are approved (the stage ends at the animation; no pack, no Telegram)")
+            return
         r = tools.pack_add(gid, run["subject"])
         run["pack_id"] = r["pack_id"]
         return _go(run, "telegram", f"{r['added']} stickers are in the pack '{run['subject']}'")

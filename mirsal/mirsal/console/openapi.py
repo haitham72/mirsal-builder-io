@@ -36,7 +36,9 @@ def nullable(x):
 
 SCHEMAS = {
     "Error": obj({"error": STR}, ["error"]),
-    "Settings": obj({"grid": {"type": "string", "enum": ["3x3", "2x2"]}, "style_id": STR, "ask_before_spending": BOOL, "ai": BOOL}),
+    "Settings": obj({"grid": {"type": "string", "enum": ["3x3", "2x2"]}, "style_id": STR, "ask_before_spending": BOOL, "ai": BOOL, "allow_vlm": nullable(BOOL),
+                     "stage": {"type": "string", "enum": ["prompt", "emojis", "animation", "export"], "description": "How far a new request goes (agent/stages.py): prompt = the plan only, emojis = sheet and stickers (default), animation = + the animations (ends at G4), export = + pack and Telegram"},
+                     "creator": obj({"on": BOOL, "scope": {"type": "string", "enum": ["images", "video"]}, "bypass": BOOL})}),
     "Step": obj({"kind": {"type": "string", "enum": ["task", "step", "note", "final"]}, "label": STR, "detail": nullable(obj({"lines": arr(STR)}, extra=True)),
                  "status": {"type": "string", "enum": ["running", "done", "error"]}, "ts": NUM}, ["kind", "label"]),
     "Sticker": obj({"id": {"type": "string", "description": "G012/S3"}, "index": INT, "key": STR, "name": nullable(STR), "emoji": nullable(arr(STR)),
@@ -93,7 +95,7 @@ ROUTES = [
     ("GET", "/api/chat/sessions/{id}", "Chat", "A whole chat for display: messages with steps and cards (generation cards carry their live stickers), memory summary", None, ref("Session"), 200),
     ("GET", "/api/chat/sessions/{id}/stream", "Chat", "SSE of the turn in progress (native FastAPI): `event: turn` {working, count, message} each time the last message changes, then `event: done` {working: false, count}; retry 3000, a comment every 15 s, ends after 10 minutes. The same access as GET /api/chat/sessions/{id} (401 / 403 / 404 as JSON before any event)", None, obj({"working": BOOL, "count": INT, "message": OBJ}), 200),
     ("POST", "/api/chat/sessions/{id}/messages", "Chat", "Send a message or a button action; the turn runs in the background (409 while the last one runs). Idempotency-Key supported", ref("ChatSend"), ref("Accepted"), 202),
-    ("POST", "/api/chat/sessions/{id}/settings", "Chat", "Grid, Ask-before-spending and style (unknown keys are ignored; an unknown style is a 400)", ref("Settings"), obj({"settings": ref("Settings")}), 200),
+    ("POST", "/api/chat/sessions/{id}/settings", "Chat", "Grid, Ask-before-spending, style, AI vision, the stage (prompt | emojis | animation | export) and the creator's bypass; no chat turn. Unknown keys are ignored; an unknown style or stage is a 400", ref("Settings"), obj({"settings": ref("Settings")}), 200),
     ("POST", "/api/chat/sessions/{id}/delete", "Chat", "Delete a chat (its stickers stay)", None, obj({"deleted": STR}), 200),
     # --- particle effects (docs/effects.md)
     ("GET", "/api/packs/{id}/stickers/{sid}/particle-preview", "Particles", "Free Echo reaction for this sticker: newest own linked set, persisted motion and sizing. Returns {set, motion, url, params, preset} or {set:null,url:null}; no unrelated-set fallback. Members receive the empty answer", None, OBJ, 200),

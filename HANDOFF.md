@@ -6,10 +6,6 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-`plan.md` Steps 1–3 handed to another agent (Haitham, 2026-10-09) — the paste-ready prompt is in the chat. Step 0 built and committed (`c7835b6` + `022f57a`).
+`plan.md` Steps 2–3 (Steps 0 and 1 built and committed). Step 2 next: the stage pill in the web chat bar + `/stage` and the fifth `/model` row in Telegram.
 
-Step 1 (next): `settings.stage` + `agent/stages.py` + creator `end`. Reads done, no Step 1 code written yet. Resume: create `mirsal/mirsal/agent/stages.py` (`of`, `run_spec`, pure); `memory.py` `DEFAULT_SETTINGS` + `summary_structured`; `console/server.py` settings route validates `stage`; `graph.py` `n_new` branches (prompt = plan-only pending, animation/export = `_creator_plan` with `end`), `_creator_plan(end)` reply/chips, `_start_creator` passes `end`, `_creator_say` done-text for the animation end; `creator.py` `new_run(end)` + pack-step intercept when `end == "animation"`; `tg_chat.py` `session_of` defaults `stage: emojis`, `_run_part` done-label; `openapi.py` Settings; new `mirsal/tests/test_chat_stage.py` + stage cases in `mirsal/tests/test_agent_server.py`.
-
-Still unknown: none on Step 0 (its 6 new tests + resolver tests + 146 agent-area tests green). `mirsal test area agent/graph` has 3 failures, all unrelated and 2 verified pre-existing via stash (video-prompt wording x2, history-card `KeyError: 'G002'` x1).
-
-Not mine, do not commit: the AddCollection URL change (`docs/Api/`, `mirsal/.env.example`, `services/collection.py`) and `mirsal/out/` runtime files (library, jobs, model_calls, collection_exports).
+Not mine, do not commit: the AddCollection URL change (`docs/Api/`, `mirsal/.env.example`, `services/collection.py`) and `mirsal/out/` runtime files.

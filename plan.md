@@ -1,6 +1,6 @@
 # plan.md — the chat: a stage selector (Prompt · Emojis · Animation · Export) and the batch follow-up
 
-What an LLM builds next. Step 0 (the continuation fix) is built (`c7835b6`, 2026-10-09); Steps 1–3 are the feature. Read `CLAUDE.md` first (the rules, especially 10, 11, 12, 13), then
+What an LLM builds next. Step 0 (the continuation fix) and Step 1 (the stage as state: `settings.stage`, `agent/stages.py`, creator `end`) are built; Steps 2–3 are left. Read `CLAUDE.md` first (the rules, especially 10, 11, 12, 13), then
 `docs/agent-and-chat.md` (One turn, the agentic creator, "The chat in Telegram"), `docs/engine-and-studio.md` ("Batches, generations, regenerate", the
 multi-batch Generate and "Packs in Earlier batches") and `docs/design.md` (one shell, one token set; read it before touching CSS). Test budget:
 `docs/testing.md` (one narrowest run per change). No paid call in any test (`MIRSAL_NO_REAL_CLI`, `FakeTools` / the fake CLI). Delete each step when it is built;
@@ -34,25 +34,6 @@ picker of Claude / ChatGPT, but with four stages instead of low...max: **Prompt 
 - Regenerate = a new generation of the same batch: `POST /api/live/sheet {from_generation, parent, regen_of}` (`flow/groups.py` family/pick).
 - The Telegram chat (`services/tg_chat.py`): every chip of a reply is an inline button (`_chip_rows`), `/model` is a minimal button card
   (`models_card`). Pack / export of an existing batch works in chat through `n_export` (pending `pack_send`; built in Step 0).
-
-## Step 1 — the stage, as state and contract (engine first, rule 11)
-
-- `settings.stage` in the chat session: `prompt | emojis | animation | export`, default **`emojis`** (today's behaviour). Validate it in the settings
-  route (`POST /api/chat/sessions/{id}/settings {stage}`), add it to `DEFAULT_SETTINGS`, to the session's `summary_structured`, to OpenAPI (`Settings`,
-  chat actions) and `docs/api.md`.
-- Meaning (one place, e.g. `agent/stages.py`, pure, tested):
-  - **prompt** — plan only: the plan card (cells, tags, the sheet prompt) and an "Edit / Generate" follow-up; nothing is spent, no job.
-  - **emojis** — the sheet and the cut stickers (today's default turn); stops at G2 for the person.
-  - **animation** — emojis + the video: the creator path with `scope: video` that ENDS after the animations (G4), no pack, no Telegram.
-  - **export** — the full creator run: animation, pack (Library), then send (D1).
-- Map onto the creator, do not fork it: `stage` animation/export = `creator.on` with `scope: video` and an end step (`animation` stops after
-  "approve the animations", `export` runs to the end); `stage` emojis = creator off (or `scope: images` stopping at G2); `stage` prompt = no
-  `_start_create`. Keep `settings.creator` readable for old sessions (migrate on load: `creator.on` + `scope: video` -> `export`).
-- The stage governs NEW requests; Step 0 continuation keeps working on the open batch; follow-up batches (Step 3) run to the chat's stage.
-- The plan card shows the whole price of the chosen stage before the go-ahead (sheet, + animation when the stage animates), as the creator card
-  does today (rule 13: nothing spends before the click; a price rise > 25% stops and asks, as now).
-- Tests: `tests/test_chat_stage.py` (stage -> what the turn does, on `FakeTools`; migration of old `creator` settings; the settings route
-  validates; the price on the card per stage).
 
 ## Step 2 — the selector in the web chat (screen second)
 

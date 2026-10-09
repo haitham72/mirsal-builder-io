@@ -131,7 +131,7 @@ def _store(c, user: dict):
 
 
 def session_of(c, user: dict, chat_id, fresh: bool = False) -> str:
-    """The chat's session; a new one starts on the Telegram defaults (Glossy, Nano Banana 2, Grok Lite, gpt-4o)."""
+    """The chat's session; a new one starts on the Telegram defaults (Glossy, Nano Banana 2, Grok Lite, gpt-4o, the Emojis stage)."""
     ch = _chat(c.out, chat_id)
     store = _store(c, user)
     if ch.get("sid") and not fresh and ch.get("user") == user["id"]:
@@ -140,7 +140,7 @@ def session_of(c, user: dict, chat_id, fresh: bool = False) -> str:
             return ch["sid"]
         except Exception:
             pass
-    s = store.create("Telegram", {"style_id": DEFAULT_STYLE, "models": dict(DEFAULTS)})
+    s = store.create("Telegram", {"style_id": DEFAULT_STYLE, "models": dict(DEFAULTS), "stage": "emojis"})
     _put_chat(c.out, chat_id, sid=s["id"], user=user["id"])
     return s["id"]
 
@@ -213,8 +213,8 @@ def _chip_rows(c, chat_id, m: dict) -> list:
             act = {"t": "setting", "set": {k: v if v is not None else True}}
         elif ch.get("action"):
             act = {"t": "action", "a": {k: ch[k] for k in ("generation", "indexes") if ch.get(k) is not None} | {"type": ch["action"]}}
-        elif ch.get("editor"):
-            continue                                       # the sticker editor is a browser screen
+        elif ch.get("editor") or ch.get("fill"):
+            continue                                       # the sticker editor is a browser screen; "Edit" fills the web chat's box (here the person just types)
         else:
             act = {"t": "text", "text": ch.get("text") or ch.get("label")}
         rows.append([{"text": str(ch.get("label") or "…")[:60], "callback_data": "c:" + _key(c.out, chat_id, act)}])
@@ -306,7 +306,7 @@ def _run_part(c, chat_id, run: dict) -> bool:
     """A creator run: one message, edited as its steps move. True while it runs."""
     steps = "\n".join(f"{'✅' if s.get('state') == 'done' else '⏳' if s.get('state') in ('running', 'current') else '⛔' if s.get('state') in ('failed', 'stopped') else '▫️'} {s.get('label')}"
                       for s in run.get("steps") or [])
-    st = {"running": "Working…", "waiting": "Waiting for you", "done": "On Telegram", "failed": "Failed"}.get(run.get("status"), "Stopped")
+    st = {"running": "Working…", "waiting": "Waiting for you", "done": "Animated" if run.get("end") == "animation" else "On Telegram", "failed": "Failed"}.get(run.get("status"), "Stopped")
     why = (run.get("stop") or run.get("waiting") or {}).get("why")
     text = f"<b>{html.escape(str(run.get('subject') or 'Pack'))}</b> · {st}\n{html.escape(steps)}" + (f"\n{html.escape(str(why))}" if why else "")
     rows = [[{"text": "Stop", "callback_data": "c:" + _key(c.out, chat_id, {"t": "action", "a": {"type": "creator_stop"}})}]] if run.get("status") == "running" else []

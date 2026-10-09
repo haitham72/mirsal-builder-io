@@ -1790,6 +1790,7 @@ def make_handler(c: Console):
                 return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
             if path.startswith("/api/chat/sessions"):
                 from ..agent.memory import SessionError as _SE
+                from ..agent import stages as _stages
                 cp = path.strip("/").split("/")
                 store = c.chat_parts(self.user)[0]
                 try:
@@ -1810,6 +1811,12 @@ def make_handler(c: Console):
                                     elif ck == "scope" and cv in ("images", "video"):
                                         cur[ck] = cv
                                 sess["settings"]["creator"] = cur
+                                if "stage" not in body and (cur.get("on") or _stages.animates(_stages.of(sess["settings"]))):
+                                    sess["settings"]["stage"] = _stages.of({"creator": cur})  # an old client's creator switches still mean what they meant (agent/stages.py)
+                            elif k == "stage":
+                                if not _stages.valid(v):                              # a stage nobody knows is refused out loud, like an unknown style
+                                    raise pl.PipelineError(f"unknown stage {v!r}: the stages are " + ", ".join(_stages.STAGES), 400)
+                                sess["settings"]["stage"] = v
                             elif k == "allow_vlm" and v in (True, False):
                                 store.set_vision(sess, v)                            # state only: no chat turn; the next turn says it once
                             elif k in allowed and v in allowed[k]:

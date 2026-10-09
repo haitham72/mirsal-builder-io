@@ -80,6 +80,22 @@ class ChatServerTests(unittest.TestCase):
         self.req("POST", f"/api/chat/sessions/{sid}/settings", {"allow_vlm": False})
         self.assertIs(self.req("GET", f"/api/chat/sessions/{sid}")[1]["settings"]["allow_vlm"], False)
 
+    def test_the_stage_is_a_validated_setting_and_makes_no_turn(self):
+        """plan.md Step 1: settings.stage through the real settings route; an unknown stage is a 400; the old creator switches still map onto it."""
+        s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
+        sid = sess["id"]
+        self.assertEqual(sess["settings"]["stage"], "emojis", "D3: a new chat starts on Emojis")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"stage": "animation"})
+        self.assertEqual((s, r["settings"]["stage"]), (200, "animation"))
+        self.assertEqual(len(self.req("GET", f"/api/chat/sessions/{sid}")[1]["messages"]), 0, "no chat turn")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"stage": "everything"})
+        self.assertEqual(s, 400)
+        self.assertEqual(self.req("GET", f"/api/chat/sessions/{sid}")[1]["settings"]["stage"], "animation", "the refused one changed nothing")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"creator": {"on": True, "scope": "video"}})
+        self.assertEqual(r["settings"]["stage"], "export", "an old client's creator on + video reads as Export")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"creator": {"bypass": True}})
+        self.assertEqual((r["settings"]["stage"], r["settings"]["creator"]["bypass"]), ("export", True), "bypass alone leaves the stage alone")
+
     def test_a_full_conversation(self):
         s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
         self.assertEqual(s, 200)

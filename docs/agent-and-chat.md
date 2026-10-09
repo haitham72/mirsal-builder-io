@@ -205,6 +205,27 @@ Restart driving still begins on the next chat poll, after the session lock is av
 - **Tests**: `tests/test_creator.py` (the state machine on `FakeTools`: the happy path, waiting without bypass, a blocked cell, a vision rejection, a blocked sheet and its retry, a failed job, Telegram down, a price rise, a blocked animation, stop, a second request) and
   `tests/test_creator_live.py` (the real server, the fake Higgsfield CLI and the fake Bot API: a request, one click, nine stickers in a pack on "Telegram"). Not yet run against the real Higgsfield or a real bot: it needs Haitham's go and a spare bot (`docs/waiting-for-haitham.md` W6).
 
+## Stages and the batch follow-up (`agent/stages.py`, 2026-10-09)
+
+How far a NEW request goes is the chat's **stage**, `settings.stage`, one of four (Haitham, 2026-10-09). `agent/stages.py` is the one pure table (`of`, `run_spec`, `batch_label`):
+
+| stage | a new request | spends |
+|---|---|---|
+| `prompt` | the plan card only (cells, tags, the sheet prompt) and **Generate** / **Edit**; a pending `create` with `stage: prompt` that never starts by itself, even with "Ask before spending" off | nothing until Generate (which makes the sheet) |
+| `emojis` (default, web and Telegram) | today's turn: the plan, the go-ahead, the sheet, the cut stickers; stops at G2 for the person | the sheet |
+| `animation` | the agentic creator with `scope: video` and `end: animation`: the run ends after "Approve the animations" (G4), no pack, no Telegram; its done message says "export" packs and sends | sheet + animation, both on the plan card |
+| `export` | the full creator run with `end: export`: animation, then the Library pack and the Telegram send (D1; the AddCollection export stays a second button, never automatic) | sheet + animation |
+
+- **It maps onto the creator, never forks it.** `n_new` reads `stages.run_spec(stages.of(settings), bypass)`: `plan_only` -> `_prompt_plan`; `creator` -> `_creator_plan(end=…)`,
+  which shows the whole price (`card.creator = {sheet, video, end}`) and `Create and animate` / `Create and send to Telegram`. `creator.new_run(end)` stores `end` on the run;
+  `creator.steps_of(run)` drops the pack and Telegram steps for `end: animation`, and the `pack` step ends such a run as `done` without packing.
+- **D2:** Animation and Export stop at G2 and G4 for one click unless the creator's bypass ("Approve everything for me", `settings.creator.bypass`) is on, as the creator always did.
+- **Old sessions:** `stages.of` reads a missing stage from the old switches (`creator.on` + `scope: video` -> `export`, anything else -> `emojis`); the settings route does the same when an old
+  client posts `creator` without `stage`. `summary_structured` carries `stage`.
+- The stage governs NEW requests only: a continuation of the open batch (Step 0: "animate it", "export") keeps working whatever the stage.
+- **Tests:** `tests/test_chat_stage.py` (each stage on `FakeTools`: the plan card, the price, Prompt never starts, an Animation run ends with no pack and no Telegram, Export reaches Telegram,
+  waiting at G2 without bypass, the migration, `batch_label`) and `tests/test_agent_server.py` (the route: validated, 400 on an unknown stage, no turn, the old switches).
+
 ## The chat in Telegram (`services/tg_chat.py`, 2026-10-09)
 
 The same agent, on the bot already configured in Settings (the admin cards' bot; `admin_bot.start` long-polls it, only under `serve --lan`). Every private
@@ -217,7 +238,7 @@ is the same action the web chat's chip sends; the key's action is kept server-si
 - **One session per Telegram chat** (`/new` starts another). A session's `settings.models` `{image, video, ai}` are its own: `Console.chat_parts(user, sid)`
   gives `ConsoleTools(models=…)` (the sheet and video jobs and their price use them) and `_pin_ai` sets `llm.FORCE` for the turn, the creator driver and the
   naming pass (`llm.provider` / `model` and `brain.target` read it; `MIRSAL_LLM_PROVIDER=none` still wins). A Telegram chat starts on Nano Banana 2
-  (`nano_banana_flash`), Grok Imagine 1.5 Lite, gpt-4o and the Glossy style; `/model` shows the four as buttons, a tap opens that list, a pick saves it.
+  (`nano_banana_flash`), Grok Imagine 1.5 Lite, gpt-4o, the Glossy style and the Emojis stage; `/model` shows the four as buttons, a tap opens that list, a pick saves it.
   A web chat has no `models` and keeps the server's defaults.
 - **What comes back** (`render`, polled every 2 s by one follower thread per chat until three quiet polls, at most 4 h; each part is sent once, keyed in
   `sent`): the reply text (`**bold**` as HTML) with its chips as inline buttons (a paid step's chip states the price: nothing spends before the tap, rule 13;

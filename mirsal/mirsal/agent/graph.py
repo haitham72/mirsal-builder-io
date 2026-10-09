@@ -28,7 +28,7 @@ from typing import Any, TypedDict
 
 from ..generation import styles
 from ..runtime import cache as cachemod
-from . import creator
+from . import creator, stages
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from . import editroute, refine, subjects
@@ -421,9 +421,13 @@ class Agent:
                 "prepared": bool(pm),
                 "free": not self.tools.live(), **({"transformation": {k: tr[k] for k in ("id", "subject", "target", "required")}} if tr else {})}
         spend = self.tools.live()
-        cs = creator.settings_of(sess)
-        if cs["on"]:
-            return self._creator_plan(t, subject, prompt, names, est, card, cs)
+        run = stages.run_spec(stages.of(st), creator.settings_of(sess)["bypass"])        # how far this request goes: the chat's stage (agent/stages.py)
+        card["stage"] = run["stage"]
+        if run["plan_only"]:
+            return self._prompt_plan(t, subject, prompt, sid, plan, est, card)
+        if run["creator"]:
+            return self._creator_plan(t, subject, prompt, names, est, card, {"on": True, "scope": run["scope"], "bypass": run["bypass"]}, end=run["end"], style_id=sid,
+                                      plan=compact_plan(plan))
         if spend and st.get("ask_before_spending", True):
             sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid,
                                "ai": bool(st.get("ai", True)), "estimate": est, "plan": compact_plan(plan)}
@@ -435,8 +439,25 @@ class Agent:
         self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "plan": compact_plan(plan)}, card)
         return {}
 
+    def _prompt_plan(self, t: Turn, subject: str, prompt: str, sid: str, plan: dict, est, card: dict) -> dict:
+        """The Prompt stage: the plan (cells, tags, the sheet prompt) and Generate / Edit. Nothing is spent and nothing starts, even with "ask before
+        spending" off: Generate is the go-ahead, and it makes the sheet."""
+        sess, st = t.sess, t.sess["settings"]
+        sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "estimate": est,
+                           "plan": compact_plan(plan), "stage": "prompt"}
+        card["sheet_prompt"] = plan.get("sheet_prompt") or ""
+        t.cards.append(card)
+        t.reply = (f"Here's the prompt for **{subject}**: {card['count']} stickers, {STYLE_NAMES.get(sid, sid)}. Nothing is spent at the Prompt stage: "
+                   f"press Generate to make the sheet ({_credits(est)}), or tell me what to change.")
+        t.chips = [{"label": "Generate" + (f" · {est:g} credits" if est else ""), "action": "confirm"}, {"label": "Edit", "fill": prompt}]
+        t.trace.end("prompt ready · nothing spent")
+        return {}
+
     # -- the agentic creator: one go-ahead from the request to the pack on Telegram (agent/creator.py) --------------------------------------------------------
-    def _creator_plan(self, t: Turn, subject: str, prompt: str, names: list, est, card: dict, cs: dict) -> dict:
+    def _creator_plan(self, t: Turn, subject: str, prompt: str, names: list, est, card: dict, cs: dict, end: str = "export", style_id: str | None = None,
+                      plan: dict | None = None) -> dict:
+        """The Animation and Export stages: the creator with the whole price (sheet + animation) on the card before the go-ahead. `end` is the stage:
+        'animation' stops after the animations are approved, 'export' packs and sends (D1)."""
         sess, st = t.sess, t.sess["settings"]
         if (sess.get("creator_run") or {}).get("status") in ("running", "waiting"):
             t.reply = "The creator is still working on your last pack. Wait for it, or press Stop on its card."
@@ -444,19 +465,24 @@ class Agent:
             return {}
         v_est = self.tools.estimate("video") if cs["scope"] == "video" and self.tools.live() else None
         total = round((est or 0) + (v_est or 0), 2) or None
-        spec = {"type": "creator", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": st["style_id"], "ai": bool(st.get("ai", True)), "estimate": est,
-                "video_estimate": v_est, "scope": cs["scope"], "bypass": cs["bypass"]}
-        card.update(estimate=total, creator={"scope": cs["scope"], "bypass": cs["bypass"], "sheet": est, "video": v_est})
-        ready, why = self.tools.telegram_ready()
-        what = "the stickers as a static pack" if cs["scope"] == "images" else "the stickers animated"
+        spec = {"type": "creator", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": style_id or st["style_id"], "ai": bool(st.get("ai", True)), "estimate": est,
+                "video_estimate": v_est, "scope": cs["scope"], "bypass": cs["bypass"], "end": end, **({"plan": plan} if plan else {})}
+        card.update(estimate=total, creator={"scope": cs["scope"], "bypass": cs["bypass"], "sheet": est, "video": v_est, "end": end})
         how = "approving everything for you and stopping at the first rejection" if cs["bypass"] else "stopping at each approval for one click from you"
-        t.reply = (f"Creator plan for **{subject}**: {len(names)} stickers, then {what}, then to Telegram, {how}. "
-                   + ("" if ready else "Telegram is not connected yet, so I will stop before sending. ") + "Shall I run it?")
-        t.trace.step("creator: " + " > ".join(label for _, label in creator.STEPS[cs["scope"]]))
+        if end == "animation":
+            t.reply = f"Plan for **{subject}**: {len(names)} stickers, then animated, {how}. It ends with the animations: nothing is packed or sent. Shall I run it?"
+            go = "Create and animate"
+        else:
+            ready, why = self.tools.telegram_ready()
+            what = "the stickers as a static pack" if cs["scope"] == "images" else "the stickers animated"
+            t.reply = (f"Creator plan for **{subject}**: {len(names)} stickers, then {what}, then to Telegram, {how}. "
+                       + ("" if ready else "Telegram is not connected yet, so I will stop before sending. ") + "Shall I run it?")
+            go = "Create and send to Telegram"
+        t.trace.step("creator: " + " > ".join(label for _, label in creator.steps_of({"scope": cs["scope"], "end": end})))
         if self.tools.live() and st.get("ask_before_spending", True):
             sess["pending"] = spec
             t.cards.append(card)
-            t.chips = [{"label": "Create and send to Telegram", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.chips = [{"label": go, "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end(f"plan ready · {_credits(total)}")
             return {}
         self._start_creator(t, spec)
@@ -464,12 +490,12 @@ class Agent:
 
     def _start_creator(self, t: Turn, p: dict) -> None:
         sess = t.sess
-        self._start_create(t, p)
+        self._start_create(t, p, parent=p.get("parent"), regen_of=p.get("regen_of"), note=p.get("note", ""))
         card = next((c for c in reversed(t.cards) if c.get("type") == "generation"), None)
         if not card:
             return
         run = creator.new_run(prompt=p["prompt"], subject=p["subject"], grid=p["grid"], style_id=p["style_id"], scope=p.get("scope", "images"), bypass=p.get("bypass", False),
-                              estimate=p.get("estimate"), video_estimate=p.get("video_estimate"))
+                              estimate=p.get("estimate"), video_estimate=p.get("video_estimate"), end=p.get("end", "export"))
         run["job"], run["generation"] = card.get("job"), card.get("generation")
         creator._log(run, "started: " + ("the sheet is being drawn" if run["job"] else "the sheet is ready"))
         sess["creator_run"] = run
@@ -522,7 +548,9 @@ class Agent:
 
     def _creator_say(self, sess: dict, run: dict) -> None:
         name = run["subject"]
-        if run["status"] == "done":
+        if run["status"] == "done" and run.get("end") == "animation":
+            text, chips = f"Done: **{name}** is animated and the animations are approved. Nothing was packed or sent; say \"export\" to pack it and send it to Telegram.", []
+        elif run["status"] == "done":
             links = [s["link"] for s in (run.get("telegram") or {}).get("sets", [])]
             text, chips = f"Done: **{name}** is on Telegram. " + " ".join(links), []
         elif run["status"] == "waiting":
