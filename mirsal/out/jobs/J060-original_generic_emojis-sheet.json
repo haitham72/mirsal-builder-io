@@ -1,0 +1,46 @@
+{
+  "id": "J060",
+  "kind": "sheet",
+  "task": "044",
+  "generation": "G119",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: smiling broadly with joyful eyes and slightly blushing cheeks\nCharacter 2: eyes wide open with raised eyebrows and mouth forming an O in surprise\nCharacter 3: frowning with furrowed brows and tightly pressed lips showing anger\nCharacter 4: eyes closed and mouth turned up in a relaxed sleepy smile, head leaning\nCharacter 5: big heart-shaped eyes and wide smiling mouth expressing love\nCharacter 6: mouth curved downwards with a single tear falling from one eye\nCharacter 7: raised eyebrow with a small smirk and squinted eyes showing mischief\nCharacter 8: wide-open laughing mouth with closed eyes and tilted head\nCharacter 9: neutral expression with one eyebrow raised showing doubt or skepticism\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "original generic emojis",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": true,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "42f46d94-883a-4796-aee2-9e189468b170",
+  "result": {
+    "file": "jobs/J060-original_generic_emojis-sheet/result.png",
+    "sha256": "472a0253ff20cd42deb23f579db2bf255b5307dc4f31f018443ceccf46c00ebe",
+    "bytes": 4254435
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791455522.669,
+  "claimed_at": 1791455524.431,
+  "completed_at": 1791455547.14,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791455970.905,
+    "by": "local"
+  }
+}

@@ -1,0 +1,432 @@
+{
+ "id": "S012",
+ "user": "local",
+ "title": "generic emoji",
+ "created": 1791454498.485,
+ "updated": 1791454511.61,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "glossy_3d",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791454504.269,
+   "user": "generic emoji",
+   "assistant": "Here's the plan for **generic emoji**: 9 stickers, glossy 3d (I have this prepared: 0 credits). Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "generic emoji",
+   "cards": [],
+   "steps": [],
+   "ts": 1791454498.679
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **generic emoji**: 9 stickers, glossy 3d (I have this prepared: 0 credits). Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "generic emoji",
+     "grid": "3x3",
+     "style": "glossy 3d",
+     "count": 9,
+     "names": [
+      "generic emoji joyful smile",
+      "generic emoji laughing",
+      "generic emoji surprised",
+      "generic emoji sadness",
+      "generic emoji angry",
+      "generic emoji confused",
+      "generic emoji embarrassed",
+      "generic emoji sleepy",
+      "generic emoji mischievous"
+     ],
+     "estimate": 0,
+     "balance": 1307.87,
+     "prompt": "generic emoji",
+     "prepared": true,
+     "free": false
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating generic emoji",
+     "detail": null,
+     "status": "running",
+     "ts": 1791454498.728
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791454498.749
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with gpt-4.1-mini (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791454498.791
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "generic emoji joyful smile",
+       "generic emoji laughing",
+       "generic emoji surprised",
+       "generic emoji sadness",
+       "generic emoji angry",
+       "generic emoji confused",
+       "generic emoji embarrassed",
+       "generic emoji sleepy",
+       "generic emoji mischievous"
+      ]
+     },
+     "status": "done",
+     "ts": 1791454503.69
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · free",
+     "detail": null,
+     "status": "done",
+     "ts": 1791454504.252
+    }
+   ],
+   "ts": 1791454498.679,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Make a new one (paid)",
+     "action": "confirm_new"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": {
+  "type": "create",
+  "prompt": "generic emoji",
+  "subject": "generic emoji",
+  "grid": "3x3",
+  "style_id": "glossy_3d",
+  "ai": true,
+  "estimate": 0,
+  "plan": {
+   "task": "generic emoji",
+   "task_slug": "generic_emoji",
+   "subject": "generic emoji",
+   "scene": "",
+   "described": "generic emoji",
+   "context": "",
+   "kind": "default",
+   "grid": [
+    3,
+    3
+   ],
+   "template_id": "sheet_3x3",
+   "template_version": 4,
+   "slots": {
+    "subject_description": "a simple round yellow emoji face with black eyes and a mouth, identical in every cell",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "smiling happily with bright eyes and a wide grin",
+      "tags": [
+       "generic_emoji_joyful_smile",
+       "happy",
+       "bright",
+       "grin"
+      ],
+      "emoji": "😊😄",
+      "motion": "the face gently bounces up and down with sparkling eyes"
+     },
+     {
+      "pos": 2,
+      "label": "laughing heartily with eyes closed and mouth open wide",
+      "tags": [
+       "generic_emoji_laughing",
+       "joy",
+       "funny",
+       "tears"
+      ],
+      "emoji": "😂🤣",
+      "motion": "the face shakes with laughter and tears appear near eyes"
+     },
+     {
+      "pos": 3,
+      "label": "looking surprised with wide open eyes and mouth in an O shape",
+      "tags": [
+       "generic_emoji_surprised",
+       "shock",
+       "wow",
+       "amazed"
+      ],
+      "emoji": "😮😲",
+      "motion": "the face blinks rapidly and the mouth opens and closes"
+     },
+     {
+      "pos": 4,
+      "label": "frowning sadly with downturned mouth and teary eyes",
+      "tags": [
+       "generic_emoji_sadness",
+       "cry",
+       "tear",
+       "downcast"
+      ],
+      "emoji": "😢😞",
+      "motion": "the face slowly quivers as if about to cry"
+     },
+     {
+      "pos": 5,
+      "label": "angrily scowling with furrowed brows and clenched mouth",
+      "tags": [
+       "generic_emoji_angry",
+       "mad",
+       "furious",
+       "rage"
+      ],
+      "emoji": "😠😡",
+      "motion": "the face pulses red and steam puffs appear from the sides"
+     },
+     {
+      "pos": 6,
+      "label": "looking confused with one eyebrow raised and crooked mouth",
+      "tags": [
+       "generic_emoji_confused",
+       "doubt",
+       "puzzled",
+       "uncertain"
+      ],
+      "emoji": "😕🤔",
+      "motion": "the face tilts side to side as if unsure"
+     },
+     {
+      "pos": 7,
+      "label": "blushing shyly with eyes looking down and a small smile",
+      "tags": [
+       "generic_emoji_embarrassed",
+       "shy",
+       "bashful",
+       "blush"
+      ],
+      "emoji": "😊☺️",
+      "motion": "the face slowly turns pink with a gentle nodding motion"
+     },
+     {
+      "pos": 8,
+      "label": "sleepily closing eyes with a tiny yawn and drooping mouth",
+      "tags": [
+       "generic_emoji_sleepy",
+       "tired",
+       "yawn",
+       "drowsy"
+      ],
+      "emoji": "😴😪",
+      "motion": "the face slowly closes eyes and the mouth opens and closes softly"
+     },
+     {
+      "pos": 9,
+      "label": "winking cheekily with a playful grin and one eye closed",
+      "tags": [
+       "generic_emoji_mischievous",
+       "playful",
+       "sly",
+       "tease"
+      ],
+      "emoji": "😉😏",
+      "motion": "the face winks repeatedly and tilts slightly side to side"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "generic_emoji_joyful_smile",
+     "tags": [
+      "generic_emoji_joyful_smile",
+      "happy",
+      "bright",
+      "grin"
+     ],
+     "emoji": "😊😄"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "generic_emoji_laughing",
+     "tags": [
+      "generic_emoji_laughing",
+      "joy",
+      "funny",
+      "tears"
+     ],
+     "emoji": "😂🤣"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "generic_emoji_surprised",
+     "tags": [
+      "generic_emoji_surprised",
+      "shock",
+      "wow",
+      "amazed"
+     ],
+     "emoji": "😮😲"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "generic_emoji_sadness",
+     "tags": [
+      "generic_emoji_sadness",
+      "cry",
+      "tear",
+      "downcast"
+     ],
+     "emoji": "😢😞"
+    },
+    {
+     "index": 5,
+     "id": "prompt05",
+     "key": "generic_emoji_angry",
+     "tags": [
+      "generic_emoji_angry",
+      "mad",
+      "furious",
+      "rage"
+     ],
+     "emoji": "😠😡"
+    },
+    {
+     "index": 6,
+     "id": "prompt06",
+     "key": "generic_emoji_confused",
+     "tags": [
+      "generic_emoji_confused",
+      "doubt",
+      "puzzled",
+      "uncertain"
+     ],
+     "emoji": "😕🤔"
+    },
+    {
+     "index": 7,
+     "id": "prompt07",
+     "key": "generic_emoji_embarrassed",
+     "tags": [
+      "generic_emoji_embarrassed",
+      "shy",
+      "bashful",
+      "blush"
+     ],
+     "emoji": "😊☺️"
+    },
+    {
+     "index": 8,
+     "id": "prompt08",
+     "key": "generic_emoji_sleepy",
+     "tags": [
+      "generic_emoji_sleepy",
+      "tired",
+      "yawn",
+      "drowsy"
+     ],
+     "emoji": "😴😪"
+    },
+    {
+     "index": 9,
+     "id": "prompt09",
+     "key": "generic_emoji_mischievous",
+     "tags": [
+      "generic_emoji_mischievous",
+      "playful",
+      "sly",
+      "tease"
+     ],
+     "emoji": "😉😏"
+    }
+   ],
+   "expanded_by": "ai",
+   "expand_model": "gpt-4.1-mini-2025-04-14"
+  }
+ },
+ "vision_asked": true,
+ "vision_ack": "allowed"
+}

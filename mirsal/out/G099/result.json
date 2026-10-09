@@ -104,7 +104,7 @@
     3,
     3
   ],
-  "stage": "video_sliced",
+  "stage": "pack_final",
   "error": null,
   "plan_source": "task 028",
   "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: anime kitten.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: blowing a kiss with a wink, a small heart floating away\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open\nCharacter 3: hugging a big red heart, eyes sparkling, blushing cheeks\nCharacter 4: holding a golden trophy overhead, triumphant\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: furious, steaming, fists clenched, deep scowl\nCharacter 8: mind blown, hands on the head, eyes spiralling wide\nCharacter 9: wearing sunglasses, smirking, arms crossed, ultra cool\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -251,7 +251,23 @@
         "note": "approved by Make a video"
       }
     },
-    "pack": null
+    "pack": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791455400.735,
+      "note": "approved by Add",
+      "stickers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
   },
   "video_sheets": [
     {
@@ -734,7 +750,7 @@
       "webm": "slices/vid-anime_kitten-blowing_a_kiss-20261002T151237-4f7308.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -830,6 +846,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.5,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -1271,7 +1305,7 @@
       "webm": "slices/vid-anime_kitten-laughing-20261002T151237-cc2946.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1365,6 +1399,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.568,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -1802,7 +1854,7 @@
       "webm": "slices/vid-anime_kitten-in_love-20261002T151237-396599.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1864,6 +1916,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.572,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -2301,7 +2371,7 @@
       "webm": "slices/vid-anime_kitten-winner-20261002T151237-1c4288.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -2397,6 +2467,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.575,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -2839,7 +2927,7 @@
       "webm": "slices/vid-anime_kitten-eye_roll-20261002T151237-3a5b38.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -2935,6 +3023,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.577,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -3373,7 +3479,7 @@
       "webm": "slices/vid-anime_kitten-sad-20261002T151237-212b79.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -3435,6 +3541,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.579,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -3873,7 +3997,7 @@
       "webm": "slices/vid-anime_kitten-angry-20261002T151237-2b2450.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -3969,6 +4093,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.581,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -4411,7 +4553,7 @@
       "webm": "slices/vid-anime_kitten-mind_blown-20261002T151237-94123f.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -4507,6 +4649,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.584,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -4944,7 +5104,7 @@
       "webm": "slices/vid-anime_kitten-cool-20261002T151237-69eea9.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -5006,6 +5166,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791455400.586,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791455400.735,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "judge": {
@@ -5208,5 +5386,18 @@
       ],
       "anim_verdict_stale": true
     }
-  ]
+  ],
+  "added": {
+    "eabff4df": [
+      "animated:1",
+      "animated:2",
+      "animated:3",
+      "animated:4",
+      "animated:5",
+      "animated:6",
+      "animated:7",
+      "animated:8",
+      "animated:9"
+    ]
+  }
 }

@@ -1,0 +1,46 @@
+{
+  "id": "J058",
+  "kind": "sheet",
+  "task": "042",
+  "generation": "G111",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: standing with a big joyful grin and sparkling eyes, hands raised in excitement\nCharacter 2: walking confidently with a proud smile and chest out, hands on hips\nCharacter 3: jumping high with wide eyes and open mouth showing surprise and shock\nCharacter 4: sitting slouched with a sad frown and teardrop falling down cheek\nCharacter 5: lying down exhausted with closed eyes and a tired droop\nCharacter 6: reaching forward with a mischievous grin and narrowed eyes\nCharacter 7: spinning happily with eyes closed and wide smile\nCharacter 8: leaning forward with skeptical raised eyebrow and crossed arms\nCharacter 9: running with fearful wide eyes and open mouth, arms pumping\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "original emojis with the varius emotions",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": true,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "f9cd16ba-d355-482e-b925-9cd9acf91269",
+  "result": {
+    "file": "jobs/J058-original_emojis_varius_emoti-sheet/result.png",
+    "sha256": "865fe81c5e15c919adc3dc01dc8a8cc9aa87d3a821dc8a6d5dd48d4fa71bc487",
+    "bytes": 4010954
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791437921.098,
+  "claimed_at": 1791437922.668,
+  "completed_at": 1791437946.046,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791438021.41,
+    "by": "local"
+  }
+}

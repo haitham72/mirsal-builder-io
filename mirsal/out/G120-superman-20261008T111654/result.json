@@ -1,0 +1,432 @@
+{
+  "generation_id": "G120",
+  "number": 120,
+  "owner": "local",
+  "created": 1791458214.654,
+  "parent": null,
+  "prompt": "superman",
+  "task": "superman",
+  "task_slug": "superman",
+  "source": {
+    "subject": "i_need_superman_as_watermelon",
+    "subject_id": "014",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "img-014-i_need_superman_as_watermelon-sheet-nano_banana_flash-2k-20261002.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "none",
+    "clips_dup_of": null,
+    "prepared": true,
+    "clips": {},
+    "sheet_path": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-014-i_need_superman_as_watermelon\\img-014-i_need_superman_as_watermelon-sheet-nano_banana_flash-2k-20261002.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 1,
+      "cols": 1,
+      "rects": [
+        [
+          0,
+          0,
+          2048,
+          2048
+        ]
+      ],
+      "xs": [
+        0,
+        2048
+      ],
+      "ys": [
+        0,
+        2048
+      ],
+      "method": "single"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    1,
+    1
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "stub (generation/prompter.py)",
+  "sheet_prompt": "A single character, centred on a square canvas.\nSubject: superman.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw the character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nExpression and state of action (a wide range of emotions, a clear body position), big and readable at small size: bursting with excitement, star-sparkle eyes, fists shaking\nBackground: one single flat pure green (#00FF00) colour over the entire image, one identical shade everywhere; no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nMargin: full body, centred, with a generous empty margin on every side (at least 20% of the canvas), nothing touching or crossing the edge.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. vibrates with joy, jumps up and down, claps\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 1x1 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "single_1x1",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "superman",
+    "style_id": "flat_vector",
+    "mode": "single_1x1",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "bursting with excitement, star-sparkle eyes, fists shaking",
+        "tags": [
+          "superman_excited",
+          "bursting",
+          "excitement",
+          "star"
+        ],
+        "emoji": "🤩",
+        "motion": "vibrates with joy, jumps up and down, claps"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null
+  },
+  "task_id": null,
+  "name_key": "superman",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 0,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791458214.835,
+      "note": "approved by pressing Generate"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 57.6
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 188 blue-ward; a sheet without a blue screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 188.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 10.6
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": false,
+        "detail": "found 3x4, plan says 1x1",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x4",
+        "limit": "1x1",
+        "data": {
+          "ms": 33.8
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: single",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "single",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            2048
+          ],
+          "ys": [
+            0,
+            2048
+          ],
+          "ms": 33.3
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 7.5 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 7.54,
+        "limit": 12.0,
+        "data": {
+          "ms": 84.7
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "superman_excited",
+      "tags": [
+        "superman_excited",
+        "bursting",
+        "excitement",
+        "star"
+      ],
+      "emoji": "🤩",
+      "prompt": "superman bursting with excitement, star-sparkle eyes, fists shaking, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman-excited-20261008T111654-fc33df",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 1284541,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 90.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 53504,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 53.504,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.5% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0051,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": false,
+          "detail": "9 part(s); the second is 12.4% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.124,
+          "limit": 0.12,
+          "data": {
+            "parts": 9,
+            "ms": 47.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "150.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 150.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          2048,
+          2048
+        ],
+        "bg": [
+          5,
+          64,
+          253
+        ],
+        "threshold": 94.0,
+        "fg_px": 1284541,
+        "bbox": [
+          62,
+          100,
+          2006,
+          1952
+        ],
+        "scale": 0.2041,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0051,
+        "warnings": [
+          "single_subject"
+        ],
+        "kb": 150.7,
+        "format": "png",
+        "sheet_issue": "grid_detected"
+      },
+      "png": "slices/img-superman-excited-20261008T111654-fc33df.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791458215.783,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "WARN",
+          "reason": "grid_detected",
+          "ref": null,
+          "detail": {
+            "check": "grid_detected",
+            "value": "3x4",
+            "limit": "1x1",
+            "note": "found 3x4, plan says 1x1",
+            "forced": false,
+            "cut_anyway": true
+          }
+        },
+        {
+          "ts": 1791458215.79,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "single_subject"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "key_colour": "blue",
+  "sheet_issues": [
+    {
+      "check": "grid_detected",
+      "value": "3x4",
+      "limit": "1x1",
+      "note": "found 3x4, plan says 1x1",
+      "forced": false
+    }
+  ]
+}

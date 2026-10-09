@@ -1,0 +1,7 @@
+{"ts": 1791437946.215, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "original emojis with the varius emotions", "task_slug": "original_emojis_varius_emotions"}}
+{"ts": 1791437946.244, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791437946.638, "stage": "sheet_picked", "status": "done", "ms": 393, "detail": {"subject": "original_emojis", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791437946.64, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791437946.959, "stage": "keyed", "status": "done", "ms": 318, "detail": {"bg": [6, 251, 3], "threshold": [122.5, 122.0, 122.0, 124.5, 124.5, 123.5, 124.0, 124.5, 123.5], "grid": "3x3", "cut": "gutter", "xs": [0, 698, 1355, 2048], "ys": [0, 755, 1371, 2048]}}
+{"ts": 1791437946.96, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791437947.486, "stage": "sliced", "status": "done", "ms": 525, "detail": {"ready": 9, "failed": 0}}

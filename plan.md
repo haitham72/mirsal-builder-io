@@ -3,6 +3,12 @@
 Source of truth for each phase is `docs/export to team/mirsal-export-architecture.md` §9–§10.7. Build in order; each phase ends green
 (one narrowest test run per change, `docs/testing.md`) before the next starts. No paid call without Haitham's explicit yes (rule 13).
 
+## Separate: Export to AddCollection API (external CMS)
+
+**Status:** Guide prepared 2026-10-09 (`docs/Api/export-to-addcollection-guide.md`). A new export button (Library and Studio) that sends packs to the external AddCollection API at `emojicms.devinprocess888.com`. Not blocked by or blocking the phases below; can be built in parallel. Needs Haitham's go before starting.
+
+**Scope:** Backend route (`POST /api/packs/{id}/export-collection`), UI buttons, multipart/form-data construction with ordered media + metadata, external API call with Basic auth, tests. No changes to existing export flows (ZIP downloads).
+
 ## Next (Haitham, 2026-10-08): the Studio's batch -> generation rows, then Import inside a batch
 
 Backend is built and tested (`docs/engine-and-studio.md` "Batches, generations, regenerate"); the screens are not.

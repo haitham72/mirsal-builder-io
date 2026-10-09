@@ -1,0 +1,264 @@
+{
+  "task": "generic emojis",
+  "task_slug": "generic_emojis",
+  "subject": "generic emojis",
+  "scene": "",
+  "described": "generic emojis",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    3,
+    3
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 4,
+  "slots": {
+    "subject_description": "generic emojis",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "blowing a kiss with a wink, a small heart floating free",
+        "tags": [
+          "generic_emojis_blowing_a_kiss",
+          "blowing",
+          "kiss",
+          "wink"
+        ],
+        "emoji": "😘",
+        "motion": "lips purse, a wink, the heart pulses"
+      },
+      {
+        "pos": 2,
+        "label": "bursting with excitement, star-sparkle eyes, huge open smile",
+        "tags": [
+          "generic_emojis_excited",
+          "bursting",
+          "excitement",
+          "star"
+        ],
+        "emoji": "🤩",
+        "motion": "eyes sparkle, the grin stretches, the face vibrates with joy"
+      },
+      {
+        "pos": 3,
+        "label": "huge shiny puppy eyes with a trembling lip, begging please",
+        "tags": [
+          "generic_emojis_puppy_eyes",
+          "huge",
+          "shiny",
+          "puppy"
+        ],
+        "emoji": "🥺",
+        "motion": "eyes shimmer and widen, the lip trembles, hopeful tilt"
+      },
+      {
+        "pos": 4,
+        "label": "cheerful squint with a knowing smile",
+        "tags": [
+          "generic_emojis_ok_sign",
+          "cheerful",
+          "squint",
+          "knowing"
+        ],
+        "emoji": "👌",
+        "motion": "squints cheerfully, nods approvingly, tilts the head"
+      },
+      {
+        "pos": 5,
+        "label": "rolling eyes with a bored deadpan face",
+        "tags": [
+          "generic_emojis_eye_roll",
+          "rolling",
+          "eyes",
+          "bored"
+        ],
+        "emoji": "🙄",
+        "motion": "eyes circle slowly, head tilts back with a sigh"
+      },
+      {
+        "pos": 6,
+        "label": "sad and drooping face with a single tear",
+        "tags": [
+          "generic_emojis_sad",
+          "sad",
+          "drooping",
+          "face"
+        ],
+        "emoji": "😞",
+        "motion": "sighs, a tear slides down, the face droops lower"
+      },
+      {
+        "pos": 7,
+        "label": "grumpy pouting face, turned slightly away, puffed cheeks",
+        "tags": [
+          "generic_emojis_grumpy",
+          "grumpy",
+          "pouting",
+          "face"
+        ],
+        "emoji": "😤",
+        "motion": "huffs, puffs the cheeks, looks away"
+      },
+      {
+        "pos": 8,
+        "label": "dizzy with spiral eyes, wobbling on the spot",
+        "tags": [
+          "generic_emojis_dizzy",
+          "dizzy",
+          "spiral",
+          "eyes"
+        ],
+        "emoji": "😵‍💫",
+        "motion": "sways in circles, little stars orbit the head"
+      },
+      {
+        "pos": 9,
+        "label": "embarrassed and blushing, peeking shyly",
+        "tags": [
+          "generic_emojis_embarrassed",
+          "embarrassed",
+          "blushing",
+          "peeking"
+        ],
+        "emoji": "😳",
+        "motion": "the blush deepens, glances shyly to the side"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: generic emojis.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: blowing a kiss with a wink, a small heart floating free\nCharacter 2: bursting with excitement, star-sparkle eyes, huge open smile\nCharacter 3: huge shiny puppy eyes with a trembling lip, begging please\nCharacter 4: cheerful squint with a knowing smile\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: sad and drooping face with a single tear\nCharacter 7: grumpy pouting face, turned slightly away, puffed cheeks\nCharacter 8: dizzy with spiral eyes, wobbling on the spot\nCharacter 9: embarrassed and blushing, peeking shyly\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every face performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. lips purse, a wink, the heart pulses\n2. eyes sparkle, the grin stretches, the face vibrates with joy\n3. eyes shimmer and widen, the lip trembles, hopeful tilt\n4. squints cheerfully, nods approvingly, tilts the head\n5. eyes circle slowly, head tilts back with a sigh\n6. sighs, a tear slides down, the face droops lower\n7. huffs, puffs the cheeks, looks away\n8. sways in circles, little stars orbit the head\n9. the blush deepens, glances shyly to the side\nAnimation style: wide emotions on highly expressive faces, exaggerated squash and stretch of the face, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), each face on its own rhythm, lively and full of personality. Faces only: no bodies, no hands, no ears, no tails, no props. Never still and never only a gentle sway.\nKeep every face inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and faces never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each face's design, proportions and colours unchanged and do not add outlines or borders.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "generic emojis blowing a kiss with a wink, a small heart floating free, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_blowing_a_kiss",
+      "tags": [
+        "generic_emojis_blowing_a_kiss",
+        "blowing",
+        "kiss",
+        "wink"
+      ],
+      "emoji": "😘"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "prompt": "generic emojis bursting with excitement, star-sparkle eyes, huge open smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_excited",
+      "tags": [
+        "generic_emojis_excited",
+        "bursting",
+        "excitement",
+        "star"
+      ],
+      "emoji": "🤩"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "prompt": "generic emojis huge shiny puppy eyes with a trembling lip, begging please, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_puppy_eyes",
+      "tags": [
+        "generic_emojis_puppy_eyes",
+        "huge",
+        "shiny",
+        "puppy"
+      ],
+      "emoji": "🥺"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "prompt": "generic emojis cheerful squint with a knowing smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_ok_sign",
+      "tags": [
+        "generic_emojis_ok_sign",
+        "cheerful",
+        "squint",
+        "knowing"
+      ],
+      "emoji": "👌"
+    },
+    {
+      "index": 5,
+      "id": "prompt05",
+      "prompt": "generic emojis rolling eyes with a bored deadpan face, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_eye_roll",
+      "tags": [
+        "generic_emojis_eye_roll",
+        "rolling",
+        "eyes",
+        "bored"
+      ],
+      "emoji": "🙄"
+    },
+    {
+      "index": 6,
+      "id": "prompt06",
+      "prompt": "generic emojis sad and drooping face with a single tear, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_sad",
+      "tags": [
+        "generic_emojis_sad",
+        "sad",
+        "drooping",
+        "face"
+      ],
+      "emoji": "😞"
+    },
+    {
+      "index": 7,
+      "id": "prompt07",
+      "prompt": "generic emojis grumpy pouting face, turned slightly away, puffed cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_grumpy",
+      "tags": [
+        "generic_emojis_grumpy",
+        "grumpy",
+        "pouting",
+        "face"
+      ],
+      "emoji": "😤"
+    },
+    {
+      "index": 8,
+      "id": "prompt08",
+      "prompt": "generic emojis dizzy with spiral eyes, wobbling on the spot, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_dizzy",
+      "tags": [
+        "generic_emojis_dizzy",
+        "dizzy",
+        "spiral",
+        "eyes"
+      ],
+      "emoji": "😵‍💫"
+    },
+    {
+      "index": 9,
+      "id": "prompt09",
+      "prompt": "generic emojis embarrassed and blushing, peeking shyly, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_embarrassed",
+      "tags": [
+        "generic_emojis_embarrassed",
+        "embarrassed",
+        "blushing",
+        "peeking"
+      ],
+      "emoji": "😳"
+    }
+  ],
+  "expanded_by": "deterministic",
+  "previewed": true
+}

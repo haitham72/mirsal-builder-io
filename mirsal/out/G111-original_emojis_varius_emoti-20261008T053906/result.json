@@ -1,0 +1,2239 @@
+{
+  "generation_id": "G111",
+  "number": 111,
+  "owner": "local",
+  "created": 1791437946.175,
+  "parent": null,
+  "prompt": "original emojis with the varius emotions",
+  "task": "original emojis with the varius emotions",
+  "task_slug": "original_emojis_varius_emotions",
+  "source": {
+    "subject": "original_emojis",
+    "subject_id": "042",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "prepared": false,
+    "clips": {},
+    "sheet_path": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\jobs\\J058-original_emojis_varius_emoti-sheet\\result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          698,
+          755
+        ],
+        [
+          698,
+          0,
+          657,
+          755
+        ],
+        [
+          1355,
+          0,
+          693,
+          755
+        ],
+        [
+          0,
+          755,
+          698,
+          616
+        ],
+        [
+          698,
+          755,
+          657,
+          616
+        ],
+        [
+          1355,
+          755,
+          693,
+          616
+        ],
+        [
+          0,
+          1371,
+          698,
+          677
+        ],
+        [
+          698,
+          1371,
+          657,
+          677
+        ],
+        [
+          1355,
+          1371,
+          693,
+          677
+        ]
+      ],
+      "xs": [
+        0,
+        698,
+        1355,
+        2048
+      ],
+      "ys": [
+        0,
+        755,
+        1371,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "task 042",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: standing with a big joyful grin and sparkling eyes, hands raised in excitement\nCharacter 2: walking confidently with a proud smile and chest out, hands on hips\nCharacter 3: jumping high with wide eyes and open mouth showing surprise and shock\nCharacter 4: sitting slouched with a sad frown and teardrop falling down cheek\nCharacter 5: lying down exhausted with closed eyes and a tired droop\nCharacter 6: reaching forward with a mischievous grin and narrowed eyes\nCharacter 7: spinning happily with eyes closed and wide smile\nCharacter 8: leaning forward with skeptical raised eyebrow and crossed arms\nCharacter 9: running with fearful wide eyes and open mouth, arms pumping\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. bouncing gently side to side with a happy sway\n2. strutting smoothly forward with a steady pace\n3. springing up quickly then landing softly\n4. slightly rocking back and forth slowly\n5. breathing slowly with subtle chest movement\n6. waving one hand slyly then pulling back\n7. rotating smoothly in a full circle repeatedly\n8. shifting weight side to side with doubtful glance\n9. moving legs fast with quick anxious breaths\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [
+    "sheet_prompt"
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell",
+    "style_id": "flat_vector",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "standing with a big joyful grin and sparkling eyes, hands raised in excitement",
+        "tags": [
+          "original_emojis_joyful_bounce",
+          "happy",
+          "excited",
+          "joy"
+        ],
+        "emoji": "😄✨",
+        "motion": "bouncing gently side to side with a happy sway"
+      },
+      {
+        "pos": 2,
+        "label": "walking confidently with a proud smile and chest out, hands on hips",
+        "tags": [
+          "original_emojis_proud_walk",
+          "pride",
+          "confident",
+          "strong"
+        ],
+        "emoji": "😌💪",
+        "motion": "strutting smoothly forward with a steady pace"
+      },
+      {
+        "pos": 3,
+        "label": "jumping high with wide eyes and open mouth showing surprise and shock",
+        "tags": [
+          "original_emojis_surprised_jump",
+          "shock",
+          "surprise",
+          "startled"
+        ],
+        "emoji": "😲😳",
+        "motion": "springing up quickly then landing softly"
+      },
+      {
+        "pos": 4,
+        "label": "sitting slouched with a sad frown and teardrop falling down cheek",
+        "tags": [
+          "original_emojis_sad_slouch",
+          "sad",
+          "tearful",
+          "down"
+        ],
+        "emoji": "😢😞",
+        "motion": "slightly rocking back and forth slowly"
+      },
+      {
+        "pos": 5,
+        "label": "lying down exhausted with closed eyes and a tired droop",
+        "tags": [
+          "original_emojis_exhausted_lie",
+          "tired",
+          "sleepy",
+          "exhausted"
+        ],
+        "emoji": "😴😪",
+        "motion": "breathing slowly with subtle chest movement"
+      },
+      {
+        "pos": 6,
+        "label": "reaching forward with a mischievous grin and narrowed eyes",
+        "tags": [
+          "original_emojis_mischievous_reach",
+          "mischief",
+          "sly",
+          "playful"
+        ],
+        "emoji": "😏🤭",
+        "motion": "waving one hand slyly then pulling back"
+      },
+      {
+        "pos": 7,
+        "label": "spinning happily with eyes closed and wide smile",
+        "tags": [
+          "original_emojis_happy_spin",
+          "joy",
+          "playful",
+          "spinning"
+        ],
+        "emoji": "😊💫",
+        "motion": "rotating smoothly in a full circle repeatedly"
+      },
+      {
+        "pos": 8,
+        "label": "leaning forward with skeptical raised eyebrow and crossed arms",
+        "tags": [
+          "original_emojis_skeptical_lean",
+          "doubt",
+          "skeptical",
+          "questioning"
+        ],
+        "emoji": "🤨🧐",
+        "motion": "shifting weight side to side with doubtful glance"
+      },
+      {
+        "pos": 9,
+        "label": "running with fearful wide eyes and open mouth, arms pumping",
+        "tags": [
+          "original_emojis_fearful_run",
+          "fear",
+          "running",
+          "panic"
+        ],
+        "emoji": "😨🏃‍♂️",
+        "motion": "moving legs fast with quick anxious breaths"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "loop": false
+  },
+  "task_id": "042",
+  "name_key": "original_emojis_varius_emotions",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 0,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791437920.576,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 50.4
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 244 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 244.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 12.7
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 37.6
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            698,
+            1355,
+            2048
+          ],
+          "ys": [
+            0,
+            755,
+            1371,
+            2048
+          ],
+          "ms": 36.9
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 2.2 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 2.2,
+        "limit": 12.0,
+        "data": {
+          "ms": 89.7
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "original_emojis_joyful_bounce",
+      "tags": [
+        "original_emojis_joyful_bounce",
+        "happy",
+        "excited",
+        "joy"
+      ],
+      "emoji": "😄✨",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell standing with a big joyful grin and sparkling eyes, hands raised in excitement, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-joyful_bounce-20261008T053906-beb192",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134391,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 22.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 71121,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 71.121,
+          "data": {
+            "ms": 3.4
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 1.5
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "116.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 116.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.6
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          698,
+          755
+        ],
+        "bg": [
+          6,
+          251,
+          3
+        ],
+        "threshold": 122.5,
+        "fg_px": 134391,
+        "bbox": [
+          82,
+          106,
+          662,
+          664
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 116.7,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-joyful_bounce-20261008T053906-beb192.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.378,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "original_emojis_proud_walk",
+      "tags": [
+        "original_emojis_proud_walk",
+        "pride",
+        "confident",
+        "strong"
+      ],
+      "emoji": "😌💪",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell walking confidently with a proud smile and chest out, hands on hips, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-proud_walk-20261008T053906-958a09",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 129145,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 15.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 68501,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 68.501,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": false,
+          "detail": "2 enclosed hole(s), 2.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0199,
+          "limit": 0.01,
+          "data": {
+            "count": 2,
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 26 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 26,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "100.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 100.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          698,
+          0,
+          657,
+          755
+        ],
+        "bg": [
+          7,
+          251,
+          3
+        ],
+        "threshold": 122.0,
+        "fg_px": 129145,
+        "bbox": [
+          90,
+          161,
+          562,
+          664
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0199,
+        "warnings": [
+          "holes"
+        ],
+        "kb": 100.4,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-proud_walk-20261008T053906-958a09.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.384,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [
+              "holes"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "original_emojis_surprised_jump",
+      "tags": [
+        "original_emojis_surprised_jump",
+        "shock",
+        "surprise",
+        "startled"
+      ],
+      "emoji": "😲😳",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell jumping high with wide eyes and open mouth showing surprise and shock, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-surprised_jump-20261008T053906-266e8e",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 132786,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 68547,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 68.547,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "107.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 107.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1355,
+          0,
+          693,
+          755
+        ],
+        "bg": [
+          7,
+          251,
+          3
+        ],
+        "threshold": 122.0,
+        "fg_px": 132786,
+        "bbox": [
+          19,
+          150,
+          625,
+          613
+        ],
+        "scale": 0.7182,
+        "scale_mode": "clamped",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 107.7,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-surprised_jump-20261008T053906-266e8e.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.389,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "original_emojis_sad_slouch",
+      "tags": [
+        "original_emojis_sad_slouch",
+        "sad",
+        "tearful",
+        "down"
+      ],
+      "emoji": "😢😞",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell sitting slouched with a sad frown and teardrop falling down cheek, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-sad_slouch-20261008T053906-c9a9a9",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 119796,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 13.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 63649,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 63.649,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0008,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.1% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0012,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 21 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 21,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "90.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 90.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          755,
+          698,
+          616
+        ],
+        "bg": [
+          4,
+          252,
+          3
+        ],
+        "threshold": 124.5,
+        "fg_px": 119796,
+        "bbox": [
+          136,
+          93,
+          603,
+          503
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0008,
+        "holes": 0.0012,
+        "kb": 90.5,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-sad_slouch-20261008T053906-c9a9a9.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.396,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "original_emojis_exhausted_lie",
+      "tags": [
+        "original_emojis_exhausted_lie",
+        "tired",
+        "sleepy",
+        "exhausted"
+      ],
+      "emoji": "😴😪",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell lying down exhausted with closed eyes and a tired droop, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-exhausted_lie-20261008T053906-53f5b9",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 136504,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 72303,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 72.303,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 23 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 23,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "95.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 95.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          698,
+          755,
+          657,
+          616
+        ],
+        "bg": [
+          4,
+          252,
+          3
+        ],
+        "threshold": 124.5,
+        "fg_px": 136504,
+        "bbox": [
+          50,
+          126,
+          636,
+          481
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 95.7,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-exhausted_lie-20261008T053906-53f5b9.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.401,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "original_emojis_mischievous_reach",
+      "tags": [
+        "original_emojis_mischievous_reach",
+        "mischief",
+        "sly",
+        "playful"
+      ],
+      "emoji": "😏🤭",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell reaching forward with a mischievous grin and narrowed eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-mischievous_reach-20261008T053906-d7bb35",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 125621,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.6
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 66478,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 66.478,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 23 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 23,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "101.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 101.1,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1355,
+          755,
+          693,
+          616
+        ],
+        "bg": [
+          4,
+          252,
+          3
+        ],
+        "threshold": 123.5,
+        "fg_px": 125621,
+        "bbox": [
+          59,
+          66,
+          543,
+          525
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 101.1,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-mischievous_reach-20261008T053906-d7bb35.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.407,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "original_emojis_happy_spin",
+      "tags": [
+        "original_emojis_happy_spin",
+        "joy",
+        "playful",
+        "spinning"
+      ],
+      "emoji": "😊💫",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell spinning happily with eyes closed and wide smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-happy_spin-20261008T053906-6bfad9",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 120772,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 64035,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 64.035,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.8% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0075,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 13 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 13,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "100.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 100.3,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1371,
+          698,
+          677
+        ],
+        "bg": [
+          4,
+          252,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 120772,
+        "bbox": [
+          100,
+          95,
+          645,
+          580
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0075,
+        "kb": 100.3,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-happy_spin-20261008T053906-6bfad9.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.412,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "original_emojis_skeptical_lean",
+      "tags": [
+        "original_emojis_skeptical_lean",
+        "doubt",
+        "skeptical",
+        "questioning"
+      ],
+      "emoji": "🤨🧐",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell leaning forward with skeptical raised eyebrow and crossed arms, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-skeptical_lean-20261008T053906-fbc828",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 117803,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 13.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 62488,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 62.488,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.4% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0043,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.5
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 19 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 19,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "91.6KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 91.6,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          698,
+          1371,
+          657,
+          677
+        ],
+        "bg": [
+          4,
+          252,
+          3
+        ],
+        "threshold": 124.5,
+        "fg_px": 117803,
+        "bbox": [
+          142,
+          81,
+          510,
+          578
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0043,
+        "kb": 91.6,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-skeptical_lean-20261008T053906-fbc828.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.419,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "original_emojis_fearful_run",
+      "tags": [
+        "original_emojis_fearful_run",
+        "fear",
+        "running",
+        "panic"
+      ],
+      "emoji": "😨🏃‍♂️",
+      "prompt": "a simple round yellow smiley face emoji showing various emotions with dynamic facial expressions and body language in every cell running with fearful wide eyes and open mouth, arms pumping, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-original_emojis_varius_emoti-fearful_run-20261008T053906-5d69bd",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134983,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 71592,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 71.592,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 7",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 7,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "107.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 107.9,
+          "limit": 512,
+          "data": {
+            "ms": 3.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1355,
+          1371,
+          693,
+          677
+        ],
+        "bg": [
+          4,
+          251,
+          3
+        ],
+        "threshold": 123.5,
+        "fg_px": 134983,
+        "bbox": [
+          43,
+          95,
+          620,
+          544
+        ],
+        "scale": 0.7281,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 107.9,
+        "format": "png"
+      },
+      "png": "slices/img-original_emojis_varius_emoti-fearful_run-20261008T053906-5d69bd.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "PENDING",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791437947.425,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        }
+      ]
+    }
+  ],
+  "sheet_issues": []
+}

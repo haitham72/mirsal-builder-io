@@ -1,0 +1,429 @@
+{
+  "id": "044",
+  "number": 44,
+  "provider": "higgsfield-manual",
+  "external_task_id": "42f46d94-883a-4796-aee2-9e189468b170",
+  "name_key": "original_generic_emojis",
+  "status": "running",
+  "created": 1791455522.037,
+  "prompt": "original generic emojis",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "glossy_3d",
+  "folders": {
+    "img": "img-044-original_generic_emojis",
+    "vid": "vid-044-original_generic_emojis"
+  },
+  "paths": {
+    "img": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-044-original_generic_emojis",
+    "vid": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\videos_gen\\vid-044-original_generic_emojis"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "smiling broadly with joyful eyes and slightly blushing cheeks",
+          "tags": [
+            "original_generic_emojis_happy_smile",
+            "joy",
+            "happiness",
+            "friendly"
+          ],
+          "emoji": "😀😊",
+          "motion": "the face gently bounces up and down with a subtle sparkle in the eyes"
+        },
+        {
+          "pos": 2,
+          "label": "eyes wide open with raised eyebrows and mouth forming an O in surprise",
+          "tags": [
+            "original_generic_emojis_surprised_shock",
+            "shock",
+            "amazement",
+            "wow"
+          ],
+          "emoji": "😲😮",
+          "motion": "the face snaps eyes wide open then slowly closes them in astonishment"
+        },
+        {
+          "pos": 3,
+          "label": "frowning with furrowed brows and tightly pressed lips showing anger",
+          "tags": [
+            "original_generic_emojis_angry_frown",
+            "anger",
+            "mad",
+            "frustration"
+          ],
+          "emoji": "😠😡",
+          "motion": "the face shakes side to side with a slight steam puff animation"
+        },
+        {
+          "pos": 4,
+          "label": "eyes closed and mouth turned up in a relaxed sleepy smile, head leaning",
+          "tags": [
+            "original_generic_emojis_sleepy_relaxed",
+            "sleepy",
+            "tired",
+            "peaceful"
+          ],
+          "emoji": "😴😌",
+          "motion": "the face slowly nods up and down as if drifting to sleep"
+        },
+        {
+          "pos": 5,
+          "label": "big heart-shaped eyes and wide smiling mouth expressing love",
+          "tags": [
+            "original_generic_emojis_in_love",
+            "love",
+            "affection",
+            "crush"
+          ],
+          "emoji": "😍💕",
+          "motion": "the eyes pulse with a glowing heart effect and a subtle head tilt"
+        },
+        {
+          "pos": 6,
+          "label": "mouth curved downwards with a single tear falling from one eye",
+          "tags": [
+            "original_generic_emojis_sad_cry",
+            "sadness",
+            "tears",
+            "unhappy"
+          ],
+          "emoji": "😢😥",
+          "motion": "the tear slowly rolls down while the face gently quivers"
+        },
+        {
+          "pos": 7,
+          "label": "raised eyebrow with a small smirk and squinted eyes showing mischief",
+          "tags": [
+            "original_generic_emojis_mischievous_smirk",
+            "mischief",
+            "playful",
+            "cheeky"
+          ],
+          "emoji": "😏😉",
+          "motion": "the face winks one eye and tilts side to side playfully"
+        },
+        {
+          "pos": 8,
+          "label": "wide-open laughing mouth with closed eyes and tilted head",
+          "tags": [
+            "original_generic_emojis_laughing_hard",
+            "laughter",
+            "funny",
+            "joy"
+          ],
+          "emoji": "😂🤣",
+          "motion": "the face shakes as if laughing heartily with occasional tears"
+        },
+        {
+          "pos": 9,
+          "label": "neutral expression with one eyebrow raised showing doubt or skepticism",
+          "tags": [
+            "original_generic_emojis_doubtful",
+            "doubt",
+            "skepticism",
+            "questioning"
+          ],
+          "emoji": "🤨😕",
+          "motion": "the eyebrow slowly rises and the face slightly leans forward inquisitively"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "core-v1",
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "original generic emojis",
+    "task_slug": "original_generic_emojis",
+    "subject": "original generic emojis",
+    "scene": "",
+    "described": "original generic emojis",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "smiling broadly with joyful eyes and slightly blushing cheeks",
+          "tags": [
+            "original_generic_emojis_happy_smile",
+            "joy",
+            "happiness",
+            "friendly"
+          ],
+          "emoji": "😀😊",
+          "motion": "the face gently bounces up and down with a subtle sparkle in the eyes"
+        },
+        {
+          "pos": 2,
+          "label": "eyes wide open with raised eyebrows and mouth forming an O in surprise",
+          "tags": [
+            "original_generic_emojis_surprised_shock",
+            "shock",
+            "amazement",
+            "wow"
+          ],
+          "emoji": "😲😮",
+          "motion": "the face snaps eyes wide open then slowly closes them in astonishment"
+        },
+        {
+          "pos": 3,
+          "label": "frowning with furrowed brows and tightly pressed lips showing anger",
+          "tags": [
+            "original_generic_emojis_angry_frown",
+            "anger",
+            "mad",
+            "frustration"
+          ],
+          "emoji": "😠😡",
+          "motion": "the face shakes side to side with a slight steam puff animation"
+        },
+        {
+          "pos": 4,
+          "label": "eyes closed and mouth turned up in a relaxed sleepy smile, head leaning",
+          "tags": [
+            "original_generic_emojis_sleepy_relaxed",
+            "sleepy",
+            "tired",
+            "peaceful"
+          ],
+          "emoji": "😴😌",
+          "motion": "the face slowly nods up and down as if drifting to sleep"
+        },
+        {
+          "pos": 5,
+          "label": "big heart-shaped eyes and wide smiling mouth expressing love",
+          "tags": [
+            "original_generic_emojis_in_love",
+            "love",
+            "affection",
+            "crush"
+          ],
+          "emoji": "😍💕",
+          "motion": "the eyes pulse with a glowing heart effect and a subtle head tilt"
+        },
+        {
+          "pos": 6,
+          "label": "mouth curved downwards with a single tear falling from one eye",
+          "tags": [
+            "original_generic_emojis_sad_cry",
+            "sadness",
+            "tears",
+            "unhappy"
+          ],
+          "emoji": "😢😥",
+          "motion": "the tear slowly rolls down while the face gently quivers"
+        },
+        {
+          "pos": 7,
+          "label": "raised eyebrow with a small smirk and squinted eyes showing mischief",
+          "tags": [
+            "original_generic_emojis_mischievous_smirk",
+            "mischief",
+            "playful",
+            "cheeky"
+          ],
+          "emoji": "😏😉",
+          "motion": "the face winks one eye and tilts side to side playfully"
+        },
+        {
+          "pos": 8,
+          "label": "wide-open laughing mouth with closed eyes and tilted head",
+          "tags": [
+            "original_generic_emojis_laughing_hard",
+            "laughter",
+            "funny",
+            "joy"
+          ],
+          "emoji": "😂🤣",
+          "motion": "the face shakes as if laughing heartily with occasional tears"
+        },
+        {
+          "pos": 9,
+          "label": "neutral expression with one eyebrow raised showing doubt or skepticism",
+          "tags": [
+            "original_generic_emojis_doubtful",
+            "doubt",
+            "skepticism",
+            "questioning"
+          ],
+          "emoji": "🤨😕",
+          "motion": "the eyebrow slowly rises and the face slightly leans forward inquisitively"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "core-v1",
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: smiling broadly with joyful eyes and slightly blushing cheeks\nCharacter 2: eyes wide open with raised eyebrows and mouth forming an O in surprise\nCharacter 3: frowning with furrowed brows and tightly pressed lips showing anger\nCharacter 4: eyes closed and mouth turned up in a relaxed sleepy smile, head leaning\nCharacter 5: big heart-shaped eyes and wide smiling mouth expressing love\nCharacter 6: mouth curved downwards with a single tear falling from one eye\nCharacter 7: raised eyebrow with a small smirk and squinted eyes showing mischief\nCharacter 8: wide-open laughing mouth with closed eyes and tilted head\nCharacter 9: neutral expression with one eyebrow raised showing doubt or skepticism\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every face performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. the face gently bounces up and down with a subtle sparkle in the eyes\n2. the face snaps eyes wide open then slowly closes them in astonishment\n3. the face shakes side to side with a slight steam puff animation\n4. the face slowly nods up and down as if drifting to sleep\n5. the eyes pulse with a glowing heart effect and a subtle head tilt\n6. the tear slowly rolls down while the face gently quivers\n7. the face winks one eye and tilts side to side playfully\n8. the face shakes as if laughing heartily with occasional tears\n9. the eyebrow slowly rises and the face slightly leans forward inquisitively\nAnimation style: wide emotions on highly expressive faces, exaggerated squash and stretch of the face, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), each face on its own rhythm, lively and full of personality. Faces only: no bodies, no hands, no ears, no tails, no props. Never still and never only a gentle sway.\nKeep every face inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and faces never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each face's design, proportions and colours unchanged and do not add outlines or borders.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell smiling broadly with joyful eyes and slightly blushing cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_happy_smile",
+        "tags": [
+          "original_generic_emojis_happy_smile",
+          "joy",
+          "happiness",
+          "friendly"
+        ],
+        "emoji": "😀😊"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell eyes wide open with raised eyebrows and mouth forming an O in surprise, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_surprised_shock",
+        "tags": [
+          "original_generic_emojis_surprised_shock",
+          "shock",
+          "amazement",
+          "wow"
+        ],
+        "emoji": "😲😮"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell frowning with furrowed brows and tightly pressed lips showing anger, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_angry_frown",
+        "tags": [
+          "original_generic_emojis_angry_frown",
+          "anger",
+          "mad",
+          "frustration"
+        ],
+        "emoji": "😠😡"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell eyes closed and mouth turned up in a relaxed sleepy smile, head leaning, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_sleepy_relaxed",
+        "tags": [
+          "original_generic_emojis_sleepy_relaxed",
+          "sleepy",
+          "tired",
+          "peaceful"
+        ],
+        "emoji": "😴😌"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell big heart-shaped eyes and wide smiling mouth expressing love, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_in_love",
+        "tags": [
+          "original_generic_emojis_in_love",
+          "love",
+          "affection",
+          "crush"
+        ],
+        "emoji": "😍💕"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell mouth curved downwards with a single tear falling from one eye, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_sad_cry",
+        "tags": [
+          "original_generic_emojis_sad_cry",
+          "sadness",
+          "tears",
+          "unhappy"
+        ],
+        "emoji": "😢😥"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell raised eyebrow with a small smirk and squinted eyes showing mischief, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_mischievous_smirk",
+        "tags": [
+          "original_generic_emojis_mischievous_smirk",
+          "mischief",
+          "playful",
+          "cheeky"
+        ],
+        "emoji": "😏😉"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell wide-open laughing mouth with closed eyes and tilted head, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_laughing_hard",
+        "tags": [
+          "original_generic_emojis_laughing_hard",
+          "laughter",
+          "funny",
+          "joy"
+        ],
+        "emoji": "😂🤣"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "prompt": "a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell neutral expression with one eyebrow raised showing doubt or skepticism, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_doubtful",
+        "tags": [
+          "original_generic_emojis_doubtful",
+          "doubt",
+          "skepticism",
+          "questioning"
+        ],
+        "emoji": "🤨😕"
+      }
+    ],
+    "expanded_by": "ai",
+    "expand_model": "gpt-4.1-mini-2025-04-14",
+    "previewed": true,
+    "custom": {
+      "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: a classic round yellow face emoji with simple black eyes and a mouth, identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: smiling broadly with joyful eyes and slightly blushing cheeks\nCharacter 2: eyes wide open with raised eyebrows and mouth forming an O in surprise\nCharacter 3: frowning with furrowed brows and tightly pressed lips showing anger\nCharacter 4: eyes closed and mouth turned up in a relaxed sleepy smile, head leaning\nCharacter 5: big heart-shaped eyes and wide smiling mouth expressing love\nCharacter 6: mouth curved downwards with a single tear falling from one eye\nCharacter 7: raised eyebrow with a small smirk and squinted eyes showing mischief\nCharacter 8: wide-open laughing mouth with closed eyes and tilted head\nCharacter 9: neutral expression with one eyebrow raised showing doubt or skepticism\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another."
+    }
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791455522.037,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G119"
+  ]
+}

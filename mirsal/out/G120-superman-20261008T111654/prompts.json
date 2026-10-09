@@ -1,0 +1,62 @@
+{
+  "task": "superman",
+  "task_slug": "superman",
+  "subject": "superman",
+  "scene": "",
+  "described": "superman",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    1,
+    1
+  ],
+  "template_id": "single_1x1",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "superman",
+    "style_id": "flat_vector",
+    "mode": "single_1x1",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "bursting with excitement, star-sparkle eyes, fists shaking",
+        "tags": [
+          "superman_excited",
+          "bursting",
+          "excitement",
+          "star"
+        ],
+        "emoji": "🤩",
+        "motion": "vibrates with joy, jumps up and down, claps"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null
+  },
+  "guidelines": {
+    "sheet": "1x1 sticker sheet, 1 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 1 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "A single character, centred on a square canvas.\nSubject: superman.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw the character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nExpression and state of action (a wide range of emotions, a clear body position), big and readable at small size: bursting with excitement, star-sparkle eyes, fists shaking\nBackground: one single flat pure green (#00FF00) colour over the entire image, one identical shade everywhere; no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nMargin: full body, centred, with a generous empty margin on every side (at least 20% of the canvas), nothing touching or crossing the edge.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. vibrates with joy, jumps up and down, claps\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 1x1 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "superman bursting with excitement, star-sparkle eyes, fists shaking, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "superman_excited",
+      "tags": [
+        "superman_excited",
+        "bursting",
+        "excitement",
+        "star"
+      ],
+      "emoji": "🤩"
+    }
+  ]
+}

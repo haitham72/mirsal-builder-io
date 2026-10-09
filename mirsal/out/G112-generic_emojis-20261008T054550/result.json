@@ -1,0 +1,4294 @@
+{
+  "generation_id": "G112",
+  "number": 112,
+  "owner": "local",
+  "created": 1791438350.355,
+  "parent": null,
+  "prompt": "generic emojis",
+  "task": "generic emojis",
+  "task_slug": "generic_emojis",
+  "source": {
+    "subject": "generic_emojis",
+    "subject_id": "005",
+    "variant": 1,
+    "n_variants": 6,
+    "sheet": "img-05-generic_emojis.png",
+    "video": "vid-05-generic_emojis.mp4",
+    "has_video": true,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "prepared": true,
+    "clips": {},
+    "sheet_path": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-005-generic_emojis\\img-05-generic_emojis.png",
+    "video_path": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\videos_gen\\vid-005-generic_emojis\\vid-05-generic_emojis.mp4",
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          688,
+          727
+        ],
+        [
+          688,
+          0,
+          646,
+          727
+        ],
+        [
+          1334,
+          0,
+          714,
+          727
+        ],
+        [
+          0,
+          727,
+          688,
+          648
+        ],
+        [
+          688,
+          727,
+          646,
+          648
+        ],
+        [
+          1334,
+          727,
+          714,
+          648
+        ],
+        [
+          0,
+          1375,
+          688,
+          673
+        ],
+        [
+          688,
+          1375,
+          646,
+          673
+        ],
+        [
+          1334,
+          1375,
+          714,
+          673
+        ]
+      ],
+      "xs": [
+        0,
+        688,
+        1334,
+        2048
+      ],
+      "ys": [
+        0,
+        727,
+        1375,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png",
+    "video_info": {
+      "mode": "3x3 mp4",
+      "clips": 0,
+      "from_mp4": 9,
+      "missing": [],
+      "file": "vid-05-generic_emojis.mp4",
+      "size": "1440x1440",
+      "fps": 24.0,
+      "duration": 3.04,
+      "codec": "h264"
+    }
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "pack_final",
+  "error": null,
+  "plan_source": "stub (generation/prompter.py)",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: generic emojis.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: blowing a kiss with a wink, a small heart floating away\nCharacter 2: bursting with excitement, star-sparkle eyes, fists shaking\nCharacter 3: huge shiny puppy eyes, hands clasped, begging please\nCharacter 4: making an OK sign with a cheerful squint\nCharacter 5: rolling eyes with a bored deadpan face\nCharacter 6: sad and drooping, a single tear, slumped shoulders\nCharacter 7: grumpy with arms crossed, pouting, turned slightly away\nCharacter 8: dizzy with spiral eyes, wobbling on the spot\nCharacter 9: embarrassed and blushing, hiding the face behind paws, peeking\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. kisses the air, the heart floats off, a playful wink\n2. vibrates with joy, jumps up and down, claps\n3. wrings the hands, eyes shimmer, small hopeful bounce\n4. bobs the hand, nods approvingly, tilts the head\n5. eyes circle slowly, head tilts back with a sigh\n6. sighs, shoulders sag, droops slowly lower\n7. huffs, taps a foot, puffs the cheeks\n8. sways in circles, little stars orbit the head\n9. shy sway, peeks through the fingers then hides again\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "generic emojis",
+    "style_id": "flat_vector",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "blowing a kiss with a wink, a small heart floating away",
+        "tags": [
+          "generic_emojis_blowing_a_kiss",
+          "blowing",
+          "kiss",
+          "wink"
+        ],
+        "emoji": "😘",
+        "motion": "kisses the air, the heart floats off, a playful wink"
+      },
+      {
+        "pos": 2,
+        "label": "bursting with excitement, star-sparkle eyes, fists shaking",
+        "tags": [
+          "generic_emojis_excited",
+          "bursting",
+          "excitement",
+          "star"
+        ],
+        "emoji": "🤩",
+        "motion": "vibrates with joy, jumps up and down, claps"
+      },
+      {
+        "pos": 3,
+        "label": "huge shiny puppy eyes, hands clasped, begging please",
+        "tags": [
+          "generic_emojis_puppy_eyes",
+          "huge",
+          "shiny",
+          "puppy"
+        ],
+        "emoji": "🥺",
+        "motion": "wrings the hands, eyes shimmer, small hopeful bounce"
+      },
+      {
+        "pos": 4,
+        "label": "making an OK sign with a cheerful squint",
+        "tags": [
+          "generic_emojis_ok_sign",
+          "making",
+          "sign",
+          "cheerful"
+        ],
+        "emoji": "👌",
+        "motion": "bobs the hand, nods approvingly, tilts the head"
+      },
+      {
+        "pos": 5,
+        "label": "rolling eyes with a bored deadpan face",
+        "tags": [
+          "generic_emojis_eye_roll",
+          "rolling",
+          "eyes",
+          "bored"
+        ],
+        "emoji": "🙄",
+        "motion": "eyes circle slowly, head tilts back with a sigh"
+      },
+      {
+        "pos": 6,
+        "label": "sad and drooping, a single tear, slumped shoulders",
+        "tags": [
+          "generic_emojis_sad",
+          "sad",
+          "drooping",
+          "single"
+        ],
+        "emoji": "😞",
+        "motion": "sighs, shoulders sag, droops slowly lower"
+      },
+      {
+        "pos": 7,
+        "label": "grumpy with arms crossed, pouting, turned slightly away",
+        "tags": [
+          "generic_emojis_grumpy",
+          "grumpy",
+          "arms",
+          "crossed"
+        ],
+        "emoji": "😤",
+        "motion": "huffs, taps a foot, puffs the cheeks"
+      },
+      {
+        "pos": 8,
+        "label": "dizzy with spiral eyes, wobbling on the spot",
+        "tags": [
+          "generic_emojis_dizzy",
+          "dizzy",
+          "spiral",
+          "eyes"
+        ],
+        "emoji": "😵‍💫",
+        "motion": "sways in circles, little stars orbit the head"
+      },
+      {
+        "pos": 9,
+        "label": "embarrassed and blushing, hiding the face behind paws, peeking",
+        "tags": [
+          "generic_emojis_embarrassed",
+          "embarrassed",
+          "blushing",
+          "hiding"
+        ],
+        "emoji": "😳",
+        "motion": "shy sway, peeks through the fingers then hides again"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green"
+  },
+  "task_id": null,
+  "name_key": "generic_emojis",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791438350.393,
+      "note": "approved by pressing Generate"
+    },
+    "video_sheet": {},
+    "pack": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791438430.59,
+      "note": "approved by Add",
+      "stickers": [
+        3
+      ]
+    }
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 44.8
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 142 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 142.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 11.1
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 35.1
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            688,
+            1334,
+            2048
+          ],
+          "ys": [
+            0,
+            727,
+            1375,
+            2048
+          ],
+          "ms": 34.5
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 1.8 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.83,
+        "limit": 12.0,
+        "data": {
+          "ms": 78.0
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "generic_emojis_blowing_a_kiss",
+      "tags": [
+        "generic_emojis_blowing_a_kiss",
+        "blowing",
+        "kiss",
+        "wink"
+      ],
+      "emoji": "😘",
+      "prompt": "generic emojis blowing a kiss with a wink, a small heart floating away, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-blowing_a_kiss-20261008T054550-2588a6",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 171874,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 24.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 127584,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 127.584,
+          "data": {
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "218.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 218.2,
+          "limit": 512,
+          "data": {
+            "ms": 4.9
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          688,
+          727
+        ],
+        "bg": [
+          21,
+          176,
+          34
+        ],
+        "threshold": 71.0,
+        "fg_px": 171874,
+        "bbox": [
+          113,
+          160,
+          604,
+          657
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0001,
+        "holes": 0.0,
+        "kb": 218.2,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-blowing_a_kiss-20261008T054550-2588a6.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 1167,
+          "key": 701,
+          "bounds": 98,
+          "render": 1837,
+          "seam": 1253,
+          "encode": 5424,
+          "encodes": 4,
+          "probe": 268,
+          "verify": 15,
+          "finish": 8900
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          12,
+          68,
+          484,
+          510
+        ],
+        "edge_touch_frames": 40,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.8407,
+        "motion": 35.54,
+        "loop_seam_before": 176.5,
+        "loop_cut": 17,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 51.03,
+        "frames_out": 49,
+        "crf": 34,
+        "sharp_kept": 1.0,
+        "kb": 204.5
+      },
+      "webm": "slices/vid-generic_emojis-blowing_a_kiss-20261008T054550-2588a6.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.505,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438423.431,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 448,
+            "limit": 8,
+            "note": "frame 7: 128px on the cell border (42 of 72 frames over)",
+            "data": {
+              "frame": 7,
+              "frames_over": 42,
+              "ms": 7.0
+            }
+          }
+        },
+        {
+          "ts": 1791438430.397,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 7: 128px on the cell border (42 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 448,
+          "limit": 8,
+          "data": {
+            "frame": 7,
+            "frames_over": 42,
+            "ms": 7.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "204KB @crf34",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 204,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.04",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.04,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 51.03",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 51.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 35.54",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 35.54,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.048,
+          "limit": 0.35,
+          "data": {
+            "ms": 14.3
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "generic_emojis_excited",
+      "tags": [
+        "generic_emojis_excited",
+        "bursting",
+        "excitement",
+        "star"
+      ],
+      "emoji": "🤩",
+      "prompt": "generic emojis bursting with excitement, star-sparkle eyes, fists shaking, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-excited-20261008T054550-43b7bf",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 153541,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 114493,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 114.49300000000001,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 25 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 25,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "191.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 191.7,
+          "limit": 512,
+          "data": {
+            "ms": 4.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          688,
+          0,
+          646,
+          727
+        ],
+        "bg": [
+          21,
+          176,
+          33
+        ],
+        "threshold": 71.0,
+        "fg_px": 153541,
+        "bbox": [
+          143,
+          164,
+          551,
+          685
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0001,
+        "holes": 0.0,
+        "kb": 191.7,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-excited-20261008T054550-43b7bf.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 1148,
+          "key": 653,
+          "bounds": 107,
+          "render": 1781,
+          "seam": 1473,
+          "encode": 5651,
+          "encodes": 4,
+          "probe": 193,
+          "verify": 14,
+          "finish": 9224
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          110,
+          416,
+          510
+        ],
+        "edge_touch_frames": 5,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.9538,
+        "motion": 26.07,
+        "loop_seam_before": 168.16,
+        "loop_cut": 5,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 39.71,
+        "frames_out": 61,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "kb": 246.4
+      },
+      "webm": "slices/vid-generic_emojis-excited-20261008T054550-43b7bf.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.512,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438423.69,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 96,
+            "limit": 8,
+            "note": "frame 36: 96px on the cell border (5 of 72 frames over)",
+            "data": {
+              "frame": 36,
+              "frames_over": 5,
+              "ms": 9.3
+            }
+          }
+        },
+        {
+          "ts": 1791438430.398,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 36: 96px on the cell border (5 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 96,
+          "limit": 8,
+          "data": {
+            "frame": 36,
+            "frames_over": 5,
+            "ms": 9.3
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "246KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 246,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.54",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.54,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 39.71",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 39.71,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 26.07",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 26.07,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.05,
+          "limit": 0.35,
+          "data": {
+            "ms": 14.2
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "generic_emojis_puppy_eyes",
+      "tags": [
+        "generic_emojis_puppy_eyes",
+        "huge",
+        "shiny",
+        "puppy"
+      ],
+      "emoji": "🥺",
+      "prompt": "generic emojis huge shiny puppy eyes, hands clasped, begging please, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-puppy_eyes-20261008T054550-e18027",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 151806,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 19.7
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 111265,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 111.265,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "183.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 183.9,
+          "limit": 512,
+          "data": {
+            "ms": 4.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1334,
+          0,
+          714,
+          727
+        ],
+        "bg": [
+          21,
+          175,
+          33
+        ],
+        "threshold": 71.0,
+        "fg_px": 151806,
+        "bbox": [
+          89,
+          165,
+          573,
+          583
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 183.9,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-puppy_eyes-20261008T054550-e18027.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 1175,
+          "key": 724,
+          "bounds": 93,
+          "render": 1678,
+          "seam": 570,
+          "encode": 6277,
+          "encodes": 4,
+          "probe": 241,
+          "verify": 31,
+          "finish": 8895
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          52,
+          110,
+          412,
+          414
+        ],
+        "edge_touch_frames": 0,
+        "scale": 1.1022,
+        "motion": 26.14,
+        "loop_seam_before": 94.88,
+        "loop_cut": 8,
+        "loop_seam": 35.16,
+        "loop_limit": 39.22,
+        "frames_out": 64,
+        "crf": 34,
+        "sharp_kept": 0.99,
+        "kb": 239.8
+      },
+      "webm": "slices/vid-generic_emojis-puppy_eyes-20261008T054550-e18027.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "APPROVED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.518,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438423.542,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "prepared video",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438430.4,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791438430.507,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791438430.59,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": true,
+          "detail": "0px on the cell border at most",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "frame": null,
+            "frames_over": 0,
+            "ms": 6.8
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "239KB @crf34",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 239,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.67",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.67,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "35.16 <= 39.22",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 35.16,
+          "limit": 39.22,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 26.14",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 26.14,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 3% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.031,
+          "limit": 0.35,
+          "data": {
+            "ms": 30.4
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.99x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.99,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "generic_emojis_ok_sign",
+      "tags": [
+        "generic_emojis_ok_sign",
+        "making",
+        "sign",
+        "cheerful"
+      ],
+      "emoji": "👌",
+      "prompt": "generic emojis making an OK sign with a cheerful squint, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-ok_sign-20261008T054550-2c74bd",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 172086,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 21.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 129809,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 129.809,
+          "data": {
+            "ms": 2.5
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "221.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 221.8,
+          "limit": 512,
+          "data": {
+            "ms": 5.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          727,
+          688,
+          648
+        ],
+        "bg": [
+          21,
+          175,
+          33
+        ],
+        "threshold": 71.0,
+        "fg_px": 172086,
+        "bbox": [
+          128,
+          43,
+          606,
+          542
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 221.8,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-ok_sign-20261008T054550-2c74bd.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 1171,
+          "key": 623,
+          "bounds": 118,
+          "render": 1910,
+          "seam": 1602,
+          "encode": 3740,
+          "encodes": 2,
+          "probe": 207,
+          "verify": 14,
+          "finish": 7610
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          0,
+          484,
+          456
+        ],
+        "edge_touch_frames": 58,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.8198,
+        "motion": 85.22,
+        "loop_seam_before": 164.51,
+        "loop_cut": 6,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 114.23,
+        "frames_out": 60,
+        "crf": 42,
+        "sharp_kept": 1.0,
+        "kb": 252.4
+      },
+      "webm": "slices/vid-generic_emojis-ok_sign-20261008T054550-2c74bd.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.526,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438422.08,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 1460,
+            "limit": 8,
+            "note": "frame 6: 403px on the cell border (58 of 72 frames over)",
+            "data": {
+              "frame": 6,
+              "frames_over": 58,
+              "ms": 7.6
+            }
+          }
+        },
+        {
+          "ts": 1791438430.401,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 6: 403px on the cell border (58 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 1460,
+          "limit": 8,
+          "data": {
+            "frame": 6,
+            "frames_over": 58,
+            "ms": 7.6
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "252KB @crf42",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 252,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.5",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.5,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 114.23",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 114.23,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 85.22",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 85.22,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 12% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.121,
+          "limit": 0.35,
+          "data": {
+            "ms": 14.1
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "generic_emojis_eye_roll",
+      "tags": [
+        "generic_emojis_eye_roll",
+        "rolling",
+        "eyes",
+        "bored"
+      ],
+      "emoji": "🙄",
+      "prompt": "generic emojis rolling eyes with a bored deadpan face, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-eye_roll-20261008T054550-3e5562",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 174036,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 23.7
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 131397,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 131.397,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0004,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0017,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 22 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 22,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "259.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 259.4,
+          "limit": 512,
+          "data": {
+            "ms": 5.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          688,
+          727,
+          646,
+          648
+        ],
+        "bg": [
+          21,
+          176,
+          33
+        ],
+        "threshold": 71.5,
+        "fg_px": 174036,
+        "bbox": [
+          67,
+          44,
+          585,
+          594
+        ],
+        "scale": 0.7913,
+        "scale_mode": "clamped",
+        "spill_px": 0,
+        "chroma_risk": 0.0004,
+        "holes": 0.0017,
+        "kb": 259.4,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-eye_roll-20261008T054550-3e5562.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 1102,
+          "key": 569,
+          "bounds": 137,
+          "render": 1941,
+          "seam": 781,
+          "encode": 4372,
+          "encodes": 2,
+          "probe": 216,
+          "verify": 22,
+          "finish": 7480
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          0,
+          454,
+          456
+        ],
+        "edge_touch_frames": 54,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.8702,
+        "motion": 56.79,
+        "loop_seam_before": 143.48,
+        "loop_cut": 3,
+        "loop_seam": 74.95,
+        "loop_limit": 85.07,
+        "frames_out": 69,
+        "crf": 46,
+        "sharp_kept": 0.98,
+        "kb": 202.8
+      },
+      "webm": "slices/vid-generic_emojis-eye_roll-20261008T054550-3e5562.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.532,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438421.83,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 880,
+            "limit": 8,
+            "note": "frame 6: 73px on the cell border (54 of 72 frames over)",
+            "data": {
+              "frame": 6,
+              "frames_over": 54,
+              "ms": 8.9
+            }
+          }
+        },
+        {
+          "ts": 1791438430.402,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 6: 73px on the cell border (54 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 880,
+          "limit": 8,
+          "data": {
+            "frame": 6,
+            "frames_over": 54,
+            "ms": 8.9
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "202KB @crf46",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 202,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.88",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.88,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.3
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "74.95 <= 85.07",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 74.95,
+          "limit": 85.07,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 56.79",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 56.79,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 5% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.05,
+          "limit": 0.35,
+          "data": {
+            "ms": 21.6
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.98x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.98,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "generic_emojis_sad",
+      "tags": [
+        "generic_emojis_sad",
+        "sad",
+        "drooping",
+        "single"
+      ],
+      "emoji": "😞",
+      "prompt": "generic emojis sad and drooping, a single tear, slumped shoulders, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-sad-20261008T054550-245e89",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 159330,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 21.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 118658,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 118.658,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 14 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 14,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "199.1KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 199.1,
+          "limit": 512,
+          "data": {
+            "ms": 4.7
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1334,
+          727,
+          714,
+          648
+        ],
+        "bg": [
+          21,
+          175,
+          33
+        ],
+        "threshold": 71.5,
+        "fg_px": 159330,
+        "bbox": [
+          60,
+          90,
+          581,
+          514
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 199.1,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-sad-20261008T054550-245e89.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 1166,
+          "key": 667,
+          "bounds": 99,
+          "render": 1717,
+          "seam": 786,
+          "encode": 5561,
+          "encodes": 4,
+          "probe": 220,
+          "verify": 12,
+          "finish": 8400
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          62,
+          502,
+          456
+        ],
+        "edge_touch_frames": 29,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.7904,
+        "motion": 57.27,
+        "loop_seam_before": 126.1,
+        "loop_cut": 20,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 57.74,
+        "frames_out": 46,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "kb": 207.9
+      },
+      "webm": "slices/vid-generic_emojis-sad-20261008T054550-245e89.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.54,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438422.901,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 432,
+            "limit": 8,
+            "note": "frame 23: 25px on the cell border (30 of 72 frames over)",
+            "data": {
+              "frame": 23,
+              "frames_over": 30,
+              "ms": 6.9
+            }
+          }
+        },
+        {
+          "ts": 1791438430.402,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 23: 25px on the cell border (30 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 432,
+          "limit": 8,
+          "data": {
+            "frame": 23,
+            "frames_over": 30,
+            "ms": 6.9
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "207KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 207,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "1.92",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 1.92,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 57.74",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 57.74,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 57.27",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 57.27,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 4% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.042,
+          "limit": 0.35,
+          "data": {
+            "ms": 11.7
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "generic_emojis_grumpy",
+      "tags": [
+        "generic_emojis_grumpy",
+        "grumpy",
+        "arms",
+        "crossed"
+      ],
+      "emoji": "😤",
+      "prompt": "generic emojis grumpy with arms crossed, pouting, turned slightly away, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-grumpy-20261008T054550-727be4",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 144155,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 19.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 106202,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 106.202,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 19 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 19,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "170.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 170.4,
+          "limit": 512,
+          "data": {
+            "ms": 4.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1375,
+          688,
+          673
+        ],
+        "bg": [
+          21,
+          175,
+          34
+        ],
+        "threshold": 71.0,
+        "fg_px": 144155,
+        "bbox": [
+          157,
+          57,
+          620,
+          507
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 170.4,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-grumpy-20261008T054550-727be4.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 325,
+          "key": 561,
+          "bounds": 68,
+          "render": 1615,
+          "seam": 672,
+          "encode": 2704,
+          "encodes": 4,
+          "probe": 185,
+          "verify": 10,
+          "finish": 5258
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          0,
+          484,
+          358
+        ],
+        "edge_touch_frames": 37,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.8198,
+        "motion": 29.26,
+        "loop_seam_before": 101.08,
+        "loop_cut": 18,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 43.01,
+        "frames_out": 48,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "kb": 158.9
+      },
+      "webm": "slices/vid-generic_emojis-grumpy-20261008T054550-727be4.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.545,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438428.081,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 616,
+            "limit": 8,
+            "note": "frame 5: 217px on the cell border (38 of 72 frames over)",
+            "data": {
+              "frame": 5,
+              "frames_over": 38,
+              "ms": 7.0
+            }
+          }
+        },
+        {
+          "ts": 1791438430.404,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 5: 217px on the cell border (38 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 616,
+          "limit": 8,
+          "data": {
+            "frame": 5,
+            "frames_over": 38,
+            "ms": 7.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "158KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 158,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 43.01",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 43.01,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 29.26",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 29.26,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 3% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.032,
+          "limit": 0.35,
+          "data": {
+            "ms": 9.6
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "generic_emojis_dizzy",
+      "tags": [
+        "generic_emojis_dizzy",
+        "dizzy",
+        "spiral",
+        "eyes"
+      ],
+      "emoji": "😵‍💫",
+      "prompt": "generic emojis dizzy with spiral eyes, wobbling on the spot, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-dizzy-20261008T054550-763743",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 143430,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 19.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 112454,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 112.45400000000001,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.3% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0033,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "183.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 183.9,
+          "limit": 512,
+          "data": {
+            "ms": 4.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          688,
+          1375,
+          646,
+          673
+        ],
+        "bg": [
+          21,
+          176,
+          33
+        ],
+        "threshold": 71.0,
+        "fg_px": 143430,
+        "bbox": [
+          110,
+          54,
+          561,
+          518
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0033,
+        "kb": 183.9,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-dizzy-20261008T054550-763743.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 311,
+          "key": 414,
+          "bounds": 61,
+          "render": 1633,
+          "seam": 891,
+          "encode": 3454,
+          "encodes": 4,
+          "probe": 158,
+          "verify": 13,
+          "finish": 6214
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          0,
+          454,
+          366
+        ],
+        "edge_touch_frames": 37,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.874,
+        "motion": 30.65,
+        "loop_seam_before": 78.07,
+        "loop_cut": 1,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 44.46,
+        "frames_out": 65,
+        "crf": 34,
+        "sharp_kept": 1.01,
+        "kb": 237.1
+      },
+      "webm": "slices/vid-generic_emojis-dizzy-20261008T054550-763743.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.552,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438429.237,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 510,
+            "limit": 8,
+            "note": "frame 5: 168px on the cell border (39 of 72 frames over)",
+            "data": {
+              "frame": 5,
+              "frames_over": 39,
+              "ms": 5.1
+            }
+          }
+        },
+        {
+          "ts": 1791438430.404,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 5: 168px on the cell border (39 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 510,
+          "limit": 8,
+          "data": {
+            "frame": 5,
+            "frames_over": 39,
+            "ms": 5.1
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "237KB @crf34",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 237,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.71",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.71,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 44.46",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 44.46,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 30.65",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 30.65,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 3% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.028,
+          "limit": 0.35,
+          "data": {
+            "ms": 12.8
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.01x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.01,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "generic_emojis_embarrassed",
+      "tags": [
+        "generic_emojis_embarrassed",
+        "embarrassed",
+        "blushing",
+        "hiding"
+      ],
+      "emoji": "😳",
+      "prompt": "generic emojis embarrassed and blushing, hiding the face behind paws, peeking, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis-embarrassed-20261008T054550-990cc0",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 145065,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.2
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 110577,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 110.577,
+          "data": {
+            "ms": 2.2
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0002,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 7",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 7,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "184.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 184.5,
+          "limit": 512,
+          "data": {
+            "ms": 4.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1334,
+          1375,
+          714,
+          673
+        ],
+        "bg": [
+          20,
+          175,
+          33
+        ],
+        "threshold": 71.0,
+        "fg_px": 145065,
+        "bbox": [
+          86,
+          82,
+          577,
+          527
+        ],
+        "scale": 0.7984,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0002,
+        "holes": 0.0,
+        "kb": 184.5,
+        "format": "png"
+      },
+      "png": "slices/img-generic_emojis-embarrassed-20261008T054550-990cc0.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "3x3 mp4",
+        "threshold": 71.5,
+        "ms": {
+          "decode": 313,
+          "key": 516,
+          "bounds": 61,
+          "render": 1473,
+          "seam": 695,
+          "encode": 2499,
+          "encodes": 4,
+          "probe": 164,
+          "verify": 15,
+          "finish": 4912
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          0,
+          482,
+          396
+        ],
+        "edge_touch_frames": 23,
+        "warnings": [
+          "inside_frame"
+        ],
+        "scale": 0.8232,
+        "motion": 17.81,
+        "loop_seam_before": 260.25,
+        "loop_cut": 22,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 28.5,
+        "frames_out": 44,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "kb": 182.1
+      },
+      "webm": "slices/vid-generic_emojis-embarrassed-20261008T054550-990cc0.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791438351.559,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791438428.752,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_frame",
+          "ref": "prepared video",
+          "detail": {
+            "check": "inside_frame",
+            "value": 196,
+            "limit": 8,
+            "note": "frame 23: 144px on the cell border (23 of 72 frames over)",
+            "data": {
+              "frame": 23,
+              "frames_over": 23,
+              "ms": 5.2
+            }
+          }
+        },
+        {
+          "ts": 1791438430.406,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_frame",
+          "ok": false,
+          "detail": "frame 23: 144px on the cell border (23 of 72 frames over)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 196,
+          "limit": 8,
+          "data": {
+            "frame": 23,
+            "frames_over": 23,
+            "ms": 5.2
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "182KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 182,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "1.83",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 1.83,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 28.5",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 28.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 17.81",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 17.81,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 4% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.035,
+          "limit": 0.35,
+          "data": {
+            "ms": 14.9
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "1.00x of the edge detail survives the encode",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 1.0,
+          "limit": 0.8,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "sheet_issues": [],
+  "added": {
+    "5ca8a616": [
+      "animated:3"
+    ]
+  }
+}

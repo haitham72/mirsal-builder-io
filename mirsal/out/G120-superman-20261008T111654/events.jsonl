@@ -1,0 +1,7 @@
+{"ts": 1791458214.767, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "superman", "task_slug": "superman"}}
+{"ts": 1791458214.86, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791458215.196, "stage": "sheet_picked", "status": "done", "ms": 336, "detail": {"subject": "i_need_superman_as_watermelon", "variant": 1, "of": 1, "file": "img-014-i_need_superman_as_watermelon-sheet-nano_banana_flash-2k-20261002.png", "blocked": null, "cut_anyway": ["grid_detected"], "warnings": []}}
+{"ts": 1791458215.199, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791458215.491, "stage": "keyed", "status": "done", "ms": 292, "detail": {"bg": [5, 64, 253], "threshold": [94.0], "grid": "1x1", "cut": "single", "xs": [0, 2048], "ys": [0, 2048]}}
+{"ts": 1791458215.493, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791458215.845, "stage": "sliced", "status": "done", "ms": 351, "detail": {"ready": 1, "failed": 0}}

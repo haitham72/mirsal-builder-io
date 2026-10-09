@@ -5419,5 +5419,15 @@
       "animated:8",
       "animated:9"
     ]
-  }
+  },
+  "group": "G099",
+  "group_history": [
+    {
+      "ts": 1791455433.329,
+      "actor": "local",
+      "decision": "JOIN",
+      "to": "G099",
+      "via": "G108"
+    }
+  ]
 }
