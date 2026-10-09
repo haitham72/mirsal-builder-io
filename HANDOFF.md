@@ -6,5 +6,4 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-Nothing. Every session so far ended committed and pushed. The next work is `plan.md`; what is open is in `docs/backlog.md` and
-`docs/waiting-for-haitham.md`.
+`plan.md` rewritten (Step 0 continuation fix + stages + batches, Q1–Q3 recorded decided), uncommitted. No code touched: Steps 0–4 all unbuilt.
