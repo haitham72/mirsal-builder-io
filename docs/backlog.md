@@ -34,6 +34,16 @@ Still open from the chat audit of 2026-10-02 and the browser look of 2026-10-03,
 4. **Smaller.** "continue with a dragon pack instead" at a creator gate approves the pack; the model's intent is trusted unchecked; a down model can cost up to 45 s per call; `ai: True` is hardcoded in another / edit / retry; the edit trace and stored pass show the stub, not the prompt sent. **open**.
 5. **Gaps from the browser look**: an empty "New chat" created by clicking a setting with no chat open (W22); a chat edit of an animated sticker opens Prepare; "undo" has no "redo"; a bare "the last one" / "wear a hat" with no person and no focus still plans a new batch (W23). **needs Haitham**.
 
+6. **The Telegram chat** (`services/tg_chat.py`, 2026-10-09): a picture sent to the bot is not read yet (it says so); single sheet cells, the editor and
+   the gap slider stay in the browser; never run against the real bot (W49). **open**.
+7. **The claim ledger behind Next batch** (`generation/claims.py`, migration 012, built and tested, not wired): "unclaimed" is still derived from the
+   batches (`tasks.session_state`), not from the ledger. Wire `claim_next` for a pack request and "generate more", `mark_requested` when the sheet job
+   is created, `link_generation` when its batch exists; the loser of a double click reads the winner's row; `ClaimError` text as the answer. Source:
+   `docs/export to team/mirsal-export-architecture.md` §9-§10.7. **open**.
+8. **A local-model judge run** (no human labels, Haitham 2026-10-07): run `mirsal/local_eval/run.py run` on the current local pick (free), compare
+   with the 2026-10-05 baseline (usable rate, median latency, UNJUDGED count), a two-model disagreement re-check, one dated block in
+   `docs/measurements.md`. **open**.
+
 Other open items:
 
 - Creator recovery at every external side effect is not proven: checkpoints and tagged video-job lookup cover the lost-animation-pointer window, but initial sheet/session linkage and pack creation can still be interrupted between durable writes. A tagged REQUESTED job not yet scheduled may need Queue recovery. **open**; live crash validation belongs with W6.
@@ -49,11 +59,24 @@ Other open items:
 
 ## Engine and Studio (`docs/engine-and-studio.md`)
 
+- **Short export codes** (exports stop emitting `G###`): registry `out/export_codes.json` + allocator (random 4, check, retry) at claim time, lazy
+  backfill at the first export, `export_names` id = the code, the manifest carries both ids, a Postgres column. Source: the export architecture §9-§10.7. **open**.
+- **The exporter's bank picker** (Studio export dialog): a bank choice per `unresolved` cell, recorded and reversible, saved on the sticker. **open**.
+- **In-batch versions, the rest**: a switcher to look at an earlier animation clip without re-cutting, the Postgres mirror of picks and versions,
+  export naming per version (`revision`). **open**.
+- `batch_import_inputs.py` at the repo root does not run (it calls `pl.Config.default()` / `pl.Pace.default()`, which do not exist, prints characters
+  cp1252 cannot encode, ignores its arguments and would import a folder twice). Fix it before anyone runs it against the real `out/`. **open**.
+
 - The Studio's JavaScript has node tests on the pure builders (`tests/js`) but no browser smoke test: add one for issue colours, Include anyway, the history folds, the AI captions panel and the bulk move (checked by hand in Chromium on a scratch copy of `out/`; `tests/test_js.py` only guards the shared `ACT` names, that every button has a handler and the shell rules). **open**.
 - A second request while the *pipeline* is busy gets 409 (the provider jobs have their own durable queue). `result.json` is read-modify-write under one in-process lock plus the cross-process writer lock: two request threads can still interleave inside one server (two processes are kept out by the writer lock; every file write is atomic: `tests/test_multiprocess.py`). **open, low**.
 - Add a focused-tier profile for the trash purge / storage area (`docs/testing.md`: the existing profiles do not cover it). **open**.
 
 ## Live generation (`docs/generation.md`, `docs/higgsfield.md`, `docs/operator.md`)
+
+- **Paid proof of the face preset**: one `generic emojis` sheet (v4 + core-v1), measure keying and the cut only (never open the media); if limbs
+  persist, tighten the v4 clause once (new `_v5` files, never edit v4) and retry once; then one pack at the default gap. About 2 credits + one pack.
+  **needs a paid test** (W50).
+- **Export to collection** (`services/collection.py`) has never reached the real CMS since the ContentSubType fix. **needs Haitham** (W49).
 
 - S4 re-run with Kling `pro` and the default gap decision (`slot_fill`); S7 decisions (one 3x3 sheet vs single stickers; the engine's outline vs a model-drawn one). **needs a paid test** (W7).
 - The vision judge's recovery is a recommendation (`vision/recovery.py`); nothing executes it. Executing means paid regenerations, so it needs a confirmation flow. **needs Haitham**.
@@ -117,6 +140,8 @@ Other open items:
 - `serve --stdlib` has no Help routes (the old server goes after one release). **parked**.
 
 ## Testing
+
+- `tests.test_batches.RemoveRoutes` fails now and then on Windows in teardown (a file still locked). **open**.
 
 - `tests.test_golden` failed intermittently once under heavy load (another Python suite running at the same time): one test left the server busy (`409 busy`) for the next. It passes alone and as a suite on a quiet machine (FastAPI and stdlib alike). If it returns, make `GoldenPathTests.wait` also wait for `busy` to stay false for a moment before the next create. **watch**.
 

@@ -1,70 +1,91 @@
-# plan.md — next build: pack resolver, short codes, picker, versions (ledger core built)
+# plan.md — the chat: a stage selector (Prompt · Emojis · Animation · Export) and the batch follow-up
 
-Source of truth for each phase is `docs/export to team/mirsal-export-architecture.md` §9–§10.7. Build in order; each phase ends green
-(one narrowest test run per change, `docs/testing.md`) before the next starts. No paid call without Haitham's explicit yes (rule 13).
+What an LLM builds next. Nothing here is built yet (2026-10-09). Read `CLAUDE.md` first (the rules, especially 10, 11, 12, 13), then
+`docs/agent-and-chat.md` (the agent, the creator, "The chat in Telegram"), `docs/engine-and-studio.md` ("Batches, generations, regenerate", the
+multi-batch Generate and "Packs in Earlier batches") and `docs/design.md` (one shell, one token set; read it before touching CSS). Test budget:
+`docs/testing.md` (one narrowest run per change). No paid call in any test (`MIRSAL_NO_REAL_CLI`, the fake CLI). Delete each step when it is built;
+delete this file when the plan is done; record what was built in `docs/agent-and-chat.md` (and `docs/api.md` for any route) in the same commit.
 
-## Next: the claim ledger behind Next batch
+## Why
 
-Today "unclaimed" is derived from the batches on screen, not from `claims.py`; Phase 2 below wires the ledger in.
+Haitham, 2026-10-09: in the chat the person should choose **how far a request goes**, with a clean, minimal selector like the "thinking" level
+picker of Claude / ChatGPT, but with four stages instead of low…max: **Prompt · Emojis · Animation · Export**. And a pack request should start
+with the first batch of the pack (the first 9 actions), then offer, after the generation, **Regenerate | Batch 02 | Batch 03 | Batch 04**.
 
-## Phase 2 — resolver + chat wiring (pack intent, generate more)
+## What exists to build on (do not rebuild)
 
-- Pack intent (`"generate sticker pack for {subject}"`) → new session + first claim; `generate more` → next unclaimed preset, same session;
-  all-claimed → "pack complete" with choices (custom 9-pick / new pack), in words. Loser of a double-click reads the winner's row.
-- Call the built ledger (`generation/claims.py`): `claim_next` for both intents, `mark_requested` when the sheet job is created, `link_generation` when its batch exists (the job's DONE path), `ClaimError` text as the answer.
-- Tests: resolver/agent tests by name. Needs Haitham's eyes on the reply wording once (W1-style browser look, not a test gate).
+- The agent and its turns: `agent/graph.py` (`Agent.prepare/execute`, intents, `n_new`, `n_multi` + `_start_items` = several jobs under ONE card and
+  ONE price), `agent/tools.py` (`ConsoleTools.create/animate/pack_add/telegram_send`, the Studio's own engine calls), `agent/memory.py`
+  (`settings`, `DEFAULT_SETTINGS`), the web chat `console/agent.js` (cards, chips, `agSend(text, action)`), `console/composer.js` (the bar under the
+  chat box).
+- The agentic creator (`agent/creator.py`): a state machine `sheet > cut > look > approve > [animate > approve] > pack > Telegram`, settings
+  `settings.creator = {on, scope: images|video, bypass}`, driven by `Console.drive_creator`. It already stops and waits at G2 / G4 without bypass.
+- Batches of a pack: `generation/tasks.py` `preview` (answers `batches_max`), `next_batch`, `session_state(out, gens)` (what a session holds;
+  an emoji pack counts GRIDS: batch k is grid k = `actions.PRESETS` core 1-9, social 10-18, reactions 19-27, daily 28-36), `more_batches`
+  (the next grids / bank actions, never a repeat, never past `MAX_BATCHES` 4). Routes `POST /api/plan/next`, `POST /api/plan/more`.
+- Regenerate = a new generation of the same batch: `POST /api/live/sheet {from_generation, parent, regen_of}` (`flow/groups.py` family/pick).
+- The Telegram chat (`services/tg_chat.py`): every chip of a reply is an inline button (`_chip_rows`), `/model` is a minimal button card
+  (`models_card`): the stage selector and the follow-up card must work there too.
 
-## Phase 3 — short codes (exports stop emitting `G###`)
+## Step 1 — the stage, as state and contract (engine first, rule 11)
 
-- Registry `out/export_codes.json` + allocator (random 4, check, retry) at claim time; lazy backfill at first export for old batches;
-  `export_names` id field becomes the code, manifest carries both ids; Postgres mirror column + migration.
-- Tests: allocator collisions on a fake registry, export output with codes, re-export stability.
+- `settings.stage` in the chat session: `prompt | emojis | animation | export`, default **`emojis`** (today's behaviour). Validate it in the settings
+  route (`POST /api/chat/sessions/{id}/settings {stage}`), add it to `DEFAULT_SETTINGS`, to the session's `summary_structured`, to OpenAPI and
+  `docs/api.md`.
+- Meaning (one place, e.g. `agent/stages.py`, pure, tested):
+  - **prompt** — plan only: the plan card (cells, tags, the sheet prompt) and an "Edit / Generate" follow-up; nothing is spent, no job.
+  - **emojis** — the sheet and the cut stickers (today's default turn); stops at G2 for the person.
+  - **animation** — emojis + the video: the creator path with `scope: video` that ENDS after the animations (G4), no pack, no Telegram.
+  - **export** — the full creator run: animation, pack (Library), then send. Export target: see question Q1.
+- Map onto the creator, do not fork it: `stage` animation/export = `creator.on` with `scope: video` and an end step (`animation` stops after
+  "approve the animations", `export` runs to the end); `stage` emojis = creator off (or `scope: images` stopping at G2); `stage` prompt = no
+  `_start_create`. Keep `settings.creator` readable for old sessions (migrate on load: `creator.on` + `scope: video` -> `export`).
+- The plan card shows the whole price of the chosen stage before the go-ahead (sheet, + animation when the stage animates), as the creator card
+  does today (rule 13: nothing spends before the click; a price rise > 25% stops and asks, as now).
+- Tests: `tests/test_chat_stage.py` (stage -> what the turn does, on `FakeTools`; migration of old `creator` settings; the settings route
+  validates; the price on the card per stage).
 
-## Phase 4 — exporter bank picker UI (Studio export dialog)
+## Step 2 — the selector in the web chat (screen second)
 
-- Per-`unresolved` cell bank choice (recorded human pick, reversible, saved on the sticker); fallback stays until picked.
-- Tests: `tests/js` builder test for the dialog + route test by name; one browser look at the end.
+- One compact pill in the chat box's bar (left of Send), like the reasoning-level picker of Claude / ChatGPT: it shows the current stage
+  ("Emojis ▾"); a click opens a small popover with the four stages, each one line: the name, a few words ("plan only, free" / "sheet and
+  stickers" / "+ animation" / "+ pack and send"), the selected one checked. Keyboard: Tab to it, Enter opens, arrows move, Enter picks, Esc closes.
+  It writes `settings.stage` (the same route as the other chat settings) and makes no chat turn. It replaces the creator's on/scope switches in the
+  chat's settings (bypass stays where it is).
+- Tokens and shell from `docs/design.md`; no new colours. Node test in `tests/js/` for the builder (four rows, the checked one, the label).
+- Telegram: a fifth row on the `/model` card ("🧭 Emojis") opening the same four choices (`tg_chat.models_card`), and a `/stage` command that sends
+  the same card. A new Telegram chat starts on `emojis`.
 
-## Phase 5 — in-batch versions
+## Step 3 — a pack request starts at batch 01 and the follow-up card
 
-- Built 2026-10-08: earlier results are kept (`stickers[].anim_versions[]`, retired video sheets, every generation of a batch). Still open: a switcher to look at an earlier animation clip without re-cutting, the Postgres mirror of picks and versions, export naming per version (`revision`).
-- Non-preset batches keep new-batch regen until unified (open decision, do not mix into this phase).
+- A pack request ("generic emojis", "a teddy bear pack", any request whose plan has `batches_max > 1`) plans **batch 01** only: for an emoji pack
+  the first grid (core-v1, actions 1-9), else the first 9 bank actions. The plan card says "Batch 01 of 04" and which grid.
+- After the batch reaches the stage's end (stickers cut for `emojis`, animations for `animation`, sent for `export`; for `prompt`, right after the
+  plan), the chat posts ONE follow-up card: **Regenerate** · **Batch 02** · **Batch 03** · **Batch 04**. Numbers are batch numbers of THIS pack,
+  as in the Studio's picker: only the ones still possible are shown (`session_state(out, the chat's batches)` -> `existing`, `batches_max`); "Batch 03"
+  with one batch made makes batches 02 and 03 (two sheets, one card, one total price, one go-ahead, `_start_items`-style); a transformation
+  (one character changed) shows Regenerate only. Each new batch runs to the same stage as the chat's stage.
+- Regenerate = a new generation of the batch (the Studio's Regenerate: `from_generation`, `parent`, `regen_of`), priced on the button.
+- New chat action types, handled in `agent/graph.py` like the other buttons: `{type: "batch_more", to: k}` (plans via `tasks.more_batches` with the
+  session's used grids/actions, then the same go-ahead card) and `{type: "regenerate", generation}`. Typed words must also work: "next batch",
+  "batch 3", "make the rest of the pack", "regenerate it".
+- The batches the chat makes share the pack in Earlier batches automatically (`pipeline._packs`: same request without grid names, same person,
+  within 6 h); the chat's generation cards should say "Batch 02 · social" etc.
+- Telegram gets the follow-up card as inline buttons for free once it is a chip row on a message (`tg_chat._chip_rows`); check it renders.
+- Tests: resolver tests for the typed forms; `tests/test_chat_batches.py` on `FakeTools` (batch 01 first, the follow-up card's buttons from the
+  session state, "Batch 03" starts two sheets after one go-ahead, Regenerate, a transformation gets Regenerate only, never a fifth batch);
+  `tests/test_tg_chat.py` extended (the follow-up card is buttons).
 
-## Phase 6 — paid proof (Haitham's yes first, ~2 credits + one pack later)
+## Step 4 — docs and the look
 
-- One face-preset sheet (`generic emojis`, v4 + core-v1): measure keying/cut only, never open the media. If limbs persist, tighten the
-  v4 clause once (new `_v5` files, never edit v4 after use) and retry once. Then one pack at the default gap.
+- `docs/agent-and-chat.md`: a section "Stages and the batch follow-up" (state, the mapping onto the creator, the card, Telegram); `docs/api.md`
+  (`settings.stage`, the two actions); `docs/design.md` (the pill and popover); `README.md` only if the index changes.
+- One browser look at the end (Haitham's eyes, W1-style): the pill, the popover, the follow-up card.
 
----
+## Questions for Haitham (recommendation first; build with the recommendation if he does not answer)
 
-# plan.md — extra local-vLLM judge tests (no human labels)
-
-(Kept from before, untouched. Runs after or between the phases above; it needs no code changes.)
-
-Haitham, 2026-10-07: no labeling, ever, in this track. Everything below runs
-on the free local server against the 30 prepared cases; no Postgres, no paid
-calls, no OpenAI fallback unless asked. Model-vs-model agreement is tracked;
-human accuracy is never claimed (`local_eval/WORKFLOW.md:35`).
-
-## Baseline (do not rebuild)
-
-- `mirsal/local_eval/` runner (`prepare | run | smoke | summary`,
-  options `--limit/--timeout/--max-seconds`) + `dataset.json` (30 cases).
-- 2026-10-05 Qwen 9B: 25/30 usable verdicts (83.3% usable-response, not
-  accuracy), median ~10 s/sticker, UNJUDGED on unsupported reason codes.
-  Results in `results.md` / `summary.json`.
-
-## Steps
-
-1. Fresh full run on the current local pick (whatever LM Studio lists now —
-   `llm.resolve_local_model`, never a hardcoded id), from the repo root:
-   `mirsal/.venv/Scripts/python.exe -B mirsal/local_eval/run.py run`
-   Free local server only.
-2. Compare `summary.json` against the Oct-05 baseline (usable-rate, median
-   latency, UNJUDGED count + reason codes). Append one dated block to
-   `docs/measurements.md`; docs are part of the change (rule 12).
-3. Two-model disagreement re-check (current pair, S6 shape): record which
-   stickers the models split on. A split is a finding about the models,
-   never a verdict about the sticker.
-4. Delete this plan when done (finished plans are deleted; what was built
-   lives in README/docs).
+- **Q1. What does "Export" send to?** Recommendation: the Library pack + Telegram (the creator's existing end); the AddCollection API as a second
+  button on the final card, not automatic.
+- **Q2. Do Animation / Export approve the stickers for the person?** Recommendation: no, they stop at G2 and G4 for one click unless the chat's
+  "Approve everything for me" (the creator's bypass) is on, as today.
+- **Q3. Default stage for a new chat?** Recommendation: Emojis (today's behaviour); Telegram the same.
