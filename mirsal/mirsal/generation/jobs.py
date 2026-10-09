@@ -319,7 +319,7 @@ def dismiss(out: Path, jid: str, by: str = "local") -> dict:
     its file, its ticket, its cost and the Users page keep it. A job still running cannot be dismissed (409): it would vanish while it can still spend."""
     p = _path(out, jid)
     job = json.loads(p.read_text(encoding="utf-8"))
-    if job["status"] in ("REQUESTED", "CLAIMED"):
+    if job["status"] in ("REQUESTED", "CLAIMED") and not _expired(job):          # an expired one is listed as TIMEOUT: it can be removed like one
         raise JobError(f"{job['id']} is still {job['status']}: wait for it to finish before removing it", 409)
     job.setdefault("dismissed", {"at": _now(), "by": str(by or "local")})
     return _write(p, job)

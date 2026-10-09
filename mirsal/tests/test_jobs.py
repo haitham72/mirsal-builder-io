@@ -79,6 +79,7 @@ class JobsTests(unittest.TestCase):
         old["created_at"] -= jobs.timeout_s() + 10
         p.write_text(json.dumps(old), encoding="utf-8")
         self.assertEqual(jobs.read(self.out, j["id"])["status"], "TIMEOUT")
+        self.assertTrue(jobs.dismiss(self.out, j["id"], by="U1")["dismissed"])      # listed as TIMEOUT, so its x works (it used to 409 on every poll)
         jobs.requeue(self.out, j["id"])
         self.assertEqual(jobs.read(self.out, j["id"])["status"], "REQUESTED")
 
