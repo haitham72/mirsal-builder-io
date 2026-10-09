@@ -3026,6 +3026,593 @@
      }
     ]
    }
+  },
+  {
+   "id": "9291dfed",
+   "name": "Original Generic Emojis Colorful",
+   "slug": "original_generic_emojis_colorful",
+   "cover": "e9d76cf3",
+   "owner": "local",
+   "created": 1791530981.5548177,
+   "stickers": [
+    {
+     "id": "e9d76cf3",
+     "name": "Original generic emojis colorful happy",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-happy-original_generic_emojis-20261009T072941-2c1461.webm",
+     "type": "animated",
+     "emoji": "😀",
+     "kb": 241,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 1
+     },
+     "created": 1791530981.822381,
+     "file_name": "img-original_generic_emojis_colo-happy-20261009T070157-cb548a"
+    },
+    {
+     "id": "fab0704b",
+     "name": "Original generic emojis colorful laugh",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-laugh-original_generic_emojis-20261009T072941-e3c5fe.webm",
+     "type": "animated",
+     "emoji": "🤣",
+     "kb": 250,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 2
+     },
+     "created": 1791530981.8438623,
+     "file_name": "img-original_generic_emojis_colo-laugh-20261009T070157-6bb011"
+    },
+    {
+     "id": "caa57be3",
+     "name": "Original generic emojis colorful love",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-love-original_generic_emojis-20261009T072941-88279e.webm",
+     "type": "animated",
+     "emoji": "😍",
+     "kb": 239,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 3
+     },
+     "created": 1791530981.8640487,
+     "file_name": "img-original_generic_emojis_colo-love-20261009T070157-c7e668"
+    },
+    {
+     "id": "d5e333dd",
+     "name": "Original generic emojis colorful cry",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-cry-original_generic_emojis-20261009T072941-f50626.webm",
+     "type": "animated",
+     "emoji": "😭",
+     "kb": 225,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 4
+     },
+     "created": 1791530981.8855293,
+     "file_name": "img-original_generic_emojis_colo-cry-20261009T070157-ef6f48"
+    },
+    {
+     "id": "fa73fda6",
+     "name": "Original generic emojis colorful sad",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-sad-original_generic_emojis-20261009T072941-00e73c.webm",
+     "type": "animated",
+     "emoji": "😔",
+     "kb": 214,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 5
+     },
+     "created": 1791530981.9067688,
+     "file_name": "img-original_generic_emojis_colo-sad-20261009T070157-a69931"
+    },
+    {
+     "id": "67fd4e33",
+     "name": "Original generic emojis colorful angry",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-angry-original_generic_emojis-20261009T072941-77d408.webm",
+     "type": "animated",
+     "emoji": "😠",
+     "kb": 202,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 6
+     },
+     "created": 1791530981.92821,
+     "file_name": "img-original_generic_emojis_colo-angry-20261009T070157-add956"
+    },
+    {
+     "id": "3732b51e",
+     "name": "Original generic emojis colorful surprised",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-surprised-original_generic_emojis-20261009T072941-f3077d.webm",
+     "type": "animated",
+     "emoji": "😮",
+     "kb": 195,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 7
+     },
+     "created": 1791530981.9500911,
+     "file_name": "img-original_generic_emojis_colo-surprised-20261009T070157-8f627b"
+    },
+    {
+     "id": "50ed2114",
+     "name": "Original generic emojis colorful scared",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-scared-original_generic_emojis-20261009T072941-4df32f.webm",
+     "type": "animated",
+     "emoji": "😱",
+     "kb": 216,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 8
+     },
+     "created": 1791530981.9691439,
+     "file_name": "img-original_generic_emojis_colo-scared-20261009T070157-cbf72c"
+    },
+    {
+     "id": "a61efdc4",
+     "name": "Original generic emojis colorful thanks",
+     "file": "G123-original_generic_emojis_colo-20261009T070157/vid-original_generic_emojis_colo-thanks-original_generic_emojis-20261009T072941-53ebcc.webm",
+     "type": "animated",
+     "emoji": "🙏",
+     "kb": 218,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G123",
+      "index": 9
+     },
+     "created": 1791530981.9915876,
+     "file_name": "img-original_generic_emojis_colo-thanks-20261009T070157-aac87a"
+    },
+    {
+     "id": "bf6d581b",
+     "name": "Original generic emojis colorful hello",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-hello-original_generic_emojis-20261009T072942-65ef81.webm",
+     "type": "animated",
+     "emoji": "👋",
+     "kb": 204,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 1
+     },
+     "created": 1791530982.3286622,
+     "file_name": "img-original_generic_emojis_colo-hello-20261009T061403-a5db01"
+    },
+    {
+     "id": "039bf1bd",
+     "name": "Original generic emojis colorful hug",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-hug-original_generic_emojis-20261009T072942-71a97d.webm",
+     "type": "animated",
+     "emoji": "🤗",
+     "kb": 231,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 2
+     },
+     "created": 1791530982.3528578,
+     "file_name": "img-original_generic_emojis_colo-hug-20261009T061403-186c0d"
+    },
+    {
+     "id": "6d1d889a",
+     "name": "Original generic emojis colorful kiss",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-kiss-original_generic_emojis-20261009T072942-db82f3.webm",
+     "type": "animated",
+     "emoji": "😘",
+     "kb": 197,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 3
+     },
+     "created": 1791530982.3757207,
+     "file_name": "img-original_generic_emojis_colo-kiss-20261009T061403-826162"
+    },
+    {
+     "id": "33ca68e1",
+     "name": "Original generic emojis colorful wink",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-wink-original_generic_emojis-20261009T072942-d4477b.webm",
+     "type": "animated",
+     "emoji": "😉",
+     "kb": 200,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 4
+     },
+     "created": 1791530982.398062,
+     "file_name": "img-original_generic_emojis_colo-wink-20261009T061403-b17ebc"
+    },
+    {
+     "id": "fdc74813",
+     "name": "Original generic emojis colorful shy",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-shy-original_generic_emojis-20261009T072942-3a7910.webm",
+     "type": "animated",
+     "emoji": "😊",
+     "kb": 198,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 5
+     },
+     "created": 1791530982.4205596,
+     "file_name": "img-original_generic_emojis_colo-shy-20261009T061403-ab80c5"
+    },
+    {
+     "id": "e061b0ac",
+     "name": "Original generic emojis colorful celebrate",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-celebrate-original_generic_emojis-20261009T072942-4cebbf.webm",
+     "type": "animated",
+     "emoji": "🥳",
+     "kb": 229,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 6
+     },
+     "created": 1791530982.4410548,
+     "file_name": "img-original_generic_emojis_colo-celebrate-20261009T061403-b3dd93"
+    },
+    {
+     "id": "a0496fc8",
+     "name": "Original generic emojis colorful clap",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-clap-original_generic_emojis-20261009T072942-e45ed9.webm",
+     "type": "animated",
+     "emoji": "👏",
+     "kb": 221,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 7
+     },
+     "created": 1791530982.460522,
+     "file_name": "img-original_generic_emojis_colo-clap-20261009T061403-585102"
+    },
+    {
+     "id": "91585f5a",
+     "name": "Original generic emojis colorful approve",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-approve-original_generic_emojis-20261009T072942-3e8811.webm",
+     "type": "animated",
+     "emoji": "👍",
+     "kb": 223,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 8
+     },
+     "created": 1791530982.4827423,
+     "file_name": "img-original_generic_emojis_colo-approve-20261009T061403-19ab39"
+    },
+    {
+     "id": "c50c6bc3",
+     "name": "Original generic emojis colorful disapprove",
+     "file": "G122-original_generic_emojis_colo-20261009T061403/vid-original_generic_emojis_colo-disapprove-original_generic_emojis-20261009T072942-324b79.webm",
+     "type": "animated",
+     "emoji": "👎",
+     "kb": 203,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G122",
+      "index": 9
+     },
+     "created": 1791530982.5028749,
+     "file_name": "img-original_generic_emojis_colo-disapprove-20261009T061403-f62539"
+    },
+    {
+     "id": "f71be0f6",
+     "name": "Original generic emojis colorful think",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-think-original_generic_emojis-20261009T072942-ed679d.webm",
+     "type": "animated",
+     "emoji": "🤔",
+     "kb": 221,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 1
+     },
+     "created": 1791530982.8027565,
+     "file_name": "img-original_generic_emojis_colo-think-20261009T072404-0bb6fe"
+    },
+    {
+     "id": "cab9af6d",
+     "name": "Original generic emojis colorful confused",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-confused-original_generic_emojis-20261009T072942-6ffe25.webm",
+     "type": "animated",
+     "emoji": "😕",
+     "kb": 228,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 2
+     },
+     "created": 1791530982.8317184,
+     "file_name": "img-original_generic_emojis_colo-confused-20261009T072404-9fe996"
+    },
+    {
+     "id": "9cd4be9e",
+     "name": "Original generic emojis colorful eye roll",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-eye_roll-original_generic_emojis-20261009T072942-9daf66.webm",
+     "type": "animated",
+     "emoji": "🙄",
+     "kb": 188,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 3
+     },
+     "created": 1791530982.8623211,
+     "file_name": "img-original_generic_emojis_colo-eye_roll-20261009T072404-fc1a7c"
+    },
+    {
+     "id": "6e71c8fc",
+     "name": "Original generic emojis colorful facepalm",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-facepalm-original_generic_emojis-20261009T072942-8bcf5c.webm",
+     "type": "animated",
+     "emoji": "🤦",
+     "kb": 193,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 4
+     },
+     "created": 1791530982.8895216,
+     "file_name": "img-original_generic_emojis_colo-facepalm-20261009T072404-e12bf4"
+    },
+    {
+     "id": "b550b499",
+     "name": "Original generic emojis colorful shrug",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-shrug-original_generic_emojis-20261009T072942-aa9026.webm",
+     "type": "animated",
+     "emoji": "🤷",
+     "kb": 200,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 5
+     },
+     "created": 1791530982.9148402,
+     "file_name": "img-original_generic_emojis_colo-shrug-20261009T072404-fbb127"
+    },
+    {
+     "id": "1854f31f",
+     "name": "Original generic emojis colorful bored",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-bored-original_generic_emojis-20261009T072942-9fa8d7.webm",
+     "type": "animated",
+     "emoji": "😑",
+     "kb": 192,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 6
+     },
+     "created": 1791530982.9398468,
+     "file_name": "img-original_generic_emojis_colo-bored-20261009T072404-3e7fa8"
+    },
+    {
+     "id": "8bd43088",
+     "name": "Original generic emojis colorful cool",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-cool-original_generic_emojis-20261009T072942-43bbd1.webm",
+     "type": "animated",
+     "emoji": "😎",
+     "kb": 252,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 7
+     },
+     "created": 1791530982.999871,
+     "file_name": "img-original_generic_emojis_colo-cool-20261009T072404-cdf8db"
+    },
+    {
+     "id": "ea763392",
+     "name": "Original generic emojis colorful flex",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-flex-original_generic_emojis-20261009T072943-50b312.webm",
+     "type": "animated",
+     "emoji": "💪",
+     "kb": 250,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 8
+     },
+     "created": 1791530983.0362382,
+     "file_name": "img-original_generic_emojis_colo-flex-20261009T072404-6b3183"
+    },
+    {
+     "id": "15687a3c",
+     "name": "Original generic emojis colorful scheme",
+     "file": "G125-original_generic_emojis_colo-20261009T072404/vid-original_generic_emojis_colo-scheme-original_generic_emojis-20261009T072943-9a28d1.webm",
+     "type": "animated",
+     "emoji": "😏",
+     "kb": 243,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G125",
+      "index": 9
+     },
+     "created": 1791530983.0746841,
+     "file_name": "img-original_generic_emojis_colo-scheme-20261009T072404-0f3e07"
+    },
+    {
+     "id": "15d108c3",
+     "name": "Original generic emojis colorful sleep",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-sleep-original_generic_emojis-20261009T072943-e772ce.webm",
+     "type": "animated",
+     "emoji": "😴",
+     "kb": 245,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 1
+     },
+     "created": 1791530983.4897654,
+     "file_name": "img-original_generic_emojis_colo-sleep-20261009T072411-13f978"
+    },
+    {
+     "id": "c9e8e0b3",
+     "name": "Original generic emojis colorful sick",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-sick-original_generic_emojis-20261009T072943-06ddb0.webm",
+     "type": "animated",
+     "emoji": "🤒",
+     "kb": 242,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 2
+     },
+     "created": 1791530983.5191205,
+     "file_name": "img-original_generic_emojis_colo-sick-20261009T072411-f03720"
+    },
+    {
+     "id": "4836f1b9",
+     "name": "Original generic emojis colorful sneeze",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-sneeze-original_generic_emojis-20261009T072943-db160f.webm",
+     "type": "animated",
+     "emoji": "🤧",
+     "kb": 222,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 3
+     },
+     "created": 1791530983.5497088,
+     "file_name": "img-original_generic_emojis_colo-sneeze-20261009T072411-1242d9"
+    },
+    {
+     "id": "14d6667f",
+     "name": "Original generic emojis colorful dance",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-dance-original_generic_emojis-20261009T072943-86bf14.webm",
+     "type": "animated",
+     "emoji": "🕺",
+     "kb": 243,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 4
+     },
+     "created": 1791530983.5829365,
+     "file_name": "img-original_generic_emojis_colo-dance-20261009T072411-40d2b2"
+    },
+    {
+     "id": "bfff22e3",
+     "name": "Original generic emojis colorful plead",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-plead-original_generic_emojis-20261009T072943-2a0ca3.webm",
+     "type": "animated",
+     "emoji": "🥺",
+     "kb": 209,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 5
+     },
+     "created": 1791530983.6143713,
+     "file_name": "img-original_generic_emojis_colo-plead-20261009T072411-bd9d81"
+    },
+    {
+     "id": "05a6f10d",
+     "name": "Original generic emojis colorful salute",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-salute-original_generic_emojis-20261009T072943-133d48.webm",
+     "type": "animated",
+     "emoji": "🫡",
+     "kb": 250,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 6
+     },
+     "created": 1791530983.638885,
+     "file_name": "img-original_generic_emojis_colo-salute-20261009T072411-ee5565"
+    },
+    {
+     "id": "a8d88880",
+     "name": "Original generic emojis colorful cheers",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-cheers-original_generic_emojis-20261009T072943-1c5503.webm",
+     "type": "animated",
+     "emoji": "🍻",
+     "kb": 205,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 7
+     },
+     "created": 1791530983.6648762,
+     "file_name": "img-original_generic_emojis_colo-cheers-20261009T072411-477b71"
+    },
+    {
+     "id": "08fdd796",
+     "name": "Original generic emojis colorful gift",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-gift-original_generic_emojis-20261009T072943-d6cacb.webm",
+     "type": "animated",
+     "emoji": "🎁",
+     "kb": 233,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 8
+     },
+     "created": 1791530983.6889641,
+     "file_name": "img-original_generic_emojis_colo-gift-20261009T072411-5d50c6"
+    },
+    {
+     "id": "62ac4674",
+     "name": "Original generic emojis colorful star struck",
+     "file": "G126-original_generic_emojis_colo-20261009T072411/vid-original_generic_emojis_colo-star_struck-original_generic_emojis-20261009T072943-580906.webm",
+     "type": "animated",
+     "emoji": "🤩",
+     "kb": 206,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G126",
+      "index": 9
+     },
+     "created": 1791530983.7190382,
+     "file_name": "img-original_generic_emojis_colo-star_struck-20261009T072411-7277a3"
+    }
+   ],
+   "lead_at": 1791530984.035
   }
  ],
  "layout": 2,

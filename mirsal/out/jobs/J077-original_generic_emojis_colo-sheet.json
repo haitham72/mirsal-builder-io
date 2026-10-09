@@ -30,4 +30,13 @@
   "cost": 2.0,
   "error": null,
   "created_at": 1791530618.405,
-  "claimed_at": 179153062
+  "claimed_at": 1791530620.13,
+  "completed_at": 1791530644.903,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

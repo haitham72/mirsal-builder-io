@@ -1,0 +1,41 @@
+{
+  "id": "J079",
+  "kind": "video",
+  "task": "original generic emojis colorful",
+  "generation": "G125",
+  "provider": "higgsfield-cli",
+  "model": "grok_video_v15",
+  "request": {
+    "model": "grok_video_v15",
+    "options": {
+      "resolution": "1080p",
+      "duration": "3"
+    },
+    "prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes glance up, the brow furrows then lifts, a slow nod\n2. the head tilts, one brow lifts, eyes glance aside\n3. eyes circle slowly, head tilts back with a sigh\n4. eyes squeeze shut, the head shakes slowly, deep sigh\n5. glances side to side, the half-smile tilts, head tilts\n6. eyelids droop, the mouth stays flat, slow exhale\n7. slow confident head nod, the sunglasses glint\n8. the smug grin spreads, the brow lifts, confident nod\n9. eyebrows wiggle, the grin widens, sneaky giggle\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+    "custom_prompt": false,
+    "start_image": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\G125-original_generic_emojis_colo-20261009T072404\\video_sheet\\A1\\sheet.png",
+    "sheet": "A1",
+    "label": "original generic emojis, colorful reactions-v1",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "c9c67bec-df59-4df7-9925-56f001cb833b",
+  "result": {
+    "file": "jobs/J079-original_generic_emojis_colo-video/result.mp4",
+    "sha256": "e1cce500569d144ca35fcb7a8c9e9702d28e32f738ca291f3e0268d6e6132b64",
+    "bytes": 1602035
+  },
+  "cost": 24.0,
+  "error": null,
+  "created_at": 1791530734.611,
+  "claimed_at": 1791530741.031,
+  "completed_at": 1791530790.66,
+  "params": {
+    "resolution": "1080p",
+    "duration": "3"
+  },
+  "cost_estimate": 24.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

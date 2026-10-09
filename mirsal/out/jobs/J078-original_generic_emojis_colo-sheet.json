@@ -2,7 +2,7 @@
   "id": "J078",
   "kind": "sheet",
   "task": "050",
-  "generation": null,
+  "generation": "G126",
   "provider": "higgsfield-cli",
   "model": "nano_banana_flash",
   "request": {
@@ -20,19 +20,23 @@
     "regen_of": null,
     "user": "local"
   },
-  "status": "CLAIMED",
+  "status": "DONE",
   "external_task_id": "3d85c0eb-dfea-455b-9cfd-73f8f0c95051",
-  "result": null,
-  "cost": null,
+  "result": {
+    "file": "jobs/J078-original_generic_emojis_colo-sheet/result.png",
+    "sha256": "325662fa8c24be6e7dfe03f03344372eedc4983236af6f5d5986adc01ff9798e",
+    "bytes": 4541769
+  },
+  "cost": 2.0,
   "error": null,
   "created_at": 1791530619.21,
   "claimed_at": 1791530622.641,
-  "completed_at": null,
+  "completed_at": 1791530651.772,
   "params": {
     "aspect_ratio": "1:1",
     "resolution": "2k"
   },
   "cost_estimate": 2.0,
-  "stage": "working",
-  "waiting_pid": 27012
+  "stage": "downloading",
+  "waiting_pid": null
 }

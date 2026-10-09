@@ -105,7 +105,7 @@
     3,
     3
   ],
-  "stage": "video_sliced",
+  "stage": "pack_final",
   "error": null,
   "plan_source": "task 047",
   "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: pure happiness with a bright beaming smile and joyful eyes\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut\nCharacter 3: lovestruck with sparkling eyes, blushing cheeks and a dreamy smile\nCharacter 4: bawling with big streaming tears and a trembling lip\nCharacter 5: sad and drooping face with a single tear\nCharacter 6: furious and steaming with a deep scowl and flared nostrils\nCharacter 7: surprised with wide round eyes and a small o-shaped mouth\nCharacter 8: terrified and trembling with wide darting eyes\nCharacter 9: grateful smile with eyes closed in thanks and glowing cheeks\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -257,7 +257,23 @@
         "note": "approved by Make a video"
       }
     },
-    "pack": null
+    "pack": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791530981.71,
+      "note": "approved by Add",
+      "stickers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
   },
   "video_sheets": [
     {
@@ -736,7 +752,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-happy-20261009T070157-cb548a.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -787,6 +803,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.592,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -1213,7 +1247,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-laugh-20261009T070157-6bb011.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -1296,6 +1330,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.593,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -2188,7 +2240,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-love-20261009T070157-c7e668.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -2239,6 +2291,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.594,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -2664,7 +2734,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-cry-20261009T070157-ef6f48.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -2747,6 +2817,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.595,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -3638,7 +3726,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-sad-20261009T070157-a69931.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -3689,6 +3777,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.595,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -4114,7 +4220,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-angry-20261009T070157-add956.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -4197,6 +4303,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.596,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -5089,7 +5213,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-surprised-20261009T070157-8f627b.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -5140,6 +5264,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.598,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -5565,7 +5707,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-scared-20261009T070157-cbf72c.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -5648,6 +5790,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.599,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -6540,7 +6700,7 @@
       "webm": "slices/vid-original_generic_emojis_colo-thanks-20261009T070157-aac87a.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "PENDING"
+        "anim": "APPROVED"
       },
       "history": [
         {
@@ -6591,6 +6751,24 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791530981.6,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791530981.71,
+          "stage": "pack",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ],
       "anim_report": [
@@ -6782,5 +6960,18 @@
       ]
     }
   ],
-  "sheet_issues": []
+  "sheet_issues": [],
+  "added": {
+    "9291dfed": [
+      "animated:1",
+      "animated:2",
+      "animated:3",
+      "animated:4",
+      "animated:5",
+      "animated:6",
+      "animated:7",
+      "animated:8",
+      "animated:9"
+    ]
+  }
 }

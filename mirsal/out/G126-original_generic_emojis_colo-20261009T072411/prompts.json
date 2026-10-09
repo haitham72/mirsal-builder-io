@@ -1,0 +1,255 @@
+{
+  "task": "original generic emojis colorful",
+  "task_slug": "original_generic_emojis_colorful",
+  "subject": "original generic emojis colorful",
+  "scene": "",
+  "described": "original generic emojis colorful",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    3,
+    3
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 4,
+  "slots": {
+    "subject_description": "original generic emojis colorful",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "fast asleep with a drool bubble, snoring softly",
+        "tags": [
+          "original_generic_emojis_colorful_sleep",
+          "sleep",
+          "sleepy"
+        ],
+        "emoji": "😴",
+        "motion": "eyes stay shut, the bubble inflates and shrinks, gentle drift"
+      },
+      {
+        "pos": 2,
+        "label": "sickly with a greenish tint, droopy eyes and a weak frown",
+        "tags": [
+          "original_generic_emojis_colorful_sick",
+          "sick",
+          "ill"
+        ],
+        "emoji": "🤒",
+        "motion": "the face pales greenish, eyes droop, weak shiver"
+      },
+      {
+        "pos": 3,
+        "label": "mid-sneeze with squeezed eyes and a drippy nose",
+        "tags": [
+          "original_generic_emojis_colorful_sneeze",
+          "sneeze",
+          "sneezing"
+        ],
+        "emoji": "🤧",
+        "motion": "the face scrunches, bursts into the sneeze, sniffles"
+      },
+      {
+        "pos": 4,
+        "label": "pure joy, eyes closed, huge blissful smile, jiggling cheeks",
+        "tags": [
+          "original_generic_emojis_colorful_dance",
+          "dance",
+          "dancing"
+        ],
+        "emoji": "🕺",
+        "motion": "the face bobs to a beat, cheeks jiggle, blissful sway"
+      },
+      {
+        "pos": 5,
+        "label": "huge shiny puppy eyes with a trembling lip, begging please",
+        "tags": [
+          "original_generic_emojis_colorful_plead",
+          "plead",
+          "begging",
+          "please"
+        ],
+        "emoji": "🥺",
+        "motion": "eyes shimmer and widen, the lip trembles, hopeful tilt"
+      },
+      {
+        "pos": 6,
+        "label": "respectful attention with a chin-up nod and focused eyes",
+        "tags": [
+          "original_generic_emojis_colorful_salute",
+          "salute",
+          "saluting",
+          "respect"
+        ],
+        "emoji": "🫡",
+        "motion": "the chin lifts, eyes lock forward, firm respectful nod"
+      },
+      {
+        "pos": 7,
+        "label": "cheerful toast with a clinking grin and merry crinkled eyes",
+        "tags": [
+          "original_generic_emojis_colorful_cheers",
+          "cheers",
+          "toast"
+        ],
+        "emoji": "🍻",
+        "motion": "grins broadly, eyes crinkle merrily, joyful nod"
+      },
+      {
+        "pos": 8,
+        "label": "delighted with wide sparkling eyes and a joyful gasp",
+        "tags": [
+          "original_generic_emojis_colorful_gift",
+          "gift",
+          "present",
+          "surprise"
+        ],
+        "emoji": "🎁",
+        "motion": "eyes widen and sparkle, happy gasp"
+      },
+      {
+        "pos": 9,
+        "label": "star-struck with huge starry eyes and an awestruck open smile",
+        "tags": [
+          "original_generic_emojis_colorful_star_struck",
+          "star_struck",
+          "starstruck",
+          "amazed"
+        ],
+        "emoji": "🤩",
+        "motion": "eyes turn starry, the mouth opens in awe"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "preset": "daily-v1",
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: fast asleep with a drool bubble, snoring softly\nCharacter 2: sickly with a greenish tint, droopy eyes and a weak frown\nCharacter 3: mid-sneeze with squeezed eyes and a drippy nose\nCharacter 4: pure joy, eyes closed, huge blissful smile, jiggling cheeks\nCharacter 5: huge shiny puppy eyes with a trembling lip, begging please\nCharacter 6: respectful attention with a chin-up nod and focused eyes\nCharacter 7: cheerful toast with a clinking grin and merry crinkled eyes\nCharacter 8: delighted with wide sparkling eyes and a joyful gasp\nCharacter 9: star-struck with huge starry eyes and an awestruck open smile\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes stay shut, the bubble inflates and shrinks, gentle drift\n2. the face pales greenish, eyes droop, weak shiver\n3. the face scrunches, bursts into the sneeze, sniffles\n4. the face bobs to a beat, cheeks jiggle, blissful sway\n5. eyes shimmer and widen, the lip trembles, hopeful tilt\n6. the chin lifts, eyes lock forward, firm respectful nod\n7. grins broadly, eyes crinkle merrily, joyful nod\n8. eyes widen and sparkle, happy gasp\n9. eyes turn starry, the mouth opens in awe\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "original generic emojis colorful fast asleep with a drool bubble, snoring softly, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_sleep",
+      "tags": [
+        "original_generic_emojis_colorful_sleep",
+        "sleep",
+        "sleepy"
+      ],
+      "emoji": "😴"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "prompt": "original generic emojis colorful sickly with a greenish tint, droopy eyes and a weak frown, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_sick",
+      "tags": [
+        "original_generic_emojis_colorful_sick",
+        "sick",
+        "ill"
+      ],
+      "emoji": "🤒"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "prompt": "original generic emojis colorful mid-sneeze with squeezed eyes and a drippy nose, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_sneeze",
+      "tags": [
+        "original_generic_emojis_colorful_sneeze",
+        "sneeze",
+        "sneezing"
+      ],
+      "emoji": "🤧"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "prompt": "original generic emojis colorful pure joy, eyes closed, huge blissful smile, jiggling cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_dance",
+      "tags": [
+        "original_generic_emojis_colorful_dance",
+        "dance",
+        "dancing"
+      ],
+      "emoji": "🕺"
+    },
+    {
+      "index": 5,
+      "id": "prompt05",
+      "prompt": "original generic emojis colorful huge shiny puppy eyes with a trembling lip, begging please, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_plead",
+      "tags": [
+        "original_generic_emojis_colorful_plead",
+        "plead",
+        "begging",
+        "please"
+      ],
+      "emoji": "🥺"
+    },
+    {
+      "index": 6,
+      "id": "prompt06",
+      "prompt": "original generic emojis colorful respectful attention with a chin-up nod and focused eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_salute",
+      "tags": [
+        "original_generic_emojis_colorful_salute",
+        "salute",
+        "saluting",
+        "respect"
+      ],
+      "emoji": "🫡"
+    },
+    {
+      "index": 7,
+      "id": "prompt07",
+      "prompt": "original generic emojis colorful cheerful toast with a clinking grin and merry crinkled eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_cheers",
+      "tags": [
+        "original_generic_emojis_colorful_cheers",
+        "cheers",
+        "toast"
+      ],
+      "emoji": "🍻"
+    },
+    {
+      "index": 8,
+      "id": "prompt08",
+      "prompt": "original generic emojis colorful delighted with wide sparkling eyes and a joyful gasp, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_gift",
+      "tags": [
+        "original_generic_emojis_colorful_gift",
+        "gift",
+        "present",
+        "surprise"
+      ],
+      "emoji": "🎁"
+    },
+    {
+      "index": 9,
+      "id": "prompt09",
+      "prompt": "original generic emojis colorful star-struck with huge starry eyes and an awestruck open smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_star_struck",
+      "tags": [
+        "original_generic_emojis_colorful_star_struck",
+        "star_struck",
+        "starstruck",
+        "amazed"
+      ],
+      "emoji": "🤩"
+    }
+  ],
+  "expanded_by": "deterministic",
+  "previewed": true
+}

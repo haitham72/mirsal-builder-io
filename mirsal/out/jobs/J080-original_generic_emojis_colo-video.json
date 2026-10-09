@@ -1,0 +1,44 @@
+{
+  "id": "J080",
+  "kind": "video",
+  "task": "original generic emojis colorful",
+  "generation": "G126",
+  "provider": "higgsfield-cli",
+  "model": null,
+  "request": {
+    "model": "grok_video_v15",
+    "options": {
+      "resolution": "1080p",
+      "duration": "3"
+    },
+    "prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes stay shut, the bubble inflates and shrinks, gentle drift\n2. the face pales greenish, eyes droop, weak shiver\n3. the face scrunches, bursts into the sneeze, sniffles\n4. the face bobs to a beat, cheeks jiggle, blissful sway\n5. eyes shimmer and widen, the lip trembles, hopeful tilt\n6. the chin lifts, eyes lock forward, firm respectful nod\n7. grins broadly, eyes crinkle merrily, joyful nod\n8. eyes widen and sparkle, happy gasp\n9. eyes turn starry, the mouth opens in awe\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+    "custom_prompt": false,
+    "start_image": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\G126-original_generic_emojis_colo-20261009T072411\\video_sheet\\A1\\sheet.png",
+    "sheet": "A1",
+    "label": "original generic emojis, colorful daily-v1",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "FAILED",
+  "external_task_id": null,
+  "result": null,
+  "cost": null,
+  "error": "Error: Higgsfield API error (HTTP 520). failed to PUT media bytes to upload_url: 520",
+  "created_at": 1791530734.635,
+  "claimed_at": null,
+  "completed_at": 1791530745.562,
+  "retry_quote": {
+    "credits": 24.0,
+    "at": 1791530870.262
+  },
+  "retried_as": "J081",
+  "history": [
+    {
+      "ts": 1791530871.972,
+      "actor": "human",
+      "by": "local",
+      "action": "RETRY",
+      "detail": "New paid request J081; 24 credits explicitly approved."
+    }
+  ]
+}
