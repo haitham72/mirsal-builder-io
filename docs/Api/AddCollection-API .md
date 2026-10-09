@@ -10,7 +10,7 @@ Content-Type: multipart/form-data
 Authorization: Basic <base64(username:password)>
 ```
 
-Base URL: `https://emojicms.devinprocess888.com` (local: `http://localhost:5189`)
+Base URL: `https://emojicms.devinprocess.com` (local: `http://localhost:5189`)
 
 > Do not set `Content-Type` manually. `fetch` + `FormData` sets it with the correct multipart boundary.
 

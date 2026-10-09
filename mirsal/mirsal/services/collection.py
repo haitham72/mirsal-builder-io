@@ -25,7 +25,7 @@ import uuid
 import zipfile
 from pathlib import Path
 
-DEFAULT_URL = "https://emojicms.devinprocess888.com"
+DEFAULT_URL = "https://emojicms.devinprocess.com"
 ENDPOINT = "/api/v1/Upload/AddCollection"
 TIMEOUT = 120
 MIME = {".webm": "video/webm", ".png": "image/png", ".webp": "image/webp"}
