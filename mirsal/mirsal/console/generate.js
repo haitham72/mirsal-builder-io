@@ -153,7 +153,7 @@ const keptAnim=g=>g.stickers.filter(t=>t.anim_status==='READY'&&t.review.still!=
 const keptOf=g=>animPhase(g)?keptAnim(g):keptStills(g);
 const sheetOf=g=>[...g.video_sheets].reverse().find(v=>v.status!=='REJECTED');
 /* the sheet the animations are cut from now: a sheet retired by Regenerate video (SUPERSEDED) stays it until the new video is sliced (gates.cut_sheet) */
-const cutOf=g=>[...g.video_sheets].reverse().find(v=>['SLICED','SUPERSEDED'].includes(v.status)&&v.video)||sheetOf(g);
+const cutOf=g=>{const vs=[...g.video_sheets].reverse().filter(v=>v.video);return vs.find(v=>v.status==='SLICED')||vs.find(v=>v.status==='SUPERSEDED')||sheetOf(g)};      // as gates.cut_sheet: the picked (SLICED) one first
 const hasVid=g=>!!(g.source.has_video||(cutOf(g)&&cutOf(g).video));
 const sessionGens=()=>SES.gens.map(id=>GM.get(id)).filter(Boolean);
 /* A batch is a family of generations (gen 1 … n); ONE is the main (Haitham, 2026-10-08: "this generation is the main image/video generation now, the others

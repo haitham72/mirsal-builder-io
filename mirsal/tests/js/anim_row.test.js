@@ -23,13 +23,13 @@ function load(sheets, { busy = false } = {}) {
     calls, glast: 'x', GM: new Map([[104, G]]),
     esc: s => String(s == null ? '' : s), ic: n => `<svg data-i=${n}></svg>`,
     processing: g => g.stickers.some(t => t.anim_status === 'PROCESSING'),
-    cutOf: g => [...g.video_sheets].reverse().find(v => ['SLICED', 'SUPERSEDED'].includes(v.status) && v.video),
+    sheetOf: g => [...g.video_sheets].reverse().find(v => v.status !== 'REJECTED'),
     post: async (u, b) => { calls.push(['post', u, b]); return { ok: true, j: { removed: b.sheet } }; },
     postWait: async (u, b) => { calls.push(['postWait', u, b]); return { ok: true, j: { changed: true } }; },
     toast: m => calls.push(['toast', m]), tick: () => calls.push(['tick']),
     confirmDlg: (msg, cb) => { calls.push(['confirm', msg]); return cb(); },
   };
-  const body = ['const animsOf=', 'function animRow(', 'ACT.gapick=', 'ACT.garm='].map(statement).join('\n');
+  const body = ['const cutOf=', 'const animsOf=', 'function animRow(', 'ACT.gapick=', 'ACT.garm='].map(statement).join('\n');
   const f = new Function(...Object.keys(sb), 'const ACT={};\n' + body + '\nreturn {ACT,animRow};')(...Object.values(sb));
   return { ...f, ...sb, G };
 }
@@ -53,6 +53,16 @@ test('one chip per video sheet with a video, the one in use starred, a removed o
   assert.match(h, /data-act=garm data-g=104 data-a=A1/);
   assert.doesNotMatch(h, /data-act=garm data-g=104 data-a=A3/);  // never remove the one in use
   assert.match(h, /data-k=animation data-id=G104\/A3/);
+});
+
+test('the star follows the picked (SLICED) animation, not the newest earlier one', () => {
+  const { animRow, G } = load([
+    { id: 'A1', status: 'SUPERSEDED', video: 'v1' }, { id: 'A2', status: 'SLICED', video: 'v2' },
+    { id: 'A3', status: 'SUPERSEDED', video: 'v3' }, { id: 'A4', status: 'APPROVED', video: null }]);
+  const h = animRow(G);
+  assert.match(h, /★ animation 2/);
+  assert.doesNotMatch(h, /★ animation 3/);
+  assert.match(h, /data-act=gapick data-g=104 data-a=A3/);
 });
 
 test('nothing to show without an animation, and a prepared video has no row', () => {
