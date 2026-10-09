@@ -97,6 +97,9 @@ class CollectionTests(unittest.TestCase):
         media = [(f, t, v) for n, f, t, v in parts if n == "Media"]
         meta = json.loads(fields["MediaMetadata"].decode())
         self.assertEqual((fields["CollectionName"].decode(), fields["Description"].decode()), ("Blob pack", "made in Mirsal"))
+        self.assertEqual(fields["ContentSubType"].decode(), "png", "stills only: their own type")
+        self.assertEqual(col.content_subtype([{"filename": "a.webm"}, {"filename": "b.png"}]), "webm")
+        self.assertEqual(col.content_subtype([{"filename": "a.webm"}]), "webm")
         self.req(f"/api/generations/{g}/export-collection", {"name": "No words"})
         self.assertEqual({n: v for n, f, _, v in form(FakeCMS.seen[-1]) if f is None}["Description"].decode(), "No words")    # never an empty description
         self.assertEqual(len(media), len(meta))

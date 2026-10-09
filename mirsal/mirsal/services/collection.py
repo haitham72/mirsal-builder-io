@@ -83,6 +83,12 @@ def items_from_zip(data: bytes) -> tuple[dict, list[dict]]:
     return man.get("pack") or {}, items
 
 
+def content_subtype(items: list[dict]) -> str:
+    """The collection's media type for the CMS: `webm` for animated stickers (and for a mix), else the stills' own type (`png` / `webp`)."""
+    kinds = {Path(it["filename"]).suffix.lower().lstrip(".") for it in items}
+    return kinds.pop() if len(kinds) == 1 else "webm"
+
+
 def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, str]:
     """The form body and its Content-Type (with the boundary). Media parts in order, then MediaMetadata as one JSON string of the same length."""
     boundary = "----mirsal" + uuid.uuid4().hex
@@ -94,6 +100,7 @@ def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, st
 
     field("CollectionName", name)
     field("Description", description)
+    field("ContentSubType", content_subtype(items))       # required by the CMS (2026-10-09: "The ContentSubType field is required")
     for it in items:
         safe = it["filename"].replace('"', "").replace("\r", "").replace("\n", "")
         buf.write(f'--{boundary}\r\nContent-Disposition: form-data; name="Media"; filename="{safe}"\r\nContent-Type: {it["mime"]}\r\n\r\n'.encode("utf-8"))
