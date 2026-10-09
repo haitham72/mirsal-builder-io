@@ -145,6 +145,19 @@ test('Generate sheet shows the Higgsfield price on its own line, outside the but
   assert.equal(h.log.painted.length, 1, 'the footer repaints by itself when the price arrives');
 });
 
+test('a second Generate prompt, with the price already known, leaves Generate sheet clickable (it was drawn disabled while busy)', async () => {
+  const h = load();
+  await h.api.ACT.gprompt();
+  await flush();
+  const before = h.log.painted.length;
+  await h.api.ACT.gprompt();
+  await flush();
+  assert.ok(h.log.painted.length > before, 'repainted after the second plan, not left as drawn while busy');
+  const last = h.log.painted[h.log.painted.length - 1];
+  assert.match(last, /Higgsfield sheet price: ◈ 12.5 credits/);
+  assert.doesNotMatch(last, /data-act=gdsheet disabled/, 'the footer is repainted once the busy flag is cleared');
+});
+
 test('an unavailable price offers a Retry that asks again; a click without a price spends nothing', async () => {
   const h = load({ price: null });
   await h.api.ACT.gprompt();
