@@ -1,0 +1,426 @@
+{
+  "id": "051",
+  "number": 51,
+  "provider": "higgsfield-manual",
+  "external_task_id": "cba5f48c-5751-42f2-b8f9-290a8a48dd2e",
+  "name_key": "girl_emirati",
+  "status": "running",
+  "created": 1791535776.346,
+  "prompt": "girl emirati",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "kawaii",
+  "folders": {
+    "img": "img-051-girl_emirati",
+    "vid": "vid-051-girl_emirati"
+  },
+  "paths": {
+    "img": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-051-girl_emirati",
+    "vid": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\videos_gen\\vid-051-girl_emirati"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid.",
+      "style_id": "kawaii",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "joyfully jumping with arms wide open, big smile showing happiness",
+          "tags": [
+            "girl_emirati_jump_happy",
+            "joy",
+            "excitement",
+            "open_arms"
+          ],
+          "emoji": "😊🎉",
+          "motion": "bounces gently up and down with joyful energy"
+        },
+        {
+          "pos": 2,
+          "label": "sitting calmly cross-legged with eyes closed, peaceful and serene",
+          "tags": [
+            "girl_emirati_sit_calm",
+            "peace",
+            "serenity",
+            "meditation"
+          ],
+          "emoji": "🧘‍♀️🌿",
+          "motion": "subtle breathing with slight head nod indicating calmness"
+        },
+        {
+          "pos": 3,
+          "label": "leaning forward curiously with a tilted head, eager to listen",
+          "tags": [
+            "girl_emirati_lean_curious",
+            "curiosity",
+            "interest",
+            "leaning"
+          ],
+          "emoji": "🤔👂",
+          "motion": "slow gentle lean and head tilt back and forth"
+        },
+        {
+          "pos": 4,
+          "label": "standing proudly with hands on hips, chest out with confidence",
+          "tags": [
+            "girl_emirati_stand_proud",
+            "confidence",
+            "pride",
+            "strong"
+          ],
+          "emoji": "😌💪",
+          "motion": "slight chest puff and head held high with pride"
+        },
+        {
+          "pos": 5,
+          "label": "running energetically with arms pumping and wide smile",
+          "tags": [
+            "girl_emirati_run_excited",
+            "energy",
+            "speed",
+            "playful"
+          ],
+          "emoji": "🏃‍♀️😁",
+          "motion": "fast arm and leg movement simulating running"
+        },
+        {
+          "pos": 6,
+          "label": "sitting on knees, shyly glancing sideways with blushing cheeks",
+          "tags": [
+            "girl_emirati_sit_shy",
+            "shyness",
+            "embarrassment",
+            "blush"
+          ],
+          "emoji": "😊🙈",
+          "motion": "small shy head turns and subtle blush animation"
+        },
+        {
+          "pos": 7,
+          "label": "lying on side, propped on elbow, smiling mischievously",
+          "tags": [
+            "girl_emirati_lie_mischief",
+            "mischief",
+            "playful",
+            "relaxed"
+          ],
+          "emoji": "😏😉",
+          "motion": "slow playful head wiggle and cheeky smile"
+        },
+        {
+          "pos": 8,
+          "label": "spinning happily with a carefree laugh and arms extended",
+          "tags": [
+            "girl_emirati_spin_happy",
+            "joy",
+            "spinning",
+            "carefree"
+          ],
+          "emoji": "😄💃",
+          "motion": "continuous slow spin with laughing expression"
+        },
+        {
+          "pos": 9,
+          "label": "standing stiffly with wide eyes and hands raised in shock",
+          "tags": [
+            "girl_emirati_stand_shocked",
+            "shock",
+            "surprise",
+            "fear"
+          ],
+          "emoji": "😲😱",
+          "motion": "shaking slightly with startled blinking"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": false,
+      "preset": null,
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "girl emirati",
+    "task_slug": "girl_emirati",
+    "subject": "girl emirati",
+    "scene": "",
+    "described": "girl emirati",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 3,
+    "slots": {
+      "subject_description": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid.",
+      "style_id": "kawaii",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "joyfully jumping with arms wide open, big smile showing happiness",
+          "tags": [
+            "girl_emirati_jump_happy",
+            "joy",
+            "excitement",
+            "open_arms"
+          ],
+          "emoji": "😊🎉",
+          "motion": "bounces gently up and down with joyful energy"
+        },
+        {
+          "pos": 2,
+          "label": "sitting calmly cross-legged with eyes closed, peaceful and serene",
+          "tags": [
+            "girl_emirati_sit_calm",
+            "peace",
+            "serenity",
+            "meditation"
+          ],
+          "emoji": "🧘‍♀️🌿",
+          "motion": "subtle breathing with slight head nod indicating calmness"
+        },
+        {
+          "pos": 3,
+          "label": "leaning forward curiously with a tilted head, eager to listen",
+          "tags": [
+            "girl_emirati_lean_curious",
+            "curiosity",
+            "interest",
+            "leaning"
+          ],
+          "emoji": "🤔👂",
+          "motion": "slow gentle lean and head tilt back and forth"
+        },
+        {
+          "pos": 4,
+          "label": "standing proudly with hands on hips, chest out with confidence",
+          "tags": [
+            "girl_emirati_stand_proud",
+            "confidence",
+            "pride",
+            "strong"
+          ],
+          "emoji": "😌💪",
+          "motion": "slight chest puff and head held high with pride"
+        },
+        {
+          "pos": 5,
+          "label": "running energetically with arms pumping and wide smile",
+          "tags": [
+            "girl_emirati_run_excited",
+            "energy",
+            "speed",
+            "playful"
+          ],
+          "emoji": "🏃‍♀️😁",
+          "motion": "fast arm and leg movement simulating running"
+        },
+        {
+          "pos": 6,
+          "label": "sitting on knees, shyly glancing sideways with blushing cheeks",
+          "tags": [
+            "girl_emirati_sit_shy",
+            "shyness",
+            "embarrassment",
+            "blush"
+          ],
+          "emoji": "😊🙈",
+          "motion": "small shy head turns and subtle blush animation"
+        },
+        {
+          "pos": 7,
+          "label": "lying on side, propped on elbow, smiling mischievously",
+          "tags": [
+            "girl_emirati_lie_mischief",
+            "mischief",
+            "playful",
+            "relaxed"
+          ],
+          "emoji": "😏😉",
+          "motion": "slow playful head wiggle and cheeky smile"
+        },
+        {
+          "pos": 8,
+          "label": "spinning happily with a carefree laugh and arms extended",
+          "tags": [
+            "girl_emirati_spin_happy",
+            "joy",
+            "spinning",
+            "carefree"
+          ],
+          "emoji": "😄💃",
+          "motion": "continuous slow spin with laughing expression"
+        },
+        {
+          "pos": 9,
+          "label": "standing stiffly with wide eyes and hands raised in shock",
+          "tags": [
+            "girl_emirati_stand_shocked",
+            "shock",
+            "surprise",
+            "fear"
+          ],
+          "emoji": "😲😱",
+          "motion": "shaking slightly with startled blinking"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": false,
+      "preset": null,
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "key": "girl_emirati_jump_happy",
+        "tags": [
+          "girl_emirati_jump_happy",
+          "joy",
+          "excitement",
+          "open_arms"
+        ],
+        "emoji": "😊🎉",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. joyfully jumping with arms wide open, big smile showing happiness, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "key": "girl_emirati_sit_calm",
+        "tags": [
+          "girl_emirati_sit_calm",
+          "peace",
+          "serenity",
+          "meditation"
+        ],
+        "emoji": "🧘‍♀️🌿",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. sitting calmly cross-legged with eyes closed, peaceful and serene, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "key": "girl_emirati_lean_curious",
+        "tags": [
+          "girl_emirati_lean_curious",
+          "curiosity",
+          "interest",
+          "leaning"
+        ],
+        "emoji": "🤔👂",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. leaning forward curiously with a tilted head, eager to listen, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "key": "girl_emirati_stand_proud",
+        "tags": [
+          "girl_emirati_stand_proud",
+          "confidence",
+          "pride",
+          "strong"
+        ],
+        "emoji": "😌💪",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. standing proudly with hands on hips, chest out with confidence, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "key": "girl_emirati_run_excited",
+        "tags": [
+          "girl_emirati_run_excited",
+          "energy",
+          "speed",
+          "playful"
+        ],
+        "emoji": "🏃‍♀️😁",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. running energetically with arms pumping and wide smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "key": "girl_emirati_sit_shy",
+        "tags": [
+          "girl_emirati_sit_shy",
+          "shyness",
+          "embarrassment",
+          "blush"
+        ],
+        "emoji": "😊🙈",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. sitting on knees, shyly glancing sideways with blushing cheeks, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "key": "girl_emirati_lie_mischief",
+        "tags": [
+          "girl_emirati_lie_mischief",
+          "mischief",
+          "playful",
+          "relaxed"
+        ],
+        "emoji": "😏😉",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. lying on side, propped on elbow, smiling mischievously, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "key": "girl_emirati_spin_happy",
+        "tags": [
+          "girl_emirati_spin_happy",
+          "joy",
+          "spinning",
+          "carefree"
+        ],
+        "emoji": "😄💃",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. spinning happily with a carefree laugh and arms extended, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "key": "girl_emirati_stand_shocked",
+        "tags": [
+          "girl_emirati_stand_shocked",
+          "shock",
+          "surprise",
+          "fear"
+        ],
+        "emoji": "😲😱",
+        "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. standing stiffly with wide eyes and hands raised in shock, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+    ],
+    "expanded_by": "ai",
+    "expand_model": "gpt-4.1-mini-2025-04-14",
+    "batches_max": 4,
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid..\nStyle: kawaii chibi style, big shiny eyes, tiny body and an oversized head, pastel colours, soft blush cheeks, very cute and rounded.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: joyfully jumping with arms wide open, big smile showing happiness\nCharacter 2: sitting calmly cross-legged with eyes closed, peaceful and serene\nCharacter 3: leaning forward curiously with a tilted head, eager to listen\nCharacter 4: standing proudly with hands on hips, chest out with confidence\nCharacter 5: running energetically with arms pumping and wide smile\nCharacter 6: sitting on knees, shyly glancing sideways with blushing cheeks\nCharacter 7: lying on side, propped on elbow, smiling mischievously\nCharacter 8: spinning happily with a carefree laugh and arms extended\nCharacter 9: standing stiffly with wide eyes and hands raised in shock\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. bounces gently up and down with joyful energy\n2. subtle breathing with slight head nod indicating calmness\n3. slow gentle lean and head tilt back and forth\n4. slight chest puff and head held high with pride\n5. fast arm and leg movement simulating running\n6. small shy head turns and subtle blush animation\n7. slow playful head wiggle and cheeky smile\n8. continuous slow spin with laughing expression\n9. shaking slightly with startled blinking\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every character's design unchanged."
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791535776.346,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G127"
+  ]
+}

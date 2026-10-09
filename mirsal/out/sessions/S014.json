@@ -1,0 +1,36 @@
+{
+ "id": "S014",
+ "user": "local",
+ "title": "New chat",
+ "created": 1791548246.046,
+ "updated": 1791548248.172,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "kawaii",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": null,
+  "stage": "emojis",
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [],
+ "messages": [],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null
+}

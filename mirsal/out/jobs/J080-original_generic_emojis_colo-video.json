@@ -40,5 +40,9 @@
       "action": "RETRY",
       "detail": "New paid request J081; 24 credits explicitly approved."
     }
-  ]
+  ],
+  "dismissed": {
+    "at": 1791534073.432,
+    "by": "local"
+  }
 }

@@ -10,7 +10,7 @@ Content-Type: multipart/form-data
 Authorization: Basic <base64(username:password)>
 ```
 
-Base URL: `https://emojicms.devinprocess.com` (local: `http://localhost:5189`)
+Base URL: `https://emojicms.ehub.ae` (local: `http://localhost:5189`)
 
 > Do not set `Content-Type` manually. `fetch` + `FormData` sets it with the correct multipart boundary.
 
@@ -87,7 +87,7 @@ async function addCollection() {
 
   const credentials = process.env.COLLECTION_API_CREDENTIALS; // base64(username:password), never hardcoded
 
-  const baseUrl = "https://emojicms.devinprocess.com";
+  const baseUrl = "https://emojicms.ehub.ae";
 
   const response = await fetch(`${baseUrl}/api/v1/Upload/AddCollection`, {
     method: "POST",

@@ -3612,7 +3612,179 @@
      "file_name": "img-original_generic_emojis_colo-star_struck-20261009T072411-7277a3"
     }
    ],
-   "lead_at": 1791530984.035
+   "lead_at": 1791530984.035,
+   "telegram": {
+    "sets": [
+     {
+      "kind": "video",
+      "name": "original_generic_emojis_colorful_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/original_generic_emojis_colorful_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "e9d76cf3",
+        "file_unique_id": "AgADhh8AAh_jSFI"
+       },
+       {
+        "sticker_id": "fab0704b",
+        "file_unique_id": "AgADPRoAAvaSSFI"
+       },
+       {
+        "sticker_id": "caa57be3",
+        "file_unique_id": "AgADIiMAAqOIQFI"
+       },
+       {
+        "sticker_id": "d5e333dd",
+        "file_unique_id": "AgADoB8AAjqcQFI"
+       },
+       {
+        "sticker_id": "fa73fda6",
+        "file_unique_id": "AgADNyQAAvdHQFI"
+       },
+       {
+        "sticker_id": "67fd4e33",
+        "file_unique_id": "AgADSCAAAtYVSFI"
+       },
+       {
+        "sticker_id": "3732b51e",
+        "file_unique_id": "AgADEh0AAjgxQFI"
+       },
+       {
+        "sticker_id": "50ed2114",
+        "file_unique_id": "AgADZSIAArfJQVI"
+       },
+       {
+        "sticker_id": "a61efdc4",
+        "file_unique_id": "AgADmiEAApg6QVI"
+       },
+       {
+        "sticker_id": "bf6d581b",
+        "file_unique_id": "AgAD9B8AAhm_SVI"
+       },
+       {
+        "sticker_id": "039bf1bd",
+        "file_unique_id": "AgADHB8AAltfSVI"
+       },
+       {
+        "sticker_id": "6d1d889a",
+        "file_unique_id": "AgADdx8AAihFQVI"
+       },
+       {
+        "sticker_id": "33ca68e1",
+        "file_unique_id": "AgADxCAAAncPSFI"
+       },
+       {
+        "sticker_id": "fdc74813",
+        "file_unique_id": "AgADYR4AAgNkSFI"
+       },
+       {
+        "sticker_id": "e061b0ac",
+        "file_unique_id": "AgADyh0AAshtSVI"
+       },
+       {
+        "sticker_id": "a0496fc8",
+        "file_unique_id": "AgADGiYAAopzQVI"
+       },
+       {
+        "sticker_id": "91585f5a",
+        "file_unique_id": "AgADryQAAjRoSVI"
+       },
+       {
+        "sticker_id": "c50c6bc3",
+        "file_unique_id": "AgADFSAAAqC9SVI"
+       },
+       {
+        "sticker_id": "f71be0f6",
+        "file_unique_id": "AgADRiAAAoyrSFI"
+       },
+       {
+        "sticker_id": "cab9af6d",
+        "file_unique_id": "AgADIBwAAqpaSVI"
+       },
+       {
+        "sticker_id": "9cd4be9e",
+        "file_unique_id": "AgAD-CYAAjfXQFI"
+       },
+       {
+        "sticker_id": "6e71c8fc",
+        "file_unique_id": "AgADiRsAAi3PSVI"
+       },
+       {
+        "sticker_id": "b550b499",
+        "file_unique_id": "AgADBSAAAvplSFI"
+       },
+       {
+        "sticker_id": "1854f31f",
+        "file_unique_id": "AgAD0R4AApliSVI"
+       },
+       {
+        "sticker_id": "8bd43088",
+        "file_unique_id": "AgADHh4AAkO3QVI"
+       },
+       {
+        "sticker_id": "ea763392",
+        "file_unique_id": "AgADMB4AAlVRQVI"
+       },
+       {
+        "sticker_id": "15687a3c",
+        "file_unique_id": "AgADMx4AAkKbSFI"
+       },
+       {
+        "sticker_id": "15d108c3",
+        "file_unique_id": "AgADKCMAAmE9SVI"
+       },
+       {
+        "sticker_id": "c9e8e0b3",
+        "file_unique_id": "AgADrSwAAnfoQFI"
+       },
+       {
+        "sticker_id": "4836f1b9",
+        "file_unique_id": "AgADxiEAAvtHQVI"
+       },
+       {
+        "sticker_id": "14d6667f",
+        "file_unique_id": "AgAD3yAAAvcHQFI"
+       },
+       {
+        "sticker_id": "bfff22e3",
+        "file_unique_id": "AgADwR0AAtxCSVI"
+       },
+       {
+        "sticker_id": "05a6f10d",
+        "file_unique_id": "AgAD9B8AAlltSFI"
+       },
+       {
+        "sticker_id": "a8d88880",
+        "file_unique_id": "AgADUR8AAom2QFI"
+       },
+       {
+        "sticker_id": "08fdd796",
+        "file_unique_id": "AgAD-RwAAvTBSVI"
+       },
+       {
+        "sticker_id": "62ac4674",
+        "file_unique_id": "AgADQB8AAiL1QVI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "8d7afab3eee59d1bf99b35ccf5ca420e90aa3fb422c9180a2a7fc4b8431193b4",
+      "sent_at": 1791534374.994,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "video",
+        "name": "original_generic_emojis_colorful_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/original_generic_emojis_colorful_by_Mirsal_builder_bot",
+        "added": 36,
+        "total": 36
+       }
+      ]
+     }
+    ]
+   }
   }
  ],
  "layout": 2,
