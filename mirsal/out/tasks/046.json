@@ -1,0 +1,413 @@
+{
+  "id": "046",
+  "number": 46,
+  "provider": "higgsfield-manual",
+  "external_task_id": "0fe63fe1-9dbe-4236-ab43-840023d31d4d",
+  "name_key": "original_generic_emojis_colorful",
+  "status": "running",
+  "created": 1791526403.867,
+  "prompt": "original generic emojis, colorful social-v1",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "glossy_3d",
+  "folders": {
+    "img": "img-046-original_generic_emojis_colorful",
+    "vid": "vid-046-original_generic_emojis_colorful"
+  },
+  "paths": {
+    "img": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-046-original_generic_emojis_colorful",
+    "vid": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\videos_gen\\vid-046-original_generic_emojis_colorful"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "original generic emojis colorful",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "friendly hello with a warm open smile and bright welcoming eyes",
+          "tags": [
+            "original_generic_emojis_colorful_hello",
+            "hello",
+            "wave",
+            "hi"
+          ],
+          "emoji": "👋",
+          "motion": "smiles warmly, eyes light up, cheerful tilt"
+        },
+        {
+          "pos": 2,
+          "label": "warm loving smile with happy squinted eyes and glowing cheeks",
+          "tags": [
+            "original_generic_emojis_colorful_hug",
+            "hug",
+            "openarms"
+          ],
+          "emoji": "🤗",
+          "motion": "the face glows, happy squint, gentle tilt side to side"
+        },
+        {
+          "pos": 3,
+          "label": "blowing a kiss with a wink, a small heart floating free",
+          "tags": [
+            "original_generic_emojis_colorful_kiss",
+            "kiss",
+            "kissing"
+          ],
+          "emoji": "😘",
+          "motion": "lips purse, a wink, the heart pulses"
+        },
+        {
+          "pos": 4,
+          "label": "playful wink with one eye closed and a cheeky grin",
+          "tags": [
+            "original_generic_emojis_colorful_wink",
+            "wink",
+            "winking"
+          ],
+          "emoji": "😉",
+          "motion": "winks, the grin tilts, the cheek lifts"
+        },
+        {
+          "pos": 5,
+          "label": "shy with a bashful smile and downcast glancing eyes",
+          "tags": [
+            "original_generic_emojis_colorful_shy",
+            "shy",
+            "bashful",
+            "blushing"
+          ],
+          "emoji": "😊",
+          "motion": "smiles bashfully, eyes glance down and away"
+        },
+        {
+          "pos": 6,
+          "label": "celebrating with sparkling joyful eyes and a huge party grin",
+          "tags": [
+            "original_generic_emojis_colorful_celebrate",
+            "celebrate",
+            "party"
+          ],
+          "emoji": "🥳",
+          "motion": "eyes sparkle, the grin stretches wide, joyful tremble"
+        },
+        {
+          "pos": 7,
+          "label": "cheering with a huge congratulatory grin and sparkling eyes",
+          "tags": [
+            "original_generic_emojis_colorful_clap",
+            "clap",
+            "applause"
+          ],
+          "emoji": "👏",
+          "motion": "grins widely, nods along, joyful sway"
+        },
+        {
+          "pos": 8,
+          "label": "confident wink with a proud grin",
+          "tags": [
+            "original_generic_emojis_colorful_approve",
+            "approve",
+            "okay",
+            "yes",
+            "thumbsup"
+          ],
+          "emoji": "👍",
+          "motion": "winks twice, the grin widens, proud nod"
+        },
+        {
+          "pos": 9,
+          "label": "stern disapproval with a tight frown and narrowed eyes",
+          "tags": [
+            "original_generic_emojis_colorful_disapprove",
+            "disapprove",
+            "reject",
+            "no"
+          ],
+          "emoji": "👎",
+          "motion": "frowns firmly, eyes narrow, slow disapproving shake of the head"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "social-v1",
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "original generic emojis colorful",
+    "task_slug": "original_generic_emojis_colorful",
+    "subject": "original generic emojis colorful",
+    "scene": "",
+    "described": "original generic emojis colorful",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "original generic emojis colorful",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "friendly hello with a warm open smile and bright welcoming eyes",
+          "tags": [
+            "original_generic_emojis_colorful_hello",
+            "hello",
+            "wave",
+            "hi"
+          ],
+          "emoji": "👋",
+          "motion": "smiles warmly, eyes light up, cheerful tilt"
+        },
+        {
+          "pos": 2,
+          "label": "warm loving smile with happy squinted eyes and glowing cheeks",
+          "tags": [
+            "original_generic_emojis_colorful_hug",
+            "hug",
+            "openarms"
+          ],
+          "emoji": "🤗",
+          "motion": "the face glows, happy squint, gentle tilt side to side"
+        },
+        {
+          "pos": 3,
+          "label": "blowing a kiss with a wink, a small heart floating free",
+          "tags": [
+            "original_generic_emojis_colorful_kiss",
+            "kiss",
+            "kissing"
+          ],
+          "emoji": "😘",
+          "motion": "lips purse, a wink, the heart pulses"
+        },
+        {
+          "pos": 4,
+          "label": "playful wink with one eye closed and a cheeky grin",
+          "tags": [
+            "original_generic_emojis_colorful_wink",
+            "wink",
+            "winking"
+          ],
+          "emoji": "😉",
+          "motion": "winks, the grin tilts, the cheek lifts"
+        },
+        {
+          "pos": 5,
+          "label": "shy with a bashful smile and downcast glancing eyes",
+          "tags": [
+            "original_generic_emojis_colorful_shy",
+            "shy",
+            "bashful",
+            "blushing"
+          ],
+          "emoji": "😊",
+          "motion": "smiles bashfully, eyes glance down and away"
+        },
+        {
+          "pos": 6,
+          "label": "celebrating with sparkling joyful eyes and a huge party grin",
+          "tags": [
+            "original_generic_emojis_colorful_celebrate",
+            "celebrate",
+            "party"
+          ],
+          "emoji": "🥳",
+          "motion": "eyes sparkle, the grin stretches wide, joyful tremble"
+        },
+        {
+          "pos": 7,
+          "label": "cheering with a huge congratulatory grin and sparkling eyes",
+          "tags": [
+            "original_generic_emojis_colorful_clap",
+            "clap",
+            "applause"
+          ],
+          "emoji": "👏",
+          "motion": "grins widely, nods along, joyful sway"
+        },
+        {
+          "pos": 8,
+          "label": "confident wink with a proud grin",
+          "tags": [
+            "original_generic_emojis_colorful_approve",
+            "approve",
+            "okay",
+            "yes",
+            "thumbsup"
+          ],
+          "emoji": "👍",
+          "motion": "winks twice, the grin widens, proud nod"
+        },
+        {
+          "pos": 9,
+          "label": "stern disapproval with a tight frown and narrowed eyes",
+          "tags": [
+            "original_generic_emojis_colorful_disapprove",
+            "disapprove",
+            "reject",
+            "no"
+          ],
+          "emoji": "👎",
+          "motion": "frowns firmly, eyes narrow, slow disapproving shake of the head"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "social-v1",
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: friendly hello with a warm open smile and bright welcoming eyes\nCharacter 2: warm loving smile with happy squinted eyes and glowing cheeks\nCharacter 3: blowing a kiss with a wink, a small heart floating free\nCharacter 4: playful wink with one eye closed and a cheeky grin\nCharacter 5: shy with a bashful smile and downcast glancing eyes\nCharacter 6: celebrating with sparkling joyful eyes and a huge party grin\nCharacter 7: cheering with a huge congratulatory grin and sparkling eyes\nCharacter 8: confident wink with a proud grin\nCharacter 9: stern disapproval with a tight frown and narrowed eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every face performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. smiles warmly, eyes light up, cheerful tilt\n2. the face glows, happy squint, gentle tilt side to side\n3. lips purse, a wink, the heart pulses\n4. winks, the grin tilts, the cheek lifts\n5. smiles bashfully, eyes glance down and away\n6. eyes sparkle, the grin stretches wide, joyful tremble\n7. grins widely, nods along, joyful sway\n8. winks twice, the grin widens, proud nod\n9. frowns firmly, eyes narrow, slow disapproving shake of the head\nAnimation style: wide emotions on highly expressive faces, exaggerated squash and stretch of the face, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), each face on its own rhythm, lively and full of personality. Faces only: no bodies, no hands, no ears, no tails, no props. Never still and never only a gentle sway.\nKeep every face inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and faces never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each face's design, proportions and colours unchanged and do not add outlines or borders.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "original generic emojis colorful friendly hello with a warm open smile and bright welcoming eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_hello",
+        "tags": [
+          "original_generic_emojis_colorful_hello",
+          "hello",
+          "wave",
+          "hi"
+        ],
+        "emoji": "👋"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "original generic emojis colorful warm loving smile with happy squinted eyes and glowing cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_hug",
+        "tags": [
+          "original_generic_emojis_colorful_hug",
+          "hug",
+          "openarms"
+        ],
+        "emoji": "🤗"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "original generic emojis colorful blowing a kiss with a wink, a small heart floating free, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_kiss",
+        "tags": [
+          "original_generic_emojis_colorful_kiss",
+          "kiss",
+          "kissing"
+        ],
+        "emoji": "😘"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "original generic emojis colorful playful wink with one eye closed and a cheeky grin, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_wink",
+        "tags": [
+          "original_generic_emojis_colorful_wink",
+          "wink",
+          "winking"
+        ],
+        "emoji": "😉"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "prompt": "original generic emojis colorful shy with a bashful smile and downcast glancing eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_shy",
+        "tags": [
+          "original_generic_emojis_colorful_shy",
+          "shy",
+          "bashful",
+          "blushing"
+        ],
+        "emoji": "😊"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "prompt": "original generic emojis colorful celebrating with sparkling joyful eyes and a huge party grin, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_celebrate",
+        "tags": [
+          "original_generic_emojis_colorful_celebrate",
+          "celebrate",
+          "party"
+        ],
+        "emoji": "🥳"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "prompt": "original generic emojis colorful cheering with a huge congratulatory grin and sparkling eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_clap",
+        "tags": [
+          "original_generic_emojis_colorful_clap",
+          "clap",
+          "applause"
+        ],
+        "emoji": "👏"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "prompt": "original generic emojis colorful confident wink with a proud grin, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_approve",
+        "tags": [
+          "original_generic_emojis_colorful_approve",
+          "approve",
+          "okay",
+          "yes",
+          "thumbsup"
+        ],
+        "emoji": "👍"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "prompt": "original generic emojis colorful stern disapproval with a tight frown and narrowed eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_disapprove",
+        "tags": [
+          "original_generic_emojis_colorful_disapprove",
+          "disapprove",
+          "reject",
+          "no"
+        ],
+        "emoji": "👎"
+      }
+    ],
+    "expanded_by": "deterministic",
+    "previewed": true
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791526403.867,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G122"
+  ]
+}

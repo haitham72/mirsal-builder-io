@@ -1,0 +1,429 @@
+{
+  "id": "045",
+  "number": 45,
+  "provider": "higgsfield-manual",
+  "external_task_id": "419a893f-c724-4650-92ae-dfe165801255",
+  "name_key": "original_generic_emojis_colorful",
+  "status": "running",
+  "created": 1791523467.896,
+  "prompt": "original generic emojis, colorful",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "glossy_3d",
+  "folders": {
+    "img": "img-045-original_generic_emojis_colorful",
+    "vid": "vid-045-original_generic_emojis_colorful"
+  },
+  "paths": {
+    "img": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-045-original_generic_emojis_colorful",
+    "vid": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\videos_gen\\vid-045-original_generic_emojis_colorful"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "Smiling brightly with wide open eyes and a big grin",
+          "tags": [
+            "original_generic_emojis_colorful_happy_bounce",
+            "joy",
+            "cheerful",
+            "bright"
+          ],
+          "emoji": "😊😄",
+          "motion": "The emoji bounces gently up and down with a cheerful spring."
+        },
+        {
+          "pos": 2,
+          "label": "Eyes closed, blushing with a shy smile, tilting head slightly",
+          "tags": [
+            "original_generic_emojis_colorful_shy_sway",
+            "embarrassment",
+            "bashful",
+            "blushing"
+          ],
+          "emoji": "😊☺️",
+          "motion": "The emoji gently sways side to side with a bashful bounce."
+        },
+        {
+          "pos": 3,
+          "label": "Frowning deeply with downward eyebrows and teardrops",
+          "tags": [
+            "original_generic_emojis_colorful_sad_tremble",
+            "sadness",
+            "tears",
+            "unhappy"
+          ],
+          "emoji": "😢☹️",
+          "motion": "The emoji quivers slightly with a slow trembling motion."
+        },
+        {
+          "pos": 4,
+          "label": "Eyes wide open, mouth round in shock, eyebrows raised",
+          "tags": [
+            "original_generic_emojis_colorful_shocked_shake",
+            "shock",
+            "surprise",
+            "startled"
+          ],
+          "emoji": "😲😳",
+          "motion": "The emoji shakes side to side quickly like a startled jolt."
+        },
+        {
+          "pos": 5,
+          "label": "Eyes narrowed with a mischievous grin, one eyebrow raised",
+          "tags": [
+            "original_generic_emojis_colorful_mischievous_lean",
+            "mischief",
+            "playful",
+            "sly"
+          ],
+          "emoji": "😏😼",
+          "motion": "The emoji leans forward and back like plotting a playful trick."
+        },
+        {
+          "pos": 6,
+          "label": "Angry scowl with furrowed brows and clenched teeth",
+          "tags": [
+            "original_generic_emojis_colorful_angry_pulse",
+            "anger",
+            "furious",
+            "mad"
+          ],
+          "emoji": "😠😡",
+          "motion": "The emoji pulses in size quickly like a furious heartbeat."
+        },
+        {
+          "pos": 7,
+          "label": "Yawning with eyes half closed and hand covering mouth",
+          "tags": [
+            "original_generic_emojis_colorful_sleepy_rock",
+            "sleepiness",
+            "tired",
+            "yawn"
+          ],
+          "emoji": "😪🥱",
+          "motion": "The emoji slowly rocks side to side like sleepy swaying."
+        },
+        {
+          "pos": 8,
+          "label": "Rolling eyes upwards with a bored flat mouth",
+          "tags": [
+            "original_generic_emojis_colorful_bored_rotate",
+            "boredom",
+            "disinterest",
+            "apathetic"
+          ],
+          "emoji": "🙄😒",
+          "motion": "The emoji rotates slowly in place showing disinterest."
+        },
+        {
+          "pos": 9,
+          "label": "Loving eyes shaped like hearts, smiling warmly",
+          "tags": [
+            "original_generic_emojis_colorful_love_pulse",
+            "love",
+            "affection",
+            "heart"
+          ],
+          "emoji": "😍❤️",
+          "motion": "The emoji pulses gently with heart shapes shimmering softly."
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "core-v1",
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "original generic emojis colorful",
+    "task_slug": "original_generic_emojis_colorful",
+    "subject": "original generic emojis colorful",
+    "scene": "",
+    "described": "original generic emojis colorful",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "Smiling brightly with wide open eyes and a big grin",
+          "tags": [
+            "original_generic_emojis_colorful_happy_bounce",
+            "joy",
+            "cheerful",
+            "bright"
+          ],
+          "emoji": "😊😄",
+          "motion": "The emoji bounces gently up and down with a cheerful spring."
+        },
+        {
+          "pos": 2,
+          "label": "Eyes closed, blushing with a shy smile, tilting head slightly",
+          "tags": [
+            "original_generic_emojis_colorful_shy_sway",
+            "embarrassment",
+            "bashful",
+            "blushing"
+          ],
+          "emoji": "😊☺️",
+          "motion": "The emoji gently sways side to side with a bashful bounce."
+        },
+        {
+          "pos": 3,
+          "label": "Frowning deeply with downward eyebrows and teardrops",
+          "tags": [
+            "original_generic_emojis_colorful_sad_tremble",
+            "sadness",
+            "tears",
+            "unhappy"
+          ],
+          "emoji": "😢☹️",
+          "motion": "The emoji quivers slightly with a slow trembling motion."
+        },
+        {
+          "pos": 4,
+          "label": "Eyes wide open, mouth round in shock, eyebrows raised",
+          "tags": [
+            "original_generic_emojis_colorful_shocked_shake",
+            "shock",
+            "surprise",
+            "startled"
+          ],
+          "emoji": "😲😳",
+          "motion": "The emoji shakes side to side quickly like a startled jolt."
+        },
+        {
+          "pos": 5,
+          "label": "Eyes narrowed with a mischievous grin, one eyebrow raised",
+          "tags": [
+            "original_generic_emojis_colorful_mischievous_lean",
+            "mischief",
+            "playful",
+            "sly"
+          ],
+          "emoji": "😏😼",
+          "motion": "The emoji leans forward and back like plotting a playful trick."
+        },
+        {
+          "pos": 6,
+          "label": "Angry scowl with furrowed brows and clenched teeth",
+          "tags": [
+            "original_generic_emojis_colorful_angry_pulse",
+            "anger",
+            "furious",
+            "mad"
+          ],
+          "emoji": "😠😡",
+          "motion": "The emoji pulses in size quickly like a furious heartbeat."
+        },
+        {
+          "pos": 7,
+          "label": "Yawning with eyes half closed and hand covering mouth",
+          "tags": [
+            "original_generic_emojis_colorful_sleepy_rock",
+            "sleepiness",
+            "tired",
+            "yawn"
+          ],
+          "emoji": "😪🥱",
+          "motion": "The emoji slowly rocks side to side like sleepy swaying."
+        },
+        {
+          "pos": 8,
+          "label": "Rolling eyes upwards with a bored flat mouth",
+          "tags": [
+            "original_generic_emojis_colorful_bored_rotate",
+            "boredom",
+            "disinterest",
+            "apathetic"
+          ],
+          "emoji": "🙄😒",
+          "motion": "The emoji rotates slowly in place showing disinterest."
+        },
+        {
+          "pos": 9,
+          "label": "Loving eyes shaped like hearts, smiling warmly",
+          "tags": [
+            "original_generic_emojis_colorful_love_pulse",
+            "love",
+            "affection",
+            "heart"
+          ],
+          "emoji": "😍❤️",
+          "motion": "The emoji pulses gently with heart shapes shimmering softly."
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "core-v1",
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A colorful round generic emoji face with simple eyes and mouth, identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: Smiling brightly with wide open eyes and a big grin\nCharacter 2: Eyes closed, blushing with a shy smile, tilting head slightly\nCharacter 3: Frowning deeply with downward eyebrows and teardrops\nCharacter 4: Eyes wide open, mouth round in shock, eyebrows raised\nCharacter 5: Eyes narrowed with a mischievous grin, one eyebrow raised\nCharacter 6: Angry scowl with furrowed brows and clenched teeth\nCharacter 7: Yawning with eyes half closed and hand covering mouth\nCharacter 8: Rolling eyes upwards with a bored flat mouth\nCharacter 9: Loving eyes shaped like hearts, smiling warmly\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this illustration sheet as a 3-second clip. Every face performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. The emoji bounces gently up and down with a cheerful spring.\n2. The emoji gently sways side to side with a bashful bounce.\n3. The emoji quivers slightly with a slow trembling motion.\n4. The emoji shakes side to side quickly like a startled jolt.\n5. The emoji leans forward and back like plotting a playful trick.\n6. The emoji pulses in size quickly like a furious heartbeat.\n7. The emoji slowly rocks side to side like sleepy swaying.\n8. The emoji rotates slowly in place showing disinterest.\n9. The emoji pulses gently with heart shapes shimmering softly.\nAnimation style: wide emotions on highly expressive faces, exaggerated squash and stretch of the face, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), each face on its own rhythm, lively and full of personality. Faces only: no bodies, no hands, no ears, no tails, no props. Never still and never only a gentle sway.\nKeep every face inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and faces never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each face's design, proportions and colours unchanged and do not add outlines or borders.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Smiling brightly with wide open eyes and a big grin, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_happy_bounce",
+        "tags": [
+          "original_generic_emojis_colorful_happy_bounce",
+          "joy",
+          "cheerful",
+          "bright"
+        ],
+        "emoji": "😊😄"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Eyes closed, blushing with a shy smile, tilting head slightly, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_shy_sway",
+        "tags": [
+          "original_generic_emojis_colorful_shy_sway",
+          "embarrassment",
+          "bashful",
+          "blushing"
+        ],
+        "emoji": "😊☺️"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Frowning deeply with downward eyebrows and teardrops, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_sad_tremble",
+        "tags": [
+          "original_generic_emojis_colorful_sad_tremble",
+          "sadness",
+          "tears",
+          "unhappy"
+        ],
+        "emoji": "😢☹️"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Eyes wide open, mouth round in shock, eyebrows raised, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_shocked_shake",
+        "tags": [
+          "original_generic_emojis_colorful_shocked_shake",
+          "shock",
+          "surprise",
+          "startled"
+        ],
+        "emoji": "😲😳"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Eyes narrowed with a mischievous grin, one eyebrow raised, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_mischievous_lean",
+        "tags": [
+          "original_generic_emojis_colorful_mischievous_lean",
+          "mischief",
+          "playful",
+          "sly"
+        ],
+        "emoji": "😏😼"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Angry scowl with furrowed brows and clenched teeth, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_angry_pulse",
+        "tags": [
+          "original_generic_emojis_colorful_angry_pulse",
+          "anger",
+          "furious",
+          "mad"
+        ],
+        "emoji": "😠😡"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Yawning with eyes half closed and hand covering mouth, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_sleepy_rock",
+        "tags": [
+          "original_generic_emojis_colorful_sleepy_rock",
+          "sleepiness",
+          "tired",
+          "yawn"
+        ],
+        "emoji": "😪🥱"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Rolling eyes upwards with a bored flat mouth, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_bored_rotate",
+        "tags": [
+          "original_generic_emojis_colorful_bored_rotate",
+          "boredom",
+          "disinterest",
+          "apathetic"
+        ],
+        "emoji": "🙄😒"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "prompt": "A colorful round generic emoji face with simple eyes and mouth, identical in every cell Loving eyes shaped like hearts, smiling warmly, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_love_pulse",
+        "tags": [
+          "original_generic_emojis_colorful_love_pulse",
+          "love",
+          "affection",
+          "heart"
+        ],
+        "emoji": "😍❤️"
+      }
+    ],
+    "expanded_by": "ai",
+    "expand_model": "gpt-4.1-mini-2025-04-14",
+    "previewed": true,
+    "custom": {
+      "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A colorful round generic emoji face with simple eyes and mouth, identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: Smiling brightly with wide open eyes and a big grin\nCharacter 2: Eyes closed, blushing with a shy smile, tilting head slightly\nCharacter 3: Frowning deeply with downward eyebrows and teardrops\nCharacter 4: Eyes wide open, mouth round in shock, eyebrows raised\nCharacter 5: Eyes narrowed with a mischievous grin, one eyebrow raised\nCharacter 6: Angry scowl with furrowed brows and clenched teeth\nCharacter 7: Yawning with eyes half closed and hand covering mouth\nCharacter 8: Rolling eyes upwards with a bored flat mouth\nCharacter 9: Loving eyes shaped like hearts, smiling warmly\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another."
+    }
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791523467.896,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G121"
+  ]
+}

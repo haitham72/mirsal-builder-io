@@ -1,0 +1,393 @@
+{
+  "id": "049",
+  "number": 49,
+  "provider": "higgsfield-manual",
+  "external_task_id": "fc98a084-7a8f-43e7-9632-4dba527ecb18",
+  "name_key": "original_generic_emojis_colorful",
+  "status": "running",
+  "created": 1791530617.879,
+  "prompt": "original generic emojis, colorful reactions-v1",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "glossy_3d",
+  "folders": {
+    "img": "img-049-original_generic_emojis_colorful",
+    "vid": "vid-049-original_generic_emojis_colorful"
+  },
+  "paths": {
+    "img": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-049-original_generic_emojis_colorful",
+    "vid": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\videos_gen\\vid-049-original_generic_emojis_colorful"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "original generic emojis colorful",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "thinking hard, eyes glancing up and to the side, one eyebrow raised",
+          "tags": [
+            "original_generic_emojis_colorful_think",
+            "think",
+            "thinking"
+          ],
+          "emoji": "🤔",
+          "motion": "eyes glance up, the brow furrows then lifts, a slow nod"
+        },
+        {
+          "pos": 2,
+          "label": "confused with a tilted head, crooked brow and sideways glance",
+          "tags": [
+            "original_generic_emojis_colorful_confused",
+            "confused",
+            "puzzled"
+          ],
+          "emoji": "😕",
+          "motion": "the head tilts, one brow lifts, eyes glance aside"
+        },
+        {
+          "pos": 3,
+          "label": "rolling eyes with a bored deadpan face",
+          "tags": [
+            "original_generic_emojis_colorful_eye_roll",
+            "eye_roll",
+            "eyeroll"
+          ],
+          "emoji": "🙄",
+          "motion": "eyes circle slowly, head tilts back with a sigh"
+        },
+        {
+          "pos": 4,
+          "label": "disbelief with squeezed-shut eyes and a deep sigh",
+          "tags": [
+            "original_generic_emojis_colorful_facepalm",
+            "facepalm"
+          ],
+          "emoji": "🤦",
+          "motion": "eyes squeeze shut, the head shakes slowly, deep sigh"
+        },
+        {
+          "pos": 5,
+          "label": "clueless sideways glance with a crooked half-smile",
+          "tags": [
+            "original_generic_emojis_colorful_shrug",
+            "shrug",
+            "dunno"
+          ],
+          "emoji": "🤷",
+          "motion": "glances side to side, the half-smile tilts, head tilts"
+        },
+        {
+          "pos": 6,
+          "label": "bored with half-lowered eyelids and a flat unimpressed mouth",
+          "tags": [
+            "original_generic_emojis_colorful_bored",
+            "bored",
+            "unimpressed"
+          ],
+          "emoji": "😑",
+          "motion": "eyelids droop, the mouth stays flat, slow exhale"
+        },
+        {
+          "pos": 7,
+          "label": "wearing sunglasses, smirking, ultra cool",
+          "tags": [
+            "original_generic_emojis_colorful_cool",
+            "cool",
+            "sunglasses"
+          ],
+          "emoji": "😎",
+          "motion": "slow confident head nod, the sunglasses glint"
+        },
+        {
+          "pos": 8,
+          "label": "proud smug grin with a confident raised brow",
+          "tags": [
+            "original_generic_emojis_colorful_flex",
+            "flex",
+            "flexing"
+          ],
+          "emoji": "💪",
+          "motion": "the smug grin spreads, the brow lifts, confident nod"
+        },
+        {
+          "pos": 9,
+          "label": "scheming grin with wiggling eyebrows",
+          "tags": [
+            "original_generic_emojis_colorful_scheme",
+            "scheme",
+            "scheming"
+          ],
+          "emoji": "😏",
+          "motion": "eyebrows wiggle, the grin widens, sneaky giggle"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "reactions-v1",
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "original generic emojis colorful",
+    "task_slug": "original_generic_emojis_colorful",
+    "subject": "original generic emojis colorful",
+    "scene": "",
+    "described": "original generic emojis colorful",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "original generic emojis colorful",
+      "style_id": "glossy_3d",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "thinking hard, eyes glancing up and to the side, one eyebrow raised",
+          "tags": [
+            "original_generic_emojis_colorful_think",
+            "think",
+            "thinking"
+          ],
+          "emoji": "🤔",
+          "motion": "eyes glance up, the brow furrows then lifts, a slow nod"
+        },
+        {
+          "pos": 2,
+          "label": "confused with a tilted head, crooked brow and sideways glance",
+          "tags": [
+            "original_generic_emojis_colorful_confused",
+            "confused",
+            "puzzled"
+          ],
+          "emoji": "😕",
+          "motion": "the head tilts, one brow lifts, eyes glance aside"
+        },
+        {
+          "pos": 3,
+          "label": "rolling eyes with a bored deadpan face",
+          "tags": [
+            "original_generic_emojis_colorful_eye_roll",
+            "eye_roll",
+            "eyeroll"
+          ],
+          "emoji": "🙄",
+          "motion": "eyes circle slowly, head tilts back with a sigh"
+        },
+        {
+          "pos": 4,
+          "label": "disbelief with squeezed-shut eyes and a deep sigh",
+          "tags": [
+            "original_generic_emojis_colorful_facepalm",
+            "facepalm"
+          ],
+          "emoji": "🤦",
+          "motion": "eyes squeeze shut, the head shakes slowly, deep sigh"
+        },
+        {
+          "pos": 5,
+          "label": "clueless sideways glance with a crooked half-smile",
+          "tags": [
+            "original_generic_emojis_colorful_shrug",
+            "shrug",
+            "dunno"
+          ],
+          "emoji": "🤷",
+          "motion": "glances side to side, the half-smile tilts, head tilts"
+        },
+        {
+          "pos": 6,
+          "label": "bored with half-lowered eyelids and a flat unimpressed mouth",
+          "tags": [
+            "original_generic_emojis_colorful_bored",
+            "bored",
+            "unimpressed"
+          ],
+          "emoji": "😑",
+          "motion": "eyelids droop, the mouth stays flat, slow exhale"
+        },
+        {
+          "pos": 7,
+          "label": "wearing sunglasses, smirking, ultra cool",
+          "tags": [
+            "original_generic_emojis_colorful_cool",
+            "cool",
+            "sunglasses"
+          ],
+          "emoji": "😎",
+          "motion": "slow confident head nod, the sunglasses glint"
+        },
+        {
+          "pos": 8,
+          "label": "proud smug grin with a confident raised brow",
+          "tags": [
+            "original_generic_emojis_colorful_flex",
+            "flex",
+            "flexing"
+          ],
+          "emoji": "💪",
+          "motion": "the smug grin spreads, the brow lifts, confident nod"
+        },
+        {
+          "pos": 9,
+          "label": "scheming grin with wiggling eyebrows",
+          "tags": [
+            "original_generic_emojis_colorful_scheme",
+            "scheme",
+            "scheming"
+          ],
+          "emoji": "😏",
+          "motion": "eyebrows wiggle, the grin widens, sneaky giggle"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "reactions-v1",
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: thinking hard, eyes glancing up and to the side, one eyebrow raised\nCharacter 2: confused with a tilted head, crooked brow and sideways glance\nCharacter 3: rolling eyes with a bored deadpan face\nCharacter 4: disbelief with squeezed-shut eyes and a deep sigh\nCharacter 5: clueless sideways glance with a crooked half-smile\nCharacter 6: bored with half-lowered eyelids and a flat unimpressed mouth\nCharacter 7: wearing sunglasses, smirking, ultra cool\nCharacter 8: proud smug grin with a confident raised brow\nCharacter 9: scheming grin with wiggling eyebrows\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes glance up, the brow furrows then lifts, a slow nod\n2. the head tilts, one brow lifts, eyes glance aside\n3. eyes circle slowly, head tilts back with a sigh\n4. eyes squeeze shut, the head shakes slowly, deep sigh\n5. glances side to side, the half-smile tilts, head tilts\n6. eyelids droop, the mouth stays flat, slow exhale\n7. slow confident head nod, the sunglasses glint\n8. the smug grin spreads, the brow lifts, confident nod\n9. eyebrows wiggle, the grin widens, sneaky giggle\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "original generic emojis colorful thinking hard, eyes glancing up and to the side, one eyebrow raised, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_think",
+        "tags": [
+          "original_generic_emojis_colorful_think",
+          "think",
+          "thinking"
+        ],
+        "emoji": "🤔"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "original generic emojis colorful confused with a tilted head, crooked brow and sideways glance, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_confused",
+        "tags": [
+          "original_generic_emojis_colorful_confused",
+          "confused",
+          "puzzled"
+        ],
+        "emoji": "😕"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "original generic emojis colorful rolling eyes with a bored deadpan face, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_eye_roll",
+        "tags": [
+          "original_generic_emojis_colorful_eye_roll",
+          "eye_roll",
+          "eyeroll"
+        ],
+        "emoji": "🙄"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "original generic emojis colorful disbelief with squeezed-shut eyes and a deep sigh, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_facepalm",
+        "tags": [
+          "original_generic_emojis_colorful_facepalm",
+          "facepalm"
+        ],
+        "emoji": "🤦"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "prompt": "original generic emojis colorful clueless sideways glance with a crooked half-smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_shrug",
+        "tags": [
+          "original_generic_emojis_colorful_shrug",
+          "shrug",
+          "dunno"
+        ],
+        "emoji": "🤷"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "prompt": "original generic emojis colorful bored with half-lowered eyelids and a flat unimpressed mouth, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_bored",
+        "tags": [
+          "original_generic_emojis_colorful_bored",
+          "bored",
+          "unimpressed"
+        ],
+        "emoji": "😑"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "prompt": "original generic emojis colorful wearing sunglasses, smirking, ultra cool, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_cool",
+        "tags": [
+          "original_generic_emojis_colorful_cool",
+          "cool",
+          "sunglasses"
+        ],
+        "emoji": "😎"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "prompt": "original generic emojis colorful proud smug grin with a confident raised brow, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_flex",
+        "tags": [
+          "original_generic_emojis_colorful_flex",
+          "flex",
+          "flexing"
+        ],
+        "emoji": "💪"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "prompt": "original generic emojis colorful scheming grin with wiggling eyebrows, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "original_generic_emojis_colorful_scheme",
+        "tags": [
+          "original_generic_emojis_colorful_scheme",
+          "scheme",
+          "scheming"
+        ],
+        "emoji": "😏"
+      }
+    ],
+    "expanded_by": "deterministic",
+    "previewed": true
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791530617.879,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+  

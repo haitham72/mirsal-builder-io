@@ -1,0 +1,269 @@
+{
+  "task": "original generic emojis colorful",
+  "task_slug": "original_generic_emojis_colorful",
+  "subject": "original generic emojis colorful",
+  "scene": "",
+  "described": "original generic emojis colorful",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    3,
+    3
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 4,
+  "slots": {
+    "subject_description": "original generic emojis colorful",
+    "style_id": "glossy_3d",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "pure happiness with a bright beaming smile and joyful eyes",
+        "tags": [
+          "original_generic_emojis_colorful_happy",
+          "happy",
+          "smile",
+          "joy"
+        ],
+        "emoji": "😀",
+        "motion": "beams brightly, eyes shine with joy, happy sway"
+      },
+      {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut",
+        "tags": [
+          "original_generic_emojis_colorful_laugh",
+          "laugh",
+          "laughing",
+          "lol",
+          "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "the face shakes with laughter, tears fly, the mouth opens wide"
+      },
+      {
+        "pos": 3,
+        "label": "lovestruck with sparkling eyes, blushing cheeks and a dreamy smile",
+        "tags": [
+          "original_generic_emojis_colorful_love",
+          "love",
+          "heart",
+          "loving"
+        ],
+        "emoji": "😍",
+        "motion": "eyes sparkle, cheeks flush deeper, dreamy sway"
+      },
+      {
+        "pos": 4,
+        "label": "bawling with big streaming tears and a trembling lip",
+        "tags": [
+          "original_generic_emojis_colorful_cry",
+          "cry",
+          "crying",
+          "sobbing",
+          "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the lip quivers, the face crumples"
+      },
+      {
+        "pos": 5,
+        "label": "sad and drooping face with a single tear",
+        "tags": [
+          "original_generic_emojis_colorful_sad",
+          "sad",
+          "unhappy",
+          "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, a tear slides down, the face droops lower"
+      },
+      {
+        "pos": 6,
+        "label": "furious and steaming with a deep scowl and flared nostrils",
+        "tags": [
+          "original_generic_emojis_colorful_angry",
+          "angry",
+          "mad",
+          "furious",
+          "rage"
+        ],
+        "emoji": "😠",
+        "motion": "steam puffs from the head, the face shakes with rage, the scowl deepens"
+      },
+      {
+        "pos": 7,
+        "label": "surprised with wide round eyes and a small o-shaped mouth",
+        "tags": [
+          "original_generic_emojis_colorful_surprised",
+          "surprised",
+          "shocked",
+          "wow"
+        ],
+        "emoji": "😮",
+        "motion": "eyes widen, the mouth forms a small o, quick gasp"
+      },
+      {
+        "pos": 8,
+        "label": "terrified and trembling with wide darting eyes",
+        "tags": [
+          "original_generic_emojis_colorful_scared",
+          "scared",
+          "frightened",
+          "fear"
+        ],
+        "emoji": "😱",
+        "motion": "shivers fast, eyes dart, the face pales"
+      },
+      {
+        "pos": 9,
+        "label": "grateful smile with eyes closed in thanks and glowing cheeks",
+        "tags": [
+          "original_generic_emojis_colorful_thanks",
+          "thanks",
+          "thankyou"
+        ],
+        "emoji": "🙏",
+        "motion": "the head bows gently, the smile widens, warm glow"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "preset": "core-v1",
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: pure happiness with a bright beaming smile and joyful eyes\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut\nCharacter 3: lovestruck with sparkling eyes, blushing cheeks and a dreamy smile\nCharacter 4: bawling with big streaming tears and a trembling lip\nCharacter 5: sad and drooping face with a single tear\nCharacter 6: furious and steaming with a deep scowl and flared nostrils\nCharacter 7: surprised with wide round eyes and a small o-shaped mouth\nCharacter 8: terrified and trembling with wide darting eyes\nCharacter 9: grateful smile with eyes closed in thanks and glowing cheeks\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. beams brightly, eyes shine with joy, happy sway\n2. the face shakes with laughter, tears fly, the mouth opens wide\n3. eyes sparkle, cheeks flush deeper, dreamy sway\n4. tears stream in two arcs, the lip quivers, the face crumples\n5. sighs, a tear slides down, the face droops lower\n6. steam puffs from the head, the face shakes with rage, the scowl deepens\n7. eyes widen, the mouth forms a small o, quick gasp\n8. shivers fast, eyes dart, the face pales\n9. the head bows gently, the smile widens, warm glow\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "original generic emojis colorful pure happiness with a bright beaming smile and joyful eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_happy",
+      "tags": [
+        "original_generic_emojis_colorful_happy",
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "emoji": "😀"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "prompt": "original generic emojis colorful laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_laugh",
+      "tags": [
+        "original_generic_emojis_colorful_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+      ],
+      "emoji": "🤣"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "prompt": "original generic emojis colorful lovestruck with sparkling eyes, blushing cheeks and a dreamy smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_love",
+      "tags": [
+        "original_generic_emojis_colorful_love",
+        "love",
+        "heart",
+        "loving"
+      ],
+      "emoji": "😍"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "prompt": "original generic emojis colorful bawling with big streaming tears and a trembling lip, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_cry",
+      "tags": [
+        "original_generic_emojis_colorful_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "emoji": "😭"
+    },
+    {
+      "index": 5,
+      "id": "prompt05",
+      "prompt": "original generic emojis colorful sad and drooping face with a single tear, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_sad",
+      "tags": [
+        "original_generic_emojis_colorful_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "emoji": "😔"
+    },
+    {
+      "index": 6,
+      "id": "prompt06",
+      "prompt": "original generic emojis colorful furious and steaming with a deep scowl and flared nostrils, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_angry",
+      "tags": [
+        "original_generic_emojis_colorful_angry",
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "emoji": "😠"
+    },
+    {
+      "index": 7,
+      "id": "prompt07",
+      "prompt": "original generic emojis colorful surprised with wide round eyes and a small o-shaped mouth, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_surprised",
+      "tags": [
+        "original_generic_emojis_colorful_surprised",
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "emoji": "😮"
+    },
+    {
+      "index": 8,
+      "id": "prompt08",
+      "prompt": "original generic emojis colorful terrified and trembling with wide darting eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_scared",
+      "tags": [
+        "original_generic_emojis_colorful_scared",
+        "scared",
+        "frightened",
+        "fear"
+      ],
+      "emoji": "😱"
+    },
+    {
+      "index": 9,
+      "id": "prompt09",
+      "prompt": "original generic emojis colorful grateful smile with eyes closed in thanks and glowing cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "original_generic_emojis_colorful_thanks",
+      "tags": [
+        "original_generic_emojis_colorful_thanks",
+        "thanks",
+        "thankyou"
+      ],
+      "emoji": "🙏"
+    }
+  ],
+  "expanded_by": "deterministic",
+  "previewed": true
+}

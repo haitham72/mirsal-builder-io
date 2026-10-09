@@ -1,0 +1,70 @@
+{
+ "id": "0af3e7a3dc",
+ "name": "original generic emojis colorful shy",
+ "type": "animated",
+ "version": 1,
+ "source": {
+  "file": "source.webm",
+  "kind": "video",
+  "w": 512,
+  "h": 512,
+  "aspect": 1.0,
+  "duration": 2.96,
+  "fps": 24.0,
+  "previewFps": 12.0,
+  "frames": 35,
+  "frameExt": "png",
+  "hasAlpha": true
+ },
+ "canvas": {
+  "size": 512,
+  "fit": "contain"
+ },
+ "video": {
+  "trimStartMs": 0,
+  "trimEndMs": 2960,
+  "currentTimeMs": 1133,
+  "fps": 24
+ },
+ "gif": {
+  "enabled": false,
+  "loop": true,
+  "quality": 256
+ },
+ "videoBackgroundRemoval": {
+  "enabled": false,
+  "status": "UNAVAILABLE",
+  "provider": null,
+  "chroma": null,
+  "model": null,
+  "reason": "The clip already has transparency."
+ },
+ "layers": [
+  {
+   "id": "ahmdnso",
+   "type": "sticker",
+   "visible": true,
+   "locked": false,
+   "zIndex": 1,
+   "transform": {
+    "x": 134.0,
+    "y": 390.0,
+    "scale": 1.0,
+    "rotation": 0.0
+   },
+   "opacity": 1,
+   "payload": {
+    "file": "G012/img-superman_dubai-shocked_rain-superman-20261002T090921-6c4c0d.png",
+    "size": 220
+   }
+  }
+ ],
+ "packId": null,
+ "export": {
+  "format": "webm",
+  "name": "",
+  "emoji": "🙂"
+ },
+ "createdAt": "2026-10-09T10:37:55",
+ "updatedAt": "2026-10-09T10:38:08"
+}

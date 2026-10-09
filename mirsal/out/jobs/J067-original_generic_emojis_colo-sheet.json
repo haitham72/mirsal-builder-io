@@ -1,0 +1,46 @@
+{
+  "id": "J067",
+  "kind": "sheet",
+  "task": "045",
+  "generation": "G121",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A colorful round generic emoji face with simple eyes and mouth, identical in every cell.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: Smiling brightly with wide open eyes and a big grin\nCharacter 2: Eyes closed, blushing with a shy smile, tilting head slightly\nCharacter 3: Frowning deeply with downward eyebrows and teardrops\nCharacter 4: Eyes wide open, mouth round in shock, eyebrows raised\nCharacter 5: Eyes narrowed with a mischievous grin, one eyebrow raised\nCharacter 6: Angry scowl with furrowed brows and clenched teeth\nCharacter 7: Yawning with eyes half closed and hand covering mouth\nCharacter 8: Rolling eyes upwards with a bored flat mouth\nCharacter 9: Loving eyes shaped like hearts, smiling warmly\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "original generic emojis, colorful",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": true,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "419a893f-c724-4650-92ae-dfe165801255",
+  "result": {
+    "file": "jobs/J067-original_generic_emojis_colo-sheet/result.png",
+    "sha256": "cce13f4b0262ef1fb11b404ef612c7bf5c63f7f2355abd1a8f260bb1df44a365",
+    "bytes": 4456352
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791523468.427,
+  "claimed_at": 1791523469.864,
+  "completed_at": 1791523540.798,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791523592.991,
+    "by": "local"
+  }
+}

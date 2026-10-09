@@ -1,0 +1,41 @@
+{
+  "id": "J075",
+  "kind": "video",
+  "task": "original generic emojis colorful",
+  "generation": "G124",
+  "provider": "higgsfield-cli",
+  "model": "grok_video_v15",
+  "request": {
+    "model": "grok_video_v15",
+    "options": {
+      "resolution": "1080p",
+      "duration": "3"
+    },
+    "prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. smiles warmly, eyes light up, cheerful tilt\n2. the face glows, happy squint, gentle tilt side to side\n3. lips purse, a wink, the heart pulses\n4. winks, the grin tilts, the cheek lifts\n5. smiles bashfully, eyes glance down and away\n6. eyes sparkle, the grin stretches wide, joyful tremble\n8. winks twice, the grin widens, proud nod\n9. frowns firmly, eyes narrow, slow disapproving shake of the head\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+    "custom_prompt": false,
+    "start_image": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\G124-original_generic_emojis_colo-20261009T070528\\video_sheet\\A1\\sheet.png",
+    "sheet": "A1",
+    "label": "original generic emojis, colorful social-v1 reactions-v1",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "2a5a155e-b58b-4196-8ef4-8bf24db5e4a7",
+  "result": {
+    "file": "jobs/J075-original_generic_emojis_colo-video/result.mp4",
+    "sha256": "bc8fdb40f50f30914d49c99d032fb9bce4aa2128aea5ceab169caf93c29b37b4",
+    "bytes": 2005318
+  },
+  "cost": 24.0,
+  "error": null,
+  "created_at": 1791529570.723,
+  "claimed_at": 1791529577.478,
+  "completed_at": 1791529666.352,
+  "params": {
+    "resolution": "1080p",
+    "duration": "3"
+  },
+  "cost_estimate": 24.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

@@ -19,5 +19,9 @@
   "error": null,
   "created_at": 1790872405.908,
   "claimed_at": null,
-  "completed_at": null
+  "completed_at": null,
+  "dismissed": {
+    "at": 1791524873.962,
+    "by": "local"
+  }
 }

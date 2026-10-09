@@ -1,0 +1,175 @@
+{
+ "canvas": [
+  2048,
+  2048
+ ],
+ "key_rgb": [
+  0,
+  255,
+  0
+ ],
+ "grid": [
+  3,
+  3
+ ],
+ "slots": [
+  {
+   "slot": 1,
+   "sticker": "S1",
+   "rect": [
+    0,
+    0,
+    682,
+    682
+   ],
+   "subject_rect": [
+    149,
+    148,
+    384,
+    386
+   ],
+   "scale": 0.97429,
+   "subject_px": 117435
+  },
+  {
+   "slot": 2,
+   "sticker": "S2",
+   "rect": [
+    682,
+    0,
+    683,
+    682
+   ],
+   "subject_rect": [
+    831,
+    148,
+    384,
+    385
+   ],
+   "scale": 0.97429,
+   "subject_px": 117304
+  },
+  {
+   "slot": 3,
+   "sticker": "S3",
+   "rect": [
+    1365,
+    0,
+    683,
+    682
+   ],
+   "subject_rect": [
+    1505,
+    148,
+    402,
+    385
+   ],
+   "scale": 0.97429,
+   "subject_px": 119141
+  },
+  {
+   "slot": 4,
+   "sticker": "S4",
+   "rect": [
+    0,
+    682,
+    682,
+    683
+   ],
+   "subject_rect": [
+    149,
+    830,
+    384,
+    387
+   ],
+   "scale": 0.97429,
+   "subject_px": 117882
+  },
+  {
+   "slot": 5,
+   "sticker": "S5",
+   "rect": [
+    682,
+    682,
+    683,
+    683
+   ],
+   "subject_rect": [
+    831,
+    830,
+    384,
+    387
+   ],
+   "scale": 0.97429,
+   "subject_px": 117884
+  },
+  {
+   "slot": 6,
+   "sticker": "S6",
+   "rect": [
+    1365,
+    682,
+    683,
+    683
+   ],
+   "subject_rect": [
+    1514,
+    830,
+    384,
+    386
+   ],
+   "scale": 0.97429,
+   "subject_px": 117827
+  },
+  {
+   "slot": 7,
+   "sticker": null,
+   "rect": [
+    0,
+    1365,
+    682,
+    683
+   ],
+   "subject_rect": null,
+   "scale": 0.0,
+   "subject_px": 0
+  },
+  {
+   "slot": 8,
+   "sticker": "S8",
+   "rect": [
+    682,
+    1365,
+    683,
+    683
+   ],
+   "subject_rect": [
+    831,
+    1513,
+    384,
+    387
+   ],
+   "scale": 0.97429,
+   "subject_px": 117861
+  },
+  {
+   "slot": 9,
+   "sticker": "S9",
+   "rect": [
+    1365,
+    1365,
+    683,
+    683
+   ],
+   "subject_rect": [
+    1514,
+    1512,
+    384,
+    388
+   ],
+   "scale": 0.97429,
+   "subject_px": 117934
+  }
+ ],
+ "verify_version": 2
+}

@@ -1,0 +1,46 @@
+{
+  "id": "J069",
+  "kind": "video",
+  "task": "original generic emojis colorful",
+  "generation": "G121",
+  "provider": "higgsfield-cli",
+  "model": "grok_video_v15_lite",
+  "request": {
+    "model": "grok_video_v15_lite",
+    "options": {
+      "resolution": "1080p",
+      "duration": "3"
+    },
+    "prompt": "Animate this illustration sheet as a 3-second clip. Every face performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. The emoji bounces gently up and down with a cheerful spring.\n2. The emoji gently sways side to side with a bashful bounce.\n3. The emoji quivers slightly with a slow trembling motion.\n4. The emoji shakes side to side quickly like a startled jolt.\n5. The emoji leans forward and back like plotting a playful trick.\n6. The emoji pulses in size quickly like a furious heartbeat.\n7. The emoji slowly rocks side to side like sleepy swaying.\n8. The emoji rotates slowly in place showing disinterest.\n9. The emoji pulses gently with heart shapes shimmering softly.\nAnimation style: wide emotions on highly expressive faces, exaggerated squash and stretch of the face, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), each face on its own rhythm, lively and full of personality. Faces only: no bodies, no hands, no ears, no tails, no props. Never still and never only a gentle sway.\nKeep every face inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and faces never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each face's design, proportions and colours unchanged and do not add outlines or borders.",
+    "custom_prompt": true,
+    "start_image": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\G121-original_generic_emojis_colo-20261009T052540\\video_sheet\\A2\\sheet.png",
+    "sheet": "A2",
+    "label": "original generic emojis, colorful",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "7e9ce082-5a09-4814-80dd-41f1437c6eb1",
+  "result": {
+    "file": "jobs/J069-original_generic_emojis_colo-video/result.mp4",
+    "sha256": "b770e957816baa58d8cafac07b7313d7c1bf293aa41f1be8643a59755a12898d",
+    "bytes": 2866705
+  },
+  "cost": 12.0,
+  "error": null,
+  "created_at": 1791524046.717,
+  "claimed_at": 1791524051.653,
+  "completed_at": 1791524104.186,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "1080p",
+    "duration": "3"
+  },
+  "cost_estimate": 12.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791524419.315,
+    "by": "local"
+  }
+}

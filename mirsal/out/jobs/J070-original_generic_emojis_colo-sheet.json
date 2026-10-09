@@ -1,0 +1,46 @@
+{
+  "id": "J070",
+  "kind": "sheet",
+  "task": "046",
+  "generation": "G122",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: friendly hello with a warm open smile and bright welcoming eyes\nCharacter 2: warm loving smile with happy squinted eyes and glowing cheeks\nCharacter 3: blowing a kiss with a wink, a small heart floating free\nCharacter 4: playful wink with one eye closed and a cheeky grin\nCharacter 5: shy with a bashful smile and downcast glancing eyes\nCharacter 6: celebrating with sparkling joyful eyes and a huge party grin\nCharacter 7: cheering with a huge congratulatory grin and sparkling eyes\nCharacter 8: confident wink with a proud grin\nCharacter 9: stern disapproval with a tight frown and narrowed eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "original generic emojis, colorful social-v1",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "0fe63fe1-9dbe-4236-ab43-840023d31d4d",
+  "result": {
+    "file": "jobs/J070-original_generic_emojis_colo-sheet/result.png",
+    "sha256": "7b8f3a7f97aacfa8e33e350b824742e2ade86ddec1e77e9ecae81b3c43a1700c",
+    "bytes": 4428263
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791526404.393,
+  "claimed_at": 1791526406.161,
+  "completed_at": 1791526443.677,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791527187.99,
+    "by": "local"
+  }
+}

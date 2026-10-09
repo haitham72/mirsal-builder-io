@@ -1492,7 +1492,43 @@
      "file_name": "img-school_buss-dancing_parade-20261003T050701-45ce6b"
     }
    ],
-   "owner": "local"
+   "owner": "local",
+   "telegram": {
+    "sets": [
+     {
+      "kind": "static",
+      "name": "school_buss_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/school_buss_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "17b9bdbc",
+        "file_unique_id": "AgAD9B0AApxqQVI"
+       },
+       {
+        "sticker_id": "a20189cf",
+        "file_unique_id": "AgADgCAAAnJBSFI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "299ed6d2dc20b8f89d77b097f5a5065581b90fbb718f0dddad9d17f72b0cc6cc",
+      "sent_at": 1791521185.755,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "static",
+        "name": "school_buss_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/school_buss_by_Mirsal_builder_bot",
+        "added": 2,
+        "total": 2
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "782c4187",
@@ -1772,7 +1808,71 @@
      "edited": 1791183722.1491046
     }
    ],
-   "owner": "local"
+   "owner": "local",
+   "telegram": {
+    "sets": [
+     {
+      "kind": "video",
+      "name": "old_man_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/old_man_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "8434d3b4",
+        "file_unique_id": "AgADo5IAAhuVSVI"
+       },
+       {
+        "sticker_id": "3ca99871",
+        "file_unique_id": "AgADPx4AAkyQSVI"
+       },
+       {
+        "sticker_id": "a8e79bbf",
+        "file_unique_id": "AgADbCEAAmidQFI"
+       },
+       {
+        "sticker_id": "e4536295",
+        "file_unique_id": "AgADmhwAAozTSVI"
+       },
+       {
+        "sticker_id": "2f276704",
+        "file_unique_id": "AgADth4AAnLMSVI"
+       },
+       {
+        "sticker_id": "a4b28cca",
+        "file_unique_id": "AgADLSIAAicFSFI"
+       },
+       {
+        "sticker_id": "b04e9ec3",
+        "file_unique_id": "AgADLSIAApgdQFI"
+       },
+       {
+        "sticker_id": "54c3636d",
+        "file_unique_id": "AgADByEAAu1dSFI"
+       },
+       {
+        "sticker_id": "d4914f63",
+        "file_unique_id": "AgADfCEAApXDQVI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "31611cc4d180e0e2747112364b0ccff2298237d70f22e016750c727b17bc0cff",
+      "sent_at": 1791521153.092,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "video",
+        "name": "old_man_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/old_man_by_Mirsal_builder_bot",
+        "added": 9,
+        "total": 9
+       }
+      ]
+     }
+    ]
+   }
   },
   {
    "id": "af5600ee",
@@ -2707,6 +2807,225 @@
     }
    ],
    "lead_at": 1791455401.239
+  },
+  {
+   "id": "f2e53165",
+   "name": "Original Generic Emojis",
+   "slug": "original_generic_emojis",
+   "cover": "923c6112",
+   "owner": "local",
+   "created": 1791524407.484131,
+   "stickers": [
+    {
+     "id": "923c6112",
+     "name": "Original generic emojis colorful happy bounce",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-happy_bounce-original_generic_emojis-20261009T054007-bdce39.webm",
+     "type": "animated",
+     "emoji": "😊😄",
+     "kb": 215,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 1
+     },
+     "created": 1791524407.782225,
+     "file_name": "img-original_generic_emojis_colo-happy_bounce-20261009T052540-ee5eeb"
+    },
+    {
+     "id": "a13d3096",
+     "name": "Original generic emojis colorful shy sway",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-shy_sway-original_generic_emojis-20261009T054007-907309.webm",
+     "type": "animated",
+     "emoji": "😊☺️",
+     "kb": 193,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 2
+     },
+     "created": 1791524407.8043892,
+     "file_name": "img-original_generic_emojis_colo-shy_sway-20261009T052540-00a95f"
+    },
+    {
+     "id": "d4008ba4",
+     "name": "Original generic emojis colorful sad tremble",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-sad_tremble-original_generic_emojis-20261009T054007-4b84b6.webm",
+     "type": "animated",
+     "emoji": "😢☹️",
+     "kb": 213,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 3
+     },
+     "created": 1791524407.8241436,
+     "file_name": "img-original_generic_emojis_colo-sad_tremble-20261009T052540-acdc39"
+    },
+    {
+     "id": "db53c3f7",
+     "name": "Original generic emojis colorful shocked shake",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-shocked_shake-original_generic_emojis-20261009T054007-d775fc.webm",
+     "type": "animated",
+     "emoji": "😲😳",
+     "kb": 220,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 4
+     },
+     "created": 1791524407.844766,
+     "file_name": "img-original_generic_emojis_colo-shocked_shake-20261009T052540-3a343d"
+    },
+    {
+     "id": "8b4bef63",
+     "name": "Original generic emojis colorful mischievous lean",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-mischievous_lean-original_generic_emojis-20261009T054007-978c0c.webm",
+     "type": "animated",
+     "emoji": "😏😼",
+     "kb": 219,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 5
+     },
+     "created": 1791524407.8654509,
+     "file_name": "img-original_generic_emojis_colo-mischievous_lean-20261009T052540-18ce39"
+    },
+    {
+     "id": "1e1e9810",
+     "name": "Original generic emojis colorful angry pulse",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-angry_pulse-original_generic_emojis-20261009T054007-fea8cf.webm",
+     "type": "animated",
+     "emoji": "😠😡",
+     "kb": 212,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 6
+     },
+     "created": 1791524407.886411,
+     "file_name": "img-original_generic_emojis_colo-angry_pulse-20261009T052540-8a41b8"
+    },
+    {
+     "id": "9000458c",
+     "name": "Original generic emojis colorful sleepy rock",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-sleepy_rock-original_generic_emojis-20261009T054007-620433.webm",
+     "type": "animated",
+     "emoji": "😪🥱",
+     "kb": 197,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 7
+     },
+     "created": 1791524407.9067118,
+     "file_name": "img-original_generic_emojis_colo-sleepy_rock-20261009T052540-638caa"
+    },
+    {
+     "id": "e36cb8f8",
+     "name": "Original generic emojis colorful bored rotate",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-bored_rotate-original_generic_emojis-20261009T054007-7de44b.webm",
+     "type": "animated",
+     "emoji": "🙄😒",
+     "kb": 233,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 8
+     },
+     "created": 1791524407.9273963,
+     "file_name": "img-original_generic_emojis_colo-bored_rotate-20261009T052540-4b1364"
+    },
+    {
+     "id": "3baca0cb",
+     "name": "Original generic emojis colorful love pulse",
+     "file": "G121-original_generic_emojis_colo-20261009T052540/vid-original_generic_emojis_colo-love_pulse-original_generic_emojis-20261009T054007-b6d730.webm",
+     "type": "animated",
+     "emoji": "😍❤️",
+     "kb": 208,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G121",
+      "index": 9
+     },
+     "created": 1791524407.9477394,
+     "file_name": "img-original_generic_emojis_colo-love_pulse-20261009T052540-e536a6"
+    }
+   ],
+   "lead_at": 1791524408.055,
+   "telegram": {
+    "sets": [
+     {
+      "kind": "video",
+      "name": "original_generic_emojis_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/original_generic_emojis_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "923c6112",
+        "file_unique_id": "AgADgh4AAuJ-QFI"
+       },
+       {
+        "sticker_id": "a13d3096",
+        "file_unique_id": "AgADkR0AApf_QFI"
+       },
+       {
+        "sticker_id": "d4008ba4",
+        "file_unique_id": "AgAD0x4AAqFHSVI"
+       },
+       {
+        "sticker_id": "db53c3f7",
+        "file_unique_id": "AgADMSAAAkuOQFI"
+       },
+       {
+        "sticker_id": "8b4bef63",
+        "file_unique_id": "AgADix0AAtU7SFI"
+       },
+       {
+        "sticker_id": "1e1e9810",
+        "file_unique_id": "AgADaS4AAl6cQFI"
+       },
+       {
+        "sticker_id": "9000458c",
+        "file_unique_id": "AgADhB8AAtN3SVI"
+       },
+       {
+        "sticker_id": "e36cb8f8",
+        "file_unique_id": "AgADLCEAAoqtQFI"
+       },
+       {
+        "sticker_id": "3baca0cb",
+        "file_unique_id": "AgADeCUAAvnYSVI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "f3d540f9e0f871aab84c38ff6252d05e6a5a068752dab3611babfe72404cdbbd",
+      "sent_at": 1791524466.411,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "video",
+        "name": "original_generic_emojis_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/original_generic_emojis_by_Mirsal_builder_bot",
+        "added": 9,
+        "total": 9
+       }
+      ]
+     }
+    ]
+   }
   }
  ],
  "layout": 2,

@@ -1,0 +1,33 @@
+{
+  "id": "J077",
+  "kind": "sheet",
+  "task": "049",
+  "generation": "G125",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: thinking hard, eyes glancing up and to the side, one eyebrow raised\nCharacter 2: confused with a tilted head, crooked brow and sideways glance\nCharacter 3: rolling eyes with a bored deadpan face\nCharacter 4: disbelief with squeezed-shut eyes and a deep sigh\nCharacter 5: clueless sideways glance with a crooked half-smile\nCharacter 6: bored with half-lowered eyelids and a flat unimpressed mouth\nCharacter 7: wearing sunglasses, smirking, ultra cool\nCharacter 8: proud smug grin with a confident raised brow\nCharacter 9: scheming grin with wiggling eyebrows\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "original generic emojis, colorful reactions-v1",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "fc98a084-7a8f-43e7-9632-4dba527ecb18",
+  "result": {
+    "file": "jobs/J077-original_generic_emojis_colo-sheet/result.png",
+    "sha256": "de786679834a80f813c4fa7473ba41a70e3b16f1d056bccf6fa35e2d67c49b7d",
+    "bytes": 4489405
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791530618.405,
+  "claimed_at": 179153062

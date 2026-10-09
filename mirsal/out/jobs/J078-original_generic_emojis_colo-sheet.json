@@ -1,0 +1,38 @@
+{
+  "id": "J078",
+  "kind": "sheet",
+  "task": "050",
+  "generation": null,
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: original generic emojis colorful.\nStyle: glossy 3D render, smooth rounded shapes, shiny plastic-like material, soft studio lighting with bright reflections.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: fast asleep with a drool bubble, snoring softly\nCharacter 2: sickly with a greenish tint, droopy eyes and a weak frown\nCharacter 3: mid-sneeze with squeezed eyes and a drippy nose\nCharacter 4: pure joy, eyes closed, huge blissful smile, jiggling cheeks\nCharacter 5: huge shiny puppy eyes with a trembling lip, begging please\nCharacter 6: respectful attention with a chin-up nod and focused eyes\nCharacter 7: cheerful toast with a clinking grin and merry crinkled eyes\nCharacter 8: delighted with wide sparkling eyes and a joyful gasp\nCharacter 9: star-struck with huge starry eyes and an awestruck open smile\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "original generic emojis, colorful daily-v1",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "CLAIMED",
+  "external_task_id": "3d85c0eb-dfea-455b-9cfd-73f8f0c95051",
+  "result": null,
+  "cost": null,
+  "error": null,
+  "created_at": 1791530619.21,
+  "claimed_at": 1791530622.641,
+  "completed_at": null,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "working",
+  "waiting_pid": 27012
+}
