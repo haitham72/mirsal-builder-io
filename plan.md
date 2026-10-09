@@ -1,6 +1,6 @@
-# plan.md — the chat: a continuation fix, a stage selector (Prompt · Emojis · Animation · Export) and the batch follow-up
+# plan.md — the chat: a stage selector (Prompt · Emojis · Animation · Export) and the batch follow-up
 
-What an LLM builds next. Step 0 goes first (it fixes a live mis-route); Steps 1–3 are the feature. Nothing here is built yet (2026-10-09). Read `CLAUDE.md` first (the rules, especially 10, 11, 12, 13), then
+What an LLM builds next. Step 0 (the continuation fix) is built (`c7835b6`, 2026-10-09); Steps 1–3 are the feature. Read `CLAUDE.md` first (the rules, especially 10, 11, 12, 13), then
 `docs/agent-and-chat.md` (One turn, the agentic creator, "The chat in Telegram"), `docs/engine-and-studio.md` ("Batches, generations, regenerate", the
 multi-batch Generate and "Packs in Earlier batches") and `docs/design.md` (one shell, one token set; read it before touching CSS). Test budget:
 `docs/testing.md` (one narrowest run per change). No paid call in any test (`MIRSAL_NO_REAL_CLI`, `FakeTools` / the fake CLI). Delete each step when it is built;
@@ -10,9 +10,7 @@ delete this file when the plan is done; record what was built in `docs/agent-and
 
 Haitham, 2026-10-09: (1) in the chat the person should choose **how far a request goes**, with a clean, minimal selector like the "thinking" level
 picker of Claude / ChatGPT, but with four stages instead of low...max: **Prompt · Emojis · Animation · Export**. (2) A pack request assumes **batch 01**
-(the first 9 actions), then offers, after the generation, **Regenerate | Batch 02 | Batch 03 | Batch 04**. (3) A transcript the same day ("girl emirati"):
-"create video and export" planned a NEW subject called "video and export" instead of animating G127, and a names/describe turn reported "no finished
-stickers to look at yet" on a batch with nothing cut. Step 0 fixes both before the feature lands on top.
+(the first 9 actions), then offers, after the generation, **Regenerate | Batch 02 | Batch 03 | Batch 04**.
 
 ## Decided (Haitham; these were the plan's Q1–Q3, build with them)
 
@@ -35,24 +33,7 @@ stickers to look at yet" on a batch with nothing cut. Step 0 fixes both before t
   repeat, never past `MAX_BATCHES` 4). Routes `POST /api/plan/next`, `POST /api/plan/more`.
 - Regenerate = a new generation of the same batch: `POST /api/live/sheet {from_generation, parent, regen_of}` (`flow/groups.py` family/pick).
 - The Telegram chat (`services/tg_chat.py`): every chip of a reply is an inline button (`_chip_rows`), `/model` is a minimal button card
-  (`models_card`). Pack / export of an existing batch does not exist in chat today outside the creator.
-
-## Step 0 — the continuation fix (first: the transcript bug)
-
-- **Order in `classify`:** with `has_generation`, continuation verbs beat `NEW_VERBS` — put the match BEFORE the `NEW_VERBS` branch (~line 533), because
-  "create video" contains "create". Pattern: `\b(video|videos|animate|animated|animation|export|send|pack|telegram)\b` with an optional
-  it/them/these/those/this/that: video-words → ANIMATE (the existing node, on the focus batch); export-words → a new EXPORT intent. "create video and
-  export" with G127 in focus ends as a pending animate of G127 — the reply says in one line that pack + send follow after the animation — never a plan
-  for a subject called "video and export". "animate G001"-by-name adoption stays as it is (`tests/test_agent.py:554`).
-- **New `n_export`:** no READY animations on the focus batch → pending animate first ("I'll animate G127 first, then pack and send it"); animated →
-  pending `{type: "pack_send", generation}` → "Pack G127 (N stickers) and send it to Telegram?" with chips `Pack and send: confirm` / `Not yet: cancel` →
-  confirm runs `tools.pack_add` + `tools.telegram_send` (both free; the confirm is for the outward step). Typed forms that must work: "export",
-  "export it", "send to telegram", "pack it and send", "create video", "make a video", "video it".
-- **Names/describe guard** (pending names/describe, `n_confirm` ~603–610): zero `ready_indexes` → no vision call, one calm sentence ("<Name> has no finished
-  stickers yet — I'll look at them once they're cut"), pending dropped, nothing spent. Same guard shape as `n_animate` 1426–1429.
-- Tests: resolver intent cases in `tests/test_agent_resolver.py`; new `tests/test_chat_continue.py` on `FakeTools` (video-words → pending animate of the
-  focus batch with no `create` call; export on an animated batch → `pack_add` + `telegram_send` after confirm; export on an unanimated batch → animate
-  first; names with zero ready → no vision call and the calm sentence).
+  (`models_card`). Pack / export of an existing batch works in chat through `n_export` (pending `pack_send`; built in Step 0).
 
 ## Step 1 — the stage, as state and contract (engine first, rule 11)
 
@@ -106,6 +87,6 @@ stickers to look at yet" on a batch with nothing cut. Step 0 fixes both before t
 
 ## Step 4 — docs and the look
 
-- `docs/agent-and-chat.md`: a section "Stages and the batch follow-up" (Step 0 continuation, state, the mapping onto the creator, the card, Telegram);
+- `docs/agent-and-chat.md`: a section "Stages and the batch follow-up" (state, the mapping onto the creator, the card, Telegram);
   `docs/api.md` (`settings.stage`, the new actions); `docs/design.md` (the pill and popover); `README.md` only if the index changes.
 - One browser look at the end (Haitham's eyes, W1-style): the pill, the popover, the follow-up card.
