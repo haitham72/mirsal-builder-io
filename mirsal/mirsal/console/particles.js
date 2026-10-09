@@ -120,10 +120,12 @@ const spEffectsRender=RENDER.effects;
 RENDER.effects=arg=>{if(arg)return spEffectsRender(arg);$('s-effects').innerHTML=spView([]);spAfterDraw()};
 /* the tab is part of the Studio's header and body: generate.js owns both, so they are wrapped here (the way live.js wraps drawRail) instead of being edited */
 const spWasBody=gbodyHtml;
-gbodyHtml=function(gs,c){return GS.tab==='particles'?spView(gs):spWasBody(gs,c)};
-/* the tab's step goes right after Animation; the steps after it are numbered again (Pack becomes 6) */
+const spAnimated=gs=>(gs||[]).some(g=>g.kind==='particles'||((g.stickers||[]).some(t=>['READY','FAILED'].includes(t.anim_status))));
+gbodyHtml=function(gs,c){return (GS.tab==='particles'&&(!gs.length||spAnimated(gs)))?spView(gs):spWasBody(gs,c)};
+/* the tab's step goes right after Animation, and only once an animation exists (before that there is nothing to put particles on):
+   the steps after it are numbered again (Pack becomes 6) */
 const spMade=gs=>{let n=0;for(const l of gs.map(g=>spLinkIndex(LIB.packs,g.generation_id)))for(const x of Object.values(l)){const c=(PKPT.c[x.pack_id]||{})[x.sticker.id];if(c)n+=c.created+c.saved}return n};
-function spSteps(h,gs){const at=h.indexOf('data-act=gadd'),i=at<0?-1:h.lastIndexOf('<button class="gst',at);if(i<0)return h;
+function spSteps(h,gs){const at=h.indexOf('data-act=gadd'),i=at<0?-1:h.lastIndexOf('<button class="gst',at);if(i<0||!spAnimated(gs))return h;
  const n=spMade(gs),cur=GS.tab==='particles',btn=`<button class="gst ${n?'done':'todo'} ${cur?'cur':''}" data-act=gtab data-t=particles><span class=gsm>${n?ic('check'):5}</span><span class=gsl><b>Particles</b><small>${n?`${n} made`:'None yet'}</small></span></button>`;
  return(h.slice(0,i)+btn+h.slice(i)).split('<button class="gst').map((x,k)=>k?x.replace(/<span class=gsm>\d<\/span>/,`<span class=gsm>${k}</span>`):x).join('<button class="gst')}
 const spWasSteps=stepsHtml;
@@ -148,7 +150,8 @@ function spSecBatchHtml(b,many){const free=b.cells.filter(c=>!c.link),{rows,draf
  return `<div class=sp-bt>${many?`<div class=sp-bh><b>${esc(b.gid)}</b></div>`:''}
  ${rows.length||drafts.length?`<div class=pk-rows>${rows.map(x=>ptRow(x.r,x.s,false)).join('')}${drafts.map(x=>ptRow(x.r,x.s,true)).join('')}</div>`:[...b.cells,...(b.family||[])].some(c=>c.link)?'<span class=mut>No particles yet</span>':''}
  ${free.length?spApproveHtml({generation:b.gid}):''}</div>`}
-const spSecHtml=bs=>bs.length?`<section class=sp-sec><div class=sp-sech><h2>${ic('fx')} Particles</h2><button class="btn sm pri" data-act=spopen>${ic('fx')} Create particles</button></div>${bs.map(b=>spSecBatchHtml(b,bs.length>1)).join('')}</section>`:'';
+const spSecHtml=bs=>{const shown=bs.filter(b=>{const {rows,drafts}=spSecRows(b);return rows.length||drafts.length});
+ return shown.length?`<section class=sp-sec><div class=sp-sech><h2>${ic('fx')} Particles</h2><button class="btn sm pri" data-act=spopen>${ic('fx')} Create particles</button></div>${shown.map(b=>spSecBatchHtml(b,shown.length>1)).join('')}</section>`:''};
 function spSecData(){const out=[];for(const id of SES.gens){const g=GM.get(id);if(!g)continue;const gid=spGid(g.generation_id),ix=spLinkIndex(LIB.packs,gid),batch=SPS.batches[gid];
  out.push({gid,cells:g.stickers.filter(t=>t.status==='READY'&&t.png&&(t.review||{}).still!=='REJECTED').map(t=>{const det=batch?(batch.cells||[]).find(c=>c.index===t.index):null,l=det?det.link:ix[t.index]||null,fallback=l?PKPT.d[l.sticker.id]:null,d=det||fallback,c=l?(PKPT.c[l.pack_id]||{})[l.sticker.id]:null;
  return{index:t.index,key:t.key,png:t.png,link:l,n:d?(d.sets||[]).length+(d.created||[]).length+(d.saved||[]).length:c?c.created+c.saved:0,det:d||null}}),

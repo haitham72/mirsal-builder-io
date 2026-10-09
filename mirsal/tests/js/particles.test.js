@@ -63,18 +63,21 @@ test('three creation cards (sticker sprites, AI images, Kling) and scoped slices
   assert.doesNotMatch(h,/Nothing is drawn or spent yet/);
 });
 
-test('the Studio’s header gets a Particles step after Animation, and the steps after it are numbered again', () => {
+test('the Studio’s header gets a Particles step after Animation, and only once an animation exists', () => {
   const done = t => `<button class="gst done " data-act=gtab data-t=${t}><span class=gsm><svg></svg></span><span class=gsl><b>${t}</b></span></button>`;
   const steps = '<div class=gsteps>' + done('request') + done('plan') + done('stickers')
     + '<button class="gst todo " data-act=gtab data-t=anim><span class=gsm>4</span><span class=gsl><b>Animation</b></span></button>'
     + '<button class="gst todo " data-act=gadd ><span class=gsm>5</span><span class=gsl><b>Pack</b></span></button></div>';
-  const h = run(withPacks(`spSteps(${JSON.stringify(steps)},[])`));
+  const anim = [{generation_id:'G012',stickers:[{anim_status:'READY'}]}];
+  assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[])`)), steps, 'no animation yet: no Particles step anywhere');
+  assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[{generation_id:'G012'}])`)), steps, 'a batch without stickers is not animated either');
+  const h = run(withPacks(`spSteps(${JSON.stringify(steps)},${JSON.stringify(anim)})`));
   assert.ok(h.indexOf('data-t=particles') > h.indexOf('data-t=anim') && h.indexOf('data-t=particles') < h.indexOf('data-act=gadd'), 'between Animation and Pack');
   assert.match(h, /<button class="gst todo " data-act=gtab data-t=particles><span class=gsm>5<\/span><span class=gsl><b>Particles<\/b><small>None yet<\/small>/);
   assert.match(h, /data-act=gadd ><span class=gsm>6<\/span>/, 'Pack is the sixth step now');
   assert.match(h, /data-t=anim><span class=gsm>4<\/span>/, 'what is before it is untouched');
   assert.equal(run("spSteps('no steps at all',[])"), 'no steps at all');
-  const cur = run(withPacks(`(GS.tab='particles',spSteps(${JSON.stringify(steps)},[]))`));
+  const cur = run(withPacks(`(GS.tab='particles',spSteps(${JSON.stringify(steps)},${JSON.stringify(anim)}))`));
   assert.match(cur, /class="gst todo cur" data-act=gtab data-t=particles/);
   run("GS.tab='stickers'");
 });
@@ -82,7 +85,7 @@ test('the Studio’s header gets a Particles step after Animation, and the steps
 test('the step counts what was made for the batch’s stickers', () => {
   const made = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1},a3:{created:9,saved:9}}},spMade([{generation_id:'G012'}]))"));
   assert.equal(made, 3, 'only the stickers that came from this batch count');
-  const h = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1}}},spSteps('<button class=\"gst todo \" data-act=gadd ><span class=gsm>5</span></button>',[{generation_id:'G012'}]))"));
+  const h = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1}}},spSteps('<button class=\"gst todo \" data-act=gadd ><span class=gsm>5</span></button>',[{generation_id:'G012',stickers:[{anim_status:'READY'}]}]))"));
   assert.match(h, /data-t=particles><span class=gsm><svg data-i=check><\/svg><\/span><span class=gsl><b>Particles<\/b><small>3 made<\/small>/);
   assert.match(h, /class="gst done "/);
   run("PKPT.c={}");
@@ -117,16 +120,19 @@ test('the section: the data comes from the Studio’s batches, the library and t
   run("(GM.clear(),SES.gens=[],PKPT.c={},PKPT.d={})");
 });
 
-test('the section: a heading with the one button that opens the tab, and nothing at all without a batch', () => {
-  const h = run("spSecHtml([{gid:'G012',cells:[]}])");
+test('the section: a heading with the one button that opens the tab, and nothing at all without made versions', () => {
+  assert.equal(run("spSecHtml([{gid:'G012',cells:[]}])"), '', 'no versions: no section at all, not even the header');
+  assert.equal(run("spSecHtml([])"), '');
+  const row = {id:'P001',version:1,label:'x',n_sprites:1,saved:true,saved_at:1,shared_with:0,sprites:[],in_pack:[],addable:null,preview:null,credits:0};
+  const h = run(`spSecHtml([{gid:'G012',cells:[{index:1,key:'a',png:'s.png',link:{pack_id:'p1',pack:'P',sticker:{id:'a1'}},n:1,det:{rows:[${JSON.stringify(row)}],drafts:[]}}]}])`);
   assert.match(h, /<h2><svg data-i=fx><\/svg> Particles<\/h2>/);
   assert.match(h, /data-act=spopen>.*Create particles/s);
-  assert.equal(run("spSecHtml([])"), '');
 });
 
 test('the tab replaces the body only while it is current, and a person can leave the flow at any point', () => {
   assert.equal(run("(GS.tab='stickers',gbodyHtml([],{}))"), 'ORIGINAL BODY');
-  const h = run(withPacks("(GS.tab='particles',SP.scope={generation:'G012'},SP.eid='',SP.pack='p1',SP.sel=new Set(['a1','a2']),gbodyHtml([{generation_id:'G012'}],{}))"));
+  assert.equal(run("(GS.tab='particles',gbodyHtml([{generation_id:'G012'}],{}))"), 'ORIGINAL BODY', 'no animation yet: no Particles tab either');
+  const h = run(withPacks("(GS.tab='particles',SP.scope={generation:'G012'},SP.eid='',SP.pack='p1',SP.sel=new Set(['a1','a2']),gbodyHtml([{generation_id:'G012',stickers:[{anim_status:'READY'}]}],{}))"));
   assert.match(h, /^<section class="gplan sp fx" id=sp-root data-fxx=sp>/, 'the root every handler finds its state from');
   assert.match(h, /<h2>Particles<\/h2>/);
   assert.doesNotMatch(h, /Whatever you make is saved under its sticker/);
@@ -147,7 +153,7 @@ test('the section is drawn into its container, once, and again when the containe
   run(withPacks(`(GM.set(12,${JSON.stringify(g)}),SES.gens=[12],PKPT.d={},PKPT.c={},SPS.batches={},DOMSTUB.gpart={writes:0,set innerHTML(v){this.writes++;this.html=v}},0)`));
   run("spSecDraw()");
   assert.equal(run("DOMSTUB.gpart.writes"), 1);
-  assert.match(run("DOMSTUB.gpart.html"), /No particles yet/);
+  assert.equal(run("DOMSTUB.gpart.html"), '', 'no versions yet: nothing is drawn, not even the header');
   run("spSecDraw()");
   assert.equal(run("DOMSTUB.gpart.writes"), 1, 'nothing changed: the videos in it are not restarted');
   run("DOMSTUB.gpart={writes:0,set innerHTML(v){this.writes++;this.html=v}}");
