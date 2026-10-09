@@ -4,6 +4,23 @@ What an LLM does next. The stages (Prompt · Emojis · Animation · Export) and 
 the architecture is in `docs/agent-and-chat.md` "Stages and the batch follow-up". Read `CLAUDE.md` first; test budget: `docs/testing.md` (one narrowest
 run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when it is built; delete this file when the plan is done.
 
+## Step 0 — Haitham does not see the selector (2026-10-09, FIRST)
+
+Haitham: "I still don't see a slider from 'prompt' all the way to 'export to API' at all." Three gaps between what he expects and what was built:
+
+1. **Nothing visible yet.** The pill lives only on the AI screen (`#/agent`), inside the chat box, left of Send (`agent.js` `drawStage`, `#ag-stage`). A server
+   started before `2dba73f` serves the old `agent.js`: restart `python -m mirsal serve` from `mirsal/.venv` (Windows) and hard-reload (Ctrl+F5). Check it is
+   there first; if it still is not, debug `drawStage` (is `#ag-stage` in the markup, is `drawBar` reached on the AI screen) before anything else.
+2. **A pill is not a slider.** The plan said "a picker like Claude / ChatGPT's reasoning level", and a dropdown pill was built. Haitham expects a **visible
+   slider / stepper**: Prompt -> Emojis -> Animation -> Export, every stage on screen at once, the current one marked, one click (or drag, or arrow keys)
+   to move. Rebuild the control as a 4-stop (5 with the API, below) segmented slider in the chat bar, same route (`settings.stage`), no turn, tokens from
+   `docs/design.md`; keep `AIU.stageOf`; update `tests/js/chat_stage.test.js` and `docs/design.md` "The stage pill".
+3. **"Export to API" does not exist in the chat.** D1 made Export = Library pack + Telegram and the AddCollection API "a second button on the final card";
+   that button was NOT built (`graph.py` / `agent.js` never call `services/collection.py`). Either (a) build the button on the Export run's done message
+   (the pack's existing AddCollection export route, never automatic, its credentials and live proof stay W49), or (b) if Haitham wants it as the slider's last
+   stop, add a fifth stage `api` (Export + the AddCollection send) to `agent/stages.py`, the creator's `end`, the settings route, OpenAPI, Telegram `/stage`.
+   Ask Haitham (a) or (b) once, with (a) as the recommendation while W49 is open.
+
 ## Step 1 — prove the follow-up through the real server (fakes only)
 
 The follow-up is tested on `FakeTools` only. Add ONE test in the style of `tests/test_creator_live.py` (the real console, the fake Higgsfield CLI, the

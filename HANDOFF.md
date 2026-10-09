@@ -6,7 +6,10 @@ When a session stops mid-step, write: the step being worked on, the files touche
 
 ## In progress
 
-Nothing half-done. The chat's stages and batch follow-up are built and pushed (`1e28524` Step 1, `2dba73f` Step 2, `4239bff` Step 3, `d66c647` docs). Next: `plan.md` Step 1 (prove the follow-up through the real server on fakes).
+The chat's stages and batch follow-up are built and pushed (`1e28524` Step 1, `2dba73f` Step 2, `4239bff` Step 3, `d66c647` docs), BUT Haitham (2026-10-09) does not see "a slider from 'prompt' all the way to 'export to API'". Next: `plan.md` Step 0, before anything else:
+- likely the running server predates `2dba73f` (restart from `mirsal/.venv`, Ctrl+F5; the pill is only on the AI screen, left of Send);
+- what was built is a dropdown pill, he expects a visible slider: rebuild the control as a slider;
+- the chat has no AddCollection "export to API" at all (D1's second button was never built): build it, or a fifth stage `api`; ask him which once.
 
 What was verified: `tests/test_chat_stage.py` (9), `tests/test_chat_batches.py` (12), `tests/js/chat_stage.test.js` (3), the stage route and follow-up buttons in `tests/test_agent_server.py` / `tests/test_tg_chat.py`, `mirsal test area agent/creator` (29), `tests.test_openapi` (10), the node suite. All green.
 
