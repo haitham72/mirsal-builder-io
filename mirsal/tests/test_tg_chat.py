@@ -92,7 +92,7 @@ class TelegramChatTests(unittest.TestCase):
         self.update(HAITHAM, "/model")
         card = self.sent(chat=HAITHAM)[-1]
         labels = [b["text"] for b in self.buttons(card)]
-        self.assertEqual(labels, ["🖼 Nano Banana 2", "🎞 Grok Imagine 1.5 Lite", "🎨 " + next(s["label"] for s in __import__("mirsal.generation.styles", fromlist=["x"]).PRESETS if s["id"] == "glossy_3d"), "🤖 gpt-4o"])
+        self.assertEqual(labels, ["🖼 Nano Banana 2", "🎞 Grok Imagine 1.5 Lite", "🎨 " + next(s["label"] for s in __import__("mirsal.generation.styles", fromlist=["x"]).PRESETS if s["id"] == "glossy_3d"), "🤖 gpt-4o", "🧭 Emojis"])
         self.update(HAITHAM, data=self.buttons(card)[0]["callback_data"])                    # open the image list
         listing = [f for m, f, _ in self.calls if m == "editMessageText"][-1]
         pick = next(b for b in self.buttons(listing) if b["text"] == "Seedream 5.0 Pro")
@@ -103,6 +103,20 @@ class TelegramChatTests(unittest.TestCase):
         self.assertEqual(settings["style_id"], "glossy_3d")
         _, tools, _, _ = self.c.chat_parts({"id": "local", "role": "owner", "can_spend": True}, sid)
         self.assertEqual(tools.models["image"], "seedream_v5_pro", "the chat's tools send the chat's own model")
+
+    def test_stage_is_a_fifth_row_and_its_own_command(self):
+        """plan.md Step 2: /model carries the stage (a new chat is on Emojis), /stage opens the four choices, a pick saves settings.stage and makes no turn."""
+        from mirsal.services import tg_chat
+        self.update(HAITHAM, "/new")
+        self.update(HAITHAM, "/stage")
+        card = self.sent(chat=HAITHAM)[-1]
+        labels = [b["text"] for b in self.buttons(card)]
+        self.assertEqual(labels, ["Prompt · plan only, free", "✓ Emojis · sheet and stickers", "Animation · + animation", "Export · + pack and send", "‹ Back"])
+        self.update(HAITHAM, data=self.buttons(card)[2]["callback_data"])
+        sid = tg_chat._chat(self.c.out, HAITHAM)["sid"]
+        sess = self.c.chat_parts({"id": "local", "role": "owner"})[0].load(sid)
+        self.assertEqual((sess["settings"]["stage"], sess["messages"]), ("animation", []), "a pick is a setting, never a turn")
+        self.assertEqual(self.buttons([f for m, f, _ in self.calls if m == "editMessageText"][-1])[-1]["text"], "🧭 Animation")
 
     def test_a_message_is_a_turn_of_the_same_agent_and_its_reply_comes_back(self):
         from mirsal.services import tg_chat

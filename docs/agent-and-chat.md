@@ -98,7 +98,8 @@ instead of ending the polling (a frame that throws must never freeze the chat on
 - **Cards**: a plan card (subject, grid, style, names, price, Create / Not yet), a generation card with a **carousel** (swipe on touch, drag or arrows with a mouse,
   keyboard arrows, scroll-snap, dots; stickers appear as the engine finishes them; animated stickers play), a stickers card (search results and answers).
   Tap a sticker to select it: the selection travels with the next message ("make these more energetic"). "Open in Studio" opens the batch in the Studio.
-- **Settings are two controls**: the grid (3x3 / 2x2) and "Ask before spending". The model pill shows what runs the assistant (local, cloud, or "Rules only" with the reason, see Models); the gear's "AI engine" row also holds the local model dropdown.
+- **The stage pill** left of Send ("Emojis ▾", `docs/design.md` "The stage pill"): how far a new request goes (Prompt · Emojis · Animation · Export, "Stages and the batch follow-up" below). A pick is `settings.stage`, no turn.
+- **Settings are two controls**: the grid (3x3 / 2x2) and "Ask before spending"; the gear also holds "Approve everything for me" (the creator's bypass, used by the Animation and Export stages). The model pill shows what runs the assistant (local, cloud, or "Rules only" with the reason, see Models); the gear's "AI engine" row also holds the local model dropdown.
 - **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet, the grid and "Asks before spending" (the same settings as the gear, one click each), and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`).
 
 ## Models (`services/llm.py`)
@@ -178,8 +179,8 @@ A confirmed names/describe with no finished sticker yet makes no vision call at 
 
 ## The agentic creator (`agent/creator.py`, 2026-10-02)
 
-One go-ahead from a request to a sticker pack on Telegram. In the chat's settings: **Agentic creator** on/off, **Send to Telegram as** `Images` (the stills as a static pack; one paid sheet) or `Full video` (animated first; a second paid call),
-and **Approve everything for me** (bypass) on/off. Stored in the session's `settings.creator = {on, scope, bypass}` (`POST /api/chat/sessions/{id}/settings {creator: {...}}`).
+One go-ahead from a request to a sticker pack on Telegram. Since 2026-10-09 the chat's **stage** starts it (Animation: `scope: video`, ending after the animations; Export: `scope: video` to the Telegram send; "Stages and the batch follow-up"); the gear keeps only
+**Approve everything for me** (bypass). Stored in the session's `settings.creator = {on, scope, bypass}` (`POST /api/chat/sessions/{id}/settings {creator: {...}}`); `on` and `scope` are only read for a session that has no stage yet (`stages.of`).
 
 With the creator on, a request gets ONE plan card: the price of the whole run (`sheet + animation`, each from the provider's own cost call), "then straight to Telegram", and the buttons "Create and send to Telegram / Not yet". The click is the only go-ahead; after it
 the run is a state machine over the `tools` interface (the engine functions the Studio's buttons call): `sheet > cut and check > look at the pictures > approve > [animate > approve the animations] > pack > Telegram`, stored in `sess["creator_run"]` and advanced by
@@ -238,7 +239,7 @@ is the same action the web chat's chip sends; the key's action is kept server-si
 - **One session per Telegram chat** (`/new` starts another). A session's `settings.models` `{image, video, ai}` are its own: `Console.chat_parts(user, sid)`
   gives `ConsoleTools(models=…)` (the sheet and video jobs and their price use them) and `_pin_ai` sets `llm.FORCE` for the turn, the creator driver and the
   naming pass (`llm.provider` / `model` and `brain.target` read it; `MIRSAL_LLM_PROVIDER=none` still wins). A Telegram chat starts on Nano Banana 2
-  (`nano_banana_flash`), Grok Imagine 1.5 Lite, gpt-4o, the Glossy style and the Emojis stage; `/model` shows the four as buttons, a tap opens that list, a pick saves it.
+  (`nano_banana_flash`), Grok Imagine 1.5 Lite, gpt-4o, the Glossy style and the Emojis stage; `/model` shows the four as buttons plus a fifth row, the stage ("🧭 Emojis"); a tap opens that list, a pick saves it. `/stage` opens the four stages directly (a pick is `settings.stage`, no turn).
   A web chat has no `models` and keeps the server's defaults.
 - **What comes back** (`render`, polled every 2 s by one follower thread per chat until three quiet polls, at most 4 h; each part is sent once, keyed in
   `sent`): the reply text (`**bold**` as HTML) with its chips as inline buttons (a paid step's chip states the price: nothing spends before the tap, rule 13;

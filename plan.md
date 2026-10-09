@@ -1,6 +1,6 @@
 # plan.md — the chat: a stage selector (Prompt · Emojis · Animation · Export) and the batch follow-up
 
-What an LLM builds next. Step 0 (the continuation fix) and Step 1 (the stage as state: `settings.stage`, `agent/stages.py`, creator `end`) are built; Steps 2–3 are left. Read `CLAUDE.md` first (the rules, especially 10, 11, 12, 13), then
+What an LLM builds next. Step 0 (the continuation fix) Step 1 (the stage as state: `settings.stage`, `agent/stages.py`, creator `end`) and Step 2 (the stage pill, Telegram `/stage`) are built; Step 3 is left. Read `CLAUDE.md` first (the rules, especially 10, 11, 12, 13), then
 `docs/agent-and-chat.md` (One turn, the agentic creator, "The chat in Telegram"), `docs/engine-and-studio.md` ("Batches, generations, regenerate", the
 multi-batch Generate and "Packs in Earlier batches") and `docs/design.md` (one shell, one token set; read it before touching CSS). Test budget:
 `docs/testing.md` (one narrowest run per change). No paid call in any test (`MIRSAL_NO_REAL_CLI`, `FakeTools` / the fake CLI). Delete each step when it is built;
@@ -34,17 +34,6 @@ picker of Claude / ChatGPT, but with four stages instead of low...max: **Prompt 
 - Regenerate = a new generation of the same batch: `POST /api/live/sheet {from_generation, parent, regen_of}` (`flow/groups.py` family/pick).
 - The Telegram chat (`services/tg_chat.py`): every chip of a reply is an inline button (`_chip_rows`), `/model` is a minimal button card
   (`models_card`). Pack / export of an existing batch works in chat through `n_export` (pending `pack_send`; built in Step 0).
-
-## Step 2 — the selector in the web chat (screen second)
-
-- One compact pill in the chat box's bar (left of Send), like the reasoning-level picker of Claude / ChatGPT: it shows the current stage
-  ("Emojis ▾"); a click opens a small popover with the four stages, each one line: the name, a few words ("plan only, free" / "sheet and
-  stickers" / "+ animation" / "+ pack and send"), the selected one checked. Keyboard: Tab to it, Enter opens, arrows move, Enter picks, Esc closes.
-  It writes `settings.stage` (the same route as the other chat settings) and makes no chat turn. It replaces the creator's on/scope switches in the
-  chat's settings (bypass stays where it is).
-- Tokens and shell from `docs/design.md`; no new colours. Node test in `tests/js/` for the builder (four rows, the checked one, the label).
-- Telegram: a fifth row on the `/model` card ("🧭 Emojis") opening the same four choices (`tg_chat.models_card`), and a `/stage` command that sends
-  the same card. A new Telegram chat starts on `emojis`.
 
 ## Step 3 — a pack request starts at batch 01 and the follow-up card
 

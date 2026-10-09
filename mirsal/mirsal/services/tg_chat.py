@@ -415,7 +415,10 @@ def turn(c, chat_id, user: dict, text: str = "", action: dict | None = None) -> 
 
 
 def _model_label(kind: str, mid: str | None) -> str:
+    from ..agent import stages
     from ..generation import model_catalog as mc, styles
+    if kind == "stage":
+        return stages.INFO.get(mid or "", stages.INFO[stages.DEFAULT])["label"]
     if kind == "style":
         return next((s["label"] for s in styles.PRESETS if s["id"] == mid), mid or "?")
     if kind == "ai":
@@ -427,15 +430,22 @@ def _model_label(kind: str, mid: str | None) -> str:
 
 
 def models_card(c, chat_id, user: dict, message_id=None, open_: str | None = None) -> None:
-    """/model: the chat's image model, video model, style and AI on one card; a tap opens that list, a pick saves it and closes it."""
+    """/model: the chat's image model, video model, style, AI and stage on one card; a tap opens that list, a pick saves it and closes it. /stage opens the
+    stage list directly (how far a new request goes: agent/stages.py)."""
+    from ..agent import stages
     from ..generation import model_catalog as mc, styles
     store = _store(c, user)
     sid = session_of(c, user, chat_id)
     st = store.load(sid)["settings"]
     cur = {**DEFAULTS, **(st.get("models") or {})}
     cur["style"] = st.get("style_id") or DEFAULT_STYLE
+    cur["stage"] = stages.of(st)
     btn = lambda text, act: {"text": text[:60], "callback_data": "c:" + _key(c.out, chat_id, act)}
-    if open_:
+    if open_ == "stage":
+        rows = [[btn(("✓ " if k == cur["stage"] else "") + f"{v['label']} · {v['hint']}", {"t": "model", "kind": "stage", "id": k})] for k, v in stages.INFO.items()]
+        rows.append([btn("‹ Back", {"t": "models"})])
+        text = "How far a new request goes in this chat"
+    elif open_:
         opts = ([(s["id"], s["label"]) for s in styles.PRESETS] if open_ == "style" else [(m, m) for m in AI_MODELS] if open_ == "ai"
                 else [(m["id"], m["label"]) for m in mc.catalog()[open_]])
         rows = [[btn(("✓ " if i == cur.get(open_) else "") + l, {"t": "model", "kind": open_, "id": i}) for i, l in opts[k:k + 2]] for k in range(0, len(opts), 2)]
@@ -443,7 +453,8 @@ def models_card(c, chat_id, user: dict, message_id=None, open_: str | None = Non
         text = {"image": "Image model for this chat", "video": "Video model for this chat", "style": "Style for this chat", "ai": "AI model for this chat"}[open_]
     else:
         rows = [[btn(f"🖼 {_model_label('image', cur['image'])}", {"t": "models", "open": "image"}), btn(f"🎞 {_model_label('video', cur['video'])}", {"t": "models", "open": "video"})],
-                [btn(f"🎨 {_model_label('style', cur['style'])}", {"t": "models", "open": "style"}), btn(f"🤖 {cur.get('ai') or 'default'}", {"t": "models", "open": "ai"})]]
+                [btn(f"🎨 {_model_label('style', cur['style'])}", {"t": "models", "open": "style"}), btn(f"🤖 {cur.get('ai') or 'default'}", {"t": "models", "open": "ai"})],
+                [btn(f"🧭 {_model_label('stage', cur['stage'])}", {"t": "models", "open": "stage"})]]
         text = "This chat's models · tap one to change it"
     tok = _tok(c)
     if message_id:
@@ -453,8 +464,12 @@ def models_card(c, chat_id, user: dict, message_id=None, open_: str | None = Non
 
 
 def set_model(c, user: dict, chat_id, kind: str, mid: str) -> None:
+    from ..agent import stages
     from ..generation import model_catalog as mc, styles
-    if kind == "style":
+    if kind == "stage":
+        if not stages.valid(mid):
+            raise ValueError("no such stage")
+    elif kind == "style":
         if not any(s["id"] == mid for s in styles.PRESETS):
             raise ValueError("no such style")
     elif kind == "ai":
@@ -466,13 +481,16 @@ def set_model(c, user: dict, chat_id, kind: str, mid: str) -> None:
     s = store.load(session_of(c, user, chat_id))
     if kind == "style":
         s["settings"]["style_id"] = mid
+    elif kind == "stage":
+        s["settings"]["stage"] = mid
     else:
         s["settings"]["models"] = {**DEFAULTS, **(s["settings"].get("models") or {}), kind: mid}
     store.save(s)
 
 
 HELP = ("Tell me what stickers you want, for example <b>a teddy bear for school</b>. I plan them, show the price, and make them when you tap the button.\n"
-        "/model: the image model, video model, style and AI of this chat\n/new: start a new chat\n/help: this message")
+        "/model: the image model, video model, style, AI and stage of this chat\n/stage: how far a new request goes (Prompt, Emojis, Animation, Export)\n"
+        "/new: start a new chat\n/help: this message")
 
 
 def on_message(c, cfg: dict, msg: dict) -> None:
@@ -495,6 +513,9 @@ def on_message(c, cfg: dict, msg: dict) -> None:
         return
     if cmd == "/model":
         models_card(c, chat_id, user)
+        return
+    if cmd == "/stage":
+        models_card(c, chat_id, user, open_="stage")
         return
     if msg.get("photo") or msg.get("document"):
         say(c, chat_id, "Pictures are not read in the Telegram chat yet: describe it in words, or attach it in the web chat.")

@@ -252,3 +252,18 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ai-card.multi .multi-ch{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 6px}
 .ai-card.multi .multi-ch span{padding:2px 10px;border-radius:var(--r-pill);background:#FEF3C7;color:#92400E;font-size:var(--fs-s)}
 .ai-card.multi .multi-assume{padding:8px 18px 0;font-size:var(--fs-s);color:var(--ink3)}
+
+/* the stage pill left of Send (docs/design.md "The stage pill"): how far a NEW request goes. A compact chip like the reasoning-level picker of Claude / ChatGPT;
+   its popover opens upwards (the box sits at the bottom). Tokens only: the chip's glass and line, the accent ink for the checked choice. */
+.ag-stage{position:relative;flex:none;align-self:flex-end;margin-bottom:5px}
+.ag-stage-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:var(--r-pill);border:1px solid var(--aline);background:transparent;color:var(--ink2);font-size:var(--fs-s);font-weight:600;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
+.ag-stage-btn i{font-style:normal;font-size:var(--fs-xs);opacity:.7}
+.ag-stage-btn:hover,.ag-stage-btn[aria-expanded=true]{border-color:var(--ai);color:var(--aid);background:#fff}
+.ag-stage-pop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:20;min-width:224px;padding:6px;border-radius:var(--r-m);background:#fff;box-shadow:0 14px 44px rgba(6,182,212,.18),inset 0 0 0 1px var(--aline);animation:mz-in .22s var(--ease) both}
+.ag-stage-opt{display:grid;grid-template-columns:1fr auto;grid-template-areas:"b ck" "s ck";width:100%;text-align:left;gap:1px 10px;padding:7px 10px;border:0;border-radius:var(--r-s);background:none;color:var(--ink);cursor:pointer}
+.ag-stage-opt b{grid-area:b;font-size:var(--fs-s);font-weight:600}.ag-stage-opt small{grid-area:s;font-size:var(--fs-xs);color:var(--ink3)}
+.ag-stage-opt .ck{grid-area:ck;align-self:center;color:var(--aid);font-weight:700}
+.ag-stage-opt:hover,.ag-stage-opt:focus-visible{background:rgba(6,182,212,.10);outline:none}
+.ag-stage-opt.on b{color:var(--aid)}
+.plan-prompt{margin-top:8px;font-size:var(--fs-s);color:var(--ink2)}.plan-prompt summary{cursor:pointer;color:var(--aid)}.plan-prompt p{margin:6px 0 0;white-space:pre-wrap}
+@media (prefers-reduced-motion:reduce){.ag-stage-pop{animation:none}}
