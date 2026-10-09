@@ -384,10 +384,21 @@ def session_state(out: Path, gens) -> dict:
     if not results:
         raise sources_error("Open a batch first: Next batch continues the batches on screen", 409)
     first = min(results, key=lambda r: r.get("number") or 0)
+    request = actions.strip_presets(str(first.get("prompt") or "").strip()) or str((first.get("source") or {}).get("subject", "")).replace("_", " ")
     used = {h[0] for r in results for s in r["stickers"] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
-    return {"request": str(first.get("prompt") or "").strip() or str((first.get("source") or {}).get("subject", "")).replace("_", " "),
-            "grid": tuple((first.get("grid") or [3, 3])[:2]), "used_presets": {(r.get("slots") or {}).get("preset") for r in results} - {None},
-            "used_tokens": used, "face": any((r.get("slots") or {}).get("face") for r in results), "existing": len(roots)}
+    presets = {(r.get("slots") or {}).get("preset") for r in results} - {None}
+    if presets:          # an emoji pack: its grids are the pack's, wherever its batches are (on screen or not): every batch of the same request and person counts
+        key, owner = request.lower(), first.get("owner")
+        for gid in pl.list_ids(out)[-300:]:
+            try:
+                r = pl.read_result(out, gid)
+            except Exception:
+                continue
+            if r.get("owner") == owner and (r.get("slots") or {}).get("preset") and actions.strip_presets(str(r.get("prompt") or "")).lower() == key:
+                presets.add(r["slots"]["preset"])
+    return {"request": request, "grid": tuple((first.get("grid") or [3, 3])[:2]), "used_presets": presets,
+            "used_tokens": used, "face": any((r.get("slots") or {}).get("face") for r in results),
+            "existing": len(presets) if presets else len(roots)}          # an emoji pack counts its grids: batch k IS grid k (core 1-9, social 10-18, reactions 19-27, daily 28-36)
 
 
 def _token_plan(request: str, grid: tuple, face: bool, tokens: list, style_id: str, loop: bool) -> dict:
@@ -432,7 +443,7 @@ def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector"
     request = str(request or "").strip()
     slots, grid = plan.get("slots") or {}, tuple((plan.get("grid") or [3, 3])[:2])
     if slots.get("preset") in actions.PRESETS:
-        base = re.sub(r"\s*(?<![\w-])(?:" + "|".join(map(re.escape, actions.PRESETS)) + r")(?![\w-])", "", request).strip() or request
+        base = actions.strip_presets(request) or request
         out = []
         for p in [x for x in actions.PRESETS if x != slots["preset"] and x not in set(used_presets)][:k]:      # a session's own grids are never made twice
             text = f"{base} {p}"

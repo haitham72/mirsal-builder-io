@@ -214,12 +214,18 @@ def token_cells(tokens, face: bool) -> list[tuple]:
 
 
 def preset_name(text: str | None) -> str | None:
-    """`core-v1` when the request names it (`core v1`, `core-v1`, …), else None."""
+    """`core-v1` when the request names it (`core v1`, `core-v1`, …), else None. When it names several, the LAST one wins: a following batch is the
+    request with the next grid's name added at the end (2026-10-09: "…social-v1 reactions-v1" was read as social-v1 and repeated batch 2)."""
     flat = re.sub(r"[^a-z0-9]+", "", str(text or "").lower())
-    for key in PRESETS:
-        if re.sub(r"[^a-z0-9]+", "", key) in flat:
-            return key
-    return None
+    hits = [(flat.rfind(re.sub(r"[^a-z0-9]+", "", k)), k) for k in PRESETS]
+    hits = [h for h in hits if h[0] >= 0]
+    return max(hits)[1] if hits else None
+
+
+def strip_presets(text: str | None) -> str:
+    """The request without any preset grid name in it (`generic emojis social-v1` -> `generic emojis`): the pack itself, whichever grid a batch drew."""
+    pat = r"(?<![A-Za-z0-9])(?:" + "|".join(re.escape(k).replace(r"\-", r"[\s_-]?") for k in PRESETS) + r")(?![A-Za-z0-9])"
+    return re.sub(r"\s+,", ",", re.sub(r"\s{2,}", " ", re.sub(pat, " ", str(text or ""), flags=re.I))).strip(" ,")
 
 
 def preset_cells(preset: str, n: int) -> list[tuple]:
