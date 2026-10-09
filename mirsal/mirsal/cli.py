@@ -1009,6 +1009,9 @@ def doctor() -> int:
         telegram._ssl_context(); print(f"NOTE    TLS: this PC's certificate store has malformed entries ({e.reason}); Mirsal skips them, Telegram still works")
     t = telegram.status(out_root())
     print(f"OK      Telegram: connected as @{t['bot']} (user {t['user_id']})" if t["configured"] else "NOTE    Telegram: not connected (optional: Settings -> Telegram, or MIRSAL_TELEGRAM_TOKEN and MIRSAL_TELEGRAM_USER)")
+    from .services import collection
+    cs = collection.status()
+    print(f"OK      collection API: {cs['url']} (credentials set)" if cs["configured"] else "NOTE    collection API: not set up (optional: MIRSAL_COLLECTION_API_CREDENTIALS in .env, for Export to collection)")
     from .flow import sources
     subs = sources.known_subjects(input_root())
     from .media import matte

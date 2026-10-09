@@ -12,7 +12,7 @@ function drawPack(){
    <div class=pt><h1 style="margin:0">${esc(p.name)}</h1><span class=mut>${n} stickers${anim?` · ${anim} animated`:''} · a Telegram set takes up to 120</span></div>
    <div class=pa>
     <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button><button class=btn data-act=pkrename>${ic('edit')} Rename</button>
-    <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>${n&&typeof trShareBtn==='function'?trShareBtn(p.id):''}${n?`<a class=btn href="/api/packs/${p.id}/export.zip" download title="Every sticker file of this pack in one zip: .webm for the animated ones, .png / .webp for the static ones, and a manifest.json">${ic('download')} Download .zip</a>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}${typeof ME==='undefined'||!ME||ME.role==='owner'?`<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
+    <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>${n&&typeof trShareBtn==='function'?trShareBtn(p.id):''}${n?`<a class=btn href="/api/packs/${p.id}/export.zip" download title="Every sticker file of this pack in one zip: .webm for the animated ones, .png / .webp for the static ones, and a manifest.json">${ic('download')} Download .zip</a>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}${typeof ME==='undefined'||!ME||ME.role==='owner'?`<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}${colBtn('pack',p.id,n,p.name)}
     <button class="btn dng" data-act=pkdel title="Move this pack to the trash. You can restore it, or delete it for good, from Settings, Trash.">${ic('trash')} Delete pack</button></div></div></div>
   <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
    ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${p.stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
@@ -21,6 +21,22 @@ function drawPack(){
    :`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}
   ${pkPsHtml(p)}</div>`;
  ptCounts(p.id)}
+/* Export to collection (services/collection.py, docs/api.md "Export to the AddCollection API"): the same stickers as Download .zip, in the same order, sent to the
+   external emoji CMS as one collection. Owner only, like Telegram; free but outward, so it always asks first (name, optional description, where it goes). */
+const colOwner=()=>typeof ME==='undefined'||!ME||ME.role==='owner';
+function colBtn(kind,id,n,name){return colOwner()?`<button class=btn data-act=colopen data-k=${kind} data-id="${esc(String(id))}" data-n="${esc(name||'')}" ${n?'':'disabled'} title="Send these stickers (the same as Download .zip) to the collection API as one collection">${ic('upload')} Export to collection</button>`:''}
+ACT.colopen=async el=>{const k=el.dataset.k,id=el.dataset.id,st=await api('/api/collection'),cfg=st.ok?st.j:{configured:false,url:''};
+ dlg(`<h2>Export to collection</h2><p class=mut>The stickers of Download .zip (animated where ready), in the same order, each with its emoji and tags, are sent as ONE new collection${cfg.url?` to <b>${esc(cfg.url)}</b>`:''}. Nothing in Mirsal changes.</p>
+  ${cfg.configured?'':`<div class=warn>The collection API is not set up: put <code>MIRSAL_COLLECTION_API_CREDENTIALS</code> (base64 of user:password) in <code>.env</code> and restart the server.</div>`}
+  <div class=fld><label>Collection name</label><input id=col-name maxlength=120 value="${esc(el.dataset.n||'')}"></div>
+  <div class=fld><label>Description (optional)</label><input id=col-desc maxlength=2000></div>
+  <div id=col-res></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class="btn pri" data-act=colsend data-k=${k} data-id="${esc(id)}" ${cfg.configured?'':'disabled'}>Send</button></div>`)};
+ACT.colsend=async el=>{const url=el.dataset.k==='pack'?`/api/packs/${encodeURIComponent(el.dataset.id)}/export-collection`:`/api/generations/${encodeURIComponent(el.dataset.id)}/export-collection`,box=$('col-res');
+ el.disabled=true;el.textContent='Sending…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim()});
+ el.textContent='Send';el.disabled=false;
+ if(!r.ok){if(box)box.innerHTML=`<div class=warn>${esc(r.j.error||'Could not send')}</div>`;return}
+ if(!r.j.ok){if(box)box.innerHTML=`<div class=warn>The collection API refused it (${r.j.status}): ${esc(r.j.error||'')}</div>`;return}
+ closeDlg();toast(`Sent ${r.j.count} sticker${r.j.count===1?'':'s'} as the collection “${r.j.collection}”`)};
 const sOf=id=>packById(PACK_ID).stickers.find(s=>s.id===id);
 async function pkUpdate(body,msg){const r=await post('/api/packs/'+PACK_ID,body);if(!r.ok)return toast(r.j.error,1);await loadLib();drawPack();if(msg)toast(msg)}
 ACT.pkadd=()=>{Ed.targetPack=PACK_ID;location.hash='#/create'};

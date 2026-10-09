@@ -85,7 +85,7 @@ async function addCollection() {
     ])
   );
 
-  const credentials = 'aC5pYnJhaGltQG5hZGkuYWU6TExGV2s3Z3o1NXBVdmpnREA=';
+  const credentials = process.env.COLLECTION_API_CREDENTIALS; // base64(username:password), never hardcoded
 
   const baseUrl = "https://emojicms.devinprocess.com";
 

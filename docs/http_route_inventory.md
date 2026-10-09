@@ -177,6 +177,9 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `GET /api/packs/{id}/stickers/{sid}/particles` | — | 200 object (open; operation detail) | member: empty response | no |
 | `GET /api/packs/{id}/particles` | — | 200 {pack_id?:string, sets?:[object (open; operation detail)], bursts?:[object (open; operation detail)], counts?:object (open; operation detail)} | member: empty response | no |
 | `GET /api/packs/{id}/export.zip` | — | 200 application/zip bytes + Content-Disposition | owner | no |
+| `POST /api/packs/{id}/export-collection` | {name?, description?} | 200 {ok, status, collection, count, response, error?}; 503 not set up; 504 no answer | owner (own pack) | no |
+| `POST /api/generations/{id}/export-collection` | {name?, description?} | 200 {ok, status, collection, count, response, error?}; 503 not set up; 504 no answer | owner | no |
+| `GET /api/collection` | — | 200 {configured, url} | owner | no |
 | `GET /api/packs/{id}/telegram.zip` | — | 200 application/zip bytes + Content-Disposition | owner | no |
 | `GET /api/telegram` | — | 200 object (open; operation detail) | owner | no |
 | `POST /api/telegram/config` | {token?:string, user_id?:string} | 200 object (open; operation detail) | owner | no |
@@ -346,6 +349,9 @@ Table: 158 documented operations. Additional static/source routes are enumerated
 - **`GET /api/packs/{id}/telegram`** — Dry run: what would be created and every problem
 - **`GET /api/packs/{id}/stickers/{sid}/particles`** — The particles of one sticker, newest first: {sticker, pack_id, created: [{effect, result, mode, status, bytes, warnings, url, added_to (the library's word), shared, cell?, usable, missing}], saved: [library stickers made from them, any pack], effects: [ids], can_make}; a member gets it empty
 - **`GET /api/packs/{id}/particles`** — The pack's particle studio in one read: {pack_id, sets[] (the sets assigned to it, cards as in GET /api/particles), bursts[] (every burst rendered for it, with its warnings and whether it is in the pack), counts: {sticker id: {created, saved}}} (docs/particles.md sections 5-6); a member gets {}
+- **`POST /api/packs/{id}/export-collection`** — Native FastAPI. Send the pack's Download .zip stickers to the AddCollection API as one collection (services/collection.py)
+- **`POST /api/generations/{id}/export-collection`** — Native FastAPI. The same for one Studio batch
+- **`GET /api/collection`** — Native FastAPI. Where Export to collection sends and whether credentials are set
 - **`GET /api/packs/{id}/export.zip`** — Download the pack: every sticker file (.webm animated, .png / .webp static, the engine's file names) and a manifest.json (application/zip)
 - **`GET /api/packs/{id}/telegram.zip`** — No-credentials fallback: the files for @stickers (application/zip)
 - **`GET /api/telegram`** — Connected or not and which bot (never the token)

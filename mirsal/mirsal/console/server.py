@@ -796,6 +796,8 @@ def make_handler(c: Console):
                     return 404, {"error": "not found"}
                 if parts[-1] in ("telegram", "telegram.zip") and user.get("role") != "owner":
                     return 403, {"error": "Telegram sending is available to the owner only"}
+                if parts[-1] == "export-collection" and user.get("role") != "owner":
+                    return 403, {"error": "Exporting to the collection API is available to the owner only"}
                 return None
             if path.startswith("/lib/"):
                 return None if user.get("status") != "pending" and c.lib.owns_file(path[5:], user["id"]) else (404, {"error": "not found"})

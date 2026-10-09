@@ -41,6 +41,13 @@ class ProviderImport(ImportOptions):
     local_job: str | None = Field(default=None, max_length=16)    # the failed local job this provider result completes
 
 
+class CollectionExport(BaseModel):
+    """Export to the AddCollection API (services/collection.py): the collection's name (default: the pack's) and an optional description."""
+    model_config = ConfigDict(extra="forbid")
+    name: str | None = Field(default=None, max_length=120)
+    description: str = Field(default="", max_length=2000)
+
+
 class ImportResult(BaseModel):
     model_config = ConfigDict(extra="allow")
     id: int | None = None
