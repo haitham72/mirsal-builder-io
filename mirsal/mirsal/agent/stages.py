@@ -12,6 +12,7 @@ from __future__ import annotations
 
 STAGES = ("prompt", "emojis", "animation", "export")
 DEFAULT = "emojis"
+MAX_BATCHES = 4          # = generation/tasks.MAX_BATCHES: a pack has at most four batches (an emoji pack's four preset grids)
 INFO = {"prompt": {"label": "Prompt", "hint": "plan only, free"},
         "emojis": {"label": "Emojis", "hint": "sheet and stickers"},
         "animation": {"label": "Animation", "hint": "+ animation"},

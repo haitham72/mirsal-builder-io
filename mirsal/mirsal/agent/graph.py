@@ -33,7 +33,7 @@ from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from . import editroute, refine, subjects
 from .profile import Profile
-from .resolver import DESCRIBE, NAME_QUESTION, Resolution, beyond, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind, profile_facts, request_text
+from .resolver import DESCRIBE, NAME_QUESTION, Resolution, batch_intent, beyond, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind, profile_facts, request_text
 from .profile import profile_said
 from .tools import ConsoleTools, ToolError
 
@@ -44,7 +44,7 @@ def _interrupt_message(msg):
     msg.update(status="error", text=msg.get("text") or INTERRUPTED)
     msg.setdefault("steps", []).append({"kind": "note", "label": INTERRUPTED, "status": "done"})
 CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
-CREATION_INTENTS = {"NEW", "NEW_MULTI", "ANOTHER", "REFINE", "EDIT_STICKERS", "EDIT_ROUTE", "ANIMATE", "CONFIRM", "EFFECTS", "PARTICLES", "CREATOR", "RETRY"}
+CREATION_INTENTS = {"NEW", "NEW_MULTI", "ANOTHER", "REFINE", "EDIT_STICKERS", "EDIT_ROUTE", "ANIMATE", "CONFIRM", "EFFECTS", "PARTICLES", "CREATOR", "RETRY", "BATCH_MORE", "REGENERATE"}
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
 STYLE_NAMES = {p["id"]: p["label"].lower() for p in styles.PRESETS}          # the names the cards and replies use: the real presets, never a list of the chat's own
 
@@ -136,7 +136,7 @@ class Agent:
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "particles": self.n_particles, "editroute": self.n_editroute, "unsupported": self.n_unsupported, "refine": self.n_refine, "another": self.n_another,
                   "edit": self.n_edit, "undo": self.n_undo, "animate": self.n_animate, "export": self.n_export, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "profile": self.n_profile, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "profile": self.n_profile, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "batches": self.n_batches, "regenerate": self.n_regenerate, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -171,7 +171,10 @@ class Agent:
                 if m.get("status") == "working":
                     _interrupt_message(m)
             label = text.strip() if text.strip() else {"confirm": "Create", "cancel": "No", "creator_go": "Approve and continue", "creator_stop": "Stop", "creator_skip": "Continue without those", "creator_force": "Continue with them",
-        "creator_force_video": "Animate at the new price", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again"}.get((action or {}).get("type"), "")
+        "creator_force_video": "Animate at the new price", "names_apply": "Apply the new names", "names_keep": "Keep my names", "retry_sheet": "Try the sheet again",
+        "regenerate": "Regenerate"}.get((action or {}).get("type"), "")
+            if not label and (action or {}).get("type") == "batch_more" and str(action.get("to")).isdigit():
+                label = f"Batch {int(action['to']):02d}"
             self.store.add_message(sess, "user", label)
             msg = self.store.add_message(sess, "assistant", "", status="working")
             self.store.save(sess)
@@ -248,6 +251,8 @@ class Agent:
             t.intents, t.conf = [t.action["type"].upper()], 1.0
         elif t.action and t.action.get("type") == "retry_sheet":
             t.intents, t.conf = ["RETRY"], 1.0
+        elif t.action and t.action.get("type") in ("batch_more", "regenerate"):
+            t.intents, t.conf = (["BATCH_MORE"] if t.action["type"] == "batch_more" else ["REGENERATE"]), 1.0
         elif t.action and str(t.action.get("type", "")).startswith("creator_"):
             t.intents, t.conf = ["CREATOR"], 1.0
         elif (sess.get("creator_run") or {}).get("status") in ("waiting", "stopped") and re.match(CONTINUE_RX, t.text.strip().lower()):
@@ -266,6 +271,8 @@ class Agent:
                 t.er = editroute.classify_edit(asked["text"])
         else:
             t.intents, t.conf = classify(t.text, pending, has_gen, bool(t.selected))
+            if not has_gen and sess.get("pack") and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL") and batch_intent(t.text):
+                t.intents, t.conf = (["REGENERATE"] if batch_intent(t.text)["type"] == "regenerate" else ["BATCH_MORE"]), 0.9      # the Prompt stage: a pack is planned, nothing made yet
             low = t.text.lower()
             if re.search(r"\b(approve|accept|reject|decline)\b", low) and has_gen:
                 if re.search(r"\b(?:don'?t|do not|dont|can'?t|cannot|won'?t|will not|never|not|no)\b", low):
@@ -276,7 +283,7 @@ class Agent:
                 got = self.brain.classify(t.text, self._route_context(sess, asked), focus=self.store.focus_context(sess))
                 if got:
                     t.intents, t.conf = got, 0.7
-            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "PROFILE", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO", "EXPORT"):         # a question ("can you rotate him?") is an ASK until the rules read it
+            if has_gen and t.intents and t.intents[0] not in ("CONFIRM", "CANCEL", "SMALLTALK", "PROFILE", "CHANGE_SETTINGS", "REVIEW", "SEARCH", "CREATOR", "PARTICLES", "UNDO", "EXPORT", "BATCH_MORE", "REGENERATE"):         # a question ("can you rotate him?") is an ASK until the rules read it
                 if editroute.unsupported(t.text):
                     t.intents, t.conf = ["UNSUPPORTED"], 0.9
                 else:
@@ -291,12 +298,12 @@ class Agent:
                     t.intents, t.conf = ["REFINE"], 0.9
         names = {"NEW": "a new set", "NEW_MULTI": "several new sets", "EFFECTS": "particle effects", "PARTICLES": "particles", "EDIT_ROUTE": "an edit", "UNSUPPORTED": "something I cannot do yet", "REFINE": "a change to a batch", "ANOTHER": "another pass", "EDIT_STICKERS": "an edit", "UNDO": "an undo", "ANIMATE": "an animation", "EXPORT": "an export", "FEEDBACK": "feedback",
                  "REVIEW": "a decision", "ASK": "a question", "CHANGE_SETTINGS": "a setting", "SEARCH": "a search", "CONFIRM": "your go-ahead",
-                 "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "PROFILE": "something about you", "AMBIGUOUS": "something I need to ask about"}
+                 "CANCEL": "a change of mind", "RETRY": "a new try of a sheet", "NAMES": "a look at the names", "CREATOR": "the creator", "BATCH_MORE": "more batches of the pack", "REGENERATE": "a new take of a batch", "NAMES_DECIDE": "your answer about the names", "SMALLTALK": "a hello", "PROFILE": "something about you", "AMBIGUOUS": "something I need to ask about"}
         t.trace.task("reading your message")
         t.trace.step("understood: " + " + ".join(names.get(i, i.lower()) for i in t.intents) + (" · answering my question" if answered else ""))
         order = {"CONFIRM": "confirm", "CONFIRM_NEW": "confirm", "CANCEL": "cancel", "CHANGE_SETTINGS": "settings", "FEEDBACK": "feedback", "REVIEW": "review",
                   "EDIT_STICKERS": "edit", "UNDO": "undo", "ANIMATE": "animate", "EXPORT": "export", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
-                 "SMALLTALK": "smalltalk", "PROFILE": "profile", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator"}
+                 "SMALLTALK": "smalltalk", "PROFILE": "profile", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator", "BATCH_MORE": "batches", "REGENERATE": "regenerate"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
         return {}
 
@@ -423,39 +430,293 @@ class Agent:
         spend = self.tools.live()
         run = stages.run_spec(stages.of(st), creator.settings_of(sess)["bypass"])        # how far this request goes: the chat's stage (agent/stages.py)
         card["stage"] = run["stage"]
+        batch = self._first_batch(prompt, subject, st["grid"], sid, bool(st.get("ai", True)), plan, card)       # a pack request plans batch 01 only (plan.md Step 3)
         if run["plan_only"]:
-            return self._prompt_plan(t, subject, prompt, sid, plan, est, card)
+            sess["pack"] = {**batch["pack"], "made": []}
+            return self._prompt_plan(t, subject, prompt, sid, plan, est, card, batch)
         if run["creator"]:
             return self._creator_plan(t, subject, prompt, names, est, card, {"on": True, "scope": run["scope"], "bypass": run["bypass"]}, end=run["end"], style_id=sid,
-                                      plan=compact_plan(plan))
+                                      plan=compact_plan(plan), batch=batch)
         if spend and st.get("ask_before_spending", True):
             sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid,
-                               "ai": bool(st.get("ai", True)), "estimate": est, "plan": compact_plan(plan)}
+                               "ai": bool(st.get("ai", True)), "estimate": est, "plan": compact_plan(plan), "batch": batch}
             t.cards.append(card)
             t.reply = f"Here's the plan for **{subject}**: {len(names)} stickers, {STYLE_NAMES.get(st['style_id'], st['style_id'])}" + (" (I have this prepared: 0 credits)" if pm else "") + ". Shall I create it?"
             t.chips = ([{"label": "Create it", "action": "confirm"}] + ([{"label": "Make a new one (paid)", "action": "confirm_new"}] if pm else []) + [{"label": "Not yet", "action": "cancel"}])
             t.trace.end(f"plan ready · {_credits(est)}")
             return {}
-        self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "plan": compact_plan(plan)}, card)
+        self._start_create(t, {"prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "plan": compact_plan(plan), "batch": batch}, card)
         return {}
 
-    def _prompt_plan(self, t: Turn, subject: str, prompt: str, sid: str, plan: dict, est, card: dict) -> dict:
+    # -- batches of a pack: batch 01 first, then ONE follow-up card (Regenerate · Batch 02 · 03 · 04), plan.md Step 3 ----------------------------------------------
+    @staticmethod
+    def _first_batch(prompt: str, subject: str, grid: str, sid: str, ai: bool, plan: dict, card: dict) -> dict:
+        """Batch 01 of the pack this request starts: the pack it opens (`sess["pack"]` once it starts) and the card's "Batch 01 of 04 · core"."""
+        top = max(1, min(stages.MAX_BATCHES, int(plan.get("batches_max") or 1)))
+        label = stages.batch_label(1, plan)
+        if top > 1:
+            card["batch"] = {"no": 1, "max": top, "label": label, "text": f"Batch 01 of {top:02d} · {label.split(' · ', 1)[1]}"}
+        return {"no": 1, "label": label, "pack": {"request": prompt, "subject": subject, "grid": grid, "style_id": sid, "ai": ai, "plan": compact_plan(plan), "max": top,
+                                                  "transformation": bool(plan.get("transformation"))}}
+
+    def _track_batch(self, t: Turn, it: dict, r: dict) -> None:
+        """A batch of the pack started: batch 01 opens the pack, a later batch or a regenerated one takes its number's row (the newest take is the batch)."""
+        b = it.get("batch")
+        if not b:
+            return
+        if b.get("pack"):
+            t.sess["pack"] = {**b["pack"], "made": []}
+        pk = t.sess.get("pack")
+        if not pk:
+            return
+        row = {"no": int(b["no"]), "label": b.get("label"), "generation": r.get("generation"), "job": r.get("job"), "plan": it.get("plan"),
+               "creator": bool(it.get("creator_item")), "ts": round(time.time(), 3)}
+        pk["made"] = sorted([x for x in pk.get("made") or [] if x["no"] != row["no"]] + [row], key=lambda x: x["no"])
+
+    @staticmethod
+    def _batch_tag(t: Turn, it: dict) -> str | None:
+        """"Batch 02 · social" on a generation card, when the batch belongs to a pack of more than one batch."""
+        b = it.get("batch") or {}
+        top = int((b.get("pack") or t.sess.get("pack") or {}).get("max") or 1)
+        return b.get("label") if b and (int(b.get("no") or 1) > 1 or top > 1) else None
+
+    def _row_gen(self, row: dict) -> str | None:
+        if not row.get("generation") and row.get("job"):
+            try:
+                row["generation"] = self.tools.job(row["job"]).get("generation")
+            except Exception:
+                pass
+        return row.get("generation")
+
+    def _batches_made(self, pk: dict) -> int:
+        """How many batches the pack has: the chat's own, or more when the Studio made some of the same pack (`tools.batch_state`, the Studio picker's count)."""
+        rows = pk.get("made") or []
+        gens = [g for g in (self._row_gen(r) for r in rows) if g]
+        known = self.tools.batch_state(gens) if gens else None
+        return max(len(rows), int(known or 0))
+
+    def _batch_price(self, stage: str):
+        """One batch at this stage: the sheet, plus the animation when the stage animates (rule 13: the button states it before anything spends)."""
+        if not self.tools.live():
+            return None
+        est = self.tools.estimate("image")
+        if est is not None and stages.animates(stage):
+            est = round(est + (self.tools.estimate("video") or 0), 2)
+        return est
+
+    def _followup(self, sess: dict) -> tuple[str, list]:
+        """The ONE follow-up card after a batch reaches the stage's end: Regenerate · Batch 02 · Batch 03 · Batch 04 (only the batches still possible; "Batch 03"
+        with one made makes 02 and 03). A transformation (one character) gets Regenerate only."""
+        pk = sess.get("pack") or {}
+        per = self._batch_price(stages.of(sess["settings"]))
+        cost = lambda n: f" · {per * n:g} credits" if per else ""
+        existing = self._batches_made(pk)
+        top = min(int(pk.get("max") or 1), stages.MAX_BATCHES)
+        last = next((g for r in reversed(pk.get("made") or []) for g in [self._row_gen(r)] if g), None)
+        chips = [{"label": "Regenerate" + cost(1), "action": "regenerate", "generation": last}] if last else []
+        chips += [{"label": f"Batch {k:02d}" + cost(k - existing), "action": "batch_more", "to": k} for k in range(max(existing, 1) + 1, top + 1)]
+        name = pk.get("subject") or "the pack"
+        if top <= 1:
+            text = f"**{name}** is ready. It is one character, so there are no other batches: Regenerate makes another take of the same plan."
+        elif existing >= top:
+            text = f"**{name}**: all {top} batches of the pack are made. Regenerate makes another take of the newest one."
+        elif not existing:
+            text = f"This is batch 01 of {top:02d} of **{name}**. Plan more batches with it, or Generate this one."
+        else:
+            text = f"**{name}**: batch {existing:02d} of {top:02d} is ready. Regenerate it, or make the next batches of the pack."
+        return text, chips
+
+    def _batch_item(self, pk: dict, no: int, plan: dict, prompt: str) -> dict:
+        label = stages.batch_label(no, plan)
+        return {"prompt": prompt, "subject": pk["subject"], "grid": pk.get("grid") or "3x3", "style_id": pk["style_id"], "ai": bool(pk.get("ai", True)), "plan": compact_plan(plan),
+                "note": label, "batch": {"no": no, "label": label}}
+
+    def n_batches(self, state: State) -> dict:
+        """"Batch 03" (a button of the follow-up card, or typed: "next batch", "batch 3", "make the rest of the pack"): the batches after the ones made, planned through
+        `tools.more_batches` (an emoji pack's next preset grids, else the next unused bank actions; never a repeat, never past batch 04), ONE card, ONE total price,
+        ONE go-ahead; each runs to the chat's stage."""
+        t: Turn = state["turn"]
+        sess = t.sess
+        pk = sess.get("pack")
+        if not pk:
+            t.reply = "There is no pack open in this chat to continue. Tell me what to make first."
+            t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
+            return {}
+        a = t.action or {}
+        to = a.get("to") if a.get("type") == "batch_more" else (batch_intent(t.text) or {}).get("to")
+        top = min(int(pk.get("max") or 1), stages.MAX_BATCHES)
+        existing = self._batches_made(pk)
+        name = pk["subject"]
+        t.trace.retitle(f"more batches of {name}")
+        if top <= 1:
+            t.reply, t.chips = self._followup(sess)
+            t.reply = f"**{name}** is one character, so there are no other batches to make. Regenerate makes another take."
+            t.trace.end("no other batches")
+            return {}
+        to = top if to == "rest" else (max(existing, 1) + 1 if to is None else int(to))
+        if to > top:
+            _, t.chips = self._followup(sess)
+            t.reply = f"**{name}** has {top} batches at most, so there is no batch {to:02d}" + (f"; {existing} {'is' if existing == 1 else 'are'} made." if existing else ".")
+            t.trace.end("no such batch")
+            return {}
+        if to <= existing:
+            _, t.chips = self._followup(sess)
+            t.reply = f"Batch {to:02d} of **{name}** is already made." + (" Pick a later one, or Regenerate." if existing < top else " Every batch of the pack is made; Regenerate makes another take.")
+            t.trace.end("already made")
+            return {}
+        items, start = [], existing + 1
+        if not pk.get("made"):                                     # nothing made yet (the Prompt stage, or a plan never started): batch 01 goes with them
+            items.append(self._batch_item(pk, 1, pk["plan"], pk["request"]))
+            start = 2
+        if to >= start:
+            gens = [g for g in (self._row_gen(r) for r in pk.get("made") or []) if g]
+            try:
+                plans = self.tools.more_batches(pk["request"], pk["plan"], to - start + 1, pk["style_id"], [r.get("plan") for r in pk.get("made") or []], gens)
+            except ToolError as e:
+                t.reply = f"I couldn't plan the next batches: {e}"
+                t.trace.end("could not plan", ok=False)
+                return {}
+            items += [self._batch_item(pk, start + i, p, p.get("prompt") or pk["request"]) for i, p in enumerate(plans)]
+        if len(items) < to - existing:
+            t.trace.note("the bank has no more new actions for this pack" if items else "nothing new is left to draw for this pack")
+        if not items:
+            t.reply = f"Every action of the bank is already in **{name}**. Regenerate a batch you want better, or start a new request."
+            t.trace.end("nothing left")
+            return {}
+        t.trace.step("planned " + ", ".join(i["batch"]["label"] for i in items), {"title": name, "lines": [i["batch"]["label"] for i in items]})
+        return self._offer_batches(t, name, items)
+
+    def n_regenerate(self, state: State) -> dict:
+        """"Regenerate" (the follow-up card, or "regenerate it"): a new generation of the batch from its own saved plan, the Studio's Regenerate (parent + regen_of, so it
+        joins the batch's family); priced on the button, one go-ahead, run to the chat's stage."""
+        t: Turn = state["turn"]
+        sess, st = t.sess, t.sess["settings"]
+        pk = sess.get("pack") or {}
+        gid = (t.action or {}).get("generation") or next((g for r in reversed(pk.get("made") or []) for g in [self._row_gen(r)] if g), None) \
+            or (sess.get("focus") or {}).get("generation")
+        if not gid:
+            t.reply = "There is nothing to regenerate yet: the batch has not arrived. Wait for it, or tell me what to make."
+            return {}
+        try:
+            plan = self.tools.generation_plan(gid)
+        except ToolError as e:
+            t.reply = f"I can't read the plan of {self._nm(sess, gid)} to make it again: {e}"
+            return {}
+        row = next((r for r in pk.get("made") or [] if self._row_gen(r) == gid), None)
+        subj = self.store.subject_for_generation(sess, gid)
+        p = next((q for q in (subj or {}).get("passes", []) if q.get("generation") == gid), {})
+        label = (row or {}).get("label") or self._nm(sess, gid)
+        grid = p.get("grid") or pk.get("grid") or st["grid"]
+        item = {"prompt": p.get("prompt") or pk.get("request") or self._nm(sess, gid), "subject": (subj or {}).get("name") or pk.get("subject") or self._nm(sess, gid), "grid": grid,
+                "style_id": p.get("style_id") or pk.get("style_id") or st["style_id"], "ai": True, "plan": compact_plan(plan), "parent": gid, "regen_of": gid,
+                "note": f"regenerated: {label}", **({"batch": {"no": row["no"], "label": row.get("label")}} if row else {}), **self._edge(gid)}
+        t.trace.retitle(f"regenerating {label}")
+        t.trace.step(f"a new take of {label}", {"title": f"from {self._nm(sess, gid)}", "lines": ["the same plan, a new sheet; the old one stays"]})
+        return self._offer_batches(t, item["subject"], [item], regen=True)
+
+    def _offer_batches(self, t: Turn, name: str, items: list, regen: bool = False) -> dict:
+        sess, st = t.sess, t.sess["settings"]
+        stage = stages.of(st)
+        per = self._batch_price(stage)
+        what = ", ".join((i.get("batch") or {}).get("label") or i["note"] for i in items)
+        title = (f"Regenerate {what}" if regen else f"{name}: {what}")
+        card = self._items_card(title, items, st, per, {"batches": [(i.get("batch") or {}).get("label") for i in items], "stage": stage})
+        total = card["estimate"]
+        spec = {"type": "batch_more", "items": items, "stage": stage, "estimate": total, "subject": name, "label": title}
+        t.cards.append(card)
+        them = "them" if len(items) > 1 else "it"
+        if stage == "prompt":                                        # the Prompt stage plans only: Generate is the go-ahead, whatever "ask before spending" says
+            sess["pending"] = spec
+            t.reply = f"Here {'are the plans' if len(items) > 1 else 'is the plan'} for **{name}**: {what}. Nothing is spent at the Prompt stage: Generate makes {them} ({_credits(total)})."
+            t.chips = [{"label": "Generate" + (f" · {total:g} credits" if total else ""), "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end("plans ready · nothing spent")
+            return {}
+        if self.tools.live() and st.get("ask_before_spending", True):
+            sess["pending"] = spec
+            then = {"animation": ", then animated", "export": ", then animated, packed and sent to Telegram"}.get(stage, "")
+            t.reply = (f"I'll make a new take of **{what}** from the same plan; the old one stays" if regen else f"**{name}**: {what}, one sheet each") + f"{then}. Shall I make {them}?"
+            t.chips = [{"label": ("Create them" if len(items) > 1 else "Create it") + (f" · {total:g} credits" if total else ""), "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            t.trace.end(f"plan ready · {_credits(total)}")
+            return {}
+        self._run_batch_items(t, items, stage)
+        return {}
+
+    def _run_batch_items(self, t: Turn, items: list, stage: str) -> tuple[list, list]:
+        """Start batches of the pack to the chat's stage: Emojis (and Generate at the Prompt stage) as sheets side by side (`_start_items`); Animation / Export through the
+        creator, one run after the other (`sess["creator_queue"]`, started by `creator_tick` when a run is done; Stop clears it)."""
+        spec = stages.run_spec("emojis" if stage == "prompt" else stage, creator.settings_of(t.sess)["bypass"])
+        if not spec["creator"]:
+            return self._start_items(t, items)
+        live = self.tools.live()
+        est, v_est = (self.tools.estimate("image"), self.tools.estimate("video")) if live else (None, None)
+        runs = [{**it, "type": "creator", "estimate": est, "video_estimate": v_est, "scope": "video", "bypass": spec["bypass"], "end": spec["end"]} for it in items]
+        queue = t.sess.get("creator_queue") or []
+        if (t.sess.get("creator_run") or {}).get("status") in ("running", "waiting"):
+            t.sess["creator_queue"] = queue + runs
+            t.reply = "Queued: " + ", ".join((r.get("batch") or {}).get("label") or r["subject"] for r in runs) + " start when the creator finishes the run it is on."
+            t.trace.end("queued")
+            return runs, []
+        self._start_creator(t, runs[0])
+        t.sess["creator_queue"] = queue + runs[1:]
+        if runs[1:]:
+            t.reply += " Then " + ", ".join((r.get("batch") or {}).get("label") or r["subject"] for r in runs[1:]) + ", one after the other."
+        return runs, []
+
+    def batch_followup(self, sid: str) -> bool:
+        """Post the follow-up card once the batches the chat started last are cut (the Emojis stage's end; a creator run says its own when it is done). Called on every
+        poll of the chat (web and Telegram); takes the session's lock like any turn and is skipped while a turn holds it. True when it posted."""
+        lock = self.cache.lock(f"session:{sid}")
+        try:
+            lock.__enter__()
+        except cachemod.Busy:
+            return False
+        try:
+            sess = self.store.load(sid)
+            pk = sess.get("pack") or {}
+            rows = pk.get("made") or []
+            if not rows or max(rows, key=lambda r: r.get("ts") or 0).get("creator"):
+                return False
+            sig = "|".join(f"{r['no']}:{r.get('job') or r.get('generation')}" for r in rows)
+            if pk.get("said") == sig:
+                return False
+            for r in rows:
+                if r.get("creator"):
+                    continue
+                if r.get("job") and str(self.tools.job(r["job"]).get("status") or "") in ("FAILED", "TIMEOUT"):
+                    continue
+                gid = self._row_gen(r)
+                if not gid:
+                    return False
+                card = self.tools.generation(gid)
+                if not card.get("problem") and (not card.get("stickers") or any(s.get("status") == "PENDING" for s in card["stickers"])):
+                    return False
+            text, chips = self._followup(sess)
+            pk["said"] = sig
+            if chips:
+                self.store.add_message(sess, "assistant", text, chips=chips, cards=[])
+            self.store.save(sess)
+            return bool(chips)
+        finally:
+            lock.__exit__(None, None, None)
+
+    def _prompt_plan(self, t: Turn, subject: str, prompt: str, sid: str, plan: dict, est, card: dict, batch: dict | None = None) -> dict:
         """The Prompt stage: the plan (cells, tags, the sheet prompt) and Generate / Edit. Nothing is spent and nothing starts, even with "ask before
         spending" off: Generate is the go-ahead, and it makes the sheet."""
         sess, st = t.sess, t.sess["settings"]
         sess["pending"] = {"type": "create", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": sid, "ai": bool(st.get("ai", True)), "estimate": est,
-                           "plan": compact_plan(plan), "stage": "prompt"}
+                           "plan": compact_plan(plan), "stage": "prompt", **({"batch": batch} if batch else {})}
         card["sheet_prompt"] = plan.get("sheet_prompt") or ""
         t.cards.append(card)
         t.reply = (f"Here's the prompt for **{subject}**: {card['count']} stickers, {STYLE_NAMES.get(sid, sid)}. Nothing is spent at the Prompt stage: "
                    f"press Generate to make the sheet ({_credits(est)}), or tell me what to change.")
         t.chips = [{"label": "Generate" + (f" · {est:g} credits" if est else ""), "action": "confirm"}, {"label": "Edit", "fill": prompt}]
+        t.chips += [c for c in self._followup(sess)[1] if c.get("action") == "batch_more"]      # the follow-up comes right after the plan: "Batch 03" plans 01-03 together
         t.trace.end("prompt ready · nothing spent")
         return {}
 
     # -- the agentic creator: one go-ahead from the request to the pack on Telegram (agent/creator.py) --------------------------------------------------------
     def _creator_plan(self, t: Turn, subject: str, prompt: str, names: list, est, card: dict, cs: dict, end: str = "export", style_id: str | None = None,
-                      plan: dict | None = None) -> dict:
+                      plan: dict | None = None, batch: dict | None = None) -> dict:
         """The Animation and Export stages: the creator with the whole price (sheet + animation) on the card before the go-ahead. `end` is the stage:
         'animation' stops after the animations are approved, 'export' packs and sends (D1)."""
         sess, st = t.sess, t.sess["settings"]
@@ -466,7 +727,7 @@ class Agent:
         v_est = self.tools.estimate("video") if cs["scope"] == "video" and self.tools.live() else None
         total = round((est or 0) + (v_est or 0), 2) or None
         spec = {"type": "creator", "prompt": prompt, "subject": subject, "grid": st["grid"], "style_id": style_id or st["style_id"], "ai": bool(st.get("ai", True)), "estimate": est,
-                "video_estimate": v_est, "scope": cs["scope"], "bypass": cs["bypass"], "end": end, **({"plan": plan} if plan else {})}
+                "video_estimate": v_est, "scope": cs["scope"], "bypass": cs["bypass"], "end": end, **({"plan": plan} if plan else {}), **({"batch": batch} if batch else {})}
         card.update(estimate=total, creator={"scope": cs["scope"], "bypass": cs["bypass"], "sheet": est, "video": v_est, "end": end})
         how = "approving everything for you and stopping at the first rejection" if cs["bypass"] else "stopping at each approval for one click from you"
         if end == "animation":
@@ -490,7 +751,7 @@ class Agent:
 
     def _start_creator(self, t: Turn, p: dict) -> None:
         sess = t.sess
-        self._start_create(t, p, parent=p.get("parent"), regen_of=p.get("regen_of"), note=p.get("note", ""))
+        self._start_create(t, {**p, "creator_item": True}, parent=p.get("parent"), regen_of=p.get("regen_of"), note=p.get("note", ""))
         card = next((c for c in reversed(t.cards) if c.get("type") == "generation"), None)
         if not card:
             return
@@ -512,6 +773,8 @@ class Agent:
             t.reply = "There is no creator run to continue."
             return {}
         creator.resume(run, act, (t.action or {}).get("indexes"))
+        if act == "creator_stop":
+            t.sess.pop("creator_queue", None)                       # Stop means stop: the queued batches of the pack are not started either
         t.trace.task("continuing the creator" if act != "creator_stop" else "stopping the creator")
         t.trace.step({"creator_go": "approved", "creator_skip": "continuing without those stickers", "creator_force": "continuing with them anyway",
                       "creator_allow": "you allowed a block Python flagged: cutting it again", "creator_unallow": "the permission is taken back",
@@ -541,10 +804,21 @@ class Agent:
             if run["status"] in ("stopped", "waiting", "done") and run.get("said") != mark:
                 run["said"] = mark
                 self._creator_say(sess, run)
+            if run["status"] == "done" and sess.get("creator_queue"):
+                self._next_queued(sess)                             # the next batch of the pack, already priced and approved with the first
+                run = sess["creator_run"]
             self.store.save(sess)
             return run["status"]
         finally:
             lock.__exit__(None, None, None)
+
+    def _next_queued(self, sess: dict) -> None:
+        spec = sess["creator_queue"].pop(0)
+        msg = self.store.add_message(sess, "assistant", "", status="working")
+        t = Turn(sess["id"], "", [], None, sess, msg, Trace(self.store, sess, msg))
+        t.trace.task(f"starting {(spec.get('batch') or {}).get('label') or spec['subject']}")
+        self._start_creator(t, spec)
+        msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done")
 
     def _creator_say(self, sess: dict, run: dict) -> None:
         name = run["subject"]
@@ -553,6 +827,11 @@ class Agent:
         elif run["status"] == "done":
             links = [s["link"] for s in (run.get("telegram") or {}).get("sets", [])]
             text, chips = f"Done: **{name}** is on Telegram. " + " ".join(links), []
+        if run["status"] == "done" and not sess.get("creator_queue") and (sess.get("pack") or {}).get("made"):
+            more, chips = self._followup(sess)                       # the stage's end: the ONE follow-up card (Regenerate · Batch 02 · 03 · 04)
+            text += "\n\n" + more
+            pk = sess["pack"]
+            pk["said"] = "|".join(f"{r['no']}:{r.get('job') or r.get('generation')}" for r in pk["made"])
         elif run["status"] == "waiting":
             text, chips = f"**{name}**: {run['waiting']['why']}.", run["waiting"]["chips"]
         else:
@@ -576,12 +855,13 @@ class Agent:
             return False
         self.store.add_pass(t.sess, p["subject"], generation=r.get("generation"), job=r.get("job"), prompt=p["prompt"], grid=p["grid"],
                             style_id=p["style_id"], parent=parent, note=note)
+        self._track_batch(t, p, r)
         if r.get("generation"):
             t.generation = r["generation"]
             t.sess["focus"] = {"generation": r["generation"], "stickers": []}
         t.spent += r.get("estimate") or 0
         t.cards.append({"type": "generation", "generation": r.get("generation"), "job": r.get("job"), "subject": p["subject"],
-                        "parent": parent, "note": note})
+                        "parent": parent, "note": note, **({"batch": self._batch_tag(t, p)} if self._batch_tag(t, p) else {})})
         t.reply = (t.reply + " " if t.reply else "") + (f"Creating **{p['subject']}** now" + (f" ({_credits(r.get('estimate'))})" if r.get("estimate") else "") + ". The stickers appear below as they are ready.")
         t.trace.end("started · " + (r.get("job") or r.get("generation") or ""))
         return True
@@ -597,6 +877,15 @@ class Agent:
         if p["type"] == "multi":
             t.trace.retitle(f"generating {p.get('label') or 'several packs'}")
             done, failed = self._start_items(t, p["items"])
+            if failed:                                       # what could not start stays waiting; what started is not asked again
+                t.sess["pending"] = {**p, "items": [i for i, _ in failed], "estimate": None}
+                t.chips = [{"label": "Try the rest", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
+            else:
+                t.sess["pending"] = None
+            return {}
+        if p["type"] == "batch_more":
+            t.trace.retitle("generating " + (p.get("label") or p.get("subject") or "the batches"))
+            done, failed = self._run_batch_items(t, p["items"], p.get("stage") or "emojis")
             if failed:                                       # what could not start stays waiting; what started is not asked again
                 t.sess["pending"] = {**p, "items": [i for i, _ in failed], "estimate": None}
                 t.chips = [{"label": "Try the rest", "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
@@ -754,16 +1043,18 @@ class Agent:
         done, failed = [], []
         for it in items:
             try:
-                r = self.tools.create(it["prompt"], it["grid"], it["style_id"], it.get("ai", True), parent=it.get("parent"), base_plan=it.get("plan"), refs=it.get("refs"), ref_clause=it.get("ref_clause"), **_edge_kw(it))
+                r = self.tools.create(it["prompt"], it["grid"], it["style_id"], it.get("ai", True), parent=it.get("parent"), regen_of=it.get("regen_of"), base_plan=it.get("plan"), refs=it.get("refs"), ref_clause=it.get("ref_clause"), **_edge_kw(it))
             except ToolError as e:
                 failed.append((it, str(e)))
                 continue
             self.store.add_pass(t.sess, it["subject"], generation=r.get("generation"), job=r.get("job"), prompt=it["prompt"], grid=it["grid"], style_id=it["style_id"],
                                 parent=it.get("parent"), note=it.get("note", ""))
+            self._track_batch(t, it, r)
             if r.get("generation"):
                 t.sess["focus"] = {"generation": r["generation"], "stickers": []}
             t.spent += r.get("estimate") or 0
-            t.cards.append({"type": "generation", "generation": r.get("generation"), "job": r.get("job"), "subject": it["subject"], "parent": it.get("parent"), "note": it.get("note", "")})
+            t.cards.append({"type": "generation", "generation": r.get("generation"), "job": r.get("job"), "subject": it["subject"], "parent": it.get("parent"), "note": it.get("note", ""),
+                            **({"batch": it["batch"]["label"]} if it.get("batch") else {})})
             if it.get("delta"):                                          # what the person asked for, counted as a taste only now that it is really made
                 try:
                     self._profile().vote_delta(it["delta"], it.get("note", ""))

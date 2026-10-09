@@ -212,7 +212,7 @@ def _chip_rows(c, chat_id, m: dict) -> list:
             k, v = next(iter(ch["setting"].items()))
             act = {"t": "setting", "set": {k: v if v is not None else True}}
         elif ch.get("action"):
-            act = {"t": "action", "a": {k: ch[k] for k in ("generation", "indexes") if ch.get(k) is not None} | {"type": ch["action"]}}
+            act = {"t": "action", "a": {k: ch[k] for k in ("generation", "indexes", "to") if ch.get(k) is not None} | {"type": ch["action"]}}
         elif ch.get("editor") or ch.get("fill"):
             continue                                       # the sticker editor is a browser screen; "Edit" fills the web chat's box (here the person just types)
         else:
@@ -225,6 +225,7 @@ def _plan_lines(card: dict) -> str:
     if card.get("type") == "plan":
         price = "free (no provider call)" if card.get("free") else f"{card.get('estimate')} credits"
         return f"\n\n<b>{html.escape(str(card.get('subject')))}</b>: {card.get('count')} stickers · {card.get('grid')} · {html.escape(str(card.get('style')))} · {price}" + \
+               (f"\n{html.escape(str((card.get('batch') or {}).get('text')))}" if card.get("batch") else "") + \
                (f"\n{html.escape(', '.join(card.get('names') or [])[:600])}" if card.get("names") else "")
     if card.get("type") == "multi":
         items = "\n".join(f"• {html.escape(str(i.get('subject')))}: {i.get('count')} stickers" for i in card.get("items") or [])
@@ -335,6 +336,10 @@ def render(c, chat_id, user: dict, sid: str) -> bool:
     """Send every part of the session that was not sent yet. True while something is still working (a turn, a sheet, an animation, a creator run)."""
     from ..agent import graph as ag
     store, tools, _agent, _ = c.chat_parts(user, sid)
+    try:
+        _agent.batch_followup(sid)                         # the batches are cut: the follow-up card arrives as buttons (Regenerate · Batch 02 · 03 · 04)
+    except Exception:
+        pass
     sess = ag.hydrate(store, tools, store.load(sid))
     busy = bool(sess.get("working"))
     run = sess.get("creator_run") or {}

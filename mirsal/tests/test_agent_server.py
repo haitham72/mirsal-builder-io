@@ -114,8 +114,9 @@ class ChatServerTests(unittest.TestCase):
         self.assertEqual(last["steps"][-1]["kind"], "final")
 
         # 2. the stickers appear on the card as the engine finishes them (live data, with file urls)
-        j = self.wait(sid, lambda j: len([x for x in (j["messages"][-1]["cards"][0].get("data") or {}).get("stickers", []) if x["status"] == "READY"]) >= 3)
-        st = j["messages"][-1]["cards"][0]["data"]["stickers"]
+        gen_msg = lambda j: next(m for m in reversed(j["messages"]) if any(c["type"] == "generation" for c in m.get("cards") or []))      # the batch follow-up (no cards) may follow it
+        j = self.wait(sid, lambda j: len([x for x in (gen_msg(j)["cards"][0].get("data") or {}).get("stickers", []) if x["status"] == "READY"]) >= 3)
+        st = gen_msg(j)["cards"][0]["data"]["stickers"]
         png = next(x["png"] for x in st if x["png"])
         self.assertEqual(self.req("GET", png)[0], 200)
 

@@ -118,6 +118,17 @@ class TelegramChatTests(unittest.TestCase):
         self.assertEqual((sess["settings"]["stage"], sess["messages"]), ("animation", []), "a pick is a setting, never a turn")
         self.assertEqual(self.buttons([f for m, f, _ in self.calls if m == "editMessageText"][-1])[-1]["text"], "🧭 Animation")
 
+    def test_the_batch_follow_up_card_is_buttons(self):
+        """plan.md Step 3: Regenerate · Batch 02 · Batch 03 are inline buttons, and a tap carries the same action as the web chip (its batch number included)."""
+        from mirsal.services import tg_chat
+        m = {"chips": [{"label": "Regenerate · 2 credits", "action": "regenerate", "generation": "G050"}, {"label": "Batch 02 · 2 credits", "action": "batch_more", "to": 2},
+                       {"label": "Batch 03 · 4 credits", "action": "batch_more", "to": 3}]}
+        rows = tg_chat._chip_rows(self.c, HAITHAM, m)
+        self.assertEqual([r[0]["text"] for r in rows], ["Regenerate · 2 credits", "Batch 02 · 2 credits", "Batch 03 · 4 credits"])
+        keys = tg_chat._chat(self.c.out, HAITHAM)["keys"]
+        acts = [keys[r[0]["callback_data"][2:]]["a"] for r in rows]
+        self.assertEqual(acts, [{"generation": "G050", "type": "regenerate"}, {"to": 2, "type": "batch_more"}, {"to": 3, "type": "batch_more"}])
+
     def test_a_message_is_a_turn_of_the_same_agent_and_its_reply_comes_back(self):
         from mirsal.services import tg_chat
         self.update(HAITHAM, "/new")

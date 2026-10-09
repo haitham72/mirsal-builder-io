@@ -185,11 +185,11 @@ function chipHTML(c){
   return `<span class="ai-vis${cur==null&&c.glow?' glow':''}${on?' is-on':''}"><button class="ai-chip" data-act=agsetting data-set="${AIU.esc(JSON.stringify(next))}" aria-pressed=${on} title="${on?'Click to switch it off':'Click to switch it on'}">${AIU.esc(on?(c.on||c.label):off?(c.off||c.label):c.label)}</button></span>`}
  if(c.fill!=null)return `<button class=ai-chip data-act=agfill data-text="${AIU.esc(c.fill)}" title="Put the prompt in the box to change it">${AIU.esc(c.label)}</button>`;
  if(c.editor)return `<button class="ai-chip pri" data-act=agedit data-g="${AIU.esc(c.editor.generation)}" data-i=${+c.editor.index}>${AIU.esc(c.label)}</button>`;
- return c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
+ return c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.to!=null?` data-to="${AIU.esc(c.to)}"`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
   :`<button class=ai-chip data-act=agchip data-text="${AIU.esc(c.text||c.label)}">${AIU.esc(c.label)}</button>`}
 function cardHTML(c,m,i){
  if(c.type==='plan'){const last=AIU.lastBot((A.sess&&A.sess.messages)||[]),done=!(A.sess&&A.sess.pending)||!last||m.id!==last.id;
-  return `<div class="ai-card plan${done?' is-done':''}"><div class=ai-ch><b>${AIU.esc(c.subject)}</b><small>${c.count} stickers · ${AIU.esc(c.grid)} · ${AIU.esc(c.style)}</small></div>
+  return `<div class="ai-card plan${done?' is-done':''}"><div class=ai-ch><b>${AIU.esc(c.subject)}</b><small>${c.count} stickers · ${AIU.esc(c.grid)} · ${AIU.esc(c.style)}${c.batch?' · '+AIU.esc(c.batch.text):''}</small></div>
    <div class=plan-tags>${(c.names||[]).map(n=>`<span>${AIU.esc(n)}</span>`).join('')}</div>
    <div class=plan-foot><div class=price>${c.free?'Free: no provider call.':`Costs <b>${AIU.credits(c.estimate)}</b>${c.creator&&c.creator.video?` (sheet ${+c.creator.sheet} + animation ${+c.creator.video})`:''}${c.balance!=null?` · balance ${+(+c.balance).toFixed(0)}`:''}`}${c.creator?`<br><small>${c.creator.end==='animation'?'Then animated; nothing is packed or sent':`Then straight to Telegram: ${c.creator.scope==='video'?'animated':'static'}`}, ${c.creator.bypass?'approving for you, stopping at any rejection':'one click from you at each approval'}.</small>`:''}${c.stage==='prompt'?'<br><small>Prompt stage: nothing is spent until you press Generate.</small>':''}</div>
     </div>${c.sheet_prompt?`<details class=plan-prompt><summary>The sheet prompt</summary><p>${AIU.esc(c.sheet_prompt)}</p></details>`:''}</div>`}   /* the go-ahead lives in the two chips under the message (Create it / Not yet), the same place as "Allow AI vision / Not now": one pair of buttons, never two */
@@ -215,7 +215,7 @@ function cardHTML(c,m,i){
   else if(!st.length)note='Cutting the stickers…';else if(st.some(x=>x.status==='PENDING'))note='Cutting the stickers…';
   else if(c.animating&&st.some(x=>['PENDING','RUNNING'].includes(x.anim_status)))note='Animating…';
   const meta=gid?`${gid}${c.data&&c.data.parent?' · from '+c.data.parent:''} · ${ready} ready`:'';
-  return `<div class="ai-card gen"><div class=ai-ch><b>${AIU.esc(c.subject||'Stickers')}</b><small>${meta}</small><span class=sp></span>${gid?`<button class=ai-link data-act=agstudio data-g="${gid}">Open in Studio</button>`:''}</div>
+  return `<div class="ai-card gen"><div class=ai-ch><b>${AIU.esc(c.subject||'Stickers')}</b><small>${c.batch?AIU.esc(c.batch)+(meta?' · ':''):''}${meta}</small><span class=sp></span>${gid?`<button class=ai-link data-act=agstudio data-g="${gid}">Open in Studio</button>`:''}</div>
    ${(c.data&&c.data.video_sheets||[]).filter(v=>v.status!=='REJECTED').map(v=>SR.picture(c.data,v)).join('')}${c.data?SR.bulk(c.data):''}${carHTML(st.length?st:null,gid,(c.data&&c.data.allow)||null)}${note?`<div class=car-note>${note}</div>`:''}</div>`}
  if(c.type==='creator'){const g=c.run&&(m.cards||[]).find(x=>x.type==='generation'&&x.generation===c.run.generation);return runHTML(c.run,(g&&g.data&&g.data.allow)||null)}
  if(c.type==='stickers'){return `<div class="ai-card"><div class=ai-ch><b>${c.stickers.length===1?'Sticker':'Stickers'}</b><small>${c.stickers.length} found</small></div>${carHTML(c.stickers.map(x=>({...x,status:'READY',name:x.key})),null)}</div>`}
@@ -305,7 +305,7 @@ ACT.agchip=el=>agSend(el.dataset.text);
 ACT.agfill=el=>{const t=$('ai-in');if(!t)return;t.value=el.dataset.text||'';t.dispatchEvent(new Event('input'));t.focus()};
 ACT.agedit=el=>{if(typeof studioEditSticker==='function')studioEditSticker(+String(el.dataset.g).replace(/\D/g,''),+el.dataset.i,'agent')};          /* the editor opens at once on that slice (no chat turn); its Save lands back here */
 ACT.agsetting=async el=>{try{await saveSet(JSON.parse(el.dataset.set))}catch(e){return}paint()};          /* a one-time switch: the setting is saved and nothing is sent to the chat */
-ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
+ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.to)a.to=+el.dataset.to;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
 ACT.agcut=async el=>{const r=await post(`/api/generations/${el.dataset.g}/recut`);if(!r.ok)return toast(r.j.error||'Could not cut the sheet',1);toast('Cutting the sheet…');if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.aganimal=async el=>{const n=+String(el.dataset.g||'').replace(/\D/g,'');if(!n)return;const r=await post(`/api/generations/${n}/animate`,{scope:'slice',index:+el.dataset.i});if(!r.ok)return toast(r.j.error||'Could not animate',1);toast('Animating again');if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});

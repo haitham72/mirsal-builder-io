@@ -461,6 +461,26 @@ def particles_intent(text: str, has_set: bool) -> str | None:
     return None
 
 
+BATCH_REGEN_RX = r"^(?:please\s+)?(?:regenerate|remake)(?:\s+(?:it|this|that|them|the\s+(?:whole\s+)?(?:batch|sheet|pack|set)))?\s*[.!]*$|^(?:please\s+)?redo\s+the\s+(?:whole\s+)?(?:batch|sheet)\s*[.!]*$"
+BATCH_REST_RX = r"\b(?:make|do|create|generate|finish|complete|draw)\s+(?:me\s+)?(?:all\s+)?(?:the\s+)?rest(?:\s+of\s+(?:the\s+|this\s+)?(?:pack|batches|set|grids))?\b|\b(?:all|the other)\s+(?:the\s+)?(?:remaining\s+)?batches\b"
+
+
+def batch_intent(text: str) -> dict | None:
+    """The batch follow-up typed in words (plan.md Step 3): "regenerate it" -> {type: regenerate}; "next batch" -> {type: batch_more, to: None} (the next one);
+    "batch 3" / "make batch 03" -> {to: 3}; "make the rest of the pack" -> {to: "rest"} (up to the pack's last batch). None for anything else ("regenerate 2" is an edit)."""
+    t = " ".join(str(text or "").lower().split())
+    if re.match(BATCH_REGEN_RX, t):
+        return {"type": "regenerate"}
+    if re.search(r"\bnext batch\b|\bthe next (?:grid|set of 9)\b", t):
+        return {"type": "batch_more", "to": None}
+    m = re.search(r"\bbatch(?:es)?\s*(?:no\.?\s*|number\s*|#\s*)?0?([1-9])\b", t)
+    if m and not re.search(r"\bg\d", t):
+        return {"type": "batch_more", "to": int(m.group(1))}
+    if re.search(BATCH_REST_RX, t):
+        return {"type": "batch_more", "to": "rest"}
+    return None
+
+
 def classify(text: str, has_pending: bool, has_generation: bool, has_selection: bool = False) -> tuple[list, float]:
     """Intents in order of importance, with a confidence. Below 0.6 the graph asks the model to classify."""
     t = text.strip().lower()
@@ -505,7 +525,10 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         or bool(has_selection and re.search(r"\b(these|this|those|them|it|selected)\b", t))
     concept_edit = bool(has_generation and re.search(rf"\b(make|turn|give|put|let|get)\s+{PRON}\b", t) and (re.search(COMPARATIVE, t) or re.search(WEARISH, t) or re.search(COLOURS, t))
                         and not re.search(r"\b(?:a|an|some|\d+)\s+(?:\w+\s+)?(?:stickers?|emoji|packs?|sets?)\b", t))
-    if len(t.split()) <= 8 and re.search(r"\b(grid|2x2|3x3|style|no animation|without animation|with animation|ask before|don'?t ask|ask me|instant|auto[- ]?create|ai vision)\b", t) \
+    bi = batch_intent(t) if has_generation else None
+    if bi:                                                           # "next batch", "batch 3", "make the rest of the pack", "regenerate it": the open pack's follow-up
+        intents, conf = (["REGENERATE"] if bi["type"] == "regenerate" else ["BATCH_MORE"]), 0.9
+    elif len(t.split()) <= 8 and re.search(r"\b(grid|2x2|3x3|style|no animation|without animation|with animation|ask before|don'?t ask|ask me|instant|auto[- ]?create|ai vision)\b", t) \
             and re.search(r"\b(use|set|switch|change|make it|go|turn|please|from now|always|stop|no|with|without|don'?t|do not|ask|just|allow|enable|disable)\b", t) \
             and not re.search(NEW_VERBS, t.replace("make it", "")):
         intents, conf = ["CHANGE_SETTINGS"], 0.8

@@ -227,6 +227,33 @@ How far a NEW request goes is the chat's **stage**, `settings.stage`, one of fou
 - **Tests:** `tests/test_chat_stage.py` (each stage on `FakeTools`: the plan card, the price, Prompt never starts, an Animation run ends with no pack and no Telegram, Export reaches Telegram,
   waiting at G2 without bypass, the migration, `batch_label`) and `tests/test_agent_server.py` (the route: validated, 400 on an unknown stage, no turn, the old switches).
 
+### Batch 01 first, then ONE follow-up card
+
+A new request plans **batch 01 only** (Haitham, 2026-10-09): for an emoji pack the first preset grid (core-v1, actions 1-9), else the first 9 bank actions. When its plan
+has `batches_max > 1` (`tasks.preview`, capped at `stages.MAX_BATCHES` = 4) the plan card says "Batch 01 of 04 · core" (`card.batch`); a transformation (one character changed) or a 1x1 has one batch.
+
+- **The pack** (`sess["pack"]`): `{request, subject, grid, style_id, ai, plan (batch 01's, compact), max, transformation, made: [{no, label, generation, job, plan, creator, ts}], said}`.
+  It opens when batch 01 starts (`_track_batch` from `_start_create` / `_start_items`; the Prompt stage opens it with the plan, nothing made); a later batch or a regenerated one takes its
+  number's row (the newest take is the batch). How many exist is `max(rows, tools.batch_state(gens))`: `tasks.session_state`, the Studio picker's own count (an emoji pack counts its grids
+  wherever they were made).
+- **The follow-up card** (`_followup`): one message with the chips **Regenerate · N credits** and **Batch 02 · 03 · 04** (only the ones still possible; the price is the stage's per batch, so
+  "Batch 03" with one made states two batches). It comes when the batch reaches the stage's end: for Emojis when every batch just started is cut (`Agent.batch_followup`, called on every
+  poll of the chat, web `GET /api/chat/sessions/{id}` and Telegram `render`; once per set of batches, `pack.said`); for Animation / Export in the creator's done message (`_creator_say`);
+  for Prompt right after the plan (its Batch chips plan 01..k together). A transformation shows Regenerate only; with all four made, Regenerate only.
+- **`{type: "batch_more", to: k}`** (`n_batches`): the batches after the ones made up to `k`, planned by `tools.more_batches` (an emoji pack's next preset grids, else the next unused bank
+  actions; the chat's batches and, through their generations, the Studio's batches of the same pack are skipped; never a repeat, never past batch 04), on ONE `multi` card with ONE total and
+  ONE go-ahead (pending `batch_more`). Nothing made yet (the Prompt stage): batch 01 goes with them. Each new batch runs to the chat's stage (`_run_batch_items`): Emojis as sheets side by
+  side (`_start_items`); Animation / Export through the creator, one run after the other (`sess["creator_queue"]`, started by `creator_tick` when a run is done, priced and approved
+  with the first; Stop clears it). At the Prompt stage the card is a plan and Generate is the go-ahead.
+- **`{type: "regenerate", generation}`** (`n_regenerate`): a new generation of that batch from its own saved plan, the Studio's Regenerate (`parent` + `regen_of`, so it joins the batch's
+  family in Earlier batches), priced on the button, one go-ahead, to the chat's stage; the old one stays.
+- **Typed words work too** (`resolver.batch_intent`, in `classify` and, at the Prompt stage with no batch made, in `n_understand`): "next batch", "batch 3", "make the rest of the pack",
+  "regenerate it" ("regenerate 2" stays an edit of sticker 2).
+- The chat's batches share the pack in Earlier batches on their own (`pipeline._packs`: same request, same person, within 6 h); the chat's generation cards say "Batch 02 · social" (`card.batch`).
+- **Telegram:** the follow-up card is a chip row, so it arrives as inline buttons (`_chip_rows` carries `to`); a plan's "Batch 01 of 04" is a line of its text.
+- **Tests:** `tests/test_chat_batches.py` (batch 01 first, an emoji pack's grid names, the follow-up once when cut, Batch 03 = two sheets after one go-ahead, never a fifth batch,
+  Regenerate's parent and regen_of, a transformation gets Regenerate only, the typed forms, the Prompt stage, the Animation stage's queue and Stop), `tests/test_tg_chat.py` (the buttons).
+
 ## The chat in Telegram (`services/tg_chat.py`, 2026-10-09)
 
 The same agent, on the bot already configured in Settings (the admin cards' bot; `admin_bot.start` long-polls it, only under `serve --lan`). Every private

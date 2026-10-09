@@ -81,6 +81,32 @@ class ConsoleTools:
             c.set(key, plan, 7 * 24 * 3600)
         return plan
 
+    def batch_state(self, gens: list) -> int | None:
+        """How many batches the pack these generations belong to already has (`tasks.session_state`: an emoji pack counts its grids, wherever they were made,
+        as the Studio's picker does); None when it cannot be read (the chat then counts its own)."""
+        try:
+            return int(tasks.session_state(self.out, [g for g in gens if g])["existing"])
+        except Exception:
+            return None
+
+    def more_batches(self, request: str, plan: dict, k: int, style_id: str, made_plans: list, gens: list | None = None) -> list:
+        """The plans of the next `k` batches of a pack after `plan` (its batch 01), skipping every grid and bank action the chat's batches (and, through
+        `gens`, the Studio's batches of the same pack) already used. Nothing is reserved or spent."""
+        from ..generation import actions
+        used_presets = {((p or {}).get("slots") or {}).get("preset") for p in made_plans} - {None}
+        used_tokens = {h[0] for p in made_plans for s in (p or {}).get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+        if gens:
+            try:
+                ses = tasks.session_state(self.out, [g for g in gens if g])
+                used_presets |= set(ses["used_presets"])
+                used_tokens |= set(ses["used_tokens"])
+            except Exception:
+                pass
+        try:
+            return tasks.more_batches(request, plan, k, style_id, False, used_presets, used_tokens)
+        except pl.PipelineError as e:
+            raise ToolError(str(e), e.code)
+
     def engine_label(self, ai: bool = True) -> str | None:
         """Which model writes the sticker ideas right now ("qwen3.5-4b (local)", "gpt-4.1-mini (cloud)"), None when the built-in sets are used. Shown as a step before the model is asked."""
         from ..services import llm
@@ -637,6 +663,9 @@ class FakeTools:
         self.job_errors: dict = {}
         self.video_estimate = 8.0
         self.telegram = True
+        self.batches_max = 4                                  # what tasks.preview answers for a bank request; 1 for a transformation
+        self.transform = False
+        self.existing = None                                  # batch_state: None = the chat counts its own batches
         self.n_jobs = 0
         self.n_gens = max([int(g[1:]) for g in self.gens] or [0])
 
@@ -651,8 +680,30 @@ class FakeTools:
         words = [w for w in prompt.lower().split() if w not in ("make", "me", "a", "an", "some", "stickers", "sticker", "of", "create")]
         subject = " ".join(words[:3]) or "sticker"
         n = 9 if grid == "3x3" else 4 if grid == "2x2" else 1
-        return {"subject": subject, "task_slug": subject.replace(" ", "_"), "grid": grid, "expanded_by": "fake", "template_id": "fake_t", "template_version": 1, "slots": {"subject_description": subject, "style_id": style_id}, "sheet_prompt": f"sheet of {subject}",
-                "stickers": [{"index": i, "key": f"{subject.replace(' ', '_')}_{i}", "emoji": ["😀"], "prompt": f"{subject} {i}"} for i in range(1, n + 1)]}
+        preset = "core-v1" if "emoji" in prompt.lower() else None
+        out = {"subject": subject, "task_slug": subject.replace(" ", "_"), "grid": grid, "expanded_by": "transformation" if self.transform else "fake", "template_id": "fake_t", "template_version": 1,
+               "slots": {"subject_description": subject, "style_id": style_id, **({"preset": preset} if preset else {})}, "sheet_prompt": f"sheet of {subject}",
+               "stickers": [{"index": i, "key": f"{subject.replace(' ', '_')}_{i}", "emoji": ["😀"], "prompt": f"{subject} {i}"} for i in range(1, n + 1)],
+               "batches_max": 1 if self.transform or n == 1 else self.batches_max}
+        if self.transform:
+            out["transformation"] = {"id": "fake_tr", "subject": "dog", "target": "banana", "required": []}
+        return out
+
+    def batch_state(self, gens):
+        return self.existing
+
+    def more_batches(self, request, plan, k, style_id, made_plans, gens=None):
+        self.calls.append(("more_batches", request, k))
+        presets = ["core-v1", "social-v1", "reactions-v1", "daily-v1"]
+        used = {((p or {}).get("slots") or {}).get("preset") for p in made_plans} | {(plan.get("slots") or {}).get("preset")}
+        free = [p for p in presets if p not in used]
+        out = []
+        for i in range(k):
+            pre = free[i] if (plan.get("slots") or {}).get("preset") and i < len(free) else None
+            out.append({"prompt": request + (f" {pre}" if pre else ""), "subject": plan.get("subject"), "grid": plan.get("grid") or "3x3", "expanded_by": "deterministic",
+                        "slots": {**(plan.get("slots") or {}), **({"preset": pre} if pre else {})},
+                        "stickers": [{"index": j, "key": f"more{len(made_plans) + i + 2}_{j}", "emoji": ["😀"]} for j in range(1, 10)]})
+        return out
 
     def engine_label(self, ai=True):
         return None

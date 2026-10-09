@@ -1099,6 +1099,11 @@ def make_handler(c: Console):
                 store, tools, _agent, ag = c.chat_parts(self.user)
                 try:
                     sess = store.load(path.rsplit("/", 1)[1])
+                    try:
+                        if sess.get("pack") and _agent.batch_followup(sess["id"]):        # the batches the chat started are cut: the follow-up card (Regenerate · Batch 02 · 03 · 04)
+                            sess = store.load(sess["id"])
+                    except Exception as e:                                                 # a follow-up must never break reading the chat
+                        print(f"[mirsal] batch follow-up {sess['id']}: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
                     store.refresh(sess)
                     if (sess.get("creator_run") or {}).get("status") == "running":
                         c.drive_creator(self.user, sess["id"])           # resumes a run after a restart; a no-op while a driver is alive
