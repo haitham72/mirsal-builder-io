@@ -427,8 +427,10 @@ function gdPriceLine(){if(typeof liveReadyNow!=='function'||!liveReadyNow())retu
   return GDP.c==null?{t:'Higgsfield sheet price: unavailable',ok:false,retry:true}:{t:`Higgsfield sheet price: ◈ ${fcr(GDP.c)} credits`,ok:true}}
 function gdFoot(g,kind){const reset=`<button class="btn sm" data-act=pgreset data-g=draft data-kind=${kind} ${PD[pdKey('draft',kind)]!==undefined?'':'hidden'}>Reset</button>`;
   if(kind==='video')return`<div class=pdfoot data-pdfoot=video>${reset}<small class=mut>This video prompt is for later: the animation is made after the sheet and its stickers exist.</small></div>`;
-  const P=gdPriceLine(),custom=pdCustom(g,'sheet'),mx=Math.max(1,+g.batches_max||1),nb=gdNb(g);
-  const pick=mx>1?`<div class=gdnb><span class=mut>Batches</span>${Array.from({length:mx},(_,i)=>i+1).map(k=>`<button class="tab${k===nb?' on':''}" data-act=gdnb data-n=${k} aria-pressed=${k===nb} title="${k===1?'Only this batch':`This batch and the next ${k-1}: ${9*k} stickers, every one a different action`}">${k}</button>`).join('')}${nb>1&&GDP&&GDP.c!=null?`<span class=mut>${nb} sheets · ◈ ${fcr(GDP.c*nb)} credits in all</span>`:''}</div>`:'';
+  const P=gdPriceLine(),custom=pdCustom(g,'sheet'),mx=Math.max(1,+g.batches_max||1),nb=gdNb(g),ex=Math.max(0,+g.existing||0);
+  /* the buttons are BATCH NUMBERS of the session: a new request offers 1-4; a session that has 1 batch offers 2-4 (this draft is batch 2), one that has 3 only 4.
+     Pressing k makes batches ex+1 .. k (k - ex sheets). */
+  const pick=mx>1||ex?`<div class=gdnb><span class=mut>${ex?`This session has ${ex} batch${ex===1?'':'es'}. Make up to batch`:'Batches'}</span>${Array.from({length:mx},(_,i)=>ex+i+1).map(k=>`<button class="tab${k-ex===nb?' on':''}" data-act=gdnb data-n=${k-ex} aria-pressed=${k-ex===nb} title="${k-ex===1?`Only batch ${k}`:`Batches ${ex+1} to ${k}: ${9*(k-ex)} new stickers, every one a different action`}">${k}</button>`).join('')}${nb>1&&GDP&&GDP.c!=null?`<span class=mut>${nb} sheets · ◈ ${fcr(GDP.c*nb)} credits in all</span>`:''}</div>`:'';
   return`<div class=pdfoot data-pdfoot=sheet>${pick}<div class=mut id=gdprice>${P.t}</div>${P.retry?'<button class="btn sm" data-act=gdpriceretry>Retry the price</button>':''}<button class="btn sm pri" data-act=gdsheet ${P.ok&&!GDWORK?'':'disabled'} title="Spends the Higgsfield credits shown above">${nb>1?`Generate ${nb} sheets`:'Generate sheet'}${custom?' with my prompt':''}</button>${reset}<small class=mut>${custom?'Your text is sent exactly as written.':g.expanded_by==='ai'?'The AI enhancer\'s text is sent exactly as shown.':'This is the template\'s text; edit it to send your own.'} Generating the prompt spent no Higgsfield credits; this click is what spends.</small></div>`}
 /* Batches (Haitham, 2026-10-09: "1 batch, 2 batches, n batches"): one Generate makes this batch and the next ones of the pack (the next preset grids of an
    emoji pack, else the next unused actions of the bank), each its own sheet with its own price; the total is on the button. GD.nb is the choice. */
@@ -478,7 +480,7 @@ ACT.gdsheet=async el=>{if(!gdOn()||GDWORK)return;const g=GD,text=(pdText(g,'shee
   finally{GDWORK=false;if(GD){gdSave();gdPaint()}if(typeof cpDrawBar==='function')cpDrawBar()}};
 /* the batches after the first: their plans come from the server (POST /api/plan/more: the next preset grids or bank actions), each is started like the
    first, and every finished sheet joins the same session (mode pack, one run key; a Next-batch draft keeps adding to the session on screen) */
-async function gdMore(g,run){const r=await post('/api/plan/more',{prompt:g.prompt,n:gdNb(g)-1,style_id:g.style,loop:g.loop,
+async function gdMore(g,run){const r=await post('/api/plan/more',{prompt:g.prompt,n:gdNb(g)-1,style_id:g.style,loop:g.loop,...(g.next&&g.gens?{gens:String(g.gens).split(',').filter(Boolean)}:{}),
     plan:{slots:g.slots,grid:g.grid,expanded_by:g.expanded_by,stickers:(g.stickers||[]).map(t=>({key:t.key,tags:t.tags}))}});
   if(!r.ok)return toast(r.j.error||'Could not plan the other batches',1);
   let n=1;for(const p of r.j.plans){const ok=await liveStart('sheet',{prompt:p.prompt,ai:false,refs:g.refs||[],style_id:g.style,loop:g.loop,...run,

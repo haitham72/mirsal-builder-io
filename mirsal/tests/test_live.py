@@ -1066,6 +1066,13 @@ class LiveConsoleTests(Base):
         self.assertEqual(list(nb["next"]["tokens"]), actions.next_tokens(used))
         self.assertTrue(nb["sheet_prompt"])
         self.assertFalse([c for c in self.cli.calls[n:] if c[:2] == ["generate", "create"]])              # a prompt to read, nothing spent
+        self.assertEqual((nb["existing"], nb["batches_max"]), (1, 3), "1 batch on screen: batches 2 to 4 may be made in one Generate")
+        s, more = self.req("POST", "/api/plan/more", {"prompt": nb["prompt"], "plan": nb, "n": 9, "gens": [gid]})
+        self.assertEqual((s, more["existing"], len(more["plans"])), (200, 1, 2), "never past batch 4")
+        drawn = [set(nb["next"]["tokens"])] + [{h[0] for st in p["stickers"] if (h := actions.canonical_for(st.get("key"), st.get("tags")))} for p in more["plans"]]
+        self.assertFalse(used & set().union(*drawn), "the session's own actions are skipped")
+        self.assertEqual(len(set().union(*drawn)), 27, "and none twice between the new batches")
+        self.assertFalse([c for c in self.cli.calls[n:] if c[:2] == ["generate", "create"]])
         self.assertEqual(self.req("POST", "/api/plan/next", {"gens": []})[0], 409)
 
     def test_an_empty_or_absurd_hand_written_prompt_is_refused_and_starts_nothing(self):

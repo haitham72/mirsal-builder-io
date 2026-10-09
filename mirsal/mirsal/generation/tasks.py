@@ -341,12 +341,40 @@ def next_batch(out: Path, gens, style_id: str = "flat_vector", loop: bool = Fals
     every generation of their families counts as used. A preset emoji pack takes the next preset grid nobody used (core-v1 -> social-v1 ->
     reactions-v1 -> daily-v1); any other request takes the next bank actions none of them drew yet (bank order). When nothing is left the answer
     is {complete: true, message} in words, never a silent repeat."""
-    from ..flow import groups, pipeline as pl
     from . import actions, spelling
-    seen, results = set(), []
+    ses = session_state(out, gens)
+    request, (rows, cols), existing = ses["request"], ses["grid"], ses["existing"]
+    room = MAX_BATCHES - existing                     # one Generate never takes a session past MAX_BATCHES batches (the picker counts from the next batch)
+    if ses["used_presets"]:
+        free = [p for p in actions.PRESETS if p not in ses["used_presets"]]
+        if not free:
+            return {"complete": True, "message": f"All {len(actions.PRESETS)} preset grids of this pack are made ({9 * len(actions.PRESETS)} stickers). Start a new pack, or regenerate a batch you want better."}
+        text = f"{request} {free[0]}"
+        plan = preview(text, "3x3", style_id, False, loop)
+        return {**plan, "prompt": text, "next": {"kind": "preset", "preset": free[0], "left": len(free) - 1},
+                "existing": existing, "batches_max": max(1, min(len(free), room))}
+    if expander.expand(spelling.fix_text(request), (rows, cols)).get("expanded_by") == "transformation":
+        return {"complete": True, "message": "This request is one transformed character, so there are no other actions to draw: regenerate it for another take."}
+    used = ses["used_tokens"]
+    tokens = actions.next_tokens(used, rows * cols)
+    if len(tokens) < rows * cols:
+        return {"complete": True, "message": f"Every action of the {len(actions.ACTION_BANK)}-action bank is already in these batches. Start a new request, or regenerate a batch you want better."}
+    plan = _token_plan(request, (rows, cols), ses["face"], tokens, style_id, loop)
+    left = len(actions.next_tokens(used | set(tokens), 999))
+    return {**plan, "prompt": request, "next": {"kind": "actions", "tokens": tokens, "left": left},
+            "existing": existing, "batches_max": max(1, min(1 + left // (rows * cols), room))}
+
+
+def session_state(out: Path, gens) -> dict:
+    """What a Studio session already holds (`gens`: any generation of each batch on screen; every generation of their families counts): its request, grid,
+    the preset grids and bank actions it used, face mode, and how many BATCHES it has (families, not generations)."""
+    from ..flow import groups, pipeline as pl
+    from . import actions
+    seen, results, roots = set(), [], set()
     for g in gens or []:
         try:
             gid = int(str(g).upper().lstrip("G"))
+            roots.add(groups.root_of(out, gid))
             for m in groups.members(out, gid):
                 if m not in seen:
                     seen.add(m)
@@ -356,30 +384,10 @@ def next_batch(out: Path, gens, style_id: str = "flat_vector", loop: bool = Fals
     if not results:
         raise sources_error("Open a batch first: Next batch continues the batches on screen", 409)
     first = min(results, key=lambda r: r.get("number") or 0)
-    request = str(first.get("prompt") or "").strip() or str((first.get("source") or {}).get("subject", "")).replace("_", " ")
-    rows, cols = (first.get("grid") or [3, 3])[:2]
-    used_presets = {(r.get("slots") or {}).get("preset") for r in results} - {None}
-    if used_presets:
-        free = [p for p in actions.PRESETS if p not in used_presets]
-        if not free:
-            return {"complete": True, "message": f"All {len(actions.PRESETS)} preset grids of this pack are made ({9 * len(actions.PRESETS)} stickers). Start a new pack, or regenerate a batch you want better."}
-        text = f"{request} {free[0]}"
-        plan = preview(text, "3x3", style_id, False, loop)
-        return {**plan, "prompt": text, "next": {"kind": "preset", "preset": free[0], "left": len(free) - 1}}
-    if expander.expand(spelling.fix_text(request), (rows, cols)).get("expanded_by") == "transformation":
-        return {"complete": True, "message": "This request is one transformed character, so there are no other actions to draw: regenerate it for another take."}
-    used = set()
-    for r in results:
-        for s in r["stickers"]:
-            hit = actions.canonical_for(s.get("key"), s.get("tags"))
-            if hit:
-                used.add(hit[0])
-    face = any((r.get("slots") or {}).get("face") for r in results)
-    tokens = actions.next_tokens(used, rows * cols)
-    if len(tokens) < rows * cols:
-        return {"complete": True, "message": f"Every action of the {len(actions.ACTION_BANK)}-action bank is already in these batches. Start a new request, or regenerate a batch you want better."}
-    plan = _token_plan(request, (rows, cols), face, tokens, style_id, loop)
-    return {**plan, "prompt": request, "next": {"kind": "actions", "tokens": tokens, "left": len(actions.next_tokens(used | set(tokens), 99))}}
+    used = {h[0] for r in results for s in r["stickers"] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+    return {"request": str(first.get("prompt") or "").strip() or str((first.get("source") or {}).get("subject", "")).replace("_", " "),
+            "grid": tuple((first.get("grid") or [3, 3])[:2]), "used_presets": {(r.get("slots") or {}).get("preset") for r in results} - {None},
+            "used_tokens": used, "face": any((r.get("slots") or {}).get("face") for r in results), "existing": len(roots)}
 
 
 def _token_plan(request: str, grid: tuple, face: bool, tokens: list, style_id: str, loop: bool) -> dict:
@@ -413,12 +421,12 @@ def batches_max(plan: dict) -> int:
     return max(1, min(MAX_BATCHES, 1 + len(actions.next_tokens(used, 999)) // n))
 
 
-def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector", loop: bool = False) -> list[dict]:
+def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector", loop: bool = False, used_presets=(), used_tokens=()) -> list[dict]:
     """The `k` batches that follow a previewed plan in ONE Generate (Haitham, 2026-10-09: "1 batch, 2 batches, n batches"): an emoji pack's next preset
     grids (core-v1 -> social-v1 -> reactions-v1 -> daily-v1, the one shown skipped), any other request the next unused bank actions, 9 at a time. Each
     comes back with its own `prompt`; nothing is reserved or spent here (each sheet is priced and started on its own)."""
     from . import actions
-    k = max(0, min(int(k), batches_max(plan) - 1))
+    k = max(0, min(int(k), MAX_BATCHES - 1, batches_max(plan) - 1))
     if not k:
         return []
     request = str(request or "").strip()
@@ -426,11 +434,11 @@ def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector"
     if slots.get("preset") in actions.PRESETS:
         base = re.sub(r"\s*(?<![\w-])(?:" + "|".join(map(re.escape, actions.PRESETS)) + r")(?![\w-])", "", request).strip() or request
         out = []
-        for p in [x for x in actions.PRESETS if x != slots["preset"]][:k]:
+        for p in [x for x in actions.PRESETS if x != slots["preset"] and x not in set(used_presets)][:k]:      # a session's own grids are never made twice
             text = f"{base} {p}"
             out.append({**preview(text, "3x3", style_id, False, loop), "prompt": text})
         return out
-    used = {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+    used = set(used_tokens) | {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
     out = []
     for _ in range(k):
         tokens = actions.next_tokens(used, grid[0] * grid[1])

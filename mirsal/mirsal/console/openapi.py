@@ -211,7 +211,7 @@ ROUTES = [
     ("GET", "/api/vision", "Gates", "The vision judge: model and policy", None, OBJ, 200),
     ("POST", "/api/plan", "Live generation", "Preview a plan; nothing is reserved", OBJ, OBJ, 200),
     ("POST", "/api/plan/next", "Live generation", "Next batch: the next unclaimed batch of the batches on screen ({gens}) as a plan to read first, or {complete, message}; nothing is reserved or spent", OBJ, OBJ, 200),
-    ("POST", "/api/plan/more", "Live generation", "Several batches in one Generate: the plans of the n batches after a previewed one ({prompt, plan, n, style_id?, loop?}): an emoji pack's next preset grids, else the next unused bank actions. {plans, max}; nothing is reserved or spent", OBJ, OBJ, 200),
+    ("POST", "/api/plan/more", "Live generation", "Several batches in one Generate: the plans of the n batches after a previewed one ({prompt, plan, n, style_id?, loop?, gens?}): an emoji pack's next preset grids, else the next unused bank actions; with gens (a Next-batch draft) the session's own grids and actions are skipped and it never goes past batch 4. {plans, existing}; nothing is reserved or spent", OBJ, OBJ, 200),
     ("GET", "/api/generations/{id}/family", "Generations", "The batch this generation is in: {root, picked, members [{id, generation_id, n, relation, stage, ready, sheet_model}]}", None, OBJ, 200),
     ("POST", "/api/generations/{id}/pick", "Generations", "Pick this generation for its batch (one per batch, stored on the root); answers the family", None, OBJ, 200),
     ("POST", "/api/generations/{id}/pick_video", "Generations", "Make an earlier animation {sheet} of this generation current again (re-cut from its stored video, free); 409 while a video is being cut", OBJ, OBJ, 200),

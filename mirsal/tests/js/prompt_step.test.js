@@ -210,6 +210,29 @@ test('Batches: one Generate makes this batch and the next ones, each its own she
   assert.ok(runs.every(r => r[0] === 'pack' && r[1]));
 });
 
+test('Next batch counts from the session: 1 batch on screen offers 2-4, 3 batches only 4', async () => {
+  const h = load();
+  await h.api.ACT.gprompt();
+  await flush();
+  h.SES.gens = [7];
+  Object.assign(h.api.GD, { next: true, existing: 1, batches_max: 3, gens: '7' });
+  let foot = h.api.gdFoot(h.api.GD, 'sheet');
+  assert.deepEqual([...foot.matchAll(/data-act=gdnb data-n=\d+ aria-pressed=\w+ title="[^"]*">(\d)</g)].map(m => m[1]), ['2', '3', '4']);
+  assert.match(foot, /This session has 1 batch/);
+  h.api.ACT.gdnb({ dataset: { n: '3' } });                     // the "4" button: batches 2, 3 and 4
+  assert.match(h.api.gdFoot(h.api.GD, 'sheet'), />Generate 3 sheets</);
+  await h.api.ACT.gdsheet({ disabled: false });
+  const more = h.log.posts.find(([u]) => u === '/api/plan/more');
+  assert.deepEqual([more[1].n, more[1].gens], [2, ['7']], 'the session goes along, so its own grids are skipped');
+  assert.ok(h.LIVE.jobs.every(j => j.mode === 'next'), 'they join the session on screen');
+  const h3 = load();
+  await h3.api.ACT.gprompt();
+  await flush();
+  Object.assign(h3.api.GD, { next: true, existing: 3, batches_max: 1, gens: '7,8,9' });
+  foot = h3.api.gdFoot(h3.api.GD, 'sheet');
+  assert.deepEqual([...foot.matchAll(/data-act=gdnb data-n=\d+ aria-pressed=\w+ title="[^"]*">(\d)</g)].map(m => m[1]), ['4']);
+});
+
 test('one batch stays exactly as before: no plan/more call, no run key', async () => {
   const h = load();
   await h.api.ACT.gprompt();

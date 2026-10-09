@@ -1777,8 +1777,13 @@ def make_handler(c: Console):
                 return self._json(200, tasks.next_batch(c.out, body.get("gens") or [], body.get("style_id", "flat_vector"), bool(body.get("loop"))))
             if path == "/api/plan/more":  # the batches after the previewed one, for a multi-batch Generate (nothing is reserved or spent here)
                 plan = body.get("plan") if isinstance(body.get("plan"), dict) else {}
-                plans = tasks.more_batches(str(body.get("prompt") or ""), plan, int(body.get("n") or 0), body.get("style_id", "flat_vector"), bool(body.get("loop")))
-                return self._json(200, {"plans": plans, "max": tasks.batches_max(plan)})
+                n, ses = int(body.get("n") or 0), None
+                if body.get("gens"):              # a Next-batch draft: the session's own grids and actions are skipped, and it never goes past MAX_BATCHES batches
+                    ses = tasks.session_state(c.out, body["gens"])
+                    n = min(n, tasks.MAX_BATCHES - ses["existing"] - 1)
+                plans = tasks.more_batches(str(body.get("prompt") or ""), plan, n, body.get("style_id", "flat_vector"), bool(body.get("loop")),
+                                           **({"used_presets": ses["used_presets"], "used_tokens": ses["used_tokens"]} if ses else {}))
+                return self._json(200, {"plans": plans, "existing": ses["existing"] if ses else 0})
             if path == "/api/plan":      # preview only: nothing is reserved
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
