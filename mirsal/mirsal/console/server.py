@@ -1936,6 +1936,9 @@ def make_handler(c: Console):
                     return self._json(200, batches.restore(c.out, gid))
                 if parts[3] == "join":           # Add to group / drag onto a batch: this batch's family goes under the family of `to` (the target is the parent; flow/groups.py)
                     return self._json(200, groups.join(c.out, gid, int(str(body.get("to") or "0").upper().lstrip("G") or 0), by=self.user.get("id") or "human"))
+                if parts[3] == "pack":           # Earlier batches' drag and drop: this batch becomes another batch of the pack of `to` (to null: out of it again; flow/groups.set_pack)
+                    to_ = body.get("to")
+                    return self._json(200, groups.set_pack(c.out, gid, int(str(to_).upper().lstrip("G")) if to_ else None, by=self.user.get("id") or "human"))
                 if parts[3] == "leave":          # out of its family again: its own root
                     return self._json(200, groups.leave(c.out, gid, by=self.user.get("id") or "human"))
                 if parts[3] == "pick":           # the ONE generation its batch is animated and packed from (flow/groups.pick)

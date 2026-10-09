@@ -37,6 +37,7 @@ function load(route = 'library') {
     esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
     titleCase: s => s.replace(/(^|\s)([a-z])/g, (_, a, b) => a + b.toUpperCase()),
     ago: () => '2 d ago',
+    ic: n => `<svg data-i=${n}></svg>`,
     SES: { gens: [] },
     HB: { items: [], more: false, total: 0, loaded: true },
     route_: route,
@@ -44,8 +45,8 @@ function load(route = 'library') {
     histCol: () => { sandbox.calls.col++; },
     spSecDraw: () => { sandbox.calls.sec++; },
   };
-  const body = ['const histTitle=', 'const histInfo=', 'const histThumb=', 'const histVars=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
-  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histThumb,histRow,histColHTML,drawHist};')(...Object.values(sandbox));
+  const body = ['const histTitle=', 'const histInfo=', 'const histThumb=', 'const histVars=', 'const histBatches=', 'const histAll=', 'const histShown=', 'const histPackTitle=', 'const histEntry=', 'const histRow=', 'function histColHTML', 'function drawHist'].map(statement).join('\n');
+  const api = new Function(...Object.keys(sandbox), body + '\nreturn {histThumb,histRow,histEntry,histColHTML,drawHist};')(...Object.values(sandbox));
   return { ...sandbox, ...api, env: sandbox };          // env: the globals the statements closed over (mutate them, not the copy)
 }
 
@@ -78,7 +79,7 @@ test('the row says which batch it is; when the first cell has no picture the nex
 test('a row is one button that presents the batch; the batch the Studio presents is marked', () => {
   const hx = load();
   const it = BATCH([3, 3]);
-  assert.match(hx.histRow(it), /^<div class=lv-hfam draggable=true data-hid=5><button class="lv-hrow" data-act=hopen data-id=5 aria-pressed=false/, 'one button in a draggable entry (drop it on another batch to join its group)');
+  assert.match(hx.histRow(it), /^<div class=lv-hfam draggable=true data-hid=5 title="[^"]*"><button class="lv-hrow" data-act=hopen data-id=5 aria-pressed=false/, 'one button in a draggable entry (drop it on another batch to join its group)');
   hx.SES.gens = [5];
   assert.match(hx.histRow(it), /class="lv-hrow on"[^>]*aria-pressed=true/);
   hx.SES.gens = [6];
@@ -120,8 +121,22 @@ test('a family is ONE plain entry in Earlier batches (no strip); its generations
   const fam = { ...root, variants: [root, edit] };
   hx.env.SES.gens = [105];
   const row = hx.histRow(fam);
-  assert.match(row, /^<div class=lv-hfam draggable=true data-hid=104><button class="lv-hrow on" data-act=hopen data-id=105/, 'the entry opens the variation in view');
+  assert.match(row, /^<div class=lv-hfam draggable=true data-hid=104 title="[^"]*"><button class="lv-hrow on" data-act=hopen data-id=105/, 'the entry opens the variation in view');
   assert.match(row, /<b>Superhero Dubai<\/b>/, 'the parent\'s title');
   assert.match(row, /· 2 variations<\/small>/);
   assert.doesNotMatch(row, /lv-hvar|gvar|data-act=hleave|›/, 'no strip in the column');
 });
+
+test('a pack is ONE entry with its batches under it, Batch 1 … n; the head opens them all, each batch is draggable and can be taken out', () => {
+  const hx = load();
+  const b = (id, prompt) => ({ ...BATCH([3, 3]), id, generation_id: `G${id}`, prompt });
+  const h = hx.histEntry({ ...b(123, 'generic emojis core-v1'), batches: [b(123, 'generic emojis core-v1'), b(122, 'generic emojis social-v1')] });
+  assert.match(h, /data-act=hopenpack data-ids="123,122"/);
+  assert.match(h, /<b>Generic Emojis<\/b><small>2 batches · 18 stickers/, 'the pack title has no grid name');
+  assert.match(h, /Batch 1 · /);
+  assert.match(h, /Batch 2 · /);
+  assert.equal((h.match(/data-act=hunpack/g) || []).length, 2);
+  assert.equal((h.match(/draggable=true data-hid=/g) || []).length, 2, 'every batch can be dragged onto another entry');
+  assert.equal(hx.histEntry(b(5, 'one')), hx.histRow(b(5, 'one')), 'a pack of one batch is the plain row');
+});
+

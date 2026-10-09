@@ -271,12 +271,12 @@ setInterval(()=>{egSync();applyEdgePreview()},800);       // egSync leaves the s
    over what is already loaded (nothing that was loaded is dropped). */
 const HB={items:[],more:false,total:0,loading:false,page:50,loaded:false,tried:false,sig:''};
 const ago=ts=>{if(!ts)return'';const s=Math.max(0,Date.now()/1000-ts);return s<90?'just now':s<5400?Math.round(s/60)+' min ago':s<129600?Math.round(s/3600)+' h ago':s<2592000?Math.round(s/86400)+' d ago':new Date(ts*1000).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'})};
-const hbSig=()=>HB.items.map(x=>[x.id,x.edited,x.ready,x.animated].join(':')).join(',')+'|'+HB.total;
+const hbSig=()=>HB.items.map(x=>[x.id,x.edited,x.ready,x.animated,histBatches(x).map(b=>b.id).join('+')].join(':')).join(',')+'|'+HB.total;
 async function histLoad(more,quiet){if(HB.loading)return;HB.loading=true;
   const r=await api(`/api/history?offset=${more?HB.items.length:0}&limit=${HB.page}`);HB.loading=false;
   if(r.ok){
     if(more){const seen=new Set(HB.items.map(x=>x.id));HB.items=HB.items.concat(r.j.items.filter(x=>!seen.has(x.id)))}
-    else{const fresh=new Set(r.j.items.flatMap(x=>[x.id,...(x.variants||[]).map(v=>v.id)]));HB.items=   /* a batch that joined a group is now a variation of a fresh row: its old row goes */r.j.items.concat(HB.items.filter(x=>!fresh.has(x.id)))}
+    else{const fresh=new Set(r.j.items.flatMap(histBatches).flatMap(x=>[x.id,...(x.variants||[]).map(v=>v.id)]));HB.items=   /* a batch that joined a group is now a variation of a fresh row: its old row goes */r.j.items.concat(HB.items.filter(x=>!fresh.has(x.id)))}
     HB.total=r.j.total;HB.more=HB.items.length<HB.total;HB.loaded=true}
   const sig=hbSig(),same=sig===HB.sig;HB.sig=sig;
   if(!(quiet&&same)){drawHist();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()}}
@@ -301,19 +301,43 @@ const histThumb=it=>{const c=(it.cells||[]).find(x=>x.png);return`<span class=lv
    Any entry can be dragged onto another: the one dropped on is the parent (POST /api/generations/{id}/join). The generations themselves are chosen in the Studio, in each batch's
    generations row (generate.js gensHtml), not in this column (Haitham, 2026-10-08). */
 const histVars=it=>(it.variants&&it.variants.length?it.variants:[it]);
-const histRow=it=>{const vs=histVars(it),cur=vs.find(v=>SES.gens.includes(v.id)),on=!!cur,shown=cur||vs[vs.length-1];
-  return`<div class=lv-hfam draggable=true data-hid=${it.id}><button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${shown.id} aria-pressed=${on} title="Show ${esc(shown.generation_id)} in the Studio">${histThumb(shown)}<span class=lv-hmeta><b>${histTitle(it)}</b><small>${histInfo(shown)}${vs.length>1?` · ${vs.length} variations`:''}</small></span>${shown.kind==='particles'?`<span class=lv-pbadge title="Particles: no sticker owns them. Use, render and export them as they are">${ic('fx')}</span>`:''}</button></div>`};
+/* a pack (pipeline._packs: one request's batches by one person, or batches dropped onto it) is ONE entry of the column with its batches under it, Batch 1 … n
+   (an emoji pack in grid order). histBatches = the batches of an entry; histAll = every generation of every batch of the column. */
+const histBatches=it=>(it.batches&&it.batches.length?it.batches:[it]);
+const histAll=()=>HB.items.flatMap(histBatches).flatMap(histVars);
+const histShown=b=>{const vs=histVars(b);return vs.find(v=>SES.gens.includes(v.id))||vs[vs.length-1]};
+const histPackTitle=it=>String(it.prompt||'').replace(/\s*\b(core|social|reactions|daily)[\s_-]?v1\b/gi,'');
+const histEntry=it=>{const bs=histBatches(it);if(bs.length<2)return histRow(bs[0]);
+  const on=bs.some(b=>histVars(b).some(v=>SES.gens.includes(v.id))),n=bs.reduce((a,b)=>a+(histShown(b).ready||0),0);
+  return`<div class="lv-hpack${on?' on':''}"><button class=lv-hphead data-act=hopenpack data-ids="${bs.map(b=>histShown(b).id).join(',')}" title="Open the whole pack in the Studio: every batch, one under the other">${histThumb(histShown(bs[0]))}<span class=lv-hmeta><b>${histTitle({prompt:histPackTitle(it)})}</b><small>${bs.length} batches · ${n} stickers · edited ${ago(it.edited||it.created)}</small></span></button>
+   <div class=lv-hpbs>${bs.map((b,k)=>histRow(b,k+1,true)).join('')}</div></div>`};
+const histRow=(it,k,inPack)=>{const vs=histVars(it),cur=vs.find(v=>SES.gens.includes(v.id)),on=!!cur,shown=cur||vs[vs.length-1];
+  return`<div class=lv-hfam draggable=true data-hid=${it.id} title="Drag it onto another entry to put it in that pack">${inPack?`<button class="link lv-hout" data-act=hunpack data-id=${it.id} title="Take this batch out of the pack">${ic('x')}</button>`:''}<button class="lv-hrow${on?' on':''}" data-act=hopen data-id=${shown.id} aria-pressed=${on} title="Show ${esc(shown.generation_id)} in the Studio">${histThumb(shown)}<span class=lv-hmeta><b>${k?`Batch ${k} · `:''}${histTitle(it)}</b><small>${histInfo(shown)}${vs.length>1?` · ${vs.length} variations`:''}</small></span>${shown.kind==='particles'?`<span class=lv-pbadge title="Particles: no sticker owns them. Use, render and export them as they are">${ic('fx')}</span>`:''}</button></div>`};
 async function histJoin(id,to){if(!id||!to||id===to)return;const r=await post(`/api/generations/${id}/join`,{to});if(!r.ok)return toast(r.j.error||'Could not add it to the group',1);
   toast(`Added to ${r.j.root}'s group`);HB.items=HB.items.filter(x=>x.id!==id);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)}
+/* drag and drop in the column (Haitham, 2026-10-09): the dropped batch becomes ANOTHER BATCH of the pack it was dropped on (POST …/pack, flow/groups.set_pack),
+   never a regeneration of it; the x on a batch of a pack takes it out again (a pack of its own) */
+async function histPack(id,to){if(!id||!to||id===to)return;const r=await post(`/api/generations/${id}/pack`,{to});if(!r.ok)return toast(r.j.error||'Could not move it',1);
+  toast(`${r.j.id} is in the pack now`);histLoad(false)}
+ACT.hunpack=async el=>{const r=await post(`/api/generations/${el.dataset.id}/pack`,{to:null});if(!r.ok)return toast(r.j.error||'Could not take it out',1);toast(`${r.j.id} is a pack of its own now`);histLoad(false)};
+ACT.hopenpack=el=>{const ids=String(el.dataset.ids||'').split(',').map(Number).filter(Boolean),first=histAll().find(x=>x.id===ids[0]);if(!first)return;
+  gdHide();SES={prompt:first.prompt||'',gens:ids,off:[],pack:''};saveSes();GS.tab='stickers';glast='';MD=null;
+  for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
+  if(location.hash!=='#/studio')location.hash='#/studio';if(typeof tick==='function')tick(true);drawHist();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()};
 ACT.hleave=async el=>{const r=await post(`/api/generations/${el.dataset.id}/leave`,{});if(!r.ok)return toast(r.j.error||'Could not take it out',1);toast(`${r.j.id} is on its own again`);histLoad(false);if(typeof spSecSync==='function')spSecSync(true)};
 if(typeof document!=='undefined'&&document.addEventListener){
   document.addEventListener('dragstart',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;ev.dataTransfer.setData('text/x-mirsal-batch',f.dataset.hid);ev.dataTransfer.effectAllowed='move'});
-  document.addEventListener('dragover',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f||!ev.dataTransfer.types.includes('text/x-mirsal-batch'))return;ev.preventDefault();f.classList.add('drop')});
-  document.addEventListener('dragleave',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(f)f.classList.remove('drop')});
-  document.addEventListener('drop',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;const id=ev.dataTransfer.getData('text/x-mirsal-batch');if(!id)return;ev.preventDefault();f.classList.remove('drop');histJoin(+id,+f.dataset.hid)})}
+  /* `hdrop`, never `drop`: `.drop` is the upload area's style (300 px tall), which made the entry under the pointer jump (2026-10-09). The highlight goes only when the
+     pointer really leaves the entry, not when it crosses one of its children. */
+  document.addEventListener('dragover',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f||!ev.dataTransfer.types.includes('text/x-mirsal-batch'))return;ev.preventDefault();ev.dataTransfer.dropEffect='move';
+    document.querySelectorAll('.hdrop').forEach(x=>{if(x!==f)x.classList.remove('hdrop')});f.classList.add('hdrop')});
+  document.addEventListener('dragleave',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(f&&!(ev.relatedTarget&&f.contains(ev.relatedTarget)))f.classList.remove('hdrop')});
+  document.addEventListener('dragend',()=>document.querySelectorAll('.hdrop').forEach(x=>x.classList.remove('hdrop')));
+  document.addEventListener('drop',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;const id=ev.dataTransfer.getData('text/x-mirsal-batch');if(!id)return;ev.preventDefault();
+    document.querySelectorAll('.hdrop').forEach(x=>x.classList.remove('hdrop'));histPack(+id,+f.dataset.hid)})}
 /* the column: a title and the whole list, newest edit first; the next page is asked for when the list is scrolled near its end (no "Load more") */
 function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
-  <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histRow).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div><div class=c2rem id=c2rem></div>`}
+  <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histEntry).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div><div class=c2rem id=c2rem></div>`}
 /* the trash of batches (GET /api/generations/removed, owner only): Restore puts a batch back under its own number; the list is empty (and hidden) for anyone else */
 const REM={items:[],tried:false};
 async function remLoad(){const r=await api('/api/generations/removed');REM.items=r.ok?r.j.batches:[];REM.tried=true;remDraw()}
@@ -339,14 +363,14 @@ ACT.grestore=async el=>{const r=await post(`/api/generations/${el.dataset.n}/res
 function histCol(){const c2=document.getElementById('col2');if(!c2)return;
   if(!c2.querySelector('#c2hist')||c2.dataset.k!=='batches'){c2.dataset.k='batches';c2.innerHTML=histColHTML();const l=document.getElementById('c2hist');
     l.addEventListener('scroll',()=>{if(HB.more&&!HB.loading&&l.scrollTop+l.clientHeight>l.scrollHeight-320)histLoad(true)})}
-  else{const l=document.getElementById('c2hist'),top=l.scrollTop;c2.querySelector('.c2n').textContent=HB.loaded?`${HB.total} in total`:'';l.innerHTML=HB.items.map(histRow).join('')||l.innerHTML;l.scrollTop=top}
+  else{const l=document.getElementById('c2hist'),top=l.scrollTop;c2.querySelector('.c2n').textContent=HB.loaded?`${HB.total} in total`:'';l.innerHTML=HB.items.map(histEntry).join('')||l.innerHTML;l.scrollTop=top}
   if(!REM.tried){REM.tried=true;remLoad()}else remDraw();
   if(!HB.loaded){if(!HB.tried){HB.tried=true;histLoad(false)}}
   else{const l=document.getElementById('c2hist');if(HB.more&&!HB.loading&&l.scrollHeight<=l.clientHeight+320)histLoad(true)}}
 /* the column is redrawn here; under the Studio's view the batch's Particles section is drawn by particles.js (spSecDraw) */
 function drawHist(){if(['generate','create'].includes(route_))histCol();if(typeof spSecDraw==='function')spSecDraw()}
 /* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio, as does a row of the Earlier-batches column */
-ACT.hopen=el=>{const it=HB.items.flatMap(histVars).find(x=>x.id===+el.dataset.id);if(!it)return;
+ACT.hopen=el=>{const it=histAll().find(x=>x.id===+el.dataset.id);if(!it)return;
   if(it.kind==='particles'&&typeof spOpenBatch==='function')setTimeout(()=>spOpenBatch(it.generation_id||it.id));     /* a particle batch opens on its set (particles.js) */
   gdHide();
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;

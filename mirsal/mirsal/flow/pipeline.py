@@ -1385,16 +1385,79 @@ def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
         except OSError:
             continue
     fams = groups.families(out, list(edited_at))
-    order = sorted(fams, key=lambda r: (max(edited_at[g] for g in fams[r]), r), reverse=True)
+    packs = _packs(out, fams)
+    order = sorted(packs, key=lambda p: (max(edited_at[g] for r in packs[p] for g in fams[r]), p), reverse=True)
     offset, limit = max(0, int(offset)), max(1, min(int(limit), 50))
     items = []
-    for root in order[offset:offset + limit]:
-        try:
-            variants = [_history_item(out, g, edited_at[g]) for g in fams[root]]
-        except Exception:
-            continue
-        items.append({**variants[0], "edited": max(v["edited"] for v in variants), "variants": variants})
+    for pid in order[offset:offset + limit]:
+        batches = []
+        for root in packs[pid]:
+            try:
+                variants = [_history_item(out, g, edited_at[g]) for g in fams[root]]
+            except Exception:
+                continue
+            batches.append({**variants[0], "edited": max(v["edited"] for v in variants), "variants": variants})
+        if batches:
+            items.append({**batches[0], "edited": max(b["edited"] for b in batches), "batches": batches})
     return {"items": items, "more": offset + limit < len(order), "total": len(order)}
+
+
+PACK_GAP_S = 6 * 3600     # batches of one request made within this of the previous one are one pack in Earlier batches
+
+
+def _packs(out: Path, fams: dict) -> dict:
+    """The batches of ONE pack, as Earlier batches shows them (Haitham, 2026-10-09: Next batch and a multi-batch Generate make separate batches of one pack,
+    and the column showed them apart). Derived when read, nothing stored: families of the same request (its preset grid name left out,
+    `actions.strip_presets`) by the same person, each made within PACK_GAP_S of the previous one, are one pack. Within a pack an emoji pack's batches are in
+    grid order (core 1-9, social 10-18, reactions 19-27, daily 28-36), any other in the order they were made. {pack id (its first root): [family roots]}."""
+    from ..generation import actions
+    info, linked = {}, {}            # linked: an explicit link (dropped on another batch in Earlier batches, groups.set_pack) beats the derived grouping
+    for root in fams:
+        try:
+            r = read_result(out, root)
+        except Exception:
+            info[root] = (None, root, 0.0, None)
+            continue
+        key = (r.get("owner", "local"), actions.strip_presets(str(r.get("prompt") or "")).strip().lower())
+        info[root] = (key if key[1] else None, root, float(r.get("created") or 0), (r.get("slots") or {}).get("preset"))
+        link = str(r.get("pack") or "").upper().lstrip("G")
+        if link.isdigit():
+            linked[root] = int(link)
+    grid = {k: i for i, k in enumerate(actions.PRESETS)}
+    out_packs, last = {}, {}
+    for root in sorted(fams, key=lambda x: (info[x][2], x)):
+        key, _, created, _ = info[root]
+        prev = last.get(key) if key else None
+        if prev and created - prev[1] <= PACK_GAP_S:
+            out_packs[prev[0]].append(root)
+            last[key] = (prev[0], created)
+        else:
+            out_packs[root] = [root]
+            if key:
+                last[key] = (root, created)
+    where = {r: pid for pid, roots in out_packs.items() for r in roots}
+    for root, to in linked.items():
+        if to == root:                                   # taken out on purpose: a pack of its own
+            pid = where[root]
+            if len(out_packs[pid]) > 1:
+                rest = [x for x in out_packs.pop(pid) if x != root]
+                out_packs[rest[0]] = rest                # the others stay one pack, under their first batch
+                for x in rest:
+                    where[x] = rest[0]
+                out_packs[root] = [root]
+                where[root] = root
+            continue
+        dest = where.get(to)
+        if dest is None or dest == where.get(root):
+            continue
+        out_packs[where[root]].remove(root)
+        if not out_packs[where[root]]:
+            del out_packs[where[root]]
+        out_packs[dest].append(root)
+        where[root] = dest
+    for pid, roots in out_packs.items():
+        roots.sort(key=lambda x: (grid.get(info[x][3], 99) if info[x][3] else 99, info[x][2], x))
+    return out_packs
 
 
 def summary(out: Path) -> list[dict]:

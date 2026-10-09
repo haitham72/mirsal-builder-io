@@ -149,6 +149,7 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `POST /api/plan/more` | {prompt, plan, n, style_id?, loop?, gens?} | 200 {plans, existing} | any signed-in person | no |
 | `GET /api/generations/{id}/family` | — | 200 {root, picked, members} | visible batch | no |
 | `POST /api/generations/{id}/pick` | {} | 200 family | visible batch | no |
+| `POST /api/generations/{id}/pack` | {to: G### or null} | 200 {id, root, pack} | visible batch | no |
 | `POST /api/generations/{id}/pick_video` | {sheet} | 200 {picked, changed, was}; 409 while cutting | visible batch | no |
 | `POST /api/generations/{id}/remove_video` | {sheet} | 200 {removed}; 409 the one in use | visible batch | no |
 | `GET /api/tasks` | — | 200 object (open; operation detail) | owner | no |

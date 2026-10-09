@@ -215,3 +215,28 @@ def hand_over(out: Path, plan: dict | None, by: str = "human") -> dict | None:
             res["picked"] = f"G{plan['main']:03d}"
         pl.write_result(out, m, res)
     return {"root": f"G{new_root:03d}", "members": [f"G{m:03d}" for m in plan["others"]]}
+
+
+@pl.serialized
+def set_pack(out: Path, gid: int, to: int | None, by: str = "human") -> dict:
+    """Earlier batches' drag and drop (Haitham, 2026-10-09): put batch `gid` (its whole family) into the PACK of batch `to` as another batch of it, or with
+    `to=None` take it out (a pack of its own, even beside batches of the same request). Stored on the family root as `pack` (+ `pack_history`): an explicit link beats the
+    derived grouping (pipeline._packs). A batch dropped on itself or its own pack changes nothing. Free and reversible; never a regeneration (that is `join`)."""
+    gid = int(gid)
+    if not _alive(out, gid):
+        raise pl.PipelineError(f"G{gid:03d} is not a batch on disk", 404)
+    root = root_of(out, gid)
+    target = None
+    if to is not None:
+        to = int(to)
+        if not _alive(out, to):
+            raise pl.PipelineError(f"G{to:03d} is not a batch on disk", 404)
+        target = root_of(out, to)
+        if target == root:
+            raise pl.PipelineError("That is the same batch", 409)
+    res = pl.read_result(out, root)
+    res["pack"] = f"G{(target if target is not None else root):03d}"        # out of a pack = a link to itself, so the derived grouping does not pull it back in
+    res.setdefault("pack_history", []).append({"ts": round(time.time(), 3), "actor": by, "decision": "PACK" if target is not None else "UNPACK",
+                                               "to": res["pack"], "via": f"G{gid:03d}"})
+    pl.write_result(out, root, res)
+    return {"id": f"G{gid:03d}", "root": f"G{root:03d}", "pack": res["pack"]}

@@ -348,6 +348,17 @@ Earlier batches (`GET /api/history`) lists **families**: one plain entry with th
 
 **The Library follows the groups (Haitham, 2026-10-05).** `GET /api/library` gives each pack a `group` (`"G104"`, the family root; `null` when none): the family most of its stickers came from (`source.generation`), and only when that family has more than one pack (`groups.pack_groups`, a pure read, so a join or leave in the Studio shows at the next read). The Packs column shows a group as one row (its first pack, "N packs · group G104") with a fold that lists the others (`app.js` `packEntries`, `pkgrp`); My Packs frames the group's packs together. Packs themselves are unchanged: grouping never moves or merges stickers.
 
+**Packs in Earlier batches (2026-10-09).** Above families there is the PACK: the batches of one pack (Next batch, a multi-batch Generate) are separate families,
+and the column showed them apart. `pipeline._packs` derives it when the column is read, nothing migrated: families of the same request (grid names left out,
+`actions.strip_presets`) by the same person, each made within `PACK_GAP_S` (6 h) of the previous one, are ONE pack; an emoji pack's batches are in grid order
+(core 1-9, social 10-18, reactions 19-27, daily 28-36). `GET /api/history` pages by pack: an item is its first batch's family item plus `batches[]` (each a
+family item with its `variants`). The column draws a pack as one entry, its head (title without the grid name, "N batches · M stickers") opens every batch
+of it in the Studio, and its batches sit under it as **Batch 1 … n**. **Drag and drop moves a batch between packs**: drop a batch on any entry and it becomes
+another batch of that entry's pack (`POST /api/generations/{id}/pack {to}`, `groups.set_pack`, stored as `pack` + `pack_history` on the family root; an
+explicit link beats the derived grouping); the x on a batch of a pack takes it out (`{to: null}` stores a link to itself, so the derived grouping does not
+pull it back). It is never a regeneration (that is `join`, the Studio's Add to group). The drop highlight is `hdrop` (the old `drop` class was the upload
+area's 300 px style, which made the entry under the pointer jump).
+
 ## Emptying the trash: the purge of batches and packs (`flow/purge.py`, 2026-10-03)
 
 Remove batch, Delete pack and a deleted particle set are soft. What empties the trash is **Settings > Trash** (`console/trash.js`, a card on the Settings screen, no new screen): `GET /api/trash` lists every removed batch and deleted pack with exactly what a purge would remove, Restore sits on each row, *Delete for good* has a plain confirm per item, *Delete all (N)* a typed one (`purge N`, checked again by the server against the trash as it is then). Routes: `docs/api.md` "Trash and purge". Particle sets are not part of the purge yet.
