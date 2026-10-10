@@ -1,4 +1,4 @@
-/* The welcome modal: shown once when the app is first opened in a browser session, and again whenever the Mirsal logo (the home button) is pressed.
+/* The welcome modal: shown once when the app is first opened in a browser session, and again from Home's "Watch the film" (home.js; the Mirsal logo opens Home).
    Page 0 is a fast-cut ad film (Seedance 2.5, /assets/welcome/welcome.mp4), pages 1-4 are the features as sliding images (Nano Banana 2): stickers from one idea, stickers that move,
    emoji particle bursts, the AI chat. The slides are data (WL_SLIDES), the markup is built by pure functions. Nothing here talks to the server except the assets; the files are real files
    under console/assets/welcome/ (a missing one just leaves the soft gradient behind the text, the modal still works). docs/onboarding.md has the prompts that made the media. */
@@ -65,9 +65,6 @@ ACT.wlgo=el=>{const to=el.dataset.to;wlClose();location.hash='#/'+to};
 ACT.wlplay=()=>{const v=$('wl-v');if(!v)return;WL.auto=false;v.paused?v.play().catch(()=>0):v.pause();wlPP()};
 ACT.wlsound=()=>{const v=$('wl-v');WL.needTap=false;WL.muted=!WL.muted;if(v){v.muted=WL.muted;if(!WL.muted&&v.paused)v.play().catch(()=>0)}wlPP()};
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='wl-off')wlSet(localStorage,WL_OFF,e.target.checked?'1':'0')});     // not a data-act: the click handler's preventDefault would undo the tick
-/* the home button: the Mirsal logo goes to a clean AI screen and opens the welcome again */
-ACT.home=()=>{const there=route_==='agent'&&$('s-agent').dataset.ready;if(there&&typeof ACT.agnew==='function')ACT.agnew();
- else{try{localStorage.setItem('mirsal.ai.sid','')}catch(e){}if(typeof A!=='undefined'){A.sid=null;A.sess=null}location.hash='#/agent'}wlOpen()};
 document.addEventListener('keydown',e=>{if(!WL.open)return;if(e.key==='Escape'){e.stopPropagation();wlClose()}else if(e.key==='ArrowRight')wlStep(1);else if(e.key==='ArrowLeft')wlStep(-1);
  else if(e.key===' '&&WL.i===0&&!/button|input/i.test((document.activeElement||{}).tagName||'')){e.preventDefault();ACT.wlplay()}},true);
 document.addEventListener('click',e=>{if(WL.open&&e.target.id==='welcome')wlClose()});

@@ -1,5 +1,5 @@
 """The welcome modal: the files it shows are served with Range (a browser seeks and loops a video through it), nothing outside its folder is, the page loads its script, and the
-Mirsal logo is the home button. The modal's own markup is tested in tests/js/welcome.test.js."""
+Mirsal logo is the home button (it opens Home, home.js, which can open the film again). The modal's own markup is tested in tests/js/welcome.test.js."""
 import http.client
 import shutil
 import tempfile
@@ -56,11 +56,15 @@ class WelcomeTests(unittest.TestCase):
         self.assertIn(b"<div id=welcome>", html)
         self.assertEqual(self.get("/ui/welcome.js")[0], 200)
         self.assertIn("data-act=home", (UI / "app.js").read_text(encoding="utf-8"))
+        self.assertIn(b"/ui/home.js", html)
+        self.assertEqual(self.get("/ui/home.js")[0], 200)
 
     def test_the_session_and_home_rules(self):
         js = (UI / "welcome.js").read_text(encoding="utf-8")
         self.assertIn("sessionStorage,WL_SEEN", js, "the first open of a browser session")
-        self.assertIn("ACT.home=", js)
+        self.assertNotIn("ACT.home=", js, "the logo opens Home: home.js owns ACT.home")
+        self.assertIn("ACT.home=", (UI / "home.js").read_text(encoding="utf-8"))
+        self.assertIn("wlOpen()", (UI / "home.js").read_text(encoding="utf-8"), "Home's Watch the film opens the welcome")
         self.assertIn("ACT.wlclose", js)
         self.assertIn("Escape", js)
 
