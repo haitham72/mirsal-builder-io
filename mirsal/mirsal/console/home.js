@@ -3,6 +3,11 @@
    every card opens the real pack, every shortcut opens the real screen (docs/design.md "Home"). */
 'use strict';
 const HM={q:'',filter:'all'};
+/* the first start of a browser session opens Home, whatever screen the tab or bookmark was on (#/agent was the old first screen); the welcome film opens over
+   it (welcome.js wlAuto). A link to one thing (#/pack/<id>, #/agent/S012) still opens that thing. Runs before the first route() (animate.js) */
+const hmFirstStart=(store,hash)=>{try{if(store.getItem('mirsal.home.seen')==='1')return false;store.setItem('mirsal.home.seen','1')}catch(e){return false}
+ return!hash.replace(/^#\/?/,'').includes('/')};
+try{if(hmFirstStart(sessionStorage,location.hash))history.replaceState(null,'','#/home')}catch(e){}
 const HM_TINTS=['ice','lilac','cream','lavender','mint','rose','sand','green'];
 /* what a pack is, for the filters and the card's subtitle (pure) */
 const hmPackInfo=p=>{const st=p.stickers||[],animated=st.filter(s=>s.type==='animated').length,particles=st.some(s=>Array.isArray(s.particles)&&s.particles.length);

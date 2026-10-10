@@ -72,3 +72,12 @@ test('a filter redraws the gallery; the logo opens Home', async () => {
   const app = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'app.js'), 'utf8');
   assert.match(app, /\|\|'home'/, 'an empty hash opens Home');
 });
+
+test('the first start of a session opens Home from any screen, once; a link to one thing keeps it', () => {
+  const run = load();
+  const first = h => run(`(()=>{const m={};const s={getItem:k=>m[k]||null,setItem:(k,v)=>{m[k]=v}};return [hmFirstStart(s,${JSON.stringify(h)}),hmFirstStart(s,${JSON.stringify(h)})].join()})()`);
+  assert.equal(first('#/agent'), 'true,false', 'the old first screen goes to Home, and only on the first start');
+  assert.equal(first(''), 'true,false');
+  assert.equal(first('#/pack/20b742ee'), 'false,false', 'a deep link is kept');
+  assert.equal(run(`hmFirstStart({getItem(){throw 0}},'')`), false, 'no storage: the hash decides, as before');
+});
