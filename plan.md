@@ -4,6 +4,16 @@ What an LLM does next. The stages (Prompt · Emojis · Animation · Export) and 
 the architecture is in `docs/agent-and-chat.md` "Stages and the batch follow-up". Read `CLAUDE.md` first; test budget: `docs/testing.md` (one narrowest
 run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when it is built; delete this file when the plan is done.
 
+## The redesign (branch `edit-design`, 2026-10-10) — waits for Haitham and an outside review
+
+`docs/redesign_plan.md` is the spec (read it whole, with `docs/architecture.md` and `docs/ui_inventory.md`). Next, in order:
+1. **Haitham answers D1-D7** (`docs/redesign_plan.md` §7) and an outside LLM reviews the plan against §9 of that file. Fold the answers and the
+   review into the plan before building.
+2. **Phase 1 — tokens and shell** (§5), then the phases in order: one session at a time, Opus on medium effort, one commit per phase, the
+   inventory test green (`python -m unittest tests.test_ui_inventory`) with `renamed` / `retired` filled for anything that moved or left.
+
+The journey bar of phase 2 is the slider Step 0 below asks for (item 2); on this branch, build it there instead of a separate slider.
+
 ## Step 0 — Haitham does not see the selector (2026-10-09, FIRST)
 
 Haitham: "I still don't see a slider from 'prompt' all the way to 'export to API' at all." Three gaps between what he expects and what was built:
