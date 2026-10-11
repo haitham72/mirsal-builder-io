@@ -14,6 +14,7 @@ try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.ou
   const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens.filter(g=>Number.isInteger(g)&&g>0),off:s.off||[],pack:s.pack||'',...(s.run?{run:s.run}:{})}}catch(e){}      // a saved [null] / NaN (the old hopen clash) must not fire a 400 at every load
 const gstore=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 try{const v=localStorage.getItem('mirsal.view');if(['stickers','sheet','both'].includes(v))GS.view=v}catch(e){}
+try{GS.screen=localStorage.getItem('mirsal.screen')==='1'}catch(e){}
 const saveSes=()=>gstore('mirsal.session',JSON.stringify(SES));
 const wait=ms=>new Promise(f=>setTimeout(f,ms));
 const BGS=[['checker','Transparent'],['light','Light'],['dark','Dark'],['wall','Wallpaper']];
@@ -222,14 +223,18 @@ function tileHtml(g,t,mode){const base=`/out/${g.generation_id}/`,anim=mode==='a
     mk=mark(t,anim?'anim':'still',g),hard=mk&&!mk.accepted,kind=anim?'animation':'still',can=canAllow(g,t,kind),allowedNow=hasAllowed(g,t,kind),
     live=anim&&!off&&PVON.has(g.number)&&t.status==='READY'&&g.source.video_path&&!t.webm,blockedClip=anim&&t.webm&&t.anim_status==='FAILED',hasV=t.webm&&(t.anim_status==='READY'||blockedClip);
   let m;
-  if(!anim)m=t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" loading=lazy>`:t.status==='FAILED'?blockedBox(g,t,'still'):`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
+  const raw=!anim&&GS.screen&&g.source.grid&&g.source.sheet_copy&&g.source.sheet_size&&(g.source.grid.rects||[])[t.index-1];
+  if(raw){const [x,y,w,h]=raw,[W,H]=g.source.sheet_size;     /* "with the screen": the cell cut from the raw sheet, its green or blue screen behind the character */
+    m=`<span class=gtrawbox><span class=gtraw style="aspect-ratio:${w}/${h};${w>=h?'width:100%':'height:100%'};background-image:url('${base+g.source.sheet_copy}');background-size:${(W/w*100).toFixed(3)}% ${(H/h*100).toFixed(3)}%;background-position:${W>w?(x/(W-w)*100).toFixed(3):0}% ${H>h?(y/(H-h)*100).toFixed(3):0}%" role=img aria-label="S${t.index} on its screen"></span></span>`}
+  else if(!anim)m=t.png?`<img src="${base+t.png}?e=${t.edited_at||t.rendered_at||0}" loading=lazy>`:t.status==='FAILED'?blockedBox(g,t,'still'):`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
   else m=hasV?`<video src="${base+t.webm}" autoplay loop muted playsinline></video>`:live?`<canvas data-g=${g.number} data-pv=${t.index} width=288 height=288></canvas><span class=livebadge>live preview</span>`
     :t.anim_status==='FAILED'?blockedBox(g,t,'animation'):t.anim_status==='STALE'?`<div class="gbadmsg mut">${esc(t.anim_reason||'Animate again')}</div>`:t.status==='READY'?`<div class="gbadmsg mut">Not animated yet</div>`:t.status==='FAILED'?blockedBox(g,t,'still'):`<div class=gbadmsg>${esc(t.reason||t.status)}</div>`;
   const stg=anim?'anim':'still',op=cellOp(g,t,stg),canX=op.op!=='none'&&(anim?ap:!ap||op.op==='allow'||op.op==='unallow');
   const lines=mk?mk.issues.slice(0,2).map(i=>`<div class=giss style="--cc:${CAT[i.cat][0]}"><i></i>${esc(CAT[i.cat][1])}: ${esc(i.text)}</div>`).join(''):'';
-  return`<div class="gt ${off?'off':''} ${off||hard||blk?'nx':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}"${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index}>${m}${blockedClip?blockedAnimOverlay(g,t):hard&&!off?`<span class="isstag${can?' clk':''}" ${can?`${cellAct(g,t,stg)} title="Click to use it anyway"`:''}>${esc(CAT[mk.cat][1])}${can?' · click to use it anyway':''}</span>`:''}${off?'<span class="isstag offtag">Not in the set</span>':''}</div><span class=gem>${esc(t.emoji)}</span>
+  const pend=alPending(g,kind,t.index);
+  return`<div class="gt ${off?'off':''} ${off||hard||blk?'nx':''} ${blk?'blk':''} ${hard?'iss':mk?'issw':''}${pend!==undefined?' pend':''}"${pend!==undefined?` data-pend="${pend?'Using it…':'Taking it back…'}"`:''}${mk?` style="--cc:${CAT[mk.cat][0]};--ct:${CAT[mk.cat][2]}"`:''}><div class="gtv bg-${bg}" data-act=gopen data-g=${g.number} data-i=${t.index} title="${esc(t.key.replace(/_/g,' '))}${mk?' · '+esc(mk.issues.map(i=>CAT[i.cat][1]).join(', ')):''}">${m}${blockedClip?blockedAnimOverlay(g,t):hard&&!off?`<span class="isstag${can?' clk':''}" ${can?`${cellAct(g,t,stg)} title="Click to use it anyway"`:''}>${esc(CAT[mk.cat][1])}${can?' · click to use it anyway':''}</span>`:''}${off?'<span class="isstag offtag">Not in the set</span>':''}<div class=gtinfo aria-hidden=true><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}</div></div><span class=gem>${esc(t.emoji)}</span>
     ${canX?`<button class=gx ${cellAct(g,t,stg)} title="${cellTitle(op,t)}">${['allow','include'].includes(op.op)?ic('plus'):ic('x')}</button>`:''}
-    <div class=gcap><b>${esc(t.key.replace(/_/g,' '))}</b>${lines}${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" ${cellAct(g,t,stg)}>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${t.anim_from_previous&&t.webm?`<div class=gwarn style="color:var(--pri-d)">The animation is from the previous picture <button class="btn sm" data-act=ganimslice data-g=${g.number} data-i=${t.index}>Animate again</button></div>`:''}${allowedNow?`<div class=gwarn style="color:var(--pri-d)">allowed by you${ALW(g,kind).undo.includes(t.index)?` · <button class=link ${cellAct(g,t,stg)}>Take it back</button>`:''}</div>`:''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
+    <div class=gcap>${blk?`<div class=giss style="--cc:${CAT[mk.cat][0]}">Off by default, not added. <button class="btn sm gincl" ${cellAct(g,t,stg)}>Include anyway</button></div>`:''}${t.edited?'<div class=gwarn style="color:var(--pri-d)">edited</div>':''}${t.anim_from_previous&&t.webm?`<div class=gwarn style="color:var(--pri-d)">The animation is from the previous picture <button class="btn sm" data-act=ganimslice data-g=${g.number} data-i=${t.index}>Animate again</button></div>`:''}${allowedNow?`<div class=gwarn style="color:var(--pri-d)">allowed by you${ALW(g,kind).undo.includes(t.index)?` · <button class=link ${cellAct(g,t,stg)}>Take it back</button>`:''}</div>`:''}${off&&!mk?'<div class=gwarn>Dropped</div>':''}</div></div>`}
 ACT.ganimslice=async el=>{const r=await postWait(`/api/generations/${el.dataset.g}/animate`,{scope:'slice',index:+el.dataset.i},'Animating the sticker again…');if(!r.ok){toast(r.j.error,1);return}glast='';tick(true)};
 let GREP={g:0,i:0};
 ACT.greplace=el=>{GREP={g:+el.dataset.g,i:+el.dataset.i};let f=$('grep-file');if(!f){f=document.createElement('input');f.type='file';f.id='grep-file';f.accept='.png,.jpg,.jpeg,.webp';f.hidden=true;f.onchange=grepSend;document.body.appendChild(f)}f.click()};
@@ -258,6 +263,7 @@ function batchHtml(g,k,total,mode){
     ${gensHtml(g)}
     ${g.key_colour==='blue'?`<span class=keychip title="This sheet has a blue screen, so it was keyed as blue (and the video sheet is blue too). Nothing to do.">Blue key</span>`:''}
     ${s.prepared&&staff?`<span class=keychip title="Served from a prepared sheet in the watch folder: 0 credits, no provider call.">Prepared</span>`:''}
+    ${allowAllRow(g,mode==='anim'?'animation':'still')}
     <span class=gbact>${s.has_video||making(g)||(typeof liveReadyNow==='function'&&liveReadyNow())?'':`<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length?'':'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
     ${typeof impBatchBtn==='function'?impBatchBtn(g,mode):''}
     <button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
@@ -291,6 +297,7 @@ function gview(){
   /* the toolbar (redesign phase 5): the title, then the view (Stickers · Sheet · Both), Background, Size and ⋯ with the batch's other actions, as they were */
   return`<div class=ghead><div class=gh-title><h2>${esc(titleCase(gs[0].source.subject))}</h2><small class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}${gs[0].source.prepared?' · prepared sheet, 0 credits':''}</small></div>
     <div class=gh-tools><div class=gseg role=group aria-label="What to show">${seg('stickers','Stickers','Only the sticker tiles')}${seg('sheet','Sheet','Only the whole sheet, with its cut lines and checks')}${seg('both','Both','The sheet beside the tiles')}</div>
+    <button type=button class="btn sm gh-screen" data-act=gscreen aria-pressed=${!!GS.screen} title="${GS.screen?'Showing each sticker on its green / blue screen, cut from the raw sheet. Click to show the cut-out stickers.':'Show each sticker on its green / blue screen, as it was drawn on the raw sheet'}">${GS.screen?'Screen on':'Screen off'}</button>
     <label class=gh-bg title="Background behind the stickers"><span class=mut>Background</span><select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
     <label class=gh-size title="Tile size">${ic('lib')}<input type=range id=gsize min=130 max=420 step=10 value=${GS.tile} aria-label="Tile size"></label>
     <button class="btn sm" data-act=gnext ${s.ready&&!s.busyAnim?'':'disabled'} title="The next batch of this request that has not been made yet, as a prompt you read before anything is spent">${ic('plus')} Next batch</button>
@@ -512,6 +519,7 @@ ACT.grm=()=>{const gs=sessionGens();if(!gs.length)return;
   confirmDlg(grmText(gs),async()=>{for(const g of gs){const r=await post(`/api/generations/${g.number}/remove`,{});if(!r.ok){toast(r.j.error,1);return}}
     const gone=gs.map(g=>g.number);SES.gens=SES.gens.filter(id=>!gone.includes(id));saveSes();gone.forEach(n=>GM.delete(n));HB.items=HB.items.filter(x=>!gone.includes(x.id));
     glast='';await remLoad();histLoad(false);tick(true)},'Remove')};
+ACT.gscreen=()=>{GS.screen=!GS.screen;gstore('mirsal.screen',GS.screen?'1':'0');glast='';tick(true)};
 ACT.gvmode=el=>{GS.view=el.dataset.v;gstore('mirsal.view',GS.view);glast='';tick(true)};
 ACT.gtab=el=>{if(el.dataset.t==='particles'&&typeof ACT.spopen==='function')return ACT.spopen(el);GS.tab=el.dataset.t;glast='';tick(true)};
 
@@ -644,7 +652,6 @@ function videoPanel(g){const s=g.source,vs=cutOf(g),vi=Object.assign({},vs&&vs.v
   return`${animRow(g)}${videoBox(g,2)}
    ${SR.bulk(g)}
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'anim')).join('')}</div>
-    ${allowAllRow(g,'animation')}
    <div class=gsfoot><span class="gcut ${bad?'warn':'ok'}">${a.done} of ${a.total} animated${a.oob.length?` · ${a.oob.map(t=>'S'+t.index).join(', ')} out`:''}${a.fail.length?` · ${a.fail.map(t=>'S'+t.index).join(', ')} not animated`:''}</span>
     <span class=mut>${esc(vi.mode||(s.video_path?'3x3 mp4':vs&&vs.video?'video sheet':'clips'))}${vi.width?' · '+vi.width+'×'+vi.height:''}${a.done?` · ${a.avg} KB avg`:''}</span><button class="link" data-act=gvsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'anim')}`}
 const AV={g:null};
@@ -691,7 +698,6 @@ function sheetPanel(g,mode,opt){const s=g.source,size=s.sheet_size;if(!size||!s.
      <div class=gsfoot><span class=mut>What the video model gets: your ${keptStills(g).length} kept sticker${keptStills(g).length===1?'':'s'} at this gap</span></div>`}
   else body=`<div class="sbox ${keyed?'bg-'+bg:''}"><img src="${base+cur.file}" alt="${esc(cur.label)}"><svg viewBox="0 0 ${W} ${H}">${cutSvg(g,true,true,2)}</svg></div>
    <div class=vchips>${g.stickers.map(t=>chip(g,t,'still')).join('')}</div>
-    ${allowAllRow(g,'still')}
    <div class=gsfoot>${cut}<span class=mut>blue = cuts, yellow = sticker edge</span><button class="link" data-act=gsheet data-g=${g.number}>Full analysis</button></div>${legend(g,'still')}`;
   return`<aside class=gsheet><div class=gshead>${tabs}</div>${body}${genRow(g,mode,opt)}</aside>`}
 /* The ONE control row under the frame: the model (a plain drop-down, "made with X →" once something exists), the settings that have a choice, Loop for a
@@ -833,9 +839,21 @@ setInterval(tick,700);loadLib();
 
 const layoutOfCell=(g,i)=>{const v=cutOf(g),lay=v&&LAY.get(g.number+v.id);const sl=lay&&lay.slots.find(x=>x.slot===i);return sl?sl.rect:null};
 /* "Use it anyway" / "Take it back": POST .../allow {kind, index, allow}. An animation (the default kind) is cut again from the stored video, a still from the stored sheet: free, a few seconds. */
-async function allowCall(g,t,kind,allow){const r=await postWait(`/api/generations/${g.number}/allow`,{kind,index:t.index,allow},'Finishing the previous step…');
-  if(!r.ok)return toast(r.j.error||'Could not change it',1);
-  toast(allow?`S${t.index} is used anyway: cutting its ${kind==='still'?'picture':'animation'} again…`:`S${t.index}: the permission is taken back`);glast='';if(typeof tick==='function')tick(true)}
+/* "Use it anyway" / "Take it back" never makes the next click wait (Haitham, 2026-10-11: one sticker at a time blocked the others). A click when nothing of its
+   batch and kind is on its way is sent at once, as always; clicks while one is on its way are queued (their tiles say so at once; a second click on the same
+   sticker cancels it) and go as ONE request per direction (POST …/allow {indexes}) the moment the one before has answered. */
+const ALQ=new Map();          // "<batch>:<kind>" -> {busy, m: Map(index -> allow)}
+const alPending=(g,kind,i)=>{const q=ALQ.get(g.number+':'+kind);return q&&q.m.has(i)?q.m.get(i):undefined};
+async function allowCall(g,t,kind,allow){const key=g.number+':'+kind;let q=ALQ.get(key);if(!q){q={busy:false,m:new Map()};ALQ.set(key,q)}
+  if(q.busy){if(q.m.has(t.index))q.m.delete(t.index);else q.m.set(t.index,allow);glast='';if(typeof tick==='function')tick(true);return}
+  q.busy=true;let body={kind,index:t.index,allow};
+  try{while(body){const r=await postWait(`/api/generations/${g.number}/allow`,body,'Finishing the previous step…'),n=body.indexes||[body.index],what=kind==='still'?'picture':'animation';
+      if(!r.ok)toast(r.j.error||'Could not change it',1);
+      else toast(body.allow?`${n.map(i=>'S'+i).join(', ')} ${n.length>1?'are':'is'} used anyway: cutting the ${what}${n.length>1?'s':''} again…`:`${n.map(i=>'S'+i).join(', ')}: the permission is taken back`);
+      const yes=[...q.m].filter(([,a])=>a).map(([i])=>i),no=[...q.m].filter(([,a])=>!a).map(([i])=>i);q.m.clear();
+      if(yes.length&&no.length)q.m=new Map(no.map(i=>[i,false]));     /* both directions waited: the uses go now, the take-backs right after */
+      body=yes.length?{kind,indexes:yes,allow:true}:no.length?{kind,indexes:no,allow:false}:null;glast='';if(typeof tick==='function')tick(true)}}
+  finally{q.busy=false;if(!q.m.size)ALQ.delete(key)}}
 /* a human decision on a sticker or animation that is made: drop it from the set, or include it / bring it back. Never deletes. POST .../drop {index, dropped} */
 async function dropCall(g,t,drop){const r=await postWait(`/api/generations/${g.number}/drop`,{index:t.index,dropped:drop});if(!r.ok)toast(r.j.error,1);
   else if(!drop&&isOob(t))toast(`S${t.index} is included anyway: it will be added with the rest (the marker stays)`);glast='';await tick(true);if(MD)gmodal()}

@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after the Claude-style slider and Creative / Predefined.
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after hover info, Screen on / off and the allow queue.
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**440 actions** (441 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**441 actions** (442 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -236,78 +236,79 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `fxuseset` | 273 | effects.js | `/api/particles` |
 | `psusesave` | 274 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
 
-### `generate.js` (68)
+### `generate.js` (69)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `goutline` | 182 | generate.js | none (browser only) |
-| `ggo` | 195 | (no `data-act` button: called from code, a key, or a form) | `/api/generations`<br>`/api/particles`<br>`/api/particles/{}/more` |
-| `gmore` | 197 | (no `data-act` button: called from code, a key, or a form) | `/api/generations` |
-| `gnext` | 204 | generate.js, projmap.js | `/api/live/cost`<br>`/api/plan/next` |
-| `gbdrop` | 213 | generate.js | none (browser only) |
-| `ginc` | 214 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `ganimslice` | 233 | generate.js | `/api/generations/{}/animate` |
-| `greplace` | 235 | generate.js | none (browser only) |
-| `grepundo` | 239 | generate.js | `/api/generations/{}/replace` |
-| `ggen` | 245 | generate.js, projmap.js | none (browser only) |
-| `gmain` | 246 | generate.js, projmap.js | `/api/generations/{}/pick` |
-| `gdel` | 248 | generate.js, projmap.js | `/api/generations/{}/family`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
-| `ganmo` | 332 | generate.js | none (browser only) |
-| `gcutany` | 345 | generate.js | `/api/generations/{}/recut` |
-| `gretrysheet` | 346 | generate.js | `/api/generations` |
-| `greqgo` | 347 | generate.js | `/api/generations` |
-| `gopenfolder` | 367 | generate.js | `/api/generations/{}/reveal` |
-| `pgresheet` | 406 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `pgredo` | 412 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `pgreset` | 424 | generate.js | none (browser only) |
-| `gdnb` | 446 | generate.js | none (browser only) |
-| `gdtab` | 454 | composer.js, generate.js | none (browser only) |
-| `gddiscard` | 455 | generate.js | none (browser only) |
-| `gdpriceretry` | 456 | generate.js | `/api/live/cost` |
-| `gprompt` | 459 | composer.js, generate.js | `/api/particles`<br>`/api/particles/{}/more`<br>`/api/plan` |
-| `gpromptfree` | 460 | generate.js | `/api/plan` |
-| `gdsheet` | 479 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/plan/more` |
-| `pgsheet` | 498 | generate.js, projmap.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `pgvideo` | 501 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `ggroup` | 507 | generate.js, projmap.js | none (browser only) |
-| `ggroupgo` | 510 | generate.js | `/api/generations/{}/join`<br>`/api/generations/{}/particles`<br>`/api/history` |
-| `grm` | 511 | generate.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
-| `gvmode` | 515 | generate.js | none (browser only) |
-| `gtab` | 516 | generate.js, particles.js, projmap.js | none (browser only) |
-| `ganimate` | 520 | generate.js | `/api/generations/{}/animate` |
-| `gadd` | 528 | generate.js, particles.js | none (browser only) |
-| `pwgo` | 567 | generate.js | `/api/generations/{}/add`<br>`/api/packs` |
-| `gopenpack` | 581 | generate.js | none (browser only) |
-| `gvideo` | 584 | generate.js | `/api/generations/{}/quick_sheet` |
-| `gpickvideo` | 597 | generate.js | none (browser only) |
-| `gsheetapprove` | 598 | generate.js | `/api/generations/{}/quick_sheet` |
-| `gvclose` | 599 | generate.js | none (browser only) |
-| `gcopyprompt` | 600 | generate.js | none (browser only) |
-| `gapick` | 639 | generate.js, projmap.js | `/api/generations/{}/pick_video` |
-| `garm` | 641 | generate.js, projmap.js | `/api/generations/{}/remove_video` |
-| `gvsheet` | 651 | generate.js | none (browser only) |
-| `gaclose` | 652 | generate.js | none (browser only) |
-| `gptog` | 715 | generate.js | none (browser only) |
-| `gshk` | 716 | generate.js | none (browser only) |
-| `gsheet` | 717 | generate.js | none (browser only) |
-| `gsview` | 732 | generate.js | none (browser only) |
-| `gstog` | 733 | generate.js | none (browser only) |
-| `gsclose` | 734 | generate.js | none (browser only) |
-| `ghiggs` | 737 | generate.js | `/api/plan` |
-| `hcopy` | 743 | generate.js | none (browser only) |
-| `hgenop` | 744 | generate.js | `/api/jobs` |
-| `hreserve` | 752 | generate.js | `/api/tasks` |
-| `gmall` | 783 | generate.js | none (browser only) |
-| `gmtab` | 784 | generate.js | none (browser only) |
-| `gopen` | 785 | generate.js | none (browser only) |
-| `gmclose` | 786 | generate.js | none (browser only) |
-| `gstep` | 787 | generate.js | none (browser only) |
-| `gedit` | 788 | generate.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `openstudio` | 813 | particles.js | `/api/generations` |
-| `lcstudioedit` | 815 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `lcopenstudio` | 816 | packs.js | none (browser only) |
-| `gcell` | 847 | generate.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
-| `gallowall` | 857 | generate.js | `/api/generations/{}/allow` |
+| `goutline` | 183 | generate.js | none (browser only) |
+| `ggo` | 196 | (no `data-act` button: called from code, a key, or a form) | `/api/generations`<br>`/api/particles`<br>`/api/particles/{}/more` |
+| `gmore` | 198 | (no `data-act` button: called from code, a key, or a form) | `/api/generations` |
+| `gnext` | 205 | generate.js, projmap.js | `/api/live/cost`<br>`/api/plan/next` |
+| `gbdrop` | 214 | generate.js | none (browser only) |
+| `ginc` | 215 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `ganimslice` | 238 | generate.js | `/api/generations/{}/animate` |
+| `greplace` | 240 | generate.js | none (browser only) |
+| `grepundo` | 244 | generate.js | `/api/generations/{}/replace` |
+| `ggen` | 250 | generate.js, projmap.js | none (browser only) |
+| `gmain` | 251 | generate.js, projmap.js | `/api/generations/{}/pick` |
+| `gdel` | 253 | generate.js, projmap.js | `/api/generations/{}/family`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
+| `ganmo` | 339 | generate.js | none (browser only) |
+| `gcutany` | 352 | generate.js | `/api/generations/{}/recut` |
+| `gretrysheet` | 353 | generate.js | `/api/generations` |
+| `greqgo` | 354 | generate.js | `/api/generations` |
+| `gopenfolder` | 374 | generate.js | `/api/generations/{}/reveal` |
+| `pgresheet` | 413 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `pgredo` | 419 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `pgreset` | 431 | generate.js | none (browser only) |
+| `gdnb` | 453 | generate.js | none (browser only) |
+| `gdtab` | 461 | composer.js, generate.js | none (browser only) |
+| `gddiscard` | 462 | generate.js | none (browser only) |
+| `gdpriceretry` | 463 | generate.js | `/api/live/cost` |
+| `gprompt` | 466 | composer.js, generate.js | `/api/particles`<br>`/api/particles/{}/more`<br>`/api/plan` |
+| `gpromptfree` | 467 | generate.js | `/api/plan` |
+| `gdsheet` | 486 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/plan/more` |
+| `pgsheet` | 505 | generate.js, projmap.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `pgvideo` | 508 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `ggroup` | 514 | generate.js, projmap.js | none (browser only) |
+| `ggroupgo` | 517 | generate.js | `/api/generations/{}/join`<br>`/api/generations/{}/particles`<br>`/api/history` |
+| `grm` | 518 | generate.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
+| `gscreen` | 522 | generate.js | none (browser only) |
+| `gvmode` | 523 | generate.js | none (browser only) |
+| `gtab` | 524 | generate.js, particles.js, projmap.js | none (browser only) |
+| `ganimate` | 528 | generate.js | `/api/generations/{}/animate` |
+| `gadd` | 536 | generate.js, particles.js | none (browser only) |
+| `pwgo` | 575 | generate.js | `/api/generations/{}/add`<br>`/api/packs` |
+| `gopenpack` | 589 | generate.js | none (browser only) |
+| `gvideo` | 592 | generate.js | `/api/generations/{}/quick_sheet` |
+| `gpickvideo` | 605 | generate.js | none (browser only) |
+| `gsheetapprove` | 606 | generate.js | `/api/generations/{}/quick_sheet` |
+| `gvclose` | 607 | generate.js | none (browser only) |
+| `gcopyprompt` | 608 | generate.js | none (browser only) |
+| `gapick` | 647 | generate.js, projmap.js | `/api/generations/{}/pick_video` |
+| `garm` | 649 | generate.js, projmap.js | `/api/generations/{}/remove_video` |
+| `gvsheet` | 658 | generate.js | none (browser only) |
+| `gaclose` | 659 | generate.js | none (browser only) |
+| `gptog` | 721 | generate.js | none (browser only) |
+| `gshk` | 722 | generate.js | none (browser only) |
+| `gsheet` | 723 | generate.js | none (browser only) |
+| `gsview` | 738 | generate.js | none (browser only) |
+| `gstog` | 739 | generate.js | none (browser only) |
+| `gsclose` | 740 | generate.js | none (browser only) |
+| `ghiggs` | 743 | generate.js | `/api/plan` |
+| `hcopy` | 749 | generate.js | none (browser only) |
+| `hgenop` | 750 | generate.js | `/api/jobs` |
+| `hreserve` | 758 | generate.js | `/api/tasks` |
+| `gmall` | 789 | generate.js | none (browser only) |
+| `gmtab` | 790 | generate.js | none (browser only) |
+| `gopen` | 791 | generate.js | none (browser only) |
+| `gmclose` | 792 | generate.js | none (browser only) |
+| `gstep` | 793 | generate.js | none (browser only) |
+| `gedit` | 794 | generate.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `openstudio` | 819 | particles.js | `/api/generations` |
+| `lcstudioedit` | 821 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `lcopenstudio` | 822 | packs.js | none (browser only) |
+| `gcell` | 865 | generate.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
+| `gallowall` | 875 | generate.js | `/api/generations/{}/allow` |
 
 ### `history.js` (5)
 

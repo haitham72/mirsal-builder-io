@@ -21,18 +21,18 @@ function statement(marker) {
   return out.join('\n');
 }
 
-function load() {
+function load(opts = {}) {
   const posts = [], toasts = [];
   const GM = new Map();
   const sandbox = {
     esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
     ic: n => `<svg data-i=${n}></svg>`, ACT: {}, GM, posts, toasts,
-    postWait: async (url, body) => { posts.push([url, body]); return { ok: true, j: {} }; },
-    toast: (m, bad) => toasts.push([m, !!bad]), tick: async () => {}, bg: 'checker', PVON: new Set(),
+    postWait: opts.postWait ? async (url, body) => { posts.push([url, body]); return opts.postWait(url, body); } : async (url, body) => { posts.push([url, body]); return { ok: true, j: {} }; },
+    toast: (m, bad) => toasts.push([m, !!bad]), tick: async () => {}, bg: 'checker', PVON: new Set(), GS: {},
   };
   const body = ['let glast="",MD=null;', 'const animPhase=', 'const CAT=', 'const CATORDER=', 'const CATOF=', 'const WARNWHY=', 'const plainWarn=', 'const ANIMWHY=', 'const ALW=', 'const whyOf=',
     'const canAllow=', 'const hasAllowed=', 'const clickAllow=', 'function cellOp(', 'const cellVerb=', 'const cellTitle=', 'const cellLabel=', 'const cellAct=', 'const isOob=', 'const oobNote=', 'const cellState=', 'const CELLTXT=', 'function issuesOf(', 'function mark(', 'function chip(',
-    'const sheetOf=', 'const cutOf=', 'const LAY=', 'const layoutOfCell=', 'async function allowCall(', 'async function dropCall(', 'function cellRun(', 'ACT.gcell=',
+    'const sheetOf=', 'const cutOf=', 'const LAY=', 'const layoutOfCell=', 'const ALQ=', 'const alPending=', 'async function allowCall(', 'async function dropCall(', 'function cellRun(', 'ACT.gcell=',
     'function blockedBox(', 'function blockedAnimOverlay(', 'function issueSvg(', 'function tileHtml('].map(s => s.startsWith('let ') ? s : statement(s)).join('\n');
   const f = new Function(...Object.keys(sandbox), body + '\nreturn {cellOp,cellLabel,cellRun,issueSvg,tileHtml,blockedBox,chip,ACT,LAY,mark};')(...Object.values(sandbox));
   return { ...f, posts, toasts, GM };
@@ -150,4 +150,22 @@ test('a cell that cannot change says why and sends nothing', async () => {
 test('the old parallel handlers are gone from the file', () => {
   for (const a of ['gdrop', 'gallow', 'gsallow', 'gunallow', 'gsunallow']) assert.doesNotMatch(src, new RegExp(`ACT\\.${a}=`), `ACT.${a} was one of two handlers for the same control`);
   assert.match(src, /ACT\.gcell=/);
+});
+
+test('a click never waits for the one before: clicks while a request is on its way go together right after it, and a second click cancels', async () => {
+  const gates = [];
+  const h = load({ postWait: () => new Promise(r => gates.push(() => r({ ok: true, j: {} }))) });
+  const failed = { status: 'FAILED', png: null };
+  h.GM.set(7, G([T(1, failed), T(2, failed), T(3, failed), T(4, failed)], { still: { can: [1, 2, 3, 4], allowed: [], undo: [], why: { 1: 'a', 2: 'b', 3: 'c', 4: 'd' }, final: {} }, animation: ALLOW.animation }));
+  const click = i => h.ACT.gcell({ dataset: { g: '7', i: String(i), stage: 'still' } });
+  const first = click(1);
+  assert.deepEqual(h.posts.map(p => p[1]), [{ kind: 'still', index: 1, allow: true }], 'the first click is sent at once, as always');
+  await click(2); await click(4); await click(3); await click(3);           // 3 twice: cancelled before it was sent
+  assert.equal(h.posts.length, 1, 'nothing else is sent while the first is on its way, and nothing waits for it either');
+  gates.shift()();
+  await new Promise(r => setImmediate(r));
+  assert.deepEqual(h.posts[1][1], { kind: 'still', indexes: [2, 4], allow: true }, 'the waiting clicks go as ONE request the moment the first has answered');
+  gates.shift()();
+  await first;
+  assert.equal(h.posts.length, 2);
 });

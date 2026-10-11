@@ -995,3 +995,16 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 .lv-hth img,.lv-hth .lv-hnoimg{width:44px;height:44px}
 .lv-hrow,.lv-hphead{padding-top:8px;padding-bottom:8px}
 .cp-act{flex:none}.cp-act button{padding:6px 12px}
+/* a tile shows its picture; its name and issue lines appear on hover / focus as a frosted line at the bottom of the picture (Haitham, 2026-10-11: "just make
+   hover show info"). The override stays visible on the picture (the coloured tag, the ✕ / ＋), and a note with a button under it stays (rule 10). */
+.gtinfo{position:absolute;left:6px;right:6px;bottom:6px;padding:6px 8px;border-radius:var(--r-s);background:#ffffffe6;backdrop-filter:blur(6px);font-size:var(--fs-xs);line-height:1.3;color:var(--tx);opacity:0;transform:translateY(4px);transition:opacity .15s var(--ease),transform .15s var(--ease);pointer-events:none}
+.gtinfo b{display:block;font-weight:600;font-size:var(--fs-s);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt:hover .gtinfo,.gt:focus-within .gtinfo{opacity:1;transform:none}
+.gcap:empty{display:none}.gcap{padding:6px 10px 8px}
+@media (hover:none){.gtinfo{opacity:1;transform:none;position:static;margin:0;border-radius:0;background:none}}
+/* "Screen on" (gscreen): a still tile shows its cell cut from the raw sheet, the key colour behind it, in proportion */
+.gtrawbox{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}.gtraw{display:block;max-width:100%;max-height:100%;background-repeat:no-repeat}
+.gh-screen[aria-pressed=true]{background:#DCFCE7;border-color:#86EFAC;color:#166534}
+/* a "Use it anyway" click waits in its batch's queue (600 ms): the tile says so at once */
+.gt.pend{outline:2px dashed var(--pri);outline-offset:-2px}.gt.pend::after{content:attr(data-pend);position:absolute;top:8px;left:8px;z-index:3;padding:2px 8px;border-radius:var(--r-pill);background:var(--pri);color:#fff;font-size:var(--fs-xs);font-weight:600}
+.gbhead .lv-allow{display:inline-flex;align-items:center;gap:6px;margin:0}.gbhead .lv-allow .mut{display:none}
