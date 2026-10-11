@@ -92,7 +92,7 @@ test('the column title is plain text, every batch is a row and nothing says Load
   hx.env.HB.items = Array.from({ length: 120 }, (_, n) => ({ ...BATCH([3, 3]), id: n + 1, generation_id: `G${n + 1}` }));
   hx.env.HB.total = 120;
   const html = hx.histColHTML();
-  assert.match(html, /<h1>Earlier batches<\/h1>/);
+  assert.match(html, /<h1>Projects<\/h1>/);   // the list of every project (D2, 2026-10-11): it was "Earlier batches"
   assert.match(html, /120 in total/);
   assert.equal((html.match(/class="lv-hrow/g) || []).length, 120, 'the whole list is rendered, not one page');
   assert.ok(!/hmore|Load more/.test(html), 'no pagination button');

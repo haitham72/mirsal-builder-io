@@ -80,8 +80,8 @@ class StudioActionTests(unittest.TestCase):
         self.assertNotIn("htoggle", src, "the collapsible Earlier-batches header is gone")
         self.assertNotIn("mirsal.hopen", src, "the fold-away choice (localStorage mirsal.hopen) is gone")
         self.assertNotIn("let HO=", src, "the fold state is gone")
-        self.assertIn("<h1>Earlier batches</h1>", head, "the title is plain text above the rows")
-        self.assertIn("HB.items.map(histRow)", head, "every batch is a row")
+        self.assertIn("<h1>Projects</h1>", head, "the title is plain text above the rows (the list of every project, D2: it was Earlier batches)")
+        self.assertIn("HB.items.map(histEntry)", head, "every project is an entry (a batch alone is a row, histRow)")
         for n in order + ["index.html"]:
             self.assertNotIn("hmore", (ui / n).read_text(encoding="utf-8"), f"no 'Load more' button action left in {n}")
         self.assertIn("histLoad(true)", self.block(src, "function histCol()"), "the column asks for its next page when it is scrolled near the end")
@@ -97,7 +97,7 @@ class StudioActionTests(unittest.TestCase):
         copy of the Studio's header, views, bar and element ids are gone."""
         ui, order = self.scripts()
         src = (ui / "live.js").read_text(encoding="utf-8")
-        row = self.block(src, "const histRow=it=>{")
+        row = self.block(src, "const histRow=(it,k,inPack)=>{")
         self.assertIn("data-act=hopen", row, "the row presents the batch")
         hopen = self.block(src, "ACT.hopen=el=>{")
         self.assertIn("gens:[it.id]", hopen, "the session becomes exactly this one batch")

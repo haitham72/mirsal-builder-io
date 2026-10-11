@@ -336,7 +336,7 @@ if(typeof document!=='undefined'&&document.addEventListener){
   document.addEventListener('drop',ev=>{const f=ev.target&&ev.target.closest&&ev.target.closest('[data-hid]');if(!f)return;const id=ev.dataTransfer.getData('text/x-mirsal-batch');if(!id)return;ev.preventDefault();
     document.querySelectorAll('.hdrop').forEach(x=>x.classList.remove('hdrop'));histPack(+id,+f.dataset.hid)})}
 /* the column: a title and the whole list, newest edit first; the next page is asked for when the list is scrolled near its end (no "Load more") */
-function histColHTML(){return`<div class=c2h><h1>Earlier batches</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
+function histColHTML(){return`<div class=c2h><h1>Projects</h1><span class=c2n>${HB.loaded?`${HB.total} in total`:''}</span></div>
   <div class="c2l lv-hcol" id=c2hist>${HB.items.map(histEntry).join('')||`<div class=mut style="padding:14px 18px">${HB.loaded?'No batches yet. Describe stickers in the Studio to make the first one.':'Reading the batches…'}</div>`}</div><div class=c2rem id=c2rem></div>`}
 /* the trash of batches (GET /api/generations/removed, owner only): Restore puts a batch back under its own number; the list is empty (and hidden) for anyone else */
 const REM={items:[],tried:false};

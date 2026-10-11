@@ -179,8 +179,8 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 2. **Built 2026-10-11.** The Studio's step strip is the journey: Idea · Prompt · Stickers · Motion · (Particles) · Pack · Telegram on one slim
    track (`stepsHtml`, `.gsteps`), the same buttons and actions as before (`gtab`, `gadd`; Telegram is `gopenpack`). `docs/design.md` "The Studio's journey".
 3. **Built 2026-10-11** (§6): the project map's data.
-4. **Studio frame:** the map column (replacing Earlier batches), the project switcher, the breadcrumb, every MAP / PROJ action of §4 wired to
-   its existing `ACT`.
+4. **Built 2026-10-11:** the map column, the project switcher, the breadcrumb (`projmap.js`; `docs/design.md` "The project map"). D3 / D4 (several
+   batches at once, `ginc` / `gbdrop`) are unchanged so far: "open the whole project" (`hopenpack`) still shows every batch; they go with phase 7's bottom bar.
 5. **Studio work area:** the toolbar, Stickers | Whole sheet (merging `sheetPanel`, `videoPanel` and the Full-analysis dialog), the tiles.
 6. **The sticker panel** (replacing `gmodal`).
 7. **The bottom bar and the Idea step** (the Request and Prompt tabs, the pre-batch draft, the composer).
