@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after redesign phase 6 (the sticker panel).
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after redesign phase 8 (the pack screen).
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**436 actions** (437 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**437 actions** (438 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -373,45 +373,46 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `grestore` | 362 | live.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/restore`<br>`/api/history` |
 | `hopen` | 373 | composer.js, live.js | `/api/generations/{}/particles`<br>`/api/particles` |
 
-### `packs.js` (35)
+### `packs.js` (36)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `colopen` | 28 | packs.js | `/api/collection` |
-| `colsend` | 34 | packs.js | `/api/generations/{}/export-collection`<br>`/api/packs/{}/export-collection` |
-| `pkadd` | 42 | packs.js | none (browser only) |
-| `pkrename` | 43 | packs.js | `/api/packs` |
-| `pkdel` | 48 | packs.js | `/api/packs/{}/delete` |
-| `stanim` | 49 | packs.js | none (browser only) |
-| `stcover` | 50 | packs.js | `/api/packs` |
-| `stdel` | 51 | packs.js | `/api/packs/{}/stickers/{}/delete` |
-| `stedit` | 52 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit`<br>`/api/projects/from_sticker` |
-| `stview` | 54 | packs.js | none (browser only) |
-| `stname` | 55 | packs.js | none (browser only) |
-| `strep` | 60 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepone` | 69 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepall` | 71 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepundo` | 73 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `stsave` | 74 | packs.js | `/api/packs/{}/stickers/{}` |
-| `pkpreview` | 75 | packs.js | none (browser only) |
-| `pvbg` | 78 | packs.js | none (browser only) |
-| `lcsend` | 113 | packs.js | none (browser only) |
-| `lcopen` | 114 | app.js | none (browser only) |
-| `lcclose` | 114 | packs.js | none (browser only) |
-| `lcprev` | 114 | packs.js | none (browser only) |
-| `lcnext` | 114 | packs.js | none (browser only) |
-| `lcgo` | 115 | packs.js | none (browser only) |
-| `lcbg` | 115 | packs.js | none (browser only) |
-| `lcpack` | 116 | packs.js | none (browser only) |
-| `lcedit` | 117 | packs.js | `/api/projects/from_sticker` |
-| `lctimeline` | 118 | packs.js | none (browser only) |
-| `lcmove` | 119 | packs.js | `/api/packs/{}/stickers/{}/move` |
-| `ptmake` | 176 | packs.js | none (browser only) |
-| `ptrunsim` | 177 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `ptopen` | 178 | packs.js | none (browser only) |
-| `ptsaved` | 179 | packs.js | none (browser only) |
-| `ptadd` | 180 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
-| `psshow` | 209 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `pktab` | 6 | packs.js | none (browser only) |
+| `colopen` | 37 | packs.js | `/api/collection` |
+| `colsend` | 43 | packs.js | `/api/generations/{}/export-collection`<br>`/api/packs/{}/export-collection` |
+| `pkadd` | 51 | packs.js | none (browser only) |
+| `pkrename` | 52 | packs.js | `/api/packs` |
+| `pkdel` | 57 | packs.js | `/api/packs/{}/delete` |
+| `stanim` | 58 | packs.js | none (browser only) |
+| `stcover` | 59 | packs.js | `/api/packs` |
+| `stdel` | 60 | packs.js | `/api/packs/{}/stickers/{}/delete` |
+| `stedit` | 61 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit`<br>`/api/projects/from_sticker` |
+| `stview` | 63 | packs.js | none (browser only) |
+| `stname` | 64 | packs.js | none (browser only) |
+| `strep` | 69 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepone` | 78 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepall` | 80 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepundo` | 82 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `stsave` | 83 | packs.js | `/api/packs/{}/stickers/{}` |
+| `pkpreview` | 84 | packs.js | none (browser only) |
+| `pvbg` | 87 | packs.js | none (browser only) |
+| `lcsend` | 122 | packs.js | none (browser only) |
+| `lcopen` | 123 | app.js | none (browser only) |
+| `lcclose` | 123 | packs.js | none (browser only) |
+| `lcprev` | 123 | packs.js | none (browser only) |
+| `lcnext` | 123 | packs.js | none (browser only) |
+| `lcgo` | 124 | packs.js | none (browser only) |
+| `lcbg` | 124 | packs.js | none (browser only) |
+| `lcpack` | 125 | packs.js | none (browser only) |
+| `lcedit` | 126 | packs.js | `/api/projects/from_sticker` |
+| `lctimeline` | 127 | packs.js | none (browser only) |
+| `lcmove` | 128 | packs.js | `/api/packs/{}/stickers/{}/move` |
+| `ptmake` | 185 | packs.js | none (browser only) |
+| `ptrunsim` | 186 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `ptopen` | 187 | packs.js | none (browser only) |
+| `ptsaved` | 188 | packs.js | none (browser only) |
+| `ptadd` | 189 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
+| `psshow` | 218 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
 
 ### `particles.js` (54)
 

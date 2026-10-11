@@ -2,24 +2,33 @@
 'use strict';
 let DRAG=null;
 RENDER.pack=async id=>{await loadLib();PACK_ID=id;drawCol2();drawPack()};
+const PKTAB={id:null,t:'stickers'};
+ACT.pktab=el=>{PKTAB.id=PACK_ID;PKTAB.t=el.dataset.t;drawPack()};
 function drawPack(){
  const p=packById(PACK_ID),el=$('s-pack');
  if(!p){el.innerHTML='<div class=card>Pack not found. <a href="#/library">Back to library</a></div>';return}
  const n=p.stickers.length,anim=p.stickers.filter(s=>s.type==='animated').length;
- el.innerHTML=`<div class=page>
-  <div class=row style="margin-top:0"><button class="btn sm" data-act=nav data-to=library>${ic('back')} Library</button></div>
-  <div class=card><div class=phead><div class=cover style="width:84px;height:84px">${coverMedia(p)}</div>
-   <div class=pt><h1 style="margin:0">${esc(p.name)}</h1><span class=mut>${n} stickers${anim?` · ${anim} animated`:''} · a Telegram set takes up to 120</span></div>
-   <div class=pa>
-    <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button><button class=btn data-act=pkrename>${ic('edit')} Rename</button>
-    <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>${n&&typeof trShareBtn==='function'?trShareBtn(p.id):''}${n?`<a class=btn href="/api/packs/${p.id}/export.zip" download title="Every sticker file of this pack in one zip: .webm for the animated ones, .png / .webp for the static ones, and a manifest.json">${ic('download')} Download .zip</a>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}${typeof ME==='undefined'||!ME||ME.role==='owner'?`<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}${colBtn('pack',p.id,n,p.name)}
-    <button class="btn dng" data-act=pkdel title="Move this pack to the trash. You can restore it, or delete it for good, from Settings, Trash.">${ic('trash')} Delete pack</button></div></div></div>
-  <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
+ const owner=typeof ME==='undefined'||!ME||ME.role==='owner',tab=PKTAB.id===p.id?PKTAB.t:'stickers';
+ /* the pack screen (redesign phase 8, mockup pack.html): one header (cover, name, counts; Send to Telegram first, then Preview, Download, Try it in a chat, Add;
+    ⋯ Rename, Share, Export to collection, Delete), then two tabs: Stickers and Particles. Every button is the one it always was. */
+ el.innerHTML=`<div class="page pk-page">
+  <nav class=pm-crumbs aria-label="Where you are"><button data-act=nav data-to=library>Library</button><i>›</i><span>${esc(p.name)}</span></nav>
+  <header class=pk-head><div class=cover>${coverMedia(p)}</div>
+   <div class=pk-ttl><h1>${esc(p.name)}</h1><small>${n} sticker${n===1?'':'s'}${anim?` · ${anim} animated`:''} · a Telegram set takes up to 120</small></div>
+   <div class=pk-acts>${owner?`<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
+    <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>
+    ${n?`<a class=btn href="/api/packs/${p.id}/export.zip" download title="Every sticker file of this pack in one zip: .webm for the animated ones, .png / .webp for the static ones, and a manifest.json">${ic('download')} Download .zip</a>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
+    <button class=btn data-act=nav data-to=chat title="Try the stickers in a phone chat preview">${ic('chat')} Try it in a chat</button>
+    <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button>
+    <details class=gh-more><summary class="btn" aria-label="More for this pack" title="More for this pack">⋯</summary><div class=gh-pop role=menu>
+     <button class=btn data-act=pkrename>${ic('edit')} Rename</button>${n&&typeof trShareBtn==='function'?trShareBtn(p.id):''}${colBtn('pack',p.id,n,p.name)}
+     <button class="btn dng" data-act=pkdel title="Move this pack to the trash. You can restore it, or delete it for good, from Settings, Trash.">${ic('trash')} Delete pack</button></div></details></div></header>
+  <div class="gseg pk-tabs" role=tablist aria-label="This pack"><button type=button role=tab data-act=pktab data-t=stickers aria-pressed=${tab==='stickers'}>Stickers <small>${n}</small></button><button type=button role=tab data-act=pktab data-t=particles aria-pressed=${tab==='particles'}>Particles</button></div>
+  ${tab==='particles'?pkPsHtml(p):`  <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
    ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${p.stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stedit data-id=${s.id} title="${(s.source&&s.source.generation)?'Edit in the Studio (text, emoji; image and animation together)':s.type==='static'?'Edit a copy in the editor':'Edit: add text or emoji, trim'}">${ic('edit')}</button>${s.type==='animated'?`<button data-act=stanim data-id=${s.id} title="Timeline (trim, frame rate, export)">${ic('play')}</button>`:''}<button data-act=stcover data-id=${s.id} title="Set as cover">${ic('star')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
     <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div>`
-   :`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}
-  ${pkPsHtml(p)}</div>`;
+   :`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}`}</div>`;
  ptCounts(p.id)}
 /* Export to collection (services/collection.py, docs/api.md "Export to the AddCollection API"): the same stickers as Download .zip, in the same order, sent to the
    external emoji CMS as one collection. Owner only, like Telegram; free but outward, so it always asks first (name, optional description, where it goes). */
