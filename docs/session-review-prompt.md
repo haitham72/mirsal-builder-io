@@ -1,0 +1,23 @@
+# Prompt for the next LLM: review and finalize this session
+
+Paste the following into an LLM with access to this repository:
+
+---
+
+You are reviewing Mirsal Builder after the 2026-10-11 session. Inspect the real checkout before drawing conclusions. Read `CLAUDE.md`, `HANDOFF.md`, `plan.md`, `docs/testing.md`, then the area docs linked below. Review the implementation and finalize the open plan. Dark mode is planned only; do not implement it in this review.
+
+The completed implementation is on `main` at `2f585fd`; `edit-design` also contains the dark-mode plan and this handoff. Earlier relevant commits are `8752e2d` (expanded emoji exports and provider routing) and `0917f49` (authorized runtime snapshot). Verify the current refs rather than assuming these are still the latest. Only `main` and `edit-design` should remain locally and remotely; keep the dark-mode plan exclusively on `edit-design`.
+
+Review these concrete changes:
+
+1. **Home layout:** `console/home.js` and `.hm-*` in `console/studio.css`. “Made by you. Ready to express.” must show up to two rows of individual real stickers, with responsive two-to-six columns, then the onboarding video spanning the full width at exactly one row's height. Check container queries, row-height math, cover cropping, few/no stickers, filters/search, pack and Telegram navigation, reduced motion and keyboard access. Compare against `docs/design.md` §5 and `docs/onboarding.md`. Avoid claiming an exact Higgsfield visual match from geometry tests alone.
+2. **Daily cap:** `generation/jobs.py`. Enabled owner/admin accounts with spending permission, including the local owner running `./.venv/bin/python -m mirsal serve`, must be exempt. Members and untrusted/missing/disabled accounts remain capped. Verify the persisted request user is resolved through the server-side account store, supplied role fields cannot grant exemption, and price approval, in-flight accounting and ticket-first recovery still hold. Read `docs/generation.md` and `docs/operator.md`.
+3. **Luna badge and routing:** `console/server.py`, `console/agent.js`, `services/llm.py`, `services/llm_catalog.py`. Session-scoped status must use the saved chat model, enforce session access and reset its request-local override. Chat loading/model changes must refresh the badge and selector; stale responses must not overwrite another chat. Global Settings and new chats must retain global defaults. Luna uses official OpenAI with `OPENAI_API_KEY` and reasoning effort `high`; Nararouter uses only `NARAROUTER_API_KEY`. Check the existing vision fallback independently. Read `docs/agent-and-chat.md` and `docs/api.md`.
+4. **Emoji/export changes:** check the expanded action bank and Unicode sequence validation against `docs/export to team/mirsal-export-architecture.md`. Preserve full sequences and stored canonical resolution snapshots; distinguish built behaviour from the still-open picker/public-code/revision work.
+5. **Dark-mode plan:** finalize `docs/dark-mode_plan.md` and `plan.md` for an elegant black/cyan Higgsfield-inspired theme. Validate the token map, component coverage, startup/persistence/CSP strategy, file load order, light-mode preservation, status colours, media colours, responsive checks and acceptance criteria against actual code. Keep the script refactor separate. Remove stale/duplicated instructions and make each remaining step concrete.
+
+Validation already recorded in `HANDOFF.md` remains valid while the covered code is unchanged. Tests used fakes; there were no paid calls. For a proven defect you change, run only the narrowest relevant test once, then rewrite the corresponding architecture doc and handoff. Do not run the retired slow tier, full unittest discovery, a fresh baseline or broad unrelated suites. Do not inspect or print secrets, use real model calls, kill the user's server or alter runtime records as part of this review. Credentials must never be staged. Keep public deployment and Google OAuth paused.
+
+Return findings first, ordered by severity, with file/line evidence, a concrete trigger, impact and proposed correction. Separate confirmed defects from untested risks and human visual verdicts. Apply clear, reversible corrections to confirmed defects and docs within this review scope; preserve unrelated user changes. Finalize the plan without building dark mode. If there are no confirmed defects, say so and state what remains unverified. End with the exact changed files, focused checks and branch/push status. Update `HANDOFF.md` with completed review work and precise remaining steps; do not claim a test or push that was not performed.
+
+---

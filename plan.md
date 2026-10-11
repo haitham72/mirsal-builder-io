@@ -1,18 +1,26 @@
-# plan.md — after the redesign (2026-10-11)
+# plan.md — next work on edit-design (2026-10-11)
 
-What an LLM does next. The stages (Prompt · Stickers · Animation · Telegram · Export) and the batch follow-up are built (`1e28524`, `2dba73f`, `4239bff`, `d66c647`);
-the architecture is in `docs/agent-and-chat.md` "Stages and the batch follow-up". Read `CLAUDE.md` first; test budget: `docs/testing.md` (one narrowest
-run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when it is built; delete this file when the plan is done.
+Only remaining work lives here. Read `CLAUDE.md`, `HANDOFF.md` and `docs/testing.md` first. What this session completed and how it was checked are in `HANDOFF.md`; built behaviour is in the area docs. Follow the test budget: one narrowest run per semantic change, no paid calls, no repeated baseline, no retired slow tier or full discovery. Delete a step when it is complete.
 
-## Step A — refactor the screen scripts, no behaviour change (FIRST; a fresh session, Opus on medium)
+## First — independent review and finalize the plan
+
+Use [`docs/session-review-prompt.md`](docs/session-review-prompt.md). Review the current implementation at `main` (`2f585fd`) and this branch's documentation. Check Home's responsive rows/film, owner/admin cap exemption, session-aware model status and the earlier emoji/provider work against the real code. Fix confirmed defects with focused checks and rewrite the corresponding area docs. Distinguish untested risks and human visual verdicts from defects.
+
+Finalize [`docs/dark-mode_plan.md`](docs/dark-mode_plan.md) against the actual selectors, theme tokens, script load order, asset allow-list and CSP. Keep it exclusively on `edit-design`. The implementation is already merged into `main`; only `main` and `edit-design` remain. No further merge or branch deletion is pending from this session.
+
+## Dark mode — planned work, implementation not started
+
+Haitham requested a plan for an elegant, clean Higgsfield-inspired black/cyan theme. The full specification, proposed palette, file map, sequence and acceptance criteria are in [`docs/dark-mode_plan.md`](docs/dark-mode_plan.md). The current request prepares/finalizes that plan; begin implementation when Haitham requests it. Theme foundation and persistence come first, then each screen, then focused responsive/accessibility checks. The script refactor below is independent and must not be bundled into theme changes. Keep theme work on `edit-design` until Haitham requests a merge.
+
+## Separate phase — refactor the screen scripts, no behaviour change
 
 Why: `mirsal/mirsal/console/generate.js` (~850 lines), `agent.js`, `app.js`, `live.js`, `packs.js` put a whole function on one line (300-900 characters),
 so every read and edit costs a lot of tokens. Goal: the same behaviour, readable files of ~150-300 normal-width lines, one feature per file.
 
 1. **Test helpers first.** Several node tests read code by "one statement per line" (`statement(marker)` in `tests/js/cell_op.test.js`,
    `sheet_cells.test.js`, `remove_batch.test.js`, `history_card.test.js`, `console_vm.js`; `block()` in `tests/test_js.py`). Change them to load whole
-   files (`loadConsole([...files])`, as `project_map.test.js` does) or to find a statement by its marker and its matching closing brace. Run the node
-   suite once: 302 pass is the baseline (one Python failure is old: `test_agent.test_a_second_message_while_one_is_running...`, leave it).
+   files (`loadConsole([...files])`, as `project_map.test.js` does) or to find a statement by its marker and its matching closing brace. Run only
+   the tests affected by these helper changes; do not establish a new baseline before editing.
 2. **Split `generate.js`** by feature, loaded in this order in `index.html` and listed in `UI_FILES` (`console/server.py`): `studio-core.js` (state GS /
    SES / GM, tick, gview, the toolbar), `studio-tiles.js` (tileHtml, cellOp, the allow queue ALQ, issues/marks), `studio-sheet.js` (sheetPanel,
    videoPanel, cutSvg, the Full-analysis dialog), `studio-prompt.js` (Prompt tab, pre-batch draft GD, pd*), `studio-animate.js` (animate, Add-to-pack
@@ -24,10 +32,6 @@ so every read and edit costs a lot of tokens. Goal: the same behaviour, readable
 4. **Docs:** `docs/architecture.md` §6 (the script list and load order). One commit: "Refactor: split and format the console scripts (no behaviour change)".
 5. Then (separate commits, optional): halve `CLAUDE.md` (keep the rules, move dated history into the area docs); shorten `docs/design.md` and
    `docs/agent-and-chat.md` entries to one paragraph per feature, rewritten in place.
-
-## The redesign (branch `edit-design`) — built 2026-10-11, waits for Haitham
-
-Every phase of `docs/redesign_plan.md` §5 is built and the implementation is merged into `main` by Haitham's instruction. Remaining: Haitham's browser verdict (restart with `serve --reload`, hard reload), the outside review against §9, and D3 / D4 (§5 "Open"). The dark-mode plan stays on `edit-design`.
 
 ## Step 1 — prove the follow-up through the real server (fakes only)
 
@@ -51,4 +55,4 @@ the code when it is not. Never a loop: one run per fix.
 
 ## Not an LLM's (stays in `docs/waiting-for-haitham.md`)
 
-The browser look of the pill, the popover, the follow-up card and Telegram `/stage` (item 1); a real paid run of a stage (item 6).
+The browser look of the pill, popover, follow-up card and Telegram `/stage` (item 1); a real paid run of a stage (item 6); the remaining redesign verdicts and D3 / D4 in `docs/redesign_plan.md` §5. Public deployment and Google OAuth remain paused.
