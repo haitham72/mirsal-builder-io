@@ -667,6 +667,7 @@ class FakeTools:
     def __init__(self, generations: dict | None = None, live: bool = True, credits: float = 100.0):
         self.gens = generations or {}
         self._live, self._credits = live, credits
+        self.models = {}                    # like ConsoleTools: the chat's own picks {image, video, ai}
         self.calls: list = []
         self.proposed: dict = {}
         self.sent_plans: list = []

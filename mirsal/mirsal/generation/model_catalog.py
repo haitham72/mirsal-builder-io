@@ -143,3 +143,30 @@ def resolve(kind: str, model_id: str | None, options: dict | None = None) -> tup
     if options:
         raise CatalogError(f"{m['label']} has no option '{', '.join(sorted(options))}'")
     return m["id"], params
+
+
+FAMILY_WORDS = {"nano": ("nano", "banana"), "gpt": ("gpt",), "seedream": ("seedream",), "kling": ("kling",), "grok": ("grok",)}
+NAMED_RX = r"(?:with|using|use|in|on|via|by|through)\s+(?:the\s+)?"
+
+
+def named_in(text: str | None) -> dict:
+    """The models a chat message names (Haitham, 2026-10-11: "animate with grok" must use Grok): {kind: model id} for each kind whose model family follows
+    "with / using / in / on / via / by / through" ("animate with grok", "use nano banana pro"). Inside a family the model whose label words the message has
+    most wins, the catalog order breaking ties ("grok lite" -> Grok Imagine 1.5 Lite, "grok" -> Grok Video 1.5). Pure: the catalog only."""
+    import re
+    low = " " + re.sub(r"[^a-z0-9.]+", " ", str(text or "").lower()) + " "
+    words = set(low.split())
+    out = {}
+    for kind in ("image", "video"):
+        best = None
+        for i, m in enumerate(KINDS[kind] + more(kind)):
+            fam = next((f for f, w in FAMILY_WORDS.items() if m["id"].startswith(f) or m["label"].lower().startswith(w[0])), None)
+            if not fam or not re.search(NAMED_RX + re.escape(FAMILY_WORDS[fam][0]) + r"\b", low):
+                continue
+            label = set(re.sub(r"[^a-z0-9.]+", " ", m["label"].lower()).split()) - set(FAMILY_WORDS[fam])
+            score = len(label & words)
+            if best is None or score > best[0]:
+                best = (score, i, m["id"])
+        if best:
+            out[kind] = best[2]
+    return out

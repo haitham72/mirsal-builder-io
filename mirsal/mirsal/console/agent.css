@@ -314,3 +314,4 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sess-new{background:var(--pri-l);color:var(--pri-d)}
 .ag-st.on{box-shadow:inset 0 0 0 2px var(--pri)}
 .ag-stage-pop{box-shadow:0 18px 50px #0f172a24,0 0 0 1px var(--bd)}
+.ai-gen-ref{padding-bottom:4px}.ai-gen-ref small{white-space:normal}

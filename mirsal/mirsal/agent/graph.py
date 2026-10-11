@@ -110,6 +110,7 @@ class Turn:
     answer: str = ""                             # the typed answer to my "which sticker?" (t.text then holds the original request + the answer): "12" is checked against the batch's size
     unsure_review: bool = False                  # an approve / reject sentence with a negation in it: nothing is decided, the person is asked
     profile_answer: dict | None = None           # the reply to my own "what should I call you?": {"name": "Haitham"}, never a subject
+    model_said: str = ""                         # "Using Grok Video 1.5 for the animation": a model the message named (_models_named), said at the end of the reply
     prefix: str = ""                             # what the profile node said, put before the rest of the turn's answer ("Nice to meet you, Sam! ..." then the plan)
     _lock: Any = None
 
@@ -239,9 +240,24 @@ class Agent:
             bits.append(f"A plan I am holding (not started, waiting for the go-ahead): {held.get('subject') or held.get('type')}.")
         return "\n".join(bits + [self.store.summary_text(sess)])
 
+    def _models_named(self, t: Turn) -> None:
+        """A message that names a model ("animate with grok", "use nano banana pro") makes it the chat's own pick for that kind (settings.models, the
+        stage slider's details show it) and this turn's tools use it at once; the reply names it (`_model_said`)."""
+        from ..generation import model_catalog
+        picked = model_catalog.named_in(t.text) if t.text and not t.action else {}
+        if not picked:
+            return
+        t.sess["settings"]["models"] = {**(t.sess["settings"].get("models") or {}), **picked}
+        if hasattr(self.tools, "models"):
+            self.tools.models = {**(self.tools.models or {}), **picked}
+        names = [f"{model_catalog.find(k, v)['label']} for {'the stickers' if k == 'image' else 'the animation'}" for k, v in picked.items()]
+        t.trace.step("model picked: " + ", ".join(names))
+        t.model_said = "Using " + " and ".join(names) + " (it stays this chat's choice; change it in the slider's details)."
+
     def n_understand(self, state: State) -> dict:
         t: Turn = state["turn"]
         sess = t.sess
+        self._models_named(t)
         pending = bool(sess.get("pending"))
         t.prev_pending = sess.get("pending")
         has_gen = bool((sess.get("focus") or {}).get("generation") or self.store.latest_pass(sess) or self._named_batches(sess, t.text))
@@ -2270,6 +2286,8 @@ class Agent:
             t.reply = (t.reply + " " if t.reply else "") + f"(This replaces the plan I was holding for {gone}: nothing was spent on it.)"
         if self.brain.last_error:                                      # the model was asked in this turn and could not answer: the rules answered, and the person is told why
             t.trace.rules_note(self.brain.last_error)
+        if t.model_said and ok:
+            t.reply = (t.reply + "\n\n" if t.reply else "") + t.model_said
         msg.update(text=t.reply, cards=t.cards, chips=t.chips, status="done" if ok else "error")
         if msg["steps"] and msg["steps"][-1]["kind"] != "final":
             t.trace.end("done" if ok else "stopped", ok=ok)

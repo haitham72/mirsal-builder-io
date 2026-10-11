@@ -168,7 +168,10 @@ function paint(){
   const switched=A.shown!==A.sid;                          // a different chat than the one on screen: start clean, land at its bottom at once, no swipe
   if(switched){list.innerHTML='';A.els.clear();list.classList.remove('is-switched');void list.offsetWidth;list.classList.add('is-switched')}
   const near=switched||sc.scrollHeight-sc.scrollTop-sc.clientHeight<160;let changed=false;
-  msgs.forEach((m,i)=>{const k=AIU.sig(m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',')+((m.chips||[]).some(c=>c.setting)?String(A.sess&&A.sess.settings&&A.sess.settings.allow_vlm):'');let el=A.els.get(m.id);
+  /* ONE full card per batch: the newest message that carries it; an older card of the same batch is a one-line pointer (no second carousel, no sheet) */
+  const last=new Map();msgs.forEach((m,i)=>(m.cards||[]).forEach(c=>{if(c.type==='generation'&&c.generation)last.set(c.generation,i)}));
+  A.genLater=new Set();msgs.forEach((m,i)=>(m.cards||[]).forEach(c=>{if(c.type==='generation'&&c.generation&&last.get(c.generation)>i)A.genLater.add(m.id+':'+c.generation)}));
+  msgs.forEach((m,i)=>{const k=[...A.genLater].filter(x=>x.startsWith(m.id+':')).join(',')+'|'+AIU.sig(m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',')+((m.chips||[]).some(c=>c.setting)?String(A.sess&&A.sess.settings&&A.sess.settings.allow_vlm):'');let el=A.els.get(m.id);
    if(!el){el=document.createElement('div');A.els.set(m.id,el);list.appendChild(el);changed=true}
    if(el._k!==k){const keep=[...el.querySelectorAll('.car-track')].map(t=>t.scrollLeft);el._k=k;el.className='ai-m '+(m.role==='user'?'user':'bot'+(m.status==='working'?' working':''));
     el.innerHTML=m.role==='user'?`<div class=b>${AIU.esc(m.text)}</div>`:botHTML(m)+(m.status==='working'?'':`<button class="link ai-rep" data-act=tkreport data-k=chat data-id="${AIU.esc(A.sid||'')}" title="Something wrong with this answer? Send a report">Report</button>`);
@@ -231,6 +234,7 @@ function cardHTML(c,m,i){
  if(c.type==='particles')return `<div class="ai-card plan"><div class=ai-ch><b>Particles · ${AIU.esc(c.name||c.set)}</b><small>${AIU.esc(c.set)}${c.drawing?' · drawing':''}</small><span class=sp></span>${c.pack_id?`<a class=ai-link href="#/pack/${AIU.esc(c.pack_id)}">Open the pack's particle studio</a>`:`<button class=link data-act=agpopen data-set="${AIU.esc(c.set)}">Open the particles</button>`}</div></div>`
  if(c.type==='generation'){
   const st=(c.data&&c.data.stickers)||[],ready=st.filter(x=>x.status==='READY').length,gid=c.generation;
+  if(gid&&A.genLater&&A.genLater.has(m.id+':'+gid))return `<div class="ai-card gen ai-gen-ref"><div class=ai-ch><b>${AIU.esc(c.subject||'Stickers')}</b><small>${AIU.esc(gid)} · ${ready} ready · shown in a newer message below</small><span class=sp></span><button class=ai-link data-act=agstudio data-g="${gid}">Open in Studio</button></div></div>`;
   let note='';
   if(['FAILED','TIMEOUT'].includes(c.job_status))note=JR.controls(c.job_info||{id:c.job,status:c.job_status,error:c.job_error});
   else if(!gid){note=`Drawing the sheet${c.job_stage?' · '+AIU.esc(c.job_stage):''}…`}
@@ -239,7 +243,7 @@ function cardHTML(c,m,i){
   else if(c.animating&&st.some(x=>['PENDING','RUNNING'].includes(x.anim_status)))note='Animating…';
   const meta=gid?`${gid}${c.data&&c.data.parent?' · from '+c.data.parent:''} · ${ready} ready`:'';
   return `<div class="ai-card gen"><div class=ai-ch><b>${AIU.esc(c.subject||'Stickers')}</b><small>${c.batch?AIU.esc(c.batch)+(meta?' · ':''):''}${meta}</small><span class=sp></span>${gid?`<button class=ai-link data-act=agstudio data-g="${gid}">Open in Studio</button>`:''}</div>
-   ${(c.data&&c.data.video_sheets||[]).filter(v=>v.status!=='REJECTED').map(v=>SR.picture(c.data,v)).join('')}${c.data?SR.bulk(c.data):''}${carHTML(st.length?st:null,gid,(c.data&&c.data.allow)||null)}${note?`<div class=car-note>${note}</div>`:''}</div>`}
+   ${(c.data&&c.data.video_sheets||[]).filter(v=>v.status!=='REJECTED'&&SR.controls(c.data,v)).map(v=>SR.picture(c.data,v)).join('')}${c.data?SR.bulk(c.data):''}${carHTML(st.length?st:null,gid,(c.data&&c.data.allow)||null)}${note?`<div class=car-note>${note}</div>`:''}</div>`}
  if(c.type==='creator'){const g=c.run&&(m.cards||[]).find(x=>x.type==='generation'&&x.generation===c.run.generation);return runHTML(c.run,(g&&g.data&&g.data.allow)||null)}
  if(c.type==='stickers'){return `<div class="ai-card"><div class=ai-ch><b>${c.stickers.length===1?'Sticker':'Stickers'}</b><small>${c.stickers.length} found</small></div>${carHTML(c.stickers.map(x=>({...x,status:'READY',name:x.key})),null)}</div>`}
  return ''}
