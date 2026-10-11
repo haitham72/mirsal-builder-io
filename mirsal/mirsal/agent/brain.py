@@ -49,6 +49,16 @@ SUMMARY_SYSTEM = """You compress the older turns of a sticker chat into 2-4 shor
 want next. Keep every generation and sticker id (G012, G012/S3) exactly. Do not invent anything.
 """ + llm.DATA_RULE
 
+EDIT_SYSTEM = """Interpret a requested edit of existing stickers in its conversational context.
+Read the ENTIRE instruction, including every clause. Replacement ('replace X with Y') changes X to Y, preserving unrelated stickers.
+Distinguish a detail (tweak), a new pose/action (action), and a new character/design (redesign).
+If any phrase is nonsense, any target is unclear, or the replacement/change is missing, clear=false; acknowledge only the understood part and ask ONE focused question.
+Never invent a meaning for unknown words, discard an unclear clause, or treat show/list requests as generation.
+Reply with JSON: {"clear": true or false, "confidence": 0.0-1.0,
+"case": "tweak" or "action" or "redesign", "change": "the requested change only",
+"understood": "short understood part or empty", "clarification": "short question or empty"}.
+""" + llm.DATA_RULE
+
 
 NAMES_SYSTEM = """You check the names of stickers against what their pictures show. You get numbered stickers, each with its CURRENT name and a one-sentence description of the picture.
 For each sticker say whether the name fits the picture. Keep a name that is roughly right. If it does not fit, give a better one: 2 to 5 plain English words naming the character and the feeling or action,
@@ -201,6 +211,20 @@ class Brain:
         """What a person wants changed about one subject when the rules could not tell: {"style_id", "size", "colour"} (any may be None), checked against the real presets by the caller."""
         d = self._json("LLM_REFINE", REFINE_SYSTEM, f"{llm.fence('SUBJECT', subject, 80)}\n{llm.fence('FEEDBACK', clause, 400)}")
         return d if isinstance(d, dict) else None
+
+    def edit_meaning(self, text: str, context: str) -> dict | None:
+        d = self._json("LLM_EDIT_MEANING", EDIT_SYSTEM,
+                       llm.fence("CONTEXT", context, 1800) + "\n" + llm.fence("REQUEST", text, 600))
+        if not isinstance(d, dict) or not isinstance(d.get("clear"), bool):
+            return None
+        try:
+            confidence = float(d.get("confidence", 0))
+        except (ValueError, TypeError):
+            return None
+        if d["clear"] and (confidence < 0.8 or d.get("case") not in ("tweak", "action", "redesign") or not str(d.get("change") or "").strip()):
+            d = {**d, "clear": False, "clarification": d.get("clarification") or "What exactly should I change?"}
+        return {"clear": d["clear"], "case": d.get("case"), "change": str(d.get("change") or "")[:300],
+                "understood": str(d.get("understood") or "")[:200], "clarification": str(d.get("clarification") or "")[:300]}
 
     def name_check(self, items: list) -> dict | None:
         """items = [{index, current, caption}] -> {index: {"fits": bool, "name": str}} for the stickers the model answered about, or None (no model, or an answer that is not usable).

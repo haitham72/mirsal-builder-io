@@ -241,8 +241,17 @@ def is_sticker_answer(text: str, has_selection: bool = False) -> bool:
     return any(_NUMBERISH.fullmatch(w) for w in words) or (has_selection and any(w in _ANSWER_PRONOUNS for w in words))
 
 
-DESCRIBE = (r"\b(?:describe|caption|captions|transcribe)\b|\bwhat(?:'s| is| are)?\s+(?:in|on|visible|shown)\b|\bwhat do\b.{0,40}\b(?:show|look like|depict)\b|\blook at\b")
+DESCRIBE = (r"\b(?:describe|caption|captions|transcribe)\b|\bwhat(?:'s| is| are)?\s+(?:in|on|visible|shown)\b|\bwhat do\b.{0,40}\b(?:show|look like|depict)\b|\blook at\b"
+            r"|\bwhat(?:'s| is| are)\b.{0,60}\bdoing\b|\bwhat about\s+(?:the\s+)?(?:#?\d+(?:st|nd|rd|th)?|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)\s*(?:sticker|one)?\b")
 """A request to LOOK at the pictures ("describe the stickers", "what do they show", "what is in number 3"): it needs AI vision, so it needs the person's yes (vision/consent.py)."""
+
+
+def display_request(text: str) -> bool:
+    """Display existing stickers, never turn an imperative 'show' into an image edit."""
+    t = re.sub(r"^(?:please\s+)?(?:can|could|would) you\s+", "", text.strip().lower())
+    return bool(re.fullmatch(r"(?:please\s+)?(?:show|list|display|let me see)(?:\s+me)?\s+"
+                            r"(?:(?:all|every)(?:\s+of)?\s+(?:(?:the|these|those|my)\s+)?(?:them|ones|stickers?|results?|carousel)"
+                            r"|all|them all|the (?:whole|full) (?:carousel|batch|set)|(?:these|those|the|my) stickers)\s*[.!?]*", t))
 
 
 # ---- intent rules ---------------------------------------------------------------------------------------------------------------
@@ -518,6 +527,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["EFFECTS"], 0.9                                      # "make particle effects for my Superman pack": the effects screen, never a new sheet
     if has_generation and re.search(NAMES_RX, t):
         return ["NAMES"], 0.9
+    if has_generation and display_request(t):
+        return ["ASK"], 0.95
     intents: list = []
     conf = 0.5
     counted = re.sub(r"\b(?:make|create|generate|draw|give|design|build)\s+(?:me\s+)?(?:a\s+)?(?:pack of\s+)?\d+\s+(?:\w+\s+){0,2}?(?:stickers?|emoji|packs?|sets?|dogs?|cats?|\w+s)\b|\bpack of \d+\b|\b\d+\s+(?:different\s+)?(?:\w+\s+){0,2}stickers?\b", " ", t)
@@ -571,6 +582,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         intents, conf = ["EDIT_STICKERS"], 0.7        # "bigger", "same but red", "happier": a change to what is open, never a new subject (the next question is which sticker)
     elif re.match(STATEMENT, t):
         intents, conf = ["AMBIGUOUS"], 0.3            # a statement, not a subject: the model may still read it, else I ask what to make (it used to become a plan for "it is haitham")
+    elif has_generation and re.match(r"^\w+\s+(?:the|this|that|these|those)\b", t):
+        intents, conf = ["AMBIGUOUS"], 0.3            # an unknown command on what is open needs interpretation, never a guessed new subject
     elif len(t.split()) <= 8 and not t.endswith("?") and not re.match(r"^(?:undo|revert|ok|okay|yes|no)\b", t):
         intents, conf = ["NEW"], 0.62                 # "falcon dancing", "teddy bear with a book": a bare subject is a request
     elif not t.endswith("?") and re.search(r"\b(?:in|with|on|of|holding|wearing|sitting|standing|style|and|for|a|an|the)\b", t) \

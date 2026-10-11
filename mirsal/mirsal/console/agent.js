@@ -71,7 +71,7 @@ const AIU=(()=>{
 if(typeof module!=='undefined')module.exports=AIU;
 
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){(()=>{
-const A={sid:null,sess:null,sessions:[],agent:null,llm:null,llmBusy:false,busy:false,sel:new Set(),open:new Set(),els:new Map(),shown:undefined,poll:0,setOpen:false,since:0,pre:''};
+const A={sid:null,sess:null,sessions:[],agent:null,llm:null,llmBusy:false,busy:false,sel:new Set(),open:new Set(),els:new Map(),shown:undefined,poll:0,setOpen:false,since:0,pre:'',stage:'auto'};
 const SUGG=['a teddy bear waving','falcon stickers','my dog as a banana','Eid mubarak greetings'];
 ICONS.send='<path d="M12 19V5M6 11l6-6 6 6"/>';
 
@@ -93,6 +93,7 @@ function bgInit(root){if(bgOn)return;bgOn=true;
 
 /* ---------- data */
 async function loadSessions(){const r=await api('/api/chat/sessions');if(r.ok)A.sessions=r.j.sessions;return A.sessions}
+async function loadStage(){const r=await api('/api/prefs');if(r.ok)A.stage=AIU.stageOf(r.j);drawStage()}
 async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=r.j;pill();drawBar()}
 /* the local server's models for the engine row's dropdown (no count limit); the first call may wait while the server loads its model */
 async function loadModels(){const r=await api('/api/llm/models');A.llm=r.ok?r.j:{models:[],current:'',ok:false,why:'Could not read the model list'};engRedraw()}
@@ -139,11 +140,11 @@ RENDER.agent=async arg=>{
   carDrag(root);
  }
  loadAgent().catch(()=>{});                       /* not awaited: the answer includes the local model's readiness probe, which can take a moment while the server loads it; the pill and the tiles fill in when it arrives */
- await loadSessions();
+ await Promise.all([loadSessions(),loadStage()]);
  const want=AIU.sid(location.hash)||(arg&&/^S\d+$/.test(arg)?arg:null)||A.sid||(location.hash.replace(/^#\/?/,'')==='agent'?null:null);
  if(want&&want!==A.sid||(want&&!A.sess)){A.sid=want;store.set('mirsal.ai.sid',want);A.els.clear();await loadSession(want,true)}
  else if(!want&&!A.sid){const last=store.get('mirsal.ai.sid');if(last&&A.sessions.some(s=>s.id===last)&&location.hash.replace(/^#\/?/,'')!=='agent/new'){A.sid=last;A.els.clear();await loadSession(last,true)}}
- paint();agList();setTimeout(()=>{const t=$('ai-in');if(t&&route_==='agent')t.focus({preventScroll:true})},60);
+ paint();agList();setTimeout(()=>{const t=$('ai-in');if(t&&route_==='agent'&&!A.stageOpen)t.focus({preventScroll:true})},60);
  if(AIU.needPoll(A.sess))startPoll();
 };
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&A.sess&&AIU.needPoll(A.sess))startPoll()});
@@ -171,11 +172,12 @@ function paint(){
   /* ONE full card per batch: the newest message that carries it; an older card of the same batch is a one-line pointer (no second carousel, no sheet) */
   const last=new Map();msgs.forEach((m,i)=>(m.cards||[]).forEach(c=>{if(c.type==='generation'&&c.generation)last.set(c.generation,i)}));
   A.genLater=new Set();msgs.forEach((m,i)=>(m.cards||[]).forEach(c=>{if(c.type==='generation'&&c.generation&&last.get(c.generation)>i)A.genLater.add(m.id+':'+c.generation)}));
-  msgs.forEach((m,i)=>{const k=[...A.genLater].filter(x=>x.startsWith(m.id+':')).join(',')+'|'+AIU.sig(m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',')+((m.chips||[]).some(c=>c.setting)?String(A.sess&&A.sess.settings&&A.sess.settings.allow_vlm):'');let el=A.els.get(m.id);
+  msgs.forEach((m,i)=>{const k=[...A.genLater].filter(x=>x.startsWith(m.id+':')).join(',')+'|'+AIU.sig(m.cards_first?Object.assign({},m,{text:''}):m)+'|'+(A.open.has(m.id)?1:0)+[...A.open].filter(x=>x.startsWith(m.id+':')).join(',')+((m.chips||[]).some(c=>c.setting)?String(A.sess&&A.sess.settings&&A.sess.settings.allow_vlm):'');let el=A.els.get(m.id);
    if(!el){el=document.createElement('div');A.els.set(m.id,el);list.appendChild(el);changed=true}
    if(el._k!==k){const keep=[...el.querySelectorAll('.car-track')].map(t=>t.scrollLeft);el._k=k;el.className='ai-m '+(m.role==='user'?'user':'bot'+(m.status==='working'?' working':''));
     el.innerHTML=m.role==='user'?`<div class=b>${AIU.esc(m.text)}</div>`:botHTML(m)+(m.status==='working'?'':`<button class="link ai-rep" data-act=tkreport data-k=chat data-id="${AIU.esc(A.sid||'')}" title="Something wrong with this answer? Send a report">Report</button>`);
-    el.querySelectorAll('.car-track').forEach((t,j)=>{if(keep[j])t.scrollLeft=keep[j];carSync(t)});changed=true}});
+    el.querySelectorAll('.car-track').forEach((t,j)=>{if(keep[j])t.scrollLeft=keep[j];carSync(t)});changed=true}
+   if(m.cards_first&&el._text!==m.text){const text=el.querySelector('.ai-text');if(text)text.innerHTML=AIU.md(m.text||'');el._text=m.text;changed=true}});
   for(const [id,el] of [...A.els])if(!msgs.some(m=>m.id===id)){el.remove();A.els.delete(id)}
   if(switched){A.shown=A.sid;sc.scrollTop=sc.scrollHeight;pinBottom(sc,list)}
   else if(changed&&(near||msgs[msgs.length-1].role==='user'))requestAnimationFrame(()=>sc.scrollTo({top:sc.scrollHeight,behavior:'smooth'}));
@@ -187,10 +189,10 @@ function busyUi(){const w=!!(A.sess&&A.sess.working)||A.busy;const b=$('ai-send'
 function botHTML(m){
  const work=m.status==='working',steps=m.steps||[];
  const tr=steps.length||work?traceHTML(m,work):'';
- const text=m.text?`<div class="ai-text${m.status==='error'?' ai-err':''}">${AIU.md(m.text)}</div>`:'';
+ const text=m.text||m.cards_first?`<div class="ai-text${m.status==='error'?' ai-err':''}">${AIU.md(m.text||'')}</div>`:'';
  const cards=(m.cards||[]).map((c,i)=>cardHTML(c,m,i)).join('');
  const chips=(m.chips&&m.chips.length&&!work)?`<div class=ai-chips>${m.chips.map(chipHTML).join('')}</div>`:'';
- return `<div class=ai-av>${ic('ai')}</div><div class=ai-body>${tr}${text}${cards}${chips}</div>`}
+ return `<div class=ai-av>${ic('ai')}</div><div class=ai-body>${tr}${m.cards_first?cards+text:text+cards}${chips}</div>`}
 
 function traceHTML(m,work){
  const steps=m.steps||[],open=work||A.open.has(m.id);
@@ -370,14 +372,15 @@ function stageDetails(){const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_befo
  const kind=k=>{const list=[...(cat[k]||[]),...((cat.more||{})[k]||[])].map(x=>({id:x.id,label:x.label}));const def=(list.find(x=>x.id===(cat.defaults||{})[k])||{}).label||'';return list.length?{list,cur:mine[k]||'',def}:null};
  return {models:{ai:(llm.models||[]).length?{list:llm.models.map(x=>({id:x.id,label:x.id})),cur:mine.ai||'',def:(llm.current||'').replace(/:\d+$/,'')}:null,image:kind('image'),video:kind('video')},
   grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass),actions:st.actions||'creative'}}
-function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(AIU.stageOf(A.sess&&A.sess.settings),A.stageOpen,A.stageOpen?stageDetails():null);
+function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(A.sess?AIU.stageOf(A.sess.settings):A.stage,A.stageOpen,A.stageOpen?stageDetails():null);
  if(A.stageOpen&&!el.contains(document.activeElement)){const r=el.querySelector('.ag-range');if(r)r.focus({preventScroll:true})}}
 function closeStage(focus){if(!A.stageOpen)return;A.stageOpen=false;drawStage();if(focus){const b=document.querySelector('#ag-stage .ag-stage-btn');if(b)b.focus()}}
 ACT.agstage=async()=>{A.stageOpen=!A.stageOpen;drawStage();if(!A.stageOpen)return;
  const need=[];if(!A.cat)need.push(api('/api/models').then(r=>{A.cat=r.ok?r.j:{}}));if(!A.llm)need.push(loadModels());
  if(need.length){await Promise.all(need);if(A.stageOpen)drawStage()}};
 ACT.agsetact=el=>saveSet({actions:el.dataset.v==='predefined'?'predefined':'creative'});
-ACT.agstagepick=async(el,ev,keep)=>{const v=el.dataset.v;if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});if(!keep)A.stageOpen=false;drawStage();await saveSet({stage:v});
+ACT.agstagepick=async(el,ev,keep)=>{const v=el.dataset.v;if(!AIU.STAGES.some(s=>s[0]===v))return;const prior=A.stage;A.stage=v;if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});if(!keep)A.stageOpen=false;drawStage();
+ if(A.sess)await saveSet({stage:v});else{const r=await post('/api/prefs',{stage:v});if(!r.ok){A.stage=prior;drawStage();toast(r.j.error||'Could not save the stage',1)}}
  const b=document.querySelector(keep?'#ag-stage .ag-range':'#ag-stage .ag-stage-btn');if(b)b.focus()};
 document.addEventListener('keydown',e=>{if(!e.target.closest||!e.target.closest('#ag-stage'))return;
  if(A.stageOpen&&e.key==='Escape'){e.preventDefault();closeStage(true)}
@@ -389,7 +392,7 @@ document.addEventListener('input',e=>{const r=e.target;if(!r.dataset||r.dataset.
  r.setAttribute('aria-valuetext',s[1]);const h=document.querySelector('#ag-stage .sp-hint');if(h)h.textContent=`${s[1]}: ${s[2]}`;
  document.querySelectorAll('#ag-stage .ag-names .ag-stop').forEach((b,i)=>b.classList.toggle('on',i===k))});
 
-document.addEventListener('click',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
+document.addEventListener('click',e=>{const inside=e.composedPath().some(el=>el.id==='ag-stage');if(A.stageOpen&&!inside)closeStage(false)});
 document.addEventListener('focusin',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
 function drawBar(){if(typeof drawStage==='function')drawStage();const bar=$('ag-bar'),box=$('ag-styles');if(!bar||!box)return;
  const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},list=(A.agent&&A.agent.styles)||[],cur=styleNow();
@@ -402,7 +405,7 @@ ACT.agstyle=async el=>{A.pre=el.dataset.id;A.stylesOpen=false;store.set('mirsal.
 ACT.agstyles=()=>{A.stylesOpen=!(A.stylesOpen??!A.pre);drawBar()};
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
 ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await Promise.all([loadAgent(),engSync()]);engRedraw()}else toast(r.j.error||'Could not change the AI engine',1)};
-async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;setSet();drawBar()}else toast(r.j.error,1)}
+async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;A.stage=AIU.stageOf(r.j.settings);setSet();drawBar()}else{if(p.stage)await loadSession(sid,true);toast(r.j.error,1)}}
 /* the AI engine row: Auto keeps a working backend and only a failed call switches it; Local / Cloud are used as chosen. A backend that is not available says why. */
 function beRow(){const a=ENGSRC||A.agent||{},av=a.availability||{},pref=a.preference||'auto';
  const b=(v,label)=>{const ok=v==='auto'||(av[v]&&av[v].ok);const why=v==='auto'?'Use the local model when LM Studio answers, otherwise the cloud; keep what works':(av[v]&&av[v].why)||(av[v]&&av[v].model)||'';

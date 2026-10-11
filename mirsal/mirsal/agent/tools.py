@@ -650,6 +650,15 @@ class ConsoleTools:
         self._see(gid)
         return naming.pending(self.out, gid)
 
+    def describe(self, gid: str, index: int, question: str, allowed=None, on_delta=None) -> str:
+        from ..vision import consent, describe
+        from ..vision.judge import JudgeError
+        self._see(gid)
+        try:
+            return describe.sticker(self.out, gid, index, question, allowed=allowed, on_delta=on_delta)
+        except (consent.ConsentRequired, JudgeError) as e:
+            raise ToolError(str(e), 409)
+
     def captions(self, gid: str, allowed=None) -> list:
         """The AI caption of every READY sticker of a batch (one vision-model call per cell that has none; a stored caption is read for free). `allowed` must be True: the
         person's yes to AI vision (vision/consent.py); the chat passes it from the session's `allow_vlm`."""
@@ -976,6 +985,16 @@ class FakeTools:
 
     def pending_titles(self, gid):
         return dict(self.proposed.get(gid, {}))
+
+    def describe(self, gid, index, question, allowed=None, on_delta=None):
+        self.calls.append(("describe", gid, index, question, allowed))
+        if allowed is not True:
+            raise ToolError("AI vision is not allowed", 409)
+        text = f"The character in S{index} is holding a book. He is looking down at its pages."
+        if on_delta:
+            on_delta(text[:len(text) // 2])
+            on_delta(text[len(text) // 2:])
+        return text
 
     def captions(self, gid, allowed=None):
         self.calls.append(("captions", gid, allowed))

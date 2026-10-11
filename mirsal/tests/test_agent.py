@@ -507,9 +507,10 @@ class AiVision(Base):
         self.assertIsNone(self.sess()["pending"])
         m2 = self.say("what is in number 3")
         self.assertNotIn("Allow AI vision", m2["text"])                                       # asked once
-        self.assertEqual(len(self.captions()), 2)
-        self.assertIn("fake caption 3", m2["text"])
-        self.assertNotIn("fake caption 4", m2["text"])                                        # only the sticker asked about
+        self.assertEqual(len(self.captions()), 1)
+        self.assertEqual([c[2] for c in self.tools.calls if c[0] == "describe"], [3])
+        self.assertIn("S3", m2["text"])
+        self.assertNotIn("S4", m2["text"])                                        # only the sticker asked about
 
     def test_no_remembers_it_too_and_nothing_is_sent_until_the_person_changes_their_mind(self):
         self.seed("G012")

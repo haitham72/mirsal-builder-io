@@ -408,6 +408,58 @@ def data_url(b: bytes) -> str:
     return f"data:{mime};base64," + base64.b64encode(b).decode("ascii")
 
 
+def _visible_text(text: str) -> str:
+    """Keep hidden thinking and incomplete tags out of streamed user-facing text."""
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S)
+    text = re.sub(r"<think>.*$", "", text, flags=re.S)
+    return re.sub(r"<[^>]*$", "", text).replace("</think>", "")
+
+
+def _post_stream(url: str, body: dict, key: str | None, timeout: float, on_delta) -> dict:
+    """Read chat-completion SSE, emitting visible content as it arrives. Reasoning fields stay private."""
+    headers = {"content-type": "application/json", "accept": "text/event-stream"}
+    if key:
+        headers["authorization"] = "Bearer " + key
+    req = urllib.request.Request(url, data=json.dumps({**body, "stream": True}).encode("utf-8"), method="POST", headers=headers)
+    from .telegram import _ssl_context
+    raw, shown, usage, model, finish = "", "", {}, body["model"], None
+    deadline = time.monotonic() + timeout
+    with urllib.request.urlopen(req, timeout=timeout, context=_ssl_context()) as response:
+        # Some compatible endpoints ignore stream; still accept their ordinary response.
+        if "application/json" in response.headers.get("content-type", ""):
+            data = json.loads(response.read().decode("utf-8"))
+            try:
+                content = _visible_text(data["choices"][0]["message"].get("content") or "")
+            except (KeyError, IndexError, TypeError, AttributeError):
+                raise LLMError("The AI service answered in an unexpected shape.", kind="shape")
+            if content:
+                on_delta(content)
+            return data
+        for line in response:
+            if time.monotonic() > deadline:
+                raise LLMError("The AI description timed out.", kind="unreachable")
+            line = line.decode("utf-8").strip()
+            if not line.startswith("data:"):
+                continue
+            payload = line[5:].strip()
+            if payload == "[DONE]":
+                break
+            data = json.loads(payload)
+            if data.get("error"):
+                raise LLMError("The AI service could not finish the description.", kind="http")
+            model, usage = data.get("model") or model, data.get("usage") or usage
+            for choice in data.get("choices") or []:
+                if choice.get("index", 0) != 0:
+                    continue
+                finish = choice.get("finish_reason") or finish
+                raw += (choice.get("delta") or {}).get("content") or ""
+                visible = _visible_text(raw)
+                if visible.startswith(shown) and len(visible) > len(shown):
+                    on_delta(visible[len(shown):])
+                    shown = visible
+    return {"model": model, "usage": usage, "choices": [{"message": {"content": shown}, "finish_reason": finish}]}
+
+
 CLOSED_THINK = "<think>\n\n</think>\n\n"
 
 
@@ -499,9 +551,19 @@ def fallback_model() -> str | None:
 def _complete_on(prov: str, system: str, user: str, **kw) -> tuple[str, dict]:
     """One completion on `prov`; on the cloud, a failed or empty answer of the configured model is asked once more of MIRSAL_LLM_FALLBACK
     (not when the caller or the session pinned a model)."""
+    emitted = False
+    receive = kw.get("on_delta")
+    if receive is not None:
+        def delta(text):
+            nonlocal emitted
+            emitted = True
+            receive(text)
+        kw = {**kw, "on_delta": delta}
     try:
         return _complete_one(prov, system, user, **kw)
     except LLMError:
+        if emitted:
+            raise                                      # a visible answer must never restart on a different model
         fb = fallback_model() if prov == "openai" and not kw.get("model_") and not (forced() or {}).get("model") else None
         if not fb or fb == os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL):
             raise
@@ -510,7 +572,7 @@ def _complete_on(prov: str, system: str, user: str, **kw) -> tuple[str, dict]:
 
 def _complete_one(prov: str, system: str, user: str, *, max_tokens: int = 2500, timeout: float = 60.0, temperature: float = 0.8,
                  json_mode: bool = False, images: list | None = None,
-                 model_: str | None = None, base_url: str | None = None, retry_empty: bool = True) -> tuple[str, dict]:
+                 model_: str | None = None, base_url: str | None = None, retry_empty: bool = True, on_delta=None) -> tuple[str, dict]:
     """-> (text, meta{model, ms, tokens_in, tokens_out, provider}). Raises LLMError with a plain message that never contains the key.
     json_mode asks for a JSON object (the prompt must say JSON). Reasoning models (gpt-5*, o*) take no temperature; a model that
     refuses an optional parameter (HTTP 400) is retried once without temperature and json_mode (not when the 400 says no model is loaded: asking again cannot help).
@@ -551,6 +613,9 @@ def _complete_one(prov: str, system: str, user: str, *, max_tokens: int = 2500, 
     def request(b: dict) -> dict:
         for attempt in (0, 1):
             try:
+                if on_delta is not None:
+                    return _post_stream(url, {**b, **(optional if attempt == 0 else {})}, key,
+                                        max(1.0, t_end - time.perf_counter()), on_delta)
                 return _post(url, {**b, **(optional if attempt == 0 else {})}, key, max(1.0, t_end - time.perf_counter()))
             except urllib.error.HTTPError as e:
                 try:

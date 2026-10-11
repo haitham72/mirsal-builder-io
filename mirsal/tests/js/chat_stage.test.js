@@ -3,6 +3,56 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const U = require('../../mirsal/console/agent.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const { loadConsole } = require('./console_vm');
+
+function handlers() {
+  const source = fs.readFileSync(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8')
+    .replace('})()}', 'globalThis.ChatTest={A,drawStage,loadStage,botHTML};})()}');
+  return loadConsole([], { extra: `
+    const window=globalThis,EVENTS={};
+    document.addEventListener=(type,fn)=>(EVENTS[type]||=[]).push(fn);
+    const RANGE={focus(){document.activeElement=this}};
+    const STAGE={id:'ag-stage',innerHTML:'',contains(el){return el===RANGE},querySelector(){return RANGE}};
+    DOMSTUB['ag-stage']=STAGE;
+    ${source}
+    ChatTest.A.cat={};ChatTest.A.llm={models:[]};
+  ` });
+}
+
+test('the opening click stays inside the stage even after drawing detaches the original button', async () => {
+  const run = handlers();
+  await run('ACT.agstage()');
+  assert.equal(run('ChatTest.A.stageOpen'), true);
+  run(`EVENTS.click.forEach(fn=>fn({target:{closest:()=>null},composedPath:()=>[{id:''},STAGE,document]}))`);
+  assert.equal(run('ChatTest.A.stageOpen'), true, 'the original event path keeps the popover open');
+  assert.match(run('STAGE.innerHTML'), /class=ag-stage-pop/);
+  run(`EVENTS.click.forEach(fn=>fn({target:{closest:()=>null},composedPath:()=>[document]}))`);
+  assert.equal(run('ChatTest.A.stageOpen'), false, 'a real outside click closes it');
+});
+
+test('a new chat reads the person’s stage; picking it saves preferences without creating an empty chat', async () => {
+  const run = handlers();
+  run(`APIREPLIES.push({ok:true,j:{stage:'animation'}})`);
+  await run('ChatTest.loadStage()');
+  assert.match(run('STAGE.innerHTML'), />Animation<i/);
+  run(`POSTREPLIES.push({ok:true,j:{stage:'emojis'}})`);
+  await run(`ACT.agstagepick({dataset:{v:'emojis'}})`);
+  assert.equal(run('ChatTest.A.sid'), null);
+  assert.equal(run('POSTS.length'), 1);
+  assert.equal(run('POSTS[0][0]'), '/api/prefs');
+  assert.match(run('STAGE.innerHTML'), />Stickers<i/);
+  run(`ChatTest.A.sess={settings:{stage:'prompt'}};ChatTest.drawStage()`);
+  assert.match(run('STAGE.innerHTML'), />Prompt<i/, 'an opened session shows its effective saved stage');
+});
+
+test('descriptions put the sticker card before the streamed explanation', () => {
+  const run = handlers();
+  const html = run(`ChatTest.botHTML({status:'working',text:'He is reading',cards_first:true,
+    cards:[{type:'stickers',stickers:[]}],steps:[]})`);
+  assert.ok(html.indexOf('car') < html.indexOf('He is reading'));
+});
 
 test('closed it is one pill: a small slider glyph, the current stop and a caret, no slider', () => {
   const h = U.stageHTML('emojis', false);

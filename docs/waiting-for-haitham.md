@@ -54,7 +54,7 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 **21. `DEFAULT_SPRITE_PX` (`flow/effects.py`, now 100): change to 200?** Measured: a smaller sprite gives no latency gain (the engine already shrinks sprites) and 100 changes the 512 final by 9/255. Recommendation: 200 for render, keep 100 for preview. Unblocks: closing the particle-render default.
 
-**22. An empty "New chat" is created when a setting is clicked with no chat open.** Intended (the setting needs a home), or should the setting wait until a chat exists? Recommendation: create the chat only on the first message and keep the setting in the bar meanwhile. Unblocks: the chat-list hygiene fix.
+**22. An empty "New chat" is created when a setting other than stage is clicked with no chat open.** Intended (the setting needs a home), or should the setting wait until a chat exists? Recommendation: create the chat only on the first message and keep the setting in the bar meanwhile. Unblocks: the chat-list hygiene fix.
 
 **23. Chat gaps the browser look left open: what should happen?** (a) A chat edit of an animated sticker opens Prepare (the still editor), not the animated editor; (b) "undo" has no "redo"; (c) a bare "the last one" / "wear a hat" with no person and no focus still plans a NEW batch. Recommendation: (a) open the animated editor, (b) add "redo" as the inverse of one undo, (c) ask "which one?" when a batch is open, otherwise plan. Unblocks: the three open lines in `docs/backlog.md` (agent and chat).
 

@@ -4,34 +4,6 @@ What an LLM does next. The stages (Prompt · Stickers · Animation · Telegram �
 the architecture is in `docs/agent-and-chat.md` "Stages and the batch follow-up". Read `CLAUDE.md` first; test budget: `docs/testing.md` (one narrowest
 run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when it is built; delete this file when the plan is done.
 
-## Step 0 — bugs Haitham found in the browser (2026-10-11; FIRST, before Step A)
-
-Implementation starts here: use this plan checkpoint as the starting point for the changes below, beginning with Step 0 before Step A.
-
-1. **The stage slider does not pop up.** Haitham: "slider doesnt popup, it is now either auto for new chat or random selection".
-   Clicking the pill must open the slider and show the actual selected stage; new chats must use the intended default and existing chats their saved choice.
-   Check in a real browser (`agent.js` `drawStage` / `ACT.agstage` / `stageHTML`, `agent.css` `.ag-stage-pop`): is the panel drawn and clipped
-   (`.ai-box` overflow, z-index), or closed at once by the document click / focusin listeners? Is the pill showing the person's stop
-   (`GET /api/prefs` vs the session's `settings.stage`, `SessionStore.load` override)? Fix, then add a node or DOM test that opening keeps it open.
-2. **"Describe sticker N" must look at the picture and explain it, streamed.** "what is the second sticker doing" answered only with the stored name
-   ("G129/S2: superman kid standing proud") and a one-sticker card (the animation), no explanation. Wanted: the sticker card shows at once, then the
-   vision model inspects THAT still and streams an explanation under the immediately selected sticker (AI vision is already allowed). Showing the
-   correct animation or repeating its name/caption is not a description. Only describe motion from inspected animation evidence when relevant.
-   Resolve "what is he doing" to the previously selected sticker and "what about 4th sticker" to S4 of the same batch. Look at the
-   describe / ask path in `agent/graph.py` (`n_ask`, `DESCRIBE`) and `vision/` (judge / transcribe); stream through the chat's events.
-3. **"show all of them" was read as an edit** and planned a paid new sheet ("change only: show all of them"). It means: show every sticker of the
-   batch (the carousel). Fix the resolver (`agent/resolver.py` classify / `editroute`): resolve "them" to all nine stickers of G129 even after showing
-   only S2 or S4; show / list / see all / every sticker requests display existing results. Return the full carousel immediately, without a generation
-   plan, "change only" prompt, credit estimate or Create confirmation.
-4. **Make sense of what the person means, or ask.** Interpret "replace x with y" using the conversation's targets and the requested replacement;
-   "replace 2 with a cat", "slow down 4", "make 3 laugh" must map to the right action (replace one cell / slow that sticker's animation / edit one).
-   Ask a focused clarification when the target, replacement or requested action is unclear. For the exact mixed request "slow down 4 and flabberagsser
-   the unwhistlemended", acknowledge the understood S4 slowdown and ask what the remaining phrase means; do not silently drop it or invent a change.
-   Rule: an edit that would spend needs a clear target and a clear change; otherwise ask before preparing a paid plan.
-   Add FakeTools regressions for these sentences and the full supplied sequence: second sticker -> "what is he doing" -> fourth sticker -> "show all
-   of them". Assert the still reaches vision, selection precedes streamed explanation, pronouns/ordinals keep the right batch, the final carousel has
-   all nine stickers, and unclear requests ask rather than create a guessed plan.
-
 ## Step A — refactor the screen scripts, no behaviour change (FIRST; a fresh session, Opus on medium)
 
 Why: `mirsal/mirsal/console/generate.js` (~850 lines), `agent.js`, `app.js`, `live.js`, `packs.js` put a whole function on one line (300-900 characters),

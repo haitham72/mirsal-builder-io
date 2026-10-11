@@ -129,8 +129,14 @@ def unsupported(text: str) -> str | None:
 def classify_edit(text: str) -> dict | None:
     """{route, case, ops, subject, action, delta} for a request about what is open, or None (a new request, a question, small talk). See the module doc for the cases."""
     t = _norm(text)
-    if not t or NOT_AN_EDIT.search(t):
+    from .resolver import display_request, DESCRIBE
+    if not t or NOT_AN_EDIT.search(t) or display_request(t) or re.search(DESCRIBE, t):
         return None
+    replacement = re.match(r"^(?:replace|swap)\s+(.+?)\s+(?:with|for)\s+(.+)$", t)
+    if replacement and re.fullmatch(rf"(?:{PRON}|{_ORD}(?:\s+(?:one|sticker))?|#?\d+|number\s+\d+|g\d+/s\d|s\d|the .+ one)", replacement[1]):
+        subject = re.sub(r"^(?:an?|the)\s+", "", replacement[2]).strip()
+        if _subject_like(subject):
+            return {"route": "regen", "case": "redesign", "ops": [], "subject": subject, "action": None, "delta": None}
     if re.search(r"\b(?:style|pose|expression|face|colou?r|composition|subject|character|animation|motion)\s+(?:from|of)\s+(?:the\s+)?(?:number\s+|#|s)?(?:\d|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last)\b", t):
         return None                                  # the numbered-reference edit node binds each image to its requested role
     ops = [name for name, rx in EDITOR if re.search(rx, t)]
@@ -151,6 +157,23 @@ def classify_edit(text: str) -> dict | None:
             return None                                                # a sticker pointed at and no change named ("redo 3"): the sticker edit says "a fresh take"
         return {"route": "regen", "case": "tweak", "ops": [], "subject": None, "action": None, "delta": d or t}
     return None
+
+
+def clear_change(text: str, er: dict) -> bool:
+    """Conservative fallback when semantic interpretation is unavailable. Unknown changes need a question."""
+    t = _norm(text)
+    if er.get("route") == "editor":
+        return True
+    change = er.get("delta") or er.get("action") or er.get("subject") or ""
+    if re.search(r"\b(?:and|then|also)\b", change):
+        # Each extra clause must mean something; never drop an unknown tail from a mixed request.
+        clauses = re.split(r"\b(?:and|then|also)\b", change)
+        if any(not re.search(rf"\b(?:{EMOTIONS}|{COLOUR}|{WEAR}|{ACTVERB})\b", c) for c in clauses):
+            return False
+    if er.get("case") == "redesign":
+        return bool(re.match(r"^(?:replace|swap)\b.*\b(?:with|for)\s+\S|^(?:make|turn|change|transform|convert|redesign)\b", t) and _subject_like(change))
+    return bool(re.search(rf"\b(?:{EMOTIONS}|{COLOUR}|{WEAR}|{ACTVERB})\b", change)
+                or re.search(r"\b(?:bigger|smaller|taller|shorter|more|less|cartoonish|realistic|outline|skyline|background|hand|eyes|mouth)\b", change))
 
 
 # ---- writing a case into a copy of the parent's stored plan ----------------------------------------------------------------------------------------------------------

@@ -33,7 +33,7 @@ from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from . import editroute, refine, subjects
 from .profile import Profile
-from .resolver import DESCRIBE, NAME_QUESTION, Resolution, batch_intent, beyond, classify, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind, profile_facts, request_text
+from .resolver import DESCRIBE, NAME_QUESTION, Resolution, batch_intent, beyond, classify, display_request, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind, profile_facts, request_text
 from .profile import profile_said
 from .tools import ConsoleTools, ToolError
 
@@ -384,7 +384,10 @@ class Agent:
             if not self.store.subject_for_generation(t.sess, gid) and self.store.adopt(t.sess, gid):
                 t.trace.note(f"{gid} was made outside this chat (the Studio): I can work on it now")
         ctx = self._ctx(t)
-        r = resolve(t.text, ctx)
+        replacement = re.match(r"\s*(?:replace|swap)\s+(.+?)\s+(?:with|for)\s+(.+)", t.text, re.I)
+        r = resolve(replacement[1] if replacement else t.text, ctx)
+        if display_request(t.text):
+            r.stickers, r.needs_clarification, r.how = [], False, "whole batch"
         gone = beyond(t.text, int(ctx["known"].get(r.generation or ctx["generation"], ctx["n"]) or 9), t.answer) if (r.generation or ctx["generation"]) else []
         if gone and not r.stickers and not r.needs_clarification:       # "number 12" in a batch of 9: say what the batch has, never ask again in the same words
             size = int(ctx["known"].get(r.generation or ctx["generation"], ctx["n"]) or 9)
@@ -392,7 +395,7 @@ class Agent:
             r.clarification = f"{self._nm(t.sess, r.generation or ctx['generation'])} has {size} stickers, so there is no number {', '.join(str(g) for g in gone)}. Which one do you mean, 1 to {size}?"
         elif gone:
             t.trace.note(f"there is no number {', '.join(str(g) for g in gone)}: that batch has {ctx['n']} stickers")
-        if not r.stickers and not r.needs_clarification and ("edit" in needs or "ask" in needs) and ctx["stickers"] and self.brain.available:
+        if not r.stickers and not r.needs_clarification and not display_request(t.text) and ("edit" in needs or "ask" in needs) and ctx["stickers"] and self.brain.available:
             nums = self.brain.pick_stickers(t.text, ctx["stickers"])
             if nums and ctx["generation"]:
                 r.stickers, r.how = [f"{ctx['generation']}/S{i}" for i in nums], "language model"
@@ -997,7 +1000,7 @@ class Agent:
                 return {}
             t.sess["settings"]["allow_vlm"] = True
             t.trace.retitle(f"looking at {self._nm(t.sess, p['generation'])}")
-            self._run_describe(t, p["generation"], p.get("only") or [])
+            self._run_describe(t, p["generation"], p.get("only") or [], question=p.get("question"))
         elif p["type"] == "particles":
             self._do_particles(t, p)
         elif p["type"] == "batch":
@@ -1553,6 +1556,8 @@ class Agent:
 
     def _explicit_targets(self, t: Turn) -> list:
         """The stickers the person POINTED at in this message (a number, an id, a selection, "the shocked one"): a slice. A pronoun ("him", "it") is the character, so the whole sheet."""
+        if re.match(r"\s*(?:replace|swap)\b", t.text, re.I):
+            return list(t.res.stickers)
         return list(t.res.stickers) if t.res.how in ("number", "explicit id", "selection", "concept", "make A like B", "feedback clauses") else []
 
     def n_editroute(self, state: State) -> dict:
@@ -1565,8 +1570,32 @@ class Agent:
         if not gen or not er:
             t.reply = "There is nothing to change yet. Let's make some stickers first."
             return {}
+        replacement = re.match(r"\s*(?:replace|swap)\s+(.+?)\s+(?:with|for)\s+(.+)", t.text, re.I)
+        if replacement and re.fullmatch(r"(?:#?\d+|s\d+|g\d+/s\d+|(?:the )?(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)(?: sticker| one)?)", replacement[2], re.I):
+            target = ", ".join(x.split("/")[1] for x in t.res.stickers) or replacement[1]
+            t.reply = f"Do you want to copy {replacement[2]} into {target}, or swap the two stickers?"
+            t.trace.end("asked what replacement means")
+            return {}
         if er["route"] == "editor":
             return self._editor_offer(t, gen, er)
+        interpreted = self.brain.edit_meaning(t.text, self.store.summary_text(t.sess)) if self.brain.available else None
+        if interpreted and not interpreted["clear"]:
+            t.reply = ((interpreted["understood"] + " ") if interpreted["understood"] else "") + (interpreted["clarification"] or "What should I change?")
+            t.trace.end("asked what the edit means")
+            return {}
+        if interpreted:
+            case = interpreted["case"]
+            er = {**er, "case": case, "subject": None, "action": None, "delta": None,
+                  {"tweak": "delta", "action": "action", "redesign": "subject"}[case]: interpreted["change"]}
+        elif not editroute.clear_change(t.text, er):
+            t.reply = "I couldn't confidently understand the whole change. What should I change, and on which sticker?"
+            t.trace.end("asked what the edit means")
+            return {}
+        if re.match(r"\s*(?:replace|swap)\b", t.text, re.I) and not t.res.stickers:
+            t.reply = "Which sticker should I replace? Give its number or select it."
+            t.sess["awaiting"] = {"intents": ["EDIT_ROUTE"], "text": t.text}
+            t.trace.end("asked which sticker")
+            return {}
         return self._regen_offer(t, gen, er)
 
     def _editor_offer(self, t: Turn, gen: str, er: dict) -> dict:
@@ -1703,6 +1732,15 @@ class Agent:
         fresh = editroute.fresh_take(edit)
         if fresh:
             edit = ""
+        elif not t.res.references:
+            meaning = self.brain.edit_meaning(t.text, self.store.summary_text(t.sess)) if self.brain.available else None
+            if (meaning and not meaning["clear"]) or (not meaning and not editroute.clear_change(t.text, {"case": "tweak", "delta": edit})):
+                t.reply = (meaning or {}).get("clarification") or "What exactly should I change on this sticker?"
+                t.trace.end("asked what the edit means")
+                return {}
+            if meaning:
+                return self._regen_offer(t, gen, {"case": meaning["case"],
+                    {"tweak": "delta", "action": "action", "redesign": "subject"}[meaning["case"]]: meaning["change"]})
         like = ", ".join(self._key_of(gen, r["source"]) for r in t.res.references)
         said = (("same look as " + like) if like else "") + (f" ({edit})" if like and edit else edit if edit else "") or "a fresh take"
         card = self.tools.generation(gen)
@@ -1967,6 +2005,18 @@ class Agent:
         t: Turn = state["turn"]
         r = t.res
         low = t.text.lower()
+        if display_request(t.text):
+            gen = r.generation
+            if not gen:
+                t.reply = "Which batch should I show?"
+                t.trace.end("asked which batch")
+                return {}
+            hits = self.tools.generation(gen)["stickers"]
+            t.cards.append({"type": "stickers", "stickers": hits})
+            t.reply = f"Here are all {len(hits)} stickers from **{self._nm(t.sess, gen)}**."
+            t.generation = gen
+            t.trace.end("showed the whole batch")
+            return {}
         if re.search(DESCRIBE, low):
             return self._describe(t)
         t.trace.retitle("looking it up")
@@ -2019,7 +2069,7 @@ class Agent:
             t.trace.end("AI vision is off", ok=False)
             return {}
         if allow is None:
-            t.sess["pending"] = {"type": "describe", "generation": gen, "only": only}
+            t.sess["pending"] = {"type": "describe", "generation": gen, "only": only, "question": t.text}
             t.reply = (f"To describe **{self._nm(t.sess, gen)}** I send its pictures to the vision model (the local one when LM Studio is running, otherwise the cloud one). "
                        "Allow AI vision of generated media? I only ask once.")
             t.chips = [{"label": "Allow AI vision", "action": "confirm"}, {"label": "Not now", "action": "cancel"}]
@@ -2028,7 +2078,36 @@ class Agent:
         self._run_describe(t, gen, only)
         return {}
 
-    def _run_describe(self, t: Turn, gen: str, only: list) -> None:
+    def _run_describe(self, t: Turn, gen: str, only: list, question: str | None = None) -> None:
+        card = self.tools.generation(gen)
+        hits = [s for s in card["stickers"] if not only or s["index"] in only]
+        t.cards.append({"type": "stickers", "stickers": hits})
+        t.msg.update(cards=t.cards, cards_first=True)
+        self.store.save(t.sess)                      # the selected sticker reaches SSE before any vision call
+        if only:
+            t.trace.step("looking at the selected still image")
+            parts = []
+            for item in hits:
+                prefix = ("\n\n".join(parts) + "\n\n" if parts else "") + f"**S{item['index']}**: "
+                current = ""
+
+                def delta(text):
+                    nonlocal current
+                    current += text
+                    t.msg["text"] = prefix + current
+                    self.store.save(t.sess)
+
+                try:
+                    answer = self.tools.describe(gen, item["index"], question or t.text, allowed=True, on_delta=delta)
+                except ToolError:
+                    answer = "I couldn't inspect this still right now. Please try again."
+                parts.append(f"**S{item['index']}**: {answer}")
+            t.reply = "\n\n".join(parts) or "That sticker has no finished still yet."
+            t.sess["focus"] = {"generation": gen, "stickers": [s["id"] for s in hits][:3]}
+            t.res.generation, t.res.stickers = gen, [s["id"] for s in hits]
+            t.generation = gen
+            t.trace.end("described the still")
+            return
         try:
             caps = self.tools.captions(gen, True)
         except ToolError as e:
@@ -2268,9 +2347,13 @@ class Agent:
             t.reply = "I did not decide anything: I could not tell whether you want to approve or reject. Say it plainly, for example \"approve 3\" or \"reject 4 and 5\"."
             t.trace.end("asked what to decide")
         else:
-            t.reply = "I'm not sure what to make yet. Tell me a subject, like \"a teddy bear waving\", or pick one:"
-            t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
-            t.trace.end("asked what to make")
+            if (t.sess.get("focus") or {}).get("generation"):
+                t.reply = "I couldn't understand that request. What would you like to see or change in this batch?"
+                t.trace.end("asked what you mean")
+            else:
+                t.reply = "I'm not sure what to make yet. Tell me a subject, like \"a teddy bear waving\", or pick one:"
+                t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
+                t.trace.end("asked what to make")
         return {}
 
     # -- finish: memory ------------------------------------------------------------------------------------------------------------------------------
