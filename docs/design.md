@@ -81,6 +81,9 @@ Two through six columns are chosen from the showcase's measured width at 560 / 7
 - Chat shares the root tokens and the standard rail (§3–4); its session list uses the shared second column.
 
 ### Library (built)
+
+The Packs side panel lists newest-created packs first; a batch group takes the position of its newest pack while its assigned parent stays first within the group. Opening a pack preserves the panel’s scroll position through navigation and the subsequent library refresh. Entering a new search starts at the first matching result.
+
 - **Particles tab:** each set is a box card in a grid (`.ps-lib`), and a click on the card itself opens or closes it (`.ps-hit`, pointer cursor; no Open button); the opened card spans the row. **My Stickers** is one box per pack (`.lib-pk`, the pack's name, count and Open pack) inside one selection area, so a drag box still crosses packs. **Trending** cards keep the like and comment count on the card's bottom-left, whatever the name's wrap (`.tr-meta` `margin-top:auto`). (Haitham, 2026-10-05.)
 - **Sticker details** gains one field: **Edited outside the app** (file picker + Replace, Undo when there is a previous file): same dialog, existing `.fld`/`.row`/`.btn` classes, no new styles.
 - **Rail:** identical to AI's, same scaling, same persistent position — this is the explicit ask.

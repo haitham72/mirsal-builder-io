@@ -396,12 +396,15 @@ function drawCol2() {
   if (route_ === 'users') return typeof usCol === 'function' ? usCol() : 0;
   if (route_ === 'help') return typeof supCol === 'function' ? supCol() : 0;
   if (route_ === 'agent') return typeof agList === 'function' ? agList() : 0;
+  const previousList = $('c2-packs'),
+    scrollTop = previousList ? previousList.scrollTop : 0;
   const q = C2Q.trim().toLowerCase(),
     cur = route_ === 'pack' ? PACK_ID : null;
   $('col2').innerHTML = `<div class=c2h><h1>Packs</h1><button class=iconbtn data-act=newpack title="New pack">${ic('plus')}</button></div>
   <div class=c2s><input type=search id=c2q placeholder="Search packs…" value="${esc(C2Q)}"></div>
-  <div class=c2l>${
-    packEntries(LIB.packs.filter((p) => !q || p.name.toLowerCase().includes(q)))
+  <div class=c2l id=c2-packs>${
+    packEntries(LIB.packs.filter((p) => !q || p.name.toLowerCase().includes(q))
+      .sort((a, b) => (Number(b.created) || 0) - (Number(a.created) || 0)))
       .map((e) => {
         const row = (p, sub) =>
           `<div class="crow${sub ? ' sub' : ''} ${p.id === cur ? 'on' : ''}" data-act=openpack data-id=${p.id}><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some((s) => s.type === 'animated') ? 'animated' : ''}</span></div>`;
@@ -417,10 +420,12 @@ function drawCol2() {
       })
       .join('') || '<div class=mut style="padding:14px">No packs yet.</div>'
   }</div>`;
+  $('c2-packs').scrollTop = scrollTop;
   const i = $('c2q');
   i.oninput = (e) => {
     C2Q = e.target.value;
     const pos = e.target.selectionStart;
+    $('c2-packs').scrollTop = 0;
     drawCol2();
     const n = $('c2q');
     n.focus();
