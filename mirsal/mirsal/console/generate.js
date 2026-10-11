@@ -13,6 +13,7 @@ const ANIM=new Set();                     // batches the user pressed Animate on
 try{const o=localStorage.getItem('mirsal.outline');if(o!==null&&!isNaN(+o))GS.outline=[0,4,8,12,16].includes(+o)?+o:(+o>0?12:0);const t=+localStorage.getItem('mirsal.tile');if(t>=130&&t<=420)GS.tile=t;
   const s=JSON.parse(localStorage.getItem('mirsal.session')||'null');if(s&&Array.isArray(s.gens))SES={prompt:s.prompt||'',gens:s.gens.filter(g=>Number.isInteger(g)&&g>0),off:s.off||[],pack:s.pack||'',...(s.run?{run:s.run}:{})}}catch(e){}      // a saved [null] / NaN (the old hopen clash) must not fire a 400 at every load
 const gstore=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+try{const v=localStorage.getItem('mirsal.view');if(['stickers','sheet','both'].includes(v))GS.view=v}catch(e){}
 const saveSes=()=>gstore('mirsal.session',JSON.stringify(SES));
 const wait=ms=>new Promise(f=>setTimeout(f,ms));
 const BGS=[['checker','Transparent'],['light','Light'],['dark','Dark'],['wall','Wallpaper']];
@@ -268,7 +269,7 @@ function batchHtml(g,k,total,mode){
      ${p?`<div class=mut>${esc(p.fix)}</div>${p.received?`<div class=mut>The sheet was received${p.received.job?' ('+esc(p.received.job)+')':''}${p.received.cost?' and paid for ('+p.received.cost+' credits)':''}: nothing is lost, this batch just has no stickers. It stays in History.</div>`:''}
      ${p.cut_anyway?`<button class="btn pri" data-act=gcutany data-g=${g.number} title="Cut the sheet that was received, as it is, for free: you decide on every cell yourself">Cut it anyway</button>`:''}
      <button class="btn${p.cut_anyway?'':' pri'}" data-act=gretrysheet data-g=${g.number}>Try the sheet again</button>`:''}</div></section>`}
-  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class=gbody>${sheetPanel(g,mode==='anim'?'anim':'still')}<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div></div></section>`}
+  return`<section class="gbatch ${inc?'':'excl'}">${head}${g.error?`<div class=warn>${esc(g.error)}</div>`:''}<div class="gbody gv-${GS.view||'both'}">${(GS.view||'both')==='stickers'?'':sheetPanel(g,mode==='anim'?'anim':'still')}${GS.view==='sheet'?'':`<div class=gtiles>${g.stickers.map(t=>tileHtml(g,t,mode)).join('')}</div>`}</div></section>`}
 /* what a set of batches stands at right now: the counts the header and the bottom bar read. One implementation, used by the header and the bottom bar. */
 function gstats(gs){const inc=gs.filter(g=>!SES.off.includes(g.number)),n=inc.reduce((a,g)=>a+keptOf(g).length,0),ready=gs.every(g=>!making(g));
   const todoAnim=inc.filter(g=>g.source.has_video&&(!animPhase(g)||g.stickers.some(t=>t.anim_status==='STALE'))&&!processing(g)&&!ANIM.has(g.number)&&keptStills(g).length);
@@ -286,15 +287,19 @@ function gview(){
   if(gdOn())return gdView();
   const gs=sessionGens();if(!gs.length)return'';
   const s=gstats(gs),{pk,allAdded,n}=s;
-  return`<div class=ghead><div><h2 style="margin:0">${esc(titleCase(gs[0].source.subject))}</h2><div class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}${gs[0].source.prepared?' · prepared sheet, 0 credits':''}</div></div>
-    <button class="btn" data-act=gnext ${s.ready&&!s.busyAnim?'':'disabled'} title="The next batch of this request that has not been made yet, as a prompt you read before anything is spent">${ic('plus')} Next batch</button>
+  const vw=GS.view||'both',seg=(v,l,tip)=>`<button type=button data-act=gvmode data-v=${v} aria-pressed=${vw===v} title="${tip}">${l}</button>`;
+  /* the toolbar (redesign phase 5): the title, then the view (Stickers · Sheet · Both), Background, Size and ⋯ with the batch's other actions, as they were */
+  return`<div class=ghead><div class=gh-title><h2>${esc(titleCase(gs[0].source.subject))}</h2><small class=mut>${gs.length} batch${gs.length===1?'':'es'} · ${gs[0].outline_px?gs[0].outline_px+' px outline':'no outline'}${gs[0].source.prepared?' · prepared sheet, 0 credits':''}</small></div>
+    <div class=gh-tools><div class=gseg role=group aria-label="What to show">${seg('stickers','Stickers','Only the sticker tiles')}${seg('sheet','Sheet','Only the whole sheet, with its cut lines and checks')}${seg('both','Both','The sheet beside the tiles')}</div>
+    <label class=gh-bg title="Background behind the stickers"><span class=mut>Background</span><select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label class=gh-size title="Tile size">${ic('lib')}<input type=range id=gsize min=130 max=420 step=10 value=${GS.tile} aria-label="Tile size"></label>
+    <button class="btn sm" data-act=gnext ${s.ready&&!s.busyAnim?'':'disabled'} title="The next batch of this request that has not been made yet, as a prompt you read before anything is spent">${ic('plus')} Next batch</button>
+    <details class=gh-more><summary class="btn sm" aria-label="More for this batch" title="More for this batch">⋯</summary><div class=gh-pop role=menu>
     ${gs.length===1&&gs[0].source.prepared&&(typeof liveReadyNow==='function'&&liveReadyNow())?`<button class="btn" data-act=gnewlive title="Draw a fresh sheet with Higgsfield at the normal price instead of the prepared one">Make a new one</button>`:''}
-    ${gs.length===1?`<button class=btn data-act=ggroup title="Put this batch in the group of another batch: that batch becomes its parent">Add to group</button>`:''}
+    ${gs.length===1?`<button class=btn data-act=ggroup title="Put this batch in the group of another batch: that batch becomes its parent">Move to another batch…</button>`:''}
     ${gs.length===1&&s.ready?`<a class=btn href="/api/generations/${gs[0].number}/export.zip" download title="Download the accepted stickers (animated where ready) as one .zip">${ic('download')} Download .zip</a>`:''}${gs.length===1&&s.ready&&typeof colBtn==='function'?colBtn('generation',gs[0].generation_id,s.n,titleCase(gs[0].source.subject)):''}
     ${gs.length===1?`<button class="btn" data-act=tkreport data-k=generation data-id=${esc(gs[0].generation_id)} title="Something wrong with this batch? Send a report">Report</button>`:''}
-    <button class="btn dng" data-act=grm title="Move ${gs.length===1?'this batch':'these batches'} to the trash. You can restore ${gs.length===1?'it':'them'} from Removed batches under Earlier batches.">${ic('trash')} Remove batch</button>
-    <span style="margin-left:auto" class=gview><label class=mut>Background <select id=gbgsel>${BGS.map(([k,l])=>`<option value=${k} ${bg===k?'selected':''}>${l}</option>`).join('')}</select></label>
-    <label class=mut>Size <input type=range id=gsize min=130 max=420 step=10 value=${GS.tile}></label></span></div>
+    <button class="btn dng" data-act=grm title="Move ${gs.length===1?'this batch':'these batches'} to the trash. You can restore ${gs.length===1?'it':'them'} from Removed batches under Projects.">${ic('trash')} Remove batch</button></div></details></div></div>
    ${stepsHtml(s)}
    ${gbodyHtml(s.gs,{inc:s.inc,todoAnim:s.todoAnim,busyAnim:s.busyAnim,n:s.n})}
    <div class=gbar>${barHtml(s)}</div>`}
@@ -507,6 +512,7 @@ ACT.grm=()=>{const gs=sessionGens();if(!gs.length)return;
   confirmDlg(grmText(gs),async()=>{for(const g of gs){const r=await post(`/api/generations/${g.number}/remove`,{});if(!r.ok){toast(r.j.error,1);return}}
     const gone=gs.map(g=>g.number);SES.gens=SES.gens.filter(id=>!gone.includes(id));saveSes();gone.forEach(n=>GM.delete(n));HB.items=HB.items.filter(x=>!gone.includes(x.id));
     glast='';await remLoad();histLoad(false);tick(true)},'Remove')};
+ACT.gvmode=el=>{GS.view=el.dataset.v;gstore('mirsal.view',GS.view);glast='';tick(true)};
 ACT.gtab=el=>{if(el.dataset.t==='particles'&&typeof ACT.spopen==='function')return ACT.spopen(el);GS.tab=el.dataset.t;glast='';tick(true)};
 
 /* ---------- Animate, Add: both act on the included batches of the session. */

@@ -100,6 +100,8 @@ ACT.rme=()=>{RME=!RME;drawRail();if(RME){const b=document.querySelector('#rmenu 
 const rmeClose=()=>{if(RME){RME=false;drawRail()}};
 document.addEventListener('click',e=>{if(RME&&!e.target.closest('#rail'))rmeClose();const d=document.querySelector('#ctabs details[open]');if(d&&(!e.target.closest('.ct-new')||e.target.closest('[role=menuitem]')))d.open=false});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&RME){rmeClose();const b=document.querySelector('#rail .rme');if(b)b.focus()}});
+/* the small ⋯ menus of the Studio (its toolbar, the project map) are <details>: a pick or a click outside closes them */
+document.addEventListener('click',e=>{document.querySelectorAll('details.pm-menu[open],details.gh-more[open]').forEach(d=>{if(!d.contains(e.target)||e.target.closest('[role=menu] button,[role=menu] a'))d.open=false})});
 /* Trash lives at the end of Settings (trash.js): open Settings and bring the Trash card into view once it has drawn */
 ACT.rtrash=()=>{RME=false;let n=0;const go=()=>{const t=$('trx-box');if(t)return t.parentElement.scrollIntoView({behavior:'smooth',block:'start'});if(++n<40)setTimeout(go,100)};
  if(route_==='settings'){drawRail();go()}else{location.hash='#/settings';setTimeout(go,100)}};

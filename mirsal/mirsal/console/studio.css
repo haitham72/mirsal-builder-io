@@ -911,3 +911,22 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 .pm-crumbs{display:flex;align-items:center;gap:6px;margin:0 4px 6px;font-size:var(--fs-s);color:var(--mut);flex-wrap:wrap}
 .pm-crumbs button{border:0;background:none;padding:0;font:inherit;color:var(--pri-d);cursor:pointer}.pm-crumbs button:hover{text-decoration:underline}
 .pm-crumbs i{font-style:normal;color:var(--mut2)}.pm-crumbs span:last-child{color:var(--tx);font-weight:600}
+
+/* the Studio's toolbar (redesign phase 5): the title on the left; the view switch, Background, Size, Next batch and ⋯ on the right, all on one quiet row */
+.ghead{display:flex;align-items:center;gap:12px;margin:6px 4px 12px;flex-wrap:wrap}
+.gh-title{display:flex;flex-direction:column;min-width:0;flex:1 1 200px}.gh-title h2{margin:0;font-size:var(--fs-xl);font-weight:650;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh-title small{font-size:var(--fs-s)}
+.gh-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gseg{display:inline-flex;padding:3px;background:var(--fill);border-radius:var(--r-pill)}
+.gseg button{border:0;background:none;padding:5px 12px;border-radius:var(--r-pill);font:inherit;font-size:var(--fs-s);font-weight:500;color:var(--mut);cursor:pointer}
+.gseg button[aria-pressed=true]{background:var(--sf);color:var(--tx);font-weight:600;box-shadow:0 1px 3px #0f172a14}
+.gh-bg,.gh-size{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-s)}
+.gh-bg select{border:0;background:var(--fill);border-radius:var(--r-pill);padding:5px 10px;font:inherit;font-size:var(--fs-s);cursor:pointer}
+.gh-size svg{width:15px;height:15px;color:var(--mut)}.gh-size input{width:90px;accent-color:var(--pri)}
+.gh-more{position:relative}.gh-more summary{list-style:none;cursor:pointer;font-weight:700;letter-spacing:.05em}.gh-more summary::-webkit-details-marker{display:none}
+.gh-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:230px;padding:6px;background:var(--sf);border-radius:var(--r-m);box-shadow:0 18px 50px #0f172a24,0 0 0 1px var(--bd);display:flex;flex-direction:column;gap:2px}
+.gh-pop .btn{justify-content:flex-start;width:100%;border:0;background:none;box-shadow:none;padding:8px 10px;font-size:var(--fs-s);font-weight:500}
+.gh-pop .btn:hover{background:var(--fill)}.gh-pop .btn.dng{color:var(--bad)}.gh-pop .btn svg{width:15px;height:15px}
+/* the view switch: one of the sheet and the tiles, or both side by side as before */
+.gbody.gv-stickers,.gbody.gv-sheet{grid-template-columns:1fr}
+.gbody.gv-sheet .gsheet{max-width:min(100%,880px);margin:0 auto;width:100%}
