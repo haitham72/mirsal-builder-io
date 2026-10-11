@@ -234,7 +234,7 @@ const oobNote = (t) => {
 
 /* A batch is a family of generations (gen 1 … n); ONE is the main (Haitham, 2026-10-08: "this generation is the main image/video generation now, the others
    are backups"). SES.gens is what is IN VIEW per batch; FAM holds each batch's family (loaded once per batch, again after Regenerate / Make main / Delete),
-   and Animate / Add act on each batch's MAIN generation even while a backup is in view. */
+   Animate acts on each batch's MAIN generation; Add to a pack uses the generation actually in view. */
 const FAM = new Map();
 
 const famSet = (f) => {
@@ -252,10 +252,10 @@ const mainNum = (g) => {
   return f ? +String(f.picked).replace(/\D/g, '') : g.number;
 };
 
-const included = () =>
+const included = (useMain = true) =>
   sessionGens()
     .filter((g) => !SES.off.includes(g.number))
-    .map((g) => GM.get(mainNum(g)) || g);
+    .map((g) => useMain ? GM.get(mainNum(g)) || g : g);
 
 const nAdded = (g, pid) =>
   keptOf(g).filter((t) => ((g.added || {})[pid] || []).includes(`${animPhase(g) ? 'animated' : 'static'}:${t.index}`)).length;

@@ -78,7 +78,7 @@ const PWBG = [
 
 ACT.gadd = async (el) => {
   await loadLib();
-  const inc = el && el.dataset.g ? included().filter((g) => spGid(g.generation_id) === spGid(el.dataset.g)) : included(),
+  const inc = el && el.dataset.g ? included(false).filter((g) => spGid(g.generation_id) === spGid(el.dataset.g)) : included(false),
     rows = [];
   for (const g of inc)
     for (const t of keptOf(g))
@@ -101,7 +101,7 @@ ACT.gadd = async (el) => {
       .sort(
         (a, b) => (b.lead ? 1 : 0) - (a.lead ? 1 : 0) || held(b) - held(a),
       )[0] /* the pack this batch already lives in: its stills, upgraded, not a second pack */,
-    def = home ? home.id : SES.pack && packById(SES.pack) ? SES.pack : '',
+    def = home ? home.id : '',
     base = titleCase(inc[0].source.subject);
   let name = base,
     k = 2;
