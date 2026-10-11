@@ -54,7 +54,7 @@ def _call(texts: list, b: dict) -> list:
         if b["provider"] == "local":
             d = _post(llm.local_url() + "/embeddings", {"model": b["model"], "input": texts}, None, 120)
         else:
-            d = _post("https://api.openai.com/v1/embeddings", {"model": b["model"], "input": texts, "dimensions": DIMS}, os.environ[llm.KEY_VAR], 60)
+            d = _post(llm.cloud_url() + "/embeddings", {"model": b["model"], "input": texts, "dimensions": DIMS}, os.environ[llm.KEY_VAR], 60)
         vecs = [x["embedding"] for x in sorted(d["data"], key=lambda x: x["index"])]
     except (urllib.error.URLError, OSError, KeyError, ValueError, TypeError) as e:
         raise EmbedError("Cannot get embeddings: " + str(getattr(e, "reason", e)).replace(os.environ.get(llm.KEY_VAR) or chr(0), "<key>"))

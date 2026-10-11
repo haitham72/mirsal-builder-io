@@ -1,6 +1,7 @@
 """A minimal chat-completions client over urllib (no new dependency) for two backends that speak the same protocol:
 
-- `openai`: api.openai.com. The key (OPENAI_API_KEY) is read from the environment or mirsal/.env, never logged, never returned.
+- `openai`: the cloud, any OpenAI-compatible endpoint at MIRSAL_CLOUD_URL (default https://api.openai.com/v1; the owner's is an OpenAI-compatible router).
+  The key (OPENAI_API_KEY) is read from the environment or mirsal/.env, never logged, never returned.
 - `local`: LM Studio, vLLM or any OpenAI-compatible server at MIRSAL_LOCAL_URL, default http://localhost:1234/v1, no key. The model is whatever the
   server lists (`list_local_models`, `resolve_local_model`): MIRSAL_LOCAL_MODEL is only the wish (`qwen3.5-4b:2`; the `:2` is an LM Studio INSTANCE suffix that
   exists only while a second copy is loaded, so it falls back to `qwen3.5-4b`, then to the first chat model the server has), and `local_ready` is a REAL probe
@@ -36,7 +37,7 @@ PROBE_TOKENS = 32
 PROBE_TIMEOUT = 20.0                             # the first answer may have to load a model; the probe never waits longer than this
 PROBE_OK_TTL = 60.0
 PROBE_FAIL_TTL = 15.0
-API = "https://api.openai.com/v1/chat/completions"
+CLOUD_URL = "https://api.openai.com/v1"         # MIRSAL_CLOUD_URL overrides: any OpenAI-compatible endpoint (base URL ending in /v1)
 LOCAL_URL = "http://localhost:1234/v1"
 KEY_VAR = "OPENAI_API_KEY"
 _ENV_LOADED = False
@@ -372,6 +373,12 @@ def configured() -> bool:
     return provider() != "none"
 
 
+def cloud_url() -> str:
+    """The cloud's base URL (OpenAI-compatible, ending in /v1): MIRSAL_CLOUD_URL, else api.openai.com."""
+    _load_dotenv()
+    return (os.environ.get("MIRSAL_CLOUD_URL") or CLOUD_URL).rstrip("/")
+
+
 def model() -> str:
     _load_dotenv()
     if provider() == "local":
@@ -483,7 +490,25 @@ def complete(system: str, user: str, *, provider_: str | None = None, **kw) -> t
         return _complete_on(other, system, user, **{**kw, "timeout": remaining, "model_": None, "base_url": None})
 
 
-def _complete_on(prov: str, system: str, user: str, *, max_tokens: int = 2500, timeout: float = 60.0, temperature: float = 0.8,
+def fallback_model() -> str | None:
+    """The cloud's second model (MIRSAL_LLM_FALLBACK): asked once when the first one fails or answers empty; none = no second try."""
+    _load_dotenv()
+    return (os.environ.get("MIRSAL_LLM_FALLBACK") or "").strip() or None
+
+
+def _complete_on(prov: str, system: str, user: str, **kw) -> tuple[str, dict]:
+    """One completion on `prov`; on the cloud, a failed or empty answer of the configured model is asked once more of MIRSAL_LLM_FALLBACK
+    (not when the caller or the session pinned a model)."""
+    try:
+        return _complete_one(prov, system, user, **kw)
+    except LLMError:
+        fb = fallback_model() if prov == "openai" and not kw.get("model_") and not (forced() or {}).get("model") else None
+        if not fb or fb == os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL):
+            raise
+        return _complete_one(prov, system, user, **{**kw, "model_": fb})
+
+
+def _complete_one(prov: str, system: str, user: str, *, max_tokens: int = 2500, timeout: float = 60.0, temperature: float = 0.8,
                  json_mode: bool = False, images: list | None = None,
                  model_: str | None = None, base_url: str | None = None, retry_empty: bool = True) -> tuple[str, dict]:
     """-> (text, meta{model, ms, tokens_in, tokens_out, provider}). Raises LLMError with a plain message that never contains the key.
@@ -499,7 +524,7 @@ def _complete_on(prov: str, system: str, user: str, *, max_tokens: int = 2500, t
     if prov == "openai" and not key:
         raise LLMError(f"No AI key: add {KEY_VAR} to mirsal/.env (or the environment).")
     m = model_ or (local_model() if prov == "local" else (forced() or {}).get("model") or os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL))
-    url = (base_url.rstrip("/") + "/chat/completions") if base_url else (API if prov == "openai" else local_url() + "/chat/completions")
+    url = (base_url.rstrip("/") + "/chat/completions") if base_url else (cloud_url() + "/chat/completions" if prov == "openai" else local_url() + "/chat/completions")
     content = user
     if images:
         content = [{"type": "text", "text": user}] + [{"type": "image_url", "image_url": {"url": data_url(b)}} for b in images]

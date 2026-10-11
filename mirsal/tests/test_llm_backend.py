@@ -100,6 +100,37 @@ class BackendChoiceTests(unittest.TestCase):
             self.assertEqual(llm.provider(), "none")
 
 
+class CloudTests(unittest.TestCase):
+    """The cloud is any OpenAI-compatible endpoint (MIRSAL_CLOUD_URL); a failed or empty answer is asked once of MIRSAL_LLM_FALLBACK."""
+    def _run(self, answers, env):
+        sent = []
+
+        def post(url, body, key, timeout):
+            sent.append((url, body["model"]))
+            a = answers.pop(0)
+            if isinstance(a, Exception):
+                raise a
+            return {"choices": [{"message": {"content": a}, "finish_reason": "stop"}], "usage": {}}
+        with Env(), mock.patch.dict(os.environ, {"OPENAI_API_KEY": "k", **env}), mock.patch.object(llm, "_post", post):
+            return llm._complete_on("openai", "s", "u", max_tokens=50), sent
+
+    def test_the_endpoint_and_model_come_from_the_environment(self):
+        (text, _), sent = self._run(["hi"], {"MIRSAL_CLOUD_URL": "https://router.example/v1/", "MIRSAL_LLM_MODEL": "mimo-v2.6-flash"})
+        self.assertEqual((text, sent), ("hi", [("https://router.example/v1/chat/completions", "mimo-v2.6-flash")]))
+
+    def test_a_failed_first_model_is_asked_of_the_fallback_once(self):
+        down = llm.LLMError("down", kind="unreachable")
+        (text, meta), sent = self._run([down, "from the fallback"], {"MIRSAL_CLOUD_URL": "https://router.example/v1", "MIRSAL_LLM_MODEL": "mimo-v2.6-flash",
+                                                                            "MIRSAL_LLM_FALLBACK": "agnes-2.5-flash"})
+        self.assertEqual(text, "from the fallback")
+        self.assertEqual(sent[-1][1], "agnes-2.5-flash")
+        self.assertTrue(all(m == "mimo-v2.6-flash" for _, m in sent[:-1]))
+
+    def test_no_fallback_set_means_the_error_stands(self):
+        with self.assertRaises(llm.LLMError):
+            self._run([llm.LLMError("down", kind="unreachable")] * 4, {"MIRSAL_LLM_MODEL": "mimo-v2.6-flash", "MIRSAL_LLM_FALLBACK": ""})
+
+
 class PrefillTests(unittest.TestCase):
     def _sent(self, model, prov="local"):
         sent = {}
