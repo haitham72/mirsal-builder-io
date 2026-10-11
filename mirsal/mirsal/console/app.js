@@ -107,6 +107,7 @@ ACT.rtrash=()=>{RME=false;let n=0;const go=()=>{const t=$('trx-box');if(t)return
  if(route_==='settings'){drawRail();go()}else{location.hash='#/settings';setTimeout(go,100)}};
 function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'home',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'home';document.body.classList.remove('c2open');
  if(route_==='agent'||route_==='generate')CTAB=route_;RME=false;
+ if(route_!=='generate'&&typeof MD!=='undefined'&&MD&&typeof ACT.gmclose==='function')ACT.gmclose();   /* the sticker panel belongs to the Studio: leaving it closes the panel */
  SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCtabs();drawCol2();if(RENDER[route_])RENDER[route_](a)}
 window.addEventListener('hashchange',route);
 

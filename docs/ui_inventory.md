@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after redesign phase 5 (the Studio's toolbar).
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after redesign phase 6 (the sticker panel).
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**435 actions** (436 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**436 actions** (437 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -105,19 +105,19 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `nav` | 98 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, packs.js, prepare.js, tickets.js | none (browser only) |
 | `rme` | 99 | app.js | none (browser only) |
 | `rtrash` | 106 | app.js | none (browser only) |
-| `lsel` | 137 | app.js, packs.js | none (browser only) |
-| `lselall` | 138 | app.js | none (browser only) |
-| `lselnone` | 139 | app.js | none (browser only) |
-| `lselmove` | 145 | app.js | `/api/stickers/move` |
-| `lseldel` | 146 | app.js | `/api/stickers/delete` |
-| `libtab` | 192 | app.js | none (browser only) |
-| `pkmerge` | 193 | app.js | `/api/packs/{}/merge` |
-| `pkgrp` | 197 | app.js | none (browser only) |
-| `seeall` | 198 | app.js | none (browser only) |
-| `openpack` | 219 | app.js, home.js | none (browser only) |
-| `newpack` | 220 | app.js | none (browser only) |
-| `newpackname` | 221 | app.js | `/api/packs` |
-| `prepset` | 231 | app.js | `/api/prepared/setting` |
+| `lsel` | 138 | app.js, packs.js | none (browser only) |
+| `lselall` | 139 | app.js | none (browser only) |
+| `lselnone` | 140 | app.js | none (browser only) |
+| `lselmove` | 146 | app.js | `/api/stickers/move` |
+| `lseldel` | 147 | app.js | `/api/stickers/delete` |
+| `libtab` | 193 | app.js | none (browser only) |
+| `pkmerge` | 194 | app.js | `/api/packs/{}/merge` |
+| `pkgrp` | 198 | app.js | none (browser only) |
+| `seeall` | 199 | app.js | none (browser only) |
+| `openpack` | 220 | app.js, home.js | none (browser only) |
+| `newpack` | 221 | app.js | none (browser only) |
+| `newpackname` | 222 | app.js | `/api/packs` |
+| `prepset` | 232 | app.js | `/api/prepared/setting` |
 
 ### `auth.js` (12)
 
@@ -233,7 +233,7 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `fxuseset` | 273 | effects.js | `/api/particles` |
 | `psusesave` | 274 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
 
-### `generate.js` (67)
+### `generate.js` (68)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
@@ -294,16 +294,17 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `hcopy` | 743 | generate.js | none (browser only) |
 | `hgenop` | 744 | generate.js | `/api/jobs` |
 | `hreserve` | 752 | generate.js | `/api/tasks` |
-| `gmall` | 782 | generate.js | none (browser only) |
-| `gopen` | 783 | generate.js | none (browser only) |
-| `gmclose` | 784 | generate.js | none (browser only) |
-| `gstep` | 785 | generate.js | none (browser only) |
-| `gedit` | 786 | generate.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `openstudio` | 811 | particles.js | `/api/generations` |
-| `lcstudioedit` | 813 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `lcopenstudio` | 814 | packs.js | none (browser only) |
-| `gcell` | 845 | generate.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
-| `gallowall` | 855 | generate.js | `/api/generations/{}/allow` |
+| `gmall` | 783 | generate.js | none (browser only) |
+| `gmtab` | 784 | generate.js | none (browser only) |
+| `gopen` | 785 | generate.js | none (browser only) |
+| `gmclose` | 786 | generate.js | none (browser only) |
+| `gstep` | 787 | generate.js | none (browser only) |
+| `gedit` | 788 | generate.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `openstudio` | 813 | particles.js | `/api/generations` |
+| `lcstudioedit` | 815 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `lcopenstudio` | 816 | packs.js | none (browser only) |
+| `gcell` | 847 | generate.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
+| `gallowall` | 857 | generate.js | `/api/generations/{}/allow` |
 
 ### `history.js` (5)
 

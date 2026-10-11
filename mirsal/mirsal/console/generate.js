@@ -765,7 +765,7 @@ function gmodal(){if(!MD)return;const g=GM.get(MD.g);if(!g){MD=null;return}const
     allowAct=op.op==='none'&&op.why?`<span class=mut>${esc(op.why)}</span>`:'',
     path=(t.history||[]).slice().reverse().map(h=>`<div class=hrow><span class=mut>${new Date(h.ts*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span> <b>${esc(h.stage)}</b> ${esc(h.actor)} ${esc(h.decision)}${h.reason?` <span class=mut>· ${esc(h.reason)}</span>`:''}</div>`).join('');
   const bad=(t.report||[]).concat(t.anim_report||[]).some(r=>!r.ok);
-  $('modal').innerHTML=`<div class=mbox style="width:min(900px,96vw)"><div class=mrow><button class="btn nav" data-act=gstep data-d=-1>‹</button>
+  const gmFresh=!$('modal').classList.contains('side');$('modal').innerHTML=`<div class="mbox gm-panel${gmFresh?' gm-new':''}" role=dialog aria-label="Sticker ${g.generation_id}/S${t.index}"><div class=mrow><button class="btn nav" data-act=gstep data-d=-1 aria-label="Previous sticker">‹</button>
    <div style="flex:1"><b>${esc(t.emoji)} ${esc(t.key.replace(/_/g,' '))}</b><div class=mut>${esc(t.tags.join(' · '))}</div></div>
    <button class=idtag data-act=copyid data-v="${g.generation_id}/S${t.index}" title="${g.generation_id}/S${t.index} · click to copy the id">${g.generation_id}/S${t.index}</button>
     ${t.status==='READY'?`<button class=btn data-act=gedit title="${t.anim_status==='READY'?'Text, emoji and trim over the animation; one Save updates the image and the animation':'Add text or emoji'}">${ic('edit')} Edit${t.anim_status==='READY'?' (image + animation)':''}</button><button class=btn data-act=greplace data-g=${g.number} data-i=${t.index} title="Replace with a file you edited outside the app (same S#, re-checked, undoable)">Replace file</button><button class=btn data-act=grepundo data-g=${g.number} data-i=${t.index} title="Take back the last replace">Take back</button>`:''}<button class="btn nav" data-act=gstep data-d=1>›</button><button class=btn data-act=gmclose>✕</button></div>
@@ -773,15 +773,17 @@ function gmodal(){if(!MD)return;const g=GM.get(MD.g);if(!g){MD=null;return}const
    <div class=mpanes><div class=pane><div class=mut>Sticker</div><div class="box bg-${bg}">${still}</div></div><div class=pane><div class=mut>Animation</div><div class="box bg-${bg}">${vid}</div></div></div>
    ${typeof edgeControlsHtml==='function'&&t.status==='READY'?`<div class="lv-edge lv-edge-m"><b>Edge</b>${edgeControlsHtml()}</div>`:''}
    ${act||allowAct?`<div class=row style="margin:8px 0 2px">${act}${allowAct}</div>`:''}
-   <details ${bad?'open':''}><summary class=mut>What Python checked</summary>${rows(t.report)}${rows(t.anim_report)||''}${(rows(t.report)||rows(t.anim_report))?'':`<div class=mut>${(t.report||[]).length||(t.anim_report||[]).length?'Every check passed.':'nothing yet'}</div>`}
-    <button class=link data-act=gmall>${MD.all?'Show only problems':'Show every check'}</button></details>
-   <details><summary class=mut>Path (every decision, newest first)</summary>${path||'<div class=mut>no decisions yet</div>'}</details>
-   ${meas.length?`<details><summary class=mut>Measurements</summary><div class="kv vkv">${meas.map(x=>`<span>${x[0]}</span><span>${esc(String(x[1]))}</span>`).join('')}</div></details>`:''}
+   ${(()=>{const tab=MD.tab||'checks',tb=(k,l)=>`<button type=button role=tab data-act=gmtab data-t=${k} aria-selected=${tab===k}>${l}</button>`;
+    const body=tab==='history'?(path||'<div class=mut>no decisions yet</div>'):tab==='meas'?(meas.length?`<div class="kv vkv">${meas.map(x=>`<span>${x[0]}</span><span>${esc(String(x[1]))}</span>`).join('')}</div>`:'<div class=mut>No measurements yet</div>')
+     :`${rows(t.report)}${rows(t.anim_report)||''}${(rows(t.report)||rows(t.anim_report))?'':`<div class=mut>${(t.report||[]).length||(t.anim_report||[]).length?'Every check passed.':'nothing yet'}</div>`}<button class=link data-act=gmall>${MD.all?'Show only problems':'Show every check'}</button>`;
+    return`<div class=gm-tabs role=tablist aria-label="About this sticker">${tb('checks',`Checks${bad?' <i class=gm-dot></i>':''}`)}${tb('history','History')}${tb('meas','Measurements')}</div><div class=gm-pane role=tabpanel>${body}</div>`})()}
    <div class=mut style="margin-top:8px">${esc(t.prompt)}</div><div class=mut>← → to browse, Esc to close</div></div>`;
-  $('modal').classList.add('on');$('modal').onclick=e=>{if(e.target.id==='modal')ACT.gmclose()};if(typeof egSync==='function'){egSync();applyEdgePreview()}}
+  /* the sticker panel (redesign phase 6): the same content, docked on the right; the Studio stays usable beside it, a click on another tile switches it */
+  $('modal').classList.add('on','side');document.body.classList.add('gmside');$('modal').onclick=e=>{if(e.target.id==='modal')ACT.gmclose()};if(typeof egSync==='function'){egSync();applyEdgePreview()}}
 ACT.gmall=()=>{MD.all=!MD.all;gmodal()};
-ACT.gopen=el=>{MD={g:+el.dataset.g,i:+el.dataset.i,all:!!(MD&&MD.all)};if(typeof egPick==='function')egPick(MD.g,MD.i);gmodal()};
-ACT.gmclose=()=>{MD=null;$('modal').classList.remove('on')};
+ACT.gmtab=el=>{MD.tab=el.dataset.t;gmodal()};
+ACT.gopen=el=>{MD={g:+el.dataset.g,i:+el.dataset.i,all:!!(MD&&MD.all),tab:(MD&&MD.tab)||'checks'};if(typeof egPick==='function')egPick(MD.g,MD.i);gmodal()};
+ACT.gmclose=()=>{MD=null;$('modal').classList.remove('on','side');document.body.classList.remove('gmside')};
 ACT.gstep=el=>{if(!MD)return;const g=GM.get(MD.g),n=g.stickers.length;MD.i=((MD.i-1+(+el.dataset.d)+n)%n)+1;gmodal()};
 ACT.gedit=()=>{const g=GM.get(MD.g),t=g.stickers[MD.i-1];ACT.gmclose();return studioEditSticker(g.number,t.index);Ed.openImage(`/out/${g.generation_id}/${t.png}?e=${t.edited_at||0}`,{back:{gen:g.number,index:t.index},outlined:g.outline_px>0,name:t.name,emoji:t.emoji})};
 document.addEventListener('keydown',e=>{if(!MD)return;if(e.key==='Escape')ACT.gmclose();if(e.key==='ArrowRight')ACT.gstep({dataset:{d:1}});if(e.key==='ArrowLeft')ACT.gstep({dataset:{d:-1}})});

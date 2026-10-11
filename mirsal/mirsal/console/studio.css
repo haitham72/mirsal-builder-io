@@ -930,3 +930,19 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 /* the view switch: one of the sheet and the tiles, or both side by side as before */
 .gbody.gv-stickers,.gbody.gv-sheet{grid-template-columns:1fr}
 .gbody.gv-sheet .gsheet{max-width:min(100%,880px);margin:0 auto;width:100%}
+
+/* the sticker panel (redesign phase 6): the sticker modal docked on the right as a panel; no dim, the Studio stays usable; the checks, the history and the
+   measurements are three tabs instead of three folds */
+#modal.side{inset:0 0 0 auto;width:min(460px,100vw);background:none;backdrop-filter:none;align-items:stretch;justify-content:flex-end;animation:none}
+#modal.side .mbox.gm-panel{width:100%;max-height:none;height:100%;border-radius:0;padding:16px 18px;box-shadow:-18px 0 50px #0f172a1f,-1px 0 0 var(--bd)}
+#modal.side .mbox.gm-panel.gm-new{animation:gm-in .24s var(--ease) both}
+@keyframes gm-in{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+#modal.side .mrow{flex-wrap:wrap}#modal.side .mpanes{flex-direction:column}#modal.side .pane{min-width:0}
+.gm-tabs{display:flex;gap:16px;margin:14px 0 8px;border-bottom:1px solid var(--bd)}
+.gm-tabs button{position:relative;border:0;background:none;padding:6px 0;margin-bottom:-1px;font:inherit;font-size:var(--fs-s);font-weight:600;color:var(--mut);border-bottom:2px solid transparent;cursor:pointer}
+.gm-tabs button[aria-selected=true]{color:var(--tx);border-bottom-color:var(--tx)}
+.gm-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--bad);margin-left:4px;vertical-align:middle}
+.gm-pane{font-size:var(--fs-s)}
+@media (prefers-reduced-motion:reduce){#modal.side .mbox.gm-panel.gm-new{animation:none}}
+@media (max-width:760px){#modal.side{width:100vw;bottom:62px}}
+@media (min-width:1180px){body.gmside #s-generate{padding-right:calc(min(460px,100vw) + var(--gutter))}}
