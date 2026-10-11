@@ -23,18 +23,22 @@ const hmIc=n=>`<span class=hm-ti>${ic(n)}</span>`;
 const hmStickers=(packs,q,filter)=>[...packs].sort((a,b)=>(b.created||0)-(a.created||0))
  .flatMap(p=>(p.stickers||[]).filter(s=>
   (filter==='all'||filter==='animated'&&s.type==='animated'||filter==='static'&&s.type!=='animated'||filter==='particles'&&s.particles?.length)
-  &&(!q||`${p.name} ${s.name||''} ${s.emoji||''}`.toLowerCase().includes(q))).map(s=>({p,s}))).slice(0,12);
+  &&(!q||`${p.name} ${s.name||''} ${s.emoji||''}`.toLowerCase().includes(q))).map(s=>({p,s}))).slice(0,24);
+const hmColumns=width=>width>=1220?6:width>=1000?5:width>=780?4:width>=560?3:2;
+const hmBands=(items,cols)=>[items.slice(0,cols*2),items.slice(cols*2,cols*4)];
+let hmResize=null;
 function hmCard({p,s},i){const animated=s.type==='animated',telegram=hmPackInfo(p).telegram;
  return`<article class=hm-card data-id="${esc(p.id)}"><button class="hm-art hm-${HM_TINTS[i%HM_TINTS.length]}" data-act=openpack data-id="${esc(p.id)}" aria-label="Open ${esc(s.name||'sticker')} in ${esc(p.name)}"><span class=hm-type>${animated?ic('film'):''}${animated?'Animated':'Static sticker'}</span>${media(s)}<span class=hm-caption><b>${esc(s.name||s.emoji||'Sticker')}</b><span>${esc(p.name)}</span></span><span class=hm-open>Open pack ↗</span></button>
   ${telegram?`<a class=hm-telegram href="${esc(telegram)}" target=_blank rel="noopener noreferrer" aria-label="Open ${esc(p.name)} in Telegram">${ic('telegram')}</a>`:''}</article>`}
-function hmFilm(){const motion=!matchMedia('(prefers-reduced-motion: reduce)').matches;
- return`<button class=hm-film data-act=hmfilm aria-label="Watch the full Mirsal film"><video src=/assets/welcome/welcome.mp4 poster=/assets/welcome/welcome-poster.jpg ${motion?'autoplay ':''}muted loop playsinline preload=metadata aria-hidden=true></video><span class=hm-film-label>${ic('play')} Watch the film</span></button>`}
+function hmFilm(onboarding=false){const motion=!matchMedia('(prefers-reduced-motion: reduce)').matches,name=onboarding?'onboarding':'welcome',label=onboarding?'Watch how it works':'Watch the film';
+ return`<button class=hm-film data-act=${onboarding?'hmonboarding':'hmfilm'} aria-label="${label}"><video src=/assets/welcome/${name}.mp4 poster=/assets/welcome/${name}-poster.jpg ${motion?'autoplay ':''}muted loop playsinline preload=metadata aria-hidden=true></video><span class=hm-film-label>${ic('play')} ${label}</span></button>`}
 function hmGallery(){const box=$('hm-gal');if(!box)return;const st=hmStickers(LIB.packs,HM.q.trim().toLowerCase(),HM.filter);
- const film=typeof box.querySelector==='function'?box.querySelector('.hm-film'):null;
- if(film&&typeof film.insertAdjacentHTML==='function'){   /* keep the playing film mounted: rebuilding the <video> on every keystroke restarts it */
-  for(const c of (typeof box.querySelectorAll==='function'?[...box.querySelectorAll('.hm-card')]:[]))c.remove();
-  film.insertAdjacentHTML('beforebegin',st.map(hmCard).join(''))}
- else box.innerHTML=st.map(hmCard).join('')+hmFilm();
+ const width=typeof box.getBoundingClientRect==='function'?box.getBoundingClientRect().width:1440,bands=hmBands(st,hmColumns(width));
+ [box,$('hm-gal-more')].forEach((band,i)=>{if(!band)return;const film=typeof band.querySelector==='function'?band.querySelector('.hm-film'):null,cards=bands[i].map((item,k)=>hmCard(item,k+i*hmColumns(width)*2)).join('');
+  if(film&&typeof film.insertAdjacentHTML==='function'){   /* filters and resizing retain both playing films */
+   for(const c of (typeof band.querySelectorAll==='function'?[...band.querySelectorAll('.hm-card')]:[]))c.remove();
+   film.insertAdjacentHTML('beforebegin',cards)}
+  else band.innerHTML=cards+hmFilm(i===1)});
  $('hm-empty').hidden=!!st.length||!LIB.packs.length;
  document.querySelectorAll('#s-home [data-act=hmfilter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===HM.filter)))}
 RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stickers),anim=st.filter(s=>s.type==='animated').length,hero=hmHero(ps),
@@ -59,16 +63,18 @@ RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stic
   ${ps.length?`<div class=hm-filters role=group aria-label="Filter stickers"><button class=hm-filter data-act=hmfilter data-f=all>All stickers</button><button class=hm-filter data-act=hmfilter data-f=animated>Animated</button><button class=hm-filter data-act=hmfilter data-f=static>Static stickers</button><button class=hm-filter data-act=hmfilter data-f=particles>With particles</button></div>
   <p class=hm-empty id=hm-empty role=status hidden>No stickers match. Try a different search or filter.</p>`
   :`<div class=hm-none><h3>No packs yet</h3><p>Describe an idea to the AI, or open the Studio: your first pack lands here.</p><button class="btn pri" data-act=hmai>${ic('ai')} Create with AI</button></div><p id=hm-empty hidden></p>`}
-  <div class=hm-showcase><div class=hm-gal id=hm-gal></div></div></section>
+  <div class=hm-showcase><div class=hm-gal id=hm-gal></div><div class=hm-gal id=hm-gal-more></div></div></section>
  <section class=hm-journey><div><div class=hm-eye>An idea is all you need</div><h2>Your imagination.<br>Delivered as a sticker.</h2><p>From the first thought to the final pack, make something that feels like you.</p><button class=hm-link data-act=hmfilm>Watch the film ${ic('chev')}</button></div>
   <div class=hm-steps><article class=hm-step><span class=hm-num>01 / IMAGINE</span>${hmIc('ai')}<h3>Tell your idea</h3><p>Describe a character, a feeling, or a moment.</p></article><article class=hm-step><span class=hm-num>02 / MAKE IT YOURS</span>${hmIc('lib')}<h3>Shape the details</h3><p>Review your stickers. Add motion and a little magic.</p></article><article class=hm-step><span class=hm-num>03 / SHARE</span>${hmIc('telegram')}<h3>Send a little joy</h3><p>Export your pack, ready for your next conversation.</p></article></div></section>
  <footer class=hm-foot><span class=hm-brand><img src=/assets/brand/mirsal-logo.png alt="">mirsal<b>.</b></span><span>Small stickers. Endless expression.</span></footer></div>`;
- const i=$('hm-q');i.oninput=e=>{HM.q=e.target.value;hmGallery()};hmGallery()};
+ const i=$('hm-q');i.oninput=e=>{HM.q=e.target.value;hmGallery()};hmGallery();
+ if(hmResize)hmResize.disconnect();if(typeof ResizeObserver!=='undefined'){hmResize=new ResizeObserver(()=>{if(route_==='home')hmGallery()});hmResize.observe($('hm-gal'))}};
 ACT.hmfilter=el=>{HM.filter=el.dataset.f;hmGallery();
  if(el.dataset.scroll){const d=$('hm-disc');if(d)d.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}};
 /* a clean AI chat: what the logo did before Home (the next message starts a new conversation) */
 ACT.hmai=()=>{try{localStorage.setItem('mirsal.ai.sid','')}catch(e){}if(typeof A!=='undefined'){A.sid=null;A.sess=null}
  if(route_==='agent'&&typeof ACT.agnew==='function')ACT.agnew();else location.hash='#/agent'};
 ACT.hmfilm=()=>{if(typeof wlOpen==='function')wlOpen()};
+ACT.hmonboarding=()=>dlg(`<h2>How Mirsal works</h2><video class=hm-fullfilm src=/assets/welcome/onboarding.mp4 poster=/assets/welcome/onboarding-poster.jpg controls playsinline ${matchMedia('(prefers-reduced-motion: reduce)').matches?'':'autoplay'}></video><div class=row><button class=btn data-act=dlgx>Close</button></div>`);
 /* the home button: the Mirsal logo opens Home (the welcome film opens once per browser session on its own, and from Home's "Watch the film") */
 ACT.home=()=>{if(route_==='home'){$('s-home').scrollTo({top:0,behavior:'smooth'});RENDER.home()}else location.hash='#/home'};

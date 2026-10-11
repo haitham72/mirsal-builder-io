@@ -222,9 +222,14 @@ ACT.newpack=()=>ACT.impackopen&&(typeof ME==='undefined'||!ME||ME.role==='owner'
 ACT.newpackname=()=>askText('New pack name','My Pack',async n=>{const r=await post('/api/packs',{name:n});if(r.ok){await loadLib();location.hash='#/pack/'+r.j.id}else toast(r.j.error,1)},'Create');
 
 /* ---------- Settings */
-RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{},staff=(typeof AUV==='undefined')||AUV.staff((typeof ME==='undefined')?null:ME),prep=await api('/api/prepared/setting'),pp=prep.ok&&prep.j.prefer;
+function settingsAppearance(){const dark=typeof thmIsDark==='function'?thmIsDark():true;
+ return `<div class=card id=set-appear style="margin-top:12px"><h2>Appearance</h2><div class=row style="justify-content:space-between"><span>Theme <span class=mut>(this browser only)</span></span><div class=ai-seg role=group aria-label="Theme">${['dark','light'].map(v=>`<button type=button data-act=thmset data-v=${v} class="${(v==='dark')===dark?'on':''}" aria-pressed=${(v==='dark')===dark}>${v==='dark'?'Dark':'Light'}</button>`).join('')}</div></div></div>`}
+RENDER.settings=async()=>{
+ $('s-settings').innerHTML=`<div class="page set-page"><div class=ph><h1>Settings</h1></div>${settingsAppearance()}<p class=mut role=status>Loading system settings…</p></div>`;
+ const r=await api('/api/generations'),h=r.j.health||{},p=r.j.paths||{},tgc=await tgSettingsCard(),ai=(await api('/api/ai')).j||{},staff=(typeof AUV==='undefined')||AUV.staff((typeof ME==='undefined')?null:ME),prep=await api('/api/prepared/setting'),pp=prep.ok&&prep.j.prefer;
  $('s-settings').innerHTML=`<div class="page set-page"><div class=ph><h1>Settings</h1></div>
-  <nav class="gseg set-nav" aria-label="Settings sections">${[['au-me','Account'],['set-health','System health'],...(staff?[['set-prep','Prepared sheets']]:[]),['set-ai','AI'],['set-tg','Telegram'],['trx-box','Trash']].map(([id,l])=>`<button type=button data-act=setgo data-id=${id}>${l}</button>`).join('')}</nav>
+  <nav class="gseg set-nav" aria-label="Settings sections">${[['set-appear','Appearance'],['au-me','Account'],['set-health','System health'],...(staff?[['set-prep','Prepared sheets']]:[]),['set-ai','AI'],['set-tg','Telegram'],['trx-box','Trash']].map(([id,l])=>`<button type=button data-act=setgo data-id=${id}>${l}</button>`).join('')}</nav>
+  ${settingsAppearance()}
   <div class=card id=set-health style="margin-top:12px"><h2>System health</h2><div class=kv>
   <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span>${staff?`<span>ffmpeg</span><span>${esc(h.ffmpeg||'not found')}</span>
   <span>VP9 + alpha encoder</span><span>${h.vp9?'<b style="color:var(--pri-d)">ready</b>':'<b style="color:var(--bad)">missing</b>: final WEBM encodes will fail (live preview still works). Run <code>python -m mirsal doctor</code>'}</span>`:''}</div></div>
@@ -235,3 +240,5 @@ RENDER.settings=async()=>{const r=await api('/api/generations'),h=r.j.health||{}
 /* the section bar of Settings (redesign phase 9): each button brings its card into view (Account and Trash are added by auth.js and trash.js after the page draws) */
 ACT.setgo=el=>{const c=$(el.dataset.id);if(c)(c.closest('.card')||c).scrollIntoView({behavior:'smooth',block:'start'})};
 ACT.prepset=async el=>{const r=await post('/api/prepared/setting',{prefer:el.dataset.v==='1'});if(!r.ok)return toast(r.j.error||'Could not change the setting',1);RENDER.settings()};
+/* the theme is a browser preference (theme.js): switching it repaints at once through the data-theme attribute, no reload */
+ACT.thmset=el=>{if(typeof thmSet==='function')thmSet(el.dataset.v)};

@@ -49,6 +49,14 @@ class WelcomeTests(unittest.TestCase):
         for p in ("/assets/welcome/nope.webp", "/assets/welcome/..%2f..%2fserver.py", "/assets/welcome/s1.exe", "/assets/welcome/"):
             self.assertEqual(self.get(p)[0], 404, p)
 
+    def test_onboarding_and_theme_assets_are_served(self):
+        code, hdr, body = self.get('/assets/welcome/onboarding.mp4', {'Range': 'bytes=0-99'})
+        self.assertEqual((code, hdr['Content-Type'], len(body)), (206, 'video/mp4', 100))
+        self.assertEqual(self.get('/assets/welcome/onboarding-poster.jpg')[0], 200)
+        for name, mime in [('theme.js', 'text/javascript'), ('theme.css', 'text/css')]:
+            code, hdr, _ = self.get('/ui/' + name)
+            self.assertEqual((code, hdr['Content-Type'].split(';')[0]), (200, mime))
+
     def test_the_page_loads_the_script_and_the_logo_is_home(self):
         code, _, html = self.get("/")
         self.assertEqual(code, 200)

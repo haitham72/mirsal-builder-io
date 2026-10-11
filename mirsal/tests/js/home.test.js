@@ -12,7 +12,7 @@ const packs = [
   { id: 'p3', name: 'Dogs', created: 2, stickers: [st('d', 'still', { emoji: '🐶' })] },
 ];
 const STUB = `document.querySelectorAll=()=>[];const location={hash:''};let reducedMotion=false;const matchMedia=()=>({matches:reducedMotion});
-const box=()=>({innerHTML:'',hidden:false,value:'',oninput:null,scrollIntoView(){},scrollTo(){}});['s-home','hm-q','hm-gal','hm-empty','hm-disc'].forEach(k=>DOMSTUB[k]=box());`;
+const box=()=>({innerHTML:'',hidden:false,value:'',oninput:null,scrollIntoView(){},scrollTo(){}});['s-home','hm-q','hm-gal','hm-gal-more','hm-empty','hm-disc'].forEach(k=>DOMSTUB[k]=box());`;
 const load = () => loadConsole(['home.js'], { extra: STUB });
 
 test('a pack is animated, static, with particles, or several of them; the Telegram link is its first set', () => {
@@ -67,7 +67,7 @@ test('a filter redraws the gallery; the logo opens Home', async () => {
   assert.match(app, /\|\|'home'/, 'an empty hash opens Home');
 });
 
-test('the showcase filters individual stickers and bounds media to twelve; reduced motion keeps a still film poster', () => {
+test('the showcase filters individual stickers and bounds media to twenty-four; reduced motion keeps both film posters', () => {
   const run = load();
   run(`LIB={packs:${JSON.stringify(packs)}}`);
   const ids = (q, f) => JSON.parse(run(`JSON.stringify(hmStickers(LIB.packs,${JSON.stringify(q)},${JSON.stringify(f)}).map(x=>x.s.id))`));
@@ -75,9 +75,32 @@ test('the showcase filters individual stickers and bounds media to twelve; reduc
   assert.deepEqual(ids('', 'static'), ['d', 'b']);
   assert.deepEqual(ids('', 'particles'), ['c']);
   assert.deepEqual(ids('cat b', 'all'), ['b']);
-  assert.equal(run(`hmStickers([{name:'Many',stickers:Array.from({length:30},(_,id)=>({id}))}],'','all').length`), 12);
+  assert.equal(run(`hmStickers([{name:'Many',stickers:Array.from({length:30},(_,id)=>({id}))}],'','all').length`), 24);
   assert.match(run(`hmFilm()`), /autoplay/);
   assert.doesNotMatch(run(`reducedMotion=true;hmFilm()`), /autoplay/);
+  assert.doesNotMatch(run(`hmFilm(true)`), /autoplay/);
+  assert.match(run(`hmFilm(true)`), /onboarding\.mp4/);
+});
+
+test('each responsive band holds two rows of distinct stickers, with the second film below the remaining cards', async () => {
+  const run = load();
+  for (const [width, cols] of [[390,2],[560,3],[780,4],[1000,5],[1220,6]]) {
+    assert.equal(run(`hmColumns(${width})`), cols);
+    const bands = JSON.parse(run(`JSON.stringify(hmBands(Array.from({length:24},(_,i)=>i),${cols}))`));
+    assert.deepEqual(bands.map(b=>b.length), [cols*2,cols*2]);
+    assert.equal(new Set(bands.flat()).size, cols*4);
+  }
+  run(`LIB={packs:[{id:'many',name:'Many',stickers:Array.from({length:24},(_,i)=>({id:'s'+i}))}]}`);
+  await run('RENDER.home()');
+  const first=run(`$('hm-gal').innerHTML`), second=run(`$('hm-gal-more').innerHTML`);
+  assert.equal((first.match(/class=hm-card /g)||[]).length,12);
+  assert.equal((second.match(/class=hm-card /g)||[]).length,12);
+  assert.match(first,/data-m=s0>/);
+  assert.doesNotMatch(second,/data-m=s0>/);
+  assert.match(second,/data-m=s12>/);
+  assert.ok(second.lastIndexOf('class=hm-card')<second.indexOf('class=hm-film'));
+  run('ACT.hmonboarding()');
+  assert.match(run('DIALOGS[0]'),/onboarding\.mp4[^>]*controls/);
 });
 
 test('a filter redraw keeps the playing film mounted and only swaps the cards', async () => {
