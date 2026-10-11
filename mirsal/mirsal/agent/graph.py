@@ -810,6 +810,9 @@ class Agent:
         run = creator.new_run(prompt=p["prompt"], subject=p["subject"], grid=p["grid"], style_id=p["style_id"], scope=p.get("scope", "images"), bypass=p.get("bypass", False),
                               estimate=p.get("estimate"), video_estimate=p.get("video_estimate"), end=p.get("end", "export"))
         run["job"], run["generation"] = card.get("job"), card.get("generation")
+        batch_no = (p.get("batch") or {}).get("no", 1)
+        if batch_no > 1:
+            run["pack_name"] = f"Batch {batch_no:02d} {p['subject']}"
         creator._log(run, "started: " + ("the sheet is being drawn" if run["job"] else "the sheet is ready"))
         sess["creator_run"] = run
         t.cards.append({"type": "creator", "run_id": run["id"]})
@@ -887,7 +890,7 @@ class Agent:
             pk["said"] = "|".join(f"{r['no']}:{r.get('job') or r.get('generation')}" for r in pk["made"])
         elif run["status"] == "waiting":
             text, chips = f"**{name}**: {run['waiting']['why']}.", run["waiting"]["chips"]
-        else:
+        elif run["status"] != "done":
             text, chips = f"**{name}**: stopped, {run['stop']['why']}", run["stop"]["chips"]
         cards = [{"type": "creator", "run_id": run["id"]}]
         # The picture travels with the message (CLAUDE.md rule 10: a rejection is never a bare word). A run that stopped on a block shows

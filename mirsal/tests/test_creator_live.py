@@ -6,6 +6,11 @@ import os
 import threading
 import time
 import unittest
+from unittest import mock
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
 
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
@@ -13,6 +18,9 @@ from mirsal.services import telegram as tg
 from tests.fake_telegram import TOKEN, USER, FakeServer
 from tests.test_live import Base, png_bytes
 from tests.test_live import shape_sheet
+from tests import synth
+from mirsal.flow import pipeline as pl
+from mirsal.generation import tasks
 
 
 class CreatorThroughTheServer(Base):
@@ -85,6 +93,97 @@ class CreatorThroughTheServer(Base):
         self.assertRegex(lib["packs"][0]["stickers"][0]["file"], r"^G001-[a-z0-9_]+-\d{8}T\d{6}/img-", "library files are grouped per batch (its labelled folder name) and carry the new names")
         last = self.req("GET", f"/api/chat/sessions/{sid}")[1]["messages"][-1]
         self.assertIn("t.me/addstickers", last["text"])
+
+    def test_cut_batches_post_one_followup_and_one_confirmation_starts_two_more(self):
+        _, sess = self.req('POST', '/api/chat/sessions', {'settings': {'ai': False, 'stage': 'emojis', 'allow_vlm': False}})
+        sid = sess['id']
+        self.say(sid, 'make me falcon stickers')
+        self.say(sid, action={'type': 'confirm'})
+        self.c.wait_jobs(60)
+        def followup():
+            j = self.req('GET', f'/api/chat/sessions/{sid}')[1]
+            return j if any(c.get('action') == 'batch_more' for m in j['messages'] for c in m.get('chips', [])) else None
+        j = self.until(followup, 'the cut-batch followup')
+        messages = [m for m in j['messages'] if any(c.get('action') == 'batch_more' for c in m.get('chips', []))]
+        self.assertEqual(len(messages), 1)
+        self.assertEqual([c.get('action') for c in messages[0]['chips']], ['regenerate', 'batch_more', 'batch_more', 'batch_more'])
+        self.assertEqual([c.get('to') for c in messages[0]['chips']], [None, 2, 3, 4])
+        for _ in range(3):
+            polled = self.req('GET', f'/api/chat/sessions/{sid}')[1]
+            self.assertEqual(len(polled['messages']), len(j['messages']))
+        self.say(sid, action={'type': 'batch_more', 'to': 3})
+        creates = lambda: [c for c in self.cli.calls if c[:2] == ['generate', 'create']]
+        self.assertEqual(len(creates()), 1)
+        self.say(sid, action={'type': 'confirm'})
+        self.c.wait_jobs(60)
+        j = self.until(lambda: (lambda s: s if len(s['pack']['made']) == 3 and all(r.get('generation') for r in s['pack']['made']) else None)(
+            self.req('GET', f'/api/chat/sessions/{sid}')[1]), 'the three batches')
+        self.assertEqual(len(creates()), 3)
+        rows = j['pack']['made']
+        self.assertEqual([r['no'] for r in rows], [1, 2, 3])
+        self.assertEqual(tasks.session_state(self.out, [r['generation'] for r in rows])['existing'], len(rows))
+
+    def test_creator_driver_finishes_two_batches_in_order_at_animation_and_export(self):
+        tg.save_config(self.out, TOKEN, USER)
+        original_download = self._download
+        def download(url, dest):
+            if not url.endswith('.mp4'):
+                return original_download(url, dest)
+            ticket = url.rsplit('/', 1)[-1].split('.')[0]
+            creates = [c for c in self.cli.calls if c[:2] == ['generate', 'create']]
+            call = creates[int(ticket.rsplit('-', 1)[-1])-1]
+            start = Path(call[call.index('--start-image')+1])
+            for gid in pl.list_ids(self.out):
+                result = pl.read_result(self.out, gid)
+                base = pl.gen_dir(self.out, gid)
+                for v in result.get('video_sheets', []):
+                    if (base / v['file']).resolve() == start.resolve():
+                        sheet = np.array(Image.open(start).convert('RGB'))
+                        layout = json.loads((base / v['layout']).read_text())
+                        Path(dest).parent.mkdir(parents=True, exist_ok=True)
+                        synth.make_layout_video(Path(dest), sheet, layout, size=600, frames=45)
+                        import hashlib
+                        data = Path(dest).read_bytes()
+                        return hashlib.sha256(data).hexdigest(), len(data)
+            self.fail('No prepared layout for the fake video')
+        from mirsal.generation import higgsfield
+        with mock.patch.object(higgsfield, 'download', download):
+            for end in ['animation', 'export']:
+                with self.subTest(end=end):
+                    _, sess = self.req('POST', '/api/chat/sessions', {'settings': {'ai': False, 'stage': 'prompt', 'allow_vlm': False, 'creator': {'bypass': True}}})
+                    sid = sess['id']
+                    self.req('POST', f'/api/chat/sessions/{sid}/settings', {'stage': 'prompt'})
+                    self.say(sid, 'make me falcon stickers')
+                    self.req('POST', f'/api/chat/sessions/{sid}/settings', {'stage': end})
+                    planned = self.say(sid, action={'type': 'batch_more', 'to': 2})
+                    self.assertEqual((planned.get('pending') or {}).get('type'), 'batch_more', planned['messages'][-1]['text'])
+                    self.assertEqual(planned['pending']['stage'], end)
+                    # Use the blocking real creator driver, instead of its background entry point.
+                    with mock.patch.object(self.c, 'drive_creator'):
+                        self.say(sid, action={'type': 'confirm'})
+                    store, _, agent, _ = self.c.chat_parts(None, sid)
+                    begun = store.load(sid)
+                    self.assertEqual(len(begun['creator_queue']), 1)
+                    self.assertEqual(begun['creator_run']['end'], end)
+                    self.c.drive_creator(None, sid, block=True)
+                    j = store.load(sid)
+                    self.assertEqual(j['creator_run']['status'], 'done', j['creator_run'].get('stop'))
+                    self.assertEqual(j['creator_run']['end'], end)
+                    self.assertFalse(j.get('creator_queue'))
+                    rows = j['pack']['made']
+                    self.assertEqual([r['no'] for r in rows], [1, 2])
+                    completed = [m for m in j['messages'] if m['text'].startswith('Done:')]
+                    self.assertEqual(len(completed), 2)
+                    self.assertFalse(completed[0].get('chips'))
+                    self.assertEqual([c['action'] for c in completed[-1]['chips']], ['regenerate', 'batch_more', 'batch_more'])
+                    self.assertEqual([c.get('to') for c in completed[-1]['chips']], [None, 3, 4])
+                    self.assertEqual(tasks.session_state(self.out, [r['generation'] for r in rows])['existing'], 2)
+                    if end == 'animation':
+                        self.assertFalse(self.fake.f.sets)
+                    else:
+                        self.assertEqual(len(self.fake.f.sets), 2)
+                        self.assertEqual(sorted(len(p['stickers']) for p in self.fake.f.sets.values()), [9, 9])
+                        self.assertEqual(len({p['title'] for p in self.fake.f.sets.values()}), 2)
 
 
 if __name__ == "__main__":

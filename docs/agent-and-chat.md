@@ -187,7 +187,7 @@ One go-ahead from a request to a sticker pack on Telegram. Since 2026-10-09 the 
 With the creator on, a request gets ONE plan card: the price of the whole run (`sheet + animation`, each from the provider's own cost call), "then straight to Telegram", and the buttons "Create and send to Telegram / Not yet". The click is the only go-ahead; after it
 the run is a state machine over the `tools` interface (the engine functions the Studio's buttons call): `sheet > cut and check > look at the pictures > approve > [animate > approve the animations] > pack > Telegram`, stored in `sess["creator_run"]` and advanced by
 `Agent.creator_tick` (the session's lock, advancing as many steps as are immediately possible), which `Console.drive_creator` calls every 2.5 s in a thread of its own until the run is `done`, `stopped`, `waiting` or `failed` (one driver per chat; the poll of the chat resumes a run after a restart).
-Each stop or finish is a message of its own in the chat, with the buttons for what to do next; the card shows the steps.
+Each stop or finish is a message of its own in the chat, with the buttons for what to do next; the card shows the steps. A completed batch with another queued retains its completion message; only the last completed run offers the follow-up. A provider job marked DONE can still be slicing: `anim_status: PROCESSING` keeps the creator waiting until the engine has finished its checks. The verifier and review gates then decide normally.
 
 - **Bypass on**: the person's standing approval is used at G2 (stills), G4 (animations) and G5 (pack); each is a human decision in the batch's history with the note "agentic creator: the person's standing approval". **Bypass off**: the run stops at G2 and G4 and waits for one click
   ("Approve and continue", or typing "continue").
@@ -251,7 +251,7 @@ has `batches_max > 1` (`tasks.preview`, capped at `stages.MAX_BATCHES` = 4) the 
   actions; the chat's batches and, through their generations, the Studio's batches of the same pack are skipped; never a repeat, never past batch 04), on ONE `multi` card with ONE total and
   ONE go-ahead (pending `batch_more`). Nothing made yet (the Prompt stage): batch 01 goes with them. Each new batch runs to the chat's stage (`_run_batch_items`): Emojis as sheets side by
   side (`_start_items`); Animation / Export through the creator, one run after the other (`sess["creator_queue"]`, started by `creator_tick` when a run is done, priced and approved
-  with the first; Stop clears it). At the Prompt stage the card is a plan and Generate is the go-ahead.
+  with the first; Stop clears it). Each export run creates its own library pack; later batches use `Batch NN <subject>` as the pack title, so their Telegram names stay distinct even when a long subject is truncated. At the Prompt stage the card is a plan and Generate is the go-ahead.
 - **`{type: "regenerate", generation}`** (`n_regenerate`): a new generation of that batch from its own saved plan, the Studio's Regenerate (`parent` + `regen_of`, so it joins the batch's
   family in Earlier batches), priced on the button, one go-ahead, to the chat's stage; the old one stays.
 - **Typed words work too** (`resolver.batch_intent`, in `classify` and, at the Prompt stage with no batch made, in `n_understand`): "next batch", "batch 3", "make the rest of the pack",
@@ -259,7 +259,7 @@ has `batches_max > 1` (`tasks.preview`, capped at `stages.MAX_BATCHES` = 4) the 
 - The chat's batches share the pack in Earlier batches on their own (`pipeline._packs`: same request, same person, within 6 h); the chat's generation cards say "Batch 02 · social" (`card.batch`).
 - **Telegram:** the follow-up card is a chip row, so it arrives as inline buttons (`_chip_rows` carries `to`); a plan's "Batch 01 of 04" is a line of its text.
 - **Tests:** `tests/test_chat_batches.py` (batch 01 first, an emoji pack's grid names, the follow-up once when cut, Batch 03 = two sheets after one go-ahead, never a fifth batch,
-  Regenerate's parent and regen_of, a transformation gets Regenerate only, the typed forms, the Prompt stage, the Animation stage's queue and Stop), `tests/test_tg_chat.py` (the buttons).
+  Regenerate's parent and regen_of, a transformation gets Regenerate only, the typed forms, the Prompt stage, the Animation stage's queue and Stop), `tests/test_tg_chat.py` (the buttons). `tests/test_creator_live.py` also proves the real console path with a fake CLI/Bot API: polling posts exactly one cut-batch follow-up, one confirmation starts two more sheets, and the blocking creator driver completes two batches sequentially at Animation and Telegram export. Both checks agree with `tasks.session_state`; Animation makes no pack/send, Telegram export delivers two distinct nine-sticker sets.
 
 ## The chat in Telegram (`services/tg_chat.py`, 2026-10-09)
 

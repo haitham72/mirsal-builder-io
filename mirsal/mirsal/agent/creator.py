@@ -253,7 +253,7 @@ def _step(tools, run, vision_allowed, telegram_ready, checkpoint=None):
         if j.get("status") in ("FAILED", "TIMEOUT"):
             return _stop(run, f"the animation could not be made: {j.get('error') or j.get('status')}. Nothing more was spent.", [{"label": "Stop", "action": "creator_stop"}], "error")
         sts = [s for s in card["stickers"] if s["status"] == "READY" and s["index"] not in run["skip"]]
-        if j.get("status") != "DONE" or not sts or any(s.get("anim_status") in (None, "NOT_REQUESTED", "PENDING", "RUNNING") for s in sts):
+        if j.get("status") != "DONE" or not sts or any(s.get("anim_status") in (None, "NOT_REQUESTED", "PENDING", "RUNNING", "PROCESSING") for s in sts):
             return
         bad = [s for s in sts if s.get("anim_status") != "READY"]
         if bad:
@@ -271,9 +271,10 @@ def _step(tools, run, vision_allowed, telegram_ready, checkpoint=None):
             run.update(status="done", step="done", updated=round(time.time(), 3))
             _log(run, "done: the animations are approved (the stage ends at the animation; no pack, no Telegram)")
             return
-        r = tools.pack_add(gid, run["subject"])
+        pack_name = run.get("pack_name") or run["subject"]
+        r = tools.pack_add(gid, pack_name)
         run["pack_id"] = r["pack_id"]
-        return _go(run, "telegram", f"{r['added']} stickers are in the pack '{run['subject']}'")
+        return _go(run, "telegram", f"{r['added']} stickers are in the pack '{pack_name}'")
     if step == "telegram":
         ok, reason = telegram_ready()
         if not ok:

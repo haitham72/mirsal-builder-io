@@ -1,4 +1,4 @@
-"""plan.md Step 3: a pack request starts at batch 01, and ONE follow-up card offers Regenerate · Batch 02 · 03 · 04 (FakeTools: no provider, no paid call)."""
+"""A pack request starts at batch 01, and ONE follow-up offers Regenerate · Batch 02 · 03 · 04 (FakeTools: no provider, no paid call)."""
 import unittest
 
 from mirsal.agent.resolver import batch_intent, classify
@@ -146,6 +146,26 @@ class Batches(Base):
         self.assertEqual((s["creator_run"]["end"], len(s["creator_queue"])), ("animation", 1))
         self.say("", action={"type": "creator_stop"})
         self.assertNotIn("creator_queue", self.sess(), "Stop also drops the queued batches")
+
+    def test_later_batch_pack_names_survive_telegram_truncation(self):
+        from mirsal.services.telegram import set_name
+        self.start_batch01()
+        self.arrive("J001", "G050")
+        s = self.sess()
+        s["settings"]["stage"] = "export"
+        s["pack"]["subject"] = "falcon " + "expressive " * 12
+        self.store.save(s)
+        self.say("", action={"type": "batch_more", "to": 3})
+        self.say("", action={"type": "confirm"})
+        s = self.sess()
+        first = s["creator_run"]["pack_name"]
+        s["creator_run"].update(status="done", step="done", said="done:done")
+        self.store.save(s)
+        self.agent.creator_tick(self.sid)
+        second = self.sess()["creator_run"]["pack_name"]
+        names = [set_name(title, "", "mirsalbot") for title in (first, second)]
+        self.assertEqual([len(name) for name in names], [64, 64])
+        self.assertNotEqual(*names, "later batch names must stay distinct after Telegram truncates them")
 
 
 class Typed(unittest.TestCase):
