@@ -1,6 +1,6 @@
 # docs/design.md — the look of Mirsal: one shell, one palette
 
-**Status: written 2026-10-02 from Haitham's notes after a pass over the running app; built in the order of §8, and §8 says which steps are done.** It is the design half of the app, kept
+**Status: built design; updated 2026-10-11 for the dark/light themes, two-band Home showcase and console feature split.** It is the design half of the app, kept
 in `docs/` because it is architecture, not a log (rule 12): the screens are a sandbox over the API (rule 11), but the *shell* they share is a real, stable
 surface that every screen inherits. When a screen's look changes, this file changes in the same step.
 
@@ -8,43 +8,11 @@ surface that every screen inherits. When a screen's look changes, this file chan
 
 ---
 
-## 1. The one problem behind every item on the list
+## 1. Shared shell
 
-Haitham's notes read as five separate complaints. They are one: **the sections do not agree about what the shell is, and the app has three palettes.**
+Every screen uses the same rail, palette, typography and responsive layout. Desktop has a 96px rail and, on list-bearing routes, a 392px second column; at widths up to 1180px that column becomes 300px. Below 900px the list is a drawer; below 760px the rail becomes a bottom bar on every route. Home and Settings use the main column without a list. The four rail items are Home, Create, Library and Help; the avatar menu holds account and staff tools.
 
-*(Corrected the same day after checking the first draft against the code: the draft said the rail turns into a horizontal bar on AI, is 72px wide and is missing AI.
-None of that holds on desktop. What is really inconsistent is below.)*
-
-**The desktop shell is one rail with a second column that appears on some screens.**
-
-| | where | what it does |
-|---|---|---|
-| rail | `#app{grid-template-columns:96px 1fr}` (`studio.css:6`) | a **96px** column on every screen; 72px is the width of one `.rbtn` inside it |
-| second column | `body.col2 #app{... 96px 392px 1fr}` (`studio.css:7`) | on only for `['library','pack','chat','agent']` (`app.js:73`); Studio, Create and Settings have none, so the page starts at x=96 there and at x=488 elsewhere |
-| col2 width | `studio.css:120` 300px at <=1180px; **`agent.css:180` 280px** at <=1180px, and **`agent.css:181` hides it below 900px on AI only** | the same column has three widths depending on the screen |
-
-**The responsive layer is where the shell really splits.** The bottom-bar rail (`agent.css:182-186`: `flex-direction:row`, `.rbtn{width:auto;flex:1}`) sits inside
-`@media (max-width:760px)` and is scoped to `body.agent-view`, so **only AI has a phone layout**. At 390px Library is still a 96px rail plus a 300px column (measured:
-rail 96, col2 300, 0px left for the page).
-
-**AI is in the rail, but not where the rail is declared.** `RAIL` (`app.js:63`) lists five items; `agent.js:37` does `RAIL.unshift(['agent','ai','AI'])` and `SCREENS.push('agent')`
-when it loads, and `route()` falls back to `'agent'` for an unknown hash (`app.js:67`). It works, but the navigation's own data does not say so and depends on script order.
-
-**Three palettes.**
-
-| where | tokens | feel |
-|---|---|---|
-| `studio.css:2` `:root` | `--pri:#3B82F6` blue, `--bg:#F7F9FB`, `--sf:#fff`, `--r:16px` | light, flat, blue |
-| `agent.css:5` `#s-agent` | `--ai:#06B6D4`, `--ai2:#22D3EE`, `--wash:#F2FBFE`, `--glass`, `--aglow`, `--viol` | cyan, glass, glow |
-| `studio.css:297` `.cp` | `linear-gradient(180deg,#070b1c,#050816)` + `#2a52ff` glow, `.cp-box` `#0b1124d9` | near-black navy |
-
-AI is the good one and is the reference. `.cp` (the Studio's composer panel) is the "ugly dark blue that has no other match in the app" — a dark island in a light app.
-**Target: one token set, AI's character, available to every screen.**
-
-Smaller defects found while measuring (fixed with the screen they sit on): the Settings Telegram icon renders unsized and fills the page; the fixed Queue pill covers the
-bottom-left of the stage (the first Earlier-batches card on Studio). *(Fixed 2026-10-03: while a job is listed `live.js drawLive` sets `body.hasq` and `studio.css` reserves room under every screen's last content, 96px, 172px on a phone; the Library's Create button is no longer sticky, so it never floats over the list.)*
-
----
+`app.js` owns navigation and event dispatch. Create has Chat / Studio tabs and a New menu. `studio.css` defines shared geometry and light tokens, `agent.css` supplies namespaced chat styles, and `theme.css` maps the dark theme. Queue controls reserve space below content while jobs are listed. Built screen details follow in §5; unresolved visual decisions remain in the trackers.
 
 ## 2. Non-negotiables (breaking these breaks the app, not just the look)
 
@@ -70,19 +38,14 @@ Settings → Appearance offers Dark / Light, applied immediately and stored in t
 
 ### 3.2 Type, spacing, motion
 
-- One family, one scale. Today sizes are set ad hoc per component (`.lv-ht` 15px, `.lv-hmeta b` 14px, `.cp-style b` 14px, `.cp-style em` 11.5px, `.rbtn`
-  12px, `.sh` …). Define ~6 steps and use them, so a screen cannot drift.
-- **One radius scale** derived from `--r:16px` (8 / 12 / 16 / 24). The composer currently uses 20/24/30px on its own.
-- Motion: the app already has `transition:box-shadow .2s` on `.cp-box` and `.lv-hitem` hover transitions. **Every interactive element gets a hover and a
-- **One motion language (Haitham, 2026-10-04: "subtle animations everywhere, like the AI enhancer")** — `studio.css` after the interaction rules: `--ease` (`cubic-bezier(.2,.8,.2,1)`), `mz-in` (the enhancer's .22s rise-and-fade) on what **opens on a click** (dialogs and their backdrop, the stroke menu, the engine strip, the style tiles with a light stagger), soft hover / press (`scale(.97)`) / selected transitions on every touchable element, a 2px lift on cards, a slide on the toast. Never an entrance animation on what the Studio redraws on a timer (batches, rows, tiles, the variations strip, the credits menu): it would replay on every poll. `prefers-reduced-motion` turns all of it off.
-  `:focus-visible`**, matching `.lv-hitem` (`studio.css:353`), which is currently the best-behaved rule in the app and should be the template.
+Inter is self-hosted. The shared type steps are 11.5 / 12.5 / 14 / 16 / 20 / 24px, with radius tokens 8 / 12 / 16 / 24px and a pill radius. `--gutter` governs page spacing. Home's headline sizes remain a scoped exception; some inline script font sizes still await the scale sweep in the backlog.
 
----
+Interactive elements share hover, press, selected and `:focus-visible` states. Click-opened dialogs, menus and panels use a short entrance animation; content redrawn by polling has none. `prefers-reduced-motion` disables transitions, entrances and film autoplay. Every keyboard control retains a visible focus ring.
 
 ## 4. The shell — rules that hold on every screen
 
-1. **The rail is one fixed element in one place.** Same width, same position, same order, on all six sections. Its width is a token; it does not change
-   shape per route. Keep the icon-over-label form (`app.js:65`) — it is legible at 72px.
+1. **The rail is one fixed element in one place.** Same width, same position, same order, on all sections. Its width is a token; it does not change
+   shape per route. Keep the icon-over-label form (`app.js`) — it is legible at 72px.
 2. **The rail has four items** (Haitham, 2026-10-11, `docs/redesign_plan.md` D5), declared in `RAIL` (`app.js`): **Home, Create, Library, Help**, under the
    Mirsal logo, then the credits chip (`live.js`) and **the avatar** (`.rme`, the person's initials) at the bottom. The avatar opens `#rmenu`: **Settings &
    health**, **Team** (`#/users`, owner and admins), **Trash** (Settings' Trash card, `ACT.rtrash`), **Watch folders** (`#/history`, the owner) and **Sign out**
@@ -93,12 +56,10 @@ Settings → Appearance offers Dark / Light, applied immediately and stored in t
    (a `<details>`) with **From a photo** (`#/create`) and **Particle effects** (`#/effects`); the full-screen tools have none. The chat preview (`#/chat`) is
    reached from the pack and the Library's sticker viewer (D6).
 3. **A persistent second column on every screen that has a list** — Library, Chat, AI for sure, and **Studio and Create** because both have real lists
-   (Studio: the batches; Create: the pack/prepared sheets). `drawCol2()` (`app.js:73`) stops being an allow-list of four routes. It must be scrollable,
-   collapsible, and remember its width; on a phone it becomes a drawer.
+   (Studio: the batches; Create: the pack/prepared sheets). `COL2` and `drawCol2()` (`app.js`) select the routes with lists; the shared column scrolls and can collapse, becoming a drawer below 900px.
 4. **Same geometry everywhere:** same gutters, same card radius, same header height, same place the page title sits. If a screen needs to break the
    pattern for a real reason, the reason goes in this file.
-5. **The rail scrolls when it must, it never reflows.** "Scaling instead of fixed" means the rail and second column scale with the viewport (fluid widths,
-   clamped) while staying the same element in the same position — not a different layout per route.
+5. **Responsive navigation is shared across routes.** The desktop rail scrolls when needed; below 760px every screen uses the same bottom bar. The second column uses the shared drawer below 900px.
 
 ---
 
@@ -117,7 +78,7 @@ Two through six columns are chosen from the showcase's measured width at 560 / 7
 ### AI (`chat-core.js`, `chat-cards.js`, `chat-stage.js`, `agent.css`) — the reference, keep its character (built; styles added under the box)
 - Keep: the cyan/glass/glow depth, the gradients, the hover and selection states on the chat list, the new-chat background.
 - **Added (Haitham, 2026-10-02): the style tiles under the AI box**, smaller than the Studio's (46px swatches, 34px once a chat has messages), with chips for the style, grid and spending of the next sheet. Details in `docs/agent-and-chat.md`.
-- **Change:** it stops being a special case. Its tokens move to `:root` (3.1) and its rail becomes the standard rail (4). Its second column stays.
+- Chat shares the root tokens and the standard rail (§3–4); its session list uses the shared second column.
 
 ### Library (built)
 - **Particles tab:** each set is a box card in a grid (`.ps-lib`), and a click on the card itself opens or closes it (`.ps-hit`, pointer cursor; no Open button); the opened card spans the row. **My Stickers** is one box per pack (`.lib-pk`, the pack's name, count and Open pack) inside one selection area, so a drag box still crosses packs. **Trending** cards keep the like and comment count on the card's bottom-left, whatever the name's wrap (`.tr-meta` `margin-top:auto`). (Haitham, 2026-10-05.)
@@ -126,20 +87,11 @@ Two through six columns are chosen from the showcase's measured width at 560 / 7
 - **Sticker library gets the same glow background as AI** so the two screens read as one app.
 - Keep the rail's fonts, backgrounds, hovers and selection states **character-identical** to AI's. If a value differs between the two, AI wins.
 
-### Studio — "this is where it becomes dirty" (built)
-- **Prepared batches** wear a small `keychip` ("Prepared", owner/admin only) beside the Blue key chip; the header says "prepared sheet, 0 credits" with a **Make a new one** button (live price) next to Create more. A sticker whose animation predates its picture says so on its tile with an **Animate again** button; the open view has **Replace file** / **Take back** beside Edit. All existing classes (`.keychip`, `.btn`, `.gwarn`), no new styles.
-- **The composer panel loses the dark navy** and takes the shared surface (3.1). This is the single biggest visual defect in the app.
-- **Style tiles: fewer sizes, more choices.**
-  - Today: `.cp-styles` (`studio.css:324`) is a horizontal scroller and each `.cp-style` (325) is `flex:1 0 150px; max-width:250px`, `aspect-ratio:3/4` —
-    **huge portrait cards, six of them, in a row.** They dominate the panel and still cannot be compared at a glance.
-  - Change to a compact **chip or square tile** (one row, wrapping, ~72–96px), label below or beside, `aspect-ratio:1`. Selection by ring + check, not by
-    size. The hint text stays but gets quieter.
-  - *Enhancement:* the tiles must be honest. `console/assets/styles/` is **empty**, so all six currently render `placeholders.py`'s `style_svg()` teddy heads.
-    Ship real tile art (`<id>.png/.jpg/.webp/.svg` per `styles.py`'s docstring) or make the placeholder deliberately abstract — a large photo of a teddy is
-    worse than a clean swatch.
-- **More presets.** Six (`styles.py`) is not enough to feel like a choice, and the chat cannot even reach four of them. Add presets as real phrases and give
-    the tiles room to breathe. Every new preset is one entry in `PRESETS` — the tile list reads from the API (`server.py:980` already sends
-    `styles=styles.PRESETS, default_style=styles.DEFAULT`), so a new preset appears in both surfaces with no UI change.
+### Studio (built)
+
+The project map and journey organize the batch's Prompt, Stickers, Motion, Particles and delivery views. The toolbar offers Stickers / Sheet / Both, background, size, Next batch and a compact menu. Each rejected picture keeps its override; a click opens the docked sticker panel (§9). Prepared batches have a staff-only chip and a zero-credit explanation; Make a new one uses the live price.
+
+The composer uses the shared surface and tokens. Style presets are 84px wrapping tiles opened by the Style chip; picking closes the tiles and updates the chip. Selection uses a ring and check. Presets come from `generation/styles.py`; real art from `console/assets/styles/` wins, otherwise a deliberate abstract swatch is generated. The enhancer uses the shared engine/model rows. Feature ownership is listed in `docs/architecture.md` §6.
 
 ### Chat (built)
 - Rail and second column per §4. The conversation keeps AI's gradients and hover/selection; the header matches every other screen's header.
@@ -208,9 +160,9 @@ whether to delete it; do not fold it into this column.
 ## 7. What "done" means for this work
 
 - One token set; `--pri` is the accent on every screen; no `#070b1c` island remains.
-- Six rail items including AI declared in `app.js`, identical width, position and order on every route; one phone layout (bottom bar) on every screen, not only AI.
+- Four rail items declared in `app.js`, identical width, position and order on every route; one phone layout (bottom bar) on every screen, not only AI.
 - The second column exists on every list-bearing screen and remembers its state.
-- **The Animation tab is a studio of its own** (Haitham, 2026-10-04: it used to say there was nothing to see while the controls lived on Stickers). Before any animation exists each batch shows the video sheet that will be sent (the server's preview of the kept stickers), the sheet panel with the model, price and Generate, the editable video prompt with the Prompt tab's footer, and each kept sticker with motion suggestion chips that add a line to that prompt (`generate.js` `animCreate`, `ACT.ganmo`). A prepared-video batch keeps its Animate view.
+- **The Animation tab is a studio of its own** (Haitham, 2026-10-04: it used to say there was nothing to see while the controls lived on Stickers). Before any animation exists each batch shows the video sheet that will be sent (the server's preview of the kept stickers), the sheet panel with the model, price and Generate, the editable video prompt with the Prompt tab's footer, and each kept sticker with motion suggestion chips that add a line to that prompt (`studio-animate.js` `animCreate`, `ACT.ganmo`). A prepared-video batch keeps its Animate view.
 - Style tiles are compact, honest, and read from `styles.PRESETS`. **They are hidden until the Style chip in the composer bar is clicked** (Haitham, 2026-10-04: always-open tiles took three rows, each as tall as a sticker); picking one closes them and the chip names it (`composer.js` `ACT.cpstyles`, `cpstylepick`). The AI enhancer's engine control under the bar is one compact strip (segment + model drop-down; the cost note is its tooltip), and it reappears every time the enhancer is turned On again.
 - Earlier batches: one vertical column, no "Load more", reachable from anywhere.
 - `tests/test_js.py` green (it guards the shared `ACT` names and that every `data-act` button has a handler) — **a redesign that trips it has broken the
@@ -218,14 +170,9 @@ whether to delete it; do not fold it into this column.
 - Checked in a browser on a **copy** of `out/` (`MIRSAL_OUT=<copy>`, never press Create) — see `docs/dev-notes.md` for the Playwright recipe and the
   `location.reload()` trap.
 
-## 8. Order of work (done steps are marked)
+## 8. Built foundations
 
-1. **Done.** Tokens (§3.1) and the rail (§4.1-4.2) — everything else inherits from these. Also done in this step: one phone layout (bottom bar) and one drawer for the second column on every screen (`#c2tog` below 900px; AI's private drawer is gone), AI declared in `RAIL`, the column's glass background and gradient title are the shell's, `body.agent-view` is gone. Guarded by `tests/test_js.py::ShellTests`.
-2. **Done.** The second column everywhere (§4.3), then Earlier batches moved into it (§6). Guarded by `tests/test_js.py` and `tests/js/history_card.test.js`.
-3. **Done.** Library, Chat and Settings alignment to AI (§5): the glow (`--glow-bg`, a static CSS version of AI's aurora, behind the whole shell so the glass columns sit on it), AI's row hover / selection (`#F0F9FC` / `#E3F4F9`) on the pack, chat and batch rows, one page width and one header (`.page`, `.ph`) for Library, Create, Pack, Export and Settings, the Chat conversation as a glass panel, and the heading-icon size (the Settings Telegram icon used to fill the page). A pack opened by its address now draws its column after the library is read. Guarded by `tests/test_js.py::ShellTests`.
-4. **Done.** The composer's dark panel and the style tiles (§5, Studio): the panel is the shared glass surface (`--glass`, the aurora halo, `--aglow` focus ring), no navy hex is left in `studio.css`; the tiles are 104px wrapping squares with a ring and a check, twelve presets (Minimal, Pixel art, Watercolour, Paper cut, Pop comic, Kawaii added; one entry each in `generation/styles.py`), and the swatch (`console/placeholders.py`) is an abstract orb drawn the way the style looks, derived from the id for any preset with no art. Real tile art still wins: drop `<id>.png` into `console/assets/styles/`. Guarded by `tests/test_js.py::ShellTests` and `tests/test_style_tiles.py`.
-5. **Done.** Type / spacing / motion sweep (§3.2): `:root` carries six type steps (`--fs-xs` 11.5, `--fs-s` 12.5, `--fs-m` 14, `--fs-l` 16, `--fs-xl` 20, `--fs-2xl` 24), the radius scale (`--r-s` 8, `--r-m` 12, `--r` 16, `--r-l` 24, `--r-pill`) and `--gutter`; every `font-size` and `border-radius` in `studio.css` and `agent.css` was snapped onto them (so 13px became 14, page titles 22 became 24, a 10px radius 12), the classes that lacked a hover got one, one `:focus-visible` ring covers every button / link / select, interactive elements share one transition, and `prefers-reduced-motion` switches transitions off. Inline `style="font-size"` in the scripts is not covered. Guarded by `tests/test_js.py::ShellTests`.
-6. **Built:** the rejection surfaces retain per-picture overrides, bulk allowance and locked technical marks. Particle sets now belong to stickers; owner galleries, trash/restore and the shared burst maker are documented in `particles.md`. The compact editor, rows of saved versions and animated sprites are built and accepted (2026-10-04).
+Shared tokens, the responsive rail and list drawer, aligned Library/Chat/Settings, compact style tiles, type/radius scales, motion rules and per-picture overrides are built. `tests/test_js.py`, the Node feature tests and `tests/test_ui_inventory.py` guard the shell and existing controls. The console feature split preserves all action, screen and route names. Remaining art, visual verdicts and spending controls belong in `docs/backlog.md` and `docs/waiting-for-haitham.md`.
 
 ## 9. Every rejected picture carries its own override (2026-10-03)
 
@@ -269,7 +216,7 @@ The sticker window's bottom gallery presents **sets or source runs**, each with 
 * **Settings** (`settings.js`, `.set-page`): Appearance renders immediately; the sticky section bar and existing system/account cards are described in §5. Spending controls remain open in `docs/backlog.md`.
 * **The chat restyle** (2026-10-11, redesign phase 10; the last block of `agent.css`): the AI screen keeps its gradient background, glow, dot grid and gradient greeting (Haitham asked for them back the same day); the prompt box, cards, chips and the settings popover are white with a hairline; your own message is a pale blue bubble; Send, the plan's Go and the primary chips are Mirsal blue; the stage slider's accent is blue. The AI-vision chip keeps its rolling highlight on purpose (the one place that asks for attention).
 * **The polish** (2026-10-11, redesign phase 11): the shared `--glass` token follows the active theme, so every surface that used it (Library packs, Trending, the pack's particle rows, particle effects, Help's agent bubbles, the welcome film's buttons, the chat preview) is a themed card with its hairline; the side column uses the shared surface; its title is plain ink at 20px; the project list's pictures are 44px. Home follows the two-band layout above.
-* **The Studio asks, it never guesses** (2026-10-11; `studio-core.js` `stageOk`, `gstagego`): Animate (`ganimate`), Make a video (`pgvideo`) and Regenerate video (`pgredo`) read the person's slider (`GET /api/prefs`); past the stop a small dialog says so ("This goes past Stickers") with Cancel / Set to Auto / **Proceed: set to Animation**; a pick sets the slider (here and in the chat) and goes on. Auto, or a step at or before the stop, goes straight on.
+* **The Studio asks, it never guesses** (2026-10-11; `studio-prompt.js` `stageOk`, `gstagego`): Animate (`ganimate`), Make a video (`pgvideo`) and Regenerate video (`pgredo`) read the person's slider (`GET /api/prefs`); past the stop a small dialog says so ("This goes past Stickers") with Cancel / Set to Auto / **Proceed: set to Animation**; a pick sets the slider (here and in the chat) and goes on. Auto, or a step at or before the stop, goes straight on.
 * **Creative or Predefined** (2026-10-11; `tasks.preview(actions_mode)`, the chat's `settings.actions`, the Studio composer's `cpactions` chip, remembered in localStorage `mirsal.actions`): **Creative** is the plan as before, nine stickers the AI (or the built-in mood list) invents for the idea. **Predefined** (the new-chat default) takes the first nine of the 36 bank actions (`actions.ACTION_BANK`: happy, laugh, cry, sad, love, angry, wink, kiss, surprised …) drawn as the whole character, and the next batches continue through the 36 the way Next batch always did. An emoji pack (faces) and a named grid ("core-v1") are the 36 already, and a transformation writes its own cells, so for those the switch changes nothing.
 * **Tiles show their info on hover** (2026-10-11, Haitham: "just make hover show info"; `tileHtml`, `.gtinfo`): a tile is its picture; the sticker's name and its issue lines appear on hover or keyboard focus as a frosted line at the bottom of the picture (always shown on a touch screen, which has no hover). The override stays visible on the picture (the coloured tag, ✕ / ＋), and a note that carries a button (Take it back, Include anyway, Animate again) stays under it (rule 10).
 * **Screen on / off** (2026-10-11; `gscreen`, remembered in localStorage `mirsal.screen`; the Studio toolbar): on, every still tile shows its cell cut straight from the raw sheet (`source.sheet_copy` and `source.grid.rects`, in proportion), the green or blue screen behind the character; off, the cut-out sticker. Animations are always the cut clips.

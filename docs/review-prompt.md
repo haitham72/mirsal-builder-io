@@ -453,7 +453,7 @@ short report full of reproduced facts beats a long one of opinions.
    mis-described). Equally: do not report as a finding something that was open in
    those trackers but is now built — check the code first.
 8. **The docs are the contract, and a doc that disagrees with the code is itself a
-   finding.** Where `README.md`, `CLAUDE.md`, `HANDOFF.md` (only a pointer plus the session state) or `docs/`
+   finding.** Where `README.md`, `CLAUDE.md`, `HANDOFF.md`, if present (only a save point) or `docs/`
    says something the code does not do, that is a finding with **both sides
    cited**. Do not silently believe either one, and do not assume the code is the
    side that is right.
@@ -584,7 +584,7 @@ docs record it.
 ## 3. Reading order (do it in this order, then the code)
 
 `README.md` (architecture + invariants) -> `CLAUDE.md` (**13 binding rules**; judge
-the project against them) -> `docs/waiting-for-haitham.md` and `docs/backlog.md` (what is open; `HANDOFF.md` is a pointer) ->
+the project against them) -> `docs/waiting-for-haitham.md` and `docs/backlog.md` (what is open; `HANDOFF.md`, if present, is a save point) ->
 `docs/api.md` (the HTTP migration, paused) and `docs/dev-notes.md` ->
 `docs/engine-and-studio.md` (the golden path, the verifier, the gates, "Use it
 anyway") -> `docs/agent-and-chat.md` -> `docs/generation.md` +
@@ -825,7 +825,7 @@ generic advice. Name the file and the line.
   in the recent diffs and check each removal was a deliberate contract change
   rather than a relaxed test.**
 - **Docs**: statements that are false today (cite both sides), missing docs,
-  contradictions between `README.md`, `CLAUDE.md`, `HANDOFF.md` and `docs/`;
+  contradictions between `README.md`, `CLAUDE.md`, `HANDOFF.md` (when present) and `docs/`;
   tracker hygiene — `docs/waiting-for-haitham.md` should hold only what needs a person,
   `docs/backlog.md` only work not yet built, and a finished item should have been
   deleted from both after being recorded in `docs/`.

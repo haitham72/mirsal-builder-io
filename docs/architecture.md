@@ -1,7 +1,7 @@
 # docs/architecture.md — how Mirsal is put together
 
 One page for the whole app: the layers, where the data lives, how one request travels, and how the browser sandbox is wired. Every area has its own doc
-with the detail (the table in `CLAUDE.md`); this page only says how they fit. Written 2026-10-10 before the redesign (`docs/redesign_plan.md`), so the
+with the detail (the table in `CLAUDE.md`); this page says how they fit. Updated 2026-10-11 for the console feature split and themes; the
 redesign has a map of what it must keep.
 
 ## 1. What it is
@@ -173,8 +173,8 @@ Each line is the module's own first docstring line.
 - `sticker_history.py` — The generation history of every sticker of a batch, for the page: one summary per sticker with its decisions grouped by stage.
 - `support.py` — Help & Support (docs/agent-and-chat.md "Support"): a person describes a problem, the support agent answers from what is documented, and a person
 - `support_kb.py` — What the support agent may read (docs/agent-and-chat.md "Support"): published FAQ entries, the repo's `docs/`, and, for the owner and admins only, …
-- `ticket_models.py` — The ticket shapes (docs/tickets_plan.md), pydantic, written once: `flow/tickets.py` validates the local model's draft with them and the native routes
-- `tickets.py` — Tickets: every problem is one record of what happened, what the person meant, what the issue is and what should be fixed (docs/tickets_plan.md).
+- `ticket_models.py` — The ticket shapes (docs/store-and-search.md, Tickets), pydantic, written once: `flow/tickets.py` validates the local model's draft with them and the native routes
+- `tickets.py` — Tickets: every problem is one record of what happened, what the person meant, what the issue is and what should be fixed (docs/store-and-search.md, Tickets).
 - `trending.py` — Trending (docs/api.md, Office accounts on the LAN, Haitham 2026-10-04: "higgsfield 'trending' style … liked and commented, and use pack in your …
 - `user_report.py` — What each person made and spent (the Users dashboard, docs/api.md "Users"): aggregates computed on request from the stores that already exist, …
 - `watch.py` — History = the real watch folders (inputs/Images_gen and inputs/videos_gen), with Remove.

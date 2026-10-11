@@ -519,7 +519,9 @@ class LiveConsoleTests(Base):
         """A batch's card shows its stickers as the sheet's own grid (3x3 or 2x2), not four thumbnails: GET /api/history reads the grid out of result.json and names every cell."""
         self._one_batch_on_disk("G002", (3, 3), animated=(1, 5, 9))
         self._one_batch_on_disk("G001", (2, 2), animated=(2,))
-        by = {i["generation_id"]: i for i in self.req("GET", "/api/history?limit=5")[1]["items"]}
+        items = self.req("GET", "/api/history?limit=5")[1]["items"]
+        self.assertEqual(len(items), 1, "the same request groups both batches in one project")
+        by = {b["generation_id"]: b for i in items for b in i["batches"]}
         g3, g2 = by["G002"], by["G001"]
         self.assertEqual(g3["grid"], [3, 3])
         self.assertEqual([c["index"] for c in g3["cells"]], list(range(1, 10)))
@@ -803,7 +805,7 @@ class LiveConsoleTests(Base):
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/video_sheet")[0], 200)
         vs = np.asarray(Image.open(pl.gen_dir(self.out, gid) / "video_sheet" / "A1" / "sheet.png").convert("RGB"))
         self.assertEqual(vs[3, 3].tolist(), [0, 0, 255])
-        self.assertNotIn("green", self.c.video_prompt_for(gid, "A1").lower())
+        self.assertIn("flat blue background", self.c.video_prompt_for(gid, "A1").lower())
         # a green sheet leaves no mark at all
         self.files["png"] = png_bytes(green)
         gid2 = self._stills_ready("green blob")
@@ -859,7 +861,8 @@ class LiveConsoleTests(Base):
         # the plan keeps the choice too: Loop off is the default in the saved video prompt
         task = self.req("GET", "/api/tasks")[1]["tasks"][0]
         self.assertFalse(task["plan"]["slots"]["loop"])
-        self.assertNotIn("loop", task["plan"]["video_prompt"].lower())
+        self.assertNotIn("seamless loop", task["plan"]["video_prompt"].lower())
+        self.assertNotIn("end on the starting pose", task["plan"]["video_prompt"].lower())
 
     def test_from_a_request_to_a_sliced_kling_animation(self):
         s, j = self.req("POST", "/api/live/sheet", {"prompt": "blob", "grid": "3x3", "style_id": "toon_shade", "outline": 12})

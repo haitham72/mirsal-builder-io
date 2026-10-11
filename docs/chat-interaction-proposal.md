@@ -48,7 +48,7 @@ Showing all nine stickers should expand the visible collection without making a 
 
 ## The user's stage slider
 
-The right popover contains only the task slider. Image/video models, Creative/Predefined (Predefined default) and Ask before spending belong in the left composer selector; grid size stays outside, and the LLM picker opens beside the top-right control. Luna and grouped provider selection remain implementation work in `plan.md` Step B.
+The right popover contains only the task slider. Image/video models, Creative/Predefined (Predefined default) and Ask before spending belong in the left composer selector; grid size stays outside, and the LLM picker opens beside the top-right control. Luna and grouped provider selection are built; their contract is in `docs/agent-and-chat.md` under Models.
 
 Treat the slider as an explicit preference about creation depth. First resolve intent, targets and scope; then apply the stage to work that would create or deliver results. Display, description, feedback and clarification retain their own meaning at every slider position.
 

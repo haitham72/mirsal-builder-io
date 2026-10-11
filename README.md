@@ -99,7 +99,7 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Particle effects** | AI image or text-only Kling animated sheets, keyed/cut sprites, one deterministic particle simulator, and ordinary animated-sticker delivery. Animated-sprite restoration is undergoing acceptance. [docs/effects.md](docs/effects.md) |
 | **Particle sets** | Sets belong to library stickers, one saved version per row (v1, v2...); three equal sources (sticker sprites, AI image sprites, Kling from scratch); animated sprites in the simulator; Save / Save as new / Add to pack; mistaken-pack recovery; soft delete and restore. [docs/particles.md](docs/particles.md) |
 | **Trending** | public packs to like, comment on and copy into your own Library; maker names, views and uses, with relative attention scoring. [docs/api.md](docs/api.md) |
-| **Open work** | Next: [plan.md](plan.md) (independent review and dark-mode plan finalization, separate console-script refactoring, then fake-server proofs of the chat's batch follow-up and creator queue; the stages Prompt · Stickers · Animation · Telegram · Export and grouped model selection are built: [docs/agent-and-chat.md](docs/agent-and-chat.md) "Stages and the batch follow-up"). v1.0 is done (2026-10-04): [docs/backlog.md](docs/backlog.md) by area, [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md) for decisions. Public hosting and Google OAuth stay paused: [deployment_plan.md](docs/deployment_plan.md) |
+| **Open work** | [docs/backlog.md](docs/backlog.md) lists unbuilt work; [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md) holds human decisions and paid checks. The theme, Home bands, console refactor and fake-server batch proofs are complete on `edit-design`. Public hosting and Google OAuth remain paused: [deployment_plan.md](docs/deployment_plan.md). |
 | **Burst creation (proposal)** | many packs from one liked sheet: reuse the image, pick actions, one queue each, async; waits for Haitham's go (W27) | [docs/burst_plan.md](docs/burst_plan.md) |
 | **Architecture** | the whole app on one page: the layers, where the data lives, one request end to end, the HTTP server, how the browser sandbox is wired, every module. [docs/architecture.md](docs/architecture.md); everything the sandbox can do, generated: [docs/ui_inventory.md](docs/ui_inventory.md) |
 | **Redesign (built, merged into `main`; visual verdicts open)** | one clean app with nothing lost: a rail of four, Create = Chat \| Studio, the journey bar, the Studio's project map; a map of every Studio action to its new home; the phases and Haitham's decisions. [docs/redesign_plan.md](docs/redesign_plan.md), mockups in `mirsal/web/mockups/redesign/` |
@@ -128,7 +128,7 @@ ZIP exports resolve the expanded bank of 1,934 tokens (1,898 distinct base glyph
 ## Folders
 
 ```
-README.md  CLAUDE.md  HANDOFF.md        this file · the rules for LLM sessions · a pointer to the trackers in docs/ plus the session state
+README.md  CLAUDE.md                   this file · the rules and routing for LLM sessions
 docs/                                    the documentation (one file per area) · docs/inputs/ (Haitham's inputs and reference)
 mirsal/                                  the app: requirements.txt, docker-compose.yml, migrations/, tests/, .env.example
   mirsal/                                the Python package, one folder per concern: engine/ (pure engine) · flow/ (the golden path: pipeline, gates) · generation/ (Higgsfield, jobs, prompts, planner) ·

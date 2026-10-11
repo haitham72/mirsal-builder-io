@@ -143,9 +143,9 @@ Other open items:
 
 - `tests.test_golden` failed intermittently once under heavy load (another Python suite running at the same time): one test left the server busy (`409 busy`) for the next. It passes alone and as a suite on a quiet machine (FastAPI and stdlib alike). If it returns, make `GoldenPathTests.wait` also wait for `busy` to stay false for a moment before the next create. **watch**.
 
-## Deployment (branch `deployment`): parked
+## Deployment: parked
 
-Paused by Haitham on 2026-10-02: nothing here is worked on, extended, turned on or deleted until he asks. The reasoning, phases, runbook and open questions are in [`deployment_plan.md`](deployment_plan.md); the prepared files are `deploy/` (map: `deploy/README.md`); the questions are W40-W48. Branches (2026-10-03): `deployment` holds the build and `better_ui/ux` branches from it; `merge/generate-advanced` is retired. Of the prepared slice, only **Telegram never-twice** (`services/telegram.py` `fingerprint()`, `send(mode="once" | "replace" | "new_set")`, `tests/test_telegram.py::NeverTwice`) and the **library fingerprint** are app work worth keeping; the gateway, SQL, Docker and Render files stay untouched. `deploy/gateway/ratelimit.py` stays inert.
+Paused by Haitham on 2026-10-02: nothing here is worked on, extended, turned on or deleted until he asks. The reasoning, phases, runbook and open questions are in [`deployment_plan.md`](deployment_plan.md); the prepared files are `deploy/` (map: `deploy/README.md`); the questions are W40-W48. The groundwork is merged into `main`; only `main` and `edit-design` remain. Of the prepared slice, only **Telegram never-twice** (`services/telegram.py` `fingerprint()`, `send(mode="once" | "replace" | "new_set")`, `tests/test_telegram.py::NeverTwice`) and the **library fingerprint** are app work worth keeping; the gateway, SQL, Docker and Render files stay untouched. `deploy/gateway/ratelimit.py` stays inert.
 
 ## Redesign
 

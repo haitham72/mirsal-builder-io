@@ -74,7 +74,7 @@ class StudioActionTests(unittest.TestCase):
 
     @staticmethod
     def block(src: str, marker: str) -> str:
-        """The whole of a top-level statement: from `marker` to the next line that starts in column 0 (the Studio's scripts are one statement per line, minified)."""
+        """Extract the production statement by its parsed AST, independent of multiline formatting."""
         helper = Path(__file__).parent / 'js' / 'console_source.js'
         code = "const s=require(process.argv[1]);let data='';process.stdin.on('data',c=>data+=c);process.stdin.on('end',()=>{const [src,marker]=JSON.parse(data);process.stdout.write(s.statement(src,marker))});"
         import json
