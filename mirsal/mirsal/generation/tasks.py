@@ -83,9 +83,9 @@ ACTIONS_MODES = ("creative", "predefined")
 def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False,
             actions_mode: str = "creative") -> dict:
     """The plan for a typed task, for the Inbox to show before anything is reserved: template, slot JSON, final prompts.
-    `actions_mode` (Haitham, 2026-10-11): "creative" = the AI's (or the mood bank's) own nine stickers; "predefined" = the first nine of the 36 bank
-    actions (`actions.ACTION_BANK`, the order "Next batch" continues in), drawn as whole characters. An emoji pack (faces) and a named grid ("core-v1")
-    are the 36 already, and a transformation writes its own cells, so for those the mode changes nothing."""
+    `actions_mode` (Haitham, 2026-10-11): "creative" = the AI's (or the mood bank's) own nine stickers; "predefined" = the first nine of the complete bank
+    actions (`actions.generation_bank`, the order "Next batch" continues in). Named grids retain their original cells,
+    and a transformation writes its own cells, so for those the mode changes nothing."""
     g = GRID_NAMES.get(grid) if isinstance(grid, str) else tuple(grid)
     if actions_mode not in ACTIONS_MODES:
         raise sources_error("actions must be creative or predefined")
@@ -98,8 +98,8 @@ def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat
     if actions_mode == "predefined":
         from . import actions as bank
         words = set(re.findall(r"[a-z0-9]+", str(prompt).lower()))
-        if not (words & prompter.EMOJI_WORDS) and not bank.preset_name(prompt) and expander.expand(str(prompt).strip(), g).get("expanded_by") != "transformation":
-            plan = _token_plan(str(prompt).strip(), g, False, bank.next_tokens(set(), g[0] * g[1]), style_id, loop)
+        if not bank.preset_name(prompt) and expander.expand(str(prompt).strip(), g).get("expanded_by") != "transformation":
+            plan = _token_plan(str(prompt).strip(), g, bool(words & prompter.EMOJI_WORDS), bank.next_tokens(set(), g[0] * g[1]), style_id, loop)
             plan["actions_mode"] = "predefined"
             plan["batches_max"] = batches_max(plan)
             return plan
@@ -198,6 +198,9 @@ def plan_from_preview(raw, prompt: str, grid: str | list | tuple = "3x3", style_
         base["stickers"] = [{"index": c["pos"], "id": f"prompt{c['pos']:02d}", "prompt": "", "key": c["tags"][0], "tags": c["tags"], "emoji": c["emoji"]} for c in cells]
     base["slots"]["style_id"] = style_id
     base["slots"]["loop"] = bool(loop)
+    if "emoji_batch" in slots_in:
+        from .emoji_batches import validate_metadata
+        base["slots"]["emoji_batch"] = validate_metadata(slots_in["emoji_batch"], base["slots"]["cells"])
     base["previewed"] = True              # the cells came from a plan the person saw (kept on the task, so a batch can say where its cells came from)
     return plan_again(base, loop)
 
@@ -375,7 +378,7 @@ def next_batch(out: Path, gens, style_id: str = "flat_vector", loop: bool = Fals
     used = ses["used_tokens"]
     tokens = actions.next_tokens(used, rows * cols)
     if len(tokens) < rows * cols:
-        return {"complete": True, "message": f"Every action of the {len(actions.ACTION_BANK)}-action bank is already in these batches. Start a new request, or regenerate a batch you want better."}
+        return {"complete": True, "message": f"Every action of the {len(actions.generation_bank())}-action bank is already in these batches. Start a new request, or regenerate a batch you want better."}
     plan = _token_plan(request, (rows, cols), ses["face"], tokens, style_id, loop)
     left = len(actions.next_tokens(used | set(tokens), 999))
     return {**plan, "prompt": request, "next": {"kind": "actions", "tokens": tokens, "left": left},
@@ -402,7 +405,7 @@ def session_state(out: Path, gens) -> dict:
         raise sources_error("Open a batch first: Next batch continues the batches on screen", 409)
     first = min(results, key=lambda r: r.get("number") or 0)
     request = actions.strip_presets(str(first.get("prompt") or "").strip()) or str((first.get("source") or {}).get("subject", "")).replace("_", " ")
-    used = {h[0] for r in results for s in r["stickers"] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
+    used = actions.tokens_from_stickers([s for r in results for s in r["stickers"]])
     presets = {(r.get("slots") or {}).get("preset") for r in results} - {None}
     if presets:          # an emoji pack: its grids are the pack's, wherever its batches are (on screen or not): every batch of the same request and person counts
         key, owner = request.lower(), first.get("owner")
@@ -444,7 +447,7 @@ def batches_max(plan: dict) -> int:
         return 1
     if slots.get("preset") in actions.PRESETS:
         return min(MAX_BATCHES, len(actions.PRESETS))
-    used = {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
+    used = actions.tokens_from_stickers(plan.get("stickers"))
     n = int(grid[0]) * int(grid[1])
     return max(1, min(MAX_BATCHES, 1 + len(actions.next_tokens(used, 999)) // n))
 
@@ -466,7 +469,7 @@ def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector"
             text = f"{base} {p}"
             out.append({**preview(text, "3x3", style_id, False, loop), "prompt": text})
         return out
-    used = set(used_tokens) | {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
+    used = set(used_tokens) | actions.tokens_from_stickers(plan.get("stickers"))
     out = []
     for _ in range(k):
         tokens = actions.next_tokens(used, grid[0] * grid[1])

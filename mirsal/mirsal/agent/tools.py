@@ -94,7 +94,7 @@ class ConsoleTools:
         `gens`, the Studio's batches of the same pack) already used. Nothing is reserved or spent."""
         from ..generation import actions
         used_presets = {((p or {}).get("slots") or {}).get("preset") for p in made_plans} - {None}
-        used_tokens = {h[0] for p in made_plans for s in (p or {}).get("stickers") or [] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
+        used_tokens = actions.tokens_from_stickers([s for p in made_plans for s in (p or {}).get("stickers") or []])
         if gens:
             try:
                 ses = tasks.session_state(self.out, [g for g in gens if g])
@@ -221,6 +221,16 @@ class ConsoleTools:
         otherwise the prepared-sheet lookup, exactly as the page does. `base_plan` is the plan the person
         approved on the card: it is what is sent (the cells, tags and slots of the card), never planned a second time."""
         match = None if force_live else self.prepared_match(prompt)
+        manual = (base_plan or {}).get("slots", {}).get("emoji_batch")
+        if manual:
+            from ..generation.emoji_batches import validate_target
+            try:
+                validate_target(manual, self.c.lib, self.user["id"])
+            except pl.PipelineError as e:
+                raise ToolError(str(e), e.code)
+            if not self.live():
+                raise ToolError("Manual emoji batches need live generation. Enable the provider before creating this plan.", 409)
+            match = None
         if not match:
             self._may_spend()
         if parent:
@@ -432,6 +442,10 @@ class ConsoleTools:
         if self.member:
             return []
         return [{"id": p["id"], "name": p["name"], "count": len(p.get("stickers") or [])} for p in self.c.lib.snapshot(owner=self.user["id"])["packs"]]
+
+    def emoji_packs(self) -> list:
+        """Owned packs for manual emoji batches, including members' own packs."""
+        return self.c.lib.snapshot(owner=self.user["id"])["packs"]
 
     # ---- particle sets (docs/particles.md): the chat's reads and free edits, and the one call that spends (a sheet) ----
     def _owner(self) -> None:
@@ -890,6 +904,9 @@ class FakeTools:
         return {"pack_id": "P1", "added": len([s for s in self.gens[gid]["stickers"] if s["status"] == "READY"]), "kind": "static"}
 
     def packs(self):
+        return list(getattr(self, "pack_list", []))
+
+    def emoji_packs(self):
         return list(getattr(self, "pack_list", []))
 
     def particle_sets(self):

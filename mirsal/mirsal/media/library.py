@@ -570,6 +570,7 @@ class Library:
             s = next((s for s in p["stickers"] if s["id"] == sid), None)
             if not s:
                 raise LibraryError("no such sticker", 404)
+            s.pop("prev_metadata", None)
             if keep_prev:
                 cur = self.files / s["file"]
                 if cur.is_file():
@@ -611,8 +612,65 @@ class Library:
             s["kb"] = max(1, len(data) // 1024); s["edited"] = time.time()
             f.unlink(missing_ok=True)
             s.pop("prev_file", None)
+            for key, value in s.pop("prev_metadata", {}).items():
+                if value is None:
+                    s.pop(key, None)
+                else:
+                    s[key] = value
             self._save(db)
             return s
+
+    def add_emoji_from_generation(self, out: Path, pid: str, gid: int, index: int, kind: str, decision: str,
+                                  mode: str = "add", name: str | None = None) -> dict:
+        """Apply a manual batch's explicit duplicate decision within one pack. Repeated delivery is idempotent."""
+        from ..generation.emoji_batches import identity
+        from ..generation.emoji import first_emoji
+        if decision not in ("new", "add", "overwrite"):
+            raise LibraryError("Choose overwrite, add or an unused emoji first.")
+        state = pl.state(out, gid)
+        cell = state["stickers"][index - 1]
+        glyph = first_emoji(cell.get("emoji"))
+        source = {"generation": state["generation_id"], "index": index}
+        with self.lock:
+            db = self._load(); pack = self._pack(db, pid)
+            same = [s for s in pack["stickers"] if all((s.get("source") or {}).get(k) == v for k, v in source.items())]
+            delivered = next((s for s in same if s["type"] == kind), None)
+            if delivered:
+                return delivered
+            matches = [s for s in pack["stickers"] if identity(first_emoji(s.get("emoji"))) == identity(glyph)]
+            target = (same[-1] if same and kind == "animated" and mode == "replace" else
+                      max(matches, key=lambda s: (s.get("emoji_version", 1), s.get("created", 0))) if decision == "overwrite" and matches else None)
+            if decision == "new" and matches and not same:
+                raise LibraryError(f"{glyph} was added to this pack after the preview. Choose overwrite or add first.", 409)
+            if target:
+                rel = cell.get("webm") if kind == "animated" else cell.get("png")
+                status = cell.get("anim_status") if kind == "animated" else cell.get("status")
+                file = pl.gen_dir(Path(out), gid) / (rel or "missing")
+                if status != "READY" or not file.is_file():
+                    raise LibraryError("That sticker is not READY.", 409)
+                previous = {key: target.get(key) for key in ("source", "file_name", "emoji_version", "emoji")}
+                self.replace_file(pid, target["id"], file.read_bytes(), file.suffix.lstrip("."), kind, keep_prev=True)
+                db = self._load(); pack = self._pack(db, pid)
+                saved = next(s for s in pack["stickers"] if s["id"] == target["id"])
+                saved.update(source=source, emoji=glyph, file_name=cell.get("name") or file.stem,
+                             emoji_version=target.get("emoji_version", 1), prev_metadata=previous)
+            else:
+                versions = {}
+                for s in matches:
+                    src = s.get("source") or {}
+                    key = (src.get("generation"), src.get("index")) if src.get("generation") else s["id"]
+                    versions[key] = max(versions.get(key, 0), s.get("emoji_version", 1))
+                version = same[-1].get("emoji_version", 1) if same else max(len(versions), max(versions.values(), default=0)) + 1
+                label = name or cell.get("title") or readable_name(cell.get("key"))
+                label = re.sub(r"(?:[_ ]v?\d{2,})$", "", label, flags=re.I)
+                if version > 1:
+                    label = label[:56] + f" {version:02d}"
+                added = self.add_from_generation(out, pid, gid, index, kind, label)
+                db = self._load(); pack = self._pack(db, pid)
+                saved = next(s for s in pack["stickers"] if s["id"] == added["id"])
+                saved["emoji_version"] = version
+            self._save(db)
+            return saved
 
     def copies_of(self, pid: str, sid: str) -> list[dict]:
         """Other packs' stickers from the same batch sticker (generation + index): the offer after a replace."""

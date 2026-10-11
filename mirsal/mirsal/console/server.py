@@ -426,6 +426,9 @@ class Console:
                 raise pl.PipelineError("Send either plan (the previewed one) or from_generation (a batch's own plan), not both", 400)
             style_id = body.get("style_id", "flat_vector")
             previewed = tasks.plan_from_preview(body["plan"], body.get("prompt", ""), body.get("grid", "3x3"), style_id if isinstance(style_id, str) else "", bool(body.get("loop")))
+        if what == "sheet":
+            from ..generation.emoji_batches import validate_target
+            validate_target((previewed or base_plan or {}).get("slots", {}).get("emoji_batch"), self.lib, who["id"])
         try:
             model, params = model_catalog.resolve(kind, body.get("model"), body.get("options"))
             if what == "cost":
@@ -438,6 +441,7 @@ class Console:
                 if refs and not model_catalog.find("image", model).get("refs"):
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
                 base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else previewed)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
+                validate_target((base or {}).get("slots", {}).get("emoji_batch"), self.lib, who["id"])
                 t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
                 try:
@@ -1830,6 +1834,16 @@ def make_handler(c: Console):
                 _SS(c.out, user=self.user["id"]).set_person_stage(body["stage"])
                 return self._json(200, {"stage": body["stage"]})
             if path == "/api/plan":      # preview only: nothing is reserved
+                if "emojis" in body:
+                    from ..generation import emoji_batches
+                    pid = body.get("pack_id")
+                    if pid and not c.lib.owns(str(pid), self.user["id"]):
+                        raise pl.PipelineError("No such pack", 404)
+                    pack = next((p for p in c.lib.snapshot(owner=self.user["id"])["packs"] if p["id"] == pid), {})
+                    glyphs = emoji_batches.extract(body["emojis"])[0] if isinstance(body["emojis"], str) else body["emojis"]
+                    return self._json(200, emoji_batches.plan(body.get("prompt") or pack.get("name") or "Generic emojis", glyphs,
+                        emoji_batches.sticker_emojis(pack.get("stickers")), body.get("decisions"), body.get("replacements"), pid,
+                        body.get("style_id", "flat_vector"), bool(body.get("loop"))))
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                                      body.get("actions") or "creative"))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)

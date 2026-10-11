@@ -14,7 +14,7 @@ from __future__ import annotations
 STAGES = ("auto", "prompt", "emojis", "animation", "export", "api")
 STEPS = STAGES[1:]          # the fixed stops, in order; "auto" lets each message decide
 DEFAULT = "auto"
-MAX_BATCHES = 4          # = generation/tasks.MAX_BATCHES: a pack has at most four batches (an emoji pack's four preset grids)
+MAX_BATCHES = 4          # = generation/tasks.MAX_BATCHES: one automatic request has at most four batches; manual additions can continue
 INFO = {"auto": {"label": "Auto", "hint": "each message decides"},
         "prompt": {"label": "Prompt", "hint": "plan only, free"},
         "emojis": {"label": "Stickers", "hint": "sheet and stickers"},

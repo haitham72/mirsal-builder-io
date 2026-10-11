@@ -68,3 +68,15 @@ test('explicit generation scope and excluded batches remain respected', async ()
   await excluded.run('ACT.gadd()');
   assert.deepEqual(Array.from(excluded.ctx.PW.rows, r => r.g), [127]);
 });
+
+test('a manual batch defaults only to its explicitly planned pack', async () => {
+  const w = wizard();
+  w.ctx.GM.get(127).slots = {emoji_batch: {pack_id: 'g128-pack'}};
+  await w.run('ACT.gadd()');
+  assert.match(w.dialogs[0], /value=old checked/);
+  assert.equal(w.ctx.PW.rows[0].g, 127);
+  const unavailable = wizard();
+  unavailable.ctx.GM.get(127).slots = {emoji_batch: {pack_id: 'removed-pack'}};
+  await unavailable.run('ACT.gadd()');
+  assert.match(unavailable.dialogs[0], /value=new checked/);
+});

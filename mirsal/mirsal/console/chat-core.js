@@ -479,7 +479,7 @@ if (typeof document !== 'undefined' && typeof ACT !== 'undefined') {
         if (el.dataset.force) a.force = true;
       }
       if (el.dataset.g) a.generation = el.dataset.g;
-      if (el.dataset.to) a.to = +el.dataset.to;
+      if (el.dataset.to) a.to = /^\d+$/.test(el.dataset.to) ? +el.dataset.to : el.dataset.to;
       if (el.dataset.i) {
         try {
           a.indexes = JSON.parse(el.dataset.i);

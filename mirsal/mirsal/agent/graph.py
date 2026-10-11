@@ -28,7 +28,7 @@ from typing import Any, TypedDict
 
 from ..generation import styles
 from ..runtime import cache as cachemod
-from . import creator, stages
+from . import creator, stages, manual_batches
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from . import editroute, refine, subjects
@@ -138,7 +138,7 @@ class Agent:
         nodes = {"understand": self.n_understand, "resolve": self.n_resolve, "new": self.n_new, "multi": self.n_multi, "effects": self.n_effects, "particles": self.n_particles, "editroute": self.n_editroute, "unsupported": self.n_unsupported, "refine": self.n_refine, "another": self.n_another,
                   "edit": self.n_edit, "undo": self.n_undo, "animate": self.n_animate, "export": self.n_export, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
-                 "smalltalk": self.n_smalltalk, "profile": self.n_profile, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "batches": self.n_batches, "regenerate": self.n_regenerate, "finish": self.n_finish}
+                 "smalltalk": self.n_smalltalk, "profile": self.n_profile, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "batches": self.n_batches, "regenerate": self.n_regenerate, "emoji_batch": self.n_emoji_batch, "finish": self.n_finish}
         for k, fn in nodes.items():
             g.add_node(k, fn)
         g.set_entry_point("understand")
@@ -293,6 +293,8 @@ class Agent:
         answered = False
         if t.action and t.action.get("type") in ("confirm", "confirm_new", "cancel"):
             t.intents, t.conf = [t.action["type"].upper()], 1.0
+        elif manual_batches.matches(t):
+            t.intents, t.conf = ["EMOJI_BATCH"], 1.0
         elif t.action and t.action.get("type") == "retry_sheet":
             t.intents, t.conf = ["RETRY"], 1.0
         elif t.action and t.action.get("type") in ("batch_more", "regenerate"):
@@ -349,7 +351,12 @@ class Agent:
                   "EDIT_STICKERS": "edit", "UNDO": "undo", "ANIMATE": "animate", "EXPORT": "export", "ANOTHER": "another", "NEW": "new", "NEW_MULTI": "multi", "EFFECTS": "effects", "PARTICLES": "particles", "EDIT_ROUTE": "editroute", "UNSUPPORTED": "unsupported", "REFINE": "refine", "ASK": "ask", "SEARCH": "search",
                  "SMALLTALK": "smalltalk", "PROFILE": "profile", "AMBIGUOUS": "clarify", "RETRY": "retry", "NAMES": "names", "NAMES_DECIDE": "names_decide", "CREATOR": "creator", "BATCH_MORE": "batches", "REGENERATE": "regenerate"}
         t.queue = [order[i] for i in t.intents if i in order] or ["clarify"]
+        if t.intents == ["EMOJI_BATCH"]:
+            t.queue = ["emoji_batch"]
         return {}
+
+    def n_emoji_batch(self, state: State) -> dict:
+        return manual_batches.handle(self, state["turn"])
 
     def _ctx(self, t: Turn) -> dict:
         sess = t.sess
@@ -519,6 +526,9 @@ class Agent:
         pk = t.sess.get("pack")
         if not pk:
             return
+        manual = (it.get("plan") or {}).get("slots", {}).get("emoji_batch")
+        if manual:
+            pk.update(manual=True, library_id=manual.get("pack_id"))
         row = {"no": int(b["no"]), "label": b.get("label"), "generation": r.get("generation"), "job": r.get("job"), "plan": it.get("plan"),
                "creator": bool(it.get("creator_item")), "ts": round(time.time(), 3)}
         pk["made"] = sorted([x for x in pk.get("made") or [] if x["no"] != row["no"]] + [row], key=lambda x: x["no"])
@@ -564,6 +574,8 @@ class Agent:
         top = min(int(pk.get("max") or 1), stages.MAX_BATCHES)
         last = next((g for r in reversed(pk.get("made") or []) for g in [self._row_gen(r)] if g), None)
         chips = [{"label": "Regenerate" + cost(1), "action": "regenerate", "generation": last}] if last else []
+        if pk.get("manual"):
+            return f"**{pk.get('subject') or 'The pack'}** is ready. Paste nine emojis for another batch; I will check repeats in this pack.", chips
         chips += [{"label": f"Batch {k:02d}" + cost(k - existing), "action": "batch_more", "to": k} for k in range(max(existing, 1) + 1, top + 1)]
         name = pk.get("subject") or "the pack"
         if top <= 1:
@@ -903,7 +915,7 @@ class Agent:
                       refs: list | None = None, note: str = "") -> bool:
         """Start a batch from an approved plan (`p["plan"]` is sent as it is: the card and the batch are the same). True when it started; False leaves the reply explaining why."""
         try:
-            force_live = (t.action or {}).get("type") == "confirm_new"      # "Make a new one": a fresh provider sheet at the normal price, never the prepared set
+            force_live = bool(p.get("force_live")) or (t.action or {}).get("type") == "confirm_new"      # manual batches must keep their exact approved cells
             r = self.tools.create(p["prompt"], p["grid"], p["style_id"], p.get("ai", True), parent=parent, regen_of=regen_of, refs=refs, base_plan=p.get("plan"), ref_clause=p.get("ref_clause"), **_edge_kw(p), force_live=force_live)
         except ToolError as e:
             t.reply = f"I couldn't start that: {e}"
@@ -930,6 +942,8 @@ class Agent:
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
             return {}
         t.trace.step(f"confirmed: {p['type']}")
+        if p["type"] == "emoji_batch":
+            return manual_batches.handle(self, t)
         if p["type"] == "multi":
             t.trace.retitle(f"generating {p.get('label') or 'several packs'}")
             done, failed = self._start_items(t, p["items"])

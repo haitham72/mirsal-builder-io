@@ -36,7 +36,7 @@ class ResolutionTests(unittest.TestCase):
         self.assertEqual(len(actions.canonical_all("bus", ["happy", "laugh", "cry", "wink"])), 4)
         self.assertEqual(len(actions.canonical_all("bus", ["happy"], limit=1)), 1)
         self.assertEqual(actions.canonical_mood("bus_happy", ["bus"])[0], "happy")
-        self.assertEqual(len(actions.next_tokens([], 2000)), 36)
+        self.assertGreater(len(actions.next_tokens([], 2000)), 1800)
 
     def test_invalid_saved_primary_is_unresolved_and_never_becomes_a_path(self):
         args = dict(key="bus", tags=["bus"], slug="city", index=1, gid=1, date="20261011")

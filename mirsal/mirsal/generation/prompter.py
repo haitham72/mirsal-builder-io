@@ -207,7 +207,7 @@ def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: st
     for i, (suffix, phrase, emoji, motion) in enumerate(entries, 1):
         key = f"{subject_slug}_{suffix}"                  # searchable action name; also the file name tail
         if preset or tokens:
-            seed = [suffix, *actions.ACTION_BANK[suffix]["aliases"]] + ctx_tags
+            seed = [suffix, *actions.generation_bank()[suffix]["aliases"]] + ctx_tags
         else:
             seed = [w for w in re.findall(r"[a-z0-9]+", phrase) if len(w) > 2 and w not in STOP and w not in {"with", "holding", "wearing"}][:3] + ctx_tags
         tags = clean_tags(key, seed)

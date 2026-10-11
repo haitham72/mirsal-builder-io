@@ -1,7 +1,8 @@
 """The canonical action bank for export tags (`docs/export to team/mirsal-export-architecture.md` §6-§6b).
 
-`ACTION_BANK`: the 36 core mood tokens (presets, sentences and `next_tokens` only ever
-draw from these). `EXTENDED_BANK`: every remaining base iOS emoji (generated from
+`ACTION_BANK`: the 36 core mood tokens (named presets and sentences).
+`next_tokens` draws from the complete bank, deduplicated by emoji.
+`EXTENDED_BANK`: every remaining base iOS emoji (generated from
 Unicode `emoji-test.txt` 15.1 fully-qualified rows minus skin-tone variants), so any
 object sticker — school 🏫, bus 🚌, statue 🗽, cherry 🍒 — maps onto a well-established
 public iOS emoji instead of exporting unresolved.
@@ -18,6 +19,7 @@ Pure: stdlib only (the engine never imports this; rule 3)."""
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 
 # token -> {"emoji": primary glyph, "aliases": [single-token spellings]}
 ACTION_BANK: dict[str, dict] = {
@@ -2072,7 +2074,7 @@ def canonical_all(key: str | None, tags: list | tuple | None = None, limit: int 
 
 
 def canonical_mood(key: str | None, tags: list | tuple | None = None) -> tuple[str, list[str]] | None:
-    """Generation queues draw only core moods, independently of object matching."""
+    """Legacy mood association, independently of object matching; queues use tokens_from_stickers."""
     for word in _candidates(key, tags):
         tok = _CORE_LOOKUP.get(word)
         if tok:
@@ -2195,16 +2197,57 @@ BODY_SENTENCES = {
 }
 
 
+@lru_cache(maxsize=1)
+def generation_bank() -> dict:
+    """One token per base emoji, core moods first, then the complete offline bank."""
+    from .emoji import base
+    out, seen = {}, set()
+    for token, row in _BANK_OF.items():
+        glyph = base(row["emoji"])
+        if glyph not in seen:
+            out[token] = row
+            seen.add(glyph)
+    return out
+
+
+@lru_cache(maxsize=4096)
+def token_for_emoji(glyph: str) -> str | None:
+    from .emoji import base, valid
+    if not valid(glyph):
+        return None
+    wanted = base(glyph)
+    return next((t for t, row in generation_bank().items() if base(row["emoji"]) == wanted), None)
+
+
+def tokens_from_stickers(stickers) -> set:
+    from .emoji import split_emoji
+    out = set()
+    for s in stickers or []:
+        glyphs = s.get("emoji") or []
+        glyphs = split_emoji(glyphs) if isinstance(glyphs, str) else glyphs
+        hit = next((t for g in glyphs if (t := token_for_emoji(g))), None)
+        if hit:
+            out.add(hit)
+        elif mood := canonical_mood(s.get("key"), s.get("tags")):
+            out.add(mood[0])
+    return out
+
+
 def next_tokens(used, n: int = 9) -> list[str]:
     """The first `n` bank tokens (bank order) not in `used`; fewer when the bank runs out (the caller says the bank is complete)."""
     used = set(used or ())
-    return [t for t in ACTION_BANK if t not in used][:n]
+    return [t for t in generation_bank() if t not in used][:n]
 
 
 def token_cells(tokens, face: bool) -> list[tuple]:
     """`(token, label, emoji, motion)` for explicit tokens: face sentences for an emoji-style subject, whole-character sentences otherwise."""
     bank = FACE_SENTENCES if face else BODY_SENTENCES
-    return [(t, *bank[t][:1], ACTION_BANK[t]["emoji"], bank[t][1]) for t in tokens]
+    out = []
+    for t in tokens:
+        label = t.replace("-", " ")
+        phrase, motion = bank.get(t, (f"expressing {label} with a clear {label} motif", f"acts out {label} with expressive {'facial' if face else 'body'} motion"))
+        out.append((t, phrase, _BANK_OF[t]["emoji"], motion))
+    return out
 
 
 def preset_name(text: str | None) -> str | None:

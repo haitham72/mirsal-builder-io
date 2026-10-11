@@ -101,7 +101,8 @@ ACT.gadd = async (el) => {
       .sort(
         (a, b) => (b.lead ? 1 : 0) - (a.lead ? 1 : 0) || held(b) - held(a),
       )[0] /* the pack this batch already lives in: its stills, upgraded, not a second pack */,
-    def = home ? home.id : '',
+    target = inc.length === 1 ? ((inc[0].slots || {}).emoji_batch || {}).pack_id : '',
+    def = target && ps.some((p) => p.id === target) ? target : home ? home.id : '',
     base = titleCase(inc[0].source.subject);
   let name = base,
     k = 2;

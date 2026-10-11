@@ -1,4 +1,4 @@
-"""Predefined or creative stickers (Haitham, 2026-10-11): a plan's nine actions come from the 36 bank actions, or from the AI / the mood bank as before."""
+"""Predefined actions use the full bank; creative requests and named presets retain their behavior."""
 import unittest
 
 from mirsal.generation import actions, tasks
@@ -11,13 +11,17 @@ class ActionsModeTests(unittest.TestCase):
         self.assertEqual([s["key"].rsplit("_", 1)[-1] for s in p["stickers"]][:3], ["happy", "laugh", "cry"])
         self.assertFalse(p["slots"]["face"], "a character is drawn whole, not as a face")
         self.assertEqual(len(p["stickers"]), 9)
-        self.assertGreater(p["batches_max"], 1, "the rest of the 36 follow as the next batches")
+        self.assertGreater(p["batches_max"], 1, "unused bank emojis follow as the next batches")
 
-    def test_creative_is_todays_plan_and_an_emoji_pack_is_the_36_either_way(self):
+    def test_predefined_emoji_requests_use_the_full_bank_and_named_presets_keep_their_cells(self):
         self.assertNotEqual(tasks.preview("kid superman", "3x3").get("actions_mode"), "predefined")
         a, b = tasks.preview("cat emojis", "3x3"), tasks.preview("cat emojis", "3x3", actions_mode="predefined")
-        self.assertEqual([s["key"] for s in a["stickers"]], [s["key"] for s in b["stickers"]])
+        self.assertEqual([s["emoji"] for s in b["stickers"]], [actions.generation_bank()[t]["emoji"] for t in actions.next_tokens([],9)])
         self.assertEqual(a["slots"]["preset"], "core-v1")
+        self.assertEqual(b["actions_mode"], "predefined")
+        self.assertIsNone(b["slots"]["preset"])
+        named=tasks.preview("cat emojis social-v1", "3x3", actions_mode="predefined")
+        self.assertEqual(named["slots"]["preset"],"social-v1")
 
     def test_an_unknown_mode_is_refused(self):
         with self.assertRaises(Exception):

@@ -1015,6 +1015,19 @@ def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: s
     """'Add to pack': approve what was kept at G2 / G4, approve the final pack (G5) and add it to a Library pack.
     Animated stickers when the video was made, the stills when it was not. Anything already added to that pack is skipped.
     mode: when an animated sticker's still is already in the pack, 'add' keeps both, 'replace' puts the animated one in the still's place."""
+    res = pl.read_result(out, gid)
+    manual = (res.get("slots") or {}).get("emoji_batch")
+    target = (manual or {}).get("pack_id")
+    if manual and not target and pack_id:
+        owned = next((p for p in lib.snapshot(owner=owner or res.get("owner", "local"))["packs"] if p["id"] == pack_id), None)
+        if not owned or owned.get("stickers"):
+            raise refuse("This manual batch was planned for a new pack. Plan it for the existing pack before adding it there.")
+    if target:
+        if pack_id and pack_id != target:
+            raise refuse("This manual batch was planned for another pack. Use its chosen pack or make a new plan.")
+        if not lib.owns(target, owner or res.get("owner", "local")):
+            raise refuse("No such target pack")
+        pack_id = target
     res = _ensure_plan(out, gid, "approved by pressing Add")
     _approve_stills(out, gid, res, "approved by Add")
     res = pl.read_result(out, gid)
@@ -1038,6 +1051,10 @@ def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: s
             raise refuse("Nothing to add: every sticker was dropped or blocked.")
     pid = pack_id or (lib.create_pack(pack_name or "My stickers", owner=owner or res.get("owner", "local"))["id"])
     res = pl.read_result(out, gid)
+    if manual and not target:
+        manual["pack_id"] = pid
+        res["slots"]["emoji_batch"] = manual
+        pl.write_result(out, gid, res)
     done = res.setdefault("added", {}).setdefault(pid, [])
     added = []
     for i in keep:
@@ -1045,7 +1062,15 @@ def quick_add(out: Path, gid: int, lib, pack_id: str | None = None, pack_name: s
         if key in done:
             continue
         o = (names or {}).get(str(i)) or {}
-        lib.add_from_generation(out, pid, gid, i, kind, o.get("name"), o.get("emoji"))
+        if manual:
+            entry = next((e for e in manual["entries"] if e["index"] == i), None)
+            if not entry or entry["emoji"] != res["stickers"][i - 1]["emoji"]:
+                raise refuse("This manual batch's decisions no longer match its stickers. Plan it again.")
+            if o.get("emoji") and o["emoji"] != entry["emoji"]:
+                raise refuse("Changing a manual batch's emoji needs a new duplicate check. Paste the revised batch in chat.")
+            lib.add_emoji_from_generation(out, pid, gid, i, kind, entry["choice"], mode, o.get("name"))
+        else:
+            lib.add_from_generation(out, pid, gid, i, kind, o.get("name"), o.get("emoji"))
         done.append(key)
         added.append(i)
     replaced = 0
