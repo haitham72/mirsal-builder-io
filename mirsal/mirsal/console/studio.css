@@ -946,3 +946,33 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 @media (prefers-reduced-motion:reduce){#modal.side .mbox.gm-panel.gm-new{animation:none}}
 @media (max-width:760px){#modal.side{width:100vw;bottom:62px}}
 @media (min-width:1180px){body.gmside #s-generate{padding-right:calc(min(460px,100vw) + var(--gutter))}}
+
+/* ---------- the density pass (redesign phase 7, Haitham 2026-10-11: "everything looks big and clunky", the redesign mockups are the reference: minimal,
+   flat, iOS-like). ONE override block, last in the file: a flat paper behind every screen (the AI screen keeps its own wash), a flatter and smaller
+   composer, a floating bottom bar, slightly tighter buttons. Sizes stay on the scale (--fs-*, --r-*). */
+#app{background:var(--bg)}
+.btn{padding:7px 13px;font-weight:550}
+.gbig{height:38px;padding:0 18px;font-size:var(--fs-m);border-radius:var(--r-pill)}
+.card{box-shadow:none}
+/* the composer (the Idea step): one quiet prompt box */
+.cp{background:var(--sf);backdrop-filter:none;box-shadow:0 0 0 1px var(--bd);padding:14px 16px 16px;border-radius:var(--r-l)}
+.cp-halo{display:none}
+.cp-head{margin-bottom:10px}.cp-orb{width:28px;height:28px;filter:none}.cp-head h1{font-size:var(--fs-m);font-weight:650}
+.cp-box{background:var(--bg);backdrop-filter:none;box-shadow:inset 0 0 0 1px var(--bd);padding:10px 12px 10px}
+.cp-box:focus-within{box-shadow:inset 0 0 0 1px var(--pri),0 0 0 3px var(--pri-glow)}
+.cp .cp-box textarea{font-size:var(--fs-l);font-weight:450;letter-spacing:0;line-height:1.45;min-height:44px;padding:4px 4px 8px}
+.cp-ref{width:44px;height:44px}.cp-add{height:44px;min-width:44px;font-size:var(--fs-s)}
+.cp-bar{gap:6px;padding-top:10px;border-top-color:var(--bd)}
+.cp-chip{height:36px;padding:0 12px 0 6px;gap:8px;border-radius:var(--r-pill);background:var(--sf);box-shadow:inset 0 0 0 1px var(--bd)}
+.cp-chip b{font-size:var(--fs-s)}.cp-chip em{font-size:var(--fs-xs)}.cp-chip .lv-logo,.cp-gl{width:24px;height:24px}
+.cp-chip:hover,.cp-chip.open{box-shadow:inset 0 0 0 1px var(--pri-bd)}
+.cp-go{height:38px;padding:0 20px;border-radius:var(--r-pill);font-size:var(--fs-m);font-weight:600;background:var(--pri);box-shadow:0 4px 12px var(--pri-glow)}
+.cp-go:hover{background:var(--pri-d);filter:none}
+.cp-style{width:72px;padding:5px 5px 6px;gap:4px;background:var(--sf);box-shadow:inset 0 0 0 1px var(--bd)}
+.cp-style b{font-size:var(--fs-s)}.cp-style.on::after{top:9px;right:9px;width:16px;height:16px}
+.cp-cr{height:32px;background:var(--fill);box-shadow:none}.cp-cr b{font-size:var(--fs-m)}
+/* the bottom bar: a floating pill with the counts and the ONE main button for the state */
+.gbar{position:sticky;bottom:14px;margin:18px auto 0;width:fit-content;max-width:100%;padding:6px 6px 6px 18px;gap:10px;border-radius:var(--r-pill);background:#ffffffeb;backdrop-filter:blur(14px);box-shadow:0 10px 30px #0f172a1f,0 0 0 1px var(--bd);justify-content:center}
+.gbar .gstat{font-size:var(--fs-s);margin-right:6px}
+.gbar .link{font-size:var(--fs-s)}
+.gbar:empty{display:none}

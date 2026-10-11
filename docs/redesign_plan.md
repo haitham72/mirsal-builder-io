@@ -184,7 +184,8 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 5. **Built 2026-10-11:** the toolbar and the view switch (Stickers · Sheet · Both; `docs/design.md` "The Studio's toolbar"). The sheet panel already
    holds the sheet and the video as views; the Full-analysis dialog stays a dialog.
 6. **Built 2026-10-11:** the sticker panel (`gmodal` docked on the right, tabs Checks · History · Measurements; `docs/design.md` "The sticker panel").
-7. **The bottom bar and the Idea step** (the Request and Prompt tabs, the pre-batch draft, the composer).
+7. **Built 2026-10-11:** the floating bottom bar and the density pass over the composer (`docs/design.md` "The density pass"). The Request and
+   Prompt views stay two stops of the journey (Idea, Prompt); D3 (Animate / Add on several batches) is unchanged: the bar still acts on the included batches.
 8. **Pack screen. 9. Settings and the avatar items. 10. Chat restyle. 11. Library, Help, Home polish.**
 
 Each phase ends with `renamed` / `retired` filled for whatever left, `docs/ui_inventory.md` regenerated, the area doc updated (rule 12), and the
