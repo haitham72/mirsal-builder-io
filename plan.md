@@ -2,12 +2,6 @@
 
 Only remaining work lives here. Read `CLAUDE.md`, `HANDOFF.md` and `docs/testing.md` first. What this session completed and how it was checked are in `HANDOFF.md`; built behaviour is in the area docs. Follow the test budget: one narrowest run per semantic change, no paid calls, no repeated baseline, no retired slow tier or full discovery. Delete a step when it is complete.
 
-## First — independent review and finalize the plan
-
-Use [`docs/session-review-prompt.md`](docs/session-review-prompt.md). Review the current implementation at `main` (`2f585fd`) and this branch's documentation. Check Home's responsive rows/film, owner/admin cap exemption, session-aware model status and the earlier emoji/provider work against the real code. Fix confirmed defects with focused checks and rewrite the corresponding area docs. Distinguish untested risks and human visual verdicts from defects.
-
-Finalize [`docs/dark-mode_plan.md`](docs/dark-mode_plan.md) against the actual selectors, theme tokens, script load order, asset allow-list and CSP. Keep it exclusively on `edit-design`. The implementation is already merged into `main`; only `main` and `edit-design` remain. No further merge or branch deletion is pending from this session.
-
 ## Dark mode — planned work, implementation not started
 
 Haitham requested a plan for an elegant, clean Higgsfield-inspired black/cyan theme. The full specification, proposed palette, file map, sequence and acceptance criteria are in [`docs/dark-mode_plan.md`](docs/dark-mode_plan.md). The current request prepares/finalizes that plan; begin implementation when Haitham requests it. Theme foundation and persistence come first, then each screen, then focused responsive/accessibility checks. The script refactor below is independent and must not be bundled into theme changes. Keep theme work on `edit-design` until Haitham requests a merge.

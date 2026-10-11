@@ -15,7 +15,6 @@ const hmPackInfo=p=>{const st=p.stickers||[],animated=st.filter(s=>s.type==='ani
  return{animated,still:st.length-animated,particles,tags,telegram:((p.telegram||{}).sets||[]).map(x=>x.link).find(Boolean)||'',
   label:animated?(st.length-animated?'Mixed pack':'Animated'):'Static pack',
   text:(p.name+' '+st.map(s=>s.name+' '+(s.emoji||'')).join(' ')).toLowerCase()}};
-const hmShown=(p,q,filter)=>{const i=hmPackInfo(p);return(filter==='all'||i.tags.includes(filter))&&(!q||i.text.includes(q))};
 /* up to three stickers for the hero, newest pack first, animated first (pure) */
 const hmHero=packs=>{const out=[];for(const p of [...packs].sort((a,b)=>(b.created||0)-(a.created||0))){
   const st=p.stickers||[],s=st.find(x=>x.id===p.cover)||st.find(x=>x.type==='animated')||st[0];if(s)out.push(s);if(out.length===3)break}return out};
@@ -31,7 +30,12 @@ function hmCard({p,s},i){const animated=s.type==='animated',telegram=hmPackInfo(
 function hmFilm(){const motion=!matchMedia('(prefers-reduced-motion: reduce)').matches;
  return`<button class=hm-film data-act=hmfilm aria-label="Watch the full Mirsal film"><video src=/assets/welcome/welcome.mp4 poster=/assets/welcome/welcome-poster.jpg ${motion?'autoplay ':''}muted loop playsinline preload=metadata aria-hidden=true></video><span class=hm-film-label>${ic('play')} Watch the film</span></button>`}
 function hmGallery(){const box=$('hm-gal');if(!box)return;const st=hmStickers(LIB.packs,HM.q.trim().toLowerCase(),HM.filter);
- box.innerHTML=st.map(hmCard).join('')+hmFilm();$('hm-empty').hidden=!!st.length||!LIB.packs.length;
+ const film=typeof box.querySelector==='function'?box.querySelector('.hm-film'):null;
+ if(film&&typeof film.insertAdjacentHTML==='function'){   /* keep the playing film mounted: rebuilding the <video> on every keystroke restarts it */
+  for(const c of (typeof box.querySelectorAll==='function'?[...box.querySelectorAll('.hm-card')]:[]))c.remove();
+  film.insertAdjacentHTML('beforebegin',st.map(hmCard).join(''))}
+ else box.innerHTML=st.map(hmCard).join('')+hmFilm();
+ $('hm-empty').hidden=!!st.length||!LIB.packs.length;
  document.querySelectorAll('#s-home [data-act=hmfilter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===HM.filter)))}
 RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stickers),anim=st.filter(s=>s.type==='animated').length,hero=hmHero(ps),
   owner=typeof ME==='undefined'||!ME||ME.role==='owner',canImport=typeof ACT.impackopen==='function'&&owner;
@@ -60,8 +64,8 @@ RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stic
   <div class=hm-steps><article class=hm-step><span class=hm-num>01 / IMAGINE</span>${hmIc('ai')}<h3>Tell your idea</h3><p>Describe a character, a feeling, or a moment.</p></article><article class=hm-step><span class=hm-num>02 / MAKE IT YOURS</span>${hmIc('lib')}<h3>Shape the details</h3><p>Review your stickers. Add motion and a little magic.</p></article><article class=hm-step><span class=hm-num>03 / SHARE</span>${hmIc('telegram')}<h3>Send a little joy</h3><p>Export your pack, ready for your next conversation.</p></article></div></section>
  <footer class=hm-foot><span class=hm-brand><img src=/assets/brand/mirsal-logo.png alt="">mirsal<b>.</b></span><span>Small stickers. Endless expression.</span></footer></div>`;
  const i=$('hm-q');i.oninput=e=>{HM.q=e.target.value;hmGallery()};hmGallery()};
-ACT.hmfilter=el=>{HM.filter=el.dataset.f;if(el.dataset.clear){HM.q='';const i=$('hm-q');if(i)i.value=''}hmGallery();
- if(el.dataset.scroll||el.dataset.clear){const d=$('hm-disc');if(d)d.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}};
+ACT.hmfilter=el=>{HM.filter=el.dataset.f;hmGallery();
+ if(el.dataset.scroll){const d=$('hm-disc');if(d)d.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}};
 /* a clean AI chat: what the logo did before Home (the next message starts a new conversation) */
 ACT.hmai=()=>{try{localStorage.setItem('mirsal.ai.sid','')}catch(e){}if(typeof A!=='undefined'){A.sid=null;A.sess=null}
  if(route_==='agent'&&typeof ACT.agnew==='function')ACT.agnew();else location.hash='#/agent'};

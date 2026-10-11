@@ -32,7 +32,7 @@ The app is in its **dev cycle**: architecture lives in `docs/`, open work in `do
 | the redesign (built on `main`, visual verdicts open): rail of four, Create = Chat \| Studio, journey bar, project map | `docs/redesign_plan.md` — every Studio action's new home, the phases, decisions D1-D7; **no action, screen or route may disappear** without a `renamed` / `retired` entry in `mirsal/tests/data/ui_baseline.json` (`tests/test_ui_inventory.py`) |
 | recorded numbers | [`docs/measurements.md`](docs/measurements.md) — never-opinion metrics on slot fill, search precision, vision-judge agreement, sharpness |
 | a prompt to hand to an independent reviewing LLM | [`docs/review-prompt.md`](docs/review-prompt.md) — paste-ready prompt that audits the whole repo in one pass |
-| dark mode (plan only, kept on `edit-design`) | `docs/dark-mode_plan.md` — black/cyan palette, shared theme tokens, persistence, screen coverage and acceptance; `docs/session-review-prompt.md` — focused review and plan finalization |
+| dark mode (plan only, kept on `edit-design`) | `docs/dark-mode_plan.md` — black/cyan palette, shared theme tokens, persistence, screen coverage and acceptance (reviewed and finalized 2026-10-11) |
 | Home (the first screen, the logo's target: the library as a landing page, `home.js`) | `docs/design.md` §5 "Home" |
 | the welcome modal (film + feature slides, opened from Home) | `docs/onboarding.md` — what it shows, how the media were made and paid, the prompts; `docs/design.md` §10 |
 | reference inputs | `docs/inputs/` — Haitham's reference material: `prompt_samples.md`, `resolver_utterances.md`, `search_queries.md`, `telegram-plan.md` |

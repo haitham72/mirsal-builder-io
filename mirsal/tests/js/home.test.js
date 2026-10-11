@@ -23,18 +23,6 @@ test('a pack is animated, static, with particles, or several of them; the Telegr
   assert.equal(run(`hmPackInfo(LIB.packs[1]).telegram`), 'https://t.me/addstickers/falcon_by_bot');
 });
 
-test('the filters and the search pick the packs; the search reads sticker names and emoji too', () => {
-  const run = load();
-  run(`LIB={packs:${JSON.stringify(packs)}}`);
-  const ids = (q, f) => JSON.parse(run(`JSON.stringify(LIB.packs.filter(p=>hmShown(p,${JSON.stringify(q)},${JSON.stringify(f)})).map(p=>p.id))`));
-  assert.deepEqual(ids('', 'all'), ['p1', 'p2', 'p3']);
-  assert.deepEqual(ids('', 'animated'), ['p1', 'p2']);
-  assert.deepEqual(ids('', 'static'), ['p1', 'p3']);
-  assert.deepEqual(ids('', 'particles'), ['p2']);
-  assert.deepEqual(ids('🐶', 'all'), ['p3']);
-  assert.deepEqual(ids('falcon', 'static'), []);
-});
-
 test('the hero shows up to three stickers, newest pack first, its cover when it has one', () => {
   const run = load();
   assert.deepEqual(JSON.parse(run(`JSON.stringify(hmHero(${JSON.stringify(packs)}).map(s=>s.id))`)), ['c', 'd', 'a']);
@@ -90,6 +78,25 @@ test('the showcase filters individual stickers and bounds media to twelve; reduc
   assert.equal(run(`hmStickers([{name:'Many',stickers:Array.from({length:30},(_,id)=>({id}))}],'','all').length`), 12);
   assert.match(run(`hmFilm()`), /autoplay/);
   assert.doesNotMatch(run(`reducedMotion=true;hmFilm()`), /autoplay/);
+});
+
+test('a filter redraw keeps the playing film mounted and only swaps the cards', async () => {
+  const run = load();
+  run(`LIB={packs:${JSON.stringify(packs)}}`);
+  run(`let mounted=false;const film={inserted:'',insertAdjacentHTML(p,h){this.inserted=h}};
+   const live=[];let sets=0;DOMSTUB['hm-gal']={set innerHTML(v){sets++;mounted=v.includes('hm-film');live.length=0;
+   for(const _ of (v.match(/class=hm-card /g)||[]))live.push({gone:false,remove(){this.gone=true}})},
+   get innerHTML(){return ''},querySelector:s=>s==='.hm-film'&&mounted?film:null,querySelectorAll:s=>s==='.hm-card'?live:[]};
+   globalThis.GALSETS=()=>sets;globalThis.FILMINS=()=>film.inserted;globalThis.OLDGONE=()=>live.every(c=>c.gone);`);
+  await run(`RENDER.home()`);
+  assert.equal(run('GALSETS()'), 1, 'the first draw mounts everything');
+  run(`ACT.hmfilter({dataset:{f:'animated'}})`);
+  assert.equal(run('GALSETS()'), 1, 'no second full rewrite: the film node stays mounted');
+  assert.equal((run('FILMINS()').match(/class=hm-card /g) || []).length, 2, 'the two animated cards are inserted before the film');
+  assert.match(run('FILMINS()'), /data-id="p2"/);
+  assert.match(run('FILMINS()'), /data-id="p1"/);
+  assert.doesNotMatch(run('FILMINS()'), /data-id="p3"/);
+  assert.equal(run('OLDGONE()'), true, 'the old cards are removed');
 });
 
 test('the first start of a session opens Home from any screen, once; a link to one thing keeps it', () => {
