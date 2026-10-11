@@ -46,6 +46,42 @@ Showing all nine stickers should expand the visible collection without making a 
 | Permission undecided or declined | Keep display available. Ask for vision permission only when inspection needs it; respect a refusal and distinguish stored metadata from an inspected answer. |
 | Vision fails after selection | Keep the selected card visible and explain that inspection failed. Offer retry of inspection, never generation as an implicit recovery. |
 
+## The user's stage slider
+
+Treat the slider as an explicit preference about creation depth. First resolve intent, targets and scope; then apply the stage to work that would create or deliver results. Display, description, feedback and clarification retain their own meaning at every slider position.
+
+The existing six stops mean:
+
+| Slider | Ordinary new creation request |
+|---|---|
+| Auto | Infer the endpoint from the request; an ordinary sticker request ends at Stickers. Infer from clear intent, never randomly. |
+| Prompt | Prepare the plan and prompt; start generation only after an explicit Generate action. |
+| Stickers | Create the still stickers and stop for review. |
+| Animation | Create stickers and animation, stopping at the configured review gates. |
+| Telegram | Continue through the pack and Telegram delivery. |
+| Export | Continue through Telegram and the configured collection API export, subject to access and setup. |
+
+The preference is one per person, shared by their chats and Studio. A new chat reads that preference; Auto is the initial default when none was saved. An individual request also needs its own effective endpoint, distinct from the saved preference and from a running job's approved endpoint.
+
+| Condition | Proposed decision |
+|---|---|
+| Animation selected; “show all” or “what is 4 doing?” | Display or describe existing stickers. Do not create animation merely because the slider is at Animation. |
+| Auto selected; “make a cat pack” | Plan creation to Stickers. “Make cats and animate them” instead resolves to Animation. |
+| Fixed endpoint; ordinary new creation without another endpoint named | Plan to the selected endpoint and show its complete price. Review gates and spending permission remain separate controls. |
+| Stickers selected; “animate 4” | Resolve S4 first, then explain that animation exceeds the selected stop. Offer a clearly labelled stage change and continuation; do not start or silently change the preference. |
+| Animation selected; “just the stickers” | Explain the conflict and offer the requested earlier stop. An explicit “only” must survive planning and confirmation. |
+| Prompt selected; “replace 2 with a cat” | Prepare a replacement plan for S2 without generating it. The source batch and unrelated stickers remain intact. |
+| Animation selected; “replace 2 with a cat” | Resolve replacement scope first, then plan the still and downstream animation for the affected result only. Do not regenerate the other eight or reuse an animation of the old character. |
+| Earlier slider stop selected while later results already exist | Continue to display existing results. Explain that the preference applies to future work; do not delete results or undo completed stages. |
+| Slider moved with no request or pending plan | Save the preference and update its label. Start no work; create no empty chat. |
+| Slider moved while a plan awaits confirmation | Preserve the requested content and targets, revise the endpoint and price, and invalidate the old confirmation. Show the revised plan before execution. Moving the slider alone is not approval. |
+| Slider moved during approved running work | Keep the running job's approved scope. Apply the preference to future plans; cancellation or extending the current job needs a separate explicit action. |
+| Required still or animation already exists | Reuse valid work and price only the remaining necessary work. A stage choice alone does not request fresh generation. |
+
+Apply these checks to every generation path: new packs, replacements, slice edits, whole-sheet edits, regeneration and additional batches. Changing character or pose invalidates that result's downstream animation; free editor changes may also require revalidation before an existing animation can be reused. Separate a free edit, a new still and a new animation in the proposed cost and outcome.
+
+Current code already supports saved person preferences, stage conflicts for new requests and explicit animation/Telegram actions, and the repaired popup. The existing slice/whole-sheet regeneration edit paths do not uniformly apply stage planning. Uniform edit handling, pending-plan revision on slider changes and request-specific endpoints are proposed here, not reported as completed fixes.
+
 ## Resolve targets before changing anything
 
 Prefer an explicit batch/sticker id, then a sticker number or ordinal in the active batch. “Change 4” should not edit a stale selected S2. Selection is useful for “this selected one”; recent discussion is useful for “he”. A unique semantic source such as “the proud one” can resolve a target, but two plausible matches need a short choice.
@@ -78,8 +114,8 @@ Code should validate existence, access, supported operations, scope and referenc
 
 ## Suggested order and acceptance checks
 
-First stabilize the frequent loop: show → describe → follow up → select → edit/replace → review price → confirm. Next preserve pending clarification and plans across conversational detours. Then address reference transfer, compound edits and interruptions during running work. No dedicated playback-speed feature is proposed.
+First stabilize the frequent loop: show → describe → follow up → select → edit/replace → apply stage → review price → confirm. Apply stage planning uniformly to creation and regeneration edits. Next preserve pending clarification and plans across conversational detours, including slider changes. Then address reference transfer, compound edits and interruptions during running work. No dedicated playback-speed feature is proposed.
 
 This change already addresses the reported carousel routing, numbered still descriptions with streaming, stage popup, several source-replacement cases and clarification before unclear generation edits. The remaining rules above are proposed behaviour, particularly independent pending states, attribute replacements, multi-operation plans and plan versions; their presence here is not an implementation claim.
 
-Test the decision table with fakes and assert outcomes, not just intent labels: exact target ids, number of displayed stickers, images actually sent to vision, card-before-text ordering, whether pending work survived, and zero generation calls for display/clarification. The supplied S2 → “he” → S4 → “all” sequence is the core regression. Add stale selection, two semantic matches, unknown second clause, clarification reply, permission detour, “yes but…”, out-of-range target and running-job cases before expanding the routing.
+Test the decision table with fakes and assert outcomes, not just intent labels: exact target ids, number of displayed stickers, images actually sent to vision, card-before-text ordering, whether pending work survived, and zero generation calls for display/clarification. The supplied S2 → “he” → S4 → “all” sequence is the core regression. Run display and description cases at all six slider positions, assert no generation for Prompt-stage edits, and check the endpoint/price of Animation-stage replacements. Add pending-plan slider changes, stale selection, two semantic matches, unknown second clause, clarification reply, permission detour, “yes but…”, out-of-range target and running-job cases before expanding the routing.
