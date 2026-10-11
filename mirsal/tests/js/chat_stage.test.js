@@ -1,32 +1,30 @@
-// The stage slider's builder (pure half of agent.js): five stops, the current one named, details with the stops, the chat's models and the options.
+// The stage control's builder (pure half of agent.js): a pill that opens a panel with the five-stop slider, the chat's models and the options.
 // Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const U = require('../../mirsal/console/agent.js');
 
-test('the closed slider has five stops, the current one checked and named, and a details button', () => {
+test('closed it is one pill: the current stop and a caret, no slider', () => {
   const h = U.stageHTML('emojis', false);
-  assert.deepEqual([...h.matchAll(/class="ag-stop[^"]*" data-act=agstagepick data-v=(\w+)/g)].map(m => m[1]), ['prompt', 'emojis', 'animation', 'export', 'api']);
-  assert.equal((h.match(/aria-checked=true/g) || []).length, 1);
-  assert.match(h, /aria-checked=true class="ag-stop on" data-act=agstagepick data-v=emojis tabindex=0/);
-  assert.equal((h.match(/tabindex=0/g) || []).length, 1, 'arrows move along the slider; Tab leaves it');
-  assert.match(h, /class="ag-stop done" data-act=agstagepick data-v=prompt/, 'the stops before the current one are filled');
-  assert.match(h, /<span class=ag-stage-lab>Stickers<\/span>/);
-  assert.match(h, /style="--k:1"/);
-  assert.match(h, /data-act=agstage aria-haspopup=dialog aria-expanded=false/);
-  assert.doesNotMatch(h, /ag-stage-pop/);
+  assert.match(h, /data-act=agstage aria-haspopup=dialog aria-expanded=false[^>]*>Stickers<i aria-hidden=true>▾<\/i><\/button>$/);
+  assert.doesNotMatch(h, /ag-stop|ag-slider|ag-stage-pop/, 'the slider is not on screen until the pill is clicked');
 });
 
-test('the details list the five stops with what each does, and only the current one is checked', () => {
-  const h = U.stageHTML('api', true, { grid: '3x3', ask: true, bypass: false });
-  const pop = h.slice(h.indexOf('ag-stage-pop'));
-  assert.deepEqual([...pop.matchAll(/class="ag-stage-opt[^"]*" data-act=agstagepick data-v=(\w+)/g)].map(m => m[1]), ['prompt', 'emojis', 'animation', 'export', 'api']);
-  assert.match(pop, /<b>Telegram<\/b><small>\+ pack and Telegram<\/small>/);
-  assert.match(pop, /<b>Export<\/b><small>\+ send to the API<\/small>/);
-  assert.equal((pop.match(/✓/g) || []).length, 1);
-  assert.match(pop, /data-act=agcr data-k=bypass role=switch aria-checked=false/, 'from Animation on: approve everything for me');
-  assert.match(pop, /data-act=agsetask role=switch aria-checked=true/);
-  assert.match(pop, /data-act=agsetgrid data-v=3x3 class="on"/);
+test('open, the panel holds the slider: five named stops, the current one checked, the ones before it filled', () => {
+  const h = U.stageHTML('animation', true, { grid: '3x3', ask: true, bypass: false });
+  assert.match(h, /aria-expanded=true/);
+  assert.deepEqual([...h.matchAll(/class="ag-stop[^"]*" data-act=agstagepick data-v=(\w+)/g)].map(m => m[1]), ['prompt', 'emojis', 'animation', 'export', 'api']);
+  assert.deepEqual([...h.matchAll(/<span>(\w+)<\/span><\/button>/g)].map(m => m[1]), ['Prompt', 'Stickers', 'Animation', 'Telegram', 'Export']);
+  assert.equal((h.match(/aria-checked=true class="ag-stop/g) || []).length, 1);
+  assert.match(h, /class="ag-stop on" data-act=agstagepick data-v=animation tabindex=0/);
+  assert.match(h, /class="ag-stop done" data-act=agstagepick data-v=emojis/);
+  assert.equal((h.match(/class="ag-stop[^"]*"[^>]*tabindex=0/g) || []).length, 1, 'arrows move along the slider; Tab leaves it');
+  assert.match(h, /style="--k:2"/);
+  assert.match(h, /<p class=sp-hint>Animation: \+ animation<\/p>/);
+  assert.match(h, /data-act=agcr data-k=bypass role=switch aria-checked=false/, 'from Animation on: approve everything for me');
+  assert.match(h, /data-act=agsetask role=switch aria-checked=true/);
+  assert.match(h, /data-act=agsetgrid data-v=3x3 class="on"/);
+  assert.match(U.stageHTML('api', true), /Export: \+ send to the API/);
 });
 
 test('the models: Default first, the chat\'s pick selected; video only from Animation on', () => {
@@ -42,7 +40,7 @@ test('the models: Default first, the chat\'s pick selected; video only from Anim
 });
 
 test('an unknown stage reads as Stickers, and old creator switches migrate like the server', () => {
-  assert.match(U.stageHTML('bogus', false), /ag-stage-lab>Stickers</);
+  assert.match(U.stageHTML('bogus', false), />Stickers<i aria-hidden=true>▾/);
   assert.equal(U.stageOf({ stage: 'prompt' }), 'prompt');
   assert.equal(U.stageOf({ stage: 'api' }), 'api');
   assert.equal(U.stageOf({}), 'emojis');

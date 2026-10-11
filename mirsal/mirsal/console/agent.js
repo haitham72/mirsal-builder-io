@@ -44,17 +44,20 @@ const AIU=(()=>{
  /* one model drop-down of the details: "Default (label)" first (value ""), then every model; the chat's own pick selected */
  const modelSel=(kind,label,m)=>{if(!m||!(m.list||[]).length)return '';const cur=m.cur||'';
   return `<label class=sp-r><span>${esc(label)}</span><select data-agm=${kind} aria-label="${esc(label)} model"><option value=""${cur?'':' selected'}>Default${m.def?` · ${esc(m.def)}`:''}</option>${m.list.map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(x.label||x.id)}</option>`).join('')}</select></label>`};
- /* stageHTML(cur, open, d): the closed slider (five stops, the current one named) and, when open, the details: the stops with what each does, the
-    chat's models (d.models: {ai, image, video} each {list, cur, def}), and the options (d.grid, d.ask, d.bypass). Pure: the caller wires the actions. */
+ /* stageHTML(cur, open, d): CLOSED it is one small pill, the current stop and a caret ("Stickers ▾"), like a reasoning-level picker (Haitham, 2026-10-11:
+    "you click first and then you find your slider ... and then it goes away"). OPEN it is a panel above the box: the five stops on one slider with their
+    names under them and what the chosen one does, then the chat's models (d.models: {ai, image, video} each {list, cur, def}) and the options (d.grid,
+    d.ask, d.bypass). A stop picked closes the panel. Pure: the caller wires the actions. */
  const stageHTML=(cur,open,d)=>{d=d||{};let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=1;const n=STAGES[k];
-  const stops=STAGES.map(([id,l,h],i)=>`<button type=button role=radio aria-checked=${i===k} class="ag-stop${i===k?' on':''}${i<k?' done':''}" data-act=agstagepick data-v=${id} tabindex=${i===k?0:-1} title="${esc(l)}: ${esc(h)}" aria-label="${esc(l)}"><i></i></button>`).join('');
-  const sl=`<div class=ag-slider role=radiogroup aria-label="How far a new request goes" style="--k:${k}">${stops}</div><span class=ag-stage-lab>${esc(n[1])}</span>`+
-   `<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="Details: where it ends, the models, the options" aria-label="Details"><i aria-hidden=true>▾</i></button>`;
-  if(!open)return sl;
+  const pill=`<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change.">${esc(n[1])}<i aria-hidden=true>▾</i></button>`;
+  if(!open)return pill;
   const m=d.models||{},anim=k>=2;
+  const stops=STAGES.map(([id,l,h],i)=>`<button type=button role=radio aria-checked=${i===k} class="ag-stop${i===k?' on':''}${i<k?' done':''}" data-act=agstagepick data-v=${id} tabindex=${i===k?0:-1} title="${esc(l)}: ${esc(h)}"><i></i><span>${esc(l)}</span></button>`).join('');
   const sw=(act,on,label,hint,extra)=>`<div class=sp-r><span>${esc(label)}${hint?`<small>${esc(hint)}</small>`:''}</span><button type=button class="ai-sw${on?' on':''}" data-act=${act}${extra||''} role=switch aria-checked=${!!on} aria-label="${esc(label)}"></button></div>`;
-  return sl+`<div class=ag-stage-pop role=dialog aria-label="Where a new request ends, and with what">
-   <div class=sp-h>Goes as far as</div>${STAGES.map(([id,l,h],i)=>`<button type=button role=menuitemradio aria-checked=${i===k} class="ag-stage-opt${i===k?' on':''}" data-act=agstagepick data-v=${id} tabindex=${i===k?0:-1}><b>${l}</b><small>${h}</small><span class=ck aria-hidden=true>${i===k?'✓':''}</span></button>`).join('')}
+  return pill+`<div class=ag-stage-pop role=dialog aria-label="Where a new request ends, and with what">
+   <div class=sp-h>Goes as far as</div>
+   <div class=ag-slider role=radiogroup aria-label="How far a new request goes" style="--k:${k}">${stops}</div>
+   <p class=sp-hint>${esc(n[1])}: ${esc(n[2])}</p>
    ${m.ai||m.image||m.video?`<div class=sp-h>Models</div>${modelSel('ai','Chat',m.ai)}${modelSel('image','Stickers',m.image)}${anim?modelSel('video','Video',m.video):''}`:''}
    <div class=sp-h>Options</div>
    <div class=sp-r><span>Sheet</span><div class=ai-seg><button type=button data-act=agsetgrid data-v=3x3 class="${d.grid==='2x2'?'':'on'}">3×3</button><button type=button data-act=agsetgrid data-v=2x2 class="${d.grid==='2x2'?'on':''}">2×2</button></div></div>
@@ -354,27 +357,24 @@ ACT.aggridtoggle=async el=>saveSet({grid:((A.sess&&A.sess.settings&&A.sess.setti
 /* the sheet size in the bar is one chip that flips on click; the settings panel keeps its own side-by-side pair (ai-seg) below */
 /* ---------- under the box: what the next sheet will be made with, one click from changing it (the same settings as the gear, and the style tiles the Studio has, smaller) */
 const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(A.agent&&A.agent.default_style)||'flat_vector';
-/* the stage slider: writes settings.stage through the settings route and makes no chat turn. Keyboard: Tab to the current stop, Left / Right move along
-   the slider; the ▾ opens the details (Esc closes, Up / Down move between the stops). The details read the model catalog once (GET /api/models). */
+/* the stage: a pill that opens the slider. A pick writes settings.stage through the settings route and makes no chat turn. Keyboard: Enter on the pill
+   opens it with the current stop focused, Left / Right move along the slider (it stays open), Enter picks and closes, Esc closes. The details read the model catalog once (GET /api/models). */
 function stageDetails(){const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},mine=st.models||{},cat=A.cat||{},llm=A.llm||{};
  const kind=k=>{const list=[...(cat[k]||[]),...((cat.more||{})[k]||[])].map(x=>({id:x.id,label:x.label}));const def=(list.find(x=>x.id===(cat.defaults||{})[k])||{}).label||'';return list.length?{list,cur:mine[k]||'',def}:null};
  return {models:{ai:(llm.models||[]).length?{list:llm.models.map(x=>({id:x.id,label:x.id})),cur:mine.ai||'',def:(llm.current||'').replace(/:\d+$/,'')}:null,image:kind('image'),video:kind('video')},
   grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass)}}
 function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(AIU.stageOf(A.sess&&A.sess.settings),A.stageOpen,A.stageOpen?stageDetails():null);
- if(A.stageOpen&&!el.contains(document.activeElement)){const on=el.querySelector('.ag-stage-opt.on');if(on)on.focus({preventScroll:true})}}
+ if(A.stageOpen&&!el.contains(document.activeElement)){const on=el.querySelector('.ag-stop.on');if(on)on.focus({preventScroll:true})}}
 function closeStage(focus){if(!A.stageOpen)return;A.stageOpen=false;drawStage();if(focus){const b=document.querySelector('#ag-stage .ag-stage-btn');if(b)b.focus()}}
 ACT.agstage=async()=>{A.stageOpen=!A.stageOpen;drawStage();if(!A.stageOpen)return;
  const need=[];if(!A.cat)need.push(api('/api/models').then(r=>{A.cat=r.ok?r.j:{}}));if(!A.llm)need.push(loadModels());
  if(need.length){await Promise.all(need);if(A.stageOpen)drawStage()}};
-ACT.agstagepick=async el=>{const v=el.dataset.v,fromPop=!!el.closest('.ag-stage-pop');if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});drawStage();await saveSet({stage:v});
- const b=document.querySelector(fromPop?'#ag-stage .ag-stage-opt.on':'#ag-stage .ag-stop.on');if(b)b.focus()};
+ACT.agstagepick=async(el,ev,keep)=>{const v=el.dataset.v;if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});if(!keep)A.stageOpen=false;drawStage();await saveSet({stage:v});
+ const b=document.querySelector(keep?'#ag-stage .ag-stop.on':'#ag-stage .ag-stage-btn');if(b)b.focus()};
 document.addEventListener('keydown',e=>{if(!e.target.closest||!e.target.closest('#ag-stage'))return;
  if(e.target.classList.contains('ag-stop')&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();
-  const stops=[...document.querySelectorAll('#ag-stage .ag-stop')],i=stops.indexOf(e.target),n=stops[Math.max(0,Math.min(stops.length-1,i+(e.key==='ArrowRight'?1:-1)))];if(n&&n!==e.target)ACT.agstagepick(n);return}
- if(!A.stageOpen)return;
- const opts=[...document.querySelectorAll('#ag-stage .ag-stage-opt')],i=opts.indexOf(document.activeElement);
- if(e.key==='Escape'){e.preventDefault();closeStage(true)}
- else if(i>=0&&(e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();const n=opts[(i+(e.key==='ArrowDown'?1:-1)+opts.length)%opts.length];if(n)n.focus()}});
+  const stops=[...document.querySelectorAll('#ag-stage .ag-stop')],i=stops.indexOf(e.target),n=stops[Math.max(0,Math.min(stops.length-1,i+(e.key==='ArrowRight'?1:-1)))];if(n&&n!==e.target)ACT.agstagepick(n,null,true);return}
+ if(A.stageOpen&&e.key==='Escape'){e.preventDefault();closeStage(true)}});
 document.addEventListener('click',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
 document.addEventListener('focusin',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
 function drawBar(){if(typeof drawStage==='function')drawStage();const bar=$('ag-bar'),box=$('ag-styles');if(!bar||!box)return;
