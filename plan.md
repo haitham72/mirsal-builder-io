@@ -4,6 +4,23 @@ What an LLM does next. The stages (Prompt · Stickers · Animation · Telegram �
 the architecture is in `docs/agent-and-chat.md` "Stages and the batch follow-up". Read `CLAUDE.md` first; test budget: `docs/testing.md` (one narrowest
 run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when it is built; delete this file when the plan is done.
 
+## Step 0 — bugs Haitham found in the browser (2026-10-11; FIRST, before Step A)
+
+1. **The stage slider does not pop up.** Clicking the pill shows nothing, and the stop looks random (Auto on a new chat, otherwise whatever it was).
+   Check in a real browser (`agent.js` `drawStage` / `ACT.agstage` / `stageHTML`, `agent.css` `.ag-stage-pop`): is the panel drawn and clipped
+   (`.ai-box` overflow, z-index), or closed at once by the document click / focusin listeners? Is the pill showing the person's stop
+   (`GET /api/prefs` vs the session's `settings.stage`, `SessionStore.load` override)? Fix, then add a node or DOM test that opening keeps it open.
+2. **"Describe sticker N" must look at the picture and explain it, streamed.** "what is the second sticker doing" answered only with the stored name
+   ("G129/S2: superman kid standing proud") and a one-sticker card (the animation), no explanation. Wanted: the sticker card shows at once, then the
+   vision model's description of THAT still (and its animation when there is one) streams in under it (AI vision is allowed). Look at the
+   describe / ask path in `agent/graph.py` (`n_ask`, `DESCRIBE`) and `vision/` (judge / transcribe); stream through the chat's events.
+3. **"show all of them" was read as an edit** and planned a paid new sheet ("change only: show all of them"). It means: show every sticker of the
+   batch (the carousel). Fix the resolver (`agent/resolver.py` classify / `editroute`): show / list / see all / every sticker = a free display, never an edit.
+4. **Make sense of what the person means, or ask.** "replace 2 with a cat", "slow down 4", "make 3 laugh" must map to the right action (replace one
+   cell / re-animate one / edit one). A sentence the model cannot map to an action with confidence ("flabbergast the unwhistlemended") must get a
+   question back ("Did you mean …? Or tell me in other words"), never a guessed paid plan. Rule: an edit that would spend needs a clear target and a
+   clear change; otherwise ask. Add tests on FakeTools for each of these sentences.
+
 ## Step A — refactor the screen scripts, no behaviour change (FIRST; a fresh session, Opus on medium)
 
 Why: `mirsal/mirsal/console/generate.js` (~850 lines), `agent.js`, `app.js`, `live.js`, `packs.js` put a whole function on one line (300-900 characters),
