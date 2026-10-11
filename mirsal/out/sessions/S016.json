@@ -3,14 +3,14 @@
  "user": "local",
  "title": "hi",
  "created": 1791693172.688,
- "updated": 1791702796.48,
+ "updated": 1791706701.332,
  "settings": {
   "grid": "3x3",
   "style_id": "pop_comic",
   "ask_before_spending": true,
   "ai": true,
   "allow_vlm": true,
-  "stage": "auto",
+  "stage": "export",
   "creator": {
    "on": false,
    "scope": "images",
@@ -64,6 +64,21 @@
      "liked": [],
      "disliked": [],
      "note": "tweak: Make him wear UAE clothing."
+    },
+    {
+     "generation": null,
+     "job": "J091",
+     "prompt": "Porsche",
+     "grid": "3x3",
+     "style_id": "pop_comic",
+     "parent": "G130",
+     "created": 1791706362.755,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "tweak: Make him wear UAE clothing again"
     }
    ]
   }
@@ -262,6 +277,52 @@
   {
    "seq": 9,
    "ts": 1791702796.48,
+   "user": "confirm",
+   "assistant": "Creating **Porsche** (about 2 credits). Each one appears below as it is ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 10,
+   "ts": 1791706355.407,
+   "user": "do it again",
+   "assistant": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: Make him wear UAE clothing again. A new sheet; the original stays. Shall I create them?",
+   "intents": [
+    "EDIT_ROUTE"
+   ],
+   "resolved": {
+    "stickers": [
+     "G130/S3"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G130",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "focus",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G130"
+  },
+  {
+   "seq": 11,
+   "ts": 1791706362.758,
    "user": "confirm",
    "assistant": "Creating **Porsche** (about 2 credits). Each one appears below as it is ready.",
    "intents": [
@@ -1087,6 +1148,184 @@
    "ts": 1791702792.307,
    "status": "done",
    "chips": []
+  },
+  {
+   "id": "m22",
+   "role": "user",
+   "text": "do it again",
+   "cards": [],
+   "steps": [],
+   "ts": 1791706350.692
+  },
+  {
+   "id": "m23",
+   "role": "assistant",
+   "text": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: Make him wear UAE clothing again. A new sheet; the original stays. Shall I create them?",
+   "cards": [
+    {
+     "type": "multi",
+     "title": "Porsche: change only: Make him wear UAE clothing again",
+     "grid": "3x3",
+     "estimate": 2.0,
+     "balance": 615.12,
+     "free": false,
+     "items": [
+      {
+       "subject": "Porsche",
+       "count": 9,
+       "names": [
+        "porsche happy",
+        "porsche laugh",
+        "porsche cry",
+        "porsche sad",
+        "porsche love",
+        "porsche angry",
+        "porsche wink",
+        "porsche kiss",
+        "porsche surprised"
+       ],
+       "style": "pop comic",
+       "changes": [
+        "change only: Make him wear UAE clothing again"
+       ]
+      }
+     ],
+     "edit": "tweak",
+     "image": true
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "changing a detail",
+     "detail": null,
+     "status": "running",
+     "ts": 1791706350.775
+    },
+    {
+     "kind": "step",
+     "label": "understood: an edit",
+     "detail": null,
+     "status": "done",
+     "ts": 1791706350.797
+    },
+    {
+     "kind": "step",
+     "label": "found S3 in Porsche · focus",
+     "detail": null,
+     "status": "done",
+     "ts": 1791706350.803
+    },
+    {
+     "kind": "step",
+     "label": "tweak: Make him wear UAE clothing again",
+     "detail": {
+      "title": "from Porsche",
+      "lines": [
+       "the picture: this sheet (2048 px)"
+      ]
+     },
+     "status": "done",
+     "ts": 1791706355.159
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791706355.405
+    }
+   ],
+   "ts": 1791706350.692,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create them",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m24",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791706358.736
+  },
+  {
+   "id": "m25",
+   "role": "assistant",
+   "text": "Creating **Porsche** (about 2 credits). Each one appears below as it is ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J091",
+     "subject": "Porsche",
+     "parent": "G130",
+     "note": "tweak: Make him wear UAE clothing again"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating Porsche (tweak)",
+     "detail": null,
+     "status": "running",
+     "ts": 1791706358.74
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791706358.742
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: multi",
+     "detail": null,
+     "status": "done",
+     "ts": 1791706358.744
+    },
+    {
+     "kind": "final",
+     "label": "started 1",
+     "detail": null,
+     "status": "done",
+     "ts": 1791706362.755
+    }
+   ],
+   "ts": 1791706358.736,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m26",
+   "role": "assistant",
+   "text": "That turn was interrupted before it finished (the server restarted). Check the Queue for any job already started before trying again.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Porsche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791706401.061
+    },
+    {
+     "kind": "note",
+     "label": "That turn was interrupted before it finished (the server restarted). Check the Queue for any job already started before trying again.",
+     "status": "done"
+    }
+   ],
+   "ts": 1791706401.059,
+   "status": "error"
   }
  ],
  "summary": {
@@ -1630,6 +1869,7 @@
   "said": "1:J088"
  },
  "named": [
-  "G130"
+  "G130",
+  "G131"
  ]
 }

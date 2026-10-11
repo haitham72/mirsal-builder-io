@@ -3,7 +3,7 @@
  "user": "local",
  "title": "girl emirati",
  "created": 1791535752.366,
- "updated": 1791546555.077,
+ "updated": 1791715831.189,
  "settings": {
   "grid": "3x3",
   "style_id": "kawaii",
@@ -14,7 +14,8 @@
    "on": false,
    "scope": "images",
    "bypass": false
-  }
+  },
+  "stage": "auto"
  },
  "focus": {
   "generation": "G127",

@@ -3836,161 +3836,6 @@
    "lead_at": 1791641949.837
   },
   {
-   "id": "54c371fd",
-   "name": "Girl Emirati",
-   "slug": "girl_emirati",
-   "cover": "6d474ca2",
-   "owner": "local",
-   "created": 1791642059.528307,
-   "stickers": [
-    {
-     "id": "6d474ca2",
-     "name": "Girl emirati jump happy",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-jump_happy-girl_emirati-20261010T142059-0a1c97.webm",
-     "type": "animated",
-     "emoji": "😊🎉",
-     "kb": 234,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 1
-     },
-     "created": 1791642059.5897448,
-     "file_name": "img-girl_emirati-jump_happy-20261009T114909-34da23"
-    },
-    {
-     "id": "c0b2532c",
-     "name": "Girl emirati sit calm",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_calm-girl_emirati-20261010T142059-94bb1b.webm",
-     "type": "animated",
-     "emoji": "🧘‍♀️🌿",
-     "kb": 145,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 2
-     },
-     "created": 1791642059.599933,
-     "file_name": "img-girl_emirati-sit_calm-20261009T114909-f4c559"
-    },
-    {
-     "id": "d401f999",
-     "name": "Girl emirati lean curious",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lean_curious-girl_emirati-20261010T142059-bce629.webm",
-     "type": "animated",
-     "emoji": "🤔👂",
-     "kb": 199,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 3
-     },
-     "created": 1791642059.610601,
-     "file_name": "img-girl_emirati-lean_curious-20261009T114909-098f68"
-    },
-    {
-     "id": "16bd7866",
-     "name": "Girl emirati stand proud",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_proud-girl_emirati-20261010T142059-04b3c2.webm",
-     "type": "animated",
-     "emoji": "😌💪",
-     "kb": 167,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 4
-     },
-     "created": 1791642059.621231,
-     "file_name": "img-girl_emirati-stand_proud-20261009T114909-d5bddb"
-    },
-    {
-     "id": "3ce15e16",
-     "name": "Girl emirati run excited",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-run_excited-girl_emirati-20261010T142059-16ff40.webm",
-     "type": "animated",
-     "emoji": "🏃‍♀️😁",
-     "kb": 252,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 5
-     },
-     "created": 1791642059.6309602,
-     "file_name": "img-girl_emirati-run_excited-20261009T114909-697c31"
-    },
-    {
-     "id": "a7989344",
-     "name": "Girl emirati sit shy",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_shy-girl_emirati-20261010T142059-dbe2fb.webm",
-     "type": "animated",
-     "emoji": "😊🙈",
-     "kb": 241,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 6
-     },
-     "created": 1791642059.6406488,
-     "file_name": "img-girl_emirati-sit_shy-20261009T114909-762323"
-    },
-    {
-     "id": "a538d8c6",
-     "name": "Girl emirati lie mischief",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lie_mischief-girl_emirati-20261010T142059-4f5640.webm",
-     "type": "animated",
-     "emoji": "😏😉",
-     "kb": 216,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 7
-     },
-     "created": 1791642059.6491048,
-     "file_name": "img-girl_emirati-lie_mischief-20261009T114909-ba33f7"
-    },
-    {
-     "id": "25a89315",
-     "name": "Girl emirati spin happy",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-spin_happy-girl_emirati-20261010T142059-799b0c.webm",
-     "type": "animated",
-     "emoji": "😄💃",
-     "kb": 253,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 8
-     },
-     "created": 1791642059.657057,
-     "file_name": "img-girl_emirati-spin_happy-20261009T114909-0f81ee"
-    },
-    {
-     "id": "c2c58b60",
-     "name": "Girl emirati stand shocked",
-     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_shocked-girl_emirati-20261010T142059-3a61fe.webm",
-     "type": "animated",
-     "emoji": "😲😱",
-     "kb": 227,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G128",
-      "index": 9
-     },
-     "created": 1791642059.666999,
-     "file_name": "img-girl_emirati-stand_shocked-20261009T114909-d76893"
-    }
-   ],
-   "lead_at": 1791642059.716
-  },
-  {
    "id": "738cdf51",
    "name": "boy",
    "slug": "boy",
@@ -4143,7 +3988,472 @@
      "file_name": "img-porsche-surprised-20261011T043931-17a1bf"
     }
    ],
-   "lead_at": 1791693683.301
+   "lead_at": 1791706448.433
+  },
+  {
+   "id": "59b88bfa",
+   "name": "Emirati boy",
+   "slug": "emirati_boy",
+   "cover": "05e67c2a",
+   "owner": "local",
+   "created": 1791706508.7916732,
+   "stickers": [
+    {
+     "id": "05e67c2a",
+     "name": "Porsche happy",
+     "file": "G131-porsche-20261011T081316/img-porsche-happy-emirati_boy-20261011T081508-3edf9a.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 216,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 1
+     },
+     "created": 1791706508.807777,
+     "file_name": "img-porsche-happy-20261011T081316-8d4d15"
+    },
+    {
+     "id": "b638f3ce",
+     "name": "Porsche laugh",
+     "file": "G131-porsche-20261011T081316/img-porsche-laugh-emirati_boy-20261011T081508-8b65a7.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 189,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 2
+     },
+     "created": 1791706508.818361,
+     "file_name": "img-porsche-laugh-20261011T081316-ea1b8e"
+    },
+    {
+     "id": "ec410892",
+     "name": "Porsche cry",
+     "file": "G131-porsche-20261011T081316/img-porsche-cry-emirati_boy-20261011T081508-5f3622.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 183,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 3
+     },
+     "created": 1791706508.827669,
+     "file_name": "img-porsche-cry-20261011T081316-709471"
+    },
+    {
+     "id": "04952f25",
+     "name": "Porsche sad",
+     "file": "G131-porsche-20261011T081316/img-porsche-sad-emirati_boy-20261011T081508-56181f.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 177,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 4
+     },
+     "created": 1791706508.8352761,
+     "file_name": "img-porsche-sad-20261011T081316-cf336f"
+    },
+    {
+     "id": "2cffea5e",
+     "name": "Porsche love",
+     "file": "G131-porsche-20261011T081316/img-porsche-love-emirati_boy-20261011T081508-40684b.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 188,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 5
+     },
+     "created": 1791706508.843173,
+     "file_name": "img-porsche-love-20261011T081316-081477"
+    },
+    {
+     "id": "3e6797fe",
+     "name": "Porsche angry",
+     "file": "G131-porsche-20261011T081316/img-porsche-angry-emirati_boy-20261011T081508-ead8b5.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 202,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 6
+     },
+     "created": 1791706508.8504388,
+     "file_name": "img-porsche-angry-20261011T081316-04ca3e"
+    },
+    {
+     "id": "8e58252a",
+     "name": "Porsche wink",
+     "file": "G131-porsche-20261011T081316/img-porsche-wink-emirati_boy-20261011T081508-6c3af3.png",
+     "type": "static",
+     "emoji": "😉",
+     "kb": 175,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 7
+     },
+     "created": 1791706508.858165,
+     "file_name": "img-porsche-wink-20261011T081316-f45939"
+    },
+    {
+     "id": "2c3e6965",
+     "name": "Porsche kiss",
+     "file": "G131-porsche-20261011T081316/img-porsche-kiss-emirati_boy-20261011T081508-7ed254.png",
+     "type": "static",
+     "emoji": "😘",
+     "kb": 179,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 8
+     },
+     "created": 1791706508.865203,
+     "file_name": "img-porsche-kiss-20261011T081316-bb3c8b"
+    },
+    {
+     "id": "a43b711b",
+     "name": "Porsche surprised",
+     "file": "G131-porsche-20261011T081316/img-porsche-surprised-emirati_boy-20261011T081508-da2bea.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 177,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G131",
+      "index": 9
+     },
+     "created": 1791706508.87375,
+     "file_name": "img-porsche-surprised-20261011T081316-354ee1"
+    }
+   ],
+   "lead_at": 1791706508.922
+  },
+  {
+   "id": "de8f4e8a",
+   "name": "Girl Emirati",
+   "slug": "girl_emirati",
+   "cover": "8ca83c1a",
+   "owner": "local",
+   "created": 1791715599.602585,
+   "stickers": [
+    {
+     "id": "8ca83c1a",
+     "name": "Girl emirati jump happy",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-jump_happy-girl_emirati-20261011T104639-73ba93.webm",
+     "type": "animated",
+     "emoji": "😊🎉",
+     "kb": 234,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 1
+     },
+     "created": 1791715599.6392891,
+     "file_name": "img-girl_emirati-jump_happy-20261009T114909-34da23"
+    },
+    {
+     "id": "ccfaff4a",
+     "name": "Girl emirati sit calm",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_calm-girl_emirati-20261011T104639-ab934f.webm",
+     "type": "animated",
+     "emoji": "🧘‍♀️🌿",
+     "kb": 145,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 2
+     },
+     "created": 1791715599.651039,
+     "file_name": "img-girl_emirati-sit_calm-20261009T114909-f4c559"
+    },
+    {
+     "id": "e66b4c40",
+     "name": "Girl emirati lean curious",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lean_curious-girl_emirati-20261011T104639-012707.webm",
+     "type": "animated",
+     "emoji": "🤔👂",
+     "kb": 199,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 3
+     },
+     "created": 1791715599.662296,
+     "file_name": "img-girl_emirati-lean_curious-20261009T114909-098f68"
+    },
+    {
+     "id": "59aafcbf",
+     "name": "Girl emirati stand proud",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_proud-girl_emirati-20261011T104639-8899d2.webm",
+     "type": "animated",
+     "emoji": "😌💪",
+     "kb": 167,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 4
+     },
+     "created": 1791715599.6721652,
+     "file_name": "img-girl_emirati-stand_proud-20261009T114909-d5bddb"
+    },
+    {
+     "id": "dee0e055",
+     "name": "Girl emirati run excited",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-run_excited-girl_emirati-20261011T104639-7b737b.webm",
+     "type": "animated",
+     "emoji": "🏃‍♀️😁",
+     "kb": 252,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 5
+     },
+     "created": 1791715599.6829739,
+     "file_name": "img-girl_emirati-run_excited-20261009T114909-697c31"
+    },
+    {
+     "id": "52fcfeb4",
+     "name": "Girl emirati sit shy",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_shy-girl_emirati-20261011T104639-e90379.webm",
+     "type": "animated",
+     "emoji": "😊🙈",
+     "kb": 241,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 6
+     },
+     "created": 1791715599.699949,
+     "file_name": "img-girl_emirati-sit_shy-20261009T114909-762323"
+    },
+    {
+     "id": "8dda479b",
+     "name": "Girl emirati lie mischief",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lie_mischief-girl_emirati-20261011T104639-e091b1.webm",
+     "type": "animated",
+     "emoji": "😏😉",
+     "kb": 216,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 7
+     },
+     "created": 1791715599.711947,
+     "file_name": "img-girl_emirati-lie_mischief-20261009T114909-ba33f7"
+    },
+    {
+     "id": "e907e96a",
+     "name": "Girl emirati spin happy",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-spin_happy-girl_emirati-20261011T104639-25e53d.webm",
+     "type": "animated",
+     "emoji": "😄💃",
+     "kb": 253,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 8
+     },
+     "created": 1791715599.727406,
+     "file_name": "img-girl_emirati-spin_happy-20261009T114909-0f81ee"
+    },
+    {
+     "id": "3b99f8e3",
+     "name": "Girl emirati stand shocked",
+     "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_shocked-girl_emirati-20261011T104639-ade983.webm",
+     "type": "animated",
+     "emoji": "😲😱",
+     "kb": 227,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G128",
+      "index": 9
+     },
+     "created": 1791715599.738593,
+     "file_name": "img-girl_emirati-stand_shocked-20261009T114909-d76893"
+    }
+   ],
+   "lead_at": 1791715599.782
+  },
+  {
+   "id": "381638dc",
+   "name": "Girl Emirati 2",
+   "slug": "girl_emirati_2",
+   "cover": "a1be7d8c",
+   "owner": "local",
+   "created": 1791715657.960377,
+   "stickers": [
+    {
+     "id": "a1be7d8c",
+     "name": "Girl emirati jump happy",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-jump_happy-girl_emirati_2-20261011T104737-94f970.png",
+     "type": "static",
+     "emoji": "😊🎉",
+     "kb": 150,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 1
+     },
+     "created": 1791715657.983231,
+     "file_name": "img-girl_emirati-jump_happy-20261009T085002-76e07d"
+    },
+    {
+     "id": "d7b17544",
+     "name": "Girl emirati sit calm",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-sit_calm-girl_emirati_2-20261011T104737-a413c3.png",
+     "type": "static",
+     "emoji": "🧘‍♀️🌿",
+     "kb": 129,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 2
+     },
+     "created": 1791715657.994462,
+     "file_name": "img-girl_emirati-sit_calm-20261009T085002-7efa88"
+    },
+    {
+     "id": "469cea0b",
+     "name": "Girl emirati lean curious",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-lean_curious-girl_emirati_2-20261011T104738-53d001.png",
+     "type": "static",
+     "emoji": "🤔👂",
+     "kb": 140,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 3
+     },
+     "created": 1791715658.003822,
+     "file_name": "img-girl_emirati-lean_curious-20261009T085002-9bde48"
+    },
+    {
+     "id": "43aab2ab",
+     "name": "Girl emirati stand proud",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-stand_proud-girl_emirati_2-20261011T104738-86262c.png",
+     "type": "static",
+     "emoji": "😌💪",
+     "kb": 139,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 4
+     },
+     "created": 1791715658.013164,
+     "file_name": "img-girl_emirati-stand_proud-20261009T085002-9584f5"
+    },
+    {
+     "id": "2faa4f40",
+     "name": "Girl emirati run excited",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-run_excited-girl_emirati_2-20261011T104738-a11205.png",
+     "type": "static",
+     "emoji": "🏃‍♀️😁",
+     "kb": 150,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 5
+     },
+     "created": 1791715658.0222669,
+     "file_name": "img-girl_emirati-run_excited-20261009T085002-c13423"
+    },
+    {
+     "id": "ee17b128",
+     "name": "Girl emirati sit shy",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-sit_shy-girl_emirati_2-20261011T104738-19c921.png",
+     "type": "static",
+     "emoji": "😊🙈",
+     "kb": 134,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 6
+     },
+     "created": 1791715658.0301309,
+     "file_name": "img-girl_emirati-sit_shy-20261009T085002-a9ee5a"
+    },
+    {
+     "id": "0f757b0b",
+     "name": "Girl emirati lie mischief",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-lie_mischief-girl_emirati_2-20261011T104738-802a62.png",
+     "type": "static",
+     "emoji": "😏😉",
+     "kb": 132,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 7
+     },
+     "created": 1791715658.037311,
+     "file_name": "img-girl_emirati-lie_mischief-20261009T085002-9b7c26"
+    },
+    {
+     "id": "01da35a4",
+     "name": "Girl emirati spin happy",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-spin_happy-girl_emirati_2-20261011T104738-41087f.png",
+     "type": "static",
+     "emoji": "😄💃",
+     "kb": 146,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 8
+     },
+     "created": 1791715658.04476,
+     "file_name": "img-girl_emirati-spin_happy-20261009T085002-26ea08"
+    },
+    {
+     "id": "aaecb9ed",
+     "name": "Girl emirati stand shocked",
+     "file": "G127-girl_emirati-20261009T085002/img-girl_emirati-stand_shocked-girl_emirati_2-20261011T104738-7f5a79.png",
+     "type": "static",
+     "emoji": "😲😱",
+     "kb": 143,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G127",
+      "index": 9
+     },
+     "created": 1791715658.051678,
+     "file_name": "img-girl_emirati-stand_shocked-20261009T085002-513c79"
+    }
+   ],
+   "lead_at": 1791715658.093
   }
  ],
  "layout": 2,
@@ -4412,6 +4722,320 @@
      ]
     },
     "deleted": 1791644430.909,
+    "deleted_by": "local"
+   },
+   {
+    "id": "54c371fd",
+    "name": "Girl Emirati",
+    "slug": "girl_emirati",
+    "cover": "6d474ca2",
+    "owner": "local",
+    "created": 1791642059.528307,
+    "stickers": [
+     {
+      "id": "6d474ca2",
+      "name": "Girl emirati jump happy",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-jump_happy-girl_emirati-20261010T142059-0a1c97.webm",
+      "type": "animated",
+      "emoji": "😊🎉",
+      "kb": 234,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 1
+      },
+      "created": 1791642059.5897448,
+      "file_name": "img-girl_emirati-jump_happy-20261009T114909-34da23"
+     },
+     {
+      "id": "c0b2532c",
+      "name": "Girl emirati sit calm",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_calm-girl_emirati-20261010T142059-94bb1b.webm",
+      "type": "animated",
+      "emoji": "🧘‍♀️🌿",
+      "kb": 145,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 2
+      },
+      "created": 1791642059.599933,
+      "file_name": "img-girl_emirati-sit_calm-20261009T114909-f4c559"
+     },
+     {
+      "id": "d401f999",
+      "name": "Girl emirati lean curious",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lean_curious-girl_emirati-20261010T142059-bce629.webm",
+      "type": "animated",
+      "emoji": "🤔👂",
+      "kb": 199,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 3
+      },
+      "created": 1791642059.610601,
+      "file_name": "img-girl_emirati-lean_curious-20261009T114909-098f68"
+     },
+     {
+      "id": "16bd7866",
+      "name": "Girl emirati stand proud",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_proud-girl_emirati-20261010T142059-04b3c2.webm",
+      "type": "animated",
+      "emoji": "😌💪",
+      "kb": 167,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 4
+      },
+      "created": 1791642059.621231,
+      "file_name": "img-girl_emirati-stand_proud-20261009T114909-d5bddb"
+     },
+     {
+      "id": "3ce15e16",
+      "name": "Girl emirati run excited",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-run_excited-girl_emirati-20261010T142059-16ff40.webm",
+      "type": "animated",
+      "emoji": "🏃‍♀️😁",
+      "kb": 252,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 5
+      },
+      "created": 1791642059.6309602,
+      "file_name": "img-girl_emirati-run_excited-20261009T114909-697c31"
+     },
+     {
+      "id": "a7989344",
+      "name": "Girl emirati sit shy",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_shy-girl_emirati-20261010T142059-dbe2fb.webm",
+      "type": "animated",
+      "emoji": "😊🙈",
+      "kb": 241,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 6
+      },
+      "created": 1791642059.6406488,
+      "file_name": "img-girl_emirati-sit_shy-20261009T114909-762323"
+     },
+     {
+      "id": "a538d8c6",
+      "name": "Girl emirati lie mischief",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lie_mischief-girl_emirati-20261010T142059-4f5640.webm",
+      "type": "animated",
+      "emoji": "😏😉",
+      "kb": 216,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 7
+      },
+      "created": 1791642059.6491048,
+      "file_name": "img-girl_emirati-lie_mischief-20261009T114909-ba33f7"
+     },
+     {
+      "id": "25a89315",
+      "name": "Girl emirati spin happy",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-spin_happy-girl_emirati-20261010T142059-799b0c.webm",
+      "type": "animated",
+      "emoji": "😄💃",
+      "kb": 253,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 8
+      },
+      "created": 1791642059.657057,
+      "file_name": "img-girl_emirati-spin_happy-20261009T114909-0f81ee"
+     },
+     {
+      "id": "c2c58b60",
+      "name": "Girl emirati stand shocked",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_shocked-girl_emirati-20261010T142059-3a61fe.webm",
+      "type": "animated",
+      "emoji": "😲😱",
+      "kb": 227,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 9
+      },
+      "created": 1791642059.666999,
+      "file_name": "img-girl_emirati-stand_shocked-20261009T114909-d76893"
+     }
+    ],
+    "lead_at": 1791642059.716,
+    "deleted": 1791715039.319,
+    "deleted_by": "local"
+   },
+   {
+    "id": "d4ba9837",
+    "name": "Girl Emirati 2",
+    "slug": "girl_emirati_2",
+    "cover": "29769278",
+    "owner": "local",
+    "created": 1791715009.659032,
+    "stickers": [
+     {
+      "id": "29769278",
+      "name": "Girl emirati jump happy",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-jump_happy-girl_emirati_2-20261011T103649-134b28.webm",
+      "type": "animated",
+      "emoji": "😊🎉",
+      "kb": 234,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 1
+      },
+      "created": 1791715009.692011,
+      "file_name": "img-girl_emirati-jump_happy-20261009T114909-34da23"
+     },
+     {
+      "id": "fa566f1f",
+      "name": "Girl emirati sit calm",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_calm-girl_emirati_2-20261011T103649-b47b60.webm",
+      "type": "animated",
+      "emoji": "🧘‍♀️🌿",
+      "kb": 145,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 2
+      },
+      "created": 1791715009.7020319,
+      "file_name": "img-girl_emirati-sit_calm-20261009T114909-f4c559"
+     },
+     {
+      "id": "b60c4ffe",
+      "name": "Girl emirati lean curious",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lean_curious-girl_emirati_2-20261011T103649-1c383d.webm",
+      "type": "animated",
+      "emoji": "🤔👂",
+      "kb": 199,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 3
+      },
+      "created": 1791715009.710687,
+      "file_name": "img-girl_emirati-lean_curious-20261009T114909-098f68"
+     },
+     {
+      "id": "1506870a",
+      "name": "Girl emirati stand proud",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_proud-girl_emirati_2-20261011T103649-c9c412.webm",
+      "type": "animated",
+      "emoji": "😌💪",
+      "kb": 167,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 4
+      },
+      "created": 1791715009.719967,
+      "file_name": "img-girl_emirati-stand_proud-20261009T114909-d5bddb"
+     },
+     {
+      "id": "00fd3f6d",
+      "name": "Girl emirati run excited",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-run_excited-girl_emirati_2-20261011T103649-2ac6cd.webm",
+      "type": "animated",
+      "emoji": "🏃‍♀️😁",
+      "kb": 252,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 5
+      },
+      "created": 1791715009.729301,
+      "file_name": "img-girl_emirati-run_excited-20261009T114909-697c31"
+     },
+     {
+      "id": "5a7260be",
+      "name": "Girl emirati sit shy",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-sit_shy-girl_emirati_2-20261011T103649-54f5e4.webm",
+      "type": "animated",
+      "emoji": "😊🙈",
+      "kb": 241,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 6
+      },
+      "created": 1791715009.737582,
+      "file_name": "img-girl_emirati-sit_shy-20261009T114909-762323"
+     },
+     {
+      "id": "04d67598",
+      "name": "Girl emirati lie mischief",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-lie_mischief-girl_emirati_2-20261011T103649-ed7286.webm",
+      "type": "animated",
+      "emoji": "😏😉",
+      "kb": 216,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 7
+      },
+      "created": 1791715009.746007,
+      "file_name": "img-girl_emirati-lie_mischief-20261009T114909-ba33f7"
+     },
+     {
+      "id": "5c462c95",
+      "name": "Girl emirati spin happy",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-spin_happy-girl_emirati_2-20261011T103649-ff099a.webm",
+      "type": "animated",
+      "emoji": "😄💃",
+      "kb": 253,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 8
+      },
+      "created": 1791715009.753281,
+      "file_name": "img-girl_emirati-spin_happy-20261009T114909-0f81ee"
+     },
+     {
+      "id": "2ebf5a6e",
+      "name": "Girl emirati stand shocked",
+      "file": "G128-girl_emirati-20261009T114909/vid-girl_emirati-stand_shocked-girl_emirati_2-20261011T103649-b4d261.webm",
+      "type": "animated",
+      "emoji": "😲😱",
+      "kb": 227,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G128",
+       "index": 9
+      },
+      "created": 1791715009.76075,
+      "file_name": "img-girl_emirati-stand_shocked-20261009T114909-d76893"
+     }
+    ],
+    "lead_at": 1791715009.803,
+    "deleted": 1791715611.512,
     "deleted_by": "local"
    }
   ]

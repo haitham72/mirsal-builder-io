@@ -105,7 +105,7 @@
     3,
     3
   ],
-  "stage": "sliced",
+  "stage": "stills_reviewed",
   "error": null,
   "plan_source": "task 051",
   "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid..\nStyle: kawaii chibi style, big shiny eyes, tiny body and an oversized head, pastel colours, soft blush cheeks, very cute and rounded.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: joyfully jumping with arms wide open, big smile showing happiness\nCharacter 2: sitting calmly cross-legged with eyes closed, peaceful and serene\nCharacter 3: leaning forward curiously with a tilted head, eager to listen\nCharacter 4: standing proudly with hands on hips, chest out with confidence\nCharacter 5: running energetically with arms pumping and wide smile\nCharacter 6: sitting on knees, shyly glancing sideways with blushing cheeks\nCharacter 7: lying on side, propped on elbow, smiling mischievously\nCharacter 8: spinning happily with a carefree laugh and arms extended\nCharacter 9: standing stiffly with wide eyes and hands raised in shock\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -533,7 +533,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -547,6 +547,15 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791715657.974,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -743,7 +752,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -757,6 +766,15 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791715657.976,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -953,7 +971,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -967,6 +985,15 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791715657.976,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -1166,7 +1193,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -1182,6 +1209,15 @@
               "duplicate_cell"
             ]
           }
+        },
+        {
+          "ts": 1791715657.976,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -1378,7 +1414,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -1392,6 +1428,15 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791715657.976,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -1588,7 +1633,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -1602,6 +1647,15 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791715657.977,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -1798,7 +1852,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -1812,6 +1866,15 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791715657.977,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -2011,7 +2074,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -2027,6 +2090,15 @@
               "holes"
             ]
           }
+        },
+        {
+          "ts": 1791715657.977,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     },
@@ -2223,7 +2295,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "PENDING",
+        "still": "APPROVED",
         "anim": "NONE"
       },
       "history": [
@@ -2237,9 +2309,31 @@
           "detail": {
             "warnings": []
           }
+        },
+        {
+          "ts": 1791715657.977,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
         }
       ]
     }
   ],
-  "sheet_issues": []
+  "sheet_issues": [],
+  "added": {
+    "381638dc": [
+      "static:1",
+      "static:2",
+      "static:3",
+      "static:4",
+      "static:5",
+      "static:6",
+      "static:7",
+      "static:8",
+      "static:9"
+    ]
+  }
 }

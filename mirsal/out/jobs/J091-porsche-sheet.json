@@ -1,0 +1,47 @@
+{
+  "id": "J091",
+  "kind": "sheet",
+  "task": "056",
+  "generation": "G131",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Porsche.\nStyle: pop-art comic style, bold black ink outlines, halftone dot shading, saturated primary colours, dynamic expressive poses.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: beaming with happiness, bouncing on the spot with a huge smile\nCharacter 2: laughing so hard tears of joy fly out, holding the belly\nCharacter 3: bawling with big streaming tears, rubbing the eyes\nCharacter 4: sad and slumped, head hanging low, a single tear\nCharacter 5: hugging a big red heart, eyes sparkling, blushing\nCharacter 6: furious and stomping, steam puffing from the head, fists clenched\nCharacter 7: winking playfully with a finger-gun and a cheeky grin\nCharacter 8: blowing a kiss from the hand, a small heart floating away\nCharacter 9: jumping back in surprise, wide eyes and an open mouth\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.\nReference: the attached image is the sheet to keep. Keep every character exactly as drawn: the same design, colours, proportions and the same pose in every cell. Apply only this change: Make him wear UAE clothing again.",
+    "label": "Porsche",
+    "refs": [
+      "refs/R007.png"
+    ],
+    "outline": 12,
+    "erode": 0,
+    "custom_prompt": false,
+    "parent": "G130",
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "d168b8a6-1e97-47dd-817c-d9d48fc0cf21",
+  "result": {
+    "file": "jobs/J091-porsche-sheet/result.png",
+    "sha256": "2669a2d6502a71a079eac39ad7c3f9ead123d6d470dcbd6c140acd724e4b89db",
+    "bytes": 4893650
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791706362.753,
+  "claimed_at": 1791706368.814,
+  "completed_at": 1791706396.915,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k",
+    "references": 1
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791706454.417,
+    "by": "local"
+  }
+}
