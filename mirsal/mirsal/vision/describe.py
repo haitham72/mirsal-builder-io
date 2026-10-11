@@ -32,7 +32,7 @@ def sticker(out, gid, index: int, question: str, *, allowed=None, on_delta=None,
     config = target()
     receive = on_delta or (lambda delta: None)
     try:
-        text, meta = (complete or llm.complete)(
+        text, meta = (complete or llm.complete_vision)(
             SYSTEM, llm.fence("QUESTION", question, 600), images=[image], on_delta=receive,
             temperature=0, max_tokens=int(_env("VISION_MAX_TOKENS", 700)),
             timeout=float(_env("VISION_TIMEOUT", 90)), provider_=config["provider"],

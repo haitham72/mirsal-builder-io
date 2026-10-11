@@ -13,7 +13,7 @@ Mirsal Builder is a local, private app that makes animated Telegram stickers (no
 - **"Use it anyway" (allow)** — a recorded, reversible human click that lets a judgement-call block through. Only Telegram's own limits stay final.
 - **Sheet / video sheet / `sheet_fixed`** — the model-drawn grid; the video sheet rebuilt from approved stickers; `sheet_fixed` is the edited-sheet view.
 - **Particle set / burst** — a set of effect sprites linked to library stickers, and the animation rendered from it.
-- **Paused** — public deployment (`deployment_plan.md`) and Google OAuth remain parked. What comes next is `plan.md` when one exists (none now: open work is `docs/backlog.md`).
+- **Paused** — public deployment (`deployment_plan.md`) and Google OAuth remain parked. Next work is in [`plan.md`](../plan.md); the remaining open work is in [`backlog.md`](backlog.md).
 
 ## Where things are tracked (CLAUDE.md rule 7)
 
@@ -23,7 +23,7 @@ Mirsal Builder is a local, private app that makes animated Telegram stickers (no
 | open work to build, by area | `backlog.md` |
 | this file: guardrails, how to run, quirks | `dev-notes.md` |
 | the paused deployment plan and its nine questions | `deployment_plan.md` |
-| the independent audit baseline | `review.md` (appendix A holds the triage of the 2026-10-02 review; a fresh audit updates that one file per `review-prompt.md`) |
+| the independent audit baseline | `review.md` (appendix A holds the triage of the 2026-10-02 review; a fresh audit updates that one file per [`review-prompt.md`](review-prompt.md)) |
 
 An entry is deleted the moment it is built and documented (history lives in git). The old phase plans, the Devin report and the 2026-10-02 review are retired the same way: what was still true of the build is in the tracker files, what was built is in the docs of its area.
 
@@ -42,7 +42,7 @@ An entry is deleted the moment it is built and documented (history lives in git)
 | Decision | What it means now |
 |---|---|
 | Public deployment and Google OAuth are paused | none of it is worked on, extended, turned on or deleted (the office LAN's sign-in throttling and the per-token limit are the rate limits in use). `deploy/` and `deployment_plan.md` (branch `deployment`) are groundwork. `deploy/gateway/ratelimit.py` stays inert; the engine's per-minute 429 (`console/server.py` `_wait`) stays untouched. Do not raise these unless asked. The local FastAPI + pydantic migration is separately authorized after particles (2026-10-04) |
-| Everything stays local for now | embeddings stay local and hardcoded (`services/embed.py` `EMBED_MODEL`, the DB is local). `gpt-4o-mini` is for greeting and routing only; the real work runs on the local server. No hosted embeddings, no swap of the embedding model |
+| Models and embeddings | local chat and vision use the configured local server; cloud routing supports the grouped Nararouter/OpenAI catalog, with official OpenAI GPT-5.6 Luna at `high` reasoning as the built-in default and explicit settings taking precedence. Official OpenAI uses `OPENAI_API_KEY`; Nararouter uses `NARAROUTER_API_KEY`, including vision recovery. The local embedding model and vector dimensions are unchanged; the existing cloud embedding fallback uses the configured endpoint's own key. See `docs/agent-and-chat.md`, Models |
 | Never a block a person cannot get past (2026-10-02) | every new check is a WARN with a visible "use it anyway"; only limits Telegram itself rejects (format, size, codec) or a file that does not open may stop something, and even then with words and a next step (`CLAUDE.md` rule 10). Applied: `pipeline.SHEET_PROCEED`, `recut`, `engine/effect_checks.py` |
 | Several sheets / effects are made all at once (2026-10-02) | `jobs.paid_parallel()`; `CLAUDE.md` rule 13 |
 | Tracking stays in Postgres; **LangSmith is removed** (2026-10-04: problems are tickets, `store-and-search.md` "Tickets") | decisions, tasks, jobs, chats and tickets are recorded in Postgres (`MIRSAL_DB_WRITE=1`, `docs/store-and-search.md`). Old `LANGSMITH_*` / `MIRSAL_TRACE` lines in `mirsal/.env` are ignored; delete them |
@@ -53,7 +53,7 @@ An entry is deleted the moment it is built and documented (history lives in git)
 
 The everyday commands are in [`run.md`](../run.md); below is what a developer session needs beyond them.
 
-**Two checkouts exist.** macOS: `/Users/haithammohamedibrahim/VsCode/mirsal-builder-io`, branch **`better_ui/ux`** (from `deployment`); the venv is **`mirsal/venv`** (not `.venv`); the server Haitham has open is `python -m mirsal serve` on **:8770** (never kill it); `mirsal/.env` has `MIRSAL_DAILY_CREDITS=` empty (= no cap). Windows: `G:\Haitham\VsCode\Mirsal-Builder`, where most of the code was first written (its former work branch `merge/generate-advanced` is retired; its content is in `deployment`) and where the `.env` had `MIRSAL_DAILY_CREDITS=15`; the venv there is `mirsal\.venv` (use `.venv\Scripts\python` in place of `venv/bin/python`).
+**Two checkouts exist.** macOS: `/Users/haithammohamedibrahim/VsCode/mirsal-builder-io`, branch **`edit-design`** for the redesign (`main` holds the merged build; merge only on Haitham's instruction); the venv is **`mirsal/venv`** (not `.venv`); the server Haitham has open is `python -m mirsal serve` on **:8770** (never kill it); `mirsal/.env` has `MIRSAL_DAILY_CREDITS=` empty (= no cap). Windows: `G:\Haitham\VsCode\Mirsal-Builder`, where most of the code was first written (its former work branch `merge/generate-advanced` is retired; its content is in `deployment`) and where the `.env` had `MIRSAL_DAILY_CREDITS=15`; the venv there is `mirsal\.venv` (use `.venv\Scripts\python` in place of `venv/bin/python`).
 
 Python 3.14 (numpy 2.5, OpenCV 5.0, Pillow 12.3: thresholds in `engine/config.py` were calibrated on an older stack, re-check metrics before trusting them). The code under `mirsal/mirsal/` is grouped by concern (`docs/engine-and-studio.md`, "Layout"): `engine/` (pure), `flow/` (pipeline, gates), `generation/` (Higgsfield, jobs, prompts), `services/` (LLM, embeddings, Telegram), `runtime/` (cache, events, paths, accounts, atomic writes), `media/` (library, video projects, cutout), `store/` (Postgres, pool), `agent/`, `vision/`, `obs/`, `console/`; only `cli.py` stays at the top. Import from the folder (`from mirsal.generation import jobs`), never from the old flat paths. `mirsal/out/` holds the real generations (G001-G105 at the time of writing), the library, jobs and the ledger of this PC, and is mostly tracked in git (`docs/engine-and-studio.md`, "What git tracks of out/"; whether that is on purpose is W29). Docker Desktop must be running for `db up` (Postgres :5434, Redis :6380); both are optional at runtime.
 

@@ -1,7 +1,7 @@
 """A minimal chat-completions client over urllib (no new dependency) for two backends that speak the same protocol:
 
 - `openai`: the cloud, any OpenAI-compatible endpoint at MIRSAL_CLOUD_URL (default https://api.openai.com/v1; the owner's is an OpenAI-compatible router).
-  The key (OPENAI_API_KEY) is read from the environment or mirsal/.env, never logged, never returned.
+  Official OpenAI uses OPENAI_API_KEY; Nararouter uses NARAROUTER_API_KEY. Keys are read from the environment or mirsal/.env, never logged, never returned.
 - `local`: LM Studio, vLLM or any OpenAI-compatible server at MIRSAL_LOCAL_URL, default http://localhost:1234/v1, no key. The model is whatever the
   server lists (`list_local_models`, `resolve_local_model`): MIRSAL_LOCAL_MODEL is only the wish (`qwen3.5-4b:2`; the `:2` is an LM Studio INSTANCE suffix that
   exists only while a second copy is loaded, so it falls back to `qwen3.5-4b`, then to the first chat model the server has), and `local_ready` is a REAL probe
@@ -26,7 +26,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-DEFAULT_MODEL = "gpt-4.1-mini"          # override with MIRSAL_LLM_MODEL (any chat model your key can use)
+DEFAULT_MODEL = "gpt-5.6-luna"          # override with MIRSAL_LLM_MODEL (any chat model your key can use)
 LOCAL_MODEL = "qwen3.5-4b:2"                     # the LAST-RESORT default only (nothing configured and the server cannot be asked); MIRSAL_LOCAL_MODEL is the wish, the server's own list decides (`resolve_local_model`)
 LOCAL_MIN_TOKENS = 2048                          # token budget when reasoning cannot be switched off (measured: 300 tokens gave an empty answer)
 LOCAL_RETRY_CAP = 8192                           # an empty local answer is retried with at most this many tokens (4x a big request would be minutes on a small machine)
@@ -40,6 +40,7 @@ PROBE_FAIL_TTL = 15.0
 CLOUD_URL = "https://api.openai.com/v1"         # MIRSAL_CLOUD_URL overrides: any OpenAI-compatible endpoint (base URL ending in /v1)
 LOCAL_URL = "http://localhost:1234/v1"
 KEY_VAR = "OPENAI_API_KEY"
+ROUTER_KEY_VAR = "NARAROUTER_API_KEY"
 _ENV_LOADED = False
 _local_up: dict = {"t": 0.0, "ok": False, "url": None}
 _models: dict = {"t": 0.0, "url": None, "ids": [], "ok": False}     # the local server's chat models, read from {MIRSAL_LOCAL_URL}/models
@@ -172,7 +173,7 @@ def resolve_local_model(force: bool = False) -> str:
     """The id to send as `model`. The person's pick, else MIRSAL_LOCAL_MODEL, each taken when the server lists it; else the same id without a trailing `:<digits>` (LM Studio's INSTANCE
     suffix: `qwen3.5-4b:2` exists only while a second copy is loaded, the base id is loaded on first use) when THAT is listed; else the first chat model the server lists; else the wish unchanged
     (server down: nothing to check it against)."""
-    wishes = [w for w in (preferred_model(), configured_local_model()) if w]
+    wishes = [w.removeprefix("local:") for w in (preferred_model(), configured_local_model()) if w]
     ids = list_local_models(force)
     for want in wishes:
         if want in ids:
@@ -247,7 +248,12 @@ def models_report(force: bool = False) -> dict:
     true for the model the probe just heard from and null for the rest (the OpenAI-compatible list does not say which are loaded)."""
     r = local_ready(force)
     ids = list_local_models()
-    return {"models": [{"id": i, "loaded": True if (r["ok"] and i == r["model"]) else None} for i in ids], "current": r["model"], "preference": preference(),
+    from . import llm_catalog
+    catalogs = llm_catalog.groups(force)
+    return {"local": catalogs["local"], "nararouter": catalogs["nararouter"], "openai": catalogs["openai"],
+            "aliases": dict(llm_catalog.MODEL_ALIASES),
+            "default": cloud_model(), "selected": preferred_cloud_model() or None,
+            "models": [{"id": i, "loaded": True if (r["ok"] and i == r["model"]) else None} for i in ids], "current": r["model"], "preference": preference(),
             "chosen": preferred_model() or None, "configured": configured_local_model(), "ok": r["ok"], "why": r["why"]}
 
 
@@ -274,7 +280,7 @@ def _write_pref_file(**changes) -> None:
     from ..runtime import atomic
     f = _pref_file()
     f.parent.mkdir(parents=True, exist_ok=True)
-    atomic.write_text(f, json.dumps({**{k: v for k, v in _read_pref_file().items() if k in ("backend", "model") and v}, **changes}))
+    atomic.write_text(f, json.dumps({**{k: v for k, v in _read_pref_file().items() if k in ("backend", "model", "cloud_model") and v}, **changes}))
 
 
 def preference() -> str:
@@ -296,12 +302,60 @@ def set_preference(value: str) -> str:
     return v
 
 
+def preferred_cloud_model() -> str:
+    from . import llm_catalog
+    return llm_catalog.normalize_model(_read_pref_file().get("cloud_model") or "")
+
+
+def cloud_model() -> str:
+    _load_dotenv()
+    from . import llm_catalog
+    return llm_catalog.normalize_model(preferred_cloud_model() or os.environ.get("MIRSAL_LLM_MODEL") or DEFAULT_MODEL)
+
+
+def set_model(value: str) -> str:
+    from . import llm_catalog
+    if not value:
+        _write_pref_file(model="", cloud_model="")
+        reset_local()
+        _sticky.update(prov=None, until=0.0)
+        return ""
+    value = llm_catalog.normalize_model(value)
+    if not str(value).startswith(("local:", "nararouter:", "openai:")):
+        return set_local_model(value)  # old /api/ai/backend {model} contract
+    selected = llm_catalog.validate(value)
+    provider_, mid = llm_catalog.split_model(selected)
+    if provider_ == "local":
+        _write_pref_file(model=mid, backend="local")
+        reset_local()
+    else:
+        _write_pref_file(cloud_model=selected, backend="cloud")
+    _sticky.update(prov=None, until=0.0)
+    return selected
+
+
+def forced_provider() -> str:
+    from . import llm_catalog
+    f = forced()
+    provider_, _ = llm_catalog.split_model(f["model"])
+    return "local" if provider_ == "local" else "openai" if llm_catalog.endpoint(provider_)[1] else "none"
+
+
+def cloud_available() -> bool:
+    from . import llm_catalog
+    provider_, _ = llm_catalog.split_model(cloud_model())
+    return bool(llm_catalog.endpoint(provider_)[1])
+
+
 def availability(probe: bool = True) -> dict:
     """What can be used right now, with the plain reason when it cannot: {local: {ok, model, why}, cloud: {ok, model, why}}. `local.ok` is the readiness probe (`local_ready`: a tiny
     chat completion, cached), not the model list or the port. `probe=False` never asks the server (the health check must not wait for a model): the last probe's answer whatever its age,
     else whether anything listens."""
     _load_dotenv()
-    key = bool(os.environ.get(KEY_VAR))
+    key = cloud_available()
+    from . import llm_catalog
+    cloud_provider, _ = llm_catalog.split_model(cloud_model())
+    key_name = llm_catalog.key_setting(cloud_provider)
     if probe or not _local_allowed():
         local = local_ready()
     elif _ready["val"] is not None:
@@ -310,11 +364,11 @@ def availability(probe: bool = True) -> dict:
         up, m = local_reachable(), configured_local_model()
         local = {"ok": up, "model": m, "why": None if up else f"LM Studio is not answering at {local_url()}: start it and load {m}"}
     return {"local": local,
-            "cloud": {"ok": key, "model": os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL), "why": None if key else f"no {KEY_VAR} in mirsal/.env"}}
+            "cloud": {"ok": key, "model": cloud_model(), "why": None if key else f"no {key_name} in mirsal/.env"}}
 
 
 def _usable(prov: str) -> bool:
-    return local_reachable() if prov == "local" else bool(os.environ.get(KEY_VAR)) if prov == "openai" else False
+    return local_reachable() if prov == "local" else cloud_available() if prov == "openai" else False
 
 
 def resolve() -> str:
@@ -326,11 +380,11 @@ def resolve() -> str:
     if pref == "local":
         return "local"
     if pref == "cloud":
-        return "openai" if os.environ.get(KEY_VAR) else "none"
+        return "openai" if cloud_available() else "none"
     now = time.time()
     if _sticky["prov"] and now < _sticky["until"] and _usable(_sticky["prov"]):
         return _sticky["prov"]
-    prov = "local" if local_reachable() else ("openai" if os.environ.get(KEY_VAR) else "none")
+    prov = "local" if local_reachable() else ("openai" if cloud_available() else "none")
     _sticky.update(prov=prov, until=now + STICKY_S)
     return prov
 
@@ -344,13 +398,16 @@ def note_failure(prov: str) -> None:
 
 
 FORCE: contextvars.ContextVar = contextvars.ContextVar("mirsal_llm_force", default=None)
-"""A cloud model pinned for the code running in this context ({"model": "gpt-4o"}): a chat whose session chose its AI model (the Telegram chat starts on gpt-4o).
+"""A cloud model pinned for the code running in this context ({"model": "openai:gpt-5.6-luna"}): a chat whose session chose its model. Qualified local ids also pin the local backend.
 It never overrides MIRSAL_LLM_PROVIDER=none, and without an OpenAI key the pin answers `none` (it never silently uses another model)."""
 
 
 def forced() -> dict | None:
     f = FORCE.get()
-    return f if isinstance(f, dict) and f.get("model") else None
+    if isinstance(f, dict) and f.get("model"):
+        from . import llm_catalog
+        return {**f, "model": llm_catalog.normalize_model(f["model"])}
+    return None
 
 
 def provider() -> str:
@@ -361,11 +418,11 @@ def provider() -> str:
     if p == "none":                            # switched off: no model of any kind is asked (the test suite pins this, tests/__init__.py)
         return "none"
     if forced():
-        return "openai" if os.environ.get(KEY_VAR) else "none"
+        return forced_provider()
     if p == "local":
         return "local"
     if p == "openai":
-        return "openai" if os.environ.get(KEY_VAR) else "none"
+        return "openai" if cloud_available() else "none"
     return resolve()
 
 
@@ -381,9 +438,11 @@ def cloud_url() -> str:
 
 def model() -> str:
     _load_dotenv()
+    if forced():
+        return forced()["model"]
     if provider() == "local":
         return local_model()
-    return (forced() or {}).get("model") or os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL)
+    return cloud_model()
 
 
 def status(probe: bool = True) -> dict:
@@ -548,6 +607,49 @@ def fallback_model() -> str | None:
     return (os.environ.get("MIRSAL_LLM_FALLBACK") or "").strip() or None
 
 
+def complete_vision(system: str, user: str, *, provider_: str | None = None, **kw) -> tuple[str, dict]:
+    """Vision may retry once on the configured Nararouter fallback, including a pinned model's failure.
+
+    Never restart a visible stream, change the saved selection, or use the fallback when AI is disabled.
+    """
+    emitted = False
+    receive = kw.get("on_delta")
+    if receive is not None:
+        def delta(text):
+            nonlocal emitted
+            emitted = emitted or bool(text)
+            receive(text)
+        kw = {**kw, "on_delta": delta}
+    selected = kw.get("model_") or (forced() or {}).get("model") or model()
+    started = time.monotonic()
+    try:
+        # An explicit vision target prevents the general auto-backend retry.
+        return complete(system, user, provider_=provider_ or provider(), **kw)
+    except LLMError as primary:
+        from . import llm_catalog
+        configured = fallback_model()
+        if emitted or provider_ == "none" or os.environ.get("MIRSAL_LLM_PROVIDER") == "none" or not configured:
+            raise
+        head, sep, tail = configured.partition(":")
+        mid = tail if sep and head in ("local", "openai", "nararouter") else configured
+        fallback = "nararouter:" + mid
+        origin_provider, origin_model = llm_catalog.split_model(selected, legacy_local=provider_ == "local")
+        if (origin_provider, origin_model) == ("nararouter", mid):
+            raise
+        if kw.get("images") and not llm_catalog.supports_images("nararouter", mid):
+            raise LLMError(f"{primary}. Configure MIRSAL_LLM_FALLBACK with an image-capable Nararouter model.") from primary
+        remaining = float(kw.get("timeout", 60.0)) - (time.monotonic() - started)
+        if remaining <= 0:
+            raise
+        try:
+            text, meta = _complete_on("openai", system, user, **{**kw, "model_": fallback, "base_url": None,
+                                                                 "timeout": remaining})
+        except LLMError as secondary:
+            raise LLMError(f"{primary}. Nararouter fallback {mid} also failed: {secondary}",
+                           kind=secondary.kind, code=secondary.code, detail=secondary.detail) from secondary
+        return text, {**meta, "fallback_from": origin_provider + ":" + origin_model, "fallback_reason": str(primary)}
+
+
 def _complete_on(prov: str, system: str, user: str, **kw) -> tuple[str, dict]:
     """One completion on `prov`; on the cloud, a failed or empty answer of the configured model is asked once more of MIRSAL_LLM_FALLBACK
     (not when the caller or the session pinned a model)."""
@@ -565,7 +667,7 @@ def _complete_on(prov: str, system: str, user: str, **kw) -> tuple[str, dict]:
         if emitted:
             raise                                      # a visible answer must never restart on a different model
         fb = fallback_model() if prov == "openai" and not kw.get("model_") and not (forced() or {}).get("model") else None
-        if not fb or fb == os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL):
+        if not fb or fb == cloud_model():
             raise
         return _complete_one(prov, system, user, **{**kw, "model_": fb})
 
@@ -582,11 +684,18 @@ def _complete_one(prov: str, system: str, user: str, *, max_tokens: int = 2500, 
     (the readiness probe) takes the empty answer as it is."""
     if prov == "none":
         raise LLMError(f"No AI backend: add {KEY_VAR} to mirsal/.env, or start LM Studio (MIRSAL_LOCAL_URL, default {LOCAL_URL}).")
-    key = os.environ.get(KEY_VAR) if prov == "openai" else None
+    from . import llm_catalog
+    selected = model_ or (forced() or {}).get("model") or (local_model() if prov == "local" else cloud_model())
+    model_provider, m = llm_catalog.split_model(selected, legacy_local=prov == "local")
+    prov = "local" if model_provider == "local" else "openai"
+    endpoint_url, key = llm_catalog.endpoint(model_provider)
     if prov == "openai" and not key:
-        raise LLMError(f"No AI key: add {KEY_VAR} to mirsal/.env (or the environment).")
-    m = model_ or (local_model() if prov == "local" else (forced() or {}).get("model") or os.environ.get("MIRSAL_LLM_MODEL", DEFAULT_MODEL))
-    url = (base_url.rstrip("/") + "/chat/completions") if base_url else (cloud_url() + "/chat/completions" if prov == "openai" else local_url() + "/chat/completions")
+        setting = llm_catalog.key_setting(model_provider)
+        raise LLMError(f"No AI key for {model_provider}: configure {setting} in mirsal/.env.")
+    if images and not llm_catalog.supports_images(model_provider, m):
+        raise LLMError(f"{m} is not an approved image-capable model; choose a vision model from the catalog.")
+    luna = model_provider == "openai" and m == DEFAULT_MODEL
+    url = ((base_url or endpoint_url) if prov == "local" else endpoint_url).rstrip("/") + "/chat/completions"
     content = user
     if images:
         content = [{"type": "text", "text": user}] + [{"type": "image_url", "image_url": {"url": data_url(b)}} for b in images]
@@ -596,13 +705,18 @@ def _complete_one(prov: str, system: str, user: str, *, max_tokens: int = 2500, 
         msgs.append({"role": "assistant", "content": CLOSED_THINK})
     body = {"model": m, "messages": msgs}
     body["max_completion_tokens" if prov == "openai" else "max_tokens"] = max_tokens
+    if luna:
+        # High reasoning shares the completion budget with visible output. Small routing/VLM
+        # caps must leave room for both. The user's effort choice is not an optional parameter.
+        body["reasoning_effort"] = "high"
+        body["max_completion_tokens"] = max(max_tokens, 8192)
     optional = {}
     if prov == "local":
         # Qwen 3.5 thinks before it answers; `reasoning_effort: "none"` switches that off through LM Studio's OpenAI endpoint (measured: 0 reasoning
         # tokens, a 7-token answer in 2 s, against 400 of 400 tokens spent thinking). A server that refuses the field gets the retry below, which
         # drops it and raises the token budget to the floor, so a thinking model still has room to answer.
         optional["reasoning_effort"] = os.environ.get("MIRSAL_LOCAL_REASONING", "none")
-    if not m.lower().startswith(("gpt-5", "o1", "o3", "o4")):
+    if not m.lower().startswith(("gpt-5", "gpt-6", "o1", "o3", "o4")):
         optional["temperature"] = temperature
     if json_mode:
         optional["response_format"] = {"type": "json_object"}
@@ -651,5 +765,5 @@ def _complete_one(prov: str, system: str, user: str, *, max_tokens: int = 2500, 
     if not text.strip() and finish == "length":
         raise LLMEmpty(f"The {'local' if prov == 'local' else 'cloud'} model used its whole answer budget thinking and returned nothing; try again or switch the AI backend.", kind="empty")
     u = data.get("usage") or {}
-    return text, {"model": data.get("model") or m, "ms": int((time.perf_counter() - t0) * 1000), "provider": prov,
+    return text, {"model": data.get("model") or m, "ms": int((time.perf_counter() - t0) * 1000), "provider": prov, "model_provider": model_provider,
                   "tokens_in": u.get("prompt_tokens"), "tokens_out": u.get("completion_tokens")}

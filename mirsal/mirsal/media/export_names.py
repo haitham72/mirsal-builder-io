@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import re
 import time
-import unicodedata
 
 from ..generation import actions as _actions
 from ..runtime import names as _names
@@ -34,40 +33,7 @@ def datestamp(ts=None) -> str:
     return time.strftime("%Y%m%d", time.gmtime(v))
 
 
-def first_emoji(text: str | None) -> str:
-    """The first grapheme cluster: a base glyph kept together with its VS16, skin-tone modifier, keycap mark,
-    combining marks, and ZWJ-joined continuations. `""` when there is nothing."""
-    s = str(text or "")
-    if not s:
-        return ""
-    out, i = s[0], 1
-    o0 = ord(out)
-    if 0x1F1E6 <= o0 <= 0x1F1FF and i < len(s) and 0x1F1E6 <= ord(s[i]) <= 0x1F1FF:
-        return s[:2]                                                                   # a flag pair
-    while i < len(s):
-        o = ord(s[i])
-        if o == 0x200D and i + 1 < len(s):                                             # ZWJ: glued to the next glyph
-            out += s[i:i + 2]
-            i += 2
-            continue
-        if o == 0xFE0F or 0x1F3FB <= o <= 0x1F3FF or o == 0x20E3 or unicodedata.combining(chr(o)):
-            out += s[i]
-            i += 1
-            continue
-        break
-    return out
-
-
-def split_emoji(text: str | None) -> list[str]:
-    """Every grapheme cluster of an emoji string (`"😂🤣"` -> `["😂", "🤣"]`)."""
-    out, rest = [], str(text or "")
-    while rest:
-        first = first_emoji(rest)
-        if not first:
-            break
-        out.append(first)
-        rest = rest[len(first):]
-    return out
+from ..generation.emoji import first_emoji, split_emoji, valid as valid_emoji
 
 
 def _clean_tag(tag: str | None) -> str:
@@ -76,7 +42,8 @@ def _clean_tag(tag: str | None) -> str:
 
 def build(*, emoji: str | None, slug: str | None, tag: str | None, index: int, gid: int, date: str) -> str:
     """The file stem (no extension). Never raises on ordinary input: every field has a deterministic fallback."""
-    e = first_emoji(emoji) or DEFAULT_EMOJI
+    e = first_emoji(emoji)
+    e = e if valid_emoji(e) else DEFAULT_EMOJI
     s = slug_snake(slug) or "pack"
     t = _clean_tag(tag) or "sticker"
     return f"{e}-{s}-{t}-s{max(1, int(index)):02d}-G{max(0, int(gid)):03d}-{re.sub(r'[^0-9]', '', str(date or ''))[:8] or '00000000'}"
@@ -107,25 +74,36 @@ def parse(name: str | None) -> dict | None:
 
 
 def describe(*, emoji: str | None, key: str | None = None, tags: list | tuple | None = None,
-             slug: str | None, index: int, gid: int, date: str, exclude: list | tuple | None = None) -> dict:
+             slug: str | None, index: int, gid: int, date: str, exclude: list | tuple | None = None, action: str | None = None) -> dict:
     """Resolved export fields for one asset: `{emoji, emojis, slug, tag, tokens, action, unresolved, index, gid,
     date, stem}`. A bank hit gives `action` + its aliases; otherwise the tag falls back to the key/tags words minus
     the subject words (`exclude`), repeats collapsed, and `unresolved` is True (a human picks from the bank later;
     nothing is silently called an action)."""
-    hit = _actions.canonical_for(key, list(tags) if tags else None)
-    if hit:
-        action, aliases = hit
+    resolution = _actions.resolve(key, tags, emoji=emoji, action=action)
+    hits = resolution["hits"]
+    if hits:
+        action = hits[0][0]
         tokens = []
-        for t in [action, *aliases]:                                          # bank tokens may hold "-" (eye-roll): not a valid in-tag char
-            n = re.sub(r"[^a-z0-9]+", "", t.lower())
-            if n and n not in tokens:
-                tokens.append(n)
+        for tok, aliases in hits:                                             # primary first, then whole-tag hits (bus+happy+laugh)
+            for t in [tok, *aliases]:                                         # bank tokens may hold "-" (eye-roll): not a valid in-tag char
+                n = re.sub(r"[^a-z0-9]+", "", t.lower())
+                if n and n not in tokens:
+                    tokens.append(n)
         seg, unresolved = "_".join(tokens), False
     else:
         seg = _actions.fallback_tag(key, list(tags) if tags else None, exclude)
         tokens, action, aliases, unresolved = seg.split("_"), seg.split("_")[0], [], True
-    e = first_emoji(emoji) or DEFAULT_EMOJI
+    reason = resolution["reason"]
+    e = first_emoji(emoji)
+    if not emoji:
+        e = _actions._BANK_OF[hits[0][0]]["emoji"] if hits else DEFAULT_EMOJI
+    elif not valid_emoji(e):
+        reason, e = "invalid_emoji", DEFAULT_EMOJI
+    associations = list(dict.fromkeys(g for g in split_emoji(emoji) if valid_emoji(g)))
+    associations = list(dict.fromkeys([e, *associations]))
+    unresolved = unresolved or bool(reason)
     stem = build(emoji=e, slug=slug, tag=seg, index=index, gid=gid, date=date)
-    return {"emoji": e, "emojis": split_emoji(emoji) or [e], "slug": slug_snake(slug) or "pack",
+    return {"emoji": e, "emojis": associations, "slug": slug_snake(slug) or "pack",
             "tag": _clean_tag(seg) or "sticker", "tokens": tokens, "action": action,
-            "unresolved": unresolved, "index": max(1, int(index)), "gid": max(0, int(gid)), "date": date, "stem": stem}
+            "unresolved": unresolved, "resolution_reason": reason, "candidates": resolution["candidates"],
+            "bank_version": _actions.BANK_VERSION, "index": max(1, int(index)), "gid": max(0, int(gid)), "date": date, "stem": stem}

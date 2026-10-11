@@ -402,7 +402,7 @@ def session_state(out: Path, gens) -> dict:
         raise sources_error("Open a batch first: Next batch continues the batches on screen", 409)
     first = min(results, key=lambda r: r.get("number") or 0)
     request = actions.strip_presets(str(first.get("prompt") or "").strip()) or str((first.get("source") or {}).get("subject", "")).replace("_", " ")
-    used = {h[0] for r in results for s in r["stickers"] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+    used = {h[0] for r in results for s in r["stickers"] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
     presets = {(r.get("slots") or {}).get("preset") for r in results} - {None}
     if presets:          # an emoji pack: its grids are the pack's, wherever its batches are (on screen or not): every batch of the same request and person counts
         key, owner = request.lower(), first.get("owner")
@@ -444,7 +444,7 @@ def batches_max(plan: dict) -> int:
         return 1
     if slots.get("preset") in actions.PRESETS:
         return min(MAX_BATCHES, len(actions.PRESETS))
-    used = {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+    used = {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
     n = int(grid[0]) * int(grid[1])
     return max(1, min(MAX_BATCHES, 1 + len(actions.next_tokens(used, 999)) // n))
 
@@ -466,7 +466,7 @@ def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector"
             text = f"{base} {p}"
             out.append({**preview(text, "3x3", style_id, False, loop), "prompt": text})
         return out
-    used = set(used_tokens) | {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+    used = set(used_tokens) | {h[0] for s in plan.get("stickers") or [] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
     out = []
     for _ in range(k):
         tokens = actions.next_tokens(used, grid[0] * grid[1])

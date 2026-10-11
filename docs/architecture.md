@@ -49,6 +49,8 @@ Rules that hold across the layers:
 | `mirsal/out/jobs/J###[-label].json` (+ folder) | one paid job, written at `claim` before waiting | `generation/jobs.py`, `generation/jobqueue.py` |
 | `mirsal/out/tasks/` | the external task id of every request (the hard truth of rule 10) | `generation/tasks.py` |
 | `mirsal/out/library/library.json` + `files/` | packs and their sticker copies | `media/library.py` |
+| `mirsal/out/export_resolutions.json` | immutable export interpretation snapshots, keyed by source identity and metadata; file-authoritative, no Postgres mirror yet | `media/export_resolutions.py` |
+| `mirsal/out/ai_backend.json` | saved global backend and local/cloud model selections | `services/llm.py` |
 | `mirsal/out/particles/`, `effects/` | particle sets and effects | `flow/particle_sets.py`, `flow/effects.py` |
 | `mirsal/out/trash/` | removed batches and deleted packs, restorable until purged | `flow/batches.py`, `flow/purge.py` |
 | `mirsal/out/sessions/`, `profile/` | chat sessions and per-person taste | `agent/memory.py`, `agent/profile.py` |
@@ -150,7 +152,8 @@ Each line is the module's own first docstring line.
 
 **`generation/`**
 
-- `actions.py` — The canonical action bank for export tags (`docs/export to team/mirsal-export-architecture.md` §6): 36 tokens, each with a
+- `actions.py` — Indexed export bank: 36 core moods plus 1,898 extended tokens, with explicit ambiguity candidates and saved canonical choices. The preset queue uses only core moods.
+- `emoji.py` + `emoji_sequences.json` — Complete emoji extraction and exact validation against 3,773 checked-in Unicode 15.1 fully-qualified sequences, including tones, flags and ZWJ sequences.
 - `claims.py` — The pack claim ledger (`docs/export to team/mirsal-export-architecture.md` §10.7): which preset grid each pack session has taken, and which …
 - `effect_prompts.py` — Prompts of the particle effects: the text Kling gets for a text-only burst video, built by code from a small plan (template-locked: a model or a …
 - `emotions.py` — A wide bank of expressive emotions for the built-in (no-AI) sets. Every entry is (key suffix, label, emoji, motion):
@@ -170,6 +173,7 @@ Each line is the module's own first docstring line.
 **`media/`**
 
 - `export_names.py` — Export-as-ZIP display names (`docs/export to team/mirsal-export-architecture.md` §1-2):
+- `export_resolutions.py` — Shared batch/library resolution ledger, atomic writes under process/file locks and additive manifest diagnostics. Metadata edits create snapshots; restoring metadata reuses the previous interpretation.
 - `library.py` — Sticker library: packs, imported/edited stickers, photo cutout, pack export (desktop builder).
 - `matte.py` — Learned background matte (optional provider). U2-Net / IS-Net through onnxruntime and nothing else (no rembg, torch or network).
 - `video_project.py` — Video / GIF sticker projects (checkpoint 1E). One StickerProject per imported video or GIF, kept on disk under
@@ -208,7 +212,8 @@ Each line is the module's own first docstring line.
 - `admin_bot.py` — Haitham's admin channel in the Mirsal Telegram bot (docs/api.md, Office accounts on the LAN): the bot already configured in Settings (token + …
 - `collection.py` — Export a pack (or one Studio batch) to the AddCollection API, an external emoji CMS (`docs/Api/AddCollection-API .md`).
 - `embed.py` — Text embeddings for the sticker pool (Phase 3B).
-- `llm.py` — A minimal chat-completions client over urllib (no new dependency) for two backends that speak the same protocol:
+- `llm.py` — Chat Completions over urllib, provider-qualified local/router/OpenAI routing, persisted selections and an official OpenAI Luna cloud default with fixed `high` reasoning; old Luna ids normalize on use.
+- `llm_catalog.py` — Authenticated cached provider catalogs intersected with approved image-capable cloud models; shared by browser and Telegram selectors and API validation. Official OpenAI uses only `OPENAI_API_KEY`; Nararouter uses only `NARAROUTER_API_KEY` with `MIRSAL_CLOUD_URL`, including vision recovery.
 - `telegram.py` — Send a Library pack to Telegram (checkpoint 1H, docs/engine-and-studio.md Part H).
 - `tg_chat.py` — The AI chat in Telegram (Haitham, 2026-10-09: "can the Telegram bot NOW be exactly like the AI chat"). The same bot as the admin cards
 

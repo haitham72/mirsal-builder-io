@@ -4,7 +4,7 @@ memory, its cards, its creator runs). Telegram is only another screen on it: not
 
 - **Who:** open to everyone for now. Haitham's own Telegram id is the owner; anyone else gets a Mirsal member account of their own, created at the first
   message with 0 credits (an account without a balance would spend without limit), and Haitham gets a card (+10 credits / Disable). They see only their own work.
-- **A chat** is one session per Telegram chat (`/new` starts another). It starts on Nano Banana 2 for sheets, Grok Imagine 1.5 Lite for videos, gpt-4o for
+- **A chat** is one session per Telegram chat (`/new` starts another). It starts on Nano Banana 2 for sheets, Grok Imagine 1.5 Lite for videos, GPT-5.6 Luna for
   the AI and the Glossy style (`DEFAULTS`); `/model` changes them with native Telegram buttons, minimally.
 - **Questions are native cards:** every chip of a reply (Create it · N credits, Not yet, Animate ...) is an inline button; a paid step is a button that states
   its price, so nothing spends until it is tapped (rule 13). A tap is the same action the web chat's chip sends.
@@ -24,9 +24,11 @@ from pathlib import Path
 
 from . import telegram
 
-DEFAULTS = {"image": "nano_banana_flash", "video": "grok_video_v15_lite", "ai": "gpt-4o"}
+DEFAULTS = {"image": "nano_banana_flash", "video": "grok_video_v15_lite", "ai": "openai:gpt-5.6-luna"}
 DEFAULT_STYLE = "glossy_3d"
-AI_MODELS = ("gpt-4o", "gpt-4.1-mini", "gpt-4.1")
+def ai_models() -> list[dict]:
+    from . import llm_catalog
+    return llm_catalog.choices()
 FOLLOW_S = 4 * 3600           # the longest a chat is followed after its last turn (a creator run can take a while)
 _LOCK = threading.RLock()
 _FOLLOW: dict = {}            # chat id -> the thread following it
@@ -131,7 +133,7 @@ def _store(c, user: dict):
 
 
 def session_of(c, user: dict, chat_id, fresh: bool = False) -> str:
-    """The chat's session; a new one starts on the Telegram defaults (Glossy, Nano Banana 2, Grok Lite, gpt-4o, the Stickers stage)."""
+    """The chat's session; a new one starts on the Telegram defaults (Glossy, Nano Banana 2, Grok Lite, GPT-5.6 Luna, the Stickers stage)."""
     ch = _chat(c.out, chat_id)
     store = _store(c, user)
     if ch.get("sid") and not fresh and ch.get("user") == user["id"]:
@@ -451,7 +453,7 @@ def models_card(c, chat_id, user: dict, message_id=None, open_: str | None = Non
         rows.append([btn("‹ Back", {"t": "models"})])
         text = "How far a new request goes in this chat"
     elif open_:
-        opts = ([(s["id"], s["label"]) for s in styles.PRESETS] if open_ == "style" else [(m, m) for m in AI_MODELS] if open_ == "ai"
+        opts = ([(s["id"], s["label"]) for s in styles.PRESETS] if open_ == "style" else [(m["id"], m["label"]) for m in ai_models()] if open_ == "ai"
                 else [(m["id"], m["label"]) for m in mc.catalog()[open_]])
         rows = [[btn(("✓ " if i == cur.get(open_) else "") + l, {"t": "model", "kind": open_, "id": i}) for i, l in opts[k:k + 2]] for k in range(0, len(opts), 2)]
         rows.append([btn("‹ Back", {"t": "models"})])
@@ -478,8 +480,8 @@ def set_model(c, user: dict, chat_id, kind: str, mid: str) -> None:
         if not any(s["id"] == mid for s in styles.PRESETS):
             raise ValueError("no such style")
     elif kind == "ai":
-        if mid not in AI_MODELS:
-            raise ValueError("no such AI model")
+        from . import llm_catalog
+        mid = llm_catalog.validate(mid)
     elif kind not in ("image", "video") or not any(m["id"] == mid for m in mc.catalog()[kind]):
         raise ValueError("no such model")
     store = _store(c, user)

@@ -36,20 +36,21 @@ const AIU=(()=>{
   return {on:false,rules:true,label:pref!=='cloud'&&loc.ok===false?'Rules only (local model not loaded)':'Rules only',title:`${why}. The assistant still works from its rules. Click for details.`}};
  /* the one line under the model dropdown (GET /api/llm/models): the model in use, or why the local model cannot answer, in the server's last sentence ("Load qwen3.5-4b in LM Studio ...") */
  const modelNote=m=>{if(!m)return '';if(m.ok)return `now: ${m.current}`;const why=String(m.why||'');return 'Local model not loaded: '+(why.split(/\.\s+/).pop()||why)};
- /* The right control is only the task-stage slider. Model selectors live in the left control;
+ /* The right control is only the task-stage slider. Image/video model selectors live in the left control; the LLM selector is top-right;
     ids stay the server's: emojis = Stickers, export = Telegram, api = collection API export. */
- const STAGES=[['auto','Auto','each message decides'],['prompt','Prompt','plan only, free'],['emojis','Stickers','sheet and stickers'],['animation','Animation','+ animation'],['export','Telegram','+ pack and Telegram'],['api','Export','+ send to the API']];
+ const STAGES=[['auto','Auto','each message decides','ai'],['prompt','Prompt','plan only, free','text'],['emojis','Stickers','sheet and stickers','emoji'],['animation','Animation','animate the sticker','play'],['export','Telegram','+ pack and Telegram','telegram'],['api','Export','+ send to the API','upload']];
  const stageOf=st=>{const v=st&&st.stage;if(STAGES.some(x=>x[0]===v))return v;const c=(st&&st.creator)||{};return c.on&&c.scope==='video'?'export':'auto'};
  /* The shared model selector: the chat's pick, or the catalog default. */
  const modelSel=(kind,label,m)=>{if(!m||!(m.list||[]).length)return '';const cur=m.cur||'';
-  return `<label class=sp-r><span>${esc(label)}</span><select data-agm=${kind} aria-label="${esc(label)} model"><option value=""${cur?'':' selected'}>Default${m.def?` · ${esc(m.def)}`:''}</option>${m.list.map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(x.label||x.id)}</option>`).join('')}</select></label>`};
- const stageHTML=(cur,open)=>{let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=0;const n=STAGES[k];
-  const pill=`<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change."><span class=ag-mini aria-hidden=true style="--k:${k}"></span>${esc(n[1])}<i aria-hidden=true>▾</i></button>`;
+  return `<label class=sp-r><span>${esc(label)}</span><select data-agm=${kind} aria-label="${esc(label)} model"><option value=""${cur?'':' selected'}>Default${m.def?` · ${esc(m.def)}`:''}</option>${cur&&!m.list.some(x=>x.id===cur)?`<option value="${esc(cur)}" selected disabled>${esc(cur)} · unavailable</option>`:''}${(m.groups?Object.entries(m.groups).map(([group,list])=>list.length?`<optgroup label="${esc(group)}">${list.map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(x.label||x.id)}</option>`).join('')}</optgroup>`:'').join(''):m.list.map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(x.label||x.id)}</option>`).join(''))}</select></label>`};
+ const stageHTML=(cur,open,icon=()=> '')=>{let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=0;const n=STAGES[k];
+  const glyph=name=>`<span class=ag-stage-icon aria-hidden=true>${icon(name)}</span>`;
+  const pill=`<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} aria-label="Task stage: ${esc(n[1])}. Change stage" title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change.">${glyph(n[3])}<i aria-hidden=true>${icon('down')}</i></button>`;
   if(!open)return pill;
-  const names=STAGES.map(([id,l,h],i)=>`<button type=button class="ag-stop${i===k?' on':''}" data-act=agstagepick data-v=${id} tabindex=-1 title="${esc(h)}">${esc(l)}</button>`).join('');
+  const names=STAGES.map(([id,l,h,name],i)=>`<button type=button class="ag-stop${i===k?' on':''}" data-act=agstagepick data-v=${id} aria-label="${esc(l)}" aria-pressed=${i===k} title="${esc(l)}: ${esc(h)}">${glyph(name)}</button>`).join('');
   return pill+`<div class=ag-stage-pop role=dialog aria-label="Task stage">
    <div class=ag-slider style="--k:${k}"><input type=range class=ag-range data-agrange min=0 max=${STAGES.length-1} step=1 value=${k} aria-label="How far a new request goes" aria-valuetext="${esc(n[1])}"><div class=ag-ticks aria-hidden=true>${STAGES.map((_,i)=>`<i class="${i<=k?'on':''}"></i>`).join('')}</div></div>
-   <div class=ag-names>${names}</div></div>`};
+   <div class=ag-names>${names}</div><p class=ag-stage-caption aria-live=polite><b>${esc(n[1])}:</b><span>${esc(n[2])}</span></p></div>`};
  return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid,lastBot,engine,modelNote,STAGES,stageOf,stageHTML,modelSel};
 })();
 if(typeof module!=='undefined')module.exports=AIU;
@@ -83,7 +84,7 @@ async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=
 async function loadModels(){const r=await api('/api/llm/models');A.llm=r.ok?r.j:{models:[],current:'',ok:false,why:'Could not read the model list'};engRedraw()}
 /* the engine control (Auto / Local / Cloud + the local model) is ONE implementation for two screens: the AI screen's gear panel and the Studio's AI enhancer (composer.js, cpDrawEngine).
    Both draw it with beRow() and both end up in engRedraw(); the Studio hands in its own source (GET /api/ai, shaped like GET /api/chat/agent) through AIENG.rows. */
-function engRedraw(){if(A.engineOpen)setEngine();if(typeof cpDrawEngine==='function')cpDrawEngine()}
+function engRedraw(){if(A.engineOpen)setEngine();if(typeof cpDrawEngine==='function')cpDrawEngine();const el=$('set-ai-engine');if(el&&A.settingsEngine)el.innerHTML=AIENG.rows(A.agent||A.settingsEngine)}
 const engSync=()=>typeof aiRefresh==='function'?aiRefresh():null;        // the Studio's copy of the same facts (generate.js)
 let ENGSRC=null;
 async function loadSession(id,quiet){const r=await api('/api/chat/sessions/'+id);
@@ -355,11 +356,18 @@ ACT.aggridtoggle=async el=>saveSet({grid:((A.sess&&A.sess.settings&&A.sess.setti
 const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(A.agent&&A.agent.default_style)||'flat_vector';
 /* the stage: a pill that opens the slider. A pick writes settings.stage through the settings route and makes no chat turn. Keyboard: Enter on the pill
    opens it with the current stop focused, Left / Right move along the slider (it stays open), Enter picks and closes, Esc closes. Opening the stage does not fetch model catalogs. */
+function aiModelDetails(llm,selected){
+ const groups=llm.local?{Local:llm.local,Nararouter:llm.nararouter||[],OpenAI:llm.openai||[]}:null;
+ const list=groups?Object.values(groups).flat():(llm.models||[]).map(x=>({id:x.id,label:x.id}));
+ const saved=(llm.aliases||{})[selected]||selected||'',cur=(list.find(x=>x.id===saved||x.model===saved)||{}).id||saved;
+ const fallback=llm.preference==='local'?llm.current:(llm.default||llm.current);
+ return list.length?{list,groups,cur,def:fallback||''}:null;
+}
 function selectorDetails(){const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},mine=st.models||{},cat=A.cat||{},llm=A.llm||{};
  const kind=k=>{const list=[...(cat[k]||[]),...((cat.more||{})[k]||[])].map(x=>({id:x.id,label:x.label}));const def=(list.find(x=>x.id===(cat.defaults||{})[k])||{}).label||'';return list.length?{list,cur:mine[k]||'',def}:null};
- return {models:{ai:(llm.models||[]).length?{list:llm.models.map(x=>({id:x.id,label:x.id})),cur:mine.ai||'',def:(llm.current||'').replace(/:\d+$/,'')}:null,image:kind('image'),video:kind('video')},
+ return {models:{ai:aiModelDetails(llm,mine.ai),image:kind('image'),video:kind('video')},
   grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass),actions:st.actions||'predefined'}}
-function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(A.sess?AIU.stageOf(A.sess.settings):A.stage,A.stageOpen);
+function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(A.sess?AIU.stageOf(A.sess.settings):A.stage,A.stageOpen,ic);
  if(A.stageOpen&&!el.contains(document.activeElement)){const r=el.querySelector('.ag-range');if(r)r.focus({preventScroll:true})}}
 function closeStage(focus){if(!A.stageOpen)return;A.stageOpen=false;drawStage();if(focus){const b=document.querySelector('#ag-stage .ag-stage-btn');if(b)b.focus()}}
 ACT.agstage=()=>{A.setOpen=false;setSet();A.engineOpen=false;setEngine();A.stageOpen=!A.stageOpen;drawStage()};
@@ -375,7 +383,8 @@ document.addEventListener('pointerdown',e=>{if(e.target.classList&&e.target.clas
 document.addEventListener('input',e=>{const r=e.target;if(!r.dataset||r.dataset.agrange===undefined)return;const k=+r.value,s=AIU.STAGES[k];
  const box=r.closest('.ag-slider');if(box)box.style.setProperty('--k',k);box&&box.querySelectorAll('.ag-ticks i').forEach((x,i)=>x.classList.toggle('on',i<=k));
  r.setAttribute('aria-valuetext',s[1]);
- document.querySelectorAll('#ag-stage .ag-names .ag-stop').forEach((b,i)=>b.classList.toggle('on',i===k))});
+ document.querySelectorAll('#ag-stage .ag-names .ag-stop').forEach((b,i)=>{b.classList.toggle('on',i===k);b.setAttribute('aria-pressed',i===k)});
+ const caption=document.querySelector('#ag-stage .ag-stage-caption');if(caption)caption.innerHTML=`<b>${AIU.esc(s[1])}</b><span>${AIU.esc(s[2])}</span>`});
 
 document.addEventListener('click',e=>{const inside=e.composedPath().some(el=>el.id==='ag-stage');if(A.stageOpen&&!inside)closeStage(false)});
 document.addEventListener('focusin',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
@@ -401,14 +410,19 @@ function beRow(){const a=ENGSRC||A.agent||{},av=a.availability||{},pref=a.prefer
    A pick is POST /api/ai/backend {model}; the first answer after a switch can take a moment while the server loads it. */
 function modelRow(){const m=A.llm,pref=((ENGSRC||A.agent)||{}).preference||'auto';
  if(A.engineOpen&&!ENGSRC)return AIU.modelSel('ai','Chat',selectorDetails().models.ai);
+ if(m&&m.local){
+  const details=aiModelDetails(m,pref==='local'?'local:'+m.current:m.selected||'');
+  if(!details)return '<div class="r ag-mrow"><small>No models available. Check the provider connection and refresh.</small></div>';
+  return AIU.modelSel('ai','Chat',details).replace('data-agm=ai','data-agmodel');
+ }
  if(A.llmBusy||!m)return `<div class="r ag-mrow"><div><small>${A.llmBusy?'Switching the local model: the first answer can take a moment…':'Checking the local model…'}</small></div></div>`;
  if(!m.models.length&&pref==='cloud')return '';
  const sel=m.models.length?`<select class=ag-sel data-agmodel aria-label="Local model">${m.models.map(x=>`<option value="${AIU.esc(x.id)}"${x.id===m.current?' selected':''}>${AIU.esc(x.id)}${x.loaded?' · loaded':''}</option>`).join('')}</select>`:'';
  return `<div class="r ag-mrow"><div><b>Local model</b><small class="${m.ok?'':'ai-err'}" title="${AIU.esc(m.why||'')}">${AIU.esc(AIU.modelNote(m))}</small></div>${sel}</div>`}
 document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset||s.dataset.agmodel===undefined)return;
  A.llmBusy=true;engRedraw();
- const r=await post('/api/ai/backend',{model:s.value});
- if(!r.ok)toast((r.j&&r.j.error)||'Could not change the local model',1);
+ const r=await post('/api/ai/backend',s.value?{model:s.value}:{model:''});
+ if(!r.ok)toast((r.j&&r.j.error)||'Could not change the model',1);
  await Promise.all([loadModels(),loadAgent(),engSync()]);A.llmBusy=false;engRedraw()});
 /* a model selector: the chat's own pick (settings.models), "" = the server's default again */
 document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset||s.dataset.agm===undefined)return;await saveSet({models:{[s.dataset.agm]:s.value}})});
@@ -416,7 +430,7 @@ document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset|
 document.addEventListener('change',e=>{const r=e.target;if(!r.dataset||r.dataset.agrange===undefined)return;const drag=A.stageDrag;A.stageDrag=false;
  ACT.agstagepick({dataset:{v:AIU.STAGES[+r.value][0]}},null,!drag)});
 /* what the Studio calls: rows(source) draws the same engine row and model row from its own source; ensure() reads the local server's models once; load() reads them again */
-globalThis.AIENG={rows:src=>{ENGSRC=src||null;try{return beRow()}finally{ENGSRC=null}},ensure:()=>{if(!A.llm&&!A.llmLoading){A.llmLoading=true;loadModels().finally(()=>{A.llmLoading=false})}},load:loadModels};
+globalThis.AIENG={rows:src=>{ENGSRC=src||null;try{return beRow()}finally{ENGSRC=null}},ensure:()=>{if(!A.llm&&!A.llmLoading){A.llmLoading=true;loadModels().finally(()=>{A.llmLoading=false})}},load:loadModels,settings:src=>{A.settingsEngine=src;const el=$('set-ai-engine');if(el)el.innerHTML=AIENG.rows(src);loadModels()}};
 /* the agentic creator's bypass. How far a request goes is the stage pill beside Send (it replaced the creator's on / scope switches); the Animation and Export
    stages run the creator, and this is whether it stops at each approval. Any rejection still stops it. */
 function crRows(st){const c=Object.assign({on:false,scope:'images',bypass:false},st.creator||{});

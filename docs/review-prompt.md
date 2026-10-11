@@ -520,8 +520,9 @@ model the server lists, probed for real; the embedding model
 `nomic-embed-text-v1.5` is hardcoded), LangGraph, vanilla JS UI, no CDN. Read
 `README.md` first — it carries the architecture and the invariants.
 
-**Branches:** `deployment` holds the build; **`better_ui/ux` branches from it
-and is where the work continues.** `merge/generate-advanced` is retired. Your
+**Branches:** `main` holds the merged build; **the redesign works on
+`edit-design`** and merges into `main` only when Haitham says so. The old
+`deployment`, `better_ui/ux` and `merge/generate-advanced` branches are retired. Your
 checkout may be `main` — run `git log --oneline -10` and `git status --short`
 first, review the branch you were given, record a dirty tree file-by-file (an
 uncommitted edit is not a finding, but judge what is on disk and say which),

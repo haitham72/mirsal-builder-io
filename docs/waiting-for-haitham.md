@@ -83,8 +83,6 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 **36. The daily credit cap must never block the owner.** Decided in principle; the code cannot: `generation/jobs.py` `fulfil()` takes no user argument and `_daily_cap()` is a global env var. Observed 2026-10-02: J030 refused with `the daily credit cap (15) would be exceeded by this 2-credit call`; `mirsal/.env` here has `MIRSAL_DAILY_CREDITS=` empty (= no cap). Recommendation: build the exemption (pass the user through) before you set a cap or add a member who can spend. Unblocks: a cap that protects members without ever refusing you.
 
-**37. Per-chat model pick (web chat).** A Telegram chat already has its own models (`/model`, `settings.models`, 2026-10-09). The model pick is process-wide (`POST /api/ai/backend {model}`, `out/ai_backend.json`). Do you want a per-chat model? Recommendation: no, keep it process-wide. Unblocks: closing the item.
-
 **39. Do you want the 3D text templates and the 3D parallax photos built at all?** Both are unstarted (`docs/backlog.md`, store and search 3D / 3E): CapCut-style flashing text-slot stickers with 30+ procedural starters, and photo depth with a gyroscope WebGL viewer. Recommendation: no for now; both are large and neither is on the golden path. Unblocks: deleting or scheduling two large backlog items.
 
 **49. Rotate the AddCollection credential, then try two things for real.** The credential pasted in `docs/Api/AddCollection-API .md` is in git

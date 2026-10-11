@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const U = require('../../mirsal/console/agent.js');
+const icon = name => `<svg data-icon="${name}"></svg>`;
 const fs = require('node:fs');
 const path = require('node:path');
 const { loadConsole } = require('./console_vm');
@@ -40,15 +41,15 @@ test('a new chat reads the person’s stage; picking it saves preferences withou
   const run = handlers();
   run(`APIREPLIES.push({ok:true,j:{stage:'animation'}})`);
   await run('ChatTest.loadStage()');
-  assert.match(run('STAGE.innerHTML'), />Animation<i/);
+  assert.match(run('STAGE.innerHTML'), /aria-label="Task stage: Animation\. Change stage"/);
   run(`POSTREPLIES.push({ok:true,j:{stage:'emojis'}})`);
   await run(`ACT.agstagepick({dataset:{v:'emojis'}})`);
   assert.equal(run('ChatTest.A.sid'), null);
   assert.equal(run('POSTS.length'), 1);
   assert.equal(run('POSTS[0][0]'), '/api/prefs');
-  assert.match(run('STAGE.innerHTML'), />Stickers<i/);
+  assert.match(run('STAGE.innerHTML'), /aria-label="Task stage: Stickers\. Change stage"/);
   run(`ChatTest.A.sess={settings:{stage:'prompt'}};ChatTest.drawStage()`);
-  assert.match(run('STAGE.innerHTML'), />Prompt<i/, 'an opened session shows its effective saved stage');
+  assert.match(run('STAGE.innerHTML'), /aria-label="Task stage: Prompt\. Change stage"/, 'an opened session shows its effective saved stage');
 });
 
 test('descriptions put the sticker card before the streamed explanation', () => {
@@ -58,19 +59,27 @@ test('descriptions put the sticker card before the streamed explanation', () => 
   assert.ok(html.indexOf('car') < html.indexOf('He is reading'));
 });
 
-test('closed it is one pill: a small slider glyph, the current stop and a caret, no slider', () => {
-  const h = U.stageHTML('emojis', false);
-  assert.match(h, /data-act=agstage aria-haspopup=dialog aria-expanded=false[^>]*><span class=ag-mini aria-hidden=true style="--k:2"><\/span>Stickers<i aria-hidden=true>▾<\/i><\/button>$/);
+test('closed it is one themed icon pill, named for assistive technology, with no slider', () => {
+  const h = U.stageHTML('emojis', false, icon);
+  assert.match(h, /aria-label="Task stage: Stickers\. Change stage"/);
+  assert.match(h, /<svg data-icon="emoji"><\/svg>/);
+  assert.match(h, /<svg data-icon="down"><\/svg>/);
+  assert.doesNotMatch(h, />Stickers</, 'the closed control uses the icon instead of a text label');
   assert.doesNotMatch(h, /ag-range|ag-slider|ag-stage-pop/, 'the slider is not on screen until the pill is clicked');
 });
 
-test('open, the panel holds only the task slider and its six stage labels', () => {
-  const h = U.stageHTML('animation', true, { grid: '3x3', ask: true, bypass: false, actions: 'predefined' });
+test('open, six themed icons retain stage names, tooltips and the selected state', () => {
+  const h = U.stageHTML('animation', true, icon);
   assert.match(h, /aria-expanded=true/);
   assert.match(h, /<input type=range class=ag-range data-agrange min=0 max=5 step=1 value=3 aria-label="How far a new request goes" aria-valuetext="Animation">/);
   assert.equal((h.match(/<i class="on"><\/i>/g) || []).length, 4, 'the ticks up to the thumb are filled');
-  assert.deepEqual([...h.matchAll(/class="ag-stop[^"]*" data-act=agstagepick data-v=(\w+)[^>]*>(\w+)</g)].map(m => m[1] + ':' + m[2]),
-    ['auto:Auto', 'prompt:Prompt', 'emojis:Stickers', 'animation:Animation', 'export:Telegram', 'api:Export']);
+  const stops = [...h.matchAll(/class="ag-stop[^"]*" data-act=agstagepick data-v=(\w+) aria-label="([^"]+)" aria-pressed=(true|false) title="([^"]+)"[^>]*><span[^>]*><svg data-icon="([^"]+)"/g)];
+  assert.deepEqual(stops.map(m => m[1] + ':' + m[2] + ':' + m[5]),
+    ['auto:Auto:ai', 'prompt:Prompt:text', 'emojis:Stickers:emoji', 'animation:Animation:play', 'export:Telegram:telegram', 'api:Export:upload']);
+  assert.deepEqual(stops.filter(m => m[3] === 'true').map(m => m[1]), ['animation']);
+  assert.ok(stops.every(m => m[4].startsWith(m[2] + ':')));
+  assert.match(h, /title="Animation: animate the sticker"/);
+  assert.match(h, /class=ag-stage-caption aria-live=polite><b>Animation:<\/b><span>animate the sticker<\/span>/);
   assert.match(h, /class="ag-stop on" data-act=agstagepick data-v=animation/);
   assert.doesNotMatch(h, /Models|Options|<select|role=switch|sp-hint|sp-h>/);
 });
@@ -118,7 +127,7 @@ test('the top-right LLM selector uses its own popup, without creation options or
 });
 
 test('an unknown stage reads as Auto, and old creator switches migrate like the server', () => {
-  assert.match(U.stageHTML('bogus', false), />Auto<i aria-hidden=true>▾/, 'unknown or unset: Auto');
+  assert.match(U.stageHTML('bogus', false, icon), /aria-label="Task stage: Auto\. Change stage"/, 'unknown or unset: Auto');
   assert.equal(U.stageOf({ stage: 'prompt' }), 'prompt');
   assert.equal(U.stageOf({ stage: 'api' }), 'api');
   assert.equal(U.stageOf({}), 'auto');

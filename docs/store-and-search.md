@@ -75,7 +75,7 @@ mirsal/mirsal/flow/tickets.py  tickets (below); obs/scrub.py keeps file paths ou
   At most 2 hits per generation (`per_gen` lifts it), near-duplicates collapse, `--style` filters. Stickers from an uploaded reference image are `shared = false` forever.
   Thresholds are provisional until Haitham's eval set exists (`docs/measurements.md` has the first real run: related 0.55-0.97, unrelated 0.20-0.35).
 - **Embeddings** (`services/embed.py`): `text-embedding-nomic-embed-text-v1.5` on the local LM Studio, 768-d, hardcoded; OpenAI `text-embedding-3-small` with `dimensions = 768` when the
-  local server is down and a key exists. Documents are `search_document: ...`, queries `search_query: ...`; vectors are cached in Redis.
+  local server is down and the configured cloud has its own key: `NARAROUTER_API_KEY` for a router `MIRSAL_CLOUD_URL`, `OPENAI_API_KEY` for official OpenAI. Each key goes only to its corresponding endpoint. Documents are `search_document: ...`, queries `search_query: ...`; vectors are cached in Redis.
 
 ## Photo cutout (`mirsal photo`)
 

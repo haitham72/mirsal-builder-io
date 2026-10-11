@@ -25,7 +25,7 @@ class MoreBatchesTests(unittest.TestCase):
         p = tasks.preview("a teddy bear")
         more = tasks.more_batches("a teddy bear", p, 2)
         self.assertEqual(len(more), 2)
-        used = [actions.canonical_for(s["key"], s["tags"]) for x in [p, *more] for s in x["stickers"]]
+        used = [actions.canonical_mood(s["key"], s["tags"]) for x in [p, *more] for s in x["stickers"]]
         names = [u[0] for u in used if u]
         self.assertEqual(len(names), len(set(names)), "no action twice across the batches")
 

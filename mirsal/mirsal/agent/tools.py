@@ -94,7 +94,7 @@ class ConsoleTools:
         `gens`, the Studio's batches of the same pack) already used. Nothing is reserved or spent."""
         from ..generation import actions
         used_presets = {((p or {}).get("slots") or {}).get("preset") for p in made_plans} - {None}
-        used_tokens = {h[0] for p in made_plans for s in (p or {}).get("stickers") or [] for h in [actions.canonical_for(s.get("key"), s.get("tags"))] if h}
+        used_tokens = {h[0] for p in made_plans for s in (p or {}).get("stickers") or [] for h in [actions.canonical_mood(s.get("key"), s.get("tags"))] if h}
         if gens:
             try:
                 ses = tasks.session_state(self.out, [g for g in gens if g])

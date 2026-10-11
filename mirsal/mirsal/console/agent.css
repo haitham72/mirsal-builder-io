@@ -254,16 +254,16 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ai-card.multi .multi-ch span{padding:2px 10px;border-radius:var(--r-pill);background:#FEF3C7;color:#92400E;font-size:var(--fs-s)}
 .ai-card.multi .multi-assume{padding:8px 18px 0;font-size:var(--fs-s);color:var(--ink3)}
 
-/* the stage slider left of Send (docs/design.md "The stage slider"): how far a NEW request goes, six stops on one thin track, the current one named.
+/* the stage slider left of Send (docs/design.md "The stage slider"): how far a NEW request goes, six outline icons on one thin track.
    Minimal and flat (a reasoning-level slider); the ▾ opens only the task slider upwards. The left selector holds image/video models. */
 .ag-stage{position:relative;flex:none;align-self:flex-end;margin-bottom:5px}
-/* closed: one small pill, the current stop and a caret */
-.ag-stage-btn{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px 0 12px;border:0;border-radius:var(--r-pill);background:var(--fill);color:var(--tx);font:inherit;font-size:var(--fs-s);font-weight:600;cursor:pointer;transition:background .15s}
-.ag-stage-btn i{font-style:normal;font-size:var(--fs-xs);color:var(--mut)}
+/* closed: the current stage icon and a caret, named by its tooltip and accessible label */
+.ag-stage-btn{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 9px;border:0;border-radius:var(--r-pill);background:var(--fill);color:var(--tx);font:inherit;cursor:pointer;transition:background .15s}
+.ag-stage-btn i{display:flex;color:var(--mut)}.ag-stage-btn i svg{width:12px;height:12px}
 .ag-stage-btn:hover,.ag-stage-btn[aria-expanded=true]{background:var(--pri-l);color:var(--pri-d)}
-/* the pill's small slider glyph: a track filled to the current stop */
-.ag-mini{position:relative;width:22px;height:4px;border-radius:var(--r-pill);background:var(--bd);overflow:hidden;margin-right:2px}
-.ag-mini::after{content:"";position:absolute;inset:0 auto 0 0;width:calc(var(--k) * 20%);background:var(--pri);border-radius:inherit}
+.ag-stage-icon{display:inline-flex;align-items:center;justify-content:center;flex:none}
+.ag-stage-icon svg{width:18px;height:18px}
+.ag-stage-btn:focus-visible,.ag-stop:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 /* open: the slider (a range with a thumb, like Claude's thinking slider), the ticks of the six stops, and their names under it */
 .ag-slider{position:relative;margin:8px 12px 0;height:22px}
 .ag-range{-webkit-appearance:none;appearance:none;position:relative;z-index:2;width:100%;height:22px;margin:0;background:transparent;cursor:pointer}
@@ -277,10 +277,11 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ag-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--pri-glow),0 2px 6px #0f172a33}
 .ag-ticks{position:absolute;z-index:1;left:9px;right:9px;top:9px;display:flex;justify-content:space-between;pointer-events:none}
 .ag-ticks i{width:4px;height:4px;border-radius:50%;background:#C3CEDA}.ag-ticks i.on{background:#fff}
-.ag-names{display:flex;justify-content:space-between;margin:4px 2px 0}
-.ag-stop{flex:1;padding:3px 0;border:0;background:none;font:inherit;font-size:var(--fs-xs);color:var(--mut);cursor:pointer;text-align:center}
-.ag-stop:first-child{text-align:left}.ag-stop:last-child{text-align:right}
-.ag-stop:hover{color:var(--tx)}.ag-stop.on{color:var(--pri-d);font-weight:650}
+.ag-names{display:grid;grid-template-columns:repeat(6,1fr);justify-items:center;margin:4px 0 0}
+.ag-stop{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:var(--r-s);background:none;color:var(--mut);cursor:pointer;transition:background .15s,color .15s}
+.ag-stop:hover{background:var(--fill);color:var(--tx)}.ag-stop.on{background:var(--pri-l);color:var(--pri-d)}
+.ag-stage-caption{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:6px 8px 4px;font-size:var(--fs-xs);color:var(--mut)}
+.ag-stage-caption b{font-weight:600;color:var(--tx)}
 .sp-hint{margin:6px 10px 2px;font-size:var(--fs-s);color:var(--mut)}
 .ag-stage-pop{position:absolute;right:-40px;bottom:calc(100% + 10px);z-index:20;width:320px;max-height:min(70vh,560px);overflow:auto;padding:6px;border-radius:var(--r-m);background:#fff;box-shadow:0 18px 50px rgba(8,60,80,.18),inset 0 0 0 1px var(--aline);animation:mz-in .22s var(--ease) both}
 .sp-r{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 10px;font-size:var(--fs-s);color:var(--ink)}

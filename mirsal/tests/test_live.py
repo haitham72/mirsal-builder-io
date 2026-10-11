@@ -1061,7 +1061,7 @@ class LiveConsoleTests(Base):
         self.assertFalse(nb.get("complete"), nb)
         self.assertEqual((nb["next"]["kind"], len(nb["next"]["tokens"]), len(nb["stickers"])), ("actions", 9, 9))
         from mirsal.generation import actions
-        used = {h[0] for st in res["stickers"] if (h := actions.canonical_for(st.get("key"), st.get("tags")))}
+        used = {h[0] for st in res["stickers"] if (h := actions.canonical_mood(st.get("key"), st.get("tags")))}
         self.assertFalse(used & set(nb["next"]["tokens"]), "nothing this batch already drew")
         self.assertEqual(list(nb["next"]["tokens"]), actions.next_tokens(used))
         self.assertTrue(nb["sheet_prompt"])
@@ -1069,7 +1069,7 @@ class LiveConsoleTests(Base):
         self.assertEqual((nb["existing"], nb["batches_max"]), (1, 3), "1 batch on screen: batches 2 to 4 may be made in one Generate")
         s, more = self.req("POST", "/api/plan/more", {"prompt": nb["prompt"], "plan": nb, "n": 9, "gens": [gid]})
         self.assertEqual((s, more["existing"], len(more["plans"])), (200, 1, 2), "never past batch 4")
-        drawn = [set(nb["next"]["tokens"])] + [{h[0] for st in p["stickers"] if (h := actions.canonical_for(st.get("key"), st.get("tags")))} for p in more["plans"]]
+        drawn = [set(nb["next"]["tokens"])] + [{h[0] for st in p["stickers"] if (h := actions.canonical_mood(st.get("key"), st.get("tags")))} for p in more["plans"]]
         self.assertFalse(used & set().union(*drawn), "the session's own actions are skipped")
         self.assertEqual(len(set().union(*drawn)), 27, "and none twice between the new batches")
         self.assertFalse([c for c in self.cli.calls[n:] if c[:2] == ["generate", "create"]])

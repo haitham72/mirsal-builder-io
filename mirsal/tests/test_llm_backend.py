@@ -13,20 +13,21 @@ class Env:
 
     def __enter__(self):
         self.td = tempfile.TemporaryDirectory()
-        self.keep = {k: os.environ.get(k) for k in ("MIRSAL_OUT", "MIRSAL_LLM_PROVIDER", "MIRSAL_AI_BACKEND", llm.KEY_VAR, "MIRSAL_LOCAL_PREFILL")}
-        os.environ["MIRSAL_OUT"] = self.td.name
-        os.environ["MIRSAL_LLM_PROVIDER"] = "auto"
-        os.environ.pop("MIRSAL_AI_BACKEND", None)
-        os.environ[llm.KEY_VAR] = "sk-test"
+        self.env = mock.patch.dict(os.environ, {
+            "MIRSAL_OUT": self.td.name, "MIRSAL_LLM_PROVIDER": "auto", llm.KEY_VAR: "sk-test",
+        }, clear=True)
+        self.env.start()
+        self.loaded = mock.patch.object(llm, "_ENV_LOADED", True)
+        self.loaded.start()
+        self.models = mock.patch.object(llm, "list_local_models", return_value=[])
+        self.models.start()
         llm._sticky.update(prov=None, until=0.0)
         return self
 
     def __exit__(self, *a):
-        for k, v in self.keep.items():
-            if v is None:
-                os.environ.pop(k, None)
-            else:
-                os.environ[k] = v
+        self.models.stop()
+        self.loaded.stop()
+        self.env.stop()
         llm._sticky.update(prov=None, until=0.0)
         self.td.cleanup()
 
@@ -111,7 +112,7 @@ class CloudTests(unittest.TestCase):
             if isinstance(a, Exception):
                 raise a
             return {"choices": [{"message": {"content": a}, "finish_reason": "stop"}], "usage": {}}
-        with Env(), mock.patch.dict(os.environ, {"OPENAI_API_KEY": "k", **env}), mock.patch.object(llm, "_post", post):
+        with Env(), mock.patch.dict(os.environ, {"OPENAI_API_KEY": "k", "NARAROUTER_API_KEY": "router-k", **env}), mock.patch.object(llm, "_post", post):
             return llm._complete_on("openai", "s", "u", max_tokens=50), sent
 
     def test_the_endpoint_and_model_come_from_the_environment(self):

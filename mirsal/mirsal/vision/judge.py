@@ -5,7 +5,7 @@ the VLM judges what is GOOD (concept, expression, style, identity, artefacts). T
 judges "funny" or "cute". Its verdict is a history line with actor `vlm` at the same gate (`still` before G2, `anim` before G4)
 and a copy on the sticker (`judge`); the human still approves or rejects (CLAUDE.md rule 10). There is no auto-approve.
 
-Backend: any OpenAI-compatible vision endpoint through `llm.complete(images=...)`: the local LM Studio (default
+Backend: any OpenAI-compatible vision endpoint through `llm.complete_vision(images=...)`, with one configured Nararouter fallback on failure: the local LM Studio (default
 `qwen3.5-4b:2`, free; a thinking model, so local calls get a large token floor) or OpenAI. `VISION_BASE_URL`, `VISION_MODEL`, `VISION_TIMEOUT`, `VISION_MAX_TOKENS`,
 `VISION_CONCURRENCY`, `MIRSAL_VISION_PROVIDER=local|openai|auto`, `MIRSAL_VISION_POLICY=FAIL_CLOSED|DETERMINISTIC_ONLY`.
 Never trust `response_format` from a local model: the answer is parsed, validated, repaired once, and the raw output is logged
@@ -99,9 +99,9 @@ def target() -> dict:
     from ..runtime import envfile
     want = envfile.choice("MIRSAL_VISION_PROVIDER")
     if want == "auto":
-        want = "local" if base else llm.resolve()
-    cloud_model = os.environ.get("MIRSAL_VISION_OPENAI_MODEL") or os.environ.get("MIRSAL_LLM_MODEL") or llm.DEFAULT_MODEL
-    model = _env("VISION_MODEL", "") or (llm.local_model() if want == "local" else cloud_model)
+        want = "local" if base else llm.provider()
+    cloud_model = os.environ.get("MIRSAL_VISION_OPENAI_MODEL") or (llm.forced() or {}).get("model") or llm.cloud_model()
+    model = _env("VISION_MODEL", "") or ((llm.forced() or {}).get("model") or llm.local_model() if want == "local" else cloud_model)
     return {"provider": want, "model": model, "base_url": base if want == "local" else None}
 
 
@@ -236,7 +236,7 @@ class VisionJudge:
             else:
                 if t["provider"] == "none":
                     raise llm.LLMError("No vision backend: start LM Studio (MIRSAL_LOCAL_URL) or set OPENAI_API_KEY.")
-                text, meta = llm.complete(system, user, images=images, json_mode=False, temperature=0,
+                text, meta = llm.complete_vision(system, user, images=images, json_mode=False, temperature=0,
                                           max_tokens=int(_env("VISION_MAX_TOKENS", 700)),
                                           timeout=float(_env("VISION_TIMEOUT", 90)), provider_=t["provider"],
                                           model_=t["model"], base_url=t["base_url"])
@@ -254,6 +254,9 @@ class VisionJudge:
             return
         from ..generation import model_calls
         meta = meta or {}
+        recovery = {k: meta[k] for k in ("fallback_from", "fallback_reason") if k in meta}
+        if recovery:
+            extra = {**(extra or {}), **recovery}
         model_calls.append(self.out, kind, meta.get("provider") or t["provider"], meta.get("model") or t["model"], status=status,
                            latency_ms=meta.get("ms", ms), tokens_in=meta.get("tokens_in"), tokens_out=meta.get("tokens_out"),
                            prompt_version=version, generation_id=gen, sticker_id=sticker, error=error, extra=extra)

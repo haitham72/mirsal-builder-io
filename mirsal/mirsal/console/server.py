@@ -1592,7 +1592,7 @@ def make_handler(c: Console):
                                                {"editor": True}))
             elif len(parts) == 5 and parts[3] == "stickers":
                 b = self._body()
-                self._json(200, lib.rename_sticker(parts[2], parts[4], b.get("name"), b.get("emoji")))
+                self._json(200, lib.rename_sticker(parts[2], parts[4], b.get("name"), b.get("emoji"), b.get("action")))
             elif len(parts) == 6 and parts[3] == "stickers" and parts[5] == "animate":
                 b = self._body()
                 fmt = b.get("format", "webm")
@@ -1757,7 +1757,7 @@ def make_handler(c: Console):
             if path == "/api/ai/backend":        # the AI selector (owner only): {backend: auto | local | cloud} and/or {model: <an id the local server lists>}; nothing is restarted, the next call uses it
                 if "model" in body:
                     try:
-                        llm.set_local_model(str(body.get("model") or ""))
+                        llm.set_model(str(body.get("model") or ""))
                     except llm.LLMError as e:
                         return self._json(400, {"error": str(e), "models": llm.list_local_models()})       # a model the server does not list: the answer carries the list
                 if "backend" in body or "model" not in body:
@@ -1864,8 +1864,12 @@ def make_handler(c: Console):
                                         cur.pop(mk, None)                            # empty = back to the server's default
                                     elif mk == "ai":
                                         if not isinstance(mv, str) or len(mv) > 200:
-                                            raise pl.PipelineError("the AI model is a model id the local server lists", 400)
-                                        cur[mk] = mv
+                                            raise pl.PipelineError("the AI model must be a listed provider:model id", 400)
+                                        try:
+                                            from ..services import llm_catalog
+                                            cur[mk] = llm_catalog.validate(mv)
+                                        except llm.LLMError as e:
+                                            raise pl.PipelineError(str(e), 400)
                                     else:
                                         try:
                                             cur[mk] = model_catalog.find(mk, str(mv))["id"]

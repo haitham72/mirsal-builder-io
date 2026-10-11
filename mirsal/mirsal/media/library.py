@@ -816,12 +816,20 @@ class Library:
                 self._save(db)
             return {"moved": len(plan), "skipped": skipped, "to": to}
 
-    def rename_sticker(self, pid: str, sid: str, name=None, emoji=None) -> dict:
+    def rename_sticker(self, pid: str, sid: str, name=None, emoji=None, action=None) -> dict:
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
             s = next((s for s in p["stickers"] if s["id"] == sid), None)
             if not s:
                 raise LibraryError("no such sticker", 404)
+            if action is not None:
+                from ..generation import actions
+                if not isinstance(action, str) or (action and action not in actions._BANK_OF):
+                    raise LibraryError("Choose a canonical action from the emoji bank")
+                if action:
+                    s["action"] = action
+                else:
+                    s.pop("action", None)
             if name and name.strip():
                 s["name"] = name.strip()[:60]
             if emoji:
@@ -833,10 +841,11 @@ class Library:
         """The pack as one downloadable zip (Export as .zip): every sticker file as stored (`.webm` for the animated ones,
         `.png` / `.webp` for the static ones), renamed to the export contract
         `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
-        (schema version 1: pack, assets with filename, sha256, tags and source cell). Nothing on disk is changed.
+        (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
         Returns (zip bytes, a safe file stem)."""
         import hashlib
         from . import export_names as xn
+        from . import export_resolutions as xr
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
         if not p["stickers"]:
@@ -874,7 +883,8 @@ class Library:
                     date = xn.datestamp(created or f.stat().st_mtime)
                 except OSError:
                     date = xn.datestamp()
-                desc = xn.describe(emoji=s.get("emoji") or bemojis, key=key, tags=tags or [s.get("name")],
+                desc = xr.describe(out, f"G{gid:03d}/S{index}" if g != "own" else f"library/{s['id']}",
+                                   emoji=s.get("emoji") or bemojis, key=key, tags=tags or [s.get("name")], action=s.get("action"),
                                    slug=pslug, index=index, gid=gid, date=date, exclude=pslug.split("_"))
                 name = desc["stem"] + f.suffix.lower()
                 if name in used:                                              # never overwrite one entry in the zip
@@ -890,7 +900,7 @@ class Library:
                              "emoji": desc["emoji"], "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]],
                              "media": media, "revision": 1, "export_date": date, "filename": name,
                              "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
-                             **({"unresolved": True} if desc["unresolved"] else {})})
+                             **xr.manifest_fields(desc)})
             z.writestr("manifest.json", json.dumps({"schema_version": 1,
                              "pack": {"id": p["id"], "slug": pslug, "title": p["name"],
                                       "generations": sorted(gens)},

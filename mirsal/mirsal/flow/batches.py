@@ -147,7 +147,7 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
     """One batch as a download from the Studio (Export as .zip): every sticker that is READY and not rejected, as its animation
     when that is ready and not rejected, otherwise its still, renamed to the export contract
     `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), plus a `manifest.json`
-    (schema version 1: pack, assets with filename, sha256, tags and source cell). Nothing on disk is changed.
+    (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
     Returns (zip bytes, a safe file stem)."""
     import hashlib
     import io
@@ -156,6 +156,7 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
     import zipfile
     from . import pipeline
     from ..media import export_names as xn
+    from ..media import export_resolutions as xr
     gid = int(gid)
     r = pipeline.read_result(out, gid)
     d = pipeline.gen_dir(out, gid)
@@ -177,7 +178,8 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
             f = d / (s["webm"] if animated else s["png"])
             if not f.is_file():
                 continue
-            desc = xn.describe(emoji=s.get("emoji"), key=s.get("key"), tags=s.get("tags"),
+            desc = xr.describe(out, f"G{gid:03d}/S{s.get('index')}",
+                               emoji=s.get("emoji"), key=s.get("key"), tags=s.get("tags"), action=s.get("action"),
                                slug=slug, index=s.get("index") or 0, gid=gid, date=date, exclude=exclude)
             name = desc["stem"] + f.suffix.lower()
             if name in used:                                                     # never overwrite one entry in the zip
@@ -194,7 +196,7 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
                          "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]], "media": media,
                          "revision": 1, "export_date": date, "filename": name,
                          "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
-                         **({"unresolved": True} if desc["unresolved"] else {})})
+                         **xr.manifest_fields(desc)})
         if not rows:
             raise ValueError("this batch has no accepted sticker yet")
         z.writestr("manifest.json", json.dumps({"schema_version": 1,

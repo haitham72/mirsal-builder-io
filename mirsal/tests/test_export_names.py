@@ -10,6 +10,32 @@ class BankTests(unittest.TestCase):
     def test_the_bank_has_36_tokens(self):
         self.assertEqual(len(actions.ACTION_BANK), 36)
 
+    def test_the_extended_bank_covers_every_remaining_base_ios_emoji(self):
+        self.assertEqual(len(actions.EXTENDED_BANK), 1898)
+        for token, glyph in (("school", "🏫"), ("bus", "🚌"), ("statue-of-liberty", "🗽"),
+                             ("cherries", "🍒"), ("cherry-blossom", "🌸"), ("cat", "🐈")):
+            self.assertEqual(actions.EXTENDED_BANK[token]["emoji"], glyph)
+
+    def test_object_words_resolve_to_ios_emoji_not_unresolved(self):
+        self.assertEqual(actions.canonical_for("x", ["school"])[0], "school")
+        self.assertEqual(actions.canonical_for("x", ["bus"])[0], "bus")
+        self.assertEqual(actions.canonical_for("x", ["statue"])[0], "statue-of-liberty")
+        self.assertEqual(actions.canonical_for("x", ["cherries"])[0], "cherries")
+        self.assertIsNone(actions.canonical_for("x", ["cherry"]), "ambiguous fruit/flower requires a choice")
+        self.assertEqual(actions.canonical_for("x", ["heart"])[0], "love", "shared words keep their core token")
+
+    def test_a_happy_bus_keeps_its_subject_and_its_moods(self):
+        self.assertEqual([t for t, _ in actions.canonical_all("bus_happy", ["bus", "happy", "laugh"])],
+                         ["bus", "happy", "laugh"])
+        self.assertEqual([t for t, _ in actions.canonical_all("eye_roll", ["eyeroll"])], ["eye-roll"],
+                         "split-word hits never become extras")
+
+    def test_only_well_established_public_ios_emoji_validate(self):
+        for glyph in ("🚌", "🗽", "🍒", "🏫", "👍🏽", "🤣😂"):
+            self.assertTrue(actions.is_ios_emoji(glyph), glyph)
+        for text in ("", "x", "bus", "gotham"):
+            self.assertFalse(actions.is_ios_emoji(text), repr(text))
+
     def test_alias_lookup_finds_the_canonical_token(self):
         token, aliases = actions.canonical_for("laughing out loud", ["lmao", "rofl"])
         self.assertEqual(token, "laugh")
@@ -59,10 +85,17 @@ class NameTests(unittest.TestCase):
         hit = xn.describe(emoji="🤣😂", key="laughing_hard", tags=["lmao"], slug="falcon", index=8, gid=112, date="20261008")
         self.assertEqual((hit["stem"], hit["action"], hit["unresolved"], hit["emojis"]),
                          ("🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-G112-20261008", "laugh", False, ["🤣", "😂"]))
-        miss = xn.describe(emoji="", key="cat_1", tags=["cat"], slug="cat", index=2, gid=1, date="20261008")
-        self.assertEqual((miss["stem"], miss["action"], miss["unresolved"]), ("🙂-cat-cat-s02-G001-20261008", "cat", True))
+        miss = xn.describe(emoji="", key="gotham_1", tags=["gotham"], slug="gotham", index=2, gid=1, date="20261008")
+        self.assertEqual((miss["stem"], miss["action"], miss["unresolved"]), ("🙂-gotham-gotham-s02-G001-20261008", "gotham", True))
+        cat = xn.describe(emoji="🐱", key="cat_1", tags=["cat"], slug="cat", index=2, gid=1, date="20261008")
+        self.assertEqual((cat["stem"], cat["action"], cat["unresolved"]), ("🐱-cat-cat-s02-G001-20261008", "cat", False))
         hyph = xn.describe(emoji="🙄", key="eye_roll", tags=["eyeroll"], slug="falcon", index=3, gid=112, date="20261008")
         self.assertEqual((hyph["tag"], hyph["action"]), ("eyeroll", "eye-roll"))
+
+    def test_describe_keeps_subject_and_moods_in_one_tag(self):
+        bus = xn.describe(emoji="🚌", key="bus_happy", tags=["bus", "happy", "laugh"], slug="city", index=3, gid=5, date="20261008")
+        self.assertEqual((bus["stem"], bus["action"], bus["unresolved"]),
+                         ("🚌-city-bus_happy_smile_joy_laugh_laughing_lol_rofl_lmao_lmfao-s03-G005-20261008", "bus", False))
 
 
 if __name__ == "__main__":

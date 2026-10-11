@@ -1,7 +1,7 @@
 """Text embeddings for the sticker pool (Phase 3B).
 
 The model is HARDCODED (Haitham, 2026-10-02: nothing asks LM Studio which models it has): `text-embedding-nomic-embed-text-v1.5` on the local
-LM Studio server, 768 dimensions, free and private. When the local server is down and an OpenAI key exists, `text-embedding-3-small` with
+LM Studio server, 768 dimensions, free and private. When the local server is down and the configured cloud's key exists, `text-embedding-3-small` with
 `dimensions=768` answers instead, so one column width serves both. Nomic is trained with task prefixes: documents are embedded as
 "search_document: ...", queries as "search_query: ...". Vectors are cached in Redis (a query embedded once is never embedded again).
 Nothing here is called unless the pool asks: indexing and search work lexically without it."""
@@ -35,11 +35,11 @@ def _post(url: str, body: dict, key: str | None, timeout: float) -> dict:
 
 def backend() -> dict:
     """Where embeddings come from now: {provider, model}."""
-    from . import llm
+    from . import llm, llm_catalog
     llm._load_dotenv()
     if os.environ.get("MIRSAL_EMBED_PROVIDER", "auto") != "openai" and llm.local_reachable():
         return {"provider": "local", "model": os.environ.get("MIRSAL_EMBED_MODEL", EMBED_MODEL)}
-    if os.environ.get(llm.KEY_VAR):
+    if llm_catalog.endpoint(llm_catalog.default_provider())[1]:
         return {"provider": "openai", "model": OPENAI_EMBED_MODEL}
     return {"provider": "none", "model": None}
 
@@ -49,15 +49,19 @@ def available() -> bool:
 
 
 def _call(texts: list, b: dict) -> list:
-    from . import llm
+    from . import llm, llm_catalog
+    key = None
     try:
         if b["provider"] == "local":
             d = _post(llm.local_url() + "/embeddings", {"model": b["model"], "input": texts}, None, 120)
         else:
-            d = _post(llm.cloud_url() + "/embeddings", {"model": b["model"], "input": texts, "dimensions": DIMS}, os.environ[llm.KEY_VAR], 60)
+            url, key = llm_catalog.endpoint(llm_catalog.default_provider())
+            if not key:
+                raise EmbedError(f"No embedding key: set {llm_catalog.key_setting(llm_catalog.default_provider())} in mirsal/.env.")
+            d = _post(url + "/embeddings", {"model": b["model"], "input": texts, "dimensions": DIMS}, key, 60)
         vecs = [x["embedding"] for x in sorted(d["data"], key=lambda x: x["index"])]
     except (urllib.error.URLError, OSError, KeyError, ValueError, TypeError) as e:
-        raise EmbedError("Cannot get embeddings: " + str(getattr(e, "reason", e)).replace(os.environ.get(llm.KEY_VAR) or chr(0), "<key>"))
+        raise EmbedError("Cannot get embeddings: " + str(getattr(e, "reason", e)).replace(key or chr(0), "<key>"))
     if len(vecs) != len(texts) or any(len(v) != DIMS for v in vecs):
         raise EmbedError(f"The embedding service answered {[len(v) for v in vecs][:1]}-d vectors, expected {DIMS}")
     return vecs
@@ -72,7 +76,8 @@ def embed(texts: list, kind: str = "document", out=None) -> list:
     cc = cachemod.default()
     b = backend()
     if b["provider"] == "none":
-        raise EmbedError("No embedding backend: start LM Studio (MIRSAL_LOCAL_URL) or set OPENAI_API_KEY.")
+        from . import llm_catalog
+        raise EmbedError(f"No embedding backend: start LM Studio (MIRSAL_LOCAL_URL) or set {llm_catalog.key_setting(llm_catalog.default_provider())}.")
     keys = [cc.key("pool", "vec", cachemod.digest(kind, t), b["model"]) for t in texts]
     got = [cc.get(k, "embed") for k in keys]
     todo = [i for i, v in enumerate(got) if v is None]
