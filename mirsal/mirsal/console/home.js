@@ -20,11 +20,18 @@ const hmShown=(p,q,filter)=>{const i=hmPackInfo(p);return(filter==='all'||i.tags
 const hmHero=packs=>{const out=[];for(const p of [...packs].sort((a,b)=>(b.created||0)-(a.created||0))){
   const st=p.stickers||[],s=st.find(x=>x.id===p.cover)||st.find(x=>x.type==='animated')||st[0];if(s)out.push(s);if(out.length===3)break}return out};
 const hmIc=n=>`<span class=hm-ti>${ic(n)}</span>`;
-function hmCard(p,i){const x=hmPackInfo(p),sub=[x.animated?`${x.animated} animated`:'',x.still?`${x.still} static`:'',x.particles?'With particles':''].filter(Boolean).join(' · ');
- return`<article class=hm-card data-id=${p.id}><button class="hm-art hm-${HM_TINTS[i%HM_TINTS.length]}" data-act=openpack data-id=${p.id} aria-label="Open ${esc(p.name)}"><span class=hm-type>${x.animated?ic('film'):''}${x.label}</span>${coverMedia(p)}<span class=hm-open>Open pack ↗</span></button>
-  <div class=hm-info><div><h3>${esc(p.name)}</h3><p>${sub||'Empty pack'}</p></div><span>${x.telegram?`<a href="${esc(x.telegram)}" target=_blank rel="noopener noreferrer" title="Open in Telegram">${ic('telegram')}</a>`:''}${p.stickers.length} sticker${p.stickers.length===1?'':'s'}</span></div></article>`}
-function hmGallery(){const box=$('hm-gal');if(!box)return;const q=HM.q.trim().toLowerCase(),ps=LIB.packs.filter(p=>hmShown(p,q,HM.filter));
- box.innerHTML=ps.map(hmCard).join('');$('hm-empty').hidden=!!ps.length||!LIB.packs.length;
+/* The landing page shows individual stickers; Library keeps the complete collection. */
+const hmStickers=(packs,q,filter)=>[...packs].sort((a,b)=>(b.created||0)-(a.created||0))
+ .flatMap(p=>(p.stickers||[]).filter(s=>
+  (filter==='all'||filter==='animated'&&s.type==='animated'||filter==='static'&&s.type!=='animated'||filter==='particles'&&s.particles?.length)
+  &&(!q||`${p.name} ${s.name||''} ${s.emoji||''}`.toLowerCase().includes(q))).map(s=>({p,s}))).slice(0,12);
+function hmCard({p,s},i){const animated=s.type==='animated',telegram=hmPackInfo(p).telegram;
+ return`<article class=hm-card data-id="${esc(p.id)}"><button class="hm-art hm-${HM_TINTS[i%HM_TINTS.length]}" data-act=openpack data-id="${esc(p.id)}" aria-label="Open ${esc(s.name||'sticker')} in ${esc(p.name)}"><span class=hm-type>${animated?ic('film'):''}${animated?'Animated':'Static sticker'}</span>${media(s)}<span class=hm-caption><b>${esc(s.name||s.emoji||'Sticker')}</b><span>${esc(p.name)}</span></span><span class=hm-open>Open pack ↗</span></button>
+  ${telegram?`<a class=hm-telegram href="${esc(telegram)}" target=_blank rel="noopener noreferrer" aria-label="Open ${esc(p.name)} in Telegram">${ic('telegram')}</a>`:''}</article>`}
+function hmFilm(){const motion=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+ return`<button class=hm-film data-act=hmfilm aria-label="Watch the full Mirsal film"><video src=/assets/welcome/welcome.mp4 poster=/assets/welcome/welcome-poster.jpg ${motion?'autoplay ':''}muted loop playsinline preload=metadata aria-hidden=true></video><span class=hm-film-label>${ic('play')} Watch the film</span></button>`}
+function hmGallery(){const box=$('hm-gal');if(!box)return;const st=hmStickers(LIB.packs,HM.q.trim().toLowerCase(),HM.filter);
+ box.innerHTML=st.map(hmCard).join('')+hmFilm();$('hm-empty').hidden=!!st.length||!LIB.packs.length;
  document.querySelectorAll('#s-home [data-act=hmfilter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===HM.filter)))}
 RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stickers),anim=st.filter(s=>s.type==='animated').length,hero=hmHero(ps),
   owner=typeof ME==='undefined'||!ME||ME.role==='owner',canImport=typeof ACT.impackopen==='function'&&owner;
@@ -44,10 +51,11 @@ RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stic
   <button class=hm-tool data-act=nav data-to=generate>${hmIc('gen')}<div><h3>Sticker Studio</h3><p>Make every detail yours</p></div>${ic('chev')}</button>
   ${canImport?`<button class=hm-tool data-act=impackopen>${hmIc('upload')}<div><h3>Bring your own</h3><p>Start from an existing sheet</p></div>${ic('chev')}</button>`:`<button class=hm-tool data-act=nav data-to=create>${hmIc('create')}<div><h3>From a photo</h3><p>Turn a picture into a sticker</p></div>${ic('chev')}</button>`}
   <button class=hm-tool data-act=nav data-to=library>${hmIc('lib')}<div><h3>Your library</h3><p>Every sticker, every pack</p></div>${ic('chev')}</button></div>
- <section class=hm-disc id=hm-disc><div class=hm-head><div><h2>Made by you. Ready to express.</h2><p>Your characters, your reactions, your little universe.</p></div><button class=hm-link data-act=hmfilter data-f=all data-clear=1>View all packs ${ic('chev')}</button></div>
-  ${ps.length?`<div class=hm-filters role=group aria-label="Filter packs"><button class=hm-filter data-act=hmfilter data-f=all>All packs</button><button class=hm-filter data-act=hmfilter data-f=animated>Animated</button><button class=hm-filter data-act=hmfilter data-f=static>Static stickers</button><button class=hm-filter data-act=hmfilter data-f=particles>With particles</button></div>
-  <div class=hm-gal id=hm-gal></div><p class=hm-empty id=hm-empty role=status hidden>No packs match. Try a different search or filter.</p>`
-  :`<div class=hm-none><h3>No packs yet</h3><p>Describe an idea to the AI, or open the Studio: your first pack lands here.</p><button class="btn pri" data-act=hmai>${ic('ai')} Create with AI</button></div><div id=hm-gal hidden></div><p id=hm-empty hidden></p>`}</section>
+ <section class=hm-disc id=hm-disc><div class=hm-head><div><h2>Made by you. Ready to express.</h2><p>Your characters, your reactions, your little universe.</p></div><button class=hm-link data-act=nav data-to=library>View all packs ${ic('chev')}</button></div>
+  ${ps.length?`<div class=hm-filters role=group aria-label="Filter stickers"><button class=hm-filter data-act=hmfilter data-f=all>All stickers</button><button class=hm-filter data-act=hmfilter data-f=animated>Animated</button><button class=hm-filter data-act=hmfilter data-f=static>Static stickers</button><button class=hm-filter data-act=hmfilter data-f=particles>With particles</button></div>
+  <p class=hm-empty id=hm-empty role=status hidden>No stickers match. Try a different search or filter.</p>`
+  :`<div class=hm-none><h3>No packs yet</h3><p>Describe an idea to the AI, or open the Studio: your first pack lands here.</p><button class="btn pri" data-act=hmai>${ic('ai')} Create with AI</button></div><p id=hm-empty hidden></p>`}
+  <div class=hm-showcase><div class=hm-gal id=hm-gal></div></div></section>
  <section class=hm-journey><div><div class=hm-eye>An idea is all you need</div><h2>Your imagination.<br>Delivered as a sticker.</h2><p>From the first thought to the final pack, make something that feels like you.</p><button class=hm-link data-act=hmfilm>Watch the film ${ic('chev')}</button></div>
   <div class=hm-steps><article class=hm-step><span class=hm-num>01 / IMAGINE</span>${hmIc('ai')}<h3>Tell your idea</h3><p>Describe a character, a feeling, or a moment.</p></article><article class=hm-step><span class=hm-num>02 / MAKE IT YOURS</span>${hmIc('lib')}<h3>Shape the details</h3><p>Review your stickers. Add motion and a little magic.</p></article><article class=hm-step><span class=hm-num>03 / SHARE</span>${hmIc('telegram')}<h3>Send a little joy</h3><p>Export your pack, ready for your next conversation.</p></article></div></section>
  <footer class=hm-foot><span class=hm-brand><img src=/assets/brand/mirsal-logo.png alt="">mirsal<b>.</b></span><span>Small stickers. Endless expression.</span></footer></div>`;

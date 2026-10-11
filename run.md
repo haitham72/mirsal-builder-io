@@ -27,6 +27,8 @@ cd mirsal
 ./.venv/bin/python -m mirsal doctor
 ```
 
+After pulling these changes, restart the server to load the owner/admin daily-cap exemption and session-aware model status, then hard-refresh the browser. Choosing Luna in a saved chat updates its badge independently of global defaults.
+
 ### Start the server on this Mac
 
 Run these commands from the project's `mirsal/` directory (the folder containing `requirements.txt` and `.venv`). If you are at the repository root, run `cd mirsal` first. If your prompt already ends in `mirsal`, stay there.

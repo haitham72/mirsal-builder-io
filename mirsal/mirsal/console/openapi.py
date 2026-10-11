@@ -92,7 +92,7 @@ ERR = {"description": "error", "content": {"application/json": {"schema": ref("E
 # (method, path, tag, summary, request schema | None, response schema | None, status)
 ROUTES = [
     # --- chat
-    ("GET", "/api/chat/agent", "Chat", "Which model runs the assistant and the vision judge, what is available (the local model by a real probe, with the reason when it cannot answer) and `agent_status` {fallback, reason}: true when the chat is on its rules only", None, OBJ, 200),
+    ("GET", "/api/chat/agent", "Chat", "Optional `session` query: resolve the saved AI model under the caller's session permissions (404 if inaccessible); otherwise use global defaults. Which model runs the assistant and the vision judge, what is available (the local model by a real probe, with the reason when it cannot answer) and `agent_status` {fallback, reason}: true when the chat is on its rules only", None, OBJ, 200),
     ("GET", "/api/chat/sessions", "Chat", "List chats, newest first", None, obj({"sessions": arr(ref("SessionSummary"))}), 200),
     ("POST", "/api/chat/sessions", "Chat", "Create a chat", obj({"title": STR, "settings": ref("Settings")}), ref("Session"), 200),
     ("GET", "/api/chat/sessions/{id}", "Chat", "A whole chat for display: messages with steps and cards (generation cards carry their live stickers), memory summary", None, ref("Session"), 200),

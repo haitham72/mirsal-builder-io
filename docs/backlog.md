@@ -83,7 +83,6 @@ Other open items:
 - The built-in prompt planner drops everything after `for / in / at / during / with / on` into the file name only (`prompter.SPLIT`: "spiderman in dubai" sends `Subject: spiderman`); the Generate prompt step makes it visible, a context-as-setting-line fix is open. **open**.
 - The Generate prompt step: Enter, the non-live button, the cost of an OpenAI call made by the enhancer. **needs Haitham** (W16, W18, W19).
 - The Higgsfield `wait` and the plan expander have timeouts (300 s create, `timeout_s + 60` wait, 60 s per model call); a *hung chat* was never reproduced, only a turn orphaned by a server restart (fixed). If "thinking" sticks again with a live server, capture the session's last step label: `out/sessions/S###.json` `messages[-1].steps`. **watch**.
-- The daily credit cap must never block the owner (`fulfil()` takes no user). **needs Haitham** (W36).
 - Stalled-job recovery has not run against the real Higgsfield (J022-J025). **needs a paid test** (W5).
 - Per-chat paid parallelism and `MIRSAL_JOB_MODE=queue` have only run on the fake CLI. **needs a paid test** (W10).
 

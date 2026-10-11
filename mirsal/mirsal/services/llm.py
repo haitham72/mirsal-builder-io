@@ -352,9 +352,11 @@ def availability(probe: bool = True) -> dict:
     chat completion, cached), not the model list or the port. `probe=False` never asks the server (the health check must not wait for a model): the last probe's answer whatever its age,
     else whether anything listens."""
     _load_dotenv()
-    key = cloud_available()
     from . import llm_catalog
-    cloud_provider, _ = llm_catalog.split_model(cloud_model())
+    pinned = forced()
+    cloud_selected = pinned["model"] if pinned and llm_catalog.split_model(pinned["model"])[0] != "local" else cloud_model()
+    cloud_provider, _ = llm_catalog.split_model(cloud_selected)
+    key = bool(llm_catalog.endpoint(cloud_provider)[1])
     key_name = llm_catalog.key_setting(cloud_provider)
     if probe or not _local_allowed():
         local = local_ready()
@@ -364,7 +366,7 @@ def availability(probe: bool = True) -> dict:
         up, m = local_reachable(), configured_local_model()
         local = {"ok": up, "model": m, "why": None if up else f"LM Studio is not answering at {local_url()}: start it and load {m}"}
     return {"local": local,
-            "cloud": {"ok": key, "model": cloud_model(), "why": None if key else f"no {key_name} in mirsal/.env"}}
+            "cloud": {"ok": key, "model": cloud_selected, "why": None if key else f"no {key_name} in mirsal/.env"}}
 
 
 def _usable(prov: str) -> bool:

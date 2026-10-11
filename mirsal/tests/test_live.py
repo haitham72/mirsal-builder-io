@@ -301,6 +301,27 @@ class FulfilTests(Base):
         self.assertIn("daily credit cap", done["error"])
         self.assertFalse([c for c in self.cli.calls if c[:2] == ["generate", "create"]])
 
+    def test_the_daily_cap_exempts_the_local_owner_and_enabled_staff_only(self):
+        from mirsal.runtime.users import UserStore
+        os.environ["MIRSAL_DAILY_CREDITS"] = "1"
+        users = UserStore(self.out)
+        owner, _ = users.create("owner", role="owner", can_spend=True)
+        admin, _ = users.create("admin", role="admin", can_spend=True)
+        member, _ = users.create("member", can_spend=True)
+        disabled, _ = users.create("disabled admin", role="admin", can_spend=True)
+        users.set_disabled(disabled["id"], True)
+        for uid, exempt in (("local", True), (owner["id"], True), (admin["id"], True),
+                            (member["id"], False), (disabled["id"], False), ("unknown", False)):
+            with self.subTest(user=uid):
+                before = len([c for c in self.cli.calls if c[:2] == ["generate", "create"]])
+                job, _ = self.sheet_job(user=uid, role="owner")
+                done = jobs.fulfil(self.out, job["id"])
+                self.assertEqual(done["status"], "DONE" if exempt else "FAILED")
+                creates = len([c for c in self.cli.calls if c[:2] == ["generate", "create"]])
+                self.assertEqual(creates - before, int(exempt))
+                if not exempt:
+                    self.assertIn("daily credit cap", done["error"])
+
     def test_kling_4k_is_never_possible(self):
         with self.assertRaises(model_catalog.CatalogError):
             model_catalog.resolve("video", "kling3_0", {"mode": "4k"})

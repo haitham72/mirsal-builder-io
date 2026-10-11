@@ -421,6 +421,16 @@ def _daily_cap() -> float | None:
         return None
 
 
+def _cap_exempt(out: Path, uid: str | None) -> bool:
+    """Use the persisted job owner and server-side account role, never a supplied role."""
+    if not uid:
+        return False
+    from ..runtime.users import UserStore
+    user = UserStore(out).get(uid)
+    return bool(user and user.get("role") in ("owner", "admin")
+                and user.get("can_spend") and not user.get("disabled"))
+
+
 def _raw(out: Path, jid: str) -> dict:
     """The job file as stored (`read` turns an old CLAIMED into a virtual TIMEOUT; the paid-call decisions need what is really on disk)."""
     return json.loads(_path(out, jid).read_text(encoding="utf-8"))
@@ -480,7 +490,7 @@ def fulfil(out: Path, jid: str, hf=None, on_done=None) -> dict:
                     if req.get("approved_cost") is not None and est != req["approved_cost"]:
                         raise JobError("The Retry price changed. No request was created; refresh the price and confirm again.", 409)
                     cap = _daily_cap()
-                    if cap is not None and _usage.spent_today(out) + _inflight(out) + est > cap:
+                    if cap is not None and not _cap_exempt(out, req.get("user")) and _usage.spent_today(out) + _inflight(out) + est > cap:
                         raise JobError(f"the daily credit cap ({cap:g}) would be exceeded by this {est:g}-credit call (counting the jobs already running)", 402)
                     ticket = hf.create(model, params, prompt, **media)
                     claim(out, jid, ticket)                      # IMMEDIATELY, before waiting

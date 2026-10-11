@@ -38,7 +38,7 @@ For jobs that must survive a restart of the server: set `MIRSAL_JOB_MODE=queue` 
 - **One job at a time.** Never run two paid calls concurrently from one session.
 - **Budgets.** The estimated credit cost is printed before a job is created and again at `done`.
   A daily cap (`MIRSAL_DAILY_CREDITS`, default: no cap — set it when Haitham gives the number)
-  refuses new paid jobs. If one experiment or the day's total would burn a large share of the
+  refuses new paid jobs for members and jobs with no trusted account. Enabled owner/admin accounts with spending permission are exempt, including the local owner when running `serve`; the role comes from the server-side account store and the persisted job user id. Price approval and spending permission still apply. If one experiment or the day's total would burn a large share of the
   remaining credits, stop and tell Haitham.
 - **Retries.** Transient errors retry at most 2 times; invalid input never retries. There is
   never a "while not good" loop. A job older than `MIRSAL_JOB_TIMEOUT` (default 20 min) shows

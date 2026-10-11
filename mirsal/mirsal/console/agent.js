@@ -79,17 +79,18 @@ function bgInit(root){if(bgOn)return;bgOn=true;
 /* ---------- data */
 async function loadSessions(){const r=await api('/api/chat/sessions');if(r.ok)A.sessions=r.j.sessions;return A.sessions}
 async function loadStage(){const r=await api('/api/prefs');if(r.ok)A.stage=AIU.stageOf(r.j);drawStage()}
-async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=r.j;pill();drawBar()}
+async function loadAgent(){const sid=A.sid,r=await api('/api/chat/agent'+(sid?'?session='+encodeURIComponent(sid):''));if(sid!==A.sid)return;if(r.ok)A.agent=r.j;pill();drawBar();if(A.engineOpen)setEngine()}
 /* the local server's models for the engine row's dropdown (no count limit); the first call may wait while the server loads its model */
 async function loadModels(){const r=await api('/api/llm/models');A.llm=r.ok?r.j:{models:[],current:'',ok:false,why:'Could not read the model list'};engRedraw()}
 /* the engine control (Auto / Local / Cloud + the local model) is ONE implementation for two screens: the AI screen's gear panel and the Studio's AI enhancer (composer.js, cpDrawEngine).
    Both draw it with beRow() and both end up in engRedraw(); the Studio hands in its own source (GET /api/ai, shaped like GET /api/chat/agent) through AIENG.rows. */
-function engRedraw(){if(A.engineOpen)setEngine();if(typeof cpDrawEngine==='function')cpDrawEngine();const el=$('set-ai-engine');if(el&&A.settingsEngine)el.innerHTML=AIENG.rows(A.agent||A.settingsEngine)}
+function engRedraw(){if(A.engineOpen)setEngine();if(typeof cpDrawEngine==='function')cpDrawEngine();const el=$('set-ai-engine');if(el&&A.settingsEngine)el.innerHTML=AIENG.rows(A.settingsEngine)}
 const engSync=()=>typeof aiRefresh==='function'?aiRefresh():null;        // the Studio's copy of the same facts (generate.js)
 let ENGSRC=null;
 async function loadSession(id,quiet){const r=await api('/api/chat/sessions/'+id);
  if(!r.ok){if(r.status===404){A.sid=null;A.sess=null;store.set('mirsal.ai.sid','');paint();return null}if(!quiet)toast(r.j.error||'Could not load the chat',1);return null}
- A.sess=r.j;paint();return r.j}
+ const changed=!A.sess||A.sess.id!==r.j.id||((A.sess.settings||{}).models||{}).ai!==((r.j.settings||{}).models||{}).ai;
+ A.sess=r.j;paint();if(changed)loadAgent().catch(()=>{});return r.j}
 async function ensureSession(){if(A.sid)return A.sid;const r=await post('/api/chat/sessions',{});if(!r.ok){toast(r.j.error||'Could not start a chat',1);return null}
  A.sid=r.j.id;A.sess=Object.assign({messages:[],subjects:[],interactions:[],working:false},r.j);store.set('mirsal.ai.sid',A.sid);history.replaceState(null,'','#/agent/'+A.sid);await applyPre();return A.sid}
 /* a chat starts with the style picked last (picking one before the first message must not create an empty chat) */
@@ -341,7 +342,7 @@ ACT.agallowall=async el=>{const gid=el.dataset.g,n=+String(gid||'').replace(/\D/
  finally{btns.forEach(b=>{if(b.isConnected){b.disabled=false;b.removeAttribute('aria-busy')}})}};
 /* the carousel's tiles are figures: Enter or Space on a focused one selects it like a click (a figure answers neither key by itself) */
 document.addEventListener('keydown',e=>{const t=e.target;if((e.key==='Enter'||e.key===' ')&&t&&t.dataset&&t.dataset.act==='agtile'&&String(t.tagName||'').toLowerCase()==='figure'){e.preventDefault();ACT.agtile(t,e)}});
-ACT.agnew=()=>{A.sid=null;A.sess=null;A.sel.clear();A.els.clear();store.set('mirsal.ai.sid','');const c=$('ai-col');if(c)c.innerHTML='';history.replaceState(null,'','#/agent');paint();agList();const t=$('ai-in');if(t)t.focus()};
+ACT.agnew=()=>{A.sid=null;A.sess=null;A.sel.clear();A.els.clear();store.set('mirsal.ai.sid','');const c=$('ai-col');if(c)c.innerHTML='';history.replaceState(null,'','#/agent');paint();agList();loadAgent().catch(()=>{});const t=$('ai-in');if(t)t.focus()};
 ACT.agopen=el=>{location.hash='#/agent/'+el.dataset.id};
 ACT.agdel=el=>{const id=el.dataset.id;confirmDlg('Delete this chat? The stickers it made stay in the Studio.',async()=>{await post(`/api/chat/sessions/${id}/delete`);if(A.sid===id)ACT.agnew();await loadSessions();agList()},'Delete')};
 ACT.agset=async()=>{closeStage(false);A.engineOpen=false;setEngine();A.setOpen=!A.setOpen;setSet();
@@ -398,7 +399,7 @@ ACT.agstyle=async el=>{A.pre=el.dataset.id;A.stylesOpen=false;store.set('mirsal.
 ACT.agstyles=()=>{A.stylesOpen=!(A.stylesOpen??!A.pre);drawBar()};
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
 ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await Promise.all([loadAgent(),engSync()]);engRedraw()}else toast(r.j.error||'Could not change the AI engine',1)};
-async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;A.stage=AIU.stageOf(r.j.settings);setSet();setEngine();drawBar()}else{if(p.stage)await loadSession(sid,true);toast(r.j.error,1)}}
+async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;A.stage=AIU.stageOf(r.j.settings);if(p.models&&Object.hasOwn(p.models,'ai'))await loadAgent();setSet();setEngine();drawBar()}else{if(p.stage)await loadSession(sid,true);toast(r.j.error,1)}}
 /* the AI engine row: Auto keeps a working backend and only a failed call switches it; Local / Cloud are used as chosen. A backend that is not available says why. */
 function beRow(){const a=ENGSRC||A.agent||{},av=a.availability||{},pref=a.preference||'auto';
  const b=(v,label)=>{const ok=v==='auto'||(av[v]&&av[v].ok);const why=v==='auto'?'Use the local model when LM Studio answers, otherwise the cloud; keep what works':(av[v]&&av[v].why)||(av[v]&&av[v].model)||'';

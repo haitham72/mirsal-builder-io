@@ -4,6 +4,7 @@ import io
 import json
 import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from mirsal.services import embed, llm, llm_catalog as catalog
@@ -195,6 +196,43 @@ class CatalogTests(unittest.TestCase):
         llm.FORCE.set({"model": "local:qwen:2"})
         self.assertEqual(brain.target(), {"provider": "local", "model": "local:qwen:2"})
         self.assertEqual(judge.target()["model"], "local:qwen:2")
+
+    def test_chat_model_status_uses_the_session_pick_and_does_not_leak_to_global_settings(self):
+        from mirsal.agent.memory import SessionStore, SessionError
+        from mirsal.console.server import Console, make_handler
+        out = Path(self.td.name)
+        store = SessionStore(out, cache=mock.Mock(), user="U001", see_all=False)
+        session = store.create()
+        session["settings"]["models"] = {"ai": "openai:gpt-5.6-luna"}
+        store.save(session)
+        console = object.__new__(Console)
+        console.chat_parts = mock.Mock(return_value=(store, None, None, None))
+        os.environ["MIRSAL_LLM_MODEL"] = "mimo-v2.6-flash"
+        os.environ.pop("NARAROUTER_API_KEY")
+        user = {"id": "U001", "role": "member"}
+        with mock.patch.object(brain, "LAST", {"error": None, "at": 0, "ok_at": 0}), mock.patch("mirsal.console.server.higgsfield.available", return_value=False):
+            info = console.agent_info(user, session["id"])
+            self.assertEqual(info["agent"], {"provider": "openai", "model": "openai:gpt-5.6-luna"})
+            self.assertEqual(info["preference"], "cloud")
+            self.assertEqual(info["availability"]["cloud"]["model"], "openai:gpt-5.6-luna")
+            self.assertTrue(info["availability"]["cloud"]["ok"])
+            self.assertFalse(info["agent_status"]["fallback"])
+            self.assertEqual(info["vision"]["model"], "openai:gpt-5.6-luna")
+            self.assertIsNone(llm.forced())
+            self.assertEqual(console.agent_info(user)["agent"]["model"], "mimo-v2.6-flash")
+            handler = object.__new__(make_handler(console))
+            handler.path, handler.user = "/api/chat/agent?session=" + session["id"], user
+            handler._json = mock.Mock()
+            handler._get()
+            self.assertEqual(handler._json.call_args.args[0], 200)
+            self.assertEqual(handler._json.call_args.args[1]["agent"]["model"], "openai:gpt-5.6-luna")
+            console.chat_parts.return_value = (SessionStore(out, cache=mock.Mock(), user="U002", see_all=False), None, None, None)
+            with self.assertRaises(SessionError):
+                console.agent_info({"id": "U002", "role": "member"}, session["id"])
+            handler.user = {"id": "U002", "role": "member"}
+            handler._get()
+            self.assertEqual(handler._json.call_args.args[0], 404)
+            self.assertIsNone(llm.forced())
 
     def test_explicit_vision_override_and_existing_env_model_are_kept(self):
         os.environ["MIRSAL_LLM_MODEL"] = "mimo-v2.6-flash"

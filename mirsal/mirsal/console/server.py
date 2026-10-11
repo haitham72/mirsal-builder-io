@@ -102,6 +102,22 @@ class Console:
         """Who is acting on this thread (the request's user, or the job's/chat's user copied into the thread)."""
         return self.users.get(pl.current_owner()) or dict(LOCAL, id=pl.current_owner(), role="member", can_spend=False)
 
+    def agent_info(self, user: dict, session: str | None = None) -> dict:
+        """Report the same model a chat turn uses; session lookup stays in the caller's namespace."""
+        from ..agent import brain
+        from ..vision import judge
+        saved = self.chat_parts(user)[0].load(session) if session else {}
+        selected = ((saved.get("settings") or {}).get("models") or {}).get("ai")
+        token = llm.FORCE.set({"model": selected} if selected else None)
+        try:
+            target = brain.target()
+            preference = ("local" if target["provider"] == "local" else "cloud") if selected else llm.preference()
+            return {"agent": target, "agent_status": brain.status(), "vision": judge.status(),
+                    "live": higgsfield.available(), "preference": preference, "availability": llm.availability(),
+                    "styles": styles.PRESETS, "default_style": styles.DEFAULT}
+        finally:
+            llm.FORCE.reset(token)
+
     def health(self) -> dict:
         """Can the final WEBM be encoded here? (live preview never needs ffmpeg)"""
         if self._health is None:
@@ -1101,10 +1117,12 @@ def make_handler(c: Console):
             if path == "/api/ai":          # is the model available (never the key)
                 return self._json(200, llm.status())
             if path == "/api/chat/agent":     # which model runs the chat, and whether the vision judge is up
-                from ..agent import brain as _brain
-                return self._json(200, {"agent": _brain.target(), "agent_status": _brain.status(), "vision": __import__("mirsal.vision.judge", fromlist=["status"]).status(),
-                                        "live": higgsfield.available(), "preference": llm.preference(), "availability": llm.availability(),
-                                        "styles": styles.PRESETS, "default_style": styles.DEFAULT})
+                from ..agent.memory import SessionError
+                try:
+                    info = c.agent_info(self.user, parse_qs(urlparse(self.path).query).get("session", [None])[0])
+                except SessionError as e:
+                    return self._json(e.code, {"error": str(e)})
+                return self._json(200, info)
             if path == "/api/llm/models":     # the local server's chat models, the one in use, and whether it can answer (the engine row's dropdown); members read it, only an owner picks (POST /api/ai/backend)
                 return self._json(200, llm.models_report())
             if path == "/api/chat/sessions":

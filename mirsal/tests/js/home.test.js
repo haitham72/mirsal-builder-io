@@ -11,7 +11,7 @@ const packs = [
   { id: 'p2', name: 'Falcon', created: 3, stickers: [st('c', 'animated', { particles: ['P001'] })], telegram: { sets: [{ link: 'https://t.me/addstickers/falcon_by_bot' }] } },
   { id: 'p3', name: 'Dogs', created: 2, stickers: [st('d', 'still', { emoji: '🐶' })] },
 ];
-const STUB = `document.querySelectorAll=()=>[];const location={hash:''};const matchMedia=()=>({matches:false});
+const STUB = `document.querySelectorAll=()=>[];const location={hash:''};let reducedMotion=false;const matchMedia=()=>({matches:reducedMotion});
 const box=()=>({innerHTML:'',hidden:false,value:'',oninput:null,scrollIntoView(){},scrollTo(){}});['s-home','hm-q','hm-gal','hm-empty','hm-disc'].forEach(k=>DOMSTUB[k]=box());`;
 const load = () => loadConsole(['home.js'], { extra: STUB });
 
@@ -41,14 +41,19 @@ test('the hero shows up to three stickers, newest pack first, its cover when it 
   assert.equal(run(`hmHero([]).length`), 0);
 });
 
-test('Home draws the real packs: every card opens its pack, every shortcut a real screen; an empty library asks for a first pack', async () => {
+test('Home draws individual stickers opening their packs, followed by the film; an empty library asks for a first pack', async () => {
   const run = load();
   run(`LIB={packs:${JSON.stringify(packs)}}`);
   await run(`RENDER.home()`);
   const page = run(`$('s-home').innerHTML`), gal = run(`$('hm-gal').innerHTML`);
   assert.match(page, /3 packs/);
   assert.match(page, /4 stickers/);
-  for (const id of ['p1', 'p2', 'p3']) assert.match(gal, new RegExp(`data-act=openpack data-id=${id}`));
+  for (const id of ['p1', 'p2', 'p3']) assert.match(gal, new RegExp(`data-act=openpack data-id="${id}"`));
+  for (const id of ['a', 'b', 'c', 'd']) assert.match(gal, new RegExp(`data-m=${id}`));
+  assert.equal((gal.match(/class=hm-card /g) || []).length, 4);
+  assert.match(gal, /class=hm-film data-act=hmfilm/);
+  assert.match(gal, /welcome\.mp4[^>]*autoplay muted loop playsinline/);
+  assert.ok(gal.lastIndexOf('class=hm-card') < gal.indexOf('class=hm-film'));
   assert.match(gal, /href="https:\/\/t.me\/addstickers\/falcon_by_bot"/);
   for (const to of ['effects', 'generate', 'library']) assert.match(page, new RegExp(`data-act=nav data-to=${to}`));
   assert.match(page, /data-act=hmai/);
@@ -57,6 +62,7 @@ test('Home draws the real packs: every card opens its pack, every shortcut a rea
   run(`LIB={packs:[]}`);
   await run(`RENDER.home()`);
   assert.match(run(`$('s-home').innerHTML`), /Make your first pack/);
+  assert.match(run(`$('hm-gal').innerHTML`), /class=hm-film/, 'the film is available before the first pack');
 });
 
 test('a filter redraws the gallery; the logo opens Home', async () => {
@@ -65,12 +71,25 @@ test('a filter redraws the gallery; the logo opens Home', async () => {
   await run(`RENDER.home()`);
   run(`ACT.hmfilter({dataset:{f:'particles'}})`);
   const gal = run(`$('hm-gal').innerHTML`);
-  assert.match(gal, /data-id=p2/);
-  assert.doesNotMatch(gal, /data-id=p1/);
+  assert.match(gal, /data-id="p2"/);
+  assert.doesNotMatch(gal, /data-id="p1"/);
   run(`route_='agent';ACT.home()`);
   assert.equal(run(`location.hash`), '#/home');
   const app = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'app.js'), 'utf8');
   assert.match(app, /\|\|'home'/, 'an empty hash opens Home');
+});
+
+test('the showcase filters individual stickers and bounds media to twelve; reduced motion keeps a still film poster', () => {
+  const run = load();
+  run(`LIB={packs:${JSON.stringify(packs)}}`);
+  const ids = (q, f) => JSON.parse(run(`JSON.stringify(hmStickers(LIB.packs,${JSON.stringify(q)},${JSON.stringify(f)}).map(x=>x.s.id))`));
+  assert.deepEqual(ids('', 'animated'), ['c', 'a']);
+  assert.deepEqual(ids('', 'static'), ['d', 'b']);
+  assert.deepEqual(ids('', 'particles'), ['c']);
+  assert.deepEqual(ids('cat b', 'all'), ['b']);
+  assert.equal(run(`hmStickers([{name:'Many',stickers:Array.from({length:30},(_,id)=>({id}))}],'','all').length`), 12);
+  assert.match(run(`hmFilm()`), /autoplay/);
+  assert.doesNotMatch(run(`reducedMotion=true;hmFilm()`), /autoplay/);
 });
 
 test('the first start of a session opens Home from any screen, once; a link to one thing keeps it', () => {

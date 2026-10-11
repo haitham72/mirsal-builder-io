@@ -8,12 +8,12 @@ function boot(){
   document:{addEventListener(){},getElementById:()=>null,querySelector:()=>null},
   localStorage:{getItem:()=>null,setItem(){}},history:{replaceState(){}},location:{hash:''},matchMedia:()=>({matches:false}),
   ACT:{},ICONS:{},RENDER:{},ic:()=>'', $:()=>null,route_:'generate',toast(){},
-  api:async()=>({ok:false,j:{}}),POSTS:[],post:async(u,b)=>{ctx.POSTS.push([u,b]);return {ok:false,j:{}}}});
+  READS:[],api:async u=>{ctx.READS.push(u);return ctx.AGENT_REPLY||{ok:false,j:{}}},POSTS:[],post:async(u,b)=>{ctx.POSTS.push([u,b]);return ctx.SETTINGS_REPLY||{ok:false,j:{}}}});
  ctx.window=ctx;
  const src=fs.readFileSync(path.join(__dirname,'../../mirsal/console/agent.js'),'utf8');
  // Expose closure state only in the test's copy; execute the complete script.
- vm.runInContext(src.replace(/\}\)\(\)\}\s*$/, 'globalThis.TEST_API={A,selectorDetails,saveSet};})()}'),ctx);
- vm.runInContext('const {A,selectorDetails,saveSet}=TEST_API;',ctx);
+ vm.runInContext(src.replace(/\}\)\(\)\}\s*$/, 'globalThis.TEST_API={A,selectorDetails,saveSet,loadAgent,beRow};})()}'),ctx);
+ vm.runInContext('const {A,selectorDetails,saveSet,loadAgent,beRow}=TEST_API;',ctx);
  return code=>vm.runInContext(code,ctx);
 }
 
@@ -67,4 +67,32 @@ test('Settings and the enhancer share the grouped global selector', () => {
   const settings = fs.readFileSync(path.join(__dirname, '../../mirsal/console/app.js'), 'utf8');
   assert.match(settings, /id=set-ai-engine/);
   assert.match(settings, /AIENG.settings\(/);
+});
+
+test('choosing Luna refreshes the session badge and engine status instead of showing global Mimo', async () => {
+  const run = boot();
+  run(`A.llm=${JSON.stringify(report)}; A.sid='S001'; A.sess={id:'S001',settings:{models:{ai:'nararouter:mimo-v2.6-flash'}}};
+    A.agent={preference:'cloud',agent:{provider:'openai',model:'mimo-v2.6-flash'}};
+    globalThis.LABEL={textContent:''}; globalThis.PILL={querySelector:()=>LABEL}; $=id=>id==='ai-pill'?PILL:null;
+    SETTINGS_REPLY={ok:true,j:{settings:{models:{ai:'openai:gpt-5.6-luna'}}}};
+    AGENT_REPLY={ok:true,j:{preference:'cloud',agent:{provider:'openai',model:'openai:gpt-5.6-luna'},agent_status:{fallback:false},availability:{cloud:{ok:true,model:'openai:gpt-5.6-luna'}}}};`);
+  await run(`saveSet({models:{ai:'openai:gpt-5.6-luna'}})`);
+  assert.equal(run('READS[0]'), '/api/chat/agent?session=S001');
+  assert.match(run('LABEL.textContent'), /luna/);
+  run('A.engineOpen=true');
+  assert.match(run('beRow()'), /<small>now: cloud · openai:gpt-5.6-luna<\/small>/);
+  assert.match(run('beRow()'), /value="openai:gpt-5.6-luna" selected/);
+  run(`A.sid=null; A.sess=null; AGENT_REPLY={ok:true,j:{preference:'cloud',agent:{provider:'openai',model:'mimo-v2.6-flash'}}};`);
+  await run('loadAgent()');
+  assert.equal(run('READS[1]'), '/api/chat/agent');
+  assert.match(run('LABEL.textContent'), /mimo/);
+});
+
+test('a late status reply from another chat cannot replace the current model', async () => {
+  const run = boot();
+  run(`A.sid='S001'; A.agent={agent:{provider:'openai',model:'openai:gpt-5.6-luna'}};
+    api=()=>new Promise(resolve=>globalThis.RESOLVE=resolve); globalThis.PENDING=loadAgent(); A.sid='S002';
+    RESOLVE({ok:true,j:{agent:{provider:'openai',model:'mimo-v2.6-flash'}}});`);
+  await run('PENDING');
+  assert.equal(run('A.agent.agent.model'), 'openai:gpt-5.6-luna');
 });

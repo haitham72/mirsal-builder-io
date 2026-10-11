@@ -798,8 +798,21 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
 .hm-filters{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
 .hm-filter{border:1px solid transparent;background:transparent;font-size:var(--fs-s);color:var(--mut);border-radius:var(--r-s);padding:6px 13px;transition:background-color .18s var(--ease)}.hm-filter:hover{background:var(--fill)}
 .hm-filter[aria-pressed=true]{background:var(--sf);border-color:var(--bd);color:var(--tx);box-shadow:0 2px 4px #293e5708}
-.hm-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
-.hm-card{min-width:0}
+.hm-showcase{container-type:inline-size;margin-top:18px}
+.hm-gal{--hm-cols:2;--hm-gap:12px;--hm-row:calc((100cqw - (var(--hm-cols) - 1)*var(--hm-gap))/var(--hm-cols));display:grid;grid-template-columns:repeat(var(--hm-cols),minmax(0,1fr));grid-auto-rows:var(--hm-row);gap:var(--hm-gap)}
+.hm-card{min-width:0;position:relative;height:100%}
+.hm-card:nth-child(n+5){display:none}
+.hm-gal .hm-art{height:100%;aspect-ratio:auto;padding:26px 12px 40px}
+.hm-caption{position:absolute;left:12px;right:12px;bottom:12px;text-align:left;display:grid;gap:2px;font-size:var(--fs-xs)}
+.hm-caption b,.hm-caption span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hm-caption span{color:#49617e}
+.hm-telegram{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:26px;height:26px;border-radius:var(--r-s);background:#ffffffcc;color:var(--pri)}.hm-telegram svg{width:15px;height:15px}
+.hm-film{position:relative;grid-column:1/-1;width:100%;height:100%;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;padding:0;background:var(--fill);color:#fff}
+.hm-film video{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.hm-film-label{position:absolute;left:16px;bottom:14px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:#080a0dbd;border:1px solid #ffffff40;border-radius:var(--r-pill);font-size:var(--fs-s)}.hm-film-label svg{width:16px;height:16px}
+@container (min-width:560px){.hm-gal{--hm-cols:3;--hm-gap:18px}.hm-card:nth-child(-n+6){display:block}.hm-card:nth-child(n+7){display:none}}
+@container (min-width:780px){.hm-gal{--hm-cols:4}.hm-card:nth-child(-n+8){display:block}.hm-card:nth-child(n+9){display:none}}
+@container (min-width:1000px){.hm-gal{--hm-cols:5}.hm-card:nth-child(-n+10){display:block}.hm-card:nth-child(n+11){display:none}}
+@container (min-width:1220px){.hm-gal{--hm-cols:6}.hm-card:nth-child(-n+12){display:block}}
 .hm-art{position:relative;width:100%;border:1px solid #00000006;border-radius:var(--r);aspect-ratio:1.18;overflow:hidden;display:grid;place-items:center;padding:22px 12px 10px;color:var(--tx);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
 .hm-art img,.hm-art video{object-fit:contain;width:85%;height:87%;max-width:100%;filter:drop-shadow(0 8px 6px #415b7020)}
 .hm-card:hover .hm-art{transform:translateY(-4px);box-shadow:0 10px 25px #2e466b14}.hm-art:active{transform:scale(.98)}
@@ -824,7 +837,7 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
  .hm-hc0{left:-26%;top:0}.hm-hc1{right:0;top:-6%}.hm-hc2{right:2%;bottom:0}.hm-bub{font-size:var(--fs-xs);padding:5px 8px}.hm-b2{left:-32px;bottom:5px}
  .hm-side{gap:12px}.hm-mini{padding:16px;min-height:190px}.hm-mini h3{font-size:var(--fs-l);max-width:120px}.hm-mini p{max-width:115px}.hm-miniart{width:80px;height:80px;right:-10px;bottom:-3px;opacity:.7}.hm-orbit{width:60px;height:60px;right:-10px;top:95px;opacity:.6}
  .hm-tools{gap:9px}.hm-tool{padding:12px 10px;gap:8px}.hm-ti{width:30px;height:30px;border-radius:var(--r-s)}.hm-tool>svg{display:none}
- .hm-head h2{font-size:var(--fs-xl)}.hm-gal{grid-template-columns:repeat(2,1fr);gap:16px 12px}.hm-art{aspect-ratio:1}.hm-open{display:none}
+ .hm-head h2{font-size:var(--fs-xl)}.hm-art{aspect-ratio:1}.hm-open{display:none}
  .hm-journey{padding:22px}.hm-steps{grid-template-columns:1fr}.hm-foot{flex-wrap:wrap}}
 @media (prefers-reduced-motion:reduce){.hm-tool,.hm-art,.hm-go,.hm-link,.hm-open{transition:none}.hm-card:hover .hm-art,.hm-tool:hover{transform:none}}
 

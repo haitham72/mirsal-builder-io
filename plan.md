@@ -27,8 +27,7 @@ so every read and edit costs a lot of tokens. Goal: the same behaviour, readable
 
 ## The redesign (branch `edit-design`) — built 2026-10-11, waits for Haitham
 
-Every phase of `docs/redesign_plan.md` §5 is built. Next: Haitham looks at it in the browser (restart with `serve --reload`, hard reload); the outside
-review against §9; then D3 / D4 (§5 "Open"). Merge into `main` only when Haitham says so.
+Every phase of `docs/redesign_plan.md` §5 is built and the implementation is merged into `main` by Haitham's instruction. Remaining: Haitham's browser verdict (restart with `serve --reload`, hard reload), the outside review against §9, and D3 / D4 (§5 "Open"). The dark-mode plan stays on `edit-design`.
 
 ## Step 1 — prove the follow-up through the real server (fakes only)
 

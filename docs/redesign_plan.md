@@ -1,7 +1,7 @@
 # docs/redesign_plan.md — one clean app, with nothing lost (branch `edit-design`)
 
 **Status (2026-10-11): every phase of §5 is built on `edit-design`** (one commit each, `docs/design.md` §5-§7 hold the result); what is open is §5's
-last list: Haitham's look in the browser, the outside review (§9), D3 / D4, and the merge into `main` when Haitham says so. This file is deleted once those
+last list: Haitham's look in the browser, the outside review (§9), D3 / D4, with the built implementation merged into `main` by Haitham's instruction; the dark-mode plan stays on `edit-design`. This file is deleted once those
 are done; §4 stays until the review has checked it against the code.
 
 Haitham, 2026-10-10: the app grew in increments and is "a little bit chaotic, so many informations everywhere"; the Home page he designed is the
