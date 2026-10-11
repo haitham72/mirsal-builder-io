@@ -128,6 +128,7 @@ Each line is the module's own first docstring line.
 - `explain.py` — Plain words for a sheet Python could not use (2026-10-02, the falcon sheet G094).
 - `faq.py` — The shared FAQ (docs/agent-and-chat.md "Support"): what the support agent may answer from, written from resolved tickets and published by an admin.
 - `gates.py` — The golden path's review gates (docs/engine-and-studio.md, checkpoint 1F). The rules live here, in Python, and every phase keeps them:
+- `projects.py` — the project map (redesign phase 3): Project > Batch > Sheet > Video as one tree for one batch, a pure read of `pipeline._packs`, the families, `video_sheets` and the jobs in flight (`GET /api/generations/{id}/map`).
 - `groups.py` — Batch groups (Haitham, 2026-10-04): variations of one idea are ONE family. Earlier batches shows a family as one entry with a strip of its …
 - `imports.py` — Bring a file into Mirsal, never twice (Haitham, 2026-10-05: "there should be a way of import with deduplication").
 - `measure.py` — Phase 2 step S4: how often does a video made from the normalised video sheet leave its cell?

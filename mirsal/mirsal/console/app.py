@@ -513,6 +513,25 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         except tr.TrendingError as e:
             return _terr(request, e)
 
+    # ---------- the project map (flow/projects.py, docs/redesign_plan.md §6): the Studio's map column in ONE read
+    from .app_models import ProjectMap
+    from ..flow import projects as _projects
+
+    @app.get("/api/generations/{gid}/map", include_in_schema=False)
+    @app.get("/api/v1/generations/{gid}/map", include_in_schema=False)
+    async def project_map(request: Request, gid: str):
+        user, resp = await _member(request, f"/api/generations/{gid}/map")
+        if resp:
+            return resp
+        num = gid.upper().lstrip("G")
+        if not num.isdigit() or not await asyncio.to_thread(c.visible, user, int(num)):
+            return _j(request, 404, {"error": "not found"})
+        try:
+            m = await asyncio.to_thread(_projects.project_map, c.out, int(num), lambda g: c.visible(user, g))
+        except (FileNotFoundError, KeyError, ValueError, pl.PipelineError):
+            return _j(request, 404, {"error": "not found"})
+        return _j(request, 200, ProjectMap.model_validate(m).model_dump())
+
     @app.get("/api/trending/{pid}/file/{sid}", include_in_schema=False)
     @app.get("/api/v1/trending/{pid}/file/{sid}", include_in_schema=False)
     async def trending_file(request: Request, pid: str, sid: str):

@@ -178,7 +178,7 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
    mockup's palette; a mockup token (e.g. the issue colours) joins `:root` in the phase that first reads it, never unused (rule 6).
 2. **Built 2026-10-11.** The Studio's step strip is the journey: Idea · Prompt · Stickers · Motion · (Particles) · Pack · Telegram on one slim
    track (`stepsHtml`, `.gsteps`), the same buttons and actions as before (`gtab`, `gadd`; Telegram is `gopenpack`). `docs/design.md` "The Studio's journey".
-3. **The project map's data** (§6): `flow/projects.py` + one native route + OpenAPI + a test on fakes. No UI yet.
+3. **Built 2026-10-11** (§6): the project map's data.
 4. **Studio frame:** the map column (replacing Earlier batches), the project switcher, the breadcrumb, every MAP / PROJ action of §4 wired to
    its existing `ACT`.
 5. **Studio work area:** the toolbar, Stickers | Whole sheet (merging `sheetPanel`, `videoPanel` and the Full-analysis dialog), the tiles.
@@ -189,13 +189,9 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 Each phase ends with `renamed` / `retired` filled for whatever left, `docs/ui_inventory.md` regenerated, the area doc updated (rule 12), and the
 part of this file it built deleted.
 
-## 6. The one new piece of backend: the project map
+## 6. The one new piece of backend: the project map — built 2026-10-11
 
-The browser must not stitch the tree from four calls (rule 11). `flow/projects.py` `project_map(out, gid, user)` reads what exists — the pack
-of batches (`pipeline._packs`), each family (`flow/groups.py`), each batch's `video_sheets`, the jobs in flight (`generation/jobs.py`) — and
-returns one JSON tree: `{project: {title, request}, batches: [{root, title, stickers, sheets: [{id, label, relation, prompt_changed, status,
-thumb, counts, videos: [{id: "A1", status, used, counts, job}]}]}]}`. A native route `GET /api/generations/{id}/map` (pydantic model in
-`app_models.py`, OpenAPI, `docs/api.md`). Pure reads: nothing migrates, nothing is written. Tested on a temp `out/` with fakes.
+`flow/projects.py` `project_map(out, gid, viewer)` and the native route `GET /api/generations/{id}/map` (`docs/api.md`, `tests/test_projects.py`).
 
 ## 7. Decisions (Haitham accepted every recommendation below, 2026-10-11)
 
