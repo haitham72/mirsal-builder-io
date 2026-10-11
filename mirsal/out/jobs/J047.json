@@ -38,5 +38,9 @@
   },
   "cost_estimate": 2.0,
   "stage": "downloading",
-  "waiting_pid": null
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791641818.8,
+    "by": "local"
+  }
 }

@@ -38,5 +38,9 @@
     "duration": "3"
   },
   "cost_estimate": 4.5,
-  "stage": "downloading"
+  "stage": "downloading",
+  "dismissed": {
+    "at": 1791641818.656,
+    "by": "local"
+  }
 }

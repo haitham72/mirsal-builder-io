@@ -2587,5 +2587,18 @@
       "to": "G005",
       "via": "G093"
     }
-  ]
+  ],
+  "added": {
+    "4fc651f2": [
+      "static:1",
+      "static:2",
+      "static:3",
+      "static:4",
+      "static:5",
+      "static:6",
+      "static:7",
+      "static:8",
+      "static:9"
+    ]
+  }
 }

@@ -34,5 +34,9 @@
     "resolution": "2k"
   },
   "cost_estimate": 2.0,
-  "stage": "downloading"
+  "stage": "downloading",
+  "dismissed": {
+    "at": 1791641818.656,
+    "by": "local"
+  }
 }

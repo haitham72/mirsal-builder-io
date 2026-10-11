@@ -1,0 +1,41 @@
+{
+  "id": "J084",
+  "kind": "video",
+  "task": "girl emirati",
+  "generation": "G128",
+  "provider": "higgsfield-cli",
+  "model": "grok_video_v15",
+  "request": {
+    "model": "grok_video_v15",
+    "options": {
+      "resolution": "1080p",
+      "duration": "3"
+    },
+    "prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. bounces gently up and down with joyful energy\n2. subtle breathing with slight head nod indicating calmness\n3. slow gentle lean and head tilt back and forth\n4. slight chest puff and head held high with pride\n5. fast arm and leg movement simulating running\n6. small shy head turns and subtle blush animation\n7. slow playful head wiggle and cheeky smile\n8. continuous slow spin with laughing expression\n9. shaking slightly with startled blinking\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every character's design unchanged.",
+    "custom_prompt": false,
+    "start_image": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/G128-girl_emirati-20261009T114909/video_sheet/A1/sheet.png",
+    "sheet": "A1",
+    "label": "girl emirati",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "a95ef863-b6c3-47e6-9495-f949ce3385a9",
+  "result": {
+    "file": "jobs/J084-girl_emirati-video/result.mp4",
+    "sha256": "f5701e365329413366b53b463503c40109bf8511fb80708f2bc1e839b0fe7170",
+    "bytes": 3820090
+  },
+  "cost": 24.0,
+  "error": null,
+  "created_at": 1791641899.915,
+  "claimed_at": 1791641905.023,
+  "completed_at": 1791641954.784,
+  "params": {
+    "resolution": "1080p",
+    "duration": "3"
+  },
+  "cost_estimate": 24.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}
