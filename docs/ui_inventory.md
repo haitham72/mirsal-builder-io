@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-10 (branch `edit-design`), before the redesign.
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after redesign phase 1 (the rail of four, the avatar menu, Create's tabs).
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**429 actions** (430 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 25 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**431 actions** (432 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 25 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -90,31 +90,33 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `anexport` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 | `ansave` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 
-### `app.js` (21)
+### `app.js` (23)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `dlgx` | 43 | app.js, auth.js, editor.js, generate.js, imports.js, live.js, packs.js, particles.js, prepare.js, support.js, telegram.js, tickets.js, trash.js, trending.js | none (browser only) |
-| `askok` | 46 | app.js | none (browser only) |
-| `copyid` | 48 | agent.js, generate.js | none (browser only) |
-| `cfok` | 50 | app.js | none (browser only) |
-| `pk` | 55 | app.js | none (browser only) |
-| `pknew` | 56 | app.js | `/api/packs` |
-| `c2tog` | 78 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `nav` | 79 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, packs.js, prepare.js, tickets.js | none (browser only) |
-| `lsel` | 108 | app.js, packs.js | none (browser only) |
-| `lselall` | 109 | app.js | none (browser only) |
-| `lselnone` | 110 | app.js | none (browser only) |
-| `lselmove` | 116 | app.js | `/api/stickers/move` |
-| `lseldel` | 117 | app.js | `/api/stickers/delete` |
-| `libtab` | 163 | app.js | none (browser only) |
-| `pkmerge` | 164 | app.js | `/api/packs/{}/merge` |
-| `pkgrp` | 168 | app.js | none (browser only) |
-| `seeall` | 169 | app.js | none (browser only) |
-| `openpack` | 190 | app.js, home.js | none (browser only) |
-| `newpack` | 191 | app.js | none (browser only) |
-| `newpackname` | 192 | app.js | `/api/packs` |
-| `prepset` | 202 | app.js | `/api/prepared/setting` |
+| `dlgx` | 44 | app.js, auth.js, editor.js, generate.js, imports.js, live.js, packs.js, particles.js, prepare.js, support.js, telegram.js, tickets.js, trash.js, trending.js | none (browser only) |
+| `askok` | 47 | app.js | none (browser only) |
+| `copyid` | 49 | agent.js, generate.js | none (browser only) |
+| `cfok` | 51 | app.js | none (browser only) |
+| `pk` | 56 | app.js | none (browser only) |
+| `pknew` | 57 | app.js | `/api/packs` |
+| `c2tog` | 97 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `nav` | 98 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, packs.js, prepare.js, tickets.js | none (browser only) |
+| `rme` | 99 | app.js | none (browser only) |
+| `rtrash` | 104 | app.js | none (browser only) |
+| `lsel` | 135 | app.js, packs.js | none (browser only) |
+| `lselall` | 136 | app.js | none (browser only) |
+| `lselnone` | 137 | app.js | none (browser only) |
+| `lselmove` | 143 | app.js | `/api/stickers/move` |
+| `lseldel` | 144 | app.js | `/api/stickers/delete` |
+| `libtab` | 190 | app.js | none (browser only) |
+| `pkmerge` | 191 | app.js | `/api/packs/{}/merge` |
+| `pkgrp` | 195 | app.js | none (browser only) |
+| `seeall` | 196 | app.js | none (browser only) |
+| `openpack` | 217 | app.js, home.js | none (browser only) |
+| `newpack` | 218 | app.js | none (browser only) |
+| `newpackname` | 219 | app.js | `/api/packs` |
+| `prepset` | 229 | app.js | `/api/prepared/setting` |
 
 ### `auth.js` (12)
 
@@ -126,7 +128,7 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `auforgot` | 60 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/forgot`<br>`/api/auth/logout`<br>`/api/auth/password`<br>`/api/people` |
 | `auchange` | 61 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/logout`<br>`/api/auth/password`<br>`/api/people` |
 | `aukeep` | 64 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/logout`<br>`/api/people` |
-| `aulogout` | 65 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/logout`<br>`/api/people` |
+| `aulogout` | 65 | app.js, auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/logout`<br>`/api/people` |
 | `aucreditask` | 66 | auth.js, composer.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/people` |
 | `auadd` | 70 | auth.js | `/api`<br>`/api/auth`<br>`/api/people` |
 | `aupeople` | 72 | auth.js | `/api`<br>`/api/auth`<br>`/api/people` |

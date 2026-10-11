@@ -100,9 +100,15 @@ island if it is *designed* as such (same radius, same border, same glow token) i
 
 1. **The rail is one fixed element in one place.** Same width, same position, same order, on all six sections. Its width is a token; it does not change
    shape per route. Keep the icon-over-label form (`app.js:65`) — it is legible at 72px.
-2. **The rail has eight items and AI is one of them**, declared in `RAIL` (`app.js:63`) in this order: **AI, Studio, Library, Chat, Create, Users, Settings, Help** (Users added 2026-10-04, Help 2026-10-05, below). It once showed six
-   today only because `agent.js:37` unshifts AI in; the declaration moves into `app.js` so the navigation does not depend on script order. `RAILOF` still maps the sub-routes (`pack→library`, `editor`/`export`/`prepare`→`create`,
-   `animate→library`).
+2. **The rail has four items** (Haitham, 2026-10-11, `docs/redesign_plan.md` D5), declared in `RAIL` (`app.js`): **Home, Create, Library, Help**, under the
+   Mirsal logo, then the credits chip (`live.js`) and **the avatar** (`.rme`, the person's initials) at the bottom. The avatar opens `#rmenu`: **Settings &
+   health**, **Team** (`#/users`, owner and admins), **Trash** (Settings' Trash card, `ACT.rtrash`), **Watch folders** (`#/history`, the owner) and **Sign out**
+   (a signed-in person on the LAN); Escape or a click outside closes it. `RAILOF` says which item a screen lights: the Create screens (`agent`, `generate`,
+   `create`, `effects`, `editor`, `export`, `prepare`) light Create, `pack` / `animate` / `chat` light Library, `settings` / `users` / `history` light the
+   avatar. Every old hash still opens. **Create opens the tab used last** (`CTAB`: Chat or Studio).
+   **Create's tabs** (`#ctabs`, `drawCtabs`, D7): above `agent`, `generate`, `create` and `effects`, a segmented **Chat | Studio** control and a **+ New** menu
+   (a `<details>`) with **From a photo** (`#/create`) and **Particle effects** (`#/effects`); the full-screen tools have none. The chat preview (`#/chat`) is
+   reached from the pack and the Library's sticker viewer (D6).
 3. **A persistent second column on every screen that has a list** — Library, Chat, AI for sure, and **Studio and Create** because both have real lists
    (Studio: the batches; Create: the pack/prepared sheets). `drawCol2()` (`app.js:73`) stops being an allow-list of four routes. It must be scrollable,
    collapsible, and remember its width; on a phone it becomes a drawer.
@@ -166,10 +172,10 @@ The first screen and the Mirsal logo's target: `#/home`, an empty hash, and the 
 - Settings keeps one card: for a member, a link to Help; for the owner, the caught failures (Tickets) with a link to the support queue.
 
 ### Users (built 2026-10-04, `users.js`)
-- **Its own section in the rail** (icon `users`), because People in Settings was a cramped list of one-liners with no usage. The **second column is the roster** (a list, so §4.3 applies): an avatar initial, the name, role · status · credits spent · batches, with two rows of filter chips (status, role); the selected person is the `.on` row, the chart icon in its header returns to everyone.
+- **Its own section, Team in the avatar menu** (§4.2; it was a rail item until 2026-10-11), because People in Settings was a cramped list of one-liners with no usage. The **second column is the roster** (a list, so §4.3 applies): an avatar initial, the name, role · status · credits spent · batches, with two rows of filter chips (status, role); the selected person is the `.on` row, the chart icon in its header returns to everyone.
 - **The stage** shows the totals (stat tiles, two 30-day bar charts, worked-vs-failed jobs, then People management: add, requests, approve, roles, passwords, credits, Answered lately) or one person: the management card (`AUV.requests` + `AUV.person`), stat tiles, the two charts, jobs with cost against estimate (a cost over its estimate in `--run`), the ledger (folded), and their work by family with prompts (folded) and 64px thumbnails linking to the WEBM when animated.
 - **The graphs are hand-drawn SVG** (`UV.bars`, `UV.split`): one rect per day on `--pri` (spend) and `--ai` (batches), an empty day a 1px hairline, the day and value in each bar's title; worked / failed is one split bar in `--ok` / `--bad`. No chart library (rule 8). Stat tiles use the glass depth (`--glass`, `--aline`) like AI.
-- **A member** has no Users in the rail (Haitham, 2026-10-05: Users is for the owner and admins). Their own page, **My usage** (their numbers only, no management card), opens from the **My usage** button in Settings, on the "Signed in as" card.
+- **A member** has no Team in the avatar menu (Haitham, 2026-10-05: Users is for the owner and admins). Their own page, **My usage** (their numbers only, no management card), opens from the **My usage** button in Settings, on the "Signed in as" card.
 
 ---
 

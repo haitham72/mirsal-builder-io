@@ -686,10 +686,22 @@ def make_handler(c: Console):
             self.wfile.write(b)
 
         def _file(self, f: Path):
-            """Serve one file with Range support (browsers need it to seek/loop video)."""
+            """Serve one file with Range support (browsers need it to seek/loop video). An ETag and Last-Modified let the browser keep the
+            file: a pack of 30 animated stickers opens from its cache (one 304 each) instead of downloading every video again; `no-cache`
+            still asks each time, so a file replaced under the same name is never shown stale."""
+            from email.utils import formatdate
+            st = f.stat()
+            etag = f'"{st.st_mtime_ns:x}-{st.st_size:x}"'
+            cache = {"ETag": etag, "Last-Modified": formatdate(st.st_mtime, usegmt=True), "Cache-Control": "private, no-cache"}
+            if etag in (self.headers.get("If-None-Match") or ""):
+                self.send_response(304)
+                for k, v in cache.items():
+                    self.send_header(k, v)
+                self.end_headers()
+                return
             data = f.read_bytes()
             ctype = mimetypes.guess_type(f.name)[0] or "application/octet-stream"
-            rng, code, hdr = self.headers.get("Range"), 200, {}
+            rng, code, hdr = self.headers.get("Range"), 200, dict(cache)
             if rng and rng.startswith("bytes="):
                 a, _, b = rng[6:].partition("-")
                 start = int(a) if a else max(0, len(data) - int(b))
@@ -1253,8 +1265,7 @@ def make_handler(c: Console):
                     raise pl.PipelineError("forbidden path", 400)
                 if not f.is_file():
                     raise pl.PipelineError("not found", 404)
-                ctype = mimetypes.guess_type(f.name)[0] or "application/octet-stream"
-                return self._send(200, f.read_bytes(), ctype)
+                return self._file(f)                                     # Range and the browser's cache, like /lib/
             raise pl.PipelineError(NO_ROUTE, 404)
 
         def _particles(self, method: str, path: str, body: dict):

@@ -837,3 +837,29 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
  .hm-head h2{font-size:var(--fs-xl)}.hm-gal{grid-template-columns:repeat(2,1fr);gap:16px 12px}.hm-art{aspect-ratio:1}.hm-open{display:none}
  .hm-journey{padding:22px}.hm-steps{grid-template-columns:1fr}.hm-foot{flex-wrap:wrap}}
 @media (prefers-reduced-motion:reduce){.hm-tool,.hm-art,.hm-go,.hm-link,.hm-open{transition:none}.hm-card:hover .hm-art,.hm-tool:hover{transform:none}}
+
+/* the rail of four and the avatar (docs/redesign_plan.md D5, docs/design.md §4): the credits chip, then the avatar at the very bottom; its menu holds Settings & health, Team, Trash, Watch folders, Sign out */
+.rme{order:1;margin:8px 0 2px;width:40px;height:40px;flex:none;border-radius:50%;border:2px solid #fff;background:linear-gradient(140deg,#dbe8ff,#c5d8fb);color:#33507e;font-weight:700;font-size:var(--fs-s);cursor:pointer;box-shadow:var(--sh);display:grid;place-items:center}
+.rme:hover,.rme.on{box-shadow:0 0 0 3px var(--pri-l2)}.rme[aria-expanded=true]{box-shadow:0 0 0 3px var(--pri-bd)}
+#rmenu{position:fixed;z-index:70;left:calc(var(--rail-w) + 8px);bottom:14px;min-width:220px;padding:6px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-m);box-shadow:0 18px 50px #0f172a24;display:flex;flex-direction:column;gap:2px}
+#rmenu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:none;border-radius:var(--r-s);font-size:var(--fs-m);color:var(--tx);cursor:pointer;text-align:left}
+#rmenu button:hover,#rmenu button:focus-visible{background:var(--fill)}#rmenu svg{width:18px;height:18px;color:var(--mut)}
+.rm-who{padding:8px 10px 10px;border-bottom:1px solid var(--bd);margin-bottom:4px;display:flex;flex-direction:column}.rm-who span{font-size:var(--fs-xs);color:var(--mut);text-transform:capitalize}
+/* Create's tabs (D7): Chat | Studio and "+ New" (a photo, a particle effect), above whichever of the four screens is open */
+#ctabs:empty{display:none}
+#ctabs{display:flex;align-items:center;gap:14px;padding:10px var(--gutter);border-bottom:1px solid var(--bd);background:#ffffffb8;backdrop-filter:blur(12px);position:relative;z-index:6}
+.ct-tabs{display:flex;gap:4px;padding:3px;background:var(--fill);border-radius:var(--r-pill)}
+.ct-tabs button{display:flex;align-items:center;gap:6px;border:0;background:none;padding:6px 14px;border-radius:var(--r-pill);font-size:var(--fs-m);font-weight:600;color:var(--mut);cursor:pointer}
+.ct-tabs button svg{width:16px;height:16px}.ct-tabs button:hover{color:var(--tx)}
+.ct-tabs button[aria-selected=true]{background:var(--sf);color:var(--pri-d);box-shadow:0 1px 3px #0f172a14}
+.ct-new{position:relative}.ct-new summary{list-style:none;display:inline-flex;align-items:center;gap:6px}.ct-new summary::-webkit-details-marker{display:none}.ct-new summary svg{width:15px;height:15px}
+.ct-menu{position:absolute;left:0;top:calc(100% + 6px);min-width:200px;padding:6px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-m);box-shadow:0 18px 50px #0f172a24;display:flex;flex-direction:column;gap:2px;z-index:20}
+.ct-menu button{display:flex;align-items:center;gap:10px;padding:9px 10px;border:0;background:none;border-radius:var(--r-s);font-size:var(--fs-m);cursor:pointer;text-align:left;color:var(--tx)}
+.ct-menu button:hover,.ct-menu button.on{background:var(--fill)}.ct-menu svg{width:18px;height:18px;color:var(--mut)}
+.ct-here{font-size:var(--fs-s);color:var(--mut)}
+@media (max-width:900px){body.col2.hasct #ctabs{padding-left:64px;min-height:60px}body.col2.hasct .screen{padding-top:22px}body.col2.hasct #s-agent .ai-top{padding-left:22px}}
+@media (max-width:760px){
+ #ctabs{padding:8px 16px;gap:10px}body.col2.hasct #ctabs{padding-left:60px}.ct-tabs button{padding:6px 11px}.ct-here{display:none}
+ .rme{order:1;margin:0 4px;width:36px;height:36px;align-self:center}
+ #rmenu{left:auto;right:8px;bottom:calc(70px + env(safe-area-inset-bottom))}
+}

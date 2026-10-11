@@ -1,7 +1,7 @@
 # docs/redesign_plan.md — one clean app, with nothing lost (branch `edit-design`)
 
-**Status: a proposal for Haitham and an outside reviewer (2026-10-10); nothing in §5-§7 is built.** Built so far on this branch: the safety net
-(§3). This file exists only while the redesign is open; each phase deletes its part once built, and the architecture moves into
+**Status: Haitham accepted every recommendation of §7 (2026-10-11); the outside review (§9) is still to come.** Built so far on this branch:
+the safety net (§3) and phase 1 (§5). This file exists only while the redesign is open; each phase deletes its part once built, and the architecture moves into
 `docs/design.md` / `docs/architecture.md`.
 
 Haitham, 2026-10-10: the app grew in increments and is "a little bit chaotic, so many informations everywhere"; the Home page he designed is the
@@ -174,8 +174,8 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 
 ## 5. Phases (one commit each; after each: the inventory test, the tests its files map to, Haitham's look in the browser)
 
-1. **Tokens and shell.** The rail of four and the avatar menu; Create's Chat | Studio tabs; `shell.css`'s tokens folded into `studio.css`
-   (`:root`, keeping `tests/test_js.py`'s scale). No screen's insides change yet. Every old hash still opens.
+1. **Built 2026-10-11** (the rail of four, the avatar menu, Create's tabs: `docs/design.md` §4.2). `studio.css`'s `:root` already carried the
+   mockup's palette; a mockup token (e.g. the issue colours) joins `:root` in the phase that first reads it, never unused (rule 6).
 2. **The journey bar** as one component (`journey.js` or in `app.js`, prefix `jb`), in Chat first (replacing the pill: `plan.md` Step 0) and
    then the Studio header.
 3. **The project map's data** (§6): `flow/projects.py` + one native route + OpenAPI + a test on fakes. No UI yet.
@@ -197,7 +197,7 @@ returns one JSON tree: `{project: {title, request}, batches: [{root, title, stic
 thumb, counts, videos: [{id: "A1", status, used, counts, job}]}]}]}`. A native route `GET /api/generations/{id}/map` (pydantic model in
 `app_models.py`, OpenAPI, `docs/api.md`). Pure reads: nothing migrates, nothing is written. Tested on a temp `out/` with fakes.
 
-## 7. Decisions for Haitham (each blocks only its phase)
+## 7. Decisions (Haitham accepted every recommendation below, 2026-10-11)
 
 - **D1 — the words.** Project / Batch / Sheet / Video, or another set (e.g. Set / Try / Animation). Recommendation: as written.
 - **D2 — Earlier batches.** The project switcher replaces the column entirely (one row per project). Recommendation: yes.

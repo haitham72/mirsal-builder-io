@@ -9,6 +9,7 @@ const ikey=()=>(self.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().to
 let toastT=0;function toast(m,bad){const t=$('toast');t.textContent=m||'';t.className=(m?'on ':'')+(bad?'bad':'');clearTimeout(toastT);if(m)toastT=setTimeout(()=>t.className='',bad?6000:3500)}
 const say=t=>{const m=$('msg');if(m)m.innerHTML=t||''};   // callers escape what they pass
 const ICONS={
+ home:'<path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
  ai:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM5.5 16l.6 1.6 1.6.6-1.6.6L5.5 20l-.6-1.7-1.6-.6 1.6-.6z"/>',panel:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/>',
  gen:'<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
  lib:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
@@ -71,14 +72,40 @@ const packById=id=>LIB.packs.find(p=>p.id===id);
 
 /* ---------- router */
 const SCREENS=['home','agent','effects','generate','history','library','create','editor','pack','export','settings','animate','chat','prepare','users','help'],RENDER={};
-const RAIL=[['agent','ai','AI'],['generate','gen','Studio'],['library','lib','Library'],['chat','chat','Chat'],['create','create','Create'],['users','users','Users'],['settings','settings','Settings'],['help','help','Help']],RAILOF={effects:'create',pack:'library',editor:'create',export:'create',animate:'library',prepare:'create'};
-let route_='home',PACK_ID=null;
-function drawRail(){$('c2tog').innerHTML=ic('panel');$('rail').innerHTML=`<button class="logo ${route_==='home'?'on':''}" data-act=home title="Home" aria-label="Mirsal home"${route_==='home'?' aria-current=page':''}><img src=/assets/brand/mirsal-logo.png alt=""></button>`+RAIL.filter(([k])=>k!=='users'||typeof AUV==='undefined'||AUV.staff(typeof ME==='undefined'?null:ME)).map(([k,i,l])=>`<button class="rbtn ${(RAILOF[route_]||route_)===k?'on':''}" data-act=nav data-to=${k}>${ic(i)}<span>${l}</span>${k==='help'&&typeof supUnread==='function'&&supUnread()?`<i class=rdot aria-label="${supUnread()} unread"></i>`:''}</button>`).join('')}
+/* the rail of four (docs/redesign_plan.md D5): Home · Create · Library · Help, and the avatar (Settings & health, Team, Trash, Watch folders, Sign out).
+   Every old hash still opens; RAILOF says which item a screen lights. Create opens the tab used last (Chat or Studio). */
+const RAIL=[['home','home','Home'],['agent','create','Create'],['library','lib','Library'],['help','help','Help']],RAILOF={generate:'agent',create:'agent',effects:'agent',editor:'agent',export:'agent',prepare:'agent',pack:'library',animate:'library',chat:'library',settings:'me',users:'me',history:'me'};
+const CREATE_TABS=['agent','generate','create','effects'];
+let route_='home',PACK_ID=null,CTAB='agent',RME=false;
+const meOf=()=>typeof ME==='undefined'?null:ME,meOwner=me=>!me||me.id==='local'||me.role==='owner',meStaff=me=>typeof AUV==='undefined'||AUV.staff(me);
+const meInitials=me=>{const n=String(me&&(me.name||me.email)||'').replace(/@.*/,'').trim().split(/[\s._-]+/).filter(Boolean);return n.length?(n[0][0]+(n[1]?n[1][0]:'')).toUpperCase():'Me'};
+function rmeMenu(){const me=meOf();
+ return `<div id=rmenu role=menu aria-label="Account and settings">${me&&me.id!=='local'?`<div class=rm-who><b>${esc(me.name||me.email||'')}</b><span>${esc(me.role||'')}</span></div>`:''}
+  <button role=menuitem data-act=nav data-to=settings>${ic('settings')} Settings & health</button>${meStaff(me)?`<button role=menuitem data-act=nav data-to=users>${ic('users')} Team</button>`:''}
+  <button role=menuitem data-act=rtrash>${ic('trash')} Trash</button>${meOwner(me)?`<button role=menuitem data-act=nav data-to=history>${ic('folder')} Watch folders</button>`:''}
+  ${me&&me.id!=='local'?`<button role=menuitem data-act=aulogout>${ic('back')} Sign out</button>`:''}</div>`}
+function drawRail(){$('c2tog').innerHTML=ic('panel');const on=RAILOF[route_]||route_,me=meOf();
+ $('rail').innerHTML=`<button class="logo ${route_==='home'?'on':''}" data-act=home title="Home" aria-label="Mirsal home"><img src=/assets/brand/mirsal-logo.png alt=""></button>`+RAIL.map(([k,i,l])=>`<button class="rbtn ${on===k?'on':''}" data-act=nav data-to=${k==='agent'?CTAB:k}${on===k?' aria-current=page':''}>${ic(i)}<span>${l}</span>${k==='help'&&typeof supUnread==='function'&&supUnread()?`<i class=rdot aria-label="${supUnread()} unread"></i>`:''}</button>`).join('')
+  +`<button class="rme ${on==='me'?'on':''}" data-act=rme aria-haspopup=menu aria-expanded=${RME} title="${esc(me&&me.id!=='local'?(me.name||me.email||''):'You')}: account and settings">${esc(meInitials(me))}</button>`+(RME?rmeMenu():'')}
+/* Create's tabs (D7): Chat | Studio over one project, and "+ New" for a photo or a particle effect; full-screen tools (editor, export, prepare) have none */
+function drawCtabs(){const el=$('ctabs'),on=CREATE_TABS.includes(route_);document.body.classList.toggle('hasct',on);if(!on){el.innerHTML='';return}
+ const tab=(k,i,l)=>`<button role=tab aria-selected=${route_===k} data-act=nav data-to=${k}>${ic(i)}${l}</button>`;
+ el.innerHTML=`<div class=ct-tabs role=tablist aria-label=Create>${tab('agent','chat','Chat')}${tab('generate','gen','Studio')}</div>
+  <details class=ct-new><summary class="btn sm">${ic('plus')} New</summary><div class=ct-menu role=menu><button role=menuitem data-act=nav data-to=create class="${route_==='create'?'on':''}">${ic('photo')} From a photo</button><button role=menuitem data-act=nav data-to=effects class="${route_==='effects'?'on':''}">${ic('film')} Particle effects</button></div></details>
+  ${route_==='create'||route_==='effects'?`<span class=ct-here>${route_==='create'?'From a photo':'Particle effects'}</span>`:''}`}
 /* narrow screens: the second column is a drawer (studio.css, 'the shell on narrow screens') */
 ACT.c2tog=()=>document.body.classList.toggle('c2open');
 ACT.nav=el=>{location.hash='#/'+(el.dataset.to==='generate'?'studio':el.dataset.to)};
+ACT.rme=()=>{RME=!RME;drawRail();if(RME){const b=document.querySelector('#rmenu [role=menuitem]');if(b)b.focus()}};
+const rmeClose=()=>{if(RME){RME=false;drawRail()}};
+document.addEventListener('click',e=>{if(RME&&!e.target.closest('#rail'))rmeClose();const d=document.querySelector('#ctabs details[open]');if(d&&(!e.target.closest('.ct-new')||e.target.closest('[role=menuitem]')))d.open=false});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&RME){rmeClose();const b=document.querySelector('#rail .rme');if(b)b.focus()}});
+/* Trash lives at the end of Settings (trash.js): open Settings and bring the Trash card into view once it has drawn */
+ACT.rtrash=()=>{RME=false;let n=0;const go=()=>{const t=$('trx-box');if(t)return t.parentElement.scrollIntoView({behavior:'smooth',block:'start'});if(++n<40)setTimeout(go,100)};
+ if(route_==='settings'){drawRail();go()}else{location.hash='#/settings';setTimeout(go,100)}};
 function route(){SEL.clear();const h=location.hash.replace(/^#\/?/,'')||'home',ps=h.split('/'),n=ps[0]==='studio'?'generate':ps[0],a=ps.slice(1).join('/');route_=SCREENS.includes(n)?n:'home';document.body.classList.remove('c2open');
- SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCol2();if(RENDER[route_])RENDER[route_](a)}
+ if(route_==='agent'||route_==='generate')CTAB=route_;RME=false;
+ SCREENS.forEach(s=>$('s-'+s).classList.toggle('on',s===route_));drawRail();drawCtabs();drawCol2();if(RENDER[route_])RENDER[route_](a)}
 window.addEventListener('hashchange',route);
 
 /* ---------- second column: packs (occupies the chat-list position of the Mirsal mockup; every row is a real pack) */

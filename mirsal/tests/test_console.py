@@ -64,6 +64,11 @@ class ConsoleTests(unittest.TestCase):
         h.request("GET", f"/src/{gid}/video", headers={"Range": "bytes=0-99"})
         r = h.getresponse(); body = r.read(); h.close()
         self.assertEqual(r.status, 206); self.assertEqual(len(body), 100)
+        etag = r.getheader("ETag"); self.assertTrue(etag); self.assertEqual(r.getheader("Cache-Control"), "private, no-cache")
+        h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)          # the browser asks again with its copy's tag: a 304, no body
+        h.request("GET", f"/src/{gid}/video", headers={"If-None-Match": etag})
+        r = h.getresponse(); body = r.read(); h.close()
+        self.assertEqual(r.status, 304); self.assertEqual(body, b"")
         self.assertEqual(self.req("GET", f"/src/{gid}/clip/1")[0], 404)
         self.assertIn("health", self.req("GET", "/api/generations")[1])
         # inline onclick handlers resolve names on the element first: `animate` is Element.animate and silently broke the button once

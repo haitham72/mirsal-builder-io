@@ -223,19 +223,25 @@ class ShellTests(unittest.TestCase):
     def ui():
         return Path(__file__).resolve().parent.parent / "mirsal" / "console"
 
-    def test_the_rail_declares_eight_items_and_ai_is_first(self):
+    def test_the_rail_declares_four_items_and_the_avatar_holds_the_rest(self):
         import re
         ui = self.ui()
         app = (ui / "app.js").read_text(encoding="utf-8")
         rail = re.search(r"const RAIL=\[(.*?)\],RAILOF", app).group(1)
         items = re.findall(r"\['(\w+)','(\w+)','([^']+)'\]", rail)
-        self.assertEqual([i[2] for i in items], ["AI", "Studio", "Library", "Chat", "Create", "Users", "Settings", "Help"])     # Users added 2026-10-04, Help 2026-10-05 (docs/design.md §4)
+        self.assertEqual([i[2] for i in items], ["Home", "Create", "Library", "Help"])     # the rail of four (Haitham, 2026-10-11, docs/redesign_plan.md D5)
+        for to in ("settings", "users", "history"):                                           # the avatar menu keeps every screen the old rail reached
+            self.assertIn(f"data-act=nav data-to={to}", app)
+        self.assertIn("data-act=rtrash", app); self.assertIn("data-act=aulogout", app)
+        for tab in ("agent", "generate", "create", "effects"):                              # Create's tabs and its + New menu
+            self.assertIn(f"'{tab}'", re.search(r"const CREATE_TABS=\[(.*?)\]", app).group(1))
         screens = re.search(r"const SCREENS=\[(.*?)\]", app).group(1)
         html = (ui / "index.html").read_text(encoding="utf-8")
         for route, icon, _ in items:
             self.assertIn(f"'{route}'", screens, f"the rail's {route} is a screen")
             self.assertIn(f"id=s-{route}", html, f"the rail's {route} has a section")
             self.assertRegex(app, rf"\b{icon}:'<", f"the rail's icon {icon} exists")
+        self.assertIn("id=ctabs", html)
         self.assertNotIn("RAIL.unshift", (ui / "agent.js").read_text(encoding="utf-8"), "a later script must not register itself in the navigation")
 
     def test_the_narrow_layout_is_the_shells_and_not_one_screens(self):
@@ -343,7 +349,7 @@ class ShellTests(unittest.TestCase):
         self.assertIn('"effects.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
         app = (ui / "app.js").read_text(encoding="utf-8")
         self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
-        self.assertIn("effects:'create'", app, "the rail keeps Create lit on the effects screen")
+        self.assertIn("effects:'agent'", app, "the rail keeps Create lit on the effects screen")
         self.assertNotIn("data-act=fxopen", (ui / "editor.js").read_text(encoding="utf-8"), "Create no longer offers Particle effects: particles start in the Studio (Haitham, 2026-10-05)")
         for route in ("/api/effects", "/estimate", "/video", "/add", "/plan"):
             self.assertIn(route, fx)

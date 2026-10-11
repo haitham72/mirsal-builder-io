@@ -7,9 +7,9 @@ run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when
 ## The redesign (branch `edit-design`, 2026-10-10) — waits for Haitham and an outside review
 
 `docs/redesign_plan.md` is the spec (read it whole, with `docs/architecture.md` and `docs/ui_inventory.md`). Next, in order:
-1. **Haitham answers D1-D7** (`docs/redesign_plan.md` §7) and an outside LLM reviews the plan against §9 of that file. Fold the answers and the
-   review into the plan before building.
-2. **Phase 1 — tokens and shell** (§5), then the phases in order: one session at a time, Opus on medium effort, one commit per phase, the
+1. **The outside review** (an LLM, against §9 of that file) is still to come; fold its findings into phases 3-11 before they are built. D1-D7 are
+   answered (every recommendation accepted, 2026-10-11); phase 1 is built.
+2. **Phase 2 — the journey bar** (§5), then the phases in order: one session at a time, Opus on medium effort, one commit per phase, the
    inventory test green (`python -m unittest tests.test_ui_inventory`) with `renamed` / `retired` filled for anything that moved or left.
 
 The journey bar of phase 2 is the slider Step 0 below asks for (item 2); on this branch, build it there instead of a separate slider.

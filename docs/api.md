@@ -46,7 +46,7 @@ only account must never open the server: delete `out/users.json` on purpose to g
 | `GET /api/users` · `POST /api/users {name, role?, can_spend?}` | owner only; the create answer is `{user, token}` (the only time the token is visible) |
 | `POST /api/users/{id}/update {name?, role?, can_spend?}` · `disable` · `enable` · `rotate` | owner only; `rotate` answers `{user, token}` and the old token stops working at once |
 
-Packs carry `owner`; a legacy pack without one belongs to `local`. `GET /api/library` filters packs, Recent and totals by the caller, including the owner. Pack routes and `/lib/` files of another person answer 404. Merge, single/bulk moves and batch Add validate every destination pack; a member may add only a batch they can see. Telegram routes remain owner-only. Reference images (`out/refs/R###`, shared by id) are not per user yet.
+Packs carry `owner`; a legacy pack without one belongs to `local`. `GET /api/library` filters packs, Recent and totals by the caller, including the owner. Pack routes and `/lib/` files of another person answer 404. Media files (`/lib/`, `/out/`, `/src/`, `/proj/`) carry an `ETag` and `Last-Modified` with `Cache-Control: private, no-cache` and answer `304` to a matching `If-None-Match`, so a pack of animated stickers reopens from the browser's cache (Range requests still answer 206). Merge, single/bulk moves and batch Add validate every destination pack; a member may add only a batch they can see. Telegram routes remain owner-only. Reference images (`out/refs/R###`, shared by id) are not per user yet.
 
 ## Contract
 
