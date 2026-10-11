@@ -46,7 +46,7 @@ class CatalogTests(unittest.TestCase):
             groups = catalog.groups()
             self.assertEqual([r["model"] for r in groups["nararouter"]], list(catalog.NARAROUTER_VISION))
             self.assertEqual(groups["local"][0]["id"], "local:qwen:2")
-            self.assertEqual(groups["openai"][0]["id"], "openai:gpt-5.6-luna")
+            self.assertEqual(groups["openai"][0]["id"], "openai:gpt-6-luna")
             self.assertNotIn("gpt-5.6-luna", [r["model"] for r in groups["nararouter"]])
             catalog.groups()
             self.assertEqual(fetch.call_count, 2, "one cached read per cloud provider")
@@ -132,7 +132,7 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(catalog.cloud_models("nararouter"), [])
 
     def test_luna_default_uses_official_openai_and_high_reasoning(self):
-        self.assertEqual(llm.cloud_model(), "openai:gpt-5.6-luna")
+        self.assertEqual(llm.cloud_model(), "openai:gpt-6-luna")
         sent = []
         def post(url, body, key, timeout):
             sent.append((url, body, key))
@@ -145,7 +145,7 @@ class CatalogTests(unittest.TestCase):
             ("https://api.openai.com/v1/chat/completions", "direct-key"),
             ("https://api.openai.com/v1/chat/completions", "direct-key"),
             (llm.LOCAL_URL + "/chat/completions", None)])
-        self.assertEqual(sent[0][1]["model"], "gpt-5.6-luna")
+        self.assertEqual(sent[0][1]["model"], "gpt-6-luna")
         self.assertEqual(sent[0][1]["reasoning_effort"], "high")
         self.assertGreaterEqual(sent[0][1]["max_completion_tokens"], 8192)
         self.assertNotIn("temperature", sent[0][1])
@@ -192,7 +192,23 @@ class CatalogTests(unittest.TestCase):
             self.assertEqual(brain.target()["model"], "nararouter:agnes-3-flash")
             self.assertEqual(judge.target()["model"], "nararouter:agnes-3-flash")
             llm._write_pref_file(cloud_model="")
-            self.assertEqual(llm.cloud_model(), "openai:gpt-5.6-luna")
+            self.assertEqual(llm.cloud_model(), "openai:gpt-6-luna")
+
+    def test_new_openai_models_are_selectable_for_chat_and_images_only_when_listed(self):
+        ids = ["gpt-6-luna", "gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra", "gpt-image-2", "gpt-audio", "text-embedding-3-small"]
+        answer = {"choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}]}
+        with mock.patch.object(catalog, "_fetch", return_value={"data": [{"id": mid} for mid in ids]}), mock.patch.object(llm, "_post", return_value=answer) as post:
+            self.assertEqual([r["model"] for r in catalog.cloud_models("openai")], ids[:4])
+            for mid in ids[:4]:
+                selected = catalog.validate("openai:" + mid)
+                llm.FORCE.set({"model": selected})
+                self.assertEqual(brain.target()["model"], selected)
+                self.assertEqual(judge.target()["model"], selected)
+                llm._complete_on("openai", "s", "u", model_=selected, images=[b"image"])
+                self.assertEqual(post.call_args.args[1]["model"], mid)
+                self.assertEqual(post.call_args.args[0], "https://api.openai.com/v1/chat/completions")
+            with self.assertRaises(llm.LLMError):
+                catalog.validate("openai:gpt-6.2-sol")
         llm.FORCE.set({"model": "local:qwen:2"})
         self.assertEqual(brain.target(), {"provider": "local", "model": "local:qwen:2"})
         self.assertEqual(judge.target()["model"], "local:qwen:2")

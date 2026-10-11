@@ -8,15 +8,18 @@ import threading
 import time
 import urllib.request
 
-DEFAULT_MODEL = "gpt-5.6-luna"
-MODEL_ALIASES = {DEFAULT_MODEL: "openai:" + DEFAULT_MODEL,
-                 "nararouter:" + DEFAULT_MODEL: "openai:" + DEFAULT_MODEL}
+DEFAULT_MODEL = "gpt-6-luna"
+MODEL_ALIASES = {alias: "openai:" + mid
+                 for mid in (DEFAULT_MODEL, "gpt-5.6-luna")
+                 for alias in (mid, "nararouter:" + mid)}
 NARAROUTER_VISION = (
     "agnes-2.5-flash", "exo-stealh", "agnes-3-flash",
     "mimo-v2.6-flash-free", "muse-spark-1.3-contributor-free",
     "step-5-preview", "stepfun-3.7-flash", "mimo-v2.6-flash",
 )
-OPENAI_VISION = (DEFAULT_MODEL, "gpt-5.6-terra", "gpt-5.6-sol", "gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini")
+OPENAI_VISION = (DEFAULT_MODEL, "gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra",
+                 "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol",
+                 "gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini")
 _CACHE: dict = {}
 _LOCK = threading.Lock()
 

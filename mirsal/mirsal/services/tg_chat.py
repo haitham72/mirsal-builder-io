@@ -22,9 +22,9 @@ import threading
 import time
 from pathlib import Path
 
-from . import telegram
+from . import telegram, llm_catalog
 
-DEFAULTS = {"image": "nano_banana_flash", "video": "grok_video_v15_lite", "ai": "openai:gpt-5.6-luna"}
+DEFAULTS = {"image": "nano_banana_flash", "video": "grok_video_v15_lite", "ai": "openai:" + llm_catalog.DEFAULT_MODEL}
 DEFAULT_STYLE = "glossy_3d"
 def ai_models() -> list[dict]:
     from . import llm_catalog

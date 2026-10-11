@@ -92,14 +92,14 @@ class TelegramChatTests(unittest.TestCase):
         self.update(HAITHAM, "/model")
         card = self.sent(chat=HAITHAM)[-1]
         labels = [b["text"] for b in self.buttons(card)]
-        self.assertEqual(labels, ["🖼 Nano Banana 2", "🎞 Grok Imagine 1.5 Lite", "🎨 " + next(s["label"] for s in __import__("mirsal.generation.styles", fromlist=["x"]).PRESETS if s["id"] == "glossy_3d"), "🤖 openai:gpt-5.6-luna", "🧭 Stickers"])
+        self.assertEqual(labels, ["🖼 Nano Banana 2", "🎞 Grok Imagine 1.5 Lite", "🎨 " + next(s["label"] for s in __import__("mirsal.generation.styles", fromlist=["x"]).PRESETS if s["id"] == "glossy_3d"), "🤖 openai:gpt-6-luna", "🧭 Stickers"])
         self.update(HAITHAM, data=self.buttons(card)[0]["callback_data"])                    # open the image list
         listing = [f for m, f, _ in self.calls if m == "editMessageText"][-1]
         pick = next(b for b in self.buttons(listing) if b["text"] == "Seedream 5.0 Pro")
         self.update(HAITHAM, data=pick["callback_data"])
         sid = tg_chat._chat(self.c.out, HAITHAM)["sid"]
         settings = self.c.chat_parts({"id": "local", "role": "owner"})[0].load(sid)["settings"]
-        self.assertEqual(settings["models"], {"image": "seedream_v5_pro", "video": "grok_video_v15_lite", "ai": "openai:gpt-5.6-luna"})
+        self.assertEqual(settings["models"], {"image": "seedream_v5_pro", "video": "grok_video_v15_lite", "ai": "openai:gpt-6-luna"})
         self.assertEqual(settings["style_id"], "glossy_3d")
         _, tools, _, _ = self.c.chat_parts({"id": "local", "role": "owner", "can_spend": True}, sid)
         self.assertEqual(tools.models["image"], "seedream_v5_pro", "the chat's tools send the chat's own model")

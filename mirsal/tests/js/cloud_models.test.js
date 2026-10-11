@@ -19,11 +19,11 @@ function boot(){
 }
 
 const report = {
-  preference: 'cloud', default: 'openai:gpt-5.6-luna', current: 'qwen', selected: null,
+  preference: 'cloud', default: 'openai:gpt-6-luna', current: 'qwen', selected: null,
   aliases: {'gpt-5.6-luna':'openai:gpt-5.6-luna','nararouter:gpt-5.6-luna':'openai:gpt-5.6-luna'},
   local: [{ id: 'local:qwen', model: 'qwen', label: 'qwen' }],
   nararouter: ['mimo-v2.6-flash-free', 'agnes-3-flash'].map(model => ({ id: `nararouter:${model}`, model, label: model })),
-  openai: [{ id: 'openai:gpt-5.6-luna', model: 'gpt-5.6-luna', label: 'gpt-5.6-luna' }], models: [],
+  openai: ['gpt-6-luna','gpt-6.1-sol','gpt-5.6-luna'].map(model=>({id:'openai:'+model,model,label:model})), models: [],
 };
 
 test('the shared selector groups all providers and preserves a saved model on reopen', () => {
@@ -34,7 +34,9 @@ test('the shared selector groups all providers and preserves a saved model on re
   for (const group of ['Local', 'Nararouter', 'OpenAI']) assert.match(html, new RegExp(`optgroup label="${group}"`));
   assert.match(html, /nararouter:agnes-3-flash" selected/);
   assert.match(html, /mimo-v2.6-flash-free/);
-  assert.match(html, /Default · openai:gpt-5.6-luna/);
+  assert.match(html, /Default · openai:gpt-6-luna/);
+  assert.match(html, /value="openai:gpt-6-luna"/);
+  assert.match(html, /value="openai:gpt-6.1-sol"/);
   assert.equal(draw(), html);
   run(`A.sess.settings.models.ai='';`);
   assert.match(draw(), /option value="" selected/);

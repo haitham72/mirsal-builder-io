@@ -26,7 +26,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-DEFAULT_MODEL = "gpt-5.6-luna"          # override with MIRSAL_LLM_MODEL (any chat model your key can use)
+from .llm_catalog import DEFAULT_MODEL  # override with MIRSAL_LLM_MODEL (any chat model your key can use)
 LOCAL_MODEL = "qwen3.5-4b:2"                     # the LAST-RESORT default only (nothing configured and the server cannot be asked); MIRSAL_LOCAL_MODEL is the wish, the server's own list decides (`resolve_local_model`)
 LOCAL_MIN_TOKENS = 2048                          # token budget when reasoning cannot be switched off (measured: 300 tokens gave an empty answer)
 LOCAL_RETRY_CAP = 8192                           # an empty local answer is retried with at most this many tokens (4x a big request would be minutes on a small machine)
@@ -696,7 +696,7 @@ def _complete_one(prov: str, system: str, user: str, *, max_tokens: int = 2500, 
         raise LLMError(f"No AI key for {model_provider}: configure {setting} in mirsal/.env.")
     if images and not llm_catalog.supports_images(model_provider, m):
         raise LLMError(f"{m} is not an approved image-capable model; choose a vision model from the catalog.")
-    luna = model_provider == "openai" and m == DEFAULT_MODEL
+    luna = model_provider == "openai" and m in (DEFAULT_MODEL, "gpt-5.6-luna")
     url = ((base_url or endpoint_url) if prov == "local" else endpoint_url).rstrip("/") + "/chat/completions"
     content = user
     if images:
