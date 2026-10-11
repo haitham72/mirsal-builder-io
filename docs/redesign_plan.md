@@ -1,8 +1,8 @@
 # docs/redesign_plan.md — one clean app, with nothing lost (branch `edit-design`)
 
-**Status: Haitham accepted every recommendation of §7 (2026-10-11); the outside review (§9) is still to come.** Built so far on this branch:
-the safety net (§3) and phase 1 (§5). This file exists only while the redesign is open; each phase deletes its part once built, and the architecture moves into
-`docs/design.md` / `docs/architecture.md`.
+**Status (2026-10-11): every phase of §5 is built on `edit-design`** (one commit each, `docs/design.md` §5-§7 hold the result); what is open is §5's
+last list: Haitham's look in the browser, the outside review (§9), D3 / D4, and the merge into `main` when Haitham says so. This file is deleted once those
+are done; §4 stays until the review has checked it against the code.
 
 Haitham, 2026-10-10: the app grew in increments and is "a little bit chaotic, so many informations everywhere"; the Home page he designed is the
 direction ("simpler and cleaner"); the logic of batches, sheets and videos is "highly confusing" (make more videos from a sheet, go back and edit
@@ -172,28 +172,21 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 | `trending.js` (8) | Library > Trending tab SAME |
 | `welcome.js` (7), `home.js` (6) | Home SAME |
 
-## 5. Phases (one commit each; after each: the inventory test, the tests its files map to, Haitham's look in the browser)
+## 5. Phases — all built 2026-10-11
 
-1. **Built 2026-10-11** (the rail of four, the avatar menu, Create's tabs: `docs/design.md` §4.2). `studio.css`'s `:root` already carried the
-   mockup's palette; a mockup token (e.g. the issue colours) joins `:root` in the phase that first reads it, never unused (rule 6).
-2. **Built 2026-10-11.** The Studio's step strip is the journey: Idea · Prompt · Stickers · Motion · (Particles) · Pack · Telegram on one slim
-   track (`stepsHtml`, `.gsteps`), the same buttons and actions as before (`gtab`, `gadd`; Telegram is `gopenpack`). `docs/design.md` "The Studio's journey".
-3. **Built 2026-10-11** (§6): the project map's data.
-4. **Built 2026-10-11:** the map column, the project switcher, the breadcrumb (`projmap.js`; `docs/design.md` "The project map"). D3 / D4 (several
-   batches at once, `ginc` / `gbdrop`) are unchanged so far: "open the whole project" (`hopenpack`) still shows every batch; they go with phase 7's bottom bar.
-5. **Built 2026-10-11:** the toolbar and the view switch (Stickers · Sheet · Both; `docs/design.md` "The Studio's toolbar"). The sheet panel already
-   holds the sheet and the video as views; the Full-analysis dialog stays a dialog.
-6. **Built 2026-10-11:** the sticker panel (`gmodal` docked on the right, tabs Checks · History · Measurements; `docs/design.md` "The sticker panel").
-7. **Built 2026-10-11:** the floating bottom bar and the density pass over the composer (`docs/design.md` "The density pass"). The Request and
-   Prompt views stay two stops of the journey (Idea, Prompt); D3 (Animate / Add on several batches) is unchanged: the bar still acts on the included batches.
-8. **Built 2026-10-11:** the pack screen (`docs/design.md` "The pack screen"). **9. Built 2026-10-11:** Settings' section bar (`docs/design.md` "Settings"). **10. Built 2026-10-11:** the chat restyle (`docs/design.md` "The chat restyle"). **11. Library, Help, Home polish.**
+1 the rail of four, the avatar menu, Create's tabs · 2 the Studio's journey track · 3 the project map's data (`flow/projects.py`,
+`GET /api/generations/{id}/map`) · 4 the map column, the project switcher, the breadcrumb (`projmap.js`) · 5 the toolbar and Stickers · Sheet · Both ·
+6 the sticker panel · 7 the floating bottom bar and the density pass · 8 the pack screen · 9 Settings' section bar · 10 the chat restyle · 11 the polish.
+Also built: the chat's stage slider with five stops and its details (`agent/stages.py` `api`), `serve --reload`. Nothing was renamed or retired: the
+inventory test passes against the untouched baseline.
 
-Each phase ends with `renamed` / `retired` filled for whatever left, `docs/ui_inventory.md` regenerated, the area doc updated (rule 12), and the
-part of this file it built deleted.
-
-## 6. The one new piece of backend: the project map — built 2026-10-11
-
-`flow/projects.py` `project_map(out, gid, viewer)` and the native route `GET /api/generations/{id}/map` (`docs/api.md`, `tests/test_projects.py`).
+**Open:**
+- **Haitham's look in the browser** (`docs/waiting-for-haitham.md` item 1).
+- **The outside review** (§9), now against the built code.
+- **D3 / D4** (accepted, not yet done): Animate / Add act on the selected batch only with "Animate every batch" in a project menu, and "take out of
+  this view" (`gbdrop`) retired. Today a whole project opened at once (`hopenpack`) still shows every batch with its include box (`ginc`); retiring
+  `gbdrop` needs its `retired` entry in `ui_baseline.json`.
+- **Settings > Spending** needs a route first (`docs/backlog.md` "Redesign").
 
 ## 7. Decisions (Haitham accepted every recommendation below, 2026-10-11)
 

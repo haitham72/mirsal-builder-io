@@ -987,3 +987,11 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 /* Settings (redesign phase 9): a section bar under the title; each card is a section with its own heading */
 .set-page .set-nav{position:sticky;top:0;z-index:5;margin:0 0 4px;flex-wrap:wrap;background:var(--fill)}
 .set-page .card{scroll-margin-top:56px}.set-page .card h2{margin:0 0 8px;font-size:var(--fs-l);font-weight:650}
+/* the polish (redesign phase 11): the shared glass token is flat white now, so every card that used it (Library packs, Trending, the pack's particle rows,
+   particle effects, Help's agent bubbles, the welcome film's buttons, the chat preview) is a white surface with its hairline; the side column is flat; its
+   title is plain ink; the project list's pictures are a little smaller */
+:root{--glass:#ffffff}
+#col2{background:var(--sf);backdrop-filter:none}
+.c2h h1{font-size:var(--fs-xl);font-weight:650;background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:currentColor;color:var(--tx)}
+.lv-hth img,.lv-hth .lv-hnoimg{width:44px;height:44px}
+.lv-hrow,.lv-hphead{padding-top:8px;padding-bottom:8px}

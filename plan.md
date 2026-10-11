@@ -1,18 +1,13 @@
-# plan.md — after the chat's stages and batch follow-up (2026-10-09)
+# plan.md — after the redesign (2026-10-11)
 
-What an LLM does next. The stages (Prompt · Emojis · Animation · Export) and the batch follow-up are built (`1e28524`, `2dba73f`, `4239bff`, `d66c647`);
+What an LLM does next. The stages (Prompt · Stickers · Animation · Telegram · Export) and the batch follow-up are built (`1e28524`, `2dba73f`, `4239bff`, `d66c647`);
 the architecture is in `docs/agent-and-chat.md` "Stages and the batch follow-up". Read `CLAUDE.md` first; test budget: `docs/testing.md` (one narrowest
 run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when it is built; delete this file when the plan is done.
 
-## The redesign (branch `edit-design`, 2026-10-10) — waits for Haitham and an outside review
+## The redesign (branch `edit-design`) — built 2026-10-11, waits for Haitham
 
-`docs/redesign_plan.md` is the spec (read it whole, with `docs/architecture.md` and `docs/ui_inventory.md`). Next, in order:
-1. **The outside review** (an LLM, against §9 of that file) is still to come; fold its findings into phases 3-11 before they are built. D1-D7 are
-   answered (every recommendation accepted, 2026-10-11); phase 1 is built.
-2. **Phase 2 — the journey bar in the Studio header** (§5), then the phases in order: one session at a time, Opus on medium effort, one commit per phase, the
-   inventory test green (`python -m unittest tests.test_ui_inventory`) with `renamed` / `retired` filled for anything that moved or left.
-
-The chat's stage slider (Prompt · Stickers · Animation · Telegram · Export) is built (2026-10-11); phase 2 is now only the Studio header's version.
+Every phase of `docs/redesign_plan.md` §5 is built. Next: Haitham looks at it in the browser (restart with `serve --reload`, hard reload); the outside
+review against §9; then D3 / D4 (§5 "Open"). Merge into `main` only when Haitham says so.
 
 ## Step 1 — prove the follow-up through the real server (fakes only)
 
