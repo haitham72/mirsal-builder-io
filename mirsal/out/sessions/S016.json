@@ -1,0 +1,1635 @@
+{
+ "id": "S016",
+ "user": "local",
+ "title": "hi",
+ "created": 1791693172.688,
+ "updated": 1791702796.48,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "pop_comic",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "stage": "auto",
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  },
+  "actions": "predefined",
+  "models": {
+   "video": "grok_video_v15",
+   "ai": "nararouter:gpt-5.6-luna"
+  }
+ },
+ "focus": {
+  "generation": "G130",
+  "stickers": [
+   "G130/S3"
+  ]
+ },
+ "subjects": [
+  {
+   "name": "Porsche",
+   "slug": "porsche",
+   "passes": [
+    {
+     "generation": "G130",
+     "job": "J088",
+     "prompt": "porche",
+     "grid": "3x3",
+     "style_id": "pop_comic",
+     "parent": null,
+     "created": 1791693544.146,
+     "ready": 9,
+     "approved": 9,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "stills_reviewed",
+     "error": null
+    },
+    {
+     "generation": null,
+     "job": "J089",
+     "prompt": "Porsche",
+     "grid": "3x3",
+     "style_id": "pop_comic",
+     "parent": "G130",
+     "created": 1791702796.477,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "tweak: Make him wear UAE clothing."
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791693172.864,
+   "user": "hi",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791693538.406,
+   "user": "porche",
+   "assistant": "Here's the plan for **Porsche**: 9 stickers, pop comic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791693544.149,
+   "user": "confirm",
+   "assistant": "Creating **Porsche** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1791693588.15,
+   "user": "what is 4 doing?",
+   "assistant": "**S4**: I couldn't inspect this still right now. Please try again.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G130/S4"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G130",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G130"
+  },
+  {
+   "seq": 5,
+   "ts": 1791697758.108,
+   "user": "what is the kid doing in the last sticker?",
+   "assistant": "**S9**: I couldn't inspect this still: The AI service refused the request (HTTP 403): Your plan does not include the requested model.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G130/S9"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G130",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G130"
+  },
+  {
+   "seq": 6,
+   "ts": 1791698787.909,
+   "user": "what is 7 doing",
+   "assistant": "**S7**: The character is smiling broadly while winking one eye. He stands on one leg with a playful stance, pointing outward with one hand while resting the other on his hip. His pose is energetic and animated, suggesting he is enthusiastically indicating something off to the side.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G130/S7"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G130",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G130"
+  },
+  {
+   "seq": 7,
+   "ts": 1791700465.997,
+   "user": "what is 3 doing",
+   "assistant": "**S3**: A child is kneeling with both hands pulling at the skin beneath their eyes. Their eyes are squeezed shut, mouth wide open, and blue droplets surround their face, making them appear to be crying loudly.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G130/S3"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G130",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G130"
+  },
+  {
+   "seq": 8,
+   "ts": 1791702779.707,
+   "user": "make him wear uae cloth",
+   "assistant": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: Make him wear UAE clothing.. A new sheet; the original stays. Shall I create them?",
+   "intents": [
+    "EDIT_ROUTE"
+   ],
+   "resolved": {
+    "stickers": [
+     "G130/S3"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G130",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "focus",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G130"
+  },
+  {
+   "seq": 9,
+   "ts": 1791702796.48,
+   "user": "confirm",
+   "assistant": "Creating **Porsche** (about 2 credits). Each one appears below as it is ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "hi",
+   "cards": [],
+   "steps": [],
+   "ts": 1791693172.834
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1791693172.838
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693172.858
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1791693172.861
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693172.862
+    }
+   ],
+   "ts": 1791693172.834,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "porche",
+   "cards": [],
+   "steps": [],
+   "ts": 1791693537.678
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Here's the plan for **Porsche**: 9 stickers, pop comic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "Porsche",
+     "grid": "3x3",
+     "style": "pop comic",
+     "count": 9,
+     "names": [
+      "porsche happy",
+      "porsche laugh",
+      "porsche cry",
+      "porsche sad",
+      "porsche love",
+      "porsche angry",
+      "porsche wink",
+      "porsche kiss",
+      "porsche surprised"
+     ],
+     "estimate": 2.0,
+     "balance": 617.12,
+     "prompt": "porche",
+     "prepared": false,
+     "free": false,
+     "stage": "emojis",
+     "batch": {
+      "no": 1,
+      "max": 4,
+      "label": "Batch 01 · actions 1-9",
+      "text": "Batch 01 of 04 · actions 1-9"
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating porche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791693537.685
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693537.686
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with mimo-v2.6-flash (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693537.714
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "porsche happy",
+       "porsche laugh",
+       "porsche cry",
+       "porsche sad",
+       "porsche love",
+       "porsche angry",
+       "porsche wink",
+       "porsche kiss",
+       "porsche surprised"
+      ]
+     },
+     "status": "done",
+     "ts": 1791693537.722
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693538.403
+    }
+   ],
+   "ts": 1791693537.678,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791693543.624
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Creating **Porsche** now (about 2 credits). The stickers appear below as they are ready.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J088",
+     "subject": "Porsche",
+     "parent": null,
+     "note": "",
+     "batch": "Batch 01 · actions 1-9"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating Porsche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791693543.627
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693543.629
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693543.631
+    },
+    {
+     "kind": "final",
+     "label": "started · J088",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693544.146
+    }
+   ],
+   "ts": 1791693543.624,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m7",
+   "role": "assistant",
+   "text": "**Porsche**: batch 01 of 04 is ready. Regenerate it, or make the next batches of the pack.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791693573.326,
+   "chips": [
+    {
+     "label": "Regenerate · 2 credits",
+     "action": "regenerate",
+     "generation": "G130"
+    },
+    {
+     "label": "Batch 02 · 2 credits",
+     "action": "batch_more",
+     "to": 2
+    },
+    {
+     "label": "Batch 03 · 4 credits",
+     "action": "batch_more",
+     "to": 3
+    },
+    {
+     "label": "Batch 04 · 6 credits",
+     "action": "batch_more",
+     "to": 4
+    }
+   ]
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "**Porche** has no finished stickers to look at yet.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Porche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791693573.357
+    },
+    {
+     "kind": "step",
+     "label": "looked at 0 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693581.497
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693581.5
+    }
+   ],
+   "ts": 1791693573.352,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "what is 4 doing?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791693585.516
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "**S4**: I couldn't inspect this still right now. Please try again.",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G130/S4",
+       "index": 4,
+       "key": "porsche_sad",
+       "name": "img-porsche-sad-20261011T043931-4026e9",
+       "emoji": "😔",
+       "tags": [
+        "porsche_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "PENDING",
+       "anim": "NONE",
+       "anim_status": "NOT_REQUESTED",
+       "anim_from_previous": false,
+       "waived": [],
+       "png": "/out/G130/slices/img-porsche-sad-20261011T043931-4026e9.png?e=0",
+       "webm": null,
+       "prompt": "Porsche sad and slumped, head hanging low, a single tear, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Porsche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791693585.521
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693585.524
+    },
+    {
+     "kind": "step",
+     "label": "found S4 in Porsche · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693585.552
+    },
+    {
+     "kind": "step",
+     "label": "looking at the selected still image",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693585.557
+    },
+    {
+     "kind": "final",
+     "label": "described the still",
+     "detail": null,
+     "status": "done",
+     "ts": 1791693588.146
+    }
+   ],
+   "ts": 1791693585.516,
+   "status": "done",
+   "cards_first": true,
+   "chips": []
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "what is the kid doing in the last sticker?",
+   "cards": [],
+   "steps": [],
+   "ts": 1791697756.346
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "**S9**: I couldn't inspect this still: The AI service refused the request (HTTP 403): Your plan does not include the requested model.",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G130/S9",
+       "index": 9,
+       "key": "porsche_surprised",
+       "name": "img-porsche-surprised-20261011T043931-17a1bf",
+       "emoji": "😮",
+       "tags": [
+        "porsche_surprised",
+        "surprised",
+        "shocked",
+        "wow"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "APPROVED",
+       "anim": "NONE",
+       "anim_status": "NOT_REQUESTED",
+       "anim_from_previous": false,
+       "waived": [],
+       "png": "/out/G130/slices/img-porsche-surprised-20261011T043931-17a1bf.png?e=0",
+       "webm": null,
+       "prompt": "Porsche jumping back in surprise, wide eyes and an open mouth, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Porsche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791697756.359
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791697756.415
+    },
+    {
+     "kind": "step",
+     "label": "found S9 in Porsche · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791697756.42
+    },
+    {
+     "kind": "step",
+     "label": "looking at the selected still image",
+     "detail": null,
+     "status": "done",
+     "ts": 1791697756.424
+    },
+    {
+     "kind": "final",
+     "label": "could not inspect the still",
+     "detail": null,
+     "status": "error",
+     "ts": 1791697758.104
+    }
+   ],
+   "ts": 1791697756.346,
+   "status": "done",
+   "cards_first": true,
+   "chips": []
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "what is 7 doing",
+   "cards": [],
+   "steps": [],
+   "ts": 1791698751.846
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "**S7**: The character is smiling broadly while winking one eye. He stands on one leg with a playful stance, pointing outward with one hand while resting the other on his hip. His pose is energetic and animated, suggesting he is enthusiastically indicating something off to the side.\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G130/S7",
+       "index": 7,
+       "key": "porsche_wink",
+       "name": "img-porsche-wink-20261011T043931-7188b9",
+       "emoji": "😉",
+       "tags": [
+        "porsche_wink",
+        "wink",
+        "winking"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "APPROVED",
+       "anim": "NONE",
+       "anim_status": "NOT_REQUESTED",
+       "anim_from_previous": false,
+       "waived": [],
+       "png": "/out/G130/slices/img-porsche-wink-20261011T043931-7188b9.png?e=0",
+       "webm": null,
+       "prompt": "Porsche winking playfully with a finger-gun and a cheeky grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Porsche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791698751.949
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791698751.971
+    },
+    {
+     "kind": "step",
+     "label": "found S7 in Porsche · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791698751.976
+    },
+    {
+     "kind": "step",
+     "label": "looking at the selected still image",
+     "detail": null,
+     "status": "done",
+     "ts": 1791698751.981
+    },
+    {
+     "kind": "final",
+     "label": "described the still",
+     "detail": null,
+     "status": "done",
+     "ts": 1791698787.907
+    }
+   ],
+   "ts": 1791698751.846,
+   "status": "done",
+   "cards_first": true,
+   "chips": []
+  },
+  {
+   "id": "m15",
+   "role": "user",
+   "text": "what is 3 doing",
+   "cards": [],
+   "steps": [],
+   "ts": 1791700462.144
+  },
+  {
+   "id": "m16",
+   "role": "assistant",
+   "text": "**S3**: A child is kneeling with both hands pulling at the skin beneath their eyes. Their eyes are squeezed shut, mouth wide open, and blue droplets surround their face, making them appear to be crying loudly.",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G130/S3",
+       "index": 3,
+       "key": "porsche_cry",
+       "name": "img-porsche-cry-20261011T043931-511ef1",
+       "emoji": "😭",
+       "tags": [
+        "porsche_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "APPROVED",
+       "anim": "NONE",
+       "anim_status": "NOT_REQUESTED",
+       "anim_from_previous": false,
+       "waived": [],
+       "png": "/out/G130/slices/img-porsche-cry-20261011T043931-511ef1.png?e=0",
+       "webm": null,
+       "prompt": "Porsche bawling with big streaming tears, rubbing the eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Porsche",
+     "detail": null,
+     "status": "running",
+     "ts": 1791700462.252
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791700462.274
+    },
+    {
+     "kind": "step",
+     "label": "found S3 in Porsche · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791700462.278
+    },
+    {
+     "kind": "step",
+     "label": "looking at the selected still image",
+     "detail": null,
+     "status": "done",
+     "ts": 1791700462.281
+    },
+    {
+     "kind": "final",
+     "label": "described the still",
+     "detail": null,
+     "status": "done",
+     "ts": 1791700465.994
+    }
+   ],
+   "ts": 1791700462.144,
+   "status": "done",
+   "cards_first": true,
+   "chips": []
+  },
+  {
+   "id": "m17",
+   "role": "assistant",
+   "text": "Prompt is already done for G130; new requests now stop at Prompt.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791700514.596,
+   "status": "done"
+  },
+  {
+   "id": "m18",
+   "role": "user",
+   "text": "make him wear uae cloth",
+   "cards": [],
+   "steps": [],
+   "ts": 1791702770.672
+  },
+  {
+   "id": "m19",
+   "role": "assistant",
+   "text": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: Make him wear UAE clothing.. A new sheet; the original stays. Shall I create them?",
+   "cards": [
+    {
+     "type": "multi",
+     "title": "Porsche: change only: Make him wear UAE clothing.",
+     "grid": "3x3",
+     "estimate": 2.0,
+     "balance": 615.12,
+     "free": false,
+     "items": [
+      {
+       "subject": "Porsche",
+       "count": 9,
+       "names": [
+        "porsche happy",
+        "porsche laugh",
+        "porsche cry",
+        "porsche sad",
+        "porsche love",
+        "porsche angry",
+        "porsche wink",
+        "porsche kiss",
+        "porsche surprised"
+       ],
+       "style": "pop comic",
+       "changes": [
+        "change only: Make him wear UAE clothing."
+       ]
+      }
+     ],
+     "edit": "tweak",
+     "image": true
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "changing a detail",
+     "detail": null,
+     "status": "running",
+     "ts": 1791702770.693
+    },
+    {
+     "kind": "step",
+     "label": "understood: an edit",
+     "detail": null,
+     "status": "done",
+     "ts": 1791702770.716
+    },
+    {
+     "kind": "step",
+     "label": "found S3 in Porsche · focus",
+     "detail": null,
+     "status": "done",
+     "ts": 1791702770.722
+    },
+    {
+     "kind": "step",
+     "label": "tweak: Make him wear UAE clothing.",
+     "detail": {
+      "title": "from Porsche",
+      "lines": [
+       "the picture: this sheet (2048 px)"
+      ]
+     },
+     "status": "done",
+     "ts": 1791702779.421
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791702779.701
+    }
+   ],
+   "ts": 1791702770.672,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create them",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m20",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791702792.307
+  },
+  {
+   "id": "m21",
+   "role": "assistant",
+   "text": "Creating **Porsche** (about 2 credits). Each one appears below as it is ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J089",
+     "subject": "Porsche",
+     "parent": "G130",
+     "note": "tweak: Make him wear UAE clothing."
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating Porsche (tweak)",
+     "detail": null,
+     "status": "running",
+     "ts": 1791702792.31
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791702792.311
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: multi",
+     "detail": null,
+     "status": "done",
+     "ts": 1791702792.314
+    },
+    {
+     "kind": "final",
+     "label": "started 1",
+     "detail": null,
+     "status": "done",
+     "ts": 1791702796.477
+    }
+   ],
+   "ts": 1791702792.307,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "pack": {
+  "request": "porche",
+  "subject": "Porsche",
+  "grid": "3x3",
+  "style_id": "pop_comic",
+  "ai": true,
+  "plan": {
+   "task": "porsche",
+   "task_slug": "porsche",
+   "subject": "Porsche",
+   "scene": "",
+   "described": "Porsche",
+   "context": "",
+   "kind": "default",
+   "grid": [
+    3,
+    3
+   ],
+   "template_id": "sheet_3x3",
+   "template_version": 3,
+   "slots": {
+    "subject_description": "Porsche",
+    "style_id": "pop_comic",
+    "mode": "sheet_3x3",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "beaming with happiness, bouncing on the spot with a huge smile",
+      "tags": [
+       "porsche_happy",
+       "happy",
+       "smile",
+       "joy"
+      ],
+      "emoji": "😀",
+      "motion": "bounces happily, the smile widens, a little hop"
+     },
+     {
+      "pos": 2,
+      "label": "laughing so hard tears of joy fly out, holding the belly",
+      "tags": [
+       "porsche_laugh",
+       "laugh",
+       "laughing",
+       "lol",
+       "rofl"
+      ],
+      "emoji": "🤣",
+      "motion": "doubles over laughing, shoulders shake, wipes a tear"
+     },
+     {
+      "pos": 3,
+      "label": "bawling with big streaming tears, rubbing the eyes",
+      "tags": [
+       "porsche_cry",
+       "cry",
+       "crying",
+       "sobbing",
+       "tears"
+      ],
+      "emoji": "😭",
+      "motion": "tears stream in two arcs, the body shakes with sobs"
+     },
+     {
+      "pos": 4,
+      "label": "sad and slumped, head hanging low, a single tear",
+      "tags": [
+       "porsche_sad",
+       "sad",
+       "unhappy",
+       "disappointed"
+      ],
+      "emoji": "😔",
+      "motion": "sighs, the shoulders drop, a tear slides down"
+     },
+     {
+      "pos": 5,
+      "label": "hugging a big red heart, eyes sparkling, blushing",
+      "tags": [
+       "porsche_love",
+       "love",
+       "heart",
+       "loving"
+      ],
+      "emoji": "😍",
+      "motion": "squeezes the heart, it pulses, sways side to side"
+     },
+     {
+      "pos": 6,
+      "label": "furious and stomping, steam puffing from the head, fists clenched",
+      "tags": [
+       "porsche_angry",
+       "angry",
+       "mad",
+       "furious",
+       "rage"
+      ],
+      "emoji": "😠",
+      "motion": "stomps twice, steam puffs, the scowl deepens"
+     },
+     {
+      "pos": 7,
+      "label": "winking playfully with a finger-gun and a cheeky grin",
+      "tags": [
+       "porsche_wink",
+       "wink",
+       "winking"
+      ],
+      "emoji": "😉",
+      "motion": "winks, the finger-gun pops, the grin tilts"
+     },
+     {
+      "pos": 8,
+      "label": "blowing a kiss from the hand, a small heart floating away",
+      "tags": [
+       "porsche_kiss",
+       "kiss",
+       "kissing"
+      ],
+      "emoji": "😘",
+      "motion": "kisses the hand, the heart floats off, a wink"
+     },
+     {
+      "pos": 9,
+      "label": "jumping back in surprise, wide eyes and an open mouth",
+      "tags": [
+       "porsche_surprised",
+       "surprised",
+       "shocked",
+       "wow"
+      ],
+      "emoji": "😮",
+      "motion": "jolts back, eyes widen, a quick gasp"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null,
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "porsche_happy",
+     "tags": [
+      "porsche_happy",
+      "happy",
+      "smile",
+      "joy"
+     ],
+     "emoji": "😀"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "porsche_laugh",
+     "tags": [
+      "porsche_laugh",
+      "laugh",
+      "laughing",
+      "lol",
+      "rofl"
+     ],
+     "emoji": "🤣"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "porsche_cry",
+     "tags": [
+      "porsche_cry",
+      "cry",
+      "crying",
+      "sobbing",
+      "tears"
+     ],
+     "emoji": "😭"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "porsche_sad",
+     "tags": [
+      "porsche_sad",
+      "sad",
+      "unhappy",
+      "disappointed"
+     ],
+     "emoji": "😔"
+    },
+    {
+     "index": 5,
+     "id": "prompt05",
+     "key": "porsche_love",
+     "tags": [
+      "porsche_love",
+      "love",
+      "heart",
+      "loving"
+     ],
+     "emoji": "😍"
+    },
+    {
+     "index": 6,
+     "id": "prompt06",
+     "key": "porsche_angry",
+     "tags": [
+      "porsche_angry",
+      "angry",
+      "mad",
+      "furious",
+      "rage"
+     ],
+     "emoji": "😠"
+    },
+    {
+     "index": 7,
+     "id": "prompt07",
+     "key": "porsche_wink",
+     "tags": [
+      "porsche_wink",
+      "wink",
+      "winking"
+     ],
+     "emoji": "😉"
+    },
+    {
+     "index": 8,
+     "id": "prompt08",
+     "key": "porsche_kiss",
+     "tags": [
+      "porsche_kiss",
+      "kiss",
+      "kissing"
+     ],
+     "emoji": "😘"
+    },
+    {
+     "index": 9,
+     "id": "prompt09",
+     "key": "porsche_surprised",
+     "tags": [
+      "porsche_surprised",
+      "surprised",
+      "shocked",
+      "wow"
+     ],
+     "emoji": "😮"
+    }
+   ],
+   "expanded_by": "deterministic",
+   "actions_mode": "predefined",
+   "batches_max": 4
+  },
+  "max": 4,
+  "transformation": false,
+  "made": [
+   {
+    "no": 1,
+    "label": "Batch 01 · actions 1-9",
+    "generation": "G130",
+    "job": "J088",
+    "plan": {
+     "task": "porsche",
+     "task_slug": "porsche",
+     "subject": "Porsche",
+     "scene": "",
+     "described": "Porsche",
+     "context": "",
+     "kind": "default",
+     "grid": [
+      3,
+      3
+     ],
+     "template_id": "sheet_3x3",
+     "template_version": 3,
+     "slots": {
+      "subject_description": "Porsche",
+      "style_id": "pop_comic",
+      "mode": "sheet_3x3",
+      "cells": [
+       {
+        "pos": 1,
+        "label": "beaming with happiness, bouncing on the spot with a huge smile",
+        "tags": [
+         "porsche_happy",
+         "happy",
+         "smile",
+         "joy"
+        ],
+        "emoji": "😀",
+        "motion": "bounces happily, the smile widens, a little hop"
+       },
+       {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, holding the belly",
+        "tags": [
+         "porsche_laugh",
+         "laugh",
+         "laughing",
+         "lol",
+         "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "doubles over laughing, shoulders shake, wipes a tear"
+       },
+       {
+        "pos": 3,
+        "label": "bawling with big streaming tears, rubbing the eyes",
+        "tags": [
+         "porsche_cry",
+         "cry",
+         "crying",
+         "sobbing",
+         "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the body shakes with sobs"
+       },
+       {
+        "pos": 4,
+        "label": "sad and slumped, head hanging low, a single tear",
+        "tags": [
+         "porsche_sad",
+         "sad",
+         "unhappy",
+         "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, the shoulders drop, a tear slides down"
+       },
+       {
+        "pos": 5,
+        "label": "hugging a big red heart, eyes sparkling, blushing",
+        "tags": [
+         "porsche_love",
+         "love",
+         "heart",
+         "loving"
+        ],
+        "emoji": "😍",
+        "motion": "squeezes the heart, it pulses, sways side to side"
+       },
+       {
+        "pos": 6,
+        "label": "furious and stomping, steam puffing from the head, fists clenched",
+        "tags": [
+         "porsche_angry",
+         "angry",
+         "mad",
+         "furious",
+         "rage"
+        ],
+        "emoji": "😠",
+        "motion": "stomps twice, steam puffs, the scowl deepens"
+       },
+       {
+        "pos": 7,
+        "label": "winking playfully with a finger-gun and a cheeky grin",
+        "tags": [
+         "porsche_wink",
+         "wink",
+         "winking"
+        ],
+        "emoji": "😉",
+        "motion": "winks, the finger-gun pops, the grin tilts"
+       },
+       {
+        "pos": 8,
+        "label": "blowing a kiss from the hand, a small heart floating away",
+        "tags": [
+         "porsche_kiss",
+         "kiss",
+         "kissing"
+        ],
+        "emoji": "😘",
+        "motion": "kisses the hand, the heart floats off, a wink"
+       },
+       {
+        "pos": 9,
+        "label": "jumping back in surprise, wide eyes and an open mouth",
+        "tags": [
+         "porsche_surprised",
+         "surprised",
+         "shocked",
+         "wow"
+        ],
+        "emoji": "😮",
+        "motion": "jolts back, eyes widen, a quick gasp"
+       }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": false,
+      "preset": null,
+      "loop": false
+     },
+     "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+     },
+     "stickers": [
+      {
+       "index": 1,
+       "id": "prompt01",
+       "key": "porsche_happy",
+       "tags": [
+        "porsche_happy",
+        "happy",
+        "smile",
+        "joy"
+       ],
+       "emoji": "😀"
+      },
+      {
+       "index": 2,
+       "id": "prompt02",
+       "key": "porsche_laugh",
+       "tags": [
+        "porsche_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+       ],
+       "emoji": "🤣"
+      },
+      {
+       "index": 3,
+       "id": "prompt03",
+       "key": "porsche_cry",
+       "tags": [
+        "porsche_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+       ],
+       "emoji": "😭"
+      },
+      {
+       "index": 4,
+       "id": "prompt04",
+       "key": "porsche_sad",
+       "tags": [
+        "porsche_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+       ],
+       "emoji": "😔"
+      },
+      {
+       "index": 5,
+       "id": "prompt05",
+       "key": "porsche_love",
+       "tags": [
+        "porsche_love",
+        "love",
+        "heart",
+        "loving"
+       ],
+       "emoji": "😍"
+      },
+      {
+       "index": 6,
+       "id": "prompt06",
+       "key": "porsche_angry",
+       "tags": [
+        "porsche_angry",
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+       ],
+       "emoji": "😠"
+      },
+      {
+       "index": 7,
+       "id": "prompt07",
+       "key": "porsche_wink",
+       "tags": [
+        "porsche_wink",
+        "wink",
+        "winking"
+       ],
+       "emoji": "😉"
+      },
+      {
+       "index": 8,
+       "id": "prompt08",
+       "key": "porsche_kiss",
+       "tags": [
+        "porsche_kiss",
+        "kiss",
+        "kissing"
+       ],
+       "emoji": "😘"
+      },
+      {
+       "index": 9,
+       "id": "prompt09",
+       "key": "porsche_surprised",
+       "tags": [
+        "porsche_surprised",
+        "surprised",
+        "shocked",
+        "wow"
+       ],
+       "emoji": "😮"
+      }
+     ],
+     "expanded_by": "deterministic",
+     "actions_mode": "predefined",
+     "batches_max": 4
+    },
+    "creator": false,
+    "ts": 1791693544.146
+   }
+  ],
+  "said": "1:J088"
+ },
+ "named": [
+  "G130"
+ ]
+}

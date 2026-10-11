@@ -1,0 +1,2331 @@
+{
+  "generation_id": "G130",
+  "number": 130,
+  "owner": "local",
+  "created": 1791693571.536,
+  "parent": null,
+  "prompt": "porche",
+  "task": "porsche",
+  "task_slug": "porsche",
+  "source": {
+    "subject": "porsche",
+    "subject_id": "054",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "prepared": false,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J088-porsche-sheet/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          687,
+          702
+        ],
+        [
+          687,
+          0,
+          696,
+          702
+        ],
+        [
+          1383,
+          0,
+          665,
+          702
+        ],
+        [
+          0,
+          702,
+          687,
+          664
+        ],
+        [
+          687,
+          702,
+          696,
+          664
+        ],
+        [
+          1383,
+          702,
+          665,
+          664
+        ],
+        [
+          0,
+          1366,
+          687,
+          682
+        ],
+        [
+          687,
+          1366,
+          696,
+          682
+        ],
+        [
+          1383,
+          1366,
+          665,
+          682
+        ]
+      ],
+      "xs": [
+        0,
+        687,
+        1383,
+        2048
+      ],
+      "ys": [
+        0,
+        702,
+        1366,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "stills_reviewed",
+  "error": null,
+  "plan_source": "task 054",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Porsche.\nStyle: pop-art comic style, bold black ink outlines, halftone dot shading, saturated primary colours, dynamic expressive poses.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: beaming with happiness, bouncing on the spot with a huge smile\nCharacter 2: laughing so hard tears of joy fly out, holding the belly\nCharacter 3: bawling with big streaming tears, rubbing the eyes\nCharacter 4: sad and slumped, head hanging low, a single tear\nCharacter 5: hugging a big red heart, eyes sparkling, blushing\nCharacter 6: furious and stomping, steam puffing from the head, fists clenched\nCharacter 7: winking playfully with a finger-gun and a cheeky grin\nCharacter 8: blowing a kiss from the hand, a small heart floating away\nCharacter 9: jumping back in surprise, wide eyes and an open mouth\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. bounces happily, the smile widens, a little hop\n2. doubles over laughing, shoulders shake, wipes a tear\n3. tears stream in two arcs, the body shakes with sobs\n4. sighs, the shoulders drop, a tear slides down\n5. squeezes the heart, it pulses, sways side to side\n6. stomps twice, steam puffs, the scowl deepens\n7. winks, the finger-gun pops, the grin tilts\n8. kisses the hand, the heart floats off, a wink\n9. jolts back, eyes widen, a quick gasp\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every character's design unchanged.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "Porsche",
+    "style_id": "pop_comic",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "beaming with happiness, bouncing on the spot with a huge smile",
+        "tags": [
+          "porsche_happy",
+          "happy",
+          "smile",
+          "joy"
+        ],
+        "emoji": "😀",
+        "motion": "bounces happily, the smile widens, a little hop"
+      },
+      {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, holding the belly",
+        "tags": [
+          "porsche_laugh",
+          "laugh",
+          "laughing",
+          "lol",
+          "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "doubles over laughing, shoulders shake, wipes a tear"
+      },
+      {
+        "pos": 3,
+        "label": "bawling with big streaming tears, rubbing the eyes",
+        "tags": [
+          "porsche_cry",
+          "cry",
+          "crying",
+          "sobbing",
+          "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the body shakes with sobs"
+      },
+      {
+        "pos": 4,
+        "label": "sad and slumped, head hanging low, a single tear",
+        "tags": [
+          "porsche_sad",
+          "sad",
+          "unhappy",
+          "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, the shoulders drop, a tear slides down"
+      },
+      {
+        "pos": 5,
+        "label": "hugging a big red heart, eyes sparkling, blushing",
+        "tags": [
+          "porsche_love",
+          "love",
+          "heart",
+          "loving"
+        ],
+        "emoji": "😍",
+        "motion": "squeezes the heart, it pulses, sways side to side"
+      },
+      {
+        "pos": 6,
+        "label": "furious and stomping, steam puffing from the head, fists clenched",
+        "tags": [
+          "porsche_angry",
+          "angry",
+          "mad",
+          "furious",
+          "rage"
+        ],
+        "emoji": "😠",
+        "motion": "stomps twice, steam puffs, the scowl deepens"
+      },
+      {
+        "pos": 7,
+        "label": "winking playfully with a finger-gun and a cheeky grin",
+        "tags": [
+          "porsche_wink",
+          "wink",
+          "winking"
+        ],
+        "emoji": "😉",
+        "motion": "winks, the finger-gun pops, the grin tilts"
+      },
+      {
+        "pos": 8,
+        "label": "blowing a kiss from the hand, a small heart floating away",
+        "tags": [
+          "porsche_kiss",
+          "kiss",
+          "kissing"
+        ],
+        "emoji": "😘",
+        "motion": "kisses the hand, the heart floats off, a wink"
+      },
+      {
+        "pos": 9,
+        "label": "jumping back in surprise, wide eyes and an open mouth",
+        "tags": [
+          "porsche_surprised",
+          "surprised",
+          "shocked",
+          "wow"
+        ],
+        "emoji": "😮",
+        "motion": "jolts back, eyes widen, a quick gasp"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null,
+    "loop": false
+  },
+  "task_id": "054",
+  "name_key": "porsche",
+  "regen_of": null,
+  "sheet_model": "nano_banana_flash",
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791693543.668,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 61.5
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 247 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 247.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 5.5
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 21.5
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            687,
+            1383,
+            2048
+          ],
+          "ys": [
+            0,
+            702,
+            1366,
+            2048
+          ],
+          "ms": 26.2
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 2.0 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 1.96,
+        "limit": 12.0,
+        "data": {
+          "ms": 55.4
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "porsche_happy",
+      "tags": [
+        "porsche_happy",
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "emoji": "😀",
+      "prompt": "Porsche beaming with happiness, bouncing on the spot with a huge smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-happy-20261011T043931-277d62",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 145020,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.2
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 92468,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 92.468,
+          "data": {
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.7% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0065,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "186.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 186.8,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          687,
+          702
+        ],
+        "bg": [
+          2,
+          252,
+          3
+        ],
+        "threshold": 124.5,
+        "fg_px": 145020,
+        "bbox": [
+          154,
+          49,
+          558,
+          682
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0065,
+        "kb": 186.8,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-happy-20261011T043931-277d62.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.459,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.149,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "porsche_laugh",
+      "tags": [
+        "porsche_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+      ],
+      "emoji": "🤣",
+      "prompt": "Porsche laughing so hard tears of joy fly out, holding the belly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-laugh-20261011T043931-91c2f2",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 139877,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.1
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 88063,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 88.063,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 26 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 26,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "186.7KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 186.7,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          687,
+          0,
+          696,
+          702
+        ],
+        "bg": [
+          2,
+          252,
+          4
+        ],
+        "threshold": 124.0,
+        "fg_px": 139877,
+        "bbox": [
+          121,
+          60,
+          565,
+          644
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 186.7,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-laugh-20261011T043931-91c2f2.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.462,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.149,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "porsche_cry",
+      "tags": [
+        "porsche_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "emoji": "😭",
+      "prompt": "Porsche bawling with big streaming tears, rubbing the eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-cry-20261011T043931-511ef1",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 152346,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 89989,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 89.989,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "186.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 186.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1383,
+          0,
+          665,
+          702
+        ],
+        "bg": [
+          2,
+          252,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 152346,
+        "bbox": [
+          129,
+          68,
+          551,
+          622
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 186.4,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-cry-20261011T043931-511ef1.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.465,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.149,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "key": "porsche_sad",
+      "tags": [
+        "porsche_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "emoji": "😔",
+      "prompt": "Porsche sad and slumped, head hanging low, a single tear, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-sad-20261011T043931-4026e9",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 133769,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 77006,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 77.006,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 17 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 17,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "173.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 173.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          702,
+          687,
+          664
+        ],
+        "bg": [
+          2,
+          251,
+          3
+        ],
+        "threshold": 124.0,
+        "fg_px": 133769,
+        "bbox": [
+          164,
+          58,
+          556,
+          590
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 173.5,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-sad-20261011T043931-4026e9.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.468,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.149,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "porsche_love",
+      "tags": [
+        "porsche_love",
+        "love",
+        "heart",
+        "loving"
+      ],
+      "emoji": "😍",
+      "prompt": "Porsche hugging a big red heart, eyes sparkling, blushing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-love-20261011T043931-7f9a5c",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 149556,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 88274,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 88.274,
+          "data": {
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 14 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 14,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "182.5KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 182.5,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          687,
+          702,
+          696,
+          664
+        ],
+        "bg": [
+          2,
+          251,
+          3
+        ],
+        "threshold": 123.5,
+        "fg_px": 149556,
+        "bbox": [
+          159,
+          21,
+          545,
+          621
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 182.5,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-love-20261011T043931-7f9a5c.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.472,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.149,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "porsche_angry",
+      "tags": [
+        "porsche_angry",
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "emoji": "😠",
+      "prompt": "Porsche furious and stomping, steam puffing from the head, fists clenched, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-angry-20261011T043931-7ea7ed",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 163730,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.0
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 105384,
+          "limit": 400,
+          "data": {
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 105.384,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.4% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.004,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 24 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 24,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "205.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 205.2,
+          "limit": 512,
+          "data": {
+            "ms": 3.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1383,
+          702,
+          665,
+          664
+        ],
+        "bg": [
+          2,
+          251,
+          3
+        ],
+        "threshold": 123.5,
+        "fg_px": 163730,
+        "bbox": [
+          81,
+          42,
+          577,
+          629
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.004,
+        "kb": 205.2,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-angry-20261011T043931-7ea7ed.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.475,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.149,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "key": "porsche_wink",
+      "tags": [
+        "porsche_wink",
+        "wink",
+        "winking"
+      ],
+      "emoji": "😉",
+      "prompt": "Porsche winking playfully with a finger-gun and a cheeky grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-wink-20261011T043931-7188b9",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134461,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 80656,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 80.656,
+          "data": {
+            "ms": 2.0
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 12 to cell 5",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 12,
+          "limit": 4,
+          "data": {
+            "of": 5,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "173.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 173.2,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1366,
+          687,
+          682
+        ],
+        "bg": [
+          3,
+          251,
+          4
+        ],
+        "threshold": 123.5,
+        "fg_px": 134461,
+        "bbox": [
+          180,
+          36,
+          598,
+          634
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 173.2,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-wink-20261011T043931-7188b9.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.479,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.149,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "key": "porsche_kiss",
+      "tags": [
+        "porsche_kiss",
+        "kiss",
+        "kissing"
+      ],
+      "emoji": "😘",
+      "prompt": "Porsche blowing a kiss from the hand, a small heart floating away, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-kiss-20261011T043931-07e2c6",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 139102,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.5
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 89843,
+          "limit": 400,
+          "data": {
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 89.843,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.002,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.5
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.6
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 18 to cell 7",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 18,
+          "limit": 4,
+          "data": {
+            "of": 7,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "184.2KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 184.2,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          687,
+          1366,
+          696,
+          682
+        ],
+        "bg": [
+          3,
+          251,
+          4
+        ],
+        "threshold": 123.5,
+        "fg_px": 139102,
+        "bbox": [
+          88,
+          47,
+          617,
+          634
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.002,
+        "kb": 184.2,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-kiss-20261011T043931-07e2c6.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.482,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.15,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "porsche_surprised",
+      "tags": [
+        "porsche_surprised",
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "emoji": "😮",
+      "prompt": "Porsche jumping back in surprise, wide eyes and an open mouth, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-porsche-surprised-20261011T043931-17a1bf",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 134643,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 21.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 85647,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 85.647,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "1 enclosed hole(s), 0.2% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0017,
+          "limit": 0.01,
+          "data": {
+            "count": 1,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 16 to cell 7",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 16,
+          "limit": 4,
+          "data": {
+            "of": 7,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "179.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 179.8,
+          "limit": 512,
+          "data": {
+            "ms": 3.2
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1383,
+          1366,
+          665,
+          682
+        ],
+        "bg": [
+          3,
+          251,
+          4
+        ],
+        "threshold": 123.5,
+        "fg_px": 134643,
+        "bbox": [
+          94,
+          44,
+          576,
+          642
+        ],
+        "scale": 0.676,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0017,
+        "kb": 179.8,
+        "format": "png"
+      },
+      "png": "slices/img-porsche-surprised-20261011T043931-17a1bf.png",
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791693572.485,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791693683.15,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        }
+      ]
+    }
+  ],
+  "sheet_issues": [],
+  "added": {
+    "738cdf51": [
+      "static:1",
+      "static:2",
+      "static:3",
+      "static:4",
+      "static:5",
+      "static:6",
+      "static:7",
+      "static:8",
+      "static:9"
+    ]
+  }
+}

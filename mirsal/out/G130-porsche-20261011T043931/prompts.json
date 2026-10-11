@@ -1,0 +1,268 @@
+{
+  "task": "porsche",
+  "task_slug": "porsche",
+  "subject": "Porsche",
+  "scene": "",
+  "described": "Porsche",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    3,
+    3
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "Porsche",
+    "style_id": "pop_comic",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "beaming with happiness, bouncing on the spot with a huge smile",
+        "tags": [
+          "porsche_happy",
+          "happy",
+          "smile",
+          "joy"
+        ],
+        "emoji": "😀",
+        "motion": "bounces happily, the smile widens, a little hop"
+      },
+      {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, holding the belly",
+        "tags": [
+          "porsche_laugh",
+          "laugh",
+          "laughing",
+          "lol",
+          "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "doubles over laughing, shoulders shake, wipes a tear"
+      },
+      {
+        "pos": 3,
+        "label": "bawling with big streaming tears, rubbing the eyes",
+        "tags": [
+          "porsche_cry",
+          "cry",
+          "crying",
+          "sobbing",
+          "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the body shakes with sobs"
+      },
+      {
+        "pos": 4,
+        "label": "sad and slumped, head hanging low, a single tear",
+        "tags": [
+          "porsche_sad",
+          "sad",
+          "unhappy",
+          "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, the shoulders drop, a tear slides down"
+      },
+      {
+        "pos": 5,
+        "label": "hugging a big red heart, eyes sparkling, blushing",
+        "tags": [
+          "porsche_love",
+          "love",
+          "heart",
+          "loving"
+        ],
+        "emoji": "😍",
+        "motion": "squeezes the heart, it pulses, sways side to side"
+      },
+      {
+        "pos": 6,
+        "label": "furious and stomping, steam puffing from the head, fists clenched",
+        "tags": [
+          "porsche_angry",
+          "angry",
+          "mad",
+          "furious",
+          "rage"
+        ],
+        "emoji": "😠",
+        "motion": "stomps twice, steam puffs, the scowl deepens"
+      },
+      {
+        "pos": 7,
+        "label": "winking playfully with a finger-gun and a cheeky grin",
+        "tags": [
+          "porsche_wink",
+          "wink",
+          "winking"
+        ],
+        "emoji": "😉",
+        "motion": "winks, the finger-gun pops, the grin tilts"
+      },
+      {
+        "pos": 8,
+        "label": "blowing a kiss from the hand, a small heart floating away",
+        "tags": [
+          "porsche_kiss",
+          "kiss",
+          "kissing"
+        ],
+        "emoji": "😘",
+        "motion": "kisses the hand, the heart floats off, a wink"
+      },
+      {
+        "pos": 9,
+        "label": "jumping back in surprise, wide eyes and an open mouth",
+        "tags": [
+          "porsche_surprised",
+          "surprised",
+          "shocked",
+          "wow"
+        ],
+        "emoji": "😮",
+        "motion": "jolts back, eyes widen, a quick gasp"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null,
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "key": "porsche_happy",
+      "tags": [
+        "porsche_happy",
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "emoji": "😀",
+      "prompt": "Porsche beaming with happiness, bouncing on the spot with a huge smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "key": "porsche_laugh",
+      "tags": [
+        "porsche_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+      ],
+      "emoji": "🤣",
+      "prompt": "Porsche laughing so hard tears of joy fly out, holding the belly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "key": "porsche_cry",
+      "tags": [
+        "porsche_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "emoji": "😭",
+      "prompt": "Porsche bawling with big streaming tears, rubbing the eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "key": "porsche_sad",
+      "tags": [
+        "porsche_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "emoji": "😔",
+      "prompt": "Porsche sad and slumped, head hanging low, a single tear, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 5,
+      "id": "prompt05",
+      "key": "porsche_love",
+      "tags": [
+        "porsche_love",
+        "love",
+        "heart",
+        "loving"
+      ],
+      "emoji": "😍",
+      "prompt": "Porsche hugging a big red heart, eyes sparkling, blushing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 6,
+      "id": "prompt06",
+      "key": "porsche_angry",
+      "tags": [
+        "porsche_angry",
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "emoji": "😠",
+      "prompt": "Porsche furious and stomping, steam puffing from the head, fists clenched, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 7,
+      "id": "prompt07",
+      "key": "porsche_wink",
+      "tags": [
+        "porsche_wink",
+        "wink",
+        "winking"
+      ],
+      "emoji": "😉",
+      "prompt": "Porsche winking playfully with a finger-gun and a cheeky grin, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 8,
+      "id": "prompt08",
+      "key": "porsche_kiss",
+      "tags": [
+        "porsche_kiss",
+        "kiss",
+        "kissing"
+      ],
+      "emoji": "😘",
+      "prompt": "Porsche blowing a kiss from the hand, a small heart floating away, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 9,
+      "id": "prompt09",
+      "key": "porsche_surprised",
+      "tags": [
+        "porsche_surprised",
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "emoji": "😮",
+      "prompt": "Porsche jumping back in surprise, wide eyes and an open mouth, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    }
+  ],
+  "expanded_by": "deterministic",
+  "actions_mode": "predefined",
+  "batches_max": 4,
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: Porsche.\nStyle: pop-art comic style, bold black ink outlines, halftone dot shading, saturated primary colours, dynamic expressive poses.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: beaming with happiness, bouncing on the spot with a huge smile\nCharacter 2: laughing so hard tears of joy fly out, holding the belly\nCharacter 3: bawling with big streaming tears, rubbing the eyes\nCharacter 4: sad and slumped, head hanging low, a single tear\nCharacter 5: hugging a big red heart, eyes sparkling, blushing\nCharacter 6: furious and stomping, steam puffing from the head, fists clenched\nCharacter 7: winking playfully with a finger-gun and a cheeky grin\nCharacter 8: blowing a kiss from the hand, a small heart floating away\nCharacter 9: jumping back in surprise, wide eyes and an open mouth\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. bounces happily, the smile widens, a little hop\n2. doubles over laughing, shoulders shake, wipes a tear\n3. tears stream in two arcs, the body shakes with sobs\n4. sighs, the shoulders drop, a tear slides down\n5. squeezes the heart, it pulses, sways side to side\n6. stomps twice, steam puffs, the scowl deepens\n7. winks, the finger-gun pops, the grin tilts\n8. kisses the hand, the heart floats off, a wink\n9. jolts back, eyes widen, a quick gasp\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every character's design unchanged."
+}
