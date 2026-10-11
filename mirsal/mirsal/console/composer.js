@@ -5,6 +5,8 @@
 'use strict';
 const CP={refs:[],pop:null,ai:false,go:false,menu:false,styles:false};
 try{CP.ai=localStorage.getItem('mirsal.ai')==='1'}catch(e){}
+/* Creative (the AI's or the mood bank's own nine) or Predefined (the 36 bank actions, nine a batch): what /api/plan builds the stickers from (tasks.preview actions_mode) */
+CP.actions='creative';try{if(localStorage.getItem('mirsal.actions')==='predefined')CP.actions='predefined'}catch(e){}
 const aiOn=()=>CP.ai&&!!(typeof GAI!=='undefined'&&GAI.configured);
 /* GAI is GET /api/ai: `configured` is true when ANY backend the person's engine choice allows can answer (auto: the local model when LM Studio listens, else the cloud key; local; cloud with a key), so LM Studio alone enables the chip. When it is off, the tooltip says which of the two is missing */
 function aiWhy(){const g=typeof GAI!=='undefined'?GAI:{},av=g.availability||{},pref=g.preference||'auto',lw=(av.local&&av.local.why)||'',cw=(av.cloud&&av.cloud.why)||'';
@@ -94,6 +96,7 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    <button class="cp-chip cp-ai ${LIVE.loop?'on':''}" data-act=cploop aria-pressed=${!!LIVE.loop} title="Off: the animation plays once through and Mirsal closes the loop itself. On: the video prompt asks for a loop and Kling ends on its first pose. A loop wording makes the stickers bounce several times in the 3 seconds."><span class=cp-sw><i></i></span><span><b>Loop</b><em>${LIVE.loop?'On':'Off'}</em></span></button>
    <button class="cp-chip cp-ai ${ptOn()?'on':''}" data-act=cppart aria-pressed=${ptOn()} title="On: the prompt asks for particles on their own (for example: particles for lipsticks and ribbons). No sticker owns them; preview, render, download them or make a pack of them."><span class=cp-sw><i></i></span><span><b>Particles</b><em>${ptOn()?'On':'Off'}</em></span></button>
    <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${esc(aiChipTitle())}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
+   <span class="gseg cp-act" role=group aria-label="Where the stickers come from"><button type=button data-act=cpactions data-v=creative aria-pressed=${CP.actions!=='predefined'} title="The AI (or the built-in mood list) invents nine stickers for your idea">Creative</button><button type=button data-act=cpactions data-v=predefined aria-pressed=${CP.actions==='predefined'} title="Nine of the 36 predefined actions (happy, laugh, cry …), drawn as your character; the next batches continue through the 36">Predefined</button></span>
    <span class=cp-gap></span>
    ${GD&&!gdOn()?'<button class="btn sm" data-act=gdtab data-t=plan title="Return to the prompt you were editing">Prompt draft</button>':''}
    <button id=go class=cp-go data-act=gprompt title="${aiOn()&&GAI.provider==='openai'?'Shows the prompt you can edit before any sheet is paid for; the AI enhancer makes one small OpenAI call to write it. No batch is created and no Higgsfield credits are spent.':'Free. Shows the prompt you can edit before any sheet is paid for; no batch is created.'} Pressing Enter in the box still starts a paid sheet at once.">Generate prompt <span class=cp-bp>${aiOn()&&GAI.provider==='openai'?'1 AI call':'free'}</span></button>${typeof impButtons==='function'?impButtons():''}`;
@@ -106,6 +109,7 @@ function cpDrawEngine(){const el=$('cpeng');if(!el)return;const show=typeof AIEN
   AIENG.ensure();
   const html=`<div class="ai-set on cp-eng" aria-label="AI enhancer engine" title="Local: free. Cloud: one small OpenAI call.">${AIENG.rows(cpEngSrc())}</div>`;
   if(el._h!==html){el._h=html;el.innerHTML=html}}          // only when it changed: the bar is redrawn often, and a redraw would close an open drop-down
+ACT.cpactions=el=>{CP.actions=el.dataset.v==='predefined'?'predefined':'creative';try{localStorage.setItem('mirsal.actions',CP.actions)}catch(e){}cpDrawBar()};
 ACT.cploop=()=>{LIVE.loop=!LIVE.loop;lsave();cpDrawBar();document.querySelectorAll('[data-lvloop]').forEach(c=>c.checked=LIVE.loop)};
 ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar();if(CP.ai){if(typeof AIENG!=='undefined')AIENG.load();if(typeof aiRefresh==='function')aiRefresh()}};      // turning it On reads the engine and the models again (LM Studio may have started since the page opened)
 ACT.cpstroke=e=>{CP.pop=CP.pop==='stroke'?null:'stroke';cpDrawBar();if(e&&e.stopPropagation)e.stopPropagation()};

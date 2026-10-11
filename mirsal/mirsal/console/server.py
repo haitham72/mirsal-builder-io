@@ -1801,9 +1801,11 @@ def make_handler(c: Console):
                                            **({"used_presets": ses["used_presets"], "used_tokens": ses["used_tokens"]} if ses else {}))
                 return self._json(200, {"plans": plans, "existing": ses["existing"] if ses else 0})
             if path == "/api/plan":      # preview only: nothing is reserved
-                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
+                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                                                     body.get("actions") or "creative"))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
-                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop"))))
+                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                                                     actions_mode=body.get("actions") or "creative"))
             if path.startswith("/api/chat/sessions"):
                 from ..agent.memory import SessionError as _SE
                 from ..agent import stages as _stages
@@ -1817,7 +1819,7 @@ def make_handler(c: Console):
                         return self._json(202, c.idem("chat:" + cp[3], self.headers.get("Idempotency-Key"), lambda: c.chat_send(cp[3], body, self.user)))
                     if len(cp) == 5 and cp[4] == "settings":
                         sess = store.load(cp[3])
-                        allowed = {"grid": ("2x2", "3x3"), "ask_before_spending": (True, False), "ai": (True, False), "allow_vlm": (True, False)}
+                        allowed = {"grid": ("2x2", "3x3"), "ask_before_spending": (True, False), "ai": (True, False), "allow_vlm": (True, False), "actions": tasks.ACTIONS_MODES}
                         for k, v in body.items():
                             if k == "creator" and isinstance(v, dict):               # the agentic creator: on / scope (images | video) / bypass
                                 cur = dict(sess["settings"].get("creator") or {"on": False, "scope": "images", "bypass": False})

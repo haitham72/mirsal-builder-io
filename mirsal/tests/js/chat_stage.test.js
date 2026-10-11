@@ -4,27 +4,27 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const U = require('../../mirsal/console/agent.js');
 
-test('closed it is one pill: the current stop and a caret, no slider', () => {
+test('closed it is one pill: a small slider glyph, the current stop and a caret, no slider', () => {
   const h = U.stageHTML('emojis', false);
-  assert.match(h, /data-act=agstage aria-haspopup=dialog aria-expanded=false[^>]*>Stickers<i aria-hidden=true>▾<\/i><\/button>$/);
-  assert.doesNotMatch(h, /ag-stop|ag-slider|ag-stage-pop/, 'the slider is not on screen until the pill is clicked');
+  assert.match(h, /data-act=agstage aria-haspopup=dialog aria-expanded=false[^>]*><span class=ag-mini aria-hidden=true style="--k:1"><\/span>Stickers<i aria-hidden=true>▾<\/i><\/button>$/);
+  assert.doesNotMatch(h, /ag-range|ag-slider|ag-stage-pop/, 'the slider is not on screen until the pill is clicked');
 });
 
-test('open, the panel holds the slider: five named stops, the current one checked, the ones before it filled', () => {
-  const h = U.stageHTML('animation', true, { grid: '3x3', ask: true, bypass: false });
+test('open, the panel holds a real slider: a range over the five stops, their names under it, what the chosen one does', () => {
+  const h = U.stageHTML('animation', true, { grid: '3x3', ask: true, bypass: false, actions: 'predefined' });
   assert.match(h, /aria-expanded=true/);
-  assert.deepEqual([...h.matchAll(/class="ag-stop[^"]*" data-act=agstagepick data-v=(\w+)/g)].map(m => m[1]), ['prompt', 'emojis', 'animation', 'export', 'api']);
-  assert.deepEqual([...h.matchAll(/<span>(\w+)<\/span><\/button>/g)].map(m => m[1]), ['Prompt', 'Stickers', 'Animation', 'Telegram', 'Export']);
-  assert.equal((h.match(/aria-checked=true class="ag-stop/g) || []).length, 1);
-  assert.match(h, /class="ag-stop on" data-act=agstagepick data-v=animation tabindex=0/);
-  assert.match(h, /class="ag-stop done" data-act=agstagepick data-v=emojis/);
-  assert.equal((h.match(/class="ag-stop[^"]*"[^>]*tabindex=0/g) || []).length, 1, 'arrows move along the slider; Tab leaves it');
-  assert.match(h, /style="--k:2"/);
+  assert.match(h, /<input type=range class=ag-range data-agrange min=0 max=4 step=1 value=2 aria-label="How far a new request goes" aria-valuetext="Animation">/);
+  assert.equal((h.match(/<i class="on"><\/i>/g) || []).length, 3, 'the ticks up to the thumb are filled');
+  assert.deepEqual([...h.matchAll(/class="ag-stop[^"]*" data-act=agstagepick data-v=(\w+)[^>]*>(\w+)</g)].map(m => m[1] + ':' + m[2]),
+    ['prompt:Prompt', 'emojis:Stickers', 'animation:Animation', 'export:Telegram', 'api:Export']);
+  assert.match(h, /class="ag-stop on" data-act=agstagepick data-v=animation/);
   assert.match(h, /<p class=sp-hint>Animation: \+ animation<\/p>/);
+  assert.match(h, /data-act=agsetact data-v=predefined class="on">Predefined/, 'Creative or Predefined: where the stickers come from');
   assert.match(h, /data-act=agcr data-k=bypass role=switch aria-checked=false/, 'from Animation on: approve everything for me');
   assert.match(h, /data-act=agsetask role=switch aria-checked=true/);
   assert.match(h, /data-act=agsetgrid data-v=3x3 class="on"/);
   assert.match(U.stageHTML('api', true), /Export: \+ send to the API/);
+  assert.match(U.stageHTML('emojis', true), /data-act=agsetact data-v=creative class="on">Creative/, 'creative by default');
 });
 
 test('the models: Default first, the chat\'s pick selected; video only from Animation on', () => {

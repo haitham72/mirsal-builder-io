@@ -463,7 +463,7 @@ async function gdPlan(ai){const p=(($('prompt')||{}).value||'').trim();if(!p){sa
   GDWORK=true;const b=$('go');if(b)b.disabled=true;
   if(ai)say(`Asking the AI enhancer${gdEngineName()?` (${esc(gdEngineName())})`:''}… a local model can take a moment.`);
   try{const style=typeof LIVE!=='undefined'?LIVE.style:'flat_vector',loop=!!(typeof LIVE!=='undefined'&&LIVE.loop);
-    const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:style,loop,ai:!!ai});if(!r.ok){say('');toast(r.j.error||'Could not generate the prompt',1);return}
+    const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:style,loop,ai:!!ai,actions:(typeof CP!=='undefined'&&CP.actions)||'creative'});if(!r.ok){say('');toast(r.j.error||'Could not generate the prompt',1);return}
     delete PD['draft:sheet'];delete PD['draft:video'];
     const byAi=r.j.expanded_by==='ai';
     GD={...r.j,number:'draft',prompt:p,ai_asked:!!ai,plan_source:byAi?`the AI enhancer${r.j.expand_model?` (${r.j.expand_model})`:''}`:'the free built-in planner',video_sheets:[],reviews:{},active:true,tab:'plan',gens:SES.gens.join(),style,loop,refs:typeof CP!=='undefined'?CP.refs.filter(x=>x.id).map(x=>x.id):[]};
@@ -735,7 +735,7 @@ ACT.gsclose=()=>{SV.g=null;closeDlg()};
 
 /* ---------- "Get the Higgsfield prompt": when nothing prepared matches the request */
 ACT.ghiggs=async()=>{const p=$('prompt').value.trim();if(!p)return;
-  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:(typeof aiOn==='function'&&aiOn())});if(!r.ok)return toast(r.j.error,1);
+  const r=await post('/api/plan',{prompt:p,grid:'3x3',style_id:(typeof LIVE!=='undefined'&&LIVE.style)||'flat_vector',loop:!!(typeof LIVE!=='undefined'&&LIVE.loop),ai:(typeof aiOn==='function'&&aiOn()),actions:(typeof CP!=='undefined'&&CP.actions)||'creative'});if(!r.ok)return toast(r.j.error,1);
   dlg(`<div class=vdlg><h2>Prompt for Higgsfield</h2><div class=mut>Nothing prepared matches “${esc(p)}”. Generate the sheet, name the folder as shown below, and it appears here.</div>
    <h3>Sheet prompt</h3><textarea readonly rows=9 id=hp1>${esc(r.j.sheet_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp1>Copy sheet prompt</button></div>
    <h3>Video prompt</h3><textarea readonly rows=5 id=hp2>${esc(r.j.video_prompt)}</textarea><div class=row><button class="btn sm" data-act=hcopy data-t=hp2>Copy video prompt</button></div>

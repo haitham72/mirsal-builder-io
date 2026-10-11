@@ -948,9 +948,8 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 @media (min-width:1180px){body.gmside #s-generate{padding-right:calc(min(460px,100vw) + var(--gutter))}}
 
 /* ---------- the density pass (redesign phase 7, Haitham 2026-10-11: "everything looks big and clunky", the redesign mockups are the reference: minimal,
-   flat, iOS-like). ONE override block, last in the file: a flat paper behind every screen (the AI screen keeps its own wash), a flatter and smaller
+   flat, iOS-like; the gradient backgrounds stay, Haitham asked for them back the same day). ONE override block, last in the file: a flatter and smaller
    composer, a floating bottom bar, slightly tighter buttons. Sizes stay on the scale (--fs-*, --r-*). */
-#app{background:var(--bg)}
 .btn{padding:7px 13px;font-weight:550}
 .gbig{height:38px;padding:0 18px;font-size:var(--fs-m);border-radius:var(--r-pill)}
 .card{box-shadow:none}
@@ -995,3 +994,4 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 .c2h h1{font-size:var(--fs-xl);font-weight:650;background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:currentColor;color:var(--tx)}
 .lv-hth img,.lv-hth .lv-hnoimg{width:44px;height:44px}
 .lv-hrow,.lv-hphead{padding-top:8px;padding-bottom:8px}
+.cp-act{flex:none}.cp-act button{padding:6px 12px}

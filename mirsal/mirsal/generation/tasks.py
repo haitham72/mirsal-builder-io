@@ -77,15 +77,32 @@ def nearest_valid(name: str, kind: str, number: int) -> str:
     return f"{kind}-{num:03d}-{prompter.slug(rest) or 'subject'}"
 
 
-def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False) -> dict:
-    """The plan for a typed task, for the Inbox to show before anything is reserved: template, slot JSON, final prompts."""
+ACTIONS_MODES = ("creative", "predefined")
+
+
+def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False,
+            actions_mode: str = "creative") -> dict:
+    """The plan for a typed task, for the Inbox to show before anything is reserved: template, slot JSON, final prompts.
+    `actions_mode` (Haitham, 2026-10-11): "creative" = the AI's (or the mood bank's) own nine stickers; "predefined" = the first nine of the 36 bank
+    actions (`actions.ACTION_BANK`, the order "Next batch" continues in), drawn as whole characters. An emoji pack (faces) and a named grid ("core-v1")
+    are the 36 already, and a transformation writes its own cells, so for those the mode changes nothing."""
     g = GRID_NAMES.get(grid) if isinstance(grid, str) else tuple(grid)
+    if actions_mode not in ACTIONS_MODES:
+        raise sources_error("actions must be creative or predefined")
     if g not in prompter.GRIDS:
         raise sources_error("grid must be 3x3, 2x2 or 1x1")
     if not str(prompt).strip():
         raise sources_error("describe the subject first")
     if style_id not in prompter.STYLES:
         raise sources_error(f"unknown style '{style_id}'")
+    if actions_mode == "predefined":
+        from . import actions as bank
+        words = set(re.findall(r"[a-z0-9]+", str(prompt).lower()))
+        if not (words & prompter.EMOJI_WORDS) and not bank.preset_name(prompt) and expander.expand(str(prompt).strip(), g).get("expanded_by") != "transformation":
+            plan = _token_plan(str(prompt).strip(), g, False, bank.next_tokens(set(), g[0] * g[1]), style_id, loop)
+            plan["actions_mode"] = "predefined"
+            plan["batches_max"] = batches_max(plan)
+            return plan
     plan = expander.expand(str(prompt).strip(), g, use_ai=ai)       # ai: the model expands the subject and names every sticker; else the built-in sets
     plan["slots"]["style_id"] = style_id
     plan["slots"]["loop"] = bool(loop)               # Loop is a choice: off = no loop wording in the video prompt, no end image
@@ -205,11 +222,11 @@ def plan_again(base: dict, loop: bool | None = None) -> dict:
 
 
 def reserve(out: Path, inp: Path, prompt: str, grid="3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False,
-            base_plan: dict | None = None, custom: dict | None = None) -> dict:
+            base_plan: dict | None = None, custom: dict | None = None, actions_mode: str = "creative") -> dict:
     """Save the task: this IS the G1 approval of the plan (recorded on the task and copied onto every generation run from it).
     `base_plan` starts from a batch's own saved plan (same cells and tags) instead of expanding the request again; `custom` is a prompt the user wrote by hand
     ({"sheet_prompt": text}), kept in `plan["custom"]` so it is what is sent, what the batch shows and what a rebuild does not undo."""
-    plan = plan_again(base_plan, loop) if base_plan else preview(prompt, grid, style_id, ai, loop)
+    plan = plan_again(base_plan, loop) if base_plan else preview(prompt, grid, style_id, ai, loop, actions_mode)
     if custom:
         plan["custom"] = {**(plan.get("custom") or {}), **custom}
     prompter.apply_custom(plan)

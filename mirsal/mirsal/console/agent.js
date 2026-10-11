@@ -49,17 +49,20 @@ const AIU=(()=>{
     names under them and what the chosen one does, then the chat's models (d.models: {ai, image, video} each {list, cur, def}) and the options (d.grid,
     d.ask, d.bypass). A stop picked closes the panel. Pure: the caller wires the actions. */
  const stageHTML=(cur,open,d)=>{d=d||{};let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=1;const n=STAGES[k];
-  const pill=`<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change.">${esc(n[1])}<i aria-hidden=true>▾</i></button>`;
+  const pill=`<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change."><span class=ag-mini aria-hidden=true style="--k:${k}"></span>${esc(n[1])}<i aria-hidden=true>▾</i></button>`;
   if(!open)return pill;
   const m=d.models||{},anim=k>=2;
-  const stops=STAGES.map(([id,l,h],i)=>`<button type=button role=radio aria-checked=${i===k} class="ag-stop${i===k?' on':''}${i<k?' done':''}" data-act=agstagepick data-v=${id} tabindex=${i===k?0:-1} title="${esc(l)}: ${esc(h)}"><i></i><span>${esc(l)}</span></button>`).join('');
+  /* the slider itself (like Claude's thinking slider): one range input with a thumb you drag, snapping to the five stops; the names under it are buttons too */
+  const names=STAGES.map(([id,l,h],i)=>`<button type=button class="ag-stop${i===k?' on':''}" data-act=agstagepick data-v=${id} tabindex=-1 title="${esc(h)}">${esc(l)}</button>`).join('');
   const sw=(act,on,label,hint,extra)=>`<div class=sp-r><span>${esc(label)}${hint?`<small>${esc(hint)}</small>`:''}</span><button type=button class="ai-sw${on?' on':''}" data-act=${act}${extra||''} role=switch aria-checked=${!!on} aria-label="${esc(label)}"></button></div>`;
   return pill+`<div class=ag-stage-pop role=dialog aria-label="Where a new request ends, and with what">
    <div class=sp-h>Goes as far as</div>
-   <div class=ag-slider role=radiogroup aria-label="How far a new request goes" style="--k:${k}">${stops}</div>
+   <div class=ag-slider style="--k:${k}"><input type=range class=ag-range data-agrange min=0 max=${STAGES.length-1} step=1 value=${k} aria-label="How far a new request goes" aria-valuetext="${esc(n[1])}"><div class=ag-ticks aria-hidden=true>${STAGES.map((_,i)=>`<i class="${i<=k?'on':''}"></i>`).join('')}</div></div>
+   <div class=ag-names>${names}</div>
    <p class=sp-hint>${esc(n[1])}: ${esc(n[2])}</p>
    ${m.ai||m.image||m.video?`<div class=sp-h>Models</div>${modelSel('ai','Chat',m.ai)}${modelSel('image','Stickers',m.image)}${anim?modelSel('video','Video',m.video):''}`:''}
    <div class=sp-h>Options</div>
+   <div class=sp-r><span>Stickers<small>${d.actions==='predefined'?'nine of the 36 predefined actions':'invented for your idea'}</small></span><div class=ai-seg><button type=button data-act=agsetact data-v=creative class="${d.actions==='predefined'?'':'on'}">Creative</button><button type=button data-act=agsetact data-v=predefined class="${d.actions==='predefined'?'on':''}">Predefined</button></div></div>
    <div class=sp-r><span>Sheet</span><div class=ai-seg><button type=button data-act=agsetgrid data-v=3x3 class="${d.grid==='2x2'?'':'on'}">3×3</button><button type=button data-act=agsetgrid data-v=2x2 class="${d.grid==='2x2'?'on':''}">2×2</button></div></div>
    ${anim?sw('agcr',d.bypass,'Approve everything for me','any rejection still stops it',' data-k=bypass'):''}
    ${sw('agsetask',d.ask!==false,'Ask before spending','show the price first')}</div>`};
@@ -362,19 +365,26 @@ const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(
 function stageDetails(){const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},mine=st.models||{},cat=A.cat||{},llm=A.llm||{};
  const kind=k=>{const list=[...(cat[k]||[]),...((cat.more||{})[k]||[])].map(x=>({id:x.id,label:x.label}));const def=(list.find(x=>x.id===(cat.defaults||{})[k])||{}).label||'';return list.length?{list,cur:mine[k]||'',def}:null};
  return {models:{ai:(llm.models||[]).length?{list:llm.models.map(x=>({id:x.id,label:x.id})),cur:mine.ai||'',def:(llm.current||'').replace(/:\d+$/,'')}:null,image:kind('image'),video:kind('video')},
-  grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass)}}
+  grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass),actions:st.actions||'creative'}}
 function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(AIU.stageOf(A.sess&&A.sess.settings),A.stageOpen,A.stageOpen?stageDetails():null);
- if(A.stageOpen&&!el.contains(document.activeElement)){const on=el.querySelector('.ag-stop.on');if(on)on.focus({preventScroll:true})}}
+ if(A.stageOpen&&!el.contains(document.activeElement)){const r=el.querySelector('.ag-range');if(r)r.focus({preventScroll:true})}}
 function closeStage(focus){if(!A.stageOpen)return;A.stageOpen=false;drawStage();if(focus){const b=document.querySelector('#ag-stage .ag-stage-btn');if(b)b.focus()}}
 ACT.agstage=async()=>{A.stageOpen=!A.stageOpen;drawStage();if(!A.stageOpen)return;
  const need=[];if(!A.cat)need.push(api('/api/models').then(r=>{A.cat=r.ok?r.j:{}}));if(!A.llm)need.push(loadModels());
  if(need.length){await Promise.all(need);if(A.stageOpen)drawStage()}};
+ACT.agsetact=el=>saveSet({actions:el.dataset.v==='predefined'?'predefined':'creative'});
 ACT.agstagepick=async(el,ev,keep)=>{const v=el.dataset.v;if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});if(!keep)A.stageOpen=false;drawStage();await saveSet({stage:v});
- const b=document.querySelector(keep?'#ag-stage .ag-stop.on':'#ag-stage .ag-stage-btn');if(b)b.focus()};
+ const b=document.querySelector(keep?'#ag-stage .ag-range':'#ag-stage .ag-stage-btn');if(b)b.focus()};
 document.addEventListener('keydown',e=>{if(!e.target.closest||!e.target.closest('#ag-stage'))return;
- if(e.target.classList.contains('ag-stop')&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();
-  const stops=[...document.querySelectorAll('#ag-stage .ag-stop')],i=stops.indexOf(e.target),n=stops[Math.max(0,Math.min(stops.length-1,i+(e.key==='ArrowRight'?1:-1)))];if(n&&n!==e.target)ACT.agstagepick(n,null,true);return}
- if(A.stageOpen&&e.key==='Escape'){e.preventDefault();closeStage(true)}});
+ if(A.stageOpen&&e.key==='Escape'){e.preventDefault();closeStage(true)}
+ else if(A.stageOpen&&e.key==='Enter'&&e.target.classList.contains('ag-range')){e.preventDefault();closeStage(true)}});
+/* the range: dragging moves the thumb and names the stop; letting go with the pointer picks it and closes the panel; the arrow keys pick and keep it open (Enter closes) */
+document.addEventListener('pointerdown',e=>{if(e.target.classList&&e.target.classList.contains('ag-range'))A.stageDrag=true});
+document.addEventListener('input',e=>{const r=e.target;if(!r.dataset||r.dataset.agrange===undefined)return;const k=+r.value,s=AIU.STAGES[k];
+ const box=r.closest('.ag-slider');if(box)box.style.setProperty('--k',k);box&&box.querySelectorAll('.ag-ticks i').forEach((x,i)=>x.classList.toggle('on',i<=k));
+ r.setAttribute('aria-valuetext',s[1]);const h=document.querySelector('#ag-stage .sp-hint');if(h)h.textContent=`${s[1]}: ${s[2]}`;
+ document.querySelectorAll('#ag-stage .ag-names .ag-stop').forEach((b,i)=>b.classList.toggle('on',i===k))});
+
 document.addEventListener('click',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
 document.addEventListener('focusin',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
 function drawBar(){if(typeof drawStage==='function')drawStage();const bar=$('ag-bar'),box=$('ag-styles');if(!bar||!box)return;
@@ -410,6 +420,9 @@ document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset|
  await Promise.all([loadModels(),loadAgent(),engSync()]);A.llmBusy=false;engRedraw()});
 /* a model of the details: the chat's own pick (settings.models), "" = the server's default again */
 document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset||s.dataset.agm===undefined)return;await saveSet({models:{[s.dataset.agm]:s.value}})});
+/* the stage range's pick (after the model drop-downs' listener, which tests take as the first) */
+document.addEventListener('change',e=>{const r=e.target;if(!r.dataset||r.dataset.agrange===undefined)return;const drag=A.stageDrag;A.stageDrag=false;
+ ACT.agstagepick({dataset:{v:AIU.STAGES[+r.value][0]}},null,!drag)});
 /* what the Studio calls: rows(source) draws the same engine row and model row from its own source; ensure() reads the local server's models once; load() reads them again */
 globalThis.AIENG={rows:src=>{ENGSRC=src||null;try{return beRow()}finally{ENGSRC=null}},ensure:()=>{if(!A.llm&&!A.llmLoading){A.llmLoading=true;loadModels().finally(()=>{A.llmLoading=false})}},load:loadModels};
 /* the agentic creator's bypass. How far a request goes is the stage pill beside Send (it replaced the creator's on / scope switches); the Animation and Export

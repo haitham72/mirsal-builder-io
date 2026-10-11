@@ -59,7 +59,7 @@ class ConsoleTools:
         except Exception:
             return None
 
-    def plan(self, prompt: str, grid: str, style_id: str, ai: bool) -> dict:
+    def plan(self, prompt: str, grid: str, style_id: str, ai: bool, actions_mode: str = "creative") -> dict:
         """The plan for a request, from the Redis planner cache when this exact request (normalised: case, spaces, end punctuation) was planned
         before with the same templates and model: 0 model calls. A plan the AI failed to expand (it fell back to the built-in sets) is never cached."""
         from .. import transformations
@@ -68,13 +68,13 @@ class ConsoleTools:
         from ..services import llm
         c = cachemod.default()
         versions = sorted(f.stem for f in prompter.TEMPLATES.glob("*.txt")) + [transformations.signature()]
-        key = c.key("plan", cachemod.digest(cachemod.normalize_request(prompt), grid, style_id, bool(ai), ",".join(versions),
+        key = c.key("plan", cachemod.digest(cachemod.normalize_request(prompt), grid, style_id, bool(ai), actions_mode, ",".join(versions),
                                               llm.model() if ai and llm.configured() else "-"))
         hit = c.get(key, "plan")
         if hit:
             return hit
         try:
-            plan = tasks.preview(prompt, grid, style_id, ai)
+            plan = tasks.preview(prompt, grid, style_id, ai, actions_mode=actions_mode)
         except pl.PipelineError as e:
             raise ToolError(str(e), e.code)
         if not plan.get("expand_error"):
@@ -691,7 +691,7 @@ class FakeTools:
     def credits(self):
         return self._credits
 
-    def plan(self, prompt, grid, style_id, ai):
+    def plan(self, prompt, grid, style_id, ai, actions_mode="creative"):
         self.calls.append(("plan", prompt))
         words = [w for w in prompt.lower().split() if w not in ("make", "me", "a", "an", "some", "stickers", "sticker", "of", "create")]
         subject = " ".join(words[:3]) or "sticker"

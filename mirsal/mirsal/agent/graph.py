@@ -398,7 +398,7 @@ class Agent:
         eng = self.tools.engine_label(bool(st.get("ai", True)))
         t.trace.step(f"writing {int(st['grid'][0]) * int(st['grid'][-1])} sticker ideas" + (f" with {eng}" if eng else " from the built-in sets"))   # shown at once: the model can take a few seconds
         try:
-            plan = self.tools.plan(prompt, st["grid"], sid, bool(st.get("ai", True)))
+            plan = self.tools.plan(prompt, st["grid"], sid, bool(st.get("ai", True)), st.get("actions", "creative"))
         except ToolError as e:
             t.reply = f"I couldn't turn that into a plan: {e}"
             t.trace.end("could not plan", ok=False)
@@ -1097,7 +1097,7 @@ class Agent:
         items = []
         for name in names:
             try:
-                plan = self.tools.plan(name, st["grid"], sid, bool(st.get("ai", True)))
+                plan = self.tools.plan(name, st["grid"], sid, bool(st.get("ai", True)), st.get("actions", "creative"))
             except ToolError as e:
                 t.trace.note(f"I could not plan {name}: {e}")
                 continue

@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after the redesign's eleven phases.
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after the Claude-style slider and Creative / Predefined.
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**438 actions** (439 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**440 actions** (441 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -44,39 +44,40 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 
 ## Actions by script
 
-### `agent.js` (29)
+### `agent.js` (30)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `agcar` | 313 | agent.js | none (browser only) |
-| `agtile` | 314 | agent.js | none (browser only) |
-| `agsel` | 317 | agent.js | none (browser only) |
-| `agchip` | 321 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agfill` | 322 | agent.js | none (browser only) |
-| `agedit` | 323 | agent.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `agsetting` | 324 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agaction` | 325 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agcut` | 326 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
-| `aganimal` | 327 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
-| `agretry` | 328 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agtrace` | 329 | agent.js | none (browser only) |
-| `agstep` | 330 | agent.js | none (browser only) |
-| `agstudio` | 331 | agent.js | none (browser only) |
-| `agallow` | 332 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agallowall` | 337 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agnew` | 347 | agent.js | none (browser only) |
-| `agopen` | 348 | agent.js | none (browser only) |
-| `agdel` | 349 | agent.js | `/api/chat/sessions/{}/delete` |
-| `agset` | 350 | agent.js | none (browser only) |
-| `agsetgrid` | 351 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `aggridtoggle` | 353 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstage` | 366 | agent.js | `/api/models` |
-| `agstagepick` | 369 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstyle` | 387 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstyles` | 388 | agent.js | none (browser only) |
-| `agsetask` | 389 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agbe` | 390 | agent.js | `/api/ai`<br>`/api/ai/backend` |
-| `agcr` | 419 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agcar` | 319 | agent.js | none (browser only) |
+| `agtile` | 320 | agent.js | none (browser only) |
+| `agsel` | 323 | agent.js | none (browser only) |
+| `agchip` | 327 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agfill` | 328 | agent.js | none (browser only) |
+| `agedit` | 329 | agent.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `agsetting` | 330 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agaction` | 331 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agcut` | 332 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
+| `aganimal` | 333 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
+| `agretry` | 334 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agtrace` | 335 | agent.js | none (browser only) |
+| `agstep` | 336 | agent.js | none (browser only) |
+| `agstudio` | 337 | agent.js | none (browser only) |
+| `agallow` | 338 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agallowall` | 343 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agnew` | 353 | agent.js | none (browser only) |
+| `agopen` | 354 | agent.js | none (browser only) |
+| `agdel` | 355 | agent.js | `/api/chat/sessions/{}/delete` |
+| `agset` | 356 | agent.js | none (browser only) |
+| `agsetgrid` | 357 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `aggridtoggle` | 359 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstage` | 372 | agent.js | `/api/models` |
+| `agsetact` | 375 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstagepick` | 376 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstyle` | 397 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstyles` | 398 | agent.js | none (browser only) |
+| `agsetask` | 399 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agbe` | 400 | agent.js | `/api/ai`<br>`/api/ai/backend` |
+| `agcr` | 432 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
 
 ### `animate.js` (8)
 
@@ -151,22 +152,23 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `chview` | 86 | chat.js | none (browser only) |
 | `chclear` | 88 | chat.js | none (browser only) |
 
-### `composer.js` (12)
+### `composer.js` (13)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `cpmenu` | 63 | composer.js | none (browser only) |
-| `cpadd` | 74 | composer.js | none (browser only) |
-| `cprefx` | 75 | composer.js | `/api/live/ref` |
-| `cppart` | 87 | composer.js | none (browser only) |
-| `cploop` | 109 | composer.js | none (browser only) |
-| `cpai` | 110 | composer.js | `/api/ai` |
-| `cpstroke` | 111 | composer.js | none (browser only) |
-| `cpstrokeset` | 112 | composer.js | none (browser only) |
-| `cpstyles` | 119 | composer.js | none (browser only) |
-| `cpstylepick` | 120 | composer.js | none (browser only) |
-| `ggo` | 127 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prepared/match` |
-| `gnewlive` | 140 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `cpmenu` | 65 | composer.js | none (browser only) |
+| `cpadd` | 76 | composer.js | none (browser only) |
+| `cprefx` | 77 | composer.js | `/api/live/ref` |
+| `cppart` | 89 | composer.js | none (browser only) |
+| `cpactions` | 112 | composer.js | none (browser only) |
+| `cploop` | 113 | composer.js | none (browser only) |
+| `cpai` | 114 | composer.js | `/api/ai` |
+| `cpstroke` | 115 | composer.js | none (browser only) |
+| `cpstrokeset` | 116 | composer.js | none (browser only) |
+| `cpstyles` | 123 | composer.js | none (browser only) |
+| `cpstylepick` | 124 | composer.js | none (browser only) |
+| `ggo` | 131 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prepared/match` |
+| `gnewlive` | 144 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
 
 ### `editor.js` (27)
 

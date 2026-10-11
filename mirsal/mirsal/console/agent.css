@@ -260,19 +260,26 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ag-stage-btn{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px 0 12px;border:0;border-radius:var(--r-pill);background:var(--fill);color:var(--tx);font:inherit;font-size:var(--fs-s);font-weight:600;cursor:pointer;transition:background .15s}
 .ag-stage-btn i{font-style:normal;font-size:var(--fs-xs);color:var(--mut)}
 .ag-stage-btn:hover,.ag-stage-btn[aria-expanded=true]{background:var(--pri-l);color:var(--pri-d)}
-/* open: the slider, with the stops' names under it */
-.ag-slider{--s:52px;position:relative;display:flex;justify-content:space-between;margin:2px 4px 0;padding:0}
-.ag-slider::before,.ag-slider::after{content:"";position:absolute;top:12px;height:3px;left:calc(var(--s) / 2);border-radius:var(--r-pill);pointer-events:none}
-.ag-slider::before{right:calc(var(--s) / 2);background:var(--bd)}
-.ag-slider::after{width:calc(var(--k) * (100% - var(--s)) / 4);background:var(--pri);transition:width .25s var(--ease)}
-.ag-stop{position:relative;z-index:1;width:var(--s);display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0;border:0;background:none;cursor:pointer;font:inherit}
-.ag-stop i{width:10px;height:10px;margin-top:3px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 2px var(--bd);transition:transform .2s var(--ease),box-shadow .2s}
-.ag-stop span{font-size:var(--fs-xs);color:var(--mut);white-space:nowrap}
-.ag-stop.done i{background:var(--pri);box-shadow:none}
-.ag-stop.on i{width:18px;height:18px;margin-top:-1px;background:#fff;box-shadow:0 0 0 3px var(--pri),0 2px 8px var(--pri-glow)}
-.ag-stop.on span{color:var(--pri-d);font-weight:650}
-.ag-stop:hover i{transform:scale(1.25)}.ag-stop.on:hover i{transform:none}
-.ag-stop:focus-visible{outline:none}.ag-stop:focus-visible i{box-shadow:0 0 0 3px var(--pri),0 0 0 6px var(--pri-glow)}
+/* the pill's small slider glyph: a track filled to the current stop */
+.ag-mini{position:relative;width:22px;height:4px;border-radius:var(--r-pill);background:var(--bd);overflow:hidden;margin-right:2px}
+.ag-mini::after{content:"";position:absolute;inset:0 auto 0 0;width:calc((var(--k) + 1) * 20%);background:var(--pri);border-radius:inherit}
+/* open: the slider (a range with a thumb, like Claude's thinking slider), the ticks of the five stops, and their names under it */
+.ag-slider{position:relative;margin:8px 12px 0;height:22px}
+.ag-range{-webkit-appearance:none;appearance:none;position:relative;z-index:2;width:100%;height:22px;margin:0;background:transparent;cursor:pointer}
+.ag-range:focus{outline:none}
+.ag-range::-webkit-slider-runnable-track{height:4px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--pri) 0 calc(var(--k) * 25%),var(--bd) calc(var(--k) * 25%) 100%)}
+.ag-range::-moz-range-track{height:4px;border-radius:var(--r-pill);background:var(--bd)}
+.ag-range::-moz-range-progress{height:4px;border-radius:var(--r-pill);background:var(--pri)}
+.ag-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 1px #0f172a1f,0 2px 6px #0f172a33;transition:transform .15s var(--ease)}
+.ag-range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 1px #0f172a1f,0 2px 6px #0f172a33}
+.ag-range:active::-webkit-slider-thumb{transform:scale(1.12)}
+.ag-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--pri-glow),0 2px 6px #0f172a33}
+.ag-ticks{position:absolute;z-index:1;left:9px;right:9px;top:9px;display:flex;justify-content:space-between;pointer-events:none}
+.ag-ticks i{width:4px;height:4px;border-radius:50%;background:#C3CEDA}.ag-ticks i.on{background:#fff}
+.ag-names{display:flex;justify-content:space-between;margin:4px 2px 0}
+.ag-stop{flex:1;padding:3px 0;border:0;background:none;font:inherit;font-size:var(--fs-xs);color:var(--mut);cursor:pointer;text-align:center}
+.ag-stop:first-child{text-align:left}.ag-stop:last-child{text-align:right}
+.ag-stop:hover{color:var(--tx)}.ag-stop.on{color:var(--pri-d);font-weight:650}
 .sp-hint{margin:6px 10px 2px;font-size:var(--fs-s);color:var(--mut)}
 .ag-stage-pop{position:absolute;right:-40px;bottom:calc(100% + 10px);z-index:20;width:320px;max-height:min(70vh,560px);overflow:auto;padding:6px;border-radius:var(--r-m);background:#fff;box-shadow:0 18px 50px rgba(8,60,80,.18),inset 0 0 0 1px var(--aline);animation:mz-in .22s var(--ease) both}
 .ag-stage-pop .sp-h{padding:10px 10px 4px;font-size:var(--fs-xs);font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--ink3)}
@@ -289,11 +296,9 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.ag-stage-pop{animation:none}}
 
 /* ---------- the chat restyle (redesign phase 10, Haitham 2026-10-11: minimal, flat, iOS-like, the mockup create-chat.html): ONE override block, last.
-   The glass, glow, dot grid and cyan gradients give way to the paper, white cards with a hairline, and Mirsal blue for the one main action.
+   White cards with a hairline and Mirsal blue for the one main action; the screen's gradient background, glow and dot grid and the gradient greeting stay
+   (Haitham asked for the gradients back, 2026-10-11).
    The AI-vision chip keeps its rolling highlight (.ai-vis): it is the one place that asks for the person's attention on purpose. */
-#s-agent.on{background:var(--bg)}
-.ai-bg,.ai-dots,.ai-glow{display:none}
-.ai-greet{background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:currentColor;color:var(--tx);font-size:clamp(28px,4vw,44px);letter-spacing:-.03em}
 .ai-pill{background:var(--sf);border-color:var(--bd);backdrop-filter:none}
 .ai-box{background:var(--sf);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 0 0 1px var(--bd),0 8px 24px #0f172a0f}
 .ai-box:focus-within{box-shadow:0 0 0 1px var(--pri),0 0 0 4px var(--pri-glow)}
