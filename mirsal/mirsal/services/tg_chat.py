@@ -131,7 +131,7 @@ def _store(c, user: dict):
 
 
 def session_of(c, user: dict, chat_id, fresh: bool = False) -> str:
-    """The chat's session; a new one starts on the Telegram defaults (Glossy, Nano Banana 2, Grok Lite, gpt-4o, the Emojis stage)."""
+    """The chat's session; a new one starts on the Telegram defaults (Glossy, Nano Banana 2, Grok Lite, gpt-4o, the Stickers stage)."""
     ch = _chat(c.out, chat_id)
     store = _store(c, user)
     if ch.get("sid") and not fresh and ch.get("user") == user["id"]:
@@ -494,7 +494,7 @@ def set_model(c, user: dict, chat_id, kind: str, mid: str) -> None:
 
 
 HELP = ("Tell me what stickers you want, for example <b>a teddy bear for school</b>. I plan them, show the price, and make them when you tap the button.\n"
-        "/model: the image model, video model, style, AI and stage of this chat\n/stage: how far a new request goes (Prompt, Emojis, Animation, Export)\n"
+        "/model: the image model, video model, style, AI and stage of this chat\n/stage: how far a new request goes (Prompt, Stickers, Animation, Telegram, Export to the API)\n"
         "/new: start a new chat\n/help: this message")
 
 

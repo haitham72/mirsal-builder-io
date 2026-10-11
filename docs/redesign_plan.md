@@ -31,9 +31,9 @@ Mockups (static, real media, not wired): `mirsal/web/mockups/redesign/` — `stu
   `#/history`, `#/effects` …): routes are not removed, only the rail is shorter.
 - **Create has two tabs: Chat | Studio** (today's AI and Studio). Create > "From a photo" (today's `#/create`) and "Particle effects"
   (`#/effects`) are entries in Create's "+ New" menu.
-- **The journey bar** (both tabs): Idea → Stickers → Motion → Pack → Telegram. It shows where the selected thing is and, in Chat, how far a new
-  request goes (it replaces the chat's stage pill: `plan.md` Step 0 asks for exactly this slider; `agent/stages.py` keeps its four stages, the
-  bar shows them plus Telegram as the end of Export).
+- **The journey bar** (both tabs). **In Chat it is built** (2026-10-11): the stage slider, Prompt · Stickers · Animation · Telegram · Export
+  (`agent/stages.py` has five stages; `docs/design.md` "The stage slider"), with its details (the chat's models and options). Still to build: the
+  Studio header's version, which shows where the selected sheet or video is on the same five stops.
 - **The project map** (Studio, left column; replaces the Earlier-batches column, the variations strip and the Animation tab's video row):
 
   ```
@@ -160,7 +160,7 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 | script (actions) | new home |
 |---|---|
 | `app.js` (21) | shell: rail of four + avatar menu; Library; dialogs and pickers SAME |
-| `agent.js` (28) | Create > Chat, restyled; the stage pill becomes the journey bar (`ag-stage`'s route `settings.stage` unchanged) |
+| `agent.js` (28) | Create > Chat, restyled; the stage slider is built (`ag-stage`'s route `settings.stage` unchanged, plus `settings.models`) |
 | `packs.js` (35) | the pack screen (`pack.html`): header with Send to Telegram, tabs Stickers · Particles · History |
 | `particles.js` (54), `effects.js` (29) | pack > Particles tab; PANEL Particles; Create "+ New" › Particle effects (`#/effects` SAME) |
 | `editor.js` (27), `prepare.js` (24), `animate.js` (8) | full-screen tools SAME, opened from PANEL / Library |
@@ -176,8 +176,8 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 
 1. **Built 2026-10-11** (the rail of four, the avatar menu, Create's tabs: `docs/design.md` §4.2). `studio.css`'s `:root` already carried the
    mockup's palette; a mockup token (e.g. the issue colours) joins `:root` in the phase that first reads it, never unused (rule 6).
-2. **The journey bar** as one component (`journey.js` or in `app.js`, prefix `jb`), in Chat first (replacing the pill: `plan.md` Step 0) and
-   then the Studio header.
+2. **The journey bar in the Studio header** (prefix `jb`): the same five stops as the chat's slider (built 2026-10-11), showing where the
+   selected sheet or video is.
 3. **The project map's data** (§6): `flow/projects.py` + one native route + OpenAPI + a test on fakes. No UI yet.
 4. **Studio frame:** the map column (replacing Earlier batches), the project switcher, the breadcrumb, every MAP / PROJ action of §4 wired to
    its existing `ACT`.

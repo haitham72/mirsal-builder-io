@@ -95,6 +95,21 @@ class ChatServerTests(unittest.TestCase):
         self.assertEqual(r["settings"]["stage"], "export", "an old client's creator on + video reads as Export")
         s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"creator": {"bypass": True}})
         self.assertEqual((r["settings"]["stage"], r["settings"]["creator"]["bypass"]), ("export", True), "bypass alone leaves the stage alone")
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"stage": "api"})
+        self.assertEqual((s, r["settings"]["stage"]), (200, "api"), "the fifth stop: Export to the API")
+
+    def test_the_chats_models_are_validated_settings(self):
+        """The slider's details: the chat's own image / video / AI model, checked against the catalog; empty returns to the default."""
+        s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
+        sid = sess["id"]
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"models": {"image": "nano_banana_pro", "ai": "qwen3-8b"}})
+        self.assertEqual((s, r["settings"]["models"]), (200, {"image": "nano_banana_pro", "ai": "qwen3-8b"}))
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"models": {"image": "no_such_model"}})
+        self.assertEqual(s, 400)
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"models": {"sound": "x"}})
+        self.assertEqual(s, 400)
+        s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"models": {"image": ""}})
+        self.assertEqual(r["settings"]["models"], {"ai": "qwen3-8b"}, "empty = the server's default again")
 
     def test_a_full_conversation(self):
         s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})

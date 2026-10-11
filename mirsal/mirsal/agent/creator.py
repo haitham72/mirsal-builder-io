@@ -37,20 +37,22 @@ def settings_of(sess: dict) -> dict:
 
 def new_run(*, prompt: str, subject: str, grid: str, style_id: str, scope: str, bypass: bool, estimate: float | None, video_estimate: float | None,
             end: str = "export") -> dict:
-    """`end` (the chat's stage, agent/stages.py): 'export' runs to the Telegram send; 'animation' ends after the animations are approved (G4), with no
-    pack and no Telegram."""
+    """`end` (the chat's stage, agent/stages.py): 'export' runs to the Telegram send; 'api' goes on and sends the pack to the AddCollection API;
+    'animation' ends after the animations are approved (G4), with no pack and no Telegram."""
     total = round((estimate or 0) + ((video_estimate or 0) if scope == "video" else 0), 2)
-    end = "animation" if end == "animation" and scope == "video" else "export"
+    end = "animation" if end == "animation" and scope == "video" else "api" if end == "api" else "export"
     return {"id": f"C{int(time.time() * 1000) % 10**9}", "prompt": prompt, "subject": subject, "grid": grid, "style_id": style_id, "scope": scope, "bypass": bool(bypass), "end": end,
             "estimate": estimate, "video_estimate": video_estimate if scope == "video" else None, "approved_credits": total or None,
             "step": "sheet", "status": "running", "generation": None, "job": None, "video_job": None, "pack_id": None, "skip": [], "waiting": None, "stop": None,
-            "telegram": None, "log": [], "started": round(time.time(), 3), "updated": round(time.time(), 3)}
+            "telegram": None, "collection": None, "log": [], "started": round(time.time(), 3), "updated": round(time.time(), 3)}
 
 
 def steps_of(run: dict) -> list:
-    """The steps this run goes through: a run that ends at the animation has no pack and no Telegram step."""
+    """The steps this run goes through: a run that ends at the animation has no pack and no Telegram step; one that ends at the API has one more."""
     steps = STEPS[run["scope"]]
-    return [s for s in steps if s[0] not in ("pack", "telegram")] if run.get("end") == "animation" else steps
+    if run.get("end") == "animation":
+        return [s for s in steps if s[0] not in ("pack", "telegram")]
+    return steps + [("api", "Export to the API")] if run.get("end") == "api" else steps
 
 
 def labels(run: dict) -> list:
@@ -279,8 +281,23 @@ def _step(tools, run, vision_allowed, telegram_ready, checkpoint=None):
                          [{"label": "Try again", "action": "creator_go"}, {"label": "Stop", "action": "creator_stop"}], "telegram")
         rep = tools.telegram_send(run["pack_id"])
         run["telegram"] = rep
+        sent = "sent: " + ", ".join(s["link"] for s in rep.get("sets", []))
+        if run.get("end") == "api":                                # the chat's stage is Export: the API comes after Telegram
+            return _go(run, "api", sent)
         run.update(status="done", step="done", updated=round(time.time(), 3))
-        _log(run, "sent: " + ", ".join(s["link"] for s in rep.get("sets", [])))
+        _log(run, sent)
+        return
+    if step == "api":
+        try:
+            rep = tools.collection_export(run["pack_id"], run["subject"])
+        except Exception as e:                                     # not set up, refused, or not the owner: the pack is safe, so it is a stop with a retry
+            if getattr(e, "code", 500) >= 500:
+                raise
+            return _stop(run, f"{e} The pack is in the library and in Telegram; fix this and continue, or stop here.",
+                         [{"label": "Try again", "action": "creator_go"}, {"label": "Stop", "action": "creator_stop"}], "api")
+        run["collection"] = rep
+        run.update(status="done", step="done", updated=round(time.time(), 3))
+        _log(run, f"exported to the API: {rep.get('count', '?')} stickers as the collection '{rep.get('collection', run['subject'])}'")
         return
 
 

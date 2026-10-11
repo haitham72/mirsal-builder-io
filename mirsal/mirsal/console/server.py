@@ -1833,6 +1833,23 @@ def make_handler(c: Console):
                                 if not _stages.valid(v):                              # a stage nobody knows is refused out loud, like an unknown style
                                     raise pl.PipelineError(f"unknown stage {v!r}: the stages are " + ", ".join(_stages.STAGES), 400)
                                 sess["settings"]["stage"] = v
+                            elif k == "models" and isinstance(v, dict):               # the chat's own picks (the slider's details): image / video from the catalog, ai = a local model id
+                                cur = dict(sess["settings"].get("models") or {})
+                                for mk, mv in v.items():
+                                    if mk not in ("image", "video", "ai"):
+                                        raise pl.PipelineError(f"unknown model kind {mk!r}: the kinds are image, video, ai", 400)
+                                    if mv in (None, ""):
+                                        cur.pop(mk, None)                            # empty = back to the server's default
+                                    elif mk == "ai":
+                                        if not isinstance(mv, str) or len(mv) > 200:
+                                            raise pl.PipelineError("the AI model is a model id the local server lists", 400)
+                                        cur[mk] = mv
+                                    else:
+                                        try:
+                                            cur[mk] = model_catalog.find(mk, str(mv))["id"]
+                                        except model_catalog.CatalogError as e:
+                                            raise pl.PipelineError(str(e), 400)
+                                sess["settings"]["models"] = cur
                             elif k == "allow_vlm" and v in (True, False):
                                 store.set_vision(sess, v)                            # state only: no chat turn; the next turn says it once
                             elif k in allowed and v in allowed[k]:

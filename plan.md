@@ -9,27 +9,10 @@ run per change, no paid call, `MIRSAL_LLM_PROVIDER=none`). Delete each step when
 `docs/redesign_plan.md` is the spec (read it whole, with `docs/architecture.md` and `docs/ui_inventory.md`). Next, in order:
 1. **The outside review** (an LLM, against §9 of that file) is still to come; fold its findings into phases 3-11 before they are built. D1-D7 are
    answered (every recommendation accepted, 2026-10-11); phase 1 is built.
-2. **Phase 2 — the journey bar** (§5), then the phases in order: one session at a time, Opus on medium effort, one commit per phase, the
+2. **Phase 2 — the journey bar in the Studio header** (§5), then the phases in order: one session at a time, Opus on medium effort, one commit per phase, the
    inventory test green (`python -m unittest tests.test_ui_inventory`) with `renamed` / `retired` filled for anything that moved or left.
 
-The journey bar of phase 2 is the slider Step 0 below asks for (item 2); on this branch, build it there instead of a separate slider.
-
-## Step 0 — Haitham does not see the selector (2026-10-09, FIRST)
-
-Haitham: "I still don't see a slider from 'prompt' all the way to 'export to API' at all." Three gaps between what he expects and what was built:
-
-1. **Nothing visible yet.** The pill lives only on the AI screen (`#/agent`), inside the chat box, left of Send (`agent.js` `drawStage`, `#ag-stage`). A server
-   started before `2dba73f` serves the old `agent.js`: restart it (Haitham runs `.\.venv\Scripts\python.exe -m mirsal serve --lan` from `mirsal/`, HTTPS on the LAN) and hard-reload (Ctrl+F5). Check it is
-   there first; if it still is not, debug `drawStage` (is `#ag-stage` in the markup, is `drawBar` reached on the AI screen) before anything else.
-2. **A pill is not a slider.** The plan said "a picker like Claude / ChatGPT's reasoning level", and a dropdown pill was built. Haitham expects a **visible
-   slider / stepper**: Prompt -> Emojis -> Animation -> Export, every stage on screen at once, the current one marked, one click (or drag, or arrow keys)
-   to move. Rebuild the control as a 4-stop (5 with the API, below) segmented slider in the chat bar, same route (`settings.stage`), no turn, tokens from
-   `docs/design.md`; keep `AIU.stageOf`; update `tests/js/chat_stage.test.js` and `docs/design.md` "The stage pill".
-3. **"Export to API" does not exist in the chat.** D1 made Export = Library pack + Telegram and the AddCollection API "a second button on the final card";
-   that button was NOT built (`graph.py` / `agent.js` never call `services/collection.py`). Either (a) build the button on the Export run's done message
-   (the pack's existing AddCollection export route, never automatic, its credentials and live proof stay W49), or (b) if Haitham wants it as the slider's last
-   stop, add a fifth stage `api` (Export + the AddCollection send) to `agent/stages.py`, the creator's `end`, the settings route, OpenAPI, Telegram `/stage`.
-   Ask Haitham (a) or (b) once, with (a) as the recommendation while W49 is open.
+The chat's stage slider (Prompt · Stickers · Animation · Telegram · Export) is built (2026-10-11); phase 2 is now only the Studio header's version.
 
 ## Step 1 — prove the follow-up through the real server (fakes only)
 

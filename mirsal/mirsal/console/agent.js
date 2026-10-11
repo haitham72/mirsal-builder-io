@@ -36,14 +36,31 @@ const AIU=(()=>{
   return {on:false,rules:true,label:pref!=='cloud'&&loc.ok===false?'Rules only (local model not loaded)':'Rules only',title:`${why}. The assistant still works from its rules. Click for details.`}};
  /* the one line under the model dropdown (GET /api/llm/models): the model in use, or why the local model cannot answer, in the server's last sentence ("Load qwen3.5-4b in LM Studio ...") */
  const modelNote=m=>{if(!m)return '';if(m.ok)return `now: ${m.current}`;const why=String(m.why||'');return 'Local model not loaded: '+(why.split(/\.\s+/).pop()||why)};
- /* the stage: how far a NEW request goes (settings.stage, agent/stages.py). One compact pill left of Send ("Emojis ▾"); a click opens four one-line choices.
-    stageOf reads an old session's creator switches the way the server does (on + video = Export). */
- const STAGES=[['prompt','Prompt','plan only, free'],['emojis','Emojis','sheet and stickers'],['animation','Animation','+ animation'],['export','Export','+ pack and send']];
+ /* the stage: how far a NEW request goes (settings.stage, agent/stages.py), on a five-stop slider beside Send (Haitham, 2026-10-11: minimal like a
+    reasoning-level slider, with details like a model menu). Ids stay the server's: `emojis` reads Stickers, `export` reads Telegram, `api` is the export
+    to the backend API. stageOf reads an old session's creator switches the way the server does (on + video = Telegram). */
+ const STAGES=[['prompt','Prompt','plan only, free'],['emojis','Stickers','sheet and stickers'],['animation','Animation','+ animation'],['export','Telegram','+ pack and Telegram'],['api','Export','+ send to the API']];
  const stageOf=st=>{const v=st&&st.stage;if(STAGES.some(x=>x[0]===v))return v;const c=(st&&st.creator)||{};return c.on&&c.scope==='video'?'export':'emojis'};
- const stageHTML=(cur,open)=>{const n=STAGES.find(x=>x[0]===cur)||STAGES[1];
-  return `<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=menu aria-expanded=${!!open} title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change.">${esc(n[1])}<i aria-hidden=true>▾</i></button>`+
-   (open?`<div class=ag-stage-pop role=menu aria-label="How far a new request goes">${STAGES.map(([id,l,h])=>`<button type=button role=menuitemradio aria-checked=${id===n[0]} class="ag-stage-opt${id===n[0]?' on':''}" data-act=agstagepick data-v=${id} tabindex=${id===n[0]?0:-1}><b>${l}</b><small>${h}</small><span class=ck aria-hidden=true>${id===n[0]?'✓':''}</span></button>`).join('')}</div>`:'')};
- return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid,lastBot,engine,modelNote,STAGES,stageOf,stageHTML};
+ /* one model drop-down of the details: "Default (label)" first (value ""), then every model; the chat's own pick selected */
+ const modelSel=(kind,label,m)=>{if(!m||!(m.list||[]).length)return '';const cur=m.cur||'';
+  return `<label class=sp-r><span>${esc(label)}</span><select data-agm=${kind} aria-label="${esc(label)} model"><option value=""${cur?'':' selected'}>Default${m.def?` · ${esc(m.def)}`:''}</option>${m.list.map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(x.label||x.id)}</option>`).join('')}</select></label>`};
+ /* stageHTML(cur, open, d): the closed slider (five stops, the current one named) and, when open, the details: the stops with what each does, the
+    chat's models (d.models: {ai, image, video} each {list, cur, def}), and the options (d.grid, d.ask, d.bypass). Pure: the caller wires the actions. */
+ const stageHTML=(cur,open,d)=>{d=d||{};let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=1;const n=STAGES[k];
+  const stops=STAGES.map(([id,l,h],i)=>`<button type=button role=radio aria-checked=${i===k} class="ag-stop${i===k?' on':''}${i<k?' done':''}" data-act=agstagepick data-v=${id} tabindex=${i===k?0:-1} title="${esc(l)}: ${esc(h)}" aria-label="${esc(l)}"><i></i></button>`).join('');
+  const sl=`<div class=ag-slider role=radiogroup aria-label="How far a new request goes" style="--k:${k}">${stops}</div><span class=ag-stage-lab>${esc(n[1])}</span>`+
+   `<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="Details: where it ends, the models, the options" aria-label="Details"><i aria-hidden=true>▾</i></button>`;
+  if(!open)return sl;
+  const m=d.models||{},anim=k>=2;
+  const sw=(act,on,label,hint,extra)=>`<div class=sp-r><span>${esc(label)}${hint?`<small>${esc(hint)}</small>`:''}</span><button type=button class="ai-sw${on?' on':''}" data-act=${act}${extra||''} role=switch aria-checked=${!!on} aria-label="${esc(label)}"></button></div>`;
+  return sl+`<div class=ag-stage-pop role=dialog aria-label="Where a new request ends, and with what">
+   <div class=sp-h>Goes as far as</div>${STAGES.map(([id,l,h],i)=>`<button type=button role=menuitemradio aria-checked=${i===k} class="ag-stage-opt${i===k?' on':''}" data-act=agstagepick data-v=${id} tabindex=${i===k?0:-1}><b>${l}</b><small>${h}</small><span class=ck aria-hidden=true>${i===k?'✓':''}</span></button>`).join('')}
+   ${m.ai||m.image||m.video?`<div class=sp-h>Models</div>${modelSel('ai','Chat',m.ai)}${modelSel('image','Stickers',m.image)}${anim?modelSel('video','Video',m.video):''}`:''}
+   <div class=sp-h>Options</div>
+   <div class=sp-r><span>Sheet</span><div class=ai-seg><button type=button data-act=agsetgrid data-v=3x3 class="${d.grid==='2x2'?'':'on'}">3×3</button><button type=button data-act=agsetgrid data-v=2x2 class="${d.grid==='2x2'?'on':''}">2×2</button></div></div>
+   ${anim?sw('agcr',d.bypass,'Approve everything for me','any rejection still stops it',' data-k=bypass'):''}
+   ${sw('agsetask',d.ask!==false,'Ask before spending','show the price first')}</div>`};
+ return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid,lastBot,engine,modelNote,STAGES,stageOf,stageHTML,modelSel};
 })();
 if(typeof module!=='undefined')module.exports=AIU;
 
@@ -337,25 +354,38 @@ ACT.aggridtoggle=async el=>saveSet({grid:((A.sess&&A.sess.settings&&A.sess.setti
 /* the sheet size in the bar is one chip that flips on click; the settings panel keeps its own side-by-side pair (ai-seg) below */
 /* ---------- under the box: what the next sheet will be made with, one click from changing it (the same settings as the gear, and the style tiles the Studio has, smaller) */
 const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(A.agent&&A.agent.default_style)||'flat_vector';
-/* the stage pill: writes settings.stage through the settings route and makes no chat turn. Keyboard: Tab to it, Enter opens, arrows move, Enter picks, Esc closes. */
-function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(AIU.stageOf(A.sess&&A.sess.settings),A.stageOpen);
- if(A.stageOpen){const on=el.querySelector('.ag-stage-opt.on');if(on)on.focus({preventScroll:true})}}
+/* the stage slider: writes settings.stage through the settings route and makes no chat turn. Keyboard: Tab to the current stop, Left / Right move along
+   the slider; the ▾ opens the details (Esc closes, Up / Down move between the stops). The details read the model catalog once (GET /api/models). */
+function stageDetails(){const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},mine=st.models||{},cat=A.cat||{},llm=A.llm||{};
+ const kind=k=>{const list=[...(cat[k]||[]),...((cat.more||{})[k]||[])].map(x=>({id:x.id,label:x.label}));const def=(list.find(x=>x.id===(cat.defaults||{})[k])||{}).label||'';return list.length?{list,cur:mine[k]||'',def}:null};
+ return {models:{ai:(llm.models||[]).length?{list:llm.models.map(x=>({id:x.id,label:x.id})),cur:mine.ai||'',def:(llm.current||'').replace(/:\d+$/,'')}:null,image:kind('image'),video:kind('video')},
+  grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass)}}
+function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(AIU.stageOf(A.sess&&A.sess.settings),A.stageOpen,A.stageOpen?stageDetails():null);
+ if(A.stageOpen&&!el.contains(document.activeElement)){const on=el.querySelector('.ag-stage-opt.on');if(on)on.focus({preventScroll:true})}}
 function closeStage(focus){if(!A.stageOpen)return;A.stageOpen=false;drawStage();if(focus){const b=document.querySelector('#ag-stage .ag-stage-btn');if(b)b.focus()}}
-ACT.agstage=()=>{A.stageOpen=!A.stageOpen;drawStage()};
-ACT.agstagepick=async el=>{A.stageOpen=false;const v=el.dataset.v;if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});drawStage();await saveSet({stage:v});const b=document.querySelector('#ag-stage .ag-stage-btn');if(b)b.focus()};
-document.addEventListener('keydown',e=>{if(!A.stageOpen||!e.target.closest||!e.target.closest('#ag-stage'))return;
+ACT.agstage=async()=>{A.stageOpen=!A.stageOpen;drawStage();if(!A.stageOpen)return;
+ const need=[];if(!A.cat)need.push(api('/api/models').then(r=>{A.cat=r.ok?r.j:{}}));if(!A.llm)need.push(loadModels());
+ if(need.length){await Promise.all(need);if(A.stageOpen)drawStage()}};
+ACT.agstagepick=async el=>{const v=el.dataset.v,fromPop=!!el.closest('.ag-stage-pop');if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});drawStage();await saveSet({stage:v});
+ const b=document.querySelector(fromPop?'#ag-stage .ag-stage-opt.on':'#ag-stage .ag-stop.on');if(b)b.focus()};
+document.addEventListener('keydown',e=>{if(!e.target.closest||!e.target.closest('#ag-stage'))return;
+ if(e.target.classList.contains('ag-stop')&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();
+  const stops=[...document.querySelectorAll('#ag-stage .ag-stop')],i=stops.indexOf(e.target),n=stops[Math.max(0,Math.min(stops.length-1,i+(e.key==='ArrowRight'?1:-1)))];if(n&&n!==e.target)ACT.agstagepick(n);return}
+ if(!A.stageOpen)return;
  const opts=[...document.querySelectorAll('#ag-stage .ag-stage-opt')],i=opts.indexOf(document.activeElement);
  if(e.key==='Escape'){e.preventDefault();closeStage(true)}
- else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const n=opts[(i+(e.key==='ArrowDown'?1:-1)+opts.length)%opts.length];if(n)n.focus()}});
+ else if(i>=0&&(e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();const n=opts[(i+(e.key==='ArrowDown'?1:-1)+opts.length)%opts.length];if(n)n.focus()}});
 document.addEventListener('click',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
 document.addEventListener('focusin',e=>{if(A.stageOpen&&!e.target.closest('#ag-stage'))closeStage(false)});
 function drawBar(){if(typeof drawStage==='function')drawStage();const bar=$('ag-bar'),box=$('ag-styles');if(!bar||!box)return;
  const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},list=(A.agent&&A.agent.styles)||[],cur=styleNow();
  const now=list.find(s=>s.id===cur);
- bar.innerHTML=`${now?`<span class="ag-chip ag-cur" title="The style of the next sheet"><img src="/assets/styles/${AIU.esc(now.id)}" alt="">${AIU.esc(now.label)} style</span>`:''}<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle" title="How many stickers in one sheet: nine (3×3) or four (2×2). Click to change.">${ic('lib')}${st.grid==='2x2'?'2×2 sheet':'3×3 sheet'}</button>
+ const open=A.stylesOpen??!A.pre;      /* the tiles until a style is picked, then only the chosen one (a chip); the chip opens them again */
+ bar.innerHTML=`${now?`<button type=button class="ag-chip ag-cur" data-act=agstyles aria-expanded=${open} title="The style of the next sheet. Click to ${open?'close':'see every style'}."><img src="/assets/styles/${AIU.esc(now.id)}" alt="">${AIU.esc(now.label)}<i aria-hidden=true>${open?'▴':'▾'}</i></button>`:''}<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle" title="How many stickers in one sheet: nine (3×3) or four (2×2). Click to change.">${ic('lib')}${st.grid==='2x2'?'2×2 sheet':'3×3 sheet'}</button>
   <button type=button class="ag-chip${st.ask_before_spending?'':' warn'}" data-act=agsetask title="${st.ask_before_spending?'The price is shown and you say go before anything is spent':'Sheets start at once, without showing the price first'}">${ic(st.ask_before_spending?'check':'x')}${st.ask_before_spending?'Asks before spending':'Spends without asking'}</button>`;
- box.innerHTML=list.map(s=>`<button type=button class="ag-st${s.id===cur?' on':''}" role=radio aria-checked=${s.id===cur} data-act=agstyle data-id="${AIU.esc(s.id)}" title="${AIU.esc(s.label)}: ${AIU.esc(s.hint)}"><img src="/assets/styles/${AIU.esc(s.id)}" alt="" loading=lazy><b>${AIU.esc(s.label)}</b></button>`).join('')}
-ACT.agstyle=async el=>{A.pre=el.dataset.id;store.set('mirsal.ai.style',A.pre);if(A.sess)await saveSet({style_id:A.pre});else drawBar()};
+ box.hidden=!open;box.innerHTML=!open?'':list.map(s=>`<button type=button class="ag-st${s.id===cur?' on':''}" role=radio aria-checked=${s.id===cur} data-act=agstyle data-id="${AIU.esc(s.id)}" title="${AIU.esc(s.label)}: ${AIU.esc(s.hint)}"><img src="/assets/styles/${AIU.esc(s.id)}" alt="" loading=lazy><b>${AIU.esc(s.label)}</b></button>`).join('')}
+ACT.agstyle=async el=>{A.pre=el.dataset.id;A.stylesOpen=false;store.set('mirsal.ai.style',A.pre);if(A.sess)await saveSet({style_id:A.pre});else drawBar()};
+ACT.agstyles=()=>{A.stylesOpen=!(A.stylesOpen??!A.pre);drawBar()};
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
 ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await Promise.all([loadAgent(),engSync()]);engRedraw()}else toast(r.j.error||'Could not change the AI engine',1)};
 async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;setSet();drawBar()}else toast(r.j.error,1)}
@@ -378,6 +408,8 @@ document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset|
  const r=await post('/api/ai/backend',{model:s.value});
  if(!r.ok)toast((r.j&&r.j.error)||'Could not change the local model',1);
  await Promise.all([loadModels(),loadAgent(),engSync()]);A.llmBusy=false;engRedraw()});
+/* a model of the details: the chat's own pick (settings.models), "" = the server's default again */
+document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset||s.dataset.agm===undefined)return;await saveSet({models:{[s.dataset.agm]:s.value}})});
 /* what the Studio calls: rows(source) draws the same engine row and model row from its own source; ensure() reads the local server's models once; load() reads them again */
 globalThis.AIENG={rows:src=>{ENGSRC=src||null;try{return beRow()}finally{ENGSRC=null}},ensure:()=>{if(!A.llm&&!A.llmLoading){A.llmLoading=true;loadModels().finally(()=>{A.llmLoading=false})}},load:loadModels};
 /* the agentic creator's bypass. How far a request goes is the stage pill beside Send (it replaced the creator's on / scope switches); the Animation and Export

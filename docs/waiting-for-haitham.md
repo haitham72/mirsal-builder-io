@@ -89,7 +89,7 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 **49. Rotate the AddCollection credential, then try two things for real.** The credential pasted in `docs/Api/AddCollection-API .md` is in git
 history (commit dd17f61, pushed): change that password and keep the new one only in `mirsal/.env` (`MIRSAL_COLLECTION_API_CREDENTIALS`). Then, with
-`serve --lan` restarted: one Export to collection of a small pack, and the Telegram chat (`/start`, `/model`, a request: real stickers, the album, a
+`serve --lan` restarted: one Export to collection of a small pack (the chat's last stop, **Export**, makes the same call after Telegram, so it waits on this too), and the Telegram chat (`/start`, `/model`, a request: real stickers, the album, a
 creator run's edited message). Recommendation: both now, they cost nothing but a pack's credits. Unblocks: the backlog's Telegram chat and export items.
 
 **50. The paid proof of the face preset** (about 2 credits + one pack): see the backlog, Live generation. Recommendation: yes, once. Unblocks: the v4

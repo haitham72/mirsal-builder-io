@@ -253,17 +253,38 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ai-card.multi .multi-ch span{padding:2px 10px;border-radius:var(--r-pill);background:#FEF3C7;color:#92400E;font-size:var(--fs-s)}
 .ai-card.multi .multi-assume{padding:8px 18px 0;font-size:var(--fs-s);color:var(--ink3)}
 
-/* the stage pill left of Send (docs/design.md "The stage pill"): how far a NEW request goes. A compact chip like the reasoning-level picker of Claude / ChatGPT;
-   its popover opens upwards (the box sits at the bottom). Tokens only: the chip's glass and line, the accent ink for the checked choice. */
-.ag-stage{position:relative;flex:none;align-self:flex-end;margin-bottom:5px}
-.ag-stage-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:var(--r-pill);border:1px solid var(--aline);background:transparent;color:var(--ink2);font-size:var(--fs-s);font-weight:600;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
-.ag-stage-btn i{font-style:normal;font-size:var(--fs-xs);opacity:.7}
-.ag-stage-btn:hover,.ag-stage-btn[aria-expanded=true]{border-color:var(--ai);color:var(--aid);background:#fff}
-.ag-stage-pop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:20;min-width:224px;padding:6px;border-radius:var(--r-m);background:#fff;box-shadow:0 14px 44px rgba(6,182,212,.18),inset 0 0 0 1px var(--aline);animation:mz-in .22s var(--ease) both}
-.ag-stage-opt{display:grid;grid-template-columns:1fr auto;grid-template-areas:"b ck" "s ck";width:100%;text-align:left;gap:1px 10px;padding:7px 10px;border:0;border-radius:var(--r-s);background:none;color:var(--ink);cursor:pointer}
+/* the stage slider left of Send (docs/design.md "The stage slider"): how far a NEW request goes, five stops on one thin track, the current one named.
+   Minimal and flat (a reasoning-level slider); the ▾ opens the details upwards (the box sits at the bottom): the stops, the chat's models, the options. */
+.ag-stage{position:relative;flex:none;align-self:flex-end;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.ag-slider{--s:16px;position:relative;display:flex;align-items:center;height:26px}
+.ag-slider::before,.ag-slider::after{content:"";position:absolute;top:50%;height:2px;margin-top:-1px;left:calc(var(--s) / 2);border-radius:var(--r-pill);pointer-events:none}
+.ag-slider::before{right:calc(var(--s) / 2);background:var(--aline)}
+.ag-slider::after{width:calc(var(--k) * var(--s));background:var(--ai);transition:width .25s var(--ease)}
+.ag-stop{position:relative;z-index:1;width:var(--s);height:26px;padding:0;border:0;background:none;display:grid;place-items:center;cursor:pointer}
+.ag-stop i{width:6px;height:6px;border-radius:50%;background:#C6D3DC;transition:transform .2s var(--ease),background .2s,box-shadow .2s}
+.ag-stop.done i{background:var(--ai)}
+.ag-stop.on i{width:12px;height:12px;background:#fff;box-shadow:0 0 0 2px var(--ai),0 2px 6px rgba(6,182,212,.35)}
+.ag-stop:hover i{transform:scale(1.35)}.ag-stop.on:hover i{transform:none}
+.ag-stop:focus-visible{outline:none}.ag-stop:focus-visible i{box-shadow:0 0 0 2px var(--ai),0 0 0 5px rgba(6,182,212,.25)}
+.ag-stage-lab{min-width:58px;font-size:var(--fs-s);font-weight:600;color:var(--aid);white-space:nowrap}
+.ag-stage-btn{width:24px;height:24px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink3);cursor:pointer;transition:background .15s,color .15s}
+.ag-stage-btn i{font-style:normal;font-size:var(--fs-xs)}
+.ag-stage-btn:hover,.ag-stage-btn[aria-expanded=true]{background:rgba(6,182,212,.12);color:var(--aid)}
+.ag-stage-pop{position:absolute;right:-40px;bottom:calc(100% + 10px);z-index:20;width:292px;max-height:min(70vh,560px);overflow:auto;padding:6px;border-radius:var(--r-m);background:#fff;box-shadow:0 18px 50px rgba(8,60,80,.18),inset 0 0 0 1px var(--aline);animation:mz-in .22s var(--ease) both}
+.ag-stage-pop .sp-h{padding:10px 10px 4px;font-size:var(--fs-xs);font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--ink3)}
+.ag-stage-pop .sp-h:first-child{padding-top:6px}
+.ag-stage-opt{display:grid;grid-template-columns:1fr auto;grid-template-areas:"b ck" "s ck";width:100%;text-align:left;gap:1px 10px;padding:6px 10px;border:0;border-radius:var(--r-s);background:none;color:var(--ink);cursor:pointer}
 .ag-stage-opt b{grid-area:b;font-size:var(--fs-s);font-weight:600}.ag-stage-opt small{grid-area:s;font-size:var(--fs-xs);color:var(--ink3)}
 .ag-stage-opt .ck{grid-area:ck;align-self:center;color:var(--aid);font-weight:700}
 .ag-stage-opt:hover,.ag-stage-opt:focus-visible{background:rgba(6,182,212,.10);outline:none}
 .ag-stage-opt.on b{color:var(--aid)}
+.sp-r{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 10px;font-size:var(--fs-s);color:var(--ink)}
+.sp-r>span{display:flex;flex-direction:column;font-weight:500}.sp-r small{font-size:var(--fs-xs);color:var(--ink3);font-weight:400}
+.sp-r select{max-width:160px;padding:5px 24px 5px 10px;border:0;border-radius:var(--r-s);background:#EEF6F9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2335606E' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center/12px;appearance:none;-webkit-appearance:none;font-size:var(--fs-s);color:var(--ink);cursor:pointer;text-overflow:ellipsis}
+.sp-r select:hover,.sp-r select:focus-visible{background-color:#E2F1F6;outline:none}
+.sp-r .ai-seg button{padding:3px 11px;font-size:var(--fs-s)}
+.sp-r .ai-sw{transform:scale(.85);transform-origin:right center}
+.ag-cur{cursor:pointer}.ag-cur i{font-style:normal;font-size:var(--fs-xs);opacity:.6}
+@media (max-width:560px){.ag-stage-lab{display:none}.ag-stage-pop{right:-44px;width:min(292px,calc(100vw - 24px))}}
 .plan-prompt{margin-top:8px;font-size:var(--fs-s);color:var(--ink2)}.plan-prompt summary{cursor:pointer;color:var(--aid)}.plan-prompt p{margin:6px 0 0;white-space:pre-wrap}
 @media (prefers-reduced-motion:reduce){.ag-stage-pop{animation:none}}

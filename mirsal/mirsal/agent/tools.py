@@ -609,6 +609,22 @@ class ConsoleTools:
         except telegram.TelegramError as e:
             raise ToolError(str(e), getattr(e, "code", 409) if getattr(e, "code", 409) < 500 else 409)
 
+    def collection_export(self, pid: str, name: str) -> dict:
+        """The chat's Export stage: the pack's Download .zip sent to the AddCollection API as one collection, the same call as the pack's
+        "Export to collection" button (console/app.py). Owner only, like Telegram; a refusal by the API is a ToolError with its words."""
+        from ..services import collection as col
+        if self.member:
+            raise ToolError("Exporting to the API is available to the owner only", 403)
+        if not self.c.lib.owns(pid, self.user["id"]):
+            raise ToolError("not found", 404)
+        try:
+            rep = col.send(self.out, f"pack {pid}", self.c.lib.export_zip(pid)[0], name, "", self.user.get("id") or "human")
+        except col.CollectionError as e:
+            raise ToolError(str(e), getattr(e, "code", 409) if getattr(e, "code", 409) < 500 else 409)
+        if not rep.get("ok"):
+            raise ToolError(f"The API refused it ({rep.get('status')}): {rep.get('error') or ''}".strip(), 409)
+        return rep
+
     def ready_indexes(self, gid: str) -> list:
         self._see(gid)
         res = pl.read_result(self.out, int(gid[1:]))
@@ -923,6 +939,10 @@ class FakeTools:
     def telegram_send(self, pid):
         self.calls.append(("telegram_send", pid))
         return {"sets": [{"kind": "static", "name": "pack_by_bot", "link": "https://t.me/addstickers/pack_by_bot", "added": 9, "total": 9}]}
+
+    def collection_export(self, pid, name):
+        self.calls.append(("collection_export", pid, name))
+        return {"ok": True, "status": 201, "collection": name, "count": 9, "response": {}}
 
     def ready_indexes(self, gid):
         return [s["index"] for s in self.gens[gid]["stickers"] if s["status"] == "READY"]

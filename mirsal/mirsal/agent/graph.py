@@ -633,7 +633,8 @@ class Agent:
             return {}
         if self.tools.live() and st.get("ask_before_spending", True):
             sess["pending"] = spec
-            then = {"animation": ", then animated", "export": ", then animated, packed and sent to Telegram"}.get(stage, "")
+            then = {"animation": ", then animated", "export": ", then animated, packed and sent to Telegram",
+                    "api": ", then animated, packed, sent to Telegram and exported to the API"}.get(stage, "")
             t.reply = (f"I'll make a new take of **{what}** from the same plan; the old one stays" if regen else f"**{name}**: {what}, one sheet each") + f"{then}. Shall I make {them}?"
             t.chips = [{"label": ("Create them" if len(items) > 1 else "Create it") + (f" · {total:g} credits" if total else ""), "action": "confirm"}, {"label": "Not yet", "action": "cancel"}]
             t.trace.end(f"plan ready · {_credits(total)}")
@@ -736,9 +737,10 @@ class Agent:
         else:
             ready, why = self.tools.telegram_ready()
             what = "the stickers as a static pack" if cs["scope"] == "images" else "the stickers animated"
-            t.reply = (f"Creator plan for **{subject}**: {len(names)} stickers, then {what}, then to Telegram, {how}. "
+            api = end == "api"
+            t.reply = (f"Creator plan for **{subject}**: {len(names)} stickers, then {what}, then to Telegram{', then exported to the API' if api else ''}, {how}. "
                        + ("" if ready else "Telegram is not connected yet, so I will stop before sending. ") + "Shall I run it?")
-            go = "Create and send to Telegram"
+            go = "Create, send and export" if api else "Create and send to Telegram"
         t.trace.step("creator: " + " > ".join(label for _, label in creator.steps_of({"scope": cs["scope"], "end": end})))
         if self.tools.live() and st.get("ask_before_spending", True):
             sess["pending"] = spec
@@ -826,7 +828,8 @@ class Agent:
             text, chips = f"Done: **{name}** is animated and the animations are approved. Nothing was packed or sent; say \"export\" to pack it and send it to Telegram.", []
         elif run["status"] == "done":
             links = [s["link"] for s in (run.get("telegram") or {}).get("sets", [])]
-            text, chips = f"Done: **{name}** is on Telegram. " + " ".join(links), []
+            col = run.get("collection") or {}
+            text, chips = f"Done: **{name}** is on Telegram. " + " ".join(links) + (f"\n\nExported to the API as the collection **{col.get('collection', name)}** ({col.get('count', '?')} stickers)." if col else ""), []
         if run["status"] == "done" and not sess.get("creator_queue") and (sess.get("pack") or {}).get("made"):
             more, chips = self._followup(sess)                       # the stage's end: the ONE follow-up card (Regenerate · Batch 02 · 03 · 04)
             text += "\n\n" + more

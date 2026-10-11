@@ -118,7 +118,7 @@ test('style metadata beside the grid chip is escaped, never interpreted as marku
   const malicious = { id: 'flat_vector', label: '<img onerror="bad">', hint: '" onclick="bad' };
   const f = fixture({ styles: [malicious] });
   f.drawBar();
-  assert.match(f.elements['ag-bar'].innerHTML, /&lt;img onerror=&quot;bad&quot;&gt; style/);
+  assert.match(f.elements['ag-bar'].innerHTML, /&lt;img onerror=&quot;bad&quot;&gt;<i/);
   assert.match(f.elements['ag-styles'].innerHTML, /&quot; onclick=&quot;bad/);
   assert.doesNotMatch(f.elements['ag-bar'].innerHTML, /<img onerror/);
   assert.doesNotMatch(f.elements['ag-styles'].innerHTML, /" onclick="bad/);

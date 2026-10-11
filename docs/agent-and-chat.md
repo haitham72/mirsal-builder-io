@@ -98,9 +98,9 @@ instead of ending the polling (a frame that throws must never freeze the chat on
 - **Cards**: a plan card (subject, grid, style, names, price, Create / Not yet), a generation card with a **carousel** (swipe on touch, drag or arrows with a mouse,
   keyboard arrows, scroll-snap, dots; stickers appear as the engine finishes them; animated stickers play), a stickers card (search results and answers).
   Tap a sticker to select it: the selection travels with the next message ("make these more energetic"). "Open in Studio" opens the batch in the Studio.
-- **The stage pill** left of Send ("Emojis ▾", `docs/design.md` "The stage pill"): how far a new request goes (Prompt · Emojis · Animation · Export, "Stages and the batch follow-up" below). A pick is `settings.stage`, no turn.
+- **The stage slider** left of Send (`docs/design.md` "The stage slider"): how far a new request goes (Prompt · Stickers · Animation · Telegram · Export, "Stages and the batch follow-up" below), and its details: the chat's own models (`settings.models` `{ai, image, video}`) and the options. A pick is a setting, no turn.
 - **Settings are two controls**: the grid (3x3 / 2x2) and "Ask before spending"; the gear also holds "Approve everything for me" (the creator's bypass, used by the Animation and Export stages). The model pill shows what runs the assistant (local, cloud, or "Rules only" with the reason, see Models); the gear's "AI engine" row also holds the local model dropdown.
-- **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet, the grid and "Asks before spending" (the same settings as the gear, one click each), and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`).
+- **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet (a button: it opens the tiles; once a style is picked only this chip shows), the grid and "Asks before spending" (the same settings as the gear, one click each), and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`).
 
 ## Models (`services/llm.py`)
 
@@ -208,14 +208,15 @@ Restart driving still begins on the next chat poll, after the session lock is av
 
 ## Stages and the batch follow-up (`agent/stages.py`, 2026-10-09)
 
-How far a NEW request goes is the chat's **stage**, `settings.stage`, one of four (Haitham, 2026-10-09). `agent/stages.py` is the one pure table (`of`, `run_spec`, `batch_label`):
+How far a NEW request goes is the chat's **stage**, `settings.stage`, one of five (Haitham, 2026-10-09; the fifth, `api`, 2026-10-11). The slider names them Prompt · Stickers · Animation · Telegram · Export; the ids stay as below so saved chats keep their meaning. `agent/stages.py` is the one pure table (`of`, `run_spec`, `batch_label`):
 
 | stage | a new request | spends |
 |---|---|---|
 | `prompt` | the plan card only (cells, tags, the sheet prompt) and **Generate** / **Edit**; a pending `create` with `stage: prompt` that never starts by itself, even with "Ask before spending" off | nothing until Generate (which makes the sheet) |
 | `emojis` (default, web and Telegram) | today's turn: the plan, the go-ahead, the sheet, the cut stickers; stops at G2 for the person | the sheet |
 | `animation` | the agentic creator with `scope: video` and `end: animation`: the run ends after "Approve the animations" (G4), no pack, no Telegram; its done message says "export" packs and sends | sheet + animation, both on the plan card |
-| `export` | the full creator run with `end: export`: animation, then the Library pack and the Telegram send (D1; the AddCollection export stays a second button, never automatic) | sheet + animation |
+| `export` ("Telegram") | the full creator run with `end: export`: animation, then the Library pack and the Telegram send (D1) | sheet + animation |
+| `api` ("Export") | the creator run with `end: api`: everything `export` does, then the pack's Download .zip is sent to the AddCollection API as one collection (`tools.collection_export`, the pack's own "Export to collection" call; owner only). A refusal or a missing setup is a stop with **Try again** / **Stop**: the pack is already in the library and in Telegram | sheet + animation |
 
 - **It maps onto the creator, never forks it.** `n_new` reads `stages.run_spec(stages.of(settings), bypass)`: `plan_only` -> `_prompt_plan`; `creator` -> `_creator_plan(end=…)`,
   which shows the whole price (`card.creator = {sheet, video, end}`) and `Create and animate` / `Create and send to Telegram`. `creator.new_run(end)` stores `end` on the run;

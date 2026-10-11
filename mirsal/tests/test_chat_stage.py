@@ -1,4 +1,4 @@
-"""plan.md Step 1: the chat's stage (Prompt · Emojis · Animation · Export) decides how far a NEW request goes, on FakeTools (no provider, no paid call)."""
+"""The chat's stage (Prompt · Stickers · Animation · Telegram · Export) decides how far a NEW request goes, on FakeTools (no provider, no paid call)."""
 import unittest
 
 from mirsal.agent import creator, stages
@@ -81,6 +81,37 @@ class Stage(Base):
         self.assertEqual([c[0] for c in self.tools.calls if c[0] in ("pack_add", "telegram_send")], ["pack_add", "telegram_send"])
         self.assertEqual(self.sess()["creator_run"]["status"], "done")
 
+    def test_api_runs_to_telegram_then_exports_the_pack(self):
+        self.tools._live = False
+        self.set_stage("api", creator={"on": False, "scope": "images", "bypass": True})
+        m = self.say("make me falcon stickers")
+        run = self.sess()["creator_run"]
+        self.assertEqual((run["end"], [s["id"] for s in creator.labels(run)][-2:]), ("api", ["telegram", "api"]))
+        self.drive()
+        gid = self.sess()["creator_run"]["generation"]
+        for s in self.tools.gens[gid]["stickers"]:
+            s["anim_status"], s["anim"] = "READY", "PENDING"
+        self.drive()
+        self.assertEqual([c[0] for c in self.tools.calls if c[0] in ("pack_add", "telegram_send", "collection_export")], ["pack_add", "telegram_send", "collection_export"])
+        run = self.sess()["creator_run"]
+        self.assertEqual((run["status"], run["collection"]["count"]), ("done", 9))
+        self.assertIn("Exported to the API", self.sess()["messages"][-1]["text"])
+
+    def test_api_refused_is_a_stop_with_try_again_not_a_dead_end(self):
+        from mirsal.agent.tools import ToolError
+        self.tools._live = False
+        self.tools.collection_export = lambda pid, name: (_ for _ in ()).throw(ToolError("The collection API is not set up", 409))
+        self.set_stage("api", creator={"on": False, "scope": "images", "bypass": True})
+        self.say("make me falcon stickers")
+        self.drive()
+        gid = self.sess()["creator_run"]["generation"]
+        for s in self.tools.gens[gid]["stickers"]:
+            s["anim_status"], s["anim"] = "READY", "PENDING"
+        self.drive()
+        run = self.sess()["creator_run"]
+        self.assertEqual((run["status"], run["step"], run["stop"]["kind"]), ("stopped", "api", "api"))
+        self.assertEqual([c["label"] for c in run["stop"]["chips"]], ["Try again", "Stop"])
+
     def test_export_waits_at_g2_without_bypass(self):
         self.tools._live = False
         self.set_stage("export")
@@ -102,6 +133,9 @@ class Migration(unittest.TestCase):
         self.assertEqual(stages.run_spec("animation", True), {"stage": "animation", "plan_only": False, "creator": True, "scope": "video", "end": "animation", "bypass": True})
         self.assertTrue(stages.run_spec("prompt")["plan_only"])
         self.assertFalse(stages.run_spec("emojis", True)["bypass"])
+        self.assertEqual(stages.run_spec("api")["end"], "api")
+        self.assertTrue(stages.animates("api"))
+        self.assertEqual([stages.INFO[s]["label"] for s in stages.STAGES], ["Prompt", "Stickers", "Animation", "Telegram", "Export"])
 
     def test_batch_label(self):
         self.assertEqual(stages.batch_label(2, {"slots": {"preset": "social-v1"}}), "Batch 02 · social")

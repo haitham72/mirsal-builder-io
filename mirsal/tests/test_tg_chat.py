@@ -111,7 +111,7 @@ class TelegramChatTests(unittest.TestCase):
         self.update(HAITHAM, "/stage")
         card = self.sent(chat=HAITHAM)[-1]
         labels = [b["text"] for b in self.buttons(card)]
-        self.assertEqual(labels, ["Prompt · plan only, free", "✓ Emojis · sheet and stickers", "Animation · + animation", "Export · + pack and send", "‹ Back"])
+        self.assertEqual(labels, ["Prompt · plan only, free", "✓ Stickers · sheet and stickers", "Animation · + animation", "Telegram · + pack and Telegram", "Export · + send to the API", "‹ Back"])
         self.update(HAITHAM, data=self.buttons(card)[2]["callback_data"])
         sid = tg_chat._chat(self.c.out, HAITHAM)["sid"]
         sess = self.c.chat_parts({"id": "local", "role": "owner"})[0].load(sid)
