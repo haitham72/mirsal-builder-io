@@ -176,8 +176,8 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 
 1. **Built 2026-10-11** (the rail of four, the avatar menu, Create's tabs: `docs/design.md` §4.2). `studio.css`'s `:root` already carried the
    mockup's palette; a mockup token (e.g. the issue colours) joins `:root` in the phase that first reads it, never unused (rule 6).
-2. **The journey bar in the Studio header** (prefix `jb`): the same five stops as the chat's slider (built 2026-10-11), showing where the
-   selected sheet or video is.
+2. **Built 2026-10-11.** The Studio's step strip is the journey: Idea · Prompt · Stickers · Motion · (Particles) · Pack · Telegram on one slim
+   track (`stepsHtml`, `.gsteps`), the same buttons and actions as before (`gtab`, `gadd`; Telegram is `gopenpack`). `docs/design.md` "The Studio's journey".
 3. **The project map's data** (§6): `flow/projects.py` + one native route + OpenAPI + a test on fakes. No UI yet.
 4. **Studio frame:** the map column (replacing Earlier batches), the project switcher, the breadcrumb, every MAP / PROJ action of §4 wired to
    its existing `ACT`.

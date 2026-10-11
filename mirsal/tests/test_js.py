@@ -25,7 +25,7 @@ class StudioActionTests(unittest.TestCase):
     replaces the first: `history.js` (the retired History screen) did that to `hopen`, so every batch in "Earlier batches" opened batch NaN. A name may be defined twice
     only on purpose, and every deliberate replacement is listed here."""
 
-    INTENTIONAL = {"ggo": "composer.js", "gsug": "composer.js"}        # the Generate menu replaces the old input row's Generate and chip handlers (it keeps `_ggo`)
+    INTENTIONAL = {"ggo": "composer.js"}        # the Generate menu replaces the old input row's Generate handler (it keeps `_ggo`)
 
     @staticmethod
     def scripts():
@@ -161,7 +161,7 @@ class StudioActionTests(unittest.TestCase):
         for route in ("/api/effects", "data-fxx=sp"):
             self.assertIn(route, sp)
         css = (ui / "studio.css").read_text(encoding="utf-8")
-        self.assertIn("repeat(6,minmax(0,1fr))", css, "the header has six steps now")
+        self.assertRegex(css, r"\.gsteps\{[^}]*display:flex", "the journey is one flex track: its stops (Particles and Telegram included) share it, however many there are")
         self.assertIn(".sp-modes", css)
 
     def test_the_effect_functions_serve_both_screens_and_say_particles(self):
@@ -208,11 +208,12 @@ class StudioActionTests(unittest.TestCase):
         import re
         ui, _ = self.scripts()
         src = (ui / "generate.js").read_text(encoding="utf-8")
-        branch =re.search(r"mode==='anim'\?`<div class=gleft>(.*?)</div>`:sheetPanel\(g\)", src)
-        self.assertIsNotNone(branch, "the animation branch of batchHtml no longer wraps both panels in .gleft")
-        self.assertIn("videoPanel(g)", branch.group(1))
-        self.assertIn("sheetPanel(g)", branch.group(1))
-        self.assertIn(".gleft", (ui / "studio.css").read_text(encoding="utf-8"))
+        # since 2026-10-04 both are views of ONE sheet panel (its tabs: the sheet views, To send, Video): neither replaces the other
+        self.assertIn("sheetPanel(g,mode==='anim'?'anim':'still')", self.block(src, "function batchHtml("), "the batch shows the sheet panel in both tabs")
+        panel = self.block(src, "function sheetPanel(")
+        self.assertIn("if(view==='video')body=videoPanel(g)", panel, "the Video view is the video panel")
+        self.assertIn("cutSvg(g,true,true,2)", panel, "the green-screen view keeps its cut lines and boxes")
+        self.assertIn("tab('video','Video')", panel)
 
 
 class ShellTests(unittest.TestCase):

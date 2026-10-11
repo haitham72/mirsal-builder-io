@@ -353,8 +353,11 @@ function stepsHtml(c){const cur=GS.tab;const {gs,ready,busyAnim,done,tot,pk,allA
    ['Stickers',ready?(good?'done':'warn'):'run',ready?`${kept} kept${dropped?`, ${dropped} dropped`:''}${blocked?`, ${blocked} blocked`:''}`:'Making…','stickers'],
    ['Animation',busyAnim?'run':anim?(oobN||animFail?'warn':'done'):'todo',busyAnim?`Animating ${done} of ${tot}…`:anim?`${animOk} ready${aDrop?`, ${aDrop} dropped`:''}${oobN?`, ${oobN} out of bounds (off)`:''}${animFail?`, ${animFail} failed`:''}`:hasVid_?'Not started':'No video prepared','anim'],
    ['Pack',allAdded?'done':'todo',allAdded?`Added to “${esc(pk.name)}”`:'Not added yet','pack']];
+  /* the journey (docs/redesign_plan.md §2): Idea · Prompt · Stickers · Motion · Pack · Telegram, one slim track; each stop is the view it always was (gtab), Pack adds, Telegram opens the pack */
+  const tg=pk&&((pk.telegram||{}).sets||[]).map(x=>x.link).find(Boolean);
+  S[0][0]='Idea';S[3][0]='Motion';S.push(['Telegram',tg?'done':'todo',tg?'Sent':allAdded?'Send from the pack':'After the pack','telegram']);
   const mark=(st,i)=>st==='done'?ic('check'):st==='run'?'<span class=spin></span>':st==='warn'?'!':i+1;
-  return`<div class=gsteps>${S.map(([l,st,sub,tab],i)=>`<button class="gst ${st} ${tab===cur?'cur':''}" ${tab==='pack'?`data-act=gadd ${ready&&n?'':'disabled'}`:`data-act=gtab data-t=${tab}`}><span class=gsm>${mark(st,i)}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g,'')}">${sub}</small></span></button>`).join('')}</div>`}
+  return`<div class=gsteps role=tablist aria-label="Where this batch is">${S.map(([l,st,sub,tab],i)=>`<button class="gst ${st} ${tab===cur?'cur':''}" ${tab==='pack'?`data-act=gadd ${ready&&n?'':'disabled'}`:tab==='telegram'?`data-act=gopenpack ${allAdded?'':'disabled'}`:`data-act=gtab data-t=${tab}`}><span class=gsm>${mark(st,i)}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g,'')}">${sub}</small></span></button>`).join('')}</div>`}
 
 ACT.gopenfolder=async el=>{const r=await post(`/api/generations/${el.dataset.g}/reveal`);if(!r.ok)return toast(r.j.error||'Could not open the folder',1);toast('Opened '+r.j.opened)};
 

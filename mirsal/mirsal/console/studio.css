@@ -243,15 +243,6 @@ a.btn{text-decoration:none;color:inherit}a.btn.pri{color:#fff}
 @media (max-width:900px){.pcols{grid-template-columns:1fr}}
 .sbox.bg-checker{background:conic-gradient(#e9edf1 25%,#fbfcfd 0 50%,#e9edf1 0 75%,#fbfcfd 0) 0 0/18px 18px}.sbox.bg-light{background:#fff}.sbox.bg-dark{background:#111827}.sbox.bg-wall{background:linear-gradient(135deg,#f6b26b,#6fa8dc 40%,#93c47d 70%,#c27ba0)}
 /* ---- Generate header (Request > Prompt > Stickers > Animation > Particles > Pack) and out-of-bounds tiles ---- */
-.gsteps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--fill);border-radius:var(--r);overflow:hidden;margin:0 4px 16px}
-.gst{display:flex;align-items:center;gap:10px;padding:12px 16px;border:0;border-left:1px solid #fff;background:none;text-align:left;font:inherit;min-width:0}.gst:first-child{border-left:0}
-button.gst{cursor:pointer}button.gst:hover{background:#ffffff80}
-.gsm{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--fs-m);font-weight:700;background:#fff;color:var(--mut);border:2px solid var(--bd)}
-.gsm svg{width:15px;height:15px}.gsm .spin{width:16px;height:16px;border-width:2px}
-.gst.done .gsm{background:var(--ok);border-color:var(--ok);color:#fff}.gst.run .gsm{border-color:var(--pri-l2)}.gst.warn .gsm{background:#fef3c7;border-color:#f59e0b;color:#92400e}
-.gsl{min-width:0;display:flex;flex-direction:column}.gsl b{font-size:var(--fs-m)}.gsl small{color:var(--mut);font-size:var(--fs-s);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gst.warn .gsl small{color:#92400e}
-@media (max-width:900px){.gsteps{grid-template-columns:repeat(2,1fr)}}
 /* issue colours (generate.js CAT): --cc is the colour of the tile's main problem. Hatched = not in the set, light outline = kept with a check */
 .gt.iss{border-color:var(--cc);box-shadow:0 0 0 2px color-mix(in srgb,var(--cc) 25%,transparent)}.gt.iss .gtv{box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--cc) 55%,transparent)}
 .gt.issw{border-color:color-mix(in srgb,var(--cc) 65%,#fff)}.gt.blk .gx{background:var(--pri);color:#fff}
@@ -263,7 +254,6 @@ button.gst{cursor:pointer}button.gst:hover{background:#ffffff80}
 .cell:hover .selbox,.selmode .cell .selbox,.cell .selbox.on{opacity:1}.cell .selbox.on{background:var(--pri);border-color:var(--pri)}.cell .selbox.on::after{content:'¹3'}
 .cell.sel{outline:3px solid var(--pri);outline-offset:-3px}.cell .badge2{left:34px}
 .selbar{display:flex;align-items:center;gap:14px;margin:6px 0 12px;padding:8px 14px;background:var(--pri-l);border-radius:var(--r-m);position:sticky;top:0;z-index:5}.selbar b{margin-right:auto}
-.gst.cur{background:#fff;box-shadow:inset 0 -3px 0 var(--pri)}.gst:disabled{opacity:.55;cursor:default}
 .pw{width:auto}.dbox:has(.pw){width:min(1010px,96vw);overflow-x:hidden}
 .pwgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;margin-top:12px;align-items:start}
 .pwstep{display:flex;align-items:center;gap:8px;margin:0 0 8px}.pwn{width:22px;height:22px;border-radius:50%;background:var(--pri);color:#fff;font-size:var(--fs-s);font-weight:700;display:flex;align-items:center;justify-content:center}
@@ -863,3 +853,20 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
  .rme{order:1;margin:0 4px;width:36px;height:36px;align-self:center}
  #rmenu{left:auto;right:8px;bottom:calc(70px + env(safe-area-inset-bottom))}
 }
+
+/* the Studio's journey (redesign phase 2, docs/design.md §5 Studio): one slim track of stops, Idea · Prompt · Stickers · Motion · (Particles) · Pack · Telegram.
+   A stop is a dot and a name, a short status under it; done stops are filled, the open view is the white pill. Same buttons as the old step strip. */
+.gsteps{position:relative;display:flex;align-items:stretch;gap:2px;margin:0 4px 16px;padding:4px;background:var(--fill);border-radius:var(--r-pill);overflow-x:auto;scrollbar-width:none}
+.gsteps::-webkit-scrollbar{display:none}
+.gst{position:relative;flex:1 1 0;display:flex;align-items:center;gap:8px;min-width:0;padding:6px 12px 6px 6px;border:0;border-radius:var(--r-pill);background:none;text-align:left;font:inherit;color:var(--mut)}
+button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;color:var(--tx)}
+.gsm{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:var(--fs-xs);font-weight:700;background:#fff;color:var(--mut);box-shadow:inset 0 0 0 1.5px var(--bd)}
+.gsm svg{width:12px;height:12px;stroke-width:2.6}.gsm .spin{width:12px;height:12px;border-width:2px}
+.gst.done{color:var(--tx)}.gst.done .gsm{background:var(--ok);color:#fff;box-shadow:none}
+.gst.run .gsm{box-shadow:inset 0 0 0 1.5px var(--pri-l2)}.gst.warn .gsm{background:#fef3c7;color:#92400e;box-shadow:none}
+.gsl{min-width:0;display:flex;flex-direction:column;line-height:1.2}.gsl b{font-size:var(--fs-s);font-weight:600}
+.gsl small{color:var(--mut);font-size:var(--fs-xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gst.warn .gsl small{color:#92400e}
+.gst.cur{background:#fff;color:var(--tx);box-shadow:0 1px 3px #0f172a14,0 0 0 1px var(--bd)}.gst.cur .gsl b{color:var(--pri-d)}
+.gst:disabled{opacity:.5;cursor:default}
+@media (max-width:900px){.gst{flex:0 0 auto}.gsl small{display:none}}
