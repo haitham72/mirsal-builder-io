@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after hover info, Screen on / off and the allow queue.
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after the slider became one per person with Auto.
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**441 actions** (442 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**442 actions** (443 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -48,36 +48,36 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `agcar` | 319 | agent.js | none (browser only) |
-| `agtile` | 320 | agent.js | none (browser only) |
-| `agsel` | 323 | agent.js | none (browser only) |
-| `agchip` | 327 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agfill` | 328 | agent.js | none (browser only) |
-| `agedit` | 329 | agent.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `agsetting` | 330 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agaction` | 331 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agcut` | 332 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
-| `aganimal` | 333 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
-| `agretry` | 334 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agtrace` | 335 | agent.js | none (browser only) |
-| `agstep` | 336 | agent.js | none (browser only) |
-| `agstudio` | 337 | agent.js | none (browser only) |
-| `agallow` | 338 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agallowall` | 343 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agnew` | 353 | agent.js | none (browser only) |
-| `agopen` | 354 | agent.js | none (browser only) |
-| `agdel` | 355 | agent.js | `/api/chat/sessions/{}/delete` |
-| `agset` | 356 | agent.js | none (browser only) |
-| `agsetgrid` | 357 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `aggridtoggle` | 359 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstage` | 372 | agent.js | `/api/models` |
-| `agsetact` | 375 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstagepick` | 376 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstyle` | 397 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstyles` | 398 | agent.js | none (browser only) |
-| `agsetask` | 399 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agbe` | 400 | agent.js | `/api/ai`<br>`/api/ai/backend` |
-| `agcr` | 432 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agcar` | 323 | agent.js | none (browser only) |
+| `agtile` | 324 | agent.js | none (browser only) |
+| `agsel` | 327 | agent.js | none (browser only) |
+| `agchip` | 331 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agfill` | 332 | agent.js | none (browser only) |
+| `agedit` | 333 | agent.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `agsetting` | 334 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agaction` | 335 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agcut` | 336 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
+| `aganimal` | 337 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
+| `agretry` | 338 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agtrace` | 339 | agent.js | none (browser only) |
+| `agstep` | 340 | agent.js | none (browser only) |
+| `agstudio` | 341 | agent.js | none (browser only) |
+| `agallow` | 342 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agallowall` | 347 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agnew` | 357 | agent.js | none (browser only) |
+| `agopen` | 358 | agent.js | none (browser only) |
+| `agdel` | 359 | agent.js | `/api/chat/sessions/{}/delete` |
+| `agset` | 360 | agent.js | none (browser only) |
+| `agsetgrid` | 361 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `aggridtoggle` | 363 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstage` | 376 | agent.js | `/api/models` |
+| `agsetact` | 379 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstagepick` | 380 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstyle` | 401 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstyles` | 402 | agent.js | none (browser only) |
+| `agsetask` | 403 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agbe` | 404 | agent.js | `/api/ai`<br>`/api/ai/backend` |
+| `agcr` | 436 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
 
 ### `animate.js` (8)
 
@@ -236,7 +236,7 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `fxuseset` | 273 | effects.js | `/api/particles` |
 | `psusesave` | 274 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
 
-### `generate.js` (69)
+### `generate.js` (70)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
@@ -258,7 +258,7 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `greqgo` | 354 | generate.js | `/api/generations` |
 | `gopenfolder` | 374 | generate.js | `/api/generations/{}/reveal` |
 | `pgresheet` | 413 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `pgredo` | 419 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `pgredo` | 419 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prefs` |
 | `pgreset` | 431 | generate.js | none (browser only) |
 | `gdnb` | 453 | generate.js | none (browser only) |
 | `gdtab` | 461 | composer.js, generate.js | none (browser only) |
@@ -268,47 +268,48 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `gpromptfree` | 467 | generate.js | `/api/plan` |
 | `gdsheet` | 486 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/plan/more` |
 | `pgsheet` | 505 | generate.js, projmap.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `pgvideo` | 508 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `pgvideo` | 508 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prefs` |
 | `ggroup` | 514 | generate.js, projmap.js | none (browser only) |
 | `ggroupgo` | 517 | generate.js | `/api/generations/{}/join`<br>`/api/generations/{}/particles`<br>`/api/history` |
 | `grm` | 518 | generate.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
-| `gscreen` | 522 | generate.js | none (browser only) |
-| `gvmode` | 523 | generate.js | none (browser only) |
-| `gtab` | 524 | generate.js, particles.js, projmap.js | none (browser only) |
-| `ganimate` | 528 | generate.js | `/api/generations/{}/animate` |
-| `gadd` | 536 | generate.js, particles.js | none (browser only) |
-| `pwgo` | 575 | generate.js | `/api/generations/{}/add`<br>`/api/packs` |
-| `gopenpack` | 589 | generate.js | none (browser only) |
-| `gvideo` | 592 | generate.js | `/api/generations/{}/quick_sheet` |
-| `gpickvideo` | 605 | generate.js | none (browser only) |
-| `gsheetapprove` | 606 | generate.js | `/api/generations/{}/quick_sheet` |
-| `gvclose` | 607 | generate.js | none (browser only) |
-| `gcopyprompt` | 608 | generate.js | none (browser only) |
-| `gapick` | 647 | generate.js, projmap.js | `/api/generations/{}/pick_video` |
-| `garm` | 649 | generate.js, projmap.js | `/api/generations/{}/remove_video` |
-| `gvsheet` | 658 | generate.js | none (browser only) |
-| `gaclose` | 659 | generate.js | none (browser only) |
-| `gptog` | 721 | generate.js | none (browser only) |
-| `gshk` | 722 | generate.js | none (browser only) |
-| `gsheet` | 723 | generate.js | none (browser only) |
-| `gsview` | 738 | generate.js | none (browser only) |
-| `gstog` | 739 | generate.js | none (browser only) |
-| `gsclose` | 740 | generate.js | none (browser only) |
-| `ghiggs` | 743 | generate.js | `/api/plan` |
-| `hcopy` | 749 | generate.js | none (browser only) |
-| `hgenop` | 750 | generate.js | `/api/jobs` |
-| `hreserve` | 758 | generate.js | `/api/tasks` |
-| `gmall` | 789 | generate.js | none (browser only) |
-| `gmtab` | 790 | generate.js | none (browser only) |
-| `gopen` | 791 | generate.js | none (browser only) |
-| `gmclose` | 792 | generate.js | none (browser only) |
-| `gstep` | 793 | generate.js | none (browser only) |
-| `gedit` | 794 | generate.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `openstudio` | 819 | particles.js | `/api/generations` |
-| `lcstudioedit` | 821 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `lcopenstudio` | 822 | packs.js | none (browser only) |
-| `gcell` | 865 | generate.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
-| `gallowall` | 875 | generate.js | `/api/generations/{}/allow` |
+| `gstagego` | 531 | generate.js | `/api/prefs` |
+| `gscreen` | 533 | generate.js | none (browser only) |
+| `gvmode` | 534 | generate.js | none (browser only) |
+| `gtab` | 535 | generate.js, particles.js, projmap.js | none (browser only) |
+| `ganimate` | 539 | generate.js | `/api/generations/{}/animate`<br>`/api/prefs` |
+| `gadd` | 547 | generate.js, particles.js | none (browser only) |
+| `pwgo` | 586 | generate.js | `/api/generations/{}/add`<br>`/api/packs` |
+| `gopenpack` | 600 | generate.js | none (browser only) |
+| `gvideo` | 603 | generate.js | `/api/generations/{}/quick_sheet` |
+| `gpickvideo` | 616 | generate.js | none (browser only) |
+| `gsheetapprove` | 617 | generate.js | `/api/generations/{}/quick_sheet` |
+| `gvclose` | 618 | generate.js | none (browser only) |
+| `gcopyprompt` | 619 | generate.js | none (browser only) |
+| `gapick` | 658 | generate.js, projmap.js | `/api/generations/{}/pick_video` |
+| `garm` | 660 | generate.js, projmap.js | `/api/generations/{}/remove_video` |
+| `gvsheet` | 669 | generate.js | none (browser only) |
+| `gaclose` | 670 | generate.js | none (browser only) |
+| `gptog` | 732 | generate.js | none (browser only) |
+| `gshk` | 733 | generate.js | none (browser only) |
+| `gsheet` | 734 | generate.js | none (browser only) |
+| `gsview` | 749 | generate.js | none (browser only) |
+| `gstog` | 750 | generate.js | none (browser only) |
+| `gsclose` | 751 | generate.js | none (browser only) |
+| `ghiggs` | 754 | generate.js | `/api/plan` |
+| `hcopy` | 760 | generate.js | none (browser only) |
+| `hgenop` | 761 | generate.js | `/api/jobs` |
+| `hreserve` | 769 | generate.js | `/api/tasks` |
+| `gmall` | 800 | generate.js | none (browser only) |
+| `gmtab` | 801 | generate.js | none (browser only) |
+| `gopen` | 802 | generate.js | none (browser only) |
+| `gmclose` | 803 | generate.js | none (browser only) |
+| `gstep` | 804 | generate.js | none (browser only) |
+| `gedit` | 805 | generate.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `openstudio` | 830 | particles.js | `/api/generations` |
+| `lcstudioedit` | 832 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `lcopenstudio` | 833 | packs.js | none (browser only) |
+| `gcell` | 876 | generate.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
+| `gallowall` | 886 | generate.js | `/api/generations/{}/allow` |
 
 ### `history.js` (5)
 

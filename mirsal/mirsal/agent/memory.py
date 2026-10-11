@@ -30,7 +30,7 @@ from ..runtime import atomic
 REDUCER_WINDOW = 15
 MAX_MESSAGES, MAX_INTERACTIONS, MAX_FEEDBACK = 400, 300, 200       # what one session file keeps; older turns live on in the narrative, the subjects and the passes
 OUTSIDE_SHOWN = 5                                                  # how many recent batches made outside the chat the summary names
-DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True, "allow_vlm": None, "stage": "emojis",
+DEFAULT_SETTINGS = {"grid": "3x3", "style_id": "flat_vector", "ask_before_spending": True, "ai": True, "allow_vlm": None, "stage": "auto",
                     "creator": {"on": False, "scope": "images", "bypass": False}}      # allow_vlm: None = not asked yet (vision/consent.py); stage: agent/stages.py
 _IO = threading.RLock()
 
@@ -72,7 +72,30 @@ class SessionStore:
             raise SessionError(f"bad session id {sid!r}", 400)
         return self.dir / f"{sid}.json"
 
+    # -- the person's own stage (Haitham, 2026-10-11: ONE slider per person, shared by every chat and the Studio): out/sessions/_prefs.json {user: {stage}}
+    def _prefs_path(self) -> Path:
+        return self.dir / "_prefs.json"
+
+    def person_stage(self) -> str | None:
+        try:
+            return (json.loads(atomic.read_text(self._prefs_path())).get(self.user) or {}).get("stage")
+        except (OSError, ValueError):
+            return None
+
+    def set_person_stage(self, stage: str) -> None:
+        with _IO:
+            self.dir.mkdir(parents=True, exist_ok=True)
+            try:
+                d = json.loads(atomic.read_text(self._prefs_path()))
+            except (OSError, ValueError):
+                d = {}
+            d[self.user] = {**(d.get(self.user) or {}), "stage": stage}
+            atomic.write_text(self._prefs_path(), json.dumps(d, ensure_ascii=False, indent=1))
+
     def create(self, title: str | None = None, settings: dict | None = None) -> dict:
+        ps = self.person_stage()
+        if ps and not (settings or {}).get("stage"):
+            settings = {**(settings or {}), "stage": ps}          # a new chat starts on the person's own stage
         with _IO:
             self.dir.mkdir(parents=True, exist_ok=True)
             n = max([int(f.stem[1:]) for f in self.dir.glob("S*.json") if f.stem[1:].isdigit()] or [0]) + 1
@@ -91,7 +114,11 @@ class SessionStore:
             s = json.loads(atomic.read_text(f))
             if not self.see_all and s.get("user", "local") != self.user:
                 raise SessionError(f"No session {sid}", 404)
-            return s
+        if s.get("user", "local") == self.user and s.get("title") != "Telegram":
+            ps = self.person_stage()
+            if ps:
+                s.setdefault("settings", {})["stage"] = ps        # every chat of this person follows the one slider
+        return s
 
     @staticmethod
     def _cap(s: dict) -> None:

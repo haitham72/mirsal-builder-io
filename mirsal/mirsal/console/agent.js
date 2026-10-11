@@ -39,8 +39,8 @@ const AIU=(()=>{
  /* the stage: how far a NEW request goes (settings.stage, agent/stages.py), on a five-stop slider beside Send (Haitham, 2026-10-11: minimal like a
     reasoning-level slider, with details like a model menu). Ids stay the server's: `emojis` reads Stickers, `export` reads Telegram, `api` is the export
     to the backend API. stageOf reads an old session's creator switches the way the server does (on + video = Telegram). */
- const STAGES=[['prompt','Prompt','plan only, free'],['emojis','Stickers','sheet and stickers'],['animation','Animation','+ animation'],['export','Telegram','+ pack and Telegram'],['api','Export','+ send to the API']];
- const stageOf=st=>{const v=st&&st.stage;if(STAGES.some(x=>x[0]===v))return v;const c=(st&&st.creator)||{};return c.on&&c.scope==='video'?'export':'emojis'};
+ const STAGES=[['auto','Auto','each message decides'],['prompt','Prompt','plan only, free'],['emojis','Stickers','sheet and stickers'],['animation','Animation','+ animation'],['export','Telegram','+ pack and Telegram'],['api','Export','+ send to the API']];
+ const stageOf=st=>{const v=st&&st.stage;if(STAGES.some(x=>x[0]===v))return v;const c=(st&&st.creator)||{};return c.on&&c.scope==='video'?'export':'auto'};
  /* one model drop-down of the details: "Default (label)" first (value ""), then every model; the chat's own pick selected */
  const modelSel=(kind,label,m)=>{if(!m||!(m.list||[]).length)return '';const cur=m.cur||'';
   return `<label class=sp-r><span>${esc(label)}</span><select data-agm=${kind} aria-label="${esc(label)} model"><option value=""${cur?'':' selected'}>Default${m.def?` · ${esc(m.def)}`:''}</option>${m.list.map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(x.label||x.id)}</option>`).join('')}</select></label>`};
@@ -48,10 +48,10 @@ const AIU=(()=>{
     "you click first and then you find your slider ... and then it goes away"). OPEN it is a panel above the box: the five stops on one slider with their
     names under them and what the chosen one does, then the chat's models (d.models: {ai, image, video} each {list, cur, def}) and the options (d.grid,
     d.ask, d.bypass). A stop picked closes the panel. Pure: the caller wires the actions. */
- const stageHTML=(cur,open,d)=>{d=d||{};let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=1;const n=STAGES[k];
+ const stageHTML=(cur,open,d)=>{d=d||{};let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=0;const n=STAGES[k];
   const pill=`<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change."><span class=ag-mini aria-hidden=true style="--k:${k}"></span>${esc(n[1])}<i aria-hidden=true>▾</i></button>`;
   if(!open)return pill;
-  const m=d.models||{},anim=k>=2;
+  const m=d.models||{},anim=k===0||k>=3;
   /* the slider itself (like Claude's thinking slider): one range input with a thumb you drag, snapping to the five stops; the names under it are buttons too */
   const names=STAGES.map(([id,l,h],i)=>`<button type=button class="ag-stop${i===k?' on':''}" data-act=agstagepick data-v=${id} tabindex=-1 title="${esc(h)}">${esc(l)}</button>`).join('');
   const sw=(act,on,label,hint,extra)=>`<div class=sp-r><span>${esc(label)}${hint?`<small>${esc(hint)}</small>`:''}</span><button type=button class="ai-sw${on?' on':''}" data-act=${act}${extra||''} role=switch aria-checked=${!!on} aria-label="${esc(label)}"></button></div>`;
@@ -211,7 +211,7 @@ function chipHTML(c){
   return `<span class="ai-vis${cur==null&&c.glow?' glow':''}${on?' is-on':''}"><button class="ai-chip" data-act=agsetting data-set="${AIU.esc(JSON.stringify(next))}" aria-pressed=${on} title="${on?'Click to switch it off':'Click to switch it on'}">${AIU.esc(on?(c.on||c.label):off?(c.off||c.label):c.label)}</button></span>`}
  if(c.fill!=null)return `<button class=ai-chip data-act=agfill data-text="${AIU.esc(c.fill)}" title="Put the prompt in the box to change it">${AIU.esc(c.label)}</button>`;
  if(c.editor)return `<button class="ai-chip pri" data-act=agedit data-g="${AIU.esc(c.editor.generation)}" data-i=${+c.editor.index}>${AIU.esc(c.label)}</button>`;
- return c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.to!=null?` data-to="${AIU.esc(c.to)}"`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
+ return c.action?`<button class="ai-chip${c.action==='confirm'||c.action==='names_apply'?' pri':''}" data-act=agaction data-type="${AIU.esc(c.action)}"${c.generation?` data-g="${AIU.esc(c.generation)}"`:''}${c.to!=null?` data-to="${AIU.esc(c.to)}"`:''}${c.stage?` data-stage="${AIU.esc(c.stage)}" data-text="${AIU.esc(c.text||'')}"${c.force?' data-force=1':''}`:''}${c.indexes?` data-i="${AIU.esc(JSON.stringify(c.indexes))}"`:''}>${AIU.esc(c.label)}</button>`
   :`<button class=ai-chip data-act=agchip data-text="${AIU.esc(c.text||c.label)}">${AIU.esc(c.label)}</button>`}
 function cardHTML(c,m,i){
  if(c.type==='plan'){const last=AIU.lastBot((A.sess&&A.sess.messages)||[]),done=!(A.sess&&A.sess.pending)||!last||m.id!==last.id;
@@ -332,7 +332,7 @@ ACT.agchip=el=>agSend(el.dataset.text);
 ACT.agfill=el=>{const t=$('ai-in');if(!t)return;t.value=el.dataset.text||'';t.dispatchEvent(new Event('input'));t.focus()};
 ACT.agedit=el=>{if(typeof studioEditSticker==='function')studioEditSticker(+String(el.dataset.g).replace(/\D/g,''),+el.dataset.i,'agent')};          /* the editor opens at once on that slice (no chat turn); its Save lands back here */
 ACT.agsetting=async el=>{try{await saveSet(JSON.parse(el.dataset.set))}catch(e){return}paint()};          /* a one-time switch: the setting is saved and nothing is sent to the chat */
-ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.to)a.to=+el.dataset.to;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
+ACT.agaction=el=>{const a={type:el.dataset.type};if(el.dataset.stage){a.stage=el.dataset.stage;a.text=el.dataset.text||'';if(el.dataset.force)a.force=true}if(el.dataset.g)a.generation=el.dataset.g;if(el.dataset.to)a.to=+el.dataset.to;if(el.dataset.i){try{a.indexes=JSON.parse(el.dataset.i)}catch(e){}}agSend('',a)};
 ACT.agcut=async el=>{const r=await post(`/api/generations/${el.dataset.g}/recut`);if(!r.ok)return toast(r.j.error||'Could not cut the sheet',1);toast('Cutting the sheet…');if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.aganimal=async el=>{const n=+String(el.dataset.g||'').replace(/\D/g,'');if(!n)return;const r=await post(`/api/generations/${n}/animate`,{scope:'slice',index:+el.dataset.i});if(!r.ok)return toast(r.j.error||'Could not animate',1);toast('Animating again');if(A.sid)await loadSession(A.sid,true);startPoll()};
 ACT.agretry=el=>agSend('',{type:'retry_sheet',generation:el.dataset.g});

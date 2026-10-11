@@ -37,7 +37,7 @@ def nullable(x):
 SCHEMAS = {
     "Error": obj({"error": STR}, ["error"]),
     "Settings": obj({"grid": {"type": "string", "enum": ["3x3", "2x2"]}, "style_id": STR, "ask_before_spending": BOOL, "ai": BOOL, "allow_vlm": nullable(BOOL),
-                     "stage": {"type": "string", "enum": ["prompt", "emojis", "animation", "export", "api"], "description": "How far a new request goes (agent/stages.py): prompt = the plan only, emojis = Stickers: sheet and stickers (default), animation = + the animations (ends at G4), export = Telegram: + pack and Telegram, api = Export: + the AddCollection API (owner only)"},
+                     "stage": {"type": "string", "enum": ["auto", "prompt", "emojis", "animation", "export", "api"], "description": "How far a new request goes (agent/stages.py): auto = each message decides (default), prompt = the plan only, emojis = Stickers: sheet and stickers (default), animation = + the animations (ends at G4), export = Telegram: + pack and Telegram, api = Export: + the AddCollection API (owner only)"},
                      "models": {"type": "object", "description": "The chat's own model picks (the slider's details): image and video are catalog ids (GET /api/models), ai a model the local server lists; an empty value returns to the default", "properties": {"image": STR, "video": STR, "ai": STR}},
                      "creator": obj({"on": BOOL, "scope": {"type": "string", "enum": ["images", "video"]}, "bypass": BOOL})}),
     "Step": obj({"kind": {"type": "string", "enum": ["task", "step", "note", "final"]}, "label": STR, "detail": nullable(obj({"lines": arr(STR)}, extra=True)),
@@ -215,6 +215,8 @@ ROUTES = [
     ("POST", "/api/ai/backend", "Live generation", "Choose the AI backend {backend: auto | local | cloud} and/or the local model {model: an id GET /api/llm/models lists; any other is a 400 that carries the list} (owner only; auto keeps a working backend and only a failed call switches it)", OBJ, OBJ, 200),
     ("GET", "/api/llm/models", "Chat", "The local server's chat models ({models: [{id, loaded: null | bool}], current, preference, chosen, configured, ok, why}): the one in use, and whether it can ANSWER (a real probe, cached), with the plain reason when not", None, OBJ, 200),
     ("GET", "/api/vision", "Gates", "The vision judge: model and policy", None, OBJ, 200),
+    ("GET", "/api/prefs", "Chat", "The person's own settings every screen shares: {stage} (auto | prompt | emojis | animation | export | api; default auto)", None, OBJ, 200),
+    ("POST", "/api/prefs", "Chat", "Set the person's slider {stage}: the chat and the Studio follow it; an unknown stage is a 400", OBJ, OBJ, 200),
     ("POST", "/api/plan", "Live generation", "Preview a plan; nothing is reserved. Body {prompt, grid?, style_id?, ai?, loop?, actions?: creative | predefined (nine of the 36 bank actions)}", OBJ, OBJ, 200),
     ("POST", "/api/plan/next", "Live generation", "Next batch: the next unclaimed batch of the batches on screen ({gens}) as a plan to read first, or {complete, message}; nothing is reserved or spent", OBJ, OBJ, 200),
     ("POST", "/api/plan/more", "Live generation", "Several batches in one Generate: the plans of the n batches after a previewed one ({prompt, plan, n, style_id?, loop?, gens?}): an emoji pack's next preset grids, else the next unused bank actions; with gens (a Next-batch draft) the session's own grids and actions are skipped and it never goes past batch 4. {plans, existing}; nothing is reserved or spent", OBJ, OBJ, 200),

@@ -110,6 +110,7 @@ class Turn:
     answer: str = ""                             # the typed answer to my "which sticker?" (t.text then holds the original request + the answer): "12" is checked against the batch's size
     unsure_review: bool = False                  # an approve / reject sentence with a negation in it: nothing is decided, the person is asked
     profile_answer: dict | None = None           # the reply to my own "what should I call you?": {"name": "Haitham"}, never a subject
+    stage_force: bool = False                    # the person chose "Keep <stage> and go": this message runs at the stage as it is, no question
     model_said: str = ""                         # "Using Grok Video 1.5 for the animation": a model the message named (_models_named), said at the end of the reply
     prefix: str = ""                             # what the profile node said, put before the rest of the turn's answer ("Nice to meet you, Sam! ..." then the plan)
     _lock: Any = None
@@ -254,9 +255,36 @@ class Agent:
         t.trace.step("model picked: " + ", ".join(names))
         t.model_said = "Using " + " and ".join(names) + " (it stays this chat's choice; change it in the slider's details)."
 
+    def _set_stage(self, t: Turn, stage: str) -> None:
+        """The person's one slider (Haitham, 2026-10-11: one per person, the chat and the Studio): this chat and every other one of theirs."""
+        t.sess["settings"]["stage"] = stage
+        try:
+            self.store.set_person_stage(stage)
+        except OSError:
+            pass
+
+    def _stage_ask(self, t: Turn, mis: dict) -> dict:
+        """A message that does not fit the slider (agent/stages.resolve): say so in words, with buttons that set the slider and go, and nothing spent."""
+        L = lambda s: stages.INFO[s]["label"]
+        need, stage, text = mis["need"], mis["stage"], t.text
+        go = lambda s, label, **x: {"label": label, "action": "stage_go", "stage": s, "text": text, **x}
+        if mis["kind"] == "more":
+            t.reply = f"That needs **{L(need)}**, and the slider is at **{L(stage)}**. Set it to {L(need)} or to Auto, and I'll go on."
+            t.chips = [go(need, f"Set to {L(need)} and go"), go("auto", "Set to Auto and go"), {"label": "Not now", "action": "cancel"}]
+        else:
+            t.reply = f"The slider is at **{L(stage)}**, so this would go on past {L(need)}. You asked for {L(need)} only: set it to {L(need)} or to Auto?"
+            t.chips = [go(need, f"Set to {L(need)} and go"), go("auto", "Set to Auto and go"), go(stage, f"Keep {L(stage)} and go", force=True)]
+        t.trace.step(f"the slider is at {L(stage)}; this asks for {L(need)}" + (" only" if mis["kind"] == "less" else ""))
+        t.trace.end("asked about the slider")
+        return {}
+
     def n_understand(self, state: State) -> dict:
         t: Turn = state["turn"]
         sess = t.sess
+        if t.action and t.action.get("type") == "stage_go":         # a button of _stage_ask: set the slider, then the message it was about runs again
+            if stages.valid(t.action.get("stage")):
+                self._set_stage(t, t.action["stage"])
+            t.stage_force, t.text, t.action = bool(t.action.get("force")), str(t.action.get("text") or ""), None
         self._models_named(t)
         pending = bool(sess.get("pending"))
         t.prev_pending = sess.get("pending")
@@ -444,7 +472,10 @@ class Agent:
                 "prepared": bool(pm),
                 "free": not self.tools.live(), **({"transformation": {k: tr[k] for k in ("id", "subject", "target", "required")}} if tr else {})}
         spend = self.tools.live()
-        run = stages.run_spec(stages.of(st), creator.settings_of(sess)["bypass"])        # how far this request goes: the chat's stage (agent/stages.py)
+        eff, mis = stages.resolve(stages.of(st), t.text)                              # how far this request goes: the slider, or the message when it is Auto
+        if mis and not t.stage_force:
+            return self._stage_ask(t, mis)
+        run = stages.run_spec(eff, creator.settings_of(sess)["bypass"])
         card["stage"] = run["stage"]
         batch = self._first_batch(prompt, subject, st["grid"], sid, bool(st.get("ai", True)), plan, card)       # a pack request plans batch 01 only (plan.md Step 3)
         if run["plan_only"]:
@@ -1780,6 +1811,11 @@ class Agent:
     def n_animate(self, state: State) -> dict:
         t: Turn = state["turn"]
         gen = t.res.generation or (t.sess.get("focus") or {}).get("generation") or (self.store.latest_pass(t.sess) or {}).get("generation")
+        if not gen and re.search(r"\b(?:make|create|draw|generate|design)\b", t.text.lower()):
+            return self.n_new(state)                       # "make me falcon stickers and animate them": a new request that runs to the animation (stages.resolve)
+        stage = stages.of(t.sess["settings"])
+        if not stages.at_least(stage, "animation") and not t.stage_force:
+            return self._stage_ask(t, {"kind": "more", "need": "animation", "stage": stage})
         if not gen:
             t.reply = "There is nothing to animate yet. Let's make some stickers first."
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
@@ -1818,6 +1854,9 @@ class Agent:
             t.reply = "There is nothing to send yet. Let's make some stickers first."
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS[:3]]
             return {}
+        stage = stages.of(t.sess["settings"])
+        if not stages.at_least(stage, "export") and not t.stage_force:
+            return self._stage_ask(t, {"kind": "more", "need": "export", "stage": stage})
         name = self._nm(t.sess, gen)
         subj = self.store.subject_for_generation(t.sess, gen)
         subject = (subj or {}).get("name") or ""

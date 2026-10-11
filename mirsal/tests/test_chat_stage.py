@@ -20,7 +20,7 @@ class Stage(Base):
             self.agent.creator_tick(self.sid)
 
     def test_a_new_chat_is_on_emojis_and_plans_a_sheet_as_today(self):
-        self.assertEqual(self.sess()["settings"]["stage"], "emojis")
+        self.assertEqual(self.sess()["settings"]["stage"], "auto", "a new chat starts on Auto: a plain request still stops at the stickers")
         m = self.say("make me falcon stickers")
         card = m["cards"][0]
         self.assertEqual((card["type"], card["stage"], card["estimate"]), ("plan", "emojis", 2.0))
@@ -121,13 +121,57 @@ class Stage(Base):
         self.assertEqual((run["status"], run["step"]), ("waiting", "approve"), "D2: one click at G2 unless bypass is on")
 
 
+class SliderBoundary(Stage):
+    """The slider is a boundary both ways (Haitham, 2026-10-11): asking for more or for "only" less gets a question with buttons that set it and go."""
+    def test_auto_follows_the_message(self):
+        m = self.say("make me falcon stickers and animate them")
+        self.assertEqual(self.sess()["pending"]["end"], "animation", "Auto: the message asked for the animation")
+
+    def test_animate_past_stickers_asks_and_the_button_sets_and_goes(self):
+        self.set_stage("emojis")
+        self.say("make me falcon stickers")
+        self.say("", action={"type": "confirm"})
+        m = self.say("animate it with grok lite")
+        self.assertIn("needs **Animation**", m["text"])
+        self.assertEqual([c["label"] for c in m["chips"]], ["Set to Animation and go", "Set to Auto and go", "Not now"])
+        self.assertFalse([c for c in self.tools.calls if c[0] == "animate"], "nothing runs before the click")
+        go = m["chips"][0]
+        self.say("", action={"type": "stage_go", "stage": go["stage"], "text": go["text"]})
+        self.assertEqual(self.sess()["settings"]["stage"], "animation")
+        self.assertEqual(self.store.person_stage(), "animation", "one slider per person")
+
+    def test_stickers_only_at_animation_asks_and_keep_goes_as_it_is(self):
+        self.set_stage("animation")
+        m = self.say("make new falcon stickers only")
+        self.assertIn("You asked for Stickers only", m["text"])
+        keep = m["chips"][2]
+        self.assertEqual((keep["label"], keep.get("force")), ("Keep Animation and go", True))
+        self.say("", action={"type": "stage_go", "stage": keep["stage"], "text": keep["text"], "force": True})
+        self.assertEqual(self.sess()["pending"]["end"], "animation")
+
+    def test_a_plain_request_at_a_fixed_stop_just_runs(self):
+        self.set_stage("animation")
+        m = self.say("make me falcon stickers")
+        self.assertNotIn("slider", m["text"])
+
+
 class Migration(unittest.TestCase):
+    def test_need_and_resolve(self):
+        self.assertEqual(stages.resolve("auto", "make kid superman"), ("emojis", None))
+        self.assertEqual(stages.resolve("emojis", "animate it with grok lite")[1]["kind"], "more")
+        self.assertEqual(stages.resolve("animation", "stickers only")[1]["kind"], "less")
+        self.assertEqual(stages.resolve("animation", "make kid batman"), ("animation", None))
+        self.assertEqual(stages.resolve("auto", "send it to telegram")[0], "export")
+        self.assertTrue(stages.at_least("auto", "api"))
+        self.assertFalse(stages.at_least("emojis", "animation"))
+        self.assertEqual(stages.reached({"stickers": [{"status": "READY", "anim_status": "READY"}]}), "animation")
+
     def test_old_creator_settings_read_as_a_stage(self):
         self.assertEqual(stages.of({"creator": {"on": True, "scope": "video"}}), "export")
-        self.assertEqual(stages.of({"creator": {"on": True, "scope": "images"}}), "emojis")
-        self.assertEqual(stages.of({}), "emojis")
+        self.assertEqual(stages.of({"creator": {"on": True, "scope": "images"}}), "auto")
+        self.assertEqual(stages.of({}), "auto", "nothing set: Auto (Haitham, 2026-10-11)")
         self.assertEqual(stages.of({"stage": "prompt", "creator": {"on": True, "scope": "video"}}), "prompt", "an explicit stage wins")
-        self.assertEqual(stages.of({"stage": "bogus"}), "emojis")
+        self.assertEqual(stages.of({"stage": "bogus"}), "auto")
 
     def test_run_spec(self):
         self.assertEqual(stages.run_spec("animation", True), {"stage": "animation", "plan_only": False, "creator": True, "scope": "video", "end": "animation", "bypass": True})
@@ -135,7 +179,7 @@ class Migration(unittest.TestCase):
         self.assertFalse(stages.run_spec("emojis", True)["bypass"])
         self.assertEqual(stages.run_spec("api")["end"], "api")
         self.assertTrue(stages.animates("api"))
-        self.assertEqual([stages.INFO[s]["label"] for s in stages.STAGES], ["Prompt", "Stickers", "Animation", "Telegram", "Export"])
+        self.assertEqual([stages.INFO[s]["label"] for s in stages.STAGES], ["Auto", "Prompt", "Stickers", "Animation", "Telegram", "Export"])
 
     def test_batch_label(self):
         self.assertEqual(stages.batch_label(2, {"slots": {"preset": "social-v1"}}), "Batch 02 · social")

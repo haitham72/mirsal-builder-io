@@ -92,7 +92,7 @@ class TelegramChatTests(unittest.TestCase):
         self.update(HAITHAM, "/model")
         card = self.sent(chat=HAITHAM)[-1]
         labels = [b["text"] for b in self.buttons(card)]
-        self.assertEqual(labels, ["🖼 Nano Banana 2", "🎞 Grok Imagine 1.5 Lite", "🎨 " + next(s["label"] for s in __import__("mirsal.generation.styles", fromlist=["x"]).PRESETS if s["id"] == "glossy_3d"), "🤖 gpt-4o", "🧭 Emojis"])
+        self.assertEqual(labels, ["🖼 Nano Banana 2", "🎞 Grok Imagine 1.5 Lite", "🎨 " + next(s["label"] for s in __import__("mirsal.generation.styles", fromlist=["x"]).PRESETS if s["id"] == "glossy_3d"), "🤖 gpt-4o", "🧭 Stickers"])
         self.update(HAITHAM, data=self.buttons(card)[0]["callback_data"])                    # open the image list
         listing = [f for m, f, _ in self.calls if m == "editMessageText"][-1]
         pick = next(b for b in self.buttons(listing) if b["text"] == "Seedream 5.0 Pro")
@@ -111,8 +111,8 @@ class TelegramChatTests(unittest.TestCase):
         self.update(HAITHAM, "/stage")
         card = self.sent(chat=HAITHAM)[-1]
         labels = [b["text"] for b in self.buttons(card)]
-        self.assertEqual(labels, ["Prompt · plan only, free", "✓ Stickers · sheet and stickers", "Animation · + animation", "Telegram · + pack and Telegram", "Export · + send to the API", "‹ Back"])
-        self.update(HAITHAM, data=self.buttons(card)[2]["callback_data"])
+        self.assertEqual(labels, ["Auto · each message decides", "Prompt · plan only, free", "✓ Stickers · sheet and stickers", "Animation · + animation", "Telegram · + pack and Telegram", "Export · + send to the API", "‹ Back"])
+        self.update(HAITHAM, data=self.buttons(card)[3]["callback_data"])
         sid = tg_chat._chat(self.c.out, HAITHAM)["sid"]
         sess = self.c.chat_parts({"id": "local", "role": "owner"})[0].load(sid)
         self.assertEqual((sess["settings"]["stage"], sess["messages"]), ("animation", []), "a pick is a setting, never a turn")

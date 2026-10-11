@@ -416,7 +416,7 @@ ACT.pgresheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=
   el.disabled=true;const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,parent:(FAM.get(g.number)||{}).root||g.generation_id,regen_of:g.generation_id,
     sheet_prompt:pdCustom(g,'sheet')?text:undefined,mode:'regen',batch:g.number});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};
-ACT.pgredo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'video')||'').trim();
+ACT.pgredo=async el=>{if(!await stageOk('animation',()=>ACT.pgredo(el)))return;const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;const text=(pdText(g,'video')||'').trim();
   if(!text){toast('Write a video prompt first',1);return}
   if(typeof lcached==='function'&&lcached('video')==null){toast('The price is not known yet: wait for it, then regenerate',1);return}       // never spend against a price the person has not been shown
   el.disabled=true;const ok=await liveStart('video',{g:g.number,video_prompt:text,redo:true});
@@ -505,7 +505,7 @@ async function gdMore(g,run){const r=await post('/api/plan/more',{prompt:g.promp
 ACT.pgsheet=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
   const ok=await liveStart('sheet',{prompt:g.prompt||SES.prompt||'',ai:false,refs:[],from_generation:g.number,sheet_prompt:pdCustom(g,'sheet')?PD[pdKey(g.number,'sheet')]:undefined});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'sheet')];glast='';tick(true)};
-ACT.pgvideo=async el=>{const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
+ACT.pgvideo=async el=>{if(!await stageOk('animation',()=>ACT.pgvideo(el)))return;const g=GM.get(+el.dataset.g);if(!g||typeof liveStart!=='function')return;el.disabled=true;
   const ok=await liveStart('video',{g:g.number,video_prompt:pdCustom(g,'video')?PD[pdKey(g.number,'video')]:undefined});
   if(!ok)el.disabled=false;else delete PD[pdKey(g.number,'video')];glast='';tick(true)};
 /* Remove batch (like Delete pack, but into the trash): says what it does before it does it; stickers already added to a pack are copies and stay in their packs */
@@ -519,13 +519,24 @@ ACT.grm=()=>{const gs=sessionGens();if(!gs.length)return;
   confirmDlg(grmText(gs),async()=>{for(const g of gs){const r=await post(`/api/generations/${g.number}/remove`,{});if(!r.ok){toast(r.j.error,1);return}}
     const gone=gs.map(g=>g.number);SES.gens=SES.gens.filter(id=>!gone.includes(id));saveSes();gone.forEach(n=>GM.delete(n));HB.items=HB.items.filter(x=>!gone.includes(x.id));
     glast='';await remLoad();histLoad(false);tick(true)},'Remove')};
+/* the person's one slider (Haitham, 2026-10-11; GET/POST /api/prefs, shared with the chat): the Studio never guesses, so a button past the stop asks
+   once: Proceed (set to that step) / Set to Auto / Cancel. Auto, and any step at or before the stop, goes straight on. */
+const STEPS=['prompt','emojis','animation','export','api'],STEPNAME={auto:'Auto',prompt:'Prompt',emojis:'Stickers',animation:'Animation',export:'Telegram',api:'Export'};
+let GSTAGEGO=null;
+async function stageOk(need,again){const r=await api('/api/prefs'),s=(r.ok&&r.j.stage)||'auto';
+  if(s==='auto'||STEPS.indexOf(need)<=STEPS.indexOf(s))return true;GSTAGEGO=again;
+  dlg(`<h2>This goes past ${STEPNAME[s]}</h2><p class=mut>Your slider is at <b>${STEPNAME[s]}</b>; this is <b>${STEPNAME[need]}</b>, the step after it. The slider is the same in the chat.</p>
+   <div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class=btn data-act=gstagego data-v=auto>Set to Auto</button><button class="btn pri" data-act=gstagego data-v=${need}>Proceed: set to ${STEPNAME[need]}</button></div>`);
+  return false}
+ACT.gstagego=async el=>{const r=await post('/api/prefs',{stage:el.dataset.v});if(!r.ok)return toast(r.j.error||'Could not change the slider',1);
+  closeDlg();toast(`The slider is at ${STEPNAME[el.dataset.v]} now (here and in the chat)`);const f=GSTAGEGO;GSTAGEGO=null;if(f)f()};
 ACT.gscreen=()=>{GS.screen=!GS.screen;gstore('mirsal.screen',GS.screen?'1':'0');glast='';tick(true)};
 ACT.gvmode=el=>{GS.view=el.dataset.v;gstore('mirsal.view',GS.view);glast='';tick(true)};
 ACT.gtab=el=>{if(el.dataset.t==='particles'&&typeof ACT.spopen==='function')return ACT.spopen(el);GS.tab=el.dataset.t;glast='';tick(true)};
 
 /* ---------- Animate, Add: both act on the included batches of the session. */
 
-ACT.ganimate=async el=>{const todo=included().filter(g=>g.source.has_video&&!animPhase(g)&&!processing(g)&&keptStills(g).length);if(!todo.length)return;
+ACT.ganimate=async el=>{if(!await stageOk('animation',()=>ACT.ganimate(el)))return;const todo=included().filter(g=>g.source.has_video&&!animPhase(g)&&!processing(g)&&keptStills(g).length);if(!todo.length)return;
   todo.forEach(g=>{ANIM.add(g.number);PVON.add(g.number);if(g.source.video_path)pvEnsure(g)});GS.tab='anim';glast='';tick(true);
   for(const g of todo){const r=await postWait(`/api/generations/${g.number}/animate`,{scope:'pack'},'Waiting for the previous animation…');if(!r.ok){toast(r.j.error,1);ANIM.delete(g.number)}}};
 /* Pack: a three-step modal. 1 the pack (and replace-or-add when stills of the same stickers are already in it), 2 how it looks on each

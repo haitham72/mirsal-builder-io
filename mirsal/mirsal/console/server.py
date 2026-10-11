@@ -44,9 +44,9 @@ _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)(?:-[A-Za-z0-9_-]+)?/")
 MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "edge", "reslice", "recheck", "add", "pack_add"}
 MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
-MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs",
+MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/prefs", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs",
               "/api/prepared/match"}
-MEMBER_POST = {"/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
+MEMBER_POST = {"/api/prefs", "/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
 RATE_DEFAULTS = {"r": 3000, "w": 240}                 # requests per minute per token holder (MIRSAL_RATE_READ / MIRSAL_RATE_WRITE; 0 = off)
 
 
@@ -1002,6 +1002,10 @@ def make_handler(c: Console):
                 return self._json(200, fx_sets.for_generation(c.out, c.lib, gp[2]))
             if path == "/api/particles" or path.startswith("/api/particles/"):
                 return self._particles("GET", path, {})
+            if path == "/api/prefs":         # the person's own settings that every screen shares: {stage} (the slider: auto | prompt | emojis | animation | export | api)
+                from ..agent.memory import SessionStore as _SS
+                from ..agent import stages as _st
+                return self._json(200, {"stage": _SS(c.out, user=self.user["id"]).person_stage() or _st.DEFAULT})
             if path == "/api/me":            # who the server thinks you are (and what you may do): for clients that hold a token
                 u = self.user
                 return self._json(200, {"id": u["id"], "name": u.get("name"), "role": u["role"], "can_spend": bool(u.get("can_spend")), "via": u.get("via")})
@@ -1800,6 +1804,13 @@ def make_handler(c: Console):
                 plans = tasks.more_batches(str(body.get("prompt") or ""), plan, n, body.get("style_id", "flat_vector"), bool(body.get("loop")),
                                            **({"used_presets": ses["used_presets"], "used_tokens": ses["used_tokens"]} if ses else {}))
                 return self._json(200, {"plans": plans, "existing": ses["existing"] if ses else 0})
+            if path == "/api/prefs":     # set the person's slider (the chat's and the Studio's one stop); an unknown stage is a 400
+                from ..agent.memory import SessionStore as _SS
+                from ..agent import stages as _st
+                if not _st.valid(body.get("stage")):
+                    raise pl.PipelineError("stage must be one of " + ", ".join(_st.STAGES), 400)
+                _SS(c.out, user=self.user["id"]).set_person_stage(body["stage"])
+                return self._json(200, {"stage": body["stage"]})
             if path == "/api/plan":      # preview only: nothing is reserved
                 return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                                      body.get("actions") or "creative"))
@@ -1835,6 +1846,15 @@ def make_handler(c: Console):
                                 if not _stages.valid(v):                              # a stage nobody knows is refused out loud, like an unknown style
                                     raise pl.PipelineError(f"unknown stage {v!r}: the stages are " + ", ".join(_stages.STAGES), 400)
                                 sess["settings"]["stage"] = v
+                                store.set_person_stage(v)                             # ONE slider per person: every chat and the Studio follow it
+                                gid = (sess.get("focus") or {}).get("generation")
+                                if v != "auto" and gid:                               # a step the open batch already passed: say so in one line, no turn
+                                    try:
+                                        got = _stages.reached(pl.read_result(c.out, int(str(gid).lstrip("G"))))
+                                    except Exception:
+                                        got = None
+                                    if got and _stages.STEPS.index(got) >= _stages.STEPS.index(v):
+                                        store.add_message(sess, "assistant", f"{_stages.INFO[v]['label']} is already done for {gid}; new requests now stop at {_stages.INFO[v]['label']}.", status="done")
                             elif k == "models" and isinstance(v, dict):               # the chat's own picks (the slider's details): image / video from the catalog, ai = a local model id
                                 cur = dict(sess["settings"].get("models") or {})
                                 for mk, mv in v.items():

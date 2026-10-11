@@ -262,12 +262,12 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ag-stage-btn:hover,.ag-stage-btn[aria-expanded=true]{background:var(--pri-l);color:var(--pri-d)}
 /* the pill's small slider glyph: a track filled to the current stop */
 .ag-mini{position:relative;width:22px;height:4px;border-radius:var(--r-pill);background:var(--bd);overflow:hidden;margin-right:2px}
-.ag-mini::after{content:"";position:absolute;inset:0 auto 0 0;width:calc((var(--k) + 1) * 20%);background:var(--pri);border-radius:inherit}
+.ag-mini::after{content:"";position:absolute;inset:0 auto 0 0;width:calc(var(--k) * 20%);background:var(--pri);border-radius:inherit}
 /* open: the slider (a range with a thumb, like Claude's thinking slider), the ticks of the five stops, and their names under it */
 .ag-slider{position:relative;margin:8px 12px 0;height:22px}
 .ag-range{-webkit-appearance:none;appearance:none;position:relative;z-index:2;width:100%;height:22px;margin:0;background:transparent;cursor:pointer}
 .ag-range:focus{outline:none}
-.ag-range::-webkit-slider-runnable-track{height:4px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--pri) 0 calc(var(--k) * 25%),var(--bd) calc(var(--k) * 25%) 100%)}
+.ag-range::-webkit-slider-runnable-track{height:4px;border-radius:var(--r-pill);background:linear-gradient(90deg,var(--pri) 0 calc(var(--k) * 20%),var(--bd) calc(var(--k) * 20%) 100%)}
 .ag-range::-moz-range-track{height:4px;border-radius:var(--r-pill);background:var(--bd)}
 .ag-range::-moz-range-progress{height:4px;border-radius:var(--r-pill);background:var(--pri)}
 .ag-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 1px #0f172a1f,0 2px 6px #0f172a33;transition:transform .15s var(--ease)}

@@ -84,7 +84,7 @@ class ChatServerTests(unittest.TestCase):
         """plan.md Step 1: settings.stage through the real settings route; an unknown stage is a 400; the old creator switches still map onto it."""
         s, sess = self.req("POST", "/api/chat/sessions", {"settings": {"ai": False}})
         sid = sess["id"]
-        self.assertEqual(sess["settings"]["stage"], "emojis", "D3: a new chat starts on Emojis")
+        self.assertEqual(sess["settings"]["stage"], "auto", "a new chat starts on Auto (Haitham, 2026-10-11)")
         s, r = self.req("POST", f"/api/chat/sessions/{sid}/settings", {"stage": "animation"})
         self.assertEqual((s, r["settings"]["stage"]), (200, "animation"))
         self.assertEqual(len(self.req("GET", f"/api/chat/sessions/{sid}")[1]["messages"]), 0, "no chat turn")
