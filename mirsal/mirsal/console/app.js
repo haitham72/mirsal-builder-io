@@ -298,6 +298,7 @@ function drawCtabs() {
 ACT.c2tog = () => document.body.classList.toggle('c2open');
 
 ACT.nav = (el) => {
+  if (el.closest('#rmenu')) rmeClose();
   location.hash = '#/' + (el.dataset.to === 'generate' ? 'studio' : el.dataset.to);
 };
 
@@ -310,6 +311,8 @@ ACT.rme = () => {
   }
 };
 
+ACT.thmtoggle = () => thmSet(thmIsDark() ? 'light' : 'dark');
+
 const rmeClose = () => {
   if (RME) {
     RME = false;
@@ -318,7 +321,8 @@ const rmeClose = () => {
 };
 
 document.addEventListener('click', (e) => {
-  if (RME && !e.target.closest('#rail')) rmeClose();
+  // drawRail replaces the clicked avatar; the original event path still contains the rail.
+  if (RME && !e.composedPath().includes($('rail'))) rmeClose();
   const d = document.querySelector('#ctabs details[open]');
   if (d && (!e.target.closest('.ct-new') || e.target.closest('[role=menuitem]'))) d.open = false;
 });

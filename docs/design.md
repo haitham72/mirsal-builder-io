@@ -34,7 +34,7 @@ Every screen uses the same rail, palette, typography and responsive layout. Desk
 
 `studio.css` defines the light palette in `:root`; `theme.css` remaps it under `html[data-theme=dark]` and supplies component overrides. All screens share `--bg`, `--sf`, `--fill`, `--bd`, `--tx`, `--mut`, `--mut2`, `--pri`, `--pri-d`, `--pri-l`, `--glass`, `--wash`, `--r` and `--sh`. Light mode uses Mirsal blue; dark mode uses black surfaces and cyan actions, with `--on-pri` for text on cyan. Composer, rail and secondary columns use the same surface family. Issue colours preserve their meanings. Media backgrounds, checkerboards and exported canvas pixels stay unchanged.
 
-Settings → Appearance offers Dark / Light, applied immediately and stored in this browser. `theme.js` applies the preference before CSS paints, defaults to dark, tolerates blocked storage and synchronizes other tabs. The complete palette and wiring are in [dark-mode.md](dark-mode.md).
+A sun/moon button at the top-right of every screen switches Dark / Light immediately and stores the choice in this browser. A shared 52px tools row reserves its space above Create’s tabs and screen content, avoiding overlap with page controls. Settings → Appearance offers the same preference. `theme.js` applies the preference before CSS paints, defaults to dark, tolerates blocked storage and synchronizes other tabs. The complete palette and wiring are in [dark-mode.md](dark-mode.md).
 
 ### 3.2 Type, spacing, motion
 
@@ -49,7 +49,7 @@ Interactive elements share hover, press, selected and `:focus-visible` states. C
 2. **The rail has four items** (Haitham, 2026-10-11, `docs/redesign_plan.md` D5), declared in `RAIL` (`app.js`): **Home, Create, Library, Help**, under the
    Mirsal logo, then the credits chip (`live.js`) and **the avatar** (`.rme`, the person's initials) at the bottom. The avatar opens `#rmenu`: **Settings &
    health**, **Team** (`#/users`, owner and admins), **Trash** (Settings' Trash card, `ACT.rtrash`), **Watch folders** (`#/history`, the owner) and **Sign out**
-   (a signed-in person on the LAN); Escape or a click outside closes it. `RAILOF` says which item a screen lights: the Create screens (`agent`, `generate`,
+   (a signed-in person on the LAN); It remains open after its avatar is redrawn; Escape, a second avatar click or a click outside closes it. `RAILOF` says which item a screen lights: the Create screens (`agent`, `generate`,
    `create`, `effects`, `editor`, `export`, `prepare`) light Create, `pack` / `animate` / `chat` light Library, `settings` / `users` / `history` light the
    avatar. Every old hash still opens. **Create opens the tab used last** (`CTAB`: Chat or Studio).
    **Create's tabs** (`#ctabs`, `drawCtabs`, D7): above `agent`, `generate`, `create` and `effects`, a segmented **Chat | Studio** control and a **+ New** menu
@@ -98,7 +98,7 @@ The composer uses the shared surface and tokens. Style presets are 84px wrapping
 
 ### Settings (built)
 
-`settings.js` renders Appearance immediately, before awaiting system APIs. Its Dark / Light buttons persist only a browser preference and retain keyboard focus when switched. The completed page adds a sticky section bar: Appearance · Appearance · Account · System health · Prepared sheets (staff) · AI · Telegram · Trash. Each item scrolls to its card. People are managed in Users; Settings keeps the signed-in account and a staff link to Users. The prepared-sheet preference remains subordinate to `MIRSAL_PREFER_PREPARED` when set.
+`settings.js` renders Appearance immediately, before awaiting system APIs. Its Dark / Light buttons persist only a browser preference and retain keyboard focus when switched. The completed page adds a sticky section bar: Appearance · Account · System health · Prepared sheets (staff) · AI · Telegram · Trash. Each item scrolls to its card. People are managed in Users; Settings keeps the signed-in account and a staff link to Users. The prepared-sheet preference remains subordinate to `MIRSAL_PREFER_PREPARED` when set.
 
 ### Help (built 2026-10-05, `support.js`, `.su-*`)
 - **Its own section at the end of the rail** (icon `help`). A red dot (`.rdot`) shows on it while a notification is unread. Everyone has it.

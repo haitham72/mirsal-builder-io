@@ -8,6 +8,8 @@ const source = readConsoleFile(path.join(__dirname, '../../mirsal/console/theme.
 
 function boot(value, blocked = false) {
   let theme;
+  let mounted = false;
+  const toggle = {setAttribute(k, val) {this[k] = val;}};
   const listeners = {}, buttons = ['dark', 'light'].map(v => ({
     dataset: {v}, classList: {toggle(k, on) {this[k] = on;}},
     setAttribute(k, val) {this[k] = val;},
@@ -17,10 +19,14 @@ function boot(value, blocked = false) {
   const ctx = vm.createContext({localStorage: storage,
     window: {addEventListener(k, f) {listeners[k] = f;}},
     document: {documentElement: {setAttribute(k, v) {theme = v;}, getAttribute() {return theme;}},
-      querySelectorAll() {return buttons;}},
+      querySelectorAll() {return buttons;},
+      getElementById() {return mounted ? toggle : null;},
+      addEventListener(k, f) {listeners[k] = f;}},
   });
   vm.runInContext(source, ctx);
-  return {run: code => vm.runInContext(code, ctx), theme: () => theme, storage, listeners, buttons};
+  mounted = true;
+  listeners.DOMContentLoaded();
+  return {run: code => vm.runInContext(code, ctx), theme: () => theme, storage, listeners, buttons, toggle};
 }
 
 test('dark is the startup default, while an explicit light preference is applied before paint', () => {
@@ -37,11 +43,13 @@ test('switching persists without a page redraw, and updates accessible button st
   assert.equal(b.theme(), 'light');
   assert.equal(b.storage.value, 'light');
   assert.equal(b.buttons[1]['aria-pressed'], 'true');
+  assert.equal(b.toggle['aria-label'], 'Switch to dark theme');
   assert.equal(boot(b.storage.value).theme(), 'light');
   b.storage.value = 'dark';
   b.listeners.storage({key: 'mirsal.ui.theme'});
   assert.equal(b.theme(), 'dark');
   assert.equal(b.buttons[0]['aria-pressed'], 'true');
+  assert.equal(b.toggle.title, 'Switch to light theme');
   b.storage.value = null;
   b.listeners.storage({key: null});
   assert.equal(b.theme(), 'dark');
@@ -52,4 +60,18 @@ test('blocked storage still allows theme switching for the current page', () => 
   assert.equal(b.theme(), 'dark');
   b.run("thmSet('light')");
   assert.equal(b.theme(), 'light');
+});
+
+test('the global toggle starts with the stored preference and switches in both directions', () => {
+  const b = boot('light');
+  assert.equal(b.toggle['aria-label'], 'Switch to dark theme');
+  const app = readConsoleFile(path.join(__dirname, '../../mirsal/console/app.js'));
+  b.run('const ACT = {}; ' + consoleStatement(app, 'ACT.thmtoggle ='));
+  b.run('ACT.thmtoggle()');
+  assert.equal(b.theme(), 'dark');
+  assert.equal(b.storage.value, 'dark');
+  assert.equal(b.toggle['aria-label'], 'Switch to light theme');
+  b.run('ACT.thmtoggle()');
+  assert.equal(b.theme(), 'light');
+  assert.equal(b.storage.value, 'light');
 });

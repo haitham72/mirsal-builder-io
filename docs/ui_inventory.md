@@ -2,7 +2,7 @@
 
 Generated from `console/*.js` on 2026-10-11 after the console feature split and theme/Home additions. Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**445 actions** (446 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **157 named server routes**.
+**446 actions** (447 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **157 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -53,7 +53,7 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `anexport` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 | `ansave` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 
-### `app.js` (10)
+### `app.js` (11)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
@@ -65,8 +65,9 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `pknew` | 184 | app.js | `/api/packs` |
 | `c2tog` | 298 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
 | `nav` | 300 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, library.js, packs.js, prepare.js, tickets.js | none (browser only) |
-| `rme` | 304 | app.js | none (browser only) |
-| `rtrash` | 342 | app.js | none (browser only) |
+| `rme` | 305 | app.js | none (browser only) |
+| `thmtoggle` | 314 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `rtrash` | 346 | app.js | none (browser only) |
 
 ### `auth.js` (12)
 

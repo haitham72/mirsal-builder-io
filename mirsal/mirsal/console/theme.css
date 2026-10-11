@@ -1,4 +1,4 @@
-/* Dark theme (docs/dark-mode_plan.md). Loaded after studio.css + agent.css; every rule below is scoped to
+/* Dark theme (docs/dark-mode.md). Loaded after studio.css + agent.css; every rule below is scoped to
    html[data-theme=dark] so the light theme is byte-identical to before. Specificity (0,2,1)+ beats the single-class
    light rules and the (0,2,0) gallery rules; id rules are beaten by the added attribute selector.
    Surfaces that must keep real colours (checkerboards, preview-background choices, media overlays, exported pixels)
