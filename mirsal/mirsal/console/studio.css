@@ -984,3 +984,6 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 .pk-ttl{display:flex;flex-direction:column;min-width:0;flex:1 1 220px}.pk-ttl h1{margin:0;font-size:var(--fs-xl);font-weight:650;letter-spacing:-.01em}.pk-ttl small{font-size:var(--fs-s)}
 .pk-acts{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .pk-tabs{margin:0 0 12px}.pk-tabs small{color:var(--mut);font-weight:500;margin-left:4px}
+/* Settings (redesign phase 9): a section bar under the title; each card is a section with its own heading */
+.set-page .set-nav{position:sticky;top:0;z-index:5;margin:0 0 4px;flex-wrap:wrap;background:var(--fill)}
+.set-page .card{scroll-margin-top:56px}.set-page .card h2{margin:0 0 8px;font-size:var(--fs-l);font-weight:650}

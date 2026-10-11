@@ -186,7 +186,7 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 6. **Built 2026-10-11:** the sticker panel (`gmodal` docked on the right, tabs Checks · History · Measurements; `docs/design.md` "The sticker panel").
 7. **Built 2026-10-11:** the floating bottom bar and the density pass over the composer (`docs/design.md` "The density pass"). The Request and
    Prompt views stay two stops of the journey (Idea, Prompt); D3 (Animate / Add on several batches) is unchanged: the bar still acts on the included batches.
-8. **Built 2026-10-11:** the pack screen (`docs/design.md` "The pack screen"). **9. Settings and the avatar items. 10. Chat restyle. 11. Library, Help, Home polish.**
+8. **Built 2026-10-11:** the pack screen (`docs/design.md` "The pack screen"). **9. Built 2026-10-11:** Settings' section bar (`docs/design.md` "Settings"). **10. Chat restyle. 11. Library, Help, Home polish.**
 
 Each phase ends with `renamed` / `retired` filled for whatever left, `docs/ui_inventory.md` regenerated, the area doc updated (rule 12), and the
 part of this file it built deleted.

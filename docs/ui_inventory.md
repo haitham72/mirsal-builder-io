@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after redesign phase 8 (the pack screen).
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after redesign phase 9 (Settings).
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**437 actions** (438 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**438 actions** (439 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -91,7 +91,7 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `anexport` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 | `ansave` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 
-### `app.js` (23)
+### `app.js` (24)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
@@ -117,7 +117,8 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `openpack` | 220 | app.js, home.js | none (browser only) |
 | `newpack` | 221 | app.js | none (browser only) |
 | `newpackname` | 222 | app.js | `/api/packs` |
-| `prepset` | 232 | app.js | `/api/prepared/setting` |
+| `setgo` | 235 | app.js | none (browser only) |
+| `prepset` | 236 | app.js | `/api/prepared/setting` |
 
 ### `auth.js` (12)
 
