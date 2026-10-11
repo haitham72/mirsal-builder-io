@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The chat's tiles and the creator's card carry the override (2026-10-03): a blocked tile shows its picture (never dimmed), the locked red marks
 // (hatched while it is not in the set, solid with a check once allowed by the person), its reason in plain words, and the allow button on the tile itself,
 // per kind. The creator's stop card gets the same bulk pair the Studio has, per kind, counting what is allow-able now. The statements are read out of
@@ -8,21 +9,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIR = path.join(__dirname, '..', '..', 'mirsal', 'console');
-const src = fs.readFileSync(path.join(DIR, 'agent.js'), 'utf8');
-const css = fs.readFileSync(path.join(DIR, 'agent.css'), 'utf8');
+const src = readConsoleFile(path.join(DIR, 'agent.js'), 'utf8');
+const css = readConsoleFile(path.join(DIR, 'agent.css'), 'utf8');
 
 /** One whole top-level statement of agent.js: from `marker` to the next line that starts in column 0. */
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in agent.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 function load(extra = '') {
   const A = { sel: new Set() };

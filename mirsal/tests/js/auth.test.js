@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The sign-in card, Waiting for approval, and Users > People (auth.js, docs/api.md, Office accounts on the LAN): the pure builders in AUV, run in a vm. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -6,7 +7,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const ctx = vm.createContext({});
-vm.runInContext(fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'auth.js'), 'utf8'), ctx);
+vm.runInContext(readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'auth.js'), 'utf8'), ctx);
 const A = ctx.AUV;
 
 test('the sign-in card has the three ways in, and each form only the fields it needs', () => {

@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // Home (console/home.js): the filters, the hero's pick, and the page drawn from the caller's real library; the logo opens Home. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -63,7 +64,7 @@ test('a filter redraws the gallery; the logo opens Home', async () => {
   assert.doesNotMatch(gal, /data-id="p1"/);
   run(`route_='agent';ACT.home()`);
   assert.equal(run(`location.hash`), '#/home');
-  const app = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'app.js'), 'utf8');
+  const app = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'app.js'), 'utf8');
   assert.match(app, /\|\|'home'/, 'an empty hash opens Home');
 });
 

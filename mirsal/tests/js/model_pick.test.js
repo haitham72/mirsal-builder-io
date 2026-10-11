@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The model drop-downs folded into the control row (live.js modelPick) carry a marker with no value (<select data-lvvid>, dataset.lvvid === "").
 // A change must still be saved as the next model: before 2026-10-09 an empty marker read as false, so the pick showed but the job went out with the old model.
 // The change handler is read out of live.js and run with the few globals stubbed. Run: node --test tests/js
@@ -6,15 +7,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const live = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'live.js'), 'utf8');
-function statement(marker) {
-  const i = live.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in live.js`);
-  const lines = live.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) { if (ln && !/^\s/.test(ln)) break; out.push(ln); }
-  return out.join('\n');
-}
+const live = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'live.js'), 'utf8');
+function statement(marker) {return consoleStatement(live,marker);}
 
 function load() {
   const log = { saved: 0, ticks: 0 };

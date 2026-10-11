@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The Prompt tab writes the prompts (2026-10-02): drafts per batch and kind, "with my prompt" only when the text really differs from the template, the buttons' conditions.
 // The helpers are read out of generate.js and run with the few globals they use stubbed. Run: node --test tests/js
 const test = require('node:test');
@@ -6,19 +7,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const FILE = path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js');
-const src = fs.readFileSync(FILE, 'utf8');
+const src = readConsoleFile(FILE, 'utf8');
 
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in generate.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 function load({ live = true } = {}) {
   const sandbox = {

@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.join(__dirname,'../../mirsal/console'),SR=require(path.join(root,'sheet-recovery.js'));
 const g={number:7,generation_id:'G007',allow:{video_sheet:{can:['A1'],allowed:['A2'],undo:['A2'],why:{A1:'outline <ring>'},final:{A3:'File cannot decode'}}}};
@@ -13,11 +14,11 @@ test('bulk pair counts current eligibility and never hides a one-sheet decision'
  assert.match(SR.bulk(g),/data-all=1/);
 });
 test('all Studio and chat surfaces share the sheet controls, including creator bulk controls',()=>{
- const src=fs.readFileSync(path.join(root,'generate.js'),'utf8'),chat=fs.readFileSync(path.join(root,'agent.js'),'utf8');
+ const src=readConsoleFile(path.join(root,'generate.js'),'utf8'),chat=readConsoleFile(path.join(root,'agent.js'),'utf8');
  const segment=(a,b)=>src.slice(src.indexOf(a),src.indexOf(b,src.indexOf(a)+1));
  assert.match(segment('function drawVdlg()','ACT.gpickvideo='),/SR.picture\(g,v\)/);
  assert.match(segment('function videoBox(','function videoPanel('),/SR.controls\(g,v\)/);
  assert.match(segment('function videoPanel(','const AV='),/SR.bulk\(g\)/);
  assert.match(chat,/SR.picture\(c.data,v\)/);assert.match(chat,/\['video_sheet','video sheet'\]/);
- assert.match(fs.readFileSync(path.join(root,'index.html'),'utf8'),/sheet-recovery.js/);
+ assert.match(readConsoleFile(path.join(root,'index.html'),'utf8'),/sheet-recovery.js/);
 });

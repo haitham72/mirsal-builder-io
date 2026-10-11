@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The stage control's builder (pure half of agent.js): a pill that opens the task slider on the right; image/video model selectors on the left.
 // Run: node --test tests/js
 const test = require('node:test');
@@ -9,8 +10,8 @@ const path = require('node:path');
 const { loadConsole } = require('./console_vm');
 
 function handlers() {
-  const source = fs.readFileSync(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8')
-    .replace('})()}', 'globalThis.ChatTest={A,drawStage,loadStage,botHTML,setSet,setEngine,drawBar};})()}');
+  const source = readConsoleFile(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8')
+    .replace(/\}\)\(\);?\}\s*$/,  ';globalThis.ChatTest={A,drawStage,loadStage,botHTML,setSet,setEngine,drawBar};})()}');
   return loadConsole([], { extra: `
     const window=globalThis,EVENTS={};
     document.addEventListener=(type,fn)=>(EVENTS[type]||=[]).push(fn);

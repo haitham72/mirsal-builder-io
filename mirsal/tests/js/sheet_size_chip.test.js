@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // Item 4: execute the current chat-bar renderer and handlers, with local stubs only.
 // No browser, HTTP server, provider or model is involved.
 const test = require('node:test');
@@ -5,19 +6,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const AIU = require('../../mirsal/console/agent.js');
-const src = fs.readFileSync(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8');
+const src = readConsoleFile(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8');
 
-function statement(marker) {
-  const start = src.indexOf(marker);
-  assert.notEqual(start, -1, `Missing production statement: ${marker}`);
-  const lines = src.slice(start).split('\n');
-  const found = [lines[0]];
-  for (const line of lines.slice(1)) {
-    if (line && !/^\s/.test(line)) break;
-    found.push(line);
-  }
-  return found.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 function fixture({ grid = '3x3', session = true, accept = true, styles = [] } = {}) {
   const settings = { grid, ask_before_spending: true, style_id: 'flat_vector' };

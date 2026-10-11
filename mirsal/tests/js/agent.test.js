@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The pure half of agent.js (the DOM half runs only in a browser). Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -136,12 +137,12 @@ test('a creator card is rebuilt when its run moves, a blocked sheet when its che
 });
 
 test('the chat draws the two particle cards: the plan with its price, and the started set with a way to the pack’s studio; names are escaped', () => {
-  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'agent.js'), 'utf8');
-  const plan = src.match(/c\.type==='particles_plan'\)return `[\s\S]*?`\r?\n/)[0];      // \r?: a Windows checkout has CRLF line ends
+  const src = readConsoleFile(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'agent.js'), 'utf8');
+  const plan = consoleStatement(src, "if(c.type==='particles_plan')");
   assert.match(plan, /AIU\.credits\(c\.estimate\)/, 'the price is on the plan');
   assert.match(plan, /AIU\.esc\(n\)/);
   assert.match(plan, /The price is shown before anything is spent/);
-  const set = src.match(/c\.type==='particles'\)return `[\s\S]*?`\r?\n/)[0];
+  const set = consoleStatement(src, "if(c.type==='particles')");
   assert.match(set, /#\/pack\/\$\{AIU\.esc\(c\.pack_id\)\}/);
   assert.match(set, /AIU\.esc\(c\.name\|\|c\.set\)/);
 });

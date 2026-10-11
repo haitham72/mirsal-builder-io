@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The Studio's "Generate prompt" step (docs/engine-and-studio.md, 2026-10-03): the button reads Generate prompt and spends nothing; it opens the Prompt editor BEFORE any batch exists (no G### is allocated);
 // "Generate sheet" inside it shows the Higgsfield price on its own line and is the only click that spends; the edited text is forwarded to the live sheet route as `sheet_prompt`; edits survive
 // re-renders and a reload; with the AI enhancer On the plan is written through the engine the person chose (POST /api/plan {ai:true}), a failed model shows its reason in the step and the built-in plan, and nothing is ever refused. The statements are read out of generate.js /
@@ -7,17 +8,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const read = f => fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', f), 'utf8');
+const read = f => readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', f), 'utf8');
 const gen = read('generate.js'), composer = read('composer.js'), live = read('live.js');
 
-function statement(src, marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in the file`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) { if (ln && !/^\s/.test(ln)) break; out.push(ln); }
-  return out.join('\n');
-}
+function statement(src,marker) {return consoleStatement(src,marker);}
 
 const PLAN = {
   template_id: 'sheet_v1', template_version: 3, sheet_prompt: 'SHEET TEMPLATE', video_prompt: 'VIDEO TEMPLATE',
@@ -404,7 +398,7 @@ test('a failed plan with the enhancer On makes no draft, clears the waiting line
 });
 
 test('the sheet start of a draft never asks the enhancer, and the old "pending price" refusal is gone from the code', () => {
-  const block = gen.slice(gen.indexOf('/* The same Prompt editor, before a sheet exists'), gen.indexOf('ACT.pgsheet=async'));
+  const block = ['async function gdPlan(', 'ACT.gdsheet=', 'async function gdMore('].map(m=>statement(gen,m)).join('\n');
   assert.ok(block.length > 500);
   const sheet = statement(gen, 'ACT.gdsheet=');
   assert.match(sheet, /ai:false/);

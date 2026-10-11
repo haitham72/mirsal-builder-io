@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // particles.js: the Studio's Particles tab (setup, the tab's step in the header) and the Particles section under the batch. The file runs in a vm after effects.js with the Studio's few globals stubbed,
 // so what is checked is the real markup and the real linking of a batch's cells to the library's stickers. Run: node --test tests/js
 const test = require('node:test');
@@ -226,7 +227,7 @@ test('the wizard’s existing-set card lists the sets with what they cost and wh
 });
 
 test('every new set action has a handler', () => {
-  const fx = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'effects.js'), 'utf8');
+  const fx = readConsoleFile(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'effects.js'), 'utf8');
   for (const act of ['fxuseset', 'psusesave']) assert.match(fx, new RegExp(`ACT\\.${act}=`), `${act} has a handler`);
 });
 
@@ -276,7 +277,7 @@ test('the library shows the trash under the sets, and also when there are no liv
 test('forgetting the sets forgets the trash too, and a restore re-reads both', () => {
   run(`SPL.sets=[];SPL.trash=[${JSON.stringify(GONE())}];spSetsForget()`);
   assert.equal(run("SPL.trash"), null);
-  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
+  const src = readConsoleFile(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
   assert.match(src, /api\('\/api\/particles\/deleted'\)/, 'the list is read from the route that serves the trash');
 });
 
@@ -478,7 +479,7 @@ test('the set card opens with Generate more AND the burst maker', () => {
 });
 
 test('every new burst action has a handler, and the burst listeners are the file’s own', () => {
-  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
+  const src = readConsoleFile(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
   for (const a of ['psbpreset', 'psbshuffle', 'psbrender', 'psbadd']) assert.match(src, new RegExp(`ACT\\.${a}=`), `${a} has a handler`);
   assert.match(src, /addEventListener\('input'/);
   assert.match(src, /addEventListener\('change'/);

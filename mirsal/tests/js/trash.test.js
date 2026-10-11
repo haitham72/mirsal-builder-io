@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The Trash panel (console/trash.js, Settings > Trash): the pure builders under node. Written 2026-10-03 and NOT RUN when it was written (testing was deferred). Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -63,15 +64,15 @@ test('a finished purge is told in one sentence, failures and skipped items inclu
 });
 
 test('the script follows the console rules: names prefixed, every data-act has a handler, one ACT object', () => {
-  const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'trash.js'), 'utf8');
+  const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'trash.js'), 'utf8');
   const top = [...src.matchAll(/^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)/gm)].map(m => m[1]);
   assert.deepEqual(top.filter(n => !/^(TRX|trx)/.test(n)), []);
   const acts = new Set([...src.matchAll(/data-act=([A-Za-z0-9_]+)/g)].map(m => m[1]));
   const defined = new Set([...src.matchAll(/\bACT\.([A-Za-z0-9_]+)\s*=(?!=)/g)].map(m => m[1]));
   for (const a of acts) assert.ok(defined.has(a) || a === 'dlgx', `data-act=${a} has a handler`);
-  const html = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'index.html'), 'utf8');
+  const html = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'index.html'), 'utf8');
   assert.match(html, /<script src=\/ui\/trash\.js><\/script>/);
-  assert.match(fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'server.py'), 'utf8'), /"trash\.js": "text\/javascript"/);
+  assert.match(readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'server.py'), 'utf8'), /"trash\.js": "text\/javascript"/);
 });
 
 test('a batch row shows the subject the way the Earlier-batches column does, not the raw key', () => {

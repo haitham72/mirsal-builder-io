@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // P3 of the UI/UX spec: the pack screen offers Delete as a labelled button, and its confirmation says exactly what happens (nothing is destroyed silently). Delete pack is SOFT since
 // 2026-10-03: the pack goes to the trash with its stickers and files, restorable and deletable for good from Settings > Trash; the stickers that came from a batch also stay in their batch,
 // the ones that exist only in this pack (editor renders, bursts) are counted, the particle sets stay in the Library.
@@ -7,18 +8,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'packs.js'), 'utf8');
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in packs.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'packs.js'), 'utf8');
+function statement(marker) {return consoleStatement(src,marker);}
 const sandbox = { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) };
 const { pkDelText } = new Function(...Object.keys(sandbox), statement('function pkDelText(') + '\nreturn {pkDelText};')(...Object.values(sandbox));
 

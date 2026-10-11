@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The animations row in the frame's Video view (Haitham, 2026-10-08): animation 1 … n = the generation's video sheets that have a video, ★ = the one in use,
 // a click on another picks it (POST …/pick_video), x takes one out (POST …/remove_video, never the one in use), Report is a ticket on G###/A#.
 // The statements are read out of generate.js and run with the few globals stubbed. Run: node --test tests/js
@@ -6,15 +7,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const gen = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
-function statement(marker) {
-  const i = gen.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in generate.js`);
-  const lines = gen.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) { if (ln && !/^\s/.test(ln)) break; out.push(ln); }
-  return out.join('\n');
-}
+const gen = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
+function statement(marker) {return consoleStatement(gen,marker);}
 
 function load(sheets, { busy = false } = {}) {
   const calls = [];

@@ -8,7 +8,7 @@ The chat's backend **is the Studio**: the agent calls the same functions the Stu
 through `agent/tools.py`. Nothing is re-implemented.
 
 ```
- browser (console/agent.js)            server (console/server.py)                 engine
+ browser (console/chat-core.js)            server (console/server.py)                 engine
  ─────────────────────────             ──────────────────────────                 ──────
  What will you create today?  ──POST /api/chat/sessions/{id}/messages──►  Agent.prepare (session lock, user + "working" message)
  poll GET /api/chat/sessions/{id}      thread: Agent.execute ─► LangGraph:  understand → resolve → intent nodes → finish
@@ -27,7 +27,7 @@ Paths below are relative to the repository root.
 | `mirsal/agent/brain.py` | the small model: classify what the rules are unsure of, pick a sticker the words do not name, answer a question from the structured state, write the narrative summary. Schema-checked, one repair round, every call in `out/model_calls.jsonl`; failure = the deterministic answer |
 | `mirsal/agent/tools.py` | `ConsoleTools` (the real engine) and `FakeTools` (tests): `plan` (Redis planner cache), `estimate`, `create`, `more`, `animate`, `review`, `search`, `generation`, `reference_from_sticker`, `describe` |
 | `mirsal/agent/graph.py` | the LangGraph state machine, the step trace, `Agent.prepare / execute / run_turn`, `hydrate` (the session as the page shows it) |
-| `mirsal/console/agent.js`, `agent.css` | the screen (see below). The pure helpers are tested under node (`tests/js/agent.test.js`) |
+| `mirsal/console/agent.js`, `chat-core.js`, `chat-cards.js`, `chat-stage.js`, `agent.css` | pure `AIU` helpers; chat sessions/turns; cards/carousels; stage/settings controls. Factories receive the private core state and callbacks; load order is in `docs/architecture.md` §6. |
 | `mirsal/runtime/cache.py`, `mirsal/runtime/events.py` | Redis (see below) |
 | `mirsal/vision/` | the vision judge, stored captions and selected-still descriptions |
 
@@ -103,7 +103,7 @@ instead of ending the polling (a frame that throws must never freeze the chat on
 - **The top-right LLM control** has its own anchored popover (`ag-engine`, `ai-engine-set`, `setEngine`), below the control rather than above the composer. It uses the shared engine rows with one per-chat model selector. Outside click and Escape dismiss it; opening another selector closes it.
 - **A model named in a message is used** (2026-10-11, Haitham: "i said animate with grok"; `model_catalog.named_in`, `Agent._models_named`): "with / using / in / on / via / by / through" + a model family (grok, kling, nano banana, gpt image, seedream) picks the catalog model whose label words the message has most ("grok" -> Grok Video 1.5, "grok lite" -> Grok Imagine 1.5 Lite, "nano banana pro" -> Nano Banana Pro). It becomes the chat's own `settings.models` pick for that kind (the left image/video selector shows it), this turn's tools use it at once, and the reply ends with "Using Grok Video 1.5 for the animation (it stays this chat's choice; change it in the image/video model selector)". A bare word ("a grok themed sticker") picks nothing.
 - **One full card per batch** (2026-10-11; `paint`, `A.genLater`): when a newer message carries a batch again (Animate, an edit), the older message's card of that batch shrinks to one line ("shown in a newer message below", Open in Studio): no second carousel. A card draws a batch's video sheet only when it carries an override (held, or allowed by you and undoable, rule 10); otherwise the carousel shows the animations and no blue- or green-screen sheet appears.
-- **Under the box** (`drawBar` in `agent.js`): chips for the style of the next sheet (a button: it opens the tiles; once a style is picked only this chip shows) and the grid; Ask before spending appears only in the left popover, and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`).
+- **Under the box** (`drawBar` in `chat-core.js`): chips for the style of the next sheet (a button: it opens the tiles; once a style is picked only this chip shows) and the grid; Ask before spending appears only in the left popover, and a row of **style tiles**, the Studio's presets at 46px (`GET /api/chat/agent` carries `styles` and `default_style`, so a new preset in `generation/styles.py` shows here with no UI change). Once a chat has messages the strip shrinks to 34px swatches. A pick is the chat's `settings.style_id` (`POST /api/chat/sessions/{id}/settings`, which refuses an id that is not a preset with 400); with no chat yet it waits in `A.pre` (remembered in localStorage `mirsal.ai.style`) and is applied when the first message creates the chat, so picking never makes an empty chat. The card's style name comes from the presets (`graph.STYLE_NAMES`).
 
 ## Models (`services/llm.py`)
 
@@ -416,7 +416,7 @@ Code: `agent/subjects.py`, `agent/refine.py`, `agent/profile.py`, nodes `n_multi
 
 ## The bar under the chat box (2026-10-03)
 
-`drawBar` (`agent.js`) paints the bar into `#ag-bar` (the style chip `.ag-cur` and the sheet size) and the style tiles into `#ag-styles`.
+`drawBar` (`chat-core.js`) paints the bar into `#ag-bar` (the style chip `.ag-cur` and the sheet size) and the style tiles into `#ag-styles`.
 
 * **The sheet size is one native click-toggle**: `<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle">`, labelled "3×3 sheet" (nine stickers, the default) or "2×2 sheet" (four), its title explaining both ("nine (3×3) or four (2×2). Click to change."). `ACT.aggridtoggle` flips the saved grid and calls `saveSet({grid})`; there is no `<select>`, no `data-aggrid`, no `.ag-sel` (that class is the settings panel's full-width model drop-down and stretched the chip over its own row). The class is `.ag-grid` (`agent.css`), never shared with a panel control.
 * **It changes a setting, nothing else**: `saveSet` posts `POST /api/chat/sessions/{id}/settings` with `{grid}` (never a message, never a generation, never a turn), then repaints from the **saved** settings: `A.sess.settings = r.j.settings`, `setSet()` (the gear) and `drawBar()`. The press is reversible (3×3 and 2×2 swap), and the gear's 3×3 / 2×2 pair (`ACT.agsetgrid`) uses the very same route and the same repaint, so the two controls never disagree.

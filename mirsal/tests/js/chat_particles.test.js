@@ -1,9 +1,10 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const source=fs.readFileSync(path.join(__dirname,'..','..','mirsal','console','chat.js'),'utf8');
+const source=readConsoleFile(path.join(__dirname,'..','..','mirsal','console','chat.js'),'utf8');
 
 function harness(){
   const calls=[],replies=[],timers=[];

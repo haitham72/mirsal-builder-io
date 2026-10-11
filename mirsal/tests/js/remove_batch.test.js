@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // Remove batch (2026-10-03, "like remove pack"): the button in the batch header, the confirm text that says what happens before it happens, the request it sends, what the page forgets
 // afterwards, and the Removed batches list with Restore under Earlier batches. The statements are read out of generate.js / live.js and run with the few globals stubbed.
 const test = require('node:test');
@@ -5,17 +6,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const read = f => fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', f), 'utf8');
+const read = f => readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', f), 'utf8');
 const gen = read('generate.js'), live = read('live.js');
 
-function statement(src, marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in the file`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) { if (ln && !/^\s/.test(ln)) break; out.push(ln); }
-  return out.join('\n');
-}
+function statement(src,marker) {return consoleStatement(src,marker);}
 
 function load(over = {}) {
   const log = { posts: [], toasts: [], dialogs: [], saved: 0, ticks: 0, hist: 0 };

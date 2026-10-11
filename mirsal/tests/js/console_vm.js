@@ -3,6 +3,7 @@
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
+const { GROUPS } = require('./console_source');
 
 const CONSOLE = path.join(__dirname, '..', '..', 'mirsal', 'console');
 const BASE = `
@@ -43,7 +44,7 @@ function loadConsole(files, { studio = false, extra = '' } = {}) {
     localStorage: { getItem: () => null, setItem() {} },
   });
   vm.runInContext(BASE + (studio ? STUDIO : '') + extra, ctx, { filename: 'stubs.js' });
-  for (const f of files) vm.runInContext(fs.readFileSync(path.join(CONSOLE, f), 'utf8'), ctx, { filename: f });
+  for (const f of files.flatMap(f=>GROUPS[f]||[f])) vm.runInContext(fs.readFileSync(path.join(CONSOLE, f), 'utf8'), ctx, { filename: f });
   return code => vm.runInContext(code, ctx);
 }
 module.exports = { loadConsole };

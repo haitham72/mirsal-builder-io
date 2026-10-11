@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // P11a of the UI/UX spec: a transformation or a cleaning is the EDITOR's job. The AI offers it ("want me to boot up the editor?") with a chip that opens the image editor on that slice at once
 // (no chat turn, nothing spent); when it is saved the person lands back in the AI, not in the Studio, because the session was in the AI. Run: node --test tests/js
 const test = require('node:test');
@@ -6,20 +7,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIR = path.join(__dirname, '..', '..', 'mirsal', 'console');
-const agent = fs.readFileSync(path.join(DIR, 'agent.js'), 'utf8');
-const editor = fs.readFileSync(path.join(DIR, 'editor.js'), 'utf8');
-const gen = fs.readFileSync(path.join(DIR, 'generate.js'), 'utf8');
-function statement(srcText, marker) {
-  const i = srcText.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in the file`);
-  const lines = srcText.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+const agent = readConsoleFile(path.join(DIR, 'agent.js'), 'utf8');
+const editor = readConsoleFile(path.join(DIR, 'editor.js'), 'utf8');
+const gen = readConsoleFile(path.join(DIR, 'generate.js'), 'utf8');
+function statement(srcText,marker) {return consoleStatement(srcText,marker);}
 const sandbox = { AIU: { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }, A: { sess: { settings: {} } } };
 const { chipHTML } = new Function(...Object.keys(sandbox), statement(agent, 'function chipHTML(') + '\nreturn {chipHTML};')(...Object.values(sandbox));
 

@@ -37,7 +37,7 @@ class UIInventoryTests(unittest.TestCase):
         acts = inventory.actions()
         by = {a["name"]: a for a in acts}
         self.assertIn("/api/generations/{}/allow", by["gcell"]["routes"], "a helper's route is found (one call deep)")
-        self.assertIn("generate.js", by["gcell"]["drawn_in"])
+        self.assertIn("studio-tiles.js", by["gcell"]["drawn_in"])
         self.assertIn(("home", "home.js"), inventory.screens())
 
 

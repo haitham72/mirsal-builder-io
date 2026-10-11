@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The left sheet is clickable per slice (2026-10-03): every cell of the still sheet and of the video sheet is a full-cell hit area that does exactly ONE thing (the UI/UX spec P1, P2): the
 // same `gcell` control as the tile (allow / take back / include / drop, tests/js/cell_op.test.js), never opening a tile. The hover and the label say the reason in plain words, never a raw check id. The statements are read out of generate.js and run with the few globals they use stubbed.
 // Run: node --test tests/js
@@ -6,20 +7,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
+const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
 
 /** One whole top-level statement of generate.js: from `marker` to the next line that starts in column 0. */
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in generate.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 function load() {
   const sandbox = { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) };
@@ -117,7 +108,7 @@ test('the bulk control waits while its request is on the way and while the batch
 });
 
 test('ACT.gallowall guards a second click while the first is in flight', () => {
-  const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
+  const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
   assert.match(src, /if\(ALWBUSY\.has\(key\)\|\|el\.disabled\)return;ALWBUSY\.add\(key\)/);
   assert.match(src, /finally\{ALWBUSY\.delete\(key\)/);
 });

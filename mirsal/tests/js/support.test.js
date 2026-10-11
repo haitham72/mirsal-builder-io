@@ -1,6 +1,7 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const ctx=vm.createContext({});
-vm.runInContext(fs.readFileSync(path.join(__dirname,'../../mirsal/console/support.js'),'utf8'),ctx);
+vm.runInContext(readConsoleFile(path.join(__dirname,'../../mirsal/console/support.js'),'utf8'),ctx);
 const S=ctx.SUV;
 
 test('an answer from the help asks whether it solved it; with nothing documented it offers support',()=>{

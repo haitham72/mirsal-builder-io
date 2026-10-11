@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // Settings > Tickets and the Report dialog (tickets.js, docs/tickets_plan.md): the pure builders in TKV, run in a vm. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -6,7 +7,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const ctx = vm.createContext({});
-vm.runInContext(fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'tickets.js'), 'utf8'), ctx);
+vm.runInContext(readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'tickets.js'), 'utf8'), ctx);
 const T = ctx.TKV;
 const ROW = { id: 'T001', source: 'job', status: 'open', issue: 'stuck_job', summary: 'The Kling job failed <after> paying', count: 3, at: 1, last_at: 2, open_questions: 2 };
 const FULL = { ...ROW, intent: 'it never finished', what_happened: 'video job failed: timeout', proposed_fix: 'resume the same provider job',

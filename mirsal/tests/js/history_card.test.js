@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The markup of the Earlier-batches column in live.js (the DOM half runs only in a browser). The statements are read out of the file and run with the few
 // globals they use stubbed, so the markup is checked for real: ONE picture per batch (the first sticker, P4 of the UI/UX spec), the plain title, one row per batch, and what drawHist redraws (the column; under the batch the Particles section).
 // Run: node --test tests/js     (MIRSAL_LIVE_JS points the test at another copy of live.js)
@@ -7,20 +8,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const FILE = process.env.MIRSAL_LIVE_JS || path.join(__dirname, '..', '..', 'mirsal', 'console', 'live.js');
-const src = fs.readFileSync(FILE, 'utf8');
+const src = readConsoleFile(FILE, 'utf8');
 
 /** One whole top-level statement of live.js: from `marker` to the next line that starts in column 0. */
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in live.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 const BATCH = (grid, animated = [], noPng = []) => ({
   id: 5, generation_id: 'G005', prompt: 'a sad_owl', stage: 'sliced', ready: grid[0] * grid[1], animated: animated.length,

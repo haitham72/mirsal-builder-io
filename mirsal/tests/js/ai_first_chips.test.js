@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // P9 / P10 of the UI/UX spec: a one-time decision is not a creation control. The first answer of a chat shows Create it and, on the right, ONE AI vision switch with a subtle rotating glow while it
 // is undecided. Pressing it writes the setting through the settings route and makes no chat turn (agsetting, never agaction / agchip). The switch then reads the live setting: on, off, or still
 // undecided. The statements are read out of agent.js. Run: node --test tests/js
@@ -7,19 +8,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIR = path.join(__dirname, '..', '..', 'mirsal', 'console');
-const src = fs.readFileSync(path.join(DIR, 'agent.js'), 'utf8');
-const css = fs.readFileSync(path.join(DIR, 'agent.css'), 'utf8');
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in agent.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+const src = readConsoleFile(path.join(DIR, 'agent.js'), 'utf8');
+const css = readConsoleFile(path.join(DIR, 'agent.css'), 'utf8');
+function statement(marker) {return consoleStatement(src,marker);}
 function load(allow) {
   const A = { sess: { settings: { allow_vlm: allow } } };
   const sandbox = { AIU: { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }, A };
@@ -62,7 +53,7 @@ test('the go-ahead and the suggestions are drawn exactly as before', () => {
 
 test('the handler only saves the setting, the message repaints when the switch changes, and the glow rests under reduced motion', () => {
   assert.match(src, /ACT\.agsetting=async el=>\{[^}]*saveSet\(JSON\.parse\(el\.dataset\.set\)\)/);
-  assert.doesNotMatch(src.match(/ACT\.agsetting=[^\n]*/)[0], /agSend|post\(`\/api\/chat\/sessions\/\$\{A\.sid\}\/messages/, 'no message is sent');
+  assert.doesNotMatch(statement('ACT.agsetting='), /agSend|post\(`\/api\/chat\/sessions\/\$\{A\.sid\}\/messages/, 'no message is sent');
   assert.match(src, /\(m\.chips\|\|\[\]\)\.some\(c=>c\.setting\)\?String\(A\.sess[^)]*allow_vlm\)/, 'the signature of a message with a switch includes the live setting');
   assert.match(css, /@property --ag-ang/);
   assert.match(css, /\.ai-vis\.glow \.ai-chip\{animation:ag-spin/);

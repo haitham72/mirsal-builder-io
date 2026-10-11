@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -16,8 +17,8 @@ test('divergence is named in words and malicious provider text is escaped',()=>{
 });
 test('all job surfaces use the shared controls and Refresh only reads local endpoints',()=>{
   const root=path.join(__dirname,'../../mirsal/console');
-  for(const file of ['live.js','generate.js','agent.js'])assert.match(fs.readFileSync(path.join(root,file),'utf8'),/JR\.controls\(/);
-  const src=fs.readFileSync(path.join(root,'job-recovery.js'),'utf8');
+  for(const file of ['live.js','generate.js','agent.js'])assert.match(readConsoleFile(path.join(root,file),'utf8'),/JR\.controls\(/);
+  const src=readConsoleFile(path.join(root,'job-recovery.js'),'utf8');
   const refresh=src.slice(src.indexOf('const localRefresh='),src.indexOf('ACT.jrrefresh='));
   assert.match(refresh,/new EventSource/);assert.doesNotMatch(refresh,/refreshHf|higgsfield|\/live\/|post\(/);
 });

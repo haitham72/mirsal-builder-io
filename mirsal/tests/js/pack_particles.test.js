@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The markup of the "Particles" section of the sticker view and of the pack grid's counter (packs.js). The pure statements are read out of the file and run with the few globals
 // they use stubbed (esc, ic, packById, FXWHY), so the markup is checked for real. Run: node --test tests/js
 const test = require('node:test');
@@ -5,20 +6,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'packs.js'), 'utf8');
+const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'packs.js'), 'utf8');
 
 /** One whole top-level statement of packs.js: from `marker` to the next line that starts in column 0. */
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in packs.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 const PACKS = { p1: { id: 'p1', name: 'Fruits' }, p2: { id: 'p2', name: 'Elsewhere <b>' } };
 const code = ['const ptWhy=', 'const ptKb=', 'const ptPackName=', 'function ptCard(', 'function ptGroupRuns(', 'function ptRunCard(', 'function ptRowMedia(', 'function ptRow(', 'function ptRowsHtml(', 'const ptCount=', 'function ptHtml(', 'function ptBody(', 'function ptBadge('].map(statement).join('\n');

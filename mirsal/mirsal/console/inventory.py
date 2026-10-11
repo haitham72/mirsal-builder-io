@@ -15,7 +15,7 @@ _DEF = re.compile(r"\bACT\.([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)")
 _USE = re.compile(r"data-act=[\"']?([A-Za-z_][A-Za-z0-9_]*)")
 _ROUTE = re.compile(r"[`'\"](/api/[^`'\"\s]*)")
 _TOP = re.compile(r"^(?:\S)")             # a line that starts a new top-level statement
-_FN = re.compile(r"^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(|^(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>")
+_FN = re.compile(r"^\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(|^\s*(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>")
 _CALL = re.compile(r"\b([A-Za-z_$][\w$]*)\s*\(")
 DEPTH = 2                                 # helper calls followed from an action's own code
 _REDRAW = re.compile(r"^(draw|render|paint|redraw|refresh|repaint|gview|gbody|load|auto|apply|sync|tick|poll)", re.I)   # reads that redraw a screen: not followed
@@ -38,7 +38,7 @@ def _bodies(text: str):
             body = [line[m.start():end]]
             if k + 1 == len(defs):
                 for nxt in lines[n + 1:]:
-                    if _TOP.match(nxt) and not nxt.startswith("}"):
+                    if nxt.strip() and len(nxt)-len(nxt.lstrip()) <= len(line)-len(line.lstrip()) and not nxt.lstrip().startswith("}"):
                         break
                     body.append(nxt)
             yield m.group(1), n + 1, "\n".join(body)
@@ -55,7 +55,7 @@ def _helpers(texts: dict[str, str]) -> dict[str, str]:
                 continue
             body = [line]
             for nxt in lines[n + 1:]:
-                if _TOP.match(nxt) and not nxt.startswith("}"):
+                if nxt.strip() and len(nxt)-len(nxt.lstrip()) <= len(line)-len(line.lstrip()) and not nxt.lstrip().startswith("}"):
                     break
                 body.append(nxt)
             out.setdefault(m.group(1) or m.group(2), "\n".join(body))

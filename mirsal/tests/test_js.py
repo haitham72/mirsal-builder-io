@@ -5,6 +5,18 @@ import shutil
 import subprocess
 import unittest
 from pathlib import Path
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
+def console_sources():
+    import json
+    helper = Path(__file__).parent / 'js' / 'console_source.js'
+    return json.loads(subprocess.check_output(['node', str(helper)], text=True))
+
+
+def read_console(path):
+    return console_sources()[path.name] if path.suffix == '.js' else path.read_text(encoding='utf-8')
 
 
 class JavaScriptTests(unittest.TestCase):
@@ -31,8 +43,8 @@ class StudioActionTests(unittest.TestCase):
     def scripts():
         import re
         ui = Path(__file__).resolve().parent.parent / "mirsal" / "console"
-        html = (ui / "index.html").read_text(encoding="utf-8")
-        order = re.findall(r"/ui/([A-Za-z0-9_.]+\.js)", html)                          # the order the page loads them in
+        html = read_console(ui / "index.html")
+        order = re.findall(r"/ui/([A-Za-z0-9_.-]+\.js)", html)                          # the order the page loads them in
         return ui, order
 
     def test_an_action_is_not_silently_replaced_by_a_later_script(self):
@@ -41,7 +53,7 @@ class StudioActionTests(unittest.TestCase):
         self.assertTrue(order)
         defs: dict[str, list[str]] = {}
         for name in order:
-            src = (ui / name).read_text(encoding="utf-8")
+            src = (ui / name).read_text(encoding='utf-8')
             for m in re.finditer(r"\bACT\.([A-Za-z0-9_]+)\s*=(?!=)", src):
                 defs.setdefault(m.group(1), []).append(name)
         twice = {act: files for act, files in defs.items() if len(files) > 1}
@@ -54,7 +66,7 @@ class StudioActionTests(unittest.TestCase):
         ui, order = self.scripts()
         defined, used = set(), {}
         for name in order + ["index.html"]:
-            src = (ui / name).read_text(encoding="utf-8")
+            src = (ui / name).read_text(encoding='utf-8')
             defined |= set(re.findall(r"\bACT\.([A-Za-z0-9_]+)\s*=(?!=)", src))
             for m in re.finditer(r"data-act=\"?([A-Za-z0-9_]+)", src):
                 used.setdefault(m.group(1), name)
@@ -63,19 +75,16 @@ class StudioActionTests(unittest.TestCase):
     @staticmethod
     def block(src: str, marker: str) -> str:
         """The whole of a top-level statement: from `marker` to the next line that starts in column 0 (the Studio's scripts are one statement per line, minified)."""
-        rest = src[src.index(marker):]
-        lines, out = rest.split("\n"), [rest.split("\n")[0]]
-        for ln in lines[1:]:
-            if ln and not ln[0].isspace():
-                break
-            out.append(ln)
-        return "\n".join(out)
+        helper = Path(__file__).parent / 'js' / 'console_source.js'
+        code = "const s=require(process.argv[1]);let data='';process.stdin.on('data',c=>data+=c);process.stdin.on('end',()=>{const [src,marker]=JSON.parse(data);process.stdout.write(s.statement(src,marker))});"
+        import json
+        return subprocess.check_output(['node', '-e', code, str(helper)], input=json.dumps([src,marker]), text=True)
 
     def test_the_earlier_batches_title_is_plain_text_and_the_list_is_not_paged_by_a_button(self):
         """Haitham asked for a plain title (2026-10-02) and, with the move into the shared column, for no "Load more": the list scrolls and asks for its next page by itself.
         Nothing folds the list away, nothing remembers that in localStorage."""
         ui, order = self.scripts()
-        src = (ui / "live.js").read_text(encoding="utf-8")
+        src = read_console(ui / "live.js")
         head = self.block(src, "function histColHTML()")
         self.assertNotIn("htoggle", src, "the collapsible Earlier-batches header is gone")
         self.assertNotIn("mirsal.hopen", src, "the fold-away choice (localStorage mirsal.hopen) is gone")
@@ -83,9 +92,9 @@ class StudioActionTests(unittest.TestCase):
         self.assertIn("<h1>Projects</h1>", head, "the title is plain text above the rows (the list of every project, D2: it was Earlier batches)")
         self.assertIn("HB.items.map(histEntry)", head, "every project is an entry (a batch alone is a row, histRow)")
         for n in order + ["index.html"]:
-            self.assertNotIn("hmore", (ui / n).read_text(encoding="utf-8"), f"no 'Load more' button action left in {n}")
+            self.assertNotIn("hmore", read_console(ui / n), f"no 'Load more' button action left in {n}")
         self.assertIn("histLoad(true)", self.block(src, "function histCol()"), "the column asks for its next page when it is scrolled near the end")
-        css = (ui / "studio.css").read_text(encoding="utf-8")
+        css = read_console(ui / "studio.css")
         import re
         self.assertIsNone(re.search(r"\.lv-hh(?!ead)", css), "the styles of the old header button are gone")
         self.assertNotIn("#ghist.open", css)
@@ -96,17 +105,17 @@ class StudioActionTests(unittest.TestCase):
         same action as the credits pill's recent batches): one session, one batch, one Studio view. The stacked open cards, their open-set, their localStorage key and the per-card
         copy of the Studio's header, views, bar and element ids are gone."""
         ui, order = self.scripts()
-        src = (ui / "live.js").read_text(encoding="utf-8")
+        src = read_console(ui / "live.js")
         row = self.block(src, "const histRow=(it,k,inPack)=>{")
         self.assertIn("data-act=hopen", row, "the row presents the batch")
         hopen = self.block(src, "ACT.hopen=el=>{")
         self.assertIn("gens:[it.id]", hopen, "the session becomes exactly this one batch")
         self.assertIn("location.hash='#/studio'", hopen, "from any other screen it goes to the Studio")
-        everything = "".join((ui / n).read_text(encoding="utf-8") for n in order + ["studio.css"])
+        everything = "".join(read_console(ui / n) for n in order + ["studio.css"])
         for gone in ("HX.open", "hxSave", "mirsal.hbopen", "histItem", "studioFor", "cardTab", "ACT.hbx", "data-act=hbx", "gcardview", "lv-hcard", "lv-hitem", "scopeGens", "const CT=", "pfx"):
             self.assertNotIn(gone, everything, "the stacked cards are gone completely: " + gone)
         for needs in (".lv-hrow", ".lv-hrow.on"):
-            self.assertIn(needs, (ui / "studio.css").read_text(encoding="utf-8"), "the presented batch is marked in the column")
+            self.assertIn(needs, read_console(ui / "studio.css"), "the presented batch is marked in the column")
 
     def test_the_history_block_is_gone_and_the_batch_has_a_particles_section(self):
         """Haitham, 2026-10-03: the "History of G###" block under the open batch (every decision on its stickers, the AI captions) was useless and is removed completely: markup, state, actions,
@@ -114,9 +123,9 @@ class StudioActionTests(unittest.TestCase):
         one list of the particle versions made for its stickers (each once), and the approval offer for stickers not in a pack."""
         import re
         ui, order = self.scripts()
-        live = (ui / "live.js").read_text(encoding="utf-8")
-        css = (ui / "studio.css").read_text(encoding="utf-8")
-        everything = "".join((ui / n).read_text(encoding="utf-8") for n in order)
+        live = read_console(ui / "live.js")
+        css = read_console(ui / "studio.css")
+        everything = "".join(read_console(ui / n) for n in order)
         for gone in ("History of ", "AI captions", "const HX=", "hxLoad", "hxSync", "hxBatch", "hxSticker", "hcapRun", "ACT.hcap", "ACT.hsx", "ACT.hgx", "ACT.hgall", "ACT.hretry", "ACT.vlmoff", "ACT.vlmno", "ghist", "lv-hdet"):
             self.assertNotIn(gone, live.replace("typeof hxSync", ""), "the history block is gone: " + gone)
         for gone in ("#ghist", ".lv-hhead", ".lv-ht{", ".lv-hsh", ".lv-hsm", ".lv-hgh", ".lv-hgs", ".lv-hcap", ".lv-hcell", ".lv-hline", ".lv-hbar", ".lv-hcb", ".lv-hdet", ".lv-hempty"):
@@ -129,7 +138,7 @@ class StudioActionTests(unittest.TestCase):
         self.assertIn("#gpart", css)
         for keep in ("const vlmState=", "const vlmSet=", "ACT.vlmyes=", "const VLM="):
             self.assertIn(keep, live, "the consent for AI vision is still asked once and remembered: " + keep)
-        sp = (ui / "particles.js").read_text(encoding="utf-8")
+        sp = read_console(ui / "particles.js")
         for needs in ("function spSecBatchHtml(", "Approve as a pack", "/api/generations/${b.gid}/particles", "ptRow(", "spLinkIndex(", "data-act=spopen"):
             self.assertIn(needs, sp)
         for gone in ("Shared by ", "Uses the shared particles above", "made for each sticker of this batch"):
@@ -140,18 +149,18 @@ class StudioActionTests(unittest.TestCase):
         functions it shares) and in the server's UI_FILES; generate.js owns the Studio's header and body, so the tab is wrapped in, the way live.js wraps drawRail."""
         import re
         ui, order = self.scripts()
-        html = (ui / "index.html").read_text(encoding="utf-8")
+        html = read_console(ui / "index.html")
         self.assertIn("particles.js", order, "index.html loads it")
         self.assertLess(order.index("effects.js"), order.index("particles.js"), "it uses effects.js's functions: loaded after it")
-        self.assertIn('"particles.js": "text/javascript"', (ui / "server.py").read_text(encoding="utf-8"), "the server serves it")
-        sp = (ui / "particles.js").read_text(encoding="utf-8")
+        self.assertIn('"particles.js": "text/javascript"', read_console(ui / "server.py"), "the server serves it")
+        sp = read_console(ui / "particles.js")
         mine = re.findall(r"^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)", sp, re.M)
         self.assertTrue(mine)
         self.assertEqual([n for n in mine if not n.startswith(("SP", "sp"))], [], "every top-level name of particles.js starts with SP / sp (the scripts share one global scope)")
         others = {}
         for n in order:
             if n != "particles.js":
-                for name in re.findall(r"^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)", (ui / n).read_text(encoding="utf-8"), re.M):
+                for name in re.findall(r"^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)", read_console(ui / n), re.M):
                     others.setdefault(name, n)
         self.assertEqual({n: others[n] for n in mine if n in others}, {}, "a top-level name declared by two scripts kills the second one")
         self.assertIn("GS.tab==='particles'", sp)
@@ -160,7 +169,7 @@ class StudioActionTests(unittest.TestCase):
         self.assertIn("data-act=gtab data-t=particles", sp, "the step is a tab like the others (generate.js's ACT.gtab)")
         for route in ("/api/effects", "data-fxx=sp"):
             self.assertIn(route, sp)
-        css = (ui / "studio.css").read_text(encoding="utf-8")
+        css = read_console(ui / "studio.css")
         self.assertRegex(css, r"\.gsteps\{[^}]*display:flex", "the journey is one flex track: its stops (Particles and Telegram included) share it, however many there are")
         self.assertIn(".sp-modes", css)
 
@@ -170,10 +179,10 @@ class StudioActionTests(unittest.TestCase):
         what the person reads says 'particles' (the chrome has no 'pieces')."""
         import re
         ui, _ = self.scripts()
-        fx = (ui / "effects.js").read_text(encoding="utf-8")
+        fx = read_console(ui / "effects.js")
         for route in ("/suggest", "/particles_estimate", "/particles`", "/particles_pick"):
             self.assertIn(route, fx)
-        self.assertIn("sprite_px", (ui / "particles.js").read_text(encoding="utf-8"), "the size of the particles travels as sprite_px / scale, with the burst maker's preview and render")
+        self.assertIn("sprite_px", read_console(ui / "particles.js"), "the size of the particles travels as sprite_px / scale, with the burst maker's preview and render")
         self.assertIn("key_is_seamless:'The green screen has panels or patterns, so the keying may eat parts of the particles. Use it anyway, or make another take.'", fx)
         self.assertIn("Draw ${fxCols(d.grid)} particles with AI", fx)
         self.assertIn("Use it anyway", fx)
@@ -187,7 +196,7 @@ class StudioActionTests(unittest.TestCase):
     def test_every_list_bearing_screen_has_the_second_column(self):
         """Studio and Create list the earlier batches in the shared column (it used to exist only for Library, Pack, Chat and AI); Settings and the full-screen tools have none."""
         ui, _ = self.scripts()
-        app = (ui / "app.js").read_text(encoding="utf-8")
+        app = read_console(ui / "app.js")
         import re
         col2 = re.search(r"const COL2=\[(.*?)\]", app).group(1)
         for route in ("agent", "generate", "library", "pack", "chat", "create"):
@@ -199,7 +208,7 @@ class StudioActionTests(unittest.TestCase):
     def test_the_credits_pill_reads_the_history_grid(self):
         """The drop-down under the credits pill lists the same batches as the history cards: it draws its one thumbnail from `cells`, not from the four-thumbnail shortcut."""
         ui, _ = self.scripts()
-        src = (ui / "composer.js").read_text(encoding="utf-8")
+        src = read_console(ui / "composer.js")
         self.assertNotIn("it.thumbs", src, "`thumbs` is gone from GET /api/history: the pill would throw on every open")
         self.assertIn("it.cells", src)
 
@@ -207,7 +216,7 @@ class StudioActionTests(unittest.TestCase):
         """The Animation tab shows the Video sheet AND the green screen (its cut lines, chips and the animation box): the second one used to be replaced."""
         import re
         ui, _ = self.scripts()
-        src = (ui / "generate.js").read_text(encoding="utf-8")
+        src = read_console(ui / "generate.js")
         # since 2026-10-04 both are views of ONE sheet panel (its tabs: the sheet views, To send, Video): neither replaces the other
         self.assertIn("sheetPanel(g,mode==='anim'?'anim':'still')", self.block(src, "function batchHtml("), "the batch shows the sheet panel in both tabs")
         panel = self.block(src, "function sheetPanel(")
@@ -227,7 +236,7 @@ class ShellTests(unittest.TestCase):
     def test_the_rail_declares_four_items_and_the_avatar_holds_the_rest(self):
         import re
         ui = self.ui()
-        app = (ui / "app.js").read_text(encoding="utf-8")
+        app = read_console(ui / "app.js")
         rail = re.search(r"const RAIL=\[(.*?)\],RAILOF", app).group(1)
         items = re.findall(r"\['(\w+)','(\w+)','([^']+)'\]", rail)
         self.assertEqual([i[2] for i in items], ["Home", "Create", "Library", "Help"])     # the rail of four (Haitham, 2026-10-11, docs/redesign_plan.md D5)
@@ -237,20 +246,20 @@ class ShellTests(unittest.TestCase):
         for tab in ("agent", "generate", "create", "effects"):                              # Create's tabs and its + New menu
             self.assertIn(f"'{tab}'", re.search(r"const CREATE_TABS=\[(.*?)\]", app).group(1))
         screens = re.search(r"const SCREENS=\[(.*?)\]", app).group(1)
-        html = (ui / "index.html").read_text(encoding="utf-8")
+        html = read_console(ui / "index.html")
         for route, icon, _ in items:
             self.assertIn(f"'{route}'", screens, f"the rail's {route} is a screen")
             self.assertIn(f"id=s-{route}", html, f"the rail's {route} has a section")
             self.assertRegex(app, rf"\b{icon}:'<", f"the rail's icon {icon} exists")
         self.assertIn("id=ctabs", html)
-        self.assertNotIn("RAIL.unshift", (ui / "agent.js").read_text(encoding="utf-8"), "a later script must not register itself in the navigation")
+        self.assertNotIn("RAIL.unshift", read_console(ui / "agent.js"), "a later script must not register itself in the navigation")
 
     def test_the_narrow_layout_is_the_shells_and_not_one_screens(self):
         import re
         ui = self.ui()
-        studio = (ui / "studio.css").read_text(encoding="utf-8")
-        agent = (ui / "agent.css").read_text(encoding="utf-8")
-        self.assertNotIn("agent-view", agent + studio + (ui / "app.js").read_text(encoding="utf-8"), "no screen has its own shell")
+        studio = read_console(ui / "studio.css")
+        agent = read_console(ui / "agent.css")
+        self.assertNotIn("agent-view", agent + studio + read_console(ui / "app.js"), "no screen has its own shell")
         for token in ("--rail-w:", "--col2-w:"):
             self.assertIn(token, studio)
         self.assertNotRegex(agent, r"grid-template-columns:\s*(96px|var\(--rail-w\))", "agent.css does not size the page grid")
@@ -259,26 +268,26 @@ class ShellTests(unittest.TestCase):
         self.assertIn("#rail{order:2;flex-direction:row", phone, "every screen gets the bottom bar on phones")
         self.assertIn("body.col2 #col2{left:0", phone)
         self.assertIn("#c2tog", studio)
-        self.assertIn("id=c2tog", (ui / "index.html").read_text(encoding="utf-8"))
+        self.assertIn("id=c2tog", read_console(ui / "index.html"))
 
     def test_every_screen_shares_the_glow_the_page_width_and_the_row_states_of_ai(self):
         """docs/design.md 5: Library takes AI's glow and AI's hover / selection; the plain screens sit in ONE page width with ONE header; a heading's icon is sized (the Settings
         Telegram icon used to fill the page because nothing sized it)."""
         import re
         ui = self.ui()
-        css = (ui / "studio.css").read_text(encoding="utf-8")
+        css = read_console(ui / "studio.css")
         self.assertIn("--glow-bg:", css)
         self.assertRegex(css, r"#app\{[^}]*background:var\(--glow-bg\)", "the glow is behind the whole shell, columns included")
         self.assertRegex(css, r"\.page\{max-width:\d+px;margin:0 auto\}")
         self.assertRegex(css, r"h1 svg,h2 svg\{width:\d+px")
         for name in ("app.js", "editor.js", "packs.js"):
-            self.assertNotRegex((ui / name).read_text(encoding="utf-8"), r'<div style="max-width:\d+px;margin:0 auto">', f"{name}: a screen's width is the shared .page, not its own number")
-        self.assertIn("class=page", (ui / "app.js").read_text(encoding="utf-8"))
-        agent = (ui / "agent.css").read_text(encoding="utf-8")
+            self.assertNotRegex(read_console(ui / name), r'<div style="max-width:\d+px;margin:0 auto">', f"{name}: a screen's width is the shared .page, not its own number")
+        self.assertIn("class=page", read_console(ui / "app.js"))
+        agent = read_console(ui / "agent.css")
         for state in ("hover{background:#F0F9FC}", "on{background:#E3F4F9}"):          # AI's chat rows: the pack rows, the chat rows and the batch rows read the same
             self.assertIn(state, agent.replace(" ", ""))
             self.assertIn(state, css.replace(" ", ""))
-        self.assertIn("drawCol2()", self.block_of((ui / "packs.js").read_text(encoding="utf-8"), "RENDER.pack="), "a pack opened by its address draws its column after the library is read")
+        self.assertIn("drawCol2()", self.block_of(read_console(ui / "packs.js"), "RENDER.pack="), "a pack opened by its address draws its column after the library is read")
 
     @staticmethod
     def block_of(src, marker):
@@ -289,7 +298,7 @@ class ShellTests(unittest.TestCase):
         squares chosen by a ring and a check (they were six huge portrait cards in a horizontal scroller). The tiles are read from the API, never listed in the page."""
         import re
         ui = self.ui()
-        css = (ui / "studio.css").read_text(encoding="utf-8")
+        css = read_console(ui / "studio.css")
         for navy in ("#070b1c", "#050816", "#2a52ff", "#0b1124", "#0e1633", "#3466ff", "#eaf0ff"):
             self.assertNotIn(navy, css, "the composer's navy island is gone: " + navy)
         self.assertRegex(css, r"\.cp\{[^}]*background:var\(--glass\)")
@@ -299,8 +308,8 @@ class ShellTests(unittest.TestCase):
         self.assertNotIn("aspect-ratio:3/4", tile)
         self.assertRegex(tile, r"width:\d{2,3}px")
         self.assertIn(".cp-style.on", css)
-        self.assertIn("LIVE.m.styles.map(", (ui / "composer.js").read_text(encoding="utf-8"), "the tiles come from the API's presets")
-        comp = (ui / "composer.js").read_text(encoding="utf-8")
+        self.assertIn("LIVE.m.styles.map(", read_console(ui / "composer.js"), "the tiles come from the API's presets")
+        comp = read_console(ui / "composer.js")
         self.assertIn("data-act=cpstyles", comp, "one Style chip in the bar opens the tiles (Haitham, 2026-10-04: always-open tiles took three rows)")
         self.assertIn("if(!CP.styles){el.innerHTML='';return}", comp, "the tiles are hidden until the chip is clicked")
         self.assertIn(".cp-styles:empty{display:none}", css)
@@ -309,7 +318,7 @@ class ShellTests(unittest.TestCase):
         """docs/design.md 3.2: six type steps and one radius scale, so a screen cannot drift; every interactive thing has a keyboard focus ring; motion respects the user's setting."""
         import re
         ui = self.ui()
-        css = {n: (ui / n).read_text(encoding="utf-8") for n in ("studio.css", "agent.css")}
+        css = {n: read_console(ui / n) for n in ("studio.css", "agent.css")}
         for name, text in css.items():
             bare = [m for m in re.findall(r"font-size:\s*([0-9.]+)px", text)]
             self.assertEqual(bare, [], f"{name}: a font size outside the scale (use var(--fs-xs|s|m|l|xl|2xl)): {bare[:8]}")
@@ -324,14 +333,14 @@ class ShellTests(unittest.TestCase):
         message must not create an empty chat (it waits in A.pre and is applied when the chat starts), and the grid and spending chips are the gear's settings, one click away."""
         import re
         ui = self.ui()
-        js = (ui / "agent.js").read_text(encoding="utf-8")
-        css = (ui / "agent.css").read_text(encoding="utf-8")
+        js = read_console(ui / "agent.js")
+        css = read_console(ui / "agent.css")
         self.assertIn("id=ag-styles", js)
         self.assertIn("(A.agent&&A.agent.styles)", js, "the tiles come from the API's presets, never a list in the page")
         pick = self.block_of(js, "ACT.agstyle=")
         self.assertIn("saveSet({style_id:A.pre})", pick, "with a chat, the pick is the chat's setting")
         self.assertIn("else drawBar()", pick, "without a chat, nothing is created")
-        self.assertIn("applyPre()", self.block_of(js, " A.sid=r.j.id;"), "the pick is applied when the chat is created")
+        self.assertIn("applyPre()", StudioActionTests.block(js, "async function ensureSession("), "the pick is applied when the chat is created")
         self.assertIn('data-act="aggridtoggle"', js)
         self.assertIn("data-act=agsetask", js)
         for sel in (".ag-styles", ".ag-st", ".ag-st.on", ".ag-chip"):
@@ -343,25 +352,25 @@ class ShellTests(unittest.TestCase):
         `go`, and the fixed Queue pill must not be able to cover its last buttons."""
         import re
         ui = self.ui()
-        fx = (ui / "effects.js").read_text(encoding="utf-8")
-        html = (ui / "index.html").read_text(encoding="utf-8")
+        fx = read_console(ui / "effects.js")
+        html = read_console(ui / "index.html")
         self.assertIn("id=s-effects", html)
         self.assertIn("/ui/effects.js", html)
         self.assertIn('"effects.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
-        app = (ui / "app.js").read_text(encoding="utf-8")
+        app = read_console(ui / "app.js")
         self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("effects:'agent'", app, "the rail keeps Create lit on the effects screen")
-        self.assertNotIn("data-act=fxopen", (ui / "editor.js").read_text(encoding="utf-8"), "Create no longer offers Particle effects: particles start in the Studio (Haitham, 2026-10-05)")
+        self.assertNotIn("data-act=fxopen", read_console(ui / "editor.js"), "Create no longer offers Particle effects: particles start in the Studio (Haitham, 2026-10-05)")
         for route in ("/api/effects", "/estimate", "/video", "/add", "/plan"):
             self.assertIn(route, fx)
         # docs/particles.md section 4: the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes
-        pt = (ui / "particles.js").read_text(encoding="utf-8")
+        pt = read_console(ui / "particles.js")
         for route in ("/api/particles/${id}/preview", "/api/particles/${s.id}/render", "/api/particles/${id}/add"):
             self.assertIn(route, pt)
         for gone in ("/preview`", "/render`", "sticker_id:sid"):
             self.assertNotIn(gone, fx, "effects.js has no per-sticker preview or render any more")
         self.assertIn("go:true", fx.replace(" ", ""), "the click on 'Make the video' is the go-ahead, and it shows the price")
-        self.assertIn(".page.fx{padding-bottom", (ui / "studio.css").read_text(encoding="utf-8"))
+        self.assertIn(".page.fx{padding-bottom", read_console(ui / "studio.css"))
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The Studio menu (2026-10-03): the empty prepared-sheets line and the Prompt preview block are gone, and nothing still calls the removed preview.
 // The scripts are read as text: the strings must not exist, and the composer must still draw its own chips. Run: node --test tests/js
 const test = require('node:test');
@@ -6,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const dir = path.join(__dirname, '..', '..', 'mirsal', 'console');
-const read = f => fs.readFileSync(path.join(dir, f), 'utf8');
+const read = f => readConsoleFile(path.join(dir, f), 'utf8');
 const gen = read('generate.js'), composer = read('composer.js'), live = read('live.js'), css = read('studio.css');
 
 test('the empty-state line that leaked a watch-folder path is gone', () => {

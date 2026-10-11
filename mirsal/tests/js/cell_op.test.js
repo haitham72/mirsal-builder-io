@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // Phase 1 of the UI/UX spec (2026-10-03): ONE decision per cell, ONE handler. P1: a click on a cell of the image or video sheet only allows / takes back / includes / drops, it never
 // opens a tile (opening belongs to the thumbnail on the right). P2: "Use it anyway", the tile's x / + and the sheet cell are the same control: they press the same handler, which
 // asks cellOp what to do from the server's word and the review state, so they send the same request and leave the same decision row. The statements are read out of generate.js
@@ -7,19 +8,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
+const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
 
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in generate.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 function load(opts = {}) {
   const posts = [], toasts = [];

@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The pack's particle studio and the sticker's one line (2026-10-03, docs/particles.md section 5): one set belongs to the pack, so the pack page carries the
 // particle studio (its sets as shared cards, its bursts with Add, Make particles for this pack / Use an existing set) and a sticker shows one line
 // linking to it. The statements are read out of packs.js and run with the few globals they use stubbed. Run: node --test tests/js
@@ -7,21 +8,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIR = path.join(__dirname, '..', '..', 'mirsal', 'console');
-const src = fs.readFileSync(path.join(DIR, 'packs.js'), 'utf8');
-const app = fs.readFileSync(path.join(DIR, 'app.js'), 'utf8');
+const src = readConsoleFile(path.join(DIR, 'packs.js'), 'utf8');
+const app = readConsoleFile(path.join(DIR, 'app.js'), 'utf8');
 
 /** One whole top-level statement of packs.js: from `marker` to the next line that starts in column 0. */
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in packs.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(marker) {return consoleStatement(src,marker);}
 
 function load(pkpt) {
   const counts = [];
@@ -97,7 +88,7 @@ test('a sticker shows only its own particles and scoped creation',()=>{
 });
 
 test('the Library has a Particles tab on the shared switch, and every new action has a handler', () => {  assert.match(app, /data-act=libtab data-t=particles>Particles</, 'the third Library tab');
-  const all = src + fs.readFileSync(path.join(DIR, 'particles.js'), 'utf8') + fs.readFileSync(path.join(DIR, 'effects.js'), 'utf8');
+  const all = src + readConsoleFile(path.join(DIR, 'particles.js'), 'utf8') + readConsoleFile(path.join(DIR, 'effects.js'), 'utf8');
   for (const act of ['psopen', 'psassign', 'psassignsave', 'psunassign', 'psdup', 'psrename', 'psdel', 'psrestore', 'pspickcell', 'pspickcancel', 'pspicksave', 'pspickset', 'psmakepack', 'pspickpack', 'fxuseset']) {
     assert.match(all, new RegExp(`ACT\\.${act}=`), `${act} has a handler`);
     assert.match(all, new RegExp(`data-act=${act}\\b`), `${act} is used`);
@@ -107,7 +98,7 @@ test('the Library has a Particles tab on the shared switch, and every new action
 test('the chrome says particles, not pieces, on every screen', () => {
   const bad = [];
   for (const f of fs.readdirSync(DIR).filter(x => x.endsWith('.js'))) {
-    let code = fs.readFileSync(path.join(DIR, f), 'utf8');
+    let code = readConsoleFile(path.join(DIR, f), 'utf8');
     code = code.replace(/\/\*.*?\*\//gs, '');
     code = code.replace(/fx-pieces|\w*[Pp]iece\w*/g, '');
     const m = code.match(/\bpieces?\b/i);

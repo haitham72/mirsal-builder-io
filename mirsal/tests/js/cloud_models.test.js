@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -10,9 +11,9 @@ function boot(){
   ACT:{},ICONS:{},RENDER:{},ic:()=>'', $:()=>null,route_:'generate',toast(){},
   READS:[],api:async u=>{ctx.READS.push(u);return ctx.AGENT_REPLY||{ok:false,j:{}}},POSTS:[],post:async(u,b)=>{ctx.POSTS.push([u,b]);return ctx.SETTINGS_REPLY||{ok:false,j:{}}}});
  ctx.window=ctx;
- const src=fs.readFileSync(path.join(__dirname,'../../mirsal/console/agent.js'),'utf8');
+ const src=readConsoleFile(path.join(__dirname,'../../mirsal/console/agent.js'),'utf8');
  // Expose closure state only in the test's copy; execute the complete script.
- vm.runInContext(src.replace(/\}\)\(\)\}\s*$/, 'globalThis.TEST_API={A,selectorDetails,saveSet,loadAgent,beRow};})()}'),ctx);
+ vm.runInContext(src.replace(/\}\)\(\);?\}\s*$/, ';globalThis.TEST_API={A,selectorDetails,saveSet,loadAgent,beRow};})()}'),ctx);
  vm.runInContext('const {A,selectorDetails,saveSet,loadAgent,beRow}=TEST_API;',ctx);
  return code=>vm.runInContext(code,ctx);
 }
@@ -51,7 +52,7 @@ test('session choices save the qualified id and the stage/composer contain no AI
   const posts = JSON.parse(run('JSON.stringify(POSTS)'));
   assert.deepEqual(posts[0], ['/api/chat/sessions/S001/settings', { models: { ai: 'openai:gpt-5.6-luna' } }]);
   assert.doesNotMatch(run(`AIU.stageHTML('emojis',true)`), /data-agm|optgroup|model/);
-  const source = fs.readFileSync(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8');
+  const source = readConsoleFile(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8');
   const composerPanel = source.slice(source.indexOf('function setSet()'), source.indexOf("document.addEventListener('click'", source.indexOf('function setSet()')));
   assert.doesNotMatch(composerPanel, /modelSel\('ai'/);
 });
@@ -64,7 +65,7 @@ test('Settings and the enhancer share the grouped global selector', () => {
   assert.match(html, /data-agmodel/);
   assert.doesNotMatch(html, /data-agm=ai/);
   assert.match(html, /nararouter:agnes-3-flash" selected/);
-  const settings = fs.readFileSync(path.join(__dirname, '../../mirsal/console/app.js'), 'utf8');
+  const settings = readConsoleFile(path.join(__dirname, '../../mirsal/console/app.js'), 'utf8');
   assert.match(settings, /id=set-ai-engine/);
   assert.match(settings, /AIENG.settings\(/);
 });

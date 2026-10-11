@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // P5 of the UI/UX spec: a sticker's name never carries its id. The id (G103/S2) stays what it is (rule 11: an id survives a rename), the title and the key stay their own fields, and the header
 // shows "superhero jump spin 🚀💥" with the id as a SEPARATE affordance: hoverable, and one click copies it. Run: node --test tests/js
 const test = require('node:test');
@@ -6,21 +7,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIR = path.join(__dirname, '..', '..', 'mirsal', 'console');
-const agent = fs.readFileSync(path.join(DIR, 'agent.js'), 'utf8');
-const gen = fs.readFileSync(path.join(DIR, 'generate.js'), 'utf8');
-const app = fs.readFileSync(path.join(DIR, 'app.js'), 'utf8');
+const agent = readConsoleFile(path.join(DIR, 'agent.js'), 'utf8');
+const gen = readConsoleFile(path.join(DIR, 'generate.js'), 'utf8');
+const app = readConsoleFile(path.join(DIR, 'app.js'), 'utf8');
 
-function statement(srcText, marker) {
-  const i = srcText.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in the file`);
-  const lines = srcText.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+function statement(srcText,marker) {return consoleStatement(srcText,marker);}
 
 const sandbox = {
   AIU: { esc: s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) },

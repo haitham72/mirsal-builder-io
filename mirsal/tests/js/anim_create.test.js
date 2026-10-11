@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The Animation tab before any animation exists (Haitham, 2026-10-04: it said "nothing to see here" while the controls lived on Stickers): the video sheet preview, the sheet panel
 // (with the model, price and Generate), the editable video prompt with the Prompt tab's footer, and each kept sticker with motion suggestions that add to that prompt.
 // The statements are read out of generate.js and run with the few globals stubbed. Run: node --test tests/js
@@ -6,15 +7,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const gen = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
-function statement(marker) {
-  const i = gen.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in generate.js`);
-  const lines = gen.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) { if (ln && !/^\s/.test(ln)) break; out.push(ln); }
-  return out.join('\n');
-}
+const gen = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
+function statement(marker) {return consoleStatement(gen,marker);}
 
 function load({ live = true } = {}) {
   const log = { ticks: 0 };

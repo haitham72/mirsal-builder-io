@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The Studio's AI enhancer shows the AI screen's own engine control (2026-10-03, Haitham: "the AI enhancer should show model selection same like AI"). ONE implementation (agent.js: beRow / modelRow,
 // exposed to the Studio as AIENG), two screens; the chip is enabled whenever a model can answer (LM Studio alone is enough) and its tooltip says what is missing otherwise.
 // agent.js runs in a vm with the few globals it uses stubbed; composer.js is read as text and its statements run on their own. Nothing touches a DOM, a server or a provider. Run: node --test tests/js
@@ -8,7 +9,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const dir = path.join(__dirname, '..', '..', 'mirsal', 'console');
-const read = f => fs.readFileSync(path.join(dir, f), 'utf8');
+const read = f => readConsoleFile(path.join(dir, f), 'utf8');
 const agentSrc = read('agent.js'), composer = read('composer.js'), gen = read('generate.js'), html = read('index.html'), css = read('studio.css');
 
 const AV_LOCAL = { local: { ok: true, model: 'qwen3.5-4b', why: null }, cloud: { ok: false, model: 'gpt-4o-mini', why: 'no OPENAI_API_KEY in mirsal/.env' } };
@@ -103,14 +104,7 @@ test('a refused pick (a member may read but not pick) shows the server\'s senten
 });
 
 // ---- composer.js: the chip and the control's visibility
-function statement(src, marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in the file`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) { if (ln && !/^\s/.test(ln)) break; out.push(ln); }
-  return out.join('\n');
-}
+function statement(src,marker) {return consoleStatement(src,marker);}
 function chip({ ai = false, gai }) {
   const log = { engine: [], loads: 0, ensures: 0 };
   const el = { hidden: true, innerHTML: '', _h: undefined };

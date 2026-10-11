@@ -74,7 +74,7 @@ IDEA and on New project), **TOOL** (the toolbar or its ⋯ menu), **GRID** (a ti
 panel), **BAR** (the bottom bar), **JOUR** (the journey bar), **PILL** (the credits pill and its jobs list), **DLG** (its dialog, unchanged),
 **AVATAR** (the avatar menu: Settings / Trash / Watch folders), **SAME** (stays where it is). The server route is the same in every row.
 
-### `generate.js` (67)
+### Studio actions (originally `generate.js`; now `studio-*.js`)
 
 | action | today | new home |
 |---|---|---|
@@ -209,10 +209,9 @@ inventory test passes against the untouched baseline.
 
 - **One global scope**: a new top-level name or `ACT.<name>` that collides kills a script or silently replaces an action. Prefix every name; the
   inventory test and `tests/test_js.py` catch clashes.
-- **`generate.js` is 850 dense lines** redrawn by a timer (`tick`): no entrance animations on anything redrawn by polling
+- **Studio uses six feature files** (`docs/architecture.md` §6), with views redrawn by a timer (`tick`): no entrance animations on anything redrawn by polling
   (`docs/design.md` 3.2); keep `glast` / `tick(true)` semantics.
 - **Roles**: owner-only and staff-only controls (`gopenfolder`, the prepared chip, Import pack, watch folders, health) keep their gates.
-- **Pre-existing failures** (`plan.md` Step 3: `tests.test_js` StudioActionTests ×3 + 1 error) are noted, not chased, unless a phase touches them.
 
 ## 9. For the outside reviewer
 

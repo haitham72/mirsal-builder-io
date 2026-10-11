@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The Users screen's pure builders (users.js UV): the roster and its filters, the hand-drawn bars, a person's page for staff and for "My usage". Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -6,7 +7,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const ctx = vm.createContext({});
-vm.runInContext(fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'users.js'), 'utf8'), ctx);
+vm.runInContext(readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'users.js'), 'utf8'), ctx);
 const U = ctx.UV;
 
 const users = [

@@ -1,38 +1,34 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after separating the task slider, left creation selectors and anchored top-right LLM selector.
-Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
-Studio action: `docs/redesign_plan.md` §4.
+Generated from `console/*.js` on 2026-10-11 after the console feature split and theme/Home additions. Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**443 actions** (444 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
-The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
-`renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
+**445 actions** (446 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **157 named server routes**.
 
-How to read a row: **action** is `ACT.<name>`; **button drawn in** is every script whose markup carries `data-act=<name>` (none: the action is
-called from code, a key, a form, or an `onchange`); **server routes** are the `/api/...` paths in the action's own code and in the helpers it
-calls (two calls deep, not into the helpers that only redraw a screen), with `{}` for an id. A route listed is one the action **may** call.
+`tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
+
+Each action row names its source, line, scripts drawing its button and routes its code or helpers may call (two calls deep, excluding redraw helpers). `{}` represents an id. A button can also be invoked from code, a key or a form.
 
 ## Screens (`RENDER.<screen>`)
 
 | screen | script |
 |---|---|
-| `agent` | agent.js |
 | `animate` | animate.js |
-| `library` | app.js |
-| `settings` | app.js |
 | `settings` | auth.js |
+| `agent` | chat-core.js |
 | `chat` | chat.js |
 | `create` | editor.js |
 | `editor` | editor.js |
 | `export` | editor.js |
 | `effects` | effects.js |
-| `generate` | generate.js |
 | `history` | history.js |
 | `home` | home.js |
+| `library` | library.js |
 | `generate` | live.js |
 | `pack` | packs.js |
 | `effects` | particles.js |
 | `prepare` | prepare.js |
+| `settings` | settings.js |
+| `generate` | studio-core.js |
 | `help` | support.js |
 | `settings` | tickets.js |
 | `settings` | trash.js |
@@ -40,45 +36,9 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 
 ## Server routes the page names
 
-`/api` · `/api/ai` · `/api/ai/backend` · `/api/auth` · `/api/auth/credits` · `/api/auth/forgot` · `/api/auth/login` · `/api/auth/logout` · `/api/auth/me` · `/api/auth/password` · `/api/auth/signup` · `/api/chat/*` · `/api/chat/agent` · `/api/chat/sessions` · `/api/chat/sessions/{}/delete` · `/api/chat/sessions/{}/messages` · `/api/chat/sessions/{}/settings` · `/api/collection` · `/api/cutout` · `/api/effects` · `/api/effects/{}/add` · `/api/effects/{}/estimate` · `/api/effects/{}/particles` · `/api/effects/{}/particles_estimate` · `/api/effects/{}/particles_pick` · `/api/effects/{}/plan` · `/api/effects/{}/suggest` · `/api/effects/{}/video` · `/api/faq` · `/api/faq/{}/{}` · `/api/generations` · `/api/generations/${+String(id).replace(/\D/g,` · `/api/generations/removed` · `/api/generations/{}/add` · `/api/generations/{}/allow` · `/api/generations/{}/animate` · `/api/generations/{}/drop` · `/api/generations/{}/edge` · `/api/generations/{}/edge_preview` · `/api/generations/{}/edit` · `/api/generations/{}/export-collection` · `/api/generations/{}/export.zip` · `/api/generations/{}/family` · `/api/generations/{}/join` · `/api/generations/{}/leave` · `/api/generations/{}/pack` · `/api/generations/{}/particles` · `/api/generations/{}/pick` · `/api/generations/{}/pick_video` · `/api/generations/{}/quick_sheet` · `/api/generations/{}/recheck` · `/api/generations/{}/recut` · `/api/generations/{}/remove` · `/api/generations/{}/remove_video` · `/api/generations/{}/replace` · `/api/generations/{}/restore` · `/api/generations/{}/reveal` · `/api/generations/{}/sheet_preview` · `/api/generations/{}/studio_edit` · `/api/generations/{}/video_sheet/{}/video` · `/api/higgsfield` · `/api/higgsfield/history` · `/api/higgsfield/import` · `/api/history` · `/api/import` · `/api/imports/candidates` · `/api/inputs` · `/api/jobs` · `/api/jobs/{}/dismiss` · `/api/jobs/{}/retry` · `/api/jobs/{}/retry_estimate` · `/api/jobs/{}/{}` · `/api/library` · `/api/live/cost` · `/api/live/ref` · `/api/live/sheet` · `/api/live/video` · `/api/llm/models` · `/api/models` · `/api/notifications` · `/api/packs` · `/api/packs/{}/delete` · `/api/packs/{}/export-collection` · `/api/packs/{}/export.zip` · `/api/packs/{}/merge` · `/api/packs/{}/particles` · `/api/packs/{}/render` · `/api/packs/{}/restore` · `/api/packs/{}/stickers/{}` · `/api/packs/{}/stickers/{}/animate` · `/api/packs/{}/stickers/{}/delete` · `/api/packs/{}/stickers/{}/move` · `/api/packs/{}/stickers/{}/particle-preview` · `/api/packs/{}/stickers/{}/particles` · `/api/packs/{}/stickers/{}/replace` · `/api/packs/{}/telegram` · `/api/packs/{}/telegram.zip` · `/api/particles` · `/api/particles/deleted` · `/api/particles/{}` · `/api/particles/{}/add` · `/api/particles/{}/delete` · `/api/particles/{}/duplicate` · `/api/particles/{}/link` · `/api/particles/{}/more` · `/api/particles/{}/preview` · `/api/particles/{}/render` · `/api/particles/{}/restore` · `/api/particles/{}/save-as-new` · `/api/particles/{}/unlink` · `/api/people` · `/api/plan` · `/api/plan/more` · `/api/plan/next` · `/api/prepared/match` · `/api/prepared/setting` · `/api/projects` · `/api/projects/from_sticker` · `/api/projects/{}/delete` · `/api/projects/{}/render` · `/api/stickers/delete` · `/api/stickers/move` · `/api/support/ask` · `/api/support/conversations` · `/api/support/conversations/{}/{}` · `/api/support/queue` · `/api/support/tickets` · `/api/tasks` · `/api/telegram` · `/api/telegram/config` · `/api/telegram/disconnect` · `/api/tickets` · `/api/tickets/{}/answer` · `/api/tickets/{}/reply` · `/api/tickets/{}/resolve` · `/api/tickets/{}/status` · `/api/trash` · `/api/trash/purge` · `/api/trash/purge_all` · `/api/trash/purges` · `/api/trending` · `/api/trending/{}/${on` · `/api/trending/{}/comments` · `/api/trending/{}/comments/{}/delete` · `/api/trending/{}/file/{}` · `/api/trending/{}/unshare` · `/api/trending/{}/use` · `/api/usage` · `/api/users` · `/api/users/me` · `/api/users/overview` · `/api/watch` · `/api/watch/purge` · `/api/watch/remove` · `/api/watch/restore`
+`/api`, `/api/ai`, `/api/ai/backend`, `/api/auth`, `/api/auth/credits`, `/api/auth/forgot`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/auth/password`, `/api/auth/signup`, `/api/chat/*`, `/api/chat/agent`, `/api/chat/sessions`, `/api/chat/sessions/{}/delete`, `/api/chat/sessions/{}/messages`, `/api/chat/sessions/{}/settings`, `/api/collection`, `/api/cutout`, `/api/effects`, `/api/effects/{}/add`, `/api/effects/{}/estimate`, `/api/effects/{}/particles`, `/api/effects/{}/particles_estimate`, `/api/effects/{}/particles_pick`, `/api/effects/{}/plan`, `/api/effects/{}/suggest`, `/api/effects/{}/video`, `/api/faq`, `/api/faq/{}/{}`, `/api/generations`, `/api/generations/${+String(id).replace(/\D/g,`, `/api/generations/removed`, `/api/generations/{}/add`, `/api/generations/{}/allow`, `/api/generations/{}/animate`, `/api/generations/{}/drop`, `/api/generations/{}/edge`, `/api/generations/{}/edge_preview`, `/api/generations/{}/edit`, `/api/generations/{}/export-collection`, `/api/generations/{}/export.zip`, `/api/generations/{}/family`, `/api/generations/{}/join`, `/api/generations/{}/leave`, `/api/generations/{}/map`, `/api/generations/{}/pack`, `/api/generations/{}/particles`, `/api/generations/{}/pick`, `/api/generations/{}/pick_video`, `/api/generations/{}/quick_sheet`, `/api/generations/{}/recheck`, `/api/generations/{}/recut`, `/api/generations/{}/remove`, `/api/generations/{}/remove_video`, `/api/generations/{}/replace`, `/api/generations/{}/restore`, `/api/generations/{}/reveal`, `/api/generations/{}/sheet_preview`, `/api/generations/{}/studio_edit`, `/api/generations/{}/video_sheet/{}/video`, `/api/higgsfield`, `/api/higgsfield/history`, `/api/higgsfield/import`, `/api/history`, `/api/import`, `/api/imports/candidates`, `/api/inputs`, `/api/jobs`, `/api/jobs/{}/dismiss`, `/api/jobs/{}/retry`, `/api/jobs/{}/retry_estimate`, `/api/jobs/{}/{}`, `/api/library`, `/api/live/cost`, `/api/live/ref`, `/api/live/sheet`, `/api/live/video`, `/api/llm/models`, `/api/models`, `/api/notifications`, `/api/packs`, `/api/packs/{}/delete`, `/api/packs/{}/export-collection`, `/api/packs/{}/export.zip`, `/api/packs/{}/merge`, `/api/packs/{}/particles`, `/api/packs/{}/render`, `/api/packs/{}/restore`, `/api/packs/{}/stickers/{}`, `/api/packs/{}/stickers/{}/animate`, `/api/packs/{}/stickers/{}/delete`, `/api/packs/{}/stickers/{}/move`, `/api/packs/{}/stickers/{}/particle-preview`, `/api/packs/{}/stickers/{}/particles`, `/api/packs/{}/stickers/{}/replace`, `/api/packs/{}/telegram`, `/api/packs/{}/telegram.zip`, `/api/particles`, `/api/particles/deleted`, `/api/particles/{}`, `/api/particles/{}/add`, `/api/particles/{}/delete`, `/api/particles/{}/duplicate`, `/api/particles/{}/link`, `/api/particles/{}/more`, `/api/particles/{}/preview`, `/api/particles/{}/render`, `/api/particles/{}/restore`, `/api/particles/{}/save-as-new`, `/api/particles/{}/unlink`, `/api/people`, `/api/plan`, `/api/plan/more`, `/api/plan/next`, `/api/prefs`, `/api/prepared/match`, `/api/prepared/setting`, `/api/projects`, `/api/projects/from_sticker`, `/api/projects/{}/delete`, `/api/projects/{}/render`, `/api/stickers/delete`, `/api/stickers/move`, `/api/support/ask`, `/api/support/conversations`, `/api/support/conversations/{}/{}`, `/api/support/queue`, `/api/support/tickets`, `/api/tasks`, `/api/telegram`, `/api/telegram/config`, `/api/telegram/disconnect`, `/api/tickets`, `/api/tickets/{}/answer`, `/api/tickets/{}/reply`, `/api/tickets/{}/resolve`, `/api/tickets/{}/status`, `/api/trash`, `/api/trash/purge`, `/api/trash/purge_all`, `/api/trash/purges`, `/api/trending`, `/api/trending/{}/${on`, `/api/trending/{}/comments`, `/api/trending/{}/comments/{}/delete`, `/api/trending/{}/file/{}`, `/api/trending/{}/unshare`, `/api/trending/{}/use`, `/api/usage`, `/api/users`, `/api/users/me`, `/api/users/overview`, `/api/watch`, `/api/watch/purge`, `/api/watch/remove`, `/api/watch/restore`
 
 ## Actions by script
-
-### `agent.js` (31)
-
-| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
-|---|---|---|---|
-| `agcar` | 309 | agent.js | none (browser only) |
-| `agtile` | 310 | agent.js | none (browser only) |
-| `agsel` | 313 | agent.js | none (browser only) |
-| `agchip` | 317 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agfill` | 318 | agent.js | none (browser only) |
-| `agedit` | 319 | agent.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `agsetting` | 320 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agaction` | 321 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agcut` | 322 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
-| `aganimal` | 323 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
-| `agretry` | 324 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agtrace` | 325 | agent.js | none (browser only) |
-| `agstep` | 326 | agent.js | none (browser only) |
-| `agstudio` | 327 | agent.js | none (browser only) |
-| `agallow` | 328 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agallowall` | 333 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agnew` | 343 | agent.js | none (browser only) |
-| `agopen` | 344 | agent.js | none (browser only) |
-| `agdel` | 345 | agent.js | `/api/chat/sessions/{}/delete` |
-| `agset` | 346 | agent.js | `/api/models` |
-| `agengine` | 348 | agent.js | none (browser only) |
-| `agsetgrid` | 350 | (no `data-act` button: called from code, a key, or a form) | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `aggridtoggle` | 352 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstage` | 365 | agent.js | none (browser only) |
-| `agsetact` | 366 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstagepick` | 367 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings`<br>`/api/prefs` |
-| `agstyle` | 388 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstyles` | 389 | agent.js | none (browser only) |
-| `agsetask` | 390 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agbe` | 391 | agent.js | `/api/ai`<br>`/api/ai/backend` |
-| `agcr` | 424 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
 
 ### `animate.js` (8)
 
@@ -93,51 +53,78 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `anexport` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 | `ansave` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 
-### `app.js` (24)
+### `app.js` (10)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `dlgx` | 44 | app.js, auth.js, editor.js, generate.js, imports.js, live.js, packs.js, particles.js, prepare.js, support.js, telegram.js, tickets.js, trash.js, trending.js | none (browser only) |
-| `askok` | 47 | app.js | none (browser only) |
-| `copyid` | 49 | agent.js, generate.js | none (browser only) |
-| `cfok` | 51 | app.js | none (browser only) |
-| `pk` | 56 | app.js | none (browser only) |
-| `pknew` | 57 | app.js | `/api/packs` |
-| `c2tog` | 97 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `nav` | 98 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, packs.js, prepare.js, tickets.js | none (browser only) |
-| `rme` | 99 | app.js | none (browser only) |
-| `rtrash` | 106 | app.js | none (browser only) |
-| `lsel` | 138 | app.js, packs.js | none (browser only) |
-| `lselall` | 139 | app.js | none (browser only) |
-| `lselnone` | 140 | app.js | none (browser only) |
-| `lselmove` | 146 | app.js | `/api/stickers/move` |
-| `lseldel` | 147 | app.js | `/api/stickers/delete` |
-| `libtab` | 193 | app.js | none (browser only) |
-| `pkmerge` | 194 | app.js | `/api/packs/{}/merge` |
-| `pkgrp` | 198 | app.js | none (browser only) |
-| `seeall` | 199 | app.js | none (browser only) |
-| `openpack` | 220 | app.js, home.js | none (browser only) |
-| `newpack` | 221 | app.js | none (browser only) |
-| `newpackname` | 222 | app.js | `/api/packs` |
-| `setgo` | 235 | app.js | none (browser only) |
-| `prepset` | 236 | app.js | `/api/prepared/setting` |
+| `dlgx` | 123 | app.js, auth.js, editor.js, home.js, imports.js, library.js, live.js, packs.js, particles.js, prepare.js, studio-animate.js, studio-prompt.js, support.js, telegram.js, tickets.js, trash.js, trending.js | none (browser only) |
+| `askok` | 140 | app.js | none (browser only) |
+| `copyid` | 147 | chat-cards.js, studio-panel.js | none (browser only) |
+| `cfok` | 165 | app.js | none (browser only) |
+| `pk` | 179 | app.js | none (browser only) |
+| `pknew` | 184 | app.js | `/api/packs` |
+| `c2tog` | 298 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `nav` | 300 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, library.js, packs.js, prepare.js, tickets.js | none (browser only) |
+| `rme` | 304 | app.js | none (browser only) |
+| `rtrash` | 342 | app.js | none (browser only) |
 
 ### `auth.js` (12)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `aumode` | 57 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/forgot`<br>`/api/auth/login`<br>`/api/auth/logout`<br>`/api/auth/password`<br>`/api/auth/signup`<br>`/api/people` |
-| `ausignin` | 58 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/forgot`<br>`/api/auth/login`<br>`/api/auth/logout`<br>`/api/auth/password`<br>`/api/auth/signup`<br>`/api/people` |
-| `ausignup` | 59 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/forgot`<br>`/api/auth/logout`<br>`/api/auth/password`<br>`/api/auth/signup`<br>`/api/people` |
-| `auforgot` | 60 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/forgot`<br>`/api/auth/logout`<br>`/api/auth/password`<br>`/api/people` |
-| `auchange` | 61 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/logout`<br>`/api/auth/password`<br>`/api/people` |
-| `aukeep` | 64 | auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/logout`<br>`/api/people` |
-| `aulogout` | 65 | app.js, auth.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/auth/logout`<br>`/api/people` |
-| `aucreditask` | 66 | auth.js, composer.js | `/api`<br>`/api/auth`<br>`/api/auth/credits`<br>`/api/people` |
-| `auadd` | 70 | auth.js | `/api`<br>`/api/auth`<br>`/api/people` |
-| `aupeople` | 72 | auth.js | `/api`<br>`/api/auth`<br>`/api/people` |
-| `aucredits` | 75 | auth.js | `/api`<br>`/api/auth`<br>`/api/people` |
-| `auignore` | 76 | auth.js | `/api`<br>`/api/auth`<br>`/api/people` |
+| `aumode` | 57 | auth.js | none (browser only) |
+| `ausignin` | 58 | auth.js | `/api/auth/login` |
+| `ausignup` | 59 | auth.js | `/api/auth/me`<br>`/api/auth/signup` |
+| `auforgot` | 60 | auth.js | `/api/auth/forgot` |
+| `auchange` | 61 | auth.js | `/api/auth/me`<br>`/api/auth/password` |
+| `aukeep` | 64 | auth.js | none (browser only) |
+| `aulogout` | 65 | app.js, auth.js | `/api/auth/logout` |
+| `aucreditask` | 66 | auth.js, composer.js | `/api/auth/credits` |
+| `auadd` | 70 | auth.js | `/api/people` |
+| `aupeople` | 72 | auth.js | `/api/people` |
+| `aucredits` | 75 | auth.js | `/api/people` |
+| `auignore` | 76 | auth.js | `/api/people` |
+
+### `chat-core.js` (18)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `agcar` | 427 | chat-cards.js | none (browser only) |
+| `agtile` | 431 | chat-cards.js | none (browser only) |
+| `agsel` | 440 | chat-core.js | none (browser only) |
+| `agchip` | 455 | chat-cards.js, chat-core.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agfill` | 456 | chat-cards.js | none (browser only) |
+| `agedit` | 463 | chat-cards.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `agsetting` | 466 | chat-cards.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agaction` | 474 | chat-cards.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agcut` | 490 | chat-cards.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
+| `aganimal` | 497 | chat-cards.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
+| `agretry` | 506 | chat-cards.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agtrace` | 507 | chat-cards.js | none (browser only) |
+| `agstep` | 513 | chat-cards.js | none (browser only) |
+| `agstudio` | 519 | chat-cards.js | none (browser only) |
+| `agallow` | 527 | chat-cards.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agallowall` | 541 | chat-cards.js, chat-core.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agnew` | 588 | chat-core.js | none (browser only) |
+| `agopen` | 603 | chat-core.js | none (browser only) |
+
+### `chat-stage.js` (13)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `agdel` | 4 | chat-core.js | `/api/chat/sessions/{}/delete` |
+| `agset` | 17 | chat-core.js | `/api/models` |
+| `agengine` | 29 | chat-core.js | none (browser only) |
+| `agsetgrid` | 40 | (no `data-act` button: called from code, a key, or a form) | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `aggridtoggle` | 41 | chat-stage.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstage` | 89 | agent.js | none (browser only) |
+| `agsetact` | 97 | chat-stage.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstagepick` | 98 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings`<br>`/api/prefs` |
+| `agstyle` | 176 | chat-stage.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstyles` | 183 | chat-stage.js | none (browser only) |
+| `agsetask` | 187 | chat-stage.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agbe` | 188 | chat-stage.js | `/api/ai`<br>`/api/ai/backend` |
+| `agcr` | 300 | chat-stage.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
 
 ### `chat.js` (9)
 
@@ -169,7 +156,7 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `cpstyles` | 123 | composer.js | none (browser only) |
 | `cpstylepick` | 124 | composer.js | none (browser only) |
 | `ggo` | 131 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prepared/match` |
-| `gnewlive` | 144 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `gnewlive` | 144 | studio-core.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
 
 ### `editor.js` (27)
 
@@ -237,81 +224,6 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `fxuseset` | 273 | effects.js | `/api/particles` |
 | `psusesave` | 274 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
 
-### `generate.js` (70)
-
-| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
-|---|---|---|---|
-| `goutline` | 183 | generate.js | none (browser only) |
-| `ggo` | 196 | (no `data-act` button: called from code, a key, or a form) | `/api/generations`<br>`/api/particles`<br>`/api/particles/{}/more` |
-| `gmore` | 198 | (no `data-act` button: called from code, a key, or a form) | `/api/generations` |
-| `gnext` | 205 | generate.js, projmap.js | `/api/live/cost`<br>`/api/plan/next` |
-| `gbdrop` | 214 | generate.js | none (browser only) |
-| `ginc` | 215 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `ganimslice` | 238 | generate.js | `/api/generations/{}/animate` |
-| `greplace` | 240 | generate.js | none (browser only) |
-| `grepundo` | 244 | generate.js | `/api/generations/{}/replace` |
-| `ggen` | 250 | generate.js, projmap.js | none (browser only) |
-| `gmain` | 251 | generate.js, projmap.js | `/api/generations/{}/pick` |
-| `gdel` | 253 | generate.js, projmap.js | `/api/generations/{}/family`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
-| `ganmo` | 339 | generate.js | none (browser only) |
-| `gcutany` | 352 | generate.js | `/api/generations/{}/recut` |
-| `gretrysheet` | 353 | generate.js | `/api/generations` |
-| `greqgo` | 354 | generate.js | `/api/generations` |
-| `gopenfolder` | 374 | generate.js | `/api/generations/{}/reveal` |
-| `pgresheet` | 413 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `pgredo` | 419 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prefs` |
-| `pgreset` | 431 | generate.js | none (browser only) |
-| `gdnb` | 453 | generate.js | none (browser only) |
-| `gdtab` | 461 | composer.js, generate.js | none (browser only) |
-| `gddiscard` | 462 | generate.js | none (browser only) |
-| `gdpriceretry` | 463 | generate.js | `/api/live/cost` |
-| `gprompt` | 466 | composer.js, generate.js | `/api/particles`<br>`/api/particles/{}/more`<br>`/api/plan` |
-| `gpromptfree` | 467 | generate.js | `/api/plan` |
-| `gdsheet` | 486 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/plan/more` |
-| `pgsheet` | 505 | generate.js, projmap.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
-| `pgvideo` | 508 | generate.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prefs` |
-| `ggroup` | 514 | generate.js, projmap.js | none (browser only) |
-| `ggroupgo` | 517 | generate.js | `/api/generations/{}/join`<br>`/api/generations/{}/particles`<br>`/api/history` |
-| `grm` | 518 | generate.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
-| `gstagego` | 531 | generate.js | `/api/prefs` |
-| `gscreen` | 533 | generate.js | none (browser only) |
-| `gvmode` | 534 | generate.js | none (browser only) |
-| `gtab` | 535 | generate.js, particles.js, projmap.js | none (browser only) |
-| `ganimate` | 539 | generate.js | `/api/generations/{}/animate`<br>`/api/prefs` |
-| `gadd` | 547 | generate.js, particles.js | none (browser only) |
-| `pwgo` | 586 | generate.js | `/api/generations/{}/add`<br>`/api/packs` |
-| `gopenpack` | 600 | generate.js | none (browser only) |
-| `gvideo` | 603 | generate.js | `/api/generations/{}/quick_sheet` |
-| `gpickvideo` | 616 | generate.js | none (browser only) |
-| `gsheetapprove` | 617 | generate.js | `/api/generations/{}/quick_sheet` |
-| `gvclose` | 618 | generate.js | none (browser only) |
-| `gcopyprompt` | 619 | generate.js | none (browser only) |
-| `gapick` | 658 | generate.js, projmap.js | `/api/generations/{}/pick_video` |
-| `garm` | 660 | generate.js, projmap.js | `/api/generations/{}/remove_video` |
-| `gvsheet` | 669 | generate.js | none (browser only) |
-| `gaclose` | 670 | generate.js | none (browser only) |
-| `gptog` | 732 | generate.js | none (browser only) |
-| `gshk` | 733 | generate.js | none (browser only) |
-| `gsheet` | 734 | generate.js | none (browser only) |
-| `gsview` | 749 | generate.js | none (browser only) |
-| `gstog` | 750 | generate.js | none (browser only) |
-| `gsclose` | 751 | generate.js | none (browser only) |
-| `ghiggs` | 754 | generate.js | `/api/plan` |
-| `hcopy` | 760 | generate.js | none (browser only) |
-| `hgenop` | 761 | generate.js | `/api/jobs` |
-| `hreserve` | 769 | generate.js | `/api/tasks` |
-| `gmall` | 800 | generate.js | none (browser only) |
-| `gmtab` | 801 | generate.js | none (browser only) |
-| `gopen` | 802 | generate.js | none (browser only) |
-| `gmclose` | 803 | generate.js | none (browser only) |
-| `gstep` | 804 | generate.js | none (browser only) |
-| `gedit` | 805 | generate.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `openstudio` | 830 | particles.js | `/api/generations` |
-| `lcstudioedit` | 832 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `lcopenstudio` | 833 | packs.js | none (browser only) |
-| `gcell` | 876 | generate.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
-| `gallowall` | 886 | generate.js | `/api/generations/{}/allow` |
-
 ### `history.js` (5)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
@@ -322,37 +234,55 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `hrestore` | 32 | history.js | `/api/watch`<br>`/api/watch/restore` |
 | `hpurge` | 33 | history.js | `/api/watch`<br>`/api/watch/purge` |
 
-### `home.js` (4)
+### `home.js` (5)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `hmfilter` | 55 | home.js | none (browser only) |
-| `hmai` | 58 | home.js | none (browser only) |
-| `hmfilm` | 60 | home.js | none (browser only) |
-| `home` | 62 | app.js | none (browser only) |
+| `hmfilter` | 72 | home.js | none (browser only) |
+| `hmai` | 75 | home.js | none (browser only) |
+| `hmfilm` | 77 | home.js | none (browser only) |
+| `hmonboarding` | 78 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `home` | 80 | app.js | none (browser only) |
 
 ### `imports.js` (9)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `impopen` | 28 | imports.js | `/api/higgsfield/history`<br>`/api/import`<br>`/api/imports/candidates` |
-| `impackopen` | 30 | app.js, home.js | `/api/higgsfield/history`<br>`/api/import`<br>`/api/imports/candidates` |
-| `impupload` | 31 | imports.js | `/api/higgsfield/history`<br>`/api/import`<br>`/api/imports/candidates` |
-| `impchoose` | 36 | imports.js | `/api/higgsfield/history`<br>`/api/import` |
-| `impnew` | 37 | imports.js | `/api/higgsfield/history`<br>`/api/import` |
-| `impretry` | 38 | imports.js | `/api/higgsfield/history`<br>`/api/import` |
-| `imphistory` | 39 | imports.js | `/api/higgsfield/history`<br>`/api/import` |
-| `imphf` | 40 | imports.js | `/api/import` |
+| `impopen` | 28 | imports.js | `/api/higgsfield/import`<br>`/api/import`<br>`/api/imports/candidates` |
+| `impackopen` | 30 | home.js, library.js | none (browser only) |
+| `impupload` | 31 | imports.js | `/api/imports/candidates` |
+| `impchoose` | 36 | imports.js | none (browser only) |
+| `impnew` | 37 | imports.js | none (browser only) |
+| `impretry` | 38 | imports.js | `/api/higgsfield/history`<br>`/api/higgsfield/import`<br>`/api/import`<br>`/api/imports/candidates` |
+| `imphistory` | 39 | imports.js | `/api/higgsfield/history`<br>`/api/higgsfield/import`<br>`/api/import`<br>`/api/imports/candidates` |
+| `imphf` | 40 | imports.js | none (browser only) |
 | `impbatch` | 44 | imports.js | `/api/import` |
 
 ### `job-recovery.js` (4)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `jrrefresh` | 30 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/jobs/{}/dismiss`<br>`/api/jobs/{}/retry`<br>`/api/jobs/{}/retry_estimate`<br>`/api/jobs/{}/{}` |
-| `jrcheck` | 32 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/jobs/{}/dismiss`<br>`/api/jobs/{}/retry`<br>`/api/jobs/{}/retry_estimate` |
-| `jrcontinue` | 33 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/jobs/{}/dismiss`<br>`/api/jobs/{}/retry`<br>`/api/jobs/{}/retry_estimate` |
+| `jrrefresh` | 30 | (no `data-act` button: called from code, a key, or a form) | `/api/generations`<br>`/api/jobs`<br>`/api/jobs/{}/dismiss` |
+| `jrcheck` | 32 | (no `data-act` button: called from code, a key, or a form) | `/api/generations`<br>`/api/jobs`<br>`/api/jobs/{}/{}` |
+| `jrcontinue` | 33 | (no `data-act` button: called from code, a key, or a form) | `/api/generations`<br>`/api/jobs`<br>`/api/jobs/{}/{}` |
 | `jrretry` | 34 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/jobs/{}/dismiss`<br>`/api/jobs/{}/retry`<br>`/api/jobs/{}/retry_estimate` |
+
+### `library.js` (12)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `lsel` | 57 | library.js, packs.js | none (browser only) |
+| `lselall` | 64 | library.js | none (browser only) |
+| `lselnone` | 72 | library.js | none (browser only) |
+| `lselmove` | 97 | library.js | `/api/stickers/move` |
+| `lseldel` | 101 | library.js | `/api/stickers/delete` |
+| `libtab` | 312 | library.js | none (browser only) |
+| `pkmerge` | 317 | app.js | `/api/packs/{}/merge` |
+| `pkgrp` | 335 | app.js | none (browser only) |
+| `seeall` | 342 | library.js | none (browser only) |
+| `openpack` | 405 | app.js, home.js, library.js | none (browser only) |
+| `newpack` | 409 | app.js | none (browser only) |
+| `newpackname` | 416 | library.js | `/api/packs` |
 
 ### `live.js` (20)
 
@@ -403,7 +333,7 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `pkpreview` | 84 | packs.js | none (browser only) |
 | `pvbg` | 87 | packs.js | none (browser only) |
 | `lcsend` | 122 | packs.js | none (browser only) |
-| `lcopen` | 123 | app.js | none (browser only) |
+| `lcopen` | 123 | library.js | none (browser only) |
 | `lcclose` | 123 | packs.js | none (browser only) |
 | `lcprev` | 123 | packs.js | none (browser only) |
 | `lcnext` | 123 | packs.js | none (browser only) |
@@ -470,9 +400,9 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `psmakepack` | 375 | packs.js | none (browser only) |
 | `pspickpack` | 376 | packs.js | none (browser only) |
 | `pspackassign` | 377 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `agpscope` | 379 | agent.js | `/api/particles` |
-| `agpopen` | 380 | agent.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `agpapprove` | 381 | agent.js | `/api/generations` |
+| `agpscope` | 379 | chat-cards.js | `/api/particles` |
+| `agpopen` | 380 | chat-cards.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `agpapprove` | 381 | chat-cards.js | `/api/generations` |
 | `psrecover` | 383 | packs.js | none (browser only) |
 | `psrecovercreate` | 384 | particles.js | none (browser only) |
 | `psrecovergo` | 386 | particles.js | `/api/particles`<br>`/api/particles/{}/preview` |
@@ -515,42 +445,150 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 | `pmlist` | 49 | projmap.js | `/api/generations/removed`<br>`/api/history` |
 | `pmopen` | 51 | projmap.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/history` |
 
+### `settings.js` (3)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `setgo` | 41 | settings.js | none (browser only) |
+| `prepset` | 46 | settings.js | `/api/prepared/setting` |
+| `thmset` | 53 | settings.js, theme.js | none (browser only) |
+
 ### `sheet-recovery.js` (1)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
 | `ssallow` | 16 | sheet-recovery.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
 
+### `studio-animate.js` (13)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `ganmo` | 30 | studio-animate.js | none (browser only) |
+| `ganimate` | 41 | studio-core.js | `/api/generations/{}/animate`<br>`/api/prefs` |
+| `gadd` | 79 | particles.js, studio-core.js | none (browser only) |
+| `pwgo` | 181 | studio-animate.js | `/api/generations/{}/add`<br>`/api/packs` |
+| `gopenpack` | 243 | studio-core.js | none (browser only) |
+| `gvideo` | 249 | studio-animate.js, studio-core.js | `/api/generations/{}/quick_sheet` |
+| `gpickvideo` | 318 | studio-animate.js | none (browser only) |
+| `gsheetapprove` | 323 | studio-animate.js | `/api/generations/{}/quick_sheet` |
+| `gvclose` | 331 | studio-animate.js | none (browser only) |
+| `gcopyprompt` | 336 | studio-animate.js | none (browser only) |
+| `openstudio` | 375 | particles.js | `/api/generations` |
+| `lcstudioedit` | 387 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `lcopenstudio` | 393 | packs.js | none (browser only) |
+
+### `studio-core.js` (13)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `goutline` | 295 | studio-core.js | none (browser only) |
+| `ggo` | 353 | (no `data-act` button: called from code, a key, or a form) | `/api/generations`<br>`/api/particles`<br>`/api/particles/{}/more` |
+| `gmore` | 372 | (no `data-act` button: called from code, a key, or a form) | `/api/generations` |
+| `gnext` | 393 | projmap.js, studio-core.js | `/api/live/cost`<br>`/api/plan/next` |
+| `gbdrop` | 430 | studio-core.js | none (browser only) |
+| `ginc` | 439 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `ggen` | 475 | projmap.js, studio-core.js | none (browser only) |
+| `gmain` | 486 | projmap.js, studio-core.js | `/api/generations/{}/pick` |
+| `gdel` | 497 | projmap.js, studio-core.js | `/api/generations/{}/family`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
+| `gcutany` | 676 | studio-core.js | `/api/generations/{}/recut` |
+| `gretrysheet` | 684 | studio-core.js | `/api/generations` |
+| `greqgo` | 692 | studio-core.js | `/api/generations` |
+| `gopenfolder` | 757 | studio-core.js | `/api/generations/{}/reveal` |
+
+### `studio-panel.js` (6)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `gmall` | 96 | studio-panel.js | none (browser only) |
+| `gmtab` | 101 | studio-panel.js | none (browser only) |
+| `gopen` | 106 | studio-tiles.js | none (browser only) |
+| `gmclose` | 112 | studio-panel.js | none (browser only) |
+| `gstep` | 118 | studio-panel.js | none (browser only) |
+| `gedit` | 126 | studio-panel.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+
+### `studio-prompt.js` (23)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `pgresheet` | 87 | studio-prompt.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `pgredo` | 117 | studio-prompt.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prefs` |
+| `pgreset` | 163 | studio-animate.js, studio-prompt.js, studio-sheet.js | none (browser only) |
+| `gdnb` | 246 | studio-prompt.js | none (browser only) |
+| `gdtab` | 288 | composer.js, studio-prompt.js | none (browser only) |
+| `gddiscard` | 299 | studio-prompt.js | none (browser only) |
+| `gdpriceretry` | 306 | studio-prompt.js | `/api/live/cost` |
+| `gprompt` | 322 | composer.js, studio-core.js | `/api/particles`<br>`/api/particles/{}/more`<br>`/api/plan` |
+| `gpromptfree` | 324 | studio-prompt.js | `/api/plan` |
+| `gdsheet` | 404 | studio-prompt.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/plan/more` |
+| `pgsheet` | 495 | projmap.js, studio-prompt.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `pgvideo` | 512 | studio-prompt.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prefs` |
+| `ggroup` | 529 | projmap.js, studio-core.js | none (browser only) |
+| `ggroupgo` | 539 | studio-prompt.js | `/api/generations/{}/join`<br>`/api/generations/{}/particles`<br>`/api/history` |
+| `grm` | 544 | studio-core.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/remove`<br>`/api/history` |
+| `gstagego` | 588 | studio-prompt.js | `/api/prefs` |
+| `gscreen` | 598 | studio-core.js | none (browser only) |
+| `gvmode` | 605 | studio-core.js | none (browser only) |
+| `gtab` | 612 | particles.js, projmap.js, studio-core.js | none (browser only) |
+| `ghiggs` | 620 | studio-core.js | `/api/plan` |
+| `hcopy` | 638 | studio-prompt.js | none (browser only) |
+| `hgenop` | 647 | studio-prompt.js | `/api/jobs` |
+| `hreserve` | 675 | studio-prompt.js | `/api/tasks` |
+
+### `studio-sheet.js` (10)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `gapick` | 189 | projmap.js, studio-sheet.js | `/api/generations/{}/pick_video` |
+| `garm` | 201 | projmap.js, studio-sheet.js | `/api/generations/{}/remove_video` |
+| `gvsheet` | 231 | studio-sheet.js | none (browser only) |
+| `gaclose` | 236 | studio-sheet.js | none (browser only) |
+| `gptog` | 379 | studio-sheet.js | none (browser only) |
+| `gshk` | 386 | studio-sheet.js | none (browser only) |
+| `gsheet` | 395 | studio-sheet.js | none (browser only) |
+| `gsview` | 439 | studio-sheet.js | none (browser only) |
+| `gstog` | 444 | studio-sheet.js | none (browser only) |
+| `gsclose` | 449 | studio-sheet.js | none (browser only) |
+
+### `studio-tiles.js` (5)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `ganimslice` | 279 | studio-tiles.js | `/api/generations/{}/animate` |
+| `greplace` | 295 | studio-panel.js | none (browser only) |
+| `grepundo` | 330 | studio-panel.js | `/api/generations/{}/replace` |
+| `gcell` | 413 | studio-tiles.js | `/api/generations/{}/allow`<br>`/api/generations/{}/drop` |
+| `gallowall` | 437 | studio-tiles.js | `/api/generations/{}/allow` |
+
 ### `support.js` (26)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `sutab` | 101 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/ask`<br>`/api/support/conversations/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sunew` | 102 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/ask`<br>`/api/support/conversations/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `suopen` | 103 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/ask`<br>`/api/support/conversations/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sunote` | 104 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/ask`<br>`/api/support/conversations/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sushot` | 105 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/ask`<br>`/api/support/conversations/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sushotx` | 106 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/ask`<br>`/api/support/conversations/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `suask` | 107 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/ask`<br>`/api/support/conversations/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sureq` | 113 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `supriv` | 114 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sucopy` | 115 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `suforget` | 116 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sugo` | 117 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/generations`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `susolved` | 119 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `suunsolved` | 120 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `suesc` | 121 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sureopen` | 122 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sucite` | 123 | support.js | `/api/faq`<br>`/api/faq/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `suq` | 125 | support.js | `/api/faq/{}/{}`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `sureply` | 127 | support.js | `/api/faq/{}/{}`<br>`/api/tickets/{}/reply`<br>`/api/tickets/{}/resolve` |
-| `suresolve` | 129 | support.js | `/api/faq/{}/{}`<br>`/api/tickets/{}/resolve` |
-| `sufaq` | 131 | support.js | `/api/faq/{}/{}` |
-| `sufall` | 132 | support.js | `/api/faq/{}/{}` |
-| `sufsave` | 134 | support.js | none (browser only) |
-| `sufpub` | 135 | support.js | none (browser only) |
-| `sufdisc` | 136 | support.js | none (browser only) |
-| `sufarch` | 137 | support.js | none (browser only) |
+| `sutab` | 101 | support.js | none (browser only) |
+| `sunew` | 102 | support.js | none (browser only) |
+| `suopen` | 103 | support.js | none (browser only) |
+| `sunote` | 104 | support.js | none (browser only) |
+| `sushot` | 105 | support.js | none (browser only) |
+| `sushotx` | 106 | support.js | none (browser only) |
+| `suask` | 107 | support.js | `/api/support/ask`<br>`/api/support/conversations` |
+| `sureq` | 113 | support.js | `/api/support/conversations`<br>`/api/support/conversations/{}/{}` |
+| `supriv` | 114 | support.js | none (browser only) |
+| `sucopy` | 115 | support.js | none (browser only) |
+| `suforget` | 116 | support.js | `/api/support/conversations`<br>`/api/support/conversations/{}/{}` |
+| `sugo` | 117 | support.js | `/api/generations` |
+| `susolved` | 119 | support.js | `/api/support/conversations`<br>`/api/support/conversations/{}/{}` |
+| `suunsolved` | 120 | support.js | `/api/support/conversations`<br>`/api/support/conversations/{}/{}` |
+| `suesc` | 121 | support.js | `/api/support/conversations`<br>`/api/support/conversations/{}/{}` |
+| `sureopen` | 122 | support.js | `/api/support/conversations`<br>`/api/support/conversations/{}/{}` |
+| `sucite` | 123 | support.js | `/api/faq` |
+| `suq` | 125 | support.js | none (browser only) |
+| `sureply` | 127 | support.js | `/api/support/queue`<br>`/api/support/tickets`<br>`/api/tickets/{}/reply` |
+| `suresolve` | 129 | support.js | `/api/support/queue`<br>`/api/support/tickets`<br>`/api/tickets/{}/resolve` |
+| `sufaq` | 131 | support.js | none (browser only) |
+| `sufall` | 132 | support.js | `/api/faq` |
+| `sufsave` | 134 | support.js | `/api/faq`<br>`/api/faq/{}/{}` |
+| `sufpub` | 135 | support.js | `/api/faq`<br>`/api/faq/{}/{}` |
+| `sufdisc` | 136 | support.js | `/api/faq`<br>`/api/faq/{}/{}` |
+| `sufarch` | 137 | support.js | `/api/faq`<br>`/api/faq/{}/{}` |
 
 ### `telegram.js` (5)
 
@@ -566,37 +604,37 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `tkopen` | 36 | tickets.js | `/api/tickets`<br>`/api/tickets/{}/answer`<br>`/api/tickets/{}/status` |
-| `tkfilter` | 37 | tickets.js | `/api/tickets`<br>`/api/tickets/{}/answer`<br>`/api/tickets/{}/status` |
-| `tkans` | 41 | tickets.js | `/api/tickets`<br>`/api/tickets/{}/answer`<br>`/api/tickets/{}/status` |
-| `tkother` | 42 | tickets.js | `/api/tickets`<br>`/api/tickets/{}/answer`<br>`/api/tickets/{}/status` |
+| `tkopen` | 36 | tickets.js | `/api/tickets` |
+| `tkfilter` | 37 | tickets.js | `/api/tickets` |
+| `tkans` | 41 | tickets.js | `/api/tickets`<br>`/api/tickets/{}/answer` |
+| `tkother` | 42 | tickets.js | `/api/tickets`<br>`/api/tickets/{}/answer` |
 | `tkstatus` | 43 | tickets.js | `/api/tickets`<br>`/api/tickets/{}/status` |
-| `tkreport` | 44 | agent.js, generate.js, packs.js, projmap.js, tickets.js | `/api/tickets` |
+| `tkreport` | 44 | chat-core.js, packs.js, projmap.js, studio-core.js, studio-sheet.js, tickets.js | none (browser only) |
 | `tksend` | 45 | tickets.js | `/api/tickets` |
-| `tkrefresh` | 49 | tickets.js | none (browser only) |
+| `tkrefresh` | 49 | tickets.js | `/api/tickets` |
 
 ### `trash.js` (5)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `trrestore` | 54 | trash.js | `/api/generations/${+String(id).replace(/\D/g,`<br>`/api/packs/{}/restore`<br>`/api/trash/purge`<br>`/api/trash/purge_all` |
-| `trpurge` | 56 | trash.js | `/api/trash/purge`<br>`/api/trash/purge_all` |
-| `trpurgeall` | 57 | trash.js | `/api/trash/purge_all` |
-| `trpurgeallgo` | 60 | trash.js | `/api/trash/purge_all` |
-| `trrefresh` | 62 | trash.js | none (browser only) |
+| `trrestore` | 54 | trash.js | `/api/generations/${+String(id).replace(/\D/g,`<br>`/api/packs/{}/restore`<br>`/api/trash` |
+| `trpurge` | 56 | trash.js | `/api/trash`<br>`/api/trash/purge`<br>`/api/trash/purges` |
+| `trpurgeall` | 57 | trash.js | none (browser only) |
+| `trpurgeallgo` | 60 | trash.js | `/api/trash`<br>`/api/trash/purge`<br>`/api/trash/purge_all`<br>`/api/trash/purges` |
+| `trrefresh` | 62 | trash.js | `/api/trash` |
 
 ### `trending.js` (8)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `trorder` | 31 | trending.js | `/api/trending/{}/${on`<br>`/api/trending/{}/comments`<br>`/api/trending/{}/comments/{}/delete`<br>`/api/trending/{}/unshare`<br>`/api/trending/{}/use` |
-| `tropen` | 32 | trending.js | `/api/trending/{}/${on`<br>`/api/trending/{}/comments`<br>`/api/trending/{}/comments/{}/delete`<br>`/api/trending/{}/unshare`<br>`/api/trending/{}/use` |
-| `trlike` | 33 | trending.js | `/api/trending/{}/${on`<br>`/api/trending/{}/comments`<br>`/api/trending/{}/comments/{}/delete`<br>`/api/trending/{}/unshare`<br>`/api/trending/{}/use` |
-| `trcomment` | 35 | trending.js | `/api/trending/{}/${on`<br>`/api/trending/{}/comments`<br>`/api/trending/{}/comments/{}/delete`<br>`/api/trending/{}/unshare`<br>`/api/trending/{}/use` |
-| `truncomment` | 37 | trending.js | `/api/trending/{}/${on`<br>`/api/trending/{}/comments/{}/delete`<br>`/api/trending/{}/unshare`<br>`/api/trending/{}/use` |
-| `truse` | 38 | trending.js | `/api/trending/{}/${on`<br>`/api/trending/{}/unshare`<br>`/api/trending/{}/use` |
-| `trunshare` | 42 | trending.js | `/api/trending/{}/${on`<br>`/api/trending/{}/unshare` |
-| `trshare` | 43 | trending.js | `/api/trending/{}/${on` |
+| `trorder` | 31 | trending.js | `/api/trending` |
+| `tropen` | 32 | trending.js | `/api/trending` |
+| `trlike` | 33 | trending.js | `/api/trending`<br>`/api/trending/{}/${on` |
+| `trcomment` | 35 | trending.js | `/api/trending`<br>`/api/trending/{}/comments` |
+| `truncomment` | 37 | trending.js | `/api/trending`<br>`/api/trending/{}/comments/{}/delete` |
+| `truse` | 38 | trending.js | `/api/trending/{}/use` |
+| `trunshare` | 42 | trending.js | `/api/trending`<br>`/api/trending/{}/unshare` |
+| `trshare` | 43 | trending.js | `/api/trending`<br>`/api/trending/{}/${on` |
 
 ### `users.js` (3)
 

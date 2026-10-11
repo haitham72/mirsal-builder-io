@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // P8 of the UI/UX spec: after a slice is edited and saved, the batch's sheet is rebuilt as one sheet with that slice fixed (source/sheet_fixed.png); the Studio's sheet panel can show it as a
 // third view next to Raw and Keyed, and only when there is one. The helpers are read out of generate.js. Run: node --test tests/js
 const test = require('node:test');
@@ -5,18 +6,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in generate.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) {
-    if (ln && !/^\s/.test(ln)) break;
-    out.push(ln);
-  }
-  return out.join('\n');
-}
+const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'generate.js'), 'utf8');
+function statement(marker) {return consoleStatement(src,marker);}
 const f = new Function(['const SHK=', 'const sheetViews=', 'const sheetView='].map(statement).join('\n') + '\nreturn {SHK,sheetViews,sheetView};')();
 const G = (source, n = 7) => ({ number: n, generation_id: 'G007', source: { sheet_copy: 'source/sheet.png', ...source } });
 

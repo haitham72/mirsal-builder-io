@@ -1,6 +1,7 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const ctx=vm.createContext({});
-for(const name of ['imports','trending'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../../mirsal/console',name+'.js'),'utf8'),ctx);
+for(const name of ['imports','trending'])vm.runInContext(readConsoleFile(path.join(__dirname,'../../mirsal/console',name+'.js'),'utf8'),ctx);
 test('history distinguishes existing results from completed and pending imports, and escapes names',()=>{
  const h=ctx.IMPV.rows([{id:'a',kind:'image',prompt:'<script>',status:'completed'},{id:'b',kind:'video',status:'running'},{id:'c',known:{job:'J1'}}]);
  assert.match(h,/&lt;script&gt;/);assert.match(h,/data-id="a" >Import/);assert.match(h,/data-id="b" disabled/);assert.match(h,/Open existing/);
@@ -19,7 +20,7 @@ test('owner upload keeps destination options, navigates to its batch, and member
  const browser=vm.createContext({document:{},ACT:{},ME:{role:'owner'},SES:{gens:[104]},GS:{},location:{},route_:'generate',glast:'',
   $:id=>fields[id],esc:s=>s,dlg:()=>{},closeDlg:()=>{},toast:()=>{},saveSes:()=>{},tick:async()=>{},
   api:async(url,opts)=>{sent.push({url,opts});return {ok:true,j:{id:111,kind:'sheet'}}},URLSearchParams});
- vm.runInContext(fs.readFileSync(path.join(__dirname,'../../mirsal/console/imports.js'),'utf8'),browser);
+ vm.runInContext(readConsoleFile(path.join(__dirname,'../../mirsal/console/imports.js'),'utf8'),browser);
  assert.match(browser.impButtons(),/Use my own sheet/);
  browser.ACT.impopen();browser.ACT.impupload();
  await new Promise(resolve=>setImmediate(resolve));

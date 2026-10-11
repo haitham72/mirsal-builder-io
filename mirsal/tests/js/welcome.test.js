@@ -1,3 +1,4 @@
+const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The welcome modal's markup (welcome.js): slides are data, markup is built by pure functions. The functions are read out of the file and run with esc / ic stubbed.
 // Run: node --test tests/js
 const test = require('node:test');
@@ -5,15 +6,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const src = fs.readFileSync(path.join(__dirname, '..', '..', 'mirsal', 'console', 'welcome.js'), 'utf8');
-function statement(marker) {
-  const i = src.indexOf(marker);
-  assert.notEqual(i, -1, `${marker} is not in welcome.js`);
-  const lines = src.slice(i).split('\n');
-  const out = [lines[0]];
-  for (const ln of lines.slice(1)) { if (ln && !/^\s/.test(ln) && !ln.startsWith('}')) break; out.push(ln); if (ln.startsWith('}')) break; }
-  return out.join('\n');
-}
+const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'welcome.js'), 'utf8');
+function statement(marker) {return consoleStatement(src,marker);}
 const slidesSrc = src.slice(src.indexOf('const WL_SLIDES='), src.indexOf('const WL={'));
 const code = [slidesSrc, 'const WL={i:0};', 'const wlGet=(s,k)=>null;const WL_OFF="off";', statement('function wlSlideHTML('), statement('function wlHTML(')].join('\n');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
