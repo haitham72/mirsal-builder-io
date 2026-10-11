@@ -1,0 +1,6217 @@
+{
+  "generation_id": "G129",
+  "number": 129,
+  "owner": "local",
+  "created": 1791687675.865,
+  "parent": null,
+  "prompt": "superman kid in dubai with kandura",
+  "task": "superman kid in dubai with kandura",
+  "task_slug": "superman_kid_dubai_with_kandura",
+  "source": {
+    "subject": "superman_kid",
+    "subject_id": "053",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "result.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "prepared": false,
+    "clips": {},
+    "sheet_path": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/jobs/J086-superman_kid_dubai_with_kand-sheet/result.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      2048,
+      2048
+    ],
+    "grid": {
+      "rows": 3,
+      "cols": 3,
+      "rects": [
+        [
+          0,
+          0,
+          710,
+          702
+        ],
+        [
+          710,
+          0,
+          633,
+          702
+        ],
+        [
+          1343,
+          0,
+          705,
+          702
+        ],
+        [
+          0,
+          702,
+          710,
+          691
+        ],
+        [
+          710,
+          702,
+          633,
+          691
+        ],
+        [
+          1343,
+          702,
+          705,
+          691
+        ],
+        [
+          0,
+          1393,
+          710,
+          655
+        ],
+        [
+          710,
+          1393,
+          633,
+          655
+        ],
+        [
+          1343,
+          1393,
+          705,
+          655
+        ]
+      ],
+      "xs": [
+        0,
+        710,
+        1343,
+        2048
+      ],
+      "ys": [
+        0,
+        702,
+        1393,
+        2048
+      ],
+      "method": "gutter"
+    },
+    "keyed": "source/keyed.png"
+  },
+  "grid": [
+    3,
+    3
+  ],
+  "stage": "video_sliced",
+  "error": null,
+  "plan_source": "task 053",
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop.\nStyle: photorealistic character, natural material and fur texture, realistic proportions and lighting, expressive face.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: Kid superhero jumping joyfully with arms raised in triumph, cape flowing behind\nCharacter 2: Superman kid standing proudly on Burj Khalifa base with hands on hips\nCharacter 3: Kid hero running fast through Dubai desert with kandura flowing\nCharacter 4: Superman kid sitting on sand dune reading a comic book\nCharacter 5: Kid superhero leaning against palm tree with cool sunglasses\nCharacter 6: Superman kid lying on back in desert sand staring at stars\nCharacter 7: Kid hero spinning in circles with cape creating wind tornado\nCharacter 8: Superman kid reaching toward hovering Dubai drone with both hands\nCharacter 9: Kid superhero sitting cross-legged meditating with closed eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. Bounces up and down with arms pumping, cape fluttering energetically\n2. Stands tall and rigid, chest puffed out, occasionally flexes slightly\n3. Sprints forward with one leg extended, cape streaming behind\n4. Shifts weight while turning pages, occasionally looking up thoughtfully\n5. Leans casually, shifts shoulder, adjusts sunglasses lazily\n6. Breathes slowly, blinks occasionally, arm drifts up to point\n7. Rotates rapidly on spot, cape billowing outward in circular motion\n8. Reaches forward with stretching fingers, body leaning toward target\n9. Becomes perfectly still, chest rises and falls slowly in meditation\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat blue background and every character's design unchanged.",
+  "custom_prompts": [],
+  "template_id": "sheet_3x3",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop",
+    "style_id": "realistic",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "Kid superhero jumping joyfully with arms raised in triumph, cape flowing behind",
+        "tags": [
+          "superman_kid_jumping_joy",
+          "excited",
+          "triumph",
+          "happy"
+        ],
+        "emoji": "🦸✨",
+        "motion": "Bounces up and down with arms pumping, cape fluttering energetically"
+      },
+      {
+        "pos": 2,
+        "label": "Superman kid standing proudly on Burj Khalifa base with hands on hips",
+        "tags": [
+          "superman_kid_standing_proud",
+          "brave",
+          "heroic",
+          "confident"
+        ],
+        "emoji": "💪🏙️",
+        "motion": "Stands tall and rigid, chest puffed out, occasionally flexes slightly"
+      },
+      {
+        "pos": 3,
+        "label": "Kid hero running fast through Dubai desert with kandura flowing",
+        "tags": [
+          "superman_kid_running_fast",
+          "speed",
+          "action",
+          "chase"
+        ],
+        "emoji": "💨🏃",
+        "motion": "Sprints forward with one leg extended, cape streaming behind"
+      },
+      {
+        "pos": 4,
+        "label": "Superman kid sitting on sand dune reading a comic book",
+        "tags": [
+          "superman_kid_reading_comic",
+          "relaxing",
+          "curious",
+          "book"
+        ],
+        "emoji": "📖🧘",
+        "motion": "Shifts weight while turning pages, occasionally looking up thoughtfully"
+      },
+      {
+        "pos": 5,
+        "label": "Kid superhero leaning against palm tree with cool sunglasses",
+        "tags": [
+          "superman_kid_leaning_cool",
+          "chill",
+          "cool",
+          "relaxed"
+        ],
+        "emoji": "😎🌴",
+        "motion": "Leans casually, shifts shoulder, adjusts sunglasses lazily"
+      },
+      {
+        "pos": 6,
+        "label": "Superman kid lying on back in desert sand staring at stars",
+        "tags": [
+          "superman_kid_lying_stargazing",
+          "dreamy",
+          "peaceful",
+          "night"
+        ],
+        "emoji": "⭐😴",
+        "motion": "Breathes slowly, blinks occasionally, arm drifts up to point"
+      },
+      {
+        "pos": 7,
+        "label": "Kid hero spinning in circles with cape creating wind tornado",
+        "tags": [
+          "superman_kid_spinning_heroic",
+          "dynamic",
+          "spin",
+          "energy"
+        ],
+        "emoji": "🌀💫",
+        "motion": "Rotates rapidly on spot, cape billowing outward in circular motion"
+      },
+      {
+        "pos": 8,
+        "label": "Superman kid reaching toward hovering Dubai drone with both hands",
+        "tags": [
+          "superman_kid_reaching_out",
+          "curious",
+          "discovery",
+          "extend"
+        ],
+        "emoji": "🤚🚁",
+        "motion": "Reaches forward with stretching fingers, body leaning toward target"
+      },
+      {
+        "pos": 9,
+        "label": "Kid superhero sitting cross-legged meditating with closed eyes",
+        "tags": [
+          "superman_kid_meditating_calm",
+          "zen",
+          "peaceful",
+          "focused"
+        ],
+        "emoji": "🧘☮️",
+        "motion": "Becomes perfectly still, chest rises and falls slowly in meditation"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "blue",
+    "face": false,
+    "preset": null,
+    "loop": false
+  },
+  "task_id": "053",
+  "name_key": "superman_kid_dubai_with_kandura",
+  "regen_of": null,
+  "sheet_model": "nano_banana_flash",
+  "verify_version": 2,
+  "outline_px": 12,
+  "erode_px": 0,
+  "reviews": {
+    "plan": {
+      "decision": "APPROVE",
+      "by": "human",
+      "ts": 1791687645.446,
+      "note": "approved when the task was reserved"
+    },
+    "video_sheet": {
+      "A1": {
+        "decision": "APPROVE",
+        "by": "human",
+        "ts": 1791687926.703,
+        "note": "approved by Make a video"
+      }
+    },
+    "pack": null
+  },
+  "video_sheets": [
+    {
+      "id": "A1",
+      "slots": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grid": [
+        3,
+        3
+      ],
+      "file": "video_sheet/A1/sheet.png",
+      "layout": "video_sheet/A1/layout.json",
+      "video": "video_sheet/A1/video.mp4",
+      "status": "SLICED",
+      "ts": 1791687926.699,
+      "verify": [
+        {
+          "name": "slots_match_approved",
+          "ok": true,
+          "detail": "filled slots are exactly the approved stickers; blank slots are pure key colour",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "limit": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "data": {
+            "problems": [],
+            "ms": 59.2
+          }
+        },
+        {
+          "name": "no_outline_on_sheet",
+          "ok": true,
+          "detail": "no white ring around the subjects",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [],
+          "limit": [],
+          "data": {
+            "slots": [],
+            "ms": 164.4
+          }
+        }
+      ],
+      "blocked": null,
+      "canvas": [
+        2048,
+        2048
+      ],
+      "video_prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. Bounces up and down with arms pumping, cape fluttering energetically\n2. Stands tall and rigid, chest puffed out, occasionally flexes slightly\n3. Sprints forward with one leg extended, cape streaming behind\n4. Shifts weight while turning pages, occasionally looking up thoughtfully\n5. Leans casually, shifts shoulder, adjusts sunglasses lazily\n6. Breathes slowly, blinks occasionally, arm drifts up to point\n7. Rotates rapidly on spot, cape billowing outward in circular motion\n8. Reaches forward with stretching fingers, body leaning toward target\n9. Becomes perfectly still, chest rises and falls slowly in meditation\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat blue background and every character's design unchanged.",
+      "slot_fill": 0.74,
+      "video_name": "J087.mp4",
+      "block": null,
+      "video_flags": [],
+      "video_checks": [
+        {
+          "name": "video_decodes",
+          "ok": true,
+          "detail": "h264 1440x1440",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": "h264",
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "video_specs",
+          "ok": true,
+          "detail": "1440x1440 24.0 fps, 3.04s",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 3.04,
+          "limit": 1.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "layout_match",
+          "ok": true,
+          "detail": "lowest slot IoU 0.97",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.975,
+          "limit": 0.6,
+          "data": {
+            "ious": {
+              "1": 0.987,
+              "2": 0.984,
+              "3": 0.988,
+              "4": 0.992,
+              "5": 0.983,
+              "6": 0.993,
+              "7": 0.98,
+              "8": 0.975,
+              "9": 0.992
+            },
+            "bad": [],
+            "ms": 48.5
+          }
+        },
+        {
+          "name": "blank_slots_stay_empty",
+          "ok": true,
+          "detail": "blank slots stayed empty",
+          "severity": "BLOCK",
+          "stage": "video",
+          "value": 0.0,
+          "limit": 0.002,
+          "data": {
+            "bad": {},
+            "ms": 0.0
+          }
+        }
+      ],
+      "preview": "video_sheet/A1/preview.mp4",
+      "video_prompt_sent": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. Bounces up and down with arms pumping, cape fluttering energetically\n2. Stands tall and rigid, chest puffed out, occasionally flexes slightly\n3. Sprints forward with one leg extended, cape streaming behind\n4. Shifts weight while turning pages, occasionally looking up thoughtfully\n5. Leans casually, shifts shoulder, adjusts sunglasses lazily\n6. Breathes slowly, blinks occasionally, arm drifts up to point\n7. Rotates rapidly on spot, cape billowing outward in circular motion\n8. Reaches forward with stretching fingers, body leaning toward target\n9. Becomes perfectly still, chest rises and falls slowly in meditation\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat blue background and every character's design unchanged.",
+      "video_prompt_custom": false,
+      "model": "kling3_0",
+      "video_info": {
+        "codec": "h264",
+        "width": 1440,
+        "height": 1440,
+        "fps": 24.0,
+        "duration": 3.04
+      }
+    }
+  ],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "2048x2048",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "2048x2048",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 56.0
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 2048px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 2048,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": true,
+        "detail": "outer ring is 195 blue-ward; a sheet without a blue screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 195.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 6.1
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 3x3, plan says 3x3",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "3x3",
+        "limit": "3x3",
+        "data": {
+          "ms": 23.3
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: gutter",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "gutter",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            710,
+            1343,
+            2048
+          ],
+          "ys": [
+            0,
+            702,
+            1393,
+            2048
+          ],
+          "ms": 22.9
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 5.1 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 5.08,
+        "limit": 12.0,
+        "data": {
+          "ms": 46.4
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "superman_kid_jumping_joy",
+      "tags": [
+        "superman_kid_jumping_joy",
+        "excited",
+        "triumph",
+        "happy"
+      ],
+      "emoji": "🦸✨",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Kid superhero jumping joyfully with arms raised in triumph, cape flowing behind, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-jumping_joy-20261011T030115-032834",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 130455,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.8
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 85961,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 85.961,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.3
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "no earlier cell",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 64,
+          "limit": 4,
+          "data": {
+            "of": null,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "183.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 183.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.3
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          0,
+          710,
+          702
+        ],
+        "bg": [
+          1,
+          59,
+          255
+        ],
+        "threshold": 97.5,
+        "fg_px": 130455,
+        "bbox": [
+          138,
+          65,
+          553,
+          676
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 183.4,
+        "format": "png"
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-jumping_joy-20261011T030115-032834.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 759,
+          "key": 321,
+          "bounds": 137,
+          "render": 1360,
+          "seam": 657,
+          "encode": 13667,
+          "encodes": 2,
+          "probe": 281,
+          "verify": 20,
+          "finish": 16127
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          69,
+          39,
+          414,
+          464
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 425,
+        "scale": 0.9336,
+        "motion": 160.35,
+        "loop_seam_before": 267.42,
+        "loop_cut": 2,
+        "loop_seam": 194.96,
+        "loop_limit": 239.56,
+        "frames_out": 70,
+        "crf": 46,
+        "sharp_kept": 1.02,
+        "detail_vs_still": 0.9,
+        "soft_sigma": 0.6,
+        "kb": 237.2
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-jumping_joy-20261011T030115-032834.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.806,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688044.652,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 43.5
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 43.1
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "237KB @crf46",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 237,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.92",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.92,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "194.96 <= 239.56",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 194.96,
+          "limit": 239.56,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.96",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.962,
+          "limit": 0.5,
+          "data": {
+            "ms": 4.2
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 160.35",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 160.35,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 6% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.057,
+          "limit": 0.35,
+          "data": {
+            "ms": 15.4
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.90x of the still's edge detail (as soft as the still blurred 0.6 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.9,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "key": "superman_kid_standing_proud",
+      "tags": [
+        "superman_kid_standing_proud",
+        "brave",
+        "heroic",
+        "confident"
+      ],
+      "emoji": "💪🏙️",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Superman kid standing proudly on Burj Khalifa base with hands on hips, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 126803,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 20.4
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 85534,
+          "limit": 400,
+          "data": {
+            "ms": 0.4
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": false,
+          "detail": "89px on the edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 89,
+          "limit": 85.534,
+          "data": {
+            "ms": 1.8
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "1.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0097,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.2
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 23 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 23,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "179.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 179.3,
+          "limit": 512,
+          "data": {
+            "ms": 3.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          710,
+          0,
+          633,
+          702
+        ],
+        "bg": [
+          2,
+          60,
+          255
+        ],
+        "threshold": 97.5,
+        "fg_px": 126803,
+        "bbox": [
+          72,
+          66,
+          572,
+          660
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 89,
+        "chroma_risk": 0.0097,
+        "waived": [
+          "no_spill"
+        ],
+        "holes": 0.0,
+        "kb": 179.3,
+        "format": "png"
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 824,
+          "key": 288,
+          "bounds": 170,
+          "render": 1370,
+          "seam": 912,
+          "encode": 19545,
+          "encodes": 4,
+          "probe": 267,
+          "verify": 9,
+          "finish": 22275
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          58,
+          66,
+          382,
+          410
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 344,
+        "scale": 1.1535,
+        "motion": 11.9,
+        "loop_seam_before": 112.83,
+        "loop_cut": 16,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 17.95,
+        "frames_out": 50,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.84,
+        "soft_sigma": 0.7,
+        "kb": 226.9
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.806,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "no_spill",
+          "ref": null,
+          "detail": {
+            "check": "no_spill",
+            "value": 89,
+            "limit": 85.534,
+            "note": "89px on the edge band",
+            "data": {
+              "ms": 1.8
+            }
+          }
+        },
+        {
+          "ts": 1791687694.713,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: no_spill",
+          "ref": null,
+          "detail": {
+            "override": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791687695.012,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": [],
+            "waived": [
+              "no_spill"
+            ]
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688050.834,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "still_override": [
+        "no_spill"
+      ],
+      "rendered_at": 1791687695.008,
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 45.6
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 74.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "226KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 226,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.08",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.08,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 17.95",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 17.95,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.95",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.947,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.8
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 11.9",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 11.9,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 3% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.031,
+          "limit": 0.35,
+          "data": {
+            "ms": 6.0
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.84x of the still's edge detail (as soft as the still blurred 0.7 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.84,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "key": "superman_kid_running_fast",
+      "tags": [
+        "superman_kid_running_fast",
+        "speed",
+        "action",
+        "chase"
+      ],
+      "emoji": "💨🏃",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Kid hero running fast through Dubai desert with kandura flowing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-running_fast-20261011T030115-b58b87",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 117759,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 80478,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "2px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 2,
+          "limit": 80.47800000000001,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.2% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0024,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.3
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 25 to cell 1",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 25,
+          "limit": 4,
+          "data": {
+            "of": 1,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "160.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 160.4,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1343,
+          0,
+          705,
+          702
+        ],
+        "bg": [
+          2,
+          60,
+          255
+        ],
+        "threshold": 73.1,
+        "fg_px": 117759,
+        "bbox": [
+          73,
+          120,
+          577,
+          635
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 2,
+        "chroma_risk": 0.0024,
+        "holes": 0.0,
+        "kb": 160.4,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                2,
+                60,
+                255
+              ],
+              "threshold": 97.5,
+              "fg_px": 119609,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-running_fast-20261011T030115-b58b87.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 248,
+          "key": 241,
+          "bounds": 127,
+          "render": 1045,
+          "seam": 741,
+          "encode": 2442,
+          "encodes": 3,
+          "probe": 183,
+          "verify": 12,
+          "finish": 4555
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          32,
+          87,
+          396,
+          451
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 364,
+        "waived": [
+          "cross_slot"
+        ],
+        "scale": 1.0901,
+        "motion": 128.64,
+        "loop_seam_before": 267.09,
+        "loop_cut": 3,
+        "loop_seam": 141.83,
+        "loop_limit": 188.4,
+        "frames_out": 69,
+        "crf": 50,
+        "sharp_kept": 1.02,
+        "detail_vs_still": 0.94,
+        "soft_sigma": 0.5,
+        "kb": 227.4
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-running_fast-20261011T030115-b58b87.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.81,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688028.678,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "cross_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "cross_slot",
+            "value": 6506,
+            "limit": 0,
+            "note": "6506px of foreign foreground, first at frame 0",
+            "data": {
+              "frame": 0,
+              "px": 6506,
+              "ms": 55.9
+            }
+          }
+        },
+        {
+          "ts": 1791688209.764,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791688215.255,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 39.8
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "6506px of foreign foreground, first at frame 0 (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 6506,
+          "limit": 0,
+          "data": {
+            "frame": 0,
+            "px": 6506,
+            "ms": 42.4
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "227KB @crf50",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 227,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.88",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.88,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "141.83 <= 188.4",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 141.83,
+          "limit": 188.4,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.96",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.956,
+          "limit": 0.5,
+          "data": {
+            "ms": 3.2
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 128.64",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 128.64,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 7% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.073,
+          "limit": 0.35,
+          "data": {
+            "ms": 8.6
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.94x of the still's edge detail (as soft as the still blurred 0.5 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.94,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "anim_override": [
+        "cross_slot"
+      ],
+      "anim_finished": {
+        "cross_slot": {
+          "anim_status": "READY",
+          "anim_reason": null,
+          "anim_metrics": {
+            "source": "video sheet",
+            "threshold": 121.5,
+            "ms": {
+              "decode": 248,
+              "key": 241,
+              "bounds": 127,
+              "render": 1045,
+              "seam": 741,
+              "encode": 2442,
+              "encodes": 3,
+              "probe": 183,
+              "verify": 12,
+              "finish": 4555
+            },
+            "frames": 72,
+            "fps": 24.0,
+            "bbox": [
+              32,
+              87,
+              396,
+              451
+            ],
+            "edge_touch_frames": 0,
+            "subject_px_in_video": 364,
+            "waived": [
+              "cross_slot"
+            ],
+            "scale": 1.0901,
+            "motion": 128.64,
+            "loop_seam_before": 267.09,
+            "loop_cut": 3,
+            "loop_seam": 141.83,
+            "loop_limit": 188.4,
+            "frames_out": 69,
+            "crf": 50,
+            "sharp_kept": 1.02,
+            "detail_vs_still": 0.94,
+            "soft_sigma": 0.5,
+            "kb": 227.4
+          },
+          "anim_report": [
+            {
+              "name": "inside_slot",
+              "ok": true,
+              "detail": "inside",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 0,
+              "limit": 0,
+              "data": {
+                "frame": null,
+                "over_px": 0,
+                "edge_px": 7,
+                "ms": 39.8
+              }
+            },
+            {
+              "name": "cross_slot",
+              "ok": false,
+              "detail": "6506px of foreign foreground, first at frame 0 (allowed by you)",
+              "severity": "WARN",
+              "stage": "slot",
+              "value": 6506,
+              "limit": 0,
+              "data": {
+                "frame": 0,
+                "px": 6506,
+                "ms": 42.4
+              }
+            },
+            {
+              "name": "size_budget",
+              "ok": true,
+              "detail": "227KB @crf50",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 227,
+              "limit": 256,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "codec_vp9",
+              "ok": true,
+              "detail": "vp9",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "vp9",
+              "limit": "vp9",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "dimensions",
+              "ok": true,
+              "detail": "512x512",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "512x512",
+              "limit": "512x512",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "fps",
+              "ok": true,
+              "detail": "24.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 24.0,
+              "limit": 30.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "duration",
+              "ok": true,
+              "detail": "2.88",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 2.88,
+              "limit": 3.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "no_audio",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_mode_tag",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_decoded",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.7
+              }
+            },
+            {
+              "name": "loop_seam",
+              "ok": true,
+              "detail": "141.83 <= 188.4",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 141.83,
+              "limit": 188.4,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "identity_kept",
+              "ok": true,
+              "detail": "first frame matches the still at IoU 0.96",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.956,
+              "limit": 0.5,
+              "data": {
+                "ms": 3.2
+              }
+            },
+            {
+              "name": "motion_present",
+              "ok": true,
+              "detail": "median frame-to-frame change 128.64",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 128.64,
+              "limit": 0.5,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_stable",
+              "ok": true,
+              "detail": "subject area varies by 7% over the frames",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.073,
+              "limit": 0.35,
+              "data": {
+                "ms": 8.6
+              }
+            },
+            {
+              "name": "sharpness",
+              "ok": true,
+              "detail": "0.94x of the still's edge detail (as soft as the still blurred 0.5 px)",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.94,
+              "limit": 0.75,
+              "data": {
+                "ms": 0.0
+              }
+            }
+          ],
+          "webm": "slices/vid-superman_kid_dubai_with_kand-running_fast-20261011T030115-b58b87.webm",
+          "review": "PENDING"
+        },
+        "plain": {
+          "anim_status": "FAILED",
+          "anim_reason": "cross_slot",
+          "anim_metrics": {
+            "source": "video sheet",
+            "threshold": 121.5,
+            "ms": {
+              "decode": 248,
+              "key": 241,
+              "bounds": 127,
+              "render": 1045,
+              "seam": 741,
+              "encode": 2442,
+              "encodes": 3,
+              "probe": 183,
+              "verify": 12,
+              "finish": 4555
+            },
+            "frames": 72,
+            "fps": 24.0,
+            "bbox": [
+              32,
+              87,
+              396,
+              451
+            ],
+            "edge_touch_frames": 0,
+            "subject_px_in_video": 364,
+            "scale": 1.0901,
+            "motion": 128.64,
+            "loop_seam_before": 267.09,
+            "loop_cut": 3,
+            "loop_seam": 141.83,
+            "loop_limit": 188.4,
+            "frames_out": 69,
+            "crf": 50,
+            "sharp_kept": 1.02,
+            "detail_vs_still": 0.94,
+            "soft_sigma": 0.5,
+            "kb": 227.4
+          },
+          "anim_report": [
+            {
+              "name": "inside_slot",
+              "ok": true,
+              "detail": "inside",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 0,
+              "limit": 0,
+              "data": {
+                "frame": null,
+                "over_px": 0,
+                "edge_px": 7,
+                "ms": 39.8
+              }
+            },
+            {
+              "name": "cross_slot",
+              "ok": false,
+              "detail": "6506px of foreign foreground, first at frame 0",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 6506,
+              "limit": 0,
+              "data": {
+                "frame": 0,
+                "px": 6506,
+                "ms": 42.4
+              }
+            },
+            {
+              "name": "size_budget",
+              "ok": true,
+              "detail": "227KB @crf50",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 227,
+              "limit": 256,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "codec_vp9",
+              "ok": true,
+              "detail": "vp9",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "vp9",
+              "limit": "vp9",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "dimensions",
+              "ok": true,
+              "detail": "512x512",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "512x512",
+              "limit": "512x512",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "fps",
+              "ok": true,
+              "detail": "24.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 24.0,
+              "limit": 30.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "duration",
+              "ok": true,
+              "detail": "2.88",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 2.88,
+              "limit": 3.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "no_audio",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_mode_tag",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_decoded",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.7
+              }
+            },
+            {
+              "name": "loop_seam",
+              "ok": true,
+              "detail": "141.83 <= 188.4",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 141.83,
+              "limit": 188.4,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "identity_kept",
+              "ok": true,
+              "detail": "first frame matches the still at IoU 0.96",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.956,
+              "limit": 0.5,
+              "data": {
+                "ms": 3.2
+              }
+            },
+            {
+              "name": "motion_present",
+              "ok": true,
+              "detail": "median frame-to-frame change 128.64",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 128.64,
+              "limit": 0.5,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_stable",
+              "ok": true,
+              "detail": "subject area varies by 7% over the frames",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.073,
+              "limit": 0.35,
+              "data": {
+                "ms": 8.6
+              }
+            },
+            {
+              "name": "sharpness",
+              "ok": true,
+              "detail": "0.94x of the still's edge detail (as soft as the still blurred 0.5 px)",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.94,
+              "limit": 0.75,
+              "data": {
+                "ms": 0.0
+              }
+            }
+          ],
+          "webm": "slices/vid-superman_kid_dubai_with_kand-running_fast-20261011T030115-b58b87.webm",
+          "review": "BLOCKED"
+        }
+      }
+    },
+    {
+      "index": 4,
+      "key": "superman_kid_reading_comic",
+      "tags": [
+        "superman_kid_reading_comic",
+        "relaxing",
+        "curious",
+        "book"
+      ],
+      "emoji": "📖🧘",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Superman kid sitting on sand dune reading a comic book, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-reading_comic-20261011T030115-89859d",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 129583,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 80562,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "12px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 12,
+          "limit": 80.562,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "1.3% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0129,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 10 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 10,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "175.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 175.3,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          702,
+          710,
+          691
+        ],
+        "bg": [
+          1,
+          59,
+          255
+        ],
+        "threshold": 97.5,
+        "fg_px": 129583,
+        "bbox": [
+          97,
+          150,
+          671,
+          650
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 12,
+        "chroma_risk": 0.0129,
+        "holes": 0.0,
+        "kb": 175.3,
+        "format": "png"
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-reading_comic-20261011T030115-89859d.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 808,
+          "key": 305,
+          "bounds": 169,
+          "render": 1334,
+          "seam": 807,
+          "encode": 18576,
+          "encodes": 4,
+          "probe": 281,
+          "verify": 14,
+          "finish": 21185
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          76,
+          90,
+          404,
+          382
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 328,
+        "scale": 1.2098,
+        "motion": 4.13,
+        "loop_seam_before": 48.53,
+        "loop_cut": 20,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "frames_out": 46,
+        "crf": 30,
+        "sharp_kept": 0.99,
+        "detail_vs_still": 0.8,
+        "soft_sigma": 0.8,
+        "kb": 138.1
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-reading_comic-20261011T030115-89859d.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.813,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688049.728,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 44.4
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 74.4
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "138KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 138,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "1.92",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 1.92,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 12.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 12.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.96",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.961,
+          "limit": 0.5,
+          "data": {
+            "ms": 4.2
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 4.13",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 4.13,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 1% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.006,
+          "limit": 0.35,
+          "data": {
+            "ms": 9.5
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.80x of the still's edge detail (as soft as the still blurred 0.8 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.8,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "key": "superman_kid_leaning_cool",
+      "tags": [
+        "superman_kid_leaning_cool",
+        "chill",
+        "cool",
+        "relaxed"
+      ],
+      "emoji": "😎🌴",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Kid superhero leaning against palm tree with cool sunglasses, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-leaning_cool-20261011T030115-b39856",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 156715,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 18.1
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 105397,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "30px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 30,
+          "limit": 105.397,
+          "data": {
+            "ms": 1.9
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 3",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 3,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "226.8KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 226.8,
+          "limit": 512,
+          "data": {
+            "ms": 3.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          710,
+          702,
+          633,
+          691
+        ],
+        "bg": [
+          1,
+          59,
+          255
+        ],
+        "threshold": 97.5,
+        "fg_px": 156715,
+        "bbox": [
+          39,
+          27,
+          532,
+          646
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 30,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 226.8,
+        "format": "png"
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-leaning_cool-20261011T030115-b39856.png",
+      "anim_status": "FAILED",
+      "anim_reason": "inside_slot",
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 796,
+          "key": 312,
+          "bounds": 176
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          94,
+          30,
+          480,
+          426
+        ],
+        "edge_touch_frames": 6,
+        "subject_px_in_video": 396
+      },
+      "webm": null,
+      "review": {
+        "still": "APPROVED",
+        "anim": "BLOCKED"
+      },
+      "history": [
+        {
+          "ts": 1791687676.817,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688028.717,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 5, 7px over the 7px edge band",
+            "data": {
+              "frame": 5,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 45.9
+            }
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 5, 7px over the 7px edge band",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 5,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 45.9
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "934px of foreign foreground, first at frame 5",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 934,
+          "limit": 0,
+          "data": {
+            "frame": 5,
+            "px": 934,
+            "ms": 79.5
+          }
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "key": "superman_kid_lying_stargazing",
+      "tags": [
+        "superman_kid_lying_stargazing",
+        "dreamy",
+        "peaceful",
+        "night"
+      ],
+      "emoji": "⭐😴",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Superman kid lying on back in desert sand staring at stars, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-lying_stargazing-20261011T030115-afe28a",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 143703,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 14.7
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 83499,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "9px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 9,
+          "limit": 83.499,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 20 to cell 4",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 20,
+          "limit": 4,
+          "data": {
+            "of": 4,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "166.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 166.9,
+          "limit": 512,
+          "data": {
+            "ms": 3.4
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1343,
+          702,
+          705,
+          691
+        ],
+        "bg": [
+          1,
+          59,
+          255
+        ],
+        "threshold": 97.5,
+        "fg_px": 143703,
+        "bbox": [
+          63,
+          283,
+          643,
+          650
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 9,
+        "chroma_risk": 0.001,
+        "holes": 0.0,
+        "kb": 166.9,
+        "format": "png"
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-lying_stargazing-20261011T030115-afe28a.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 275,
+          "key": 271,
+          "bounds": 141,
+          "render": 1095,
+          "seam": 613,
+          "encode": 2033,
+          "encodes": 4,
+          "probe": 178,
+          "verify": 7,
+          "finish": 4071
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          0,
+          52,
+          480,
+          405
+        ],
+        "edge_touch_frames": 7,
+        "subject_px_in_video": 480,
+        "waived": [
+          "inside_slot"
+        ],
+        "scale": 0.8267,
+        "motion": 8.92,
+        "loop_seam_before": 261.26,
+        "loop_cut": 22,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "frames_out": 44,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.96,
+        "soft_sigma": 0.3,
+        "kb": 130.7
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-lying_stargazing-20261011T030115-afe28a.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.82,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688028.749,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 7,
+            "limit": 0,
+            "note": "frame 4, 7px over the 7px edge band",
+            "data": {
+              "frame": 4,
+              "over_px": 7,
+              "edge_px": 7,
+              "ms": 49.2
+            }
+          }
+        },
+        {
+          "ts": 1791688225.221,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791688230.238,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 4, 7px over the 7px edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 7,
+          "limit": 0,
+          "data": {
+            "frame": 4,
+            "over_px": 7,
+            "edge_px": 7,
+            "ms": 44.4
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 46.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "130KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 130,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "1.83",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 1.83,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 12.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 12.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.98",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.98,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.1
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 8.92",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 8.92,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 15% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.148,
+          "limit": 0.35,
+          "data": {
+            "ms": 5.3
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.96x of the still's edge detail (as soft as the still blurred 0.3 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.96,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "anim_override": [
+        "inside_slot"
+      ],
+      "anim_finished": {
+        "inside_slot": {
+          "anim_status": "READY",
+          "anim_reason": null,
+          "anim_metrics": {
+            "source": "video sheet",
+            "threshold": 121.5,
+            "ms": {
+              "decode": 275,
+              "key": 271,
+              "bounds": 141,
+              "render": 1095,
+              "seam": 613,
+              "encode": 2033,
+              "encodes": 4,
+              "probe": 178,
+              "verify": 7,
+              "finish": 4071
+            },
+            "frames": 72,
+            "fps": 24.0,
+            "bbox": [
+              0,
+              52,
+              480,
+              405
+            ],
+            "edge_touch_frames": 7,
+            "subject_px_in_video": 480,
+            "waived": [
+              "inside_slot"
+            ],
+            "scale": 0.8267,
+            "motion": 8.92,
+            "loop_seam_before": 261.26,
+            "loop_cut": 22,
+            "loop_faded": true,
+            "loop_seam": 0.0,
+            "loop_limit": 12.0,
+            "frames_out": 44,
+            "crf": 30,
+            "sharp_kept": 1.0,
+            "detail_vs_still": 0.96,
+            "soft_sigma": 0.3,
+            "kb": 130.7
+          },
+          "anim_report": [
+            {
+              "name": "inside_slot",
+              "ok": false,
+              "detail": "frame 4, 7px over the 7px edge band (allowed by you)",
+              "severity": "WARN",
+              "stage": "slot",
+              "value": 7,
+              "limit": 0,
+              "data": {
+                "frame": 4,
+                "over_px": 7,
+                "edge_px": 7,
+                "ms": 44.4
+              }
+            },
+            {
+              "name": "cross_slot",
+              "ok": true,
+              "detail": "gutter clean",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 0,
+              "limit": 0,
+              "data": {
+                "frame": null,
+                "px": 0,
+                "ms": 46.0
+              }
+            },
+            {
+              "name": "size_budget",
+              "ok": true,
+              "detail": "130KB @crf30",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 130,
+              "limit": 256,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "codec_vp9",
+              "ok": true,
+              "detail": "vp9",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "vp9",
+              "limit": "vp9",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "dimensions",
+              "ok": true,
+              "detail": "512x512",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "512x512",
+              "limit": "512x512",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "fps",
+              "ok": true,
+              "detail": "24.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 24.0,
+              "limit": 30.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "duration",
+              "ok": true,
+              "detail": "1.83",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 1.83,
+              "limit": 3.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "no_audio",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_mode_tag",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_decoded",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.6
+              }
+            },
+            {
+              "name": "loop_seam",
+              "ok": true,
+              "detail": "0.0 <= 12.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 0.0,
+              "limit": 12.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "identity_kept",
+              "ok": true,
+              "detail": "first frame matches the still at IoU 0.98",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.98,
+              "limit": 0.5,
+              "data": {
+                "ms": 2.1
+              }
+            },
+            {
+              "name": "motion_present",
+              "ok": true,
+              "detail": "median frame-to-frame change 8.92",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 8.92,
+              "limit": 0.5,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_stable",
+              "ok": true,
+              "detail": "subject area varies by 15% over the frames",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.148,
+              "limit": 0.35,
+              "data": {
+                "ms": 5.3
+              }
+            },
+            {
+              "name": "sharpness",
+              "ok": true,
+              "detail": "0.96x of the still's edge detail (as soft as the still blurred 0.3 px)",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.96,
+              "limit": 0.75,
+              "data": {
+                "ms": 0.0
+              }
+            }
+          ],
+          "webm": "slices/vid-superman_kid_dubai_with_kand-lying_stargazing-20261011T030115-afe28a.webm",
+          "review": "PENDING"
+        },
+        "plain": {
+          "anim_status": "FAILED",
+          "anim_reason": "inside_slot",
+          "anim_metrics": {
+            "source": "video sheet",
+            "threshold": 121.5,
+            "ms": {
+              "decode": 275,
+              "key": 271,
+              "bounds": 141,
+              "render": 1095,
+              "seam": 613,
+              "encode": 2033,
+              "encodes": 4,
+              "probe": 178,
+              "verify": 7,
+              "finish": 4071
+            },
+            "frames": 72,
+            "fps": 24.0,
+            "bbox": [
+              0,
+              52,
+              480,
+              405
+            ],
+            "edge_touch_frames": 7,
+            "subject_px_in_video": 480,
+            "scale": 0.8267,
+            "motion": 8.92,
+            "loop_seam_before": 261.26,
+            "loop_cut": 22,
+            "loop_faded": true,
+            "loop_seam": 0.0,
+            "loop_limit": 12.0,
+            "frames_out": 44,
+            "crf": 30,
+            "sharp_kept": 1.0,
+            "detail_vs_still": 0.96,
+            "soft_sigma": 0.3,
+            "kb": 130.7
+          },
+          "anim_report": [
+            {
+              "name": "inside_slot",
+              "ok": false,
+              "detail": "frame 4, 7px over the 7px edge band",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 7,
+              "limit": 0,
+              "data": {
+                "frame": 4,
+                "over_px": 7,
+                "edge_px": 7,
+                "ms": 44.4
+              }
+            },
+            {
+              "name": "cross_slot",
+              "ok": true,
+              "detail": "gutter clean",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 0,
+              "limit": 0,
+              "data": {
+                "frame": null,
+                "px": 0,
+                "ms": 46.0
+              }
+            },
+            {
+              "name": "size_budget",
+              "ok": true,
+              "detail": "130KB @crf30",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 130,
+              "limit": 256,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "codec_vp9",
+              "ok": true,
+              "detail": "vp9",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "vp9",
+              "limit": "vp9",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "dimensions",
+              "ok": true,
+              "detail": "512x512",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "512x512",
+              "limit": "512x512",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "fps",
+              "ok": true,
+              "detail": "24.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 24.0,
+              "limit": 30.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "duration",
+              "ok": true,
+              "detail": "1.83",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 1.83,
+              "limit": 3.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "no_audio",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_mode_tag",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_decoded",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.6
+              }
+            },
+            {
+              "name": "loop_seam",
+              "ok": true,
+              "detail": "0.0 <= 12.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 0.0,
+              "limit": 12.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "identity_kept",
+              "ok": true,
+              "detail": "first frame matches the still at IoU 0.98",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.98,
+              "limit": 0.5,
+              "data": {
+                "ms": 2.1
+              }
+            },
+            {
+              "name": "motion_present",
+              "ok": true,
+              "detail": "median frame-to-frame change 8.92",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 8.92,
+              "limit": 0.5,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_stable",
+              "ok": true,
+              "detail": "subject area varies by 15% over the frames",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.148,
+              "limit": 0.35,
+              "data": {
+                "ms": 5.3
+              }
+            },
+            {
+              "name": "sharpness",
+              "ok": true,
+              "detail": "0.96x of the still's edge detail (as soft as the still blurred 0.3 px)",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.96,
+              "limit": 0.75,
+              "data": {
+                "ms": 0.0
+              }
+            }
+          ],
+          "webm": "slices/vid-superman_kid_dubai_with_kand-lying_stargazing-20261011T030115-afe28a.webm",
+          "review": "BLOCKED"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "key": "superman_kid_spinning_heroic",
+      "tags": [
+        "superman_kid_spinning_heroic",
+        "dynamic",
+        "spin",
+        "energy"
+      ],
+      "emoji": "🌀💫",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Kid hero spinning in circles with cape creating wind tornado, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-spinning_heroic-20261011T030115-24e2d7",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 113375,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 17.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 80454,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 80.45400000000001,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0001,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 1.0
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 16 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 16,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "163.3KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 163.3,
+          "limit": 512,
+          "data": {
+            "ms": 3.1
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          0,
+          1393,
+          710,
+          655
+        ],
+        "bg": [
+          1,
+          59,
+          254
+        ],
+        "threshold": 73.1,
+        "fg_px": 113375,
+        "bbox": [
+          133,
+          51,
+          648,
+          581
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0001,
+        "holes": 0.0,
+        "kb": 163.3,
+        "format": "png",
+        "recovered_by": "threshold x0.75, despill 6px",
+        "attempts": [
+          {
+            "name": "default",
+            "ok": false,
+            "reason": "no_spill"
+          },
+          {
+            "name": "dissect",
+            "ok": null,
+            "note": {
+              "ring_polluted": 0.0,
+              "bg": [
+                1,
+                59,
+                254
+              ],
+              "threshold": 97.5,
+              "fg_px": 115942,
+              "edge_px": 0
+            }
+          },
+          {
+            "name": "threshold x0.75, despill 6px",
+            "ok": true,
+            "reason": null
+          }
+        ]
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-spinning_heroic-20261011T030115-24e2d7.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 306,
+          "key": 268,
+          "bounds": 128,
+          "render": 1119,
+          "seam": 239,
+          "encode": 2458,
+          "encodes": 3,
+          "probe": 192,
+          "verify": 11,
+          "finish": 4149
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          17,
+          4,
+          445,
+          421
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 428,
+        "waived": [
+          "inside_slot",
+          "cross_slot"
+        ],
+        "scale": 0.9271,
+        "motion": 184.22,
+        "loop_seam_before": 255.49,
+        "loop_seam": 255.49,
+        "loop_limit": 276.32,
+        "frames_out": 72,
+        "crf": 50,
+        "sharp_kept": 1.02,
+        "detail_vs_still": 0.85,
+        "soft_sigma": 0.8,
+        "kb": 216.7
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-spinning_heroic-20261011T030115-24e2d7.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.823,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688029.612,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "inside_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "inside_slot",
+            "value": 2,
+            "limit": 0,
+            "note": "frame 69, 2px over the 7px edge band",
+            "data": {
+              "frame": 69,
+              "over_px": 2,
+              "edge_px": 7,
+              "ms": 43.4
+            }
+          }
+        },
+        {
+          "ts": 1791688234.609,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: inside_slot, cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "inside_slot",
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791688239.744,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": false,
+          "detail": "frame 69, 2px over the 7px edge band (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 2,
+          "limit": 0,
+          "data": {
+            "frame": 69,
+            "over_px": 2,
+            "edge_px": 7,
+            "ms": 40.1
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": false,
+          "detail": "678px of foreign foreground, first at frame 0 (allowed by you)",
+          "severity": "WARN",
+          "stage": "slot",
+          "value": 678,
+          "limit": 0,
+          "data": {
+            "frame": 0,
+            "px": 678,
+            "ms": 40.0
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "216KB @crf50",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 216,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 3.0,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "255.49 <= 276.32",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 255.49,
+          "limit": 276.32,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.89",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.891,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.4
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 184.22",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 184.22,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 13% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.126,
+          "limit": 0.35,
+          "data": {
+            "ms": 8.9
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.85x of the still's edge detail (as soft as the still blurred 0.8 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.85,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ],
+      "anim_override": [
+        "cross_slot",
+        "inside_slot"
+      ],
+      "anim_finished": {
+        "cross_slot,inside_slot": {
+          "anim_status": "READY",
+          "anim_reason": null,
+          "anim_metrics": {
+            "source": "video sheet",
+            "threshold": 121.5,
+            "ms": {
+              "decode": 306,
+              "key": 268,
+              "bounds": 128,
+              "render": 1119,
+              "seam": 239,
+              "encode": 2458,
+              "encodes": 3,
+              "probe": 192,
+              "verify": 11,
+              "finish": 4149
+            },
+            "frames": 72,
+            "fps": 24.0,
+            "bbox": [
+              17,
+              4,
+              445,
+              421
+            ],
+            "edge_touch_frames": 0,
+            "subject_px_in_video": 428,
+            "waived": [
+              "inside_slot",
+              "cross_slot"
+            ],
+            "scale": 0.9271,
+            "motion": 184.22,
+            "loop_seam_before": 255.49,
+            "loop_seam": 255.49,
+            "loop_limit": 276.32,
+            "frames_out": 72,
+            "crf": 50,
+            "sharp_kept": 1.02,
+            "detail_vs_still": 0.85,
+            "soft_sigma": 0.8,
+            "kb": 216.7
+          },
+          "anim_report": [
+            {
+              "name": "inside_slot",
+              "ok": false,
+              "detail": "frame 69, 2px over the 7px edge band (allowed by you)",
+              "severity": "WARN",
+              "stage": "slot",
+              "value": 2,
+              "limit": 0,
+              "data": {
+                "frame": 69,
+                "over_px": 2,
+                "edge_px": 7,
+                "ms": 40.1
+              }
+            },
+            {
+              "name": "cross_slot",
+              "ok": false,
+              "detail": "678px of foreign foreground, first at frame 0 (allowed by you)",
+              "severity": "WARN",
+              "stage": "slot",
+              "value": 678,
+              "limit": 0,
+              "data": {
+                "frame": 0,
+                "px": 678,
+                "ms": 40.0
+              }
+            },
+            {
+              "name": "size_budget",
+              "ok": true,
+              "detail": "216KB @crf50",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 216,
+              "limit": 256,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "codec_vp9",
+              "ok": true,
+              "detail": "vp9",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "vp9",
+              "limit": "vp9",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "dimensions",
+              "ok": true,
+              "detail": "512x512",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "512x512",
+              "limit": "512x512",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "fps",
+              "ok": true,
+              "detail": "24.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 24.0,
+              "limit": 30.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "duration",
+              "ok": true,
+              "detail": "3.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 3.0,
+              "limit": 3.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "no_audio",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_mode_tag",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_decoded",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.6
+              }
+            },
+            {
+              "name": "loop_seam",
+              "ok": true,
+              "detail": "255.49 <= 276.32",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 255.49,
+              "limit": 276.32,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "identity_kept",
+              "ok": true,
+              "detail": "first frame matches the still at IoU 0.89",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.891,
+              "limit": 0.5,
+              "data": {
+                "ms": 2.4
+              }
+            },
+            {
+              "name": "motion_present",
+              "ok": true,
+              "detail": "median frame-to-frame change 184.22",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 184.22,
+              "limit": 0.5,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_stable",
+              "ok": true,
+              "detail": "subject area varies by 13% over the frames",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.126,
+              "limit": 0.35,
+              "data": {
+                "ms": 8.9
+              }
+            },
+            {
+              "name": "sharpness",
+              "ok": true,
+              "detail": "0.85x of the still's edge detail (as soft as the still blurred 0.8 px)",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.85,
+              "limit": 0.75,
+              "data": {
+                "ms": 0.0
+              }
+            }
+          ],
+          "webm": "slices/vid-superman_kid_dubai_with_kand-spinning_heroic-20261011T030115-24e2d7.webm",
+          "review": "PENDING"
+        },
+        "plain": {
+          "anim_status": "FAILED",
+          "anim_reason": "inside_slot",
+          "anim_metrics": {
+            "source": "video sheet",
+            "threshold": 121.5,
+            "ms": {
+              "decode": 306,
+              "key": 268,
+              "bounds": 128,
+              "render": 1119,
+              "seam": 239,
+              "encode": 2458,
+              "encodes": 3,
+              "probe": 192,
+              "verify": 11,
+              "finish": 4149
+            },
+            "frames": 72,
+            "fps": 24.0,
+            "bbox": [
+              17,
+              4,
+              445,
+              421
+            ],
+            "edge_touch_frames": 0,
+            "subject_px_in_video": 428,
+            "scale": 0.9271,
+            "motion": 184.22,
+            "loop_seam_before": 255.49,
+            "loop_seam": 255.49,
+            "loop_limit": 276.32,
+            "frames_out": 72,
+            "crf": 50,
+            "sharp_kept": 1.02,
+            "detail_vs_still": 0.85,
+            "soft_sigma": 0.8,
+            "kb": 216.7
+          },
+          "anim_report": [
+            {
+              "name": "inside_slot",
+              "ok": false,
+              "detail": "frame 69, 2px over the 7px edge band",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 2,
+              "limit": 0,
+              "data": {
+                "frame": 69,
+                "over_px": 2,
+                "edge_px": 7,
+                "ms": 40.1
+              }
+            },
+            {
+              "name": "cross_slot",
+              "ok": false,
+              "detail": "678px of foreign foreground, first at frame 0",
+              "severity": "BLOCK",
+              "stage": "slot",
+              "value": 678,
+              "limit": 0,
+              "data": {
+                "frame": 0,
+                "px": 678,
+                "ms": 40.0
+              }
+            },
+            {
+              "name": "size_budget",
+              "ok": true,
+              "detail": "216KB @crf50",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 216,
+              "limit": 256,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "codec_vp9",
+              "ok": true,
+              "detail": "vp9",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "vp9",
+              "limit": "vp9",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "dimensions",
+              "ok": true,
+              "detail": "512x512",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": "512x512",
+              "limit": "512x512",
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "fps",
+              "ok": true,
+              "detail": "24.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 24.0,
+              "limit": 30.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "duration",
+              "ok": true,
+              "detail": "3.0",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 3.0,
+              "limit": 3.0,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "no_audio",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_mode_tag",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_decoded",
+              "ok": true,
+              "detail": "",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": null,
+              "limit": null,
+              "data": {
+                "ms": 0.6
+              }
+            },
+            {
+              "name": "loop_seam",
+              "ok": true,
+              "detail": "255.49 <= 276.32",
+              "severity": "BLOCK",
+              "stage": "anim",
+              "value": 255.49,
+              "limit": 276.32,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "identity_kept",
+              "ok": true,
+              "detail": "first frame matches the still at IoU 0.89",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.891,
+              "limit": 0.5,
+              "data": {
+                "ms": 2.4
+              }
+            },
+            {
+              "name": "motion_present",
+              "ok": true,
+              "detail": "median frame-to-frame change 184.22",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 184.22,
+              "limit": 0.5,
+              "data": {
+                "ms": 0.0
+              }
+            },
+            {
+              "name": "alpha_stable",
+              "ok": true,
+              "detail": "subject area varies by 13% over the frames",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.126,
+              "limit": 0.35,
+              "data": {
+                "ms": 8.9
+              }
+            },
+            {
+              "name": "sharpness",
+              "ok": true,
+              "detail": "0.85x of the still's edge detail (as soft as the still blurred 0.8 px)",
+              "severity": "WARN",
+              "stage": "anim",
+              "value": 0.85,
+              "limit": 0.75,
+              "data": {
+                "ms": 0.0
+              }
+            }
+          ],
+          "webm": "slices/vid-superman_kid_dubai_with_kand-spinning_heroic-20261011T030115-24e2d7.webm",
+          "review": "BLOCKED"
+        }
+      }
+    },
+    {
+      "index": 8,
+      "key": "superman_kid_reaching_out",
+      "tags": [
+        "superman_kid_reaching_out",
+        "curious",
+        "discovery",
+        "extend"
+      ],
+      "emoji": "🤚🚁",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Superman kid reaching toward hovering Dubai drone with both hands, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-reaching_out-20261011T030115-7e62c0",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 94341,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 16.9
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 68888,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "53px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 53,
+          "limit": 68.888,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.1% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0006,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 14 to cell 7",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 14,
+          "limit": 4,
+          "data": {
+            "of": 7,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "148.4KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 148.4,
+          "limit": 512,
+          "data": {
+            "ms": 2.8
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          710,
+          1393,
+          633,
+          655
+        ],
+        "bg": [
+          1,
+          59,
+          254
+        ],
+        "threshold": 98.0,
+        "fg_px": 94341,
+        "bbox": [
+          110,
+          41,
+          579,
+          611
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 53,
+        "chroma_risk": 0.0006,
+        "holes": 0.0,
+        "kb": 148.4,
+        "format": "png"
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-reaching_out-20261011T030115-7e62c0.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 516,
+          "key": 244,
+          "bounds": 139,
+          "render": 992,
+          "seam": 1116,
+          "encode": 18781,
+          "encodes": 4,
+          "probe": 252,
+          "verify": 10,
+          "finish": 21293
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          68,
+          82,
+          360,
+          404
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 322,
+        "scale": 1.2323,
+        "motion": 11.32,
+        "loop_seam_before": 120.0,
+        "loop_cut": 17,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 17.26,
+        "frames_out": 49,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 0.83,
+        "soft_sigma": 0.8,
+        "kb": 253.5
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-reaching_out-20261011T030115-7e62c0.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.825,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.312,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688050.787,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 43.5
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 46.2
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "253KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 253,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2.04",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 2.04,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 1.1
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 17.26",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 17.26,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.88",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.878,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.7
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 11.32",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 11.32,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 3% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.028,
+          "limit": 0.35,
+          "data": {
+            "ms": 6.1
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": true,
+          "detail": "0.83x of the still's edge detail (as soft as the still blurred 0.8 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.83,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "key": "superman_kid_meditating_calm",
+      "tags": [
+        "superman_kid_meditating_calm",
+        "zen",
+        "peaceful",
+        "focused"
+      ],
+      "emoji": "🧘☮️",
+      "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Kid superhero sitting cross-legged meditating with closed eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-superman_kid_dubai_with_kand-meditating_calm-20261011T030115-121a3d",
+      "status": "READY",
+      "reason": null,
+      "report": [
+        {
+          "name": "blank_cell",
+          "ok": true,
+          "detail": "foreground below minimum",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 99048,
+          "limit": 400,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "(512, 512, 4)",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": [
+            512,
+            512,
+            4
+          ],
+          "limit": [
+            512,
+            512,
+            4
+          ],
+          "data": {
+            "ms": 15.3
+          }
+        },
+        {
+          "name": "transparent_corners",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "foreground",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 63282,
+          "limit": 400,
+          "data": {
+            "ms": 0.1
+          }
+        },
+        {
+          "name": "inside_cell",
+          "ok": true,
+          "detail": "0px on cell border",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 8,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_spill",
+          "ok": true,
+          "detail": "0px on the edge band",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 0,
+          "limit": 63.282000000000004,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
+          "name": "chroma_risk",
+          "ok": true,
+          "detail": "0.0% of the subject is key-coloured",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.03,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "holes",
+          "ok": true,
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.01,
+          "data": {
+            "count": 0,
+            "ms": 0.2
+          }
+        },
+        {
+          "name": "single_subject",
+          "ok": true,
+          "detail": "1 part(s); the second is 0.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 0.0,
+          "limit": 0.12,
+          "data": {
+            "parts": 1,
+            "ms": 0.9
+          }
+        },
+        {
+          "name": "duplicate_cell",
+          "ok": true,
+          "detail": "hash distance 12 to cell 2",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 12,
+          "limit": 4,
+          "data": {
+            "of": 2,
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "static_file",
+          "ok": true,
+          "detail": "136.9KB png",
+          "severity": "BLOCK",
+          "stage": "still",
+          "value": 136.9,
+          "limit": 512,
+          "data": {
+            "ms": 2.5
+          }
+        }
+      ],
+      "metrics": {
+        "cell": [
+          1343,
+          1393,
+          705,
+          655
+        ],
+        "bg": [
+          1,
+          59,
+          254
+        ],
+        "threshold": 97.5,
+        "fg_px": 99048,
+        "bbox": [
+          142,
+          93,
+          563,
+          569
+        ],
+        "scale": 0.6913,
+        "scale_mode": "pack",
+        "spill_px": 0,
+        "chroma_risk": 0.0,
+        "holes": 0.0,
+        "kb": 136.9,
+        "format": "png"
+      },
+      "png": "slices/img-superman_kid_dubai_with_kand-meditating_calm-20261011T030115-121a3d.png",
+      "anim_status": "READY",
+      "anim_reason": null,
+      "anim_metrics": {
+        "source": "video sheet",
+        "threshold": 121.5,
+        "ms": {
+          "decode": 478,
+          "key": 255,
+          "bounds": 137,
+          "render": 975,
+          "seam": 1040,
+          "encode": 18579,
+          "encodes": 4,
+          "probe": 275,
+          "verify": 9,
+          "finish": 21019
+        },
+        "frames": 72,
+        "fps": 24.0,
+        "bbox": [
+          121,
+          103,
+          362,
+          376
+        ],
+        "edge_touch_frames": 0,
+        "subject_px_in_video": 273,
+        "scale": 1.4535,
+        "motion": 2.87,
+        "loop_seam_before": 37.18,
+        "loop_cut": 20,
+        "loop_faded": true,
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "frames_out": 46,
+        "crf": 30,
+        "sharp_kept": 0.99,
+        "detail_vs_still": 0.74,
+        "soft_sigma": 1.1,
+        "warnings": [
+          "sharpness"
+        ],
+        "kb": 137.2
+      },
+      "webm": "slices/vid-superman_kid_dubai_with_kand-meditating_calm-20261011T030115-121a3d.webm",
+      "review": {
+        "still": "APPROVED",
+        "anim": "PENDING"
+      },
+      "history": [
+        {
+          "ts": 1791687676.828,
+          "stage": "sliced",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791687926.313,
+          "stage": "still",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791687926.699,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687926.703,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791688050.566,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": [
+              "sharpness"
+            ]
+          }
+        }
+      ],
+      "anim_report": [
+        {
+          "name": "inside_slot",
+          "ok": true,
+          "detail": "inside",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "over_px": 0,
+            "edge_px": 7,
+            "ms": 44.3
+          }
+        },
+        {
+          "name": "cross_slot",
+          "ok": true,
+          "detail": "gutter clean",
+          "severity": "BLOCK",
+          "stage": "slot",
+          "value": 0,
+          "limit": 0,
+          "data": {
+            "frame": null,
+            "px": 0,
+            "ms": 43.1
+          }
+        },
+        {
+          "name": "size_budget",
+          "ok": true,
+          "detail": "137KB @crf30",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 137,
+          "limit": 256,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "codec_vp9",
+          "ok": true,
+          "detail": "vp9",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "vp9",
+          "limit": "vp9",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "dimensions",
+          "ok": true,
+          "detail": "512x512",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": "512x512",
+          "limit": "512x512",
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "fps",
+          "ok": true,
+          "detail": "24.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 24.0,
+          "limit": 30.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "1.92",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 1.92,
+          "limit": 3.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "no_audio",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_mode_tag",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_decoded",
+          "ok": true,
+          "detail": "",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": null,
+          "limit": null,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
+          "name": "loop_seam",
+          "ok": true,
+          "detail": "0.0 <= 12.0",
+          "severity": "BLOCK",
+          "stage": "anim",
+          "value": 0.0,
+          "limit": 12.0,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "identity_kept",
+          "ok": true,
+          "detail": "first frame matches the still at IoU 0.98",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.978,
+          "limit": 0.5,
+          "data": {
+            "ms": 2.9
+          }
+        },
+        {
+          "name": "motion_present",
+          "ok": true,
+          "detail": "median frame-to-frame change 2.87",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 2.87,
+          "limit": 0.5,
+          "data": {
+            "ms": 0.0
+          }
+        },
+        {
+          "name": "alpha_stable",
+          "ok": true,
+          "detail": "subject area varies by 1% over the frames",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.009,
+          "limit": 0.35,
+          "data": {
+            "ms": 6.0
+          }
+        },
+        {
+          "name": "sharpness",
+          "ok": false,
+          "detail": "0.74x of the still's edge detail (as soft as the still blurred 1.1 px)",
+          "severity": "WARN",
+          "stage": "anim",
+          "value": 0.74,
+          "limit": 0.75,
+          "data": {
+            "ms": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "key_colour": "blue",
+  "sheet_issues": []
+}

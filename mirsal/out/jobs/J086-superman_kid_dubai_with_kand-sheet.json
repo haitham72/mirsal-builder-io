@@ -1,0 +1,40 @@
+{
+  "id": "J086",
+  "kind": "sheet",
+  "task": "053",
+  "generation": "G129",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop.\nStyle: photorealistic character, natural material and fur texture, realistic proportions and lighting, expressive face.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: Kid superhero jumping joyfully with arms raised in triumph, cape flowing behind\nCharacter 2: Superman kid standing proudly on Burj Khalifa base with hands on hips\nCharacter 3: Kid hero running fast through Dubai desert with kandura flowing\nCharacter 4: Superman kid sitting on sand dune reading a comic book\nCharacter 5: Kid superhero leaning against palm tree with cool sunglasses\nCharacter 6: Superman kid lying on back in desert sand staring at stars\nCharacter 7: Kid hero spinning in circles with cape creating wind tornado\nCharacter 8: Superman kid reaching toward hovering Dubai drone with both hands\nCharacter 9: Kid superhero sitting cross-legged meditating with closed eyes\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure blue (#0000FF) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "superman kid in dubai with kandura",
+    "refs": [],
+    "outline": null,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "bba329ce-a2dc-4fe1-8e82-fb3cb3a17c0e",
+  "result": {
+    "file": "jobs/J086-superman_kid_dubai_with_kand-sheet/result.png",
+    "sha256": "c49454a3e659db1651095c910871111deda69a5fe34971fb80a26dc227719df6",
+    "bytes": 4675996
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791687645.927,
+  "claimed_at": 1791687647.003,
+  "completed_at": 1791687675.861,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

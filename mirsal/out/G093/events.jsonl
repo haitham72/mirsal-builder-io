@@ -18,3 +18,6 @@
 {"ts": 1790924849.377, "stage": "video_sheet_built", "status": "done", "ms": 508, "detail": {"sheet": "A1", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
 {"ts": 1790924849.382, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A1", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
 {"ts": 1791641949.78, "stage": "added_to_pack", "status": "done", "ms": 0, "detail": {"pack": "4fc651f2", "kind": "static", "stickers": [1, 2, 3, 4, 5, 6, 7, 8, 9], "replaced_stills": 0}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791687173.977, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A1", "note": "gap changed before sending"}, "actor": "human", "decision": "REJECT"}
+{"ts": 1791687174.354, "stage": "video_sheet_built", "status": "done", "ms": 300, "detail": {"sheet": "A2", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791687174.356, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A2", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}

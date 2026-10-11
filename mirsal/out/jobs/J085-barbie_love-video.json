@@ -1,0 +1,34 @@
+{
+  "id": "J085",
+  "kind": "video",
+  "task": "barbie in love",
+  "generation": "G093",
+  "provider": "higgsfield-cli",
+  "model": null,
+  "request": {
+    "model": "grok_video_v15_lite",
+    "options": {
+      "resolution": "1080p",
+      "duration": "3"
+    },
+    "prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. kisses the air, the heart floats off, a playful wink\n2. vibrates with joy, jumps up and down, claps\n3. wrings the hands, eyes shimmer, small hopeful bounce\n4. lifts the trophy, it shines, jumps with joy\n5. eyes circle slowly, head tilts back with a sigh\n6. head tips back, bursts forward with the sneeze, sniffles\n7. huffs, taps a foot, puffs the cheeks\n8. sways in circles, little stars orbit the head\n9. stretches up, big yawn, shudders and settles\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every character's design unchanged.",
+    "custom_prompt": false,
+    "start_image": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/G093/video_sheet/A2/sheet.png",
+    "sheet": "A2",
+    "label": "barbie in love",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "FAILED",
+  "external_task_id": null,
+  "result": null,
+  "cost": null,
+  "error": "the daily credit cap (10) would be exceeded by this 12-credit call (counting the jobs already running)",
+  "created_at": 1791687177.416,
+  "claimed_at": null,
+  "completed_at": 1791687179.605,
+  "dismissed": {
+    "at": 1791687403.47,
+    "by": "local"
+  }
+}

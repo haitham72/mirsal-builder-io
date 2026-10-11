@@ -253,9 +253,15 @@
     },
     "video_sheet": {
       "A1": {
+        "decision": "REJECT",
+        "by": "human",
+        "ts": 1791687173.977,
+        "note": "gap changed before sending"
+      },
+      "A2": {
         "decision": "APPROVE",
         "by": "human",
-        "ts": 1790924849.382,
+        "ts": 1791687174.356,
         "note": "approved by Make a video"
       }
     },
@@ -282,7 +288,7 @@
       "file": "video_sheet/A1/sheet.png",
       "layout": "video_sheet/A1/layout.json",
       "video": null,
-      "status": "APPROVED",
+      "status": "REJECTED",
       "ts": 1790924849.309,
       "verify": [
         {
@@ -339,6 +345,84 @@
       ],
       "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. kisses the air, the heart floats off, a playful wink\n2. vibrates with joy, jumps up and down, claps\n3. wrings the hands, eyes shimmer, small hopeful bounce\n4. lifts the trophy, it shines, jumps with joy\n5. eyes circle slowly, head tilts back with a sigh\n6. head tips back, bursts forward with the sneeze, sniffles\n7. huffs, taps a foot, puffs the cheeks\n8. sways in circles, little stars orbit the head\n9. stretches up, big yawn, shudders and settles\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
       "slot_fill": 0.74
+    },
+    {
+      "id": "A2",
+      "slots": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "grid": [
+        3,
+        3
+      ],
+      "file": "video_sheet/A2/sheet.png",
+      "layout": "video_sheet/A2/layout.json",
+      "video": null,
+      "status": "APPROVED",
+      "ts": 1791687174.353,
+      "verify": [
+        {
+          "name": "slots_match_approved",
+          "ok": true,
+          "detail": "filled slots are exactly the approved stickers; blank slots are pure key colour",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "limit": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "data": {
+            "problems": [],
+            "ms": 53.4
+          }
+        },
+        {
+          "name": "no_outline_on_sheet",
+          "ok": true,
+          "detail": "no white ring around the subjects",
+          "severity": "BLOCK",
+          "stage": "video_sheet",
+          "value": [],
+          "limit": [],
+          "data": {
+            "slots": [],
+            "ms": 148.9
+          }
+        }
+      ],
+      "blocked": null,
+      "canvas": [
+        2048,
+        2048
+      ],
+      "video_prompt": "Animate this illustration sheet as a 3-second clip. Every character performs its own big, highly expressive, cartoon-style animation in place, inside its own cell, showing a wide range of emotions:\n1. kisses the air, the heart floats off, a playful wink\n2. vibrates with joy, jumps up and down, claps\n3. wrings the hands, eyes shimmer, small hopeful bounce\n4. lifts the trophy, it shines, jumps with joy\n5. eyes circle slowly, head tilts back with a sigh\n6. head tips back, bursts forward with the sneeze, sniffles\n7. huffs, taps a foot, puffs the cheeks\n8. sways in circles, little stars orbit the head\n9. stretches up, big yawn, shudders and settles\nAnimation style: wide emotions, highly expressive faces and bodies, exaggerated squash and stretch, anticipation and follow-through, clear facial animation (eyes, eyebrows, mouth), secondary motion on ears, tails and props, each character on its own rhythm, lively and full of personality. Never a static pose and never only a gentle sway.\nKeep every character inside its own slot of the 3x3 layout; nothing may touch or cross a slot edge, and characters never interact with one another.\nEmpty slots stay empty: do not add any character, object or effect to them.\nStatic camera, no zoom, no pan, no cuts. Keep the one flat pure green (#00FF00) background exactly as it is, the same shade everywhere: no shadows, no gradient, no noise, no glow.\nKeep each character's design, proportions and colours unchanged and do not add outlines or borders.",
+      "slot_fill": 0.7
     }
   ],
   "verify": {
@@ -665,6 +749,33 @@
           "reason": "approved by Make a video",
           "ref": "A1",
           "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
+          "detail": null
         }
       ]
     },
@@ -903,6 +1014,33 @@
           "reason": "approved by Make a video",
           "ref": "A1",
           "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
+          "detail": null
         }
       ]
     },
@@ -1140,6 +1278,33 @@
           "decision": "APPROVE",
           "reason": "approved by Make a video",
           "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
           "detail": null
         }
       ]
@@ -1384,6 +1549,33 @@
           "reason": "approved by Make a video",
           "ref": "A1",
           "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
+          "detail": null
         }
       ]
     },
@@ -1621,6 +1813,33 @@
           "decision": "APPROVE",
           "reason": "approved by Make a video",
           "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
           "detail": null
         }
       ]
@@ -1860,6 +2079,33 @@
           "reason": "approved by Make a video",
           "ref": "A1",
           "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
+          "detail": null
         }
       ]
     },
@@ -2097,6 +2343,33 @@
           "decision": "APPROVE",
           "reason": "approved by Make a video",
           "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
           "detail": null
         }
       ]
@@ -2336,6 +2609,33 @@
           "reason": "approved by Make a video",
           "ref": "A1",
           "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
+          "detail": null
         }
       ]
     },
@@ -2573,6 +2873,33 @@
           "decision": "APPROVE",
           "reason": "approved by Make a video",
           "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687173.977,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "gap changed before sending",
+          "ref": "A1",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.353,
+          "stage": "video_sheet",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A2",
+          "detail": null
+        },
+        {
+          "ts": 1791687174.356,
+          "stage": "video_sheet",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "approved by Make a video",
+          "ref": "A2",
           "detail": null
         }
       ]

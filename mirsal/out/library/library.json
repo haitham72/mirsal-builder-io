@@ -1490,6 +1490,118 @@
      },
      "created": 1791004068.1306849,
      "file_name": "img-school_buss-dancing_parade-20261003T050701-45ce6b"
+    },
+    {
+     "id": "cffd48cb",
+     "name": "School buss driving happy",
+     "file": "G102/img-school_buss-driving_happy-school_buss-20261011T032002-5c0373.png",
+     "type": "static",
+     "emoji": "🚌😊",
+     "kb": 150,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 1
+     },
+     "created": 1791688802.833387,
+     "file_name": "img-school_buss-driving_happy-20261003T050701-524477"
+    },
+    {
+     "id": "c383d3c2",
+     "name": "School buss stopping smoke",
+     "file": "G102/img-school_buss-stopping_smoke-school_buss-20261011T032002-10ed59.png",
+     "type": "static",
+     "emoji": "🚌😵",
+     "kb": 170,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 2
+     },
+     "created": 1791688802.8532841,
+     "file_name": "img-school_buss-stopping_smoke-20261003T050701-964784"
+    },
+    {
+     "id": "541c1855",
+     "name": "School buss tilted wind",
+     "file": "G102/img-school_buss-tilted_wind-school_buss-20261011T032002-2c639d.png",
+     "type": "static",
+     "emoji": "🚌💨",
+     "kb": 173,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 3
+     },
+     "created": 1791688802.8685749,
+     "file_name": "img-school_buss-tilted_wind-20261003T050701-20c1af"
+    },
+    {
+     "id": "46877d8b",
+     "name": "School buss spinning fast",
+     "file": "G102/img-school_buss-spinning_fast-school_buss-20261011T032002-137809.png",
+     "type": "static",
+     "emoji": "🚌🌀",
+     "kb": 177,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 4
+     },
+     "created": 1791688802.883955,
+     "file_name": "img-school_buss-spinning_fast-20261003T050701-22d3e7"
+    },
+    {
+     "id": "a72fb061",
+     "name": "School buss jumping puddle",
+     "file": "G102/img-school_buss-jumping_puddle-school_buss-20261011T032002-7162a5.png",
+     "type": "static",
+     "emoji": "🚌💦",
+     "kb": 198,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 6
+     },
+     "created": 1791688802.894175,
+     "file_name": "img-school_buss-jumping_puddle-20261003T050701-0309b4"
+    },
+    {
+     "id": "cddce7b5",
+     "name": "School buss reaching cloud",
+     "file": "G102/img-school_buss-reaching_cloud-school_buss-20261011T032002-804b6a.png",
+     "type": "static",
+     "emoji": "🚌☁️",
+     "kb": 175,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 7
+     },
+     "created": 1791688802.902189,
+     "file_name": "img-school_buss-reaching_cloud-20261003T050701-eb0a03"
+    },
+    {
+     "id": "e2fe0439",
+     "name": "School buss shivering cold",
+     "file": "G102/img-school_buss-shivering_cold-school_buss-20261011T032002-86d974.png",
+     "type": "static",
+     "emoji": "🚌🥶",
+     "kb": 211,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G102",
+      "index": 8
+     },
+     "created": 1791688802.9082382,
+     "file_name": "img-school_buss-shivering_cold-20261003T050701-374afb"
     }
    ],
    "owner": "local",
@@ -1528,7 +1640,8 @@
       ]
      }
     ]
-   }
+   },
+   "lead_at": 1791688802.945
   },
   {
    "id": "782c4187",
@@ -1876,7 +1989,7 @@
   },
   {
    "id": "af5600ee",
-   "name": "Kitten Dubai",
+   "name": "Kitten PixxelArt",
    "slug": "kitten_dubai",
    "cover": "92d5c141",
    "created": 1791081389.7688231,
@@ -2208,7 +2321,7 @@
    "id": "87f5be26",
    "name": "Dog As Banana",
    "slug": "dog_as_banana",
-   "cover": "b18ec04f",
+   "cover": "0fdd04bc",
    "created": 1791105785.0517223,
    "stickers": [
     {

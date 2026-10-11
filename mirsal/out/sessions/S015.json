@@ -1,0 +1,1757 @@
+{
+ "id": "S015",
+ "user": "local",
+ "title": "superman kid in dubai with kandura",
+ "created": 1791687189.028,
+ "updated": 1791690506.935,
+ "settings": {
+  "grid": "3x3",
+  "style_id": "kawaii",
+  "ask_before_spending": true,
+  "ai": true,
+  "allow_vlm": true,
+  "stage": "emojis",
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": "G129",
+  "stickers": [
+   "G129/S4"
+  ]
+ },
+ "subjects": [
+  {
+   "name": "superman kid in Dubai with kandura",
+   "slug": "superman_kid_in_dubai_with_kandura",
+   "passes": [
+    {
+     "generation": "G129",
+     "job": "J086",
+     "prompt": "superman kid in dubai with kandura",
+     "grid": "3x3",
+     "style_id": "realistic",
+     "parent": null,
+     "created": 1791687645.928,
+     "ready": 9,
+     "approved": 9,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": "",
+     "stage": "video_sliced",
+     "error": null
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791687620.031,
+   "user": "superman kid in dubai with kandura",
+   "assistant": "Here's the plan for **superman kid in Dubai with kandura**: 9 stickers, realistic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791687645.931,
+   "user": "confirm",
+   "assistant": "Creating **superman kid in Dubai with kandura** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791687918.486,
+   "user": "animate it with grok",
+   "assistant": "I'll animate the 9 stickers of **Superman kid in Dubai with kandura** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "intents": [
+    "ANIMATE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G129",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G129"
+  },
+  {
+   "seq": 4,
+   "ts": 1791687929.898,
+   "user": "confirm",
+   "assistant": "Animating **Superman kid in Dubai with kandura** (about 4.5 credits). I'll show each one as it's ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G129"
+  },
+  {
+   "seq": 5,
+   "ts": 1791690474.282,
+   "user": "what is the second sticker doing",
+   "assistant": "G129/S2: superman kid standing proud 💪🏙️\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G129/S2"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G129",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G129"
+  },
+  {
+   "seq": 6,
+   "ts": 1791690487.576,
+   "user": "what is he doing",
+   "assistant": "G129/S2: superman kid standing proud 💪🏙️",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G129/S2"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G129",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "focus",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G129"
+  },
+  {
+   "seq": 7,
+   "ts": 1791690496.13,
+   "user": "what about 4th sticker",
+   "assistant": "G129/S4: superman kid reading comic 📖🧘",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G129/S4"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G129",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G129"
+  },
+  {
+   "seq": 8,
+   "ts": 1791690506.935,
+   "user": "show all of them",
+   "assistant": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: show all of them. A new sheet; the original stays. Shall I create them?",
+   "intents": [
+    "EDIT_ROUTE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G129",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G129"
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "superman kid in dubai with kandura",
+   "cards": [],
+   "steps": [],
+   "ts": 1791687602.862
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **superman kid in Dubai with kandura**: 9 stickers, realistic. Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "superman kid in Dubai with kandura",
+     "grid": "3x3",
+     "style": "realistic",
+     "count": 9,
+     "names": [
+      "superman kid jumping joy in Dubai with kandura",
+      "superman kid standing proud in Dubai with kandura",
+      "superman kid running fast in Dubai with kandura",
+      "superman kid reading comic in Dubai with kandura",
+      "superman kid leaning cool in Dubai with kandura",
+      "superman kid lying stargazing in Dubai with kandura",
+      "superman kid spinning heroic in Dubai with kandura",
+      "superman kid reaching out in Dubai with kandura",
+      "superman kid meditating calm in Dubai with kandura"
+     ],
+     "estimate": 2.0,
+     "balance": 623.62,
+     "prompt": "superman kid in dubai with kandura",
+     "prepared": false,
+     "free": false,
+     "stage": "emojis",
+     "batch": {
+      "no": 1,
+      "max": 4,
+      "label": "Batch 01 · actions 1-9",
+      "text": "Batch 01 of 04 · actions 1-9"
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superman kid in dubai with kandura",
+     "detail": null,
+     "status": "running",
+     "ts": 1791687602.871
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687602.893
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with mimo-v2.6-flash (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687602.898
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "superman kid jumping joy in Dubai with kandura",
+       "superman kid standing proud in Dubai with kandura",
+       "superman kid running fast in Dubai with kandura",
+       "superman kid reading comic in Dubai with kandura",
+       "superman kid leaning cool in Dubai with kandura",
+       "superman kid lying stargazing in Dubai with kandura",
+       "superman kid spinning heroic in Dubai with kandura",
+       "superman kid reaching out in Dubai with kandura",
+       "superman kid meditating calm in Dubai with kandura"
+      ]
+     },
+     "status": "done",
+     "ts": 1791687619.333
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687620.028
+    }
+   ],
+   "ts": 1791687602.862,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791687645.369
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Creating **superman kid in Dubai with kandura** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J086",
+     "subject": "superman kid in Dubai with kandura",
+     "parent": null,
+     "note": "",
+     "batch": "Batch 01 · actions 1-9"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating superman kid in Dubai with kandura",
+     "detail": null,
+     "status": "running",
+     "ts": 1791687645.371
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687645.372
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687645.375
+    },
+    {
+     "kind": "final",
+     "label": "started · J086",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687645.928
+    }
+   ],
+   "ts": 1791687645.369,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m5",
+   "role": "assistant",
+   "text": "**superman kid in Dubai with kandura**: batch 01 of 04 is ready. Regenerate it, or make the next batches of the pack.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791687688.385,
+   "chips": [
+    {
+     "label": "Regenerate · 2 credits",
+     "action": "regenerate",
+     "generation": "G129"
+    },
+    {
+     "label": "Batch 02 · 2 credits",
+     "action": "batch_more",
+     "to": 2
+    },
+    {
+     "label": "Batch 03 · 4 credits",
+     "action": "batch_more",
+     "to": 3
+    },
+    {
+     "label": "Batch 04 · 6 credits",
+     "action": "batch_more",
+     "to": 4
+    }
+   ]
+  },
+  {
+   "id": "m6",
+   "role": "user",
+   "text": "animate it with grok",
+   "cards": [],
+   "steps": [],
+   "ts": 1791687918.446
+  },
+  {
+   "id": "m7",
+   "role": "assistant",
+   "text": "I'll animate the 9 stickers of **Superman kid in Dubai with kandura** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Superman kid in Dubai with kandura",
+     "detail": null,
+     "status": "running",
+     "ts": 1791687918.452
+    },
+    {
+     "kind": "step",
+     "label": "understood: an animation",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687918.454
+    },
+    {
+     "kind": "step",
+     "label": "working in Superman kid in Dubai with kandura",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687918.48
+    },
+    {
+     "kind": "step",
+     "label": "9 stickers ready to move",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687918.483
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687918.484
+    }
+   ],
+   "ts": 1791687918.446,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Animate",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m8",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791687926.278
+  },
+  {
+   "id": "m9",
+   "role": "assistant",
+   "text": "Animating **Superman kid in Dubai with kandura** (about 4.5 credits). I'll show each one as it's ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": "G129",
+     "job": "J087",
+     "subject": "superman kid in Dubai with kandura",
+     "animating": true
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Superman kid in Dubai with kandura",
+     "detail": null,
+     "status": "running",
+     "ts": 1791687926.28
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687926.281
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: animate",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687926.283
+    },
+    {
+     "kind": "final",
+     "label": "animation started",
+     "detail": null,
+     "status": "done",
+     "ts": 1791687929.894
+    }
+   ],
+   "ts": 1791687926.278,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "**Superman kid in Dubai with kandura** has no finished stickers to look at yet.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Superman kid in Dubai with kandura",
+     "detail": null,
+     "status": "running",
+     "ts": 1791688198.209
+    },
+    {
+     "kind": "step",
+     "label": "looked at 0 stickers",
+     "detail": null,
+     "status": "done",
+     "ts": 1791688206.801
+    },
+    {
+     "kind": "final",
+     "label": "checked",
+     "detail": null,
+     "status": "done",
+     "ts": 1791688206.804
+    }
+   ],
+   "ts": 1791688198.208,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "what is the second sticker doing",
+   "cards": [],
+   "steps": [],
+   "ts": 1791690474.23
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "G129/S2: superman kid standing proud 💪🏙️\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G129/S2",
+       "index": 2,
+       "key": "superman_kid_standing_proud",
+       "name": "img-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615",
+       "emoji": "💪🏙️",
+       "tags": [
+        "superman_kid_standing_proud",
+        "brave",
+        "heroic",
+        "confident"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "APPROVED",
+       "anim": "PENDING",
+       "anim_status": "READY",
+       "anim_from_previous": false,
+       "waived": [
+        "no_spill"
+       ],
+       "png": "/out/G129/slices/img-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615.png?e=1791687695.008",
+       "webm": "/out/G129/slices/vid-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615.webm",
+       "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Superman kid standing proudly on Burj Khalifa base with hands on hips, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791690474.246
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690474.27
+    },
+    {
+     "kind": "step",
+     "label": "found S2 in Superman kid in Dubai with kandura · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690474.277
+    },
+    {
+     "kind": "final",
+     "label": "answered from what we made",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690474.28
+    }
+   ],
+   "ts": 1791690474.23,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "what is he doing",
+   "cards": [],
+   "steps": [],
+   "ts": 1791690487.54
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "G129/S2: superman kid standing proud 💪🏙️",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G129/S2",
+       "index": 2,
+       "key": "superman_kid_standing_proud",
+       "name": "img-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615",
+       "emoji": "💪🏙️",
+       "tags": [
+        "superman_kid_standing_proud",
+        "brave",
+        "heroic",
+        "confident"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "APPROVED",
+       "anim": "PENDING",
+       "anim_status": "READY",
+       "anim_from_previous": false,
+       "waived": [
+        "no_spill"
+       ],
+       "png": "/out/G129/slices/img-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615.png?e=1791687695.008",
+       "webm": "/out/G129/slices/vid-superman_kid_dubai_with_kand-standing_proud-20261011T030115-67a615.webm",
+       "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Superman kid standing proudly on Burj Khalifa base with hands on hips, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791690487.543
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690487.545
+    },
+    {
+     "kind": "step",
+     "label": "found S2 in Superman kid in Dubai with kandura · focus",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690487.549
+    },
+    {
+     "kind": "final",
+     "label": "answered from what we made",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690487.572
+    }
+   ],
+   "ts": 1791690487.54,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m15",
+   "role": "user",
+   "text": "what about 4th sticker",
+   "cards": [],
+   "steps": [],
+   "ts": 1791690496.094
+  },
+  {
+   "id": "m16",
+   "role": "assistant",
+   "text": "G129/S4: superman kid reading comic 📖🧘",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G129/S4",
+       "index": 4,
+       "key": "superman_kid_reading_comic",
+       "name": "img-superman_kid_dubai_with_kand-reading_comic-20261011T030115-89859d",
+       "emoji": "📖🧘",
+       "tags": [
+        "superman_kid_reading_comic",
+        "relaxing",
+        "curious",
+        "book"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "APPROVED",
+       "anim": "PENDING",
+       "anim_status": "READY",
+       "anim_from_previous": false,
+       "waived": [],
+       "png": "/out/G129/slices/img-superman_kid_dubai_with_kand-reading_comic-20261011T030115-89859d.png?e=0",
+       "webm": "/out/G129/slices/vid-superman_kid_dubai_with_kand-reading_comic-20261011T030115-89859d.webm",
+       "prompt": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop Superman kid sitting on sand dune reading a comic book, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1791690496.096
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690496.098
+    },
+    {
+     "kind": "step",
+     "label": "found S4 in Superman kid in Dubai with kandura · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690496.123
+    },
+    {
+     "kind": "final",
+     "label": "answered from what we made",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690496.127
+    }
+   ],
+   "ts": 1791690496.094,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m17",
+   "role": "user",
+   "text": "show all of them",
+   "cards": [],
+   "steps": [],
+   "ts": 1791690506.391
+  },
+  {
+   "id": "m18",
+   "role": "assistant",
+   "text": "Got it. I'll send **this sheet** as the picture with the same prompt and change only: show all of them. A new sheet; the original stays. Shall I create them?",
+   "cards": [
+    {
+     "type": "multi",
+     "title": "superman kid in Dubai with kandura: change only: show all of them",
+     "grid": "3x3",
+     "estimate": 2.0,
+     "balance": 617.12,
+     "free": false,
+     "items": [
+      {
+       "subject": "superman kid in Dubai with kandura",
+       "count": 9,
+       "names": [
+        "superman kid jumping joy",
+        "superman kid standing proud",
+        "superman kid running fast",
+        "superman kid reading comic",
+        "superman kid leaning cool",
+        "superman kid lying stargazing",
+        "superman kid spinning heroic",
+        "superman kid reaching out",
+        "superman kid meditating calm"
+       ],
+       "style": "realistic",
+       "changes": [
+        "change only: show all of them"
+       ]
+      }
+     ],
+     "edit": "tweak",
+     "image": true
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "changing a detail",
+     "detail": null,
+     "status": "running",
+     "ts": 1791690506.397
+    },
+    {
+     "kind": "step",
+     "label": "understood: an edit",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690506.399
+    },
+    {
+     "kind": "step",
+     "label": "working in Superman kid in Dubai with kandura",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690506.475
+    },
+    {
+     "kind": "step",
+     "label": "tweak: show all of them",
+     "detail": {
+      "title": "from Superman kid in Dubai with kandura",
+      "lines": [
+       "the picture: this sheet (2048 px)"
+      ]
+     },
+     "status": "done",
+     "ts": 1791690506.93
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791690506.932
+    }
+   ],
+   "ts": 1791690506.391,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create them",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": {
+  "type": "multi",
+  "items": [
+   {
+    "prompt": "superman kid in Dubai with kandura",
+    "subject": "superman kid in Dubai with kandura",
+    "grid": "3x3",
+    "style_id": "realistic",
+    "ai": true,
+    "plan": {
+     "task": "superman kid in dubai with kandura",
+     "task_slug": "superman_kid_dubai_with_kandura",
+     "subject": "superman kid",
+     "scene": "in Dubai with kandura",
+     "described": "superman kid in Dubai with kandura",
+     "context": "Dubai with kandura",
+     "kind": "default",
+     "grid": [
+      3,
+      3
+     ],
+     "template_id": "sheet_3x3",
+     "template_version": 3,
+     "slots": {
+      "subject_description": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop",
+      "style_id": "realistic",
+      "mode": "sheet_3x3",
+      "cells": [
+       {
+        "pos": 1,
+        "label": "Kid superhero jumping joyfully with arms raised in triumph, cape flowing behind",
+        "tags": [
+         "superman_kid_jumping_joy",
+         "excited",
+         "triumph",
+         "happy"
+        ],
+        "emoji": "🦸✨",
+        "motion": "Bounces up and down with arms pumping, cape fluttering energetically"
+       },
+       {
+        "pos": 2,
+        "label": "Superman kid standing proudly on Burj Khalifa base with hands on hips",
+        "tags": [
+         "superman_kid_standing_proud",
+         "brave",
+         "heroic",
+         "confident"
+        ],
+        "emoji": "💪🏙️",
+        "motion": "Stands tall and rigid, chest puffed out, occasionally flexes slightly"
+       },
+       {
+        "pos": 3,
+        "label": "Kid hero running fast through Dubai desert with kandura flowing",
+        "tags": [
+         "superman_kid_running_fast",
+         "speed",
+         "action",
+         "chase"
+        ],
+        "emoji": "💨🏃",
+        "motion": "Sprints forward with one leg extended, cape streaming behind"
+       },
+       {
+        "pos": 4,
+        "label": "Superman kid sitting on sand dune reading a comic book",
+        "tags": [
+         "superman_kid_reading_comic",
+         "relaxing",
+         "curious",
+         "book"
+        ],
+        "emoji": "📖🧘",
+        "motion": "Shifts weight while turning pages, occasionally looking up thoughtfully"
+       },
+       {
+        "pos": 5,
+        "label": "Kid superhero leaning against palm tree with cool sunglasses",
+        "tags": [
+         "superman_kid_leaning_cool",
+         "chill",
+         "cool",
+         "relaxed"
+        ],
+        "emoji": "😎🌴",
+        "motion": "Leans casually, shifts shoulder, adjusts sunglasses lazily"
+       },
+       {
+        "pos": 6,
+        "label": "Superman kid lying on back in desert sand staring at stars",
+        "tags": [
+         "superman_kid_lying_stargazing",
+         "dreamy",
+         "peaceful",
+         "night"
+        ],
+        "emoji": "⭐😴",
+        "motion": "Breathes slowly, blinks occasionally, arm drifts up to point"
+       },
+       {
+        "pos": 7,
+        "label": "Kid hero spinning in circles with cape creating wind tornado",
+        "tags": [
+         "superman_kid_spinning_heroic",
+         "dynamic",
+         "spin",
+         "energy"
+        ],
+        "emoji": "🌀💫",
+        "motion": "Rotates rapidly on spot, cape billowing outward in circular motion"
+       },
+       {
+        "pos": 8,
+        "label": "Superman kid reaching toward hovering Dubai drone with both hands",
+        "tags": [
+         "superman_kid_reaching_out",
+         "curious",
+         "discovery",
+         "extend"
+        ],
+        "emoji": "🤚🚁",
+        "motion": "Reaches forward with stretching fingers, body leaning toward target"
+       },
+       {
+        "pos": 9,
+        "label": "Kid superhero sitting cross-legged meditating with closed eyes",
+        "tags": [
+         "superman_kid_meditating_calm",
+         "zen",
+         "peaceful",
+         "focused"
+        ],
+        "emoji": "🧘☮️",
+        "motion": "Becomes perfectly still, chest rises and falls slowly in meditation"
+       }
+      ],
+      "action_guidance": "default",
+      "key_colour": "blue",
+      "face": false,
+      "preset": null,
+      "loop": false
+     },
+     "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+     },
+     "stickers": [
+      {
+       "index": 1,
+       "id": "prompt01",
+       "key": "superman_kid_jumping_joy",
+       "tags": [
+        "superman_kid_jumping_joy",
+        "excited",
+        "triumph",
+        "happy"
+       ],
+       "emoji": "🦸✨"
+      },
+      {
+       "index": 2,
+       "id": "prompt02",
+       "key": "superman_kid_standing_proud",
+       "tags": [
+        "superman_kid_standing_proud",
+        "brave",
+        "heroic",
+        "confident"
+       ],
+       "emoji": "💪🏙️"
+      },
+      {
+       "index": 3,
+       "id": "prompt03",
+       "key": "superman_kid_running_fast",
+       "tags": [
+        "superman_kid_running_fast",
+        "speed",
+        "action",
+        "chase"
+       ],
+       "emoji": "💨🏃"
+      },
+      {
+       "index": 4,
+       "id": "prompt04",
+       "key": "superman_kid_reading_comic",
+       "tags": [
+        "superman_kid_reading_comic",
+        "relaxing",
+        "curious",
+        "book"
+       ],
+       "emoji": "📖🧘"
+      },
+      {
+       "index": 5,
+       "id": "prompt05",
+       "key": "superman_kid_leaning_cool",
+       "tags": [
+        "superman_kid_leaning_cool",
+        "chill",
+        "cool",
+        "relaxed"
+       ],
+       "emoji": "😎🌴"
+      },
+      {
+       "index": 6,
+       "id": "prompt06",
+       "key": "superman_kid_lying_stargazing",
+       "tags": [
+        "superman_kid_lying_stargazing",
+        "dreamy",
+        "peaceful",
+        "night"
+       ],
+       "emoji": "⭐😴"
+      },
+      {
+       "index": 7,
+       "id": "prompt07",
+       "key": "superman_kid_spinning_heroic",
+       "tags": [
+        "superman_kid_spinning_heroic",
+        "dynamic",
+        "spin",
+        "energy"
+       ],
+       "emoji": "🌀💫"
+      },
+      {
+       "index": 8,
+       "id": "prompt08",
+       "key": "superman_kid_reaching_out",
+       "tags": [
+        "superman_kid_reaching_out",
+        "curious",
+        "discovery",
+        "extend"
+       ],
+       "emoji": "🤚🚁"
+      },
+      {
+       "index": 9,
+       "id": "prompt09",
+       "key": "superman_kid_meditating_calm",
+       "tags": [
+        "superman_kid_meditating_calm",
+        "zen",
+        "peaceful",
+        "focused"
+       ],
+       "emoji": "🧘☮️"
+      }
+     ],
+     "expanded_by": "ai",
+     "expand_model": "agnes-2.5-flash",
+     "batches_max": 4,
+     "edits": [
+      {
+       "case": "tweak",
+       "subject": null,
+       "action": null,
+       "delta": "show all of them",
+       "said": "show all of them"
+      }
+     ]
+    },
+    "parent": "G129",
+    "refs": [
+     "R005"
+    ],
+    "ref_clause": "Reference: the attached image is the sheet to keep. Keep every character exactly as drawn: the same design, colours, proportions and the same pose in every cell. Apply only this change: show all of them.",
+    "note": "tweak: show all of them",
+    "changes": [
+     "change only: show all of them"
+    ],
+    "outline": 12,
+    "erode": 0
+   }
+  ],
+  "estimate": 2.0,
+  "subject": "superman kid in Dubai with kandura (tweak)",
+  "label": "superman kid in Dubai with kandura (tweak)"
+ },
+ "vision_asked": true,
+ "pack": {
+  "request": "superman kid in dubai with kandura",
+  "subject": "superman kid in Dubai with kandura",
+  "grid": "3x3",
+  "style_id": "realistic",
+  "ai": true,
+  "plan": {
+   "task": "superman kid in dubai with kandura",
+   "task_slug": "superman_kid_dubai_with_kandura",
+   "subject": "superman kid",
+   "scene": "in Dubai with kandura",
+   "described": "superman kid in Dubai with kandura",
+   "context": "Dubai with kandura",
+   "kind": "default",
+   "grid": [
+    3,
+    3
+   ],
+   "template_id": "sheet_3x3",
+   "template_version": 3,
+   "slots": {
+    "subject_description": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop",
+    "style_id": "realistic",
+    "mode": "sheet_3x3",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "Kid superhero jumping joyfully with arms raised in triumph, cape flowing behind",
+      "tags": [
+       "superman_kid_jumping_joy",
+       "excited",
+       "triumph",
+       "happy"
+      ],
+      "emoji": "🦸✨",
+      "motion": "Bounces up and down with arms pumping, cape fluttering energetically"
+     },
+     {
+      "pos": 2,
+      "label": "Superman kid standing proudly on Burj Khalifa base with hands on hips",
+      "tags": [
+       "superman_kid_standing_proud",
+       "brave",
+       "heroic",
+       "confident"
+      ],
+      "emoji": "💪🏙️",
+      "motion": "Stands tall and rigid, chest puffed out, occasionally flexes slightly"
+     },
+     {
+      "pos": 3,
+      "label": "Kid hero running fast through Dubai desert with kandura flowing",
+      "tags": [
+       "superman_kid_running_fast",
+       "speed",
+       "action",
+       "chase"
+      ],
+      "emoji": "💨🏃",
+      "motion": "Sprints forward with one leg extended, cape streaming behind"
+     },
+     {
+      "pos": 4,
+      "label": "Superman kid sitting on sand dune reading a comic book",
+      "tags": [
+       "superman_kid_reading_comic",
+       "relaxing",
+       "curious",
+       "book"
+      ],
+      "emoji": "📖🧘",
+      "motion": "Shifts weight while turning pages, occasionally looking up thoughtfully"
+     },
+     {
+      "pos": 5,
+      "label": "Kid superhero leaning against palm tree with cool sunglasses",
+      "tags": [
+       "superman_kid_leaning_cool",
+       "chill",
+       "cool",
+       "relaxed"
+      ],
+      "emoji": "😎🌴",
+      "motion": "Leans casually, shifts shoulder, adjusts sunglasses lazily"
+     },
+     {
+      "pos": 6,
+      "label": "Superman kid lying on back in desert sand staring at stars",
+      "tags": [
+       "superman_kid_lying_stargazing",
+       "dreamy",
+       "peaceful",
+       "night"
+      ],
+      "emoji": "⭐😴",
+      "motion": "Breathes slowly, blinks occasionally, arm drifts up to point"
+     },
+     {
+      "pos": 7,
+      "label": "Kid hero spinning in circles with cape creating wind tornado",
+      "tags": [
+       "superman_kid_spinning_heroic",
+       "dynamic",
+       "spin",
+       "energy"
+      ],
+      "emoji": "🌀💫",
+      "motion": "Rotates rapidly on spot, cape billowing outward in circular motion"
+     },
+     {
+      "pos": 8,
+      "label": "Superman kid reaching toward hovering Dubai drone with both hands",
+      "tags": [
+       "superman_kid_reaching_out",
+       "curious",
+       "discovery",
+       "extend"
+      ],
+      "emoji": "🤚🚁",
+      "motion": "Reaches forward with stretching fingers, body leaning toward target"
+     },
+     {
+      "pos": 9,
+      "label": "Kid superhero sitting cross-legged meditating with closed eyes",
+      "tags": [
+       "superman_kid_meditating_calm",
+       "zen",
+       "peaceful",
+       "focused"
+      ],
+      "emoji": "🧘☮️",
+      "motion": "Becomes perfectly still, chest rises and falls slowly in meditation"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "blue",
+    "face": false,
+    "preset": null,
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "superman_kid_jumping_joy",
+     "tags": [
+      "superman_kid_jumping_joy",
+      "excited",
+      "triumph",
+      "happy"
+     ],
+     "emoji": "🦸✨"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "superman_kid_standing_proud",
+     "tags": [
+      "superman_kid_standing_proud",
+      "brave",
+      "heroic",
+      "confident"
+     ],
+     "emoji": "💪🏙️"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "superman_kid_running_fast",
+     "tags": [
+      "superman_kid_running_fast",
+      "speed",
+      "action",
+      "chase"
+     ],
+     "emoji": "💨🏃"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "superman_kid_reading_comic",
+     "tags": [
+      "superman_kid_reading_comic",
+      "relaxing",
+      "curious",
+      "book"
+     ],
+     "emoji": "📖🧘"
+    },
+    {
+     "index": 5,
+     "id": "prompt05",
+     "key": "superman_kid_leaning_cool",
+     "tags": [
+      "superman_kid_leaning_cool",
+      "chill",
+      "cool",
+      "relaxed"
+     ],
+     "emoji": "😎🌴"
+    },
+    {
+     "index": 6,
+     "id": "prompt06",
+     "key": "superman_kid_lying_stargazing",
+     "tags": [
+      "superman_kid_lying_stargazing",
+      "dreamy",
+      "peaceful",
+      "night"
+     ],
+     "emoji": "⭐😴"
+    },
+    {
+     "index": 7,
+     "id": "prompt07",
+     "key": "superman_kid_spinning_heroic",
+     "tags": [
+      "superman_kid_spinning_heroic",
+      "dynamic",
+      "spin",
+      "energy"
+     ],
+     "emoji": "🌀💫"
+    },
+    {
+     "index": 8,
+     "id": "prompt08",
+     "key": "superman_kid_reaching_out",
+     "tags": [
+      "superman_kid_reaching_out",
+      "curious",
+      "discovery",
+      "extend"
+     ],
+     "emoji": "🤚🚁"
+    },
+    {
+     "index": 9,
+     "id": "prompt09",
+     "key": "superman_kid_meditating_calm",
+     "tags": [
+      "superman_kid_meditating_calm",
+      "zen",
+      "peaceful",
+      "focused"
+     ],
+     "emoji": "🧘☮️"
+    }
+   ],
+   "expanded_by": "ai",
+   "expand_model": "agnes-2.5-flash",
+   "batches_max": 4
+  },
+  "max": 4,
+  "transformation": false,
+  "made": [
+   {
+    "no": 1,
+    "label": "Batch 01 · actions 1-9",
+    "generation": "G129",
+    "job": "J086",
+    "plan": {
+     "task": "superman kid in dubai with kandura",
+     "task_slug": "superman_kid_dubai_with_kandura",
+     "subject": "superman kid",
+     "scene": "in Dubai with kandura",
+     "described": "superman kid in Dubai with kandura",
+     "context": "Dubai with kandura",
+     "kind": "default",
+     "grid": [
+      3,
+      3
+     ],
+     "template_id": "sheet_3x3",
+     "template_version": 3,
+     "slots": {
+      "subject_description": "A young kid superhero wearing a white Dubai kandura with a red Superman cape and chest emblem, standing in Dubai with skyline and desert backdrop",
+      "style_id": "realistic",
+      "mode": "sheet_3x3",
+      "cells": [
+       {
+        "pos": 1,
+        "label": "Kid superhero jumping joyfully with arms raised in triumph, cape flowing behind",
+        "tags": [
+         "superman_kid_jumping_joy",
+         "excited",
+         "triumph",
+         "happy"
+        ],
+        "emoji": "🦸✨",
+        "motion": "Bounces up and down with arms pumping, cape fluttering energetically"
+       },
+       {
+        "pos": 2,
+        "label": "Superman kid standing proudly on Burj Khalifa base with hands on hips",
+        "tags": [
+         "superman_kid_standing_proud",
+         "brave",
+         "heroic",
+         "confident"
+        ],
+        "emoji": "💪🏙️",
+        "motion": "Stands tall and rigid, chest puffed out, occasionally flexes slightly"
+       },
+       {
+        "pos": 3,
+        "label": "Kid hero running fast through Dubai desert with kandura flowing",
+        "tags": [
+         "superman_kid_running_fast",
+         "speed",
+         "action",
+         "chase"
+        ],
+        "emoji": "💨🏃",
+        "motion": "Sprints forward with one leg extended, cape streaming behind"
+       },
+       {
+        "pos": 4,
+        "label": "Superman kid sitting on sand dune reading a comic book",
+        "tags": [
+         "superman_kid_reading_comic",
+         "relaxing",
+         "curious",
+         "book"
+        ],
+        "emoji": "📖🧘",
+        "motion": "Shifts weight while turning pages, occasionally looking up thoughtfully"
+       },
+       {
+        "pos": 5,
+        "label": "Kid superhero leaning against palm tree with cool sunglasses",
+        "tags": [
+         "superman_kid_leaning_cool",
+         "chill",
+         "cool",
+         "relaxed"
+        ],
+        "emoji": "😎🌴",
+        "motion": "Leans casually, shifts shoulder, adjusts sunglasses lazily"
+       },
+       {
+        "pos": 6,
+        "label": "Superman kid lying on back in desert sand staring at stars",
+        "tags": [
+         "superman_kid_lying_stargazing",
+         "dreamy",
+         "peaceful",
+         "night"
+        ],
+        "emoji": "⭐😴",
+        "motion": "Breathes slowly, blinks occasionally, arm drifts up to point"
+       },
+       {
+        "pos": 7,
+        "label": "Kid hero spinning in circles with cape creating wind tornado",
+        "tags": [
+         "superman_kid_spinning_heroic",
+         "dynamic",
+         "spin",
+         "energy"
+        ],
+        "emoji": "🌀💫",
+        "motion": "Rotates rapidly on spot, cape billowing outward in circular motion"
+       },
+       {
+        "pos": 8,
+        "label": "Superman kid reaching toward hovering Dubai drone with both hands",
+        "tags": [
+         "superman_kid_reaching_out",
+         "curious",
+         "discovery",
+         "extend"
+        ],
+        "emoji": "🤚🚁",
+        "motion": "Reaches forward with stretching fingers, body leaning toward target"
+       },
+       {
+        "pos": 9,
+        "label": "Kid superhero sitting cross-legged meditating with closed eyes",
+        "tags": [
+         "superman_kid_meditating_calm",
+         "zen",
+         "peaceful",
+         "focused"
+        ],
+        "emoji": "🧘☮️",
+        "motion": "Becomes perfectly still, chest rises and falls slowly in meditation"
+       }
+      ],
+      "action_guidance": "default",
+      "key_colour": "blue",
+      "face": false,
+      "preset": null,
+      "loop": false
+     },
+     "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+     },
+     "stickers": [
+      {
+       "index": 1,
+       "id": "prompt01",
+       "key": "superman_kid_jumping_joy",
+       "tags": [
+        "superman_kid_jumping_joy",
+        "excited",
+        "triumph",
+        "happy"
+       ],
+       "emoji": "🦸✨"
+      },
+      {
+       "index": 2,
+       "id": "prompt02",
+       "key": "superman_kid_standing_proud",
+       "tags": [
+        "superman_kid_standing_proud",
+        "brave",
+        "heroic",
+        "confident"
+       ],
+       "emoji": "💪🏙️"
+      },
+      {
+       "index": 3,
+       "id": "prompt03",
+       "key": "superman_kid_running_fast",
+       "tags": [
+        "superman_kid_running_fast",
+        "speed",
+        "action",
+        "chase"
+       ],
+       "emoji": "💨🏃"
+      },
+      {
+       "index": 4,
+       "id": "prompt04",
+       "key": "superman_kid_reading_comic",
+       "tags": [
+        "superman_kid_reading_comic",
+        "relaxing",
+        "curious",
+        "book"
+       ],
+       "emoji": "📖🧘"
+      },
+      {
+       "index": 5,
+       "id": "prompt05",
+       "key": "superman_kid_leaning_cool",
+       "tags": [
+        "superman_kid_leaning_cool",
+        "chill",
+        "cool",
+        "relaxed"
+       ],
+       "emoji": "😎🌴"
+      },
+      {
+       "index": 6,
+       "id": "prompt06",
+       "key": "superman_kid_lying_stargazing",
+       "tags": [
+        "superman_kid_lying_stargazing",
+        "dreamy",
+        "peaceful",
+        "night"
+       ],
+       "emoji": "⭐😴"
+      },
+      {
+       "index": 7,
+       "id": "prompt07",
+       "key": "superman_kid_spinning_heroic",
+       "tags": [
+        "superman_kid_spinning_heroic",
+        "dynamic",
+        "spin",
+        "energy"
+       ],
+       "emoji": "🌀💫"
+      },
+      {
+       "index": 8,
+       "id": "prompt08",
+       "key": "superman_kid_reaching_out",
+       "tags": [
+        "superman_kid_reaching_out",
+        "curious",
+        "discovery",
+        "extend"
+       ],
+       "emoji": "🤚🚁"
+      },
+      {
+       "index": 9,
+       "id": "prompt09",
+       "key": "superman_kid_meditating_calm",
+       "tags": [
+        "superman_kid_meditating_calm",
+        "zen",
+        "peaceful",
+        "focused"
+       ],
+       "emoji": "🧘☮️"
+      }
+     ],
+     "expanded_by": "ai",
+     "expand_model": "agnes-2.5-flash",
+     "batches_max": 4
+    },
+    "creator": false,
+    "ts": 1791687645.928
+   }
+  ],
+  "said": "1:J086"
+ },
+ "named": [
+  "G129"
+ ]
+}

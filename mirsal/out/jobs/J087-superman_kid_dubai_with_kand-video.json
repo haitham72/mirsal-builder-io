@@ -1,0 +1,44 @@
+{
+  "id": "J087",
+  "kind": "video",
+  "task": "superman kid in dubai with kandura",
+  "generation": "G129",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {},
+    "prompt": "Animate this 3x3 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. Bounces up and down with arms pumping, cape fluttering energetically\n2. Stands tall and rigid, chest puffed out, occasionally flexes slightly\n3. Sprints forward with one leg extended, cape streaming behind\n4. Shifts weight while turning pages, occasionally looking up thoughtfully\n5. Leans casually, shifts shoulder, adjusts sunglasses lazily\n6. Breathes slowly, blinks occasionally, arm drifts up to point\n7. Rotates rapidly on spot, cape billowing outward in circular motion\n8. Reaches forward with stretching fingers, body leaning toward target\n9. Becomes perfectly still, chest rises and falls slowly in meditation\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat blue background and every character's design unchanged.",
+    "custom_prompt": false,
+    "start_image": "/Users/haithammohamedibrahim/VsCode/mirsal-builder-io/mirsal/out/G129-superman_kid_dubai_with_kand-20261011T030115/video_sheet/A1/sheet.png",
+    "sheet": "A1",
+    "label": "superman kid in dubai with kandura",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "5fb02157-d15b-4e81-b996-95f439951f19",
+  "result": {
+    "file": "jobs/J087-superman_kid_dubai_with_kand-video/result.mp4",
+    "sha256": "608ea8d0963a954f82259259c22aed116df6e2885dd14eed594634e81da7f1e1",
+    "bytes": 5991778
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1791687929.893,
+  "claimed_at": 1791687934.681,
+  "completed_at": 1791688026.81,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791688766.487,
+    "by": "local"
+  }
+}

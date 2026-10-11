@@ -12,3 +12,12 @@
 {"ts": 1791004068.142, "stage": "added_to_pack", "status": "done", "ms": 0, "detail": {"pack": "f8912e13", "kind": "static", "stickers": [5, 9], "replaced_stills": 0}, "actor": "human", "decision": "APPROVE"}
 {"ts": 1791004207.924, "stage": "still_allowed", "status": "done", "ms": 0, "detail": {"indexes": [1]}, "actor": "human", "decision": "APPROVE"}
 {"ts": 1791013463.88, "stage": "still_allowed", "status": "done", "ms": 0, "detail": {"indexes": [2, 3, 4, 6, 7, 8]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.815, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 1, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.817, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 2, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.817, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 3, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.817, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 4, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.817, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 6, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.817, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 7, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.817, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 8, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.817, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4, 5, 6, 7, 8, 9]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791688802.915, "stage": "added_to_pack", "status": "done", "ms": 0, "detail": {"pack": "f8912e13", "kind": "static", "stickers": [1, 2, 3, 4, 6, 7, 8], "replaced_stills": 0}, "actor": "human", "decision": "APPROVE"}
