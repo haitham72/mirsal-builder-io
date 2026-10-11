@@ -25,7 +25,7 @@ so every read and edit costs a lot of tokens. Goal: the same behaviour, readable
 5. Then (separate commits, optional): halve `CLAUDE.md` (keep the rules, move dated history into the area docs); shorten `docs/design.md` and
    `docs/agent-and-chat.md` entries to one paragraph per feature, rewritten in place.
 
-## Step B — the cloud models: Nararouter's vision models + OpenAI, picked in the UI (after Step A)
+## Step B — unified model selection and Luna (after Step A)
 
 Today: `services/llm.py` talks to ONE OpenAI-compatible endpoint (`MIRSAL_CLOUD_URL`, `.env` = Nararouter) with `MIRSAL_LLM_MODEL` and
 `MIRSAL_LLM_FALLBACK`; the chat's model pick (`settings.models.ai`) only lists LM Studio's local models.
@@ -40,12 +40,19 @@ Today: `services/llm.py` talks to ONE OpenAI-compatible endpoint (`MIRSAL_CLOUD_
 3. **Defaults:** replace every `gpt-4o` / `gpt-4o-mini` / `gpt-4.1-mini` default with **Luna**: `DEFAULT_MODEL` in `services/llm.py`,
    `DEFAULTS["ai"]` in `services/tg_chat.py`, the `.env.example` comments. Use `gpt-5.6-luna` on Nararouter (check its router page: if it is NOT
    tagged Vision, use it for text-only calls and keep `mimo-v2.6-flash-free` for calls with images; the fallback stays `agnes-2.5-flash`).
+   Use the same provider/model resolution for chat, still descriptions, captions, naming and the vision judge; preserve explicit vision overrides.
+   Never fall back to an unrelated hardcoded model id that the configured endpoint does not offer. Validate image support before sending a still.
    Haitham's `.env` today: `MIRSAL_LLM_MODEL=mimo-v2.6-flash`, `MIRSAL_LLM_FALLBACK=agnes-2.5-flash` (do not edit `.env` yourself; tell him the lines).
 4. **One model list route:** `GET /api/llm/models` returns `{local: [...], nararouter: [...vision allow-list ∩ router], openai: [...]}` with
-   `{id, label, vision, free}`; the chat's slider details (`agent.js` `stageDetails`, the "Chat" drop-down) and Settings > AI list them grouped,
-   and a pick is `settings.models.ai = "provider:model"` (`services/llm.FORCE`). Telegram `/model` shows the same list.
+   `{id, label, vision, free}`. Put the grouped Local / Nararouter / OpenAI LLM list in the **top-right model control only**,
+   opening beside that control (`ag-engine` / `setEngine`), and reuse it in Settings > AI and Telegram `/model`.
+   A pick is `settings.models.ai = "provider:model"` (`services/llm.FORCE`); display the actual selected provider and model.
+   Keep the **left composer selector** for image/video models, Creative / Predefined (**Predefined by default**) and Ask before spending.
+   Sheet size stays in its existing outside chip. Keep the **right task-stage popover** limited to the stage slider; no models or options inside it.
+   Reuse the existing shared catalogs/selectors, and retain saved choices when opening and closing any popover.
 5. **Tests on fakes only** (`tests/test_llm_backend.py` style: patch `_post`; never call the router): the allow-list filters text-only models,
-   `provider:model` routes to the right URL and key, Luna is the default, the fallback still works. Docs: `docs/agent-and-chat.md` "Models".
+   `provider:model` routes to the right URL and key, Luna is the default, vision respects image capability and explicit overrides, the fallback still works.
+   Cover the reported unavailable-model 404, top-right popup anchoring, saved selections and absence of duplicated selectors. Docs: `docs/agent-and-chat.md` "Models".
 
 ## The redesign (branch `edit-design`) — built 2026-10-11, waits for Haitham
 

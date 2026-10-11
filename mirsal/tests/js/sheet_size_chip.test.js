@@ -39,7 +39,7 @@ function fixture({ grid = '3x3', session = true, accept = true, styles = [] } = 
   const ACT = {};
   const dependencies = { A, ACT, AIU, $: id => elements[id], post,
     ic: name => `<svg data-icon="${name}"></svg>`,
-    setSet: () => { settingsPaints++; }, toast: error => notices.push(error),
+    setSet: () => { settingsPaints++; }, setEngine: () => {}, toast: error => notices.push(error),
     store: { set: (key, value) => saved.push([key, value]) },
     history: { replaceState: (_, __, url) => urls.push(url) } };
   const code = [

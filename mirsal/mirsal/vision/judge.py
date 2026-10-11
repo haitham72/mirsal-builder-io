@@ -100,7 +100,8 @@ def target() -> dict:
     want = envfile.choice("MIRSAL_VISION_PROVIDER")
     if want == "auto":
         want = "local" if base else llm.resolve()
-    model = _env("VISION_MODEL", "") or (llm.local_model() if want == "local" else os.environ.get("MIRSAL_VISION_OPENAI_MODEL", llm.DEFAULT_MODEL))
+    cloud_model = os.environ.get("MIRSAL_VISION_OPENAI_MODEL") or os.environ.get("MIRSAL_LLM_MODEL") or llm.DEFAULT_MODEL
+    model = _env("VISION_MODEL", "") or (llm.local_model() if want == "local" else cloud_model)
     return {"provider": want, "model": model, "base_url": base if want == "local" else None}
 
 

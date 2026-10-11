@@ -1,5 +1,6 @@
 """The chat's stage (Prompt · Stickers · Animation · Telegram · Export) decides how far a NEW request goes, on FakeTools (no provider, no paid call)."""
 import unittest
+from unittest.mock import patch
 
 from mirsal.agent import creator, stages
 from tests.test_agent import Base
@@ -18,6 +19,16 @@ class Stage(Base):
     def drive(self, rounds=6):
         for _ in range(rounds):
             self.agent.creator_tick(self.sid)
+
+    def test_predefined_is_the_default_but_a_saved_creative_choice_reaches_the_planner(self):
+        self.assertEqual(self.sess()["settings"]["actions"], "predefined")
+        for mode in ("predefined", "creative"):
+            session = self.sess()
+            session["settings"]["actions"] = mode
+            self.store.save(session)
+            with patch.object(self.tools, "plan", wraps=self.tools.plan) as call:
+                self.say("make me falcon stickers")
+                self.assertEqual(call.call_args.args[4], mode)
 
     def test_a_new_chat_is_on_emojis_and_plans_a_sheet_as_today(self):
         self.assertEqual(self.sess()["settings"]["stage"], "auto", "a new chat starts on Auto: a plain request still stops at the stickers")

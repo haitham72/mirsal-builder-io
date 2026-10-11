@@ -36,42 +36,26 @@ const AIU=(()=>{
   return {on:false,rules:true,label:pref!=='cloud'&&loc.ok===false?'Rules only (local model not loaded)':'Rules only',title:`${why}. The assistant still works from its rules. Click for details.`}};
  /* the one line under the model dropdown (GET /api/llm/models): the model in use, or why the local model cannot answer, in the server's last sentence ("Load qwen3.5-4b in LM Studio ...") */
  const modelNote=m=>{if(!m)return '';if(m.ok)return `now: ${m.current}`;const why=String(m.why||'');return 'Local model not loaded: '+(why.split(/\.\s+/).pop()||why)};
- /* the stage: how far a NEW request goes (settings.stage, agent/stages.py), on a five-stop slider beside Send (Haitham, 2026-10-11: minimal like a
-    reasoning-level slider, with details like a model menu). Ids stay the server's: `emojis` reads Stickers, `export` reads Telegram, `api` is the export
-    to the backend API. stageOf reads an old session's creator switches the way the server does (on + video = Telegram). */
+ /* The right control is only the task-stage slider. Model selectors live in the left control;
+    ids stay the server's: emojis = Stickers, export = Telegram, api = collection API export. */
  const STAGES=[['auto','Auto','each message decides'],['prompt','Prompt','plan only, free'],['emojis','Stickers','sheet and stickers'],['animation','Animation','+ animation'],['export','Telegram','+ pack and Telegram'],['api','Export','+ send to the API']];
  const stageOf=st=>{const v=st&&st.stage;if(STAGES.some(x=>x[0]===v))return v;const c=(st&&st.creator)||{};return c.on&&c.scope==='video'?'export':'auto'};
- /* one model drop-down of the details: "Default (label)" first (value ""), then every model; the chat's own pick selected */
+ /* The shared model selector: the chat's pick, or the catalog default. */
  const modelSel=(kind,label,m)=>{if(!m||!(m.list||[]).length)return '';const cur=m.cur||'';
   return `<label class=sp-r><span>${esc(label)}</span><select data-agm=${kind} aria-label="${esc(label)} model"><option value=""${cur?'':' selected'}>Default${m.def?` · ${esc(m.def)}`:''}</option>${m.list.map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(x.label||x.id)}</option>`).join('')}</select></label>`};
- /* stageHTML(cur, open, d): CLOSED it is one small pill, the current stop and a caret ("Stickers ▾"), like a reasoning-level picker (Haitham, 2026-10-11:
-    "you click first and then you find your slider ... and then it goes away"). OPEN it is a panel above the box: the five stops on one slider with their
-    names under them and what the chosen one does, then the chat's models (d.models: {ai, image, video} each {list, cur, def}) and the options (d.grid,
-    d.ask, d.bypass). A stop picked closes the panel. Pure: the caller wires the actions. */
- const stageHTML=(cur,open,d)=>{d=d||{};let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=0;const n=STAGES[k];
+ const stageHTML=(cur,open)=>{let k=STAGES.findIndex(x=>x[0]===cur);if(k<0)k=0;const n=STAGES[k];
   const pill=`<button type=button class=ag-stage-btn data-act=agstage aria-haspopup=dialog aria-expanded=${!!open} title="How far a new request goes: ${esc(n[1])}, ${esc(n[2])}. Click to change."><span class=ag-mini aria-hidden=true style="--k:${k}"></span>${esc(n[1])}<i aria-hidden=true>▾</i></button>`;
   if(!open)return pill;
-  const m=d.models||{},anim=k===0||k>=3;
-  /* the slider itself (like Claude's thinking slider): one range input with a thumb you drag, snapping to the five stops; the names under it are buttons too */
   const names=STAGES.map(([id,l,h],i)=>`<button type=button class="ag-stop${i===k?' on':''}" data-act=agstagepick data-v=${id} tabindex=-1 title="${esc(h)}">${esc(l)}</button>`).join('');
-  const sw=(act,on,label,hint,extra)=>`<div class=sp-r><span>${esc(label)}${hint?`<small>${esc(hint)}</small>`:''}</span><button type=button class="ai-sw${on?' on':''}" data-act=${act}${extra||''} role=switch aria-checked=${!!on} aria-label="${esc(label)}"></button></div>`;
-  return pill+`<div class=ag-stage-pop role=dialog aria-label="Where a new request ends, and with what">
-   <div class=sp-h>Goes as far as</div>
+  return pill+`<div class=ag-stage-pop role=dialog aria-label="Task stage">
    <div class=ag-slider style="--k:${k}"><input type=range class=ag-range data-agrange min=0 max=${STAGES.length-1} step=1 value=${k} aria-label="How far a new request goes" aria-valuetext="${esc(n[1])}"><div class=ag-ticks aria-hidden=true>${STAGES.map((_,i)=>`<i class="${i<=k?'on':''}"></i>`).join('')}</div></div>
-   <div class=ag-names>${names}</div>
-   <p class=sp-hint>${esc(n[1])}: ${esc(n[2])}</p>
-   ${m.ai||m.image||m.video?`<div class=sp-h>Models</div>${modelSel('ai','Chat',m.ai)}${modelSel('image','Stickers',m.image)}${anim?modelSel('video','Video',m.video):''}`:''}
-   <div class=sp-h>Options</div>
-   <div class=sp-r><span>Stickers<small>${d.actions==='predefined'?'nine of the 36 predefined actions':'invented for your idea'}</small></span><div class=ai-seg><button type=button data-act=agsetact data-v=creative class="${d.actions==='predefined'?'':'on'}">Creative</button><button type=button data-act=agsetact data-v=predefined class="${d.actions==='predefined'?'on':''}">Predefined</button></div></div>
-   <div class=sp-r><span>Sheet</span><div class=ai-seg><button type=button data-act=agsetgrid data-v=3x3 class="${d.grid==='2x2'?'':'on'}">3×3</button><button type=button data-act=agsetgrid data-v=2x2 class="${d.grid==='2x2'?'on':''}">2×2</button></div></div>
-   ${anim?sw('agcr',d.bypass,'Approve everything for me','any rejection still stops it',' data-k=bypass'):''}
-   ${sw('agsetask',d.ask!==false,'Ask before spending','show the price first')}</div>`};
+   <div class=ag-names>${names}</div></div>`};
  return {esc,md,credits,stepSummary,nearest,atEnds,rel,sig,cardLive,needPoll,sid,lastBot,engine,modelNote,STAGES,stageOf,stageHTML,modelSel};
 })();
 if(typeof module!=='undefined')module.exports=AIU;
 
 if(typeof document!=='undefined'&&typeof ACT!=='undefined'){(()=>{
-const A={sid:null,sess:null,sessions:[],agent:null,llm:null,llmBusy:false,busy:false,sel:new Set(),open:new Set(),els:new Map(),shown:undefined,poll:0,setOpen:false,since:0,pre:'',stage:'auto'};
+const A={sid:null,sess:null,sessions:[],agent:null,llm:null,llmBusy:false,busy:false,sel:new Set(),open:new Set(),els:new Map(),shown:undefined,poll:0,setOpen:false,engineOpen:false,since:0,pre:'',stage:'auto'};
 const SUGG=['a teddy bear waving','falcon stickers','my dog as a banana','Eid mubarak greetings'];
 ICONS.send='<path d="M12 19V5M6 11l6-6 6 6"/>';
 
@@ -99,7 +83,7 @@ async function loadAgent(){const r=await api('/api/chat/agent');if(r.ok)A.agent=
 async function loadModels(){const r=await api('/api/llm/models');A.llm=r.ok?r.j:{models:[],current:'',ok:false,why:'Could not read the model list'};engRedraw()}
 /* the engine control (Auto / Local / Cloud + the local model) is ONE implementation for two screens: the AI screen's gear panel and the Studio's AI enhancer (composer.js, cpDrawEngine).
    Both draw it with beRow() and both end up in engRedraw(); the Studio hands in its own source (GET /api/ai, shaped like GET /api/chat/agent) through AIENG.rows. */
-function engRedraw(){if(A.setOpen)setSet();if(typeof cpDrawEngine==='function')cpDrawEngine()}
+function engRedraw(){if(A.engineOpen)setEngine();if(typeof cpDrawEngine==='function')cpDrawEngine()}
 const engSync=()=>typeof aiRefresh==='function'?aiRefresh():null;        // the Studio's copy of the same facts (generate.js)
 let ENGSRC=null;
 async function loadSession(id,quiet){const r=await api('/api/chat/sessions/'+id);
@@ -116,13 +100,13 @@ RENDER.agent=async arg=>{
  const root=$('s-agent');
  if(!root.dataset.ready){root.dataset.ready=1;root.innerHTML=`<div class=ai-bg><i class="ai-blob b1"></i><i class="ai-blob b2"></i><i class="ai-blob b3"></i><i class=ai-dots></i><i class=ai-glow></i></div>
   <div class=ai id=ai><div class=ai-main>
-   <div class=ai-top><span class=ttl id=ai-ttl></span><span class=sp></span><button type=button class=ai-pill id=ai-pill data-act=agset title="AI engine"><i></i><span>…</span></button>
+   <div class=ai-top><span class=ttl id=ai-ttl></span><span class=sp></span><span class=ag-engine id=ag-engine><button type=button class=ai-pill id=ai-pill data-act=agengine title="LLM model" aria-haspopup=dialog><i></i><span>…</span></button><div class="ai-set ai-engine-pop" id=ai-engine-set role=dialog aria-label="LLM model"></div></span>
     <button class=ai-ibtn data-act=agnew title="New chat" aria-label="New chat">${ic('plus')}</button></div>
    <div class=ai-scroll id=ai-scroll><div class=ai-col id=ai-col></div></div>
    <div class=ai-dock><div class=ai-dock-in>
     <div class=ai-set id=ai-set></div>
     <div class=ai-sel id=ai-sel></div>
-    <form class=ai-box id=ai-box autocomplete=off><button type=button class=ai-ibtn data-act=agset title="Settings" aria-label="Settings">${ic('settings')}</button>
+    <form class=ai-box id=ai-box autocomplete=off><button type=button class=ai-ibtn data-act=agset title="Image and video models" aria-label="Image and video models" aria-haspopup=dialog>${ic('settings')}</button>
      <textarea id=ai-in rows=1 placeholder="Make or change stickers" aria-label="Message"></textarea>
      <span class=ag-stage id=ag-stage></span>
      <button class=ai-send id=ai-send type=submit aria-label="Send" disabled>${ic('send')}</button></form>
@@ -359,7 +343,10 @@ document.addEventListener('keydown',e=>{const t=e.target;if((e.key==='Enter'||e.
 ACT.agnew=()=>{A.sid=null;A.sess=null;A.sel.clear();A.els.clear();store.set('mirsal.ai.sid','');const c=$('ai-col');if(c)c.innerHTML='';history.replaceState(null,'','#/agent');paint();agList();const t=$('ai-in');if(t)t.focus()};
 ACT.agopen=el=>{location.hash='#/agent/'+el.dataset.id};
 ACT.agdel=el=>{const id=el.dataset.id;confirmDlg('Delete this chat? The stickers it made stay in the Studio.',async()=>{await post(`/api/chat/sessions/${id}/delete`);if(A.sid===id)ACT.agnew();await loadSessions();agList()},'Delete')};
-ACT.agset=()=>{A.setOpen=!A.setOpen;setSet();if(A.setOpen)loadModels()};
+ACT.agset=async()=>{closeStage(false);A.engineOpen=false;setEngine();A.setOpen=!A.setOpen;setSet();
+ if(A.setOpen&&!A.cat){const r=await api('/api/models');A.cat=r.ok?r.j:{};setSet()}};
+ACT.agengine=async()=>{closeStage(false);A.setOpen=false;setSet();A.engineOpen=!A.engineOpen;setEngine();
+ if(A.engineOpen){await loadModels();setEngine()}};
 ACT.agsetgrid=async el=>saveSet({grid:el.dataset.v});
 /* the sheet size in the bar is ONE chip that flips on click (it used to be a native <select>, and .ag-sel in the settings panel is display:block;width:100%, which stretched this chip over its own row) */
 ACT.aggridtoggle=async el=>saveSet({grid:((A.sess&&A.sess.settings&&A.sess.settings.grid)||'3x3')==='2x2'?'3x3':'2x2'});
@@ -367,17 +354,15 @@ ACT.aggridtoggle=async el=>saveSet({grid:((A.sess&&A.sess.settings&&A.sess.setti
 /* ---------- under the box: what the next sheet will be made with, one click from changing it (the same settings as the gear, and the style tiles the Studio has, smaller) */
 const styleNow=()=>(A.sess&&A.sess.settings&&A.sess.settings.style_id)||A.pre||(A.agent&&A.agent.default_style)||'flat_vector';
 /* the stage: a pill that opens the slider. A pick writes settings.stage through the settings route and makes no chat turn. Keyboard: Enter on the pill
-   opens it with the current stop focused, Left / Right move along the slider (it stays open), Enter picks and closes, Esc closes. The details read the model catalog once (GET /api/models). */
-function stageDetails(){const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},mine=st.models||{},cat=A.cat||{},llm=A.llm||{};
+   opens it with the current stop focused, Left / Right move along the slider (it stays open), Enter picks and closes, Esc closes. Opening the stage does not fetch model catalogs. */
+function selectorDetails(){const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},mine=st.models||{},cat=A.cat||{},llm=A.llm||{};
  const kind=k=>{const list=[...(cat[k]||[]),...((cat.more||{})[k]||[])].map(x=>({id:x.id,label:x.label}));const def=(list.find(x=>x.id===(cat.defaults||{})[k])||{}).label||'';return list.length?{list,cur:mine[k]||'',def}:null};
  return {models:{ai:(llm.models||[]).length?{list:llm.models.map(x=>({id:x.id,label:x.id})),cur:mine.ai||'',def:(llm.current||'').replace(/:\d+$/,'')}:null,image:kind('image'),video:kind('video')},
-  grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass),actions:st.actions||'creative'}}
-function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(A.sess?AIU.stageOf(A.sess.settings):A.stage,A.stageOpen,A.stageOpen?stageDetails():null);
+  grid:st.grid,ask:st.ask_before_spending!==false,bypass:!!(st.creator&&st.creator.bypass),actions:st.actions||'predefined'}}
+function drawStage(){const el=$('ag-stage');if(!el)return;el.innerHTML=AIU.stageHTML(A.sess?AIU.stageOf(A.sess.settings):A.stage,A.stageOpen);
  if(A.stageOpen&&!el.contains(document.activeElement)){const r=el.querySelector('.ag-range');if(r)r.focus({preventScroll:true})}}
 function closeStage(focus){if(!A.stageOpen)return;A.stageOpen=false;drawStage();if(focus){const b=document.querySelector('#ag-stage .ag-stage-btn');if(b)b.focus()}}
-ACT.agstage=async()=>{A.stageOpen=!A.stageOpen;drawStage();if(!A.stageOpen)return;
- const need=[];if(!A.cat)need.push(api('/api/models').then(r=>{A.cat=r.ok?r.j:{}}));if(!A.llm)need.push(loadModels());
- if(need.length){await Promise.all(need);if(A.stageOpen)drawStage()}};
+ACT.agstage=()=>{A.setOpen=false;setSet();A.engineOpen=false;setEngine();A.stageOpen=!A.stageOpen;drawStage()};
 ACT.agsetact=el=>saveSet({actions:el.dataset.v==='predefined'?'predefined':'creative'});
 ACT.agstagepick=async(el,ev,keep)=>{const v=el.dataset.v;if(!AIU.STAGES.some(s=>s[0]===v))return;const prior=A.stage;A.stage=v;if(A.sess)A.sess.settings=Object.assign({},A.sess.settings,{stage:v});if(!keep)A.stageOpen=false;drawStage();
  if(A.sess)await saveSet({stage:v});else{const r=await post('/api/prefs',{stage:v});if(!r.ok){A.stage=prior;drawStage();toast(r.j.error||'Could not save the stage',1)}}
@@ -389,7 +374,7 @@ document.addEventListener('keydown',e=>{if(!e.target.closest||!e.target.closest(
 document.addEventListener('pointerdown',e=>{if(e.target.classList&&e.target.classList.contains('ag-range'))A.stageDrag=true});
 document.addEventListener('input',e=>{const r=e.target;if(!r.dataset||r.dataset.agrange===undefined)return;const k=+r.value,s=AIU.STAGES[k];
  const box=r.closest('.ag-slider');if(box)box.style.setProperty('--k',k);box&&box.querySelectorAll('.ag-ticks i').forEach((x,i)=>x.classList.toggle('on',i<=k));
- r.setAttribute('aria-valuetext',s[1]);const h=document.querySelector('#ag-stage .sp-hint');if(h)h.textContent=`${s[1]}: ${s[2]}`;
+ r.setAttribute('aria-valuetext',s[1]);
  document.querySelectorAll('#ag-stage .ag-names .ag-stop').forEach((b,i)=>b.classList.toggle('on',i===k))});
 
 document.addEventListener('click',e=>{const inside=e.composedPath().some(el=>el.id==='ag-stage');if(A.stageOpen&&!inside)closeStage(false)});
@@ -398,14 +383,13 @@ function drawBar(){if(typeof drawStage==='function')drawStage();const bar=$('ag-
  const st=(A.sess&&A.sess.settings)||{grid:'3x3',ask_before_spending:true},list=(A.agent&&A.agent.styles)||[],cur=styleNow();
  const now=list.find(s=>s.id===cur);
  const open=A.stylesOpen??!A.pre;      /* the tiles until a style is picked, then only the chosen one (a chip); the chip opens them again */
- bar.innerHTML=`${now?`<button type=button class="ag-chip ag-cur" data-act=agstyles aria-expanded=${open} title="The style of the next sheet. Click to ${open?'close':'see every style'}."><img src="/assets/styles/${AIU.esc(now.id)}" alt="">${AIU.esc(now.label)}<i aria-hidden=true>${open?'▴':'▾'}</i></button>`:''}<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle" title="How many stickers in one sheet: nine (3×3) or four (2×2). Click to change.">${ic('lib')}${st.grid==='2x2'?'2×2 sheet':'3×3 sheet'}</button>
-  <button type=button class="ag-chip${st.ask_before_spending?'':' warn'}" data-act=agsetask title="${st.ask_before_spending?'The price is shown and you say go before anything is spent':'Sheets start at once, without showing the price first'}">${ic(st.ask_before_spending?'check':'x')}${st.ask_before_spending?'Asks before spending':'Spends without asking'}</button>`;
+ bar.innerHTML=`${now?`<button type=button class="ag-chip ag-cur" data-act=agstyles aria-expanded=${open} title="The style of the next sheet. Click to ${open?'close':'see every style'}."><img src="/assets/styles/${AIU.esc(now.id)}" alt="">${AIU.esc(now.label)}<i aria-hidden=true>${open?'▴':'▾'}</i></button>`:''}<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle" title="How many stickers in one sheet: nine (3×3) or four (2×2). Click to change.">${ic('lib')}${st.grid==='2x2'?'2×2 sheet':'3×3 sheet'}</button>`;
  box.hidden=!open;box.innerHTML=!open?'':list.map(s=>`<button type=button class="ag-st${s.id===cur?' on':''}" role=radio aria-checked=${s.id===cur} data-act=agstyle data-id="${AIU.esc(s.id)}" title="${AIU.esc(s.label)}: ${AIU.esc(s.hint)}"><img src="/assets/styles/${AIU.esc(s.id)}" alt="" loading=lazy><b>${AIU.esc(s.label)}</b></button>`).join('')}
 ACT.agstyle=async el=>{A.pre=el.dataset.id;A.stylesOpen=false;store.set('mirsal.ai.style',A.pre);if(A.sess)await saveSet({style_id:A.pre});else drawBar()};
 ACT.agstyles=()=>{A.stylesOpen=!(A.stylesOpen??!A.pre);drawBar()};
 ACT.agsetask=async()=>saveSet({ask_before_spending:!(A.sess?A.sess.settings.ask_before_spending:true)});
 ACT.agbe=async el=>{const r=await post('/api/ai/backend',{backend:el.dataset.v});if(r.ok){await Promise.all([loadAgent(),engSync()]);engRedraw()}else toast(r.j.error||'Could not change the AI engine',1)};
-async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;A.stage=AIU.stageOf(r.j.settings);setSet();drawBar()}else{if(p.stage)await loadSession(sid,true);toast(r.j.error,1)}}
+async function saveSet(p){const sid=await ensureSession();if(!sid)return;const r=await post(`/api/chat/sessions/${sid}/settings`,p);if(r.ok){A.sess.settings=r.j.settings;A.stage=AIU.stageOf(r.j.settings);setSet();setEngine();drawBar()}else{if(p.stage)await loadSession(sid,true);toast(r.j.error,1)}}
 /* the AI engine row: Auto keeps a working backend and only a failed call switches it; Local / Cloud are used as chosen. A backend that is not available says why. */
 function beRow(){const a=ENGSRC||A.agent||{},av=a.availability||{},pref=a.preference||'auto';
  const b=(v,label)=>{const ok=v==='auto'||(av[v]&&av[v].ok);const why=v==='auto'?'Use the local model when LM Studio answers, otherwise the cloud; keep what works':(av[v]&&av[v].why)||(av[v]&&av[v].model)||'';
@@ -416,6 +400,7 @@ function beRow(){const a=ENGSRC||A.agent||{},av=a.availability||{},pref=a.prefer
 /* the local model, part of the engine row: a dropdown of every model the local server lists (LM Studio, vLLM: GET /api/llm/models), the one in use selected, and one line saying why when it cannot answer.
    A pick is POST /api/ai/backend {model}; the first answer after a switch can take a moment while the server loads it. */
 function modelRow(){const m=A.llm,pref=((ENGSRC||A.agent)||{}).preference||'auto';
+ if(A.engineOpen&&!ENGSRC)return AIU.modelSel('ai','Chat',selectorDetails().models.ai);
  if(A.llmBusy||!m)return `<div class="r ag-mrow"><div><small>${A.llmBusy?'Switching the local model: the first answer can take a moment…':'Checking the local model…'}</small></div></div>`;
  if(!m.models.length&&pref==='cloud')return '';
  const sel=m.models.length?`<select class=ag-sel data-agmodel aria-label="Local model">${m.models.map(x=>`<option value="${AIU.esc(x.id)}"${x.id===m.current?' selected':''}>${AIU.esc(x.id)}${x.loaded?' · loaded':''}</option>`).join('')}</select>`:'';
@@ -425,7 +410,7 @@ document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset|
  const r=await post('/api/ai/backend',{model:s.value});
  if(!r.ok)toast((r.j&&r.j.error)||'Could not change the local model',1);
  await Promise.all([loadModels(),loadAgent(),engSync()]);A.llmBusy=false;engRedraw()});
-/* a model of the details: the chat's own pick (settings.models), "" = the server's default again */
+/* a model selector: the chat's own pick (settings.models), "" = the server's default again */
 document.addEventListener('change',async e=>{const s=e.target;if(!s||!s.dataset||s.dataset.agm===undefined)return;await saveSet({models:{[s.dataset.agm]:s.value}})});
 /* the stage range's pick (after the model drop-downs' listener, which tests take as the first) */
 document.addEventListener('change',e=>{const r=e.target;if(!r.dataset||r.dataset.agrange===undefined)return;const drag=A.stageDrag;A.stageDrag=false;
@@ -439,13 +424,22 @@ function crRows(st){const c=Object.assign({on:false,scope:'images',bypass:false}
 ACT.agcr=async el=>{const cur=Object.assign({on:false,scope:'images',bypass:false},(A.sess&&A.sess.settings.creator)||{}),k=el.dataset.k;
  const next=k==='scope'?{scope:el.dataset.v}:{[k]:!cur[k]};
  await saveSet({creator:Object.assign({},cur,next)})};
+function setEngine(){const el=$('ai-engine-set');if(!el)return;el.classList.toggle('on',A.engineOpen);
+ const button=$('ai-pill');if(button)button.setAttribute('aria-expanded',!!A.engineOpen);
+ if(A.engineOpen)el.innerHTML=`${beRow()}`}
 function setSet(){const el=$('ai-set');if(!el)return;el.classList.toggle('on',A.setOpen);if(!A.setOpen)return;
- const st=A.sess?A.sess.settings:{grid:'3x3',ask_before_spending:true};
- el.innerHTML=`<div class=r><div><b>Grid</b><small>How many stickers in one sheet</small></div><div class=ai-seg><button data-act=agsetgrid data-v=3x3 class="${st.grid==='3x3'?'on':''}">3×3</button><button data-act=agsetgrid data-v=2x2 class="${st.grid==='2x2'?'on':''}">2×2</button></div></div>
-  ${beRow()}
+ const st=(A.sess&&A.sess.settings)||{ask_before_spending:true,actions:'predefined'},d=selectorDetails();
+ el.setAttribute('role','dialog');el.setAttribute('aria-label','Image and video models and options');
+ el.innerHTML=AIU.modelSel('image','Image',d.models.image)+AIU.modelSel('video','Video',d.models.video)
+  +(!A.cat?'<p class=sp-hint>Loading models…</p>':!d.models.image&&!d.models.video?'<p class=sp-hint>No image or video models available.</p>':'')
+  +`<div class=r><div><b>Sticker actions</b></div><div class=ai-seg><button type=button data-act=agsetact data-v=creative class="${d.actions==='creative'?'on':''}">Creative</button><button type=button data-act=agsetact data-v=predefined class="${d.actions==='creative'?'':'on'}">Predefined</button></div></div>
   ${crRows(st)}
-  <div class=r><div><b>Ask before spending</b><small>Show the price and wait for your go-ahead</small></div><button type=button class="ai-sw${st.ask_before_spending?' on':''}" data-act=agsetask role=switch aria-checked="${!!st.ask_before_spending}" aria-label="Ask before spending"></button></div>`}
-document.addEventListener('click',e=>{if(A.setOpen&&!e.target.closest('.ai-set')&&!e.target.closest('[data-act=agset]')){A.setOpen=false;setSet()}});
+  <div class=r><div><b>Ask before spending</b></div><button type=button class="ai-sw${st.ask_before_spending!==false?' on':''}" data-act=agsetask role=switch aria-checked="${st.ask_before_spending!==false}" aria-label="Ask before spending"></button></div>`}
+document.addEventListener('click',e=>{const path=e.composedPath();
+ if(A.setOpen&&!path.some(el=>el.id==='ai-set'||(el.dataset&&el.dataset.act==='agset'))){A.setOpen=false;setSet()}
+ if(A.engineOpen&&!path.some(el=>el.id==='ag-engine')){A.engineOpen=false;setEngine()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(A.setOpen||A.engineOpen)){const engine=A.engineOpen;
+ A.setOpen=false;A.engineOpen=false;setSet();setEngine();const b=document.querySelector(`[data-act=${engine?'agengine':'agset'}]`);if(b)b.focus()}});
 
 /* ---------- sending and polling */
 async function agSend(text,action){
@@ -453,7 +447,7 @@ async function agSend(text,action){
  const sid=await ensureSession();if(!sid)return;A.busy=true;busyUi();
  const r=await post(`/api/chat/sessions/${sid}/messages`,{text,action,selected:[...A.sel]});
  if(!r.ok){A.busy=false;busyUi();return toast(r.status===409?'Still working on your last message.':(r.j.error||'Could not send'),1)}
- A.sel.clear();selChips();A.setOpen=false;setSet();
+ A.sel.clear();selChips();A.setOpen=false;setSet();A.engineOpen=false;setEngine();
  try{await loadSession(sid,true)}catch(e){}            // a paint error must not stop this turn from being polled
  startPoll();
 }

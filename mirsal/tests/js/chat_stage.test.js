@@ -1,4 +1,4 @@
-// The stage control's builder (pure half of agent.js): a pill that opens a panel with the five-stop slider, the chat's models and the options.
+// The stage control's builder (pure half of agent.js): a pill that opens the task slider on the right; image/video model selectors on the left.
 // Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -9,13 +9,16 @@ const { loadConsole } = require('./console_vm');
 
 function handlers() {
   const source = fs.readFileSync(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8')
-    .replace('})()}', 'globalThis.ChatTest={A,drawStage,loadStage,botHTML};})()}');
+    .replace('})()}', 'globalThis.ChatTest={A,drawStage,loadStage,botHTML,setSet,setEngine,drawBar};})()}');
   return loadConsole([], { extra: `
     const window=globalThis,EVENTS={};
     document.addEventListener=(type,fn)=>(EVENTS[type]||=[]).push(fn);
     const RANGE={focus(){document.activeElement=this}};
     const STAGE={id:'ag-stage',innerHTML:'',contains(el){return el===RANGE},querySelector(){return RANGE}};
     DOMSTUB['ag-stage']=STAGE;
+    const SETTINGS={id:'ai-set',innerHTML:'',classList:{toggle(){}},setAttribute(){}};
+    DOMSTUB['ai-set']=SETTINGS;
+    const ENGINE={innerHTML:'',classList:{toggle(){}}};DOMSTUB['ai-engine-set']=ENGINE;
     ${source}
     ChatTest.A.cat={};ChatTest.A.llm={models:[]};
   ` });
@@ -25,6 +28,7 @@ test('the opening click stays inside the stage even after drawing detaches the o
   const run = handlers();
   await run('ACT.agstage()');
   assert.equal(run('ChatTest.A.stageOpen'), true);
+  assert.equal(run('APICALLS'), 0, 'opening the task slider never fetches model lists');
   run(`EVENTS.click.forEach(fn=>fn({target:{closest:()=>null},composedPath:()=>[{id:''},STAGE,document]}))`);
   assert.equal(run('ChatTest.A.stageOpen'), true, 'the original event path keeps the popover open');
   assert.match(run('STAGE.innerHTML'), /class=ag-stage-pop/);
@@ -60,7 +64,7 @@ test('closed it is one pill: a small slider glyph, the current stop and a caret,
   assert.doesNotMatch(h, /ag-range|ag-slider|ag-stage-pop/, 'the slider is not on screen until the pill is clicked');
 });
 
-test('open, the panel holds a real slider: a range over the five stops, their names under it, what the chosen one does', () => {
+test('open, the panel holds only the task slider and its six stage labels', () => {
   const h = U.stageHTML('animation', true, { grid: '3x3', ask: true, bypass: false, actions: 'predefined' });
   assert.match(h, /aria-expanded=true/);
   assert.match(h, /<input type=range class=ag-range data-agrange min=0 max=5 step=1 value=3 aria-label="How far a new request goes" aria-valuetext="Animation">/);
@@ -68,26 +72,49 @@ test('open, the panel holds a real slider: a range over the five stops, their na
   assert.deepEqual([...h.matchAll(/class="ag-stop[^"]*" data-act=agstagepick data-v=(\w+)[^>]*>(\w+)</g)].map(m => m[1] + ':' + m[2]),
     ['auto:Auto', 'prompt:Prompt', 'emojis:Stickers', 'animation:Animation', 'export:Telegram', 'api:Export']);
   assert.match(h, /class="ag-stop on" data-act=agstagepick data-v=animation/);
-  assert.match(h, /<p class=sp-hint>Animation: \+ animation<\/p>/);
-  assert.match(h, /data-act=agsetact data-v=predefined class="on">Predefined/, 'Creative or Predefined: where the stickers come from');
-  assert.match(h, /data-act=agcr data-k=bypass role=switch aria-checked=false/, 'from Animation on: approve everything for me');
-  assert.match(h, /data-act=agsetask role=switch aria-checked=true/);
-  assert.match(h, /data-act=agsetgrid data-v=3x3 class="on"/);
-  assert.match(U.stageHTML('api', true), /Export: \+ send to the API/);
-  assert.match(U.stageHTML('emojis', true), /data-act=agsetact data-v=creative class="on">Creative/, 'creative by default');
+  assert.doesNotMatch(h, /Models|Options|<select|role=switch|sp-hint|sp-h>/);
 });
 
-test('the models: Default first, the chat\'s pick selected; video only from Animation on', () => {
-  const models = { image: { list: [{ id: 'nano_banana_flash', label: 'Nano Banana 2' }, { id: 'nano_banana_pro', label: 'Nano Banana Pro' }], cur: 'nano_banana_pro', def: 'Nano Banana 2' },
-    video: { list: [{ id: 'kling3', label: 'Kling 3.0' }], cur: '', def: 'Kling 3.0' }, ai: null };
-  const still = U.stageHTML('emojis', true, { models });
-  assert.match(still, /<select data-agm=image aria-label="Stickers model"><option value="">Default · Nano Banana 2<\/option><option value="nano_banana_flash">Nano Banana 2<\/option><option value="nano_banana_pro" selected>/);
-  assert.doesNotMatch(still, /data-agm=video/, 'no video model at a stop before Animation');
-  assert.match(U.stageHTML('auto', true, { models }), /data-agm=video/, 'Auto may animate: the video model is there');
-  assert.doesNotMatch(still, /data-agm=ai/, 'no chat model when the local server lists none');
-  assert.doesNotMatch(still, /data-k=bypass/);
-  const anim = U.stageHTML('animation', true, { models });
-  assert.match(anim, /<select data-agm=video aria-label="Video model"><option value="" selected>Default · Kling 3.0<\/option>/);
+test('the left selector loads the shared catalog and shows image/video models and creation options at any task stage', async () => {
+  const run = handlers();
+  run(`ChatTest.A.cat=null;ChatTest.A.sid='S001';ChatTest.A.sess={settings:{stage:'prompt',models:{image:'nano_banana_pro'}}};
+    APIREPLIES.push({ok:true,j:{image:[{id:'nano_banana_flash',label:'Nano Banana 2'},{id:'nano_banana_pro',label:'Nano Banana Pro'}],
+      video:[{id:'kling3',label:'Kling 3.0'}],more:{},defaults:{image:'nano_banana_flash',video:'kling3'}}})`);
+  await run('ACT.agset()');
+  const html = run('SETTINGS.innerHTML');
+  assert.equal(run('APICALLS'), 1, 'one shared image/video catalog request');
+  assert.match(html, /data-agm=image aria-label="Image model"/);
+  assert.match(html, /value="nano_banana_pro" selected/);
+  assert.match(html, /Default · Nano Banana 2/);
+  assert.match(html, /data-agm=video aria-label="Video model"/);
+  assert.doesNotMatch(html, /data-agm=ai|data-agmodel|ag-range|data-act=agbe|data-act=agsetgrid/);
+  assert.match(html, /data-act=agsetact data-v=predefined class="on">Predefined/);
+  assert.match(html, /data-act=agsetask role=switch/);
+  run(`POSTREPLIES.push({ok:true,j:{settings:{stage:'prompt',models:{image:'nano_banana_pro',video:'kling3'}}}})`);
+  await run(`EVENTS.change[1]({target:{dataset:{agm:'video'},value:'kling3'}})`);
+  assert.equal(run("POSTS[0][0]"), '/api/chat/sessions/S001/settings');
+  assert.equal(run("JSON.stringify(POSTS[0][1])"), '{"models":{"video":"kling3"}}');
+  assert.equal(run('ChatTest.A.sess.settings.stage'), 'prompt', 'a model pick leaves the task stage unchanged');
+  assert.equal(run('ChatTest.A.sess.settings.models.image'), 'nano_banana_pro');
+  run('ACT.agstage()');
+  assert.equal(run('ChatTest.A.setOpen'), false, 'opening the right slider dismisses the left selector');
+});
+
+test('the top-right LLM selector uses its own popup, without creation options or a second model selector', async () => {
+  const run=handlers();
+  run(`APIREPLIES.push({ok:true,j:{ok:true,current:'qwen',models:[{id:'qwen'},{id:'other'}]}})`);
+  await run('ACT.agengine()');
+  assert.equal(run('ChatTest.A.engineOpen'),true);
+  assert.equal(run('ChatTest.A.setOpen'),false);
+  assert.match(run('ENGINE.innerHTML'), /data-agm=ai aria-label="Chat model"/);
+  assert.equal((run('ENGINE.innerHTML').match(/<select/g)||[]).length,1);
+  assert.doesNotMatch(run('ENGINE.innerHTML'), /data-agm=image|data-agm=video|ag-range|data-act=agsetact|data-act=agsetask|data-act=agsetgrid/);
+  await run('ACT.agset()');
+  assert.equal(run('ChatTest.A.engineOpen'),false);
+  assert.equal(run('ChatTest.A.setOpen'),true);
+  run(`DOMSTUB['ag-bar']={innerHTML:''};DOMSTUB['ag-styles']={innerHTML:''};ChatTest.drawBar()`);
+  assert.match(run("DOMSTUB['ag-bar'].innerHTML"), /data-act="aggridtoggle"/);
+  assert.doesNotMatch(run("DOMSTUB['ag-bar'].innerHTML"), /data-act=agsetask/);
 });
 
 test('an unknown stage reads as Auto, and old creator switches migrate like the server', () => {

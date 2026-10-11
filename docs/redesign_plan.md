@@ -32,7 +32,7 @@ Mockups (static, real media, not wired): `mirsal/web/mockups/redesign/` — `stu
 - **Create has two tabs: Chat | Studio** (today's AI and Studio). Create > "From a photo" (today's `#/create`) and "Particle effects"
   (`#/effects`) are entries in Create's "+ New" menu.
 - **The journey bar** (both tabs). **In Chat it is built** (2026-10-11): the stage slider, Prompt · Stickers · Animation · Telegram · Export
-  (`agent/stages.py` has five stages; `docs/design.md` "The stage slider"), with its details (the chat's models and options). Still to build: the
+  (`agent/stages.py` has five stages; `docs/design.md` "The stage slider"), with a stage-only popover; model selectors and creation options have their own controls. Still to build: the
   Studio header's version, which shows where the selected sheet or video is on the same five stops.
 - **The project map** (Studio, left column; replaces the Earlier-batches column, the variations strip and the Animation tab's video row):
 
@@ -177,7 +177,7 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 1 the rail of four, the avatar menu, Create's tabs · 2 the Studio's journey track · 3 the project map's data (`flow/projects.py`,
 `GET /api/generations/{id}/map`) · 4 the map column, the project switcher, the breadcrumb (`projmap.js`) · 5 the toolbar and Stickers · Sheet · Both ·
 6 the sticker panel · 7 the floating bottom bar and the density pass · 8 the pack screen · 9 Settings' section bar · 10 the chat restyle · 11 the polish.
-Also built: the chat's stage slider with five stops and its details (`agent/stages.py` `api`), `serve --reload`. Nothing was renamed or retired: the
+Also built: the chat's task slider, separate left creation selectors and top-right LLM selector (`agent/stages.py` `api`), `serve --reload`. Nothing was renamed or retired: the
 inventory test passes against the untouched baseline.
 
 **Open:**

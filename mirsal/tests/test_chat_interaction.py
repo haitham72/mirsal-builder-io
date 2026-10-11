@@ -123,6 +123,15 @@ class InteractionTests(Base):
         self.assertIn("?", self.say("make 3 laugh")["text"])
         self.assertIsNone(self.sess()["pending"])
 
+    def test_failed_inspection_preserves_the_card_and_explains_the_model_error(self):
+        from mirsal.agent.tools import ToolError
+        with patch.object(self.tools, "describe", side_effect=ToolError("The requested model does not exist (HTTP 404).")):
+            msg = self.say("what is 4 doing?")
+        self.assertIn("requested model does not exist", msg["text"])
+        self.assertEqual(msg["cards"][0]["stickers"][0]["id"], "G129/S4")
+        self.assertEqual(msg["steps"][-1]["label"], "could not inspect the still")
+        self.assertNotIn("described the still", msg["steps"][-1]["label"])
+
     def test_clear_laugh_request_still_plans_one_sticker(self):
         self.say("make 3 laugh")
         self.assertEqual(self.sess()["pending"]["items"][0]["regen_of"], "G129/S3")
@@ -174,6 +183,17 @@ class DescriptionTests(unittest.TestCase):
             with self.assertRaises(llm.LLMError):
                 llm._complete_on("openai", "system", "question", on_delta=lambda text: None)
             self.assertEqual(call.call_count, 1)
+
+    def test_cloud_vision_inherits_the_configured_model_unless_explicitly_overridden(self):
+        from mirsal.vision import judge
+        with patch.dict("os.environ", {"MIRSAL_VISION_PROVIDER": "openai", "MIRSAL_LLM_MODEL": "router-vision"}, clear=True):
+            self.assertEqual(judge.target()["model"], "router-vision")
+            with patch.dict("os.environ", {"MIRSAL_VISION_OPENAI_MODEL": "vision-override"}):
+                self.assertEqual(judge.target()["model"], "vision-override")
+                with patch.dict("os.environ", {"VISION_MODEL": "explicit-vision"}):
+                    self.assertEqual(judge.target()["model"], "explicit-vision")
+        with patch.dict("os.environ", {"MIRSAL_VISION_PROVIDER": "local"}, clear=True), patch.object(llm, "local_model", return_value="local-vision"):
+            self.assertEqual(judge.target()["model"], "local-vision")
 
     def test_nonstreaming_endpoint_emits_one_chunk_or_a_shape_error(self):
         chunks = []

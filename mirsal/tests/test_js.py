@@ -332,7 +332,7 @@ class ShellTests(unittest.TestCase):
         self.assertIn("saveSet({style_id:A.pre})", pick, "with a chat, the pick is the chat's setting")
         self.assertIn("else drawBar()", pick, "without a chat, nothing is created")
         self.assertIn("applyPre()", self.block_of(js, " A.sid=r.j.id;"), "the pick is applied when the chat is created")
-        self.assertIn("data-act=agsetgrid", js)
+        self.assertIn('data-act="aggridtoggle"', js)
         self.assertIn("data-act=agsetask", js)
         for sel in (".ag-styles", ".ag-st", ".ag-st.on", ".ag-chip"):
             self.assertIn(sel, css)

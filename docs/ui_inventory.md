@@ -1,10 +1,10 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after the slider became one per person with Auto.
+**Generated** by `python -m mirsal.console.inventory` from `mirsal/mirsal/console/*.js` on 2026-10-11 (branch `edit-design`), after separating the task slider, left creation selectors and anchored top-right LLM selector.
 Do not edit by hand: regenerate it when the console changes. How the sandbox is wired: `docs/architecture.md` §6. What the redesign does with each
 Studio action: `docs/redesign_plan.md` §4.
 
-**442 actions** (443 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
+**443 actions** (444 definitions: `ggo` is defined in generate.js and replaced by composer.js) in 26 scripts, **16 screens** (21 `RENDER` lines: some scripts wrap another's screen), **155 server routes** named by the page.
 The baseline of the three lists is `mirsal/tests/data/ui_baseline.json`; `tests/test_ui_inventory.py` fails when one of them disappears without a
 `renamed` (old -> new) or `retired` (with Haitham's approval) entry there.
 
@@ -44,40 +44,41 @@ calls (two calls deep, not into the helpers that only redraw a screen), with `{}
 
 ## Actions by script
 
-### `agent.js` (30)
+### `agent.js` (31)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `agcar` | 323 | agent.js | none (browser only) |
-| `agtile` | 324 | agent.js | none (browser only) |
-| `agsel` | 327 | agent.js | none (browser only) |
-| `agchip` | 331 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agfill` | 332 | agent.js | none (browser only) |
-| `agedit` | 333 | agent.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
-| `agsetting` | 334 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agaction` | 335 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agcut` | 336 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
-| `aganimal` | 337 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
-| `agretry` | 338 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
-| `agtrace` | 339 | agent.js | none (browser only) |
-| `agstep` | 340 | agent.js | none (browser only) |
-| `agstudio` | 341 | agent.js | none (browser only) |
-| `agallow` | 342 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agallowall` | 347 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
-| `agnew` | 357 | agent.js | none (browser only) |
-| `agopen` | 358 | agent.js | none (browser only) |
-| `agdel` | 359 | agent.js | `/api/chat/sessions/{}/delete` |
-| `agset` | 360 | agent.js | none (browser only) |
-| `agsetgrid` | 361 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `aggridtoggle` | 363 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstage` | 376 | agent.js | `/api/models` |
-| `agsetact` | 379 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstagepick` | 380 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstyle` | 401 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agstyles` | 402 | agent.js | none (browser only) |
-| `agsetask` | 403 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
-| `agbe` | 404 | agent.js | `/api/ai`<br>`/api/ai/backend` |
-| `agcr` | 436 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agcar` | 309 | agent.js | none (browser only) |
+| `agtile` | 310 | agent.js | none (browser only) |
+| `agsel` | 313 | agent.js | none (browser only) |
+| `agchip` | 317 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agfill` | 318 | agent.js | none (browser only) |
+| `agedit` | 319 | agent.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
+| `agsetting` | 320 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agaction` | 321 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agcut` | 322 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/recut` |
+| `aganimal` | 323 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/animate` |
+| `agretry` | 324 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/messages` |
+| `agtrace` | 325 | agent.js | none (browser only) |
+| `agstep` | 326 | agent.js | none (browser only) |
+| `agstudio` | 327 | agent.js | none (browser only) |
+| `agallow` | 328 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agallowall` | 333 | agent.js | `/api/chat/sessions`<br>`/api/generations/{}/allow` |
+| `agnew` | 343 | agent.js | none (browser only) |
+| `agopen` | 344 | agent.js | none (browser only) |
+| `agdel` | 345 | agent.js | `/api/chat/sessions/{}/delete` |
+| `agset` | 346 | agent.js | `/api/models` |
+| `agengine` | 348 | agent.js | none (browser only) |
+| `agsetgrid` | 350 | (no `data-act` button: called from code, a key, or a form) | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `aggridtoggle` | 352 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstage` | 365 | agent.js | none (browser only) |
+| `agsetact` | 366 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstagepick` | 367 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings`<br>`/api/prefs` |
+| `agstyle` | 388 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agstyles` | 389 | agent.js | none (browser only) |
+| `agsetask` | 390 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
+| `agbe` | 391 | agent.js | `/api/ai`<br>`/api/ai/backend` |
+| `agcr` | 424 | agent.js | `/api/chat/sessions`<br>`/api/chat/sessions/{}/settings` |
 
 ### `animate.js` (8)
 

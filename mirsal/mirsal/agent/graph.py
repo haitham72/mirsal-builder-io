@@ -243,7 +243,7 @@ class Agent:
 
     def _models_named(self, t: Turn) -> None:
         """A message that names a model ("animate with grok", "use nano banana pro") makes it the chat's own pick for that kind (settings.models, the
-        stage slider's details show it) and this turn's tools use it at once; the reply names it (`_model_said`)."""
+        image/video model selector shows it) and this turn's tools use it at once; the reply names it (`_model_said`)."""
         from ..generation import model_catalog
         picked = model_catalog.named_in(t.text) if t.text and not t.action else {}
         if not picked:
@@ -253,7 +253,7 @@ class Agent:
             self.tools.models = {**(self.tools.models or {}), **picked}
         names = [f"{model_catalog.find(k, v)['label']} for {'the stickers' if k == 'image' else 'the animation'}" for k, v in picked.items()]
         t.trace.step("model picked: " + ", ".join(names))
-        t.model_said = "Using " + " and ".join(names) + " (it stays this chat's choice; change it in the slider's details)."
+        t.model_said = "Using " + " and ".join(names) + " (it stays this chat's choice; change it in the image/video model selector)."
 
     def _set_stage(self, t: Turn, stage: str) -> None:
         """The person's one slider (Haitham, 2026-10-11: one per person, the chat and the Studio): this chat and every other one of theirs."""
@@ -445,7 +445,7 @@ class Agent:
         eng = self.tools.engine_label(bool(st.get("ai", True)))
         t.trace.step(f"writing {int(st['grid'][0]) * int(st['grid'][-1])} sticker ideas" + (f" with {eng}" if eng else " from the built-in sets"))   # shown at once: the model can take a few seconds
         try:
-            plan = self.tools.plan(prompt, st["grid"], sid, bool(st.get("ai", True)), st.get("actions", "creative"))
+            plan = self.tools.plan(prompt, st["grid"], sid, bool(st.get("ai", True)), st.get("actions", "predefined"))
         except ToolError as e:
             t.reply = f"I couldn't turn that into a plan: {e}"
             t.trace.end("could not plan", ok=False)
@@ -1147,7 +1147,7 @@ class Agent:
         items = []
         for name in names:
             try:
-                plan = self.tools.plan(name, st["grid"], sid, bool(st.get("ai", True)), st.get("actions", "creative"))
+                plan = self.tools.plan(name, st["grid"], sid, bool(st.get("ai", True)), st.get("actions", "predefined"))
             except ToolError as e:
                 t.trace.note(f"I could not plan {name}: {e}")
                 continue
@@ -2087,6 +2087,7 @@ class Agent:
         if only:
             t.trace.step("looking at the selected still image")
             parts = []
+            failed = False
             for item in hits:
                 prefix = ("\n\n".join(parts) + "\n\n" if parts else "") + f"**S{item['index']}**: "
                 current = ""
@@ -2099,14 +2100,15 @@ class Agent:
 
                 try:
                     answer = self.tools.describe(gen, item["index"], question or t.text, allowed=True, on_delta=delta)
-                except ToolError:
-                    answer = "I couldn't inspect this still right now. Please try again."
+                except ToolError as e:
+                    failed = True
+                    answer = f"I couldn't inspect this still: {e}"
                 parts.append(f"**S{item['index']}**: {answer}")
             t.reply = "\n\n".join(parts) or "That sticker has no finished still yet."
             t.sess["focus"] = {"generation": gen, "stickers": [s["id"] for s in hits][:3]}
             t.res.generation, t.res.stickers = gen, [s["id"] for s in hits]
             t.generation = gen
-            t.trace.end("described the still")
+            t.trace.end("could not inspect the still" if failed else "described the still", ok=not failed)
             return
         try:
             caps = self.tools.captions(gen, True)
