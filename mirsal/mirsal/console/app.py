@@ -1116,6 +1116,7 @@ class Server:
         tls = tls or {}
         self.app = create_app(c, self.server_address[1], secure=bool(tls))
         self.uv = uvicorn.Server(uvicorn.Config(self.app, log_level="warning", access_log=False, lifespan="off", timeout_keep_alive=5,
+                                                timeout_graceful_shutdown=3,         # Ctrl+C: open streams (a tab's event feed) get 3 s, never a wait for ever
                                                 loop="mirsal.console.app:quiet_loop",
                                                 ssl_certfile=tls.get("cert"), ssl_keyfile=tls.get("key")))
         self._stopped = threading.Event()

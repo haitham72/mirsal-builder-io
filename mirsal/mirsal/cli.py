@@ -566,8 +566,13 @@ def photo_cmd(out, args, cfg) -> int:
 def serve_reload(argv: list[str], poll: float = 1.0) -> int:
     """`serve --reload`: run the server as a child process and start it again when a .py file under mirsal/mirsal/ changes (stdlib only, any OS).
     The child holds the writer lock; it is stopped before the next one starts, so there is never a second writer. Ctrl+C stops both."""
+    import signal
     import subprocess
     import time
+    def _stop(*_):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGINT, _stop)               # explicit: a process started in the background inherits "ignore Ctrl+C"
+    signal.signal(signal.SIGTERM, _stop)
     root = Path(__file__).resolve().parent
     def stamp():
         return {f: f.stat().st_mtime_ns for f in root.rglob("*.py") if "__pycache__" not in f.parts}
@@ -881,7 +886,9 @@ def main(argv=None) -> int:
                     return 1
                 tls = {"cert": str(cert), "key": str(key)}
             serve(out, inp, args.port, args.pace, cfg, stdlib=True if args.stdlib else None, lan=args.lan, tls=tls)
-            return 0
+            print("Stopped.", flush=True)
+            os._exit(0)          # the server has stopped: a worker thread still waiting on a provider must not keep Ctrl+C from ending the process
+                                 # (a paid job was written to out/jobs/ at claim and is recovered on the next start)
         with WriterLock(out, f"mirsal {args.cmd}"):          # create / more / animate write result.json: one writer at a time
             if args.cmd == "create":
                 gid = pl.start(args.prompt, out, inp); pl.run_stills(out, gid, cfg)

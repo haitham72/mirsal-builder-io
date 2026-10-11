@@ -73,7 +73,7 @@ With Docker Desktop running, from `mirsal/`:
 
 You: <https://localhost:8770>. Colleagues on the same network: `https://YOUR_WIFI_IP:8770` (replace `YOUR_WIFI_IP` with the address used for the certificate).
 
-If the Wi-Fi address changes, rerun the certificate commands with the new `LAN_IP`, then restart the server. Stop with Ctrl+C. After a pull, restart and reload the browser.
+If the Wi-Fi address changes, rerun the certificate commands with the new `LAN_IP`, then restart the server. Stop with **Control+C** (on a Mac it is Control, not Command; the server ends within about 3 seconds and prints `Stopped.`). After a pull, restart and reload the browser.
 
 ## Windows (PowerShell)
 
@@ -113,17 +113,25 @@ Each colleague's PC: install `C:\Users\h.ibrahim\AppData\Local\mkcert\rootCA.pem
 
 ### Every day
 
+#### Windows (PowerShell)
 ```powershell
 cd mirsal
 .\.venv\Scripts\python.exe -m mirsal db up
 .\.venv\Scripts\python.exe -m mirsal serve --lan
+```
+#### Mac (Terminal / zsh)
+
+```bash
+cd mirsal
+./.venv/bin/python -m mirsal db up
+./.venv/bin/python -m mirsal serve --lan
 ```
 
 - You: <https://localhost:8770>
 - Colleagues: <https://192.168.41.242:8770>
 - Only you, no LAN: `serve` instead of `serve --lan` → <http://127.0.0.1:8770>
 - Wi-Fi address changed: rerun the `mkcert -cert-file` line, restart.
-- Stop: Ctrl+C. After a pull: restart, then Ctrl+F5 in the browser.
+- Stop: **Control+C** in the terminal (Ctrl+C on Windows; on a Mac it is Control, not Command). It ends within about 3 seconds and prints `Stopped.`. After a pull: restart, then Ctrl+F5 (Cmd+Shift+R on a Mac) in the browser.
 
 ## Settings (`mirsal/.env`, both platforms; restart after)
 
