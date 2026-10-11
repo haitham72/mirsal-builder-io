@@ -39,6 +39,8 @@ With Docker Desktop running:
 
 Open <http://127.0.0.1:8770>. This serves only this Mac and needs no certificate.
 
+**While editing the code**, add `--reload` (works with or without `--lan`): `./.venv/bin/python -m mirsal serve --reload` or `serve --lan --reload`. The server restarts by itself whenever a `.py` file under `mirsal/mirsal/` is saved; the screens' files (`.js`, `.css`) need only a browser reload (Cmd+Shift+R), never a restart. A restart stops whatever the server was doing at that moment, so do not save Python files while a sheet or video is being made. On Windows the same flag: `.\.venv\Scripts\python.exe -m mirsal serve --lan --reload`.
+
 ### Serve colleagues on the LAN: HTTPS setup (once)
 
 `serve --lan` requires `out/tls/cert.pem` and `out/tls/key.pem`. If Terminal says `command not found: mkcert`, install it first. With Homebrew installed:

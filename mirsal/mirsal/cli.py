@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from pathlib import Path
 import time
 
@@ -562,6 +563,45 @@ def photo_cmd(out, args, cfg) -> int:
     return 0
 
 
+def serve_reload(argv: list[str], poll: float = 1.0) -> int:
+    """`serve --reload`: run the server as a child process and start it again when a .py file under mirsal/mirsal/ changes (stdlib only, any OS).
+    The child holds the writer lock; it is stopped before the next one starts, so there is never a second writer. Ctrl+C stops both."""
+    import subprocess
+    import time
+    root = Path(__file__).resolve().parent
+    def stamp():
+        return {f: f.stat().st_mtime_ns for f in root.rglob("*.py") if "__pycache__" not in f.parts}
+    def stop(proc):
+        if proc.poll() is None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                proc.kill(); proc.wait()
+    seen = stamp()
+    proc = subprocess.Popen([sys.executable, "-m", "mirsal", *argv])
+    print(f"reload  watching {root} for .py changes (Ctrl+C stops)", flush=True)
+    try:
+        while True:
+            time.sleep(poll)
+            now = stamp()
+            if now != seen:
+                changed = sorted({f.name for f in set(now) ^ set(seen)} | {f.name for f in now if f in seen and now[f] != seen[f]})
+                seen = now
+                print(f"reload  {', '.join(changed[:5])} changed: restarting the server", flush=True)
+                stop(proc)
+                proc = subprocess.Popen([sys.executable, "-m", "mirsal", *argv])
+            elif proc.poll() is not None and proc.returncode not in (0, None):
+                print(f"reload  the server stopped (exit {proc.returncode}); fix the error and save: it starts again", flush=True)
+                while stamp() == seen:
+                    time.sleep(poll)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        stop(proc)
+    return 0
+
+
 def main(argv=None) -> int:
     import sys as _sys
     try:  # Windows consoles default to cp1252, which cannot print emoji: replace, never crash
@@ -584,6 +624,7 @@ def main(argv=None) -> int:
     s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0); s.add_argument("--stdlib", action="store_true", help="the old stdlib server (kept for one release)")
     s.add_argument("--lan", action="store_true", help="serve the office network: colleagues sign in with an allowed email domain (MIRSAL_EMAIL_DOMAIN, default nadi.ae,cpd.gov.ae) (docs/api.md, Office accounts on the LAN)")
     s.add_argument("--no-tls", action="store_true", help="with --lan: plain HTTP (passwords cross the network unencrypted)")
+    s.add_argument("--reload", action="store_true", help="restart the server by itself when a .py file of the app changes (the UI files are read from disk on every request already)")
     for p_ in (s, a):
         p_.add_argument("--workers", type=int, help="cells animated at the same time (default: CPU count up to 9, or MIRSAL_ANIM_WORKERS)")
     d = sub.add_parser("db", help="Postgres: up (start mirsal-db) | migrate | status (applied vs pending files) | check (does the live schema match the files?) | reset --yes (dev only) | import (backfill out/)")
@@ -826,6 +867,8 @@ def main(argv=None) -> int:
         return photo_cmd(out, args, cfg)
     try:
         if args.cmd == "serve":
+            if args.reload:
+                return serve_reload([x for x in (argv if argv is not None else sys.argv[1:]) if x != "--reload"])
             from .console.server import serve
             tls = None
             if args.lan and not args.no_tls:
