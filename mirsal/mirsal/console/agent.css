@@ -288,3 +288,27 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:560px){.ag-stage-lab{display:none}.ag-stage-pop{right:-44px;width:min(292px,calc(100vw - 24px))}}
 .plan-prompt{margin-top:8px;font-size:var(--fs-s);color:var(--ink2)}.plan-prompt summary{cursor:pointer;color:var(--aid)}.plan-prompt p{margin:6px 0 0;white-space:pre-wrap}
 @media (prefers-reduced-motion:reduce){.ag-stage-pop{animation:none}}
+
+/* ---------- the chat restyle (redesign phase 10, Haitham 2026-10-11: minimal, flat, iOS-like, the mockup create-chat.html): ONE override block, last.
+   The glass, glow, dot grid and cyan gradients give way to the paper, white cards with a hairline, and Mirsal blue for the one main action.
+   The AI-vision chip keeps its rolling highlight (.ai-vis): it is the one place that asks for the person's attention on purpose. */
+#s-agent.on{background:var(--bg)}
+.ai-bg,.ai-dots,.ai-glow{display:none}
+.ai-greet{background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:currentColor;color:var(--tx);font-size:clamp(28px,4vw,44px);letter-spacing:-.03em}
+.ai-pill{background:var(--sf);border-color:var(--bd);backdrop-filter:none}
+.ai-box{background:var(--sf);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 0 0 1px var(--bd),0 8px 24px #0f172a0f}
+.ai-box:focus-within{box-shadow:0 0 0 1px var(--pri),0 0 0 4px var(--pri-glow)}
+.ai-send{background:var(--pri);box-shadow:0 4px 12px var(--pri-glow)}.ai-send:hover:not(:disabled){background:var(--pri-d)}
+.ag-chip{background:var(--sf);backdrop-filter:none;border-color:var(--bd)}.ag-chip:hover{border-color:var(--pri-bd);color:var(--pri-d)}
+.ai-chip{background:var(--sf);backdrop-filter:none;border-color:var(--bd)}
+.ai-chip.pri,.ai-chip.pri:hover{background:var(--pri);box-shadow:0 4px 12px var(--pri-glow)}.ai-chip.pri:hover{background:var(--pri-d)}
+.ai-m.user .b{background:var(--pri-l);border-color:transparent}
+.ai-av{background:var(--pri)}
+.ai-card{background:var(--sf);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 0 0 1px var(--bd)}
+.plan-foot .go{background:var(--pri);box-shadow:0 4px 12px var(--pri-glow)}.plan-foot .go:hover{background:var(--pri-d)}
+.ai-set{background:var(--sf);backdrop-filter:none;box-shadow:0 18px 50px #0f172a24,0 0 0 1px var(--bd)}
+.sess-new{background:var(--pri-l);color:var(--pri-d)}
+.ag-st.on{box-shadow:inset 0 0 0 2px var(--pri)}
+.ag-slider::after{background:var(--pri)}.ag-stop.done i{background:var(--pri)}.ag-stop.on i{box-shadow:0 0 0 2px var(--pri),0 2px 6px var(--pri-glow)}
+.ag-stage-lab,.ag-stage-opt.on b,.ag-stage-opt .ck{color:var(--pri-d)}.ag-stage-btn:hover,.ag-stage-btn[aria-expanded=true]{background:var(--pri-l);color:var(--pri-d)}
+.ag-stage-opt:hover,.ag-stage-opt:focus-visible{background:var(--pri-l)}.ag-stage-pop{box-shadow:0 18px 50px #0f172a24,0 0 0 1px var(--bd)}
