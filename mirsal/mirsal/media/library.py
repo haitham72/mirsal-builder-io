@@ -418,10 +418,26 @@ class Library:
             self._save(db)
             return p
 
-    def update_pack(self, pid: str, name=None, cover=None, order=None, lead=None) -> dict:
-        """`lead: true` is the Studio's *Assign as parent*: this pack leads its batch group in the Library (flow/groups.pack_groups); the newest wins."""
+    def update_pack(self, pid: str, name=None, cover=None, order=None, lead=None, parent=None) -> dict:
+        """`lead: true` is the Studio's *Assign as parent*: this pack leads its batch group in the Library (flow/groups.pack_groups); the newest wins.
+        `parent`: a pack id nests this pack under that one as a SUB-PACK (the Packs column's drag of a pack onto a pack; nothing moves, every sticker
+        stays where it is) and makes that pack its group's parent; "" takes it out again. A pack is never nested under itself or its own sub-pack."""
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
+            if parent is not None:
+                if parent == "":
+                    p.pop("parent", None)
+                else:
+                    by = {x["id"]: x for x in db["packs"]}
+                    if parent not in by:
+                        raise LibraryError("no such pack to nest under", 404)
+                    q, seen = parent, set()
+                    while q in by and q not in seen:                      # walk up from the new parent: meeting this pack would make a loop
+                        if q == pid:
+                            raise LibraryError("a pack cannot go under itself or one of its own sub-packs")
+                        seen.add(q); q = by[q].get("parent")
+                    p["parent"] = parent
+                    by[parent]["lead_at"] = round(time.time(), 3)
             if lead:
                 p["lead_at"] = round(time.time(), 3)
             if name is not None and name.strip():
@@ -843,11 +859,10 @@ class Library:
 
     MEDIA_KEYS = ("file", "file_name", "type", "w", "h", "kb", "dur", "fps", "frames")
 
-    def merge_pack(self, src: str, into: str, by: str = "human", lead: bool = False) -> dict:
+    def merge_pack(self, src: str, into: str, by: str = "human") -> dict:
         """Fold pack `src` into `into` (Haitham, 2026-10-05: "it should be 1 pack with its own animation, not 2 packs nested"). An animated sticker whose
         still twin (the same batch cell) is in `into` UPGRADES that still: the still keeps its id, name, emoji, place and particle links (sets point at it)
-        and takes the animated file; nothing is deleted from disk. Every other sticker moves over as it is. The emptied pack goes to the trash (Restore).
-        `lead` (the Packs column's drag of one pack onto another): `into` also becomes the parent of its batch group, as *Assign as parent* does."""
+        and takes the animated file; nothing is deleted from disk. Every other sticker moves over as it is. The emptied pack goes to the trash (Restore)."""
         cell = lambda s: ((s.get("source") or {}).get("generation"), (s.get("source") or {}).get("index"))
         with self.lock:
             db = self._load(); a = self._pack(db, src); b = self._pack(db, into)
@@ -872,13 +887,11 @@ class Library:
                     if not b.get("cover"):
                         b["cover"] = st["id"]
             a["cover"] = None
-            if lead:
-                b["lead_at"] = round(time.time(), 3)
             self._save(db)
         trashed = False
         if not a["stickers"]:
             self.delete_pack(src, by=by); trashed = True
-        return {"into": into, "upgraded": upgraded, "moved": moved, "trashed": trashed, "lead": bool(lead)}
+        return {"into": into, "upgraded": upgraded, "moved": moved, "trashed": trashed}
 
     def move_stickers(self, items: list[dict], to: str) -> dict:
         """Bulk move: items = [{pack_id, id}, ...] (a selection may span packs) into pack `to`, ALL OR NOTHING: everything is checked first (an unknown pack or sticker refuses the

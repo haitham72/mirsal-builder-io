@@ -66,7 +66,8 @@ def families(out: Path, ids=None) -> dict[int, list[int]]:
 def pack_groups(out: Path, packs) -> dict[str, str]:
     """pack id -> the batch group it belongs to (`G104`, the family root), so the Library sits the packs of one group together as the Studio sits the batches.
     A pack follows the group most of its stickers came from (`source.generation`); a pack whose group has no other pack, or whose stickers came from no
-    batch (photos, imports), has none. A pure read: nothing is stored, so a join or leave in the Studio shows at the next read."""
+    batch (photos, imports), has none. A pack nested by hand (`parent`, a sub-pack) sits in its top parent's group: that group's key, or `P-<pack id>`
+    when the parent has no batch group. A pure read of the batches: a join or leave in the Studio shows at the next read."""
     roots: dict[int, int] = {}
     def root(gid: int) -> int | None:
         if gid not in roots:
@@ -85,10 +86,23 @@ def pack_groups(out: Path, packs) -> dict[str, str]:
                 votes[r] = votes.get(r, 0) + 1
         if votes:
             picked[p["id"]] = max(votes, key=lambda r: (votes[r], -r))
-    count: dict[int, int] = {}
-    for r in picked.values():
-        count[r] = count.get(r, 0) + 1
-    return {pid: f"G{r:03d}" for pid, r in picked.items() if count[r] > 1}
+    keys: dict[str, str] = {pid: f"G{r:03d}" for pid, r in picked.items()}
+    by = {p["id"]: p for p in packs or []}
+
+    def top(pid: str) -> str:                                             # the explicit parent chain (`parent`, a sub-pack), to its top
+        seen = {pid}
+        while (q := by[pid].get("parent")) in by and q not in seen:
+            seen.add(q); pid = q
+        return pid
+    for pid in by:                                                        # a sub-pack sits in its parent's group, whatever its own batch says
+        t = top(pid)
+        if t != pid:
+            keys[t] = keys.get(t) or f"P-{t}"
+            keys[pid] = keys[t]
+    count: dict[str, int] = {}
+    for k in keys.values():
+        count[k] = count.get(k, 0) + 1
+    return {pid: k for pid, k in keys.items() if count[k] > 1}
 
 
 def pack_leads(packs, groups_of: dict[str, str]) -> set[str]:

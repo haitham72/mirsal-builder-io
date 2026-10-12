@@ -4620,6 +4620,1416 @@
    "lead_at": 1791715658.093
   },
   {
+   "id": "f1d63c25",
+   "name": "Generic Emojis Smooth Colors Gradient",
+   "slug": "generic_emojis_smooth_colors_gradient",
+   "cover": "a7dcd8d8",
+   "owner": "local",
+   "created": 1791784749.282586,
+   "stickers": [
+    {
+     "id": "a7dcd8d8",
+     "name": "Generic emojis smooth colors gradient happy",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-happy-generic_emojis_smooth_co-20261012T055909-3ca932.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 146,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 1
+     },
+     "created": 1791784749.381233,
+     "file_name": "img-generic_emojis_smooth_colors-happy-20261012T055858-62197d"
+    },
+    {
+     "id": "00a40c38",
+     "name": "Generic emojis smooth colors gradient laugh",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-laugh-generic_emojis_smooth_co-20261012T055909-615ee3.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 141,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 2
+     },
+     "created": 1791784749.4127316,
+     "file_name": "img-generic_emojis_smooth_colors-laugh-20261012T055858-cff24b"
+    },
+    {
+     "id": "53af1993",
+     "name": "Generic emojis smooth colors gradient cry",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-cry-generic_emojis_smooth_co-20261012T055909-0dda57.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 154,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 3
+     },
+     "created": 1791784749.4423761,
+     "file_name": "img-generic_emojis_smooth_colors-cry-20261012T055858-5655bb"
+    },
+    {
+     "id": "c92a4139",
+     "name": "Generic emojis smooth colors gradient sad",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-sad-generic_emojis_smooth_co-20261012T055909-031ee1.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 143,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 4
+     },
+     "created": 1791784749.4722128,
+     "file_name": "img-generic_emojis_smooth_colors-sad-20261012T055858-ab8672"
+    },
+    {
+     "id": "b461e15e",
+     "name": "Generic emojis smooth colors gradient love",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-love-generic_emojis_smooth_co-20261012T055909-51a3ce.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 153,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 5
+     },
+     "created": 1791784749.500661,
+     "file_name": "img-generic_emojis_smooth_colors-love-20261012T055858-c2e424"
+    },
+    {
+     "id": "d3de0ad3",
+     "name": "Generic emojis smooth colors gradient angry",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-angry-generic_emojis_smooth_co-20261012T055909-5a874f.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 139,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 6
+     },
+     "created": 1791784749.5312133,
+     "file_name": "img-generic_emojis_smooth_colors-angry-20261012T055858-1b11d3"
+    },
+    {
+     "id": "8f8d2c94",
+     "name": "Generic emojis smooth colors gradient wink",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-wink-generic_emojis_smooth_co-20261012T055909-b50ada.png",
+     "type": "static",
+     "emoji": "😉",
+     "kb": 140,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 7
+     },
+     "created": 1791784749.5605927,
+     "file_name": "img-generic_emojis_smooth_colors-wink-20261012T055858-42f596"
+    },
+    {
+     "id": "bd839896",
+     "name": "Generic emojis smooth colors gradient kiss",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-kiss-generic_emojis_smooth_co-20261012T055909-8fcd3d.png",
+     "type": "static",
+     "emoji": "😘",
+     "kb": 145,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 8
+     },
+     "created": 1791784749.591019,
+     "file_name": "img-generic_emojis_smooth_colors-kiss-20261012T055858-691267"
+    },
+    {
+     "id": "d4c1674e",
+     "name": "Generic emojis smooth colors gradient surprised",
+     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-surprised-generic_emojis_smooth_co-20261012T055909-3b9160.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 143,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G141",
+      "index": 9
+     },
+     "created": 1791784749.6260512,
+     "file_name": "img-generic_emojis_smooth_colors-surprised-20261012T055858-b1a0ce"
+    }
+   ],
+   "lead_at": 1791793149.112,
+   "telegram": {
+    "sets": [
+     {
+      "kind": "static",
+      "name": "generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "a7dcd8d8",
+        "file_unique_id": "AgADQx0AAp30YFI"
+       },
+       {
+        "sticker_id": "00a40c38",
+        "file_unique_id": "AgADliEAAsKJYFI"
+       },
+       {
+        "sticker_id": "53af1993",
+        "file_unique_id": "AgADNR4AAqmqYVI"
+       },
+       {
+        "sticker_id": "c92a4139",
+        "file_unique_id": "AgADzx8AAjDaaVI"
+       },
+       {
+        "sticker_id": "b461e15e",
+        "file_unique_id": "AgADcy0AAgEyaFI"
+       },
+       {
+        "sticker_id": "d3de0ad3",
+        "file_unique_id": "AgADWCIAAkUHYVI"
+       },
+       {
+        "sticker_id": "8f8d2c94",
+        "file_unique_id": "AgAD3hwAArwaYVI"
+       },
+       {
+        "sticker_id": "bd839896",
+        "file_unique_id": "AgAD_x0AAhiXaVI"
+       },
+       {
+        "sticker_id": "d4c1674e",
+        "file_unique_id": "AgADwh0AApotYFI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "8556066c9b3189f01932c19ce226a3a8a86ef0543834ad79da301f2aa4047f9e",
+      "sent_at": 1791784758.8,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "static",
+        "name": "generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
+        "added": 9,
+        "total": 9
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "ce467354",
+   "name": "Generic Emojis Mirsal",
+   "slug": "generic_emojis_mirsal",
+   "cover": "ce1b69c4",
+   "owner": "local",
+   "created": 1791785174.3386176,
+   "stickers": [
+    {
+     "id": "ce1b69c4",
+     "name": "Generic emojis mirsal happy",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-happy-generic_emojis_mirsal-20261012T060614-7d0fc3.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 166,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 1
+     },
+     "created": 1791785174.5732787,
+     "file_name": "img-generic_emojis_mirsal-happy-20261012T060557-cfd6cc"
+    },
+    {
+     "id": "c39de98c",
+     "name": "Generic emojis mirsal laugh",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-laugh-generic_emojis_mirsal-20261012T060614-2e917b.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 175,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 2
+     },
+     "created": 1791785174.6166878,
+     "file_name": "img-generic_emojis_mirsal-laugh-20261012T060557-9479f7"
+    },
+    {
+     "id": "591f8fa0",
+     "name": "Generic emojis mirsal love",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-love-generic_emojis_mirsal-20261012T060614-587539.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 189,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 3
+     },
+     "created": 1791785174.6608973,
+     "file_name": "img-generic_emojis_mirsal-love-20261012T060557-927b66"
+    },
+    {
+     "id": "dfe75fa1",
+     "name": "Generic emojis mirsal cry",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-cry-generic_emojis_mirsal-20261012T060614-16b4a2.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 176,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 4
+     },
+     "created": 1791785174.7038007,
+     "file_name": "img-generic_emojis_mirsal-cry-20261012T060557-69aa0f"
+    },
+    {
+     "id": "fba19b71",
+     "name": "Generic emojis mirsal sad",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-sad-generic_emojis_mirsal-20261012T060614-1b6961.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 169,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 5
+     },
+     "created": 1791785174.7445464,
+     "file_name": "img-generic_emojis_mirsal-sad-20261012T060557-23629b"
+    },
+    {
+     "id": "cc932754",
+     "name": "Generic emojis mirsal angry",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-angry-generic_emojis_mirsal-20261012T060614-d2bc20.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 192,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 6
+     },
+     "created": 1791785174.786612,
+     "file_name": "img-generic_emojis_mirsal-angry-20261012T060557-d3bce3"
+    },
+    {
+     "id": "375d7741",
+     "name": "Generic emojis mirsal surprised",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-surprised-generic_emojis_mirsal-20261012T060614-9f297e.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 172,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 7
+     },
+     "created": 1791785174.8265295,
+     "file_name": "img-generic_emojis_mirsal-surprised-20261012T060557-9f8c33"
+    },
+    {
+     "id": "74221de5",
+     "name": "Generic emojis mirsal scared",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-scared-generic_emojis_mirsal-20261012T060614-3a4375.png",
+     "type": "static",
+     "emoji": "😱",
+     "kb": 163,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 8
+     },
+     "created": 1791785174.868851,
+     "file_name": "img-generic_emojis_mirsal-scared-20261012T060557-cf070a"
+    },
+    {
+     "id": "0212baab",
+     "name": "Generic emojis mirsal thanks",
+     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-thanks-generic_emojis_mirsal-20261012T060614-e7c731.png",
+     "type": "static",
+     "emoji": "🙏",
+     "kb": 172,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G144",
+      "index": 9
+     },
+     "created": 1791785174.9133937,
+     "file_name": "img-generic_emojis_mirsal-thanks-20261012T060557-a86075"
+    }
+   ],
+   "lead_at": 1791785175.143
+  },
+  {
+   "id": "701a899d",
+   "name": "Generic Emojis Smooth Colors Gradient Shiny",
+   "slug": "generic_emojis_smooth_colors_gradient_shiny",
+   "cover": "606de445",
+   "owner": "local",
+   "created": 1791784814.057409,
+   "stickers": [
+    {
+     "id": "606de445",
+     "name": "Generic emojis smooth colors gradient shiny happy",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-happy-generic_emojis_smooth_co-20261012T060014-37e343.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 159,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 1
+     },
+     "created": 1791784814.1765053,
+     "file_name": "img-generic_emojis_smooth_colors-happy-20261012T060005-435397"
+    },
+    {
+     "id": "0a142af1",
+     "name": "Generic emojis smooth colors gradient shiny laugh",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-laugh-generic_emojis_smooth_co-20261012T060014-4ccdd0.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 170,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 2
+     },
+     "created": 1791784814.2096667,
+     "file_name": "img-generic_emojis_smooth_colors-laugh-20261012T060005-3cb5de"
+    },
+    {
+     "id": "576eb0e2",
+     "name": "Generic emojis smooth colors gradient shiny cry",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-cry-generic_emojis_smooth_co-20261012T060014-e416b0.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 169,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 3
+     },
+     "created": 1791784814.2508664,
+     "file_name": "img-generic_emojis_smooth_colors-cry-20261012T060005-d42e84"
+    },
+    {
+     "id": "a571c243",
+     "name": "Generic emojis smooth colors gradient shiny sad",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-sad-generic_emojis_smooth_co-20261012T060014-a29349.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 154,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 4
+     },
+     "created": 1791784814.2913005,
+     "file_name": "img-generic_emojis_smooth_colors-sad-20261012T060005-97f6ec"
+    },
+    {
+     "id": "a04b67d2",
+     "name": "Generic emojis smooth colors gradient shiny love",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-love-generic_emojis_smooth_co-20261012T060014-fa2f17.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 161,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 5
+     },
+     "created": 1791784814.3282835,
+     "file_name": "img-generic_emojis_smooth_colors-love-20261012T060005-60c2bc"
+    },
+    {
+     "id": "889362ed",
+     "name": "Generic emojis smooth colors gradient shiny angry",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-angry-generic_emojis_smooth_co-20261012T060014-5c76e4.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 152,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 6
+     },
+     "created": 1791784814.366828,
+     "file_name": "img-generic_emojis_smooth_colors-angry-20261012T060005-440f3f"
+    },
+    {
+     "id": "5a2cd163",
+     "name": "Generic emojis smooth colors gradient shiny wink",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-wink-generic_emojis_smooth_co-20261012T060014-e69a2c.png",
+     "type": "static",
+     "emoji": "😉",
+     "kb": 155,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 7
+     },
+     "created": 1791784814.4044936,
+     "file_name": "img-generic_emojis_smooth_colors-wink-20261012T060005-54e443"
+    },
+    {
+     "id": "8e1659a1",
+     "name": "Generic emojis smooth colors gradient shiny kiss",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-kiss-generic_emojis_smooth_co-20261012T060014-3b07ea.png",
+     "type": "static",
+     "emoji": "😘",
+     "kb": 162,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 8
+     },
+     "created": 1791784814.439408,
+     "file_name": "img-generic_emojis_smooth_colors-kiss-20261012T060005-7c5fdc"
+    },
+    {
+     "id": "7755a8b4",
+     "name": "Generic emojis smooth colors gradient shiny surprised",
+     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-surprised-generic_emojis_smooth_co-20261012T060014-7e4f6c.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 158,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G142",
+      "index": 9
+     },
+     "created": 1791784814.476497,
+     "file_name": "img-generic_emojis_smooth_colors-surprised-20261012T060005-616cf2"
+    }
+   ],
+   "lead_at": 1791784814.828,
+   "parent": "f1d63c25"
+  },
+  {
+   "id": "f8d8b081",
+   "name": "Generic Emojis Cell Shade",
+   "slug": "generic_emojis_cell_shade",
+   "cover": "1ca6b8cc",
+   "owner": "local",
+   "created": 1791784603.3472023,
+   "stickers": [
+    {
+     "id": "1ca6b8cc",
+     "name": "Generic emojis cell shade happy",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-happy-generic_emojis_cell_shad-20261012T055643-519e32.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 119,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 1
+     },
+     "created": 1791784603.4640331,
+     "file_name": "img-generic_emojis_cell_shade-happy-20261012T055611-39b46c"
+    },
+    {
+     "id": "3a872c92",
+     "name": "Generic emojis cell shade laugh",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-laugh-generic_emojis_cell_shad-20261012T055643-4119bb.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 128,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 2
+     },
+     "created": 1791784603.5001078,
+     "file_name": "img-generic_emojis_cell_shade-laugh-20261012T055611-6ef2c7"
+    },
+    {
+     "id": "db45e8c4",
+     "name": "Generic emojis cell shade cry",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-cry-generic_emojis_cell_shad-20261012T055643-f1f422.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 121,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 3
+     },
+     "created": 1791784603.5295844,
+     "file_name": "img-generic_emojis_cell_shade-cry-20261012T055611-a9fa76"
+    },
+    {
+     "id": "454f1317",
+     "name": "Generic emojis cell shade sad",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-sad-generic_emojis_cell_shad-20261012T055643-560f33.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 97,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 4
+     },
+     "created": 1791784603.5584772,
+     "file_name": "img-generic_emojis_cell_shade-sad-20261012T055611-d9e7d9"
+    },
+    {
+     "id": "330bece1",
+     "name": "Generic emojis cell shade love",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-love-generic_emojis_cell_shad-20261012T055643-5f43ff.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 138,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 5
+     },
+     "created": 1791784603.5872502,
+     "file_name": "img-generic_emojis_cell_shade-love-20261012T055611-483a8d"
+    },
+    {
+     "id": "6410a8d8",
+     "name": "Generic emojis cell shade angry",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-angry-generic_emojis_cell_shad-20261012T055643-581cac.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 119,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 6
+     },
+     "created": 1791784603.6173258,
+     "file_name": "img-generic_emojis_cell_shade-angry-20261012T055611-0e6f12"
+    },
+    {
+     "id": "3392293d",
+     "name": "Generic emojis cell shade wink",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-wink-generic_emojis_cell_shad-20261012T055643-c8bde7.png",
+     "type": "static",
+     "emoji": "😉",
+     "kb": 94,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 7
+     },
+     "created": 1791784603.6486526,
+     "file_name": "img-generic_emojis_cell_shade-wink-20261012T055611-e1e16b"
+    },
+    {
+     "id": "b3efc399",
+     "name": "Generic emojis cell shade kiss",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-kiss-generic_emojis_cell_shad-20261012T055643-844f58.png",
+     "type": "static",
+     "emoji": "😘",
+     "kb": 97,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 8
+     },
+     "created": 1791784603.678578,
+     "file_name": "img-generic_emojis_cell_shade-kiss-20261012T055611-78846c"
+    },
+    {
+     "id": "f2e433f3",
+     "name": "Generic emojis cell shade surprised",
+     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-surprised-generic_emojis_cell_shad-20261012T055643-641439.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 106,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G139",
+      "index": 9
+     },
+     "created": 1791784603.7080567,
+     "file_name": "img-generic_emojis_cell_shade-surprised-20261012T055611-ca5c3a"
+    }
+   ],
+   "lead_at": 1791784603.855,
+   "telegram": {
+    "sets": [
+     {
+      "kind": "static",
+      "name": "generic_emojis_cell_shade_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/generic_emojis_cell_shade_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "1ca6b8cc",
+        "file_unique_id": "AgADrR4AAu4PYFI"
+       },
+       {
+        "sticker_id": "3a872c92",
+        "file_unique_id": "AgAD8R4AApBMYVI"
+       },
+       {
+        "sticker_id": "db45e8c4",
+        "file_unique_id": "AgADnxwAAh4uYFI"
+       },
+       {
+        "sticker_id": "454f1317",
+        "file_unique_id": "AgADUR4AAutPYFI"
+       },
+       {
+        "sticker_id": "330bece1",
+        "file_unique_id": "AgADAhoAAq-HaFI"
+       },
+       {
+        "sticker_id": "6410a8d8",
+        "file_unique_id": "AgADch0AAk8GaVI"
+       },
+       {
+        "sticker_id": "3392293d",
+        "file_unique_id": "AgADQh8AAvoWaFI"
+       },
+       {
+        "sticker_id": "b3efc399",
+        "file_unique_id": "AgADxyQAApw0YFI"
+       },
+       {
+        "sticker_id": "f2e433f3",
+        "file_unique_id": "AgADsh8AAovcaFI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "77c7605ab527ca2a1deb3da2a03e20ead740da5c1460a4aa77282b133d1b7309",
+      "sent_at": 1791784613.228,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "static",
+        "name": "generic_emojis_cell_shade_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/generic_emojis_cell_shade_by_Mirsal_builder_bot",
+        "added": 9,
+        "total": 9
+       }
+      ]
+     }
+    ]
+   },
+   "parent": "f1d63c25"
+  },
+  {
+   "id": "e418aa14",
+   "name": "Generic Emojis Toon 3",
+   "slug": "generic_emojis_toon_3",
+   "cover": "1269d518",
+   "owner": "local",
+   "created": 1791784465.1776104,
+   "stickers": [
+    {
+     "id": "1269d518",
+     "name": "Generic emojis toon happy",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-happy-generic_emojis_toon_3-20261012T055425-303d99.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 147,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 1
+     },
+     "created": 1791784465.2883554,
+     "file_name": "img-generic_emojis_toon-happy-20261012T055400-e4bb10"
+    },
+    {
+     "id": "f86f85a1",
+     "name": "Generic emojis toon laugh",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-laugh-generic_emojis_toon_3-20261012T055425-7549be.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 154,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 2
+     },
+     "created": 1791784465.3169613,
+     "file_name": "img-generic_emojis_toon-laugh-20261012T055400-005229"
+    },
+    {
+     "id": "35a9f227",
+     "name": "Generic emojis toon cry",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-cry-generic_emojis_toon_3-20261012T055425-9f8d27.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 163,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 3
+     },
+     "created": 1791784465.3466928,
+     "file_name": "img-generic_emojis_toon-cry-20261012T055400-75d853"
+    },
+    {
+     "id": "085af357",
+     "name": "Generic emojis toon sad",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-sad-generic_emojis_toon_3-20261012T055425-9545a0.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 148,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 4
+     },
+     "created": 1791784465.3758595,
+     "file_name": "img-generic_emojis_toon-sad-20261012T055400-a850b6"
+    },
+    {
+     "id": "ff72a7c3",
+     "name": "Generic emojis toon love",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-love-generic_emojis_toon_3-20261012T055425-66ed65.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 151,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 5
+     },
+     "created": 1791784465.4110026,
+     "file_name": "img-generic_emojis_toon-love-20261012T055400-6f23aa"
+    },
+    {
+     "id": "165a11da",
+     "name": "Generic emojis toon angry",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-angry-generic_emojis_toon_3-20261012T055425-abfc5b.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 168,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 6
+     },
+     "created": 1791784465.4465024,
+     "file_name": "img-generic_emojis_toon-angry-20261012T055400-3ff688"
+    },
+    {
+     "id": "639fc4f6",
+     "name": "Generic emojis toon wink",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-wink-generic_emojis_toon_3-20261012T055425-7295a9.png",
+     "type": "static",
+     "emoji": "😉",
+     "kb": 146,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 7
+     },
+     "created": 1791784465.4800267,
+     "file_name": "img-generic_emojis_toon-wink-20261012T055400-b7428d"
+    },
+    {
+     "id": "a1ce6417",
+     "name": "Generic emojis toon kiss",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-kiss-generic_emojis_toon_3-20261012T055425-dbb886.png",
+     "type": "static",
+     "emoji": "😘",
+     "kb": 142,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 8
+     },
+     "created": 1791784465.510019,
+     "file_name": "img-generic_emojis_toon-kiss-20261012T055400-e50310"
+    },
+    {
+     "id": "00024706",
+     "name": "Generic emojis toon surprised",
+     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-surprised-generic_emojis_toon_3-20261012T055425-bffaec.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 155,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G138",
+      "index": 9
+     },
+     "created": 1791784465.539554,
+     "file_name": "img-generic_emojis_toon-surprised-20261012T055400-96eb25"
+    }
+   ],
+   "lead_at": 1791784465.706,
+   "telegram": {
+    "sets": [
+     {
+      "kind": "static",
+      "name": "generic_emojis_toon_3_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/generic_emojis_toon_3_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "1269d518",
+        "file_unique_id": "AgADbBsAAk94YFI"
+       },
+       {
+        "sticker_id": "f86f85a1",
+        "file_unique_id": "AgADbRwAAomOYVI"
+       },
+       {
+        "sticker_id": "35a9f227",
+        "file_unique_id": "AgAD6x8AAo8yaVI"
+       },
+       {
+        "sticker_id": "085af357",
+        "file_unique_id": "AgADmDMAAlmJaVI"
+       },
+       {
+        "sticker_id": "ff72a7c3",
+        "file_unique_id": "AgADOBwAAtKjYVI"
+       },
+       {
+        "sticker_id": "165a11da",
+        "file_unique_id": "AgADTh4AAptFaFI"
+       },
+       {
+        "sticker_id": "639fc4f6",
+        "file_unique_id": "AgAD1SAAAl0FaFI"
+       },
+       {
+        "sticker_id": "a1ce6417",
+        "file_unique_id": "AgAD-iYAAmNzYFI"
+       },
+       {
+        "sticker_id": "00024706",
+        "file_unique_id": "AgADVB4AAvSfYFI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "b973f371cedb30c0b9f4afbd9b914fda4db08bcbcd20bab03fd904a47acb4aa0",
+      "sent_at": 1791784491.933,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "static",
+        "name": "generic_emojis_toon_3_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/generic_emojis_toon_3_by_Mirsal_builder_bot",
+        "added": 9,
+        "total": 9
+       }
+      ]
+     }
+    ]
+   },
+   "parent": "f1d63c25"
+  },
+  {
+   "id": "2905beaa",
+   "name": "Generic Emojis Toon 2",
+   "slug": "generic_emojis_toon_2",
+   "cover": "a1660ebf",
+   "owner": "local",
+   "created": 1791784369.4866495,
+   "stickers": [
+    {
+     "id": "a1660ebf",
+     "name": "Generic emojis toon happy",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-happy-generic_emojis_toon_2-20261012T055249-d51d89.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 178,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 1
+     },
+     "created": 1791784369.6188142,
+     "file_name": "img-generic_emojis_toon-happy-20261012T055139-17f939"
+    },
+    {
+     "id": "ea23c45e",
+     "name": "Generic emojis toon laugh",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-laugh-generic_emojis_toon_2-20261012T055249-754425.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 162,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 2
+     },
+     "created": 1791784369.6473608,
+     "file_name": "img-generic_emojis_toon-laugh-20261012T055139-3df4d7"
+    },
+    {
+     "id": "b30d8c86",
+     "name": "Generic emojis toon cry",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-cry-generic_emojis_toon_2-20261012T055249-e7ce9b.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 193,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 3
+     },
+     "created": 1791784369.6760375,
+     "file_name": "img-generic_emojis_toon-cry-20261012T055139-dc9b45"
+    },
+    {
+     "id": "befe1430",
+     "name": "Generic emojis toon sad",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-sad-generic_emojis_toon_2-20261012T055249-beeb4f.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 179,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 4
+     },
+     "created": 1791784369.7046938,
+     "file_name": "img-generic_emojis_toon-sad-20261012T055139-1a7107"
+    },
+    {
+     "id": "0ca4545a",
+     "name": "Generic emojis toon love",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-love-generic_emojis_toon_2-20261012T055249-4999f3.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 181,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 5
+     },
+     "created": 1791784369.7330534,
+     "file_name": "img-generic_emojis_toon-love-20261012T055139-6f1821"
+    },
+    {
+     "id": "7db295fe",
+     "name": "Generic emojis toon angry",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-angry-generic_emojis_toon_2-20261012T055249-cc9dd1.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 164,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 6
+     },
+     "created": 1791784369.7613826,
+     "file_name": "img-generic_emojis_toon-angry-20261012T055139-01e7c5"
+    },
+    {
+     "id": "32b01b96",
+     "name": "Generic emojis toon wink",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-wink-generic_emojis_toon_2-20261012T055249-f49bdc.png",
+     "type": "static",
+     "emoji": "😉",
+     "kb": 173,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 7
+     },
+     "created": 1791784369.7896845,
+     "file_name": "img-generic_emojis_toon-wink-20261012T055139-f3baec"
+    },
+    {
+     "id": "1d3c7ac4",
+     "name": "Generic emojis toon kiss",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-kiss-generic_emojis_toon_2-20261012T055249-f306c6.png",
+     "type": "static",
+     "emoji": "😘",
+     "kb": 174,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 8
+     },
+     "created": 1791784369.8201315,
+     "file_name": "img-generic_emojis_toon-kiss-20261012T055139-0554f0"
+    },
+    {
+     "id": "51756295",
+     "name": "Generic emojis toon surprised",
+     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-surprised-generic_emojis_toon_2-20261012T055249-309695.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 170,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G137",
+      "index": 9
+     },
+     "created": 1791784369.8485167,
+     "file_name": "img-generic_emojis_toon-surprised-20261012T055139-a96ae0"
+    }
+   ],
+   "lead_at": 1791784369.996,
+   "telegram": {
+    "sets": [
+     {
+      "kind": "static",
+      "name": "generic_emojis_toon_2_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/generic_emojis_toon_2_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "a1660ebf",
+        "file_unique_id": "AgAD3CIAAvGFYFI"
+       },
+       {
+        "sticker_id": "ea23c45e",
+        "file_unique_id": "AgAD_h4AAkVIaVI"
+       },
+       {
+        "sticker_id": "b30d8c86",
+        "file_unique_id": "AgADJh8AAqNMYFI"
+       },
+       {
+        "sticker_id": "befe1430",
+        "file_unique_id": "AgADjyAAAjnwYFI"
+       },
+       {
+        "sticker_id": "0ca4545a",
+        "file_unique_id": "AgADDiIAAqUpYVI"
+       },
+       {
+        "sticker_id": "7db295fe",
+        "file_unique_id": "AgADlB8AAojxaVI"
+       },
+       {
+        "sticker_id": "32b01b96",
+        "file_unique_id": "AgADGR4AArH8YFI"
+       },
+       {
+        "sticker_id": "1d3c7ac4",
+        "file_unique_id": "AgADwRwAAo5-YVI"
+       },
+       {
+        "sticker_id": "51756295",
+        "file_unique_id": "AgADBR0AAqQaaVI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "0f69157a34fe11392e61a0018ea3fb4415660d47482ef6f20d77def7827703ea",
+      "sent_at": 1791784392.425,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "static",
+        "name": "generic_emojis_toon_2_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/generic_emojis_toon_2_by_Mirsal_builder_bot",
+        "added": 9,
+        "total": 9
+       }
+      ]
+     }
+    ]
+   },
+   "parent": "f1d63c25"
+  },
+  {
+   "id": "a8ba6117",
+   "name": "Generic Emojis Toon",
+   "slug": "generic_emojis_toon",
+   "cover": "07e3faa8",
+   "owner": "local",
+   "created": 1791784168.1256707,
+   "stickers": [
+    {
+     "id": "07e3faa8",
+     "name": "Generic emojis toon happy",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-happy-generic_emojis_toon-20261012T054928-da92b4.png",
+     "type": "static",
+     "emoji": "😀",
+     "kb": 181,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 1
+     },
+     "created": 1791784168.2344465,
+     "file_name": "img-generic_emojis_toon-happy-20261012T054915-cb52a6"
+    },
+    {
+     "id": "5ed24b5e",
+     "name": "Generic emojis toon laugh",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-laugh-generic_emojis_toon-20261012T054928-07576e.png",
+     "type": "static",
+     "emoji": "🤣",
+     "kb": 144,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 2
+     },
+     "created": 1791784168.2631838,
+     "file_name": "img-generic_emojis_toon-laugh-20261012T054915-8dc9ed"
+    },
+    {
+     "id": "8612c7d8",
+     "name": "Generic emojis toon cry",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-cry-generic_emojis_toon-20261012T054928-2f67b7.png",
+     "type": "static",
+     "emoji": "😭",
+     "kb": 186,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 3
+     },
+     "created": 1791784168.291435,
+     "file_name": "img-generic_emojis_toon-cry-20261012T054915-611bc5"
+    },
+    {
+     "id": "8983d723",
+     "name": "Generic emojis toon sad",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-sad-generic_emojis_toon-20261012T054928-2a99d9.png",
+     "type": "static",
+     "emoji": "😔",
+     "kb": 173,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 4
+     },
+     "created": 1791784168.319393,
+     "file_name": "img-generic_emojis_toon-sad-20261012T054915-70d66c"
+    },
+    {
+     "id": "aa8f3642",
+     "name": "Generic emojis toon love",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-love-generic_emojis_toon-20261012T054928-98b347.png",
+     "type": "static",
+     "emoji": "😍",
+     "kb": 178,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 5
+     },
+     "created": 1791784168.3468695,
+     "file_name": "img-generic_emojis_toon-love-20261012T054915-9c5753"
+    },
+    {
+     "id": "bc390e7d",
+     "name": "Generic emojis toon angry",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-angry-generic_emojis_toon-20261012T054928-1cb301.png",
+     "type": "static",
+     "emoji": "😠",
+     "kb": 159,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 6
+     },
+     "created": 1791784168.373664,
+     "file_name": "img-generic_emojis_toon-angry-20261012T054915-cd8c52"
+    },
+    {
+     "id": "76c36702",
+     "name": "Generic emojis toon wink",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-wink-generic_emojis_toon-20261012T054928-d7c6bc.png",
+     "type": "static",
+     "emoji": "😉",
+     "kb": 170,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 7
+     },
+     "created": 1791784168.401281,
+     "file_name": "img-generic_emojis_toon-wink-20261012T054915-cc8563"
+    },
+    {
+     "id": "3b7ac04e",
+     "name": "Generic emojis toon kiss",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-kiss-generic_emojis_toon-20261012T054928-a4c460.png",
+     "type": "static",
+     "emoji": "😘",
+     "kb": 168,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 8
+     },
+     "created": 1791784168.4274676,
+     "file_name": "img-generic_emojis_toon-kiss-20261012T054915-7fdce2"
+    },
+    {
+     "id": "0b3f8372",
+     "name": "Generic emojis toon surprised",
+     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-surprised-generic_emojis_toon-20261012T054928-cf7379.png",
+     "type": "static",
+     "emoji": "😮",
+     "kb": 169,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "generation": "G136",
+      "index": 9
+     },
+     "created": 1791784168.4561708,
+     "file_name": "img-generic_emojis_toon-surprised-20261012T054915-6f35b3"
+    }
+   ],
+   "lead_at": 1791784168.628,
+   "telegram": {
+    "sets": [
+     {
+      "kind": "static",
+      "name": "generic_emojis_toon_by_Mirsal_builder_bot",
+      "link": "https://t.me/addstickers/generic_emojis_toon_by_Mirsal_builder_bot",
+      "items": [
+       {
+        "sticker_id": "07e3faa8",
+        "file_unique_id": "AgAD8h0AAr_uaVI"
+       },
+       {
+        "sticker_id": "5ed24b5e",
+        "file_unique_id": "AgAD-x0AArf1aVI"
+       },
+       {
+        "sticker_id": "8612c7d8",
+        "file_unique_id": "AgADnx0AApFxaFI"
+       },
+       {
+        "sticker_id": "8983d723",
+        "file_unique_id": "AgADSiAAAmUqYFI"
+       },
+       {
+        "sticker_id": "aa8f3642",
+        "file_unique_id": "AgADyh8AArn1aVI"
+       },
+       {
+        "sticker_id": "bc390e7d",
+        "file_unique_id": "AgAD3B8AAjz6YFI"
+       },
+       {
+        "sticker_id": "76c36702",
+        "file_unique_id": "AgADezEAAuHIaVI"
+       },
+       {
+        "sticker_id": "3b7ac04e",
+        "file_unique_id": "AgADbR8AAtyfYVI"
+       },
+       {
+        "sticker_id": "0b3f8372",
+        "file_unique_id": "AgADJSIAAi9KYVI"
+       }
+      ]
+     }
+    ],
+    "exports": [
+     {
+      "fingerprint": "0e821c6bef38aadadcdeb1a956dae11e862155e5e0fdc2d19ead906d9aceb15b",
+      "sent_at": 1791784255.41,
+      "mode": "once",
+      "bot": "Mirsal_builder_bot",
+      "sets": [
+       {
+        "kind": "static",
+        "name": "generic_emojis_toon_by_Mirsal_builder_bot",
+        "link": "https://t.me/addstickers/generic_emojis_toon_by_Mirsal_builder_bot",
+        "added": 9,
+        "total": 9
+       }
+      ]
+     }
+    ]
+   },
+   "parent": "f1d63c25"
+  },
+  {
    "id": "4702bf07",
    "name": "Generic Emojis flat",
    "slug": "generic_emojis_flat",
@@ -5376,1412 +6786,8 @@
       ]
      }
     ]
-   }
-  },
-  {
-   "id": "a8ba6117",
-   "name": "Generic Emojis Toon",
-   "slug": "generic_emojis_toon",
-   "cover": "07e3faa8",
-   "owner": "local",
-   "created": 1791784168.1256707,
-   "stickers": [
-    {
-     "id": "07e3faa8",
-     "name": "Generic emojis toon happy",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-happy-generic_emojis_toon-20261012T054928-da92b4.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 181,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 1
-     },
-     "created": 1791784168.2344465,
-     "file_name": "img-generic_emojis_toon-happy-20261012T054915-cb52a6"
-    },
-    {
-     "id": "5ed24b5e",
-     "name": "Generic emojis toon laugh",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-laugh-generic_emojis_toon-20261012T054928-07576e.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 144,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 2
-     },
-     "created": 1791784168.2631838,
-     "file_name": "img-generic_emojis_toon-laugh-20261012T054915-8dc9ed"
-    },
-    {
-     "id": "8612c7d8",
-     "name": "Generic emojis toon cry",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-cry-generic_emojis_toon-20261012T054928-2f67b7.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 186,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 3
-     },
-     "created": 1791784168.291435,
-     "file_name": "img-generic_emojis_toon-cry-20261012T054915-611bc5"
-    },
-    {
-     "id": "8983d723",
-     "name": "Generic emojis toon sad",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-sad-generic_emojis_toon-20261012T054928-2a99d9.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 173,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 4
-     },
-     "created": 1791784168.319393,
-     "file_name": "img-generic_emojis_toon-sad-20261012T054915-70d66c"
-    },
-    {
-     "id": "aa8f3642",
-     "name": "Generic emojis toon love",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-love-generic_emojis_toon-20261012T054928-98b347.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 178,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 5
-     },
-     "created": 1791784168.3468695,
-     "file_name": "img-generic_emojis_toon-love-20261012T054915-9c5753"
-    },
-    {
-     "id": "bc390e7d",
-     "name": "Generic emojis toon angry",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-angry-generic_emojis_toon-20261012T054928-1cb301.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 159,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 6
-     },
-     "created": 1791784168.373664,
-     "file_name": "img-generic_emojis_toon-angry-20261012T054915-cd8c52"
-    },
-    {
-     "id": "76c36702",
-     "name": "Generic emojis toon wink",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-wink-generic_emojis_toon-20261012T054928-d7c6bc.png",
-     "type": "static",
-     "emoji": "😉",
-     "kb": 170,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 7
-     },
-     "created": 1791784168.401281,
-     "file_name": "img-generic_emojis_toon-wink-20261012T054915-cc8563"
-    },
-    {
-     "id": "3b7ac04e",
-     "name": "Generic emojis toon kiss",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-kiss-generic_emojis_toon-20261012T054928-a4c460.png",
-     "type": "static",
-     "emoji": "😘",
-     "kb": 168,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 8
-     },
-     "created": 1791784168.4274676,
-     "file_name": "img-generic_emojis_toon-kiss-20261012T054915-7fdce2"
-    },
-    {
-     "id": "0b3f8372",
-     "name": "Generic emojis toon surprised",
-     "file": "G136-generic_emojis_toon-20261012T054915/img-generic_emojis_toon-surprised-generic_emojis_toon-20261012T054928-cf7379.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 169,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G136",
-      "index": 9
-     },
-     "created": 1791784168.4561708,
-     "file_name": "img-generic_emojis_toon-surprised-20261012T054915-6f35b3"
-    }
-   ],
-   "lead_at": 1791784168.628,
-   "telegram": {
-    "sets": [
-     {
-      "kind": "static",
-      "name": "generic_emojis_toon_by_Mirsal_builder_bot",
-      "link": "https://t.me/addstickers/generic_emojis_toon_by_Mirsal_builder_bot",
-      "items": [
-       {
-        "sticker_id": "07e3faa8",
-        "file_unique_id": "AgAD8h0AAr_uaVI"
-       },
-       {
-        "sticker_id": "5ed24b5e",
-        "file_unique_id": "AgAD-x0AArf1aVI"
-       },
-       {
-        "sticker_id": "8612c7d8",
-        "file_unique_id": "AgADnx0AApFxaFI"
-       },
-       {
-        "sticker_id": "8983d723",
-        "file_unique_id": "AgADSiAAAmUqYFI"
-       },
-       {
-        "sticker_id": "aa8f3642",
-        "file_unique_id": "AgADyh8AArn1aVI"
-       },
-       {
-        "sticker_id": "bc390e7d",
-        "file_unique_id": "AgAD3B8AAjz6YFI"
-       },
-       {
-        "sticker_id": "76c36702",
-        "file_unique_id": "AgADezEAAuHIaVI"
-       },
-       {
-        "sticker_id": "3b7ac04e",
-        "file_unique_id": "AgADbR8AAtyfYVI"
-       },
-       {
-        "sticker_id": "0b3f8372",
-        "file_unique_id": "AgADJSIAAi9KYVI"
-       }
-      ]
-     }
-    ],
-    "exports": [
-     {
-      "fingerprint": "0e821c6bef38aadadcdeb1a956dae11e862155e5e0fdc2d19ead906d9aceb15b",
-      "sent_at": 1791784255.41,
-      "mode": "once",
-      "bot": "Mirsal_builder_bot",
-      "sets": [
-       {
-        "kind": "static",
-        "name": "generic_emojis_toon_by_Mirsal_builder_bot",
-        "link": "https://t.me/addstickers/generic_emojis_toon_by_Mirsal_builder_bot",
-        "added": 9,
-        "total": 9
-       }
-      ]
-     }
-    ]
-   }
-  },
-  {
-   "id": "2905beaa",
-   "name": "Generic Emojis Toon 2",
-   "slug": "generic_emojis_toon_2",
-   "cover": "a1660ebf",
-   "owner": "local",
-   "created": 1791784369.4866495,
-   "stickers": [
-    {
-     "id": "a1660ebf",
-     "name": "Generic emojis toon happy",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-happy-generic_emojis_toon_2-20261012T055249-d51d89.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 178,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 1
-     },
-     "created": 1791784369.6188142,
-     "file_name": "img-generic_emojis_toon-happy-20261012T055139-17f939"
-    },
-    {
-     "id": "ea23c45e",
-     "name": "Generic emojis toon laugh",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-laugh-generic_emojis_toon_2-20261012T055249-754425.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 162,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 2
-     },
-     "created": 1791784369.6473608,
-     "file_name": "img-generic_emojis_toon-laugh-20261012T055139-3df4d7"
-    },
-    {
-     "id": "b30d8c86",
-     "name": "Generic emojis toon cry",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-cry-generic_emojis_toon_2-20261012T055249-e7ce9b.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 193,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 3
-     },
-     "created": 1791784369.6760375,
-     "file_name": "img-generic_emojis_toon-cry-20261012T055139-dc9b45"
-    },
-    {
-     "id": "befe1430",
-     "name": "Generic emojis toon sad",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-sad-generic_emojis_toon_2-20261012T055249-beeb4f.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 179,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 4
-     },
-     "created": 1791784369.7046938,
-     "file_name": "img-generic_emojis_toon-sad-20261012T055139-1a7107"
-    },
-    {
-     "id": "0ca4545a",
-     "name": "Generic emojis toon love",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-love-generic_emojis_toon_2-20261012T055249-4999f3.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 181,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 5
-     },
-     "created": 1791784369.7330534,
-     "file_name": "img-generic_emojis_toon-love-20261012T055139-6f1821"
-    },
-    {
-     "id": "7db295fe",
-     "name": "Generic emojis toon angry",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-angry-generic_emojis_toon_2-20261012T055249-cc9dd1.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 164,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 6
-     },
-     "created": 1791784369.7613826,
-     "file_name": "img-generic_emojis_toon-angry-20261012T055139-01e7c5"
-    },
-    {
-     "id": "32b01b96",
-     "name": "Generic emojis toon wink",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-wink-generic_emojis_toon_2-20261012T055249-f49bdc.png",
-     "type": "static",
-     "emoji": "😉",
-     "kb": 173,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 7
-     },
-     "created": 1791784369.7896845,
-     "file_name": "img-generic_emojis_toon-wink-20261012T055139-f3baec"
-    },
-    {
-     "id": "1d3c7ac4",
-     "name": "Generic emojis toon kiss",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-kiss-generic_emojis_toon_2-20261012T055249-f306c6.png",
-     "type": "static",
-     "emoji": "😘",
-     "kb": 174,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 8
-     },
-     "created": 1791784369.8201315,
-     "file_name": "img-generic_emojis_toon-kiss-20261012T055139-0554f0"
-    },
-    {
-     "id": "51756295",
-     "name": "Generic emojis toon surprised",
-     "file": "G137-generic_emojis_toon-20261012T055139/img-generic_emojis_toon-surprised-generic_emojis_toon_2-20261012T055249-309695.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 170,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G137",
-      "index": 9
-     },
-     "created": 1791784369.8485167,
-     "file_name": "img-generic_emojis_toon-surprised-20261012T055139-a96ae0"
-    }
-   ],
-   "lead_at": 1791784369.996,
-   "telegram": {
-    "sets": [
-     {
-      "kind": "static",
-      "name": "generic_emojis_toon_2_by_Mirsal_builder_bot",
-      "link": "https://t.me/addstickers/generic_emojis_toon_2_by_Mirsal_builder_bot",
-      "items": [
-       {
-        "sticker_id": "a1660ebf",
-        "file_unique_id": "AgAD3CIAAvGFYFI"
-       },
-       {
-        "sticker_id": "ea23c45e",
-        "file_unique_id": "AgAD_h4AAkVIaVI"
-       },
-       {
-        "sticker_id": "b30d8c86",
-        "file_unique_id": "AgADJh8AAqNMYFI"
-       },
-       {
-        "sticker_id": "befe1430",
-        "file_unique_id": "AgADjyAAAjnwYFI"
-       },
-       {
-        "sticker_id": "0ca4545a",
-        "file_unique_id": "AgADDiIAAqUpYVI"
-       },
-       {
-        "sticker_id": "7db295fe",
-        "file_unique_id": "AgADlB8AAojxaVI"
-       },
-       {
-        "sticker_id": "32b01b96",
-        "file_unique_id": "AgADGR4AArH8YFI"
-       },
-       {
-        "sticker_id": "1d3c7ac4",
-        "file_unique_id": "AgADwRwAAo5-YVI"
-       },
-       {
-        "sticker_id": "51756295",
-        "file_unique_id": "AgADBR0AAqQaaVI"
-       }
-      ]
-     }
-    ],
-    "exports": [
-     {
-      "fingerprint": "0f69157a34fe11392e61a0018ea3fb4415660d47482ef6f20d77def7827703ea",
-      "sent_at": 1791784392.425,
-      "mode": "once",
-      "bot": "Mirsal_builder_bot",
-      "sets": [
-       {
-        "kind": "static",
-        "name": "generic_emojis_toon_2_by_Mirsal_builder_bot",
-        "link": "https://t.me/addstickers/generic_emojis_toon_2_by_Mirsal_builder_bot",
-        "added": 9,
-        "total": 9
-       }
-      ]
-     }
-    ]
-   }
-  },
-  {
-   "id": "e418aa14",
-   "name": "Generic Emojis Toon 3",
-   "slug": "generic_emojis_toon_3",
-   "cover": "1269d518",
-   "owner": "local",
-   "created": 1791784465.1776104,
-   "stickers": [
-    {
-     "id": "1269d518",
-     "name": "Generic emojis toon happy",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-happy-generic_emojis_toon_3-20261012T055425-303d99.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 147,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 1
-     },
-     "created": 1791784465.2883554,
-     "file_name": "img-generic_emojis_toon-happy-20261012T055400-e4bb10"
-    },
-    {
-     "id": "f86f85a1",
-     "name": "Generic emojis toon laugh",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-laugh-generic_emojis_toon_3-20261012T055425-7549be.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 154,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 2
-     },
-     "created": 1791784465.3169613,
-     "file_name": "img-generic_emojis_toon-laugh-20261012T055400-005229"
-    },
-    {
-     "id": "35a9f227",
-     "name": "Generic emojis toon cry",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-cry-generic_emojis_toon_3-20261012T055425-9f8d27.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 163,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 3
-     },
-     "created": 1791784465.3466928,
-     "file_name": "img-generic_emojis_toon-cry-20261012T055400-75d853"
-    },
-    {
-     "id": "085af357",
-     "name": "Generic emojis toon sad",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-sad-generic_emojis_toon_3-20261012T055425-9545a0.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 148,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 4
-     },
-     "created": 1791784465.3758595,
-     "file_name": "img-generic_emojis_toon-sad-20261012T055400-a850b6"
-    },
-    {
-     "id": "ff72a7c3",
-     "name": "Generic emojis toon love",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-love-generic_emojis_toon_3-20261012T055425-66ed65.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 151,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 5
-     },
-     "created": 1791784465.4110026,
-     "file_name": "img-generic_emojis_toon-love-20261012T055400-6f23aa"
-    },
-    {
-     "id": "165a11da",
-     "name": "Generic emojis toon angry",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-angry-generic_emojis_toon_3-20261012T055425-abfc5b.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 168,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 6
-     },
-     "created": 1791784465.4465024,
-     "file_name": "img-generic_emojis_toon-angry-20261012T055400-3ff688"
-    },
-    {
-     "id": "639fc4f6",
-     "name": "Generic emojis toon wink",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-wink-generic_emojis_toon_3-20261012T055425-7295a9.png",
-     "type": "static",
-     "emoji": "😉",
-     "kb": 146,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 7
-     },
-     "created": 1791784465.4800267,
-     "file_name": "img-generic_emojis_toon-wink-20261012T055400-b7428d"
-    },
-    {
-     "id": "a1ce6417",
-     "name": "Generic emojis toon kiss",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-kiss-generic_emojis_toon_3-20261012T055425-dbb886.png",
-     "type": "static",
-     "emoji": "😘",
-     "kb": 142,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 8
-     },
-     "created": 1791784465.510019,
-     "file_name": "img-generic_emojis_toon-kiss-20261012T055400-e50310"
-    },
-    {
-     "id": "00024706",
-     "name": "Generic emojis toon surprised",
-     "file": "G138-generic_emojis_toon-20261012T055400/img-generic_emojis_toon-surprised-generic_emojis_toon_3-20261012T055425-bffaec.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 155,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G138",
-      "index": 9
-     },
-     "created": 1791784465.539554,
-     "file_name": "img-generic_emojis_toon-surprised-20261012T055400-96eb25"
-    }
-   ],
-   "lead_at": 1791784465.706,
-   "telegram": {
-    "sets": [
-     {
-      "kind": "static",
-      "name": "generic_emojis_toon_3_by_Mirsal_builder_bot",
-      "link": "https://t.me/addstickers/generic_emojis_toon_3_by_Mirsal_builder_bot",
-      "items": [
-       {
-        "sticker_id": "1269d518",
-        "file_unique_id": "AgADbBsAAk94YFI"
-       },
-       {
-        "sticker_id": "f86f85a1",
-        "file_unique_id": "AgADbRwAAomOYVI"
-       },
-       {
-        "sticker_id": "35a9f227",
-        "file_unique_id": "AgAD6x8AAo8yaVI"
-       },
-       {
-        "sticker_id": "085af357",
-        "file_unique_id": "AgADmDMAAlmJaVI"
-       },
-       {
-        "sticker_id": "ff72a7c3",
-        "file_unique_id": "AgADOBwAAtKjYVI"
-       },
-       {
-        "sticker_id": "165a11da",
-        "file_unique_id": "AgADTh4AAptFaFI"
-       },
-       {
-        "sticker_id": "639fc4f6",
-        "file_unique_id": "AgAD1SAAAl0FaFI"
-       },
-       {
-        "sticker_id": "a1ce6417",
-        "file_unique_id": "AgAD-iYAAmNzYFI"
-       },
-       {
-        "sticker_id": "00024706",
-        "file_unique_id": "AgADVB4AAvSfYFI"
-       }
-      ]
-     }
-    ],
-    "exports": [
-     {
-      "fingerprint": "b973f371cedb30c0b9f4afbd9b914fda4db08bcbcd20bab03fd904a47acb4aa0",
-      "sent_at": 1791784491.933,
-      "mode": "once",
-      "bot": "Mirsal_builder_bot",
-      "sets": [
-       {
-        "kind": "static",
-        "name": "generic_emojis_toon_3_by_Mirsal_builder_bot",
-        "link": "https://t.me/addstickers/generic_emojis_toon_3_by_Mirsal_builder_bot",
-        "added": 9,
-        "total": 9
-       }
-      ]
-     }
-    ]
-   }
-  },
-  {
-   "id": "f8d8b081",
-   "name": "Generic Emojis Cell Shade",
-   "slug": "generic_emojis_cell_shade",
-   "cover": "1ca6b8cc",
-   "owner": "local",
-   "created": 1791784603.3472023,
-   "stickers": [
-    {
-     "id": "1ca6b8cc",
-     "name": "Generic emojis cell shade happy",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-happy-generic_emojis_cell_shad-20261012T055643-519e32.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 119,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 1
-     },
-     "created": 1791784603.4640331,
-     "file_name": "img-generic_emojis_cell_shade-happy-20261012T055611-39b46c"
-    },
-    {
-     "id": "3a872c92",
-     "name": "Generic emojis cell shade laugh",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-laugh-generic_emojis_cell_shad-20261012T055643-4119bb.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 128,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 2
-     },
-     "created": 1791784603.5001078,
-     "file_name": "img-generic_emojis_cell_shade-laugh-20261012T055611-6ef2c7"
-    },
-    {
-     "id": "db45e8c4",
-     "name": "Generic emojis cell shade cry",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-cry-generic_emojis_cell_shad-20261012T055643-f1f422.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 121,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 3
-     },
-     "created": 1791784603.5295844,
-     "file_name": "img-generic_emojis_cell_shade-cry-20261012T055611-a9fa76"
-    },
-    {
-     "id": "454f1317",
-     "name": "Generic emojis cell shade sad",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-sad-generic_emojis_cell_shad-20261012T055643-560f33.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 97,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 4
-     },
-     "created": 1791784603.5584772,
-     "file_name": "img-generic_emojis_cell_shade-sad-20261012T055611-d9e7d9"
-    },
-    {
-     "id": "330bece1",
-     "name": "Generic emojis cell shade love",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-love-generic_emojis_cell_shad-20261012T055643-5f43ff.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 138,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 5
-     },
-     "created": 1791784603.5872502,
-     "file_name": "img-generic_emojis_cell_shade-love-20261012T055611-483a8d"
-    },
-    {
-     "id": "6410a8d8",
-     "name": "Generic emojis cell shade angry",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-angry-generic_emojis_cell_shad-20261012T055643-581cac.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 119,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 6
-     },
-     "created": 1791784603.6173258,
-     "file_name": "img-generic_emojis_cell_shade-angry-20261012T055611-0e6f12"
-    },
-    {
-     "id": "3392293d",
-     "name": "Generic emojis cell shade wink",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-wink-generic_emojis_cell_shad-20261012T055643-c8bde7.png",
-     "type": "static",
-     "emoji": "😉",
-     "kb": 94,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 7
-     },
-     "created": 1791784603.6486526,
-     "file_name": "img-generic_emojis_cell_shade-wink-20261012T055611-e1e16b"
-    },
-    {
-     "id": "b3efc399",
-     "name": "Generic emojis cell shade kiss",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-kiss-generic_emojis_cell_shad-20261012T055643-844f58.png",
-     "type": "static",
-     "emoji": "😘",
-     "kb": 97,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 8
-     },
-     "created": 1791784603.678578,
-     "file_name": "img-generic_emojis_cell_shade-kiss-20261012T055611-78846c"
-    },
-    {
-     "id": "f2e433f3",
-     "name": "Generic emojis cell shade surprised",
-     "file": "G139-generic_emojis_cell_shade-20261012T055611/img-generic_emojis_cell_shade-surprised-generic_emojis_cell_shad-20261012T055643-641439.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 106,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G139",
-      "index": 9
-     },
-     "created": 1791784603.7080567,
-     "file_name": "img-generic_emojis_cell_shade-surprised-20261012T055611-ca5c3a"
-    }
-   ],
-   "lead_at": 1791784603.855,
-   "telegram": {
-    "sets": [
-     {
-      "kind": "static",
-      "name": "generic_emojis_cell_shade_by_Mirsal_builder_bot",
-      "link": "https://t.me/addstickers/generic_emojis_cell_shade_by_Mirsal_builder_bot",
-      "items": [
-       {
-        "sticker_id": "1ca6b8cc",
-        "file_unique_id": "AgADrR4AAu4PYFI"
-       },
-       {
-        "sticker_id": "3a872c92",
-        "file_unique_id": "AgAD8R4AApBMYVI"
-       },
-       {
-        "sticker_id": "db45e8c4",
-        "file_unique_id": "AgADnxwAAh4uYFI"
-       },
-       {
-        "sticker_id": "454f1317",
-        "file_unique_id": "AgADUR4AAutPYFI"
-       },
-       {
-        "sticker_id": "330bece1",
-        "file_unique_id": "AgADAhoAAq-HaFI"
-       },
-       {
-        "sticker_id": "6410a8d8",
-        "file_unique_id": "AgADch0AAk8GaVI"
-       },
-       {
-        "sticker_id": "3392293d",
-        "file_unique_id": "AgADQh8AAvoWaFI"
-       },
-       {
-        "sticker_id": "b3efc399",
-        "file_unique_id": "AgADxyQAApw0YFI"
-       },
-       {
-        "sticker_id": "f2e433f3",
-        "file_unique_id": "AgADsh8AAovcaFI"
-       }
-      ]
-     }
-    ],
-    "exports": [
-     {
-      "fingerprint": "77c7605ab527ca2a1deb3da2a03e20ead740da5c1460a4aa77282b133d1b7309",
-      "sent_at": 1791784613.228,
-      "mode": "once",
-      "bot": "Mirsal_builder_bot",
-      "sets": [
-       {
-        "kind": "static",
-        "name": "generic_emojis_cell_shade_by_Mirsal_builder_bot",
-        "link": "https://t.me/addstickers/generic_emojis_cell_shade_by_Mirsal_builder_bot",
-        "added": 9,
-        "total": 9
-       }
-      ]
-     }
-    ]
-   }
-  },
-  {
-   "id": "f1d63c25",
-   "name": "Generic Emojis Smooth Colors Gradient",
-   "slug": "generic_emojis_smooth_colors_gradient",
-   "cover": "a7dcd8d8",
-   "owner": "local",
-   "created": 1791784749.282586,
-   "stickers": [
-    {
-     "id": "a7dcd8d8",
-     "name": "Generic emojis smooth colors gradient happy",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-happy-generic_emojis_smooth_co-20261012T055909-3ca932.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 146,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 1
-     },
-     "created": 1791784749.381233,
-     "file_name": "img-generic_emojis_smooth_colors-happy-20261012T055858-62197d"
-    },
-    {
-     "id": "00a40c38",
-     "name": "Generic emojis smooth colors gradient laugh",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-laugh-generic_emojis_smooth_co-20261012T055909-615ee3.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 141,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 2
-     },
-     "created": 1791784749.4127316,
-     "file_name": "img-generic_emojis_smooth_colors-laugh-20261012T055858-cff24b"
-    },
-    {
-     "id": "53af1993",
-     "name": "Generic emojis smooth colors gradient cry",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-cry-generic_emojis_smooth_co-20261012T055909-0dda57.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 154,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 3
-     },
-     "created": 1791784749.4423761,
-     "file_name": "img-generic_emojis_smooth_colors-cry-20261012T055858-5655bb"
-    },
-    {
-     "id": "c92a4139",
-     "name": "Generic emojis smooth colors gradient sad",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-sad-generic_emojis_smooth_co-20261012T055909-031ee1.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 143,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 4
-     },
-     "created": 1791784749.4722128,
-     "file_name": "img-generic_emojis_smooth_colors-sad-20261012T055858-ab8672"
-    },
-    {
-     "id": "b461e15e",
-     "name": "Generic emojis smooth colors gradient love",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-love-generic_emojis_smooth_co-20261012T055909-51a3ce.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 153,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 5
-     },
-     "created": 1791784749.500661,
-     "file_name": "img-generic_emojis_smooth_colors-love-20261012T055858-c2e424"
-    },
-    {
-     "id": "d3de0ad3",
-     "name": "Generic emojis smooth colors gradient angry",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-angry-generic_emojis_smooth_co-20261012T055909-5a874f.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 139,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 6
-     },
-     "created": 1791784749.5312133,
-     "file_name": "img-generic_emojis_smooth_colors-angry-20261012T055858-1b11d3"
-    },
-    {
-     "id": "8f8d2c94",
-     "name": "Generic emojis smooth colors gradient wink",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-wink-generic_emojis_smooth_co-20261012T055909-b50ada.png",
-     "type": "static",
-     "emoji": "😉",
-     "kb": 140,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 7
-     },
-     "created": 1791784749.5605927,
-     "file_name": "img-generic_emojis_smooth_colors-wink-20261012T055858-42f596"
-    },
-    {
-     "id": "bd839896",
-     "name": "Generic emojis smooth colors gradient kiss",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-kiss-generic_emojis_smooth_co-20261012T055909-8fcd3d.png",
-     "type": "static",
-     "emoji": "😘",
-     "kb": 145,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 8
-     },
-     "created": 1791784749.591019,
-     "file_name": "img-generic_emojis_smooth_colors-kiss-20261012T055858-691267"
-    },
-    {
-     "id": "d4c1674e",
-     "name": "Generic emojis smooth colors gradient surprised",
-     "file": "G141-generic_emojis_smooth_colors-20261012T055858/img-generic_emojis_smooth_colors-surprised-generic_emojis_smooth_co-20261012T055909-3b9160.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 143,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G141",
-      "index": 9
-     },
-     "created": 1791784749.6260512,
-     "file_name": "img-generic_emojis_smooth_colors-surprised-20261012T055858-b1a0ce"
-    }
-   ],
-   "lead_at": 1791784749.79,
-   "telegram": {
-    "sets": [
-     {
-      "kind": "static",
-      "name": "generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
-      "link": "https://t.me/addstickers/generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
-      "items": [
-       {
-        "sticker_id": "a7dcd8d8",
-        "file_unique_id": "AgADQx0AAp30YFI"
-       },
-       {
-        "sticker_id": "00a40c38",
-        "file_unique_id": "AgADliEAAsKJYFI"
-       },
-       {
-        "sticker_id": "53af1993",
-        "file_unique_id": "AgADNR4AAqmqYVI"
-       },
-       {
-        "sticker_id": "c92a4139",
-        "file_unique_id": "AgADzx8AAjDaaVI"
-       },
-       {
-        "sticker_id": "b461e15e",
-        "file_unique_id": "AgADcy0AAgEyaFI"
-       },
-       {
-        "sticker_id": "d3de0ad3",
-        "file_unique_id": "AgADWCIAAkUHYVI"
-       },
-       {
-        "sticker_id": "8f8d2c94",
-        "file_unique_id": "AgAD3hwAArwaYVI"
-       },
-       {
-        "sticker_id": "bd839896",
-        "file_unique_id": "AgAD_x0AAhiXaVI"
-       },
-       {
-        "sticker_id": "d4c1674e",
-        "file_unique_id": "AgADwh0AApotYFI"
-       }
-      ]
-     }
-    ],
-    "exports": [
-     {
-      "fingerprint": "8556066c9b3189f01932c19ce226a3a8a86ef0543834ad79da301f2aa4047f9e",
-      "sent_at": 1791784758.8,
-      "mode": "once",
-      "bot": "Mirsal_builder_bot",
-      "sets": [
-       {
-        "kind": "static",
-        "name": "generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
-        "link": "https://t.me/addstickers/generic_emojis_smooth_colors_gradient_by_Mirsal_builder_bot",
-        "added": 9,
-        "total": 9
-       }
-      ]
-     }
-    ]
-   }
-  },
-  {
-   "id": "701a899d",
-   "name": "Generic Emojis Smooth Colors Gradient Shiny",
-   "slug": "generic_emojis_smooth_colors_gradient_shiny",
-   "cover": "606de445",
-   "owner": "local",
-   "created": 1791784814.057409,
-   "stickers": [
-    {
-     "id": "606de445",
-     "name": "Generic emojis smooth colors gradient shiny happy",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-happy-generic_emojis_smooth_co-20261012T060014-37e343.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 159,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 1
-     },
-     "created": 1791784814.1765053,
-     "file_name": "img-generic_emojis_smooth_colors-happy-20261012T060005-435397"
-    },
-    {
-     "id": "0a142af1",
-     "name": "Generic emojis smooth colors gradient shiny laugh",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-laugh-generic_emojis_smooth_co-20261012T060014-4ccdd0.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 170,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 2
-     },
-     "created": 1791784814.2096667,
-     "file_name": "img-generic_emojis_smooth_colors-laugh-20261012T060005-3cb5de"
-    },
-    {
-     "id": "576eb0e2",
-     "name": "Generic emojis smooth colors gradient shiny cry",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-cry-generic_emojis_smooth_co-20261012T060014-e416b0.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 169,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 3
-     },
-     "created": 1791784814.2508664,
-     "file_name": "img-generic_emojis_smooth_colors-cry-20261012T060005-d42e84"
-    },
-    {
-     "id": "a571c243",
-     "name": "Generic emojis smooth colors gradient shiny sad",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-sad-generic_emojis_smooth_co-20261012T060014-a29349.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 154,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 4
-     },
-     "created": 1791784814.2913005,
-     "file_name": "img-generic_emojis_smooth_colors-sad-20261012T060005-97f6ec"
-    },
-    {
-     "id": "a04b67d2",
-     "name": "Generic emojis smooth colors gradient shiny love",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-love-generic_emojis_smooth_co-20261012T060014-fa2f17.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 161,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 5
-     },
-     "created": 1791784814.3282835,
-     "file_name": "img-generic_emojis_smooth_colors-love-20261012T060005-60c2bc"
-    },
-    {
-     "id": "889362ed",
-     "name": "Generic emojis smooth colors gradient shiny angry",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-angry-generic_emojis_smooth_co-20261012T060014-5c76e4.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 152,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 6
-     },
-     "created": 1791784814.366828,
-     "file_name": "img-generic_emojis_smooth_colors-angry-20261012T060005-440f3f"
-    },
-    {
-     "id": "5a2cd163",
-     "name": "Generic emojis smooth colors gradient shiny wink",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-wink-generic_emojis_smooth_co-20261012T060014-e69a2c.png",
-     "type": "static",
-     "emoji": "😉",
-     "kb": 155,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 7
-     },
-     "created": 1791784814.4044936,
-     "file_name": "img-generic_emojis_smooth_colors-wink-20261012T060005-54e443"
-    },
-    {
-     "id": "8e1659a1",
-     "name": "Generic emojis smooth colors gradient shiny kiss",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-kiss-generic_emojis_smooth_co-20261012T060014-3b07ea.png",
-     "type": "static",
-     "emoji": "😘",
-     "kb": 162,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 8
-     },
-     "created": 1791784814.439408,
-     "file_name": "img-generic_emojis_smooth_colors-kiss-20261012T060005-7c5fdc"
-    },
-    {
-     "id": "7755a8b4",
-     "name": "Generic emojis smooth colors gradient shiny surprised",
-     "file": "G142-generic_emojis_smooth_colors-20261012T060005/img-generic_emojis_smooth_colors-surprised-generic_emojis_smooth_co-20261012T060014-7e4f6c.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 158,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G142",
-      "index": 9
-     },
-     "created": 1791784814.476497,
-     "file_name": "img-generic_emojis_smooth_colors-surprised-20261012T060005-616cf2"
-    }
-   ],
-   "lead_at": 1791784814.828
-  },
-  {
-   "id": "ce467354",
-   "name": "Generic Emojis Mirsal",
-   "slug": "generic_emojis_mirsal",
-   "cover": "ce1b69c4",
-   "owner": "local",
-   "created": 1791785174.3386176,
-   "stickers": [
-    {
-     "id": "ce1b69c4",
-     "name": "Generic emojis mirsal happy",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-happy-generic_emojis_mirsal-20261012T060614-7d0fc3.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 166,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 1
-     },
-     "created": 1791785174.5732787,
-     "file_name": "img-generic_emojis_mirsal-happy-20261012T060557-cfd6cc"
-    },
-    {
-     "id": "c39de98c",
-     "name": "Generic emojis mirsal laugh",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-laugh-generic_emojis_mirsal-20261012T060614-2e917b.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 175,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 2
-     },
-     "created": 1791785174.6166878,
-     "file_name": "img-generic_emojis_mirsal-laugh-20261012T060557-9479f7"
-    },
-    {
-     "id": "591f8fa0",
-     "name": "Generic emojis mirsal love",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-love-generic_emojis_mirsal-20261012T060614-587539.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 189,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 3
-     },
-     "created": 1791785174.6608973,
-     "file_name": "img-generic_emojis_mirsal-love-20261012T060557-927b66"
-    },
-    {
-     "id": "dfe75fa1",
-     "name": "Generic emojis mirsal cry",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-cry-generic_emojis_mirsal-20261012T060614-16b4a2.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 176,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 4
-     },
-     "created": 1791785174.7038007,
-     "file_name": "img-generic_emojis_mirsal-cry-20261012T060557-69aa0f"
-    },
-    {
-     "id": "fba19b71",
-     "name": "Generic emojis mirsal sad",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-sad-generic_emojis_mirsal-20261012T060614-1b6961.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 169,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 5
-     },
-     "created": 1791785174.7445464,
-     "file_name": "img-generic_emojis_mirsal-sad-20261012T060557-23629b"
-    },
-    {
-     "id": "cc932754",
-     "name": "Generic emojis mirsal angry",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-angry-generic_emojis_mirsal-20261012T060614-d2bc20.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 192,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 6
-     },
-     "created": 1791785174.786612,
-     "file_name": "img-generic_emojis_mirsal-angry-20261012T060557-d3bce3"
-    },
-    {
-     "id": "375d7741",
-     "name": "Generic emojis mirsal surprised",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-surprised-generic_emojis_mirsal-20261012T060614-9f297e.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 172,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 7
-     },
-     "created": 1791785174.8265295,
-     "file_name": "img-generic_emojis_mirsal-surprised-20261012T060557-9f8c33"
-    },
-    {
-     "id": "74221de5",
-     "name": "Generic emojis mirsal scared",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-scared-generic_emojis_mirsal-20261012T060614-3a4375.png",
-     "type": "static",
-     "emoji": "😱",
-     "kb": 163,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 8
-     },
-     "created": 1791785174.868851,
-     "file_name": "img-generic_emojis_mirsal-scared-20261012T060557-cf070a"
-    },
-    {
-     "id": "0212baab",
-     "name": "Generic emojis mirsal thanks",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-thanks-generic_emojis_mirsal-20261012T060614-e7c731.png",
-     "type": "static",
-     "emoji": "🙏",
-     "kb": 172,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 9
-     },
-     "created": 1791785174.9133937,
-     "file_name": "img-generic_emojis_mirsal-thanks-20261012T060557-a86075"
-    }
-   ],
-   "lead_at": 1791785175.143
+   },
+   "parent": "f1d63c25"
   }
  ],
  "layout": 2,

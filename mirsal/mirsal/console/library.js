@@ -332,6 +332,16 @@ ACT.pkmerge = (el) => {
   );
 };
 
+ACT.pkunnest = async (el) => {
+  const a = packById(el.dataset.id);
+  if (!a) return;
+  const r = await post(`/api/packs/${a.id}`, { parent: '' });
+  if (!r.ok) return toast(r.j.error || 'Could not take it out', 1);
+  await loadLib();
+  drawCol2();
+  toast(`“${a.name}” stands on its own again`);
+};
+
 ACT.pkgrp = (el) => {
   const g = el.dataset.g,
     open = el.getAttribute('aria-expanded') === 'true';
@@ -390,7 +400,7 @@ function libBody() {
           `<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${p.stickers.length} stickers</small></div>${ic('chev')}</div>`;
         return e.pack
           ? row(e.pack)
-          : `<div class=pkgroup><div class=pkgh>Group ${esc(e.group)} · ${e.packs.length} packs</div>${e.packs.map(row).join('')}</div>`;
+          : `<div class=pkgroup><div class=pkgh>${e.group.startsWith('P-') ? esc(e.packs[0].name) : `Group ${esc(e.group)}`} · ${e.packs.length} packs</div>${e.packs.map(row).join('')}</div>`;
       })
       .join('') || '<div class=mut style="padding:14px">No packs.</div>'
   }</div>`;

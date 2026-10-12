@@ -85,11 +85,6 @@ class LibraryTests(unittest.TestCase):
         self.assertNotIn(b, [x["id"] for x in self.lib._load()["packs"]], "the emptied pack is in the trash")
         with self.assertRaises(LibraryError):
             self.lib.merge_pack(a, a)
-        self.assertNotIn("lead_at", p, "a plain merge does not make a parent")
-        c = self.lib.create_pack("Angel 3")["id"]
-        self.lib.add_bytes(c, b"png-three", "png", "Wave", "static", "👋", {"generation": "G002", "index": 1})
-        self.assertTrue(self.lib.merge_pack(c, a, lead=True)["lead"])                               # the Packs column's drag of a pack onto a pack
-        self.assertIn("lead_at", self.lib._pack(self.lib._load(), a), "the target becomes the parent of its group")
 
     def test_packs_stickers_and_export(self):
         p = self.lib.create_pack("UAE Moments")
@@ -110,6 +105,21 @@ class LibraryTests(unittest.TestCase):
         self.lib.delete_pack(p["id"]); self.assertEqual(self.lib.snapshot()["packs"], [])
         self.assertEqual(len(list(self.lib.files.rglob("*.*"))), 2, "Delete pack is SOFT: the trashed pack keeps its two remaining files until it is purged (tests/test_purge.py)")
         self.lib.purge_pack(p["id"]); self.assertEqual(list(self.lib.files.rglob("*.*")), [])
+
+    def test_a_pack_dropped_on_a_pack_becomes_a_sub_pack_and_nothing_moves(self):
+        from mirsal.flow import groups
+        a = self.lib.create_pack("Faces")["id"]; b = self.lib.create_pack("Faces toon")["id"]; c = self.lib.create_pack("Faces flat")["id"]
+        sb = self.lib.add_bytes(b, b"png-b", "png", "Happy", "static", "😀", {})
+        self.lib.update_pack(b, parent=a); self.lib.update_pack(c, parent=b)                         # c under b under a: all three in a's group
+        db = self.lib._load(); packs = db["packs"]
+        self.assertEqual([s["id"] for s in self.lib._pack(db, b)["stickers"]], [sb["id"]], "a sub-pack keeps its own stickers")
+        g = groups.pack_groups(Path(self.tmp), packs)
+        self.assertEqual({g[a], g[b], g[c]}, {f"P-{a}"})
+        self.assertEqual(groups.pack_leads(packs, g), {b}, "the newest target leads (b took c last)")
+        with self.assertRaises(LibraryError):
+            self.lib.update_pack(a, parent=c)                                                        # a loop is refused
+        self.lib.update_pack(c, parent=""); self.lib.update_pack(b, parent="")                       # Take out
+        self.assertEqual(groups.pack_groups(Path(self.tmp), self.lib._load()["packs"]), {})
 
     def test_move_sticker_between_packs(self):
         a = self.lib.create_pack("Old Pack")["id"]; b = self.lib.create_pack("New Pack")["id"]

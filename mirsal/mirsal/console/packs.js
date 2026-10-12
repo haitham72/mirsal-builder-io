@@ -93,16 +93,15 @@ S_PACK.addEventListener('drop',e=>{const c=e.target.closest('.cell[data-id]');if
  const all=packById(PACK_ID).stickers.map(s=>s.id),fi=all.indexOf(from),ti=all.indexOf(c.dataset.id),ids=all.filter(i=>i!==from),at=ids.indexOf(c.dataset.id)+(fi<ti?1:0);ids.splice(at,0,from);pkUpdate({order:ids},'Order saved')});
 S_PACK.addEventListener('dragend',()=>{DRAG=null;S_PACK.querySelectorAll('.over').forEach(x=>x.classList.remove('over'))});
 
-/* drop a sticker on a pack row in the Packs column = move it to that pack; drop a PACK row on another = merge it in, the target becomes the parent */
+/* drop a sticker on a pack row in the Packs column = move it to that pack; drop a PACK row on another = it becomes a sub-pack there (the target the parent; nothing moves) */
 const C2=$('col2');let PKDRAG=null;
 C2.addEventListener('dragstart',e=>{const r=e.target.closest('.crow[data-id]');if(!r||DRAG)return;PKDRAG=r.dataset.id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',PKDRAG)});
 C2.addEventListener('dragend',()=>{PKDRAG=null;C2.querySelectorAll('.over').forEach(x=>x.classList.remove('over'))});
 C2.addEventListener('dragover',e=>{const r=e.target.closest('.crow[data-id]');if(!r||!PKDRAG||r.dataset.id===PKDRAG)return;e.preventDefault();C2.querySelectorAll('.over').forEach(x=>x.classList.remove('over'));r.classList.add('over')});
-C2.addEventListener('drop',e=>{const r=e.target.closest('.crow[data-id]');if(!r||!PKDRAG)return;e.preventDefault();const a=packById(PKDRAG),b=packById(r.dataset.id);PKDRAG=null;
+C2.addEventListener('drop',async e=>{const r=e.target.closest('.crow[data-id]');if(!r||!PKDRAG)return;e.preventDefault();const a=packById(PKDRAG),b=packById(r.dataset.id);PKDRAG=null;
  C2.querySelectorAll('.over').forEach(x=>x.classList.remove('over'));if(!a||!b||a.id===b.id)return;
- confirmDlg(`Merge “${a.name}” into “${b.name}”? “${b.name}” becomes the parent: its stills take the animations of the same cells (names, emoji and particles stay), the other stickers move over, and “${a.name}” goes to the trash (you can restore it).`,async()=>{
-  const res=await post(`/api/packs/${a.id}/merge`,{into:b.id,lead:true});if(!res.ok)return toast(res.j.error||'Could not merge',1);
-  await loadLib();toast(`${res.j.upgraded} upgraded to animated, ${res.j.moved} moved into “${b.name}”, now the parent`);location.hash='#/pack/'+b.id;drawCol2()},'Merge')});
+ const res=await post(`/api/packs/${a.id}`,{parent:b.id});if(!res.ok)return toast(res.j.error||'Could not move the pack',1);       // a sub-pack: nothing moves, Take out undoes it
+ await loadLib();drawCol2();toast(`“${a.name}” is now a sub-pack of “${b.name}”`)});
 C2.addEventListener('dragover',e=>{const r=e.target.closest('.crow');if(!r||!DRAG||r.dataset.id===PACK_ID)return;e.preventDefault();C2.querySelectorAll('.over').forEach(x=>x.classList.remove('over'));r.classList.add('over')});
 C2.addEventListener('dragleave',e=>{const r=e.target.closest('.crow');if(r)r.classList.remove('over')});
 C2.addEventListener('drop',async e=>{const r=e.target.closest('.crow');if(!r||!DRAG||r.dataset.id===PACK_ID)return;e.preventDefault();const sid=DRAG;DRAG=null;
