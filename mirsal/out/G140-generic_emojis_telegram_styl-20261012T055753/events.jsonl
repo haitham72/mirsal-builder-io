@@ -1,0 +1,7 @@
+{"ts": 1791784673.898, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "generic emojis telegram style", "task_slug": "generic_emojis_telegram_style"}}
+{"ts": 1791784673.924, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791784674.058, "stage": "sheet_picked", "status": "done", "ms": 133, "detail": {"subject": "generic_emojis_telegram_style", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791784674.062, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791784674.148, "stage": "keyed", "status": "done", "ms": 86, "detail": {"bg": [39, 225, 23], "threshold": [92.5, 93.0, 93.0, 91.0, 91.0, 91.0, 91.0, 91.0, 91.0], "grid": "3x3", "cut": "gutter", "xs": [0, 345, 678, 1024], "ys": [0, 355, 675, 1024]}}
+{"ts": 1791784674.15, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791784674.97, "stage": "sliced", "status": "done", "ms": 819, "detail": {"ready": 9, "failed": 0}}

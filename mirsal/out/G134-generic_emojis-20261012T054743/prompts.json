@@ -1,0 +1,255 @@
+{
+  "task": "generic emojis",
+  "task_slug": "generic_emojis",
+  "subject": "generic emojis",
+  "scene": "",
+  "described": "generic emojis",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    3,
+    3
+  ],
+  "template_id": "sheet_3x3",
+  "template_version": 4,
+  "slots": {
+    "subject_description": "generic emojis",
+    "style_id": "flat_vector",
+    "mode": "sheet_3x3",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "celebrating with sparkling joyful eyes and a huge party grin",
+        "tags": [
+          "generic_emojis_celebrate",
+          "celebrate",
+          "party"
+        ],
+        "emoji": "🥳",
+        "motion": "eyes sparkle, the grin stretches wide, joyful tremble"
+      },
+      {
+        "pos": 2,
+        "label": "cheering with a huge congratulatory grin and sparkling eyes",
+        "tags": [
+          "generic_emojis_clap",
+          "clap",
+          "applause"
+        ],
+        "emoji": "👏",
+        "motion": "grins widely, nods along, joyful sway"
+      },
+      {
+        "pos": 3,
+        "label": "confident wink with a proud grin",
+        "tags": [
+          "generic_emojis_approve",
+          "approve",
+          "okay",
+          "yes",
+          "thumbsup"
+        ],
+        "emoji": "👍",
+        "motion": "winks twice, the grin widens, proud nod"
+      },
+      {
+        "pos": 4,
+        "label": "stern disapproval with a tight frown and narrowed eyes",
+        "tags": [
+          "generic_emojis_disapprove",
+          "disapprove",
+          "reject",
+          "no"
+        ],
+        "emoji": "👎",
+        "motion": "frowns firmly, eyes narrow, slow disapproving shake of the head"
+      },
+      {
+        "pos": 5,
+        "label": "grateful smile with eyes closed in thanks and glowing cheeks",
+        "tags": [
+          "generic_emojis_thanks",
+          "thanks",
+          "thankyou"
+        ],
+        "emoji": "🙏",
+        "motion": "the head bows gently, the smile widens, warm glow"
+      },
+      {
+        "pos": 6,
+        "label": "friendly hello with a warm open smile and bright welcoming eyes",
+        "tags": [
+          "generic_emojis_hello",
+          "hello",
+          "wave",
+          "hi"
+        ],
+        "emoji": "👋",
+        "motion": "smiles warmly, eyes light up, cheerful tilt"
+      },
+      {
+        "pos": 7,
+        "label": "warm loving smile with happy squinted eyes and glowing cheeks",
+        "tags": [
+          "generic_emojis_hug",
+          "hug",
+          "openarms"
+        ],
+        "emoji": "🤗",
+        "motion": "the face glows, happy squint, gentle tilt side to side"
+      },
+      {
+        "pos": 8,
+        "label": "proud smug grin with a confident raised brow",
+        "tags": [
+          "generic_emojis_flex",
+          "flex",
+          "flexing"
+        ],
+        "emoji": "💪",
+        "motion": "the smug grin spreads, the brow lifts, confident nod"
+      },
+      {
+        "pos": 9,
+        "label": "scheming grin with wiggling eyebrows",
+        "tags": [
+          "generic_emojis_scheme",
+          "scheme",
+          "scheming"
+        ],
+        "emoji": "😏",
+        "motion": "eyebrows wiggle, the grin widens, sneaky giggle"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "preset": "core-v1",
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 9 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: generic emojis.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: celebrating with sparkling joyful eyes and a huge party grin\nCharacter 2: cheering with a huge congratulatory grin and sparkling eyes\nCharacter 3: confident wink with a proud grin\nCharacter 4: stern disapproval with a tight frown and narrowed eyes\nCharacter 5: grateful smile with eyes closed in thanks and glowing cheeks\nCharacter 6: friendly hello with a warm open smile and bright welcoming eyes\nCharacter 7: warm loving smile with happy squinted eyes and glowing cheeks\nCharacter 8: proud smug grin with a confident raised brow\nCharacter 9: scheming grin with wiggling eyebrows\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes sparkle, the grin stretches wide, joyful tremble\n2. grins widely, nods along, joyful sway\n3. winks twice, the grin widens, proud nod\n4. frowns firmly, eyes narrow, slow disapproving shake of the head\n5. the head bows gently, the smile widens, warm glow\n6. smiles warmly, eyes light up, cheerful tilt\n7. the face glows, happy squint, gentle tilt side to side\n8. the smug grin spreads, the brow lifts, confident nod\n9. eyebrows wiggle, the grin widens, sneaky giggle\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "generic emojis celebrating with sparkling joyful eyes and a huge party grin, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_celebrate",
+      "tags": [
+        "generic_emojis_celebrate",
+        "celebrate",
+        "party"
+      ],
+      "emoji": "🥳"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "prompt": "generic emojis cheering with a huge congratulatory grin and sparkling eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_clap",
+      "tags": [
+        "generic_emojis_clap",
+        "clap",
+        "applause"
+      ],
+      "emoji": "👏"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "prompt": "generic emojis confident wink with a proud grin, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_approve",
+      "tags": [
+        "generic_emojis_approve",
+        "approve",
+        "okay",
+        "yes",
+        "thumbsup"
+      ],
+      "emoji": "👍"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "prompt": "generic emojis stern disapproval with a tight frown and narrowed eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_disapprove",
+      "tags": [
+        "generic_emojis_disapprove",
+        "disapprove",
+        "reject",
+        "no"
+      ],
+      "emoji": "👎"
+    },
+    {
+      "index": 5,
+      "id": "prompt05",
+      "prompt": "generic emojis grateful smile with eyes closed in thanks and glowing cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_thanks",
+      "tags": [
+        "generic_emojis_thanks",
+        "thanks",
+        "thankyou"
+      ],
+      "emoji": "🙏"
+    },
+    {
+      "index": 6,
+      "id": "prompt06",
+      "prompt": "generic emojis friendly hello with a warm open smile and bright welcoming eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_hello",
+      "tags": [
+        "generic_emojis_hello",
+        "hello",
+        "wave",
+        "hi"
+      ],
+      "emoji": "👋"
+    },
+    {
+      "index": 7,
+      "id": "prompt07",
+      "prompt": "generic emojis warm loving smile with happy squinted eyes and glowing cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_hug",
+      "tags": [
+        "generic_emojis_hug",
+        "hug",
+        "openarms"
+      ],
+      "emoji": "🤗"
+    },
+    {
+      "index": 8,
+      "id": "prompt08",
+      "prompt": "generic emojis proud smug grin with a confident raised brow, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_flex",
+      "tags": [
+        "generic_emojis_flex",
+        "flex",
+        "flexing"
+      ],
+      "emoji": "💪"
+    },
+    {
+      "index": 9,
+      "id": "prompt09",
+      "prompt": "generic emojis scheming grin with wiggling eyebrows, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_scheme",
+      "tags": [
+        "generic_emojis_scheme",
+        "scheme",
+        "scheming"
+      ],
+      "emoji": "😏"
+    }
+  ],
+  "expanded_by": "deterministic",
+  "previewed": true
+}

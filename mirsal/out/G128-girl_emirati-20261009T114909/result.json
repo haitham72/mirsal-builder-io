@@ -105,7 +105,7 @@
     3,
     3
   ],
-  "stage": "pack_final",
+  "stage": "video_sliced",
   "error": null,
   "plan_source": "task 052",
   "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid..\nStyle: kawaii chibi style, big shiny eyes, tiny body and an oversized head, pastel colours, soft blush cheeks, very cute and rounded.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: joyfully jumping with arms wide open, big smile showing happiness\nCharacter 2: sitting calmly cross-legged with eyes closed, peaceful and serene\nCharacter 3: leaning forward curiously with a tilted head, eager to listen\nCharacter 4: standing proudly with hands on hips, chest out with confidence\nCharacter 5: running energetically with arms pumping and wide smile\nCharacter 6: sitting on knees, shyly glancing sideways with blushing cheeks\nCharacter 7: lying on side, propped on elbow, smiling mischievously\nCharacter 8: spinning happily with a carefree laugh and arms extended\nCharacter 9: standing stiffly with wide eyes and hands raised in shock\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -238,7 +238,7 @@
   "regen_of": null,
   "sheet_model": "nano_banana_flash",
   "verify_version": 2,
-  "outline_px": 12,
+  "outline_px": 0,
   "erode_px": 0,
   "reviews": {
     "plan": {
@@ -256,21 +256,11 @@
       }
     },
     "pack": {
-      "decision": "APPROVE",
+      "decision": "REJECT",
       "by": "human",
-      "ts": 1791715599.631,
-      "note": "approved by Add",
-      "stickers": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9
-      ]
+      "ts": 1791785714.75,
+      "note": "reopened: a sticker was changed",
+      "stickers": []
     }
   },
   "video_sheets": [
@@ -400,7 +390,7 @@
               "9": 0.994
             },
             "bad": [],
-            "ms": 58.0
+            "ms": 56.7
           }
         },
         {
@@ -547,6 +537,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.8
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -563,7 +565,7 @@
             4
           ],
           "data": {
-            "ms": 23.7
+            "ms": 0.0
           }
         },
         {
@@ -584,10 +586,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 91987,
+          "value": 75001,
           "limit": 400,
           "data": {
-            "ms": 0.5
+            "ms": 1.2
           }
         },
         {
@@ -636,7 +638,7 @@
           "limit": 0.01,
           "data": {
             "count": 0,
-            "ms": 0.4
+            "ms": 1.7
           }
         },
         {
@@ -668,13 +670,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "157.5KB png",
+          "detail": "135.3KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 157.5,
+          "value": 135.3,
           "limit": 512,
           "data": {
-            "ms": 4.0
+            "ms": 0.0
           }
         }
       ],
@@ -703,8 +705,10 @@
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "kb": 157.5,
-        "format": "png"
+        "kb": 135.3,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-jump_happy-20261009T114909-34da23.png",
       "anim_status": "READY",
@@ -713,16 +717,16 @@
         "source": "video sheet",
         "threshold": 126.5,
         "ms": {
-          "decode": 942,
-          "key": 283,
-          "bounds": 151,
-          "render": 1110,
-          "seam": 289,
-          "encode": 19790,
+          "decode": 899,
+          "key": 1280,
+          "bounds": 434,
+          "render": 1637,
+          "seam": 194,
+          "encode": 3547,
           "encodes": 2,
-          "probe": 253,
-          "verify": 24,
-          "finish": 21622
+          "probe": 353,
+          "verify": 98,
+          "finish": 6268
         },
         "frames": 72,
         "fps": 24.0,
@@ -735,21 +739,22 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 422,
         "scale": 0.9403,
-        "motion": 101.22,
-        "loop_seam_before": 126.21,
-        "loop_seam": 126.21,
-        "loop_limit": 151.82,
+        "motion": 94.05,
+        "loop_seam_before": 117.62,
+        "loop_seam": 117.62,
+        "loop_limit": 141.08,
         "frames_out": 72,
-        "crf": 46,
-        "sharp_kept": 1.02,
-        "detail_vs_still": 1.1,
+        "crf": 42,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.14,
         "soft_sigma": 0.0,
-        "kb": 234.4
+        "kb": 252.1,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-jump_happy-20261009T114909-34da23.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -836,6 +841,75 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785654.769,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785665.003,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785728.496,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785737.993,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.364,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785778.973,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -851,7 +925,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 47.3
+            "ms": 135.9
           }
         },
         {
@@ -865,16 +939,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 50.6
+            "ms": 163.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "234KB @crf46",
+          "detail": "252KB @crf42",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 234,
+          "value": 252,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -961,17 +1035,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 0.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "126.21 <= 151.82",
+          "detail": "117.62 <= 141.08",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 126.21,
-          "limit": 151.82,
+          "value": 117.62,
+          "limit": 141.08,
           "data": {
             "ms": 0.0
           }
@@ -979,22 +1053,22 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 1.00",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.989,
+          "value": 0.998,
           "limit": 0.5,
           "data": {
-            "ms": 4.7
+            "ms": 1.8
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 101.22",
+          "detail": "median frame-to-frame change 94.05",
           "severity": "WARN",
           "stage": "anim",
-          "value": 101.22,
+          "value": 94.05,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -1006,25 +1080,27 @@
           "detail": "subject area varies by 2% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.023,
+          "value": 0.025,
           "limit": 0.35,
           "data": {
-            "ms": 19.1
+            "ms": 95.9
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.02x of the edge detail survives the encode",
+          "detail": "1.00x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.02,
+          "value": 1.0,
           "limit": 0.8,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.364,
+      "anim_verdict_stale": true
     },
     {
       "index": 2,
@@ -1054,6 +1130,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -1070,7 +1158,7 @@
             4
           ],
           "data": {
-            "ms": 19.6
+            "ms": 0.0
           }
         },
         {
@@ -1091,7 +1179,7 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 80811,
+          "value": 66612,
           "limit": 400,
           "data": {
             "ms": 0.3
@@ -1143,7 +1231,7 @@
           "limit": 0.01,
           "data": {
             "count": 0,
-            "ms": 0.3
+            "ms": 0.5
           }
         },
         {
@@ -1175,13 +1263,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "133.4KB png",
+          "detail": "113.9KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 133.4,
+          "value": 113.9,
           "limit": 512,
           "data": {
-            "ms": 3.6
+            "ms": 0.0
           }
         }
       ],
@@ -1210,8 +1298,10 @@
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "kb": 133.4,
-        "format": "png"
+        "kb": 113.9,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-sit_calm-20261009T114909-f4c559.png",
       "anim_status": "READY",
@@ -1220,16 +1310,16 @@
         "source": "video sheet",
         "threshold": 126.5,
         "ms": {
-          "decode": 919,
-          "key": 305,
-          "bounds": 151,
-          "render": 1011,
-          "seam": 1337,
-          "encode": 36389,
+          "decode": 902,
+          "key": 1276,
+          "bounds": 429,
+          "render": 1581,
+          "seam": 1473,
+          "encode": 4583,
           "encodes": 4,
-          "probe": 231,
-          "verify": 15,
-          "finish": 39136
+          "probe": 345,
+          "verify": 49,
+          "finish": 8466
         },
         "frames": 72,
         "fps": 24.0,
@@ -1242,8 +1332,8 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 350,
         "scale": 1.1337,
-        "motion": 0.88,
-        "loop_seam_before": 123.16,
+        "motion": 1.03,
+        "loop_seam_before": 116.24,
         "loop_cut": 13,
         "loop_faded": true,
         "loop_seam": 0.0,
@@ -1251,14 +1341,15 @@
         "frames_out": 53,
         "crf": 30,
         "sharp_kept": 0.99,
-        "detail_vs_still": 1.08,
+        "detail_vs_still": 1.11,
         "soft_sigma": 0.0,
-        "kb": 145.2
+        "kb": 145.8,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-sit_calm-20261009T114909-f4c559.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -1345,6 +1436,75 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785654.803,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785667.31,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785728.517,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785740.473,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.392,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785779.271,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -1360,7 +1520,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 46.8
+            "ms": 123.4
           }
         },
         {
@@ -1374,7 +1534,7 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 51.3
+            "ms": 171.0
           }
         },
         {
@@ -1470,7 +1630,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 2.2
           }
         },
         {
@@ -1488,22 +1648,22 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 0.98",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.993,
+          "value": 0.984,
           "limit": 0.5,
           "data": {
-            "ms": 3.7
+            "ms": 6.1
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 0.88",
+          "detail": "median frame-to-frame change 1.03",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.88,
+          "value": 1.03,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -1512,13 +1672,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 1% over the frames",
+          "detail": "subject area varies by 2% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.015,
+          "value": 0.02,
           "limit": 0.35,
           "data": {
-            "ms": 10.6
+            "ms": 41.5
           }
         },
         {
@@ -1533,7 +1693,9 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.392,
+      "anim_verdict_stale": true
     },
     {
       "index": 3,
@@ -1563,6 +1725,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -1579,7 +1753,7 @@
             4
           ],
           "data": {
-            "ms": 21.3
+            "ms": 0.0
           }
         },
         {
@@ -1600,10 +1774,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 81494,
+          "value": 66982,
           "limit": 400,
           "data": {
-            "ms": 0.2
+            "ms": 1.1
           }
         },
         {
@@ -1652,7 +1826,7 @@
           "limit": 0.01,
           "data": {
             "count": 0,
-            "ms": 0.3
+            "ms": 1.9
           }
         },
         {
@@ -1684,13 +1858,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "143.2KB png",
+          "detail": "123.6KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 143.2,
+          "value": 123.6,
           "limit": 512,
           "data": {
-            "ms": 4.1
+            "ms": 0.0
           }
         }
       ],
@@ -1719,8 +1893,10 @@
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "kb": 143.2,
-        "format": "png"
+        "kb": 123.6,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-lean_curious-20261009T114909-098f68.png",
       "anim_status": "READY",
@@ -1729,16 +1905,16 @@
         "source": "video sheet",
         "threshold": 126.5,
         "ms": {
-          "decode": 864,
-          "key": 335,
-          "bounds": 146,
-          "render": 1072,
-          "seam": 920,
-          "encode": 35404,
+          "decode": 902,
+          "key": 1277,
+          "bounds": 421,
+          "render": 1629,
+          "seam": 548,
+          "encode": 5049,
           "encodes": 4,
-          "probe": 244,
-          "verify": 19,
-          "finish": 37810
+          "probe": 300,
+          "verify": 97,
+          "finish": 8055
         },
         "frames": 72,
         "fps": 24.0,
@@ -1752,21 +1928,22 @@
         "subject_px_in_video": 400,
         "scale": 0.992,
         "motion": 10.13,
-        "loop_seam_before": 105.22,
+        "loop_seam_before": 99.81,
         "loop_cut": 21,
-        "loop_seam": 38.26,
-        "loop_limit": 44.63,
+        "loop_seam": 38.35,
+        "loop_limit": 44.52,
         "frames_out": 51,
         "crf": 30,
-        "sharp_kept": 1.01,
-        "detail_vs_still": 1.1,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.11,
         "soft_sigma": 0.0,
-        "kb": 199.6
+        "kb": 168.4,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-lean_curious-20261009T114909-098f68.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -1853,6 +2030,75 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785654.835,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785666.793,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785728.544,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785740.016,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.424,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785779.843,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -1868,7 +2114,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 46.1
+            "ms": 120.7
           }
         },
         {
@@ -1882,16 +2128,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 46.0
+            "ms": 165.9
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "199KB @crf30",
+          "detail": "168KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 199,
+          "value": 168,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1978,17 +2224,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.9
+            "ms": 3.0
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "38.26 <= 44.63",
+          "detail": "38.35 <= 44.52",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 38.26,
-          "limit": 44.63,
+          "value": 38.35,
+          "limit": 44.52,
           "data": {
             "ms": 0.0
           }
@@ -1996,13 +2242,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 1.00",
+          "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.997,
+          "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 3.9
+            "ms": 17.6
           }
         },
         {
@@ -2020,28 +2266,30 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 1% over the frames",
+          "detail": "subject area varies by 0% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.008,
+          "value": 0.005,
           "limit": 0.35,
           "data": {
-            "ms": 14.7
+            "ms": 76.3
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.01x of the edge detail survives the encode",
+          "detail": "1.00x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.01,
+          "value": 1.0,
           "limit": 0.8,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.424,
+      "anim_verdict_stale": true
     },
     {
       "index": 4,
@@ -2071,6 +2319,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 1.7
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -2087,7 +2347,7 @@
             4
           ],
           "data": {
-            "ms": 21.9
+            "ms": 0.0
           }
         },
         {
@@ -2108,10 +2368,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 84174,
+          "value": 68433,
           "limit": 400,
           "data": {
-            "ms": 0.2
+            "ms": 2.2
           }
         },
         {
@@ -2160,7 +2420,7 @@
           "limit": 0.01,
           "data": {
             "count": 0,
-            "ms": 0.3
+            "ms": 0.5
           }
         },
         {
@@ -2192,13 +2452,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "143.8KB png",
+          "detail": "121.9KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 143.8,
+          "value": 121.9,
           "limit": 512,
           "data": {
-            "ms": 3.7
+            "ms": 0.0
           }
         }
       ],
@@ -2227,8 +2487,10 @@
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "kb": 143.8,
-        "format": "png"
+        "kb": 121.9,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-stand_proud-20261009T114909-d5bddb.png",
       "anim_status": "READY",
@@ -2237,16 +2499,16 @@
         "source": "video sheet",
         "threshold": 126.5,
         "ms": {
-          "decode": 855,
-          "key": 335,
-          "bounds": 147,
-          "render": 1024,
-          "seam": 1400,
-          "encode": 37478,
+          "decode": 900,
+          "key": 1283,
+          "bounds": 411,
+          "render": 1599,
+          "seam": 1662,
+          "encode": 4706,
           "encodes": 4,
-          "probe": 214,
-          "verify": 14,
-          "finish": 40281
+          "probe": 271,
+          "verify": 70,
+          "finish": 8727
         },
         "frames": 72,
         "fps": 24.0,
@@ -2259,8 +2521,8 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 383,
         "scale": 1.036,
-        "motion": 0.79,
-        "loop_seam_before": 75.14,
+        "motion": 0.89,
+        "loop_seam_before": 67.77,
         "loop_cut": 4,
         "loop_faded": true,
         "loop_seam": 0.0,
@@ -2268,14 +2530,15 @@
         "frames_out": 62,
         "crf": 30,
         "sharp_kept": 0.99,
-        "detail_vs_still": 1.15,
+        "detail_vs_still": 1.2,
         "soft_sigma": 0.0,
-        "kb": 167.5
+        "kb": 170.1,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-stand_proud-20261009T114909-d5bddb.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -2362,6 +2625,75 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785654.868,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785668.021,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785728.571,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785741.389,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.454,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785779.564,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -2377,7 +2709,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 46.0
+            "ms": 117.7
           }
         },
         {
@@ -2391,16 +2723,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 46.3
+            "ms": 162.3
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "167KB @crf30",
+          "detail": "170KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 167,
+          "value": 170,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2487,7 +2819,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 1.5
           }
         },
         {
@@ -2508,19 +2840,19 @@
           "detail": "first frame matches the still at IoU 0.96",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.96,
+          "value": 0.963,
           "limit": 0.5,
           "data": {
-            "ms": 2.7
+            "ms": 4.6
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 0.79",
+          "detail": "median frame-to-frame change 0.89",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.79,
+          "value": 0.89,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2532,10 +2864,10 @@
           "detail": "subject area varies by 1% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.007,
+          "value": 0.011,
           "limit": 0.35,
           "data": {
-            "ms": 11.2
+            "ms": 64.4
           }
         },
         {
@@ -2550,7 +2882,9 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.454,
+      "anim_verdict_stale": true
     },
     {
       "index": 5,
@@ -2580,6 +2914,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 2.3
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -2596,7 +2942,7 @@
             4
           ],
           "data": {
-            "ms": 20.4
+            "ms": 0.0
           }
         },
         {
@@ -2617,10 +2963,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 86553,
+          "value": 68415,
           "limit": 400,
           "data": {
-            "ms": 0.2
+            "ms": 0.3
           }
         },
         {
@@ -2669,7 +3015,7 @@
           "limit": 0.01,
           "data": {
             "count": 0,
-            "ms": 0.3
+            "ms": 1.2
           }
         },
         {
@@ -2701,13 +3047,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "148.0KB png",
+          "detail": "126.4KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 148.0,
+          "value": 126.4,
           "limit": 512,
           "data": {
-            "ms": 3.7
+            "ms": 0.0
           }
         }
       ],
@@ -2736,8 +3082,10 @@
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "kb": 148.0,
-        "format": "png"
+        "kb": 126.4,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-run_excited-20261009T114909-697c31.png",
       "anim_status": "READY",
@@ -2746,16 +3094,16 @@
         "source": "video sheet",
         "threshold": 126.5,
         "ms": {
-          "decode": 920,
-          "key": 297,
-          "bounds": 147,
-          "render": 983,
-          "seam": 876,
-          "encode": 36334,
+          "decode": 991,
+          "key": 1224,
+          "bounds": 419,
+          "render": 1496,
+          "seam": 179,
+          "encode": 4845,
           "encodes": 3,
-          "probe": 237,
-          "verify": 24,
-          "finish": 38605
+          "probe": 342,
+          "verify": 66,
+          "finish": 7354
         },
         "frames": 72,
         "fps": 24.0,
@@ -2768,22 +3116,22 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 398,
         "scale": 0.997,
-        "motion": 73.78,
-        "loop_seam_before": 110.81,
-        "loop_cut": 1,
-        "loop_seam": 104.65,
-        "loop_limit": 110.71,
-        "frames_out": 71,
+        "motion": 64.07,
+        "loop_seam_before": 89.5,
+        "loop_seam": 89.5,
+        "loop_limit": 96.1,
+        "frames_out": 72,
         "crf": 38,
-        "sharp_kept": 1.01,
-        "detail_vs_still": 1.07,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.11,
         "soft_sigma": 0.0,
-        "kb": 252.3
+        "kb": 207.7,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-run_excited-20261009T114909-697c31.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -2870,6 +3218,75 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785654.902,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785666.146,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785728.593,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785737.489,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.488,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785779.105,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -2885,7 +3302,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 46.2
+            "ms": 136.2
           }
         },
         {
@@ -2899,16 +3316,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 48.8
+            "ms": 155.1
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "252KB @crf38",
+          "detail": "207KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 252,
+          "value": 207,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2953,10 +3370,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.96",
+          "detail": "3.0",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.96,
+          "value": 3.0,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -2995,17 +3412,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 1.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "104.65 <= 110.71",
+          "detail": "89.5 <= 96.1",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 104.65,
-          "limit": 110.71,
+          "value": 89.5,
+          "limit": 96.1,
           "data": {
             "ms": 0.0
           }
@@ -3013,22 +3430,22 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 0.96",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.992,
+          "value": 0.958,
           "limit": 0.5,
           "data": {
-            "ms": 4.2
+            "ms": 6.7
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 73.78",
+          "detail": "median frame-to-frame change 64.07",
           "severity": "WARN",
           "stage": "anim",
-          "value": 73.78,
+          "value": 64.07,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -3037,28 +3454,30 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 5% over the frames",
+          "detail": "subject area varies by 4% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.048,
+          "value": 0.041,
           "limit": 0.35,
           "data": {
-            "ms": 19.4
+            "ms": 57.9
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.01x of the edge detail survives the encode",
+          "detail": "1.00x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.01,
+          "value": 1.0,
           "limit": 0.8,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.488,
+      "anim_verdict_stale": true
     },
     {
       "index": 6,
@@ -3088,6 +3507,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 1.0
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -3104,7 +3535,7 @@
             4
           ],
           "data": {
-            "ms": 22.7
+            "ms": 0.0
           }
         },
         {
@@ -3125,10 +3556,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 80759,
+          "value": 65710,
           "limit": 400,
           "data": {
-            "ms": 0.2
+            "ms": 0.6
           }
         },
         {
@@ -3177,7 +3608,7 @@
           "limit": 0.01,
           "data": {
             "count": 0,
-            "ms": 0.3
+            "ms": 0.4
           }
         },
         {
@@ -3209,13 +3640,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "144.1KB png",
+          "detail": "123.4KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 144.1,
+          "value": 123.4,
           "limit": 512,
           "data": {
-            "ms": 3.7
+            "ms": 0.0
           }
         }
       ],
@@ -3244,8 +3675,10 @@
         "spill_px": 0,
         "chroma_risk": 0.0,
         "holes": 0.0,
-        "kb": 144.1,
-        "format": "png"
+        "kb": 123.4,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-sit_shy-20261009T114909-762323.png",
       "anim_status": "READY",
@@ -3254,16 +3687,16 @@
         "source": "video sheet",
         "threshold": 126.5,
         "ms": {
-          "decode": 846,
-          "key": 343,
-          "bounds": 145,
-          "render": 1124,
-          "seam": 1102,
-          "encode": 35895,
+          "decode": 969,
+          "key": 1246,
+          "bounds": 420,
+          "render": 1673,
+          "seam": 696,
+          "encode": 5279,
           "encodes": 4,
-          "probe": 246,
-          "verify": 14,
-          "finish": 38531
+          "probe": 346,
+          "verify": 57,
+          "finish": 8478
         },
         "frames": 72,
         "fps": 24.0,
@@ -3276,22 +3709,23 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 351,
         "scale": 1.1305,
-        "motion": 38.8,
-        "loop_seam_before": 109.94,
-        "loop_cut": 21,
-        "loop_seam": 55.84,
-        "loop_limit": 58.55,
-        "frames_out": 51,
+        "motion": 39.34,
+        "loop_seam_before": 104.69,
+        "loop_cut": 20,
+        "loop_seam": 58.09,
+        "loop_limit": 59.01,
+        "frames_out": 52,
         "crf": 34,
         "sharp_kept": 0.99,
-        "detail_vs_still": 1.07,
+        "detail_vs_still": 1.08,
         "soft_sigma": 0.0,
-        "kb": 241.1
+        "kb": 251.1,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-sit_shy-20261009T114909-762323.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -3378,6 +3812,75 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785654.937,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785667.802,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785728.614,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785741.053,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.518,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785780.2,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -3393,7 +3896,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 45.5
+            "ms": 142.3
           }
         },
         {
@@ -3407,16 +3910,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 46.3
+            "ms": 149.7
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "241KB @crf34",
+          "detail": "251KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 241,
+          "value": 251,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3461,10 +3964,10 @@
         {
           "name": "duration",
           "ok": true,
-          "detail": "2.13",
+          "detail": "2.17",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 2.13,
+          "value": 2.17,
           "limit": 3.0,
           "data": {
             "ms": 0.0
@@ -3503,17 +4006,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 1.4
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "55.84 <= 58.55",
+          "detail": "58.09 <= 59.01",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 55.84,
-          "limit": 58.55,
+          "value": 58.09,
+          "limit": 59.01,
           "data": {
             "ms": 0.0
           }
@@ -3527,16 +4030,16 @@
           "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 3.2
+            "ms": 7.4
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 38.8",
+          "detail": "median frame-to-frame change 39.34",
           "severity": "WARN",
           "stage": "anim",
-          "value": 38.8,
+          "value": 39.34,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -3551,7 +4054,7 @@
           "value": 0.008,
           "limit": 0.35,
           "data": {
-            "ms": 10.9
+            "ms": 48.5
           }
         },
         {
@@ -3566,7 +4069,9 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.518,
+      "anim_verdict_stale": true
     },
     {
       "index": 7,
@@ -3596,6 +4101,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 2.6
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -3612,7 +4129,7 @@
             4
           ],
           "data": {
-            "ms": 22.0
+            "ms": 0.0
           }
         },
         {
@@ -3633,10 +4150,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 83686,
+          "value": 68384,
           "limit": 400,
           "data": {
-            "ms": 0.3
+            "ms": 0.2
           }
         },
         {
@@ -3678,14 +4195,14 @@
         {
           "name": "holes",
           "ok": true,
-          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "detail": "1 enclosed hole(s), 0.1% of the subject",
           "severity": "WARN",
           "stage": "still",
-          "value": 0.0,
+          "value": 0.0012,
           "limit": 0.01,
           "data": {
-            "count": 0,
-            "ms": 0.3
+            "count": 1,
+            "ms": 0.6
           }
         },
         {
@@ -3717,13 +4234,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "145.5KB png",
+          "detail": "124.4KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 145.5,
+          "value": 124.4,
           "limit": 512,
           "data": {
-            "ms": 3.9
+            "ms": 0.0
           }
         }
       ],
@@ -3751,8 +4268,8 @@
         "scale_mode": "pack",
         "spill_px": 17,
         "chroma_risk": 0.0007,
-        "holes": 0.0,
-        "kb": 145.5,
+        "holes": 0.0012,
+        "kb": 124.4,
         "format": "png",
         "recovered_by": "threshold x0.6, despill 10px",
         "attempts": [
@@ -3786,7 +4303,9 @@
             "ok": true,
             "reason": null
           }
-        ]
+        ],
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-lie_mischief-20261009T114909-ba33f7.png",
       "anim_status": "READY",
@@ -3795,16 +4314,16 @@
         "source": "video sheet",
         "threshold": 125.0,
         "ms": {
-          "decode": 333,
-          "key": 449,
-          "bounds": 246,
-          "render": 1433,
-          "seam": 1464,
-          "encode": 15986,
+          "decode": 467,
+          "key": 1355,
+          "bounds": 576,
+          "render": 1160,
+          "seam": 1281,
+          "encode": 3867,
           "encodes": 4,
-          "probe": 216,
-          "verify": 12,
-          "finish": 19360
+          "probe": 225,
+          "verify": 37,
+          "finish": 7152
         },
         "frames": 72,
         "fps": 24.0,
@@ -3817,23 +4336,24 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 369,
         "scale": 1.0753,
-        "motion": 1.92,
-        "loop_seam_before": 13.35,
+        "motion": 2.4,
+        "loop_seam_before": 19.06,
         "loop_cut": 2,
         "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
         "frames_out": 64,
-        "crf": 30,
+        "crf": 34,
         "sharp_kept": 0.99,
-        "detail_vs_still": 1.16,
+        "detail_vs_still": 1.3,
         "soft_sigma": 0.0,
-        "kb": 216.8
+        "kb": 222.3,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-lie_mischief-20261009T114909-ba33f7.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -3920,6 +4440,111 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785654.973,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785674.443,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785715.0,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791785717.521,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "brought back",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791785718.789,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791785720.703,
+          "stage": "anim",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "brought back",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1791785728.636,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785746.643,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.548,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785780.484,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -3935,7 +4560,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 78.6
+            "ms": 198.6
           }
         },
         {
@@ -3949,16 +4574,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 72.8
+            "ms": 147.5
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "216KB @crf30",
+          "detail": "222KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 216,
+          "value": 222,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4045,7 +4670,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.9
+            "ms": 1.7
           }
         },
         {
@@ -4063,22 +4688,22 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 0.91",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.991,
+          "value": 0.906,
           "limit": 0.5,
           "data": {
-            "ms": 3.3
+            "ms": 3.5
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 1.92",
+          "detail": "median frame-to-frame change 2.4",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.92,
+          "value": 2.4,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -4087,13 +4712,13 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 1% over the frames",
+          "detail": "subject area varies by 2% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.014,
+          "value": 0.017,
           "limit": 0.35,
           "data": {
-            "ms": 8.4
+            "ms": 32.5
           }
         },
         {
@@ -4108,7 +4733,9 @@
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.548,
+      "anim_verdict_stale": true
     },
     {
       "index": 8,
@@ -4138,6 +4765,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.7
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -4154,7 +4793,7 @@
             4
           ],
           "data": {
-            "ms": 21.8
+            "ms": 0.0
           }
         },
         {
@@ -4175,10 +4814,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 97628,
+          "value": 72903,
           "limit": 400,
           "data": {
-            "ms": 0.3
+            "ms": 1.2
           }
         },
         {
@@ -4220,14 +4859,14 @@
         {
           "name": "holes",
           "ok": true,
-          "detail": "1 enclosed hole(s), 1.0% of the subject",
+          "detail": "0 enclosed hole(s), 0.0% of the subject",
           "severity": "WARN",
           "stage": "still",
-          "value": 0.0096,
+          "value": 0.0,
           "limit": 0.01,
           "data": {
-            "count": 1,
-            "ms": 0.4
+            "count": 0,
+            "ms": 0.8
           }
         },
         {
@@ -4259,13 +4898,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "165.4KB png",
+          "detail": "136.4KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 165.4,
+          "value": 136.4,
           "limit": 512,
           "data": {
-            "ms": 4.3
+            "ms": 0.0
           }
         }
       ],
@@ -4293,9 +4932,11 @@
         "scale_mode": "pack",
         "spill_px": 0,
         "chroma_risk": 0.0,
-        "holes": 0.0096,
-        "kb": 165.4,
-        "format": "png"
+        "holes": 0.0,
+        "kb": 136.4,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-spin_happy-20261009T114909-0f81ee.png",
       "anim_status": "READY",
@@ -4304,16 +4945,16 @@
         "source": "video sheet",
         "threshold": 126.5,
         "ms": {
-          "decode": 248,
-          "key": 377,
-          "bounds": 152,
-          "render": 1140,
-          "seam": 256,
-          "encode": 3844,
+          "decode": 627,
+          "key": 996,
+          "bounds": 155,
+          "render": 1355,
+          "seam": 432,
+          "encode": 5131,
           "encodes": 4,
-          "probe": 193,
-          "verify": 12,
-          "finish": 5600
+          "probe": 252,
+          "verify": 44,
+          "finish": 7374
         },
         "frames": 72,
         "fps": 24.0,
@@ -4329,21 +4970,22 @@
           "cross_slot"
         ],
         "scale": 1.0667,
-        "motion": 106.55,
-        "loop_seam_before": 130.25,
-        "loop_seam": 130.25,
-        "loop_limit": 159.82,
+        "motion": 104.67,
+        "loop_seam_before": 113.66,
+        "loop_seam": 113.66,
+        "loop_limit": 157.0,
         "frames_out": 72,
         "crf": 54,
-        "sharp_kept": 1.01,
-        "detail_vs_still": 1.08,
+        "sharp_kept": 0.96,
+        "detail_vs_still": 1.14,
         "soft_sigma": 0.0,
-        "kb": 254.0
+        "kb": 236.2,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-spin_happy-20261009T114909-0f81ee.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -4462,6 +5104,120 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785655.001,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785675.515,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785709.05,
+          "stage": "video",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "allowance withdrawn: cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791785711.242,
+          "stage": "video",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "cross_slot",
+          "ref": "A1",
+          "detail": {
+            "check": "cross_slot",
+            "value": 213,
+            "limit": 0,
+            "note": "213px of foreign foreground, first at frame 9",
+            "data": {
+              "frame": 9,
+              "px": 213,
+              "ms": 41.8
+            }
+          }
+        },
+        {
+          "ts": 1791785712.677,
+          "stage": "video",
+          "actor": "human",
+          "decision": "APPROVE",
+          "reason": "allowed anyway: cross_slot",
+          "ref": "A1",
+          "detail": {
+            "override": [
+              "cross_slot"
+            ]
+          }
+        },
+        {
+          "ts": 1791785728.657,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785748.718,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.578,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785780.807,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -4477,7 +5233,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 49.4
+            "ms": 46.1
           }
         },
         {
@@ -4491,16 +5247,16 @@
           "data": {
             "frame": 9,
             "px": 213,
-            "ms": 51.0
+            "ms": 47.3
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "253KB @crf54",
+          "detail": "236KB @crf54",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 253,
+          "value": 236,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4587,17 +5343,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 1.6
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "130.25 <= 159.82",
+          "detail": "113.66 <= 157.0",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 130.25,
-          "limit": 159.82,
+          "value": 113.66,
+          "limit": 157.0,
           "data": {
             "ms": 0.0
           }
@@ -4608,19 +5364,19 @@
           "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.991,
+          "value": 0.992,
           "limit": 0.5,
           "data": {
-            "ms": 2.9
+            "ms": 3.9
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 106.55",
+          "detail": "median frame-to-frame change 104.67",
           "severity": "WARN",
           "stage": "anim",
-          "value": 106.55,
+          "value": 104.67,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -4629,22 +5385,22 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 7% over the frames",
+          "detail": "subject area varies by 5% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.069,
+          "value": 0.051,
           "limit": 0.35,
           "data": {
-            "ms": 8.7
+            "ms": 38.9
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.01x of the edge detail survives the encode",
+          "detail": "0.96x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.01,
+          "value": 0.96,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -4654,471 +5410,8 @@
       "anim_override": [
         "cross_slot"
       ],
-      "anim_finished": {
-        "cross_slot": {
-          "anim_status": "READY",
-          "anim_reason": null,
-          "anim_metrics": {
-            "source": "video sheet",
-            "threshold": 126.5,
-            "ms": {
-              "decode": 248,
-              "key": 377,
-              "bounds": 152,
-              "render": 1140,
-              "seam": 256,
-              "encode": 3844,
-              "encodes": 4,
-              "probe": 193,
-              "verify": 12,
-              "finish": 5600
-            },
-            "frames": 72,
-            "fps": 24.0,
-            "bbox": [
-              67,
-              54,
-              434,
-              426
-            ],
-            "edge_touch_frames": 0,
-            "subject_px_in_video": 372,
-            "waived": [
-              "cross_slot"
-            ],
-            "scale": 1.0667,
-            "motion": 106.55,
-            "loop_seam_before": 130.25,
-            "loop_seam": 130.25,
-            "loop_limit": 159.82,
-            "frames_out": 72,
-            "crf": 54,
-            "sharp_kept": 1.01,
-            "detail_vs_still": 1.08,
-            "soft_sigma": 0.0,
-            "kb": 254.0
-          },
-          "anim_report": [
-            {
-              "name": "inside_slot",
-              "ok": true,
-              "detail": "inside",
-              "severity": "BLOCK",
-              "stage": "slot",
-              "value": 0,
-              "limit": 0,
-              "data": {
-                "frame": null,
-                "over_px": 0,
-                "edge_px": 7,
-                "ms": 49.4
-              }
-            },
-            {
-              "name": "cross_slot",
-              "ok": false,
-              "detail": "213px of foreign foreground, first at frame 9 (allowed by you)",
-              "severity": "WARN",
-              "stage": "slot",
-              "value": 213,
-              "limit": 0,
-              "data": {
-                "frame": 9,
-                "px": 213,
-                "ms": 51.0
-              }
-            },
-            {
-              "name": "size_budget",
-              "ok": true,
-              "detail": "253KB @crf54",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 253,
-              "limit": 256,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "codec_vp9",
-              "ok": true,
-              "detail": "vp9",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "vp9",
-              "limit": "vp9",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "dimensions",
-              "ok": true,
-              "detail": "512x512",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "512x512",
-              "limit": "512x512",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "fps",
-              "ok": true,
-              "detail": "24.0",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 24.0,
-              "limit": 30.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "duration",
-              "ok": true,
-              "detail": "3.0",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 3.0,
-              "limit": 3.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "no_audio",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_mode_tag",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_decoded",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.6
-              }
-            },
-            {
-              "name": "loop_seam",
-              "ok": true,
-              "detail": "130.25 <= 159.82",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 130.25,
-              "limit": 159.82,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "identity_kept",
-              "ok": true,
-              "detail": "first frame matches the still at IoU 0.99",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.991,
-              "limit": 0.5,
-              "data": {
-                "ms": 2.9
-              }
-            },
-            {
-              "name": "motion_present",
-              "ok": true,
-              "detail": "median frame-to-frame change 106.55",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 106.55,
-              "limit": 0.5,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_stable",
-              "ok": true,
-              "detail": "subject area varies by 7% over the frames",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.069,
-              "limit": 0.35,
-              "data": {
-                "ms": 8.7
-              }
-            },
-            {
-              "name": "sharpness",
-              "ok": true,
-              "detail": "1.01x of the edge detail survives the encode",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 1.01,
-              "limit": 0.8,
-              "data": {
-                "ms": 0.0
-              }
-            }
-          ],
-          "webm": "slices/vid-girl_emirati-spin_happy-20261009T114909-0f81ee.webm",
-          "review": "PENDING"
-        },
-        "plain": {
-          "anim_status": "FAILED",
-          "anim_reason": "cross_slot",
-          "anim_metrics": {
-            "source": "video sheet",
-            "threshold": 126.5,
-            "ms": {
-              "decode": 248,
-              "key": 377,
-              "bounds": 152,
-              "render": 1140,
-              "seam": 256,
-              "encode": 3844,
-              "encodes": 4,
-              "probe": 193,
-              "verify": 12,
-              "finish": 5600
-            },
-            "frames": 72,
-            "fps": 24.0,
-            "bbox": [
-              67,
-              54,
-              434,
-              426
-            ],
-            "edge_touch_frames": 0,
-            "subject_px_in_video": 372,
-            "scale": 1.0667,
-            "motion": 106.55,
-            "loop_seam_before": 130.25,
-            "loop_seam": 130.25,
-            "loop_limit": 159.82,
-            "frames_out": 72,
-            "crf": 54,
-            "sharp_kept": 1.01,
-            "detail_vs_still": 1.08,
-            "soft_sigma": 0.0,
-            "kb": 254.0
-          },
-          "anim_report": [
-            {
-              "name": "inside_slot",
-              "ok": true,
-              "detail": "inside",
-              "severity": "BLOCK",
-              "stage": "slot",
-              "value": 0,
-              "limit": 0,
-              "data": {
-                "frame": null,
-                "over_px": 0,
-                "edge_px": 7,
-                "ms": 49.4
-              }
-            },
-            {
-              "name": "cross_slot",
-              "ok": false,
-              "detail": "213px of foreign foreground, first at frame 9",
-              "severity": "BLOCK",
-              "stage": "slot",
-              "value": 213,
-              "limit": 0,
-              "data": {
-                "frame": 9,
-                "px": 213,
-                "ms": 51.0
-              }
-            },
-            {
-              "name": "size_budget",
-              "ok": true,
-              "detail": "253KB @crf54",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 253,
-              "limit": 256,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "codec_vp9",
-              "ok": true,
-              "detail": "vp9",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "vp9",
-              "limit": "vp9",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "dimensions",
-              "ok": true,
-              "detail": "512x512",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": "512x512",
-              "limit": "512x512",
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "fps",
-              "ok": true,
-              "detail": "24.0",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 24.0,
-              "limit": 30.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "duration",
-              "ok": true,
-              "detail": "3.0",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 3.0,
-              "limit": 3.0,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "no_audio",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_mode_tag",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_decoded",
-              "ok": true,
-              "detail": "",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": null,
-              "limit": null,
-              "data": {
-                "ms": 0.6
-              }
-            },
-            {
-              "name": "loop_seam",
-              "ok": true,
-              "detail": "130.25 <= 159.82",
-              "severity": "BLOCK",
-              "stage": "anim",
-              "value": 130.25,
-              "limit": 159.82,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "identity_kept",
-              "ok": true,
-              "detail": "first frame matches the still at IoU 0.99",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.991,
-              "limit": 0.5,
-              "data": {
-                "ms": 2.9
-              }
-            },
-            {
-              "name": "motion_present",
-              "ok": true,
-              "detail": "median frame-to-frame change 106.55",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 106.55,
-              "limit": 0.5,
-              "data": {
-                "ms": 0.0
-              }
-            },
-            {
-              "name": "alpha_stable",
-              "ok": true,
-              "detail": "subject area varies by 7% over the frames",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 0.069,
-              "limit": 0.35,
-              "data": {
-                "ms": 8.7
-              }
-            },
-            {
-              "name": "sharpness",
-              "ok": true,
-              "detail": "1.01x of the edge detail survives the encode",
-              "severity": "WARN",
-              "stage": "anim",
-              "value": 1.01,
-              "limit": 0.8,
-              "data": {
-                "ms": 0.0
-              }
-            }
-          ],
-          "webm": "slices/vid-girl_emirati-spin_happy-20261009T114909-0f81ee.webm",
-          "review": "BLOCKED"
-        }
-      }
+      "rendered_at": 1791785777.578,
+      "anim_verdict_stale": true
     },
     {
       "index": 9,
@@ -5148,6 +5441,18 @@
           }
         },
         {
+          "name": "edge_trimmed",
+          "ok": true,
+          "detail": "erosion kept 100.0% of the subject",
+          "severity": "WARN",
+          "stage": "still",
+          "value": 1.0,
+          "limit": 0.9,
+          "data": {
+            "ms": 0.6
+          }
+        },
+        {
           "name": "dimensions",
           "ok": true,
           "detail": "(512, 512, 4)",
@@ -5164,7 +5469,7 @@
             4
           ],
           "data": {
-            "ms": 19.5
+            "ms": 0.0
           }
         },
         {
@@ -5185,10 +5490,10 @@
           "detail": "",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 85139,
+          "value": 69435,
           "limit": 400,
           "data": {
-            "ms": 0.3
+            "ms": 1.5
           }
         },
         {
@@ -5230,14 +5535,14 @@
         {
           "name": "holes",
           "ok": true,
-          "detail": "0 enclosed hole(s), 0.0% of the subject",
+          "detail": "2 enclosed hole(s), 0.3% of the subject",
           "severity": "WARN",
           "stage": "still",
-          "value": 0.0,
+          "value": 0.0031,
           "limit": 0.01,
           "data": {
-            "count": 0,
-            "ms": 0.3
+            "count": 2,
+            "ms": 1.7
           }
         },
         {
@@ -5269,13 +5574,13 @@
         {
           "name": "static_file",
           "ok": true,
-          "detail": "145.4KB png",
+          "detail": "124.3KB png",
           "severity": "BLOCK",
           "stage": "still",
-          "value": 145.4,
+          "value": 124.3,
           "limit": 512,
           "data": {
-            "ms": 3.8
+            "ms": 0.0
           }
         }
       ],
@@ -5303,9 +5608,11 @@
         "scale_mode": "pack",
         "spill_px": 0,
         "chroma_risk": 0.0,
-        "holes": 0.0,
-        "kb": 145.4,
-        "format": "png"
+        "holes": 0.0031,
+        "kb": 124.3,
+        "format": "png",
+        "outline_px": 0,
+        "erode_px": 0
       },
       "png": "slices/img-girl_emirati-stand_shocked-20261009T114909-d76893.png",
       "anim_status": "READY",
@@ -5314,16 +5621,16 @@
         "source": "video sheet",
         "threshold": 125.0,
         "ms": {
-          "decode": 309,
-          "key": 422,
-          "bounds": 187,
-          "render": 1210,
-          "seam": 709,
-          "encode": 2450,
+          "decode": 436,
+          "key": 559,
+          "bounds": 130,
+          "render": 1240,
+          "seam": 1312,
+          "encode": 3185,
           "encodes": 4,
-          "probe": 198,
-          "verify": 8,
-          "finish": 4765
+          "probe": 235,
+          "verify": 41,
+          "finish": 6149
         },
         "frames": 72,
         "fps": 24.0,
@@ -5336,23 +5643,24 @@
         "edge_touch_frames": 0,
         "subject_px_in_video": 372,
         "scale": 1.0667,
-        "motion": 12.1,
-        "loop_seam_before": 91.37,
+        "motion": 12.38,
+        "loop_seam_before": 84.28,
         "loop_cut": 21,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 26.81,
+        "loop_limit": 26.24,
         "frames_out": 45,
         "crf": 30,
-        "sharp_kept": 1.0,
-        "detail_vs_still": 1.11,
+        "sharp_kept": 0.99,
+        "detail_vs_still": 1.15,
         "soft_sigma": 0.0,
-        "kb": 227.2
+        "kb": 233.7,
+        "cache": "hit"
       },
       "webm": "slices/vid-girl_emirati-stand_shocked-20261009T114909-d76893.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -5439,6 +5747,75 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791785655.033,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785674.869,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785728.68,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 9,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785747.492,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791785777.609,
+          "stage": "appearance",
+          "actor": "human",
+          "decision": "PASS",
+          "reason": null,
+          "ref": null,
+          "detail": {
+            "outline_px": 0,
+            "erode_px": 0
+          }
+        },
+        {
+          "ts": 1791785781.043,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A1",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -5454,7 +5831,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 60.7
+            "ms": 40.5
           }
         },
         {
@@ -5468,16 +5845,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 54.8
+            "ms": 45.2
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "227KB @crf30",
+          "detail": "233KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 227,
+          "value": 233,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -5564,17 +5941,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.6
+            "ms": 1.2
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 26.81",
+          "detail": "0.0 <= 26.24",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 26.81,
+          "limit": 26.24,
           "data": {
             "ms": 0.0
           }
@@ -5588,16 +5965,16 @@
           "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 2.6
+            "ms": 3.0
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 12.1",
+          "detail": "median frame-to-frame change 12.38",
           "severity": "WARN",
           "stage": "anim",
-          "value": 12.1,
+          "value": 12.38,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -5609,25 +5986,27 @@
           "detail": "subject area varies by 3% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.028,
+          "value": 0.026,
           "limit": 0.35,
           "data": {
-            "ms": 5.5
+            "ms": 37.4
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.00x of the edge detail survives the encode",
+          "detail": "0.99x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.0,
+          "value": 0.99,
           "limit": 0.8,
           "data": {
             "ms": 0.0
           }
         }
-      ]
+      ],
+      "rendered_at": 1791785777.609,
+      "anim_verdict_stale": true
     }
   ],
   "sheet_issues": [],
@@ -5665,5 +6044,31 @@
       "animated:8",
       "animated:9"
     ]
-  }
+  },
+  "edge_history": [
+    {
+      "outline": 12,
+      "erode": 0,
+      "ts": 1791546549.201,
+      "via": "initial"
+    },
+    {
+      "outline": 0,
+      "erode": 0,
+      "ts": 1791785655.333,
+      "via": "apply"
+    },
+    {
+      "outline": 9,
+      "erode": 0,
+      "ts": 1791785728.815,
+      "via": "apply"
+    },
+    {
+      "outline": 0,
+      "erode": 0,
+      "ts": 1791785777.903,
+      "via": "apply"
+    }
+  ]
 }

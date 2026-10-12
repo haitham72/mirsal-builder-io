@@ -1,0 +1,407 @@
+{
+  "id": "060",
+  "number": 60,
+  "provider": "higgsfield-manual",
+  "external_task_id": "f49c5ff9-3f99-4fcb-888a-f59356eae113",
+  "name_key": "generic_emojis",
+  "status": "running",
+  "created": 1791784037.217,
+  "prompt": "generic emojis",
+  "grid": [
+    3,
+    3
+  ],
+  "style_id": "flat_vector",
+  "folders": {
+    "img": "img-060-generic_emojis",
+    "vid": "vid-060-generic_emojis"
+  },
+  "paths": {
+    "img": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\Images_gen\\img-060-generic_emojis",
+    "vid": "G:\\Haitham\\VsCode\\Mirsal-Builder\\inputs\\videos_gen\\vid-060-generic_emojis"
+  },
+  "request": {
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "generic emojis",
+      "style_id": "flat_vector",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "disbelief with squeezed-shut eyes and a deep sigh",
+          "tags": [
+            "generic_emojis_facepalm",
+            "facepalm"
+          ],
+          "emoji": "🤦",
+          "motion": "eyes squeeze shut, the head shakes slowly, deep sigh"
+        },
+        {
+          "pos": 2,
+          "label": "clueless sideways glance with a crooked half-smile",
+          "tags": [
+            "generic_emojis_shrug",
+            "shrug",
+            "dunno"
+          ],
+          "emoji": "🤷",
+          "motion": "glances side to side, the half-smile tilts, head tilts"
+        },
+        {
+          "pos": 3,
+          "label": "bored with half-lowered eyelids and a flat unimpressed mouth",
+          "tags": [
+            "generic_emojis_bored",
+            "bored",
+            "unimpressed"
+          ],
+          "emoji": "😑",
+          "motion": "eyelids droop, the mouth stays flat, slow exhale"
+        },
+        {
+          "pos": 4,
+          "label": "pure joy, eyes closed, huge blissful smile, jiggling cheeks",
+          "tags": [
+            "generic_emojis_dance",
+            "dance",
+            "dancing"
+          ],
+          "emoji": "🕺",
+          "motion": "the face bobs to a beat, cheeks jiggle, blissful sway"
+        },
+        {
+          "pos": 5,
+          "label": "huge shiny puppy eyes with a trembling lip, begging please",
+          "tags": [
+            "generic_emojis_plead",
+            "plead",
+            "begging",
+            "please"
+          ],
+          "emoji": "🥺",
+          "motion": "eyes shimmer and widen, the lip trembles, hopeful tilt"
+        },
+        {
+          "pos": 6,
+          "label": "respectful attention with a chin-up nod and focused eyes",
+          "tags": [
+            "generic_emojis_salute",
+            "salute",
+            "saluting",
+            "respect"
+          ],
+          "emoji": "🫡",
+          "motion": "the chin lifts, eyes lock forward, firm respectful nod"
+        },
+        {
+          "pos": 7,
+          "label": "cheerful toast with a clinking grin and merry crinkled eyes",
+          "tags": [
+            "generic_emojis_cheers",
+            "cheers",
+            "toast"
+          ],
+          "emoji": "🍻",
+          "motion": "grins broadly, eyes crinkle merrily, joyful nod"
+        },
+        {
+          "pos": 8,
+          "label": "delighted with wide sparkling eyes and a joyful gasp",
+          "tags": [
+            "generic_emojis_gift",
+            "gift",
+            "present",
+            "surprise"
+          ],
+          "emoji": "🎁",
+          "motion": "eyes widen and sparkle, happy gasp"
+        },
+        {
+          "pos": 9,
+          "label": "star-struck with huge starry eyes and an awestruck open smile",
+          "tags": [
+            "generic_emojis_star_struck",
+            "star_struck",
+            "starstruck",
+            "amazed"
+          ],
+          "emoji": "🤩",
+          "motion": "eyes turn starry, the mouth opens in awe"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "core-v1",
+      "loop": false
+    },
+    "grid": [
+      3,
+      3
+    ]
+  },
+  "plan": {
+    "task": "generic emojis",
+    "task_slug": "generic_emojis",
+    "subject": "generic emojis",
+    "scene": "",
+    "described": "generic emojis",
+    "context": "",
+    "kind": "default",
+    "grid": [
+      3,
+      3
+    ],
+    "template_id": "sheet_3x3",
+    "template_version": 4,
+    "slots": {
+      "subject_description": "generic emojis",
+      "style_id": "flat_vector",
+      "mode": "sheet_3x3",
+      "cells": [
+        {
+          "pos": 1,
+          "label": "disbelief with squeezed-shut eyes and a deep sigh",
+          "tags": [
+            "generic_emojis_facepalm",
+            "facepalm"
+          ],
+          "emoji": "🤦",
+          "motion": "eyes squeeze shut, the head shakes slowly, deep sigh"
+        },
+        {
+          "pos": 2,
+          "label": "clueless sideways glance with a crooked half-smile",
+          "tags": [
+            "generic_emojis_shrug",
+            "shrug",
+            "dunno"
+          ],
+          "emoji": "🤷",
+          "motion": "glances side to side, the half-smile tilts, head tilts"
+        },
+        {
+          "pos": 3,
+          "label": "bored with half-lowered eyelids and a flat unimpressed mouth",
+          "tags": [
+            "generic_emojis_bored",
+            "bored",
+            "unimpressed"
+          ],
+          "emoji": "😑",
+          "motion": "eyelids droop, the mouth stays flat, slow exhale"
+        },
+        {
+          "pos": 4,
+          "label": "pure joy, eyes closed, huge blissful smile, jiggling cheeks",
+          "tags": [
+            "generic_emojis_dance",
+            "dance",
+            "dancing"
+          ],
+          "emoji": "🕺",
+          "motion": "the face bobs to a beat, cheeks jiggle, blissful sway"
+        },
+        {
+          "pos": 5,
+          "label": "huge shiny puppy eyes with a trembling lip, begging please",
+          "tags": [
+            "generic_emojis_plead",
+            "plead",
+            "begging",
+            "please"
+          ],
+          "emoji": "🥺",
+          "motion": "eyes shimmer and widen, the lip trembles, hopeful tilt"
+        },
+        {
+          "pos": 6,
+          "label": "respectful attention with a chin-up nod and focused eyes",
+          "tags": [
+            "generic_emojis_salute",
+            "salute",
+            "saluting",
+            "respect"
+          ],
+          "emoji": "🫡",
+          "motion": "the chin lifts, eyes lock forward, firm respectful nod"
+        },
+        {
+          "pos": 7,
+          "label": "cheerful toast with a clinking grin and merry crinkled eyes",
+          "tags": [
+            "generic_emojis_cheers",
+            "cheers",
+            "toast"
+          ],
+          "emoji": "🍻",
+          "motion": "grins broadly, eyes crinkle merrily, joyful nod"
+        },
+        {
+          "pos": 8,
+          "label": "delighted with wide sparkling eyes and a joyful gasp",
+          "tags": [
+            "generic_emojis_gift",
+            "gift",
+            "present",
+            "surprise"
+          ],
+          "emoji": "🎁",
+          "motion": "eyes widen and sparkle, happy gasp"
+        },
+        {
+          "pos": 9,
+          "label": "star-struck with huge starry eyes and an awestruck open smile",
+          "tags": [
+            "generic_emojis_star_struck",
+            "star_struck",
+            "starstruck",
+            "amazed"
+          ],
+          "emoji": "🤩",
+          "motion": "eyes turn starry, the mouth opens in awe"
+        }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": "core-v1",
+      "loop": false
+    },
+    "guidelines": {
+      "sheet": "3x3 sticker sheet, 9 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 9 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+    },
+    "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: generic emojis.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: disbelief with squeezed-shut eyes and a deep sigh\nCharacter 2: clueless sideways glance with a crooked half-smile\nCharacter 3: bored with half-lowered eyelids and a flat unimpressed mouth\nCharacter 4: pure joy, eyes closed, huge blissful smile, jiggling cheeks\nCharacter 5: huge shiny puppy eyes with a trembling lip, begging please\nCharacter 6: respectful attention with a chin-up nod and focused eyes\nCharacter 7: cheerful toast with a clinking grin and merry crinkled eyes\nCharacter 8: delighted with wide sparkling eyes and a joyful gasp\nCharacter 9: star-struck with huge starry eyes and an awestruck open smile\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "video_prompt": "Animate this 3x3 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes squeeze shut, the head shakes slowly, deep sigh\n2. glances side to side, the half-smile tilts, head tilts\n3. eyelids droop, the mouth stays flat, slow exhale\n4. the face bobs to a beat, cheeks jiggle, blissful sway\n5. eyes shimmer and widen, the lip trembles, hopeful tilt\n6. the chin lifts, eyes lock forward, firm respectful nod\n7. grins broadly, eyes crinkle merrily, joyful nod\n8. eyes widen and sparkle, happy gasp\n9. eyes turn starry, the mouth opens in awe\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+    "stickers": [
+      {
+        "index": 1,
+        "id": "prompt01",
+        "prompt": "generic emojis disbelief with squeezed-shut eyes and a deep sigh, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_facepalm",
+        "tags": [
+          "generic_emojis_facepalm",
+          "facepalm"
+        ],
+        "emoji": "🤦"
+      },
+      {
+        "index": 2,
+        "id": "prompt02",
+        "prompt": "generic emojis clueless sideways glance with a crooked half-smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_shrug",
+        "tags": [
+          "generic_emojis_shrug",
+          "shrug",
+          "dunno"
+        ],
+        "emoji": "🤷"
+      },
+      {
+        "index": 3,
+        "id": "prompt03",
+        "prompt": "generic emojis bored with half-lowered eyelids and a flat unimpressed mouth, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_bored",
+        "tags": [
+          "generic_emojis_bored",
+          "bored",
+          "unimpressed"
+        ],
+        "emoji": "😑"
+      },
+      {
+        "index": 4,
+        "id": "prompt04",
+        "prompt": "generic emojis pure joy, eyes closed, huge blissful smile, jiggling cheeks, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_dance",
+        "tags": [
+          "generic_emojis_dance",
+          "dance",
+          "dancing"
+        ],
+        "emoji": "🕺"
+      },
+      {
+        "index": 5,
+        "id": "prompt05",
+        "prompt": "generic emojis huge shiny puppy eyes with a trembling lip, begging please, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_plead",
+        "tags": [
+          "generic_emojis_plead",
+          "plead",
+          "begging",
+          "please"
+        ],
+        "emoji": "🥺"
+      },
+      {
+        "index": 6,
+        "id": "prompt06",
+        "prompt": "generic emojis respectful attention with a chin-up nod and focused eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_salute",
+        "tags": [
+          "generic_emojis_salute",
+          "salute",
+          "saluting",
+          "respect"
+        ],
+        "emoji": "🫡"
+      },
+      {
+        "index": 7,
+        "id": "prompt07",
+        "prompt": "generic emojis cheerful toast with a clinking grin and merry crinkled eyes, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_cheers",
+        "tags": [
+          "generic_emojis_cheers",
+          "cheers",
+          "toast"
+        ],
+        "emoji": "🍻"
+      },
+      {
+        "index": 8,
+        "id": "prompt08",
+        "prompt": "generic emojis delighted with wide sparkling eyes and a joyful gasp, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_gift",
+        "tags": [
+          "generic_emojis_gift",
+          "gift",
+          "present",
+          "surprise"
+        ],
+        "emoji": "🎁"
+      },
+      {
+        "index": 9,
+        "id": "prompt09",
+        "prompt": "generic emojis star-struck with huge starry eyes and an awestruck open smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+        "key": "generic_emojis_star_struck",
+        "tags": [
+          "generic_emojis_star_struck",
+          "star_struck",
+          "starstruck",
+          "amazed"
+        ],
+        "emoji": "🤩"
+      }
+    ],
+    "expanded_by": "deterministic",
+    "previewed": true
+  },
+  "plan_review": {
+    "decision": "APPROVE",
+    "by": "human",
+    "ts": 1791784037.217,
+    "note": "approved when the task was reserved"
+  },
+  "generations": [
+    "G135"
+  ]
+}

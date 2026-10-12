@@ -1,0 +1,20 @@
+{"ts": 1791784440.82, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "generic emojis toon", "task_slug": "generic_emojis_toon"}}
+{"ts": 1791784440.848, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791784441.178, "stage": "sheet_picked", "status": "done", "ms": 331, "detail": {"subject": "generic_emojis_toon", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": ["grid_detected"], "warnings": ["cut_clean"]}}
+{"ts": 1791784441.182, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791784441.497, "stage": "keyed", "status": "done", "ms": 314, "detail": {"bg": [5, 251, 2], "threshold": [123.5, 123.0, 123.0, 122.5, 122.5, 122.5, 123.0, 123.0, 123.0], "grid": "3x3", "cut": "mixed", "xs": [0, 681, 1365, 2048], "ys": [0, 678, 1348, 2048]}}
+{"ts": 1791784441.499, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791784442.308, "stage": "sliced", "status": "done", "ms": 809, "detail": {"ready": 7, "failed": 2}}
+{"ts": 1791784456.876, "stage": "still_allowed", "status": "done", "ms": 0, "detail": {"indexes": [9]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784458.799, "stage": "still_allowed", "status": "done", "ms": 0, "detail": {"indexes": [8]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.198, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 1, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.2, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 2, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.203, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 3, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.205, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 4, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.206, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 5, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.209, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 6, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.211, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 7, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.213, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 8, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.214, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 9, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.217, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4, 5, 6, 7, 8, 9]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791784465.641, "stage": "added_to_pack", "status": "done", "ms": 0, "detail": {"pack": "e418aa14", "kind": "static", "stickers": [1, 2, 3, 4, 5, 6, 7, 8, 9], "replaced_stills": 0}, "actor": "human", "decision": "APPROVE"}

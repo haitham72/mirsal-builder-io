@@ -166,7 +166,71 @@
       "index": 9
     }
   ],
-  "renders": [],
+  "renders": [
+    {
+      "id": "R001",
+      "pack_id": "67d29daa",
+      "preset": "burst",
+      "params": {
+        "gravity": 1.0,
+        "magnitude": 1.0,
+        "vortex": 0.0,
+        "count": 28,
+        "size_min": 0.1,
+        "size_max": 0.22,
+        "particle_size": 1.0,
+        "spin": 1.0,
+        "lifetime": 2.2,
+        "spread": 360.0,
+        "pop": 0.25,
+        "seed": 1,
+        "fps": 30.0,
+        "duration": 3.0,
+        "size": 512,
+        "origin": [
+          0.5,
+          0.5
+        ],
+        "show_source": false,
+        "sprite_px": 100,
+        "scale": 1
+      },
+      "source": "cells",
+      "sprites": 4,
+      "file": "renders/R001.webm",
+      "bytes": 204753,
+      "status": "READY",
+      "checks": [],
+      "warnings": [],
+      "blocks": [],
+      "metrics": {
+        "frames": 90,
+        "fps": 30.0,
+        "crf": 42,
+        "kb": 200.0,
+        "label": "P007 burst",
+        "loop_seam": 0.0,
+        "loop_limit": 12.0,
+        "warnings": [
+          "alpha_stable"
+        ],
+        "coverage_peak": 0.4147
+      },
+      "created": 1791781365.498,
+      "added_to": "67d29daa",
+      "added": [
+        {
+          "sticker": "120286a2",
+          "pack": "67d29daa",
+          "of": "144848e7",
+          "ts": 1791781373.762
+        }
+      ],
+      "affirmed_in": [
+        "67d29daa"
+      ]
+    }
+  ],
   "credits": 2.0,
   "notes": [],
   "history": [
@@ -189,6 +253,33 @@
         "effect": "E013",
         "generation": "G101"
       }
+    },
+    {
+      "ts": 1791781365.498,
+      "actor": "python",
+      "decision": "RENDER",
+      "reason": "R001 for 67d29daa: READY 199 KB (burst)",
+      "detail": {
+        "render": "R001",
+        "pack": "67d29daa",
+        "warnings": []
+      }
+    },
+    {
+      "ts": 1791781373.762,
+      "actor": "local",
+      "decision": "APPROVE",
+      "reason": "1 burst(s) added to the pack",
+      "detail": {
+        "pack": "67d29daa",
+        "added": [
+          {
+            "sticker": "120286a2",
+            "name": "Barbie in love · AI pieces (G101) · burst",
+            "render": "R001"
+          }
+        ]
+      }
     }
   ],
   "imports": [
@@ -197,5 +288,5 @@
     "E013/G101/S3",
     "E013/G101/S4"
   ],
-  "updated": 1791084066.28
+  "updated": 1791781373.762
 }

@@ -1,0 +1,42 @@
+{
+  "id": "J103",
+  "kind": "sheet",
+  "task": "068",
+  "generation": "G143",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: generic emojis smooth colors gradient shiny orange border.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: pure happiness with a bright beaming smile and joyful eyes\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut\nCharacter 3: bawling with big streaming tears and a trembling lip\nCharacter 4: sad and drooping face with a single tear\nCharacter 5: lovestruck with sparkling eyes, blushing cheeks and a dreamy smile\nCharacter 6: furious and steaming with a deep scowl and flared nostrils\nCharacter 7: playful wink with one eye closed and a cheeky grin\nCharacter 8: blowing a kiss with a wink, a small heart floating free\nCharacter 9: surprised with wide round eyes and a small o-shaped mouth\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "generic emojis smooth colors gradient shiny, orange border",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "9edae2c8-1607-45a5-905a-0c38af1d7f6e",
+  "result": {
+    "file": "jobs/J103-generic_emojis_smooth_colors-sheet/result.png",
+    "sha256": "fe7bebdb2dea9ea0c5979fd201fd590f52b6264b3a88d18012fac5df9adcbc6e",
+    "bytes": 4303872
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791784840.104,
+  "claimed_at": 1791784841.454,
+  "completed_at": 1791784872.291,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

@@ -1,0 +1,42 @@
+{
+  "id": "J094",
+  "kind": "sheet",
+  "task": "059",
+  "generation": "G134",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: generic emojis.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: celebrating with sparkling joyful eyes and a huge party grin\nCharacter 2: cheering with a huge congratulatory grin and sparkling eyes\nCharacter 3: confident wink with a proud grin\nCharacter 4: stern disapproval with a tight frown and narrowed eyes\nCharacter 5: grateful smile with eyes closed in thanks and glowing cheeks\nCharacter 6: friendly hello with a warm open smile and bright welcoming eyes\nCharacter 7: warm loving smile with happy squinted eyes and glowing cheeks\nCharacter 8: proud smug grin with a confident raised brow\nCharacter 9: scheming grin with wiggling eyebrows\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "generic emojis",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "2e29e990-fba4-45e4-943c-480c04b42ada",
+  "result": {
+    "file": "jobs/J094-generic_emojis-sheet/result.png",
+    "sha256": "c861a80d4b9c5d6c87d78b407bbe75fd9ca26a90044b370ecbd1a2c70c1a09fa",
+    "bytes": 4004206
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791784036.932,
+  "claimed_at": 1791784039.914,
+  "completed_at": 1791784062.919,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null
+}

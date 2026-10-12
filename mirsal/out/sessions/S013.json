@@ -3,7 +3,7 @@
  "user": "local",
  "title": "girl emirati",
  "created": 1791535752.366,
- "updated": 1791715831.189,
+ "updated": 1791779417.198,
  "settings": {
   "grid": "3x3",
   "style_id": "kawaii",
@@ -18,8 +18,10 @@
   "stage": "auto"
  },
  "focus": {
-  "generation": "G127",
-  "stickers": []
+  "generation": "G128",
+  "stickers": [
+   "G128/S2"
+  ]
  },
  "subjects": [
   {
@@ -35,28 +37,30 @@
      "parent": null,
      "created": 1791535777.447,
      "ready": 9,
-     "approved": 0,
+     "approved": 9,
      "rejected": 0,
      "liked": [],
      "disliked": [],
      "note": "",
-     "stage": "sliced",
+     "stage": "stills_reviewed",
      "error": null
     },
     {
-     "generation": null,
+     "generation": "G128",
      "job": "J083",
      "prompt": "girl emirati",
      "grid": "3x3",
      "style_id": "kawaii",
      "parent": "G127",
      "created": 1791546506.884,
-     "ready": 0,
-     "approved": 0,
+     "ready": 9,
+     "approved": 9,
      "rejected": 0,
      "liked": [],
      "disliked": [],
-     "note": "tweak: give him a hat"
+     "note": "tweak: give him a hat",
+     "stage": "pack_final",
+     "error": null
     }
    ]
   }
@@ -241,6 +245,30 @@
     "spent_estimate": 2.0
    },
    "generation_id": null
+  },
+  {
+   "seq": 9,
+   "ts": 1791779417.198,
+   "user": "what is she doing in 2rd image",
+   "assistant": "**S2**: I couldn't inspect this still: qwen/qwen3.5-9b is not an approved image-capable model; choose a vision model from the catalog.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [
+     "G128/S2"
+    ],
+    "positive": [],
+    "negative": [],
+    "generation": "G128",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "number",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G128"
   }
  ],
  "messages": [
@@ -900,6 +928,110 @@
    ],
    "ts": 1791546551.249,
    "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m19",
+   "role": "assistant",
+   "text": "Prompt is already done for G127; new requests now stop at Prompt.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791779359.935,
+   "status": "done"
+  },
+  {
+   "id": "m20",
+   "role": "assistant",
+   "text": "Stickers is already done for G127; new requests now stop at Stickers.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791779365.499,
+   "status": "done"
+  },
+  {
+   "id": "m21",
+   "role": "user",
+   "text": "what is she doing in 2rd image",
+   "cards": [],
+   "steps": [],
+   "ts": 1791779415.626
+  },
+  {
+   "id": "m22",
+   "role": "assistant",
+   "text": "**S2**: I couldn't inspect this still: qwen/qwen3.5-9b is not an approved image-capable model; choose a vision model from the catalog.",
+   "cards": [
+    {
+     "type": "stickers",
+     "stickers": [
+      {
+       "id": "G128/S2",
+       "index": 2,
+       "key": "girl_emirati_sit_calm",
+       "name": "img-girl_emirati-sit_calm-20261009T114909-f4c559",
+       "emoji": "🧘‍♀️🌿",
+       "tags": [
+        "girl_emirati_sit_calm",
+        "peace",
+        "serenity",
+        "meditation"
+       ],
+       "title": null,
+       "proposed_title": null,
+       "status": "READY",
+       "reason": null,
+       "still": "APPROVED",
+       "anim": "APPROVED",
+       "anim_status": "READY",
+       "anim_from_previous": false,
+       "waived": [],
+       "png": "/out/G128/slices/img-girl_emirati-sit_calm-20261009T114909-f4c559.png?e=0",
+       "webm": "/out/G128/slices/vid-girl_emirati-sit_calm-20261009T114909-f4c559.webm",
+       "prompt": "A young Emirati girl wearing a traditional black abaya and shayla, expressive face, standing in various poses in a 3x3 grid. sitting calmly cross-legged with eyes closed, peaceful and serene, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+      }
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Girl emirati",
+     "detail": null,
+     "status": "running",
+     "ts": 1791779415.689
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1791779415.714
+    },
+    {
+     "kind": "step",
+     "label": "found S2 in Girl emirati · number",
+     "detail": null,
+     "status": "done",
+     "ts": 1791779415.773
+    },
+    {
+     "kind": "step",
+     "label": "looking at the selected still image",
+     "detail": null,
+     "status": "done",
+     "ts": 1791779415.818
+    },
+    {
+     "kind": "final",
+     "label": "could not inspect the still",
+     "detail": null,
+     "status": "error",
+     "ts": 1791779417.176
+    }
+   ],
+   "ts": 1791779415.626,
+   "status": "done",
+   "cards_first": true,
    "chips": []
   }
  ],
