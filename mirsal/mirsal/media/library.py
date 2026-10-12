@@ -261,27 +261,35 @@ def encode_frames(frames, fps: float, fmt: str, loop: bool, cfg: EngineConfig, i
     return data, mime, fmt, info
 
 
-LIGHT_FRAMES = 30          # light exports: this many frames…
-LIGHT_BYTES = 20 * 1024    # …fitted to this budget (the crf ladder walks until it fits)
+LIGHT_FRAMES = (30, 24, 20)  # light exports: the WHOLE clip in this many frames (a 3 s loop at 10 fps), fewer only when 30 cannot fit…
+LIGHT_BYTES = 20 * 1024      # …fitted to this budget (the crf ladder, plus VP9's last rung 63, walks until it fits)
 
 
 def light_webm(path: Path, cfg: EngineConfig):
-    """A stored animation re-encoded small (30 frames, ~20 KB): decode with alpha, resample,
-    fit the crf ladder to LIGHT_BYTES. Returns (bytes, {"crf", "kb", "frames", "fps"}).
-    The stored file is untouched; quality vs size is on the record so the person can judge."""
+    """A stored animation re-encoded small (~20 KB): decode with alpha, keep the whole clip in LIGHT_FRAMES evenly spaced
+    frames (the duration and the loop stay, the frame rate drops), fit the crf ladder to LIGHT_BYTES.
+    A very detailed sticker may not reach the budget even at 20 frames and crf 63: it ships its smallest try with fits False.
+    Returns (bytes, {"crf", "kb", "frames", "fps", "fits"}). The stored file is untouched; quality vs size is on the record."""
+    import dataclasses
     import tempfile
-    from ..engine.effect_video import resample
     from ..engine.video import _encode_fit
     info = ff.probe(path, vp9_native=True)
     src_fps, dur, w, h = info["fps"] or 30.0, info["duration"], info["width"], info["height"]
     if not w or dur <= 0:
         raise LibraryError("cannot read that animation (is ffmpeg with libvpx-vp9 installed? run: python -m mirsal doctor)", 409)
     frames = ff.decode_full(path, w, h, int(dur * src_fps) + 3, None)
-    small = resample(frames, src_fps, 30, LIGHT_FRAMES / 30)
+    lcfg = dataclasses.replace(cfg, crf_ladder=tuple(sorted({*cfg.crf_ladder, 63})))
+    secs = len(frames) / src_fps
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / "light.webm"
-        crf, data, _ = _encode_fit(small, 30, cfg, out, budget=LIGHT_BYTES)
-    meta = {"crf": crf, "kb": max(1, len(data) // 1024), "frames": len(small), "fps": 30}
+        for want in LIGHT_FRAMES:
+            n = min(want, len(frames))
+            small = frames[(np.arange(n) * len(frames)) // n]       # even steps, the last frame not repeated, so the loop seam stays where it was
+            fps = round(n / secs, 3)
+            crf, data, _ = _encode_fit(small, fps, lcfg, out, start=len(lcfg.crf_ladder) - 3, budget=LIGHT_BYTES)
+            if len(data) <= LIGHT_BYTES:
+                break
+    meta = {"crf": crf, "kb": max(1, len(data) // 1024), "frames": n, "fps": fps, "fits": len(data) <= LIGHT_BYTES}
     return data, meta
 
 
@@ -835,10 +843,11 @@ class Library:
 
     MEDIA_KEYS = ("file", "file_name", "type", "w", "h", "kb", "dur", "fps", "frames")
 
-    def merge_pack(self, src: str, into: str, by: str = "human") -> dict:
+    def merge_pack(self, src: str, into: str, by: str = "human", lead: bool = False) -> dict:
         """Fold pack `src` into `into` (Haitham, 2026-10-05: "it should be 1 pack with its own animation, not 2 packs nested"). An animated sticker whose
         still twin (the same batch cell) is in `into` UPGRADES that still: the still keeps its id, name, emoji, place and particle links (sets point at it)
-        and takes the animated file; nothing is deleted from disk. Every other sticker moves over as it is. The emptied pack goes to the trash (Restore)."""
+        and takes the animated file; nothing is deleted from disk. Every other sticker moves over as it is. The emptied pack goes to the trash (Restore).
+        `lead` (the Packs column's drag of one pack onto another): `into` also becomes the parent of its batch group, as *Assign as parent* does."""
         cell = lambda s: ((s.get("source") or {}).get("generation"), (s.get("source") or {}).get("index"))
         with self.lock:
             db = self._load(); a = self._pack(db, src); b = self._pack(db, into)
@@ -863,11 +872,13 @@ class Library:
                     if not b.get("cover"):
                         b["cover"] = st["id"]
             a["cover"] = None
+            if lead:
+                b["lead_at"] = round(time.time(), 3)
             self._save(db)
         trashed = False
         if not a["stickers"]:
             self.delete_pack(src, by=by); trashed = True
-        return {"into": into, "upgraded": upgraded, "moved": moved, "trashed": trashed}
+        return {"into": into, "upgraded": upgraded, "moved": moved, "trashed": trashed, "lead": bool(lead)}
 
     def move_stickers(self, items: list[dict], to: str) -> dict:
         """Bulk move: items = [{pack_id, id}, ...] (a selection may span packs) into pack `to`, ALL OR NOTHING: everything is checked first (an unknown pack or sticker refuses the
@@ -924,7 +935,7 @@ class Library:
         `.png` / `.webp` for the static ones), renamed to the export contract
         `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
         (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
-        `light` (default on): animated stickers ship re-encoded small (30 frames, ~20 KB each; the row records crf/kb/frames so quality can be judged).
+        `light` (default on): animated stickers ship re-encoded small (the whole clip in 30 frames or fewer, ~20 KB each: `light_webm`; the row records crf/kb/frames so quality can be judged).
         Returns (zip bytes, a safe file stem)."""
         import hashlib
         from . import export_names as xn

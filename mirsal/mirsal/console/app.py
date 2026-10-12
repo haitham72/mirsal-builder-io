@@ -685,7 +685,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             n = int(str(gid).upper().lstrip("G"))
             if not c.visible(user, n):
                 raise KeyError(gid)
-            data, stem = await asyncio.to_thread(_batches.export_zip, c.out, n)
+            data, stem = await asyncio.to_thread(_batches.export_zip, c.out, n, request.query_params.get("light", "1") != "0")
         except (KeyError, ValueError, FileNotFoundError, PipelineError) as e:                # PipelineError: no such batch
             missing = isinstance(e, (KeyError, FileNotFoundError, PipelineError)) or "invalid literal" in str(e)
             return _j(request, 404 if missing else 409, {"error": "not found" if missing else str(e)})

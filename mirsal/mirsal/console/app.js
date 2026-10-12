@@ -407,7 +407,7 @@ function drawCol2() {
       .sort((a, b) => (Number(b.created) || 0) - (Number(a.created) || 0)))
       .map((e) => {
         const row = (p, sub) =>
-          `<div class="crow${sub ? ' sub' : ''} ${p.id === cur ? 'on' : ''}" data-act=openpack data-id=${p.id}><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some((s) => s.type === 'animated') ? 'animated' : ''}</span></div>`;
+          `<div class="crow${sub ? ' sub' : ''} ${p.id === cur ? 'on' : ''}" data-act=openpack data-id=${p.id} draggable=true title="Click to open; drag onto another pack to merge into it"><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some((s) => s.type === 'animated') ? 'animated' : ''}</span></div>`;
         if (e.pack) return row(e.pack);
         const open = PKFOLD.has(e.group) ? PKFOLD.get(e.group) : e.packs.some((p) => p.id === cur),
           f = e.packs[0];
@@ -416,7 +416,7 @@ function drawCol2() {
             /<\/div>$/,
             `<button class="link pkmerge" data-act=pkmerge data-id=${p.id} data-into=${f.id} title="One pack: its animated stickers replace their stills in ${esc(f.name)}, the rest moves there, and this pack goes to the trash">Merge into parent</button></div>`,
           );
-        return `<div class="crow pkgrp ${f.id === cur ? 'on' : ''}" data-act=openpack data-id=${f.id}><div class=cv>${coverMedia(f)}</div><div><b>${esc(f.name)}</b><small>${e.packs.length} packs · group ${esc(e.group)}</small></div><button class=iconbtn data-act=pkgrp data-g=${esc(e.group)} title="${open ? 'Fold the group' : 'Show every pack of the group'}" aria-expanded=${open}>${ic('chev')}</button></div>${open ? e.packs.slice(1).map(sub).join('') : ''}`;
+        return `<div class="crow pkgrp ${f.id === cur ? 'on' : ''}" data-act=openpack data-id=${f.id} draggable=true><div class=cv>${coverMedia(f)}</div><div><b>${esc(f.name)}</b><small>${e.packs.length} packs · group ${esc(e.group)}</small></div><button class=iconbtn data-act=pkgrp data-g=${esc(e.group)} title="${open ? 'Fold the group' : 'Show every pack of the group'}" aria-expanded=${open}>${ic('chev')}</button></div>${open ? e.packs.slice(1).map(sub).join('') : ''}`;
       })
       .join('') || '<div class=mut style="padding:14px">No packs yet.</div>'
   }</div>`;

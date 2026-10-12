@@ -143,11 +143,12 @@ def purge_files(out: Path, gid: int) -> dict:
     return {"files": len(files), "bytes": sum(b for _, b in files), "already": not files and not d.exists()}
 
 
-def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
+def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
     """One batch as a download from the Studio (Export as .zip): every sticker that is READY and not rejected, as its animation
     when that is ready and not rejected, otherwise its still, renamed to the export contract
     `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), plus a `manifest.json`
     (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
+    `light` (default on): animations ship re-encoded small, as the pack's zip does (`library.light_webm`; the row records crf/kb/frames/fits).
     Returns (zip bytes, a safe file stem)."""
     import hashlib
     import io
@@ -157,6 +158,8 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
     from . import pipeline
     from ..media import export_names as xn
     from ..media import export_resolutions as xr
+    from ..media.library import LibraryError, light_webm
+    from ..engine.config import EngineConfig
     gid = int(gid)
     r = pipeline.read_result(out, gid)
     d = pipeline.gen_dir(out, gid)
@@ -188,14 +191,20 @@ def export_zip(out: Path, gid: int) -> tuple[bytes, str]:
                     name = re.sub(r"(\.[a-z0-9]+)$", f"-{n}\\1", base)
                     n += 1
             used.add(name)
-            data = f.read_bytes()
-            z.write(f, name)
+            data, light_meta = f.read_bytes(), None
+            if light and animated and f.suffix.lower() == ".webm":
+                try:
+                    data, light_meta = light_webm(f, EngineConfig())
+                except LibraryError:
+                    pass                                                         # unreadable file: ship it as stored
+            z.writestr(name, data)
             media = "video" if animated else "static"
             rows.append({"sticker_id": f"G{gid:03d}/S{s.get('index')}", "source_generation": f"G{gid:03d}",
                          "source_cell": f"S{s.get('index')}", "action": desc["action"], "emoji": desc["emoji"],
                          "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]], "media": media,
                          "revision": 1, "export_date": date, "filename": name,
                          "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
+                         **({"light": True, **light_meta} if light_meta else {}),
                          **xr.manifest_fields(desc)})
         if not rows:
             raise ValueError("this batch has no accepted sticker yet")

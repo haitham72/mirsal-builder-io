@@ -1588,10 +1588,11 @@ def make_handler(c: Console):
             elif len(parts) == 4 and parts[3] == "delete":      # SOFT: to the trash, restorable (GET /api/trash lists it; POST /api/trash/purge deletes for good)
                 self._json(200, lib.delete_pack(parts[2], by=self.user.get("id") or "human"))
             elif len(parts) == 4 and parts[3] == "merge":       # fold this pack into another: animated stills upgrade their twins, the rest moves, the empty pack goes to the trash
-                into = str(self._body().get("into") or "")
+                b = self._body()
+                into = str(b.get("into") or "")
                 if not lib.owns(into, self.user["id"]):
                     raise pl.PipelineError("not found", 404)
-                self._json(200, lib.merge_pack(parts[2], into, by=self.user["id"]))
+                self._json(200, lib.merge_pack(parts[2], into, by=self.user["id"], lead=bool(b.get("lead"))))
             elif len(parts) == 4 and parts[3] == "restore":     # back from the trash under the same id
                 self._json(200, lib.restore_pack(parts[2]))
             elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)

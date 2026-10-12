@@ -85,6 +85,11 @@ class LibraryTests(unittest.TestCase):
         self.assertNotIn(b, [x["id"] for x in self.lib._load()["packs"]], "the emptied pack is in the trash")
         with self.assertRaises(LibraryError):
             self.lib.merge_pack(a, a)
+        self.assertNotIn("lead_at", p, "a plain merge does not make a parent")
+        c = self.lib.create_pack("Angel 3")["id"]
+        self.lib.add_bytes(c, b"png-three", "png", "Wave", "static", "👋", {"generation": "G002", "index": 1})
+        self.assertTrue(self.lib.merge_pack(c, a, lead=True)["lead"])                               # the Packs column's drag of a pack onto a pack
+        self.assertIn("lead_at", self.lib._pack(self.lib._load(), a), "the target becomes the parent of its group")
 
     def test_packs_stickers_and_export(self):
         p = self.lib.create_pack("UAE Moments")
@@ -177,6 +182,8 @@ class NamingTests(unittest.TestCase):
             row = json.loads(z.read("manifest.json"))["assets"][0]
             self.assertTrue(row.get("light"), row)
             self.assertEqual(row["frames"], 30)
+            self.assertAlmostEqual(row["fps"], 10, delta=0.5, msg="the whole 3 s clip in 30 frames, not its first second")
+            self.assertTrue(row["fits"], row)
             self.assertIn("crf", row)
             got = z.read(row["filename"])
             self.assertLessEqual(len(got), 21 * 1024, f"{len(got) // 1024}KB at crf{row['crf']}")
