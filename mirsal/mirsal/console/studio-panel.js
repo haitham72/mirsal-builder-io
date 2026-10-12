@@ -15,7 +15,7 @@ function gmodal() {
     : `<div class=mut style="padding:12px">${esc(t.status)}${t.reason ? ': ' + esc(t.reason) : ''}</div>`;
   const vid =
     t.webm && t.anim_status === 'READY'
-      ? `<video src="${base + t.webm}" autoplay loop muted playsinline></video>`
+      ? `<video src="${base + t.webm}?v=${t.anim_at || 0}" autoplay loop muted playsinline></video>`
       : `<div class=mut style="padding:12px">${t.anim_status === 'NOT_REQUESTED' ? 'Not animated yet' : esc(t.anim_status) + (t.anim_reason ? ': ' + esc(t.anim_reason) : '')}</div>`;
   const rows = (cs) =>
     (cs || [])

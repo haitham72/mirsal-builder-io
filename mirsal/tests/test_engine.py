@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -31,7 +32,8 @@ class SheetTests(unittest.TestCase):
         cls.res = process_sheet(synth.make_sheet(), CFG)
 
     def test_statuses(self):
-        by = {r.index: r for r in self.res}
+        # S2 is a ring: a stroke closes it. No stroke is the default since 2026-10-12, and then its hole blocks (holes), so cut with one here.
+        by = {r.index: r for r in process_sheet(synth.make_sheet(), replace(CFG, outline_px=12))}
         self.assertEqual(by[5].reason, "empty_subject")
         self.assertEqual(by[6].reason, "inside_cell")
         for i in (1, 2, 3, 4, 7, 8, 9):
@@ -154,6 +156,30 @@ def _grid_sheet(size, centres, r=40, seed=7):
     for cx, cy in centres:
         cv2.circle(s, (cx, cy), r, synth.YELLOW, -1, cv2.LINE_AA)
     return s
+
+
+class KeepSizeTests(unittest.TestCase):
+    """Keep approved size (anim_keep_size): the animation starts exactly as its approved still, at its size and place, however far it moves."""
+
+    def test_the_first_frame_lands_on_the_still_and_far_motion_is_cut_off(self):
+        from mirsal.engine.render import bbox_of
+        from mirsal.engine.video import keep_window, render_kept
+        cfg = EngineConfig(outline_px=0)
+        still = np.zeros((512, 512, 4), np.uint8)
+        still[156:356, 136:336] = (200, 50, 50, 255)                       # the approved still: a 200 px square, left of centre
+        frames = []
+        for i in range(6):                                                  # the video: a 100 px square drifting right, far out on the last frame
+            f = np.zeros((300, 300, 4), np.uint8)
+            x = 100 + i * 30
+            f[100:200, x:x + 100] = (200, 50, 50, 255)
+            frames.append(f)
+        window, s = keep_window(frames, still, cfg)
+        self.assertAlmostEqual(s, 2.0, places=2)
+        out = render_kept(frames, window, cfg)
+        b = bbox_of(out[0][..., 3])
+        self.assertTrue(all(abs(u - v) <= 2 for u, v in zip(b, (136, 156, 336, 356))), b)  # frame 0 IS the still: same size, same place
+        self.assertEqual(bbox_of(out[-1][..., 3])[2], 512, "the far motion runs into the edge and is cut off, never shrunk")
+        self.assertIsNone(keep_window(frames, None, cfg), "no still: the clip is fitted the old way")
 
 
 class GridTests(unittest.TestCase):

@@ -249,7 +249,7 @@ function tileHtml(g, t, mode) {
         : `<div class=gbadmsg>${esc(t.reason || t.status)}</div>`;
   else
     m = hasV
-      ? `<video src="${base + t.webm}" autoplay loop muted playsinline></video>`
+      ? `<video src="${base + t.webm}?v=${t.anim_at || 0}" autoplay loop muted playsinline></video>`
       : live
         ? `<canvas data-g=${g.number} data-pv=${t.index} width=288 height=288></canvas><span class=livebadge>live preview</span>`
         : t.anim_status === 'FAILED'

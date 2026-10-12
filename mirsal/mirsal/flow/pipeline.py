@@ -504,12 +504,14 @@ def block_detail(report: list) -> dict | None:
 
 def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
     """The engine config of one generation: the server's, with the edge finish that was chosen for it
-    (outline_px 0 = no stroke, erode_px 0 = no trim)."""
+    (outline_px 0 = no stroke, erode_px 0 = no trim) and its Motion size switch (keep_size -> anim_keep_size)."""
     kw = {}
     if res.get("outline_px") is not None:
         kw["outline_px"] = int(res["outline_px"])
     if res.get("erode_px") is not None:
         kw["erode_px"] = int(res["erode_px"])
+    if res.get("keep_size") is not None:      # the batch's Motion switch: keep the approved still's size (True) or fit the whole motion (False)
+        kw["anim_keep_size"] = bool(res["keep_size"])
     if res.get("key_colour") == "blue":       # the sheet came with a blue screen (green is the default and is never written): keyer, despill and video sheet follow it
         kw["chroma"] = "blue"
     return cfg if not kw else replace(cfg, **kw)
@@ -734,6 +736,7 @@ def record_anim(d: Path, st: dict, r, ref: str, preserve_finished: bool = False)
     if r.data:
         st["webm"] = f"slices/{st['name'].replace('img-', 'vid-', 1)}.webm"
         (d / st["webm"]).write_bytes(r.data)
+        st["anim_at"] = round(time.time(), 3)         # a new cut keeps the file name: the screens add ?v=anim_at so a browser never plays the old one
     oob = next((c for c in (r.report.checks if r.status == "READY" else []) if c["name"] == "inside_frame" and not c["ok"]), None)
     if oob:       # made, but the character leaves its cell: kept for inspection, blocked for review so it cannot be added
         st["review"]["anim"] = "BLOCKED"
@@ -1106,6 +1109,16 @@ def edge_preview(out: Path, gid: int, index: int, outline: int, erode: int, px: 
         fin = cv2.resize(fin, (max(1, round(fin.shape[1] * k)), max(1, round(fin.shape[0] * k))), interpolation=cv2.INTER_AREA)
     ok, buf = cv2.imencode(".png", cv2.cvtColor(fin, cv2.COLOR_RGBA2BGRA))
     return buf.tobytes()
+
+
+def set_keep_size(out: Path, gid: int, on: bool) -> dict:
+    """The batch's Motion switch "Keep approved size": True (the default) keeps every animation at its approved still's size and place, cutting off
+    what moves past the frame; False shrinks a clip until its whole motion fits. Stored on the batch (cfg_for reads it); the animations already made
+    change only when they are cut again (`gates.reslice`, free, from the stored video)."""
+    res = read_result(out, gid)
+    res["keep_size"] = bool(on)
+    write_result(out, gid, res)
+    return {"id": gid, "keep_size": bool(on)}
 
 
 def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None = None, erode: int | None = None) -> dict:

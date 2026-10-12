@@ -535,7 +535,7 @@ function batchHtml(g, k, total, mode) {
     ${s.prepared && staff ? `<span class=keychip title="Served from a prepared sheet in the watch folder: 0 credits, no provider call.">Prepared</span>` : ''}
     ${allowAllRow(g, mode === 'anim' ? 'animation' : 'still')}
     <span class=gbact>${s.has_video || making(g) || (typeof liveReadyNow === 'function' && liveReadyNow()) ? '' : `<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length ? '' : 'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
-    ${typeof impBatchBtn === 'function' ? impBatchBtn(g, mode) : ''}
+    ${typeof impBatchBtn === 'function' ? impBatchBtn(g, mode) : ''}${mode === 'anim' ? keepSizeBtn(g) : ''}
     <button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
     ${total > 1 ? `<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>` : ''}</span></div>`;
   if (making(g))
@@ -761,6 +761,27 @@ ACT.gopenfolder = async (el) => {
 };
 
 /* ---------- polling: only while this screen is open */
+/* Motion: "Keep approved size" (Haitham, 2026-10-12). On (the default): every animation keeps its approved still's size and place, and what moves past
+   the frame is cut off. Off: a clip shrinks until its whole motion fits, so a lively one plays smaller than its still. Stored on the batch; when the
+   batch already has animations they are cut again from the stored video, free (POST /api/generations/{id}/keep_size). */
+function keepSizeBtn(g) {
+  if (!g || g.kind === 'particles' || making(g)) return '';
+  const on = g.keep_size !== false;
+  return `<button class="btn sm ${on ? 'act' : ''}" data-act=gkeepsize data-g=${g.number} aria-pressed=${on} title="${on ? 'On: each animation keeps the size and place of its approved still; motion that goes past the frame is cut off. Click to fit the whole motion instead (the sticker gets smaller)' : 'Off: each animation is shrunk until its whole motion fits, so a lively one plays smaller than its approved still. Click to keep the approved size'}">Keep approved size: ${on ? 'on' : 'off'}</button>`;
+}
+
+ACT.gkeepsize = async (el) => {
+  const g = GM.get(+el.dataset.g);
+  if (!g) return;
+  const on = g.keep_size === false,
+    redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
+  const r = await post(`/api/generations/${g.number}/keep_size`, { on, reslice: redo });
+  if (!r.ok) return toast(r.j.error || 'Could not change it', 1);
+  toast(`Keep approved size: ${on ? 'on' : 'off'}${r.j.resliced ? ' · cutting the animations again (free)' : ''}`);
+  glast = '';
+  tick(true);
+};
+
 async function tick(force) {
   try {
     if (route_ !== 'generate' && !MD && VG === null && SV.g === null) return;

@@ -203,6 +203,7 @@ class NamingTests(unittest.TestCase):
             from PIL import Image
             im = Image.open(io.BytesIO(z.read("grey/fire_grey.png")))
             self.assertEqual((im.mode, im.size, im.getpalette()[:3]), ("P", (512, 512), [191, 191, 191]))
+            self.assertEqual(max(im.info["transparency"]), 153, "40% transparent: a solid pixel is at 60%")
             self.assertLess(len(z.read("grey/fire_grey.png")), 6 * 1024)
         data, _ = self.lib.export_zip(pk, light=False)                                                # opt out: the stored file untouched
         with zipfile.ZipFile(io.BytesIO(data)) as z:

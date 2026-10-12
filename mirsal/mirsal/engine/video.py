@@ -104,6 +104,40 @@ def loop_end(frames: np.ndarray, limit: float, keep: float = 0.7) -> tuple[int, 
     return e, seams[e]
 
 
+def keep_window(keyed: list, ref_rgba, cfg) -> tuple | None:
+    """Where the APPROVED still sits, found on the video (Haitham, 2026-10-12: "it was approved in images before, so scaling down again is destructive").
+    The first frame's subject is mapped onto the still's subject: the same longest side and the same centre, so the animation starts exactly as the
+    still that was approved and keeps that size however far it moves (what leaves the frame is cut off). Returns ((x0, y0, side), scale) in video
+    pixels, the square window that becomes the 512 canvas, or None when there is no still or no subject to match (the clip is then fitted, the old way)."""
+    if ref_rgba is None or getattr(ref_rgba, "ndim", 0) != 3 or ref_rgba.shape[2] != 4:
+        return None
+    rb = bbox_of(ref_rgba[..., 3])
+    fb = next((b for b in (bbox_of(k[..., 3]) for k in keyed) if b), None)
+    if not rb or not fb:
+        return None
+    o = cfg.outline_px                                   # the still carries the stroke, the video's subject does not
+    if rb[2] - rb[0] > 2 * o + 4 and rb[3] - rb[1] > 2 * o + 4:
+        rb = (rb[0] + o, rb[1] + o, rb[2] - o, rb[3] - o)
+    s = max(rb[2] - rb[0], rb[3] - rb[1]) / max(fb[2] - fb[0], fb[3] - fb[1], 1)
+    if s <= 0:
+        return None
+    side = cfg.size / s
+    cx_f, cy_f = (fb[0] + fb[2]) / 2, (fb[1] + fb[3]) / 2
+    cx_r, cy_r = (rb[0] + rb[2]) / 2, (rb[1] + rb[3]) / 2
+    return (cx_f - cx_r / s, cy_f - cy_r / s, side), s
+
+
+def render_kept(keyed: list, window: tuple, cfg) -> np.ndarray:
+    """Every frame through the window from keep_window, onto the SxS canvas with render_sticker (the same resize, despill and edge as a fitted clip).
+    The frames are padded with transparency first, so a window that runs past the cell is simply empty there."""
+    x0, y0, side = window
+    w = max(1, int(round(side)))
+    pad = w + 2
+    bx, by = int(round(x0)) + pad, int(round(y0)) + pad
+    box = (bx, by, bx + w, by + w)
+    return np.stack([render_sticker(np.pad(k, ((pad, pad), (pad, pad), (0, 0))), box, cfg.size / w, cfg) for k in keyed])
+
+
 def close_loop(frames: np.ndarray, m: int) -> np.ndarray:
     """Close a clip that does not loop by easing its LAST `m` frames into frame 0 (the last frame becomes frame 0 itself, so the wrap has no jump).
     The head is never touched: the clip starts on its own first frame, the approved pose and the thumbnail. (It used to start on the tail's pose and
@@ -416,10 +450,15 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     if any(not c.ok and c.severity == verify.BLOCK for c in pre):
         rep = Report(pre)
         return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
-    scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1]))
-    m["scale"] = round(scale, 4)
+    kept = keep_window(keyed, ref_alpha, cfg) if cfg.anim_keep_size else None
     t = time.perf_counter()
-    out = np.stack([render_sticker(k, union, scale, cfg) for k in keyed])       # ONE transform per clip
+    if kept:                                   # the approved still's size and place (anim_keep_size); what moves past the frame is cut off
+        out = render_kept(keyed, kept[0], cfg)
+        m["scale"], m["size_mode"] = round(kept[1], 4), "kept"
+    else:                                      # fit the whole motion inside the frame: the clip shrinks when the subject moves far
+        scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1]))
+        m["scale"], m["size_mode"] = round(scale, 4), "fit"
+        out = np.stack([render_sticker(k, union, scale, cfg) for k in keyed])       # ONE transform per clip
     ms["render"] = _ms(t); t = time.perf_counter()
     # A seam is only visible if it is bigger than the clip's own normal frame-to-frame change.
     def motion(a):
@@ -442,6 +481,9 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     m["loop_seam"] = round(seam(out), 2)
     m["loop_limit"] = round(limit(mo), 2)
     m["frames_out"] = len(out)
+    if kept:                                   # frames where the subject runs into the canvas edge (cut off there): a metric, the person judges
+        m["cut_off_frames"] = int(sum(1 for f in out if (f[:2, :, 3] > 127).any() or (f[-2:, :, 3] > 127).any()
+                                      or (f[:, :2, 3] > 127).any() or (f[:, -2:, 3] > 127).any()))
     ms["seam"] = _ms(t)
     rep = Report()
     with tempfile.TemporaryDirectory() as td:

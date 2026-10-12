@@ -36,8 +36,9 @@ class EngineConfig:
     crf_ladder: tuple = (30, 34, 38, 42, 46, 50, 54, 58, 62)       # finer rungs: the fit lands closer to the 256 KB budget (measured 2026-10-01: crf 46 left 8-25% unused)
     anim_workers: int = field(default_factory=default_workers)     # cells animated at the same time (each is keyed, rendered and encoded independently)
     loop_seam_max: float = 12.0     # absolute floor
-    loop_seam_ratio: float = 1.5    # seam may be up to this x the clip's own frame-to-frame motion
+    loop_seam_ratio: float = 1.0    # seam may be up to this x the clip's own frame-to-frame motion (1.5 let a lively clip snap at the wrap: G146 S1-S4, Haitham 2026-10-12)
     loop_fade_frames: int = 6
+    anim_keep_size: bool = True    # an animation keeps its APPROVED still's size and place (what leaves the 512 frame is cut off); False = shrink the clip until its whole motion fits (the old way, Haitham 2026-10-12)
     clip_prefer: tuple = ("mov", "webm")   # pre-sliced clip formats, best first (ProRes 4444 has the cleanest alpha)
     clip_alpha_floor: int = 12               # alpha below this is haze (VP9 alpha leaves values 1-3) -> 0
 

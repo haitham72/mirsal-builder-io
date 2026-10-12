@@ -1,6 +1,6 @@
 """Grey stand-ins for every exported animation (Haitham, 2026-10-12): beside each video in a Download .zip, its sticker's STILL (the image
 sheet's cell, the same S#) as a flat grey silhouette — one colour, 75% white and 25% black (#BFBFBF), the still's own alpha kept as the shape —
-named `{emoji full name}_grey.png` (`grinning_face_grey.png`) in the zip's `grey/` folder, compressed hard: a palette PNG with 4 alpha levels
+40% transparent (60% opacity: a solid pixel's alpha is 153), named `{emoji full name}_grey.png` (`grinning_face_grey.png`) in the zip's `grey/` folder, compressed hard: a palette PNG with 4 alpha levels
 (transparent, two edge steps, solid), about 2-3 KB a sticker. They are listed in `manifest.json` under `grey`, never under `assets`, so Export to
 collection still sends only the stickers. Pillow + numpy only."""
 from __future__ import annotations
@@ -14,6 +14,7 @@ import numpy as np
 
 GREY = 191                 # 75% white + 25% black: round(0.75 * 255)
 ALPHA_LEVELS = 4           # transparent, 1/3, 2/3, solid: soft edges at a fraction of the bytes of a full alpha
+OPACITY = 0.6              # 40% transparent (Haitham, 2026-10-12): the whole silhouette, edges included, at 60%
 
 _SKIN = {0x1F3FB: "light skin tone", 0x1F3FC: "medium light skin tone", 0x1F3FD: "medium skin tone",
          0x1F3FE: "medium dark skin tone", 0x1F3FF: "dark skin tone"}
@@ -42,14 +43,14 @@ def emoji_name(emoji: str | None) -> str:
 
 
 def grey_png(alpha: np.ndarray) -> bytes:
-    """A flat #BFBFBF silhouette of `alpha` (HxW uint8) as a palette PNG with ALPHA_LEVELS transparency steps."""
+    """A flat #BFBFBF silhouette of `alpha` (HxW uint8), 40% transparent, as a palette PNG with ALPHA_LEVELS transparency steps."""
     from PIL import Image
     step = 255 // (ALPHA_LEVELS - 1)
     q = np.round(alpha.astype(np.float32) / step).astype(np.uint8)          # 0 .. ALPHA_LEVELS-1, used directly as the palette index
     img = Image.fromarray(q, "P")
     img.putpalette([GREY, GREY, GREY] * ALPHA_LEVELS)
     buf = io.BytesIO()
-    img.save(buf, "PNG", optimize=True, transparency=bytes(min(255, i * step) for i in range(ALPHA_LEVELS)))
+    img.save(buf, "PNG", optimize=True, transparency=bytes(round(min(255, i * step) * OPACITY) for i in range(ALPHA_LEVELS)))
     return buf.getvalue()
 
 

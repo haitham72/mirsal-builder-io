@@ -91,7 +91,7 @@ class CacheTests(unittest.TestCase):
                 self.assertEqual(by(first)[i].status, by(again)[i].status)
             self.assertLess(warm, cold / 3)
             # another edge finish is another animation; so is another cell
-            other = process_video(mp4, replace(CFG, outline_px=0), cells=[1], cache=cache)
+            other = process_video(mp4, replace(CFG, outline_px=12), cells=[1], cache=cache)     # 0 is the default now: a stroke is the other finish
             self.assertNotIn("cache", other[0].metrics)
             # a damaged entry is ignored, never trusted
             for j in (td / "cache").glob("*.json"):

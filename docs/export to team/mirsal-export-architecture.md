@@ -2106,7 +2106,7 @@ Manifest v1 adds `bank_version` on each asset, plus `resolution_reason` and `can
 
 **Grey stand-ins (Haitham, 2026-10-12).** Every animation in a Download .zip (pack or batch) is paired with a PNG in the zip's `grey/` folder: the
 sticker's still (the image sheet's cell, same `S#`; the video's first frame when the still is gone) as a flat silhouette in one colour, 75% white and
-25% black (`#BFBFBF`), the still's alpha kept as the shape. It is a palette PNG with 4 alpha levels (transparent, two edge steps, solid), about 2-4 KB at
+25% black (`#BFBFBF`), the still's alpha kept as the shape, the whole silhouette 40% transparent (a solid pixel's alpha is 153). It is a palette PNG with 4 alpha levels (transparent, two edge steps, solid), about 2-4 KB at
 512 px. The name is `{emoji full name}_grey.png`: the emoji's Unicode character names in snake case (`grinning_face`, `flag_ae`, a skin tone as
 `medium_skin_tone`, a code point newer than Python's Unicode table as `u1fae8`); a repeated emoji gets `_2`, `_3` before `_grey`. Unicode names are
 not always CLDR's short names (❤️ is `heavy_black_heart`, not `red_heart`). They are listed under `grey`, never `assets`, so Export to collection

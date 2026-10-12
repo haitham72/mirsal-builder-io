@@ -170,6 +170,7 @@ ROUTES = [
     ("POST", "/api/generations/{id}/leave", "Generations", "Take a batch out of its family (it becomes its own root; its own edits follow it). 409 for the family's root", None, obj({"id": STR, "root": STR, "left": STR, "members": arr(STR)}), 200),
     ("POST", "/api/generations/{id}/drop", "Gates", "Drop or restore a sticker from the set", obj({"index": INT, "dropped": BOOL}, ["index"]), OBJ, 200),
     ("POST", "/api/generations/{id}/animate", "Generations", "Animate a prepared video (no provider)", obj({"scope": STR, "index": INT}), OBJ, 202),
+    ("POST", "/api/generations/{id}/keep_size", "Generations", "Motion's Keep approved size switch: on (the default) keeps every animation at its approved still's size and place, cutting off what moves past the frame (anim_metrics.cut_off_frames); off shrinks a clip until its whole motion fits. reslice: true cuts the animations again from the stored video (free)", obj({"on": BOOL, "reslice": BOOL}), obj({"id": INT, "keep_size": BOOL, "resliced": BOOL}), 200),
     ("POST", "/api/generations/{id}/appearance", "Generations", "Set the outline / trim of the batch", obj({"outline": INT, "erode": INT, "reslice": BOOL}), OBJ, 200),
     ("POST", "/api/generations/{id}/edge", "Generations", "Apply or undo an edge snapshot", obj({"outline": INT, "erode": INT, "via": STR}), obj({"id": INT}), 202),
     ("POST", "/api/generations/{id}/reslice", "Generations", "Re-cut the animations from the stored video with the current edge", None, obj({"id": INT}), 202),
