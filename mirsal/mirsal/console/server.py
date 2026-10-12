@@ -42,7 +42,7 @@ _RID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 _LOG_IDS = (re.compile(r"^/api/generations/(\d+)"), "generation_id", "G"), (re.compile(r"^/api/chat/sessions/(S\d+)"), "session_id", "")
 _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)(?:-[A-Za-z0-9_-]+)?/")
-MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "keep_size", "edge", "reslice", "recheck", "add", "pack_add"}
+MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "keep_size", "video_size", "edge", "reslice", "recheck", "add", "pack_add"}
 MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
 MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/prefs", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs",
               "/api/prepared/match"}
@@ -2075,6 +2075,16 @@ def make_handler(c: Console):
                         int(body["erode"]) if body.get("erode") is not None else None)
                     if body.get("reslice") and gates.cut_sheet(pl.read_result(c.out, gid)):
                         c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
+                        res_["resliced"] = True
+                    return self._json(200, res_)
+                if parts[3] == "video_size":     # Video size after the video is received: the batch's {scale}, or one sticker's {scale, index}; scale null resets
+                    if c.lock.locked():
+                        raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
+                    idx = body.get("index")
+                    res_ = pl.set_video_size(c.out, gid, body.get("scale"), int(idx) if idx is not None else None)
+                    if body.get("reslice") and gates.cut_sheet(pl.read_result(c.out, gid)):
+                        only = [int(idx)] if idx is not None else None
+                        c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace, only=only))
                         res_["resliced"] = True
                     return self._json(200, res_)
                 if parts[3] == "keep_size":      # Motion: keep the approved still's size (cut off what leaves the frame) or fit the whole motion; reslice cuts the animations again, free

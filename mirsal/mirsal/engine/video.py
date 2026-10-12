@@ -452,11 +452,16 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
         return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
     kept = keep_window(keyed, ref_alpha, cfg) if cfg.anim_keep_size else None
     t = time.perf_counter()
+    f = float(cfg.anim_scale or 1.0)           # Video size (anim_scale): one more factor on top of keep / fit, about the canvas centre
+    if f != 1.0:
+        m["video_size"] = round(f, 3)
     if kept:                                   # the approved still's size and place (anim_keep_size); what moves past the frame is cut off
-        out = render_kept(keyed, kept[0], cfg)
-        m["scale"], m["size_mode"] = round(kept[1], 4), "kept"
+        (x0, y0, side), s = kept
+        side2 = side / f
+        out = render_kept(keyed, (x0 + (side - side2) / 2, y0 + (side - side2) / 2, side2), cfg)
+        m["scale"], m["size_mode"] = round(s * f, 4), "kept"
     else:                                      # fit the whole motion inside the frame: the clip shrinks when the subject moves far
-        scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1]))
+        scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1])) * f
         m["scale"], m["size_mode"] = round(scale, 4), "fit"
         out = np.stack([render_sticker(k, union, scale, cfg) for k in keyed])       # ONE transform per clip
     ms["render"] = _ms(t); t = time.perf_counter()

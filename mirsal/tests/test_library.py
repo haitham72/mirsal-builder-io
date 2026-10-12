@@ -199,12 +199,12 @@ class NamingTests(unittest.TestCase):
             self.assertLessEqual(len(got), 21 * 1024, f"{len(got) // 1024}KB at crf{row['crf']}")
             self.assertEqual(row["kb"], max(1, len(got) // 1024))
             g = json.loads(z.read("manifest.json"))["grey"]                                             # its grey stand-in (no still on disk: the first frame)
-            self.assertEqual([x["filename"] for x in g], ["grey/fire_grey.png"])
+            self.assertEqual([x["filename"] for x in g], [row["filename"].rsplit(".", 1)[0] + "_grey.png"], "beside its original, under its name")
             from PIL import Image
-            im = Image.open(io.BytesIO(z.read("grey/fire_grey.png")))
+            im = Image.open(io.BytesIO(z.read(g[0]["filename"])))
             self.assertEqual((im.mode, im.size, im.getpalette()[:3]), ("P", (512, 512), [191, 191, 191]))
             self.assertEqual(max(im.info["transparency"]), 153, "40% transparent: a solid pixel is at 60%")
-            self.assertLess(len(z.read("grey/fire_grey.png")), 6 * 1024)
+            self.assertLess(len(z.read(g[0]["filename"])), 6 * 1024)
         data, _ = self.lib.export_zip(pk, light=False)                                                # opt out: the stored file untouched
         with zipfile.ZipFile(io.BytesIO(data)) as z:
             row = json.loads(z.read("manifest.json"))["assets"][0]

@@ -2099,18 +2099,18 @@ Manifest v1 adds `bank_version` on each asset, plus `resolution_reason` and `can
     }
   ],
   "grey": [
-    {"sticker_id": "<library-sid>", "emoji": "🤣", "filename": "grey/rolling_on_the_floor_laughing_grey.png", "kb": 2.7}
+    {"sticker_id": "<library-sid>", "emoji": "🤣", "original": "🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-7k2q-20261008.webm",
+     "filename": "🤣-falcon-laugh_laughing_lol_rofl_lmao_lmfao-s08-7k2q-20261008_grey.png", "kb": 2.7}
   ]
 }
 ```
 
-**Grey stand-ins (Haitham, 2026-10-12).** Every animation in a Download .zip (pack or batch) is paired with a PNG in the zip's `grey/` folder: the
-sticker's still (the image sheet's cell, same `S#`; the video's first frame when the still is gone) as a flat silhouette in one colour, 75% white and
-25% black (`#BFBFBF`), the still's alpha kept as the shape, the whole silhouette 40% transparent (a solid pixel's alpha is 153). It is a palette PNG with 4 alpha levels (transparent, two edge steps, solid), about 2-4 KB at
-512 px. The name is `{emoji full name}_grey.png`: the emoji's Unicode character names in snake case (`grinning_face`, `flag_ae`, a skin tone as
-`medium_skin_tone`, a code point newer than Python's Unicode table as `u1fae8`); a repeated emoji gets `_2`, `_3` before `_grey`. Unicode names are
-not always CLDR's short names (❤️ is `heavy_black_heart`, not `red_heart`). They are listed under `grey`, never `assets`, so Export to collection
-sends only the stickers (`media/grey.py`).
+**Grey stand-ins (Haitham, 2026-10-12).** Every animation in a Download .zip (pack or batch) has a PNG right beside it, under its own name plus
+`_grey.png` (`🤣-falcon-laugh-s08-7k2q-20261008.webm` -> `🤣-falcon-laugh-s08-7k2q-20261008_grey.png`): the sticker's still (the image sheet's
+cell, same `S#`; the video's first frame when the still is gone) as a flat silhouette in one colour, 75% white and 25% black (`#BFBFBF`), the
+still's alpha kept as the shape, the whole silhouette 40% transparent (a solid pixel's alpha is 153). It is a palette PNG with 4 alpha levels
+(transparent, two edge steps, solid), about 2-4 KB at 512 px. They are listed under `grey` (`original` names the file it stands for), never
+`assets`, so Export to collection sends only the stickers (`media/grey.py`).
 
 ## 8. Acceptance rules
 

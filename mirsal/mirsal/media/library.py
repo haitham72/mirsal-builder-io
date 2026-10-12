@@ -949,7 +949,7 @@ class Library:
         `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
         (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
         `light` (default on): animated stickers ship re-encoded small (the whole clip in 30 frames or fewer, ~20 KB each: `light_webm`; the row records crf/kb/frames so quality can be judged).
-        Every animated sticker also gets its grey stand-in, `grey/{emoji full name}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
+        Every animated sticker also gets its grey stand-in beside it, `{its file stem}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
         Returns (zip bytes, a safe file stem)."""
         import hashlib
         from . import grey as _grey
@@ -1015,7 +1015,7 @@ class Library:
                 z.writestr(name, data)
                 media = "video" if s["type"] == "animated" else "static"
                 if media == "video":
-                    greys.add(desc["emoji"], still, f, s["id"])
+                    greys.add(name, still, f, s["id"], desc["emoji"])
                 rows.append({"sticker_id": s["id"], "source_generation": f"G{gid:03d}",
                              "source_cell": f"S{index}" if g != "own" else None, "action": desc["action"],
                              "emoji": desc["emoji"], "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]],

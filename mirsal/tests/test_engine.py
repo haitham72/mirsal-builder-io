@@ -182,6 +182,27 @@ class KeepSizeTests(unittest.TestCase):
         self.assertIsNone(keep_window(frames, None, cfg), "no still: the clip is fitted the old way")
 
 
+class VideoSizeTests(unittest.TestCase):
+    """Video size after the video is received (anim_scale): one more factor on keep / fit; a sticker's own size wins over the batch's."""
+
+    def test_the_factor_scales_the_clip_and_a_sticker_value_wins(self):
+        from mirsal.engine.video import _finish
+        from mirsal.flow.pipeline import cell_cfgs
+        still = np.zeros((512, 512, 4), np.uint8)
+        still[156:356, 156:356] = (200, 50, 50, 255)
+        frames = [np.zeros((300, 300, 4), np.uint8) for _ in range(12)]
+        for f in frames:
+            f[100:200, 100:200] = (200, 50, 50, 255)
+        base = EngineConfig(outline_px=0)
+        a = _finish(1, frames, 24.0, base, {}, ref_alpha=still).metrics
+        b = _finish(1, frames, 24.0, replace(base, anim_scale=0.5), {}, ref_alpha=still).metrics
+        self.assertAlmostEqual(b["scale"], a["scale"] * 0.5, places=3)
+        self.assertEqual(b["video_size"], 0.5)
+        res = {"stickers": [{"index": 1}, {"index": 2, "anim_scale": 1.2}, {"index": 3}]}
+        groups = cell_cfgs(res, replace(base, anim_scale=0.9), [1, 2, 3])
+        self.assertEqual(sorted((c.anim_scale, cs) for c, cs in groups), [(0.9, [1, 3]), (1.2, [2])])
+
+
 class GridTests(unittest.TestCase):
     def test_off_third_gutters_are_cut_in_the_gutter(self):
         # columns centred at 70 / 220 / 470 on a 600 sheet: disc 2 spans 180..260, crossing the thirds line at 200

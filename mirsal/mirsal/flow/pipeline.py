@@ -510,6 +510,8 @@ def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
         kw["outline_px"] = int(res["outline_px"])
     if res.get("erode_px") is not None:
         kw["erode_px"] = int(res["erode_px"])
+    if res.get("anim_scale") is not None:     # the batch's Video size: every animation of the batch (a sticker's own value wins, cell_cfgs)
+        kw["anim_scale"] = float(res["anim_scale"])
     if res.get("keep_size") is not None:      # the batch's Motion switch: keep the approved still's size (True) or fit the whole motion (False)
         kw["anim_keep_size"] = bool(res["keep_size"])
     if res.get("key_colour") == "blue":       # the sheet came with a blue screen (green is the default and is never written): keyer, despill and video sheet follow it
@@ -1111,6 +1113,47 @@ def edge_preview(out: Path, gid: int, index: int, outline: int, erode: int, px: 
     return buf.tobytes()
 
 
+VIDEO_SIZE = (0.5, 1.5)          # Video size: from half to one and a half times
+
+
+def cell_cfgs(res: dict, cfg: EngineConfig, cells: list[int]) -> list[tuple[EngineConfig, list[int]]]:
+    """The cells grouped by the config each one is animated with: the batch's (cfg, from cfg_for) unless the sticker has its own Video size
+    (`anim_scale` on the sticker), which replaces the batch's for that sticker. One group per distinct size, in cell order."""
+    groups: dict[float, list[int]] = {}
+    for i in cells:
+        own = res["stickers"][i - 1].get("anim_scale")
+        groups.setdefault(float(own) if own is not None else float(cfg.anim_scale), []).append(i)
+    return [(cfg if f == float(cfg.anim_scale) else replace(cfg, anim_scale=f), cs) for f, cs in groups.items()]
+
+
+def set_video_size(out: Path, gid: int, scale, index: int | None = None) -> dict:
+    """Video size after the video is received (Haitham, 2026-10-12): the batch's (every animation) or, with `index`, one sticker's, which then
+    wins over the batch's; `scale` None clears that sticker's own value (it follows the batch again) or resets the batch to 1.0. Stored only:
+    the animations change when they are cut again (`gates.reslice`, free, from the stored video)."""
+    res = read_result(out, gid)
+    if scale is not None:
+        scale = round(float(scale), 3)
+        if not VIDEO_SIZE[0] <= scale <= VIDEO_SIZE[1]:
+            raise PipelineError(f"video size must be {VIDEO_SIZE[0]:g} to {VIDEO_SIZE[1]:g} (1 = as it is)")
+    if index is None:
+        if scale is None or scale == 1.0:
+            res.pop("anim_scale", None)
+        else:
+            res["anim_scale"] = scale
+    else:
+        n = len(res["stickers"])
+        if not 1 <= int(index) <= n:
+            raise PipelineError(f"index 1..{n} required")
+        st = res["stickers"][int(index) - 1]
+        if scale is None:
+            st.pop("anim_scale", None)
+        else:
+            st["anim_scale"] = scale
+    write_result(out, gid, res)
+    return {"id": gid, "anim_scale": res.get("anim_scale", 1.0),
+            "stickers": {s["index"]: s["anim_scale"] for s in res["stickers"] if s.get("anim_scale") is not None}}
+
+
 def set_keep_size(out: Path, gid: int, on: bool) -> dict:
     """The batch's Motion switch "Keep approved size": True (the default) keeps every animation at its approved still's size and place, cutting off
     what moves past the frame; False shrinks a clip until its whole motion fits. Stored on the batch (cfg_for reads it); the animations already made
@@ -1246,11 +1289,11 @@ def animate_cells(res: dict, cfg: EngineConfig, cells: list[int], on_cell=None, 
     for i in missing:
         results.append(AnimationResult(i, "FAILED", "no_video_source"))
         on_cell and on_cell(results[-1])
-    if use_clips:
-        results += process_clips({i: clips[i] for i in use_clips}, cfg, on_cell=on_cell, cache=cache, waive=waive)
-    if use_mp4:
-        g = res["source"].get("grid")
-        results += process_video(mp4, cfg, use_mp4, on_cell=on_cell, rects=g["rects"] if g else None,
+    for c_cfg, group in cell_cfgs(res, cfg, use_clips):                        # a sticker with its own Video size is animated with its own config
+        results += process_clips({i: clips[i] for i in group}, c_cfg, on_cell=on_cell, cache=cache, waive=waive)
+    g = res["source"].get("grid")
+    for c_cfg, group in cell_cfgs(res, cfg, use_mp4):
+        results += process_video(mp4, c_cfg, group, on_cell=on_cell, rects=g["rects"] if g else None,
                                  sheet_wh=tuple(res["source"]["sheet_size"]) if g else None, cache=cache, waive=waive)
     return results
 

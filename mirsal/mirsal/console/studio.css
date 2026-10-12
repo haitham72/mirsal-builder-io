@@ -1029,3 +1029,6 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 /* a "Use it anyway" click waits in its batch's queue (600 ms): the tile says so at once */
 .gt.pend{outline:2px dashed var(--pri);outline-offset:-2px}.gt.pend::after{content:attr(data-pend);position:absolute;top:8px;left:8px;z-index:3;padding:2px 8px;border-radius:var(--r-pill);background:var(--pri);color:#fff;font-size:var(--fs-xs);font-weight:600}
 .gbhead .lv-allow{display:inline-flex;align-items:center;gap:6px;margin:0}.gbhead .lv-allow .mut{display:none}
+
+/* Video size after the video is received (studio-core.js vsizeBatch / vsizeRow) */
+.vsize{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs)}.vsize b{min-width:3.2em;text-align:center}.gcap .vsize{margin-bottom:4px}

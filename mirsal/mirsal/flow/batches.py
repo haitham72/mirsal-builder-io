@@ -149,7 +149,7 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
     `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), plus a `manifest.json`
     (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
     `light` (default on): animations ship re-encoded small, as the pack's zip does (`library.light_webm`; the row records crf/kb/frames/fits).
-    Every animation also gets its grey stand-in, `grey/{emoji full name}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
+    Every animation also gets its grey stand-in beside it, `{its file stem}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
     Returns (zip bytes, a safe file stem)."""
     import hashlib
     import io
@@ -203,7 +203,7 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
             z.writestr(name, data)
             media = "video" if animated else "static"
             if animated:
-                greys.add(desc["emoji"], d / s["png"], f, f"G{gid:03d}/S{s.get('index')}")
+                greys.add(name, d / s["png"], f, f"G{gid:03d}/S{s.get('index')}", desc["emoji"])
             rows.append({"sticker_id": f"G{gid:03d}/S{s.get('index')}", "source_generation": f"G{gid:03d}",
                          "source_cell": f"S{s.get('index')}", "action": desc["action"], "emoji": desc["emoji"],
                          "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]], "media": media,

@@ -535,7 +535,7 @@ function batchHtml(g, k, total, mode) {
     ${s.prepared && staff ? `<span class=keychip title="Served from a prepared sheet in the watch folder: 0 credits, no provider call.">Prepared</span>` : ''}
     ${allowAllRow(g, mode === 'anim' ? 'animation' : 'still')}
     <span class=gbact>${s.has_video || making(g) || (typeof liveReadyNow === 'function' && liveReadyNow()) ? '' : `<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length ? '' : 'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
-    ${typeof impBatchBtn === 'function' ? impBatchBtn(g, mode) : ''}${mode === 'anim' ? keepSizeBtn(g) : ''}
+    ${typeof impBatchBtn === 'function' ? impBatchBtn(g, mode) : ''}${mode === 'anim' ? keepSizeBtn(g) + vsizeBatch(g) : ''}
     <button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
     ${total > 1 ? `<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>` : ''}</span></div>`;
   if (making(g))
@@ -618,7 +618,7 @@ function gview() {
     <details class=gh-more><summary class="btn sm" aria-label="More for this batch" title="More for this batch">⋯</summary><div class=gh-pop role=menu>
     ${gs.length === 1 && gs[0].source.prepared && typeof liveReadyNow === 'function' && liveReadyNow() ? `<button class="btn" data-act=gnewlive title="Draw a fresh sheet with Higgsfield at the normal price instead of the prepared one">Make a new one</button>` : ''}
     ${gs.length === 1 ? `<button class=btn data-act=ggroup title="Put this batch in the group of another batch: that batch becomes its parent">Move to another batch…</button>` : ''}
-    ${gs.length === 1 && s.ready ? `<a class=btn href="/api/generations/${gs[0].number}/export.zip" download title="Download the accepted stickers (animated where ready) as one .zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json), plus a grey/ folder with a grey silhouette PNG of each animated one ({emoji name}_grey.png)">${ic('download')} Download .zip</a><a class=link href="/api/generations/${gs[0].number}/export.zip?light=0" download title="The same zip with the full-size animation files">full quality</a>` : ''}${gs.length === 1 && s.ready && typeof colBtn === 'function' ? colBtn('generation', gs[0].generation_id, s.n, titleCase(gs[0].source.subject)) : ''}
+    ${gs.length === 1 && s.ready ? `<a class=btn href="/api/generations/${gs[0].number}/export.zip" download title="Download the accepted stickers (animated where ready) as one .zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json), plus a grey silhouette PNG beside each animated one ({its name}_grey.png)">${ic('download')} Download .zip</a><a class=link href="/api/generations/${gs[0].number}/export.zip?light=0" download title="The same zip with the full-size animation files">full quality</a>` : ''}${gs.length === 1 && s.ready && typeof colBtn === 'function' ? colBtn('generation', gs[0].generation_id, s.n, titleCase(gs[0].source.subject)) : ''}
     ${gs.length === 1 ? `<button class="btn" data-act=tkreport data-k=generation data-id=${esc(gs[0].generation_id)} title="Something wrong with this batch? Send a report">Report</button>` : ''}
     <button class="btn dng" data-act=grm title="Move ${gs.length === 1 ? 'this batch' : 'these batches'} to the trash. You can restore ${gs.length === 1 ? 'it' : 'them'} from Removed batches under Projects.">${ic('trash')} Remove batch</button></div></details></div></div>
    ${stepsHtml(s)}
@@ -769,6 +769,36 @@ function keepSizeBtn(g) {
   const on = g.keep_size !== false;
   return `<button class="btn sm ${on ? 'act' : ''}" data-act=gkeepsize data-g=${g.number} aria-pressed=${on} title="${on ? 'On: each animation keeps the size and place of its approved still; motion that goes past the frame is cut off. Click to fit the whole motion instead (the sticker gets smaller)' : 'Off: each animation is shrunk until its whole motion fits, so a lively one plays smaller than its approved still. Click to keep the approved size'}">Keep approved size: ${on ? 'on' : 'off'}</button>`;
 }
+
+/* Video size after the video is received (Haitham, 2026-10-12): the batch's (every animation) in the batch row, one sticker's under its tile, 50-150%
+   in 5% steps. A sticker's own size wins over the batch's; "batch" puts it back. Each click cuts again from the stored video, free
+   (POST /api/generations/{id}/video_size). */
+const VSTEP = 0.05,
+  pct = (f) => `${Math.round(f * 100)}%`;
+function vsizeBatch(g) {
+  if (!g || g.kind === 'particles' || making(g)) return '';
+  const f = g.anim_scale || 1;
+  return `<span class=vsize title="Video size of every animation in this batch, after the video came back (a sticker with its own size keeps it)">Video size <button class="btn sm" data-act=gvsize data-g=${g.number} data-f=${(f - VSTEP).toFixed(2)} ${f <= 0.5 ? 'disabled' : ''} aria-label="Smaller">−</button><b>${pct(f)}</b><button class="btn sm" data-act=gvsize data-g=${g.number} data-f=${(f + VSTEP).toFixed(2)} ${f >= 1.5 ? 'disabled' : ''} aria-label="Larger">+</button>${f !== 1 ? `<button class="btn sm" data-act=gvsize data-g=${g.number} data-f=1 title="Back to 100%">Reset</button>` : ''}</span>`;
+}
+function vsizeRow(g, t) {
+  const own = t.anim_scale,
+    f = own != null ? own : g.anim_scale || 1,
+    b = `data-act=gvsize data-g=${g.number} data-i=${t.index}`;
+  return `<div class=vsize title="This sticker's video size${own != null ? ' (its own)' : ' (from the batch)'}"><button class="btn sm" ${b} data-f=${(f - VSTEP).toFixed(2)} ${f <= 0.5 ? 'disabled' : ''} aria-label="Smaller">−</button><b>${pct(f)}</b><button class="btn sm" ${b} data-f=${(f + VSTEP).toFixed(2)} ${f >= 1.5 ? 'disabled' : ''} aria-label="Larger">+</button>${own != null ? `<button class="btn sm" ${b} data-f="" title="Follow the batch's video size again">batch</button>` : ''}</div>`;
+}
+
+ACT.gvsize = async (el) => {
+  const g = GM.get(+el.dataset.g);
+  if (!g) return;
+  const idx = el.dataset.i ? +el.dataset.i : undefined,
+    scale = el.dataset.f === '' ? null : Math.round(+el.dataset.f * 100) / 100,
+    redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
+  const r = await post(`/api/generations/${g.number}/video_size`, { scale, ...(idx ? { index: idx } : {}), reslice: redo });
+  if (!r.ok) return toast(r.j.error || 'Could not change the size', 1);
+  toast(`${idx ? 'S' + idx : 'Batch'} video size ${scale == null ? 'follows the batch' : pct(scale)}${r.j.resliced ? ' · cutting again (free)' : ''}`);
+  glast = '';
+  tick(true);
+};
 
 ACT.gkeepsize = async (el) => {
   const g = GM.get(+el.dataset.g);

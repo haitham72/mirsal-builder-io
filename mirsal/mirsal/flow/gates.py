@@ -753,7 +753,7 @@ def reanimate_prepared(out: Path, gid: int, indexes: list, cfg: EngineConfig, pa
         pl.write_result(out, gid, res)
 
 
-def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
+def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, only: list | None = None) -> None:
     """Apply the batch's CURRENT stroke and trim to the animations of the sliced video sheet they come from (cut_sheet), from the video that is already stored: no new video,
     no credits. Repeated settings come back from the animation cache at once."""
     res = pl.read_result(out, gid)
@@ -765,7 +765,7 @@ def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0) -> None:
                 r2 = pl.read_result(out, gid)
                 next(x for x in r2["video_sheets"] if x["id"] == v["id"])["preview"] = f"video_sheet/{v['id']}/{pv}"
                 pl.write_result(out, gid, r2)
-        slice_video(out, gid, v["id"], cfg, pace)
+        slice_video(out, gid, v["id"], cfg, pace, only=only)              # only: one sticker's Video size changed, the others stay as they are
 
 
 def reloop(out: Path, gid: int, cfg: EngineConfig, lib=None) -> dict:
@@ -891,7 +891,9 @@ def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 
                 pl.emit(out, gid, "video_cell", "done", 0, {"index": r.index, "status": r.status, "reason": r.reason}, "python", "PASS" if r.status == "READY" else "BLOCK")
             pl.write_result(out, gid, res)
             waive = {i: set(res["stickers"][i - 1].get("anim_override") or []) for i in todo}          # slot blocks a human allowed, kept across every re-slice
-            results = process_video(mp4, cfg, cells=todo, on_cell=on_cell, layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"), waive=waive)
+            results = []
+            for c_cfg, group in pl.cell_cfgs(res, cfg, todo):                   # a sticker with its own Video size is cut with its own config
+                results += process_video(mp4, c_cfg, cells=group, on_cell=on_cell, layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"), waive=waive)
             v["status"] = "SUPERSEDED" if v["status"] == "SUPERSEDED" else "SLICED"       # re-cutting a retired sheet's video (an edge change) never brings it back
             s.result = {"ready": sum(r.status == "READY" for r in results), "failed": sum(r.status != "READY" for r in results)}
             _stage(res, "video_sliced"); pl.write_result(out, gid, res)
