@@ -437,9 +437,9 @@ def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
 
 
 # ---- output ---------------------------------------------------------------------------------------------------------
-def to_webm(frames: np.ndarray, cfg, path, fps: float | None = None) -> dict:
+def to_webm(frames: np.ndarray, cfg, path, fps: float | None = None, budget: int | None = None) -> dict:
     """Encode with the engine's own Telegram path (VP9 + alpha, `engine.video._encode_fit` walks the crf ladder to the best quality that fits
-    `cfg.video_max_bytes`) and write the file to `path`. `fps` defaults to `cfg.video_max_fps`; pass the clip's own fps when it differs.
+    `budget`, default `cfg.video_max_bytes`) and write the file to `path`. `fps` defaults to `cfg.video_max_fps`; pass the clip's own fps when it differs.
     Returns {bytes, crf, size_bytes, frames, fps, seconds, fits, encodes}. `bytes` is the file's content. If even the last rung is over the
     budget the file is still written and `fits` is False: format/size/codec limits are judged by the existing verifier, not here."""
     from . import ffmpeg as ff
@@ -452,10 +452,11 @@ def to_webm(frames: np.ndarray, cfg, path, fps: float | None = None) -> dict:
     fps = float(fps if fps else cfg.video_max_fps)
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    crf, data, encodes = _encode_fit(frames, fps, cfg, path)
+    crf, data, encodes = _encode_fit(frames, fps, cfg, path, budget=budget)
     path.write_bytes(data)                                         # _encode_fit leaves the LAST attempt on disk, not necessarily the chosen one
+    limit = budget if budget is not None else cfg.video_max_bytes
     return {"bytes": data, "crf": crf, "size_bytes": len(data), "frames": len(frames), "fps": fps,
-            "seconds": round(len(frames) / fps, 3), "fits": len(data) <= cfg.video_max_bytes, "encodes": encodes}
+            "seconds": round(len(frames) / fps, 3), "fits": len(data) <= limit, "encodes": encodes}
 
 
 def preview_webp(frames: np.ndarray, size: int = 256, fps: float = 30.0) -> bytes:

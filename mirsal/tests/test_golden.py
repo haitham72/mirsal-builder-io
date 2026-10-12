@@ -190,15 +190,13 @@ class GoldenPathTests(Api):
         self.assertEqual([x[0] for x in h(3)], ["sliced", "still", "video_sheet", "video_sheet", "video", "anim", "pack"])
         self.assertEqual([(e["stage"], e.get("actor")) for e in g["events"] if e["stage"] == "pack_final"], [("pack_final", "human")])
 
-        # the final WEBMs have the outline exactly once (12 px ring, not 24)
+        # the final WEBMs carry no forced outline: at most a fringe of near-white opaque pixels
         from mirsal.engine import ffmpeg as ff
         for i in (3, 4, 7, 8, 9):
             a = ff.decode_alpha(pl.out_path(self.tmp / "out", g["generation_id"]) / g["stickers"][i - 1]["webm"], 2)[0]
             opaque = a[..., 3] > 127
-            subject = opaque & ~((a[..., :3].min(-1) > 235))
-            dist = cv2.distanceTransform((~subject).astype(np.uint8), cv2.DIST_L2, 3)
-            ring = float(dist[opaque].max())
-            self.assertTrue(9 <= ring <= 15, (i, ring))
+            white = float((opaque & (a[..., :3].min(-1) > 235)).sum()) / max(float(opaque.sum()), 1)
+            self.assertLess(white, 0.02, (i, white))
 
         # G5 -> Library
         pk = self.req("POST", "/api/packs", {"name": "Golden"})[1]
@@ -247,19 +245,19 @@ class GoldenPathTests(Api):
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/recut")[0], 409, "a batch with decisions is not cut again behind them")
 
     def test_the_outline_is_a_choice(self):
-        """The white die-cut stroke is not forced: 0 gives the plain sticker, a width gives that stroke, both are stored with the generation."""
+        """The white die-cut stroke is opt-in: omitted and 0 give the plain sticker, a width gives that stroke, all stored with the generation."""
         alpha = lambda g, rel: np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / rel).convert("RGBA"))[..., 3]
         opaque = lambda a: int((a > 127).sum())
         gid0, g0 = self.new("create a blob for school", outline=0)
-        gid12, g12 = self.new("create a blob for school")
+        gidD, gD = self.new("create a blob for school")
         gid24, g24 = self.new("create a blob for school", outline=24)
-        self.assertEqual([g0["outline_px"], g12["outline_px"], g24["outline_px"]], [0, 12, 24])
+        self.assertEqual([g0["outline_px"], gD["outline_px"], g24["outline_px"]], [0, 0, 24])
         self.assertEqual(g0["stickers"][0]["status"], "READY")
         plain = alpha(g0, "source/plain/S1.png")
         self.assertTrue((alpha(g0, g0["stickers"][0]["png"]) == plain).all())             # outline 0: the sticker IS the plain cutout
-        a12, a24 = opaque(alpha(g12, g12["stickers"][0]["png"])), opaque(alpha(g24, g24["stickers"][0]["png"]))
-        self.assertGreater(a12, opaque(plain) * 1.1)
-        self.assertGreater(a24, a12)                                                       # a wider stroke is a wider stroke
+        self.assertTrue((alpha(gD, gD["stickers"][0]["png"]) == plain).all())             # omitted: no stroke unless asked
+        a24 = opaque(alpha(g24, g24["stickers"][0]["png"]))
+        self.assertGreater(a24, opaque(plain) * 1.1)                                       # a wider stroke is a wider stroke
         self.assertEqual(self.req("POST", "/api/generations", {"prompt": "blob", "outline": 99})[0], 400)
 
     def test_appearance_renders_the_edge_without_rekeying(self):
@@ -269,7 +267,7 @@ class GoldenPathTests(Api):
         gid, g = self.new("create a blob for school")
         before = {s["png"]: (pl.out_path(self.tmp / "out", g["generation_id"]) / s["png"]).read_bytes() for s in g["stickers"]}
         plain_a = np.array(Image.open(pl.out_path(self.tmp / "out", g["generation_id"]) / "source" / "plain" / "S1.png").convert("RGBA"))[..., 3]
-        s, j = self.req("POST", f"/api/generations/{gid}/appearance", {"erode": 2})
+        s, j = self.req("POST", f"/api/generations/{gid}/appearance", {"outline": 12, "erode": 2})
         self.assertEqual(s, 200, j)
         self.assertEqual((j["outline_px"], j["erode_px"], j["rerendered"]), (12, 2, 9))
         g = self.req("GET", f"/api/generations/{gid}")[1]

@@ -160,6 +160,33 @@ class NamingTests(unittest.TestCase):
             webm = next(a["filename"] for a in man["assets"] if a["media"] == "video")
             self.assertEqual(z.read(webm), b"webm-bytes")                                              # the file as stored, not re-encoded
 
+    def test_export_zip_light_compresses_animations_and_records_quality(self):
+        from mirsal.engine.config import EngineConfig
+        from mirsal.engine.particles import to_webm
+        frames = np.zeros((90, 512, 512, 4), np.uint8)
+        for i in range(90):
+            x, y = 100 + i * 3, 256 + int(100 * np.sin(i / 6))
+            frames[i][:, :, :3] = (20, 30, 200)
+            rr, cc = np.ogrid[:512, :512]
+            frames[i][(rr - y) ** 2 + (cc - x) ** 2 < 60 ** 2] = (250, 240, 200, 255)
+        webm = to_webm(frames, EngineConfig(), Path(self.tmp) / "src.webm")["bytes"]
+        pk = self.lib.create_pack("Light")["id"]
+        self.lib.add_bytes(pk, webm, "webm", "moving", "animated", "🔥", {"generation": "G001", "index": 1})
+        data, _ = self.lib.export_zip(pk)                                                             # light is the default
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            row = json.loads(z.read("manifest.json"))["assets"][0]
+            self.assertTrue(row.get("light"), row)
+            self.assertEqual(row["frames"], 30)
+            self.assertIn("crf", row)
+            got = z.read(row["filename"])
+            self.assertLessEqual(len(got), 21 * 1024, f"{len(got) // 1024}KB at crf{row['crf']}")
+            self.assertEqual(row["kb"], max(1, len(got) // 1024))
+        data, _ = self.lib.export_zip(pk, light=False)                                                # opt out: the stored file untouched
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            row = json.loads(z.read("manifest.json"))["assets"][0]
+            self.assertNotIn("light", row)
+            self.assertEqual(z.read(row["filename"]), webm)
+
     def test_readable_name_and_legacy_file_style_names(self):
         from mirsal.media.library import readable_name
         self.assertEqual(readable_name("generic_emojis_laughing"), "Generic emojis laughing")

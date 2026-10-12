@@ -261,6 +261,30 @@ def encode_frames(frames, fps: float, fmt: str, loop: bool, cfg: EngineConfig, i
     return data, mime, fmt, info
 
 
+LIGHT_FRAMES = 30          # light exports: this many frames…
+LIGHT_BYTES = 20 * 1024    # …fitted to this budget (the crf ladder walks until it fits)
+
+
+def light_webm(path: Path, cfg: EngineConfig):
+    """A stored animation re-encoded small (30 frames, ~20 KB): decode with alpha, resample,
+    fit the crf ladder to LIGHT_BYTES. Returns (bytes, {"crf", "kb", "frames", "fps"}).
+    The stored file is untouched; quality vs size is on the record so the person can judge."""
+    import tempfile
+    from ..engine.effect_video import resample
+    from ..engine.video import _encode_fit
+    info = ff.probe(path, vp9_native=True)
+    src_fps, dur, w, h = info["fps"] or 30.0, info["duration"], info["width"], info["height"]
+    if not w or dur <= 0:
+        raise LibraryError("cannot read that animation (is ffmpeg with libvpx-vp9 installed? run: python -m mirsal doctor)", 409)
+    frames = ff.decode_full(path, w, h, int(dur * src_fps) + 3, None)
+    small = resample(frames, src_fps, 30, LIGHT_FRAMES / 30)
+    with tempfile.TemporaryDirectory() as td:
+        out = Path(td) / "light.webm"
+        crf, data, _ = _encode_fit(small, 30, cfg, out, budget=LIGHT_BYTES)
+    meta = {"crf": crf, "kb": max(1, len(data) // 1024), "frames": len(small), "fps": 30}
+    return data, meta
+
+
 class Library:
     def __init__(self, out: Path):
         self.root = Path(out) / "library"
@@ -895,11 +919,12 @@ class Library:
             self._save(db)
             return s
 
-    def export_zip(self, pid: str) -> tuple[bytes, str]:
+    def export_zip(self, pid: str, light: bool = True) -> tuple[bytes, str]:
         """The pack as one downloadable zip (Export as .zip): every sticker file as stored (`.webm` for the animated ones,
         `.png` / `.webp` for the static ones), renamed to the export contract
         `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
         (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
+        `light` (default on): animated stickers ship re-encoded small (30 frames, ~20 KB each; the row records crf/kb/frames so quality can be judged).
         Returns (zip bytes, a safe file stem)."""
         import hashlib
         from . import export_names as xn
@@ -951,6 +976,12 @@ class Library:
                         name = re.sub(r"(\.[a-z0-9]+)$", f"-{n}\\1", base)
                         n += 1
                 used.add(name)
+                light_meta = None
+                if light and s["type"] == "animated" and f.suffix.lower() == ".webm":
+                    try:
+                        data, light_meta = light_webm(f, EngineConfig())
+                    except LibraryError:
+                        light_meta = None     # unreadable file: ship it as stored, like before
                 z.writestr(name, data)
                 media = "video" if s["type"] == "animated" else "static"
                 rows.append({"sticker_id": s["id"], "source_generation": f"G{gid:03d}",
@@ -958,6 +989,7 @@ class Library:
                              "emoji": desc["emoji"], "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]],
                              "media": media, "revision": 1, "export_date": date, "filename": name,
                              "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
+                             **({"light": True, **light_meta} if light_meta else {}),
                              **xr.manifest_fields(desc)})
             z.writestr("manifest.json", json.dumps({"schema_version": 1,
                              "pack": {"id": p["id"], "slug": pslug, "title": p["name"],

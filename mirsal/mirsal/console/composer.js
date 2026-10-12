@@ -15,7 +15,7 @@ function aiWhy(){const g=typeof GAI!=='undefined'?GAI:{},av=g.availability||{},p
   return 'No AI model is reachable: start LM Studio (free) or add OPENAI_API_KEY to mirsal/.env.'}
 function aiChipTitle(){const g=typeof GAI!=='undefined'?GAI:{};
   if(!g.configured)return aiWhy();
-  const cloud=g.provider==='openai';
+  const cloud=g.provider!=='local';
   return `Writes nine different, expressive concepts from your text before the sheet is sent, with the engine chosen below (${gdEngineName()||'no model'}). ${cloud?'Cloud: one small OpenAI call.':'Local: free.'} Off = your text goes straight into the prompt template.`}
 
 const STROKES=[[0,'None'],[4,'Thin'],[8,'Medium'],[12,'Bold'],[16,'Max']];
@@ -99,7 +99,7 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    <span class="gseg cp-act" role=group aria-label="Where the stickers come from"><button type=button data-act=cpactions data-v=creative aria-pressed=${CP.actions!=='predefined'} title="The AI (or the built-in mood list) invents nine stickers for your idea">Creative</button><button type=button data-act=cpactions data-v=predefined aria-pressed=${CP.actions==='predefined'} title="Nine of the 36 predefined actions (happy, laugh, cry …), drawn as your character; the next batches continue through the 36">Predefined</button></span>
    <span class=cp-gap></span>
    ${GD&&!gdOn()?'<button class="btn sm" data-act=gdtab data-t=plan title="Return to the prompt you were editing">Prompt draft</button>':''}
-   <button id=go class=cp-go data-act=gprompt title="${aiOn()&&GAI.provider==='openai'?'Shows the prompt you can edit before any sheet is paid for; the AI enhancer makes one small OpenAI call to write it. No batch is created and no Higgsfield credits are spent.':'Free. Shows the prompt you can edit before any sheet is paid for; no batch is created.'} Pressing Enter in the box still starts a paid sheet at once.">Generate prompt <span class=cp-bp>${aiOn()&&GAI.provider==='openai'?'1 AI call':'free'}</span></button>${typeof impButtons==='function'?impButtons():''}`;
+   <button id=go class=cp-go data-act=gprompt title="${aiOn()&&GAI.provider!=='local'?'Shows the prompt you can edit before any sheet is paid for; the AI enhancer makes one small OpenAI call to write it. No batch is created and no Higgsfield credits are spent.':'Free. Shows the prompt you can edit before any sheet is paid for; no batch is created.'} Pressing Enter in the box still starts a paid sheet at once.">Generate prompt <span class=cp-bp>${aiOn()&&GAI.provider!=='local'?'1 AI call':'free'}</span></button>${typeof impButtons==='function'?impButtons():''}`;
   cpDrawEngine()}
 /* the AI enhancer's engine: the AI screen's own control (Auto / Local / Cloud, the local model drop-down, the one line saying which model answers or why it cannot; agent.js, AIENG.rows) shown under the bar while the enhancer is On,
    and also while it cannot run, so the person can pick an engine that can. One implementation, the same endpoints (an owner picks; a member sees the server's refusal as a toast). */

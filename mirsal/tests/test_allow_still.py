@@ -310,7 +310,7 @@ class TechnicalBlocksTests(unittest.TestCase):
     def test_a_still_over_the_size_limit_cannot_be_allowed(self):
         rig = Rig(EngineConfig(min_sheet_px=256, static_max_bytes=300))
         try:
-            gid, g = rig.new("create an edgy one")
+            gid, g = rig.new("create an edgy one", outline=12)     # the stroke keeps every fake cell over 300 B (a flat cell PNGs to ~100 B without it)
             S = {s["index"]: s for s in g["stickers"]}
             self.assertEqual({S[i]["reason"] for i in range(4, 10)}, {"static_file"})
             al = g["allow"]["still"]

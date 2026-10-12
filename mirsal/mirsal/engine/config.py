@@ -19,7 +19,7 @@ class EngineConfig:
     size: int = 512
     fit: float = 0.775            # target: longest side / size
     max_fit: float = 0.85         # never exceed this
-    outline_px: int = 12          # 0 disables the white die-cut outline
+    outline_px: int = 0           # 0 = no white die-cut outline (the default: a stroke is opt-in per batch)
     erode_px: int = 0             # 0 disables: trims N px of key fringe before the outline (always, outline on or off)
     chroma: str = "green"         # "green" | "blue"
     threshold: int | None = None  # None = auto-calibrate from the border ring

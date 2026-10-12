@@ -118,9 +118,13 @@ class CollectionTests(unittest.TestCase):
         self.assertNotIn("secret", json.dumps(log))                                                       # never the credentials
 
     def test_a_pack_is_sent_and_only_the_owner_may(self):
+        from mirsal.flow import pipeline as pl
+        res = pl.read_result(self.c.out, self.gid)
+        ready = [s["index"] for s in res["stickers"] if s.get("status") == "READY" and s.get("png")][:2]
+        self.assertEqual(len(ready), 2, "the fixture sheet should cut at least two clean stickers with no stroke")
         s, p = self.req("/api/packs", {"name": "Blobs"})
         self.assertEqual(s, 200, p)
-        for i in (1, 2):
+        for i in ready:
             self.assertEqual(self.req(f"/api/packs/{p['id']}/stickers", {"from_generation": {"id": self.gid, "index": i, "kind": "static"}})[0], 200)
         s, j = self.req(f"/api/v1/packs/{p['id']}/export-collection", {})
         self.assertEqual((s, j["ok"], j["count"], j["collection"]), (200, True, 2, "Blobs"), j)

@@ -17,7 +17,7 @@ let SES = { prompt: '', gens: [], off: [], pack: '' },
   GINP = [],
   GHEALTH = null;
 
-const GS = { outline: 12, tile: 220, tab: 'stickers' };
+const GS = { outline: 0, tile: 220, tab: 'stickers' };
 
 let GD = null,
   GDWORK = false,

@@ -15,7 +15,22 @@ const agentSrc = read('agent.js'), composer = read('composer.js'), gen = read('g
 const AV_LOCAL = { local: { ok: true, model: 'qwen3.5-4b', why: null }, cloud: { ok: false, model: 'gpt-4o-mini', why: 'no OPENAI_API_KEY in mirsal/.env' } };
 const AV_CLOUD = { local: { ok: false, model: 'qwen3.5-4b', why: 'LM Studio is not answering at http://localhost:1234/v1: start it and load qwen3.5-4b' }, cloud: { ok: true, model: 'gpt-4o-mini', why: null } };
 const AV_NONE = { local: AV_CLOUD.local, cloud: AV_LOCAL.cloud };
-const MODELS = { ok: true, current: 'qwen3.5-4b', why: null, models: [{ id: 'qwen3.5-4b', loaded: true }, { id: 'qwen3.5-9b', loaded: false }] };
+const MODELS_OLD = { ok: true, current: 'qwen3.5-4b', why: null, models: [{ id: 'qwen3.5-4b', loaded: true }, { id: 'qwen3.5-9b', loaded: false }] };
+const MODELS = { ok: true, current: 'qwen3.5-4b', why: null, models: [{ id: 'qwen3.5-4b', loaded: true }, { id: 'qwen3.5-9b', loaded: false }],
+  local: [{ id: 'local:qwen3.5-4b', model: 'qwen3.5-4b', label: 'qwen3.5-4b', provider: 'local', vision: null, free: true },
+           { id: 'local:qwen3.5-9b', model: 'qwen3.5-9b', label: 'qwen3.5-9b', provider: 'local', vision: null, free: true }],
+  openai: [{ id: 'openai:gpt-6-luna', model: 'gpt-6-luna', label: 'gpt-6-luna', provider: 'openai', vision: false, free: false },
+           { id: 'openai:gpt-6.1-sol', model: 'gpt-6.1-sol', label: 'gpt-6.1-sol', provider: 'openai', vision: true, free: false }],
+  nararouter: [{ id: 'nararouter:agnes-2.5-flash', model: 'agnes-2.5-flash', label: 'agnes-2.5-flash', provider: 'nararouter', vision: true, free: true },
+               { id: 'nararouter:agnes-3-flash', model: 'agnes-3-flash', label: 'agnes-3-flash', provider: 'nararouter', vision: true, free: true }],
+  default: 'openai:gpt-6-luna', selected: null, preference: 'auto' };
+const MODELS_CLOUD = { ok: true, current: 'gpt-6-luna', why: null, models: [],
+  local: [],
+  openai: [{ id: 'openai:gpt-6-luna', model: 'gpt-6-luna', label: 'gpt-6-luna', provider: 'openai', vision: false, free: false },
+           { id: 'openai:gpt-6.1-sol', model: 'gpt-6.1-sol', label: 'gpt-6.1-sol', provider: 'openai', vision: true, free: false }],
+  nararouter: [{ id: 'nararouter:agnes-2.5-flash', model: 'agnes-2.5-flash', label: 'agnes-2.5-flash', provider: 'nararouter', vision: true, free: true },
+               { id: 'nararouter:agnes-3-flash', model: 'agnes-3-flash', label: 'agnes-3-flash', provider: 'nararouter', vision: true, free: true }],
+  default: 'openai:gpt-6-luna', selected: null, preference: 'cloud' };
 
 // ---- agent.js, whole, in a vm: the page's two settings (the AI screen's gear panel and the Studio's AI enhancer) call the same functions
 function boot({ models = MODELS, post = async () => ({ ok: true, j: {} }) } = {}) {
@@ -26,7 +41,13 @@ function boot({ models = MODELS, post = async () => ({ ok: true, j: {} }) } = {}
     localStorage: { getItem: () => null, setItem() {} }, history: { replaceState() {} }, location: { hash: '' }, matchMedia: () => ({ matches: false }),
     ACT: {}, ICONS: {}, ic: n => `<svg data-i=${n}></svg>`, $: () => null, route_: 'generate', RENDER: {},
     toast: (m, bad) => log.toasts.push([m, !!bad]), confirmDlg() {},
-    api: async url => url === '/api/llm/models' ? { ok: true, j: models } : { ok: true, j: { agent: { provider: 'local', model: 'qwen3.5-4b' }, availability: AV_LOCAL, preference: 'auto' } },
+    api: async url => {
+      if (url === '/api/llm/models') {
+        const m = typeof models === 'function' ? models() : models;
+        return { ok: true, j: m };
+      }
+      return { ok: true, j: { agent: { provider: 'local', model: 'qwen3.5-4b' }, availability: AV_LOCAL, preference: 'auto' } };
+    },
     post: async (u, b) => { log.posts.push([u, b]); return post(u, b); },
     cpDrawEngine() { log.draws++; }, aiRefresh: async () => { log.refreshes++; },
   });
@@ -39,7 +60,7 @@ const J = x => JSON.parse(JSON.stringify(x));       // objects made inside the v
 const flush = () => new Promise(r => setImmediate(r));
 
 test('the Studio gets the AI screen\'s control through AIENG: Auto / Local / Cloud on the shared action, one line saying which model answers', async () => {
-  const b = boot();
+  const b = boot({ models: MODELS_OLD });
   assert.equal(typeof b.ctx.AIENG.rows, 'function');
   b.ctx.AIENG.ensure();
   await flush();
@@ -53,8 +74,30 @@ test('the Studio gets the AI screen\'s control through AIENG: Auto / Local / Clo
   assert.match(rows, /<small class="" title="">now: qwen3\.5-4b<\/small>/);
 });
 
+test('the model dropdown filters by preference: Local shows only LM Studio, Cloud shows only OpenAI and Nararouter', async () => {
+  const bCloud = boot({ models: MODELS_CLOUD });
+  bCloud.ctx.AIENG.ensure();
+  await flush();
+  const cloudRows = bCloud.ctx.AIENG.rows(SRC('cloud', AV_CLOUD));
+  assert.doesNotMatch(cloudRows, /<optgroup label="LM Studio">/, 'Cloud mode hides LM Studio');
+  assert.match(cloudRows, /<optgroup label="OpenAI">/, 'Cloud mode shows OpenAI group');
+  assert.match(cloudRows, /<optgroup label="Nararouter">/, 'Cloud mode shows Nararouter group');
+  assert.match(cloudRows, /data-agmodel/, 'Cloud mode uses the modern dropdown');
+  const bLocal = boot({ models: MODELS });
+  bLocal.ctx.AIENG.ensure();
+  await flush();
+  const localRows = bLocal.ctx.AIENG.rows(SRC('local', AV_LOCAL));
+  assert.match(localRows, /<optgroup label="LM Studio">/, 'Local mode shows LM Studio group');
+  assert.doesNotMatch(localRows, /<optgroup label="OpenAI">/, 'Local mode hides OpenAI');
+  assert.doesNotMatch(localRows, /<optgroup label="Nararouter">/, 'Local mode hides Nararouter');
+  const autoRows = bLocal.ctx.AIENG.rows(SRC('auto', AV_LOCAL));
+  assert.match(autoRows, /<optgroup label="LM Studio">/, 'Auto mode shows LM Studio');
+  assert.match(autoRows, /<optgroup label="OpenAI">/, 'Auto mode shows OpenAI');
+  assert.match(autoRows, /<optgroup label="Nararouter">/, 'Auto mode shows Nararouter');
+});
+
 test('with no model reachable the line says so in the enhancer\'s words, not "rules only", and a model that cannot answer says why', async () => {
-  const b = boot({ models: { ok: false, current: 'qwen3.5-4b', why: 'LM Studio is running but the model could not answer: No models loaded. Load qwen3.5-4b in LM Studio (or turn on Just-in-Time loading)', models: [{ id: 'qwen3.5-4b', loaded: false }] } });
+  const b = boot({ models: { ...MODELS_OLD, ok: false, current: 'qwen3.5-4b', why: 'LM Studio is running but the model could not answer: No models loaded. Load qwen3.5-4b in LM Studio (or turn on Just-in-Time loading)', models: [{ id: 'qwen3.5-4b', loaded: false }] } });
   b.ctx.AIENG.ensure();
   await flush();
   const rows = b.ctx.AIENG.rows(SRC('auto', AV_NONE, 'none', ''));

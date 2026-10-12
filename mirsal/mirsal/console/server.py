@@ -1059,7 +1059,8 @@ def make_handler(c: Console):
                 return self._json(200, dict(telegram.plan(c.lib, path.split("/")[3], st["bot"], name, c.cfg), status=st))
             if path.startswith("/api/packs/") and path.endswith("/export.zip"):        # the pack's files as a plain download (no Telegram wording)
                 try:
-                    data, stem = c.lib.export_zip(path.split("/")[3])
+                    q = parse_qs(urlparse(self.path).query)
+                    data, stem = c.lib.export_zip(path.split("/")[3], light=q.get("light", ["1"])[0] != "0")
                 except LibraryError as e:
                     raise pl.PipelineError(str(e), e.code)
                 self.send_response(200)

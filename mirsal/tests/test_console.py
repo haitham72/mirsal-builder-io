@@ -93,7 +93,7 @@ class ConsoleTests(unittest.TestCase):
         self.assertIn(r.status, (400, 404))
 
     def test_lifecycle(self):
-        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school"})
+        s, j = self.req("POST", "/api/generations", {"prompt": "create a blob for school", "outline": 12})
         self.assertEqual(s, 202); gid = j["id"]
         g = self.wait(gid, lambda j: j["stage"] == "sliced")
         self.assertEqual(g["task_slug"], "blob_school")
@@ -188,7 +188,7 @@ class ConsoleTests(unittest.TestCase):
         self.assertEqual(self.req("POST", f"/api/generations/{gid}/add", {"pack_id": pk["id"]})[0], 409)   # nothing left to add
 
     def test_add_without_a_video_adds_the_stills(self):
-        s, j = self.req("POST", "/api/generations", {"prompt": "blob", "variant": 2})
+        s, j = self.req("POST", "/api/generations", {"prompt": "blob", "variant": 2, "outline": 12})
         gid = j["id"]
         self.wait(gid, lambda x: x["stage"] == "sliced")
         s, r = self.req("POST", f"/api/generations/{gid}/add", {"pack_name": "Stills"})

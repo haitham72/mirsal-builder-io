@@ -359,7 +359,8 @@ def _hole_share(alpha, min_px):
 @check("still", "holes", WARN)
 def holes(inp, cfg):
     """Transparent regions enclosed by the subject's outer contour that survive the die-cut outline: a green part of the subject
-    keyed away. Measured on the finished sticker, so the gap inside a thin ring (which the outline closes) is not a hole."""
+    keyed away. Measured on the finished sticker, so the gap inside a thin ring (which the outline closes) is not a hole.
+    With no outline the holes stay visible and block: add a stroke or pick another cell."""
     share, n = _hole_share(_img(inp)[..., 3], cfg.min_component_px)
     inp["metrics"]["holes"] = round(share, 4)
     sev = BLOCK if share > cfg.max_hole_share else WARN

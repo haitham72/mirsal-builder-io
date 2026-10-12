@@ -19,11 +19,11 @@ function boot(){
 }
 
 const report = {
-  preference: 'cloud', default: 'openai:gpt-6-luna', current: 'qwen', selected: null,
+  preference: 'auto', default: 'openai:gpt-6-luna', current: 'qwen', selected: null,
   aliases: {'gpt-5.6-luna':'openai:gpt-5.6-luna','nararouter:gpt-5.6-luna':'openai:gpt-5.6-luna'},
-  local: [{ id: 'local:qwen', model: 'qwen', label: 'qwen' }],
-  nararouter: ['mimo-v2.6-flash-free', 'agnes-3-flash'].map(model => ({ id: `nararouter:${model}`, model, label: model })),
-  openai: ['gpt-6-luna','gpt-6.1-sol','gpt-5.6-luna'].map(model=>({id:'openai:'+model,model,label:model})), models: [],
+  local: [{ id: 'local:qwen', model: 'qwen', label: 'qwen', provider: 'local', vision: null, free: true }],
+  nararouter: ['mimo-v2.6-flash-free', 'agnes-3-flash'].map(model => ({ id: `nararouter:${model}`, model, label: model, provider: 'nararouter', vision: true, free: true })),
+  openai: ['gpt-6-luna','gpt-6.1-sol','gpt-5.6-luna'].map(model=>({id:'openai:'+model,model,label:model,provider:'openai',vision:false,free:false})), models: [],
 };
 
 test('the shared selector groups all providers and preserves a saved model on reopen', () => {
@@ -31,7 +31,7 @@ test('the shared selector groups all providers and preserves a saved model on re
   run(`A.llm=${JSON.stringify(report)}; A.sess={settings:{models:{ai:'nararouter:agnes-3-flash'}}};`);
   const draw = () => run(`AIU.modelSel('ai','Chat',selectorDetails().models.ai)`);
   const html = draw();
-  for (const group of ['Local', 'Nararouter', 'OpenAI']) assert.match(html, new RegExp(`optgroup label="${group}"`));
+  for (const group of ['LM Studio', 'Nararouter', 'OpenAI']) assert.match(html, new RegExp(`optgroup label="${group}"`));
   assert.match(html, /nararouter:agnes-3-flash" selected/);
   assert.match(html, /mimo-v2.6-flash-free/);
   assert.match(html, /Default · openai:gpt-6-luna/);
