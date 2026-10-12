@@ -315,6 +315,1087 @@
       "resolution_reason": null,
       "candidates": [],
       "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "4dada991c84ab15ad3fc602737a8e93648b41def1d0991cd9dfb2ac6d06a6c3e": {
+      "emoji": "😀",
+      "emojis": [
+        "😀"
+      ],
+      "tag": "happy_smile_joy",
+      "tokens": [
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "action": "happy",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "4fbc3ffe5a544858008baaa1616b1028994fcdd6c7f9a989aa4771295285b8d1": {
+      "emoji": "🤣",
+      "emojis": [
+        "🤣"
+      ],
+      "tag": "laugh_laughing_lol_rofl_lmao_lmfao",
+      "tokens": [
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl",
+        "lmao",
+        "lmfao"
+      ],
+      "action": "laugh",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "4dfa0c3dc6ba242e39df535618790c2d097bee3422aad9ca5eec9477ec359e25": {
+      "emoji": "😍",
+      "emojis": [
+        "😍"
+      ],
+      "tag": "love_heart_loving",
+      "tokens": [
+        "love",
+        "heart",
+        "loving"
+      ],
+      "action": "love",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "827b61c6fb9dc12210520781bac1da64a14fee929a21cf49a51f76ba9acc5d5c": {
+      "emoji": "😭",
+      "emojis": [
+        "😭"
+      ],
+      "tag": "cry_crying_sobbing_tears",
+      "tokens": [
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "action": "cry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "ee4de7b03a4933a9ab9df2fae3281172080daf32eda3e7dee3ca0bec2ac5d3e4": {
+      "emoji": "😔",
+      "emojis": [
+        "😔"
+      ],
+      "tag": "sad_unhappy_disappointed",
+      "tokens": [
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "action": "sad",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "6b9375c9201b224644a51bf2a8489ff22018536e00957cb3c384e8442d44e37a": {
+      "emoji": "😠",
+      "emojis": [
+        "😠"
+      ],
+      "tag": "angry_mad_furious_rage",
+      "tokens": [
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "action": "angry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "21f25034fe806bafa38d434e1332f44f0560de49e5b5e856b9cfc2149de7a1c1": {
+      "emoji": "😮",
+      "emojis": [
+        "😮"
+      ],
+      "tag": "surprised_shocked_wow",
+      "tokens": [
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "action": "surprised",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "90bae18ff66cf7fded5a594e3a22e3e684ca10954963da8506a135faf98a2e03": {
+      "emoji": "😱",
+      "emojis": [
+        "😱"
+      ],
+      "tag": "scared_frightened_fear",
+      "tokens": [
+        "scared",
+        "frightened",
+        "fear"
+      ],
+      "action": "scared",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "b2c2e60a24822be5f2e8aab859b0169e61ece9fa968fa1c59b109ed6d0b57d78": {
+      "emoji": "🙏",
+      "emojis": [
+        "🙏"
+      ],
+      "tag": "thanks_thankyou",
+      "tokens": [
+        "thanks",
+        "thankyou"
+      ],
+      "action": "thanks",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "bb11528b711bc33b0f02d47790badbc5a99c4e008672ecc1a6cca343697ccc30": {
+      "emoji": "👋",
+      "emojis": [
+        "👋"
+      ],
+      "tag": "hello_wave_hi",
+      "tokens": [
+        "hello",
+        "wave",
+        "hi"
+      ],
+      "action": "hello",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "bc82c11700e33c282aa476212a63019bb091af168250e8862917351b6bbf8764": {
+      "emoji": "🤗",
+      "emojis": [
+        "🤗"
+      ],
+      "tag": "hug_openarms",
+      "tokens": [
+        "hug",
+        "openarms"
+      ],
+      "action": "hug",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "5ff9b4652ead6bbe5310010bc15b7eb43830153b1d9b393ca157afc63477c826": {
+      "emoji": "😘",
+      "emojis": [
+        "😘"
+      ],
+      "tag": "kiss_kissing",
+      "tokens": [
+        "kiss",
+        "kissing"
+      ],
+      "action": "kiss",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "30fb62b615770751d39044554d4c001d02dc3a2733bee3dab74c030bbef937a2": {
+      "emoji": "😉",
+      "emojis": [
+        "😉"
+      ],
+      "tag": "wink_winking",
+      "tokens": [
+        "wink",
+        "winking"
+      ],
+      "action": "wink",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "759c7ce0f5c005bf7de18389c0b4ea2995f40e9f529f27808fb7903ae27de9ea": {
+      "emoji": "😊",
+      "emojis": [
+        "😊"
+      ],
+      "tag": "shy_bashful_blushing",
+      "tokens": [
+        "shy",
+        "bashful",
+        "blushing"
+      ],
+      "action": "shy",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "673d0679a1ae4da99f3e433c5cff42e127032278ee4b177bb2f248643e318dfc": {
+      "emoji": "🥳",
+      "emojis": [
+        "🥳"
+      ],
+      "tag": "celebrate_party",
+      "tokens": [
+        "celebrate",
+        "party"
+      ],
+      "action": "celebrate",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "7a307fa7626b1d70f9364d6324e6ef76986c6e3a8f38180b772d46e7d44d9aca": {
+      "emoji": "👏",
+      "emojis": [
+        "👏"
+      ],
+      "tag": "clap_applause",
+      "tokens": [
+        "clap",
+        "applause"
+      ],
+      "action": "clap",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "617a99b21a90d6cc31aa0e86339b876e85dcad8c4fee337b9d738034a5efcb67": {
+      "emoji": "👍",
+      "emojis": [
+        "👍"
+      ],
+      "tag": "approve_okay_yes_thumbsup",
+      "tokens": [
+        "approve",
+        "okay",
+        "yes",
+        "thumbsup"
+      ],
+      "action": "approve",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "4b054619581c5d552e1e174062b81cb0055f68be2ec739eed73d8da0cf3a41c1": {
+      "emoji": "👎",
+      "emojis": [
+        "👎"
+      ],
+      "tag": "disapprove_reject_no",
+      "tokens": [
+        "disapprove",
+        "reject",
+        "no"
+      ],
+      "action": "disapprove",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "f3273674f957168829e8a6e5f185edf1c3e57b941397631604719743a131626e": {
+      "emoji": "🤔",
+      "emojis": [
+        "🤔"
+      ],
+      "tag": "think_thinking",
+      "tokens": [
+        "think",
+        "thinking"
+      ],
+      "action": "think",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "3878468dcd52fbf3b753ef49138899ae28be4762ae45897ed61b37e807190f86": {
+      "emoji": "😕",
+      "emojis": [
+        "😕"
+      ],
+      "tag": "confused_puzzled",
+      "tokens": [
+        "confused",
+        "puzzled"
+      ],
+      "action": "confused",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "dea9a90fc56b0cd1013471d0e2829215f4e9fe3ec1ecc7ef029fe2f45a99838f": {
+      "emoji": "🙄",
+      "emojis": [
+        "🙄"
+      ],
+      "tag": "eyeroll",
+      "tokens": [
+        "eyeroll"
+      ],
+      "action": "eye-roll",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "0bbd23cba96339a32c12e84271effeea226cf836ab3eafaac05e1d74ec276411": {
+      "emoji": "🤦",
+      "emojis": [
+        "🤦"
+      ],
+      "tag": "facepalm",
+      "tokens": [
+        "facepalm"
+      ],
+      "action": "facepalm",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "4e2e324c97b85960fb179ebd2f1f2090ac48e330ecc25ef65d51291c7e55e593": {
+      "emoji": "🤷",
+      "emojis": [
+        "🤷"
+      ],
+      "tag": "shrug_dunno",
+      "tokens": [
+        "shrug",
+        "dunno"
+      ],
+      "action": "shrug",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "de5deb0b7c113232526accae79f3d49e7d705a406cfb01c94c78e85262418bce": {
+      "emoji": "😑",
+      "emojis": [
+        "😑"
+      ],
+      "tag": "bored_unimpressed",
+      "tokens": [
+        "bored",
+        "unimpressed"
+      ],
+      "action": "bored",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "a1884ecf89b0dd3d57c77160d0c226b96dc668537c20add4c7c08ce66d129e96": {
+      "emoji": "😎",
+      "emojis": [
+        "😎"
+      ],
+      "tag": "cool_sunglasses",
+      "tokens": [
+        "cool",
+        "sunglasses"
+      ],
+      "action": "cool",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "0feda31efed0f27726f454bfd3084276ab2e1f251bf1ee40ed4cd28fb80c30be": {
+      "emoji": "💪",
+      "emojis": [
+        "💪"
+      ],
+      "tag": "flex_flexing",
+      "tokens": [
+        "flex",
+        "flexing"
+      ],
+      "action": "flex",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "dbb15c8e83e338202fc052765fc086ea928dc7b6aaf646c45d3c280b92c09d24": {
+      "emoji": "😏",
+      "emojis": [
+        "😏"
+      ],
+      "tag": "scheme_scheming",
+      "tokens": [
+        "scheme",
+        "scheming"
+      ],
+      "action": "scheme",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "27ccee0f1f91cffcd43158a6c3f51afd596f89c26b700f1b77aad45367beaa52": {
+      "emoji": "😴",
+      "emojis": [
+        "😴"
+      ],
+      "tag": "sleep_sleepy",
+      "tokens": [
+        "sleep",
+        "sleepy"
+      ],
+      "action": "sleep",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "b13611656484375c2ac7445a87bfc0d472210a7eec28e7a0d87dc9c1785a413c": {
+      "emoji": "🤒",
+      "emojis": [
+        "🤒"
+      ],
+      "tag": "sick_ill",
+      "tokens": [
+        "sick",
+        "ill"
+      ],
+      "action": "sick",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "532578cf3a76f69465c99f5952a3b827e313f122588b7c511b5bc3158e9bfb6d": {
+      "emoji": "🤧",
+      "emojis": [
+        "🤧"
+      ],
+      "tag": "sneeze_sneezing",
+      "tokens": [
+        "sneeze",
+        "sneezing"
+      ],
+      "action": "sneeze",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "eea69770c65dea3cffc18f591b8b1222f9ce919743b8adc2b7d5800c89a42043": {
+      "emoji": "🕺",
+      "emojis": [
+        "🕺"
+      ],
+      "tag": "dance_dancing",
+      "tokens": [
+        "dance",
+        "dancing"
+      ],
+      "action": "dance",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "0cf6b153e74527e2ec449785236be8ff78d6872e62fe952006403994fe392898": {
+      "emoji": "🥺",
+      "emojis": [
+        "🥺"
+      ],
+      "tag": "plead_begging_please",
+      "tokens": [
+        "plead",
+        "begging",
+        "please"
+      ],
+      "action": "plead",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "f3b30b2c86b0d4af5f7c4d94f0eecb8ef01ea145a2b9cebfaf43167bded90d97": {
+      "emoji": "🫡",
+      "emojis": [
+        "🫡"
+      ],
+      "tag": "salute_saluting_respect",
+      "tokens": [
+        "salute",
+        "saluting",
+        "respect"
+      ],
+      "action": "salute",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "313ab8710600aa2958f339f1a2b8b617d91724bc2d6a4eb9e7777186d7a36c54": {
+      "emoji": "🍻",
+      "emojis": [
+        "🍻"
+      ],
+      "tag": "cheers_toast",
+      "tokens": [
+        "cheers",
+        "toast"
+      ],
+      "action": "cheers",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "dd6b466f3e873e4e52095fd33d735caa20e3882606acd29aa205977dbea85491": {
+      "emoji": "🎁",
+      "emojis": [
+        "🎁"
+      ],
+      "tag": "gift_present_surprise",
+      "tokens": [
+        "gift",
+        "present",
+        "surprise"
+      ],
+      "action": "gift",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "a12cddc35d524ae4016f7f6dc80eafa5cb5d2ef02c0a57e3c35a686a8467ca14": {
+      "emoji": "🤩",
+      "emojis": [
+        "🤩"
+      ],
+      "tag": "starstruck_amazed",
+      "tokens": [
+        "starstruck",
+        "amazed"
+      ],
+      "action": "star-struck",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "62d87507125e26ed4561ec541ce623b68915884c3975ddc1a098e1026753cae1": {
+      "emoji": "😀",
+      "emojis": [
+        "😀"
+      ],
+      "tag": "happy_smile_joy",
+      "tokens": [
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "action": "happy",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "1212d6035ee0aa1b2c2133aaa9ca43894c0830bba7119f2b6e8bcb2320206895": {
+      "emoji": "🤣",
+      "emojis": [
+        "🤣"
+      ],
+      "tag": "laugh_laughing_lol_rofl_lmao_lmfao",
+      "tokens": [
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl",
+        "lmao",
+        "lmfao"
+      ],
+      "action": "laugh",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "7c4374d228bf2a2004c1870291c87d995b1f1b48d1273d6f6cbd929b5565a83a": {
+      "emoji": "😍",
+      "emojis": [
+        "😍"
+      ],
+      "tag": "love_heart_loving",
+      "tokens": [
+        "love",
+        "heart",
+        "loving"
+      ],
+      "action": "love",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "8ae647f8b81f4983efe05991c9510daa1945bcb7e703f32334e6f326abefc73b": {
+      "emoji": "😭",
+      "emojis": [
+        "😭"
+      ],
+      "tag": "cry_crying_sobbing_tears",
+      "tokens": [
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "action": "cry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "f6b0231ecc90064a8f4e89e06b2515ca55367406ff9c6ede68fabe205f5d2aff": {
+      "emoji": "😔",
+      "emojis": [
+        "😔"
+      ],
+      "tag": "sad_unhappy_disappointed",
+      "tokens": [
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "action": "sad",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "4025c6997c2aeaa7b9e66416ae998699d97d20bb215933392fded861635c2485": {
+      "emoji": "😠",
+      "emojis": [
+        "😠"
+      ],
+      "tag": "angry_mad_furious_rage",
+      "tokens": [
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "action": "angry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "53dafcd439a8cf77615bad3633a22d29c4823bf881f81f8bd683fdf59c6a503a": {
+      "emoji": "😮",
+      "emojis": [
+        "😮"
+      ],
+      "tag": "surprised_shocked_wow",
+      "tokens": [
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "action": "surprised",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "02b635e875fce804262bd2eb2ebda7ec51dc91da20ba4e1b4c35704511a25336": {
+      "emoji": "😱",
+      "emojis": [
+        "😱"
+      ],
+      "tag": "scared_frightened_fear",
+      "tokens": [
+        "scared",
+        "frightened",
+        "fear"
+      ],
+      "action": "scared",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "c2cd8955afd77dbf329bf9f79c5dbf95fe32bfe8797ab7563ec40ebf4ef3ca0d": {
+      "emoji": "🙏",
+      "emojis": [
+        "🙏"
+      ],
+      "tag": "thanks_thankyou",
+      "tokens": [
+        "thanks",
+        "thankyou"
+      ],
+      "action": "thanks",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "8e8713da5f0001584ec16ef3dbbd6b2750ff11db1a74e997cefb694c97343841": {
+      "emoji": "🤗",
+      "emojis": [
+        "🤗"
+      ],
+      "tag": "smilingfacewithopenhands_smiling_open_hands_hand",
+      "tokens": [
+        "smilingfacewithopenhands",
+        "smiling",
+        "open",
+        "hands",
+        "hand"
+      ],
+      "action": "smiling-face-with-open-hands",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "04aba7d6e712177d3ae2685f6d06e7bc8d4f97d83667f21b6c8d6a8acb4d3ebb": {
+      "emoji": "😂",
+      "emojis": [
+        "😂"
+      ],
+      "tag": "laugh_laughing_lol_rofl_lmao_lmfao_cry_crying_sobbing_tears",
+      "tokens": [
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl",
+        "lmao",
+        "lmfao",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "action": "laugh",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "50f6f93b491ee11573b70d3daa3dd01b27542f392e5a5f820069be172fb29406": {
+      "emoji": "🙏",
+      "emojis": [
+        "🙏"
+      ],
+      "tag": "foldedhands_folded_hands_hand_palmsuptogether_palms_palm_up_together",
+      "tokens": [
+        "foldedhands",
+        "folded",
+        "hands",
+        "hand",
+        "palmsuptogether",
+        "palms",
+        "palm",
+        "up",
+        "together"
+      ],
+      "action": "folded-hands",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "57647decdb7c81435aeb7607e458490d4272100c387c737828f13537bb6cc2ab": {
+      "emoji": "💪",
+      "emojis": [
+        "💪"
+      ],
+      "tag": "flex_flexing",
+      "tokens": [
+        "flex",
+        "flexing"
+      ],
+      "action": "flex",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "5a9629f0e7f13ba642de6bfb73f00e1acd478d9bfc6292faad27edfe435b57d4": {
+      "emoji": "🙄",
+      "emojis": [
+        "🙄"
+      ],
+      "tag": "facewithrollingeyes_rolling_eyes_eye_bored_unimpressed",
+      "tokens": [
+        "facewithrollingeyes",
+        "rolling",
+        "eyes",
+        "eye",
+        "bored",
+        "unimpressed"
+      ],
+      "action": "face-with-rolling-eyes",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "6129c3c5c06c67100b48469b79e5c91a1b6e7a9d5d4dc822f9a0e40deb2040bd": {
+      "emoji": "🤧",
+      "emojis": [
+        "🤧"
+      ],
+      "tag": "sneeze_sneezing",
+      "tokens": [
+        "sneeze",
+        "sneezing"
+      ],
+      "action": "sneeze",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "014440d3404a72fbb55936ef75eedb9e8ea583930c2baac6129f73b154847414": {
+      "emoji": "😡",
+      "emojis": [
+        "😡"
+      ],
+      "tag": "angry_mad_furious_rage_steamingbowl_steaming_bowl",
+      "tokens": [
+        "angry",
+        "mad",
+        "furious",
+        "rage",
+        "steamingbowl",
+        "steaming",
+        "bowl"
+      ],
+      "action": "angry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "0af5d674114741bd4a5a6beffeb9028427f9b3e5dfc634f7a1ce72c1ff0a925a": {
+      "emoji": "😨",
+      "emojis": [
+        "😨"
+      ],
+      "tag": "facewithpeekingeye_peeking_eye",
+      "tokens": [
+        "facewithpeekingeye",
+        "peeking",
+        "eye"
+      ],
+      "action": "face-with-peeking-eye",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "e02e56543d730333f5944a3b77a05953a89c829f65026747dcea041501030f2b": {
+      "emoji": "😏",
+      "emojis": [
+        "😏"
+      ],
+      "tag": "scheme_scheming",
+      "tokens": [
+        "scheme",
+        "scheming"
+      ],
+      "action": "scheme",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "f7dccf2f78ffba0f2f16ac6f962aa9ccd8298366c67ea63d585604b68bff2b95": {
+      "emoji": "😀",
+      "emojis": [
+        "😀"
+      ],
+      "tag": "happy_smile_joy",
+      "tokens": [
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "action": "happy",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "1ffb3039943a054bf1dce887c7fdad5b3719af16857eb5503a2635dcf6819c76": {
+      "emoji": "🤣",
+      "emojis": [
+        "🤣"
+      ],
+      "tag": "laugh_laughing_lol_rofl_lmao_lmfao",
+      "tokens": [
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl",
+        "lmao",
+        "lmfao"
+      ],
+      "action": "laugh",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "275e89b1b569324ec205f151ba1534af297517a30ec0e206506568ee7b473241": {
+      "emoji": "😍",
+      "emojis": [
+        "😍"
+      ],
+      "tag": "love_heart_loving",
+      "tokens": [
+        "love",
+        "heart",
+        "loving"
+      ],
+      "action": "love",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "5e3d8481eddf08c6914780d3a9dd64741f2bd7c76c5a347dd8970747e0e6529e": {
+      "emoji": "😭",
+      "emojis": [
+        "😭"
+      ],
+      "tag": "cry_crying_sobbing_tears",
+      "tokens": [
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "action": "cry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "adad41d5a203fd17db94436bd0cc8f4bcaf4c44268af8856b8fa1082c75b04f5": {
+      "emoji": "😔",
+      "emojis": [
+        "😔"
+      ],
+      "tag": "sad_unhappy_disappointed",
+      "tokens": [
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "action": "sad",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "d64d1c2621093d3b9d76468063c340781a7974fc7b01c9a410ea556febd4cef4": {
+      "emoji": "😠",
+      "emojis": [
+        "😠"
+      ],
+      "tag": "angry_mad_furious_rage",
+      "tokens": [
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "action": "angry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "9b8d681786e1d9d21ae83730b92a80a14dc673d7a56d2b4873df6ce58868dabe": {
+      "emoji": "😮",
+      "emojis": [
+        "😮"
+      ],
+      "tag": "surprised_shocked_wow",
+      "tokens": [
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "action": "surprised",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "6e9ceebae8631dfc4ecf060ddea95eab508d776a77097b526dd264b9e06a9731": {
+      "emoji": "😱",
+      "emojis": [
+        "😱"
+      ],
+      "tag": "scared_frightened_fear",
+      "tokens": [
+        "scared",
+        "frightened",
+        "fear"
+      ],
+      "action": "scared",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "d6764113e794e3fd083e42bb98ce03c7396c59ce27a12025b758b2d073f1122b": {
+      "emoji": "🙏",
+      "emojis": [
+        "🙏"
+      ],
+      "tag": "thanks_thankyou",
+      "tokens": [
+        "thanks",
+        "thankyou"
+      ],
+      "action": "thanks",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
     }
   }
 }

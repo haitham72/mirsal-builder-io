@@ -1,0 +1,151 @@
+{"ts": 1791795589.555, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "generic emojis mirsal", "task_slug": "generic_emojis_mirsal"}}
+{"ts": 1791795589.564, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791795589.876, "stage": "sheet_picked", "status": "done", "ms": 312, "detail": {"subject": "generic_emojis_mirsal", "variant": 1, "of": 1, "file": "20261012T085949-hf_20261012_082922_3b20e0fd-d880-4cde-97fb-60218af8da26-237c41933604.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791795589.879, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791795590.166, "stage": "keyed", "status": "done", "ms": 287, "detail": {"bg": [5, 249, 17], "threshold": [116.0, 116.0, 116.0, 116.0, 116.0, 116.0, 116.0, 116.5, 116.5], "grid": "3x3", "cut": "gutter", "xs": [0, 688, 1350, 2048], "ys": [0, 686, 1313, 2048]}}
+{"ts": 1791795590.169, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791795591.067, "stage": "sliced", "status": "done", "ms": 897, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1791795658.165, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 1, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.167, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 2, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.168, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 3, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.169, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 4, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.169, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 5, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.171, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 6, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.172, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 7, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.173, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 8, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.173, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 9, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.175, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4, 5, 6, 7, 8, 9]}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795658.585, "stage": "added_to_pack", "status": "done", "ms": 0, "detail": {"pack": "a9b93219", "kind": "static", "stickers": [1, 2, 3, 4, 5, 6, 7, 8, 9], "replaced_stills": 0}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795795.867, "stage": "video_sheet_built", "status": "done", "ms": 705, "detail": {"sheet": "A1", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795795.874, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A1", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795814.73, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A1", "note": "gap changed before sending"}, "actor": "human", "decision": "REJECT"}
+{"ts": 1791795815.358, "stage": "video_sheet_built", "status": "done", "ms": 522, "detail": {"sheet": "A2", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795815.365, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A2", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791795881.806, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791795882.066, "stage": "video_returned", "status": "done", "ms": 259, "detail": {"sheet": "A2", "blocked": null, "flags": [], "codec": "h264", "width": 1440, "height": 1440, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791795882.069, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791795884.699, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "FAILED", "reason": "inside_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791795884.74, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "FAILED", "reason": "inside_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791795884.772, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "FAILED", "reason": "inside_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791795884.81, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "FAILED", "reason": "inside_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791795890.903, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795892.436, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795892.837, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795892.89, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795893.142, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795893.193, "stage": "video_sliced", "status": "done", "ms": 11123, "detail": {"ready": 5, "failed": 4}}
+{"ts": 1791795900.838, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791795901.294, "stage": "video_returned", "status": "done", "ms": 455, "detail": {"sheet": "A2", "blocked": null, "flags": [], "codec": "h264", "width": 1440, "height": 1440, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791795901.298, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791795908.493, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795908.631, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795908.846, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795909.792, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791795909.828, "stage": "video_sliced", "status": "done", "ms": 8529, "detail": {"ready": 4, "failed": 0}}
+{"ts": 1791799709.302, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A2", "note": "regenerate"}, "actor": "local", "decision": "REJECT"}
+{"ts": 1791799710.07, "stage": "video_sheet_built", "status": "done", "ms": 487, "detail": {"sheet": "A3", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799710.079, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A3", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791799710.444, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799710.719, "stage": "video_returned", "status": "done", "ms": 274, "detail": {"sheet": "A3", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 3.04}}
+{"ts": 1791799710.722, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799713.161, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "FAILED", "reason": "inside_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791799713.203, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "FAILED", "reason": "cross_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791799718.619, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799719.725, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799720.529, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799720.904, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799721.923, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799721.965, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799725.212, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799725.287, "stage": "video_sliced", "status": "done", "ms": 14564, "detail": {"ready": 7, "failed": 2}}
+{"ts": 1791799732.756, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A3", "note": "regenerate"}, "actor": "local", "decision": "REJECT"}
+{"ts": 1791799733.294, "stage": "video_sheet_built", "status": "done", "ms": 504, "detail": {"sheet": "A4", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799733.301, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A4", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791799733.805, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799734.287, "stage": "video_returned", "status": "done", "ms": 481, "detail": {"sheet": "A4", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791799734.293, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799737.189, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "FAILED", "reason": "cross_slot"}, "actor": "python", "decision": "BLOCK"}
+{"ts": 1791799743.226, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799743.545, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799743.981, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799744.145, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799744.236, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799744.83, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799750.504, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799750.752, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799750.787, "stage": "video_sliced", "status": "done", "ms": 16493, "detail": {"ready": 8, "failed": 1}}
+{"ts": 1791799753.397, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799753.856, "stage": "video_returned", "status": "done", "ms": 458, "detail": {"sheet": "A4", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791799753.864, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799759.879, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799759.923, "stage": "video_sliced", "status": "done", "ms": 6059, "detail": {"ready": 1, "failed": 0}}
+{"ts": 1791799986.88, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A4", "note": "regenerate"}, "actor": "local", "decision": "REJECT"}
+{"ts": 1791799987.488, "stage": "video_sheet_built", "status": "done", "ms": 501, "detail": {"sheet": "A5", "slots": [1, 2, 3, 4, 5, 6, 7, 8, 9], "blocked": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799987.495, "stage": "video_sheet_reviewed", "status": "done", "ms": 0, "detail": {"sheet": "A5", "note": "approved by Make a video"}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1791799987.937, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799988.292, "stage": "video_returned", "status": "done", "ms": 355, "detail": {"sheet": "A5", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791799988.295, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791799996.995, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799997.278, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799997.386, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799997.591, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799997.998, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791799998.755, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800004.696, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800004.754, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800004.912, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800004.972, "stage": "video_sliced", "status": "done", "ms": 16676, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1791800238.629, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791800239.061, "stage": "video_returned", "status": "done", "ms": 430, "detail": {"sheet": "A4", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791800239.065, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791800239.32, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.378, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.437, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.508, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.596, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.654, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.709, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.746, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.782, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800239.818, "stage": "video_sliced", "status": "done", "ms": 752, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1791800240.642, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791800241.029, "stage": "video_returned", "status": "done", "ms": 387, "detail": {"sheet": "A5", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791800241.034, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791800241.312, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.371, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.43, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.503, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.57, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.64, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.711, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.767, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.828, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791800241.884, "stage": "video_sliced", "status": "done", "ms": 848, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1791802111.256, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791802112.02, "stage": "video_returned", "status": "done", "ms": 763, "detail": {"sheet": "A5", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791802112.024, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791802122.513, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802122.705, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802123.278, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802123.723, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802123.879, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802124.158, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802132.217, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802132.415, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802132.723, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802132.759, "stage": "video_sliced", "status": "done", "ms": 20735, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1791802150.561, "stage": "video_returned", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791802151.121, "stage": "video_returned", "status": "done", "ms": 559, "detail": {"sheet": "A5", "blocked": null, "flags": [], "codec": "h264", "width": 1424, "height": 1424, "fps": 24.0, "duration": 5.04}}
+{"ts": 1791802151.126, "stage": "video_sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791802161.262, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 6, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802161.374, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 2, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802161.878, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 3, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802162.447, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 4, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802162.556, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 1, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802162.885, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 5, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802170.245, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 8, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802170.306, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 7, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802170.789, "stage": "video_cell", "status": "done", "ms": 0, "detail": {"index": 9, "status": "READY", "reason": null}, "actor": "python", "decision": "PASS"}
+{"ts": 1791802170.851, "stage": "video_sliced", "status": "done", "ms": 19725, "detail": {"ready": 9, "failed": 0}}
+{"ts": 1791803140.034, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "anim", "index": 5, "note": "dropped from the set"}, "actor": "human", "decision": "REJECT"}
+{"ts": 1791803144.726, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "anim", "index": 5, "note": "brought back"}, "actor": "human", "decision": "APPROVE"}
