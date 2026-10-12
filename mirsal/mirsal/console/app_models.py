@@ -46,6 +46,7 @@ class CollectionExport(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str | None = Field(default=None, max_length=120)
     description: str = Field(default="", max_length=2000)
+    retime: bool = False          # animations shorter than 3 s are sent stretched to 3 s (the Studio asks first)
 
 
 class ImportResult(BaseModel):

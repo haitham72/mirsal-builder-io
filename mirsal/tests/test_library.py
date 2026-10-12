@@ -211,6 +211,30 @@ class NamingTests(unittest.TestCase):
             self.assertNotIn("light", row)
             self.assertEqual(z.read(row["filename"]), webm)
 
+    def test_a_short_animation_is_listed_and_retimed_to_3_s_on_request(self):
+        from mirsal.engine.config import EngineConfig
+        from mirsal.engine.particles import to_webm
+        from mirsal.engine import ffmpeg as ff
+        frames = np.zeros((30, 512, 512, 4), np.uint8)                                              # 1 s at 30 fps
+        for i in range(30):
+            frames[i][200:300, 100 + i * 5:200 + i * 5] = (250, 200, 40, 255)
+        webm = to_webm(frames, EngineConfig(), Path(self.tmp) / "short.webm")["bytes"]
+        pk = self.lib.create_pack("Short")["id"]
+        s = self.lib.add_bytes(pk, webm, "webm", "quick", "animated", "⚡", {})
+        self.assertEqual([x["id"] for x in self.lib.short_animations(pk)], [s["id"]])
+        for light in (False, True):
+            data, _ = self.lib.export_zip(pk, light=light, retime=True)
+            with zipfile.ZipFile(io.BytesIO(data)) as z:
+                row = json.loads(z.read("manifest.json"))["assets"][0]
+                self.assertAlmostEqual(row["retimed_from"], 1.0, delta=0.1)
+                out = Path(self.tmp) / f"out{int(light)}.webm"; out.write_bytes(z.read(row["filename"]))
+                self.assertAlmostEqual(ff.probe(out, vp9_native=True)["duration"], 3.0, delta=0.15, msg=f"light={light}")
+        data, _ = self.lib.export_zip(pk, light=False)                                              # keep their length: as stored
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            row = json.loads(z.read("manifest.json"))["assets"][0]
+            self.assertNotIn("retimed_from", row)
+            self.assertEqual(z.read(row["filename"]), webm)
+
     def test_readable_name_and_legacy_file_style_names(self):
         from mirsal.media.library import readable_name
         self.assertEqual(readable_name("generic_emojis_laughing"), "Generic emojis laughing")

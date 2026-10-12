@@ -17,7 +17,7 @@ function drawPack(){
    <div class=pk-ttl><h1>${esc(p.name)}</h1><small>${n} sticker${n===1?'':'s'}${anim?` · ${anim} animated`:''} · a Telegram set takes up to 120</small></div>
    <div class=pk-acts>${owner?`<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
     <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>
-    ${n?`<a class=btn href="/api/packs/${p.id}/export.zip" download title="Every sticker file of this pack in one zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json): .webm for the animated ones, .png / .webp for the static ones, a grey silhouette PNG beside each animated one ({its name}_grey.png), and a manifest.json">${ic('download')} Download .zip</a><a class=link href="/api/packs/${p.id}/export.zip?light=0" download title="The same zip with the full-size animation files">full quality</a>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
+    ${n?`<button class=btn data-act=pkzip data-l=1 title="Every sticker file of this pack in one zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json): .webm for the animated ones, .png / .webp for the static ones, a grey silhouette PNG beside each animated one ({its name}_grey.png), and a manifest.json">${ic('download')} Download .zip</button><button class=link data-act=pkzip data-l=0 title="The same zip with the full-size animation files">full quality</button>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
     <button class=btn data-act=nav data-to=chat title="Try the stickers in a phone chat preview">${ic('chat')} Try it in a chat</button>
     <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button>
     <details class=gh-more><summary class="btn" aria-label="More for this pack" title="More for this pack">⋯</summary><div class=gh-pop role=menu>
@@ -33,15 +33,30 @@ function drawPack(){
 /* Export to collection (services/collection.py, docs/api.md "Export to the AddCollection API"): the same stickers as Download .zip, in the same order, sent to the
    external emoji CMS as one collection. Owner only, like Telegram; free but outward, so it always asks first (name, optional description, where it goes). */
 const colOwner=()=>typeof ME==='undefined'||!ME||ME.role==='owner';
+/* Retime to 3 s (Haitham, 2026-10-12): before an export, animations shorter than 3 s (a closed loop ends early) are listed and the person picks:
+   stretch them to 3 s (the same frames, played slower) or keep their length. Resolves true / false, or null when the dialog is closed. */
+let RTA=null;
+function retimeAsk(short,where){if(!short||!short.length)return Promise.resolve(false);
+ return new Promise(res=>{RTA=res;dlg(`<h2>${short.length} animation${short.length===1?' is':'s are'} shorter than 3 seconds</h2>
+  ${where==='telegram'?`<div class=warn>Telegram plays a video sticker for up to <b>3 seconds</b>. These end sooner, so they loop sooner than the rest of the pack.</div>`:''}
+  <p class=mut>${short.slice(0,12).map(s=>`${esc(s.emoji||'')} ${esc(s.name||'')} <b>${(+s.seconds).toFixed(1)} s</b>`).join(' · ')}${short.length>12?' …':''}</p>
+  <p class=mut>Retime plays the same frames over 3 s (slower motion, nothing added). Your stored animations are not changed.</p>
+  <div class=row style="justify-content:flex-end"><button class=btn data-act=rtans data-v=x>Cancel</button><button class=btn data-act=rtans data-v=0>Keep their length</button><button class="btn pri" data-act=rtans data-v=1>Retime to 3 s</button></div>`)})}
+ACT.rtans=el=>{const r=RTA;RTA=null;closeDlg();r&&r(el.dataset.v==='x'?null:el.dataset.v==='1')};
+const packShort=async id=>{const r=await api(`/api/packs/${encodeURIComponent(id)}/short`);return r.ok?r.j.short:[]};
+const genShort=n=>{const g=GM.get(+n);return g?(g.stickers||[]).filter(s=>s.anim_status==='READY'&&s.webm&&(s.review||{}).anim!=='REJECTED').map(s=>{const m=s.anim_metrics||{};return{name:String(s.key||'').replace(/_/g,' '),emoji:s.emoji,seconds:m.fps?(m.frames_out||m.frames||0)/m.fps:3}}).filter(s=>s.seconds<2.95):[]};
+ACT.pkzip=async el=>{const rt=await retimeAsk(await packShort(PACK_ID),'zip');if(rt===null)return;location.href=`/api/packs/${PACK_ID}/export.zip?light=${el.dataset.l}${rt?'&retime=1':''}`};
 function colBtn(kind,id,n,name){return colOwner()?`<button class=btn data-act=colopen data-k=${kind} data-id="${esc(String(id))}" data-n="${esc(name||'')}" ${n?'':'disabled'} title="Send these stickers (the same as Download .zip) to the collection API as one collection">${ic('upload')} Export to collection</button>`:''}
-ACT.colopen=async el=>{const k=el.dataset.k,id=el.dataset.id,st=await api('/api/collection'),cfg=st.ok?st.j:{configured:false,url:''};
+ACT.colopen=async el=>{const k=el.dataset.k,id=el.dataset.id,st=await api('/api/collection'),cfg=st.ok?st.j:{configured:false,url:''},
+  short=k==='pack'?await packShort(id):genShort(String(id).replace(/^G/i,''));
  dlg(`<h2>Export to collection</h2><p class=mut>The stickers of Download .zip (animated where ready), in the same order, each with its emoji and tags, are sent as ONE new collection${cfg.url?` to <b>${esc(cfg.url)}</b>`:''}. Nothing in Mirsal changes.</p>
   ${cfg.configured?'':`<div class=warn>The collection API is not set up: put <code>MIRSAL_COLLECTION_API_CREDENTIALS</code> (base64 of user:password) in <code>.env</code> and restart the server.</div>`}
   <div class=fld><label>Collection name</label><input id=col-name maxlength=120 value="${esc(el.dataset.n||'')}"></div>
   <div class=fld><label>Description (optional)</label><input id=col-desc maxlength=2000></div>
+  ${short.length?`<div class=fld><label>${short.length} animation${short.length===1?' is':'s are'} shorter than 3 s (${short.slice(0,6).map(s=>`${esc(s.emoji||'')} ${(+s.seconds).toFixed(1)} s`).join(', ')}${short.length>6?' …':''})</label><select id=col-retime><option value=1>Retime to 3 s (the same frames, slower)</option><option value=0>Keep their length</option></select></div>`:''}
   <div id=col-res></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class="btn pri" data-act=colsend data-k=${k} data-id="${esc(id)}" ${cfg.configured?'':'disabled'}>Send</button></div>`)};
 ACT.colsend=async el=>{const url=el.dataset.k==='pack'?`/api/packs/${encodeURIComponent(el.dataset.id)}/export-collection`:`/api/generations/${encodeURIComponent(el.dataset.id)}/export-collection`,box=$('col-res');
- el.disabled=true;el.textContent='Sending…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim()});
+ el.disabled=true;el.textContent='Sending…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim(),retime:(($('col-retime')||{}).value)==='1'});
  el.textContent='Send';el.disabled=false;
  if(!r.ok){if(box)box.innerHTML=`<div class=warn>${esc(r.j.error||'Could not send')}</div>`;return}
  if(!r.j.ok){if(box)box.innerHTML=`<div class=warn>The collection API refused it (${r.j.status}): ${esc(r.j.error||'')}</div>`;return}

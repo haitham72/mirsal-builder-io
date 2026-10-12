@@ -143,12 +143,13 @@ def purge_files(out: Path, gid: int) -> dict:
     return {"files": len(files), "bytes": sum(b for _, b in files), "already": not files and not d.exists()}
 
 
-def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
+def export_zip(out: Path, gid: int, light: bool = True, retime: bool = False) -> tuple[bytes, str]:
     """One batch as a download from the Studio (Export as .zip): every sticker that is READY and not rejected, as its animation
     when that is ready and not rejected, otherwise its still, renamed to the export contract
     `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), plus a `manifest.json`
     (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
     `light` (default on): animations ship re-encoded small, as the pack's zip does (`library.light_webm`; the row records crf/kb/frames/fits).
+    `retime`: an animation shorter than 3 s plays its same frames over 3 s (`library.retime_webm`; the row records retimed_from).
     Every animation also gets its grey stand-in beside it, `{its file stem}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
     Returns (zip bytes, a safe file stem)."""
     import hashlib
@@ -159,7 +160,7 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
     from . import pipeline
     from ..media import export_names as xn
     from ..media import export_resolutions as xr
-    from ..media.library import LibraryError, light_webm
+    from ..media.library import LibraryError, light_webm, retime_webm
     from ..media import grey as _grey
     from ..engine.config import EngineConfig
     gid = int(gid)
@@ -195,9 +196,14 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
                     n += 1
             used.add(name)
             data, light_meta = f.read_bytes(), None
-            if light and animated and f.suffix.lower() == ".webm":
+            if animated and f.suffix.lower() == ".webm" and (light or retime):
                 try:
-                    data, light_meta = light_webm(f, EngineConfig())
+                    if light:
+                        data, light_meta = light_webm(f, EngineConfig(), retime=retime)
+                    else:
+                        rt = retime_webm(f, EngineConfig())
+                        if rt:
+                            data, light_meta = rt
                 except LibraryError:
                     pass                                                         # unreadable file: ship it as stored
             z.writestr(name, data)
@@ -209,7 +215,7 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
                          "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]], "media": media,
                          "revision": 1, "export_date": date, "filename": name,
                          "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
-                         **({"light": True, **light_meta} if light_meta else {}),
+                         **({"light": True, **light_meta} if light_meta and light else light_meta or {}),
                          **xr.manifest_fields(desc)})
         if not rows:
             raise ValueError("this batch has no accepted sticker yet")

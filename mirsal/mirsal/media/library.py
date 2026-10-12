@@ -265,7 +265,44 @@ LIGHT_FRAMES = (30, 24, 20)  # light exports: the WHOLE clip in this many frames
 LIGHT_BYTES = 20 * 1024      # …fitted to this budget (the crf ladder, plus VP9's last rung 63, walks until it fits)
 
 
-def light_webm(path: Path, cfg: EngineConfig):
+RETIME_S = 3.0            # Retime to 3 s (Haitham, 2026-10-12): an export may stretch a shorter animation to Telegram's full 3 seconds…
+SHORT_S = 2.95            # …when it is shorter than this (a 72-frame clip at 24 fps is 3.0 s and is left alone)
+
+
+def _clip(path: Path):
+    """(frames RGBA, seconds) of a stored animation, decoded with its alpha."""
+    info = ff.probe(path, vp9_native=True)
+    src_fps, dur, w, h = info["fps"] or 30.0, info["duration"], info["width"], info["height"]
+    if not w or dur <= 0:
+        raise LibraryError("cannot read that animation (is ffmpeg with libvpx-vp9 installed? run: python -m mirsal doctor)", 409)
+    frames = ff.decode_full(path, w, h, int(dur * src_fps) + 3, None)
+    return frames, len(frames) / src_fps
+
+
+def clip_seconds(path: Path) -> float | None:
+    """How long a stored animation plays, in seconds (None when it cannot be read)."""
+    try:
+        info = ff.probe(path, vp9_native=True)
+        return round(float(info["duration"]), 2) if info.get("duration") else None
+    except Exception:
+        return None
+
+
+def retime_webm(path: Path, cfg: EngineConfig, seconds: float = RETIME_S):
+    """The same frames played over `seconds` (a slower frame rate, nothing invented, the loop kept), fitted to Telegram's size limit.
+    None when the clip is already at least SHORT_S long. Returns (bytes, {"retimed_from", "seconds", "fps", "frames", "crf", "kb"})."""
+    import tempfile
+    from ..engine.video import _encode_fit
+    frames, secs = _clip(path)
+    if secs >= SHORT_S:
+        return None
+    fps = round(len(frames) / seconds, 3)
+    with tempfile.TemporaryDirectory() as td:
+        crf, data, _ = _encode_fit(frames, fps, cfg, Path(td) / "retimed.webm")
+    return data, {"retimed_from": round(secs, 2), "seconds": seconds, "fps": fps, "frames": len(frames), "crf": crf, "kb": max(1, len(data) // 1024)}
+
+
+def light_webm(path: Path, cfg: EngineConfig, retime: bool = False):
     """A stored animation re-encoded small (~20 KB): decode with alpha, keep the whole clip in LIGHT_FRAMES evenly spaced
     frames (the duration and the loop stay, the frame rate drops), fit the crf ladder to LIGHT_BYTES.
     A very detailed sticker may not reach the budget even at 20 frames and crf 63: it ships its smallest try with fits False.
@@ -273,13 +310,11 @@ def light_webm(path: Path, cfg: EngineConfig):
     import dataclasses
     import tempfile
     from ..engine.video import _encode_fit
-    info = ff.probe(path, vp9_native=True)
-    src_fps, dur, w, h = info["fps"] or 30.0, info["duration"], info["width"], info["height"]
-    if not w or dur <= 0:
-        raise LibraryError("cannot read that animation (is ffmpeg with libvpx-vp9 installed? run: python -m mirsal doctor)", 409)
-    frames = ff.decode_full(path, w, h, int(dur * src_fps) + 3, None)
+    frames, secs = _clip(path)
     lcfg = dataclasses.replace(cfg, crf_ladder=tuple(sorted({*cfg.crf_ladder, 63})))
-    secs = len(frames) / src_fps
+    retimed_from = None
+    if retime and secs < SHORT_S:                                   # Retime to 3 s: the same frames over the full 3 seconds
+        retimed_from, secs = round(secs, 2), RETIME_S
     with tempfile.TemporaryDirectory() as td:
         out = Path(td) / "light.webm"
         for want in LIGHT_FRAMES:
@@ -289,7 +324,8 @@ def light_webm(path: Path, cfg: EngineConfig):
             crf, data, _ = _encode_fit(small, fps, lcfg, out, start=len(lcfg.crf_ladder) - 3, budget=LIGHT_BYTES)
             if len(data) <= LIGHT_BYTES:
                 break
-    meta = {"crf": crf, "kb": max(1, len(data) // 1024), "frames": n, "fps": fps, "fits": len(data) <= LIGHT_BYTES}
+    meta = {"crf": crf, "kb": max(1, len(data) // 1024), "frames": n, "fps": fps, "fits": len(data) <= LIGHT_BYTES,
+            **({"retimed_from": retimed_from, "seconds": RETIME_S} if retimed_from else {})}
     return data, meta
 
 
@@ -943,12 +979,26 @@ class Library:
             self._save(db)
             return s
 
-    def export_zip(self, pid: str, light: bool = True) -> tuple[bytes, str]:
+    def short_animations(self, pid: str) -> list[dict]:
+        """The pack's animations shorter than SHORT_S, [{id, name, emoji, seconds}]: what an export asks about (Retime to 3 s or keep the length)."""
+        with self.lock:
+            db = self._load(); p = self._pack(db, pid)
+        rows = []
+        for s in p["stickers"]:
+            f = self.files / s["file"]
+            if s.get("type") == "animated" and f.suffix.lower() == ".webm" and f.is_file():
+                sec = clip_seconds(f)
+                if sec is not None and sec < SHORT_S:
+                    rows.append({"id": s["id"], "name": s.get("name"), "emoji": s.get("emoji"), "seconds": sec})
+        return rows
+
+    def export_zip(self, pid: str, light: bool = True, retime: bool = False) -> tuple[bytes, str]:
         """The pack as one downloadable zip (Export as .zip): every sticker file as stored (`.webm` for the animated ones,
         `.png` / `.webp` for the static ones), renamed to the export contract
         `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
         (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
         `light` (default on): animated stickers ship re-encoded small (the whole clip in 30 frames or fewer, ~20 KB each: `light_webm`; the row records crf/kb/frames so quality can be judged).
+        `retime`: an animation shorter than SHORT_S plays its same frames over 3 s (`retime_webm`, or inside `light_webm`; the row records retimed_from).
         Every animated sticker also gets its grey stand-in beside it, `{its file stem}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
         Returns (zip bytes, a safe file stem)."""
         import hashlib
@@ -1007,9 +1057,14 @@ class Library:
                         n += 1
                 used.add(name)
                 light_meta = None
-                if light and s["type"] == "animated" and f.suffix.lower() == ".webm":
+                if s["type"] == "animated" and f.suffix.lower() == ".webm" and (light or retime):
                     try:
-                        data, light_meta = light_webm(f, EngineConfig())
+                        if light:
+                            data, light_meta = light_webm(f, EngineConfig(), retime=retime)
+                        else:
+                            rt = retime_webm(f, EngineConfig())
+                            if rt:
+                                data, light_meta = rt
                     except LibraryError:
                         light_meta = None     # unreadable file: ship it as stored, like before
                 z.writestr(name, data)
@@ -1021,7 +1076,7 @@ class Library:
                              "emoji": desc["emoji"], "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]],
                              "media": media, "revision": 1, "export_date": date, "filename": name,
                              "sha256": hashlib.sha256(data).hexdigest(), "kb": max(1, len(data) // 1024),
-                             **({"light": True, **light_meta} if light_meta else {}),
+                             **({"light": True, **light_meta} if light_meta and light else light_meta or {}),
                              **xr.manifest_fields(desc)})
             z.writestr("manifest.json", json.dumps({"schema_version": 1,
                              "pack": {"id": p["id"], "slug": pslug, "title": p["name"],

@@ -26,8 +26,9 @@ async function tgFlow(){const P=TG.plan;if(!P)return;const st=P.status||{};
     <div class=row style="justify-content:space-between"><a class=link href="/api/packs/${PACK_ID}/telegram.zip" download>download for @stickers instead (zip)</a><button class="btn pri" data-act=dlgx>Close</button></div></div>`);return}
   const newN=P.sets.reduce((a,s)=>a+s.new.length,0);
   if(!newN){tgOpenApp(P.sets[0].name);toast('Already on Telegram: opening it');return}
+  const rt=await retimeAsk(await packShort(PACK_ID),'telegram');if(rt===null)return;          // clips under 3 s: stretch them to 3 s or keep their length
   dlg(`<div class=tgdlg style="text-align:center;padding:14px 8px"><div class=spin style="margin:0 auto 12px"></div><h2 style="margin:0">Sending ${newN} sticker${newN===1?'':'s'} to Telegram…</h2><div class=mut style="margin-top:6px">${newN>20?'A big pack takes about a minute. ':''}Telegram opens when it is ready.</div></div>`);
-  const r=await post(`/api/packs/${PACK_ID}/telegram`,{name:P.pack});
+  const r=await post(`/api/packs/${PACK_ID}/telegram`,{name:P.pack,retime:rt});
   if(!r.ok){closeDlg();toast(r.j.error,1);return}
   TG.done=r.j;tgDone(r.j)}
 function tgDone(d){const first=d.sets[0];

@@ -685,7 +685,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
             n = int(str(gid).upper().lstrip("G"))
             if not c.visible(user, n):
                 raise KeyError(gid)
-            data, stem = await asyncio.to_thread(_batches.export_zip, c.out, n, request.query_params.get("light", "1") != "0")
+            data, stem = await asyncio.to_thread(_batches.export_zip, c.out, n, request.query_params.get("light", "1") != "0", request.query_params.get("retime") == "1")
         except (KeyError, ValueError, FileNotFoundError, PipelineError) as e:                # PipelineError: no such batch
             missing = isinstance(e, (KeyError, FileNotFoundError, PipelineError)) or "invalid literal" in str(e)
             return _j(request, 404 if missing else 409, {"error": "not found" if missing else str(e)})
@@ -716,7 +716,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         if bad:
             return _j(request, 400, {"error": bad})
         try:
-            data = await asyncio.to_thread(make_zip)
+            data = await asyncio.to_thread(make_zip, body.retime)                # retime: what the person chose when the Studio asked about clips under 3 s
             return _j(request, 200, await asyncio.to_thread(col.send, c.out, what, data, body.name, body.description, user.get("id") or "human"))
         except col.CollectionError as e:
             return _j(request, e.code, {"error": str(e)})
@@ -726,9 +726,9 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
     async def pack_collection(request: Request, pid: str):
         from ..media.library import LibraryError
 
-        def make():
+        def make(retime=False):
             try:
-                return c.lib.export_zip(pid)[0]
+                return c.lib.export_zip(pid, retime=retime)[0]
             except LibraryError as e:
                 raise col.CollectionError(str(e), getattr(e, "code", 409))
         return await _collection(request, f"/api/packs/{pid}/export-collection", f"pack {pid}", make, lambda u: c.lib.owns(pid, u["id"]))
@@ -739,10 +739,10 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         from ..flow import batches as _batches
         from ..flow.pipeline import PipelineError
 
-        def make():
+        def make(retime=False):
             try:
                 n = int(str(gid).upper().lstrip("G"))
-                return _batches.export_zip(c.out, n)[0]
+                return _batches.export_zip(c.out, n, retime=retime)[0]
             except (ValueError, FileNotFoundError, PipelineError) as e:
                 missing = isinstance(e, (FileNotFoundError, PipelineError)) or "invalid literal" in str(e)
                 raise col.CollectionError("not found" if missing else str(e), 404 if missing else 409)

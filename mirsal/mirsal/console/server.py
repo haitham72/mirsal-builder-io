@@ -1053,6 +1053,9 @@ def make_handler(c: Console):
                     return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_sets.counts_for_pack(c.out, c.lib, pp[2])})
                 except fx_sets.SetError as e:
                     raise pl.PipelineError(str(e), e.code)
+            if path.startswith("/api/packs/") and path.endswith("/short"):             # the animations shorter than 3 s: what an export asks about (retime or keep)
+                from ..media.library import RETIME_S
+                return self._json(200, {"seconds": RETIME_S, "short": c.lib.short_animations(path.split("/")[3])})
             if path.startswith("/api/packs/") and path.endswith("/telegram"):          # dry run: what would be created, every problem
                 st = telegram.status(c.out)
                 name = parse_qs(urlparse(self.path).query).get("name", [None])[0]
@@ -1060,7 +1063,7 @@ def make_handler(c: Console):
             if path.startswith("/api/packs/") and path.endswith("/export.zip"):        # the pack's files as a plain download (no Telegram wording)
                 try:
                     q = parse_qs(urlparse(self.path).query)
-                    data, stem = c.lib.export_zip(path.split("/")[3], light=q.get("light", ["1"])[0] != "0")
+                    data, stem = c.lib.export_zip(path.split("/")[3], light=q.get("light", ["1"])[0] != "0", retime=q.get("retime", ["0"])[0] == "1")
                 except LibraryError as e:
                     raise pl.PipelineError(str(e), e.code)
                 self.send_response(200)
@@ -1601,7 +1604,7 @@ def make_handler(c: Console):
                 body = self._body()
                 from ..runtime import activity
                 try:
-                    sent = telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once"))
+                    sent = telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once"), retime=bool(body.get("retime")))
                 except Exception as e:
                     activity.say(f"Telegram send of pack {parts[2]} failed: {e}", error=True)
                     raise

@@ -312,15 +312,26 @@ def _mime(path: Path) -> str:
     return {".webm": "video/webm", ".png": "image/png", ".webp": "image/webp"}.get(path.suffix.lower(), "application/octet-stream")
 
 
-def _input(lib, item: dict, kind: str):
+def _input(lib, item: dict, kind: str, retime: bool = False, cfg: EngineConfig | None = None):
+    """One sticker for the Bot API. `retime`: a video shorter than 3 s is sent with its same frames played over 3 s (library.retime_webm); the stored file is untouched."""
     path = lib.files / item["file"]
     ref = "s_" + item["id"]
-    return {"sticker": f"attach://{ref}", "format": kind, "emoji_list": item["emoji"]}, {ref: (path.name, path.read_bytes(), _mime(path))}
+    data = path.read_bytes()
+    if retime and kind == "video" and path.suffix.lower() == ".webm":
+        from ..media.library import LibraryError, retime_webm
+        try:
+            rt = retime_webm(path, cfg or EngineConfig())
+            if rt:
+                data = rt[0]
+        except LibraryError:
+            pass                                   # unreadable: sent as stored, Telegram judges it
+    return {"sticker": f"attach://{ref}", "format": kind, "emoji_list": item["emoji"]}, {ref: (path.name, data, _mime(path))}
 
 
-def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConfig | None = None, mode: str = "once") -> dict:
+def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConfig | None = None, mode: str = "once", retime: bool = False) -> dict:
     """Send a pack. `mode`: `once` (the default) answers with the earlier export when this exact content was already sent and calls Telegram NOT AT ALL; `replace` sends on purpose
-    (only what is new is added to the existing set); `new_set` sends the whole pack again as a second set with a numbered name. Both escape hatches are recorded."""
+    (only what is new is added to the existing set); `new_set` sends the whole pack again as a second set with a numbered name. Both escape hatches are recorded.
+    `retime`: videos shorter than 3 s go up stretched to 3 s (the person chose it when the Studio asked; Telegram's limit is 3 s at most)."""
     if mode not in MODES:
         raise TelegramError(f"mode must be one of {', '.join(MODES)}", 400)
     if mode == "once":
@@ -348,14 +359,14 @@ def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConf
             first, rest = new[:BATCH], new[BATCH:]
             inputs, files = [], {}
             for it in first:
-                i, f = _input(lib, it, st["kind"])
+                i, f = _input(lib, it, st["kind"], retime, cfg)
                 inputs.append(i)
                 files.update(f)
             _call(token, "createNewStickerSet", {"user_id": user, "name": st["name"], "title": st["title"], "stickers": inputs, "sticker_type": "regular"}, files)
         else:
             rest = new
         for it in rest:
-            i, f = _input(lib, it, st["kind"])
+            i, f = _input(lib, it, st["kind"], retime, cfg)
             _call(token, "addStickerToSet", {"user_id": user, "name": st["name"], "sticker": i}, f)
         got = _call(token, "getStickerSet", {"name": st["name"]})
         ids = [i["sticker_id"] for i in st["have_items"]] + [it["id"] for it in new]      # Telegram keeps the order they were added in
