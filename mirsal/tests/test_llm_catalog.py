@@ -41,15 +41,22 @@ class CatalogTests(unittest.TestCase):
             ids = list(catalog.OPENAI_VISION)
         return {"data": [{"id": mid} for mid in ids]}
 
-    def test_all_planned_models_are_listed_and_text_only_models_are_filtered(self):
+    def test_all_listed_models_are_shown_with_vision_flagged(self):
         with mock.patch.object(catalog, "_fetch", side_effect=self.fake_list) as fetch:
             groups = catalog.groups()
-            self.assertEqual([r["model"] for r in groups["nararouter"]], list(catalog.NARAROUTER_VISION))
+            self.assertEqual([r["model"] for r in groups["nararouter"]],
+                             [*catalog.NARAROUTER_VISION, "laguna-s-2.1"])
+            self.assertEqual([r["model"] for r in groups["nararouter"] if r["vision"]], list(catalog.NARAROUTER_VISION))
             self.assertEqual(groups["local"][0]["id"], "local:qwen:2")
-            self.assertEqual(groups["openai"][0]["id"], "openai:gpt-6-luna")
-            self.assertNotIn("gpt-5.6-luna", [r["model"] for r in groups["nararouter"]])
+            self.assertEqual([r["model"] for r in groups["openai"]], ["gpt-6.1-sol"])
             catalog.groups()
             self.assertEqual(fetch.call_count, 2, "one cached read per cloud provider")
+
+    def test_malformed_catalog_rows_are_skipped_not_fatal(self):
+        payload = {"data": [{"id": "agnes-2.5-flash"}, "junk", 42, {}, {"id": "agnes-3-flash"}]}
+        with mock.patch.object(catalog, "_fetch", return_value=payload):
+            self.assertEqual([r["model"] for r in catalog.cloud_models("nararouter", force=True)],
+                             ["agnes-2.5-flash", "agnes-3-flash"])
 
     def test_unknown_and_removed_models_cannot_be_selected(self):
         with mock.patch.object(catalog, "_fetch", return_value={"data": [{"id": "gpt-5.6-luna"}]}):
@@ -57,7 +64,8 @@ class CatalogTests(unittest.TestCase):
                 catalog.validate("nararouter:jev")
             with self.assertRaises(llm.LLMError):
                 catalog.validate("nararouter:mimo-v2.6-flash-free")
-            self.assertEqual(catalog.validate("nararouter:gpt-5.6-luna"), "openai:gpt-5.6-luna")
+            with self.assertRaises(llm.LLMError):
+                catalog.validate("nararouter:gpt-5.6-luna")
 
     def test_catalog_authentication_is_separate_and_refreshes_when_a_key_changes(self):
         with mock.patch.object(catalog, "_fetch", side_effect=self.fake_list) as fetch:
@@ -198,15 +206,17 @@ class CatalogTests(unittest.TestCase):
         ids = ["gpt-6-luna", "gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra", "gpt-image-2", "gpt-audio", "text-embedding-3-small"]
         answer = {"choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}]}
         with mock.patch.object(catalog, "_fetch", return_value={"data": [{"id": mid} for mid in ids]}), mock.patch.object(llm, "_post", return_value=answer) as post:
-            self.assertEqual([r["model"] for r in catalog.cloud_models("openai")], ids[:4])
-            for mid in ids[:4]:
+            self.assertEqual([r["model"] for r in catalog.cloud_models("openai")], ["gpt-6-luna", "gpt-6.1-sol"])
+            for mid in ("gpt-6-luna", "gpt-6.1-sol"):
                 selected = catalog.validate("openai:" + mid)
                 llm.FORCE.set({"model": selected})
                 self.assertEqual(brain.target()["model"], selected)
                 self.assertEqual(judge.target()["model"], selected)
-                llm._complete_on("openai", "s", "u", model_=selected, images=[b"image"])
+                llm._complete_on("openai", "s", "u", model_=selected)
                 self.assertEqual(post.call_args.args[1]["model"], mid)
                 self.assertEqual(post.call_args.args[0], "https://api.openai.com/v1/chat/completions")
+            llm._complete_on("openai", "s", "u", model_="openai:gpt-6.1-sol", images=[b"image"])
+            self.assertEqual(post.call_args.args[1]["model"], "gpt-6.1-sol")
             with self.assertRaises(llm.LLMError):
                 catalog.validate("openai:gpt-6.2-sol")
         llm.FORCE.set({"model": "local:qwen:2"})

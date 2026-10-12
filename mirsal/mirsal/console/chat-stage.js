@@ -42,11 +42,19 @@ function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedra
     saveSet({ grid: ((A.sess && A.sess.settings && A.sess.settings.grid) || '3x3') === '2x2' ? '3x3' : '2x2' });
   const styleNow = () =>
     (A.sess && A.sess.settings && A.sess.settings.style_id) || A.pre || (A.agent && A.agent.default_style) || 'flat_vector';
-  function aiModelDetails(llm, selected) {
-    const groups = llm.local ? { Local: llm.local, Nararouter: llm.nararouter || [], OpenAI: llm.openai || [] } : null;
+  function aiModelDetails(llm, selected, pref = 'auto') {
+    const allGroups = llm.local ? { 'LM Studio': llm.local, 'OpenAI': llm.openai || [], 'Nararouter': llm.nararouter || [] } : null;
+    let groups = allGroups;
+    if (groups) {
+      if (pref === 'local') {
+        groups = { 'LM Studio': groups['LM Studio'] };
+      } else if (pref === 'cloud') {
+        groups = { 'OpenAI': groups['OpenAI'], 'Nararouter': groups['Nararouter'] };
+      }
+    }
     const list = groups ? Object.values(groups).flat() : (llm.models || []).map((x) => ({ id: x.id, label: x.id }));
-    const saved = (llm.aliases || {})[selected] || selected || '',
-      cur = (list.find((x) => x.id === saved || x.model === saved) || {}).id || saved;
+    const saved = (llm.aliases || {})[selected] || selected || '';
+    const cur = (list.find((x) => x.id === saved || x.model === saved) || {}).id || saved;
     const fallback = llm.preference === 'local' ? llm.current : llm.default || llm.current;
     return list.length ? { list, groups, cur, def: fallback || '' } : null;
   }
@@ -55,13 +63,14 @@ function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedra
       mine = st.models || {},
       cat = A.cat || {},
       llm = A.llm || {};
+    const pref = (A.agent || {}).preference || 'auto';
     const kind = (k) => {
       const list = [...(cat[k] || []), ...((cat.more || {})[k] || [])].map((x) => ({ id: x.id, label: x.label }));
       const def = (list.find((x) => x.id === (cat.defaults || {})[k]) || {}).label || '';
       return list.length ? { list, cur: mine[k] || '', def } : null;
     };
     return {
-      models: { ai: aiModelDetails(llm, mine.ai), image: kind('image'), video: kind('video') },
+      models: { ai: aiModelDetails(llm, mine.ai, pref), image: kind('image'), video: kind('video') },
       grid: st.grid,
       ask: st.ask_before_spending !== false,
       bypass: !!(st.creator && st.creator.bypass),
@@ -188,7 +197,7 @@ function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedra
   ACT.agbe = async (el) => {
     const r = await post('/api/ai/backend', { backend: el.dataset.v });
     if (r.ok) {
-      await Promise.all([loadAgent(), engSync()]);
+      await Promise.all([loadAgent(), loadModels(), engSync()]);
       engRedraw();
     } else toast(r.j.error || 'Could not change the AI engine', 1);
   };
@@ -231,9 +240,13 @@ function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedra
   function modelRow() {
     const m = A.llm,
       pref = (ENGSRC || A.agent || {}).preference || 'auto';
-    if (A.engineOpen && !ENGSRC) return AIU.modelSel('ai', 'Chat', selectorDetails().models.ai);
-    if (m && m.local) {
-      const details = aiModelDetails(m, pref === 'local' ? 'local:' + m.current : m.selected || '');
+    if (A.engineOpen && !ENGSRC) {
+      const d = selectorDetails().models.ai;
+      if (!d) return '<div class="r ag-mrow"><small>No models available. Check the provider connection and refresh.</small></div>';
+      return AIU.modelSel('ai', 'Chat', d);
+    }
+    if (m && (m.local || m.openai || m.nararouter)) {
+      const details = aiModelDetails(m, pref === 'local' ? 'local:' + m.current : m.selected || '', pref);
       if (!details) return '<div class="r ag-mrow"><small>No models available. Check the provider connection and refresh.</small></div>';
       return AIU.modelSel('ai', 'Chat', details).replace('data-agm=ai', 'data-agmodel');
     }

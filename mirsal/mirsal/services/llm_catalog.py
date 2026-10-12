@@ -13,13 +13,19 @@ MODEL_ALIASES = {alias: "openai:" + mid
                  for mid in (DEFAULT_MODEL, "gpt-5.6-luna")
                  for alias in (mid, "nararouter:" + mid)}
 NARAROUTER_VISION = (
-    "agnes-2.5-flash", "exo-stealh", "agnes-3-flash",
-    "mimo-v2.6-flash-free", "muse-spark-1.3-contributor-free",
-    "step-5-preview", "stepfun-3.7-flash", "mimo-v2.6-flash",
+    "deepseek-v4.1-flash-free", "muse-spark-1.3-contributor-free",
+    "agnes-2.5-flash", "agnes-3-flash", "stepfun-3.7-flash",
 )
-OPENAI_VISION = (DEFAULT_MODEL, "gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra",
-                 "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol",
-                 "gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini")
+OPENAI_VISION = ("gpt-4o-mini", "gpt-6.1-sol")
+# The dropdown shows this curated set only (Haitham's list, 2026-10-12). The live
+# catalog decides availability; this decides visibility. Luna always uses official
+# OpenAI with high reasoning; Sol uses the default effort (llm._complete_one).
+NARAROUTER_MODELS = (
+    "deepseek-v4.1-flash-free", "muse-spark-1.3-contributor-free",
+    "agnes-2.5-flash", "agnes-3-flash", "atria-dawn", "laguna-s-2.1",
+    "stepfun-3.7-flash",
+)
+OPENAI_MODELS = ("gpt-6-luna", "gpt-6.1-sol")
 _CACHE: dict = {}
 _LOCK = threading.Lock()
 
@@ -87,10 +93,17 @@ def cloud_models(provider: str, force: bool = False) -> list[dict]:
         rows, ttl = [], 10.0
         try:
             data = _fetch(url, key)
-            listed = {str(row["id"]) for row in data.get("data", []) if isinstance(row, dict) and row.get("id")}
             allow = NARAROUTER_VISION if provider == "nararouter" else OPENAI_VISION
-            rows = [{"id": f"{provider}:{mid}", "model": mid, "label": mid, "provider": provider,
-                     "vision": True, "free": mid.endswith("-free")} for mid in allow if mid in listed]
+            shown = NARAROUTER_MODELS if provider == "nararouter" else OPENAI_MODELS
+            rows = []
+            for row in data.get("data", []):
+                if not isinstance(row, dict) or not row.get("id"):
+                    continue
+                mid = str(row["id"])
+                if mid not in shown:
+                    continue
+                rows.append({"id": f"{provider}:{mid}", "model": mid, "label": mid, "provider": provider,
+                           "vision": mid in allow, "free": mid.endswith("-free")})
             ttl = 30.0
         except Exception:
             # No speculative options when the authenticated catalog cannot be read.
