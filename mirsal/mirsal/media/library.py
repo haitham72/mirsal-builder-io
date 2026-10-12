@@ -949,8 +949,10 @@ class Library:
         `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
         (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
         `light` (default on): animated stickers ship re-encoded small (the whole clip in 30 frames or fewer, ~20 KB each: `light_webm`; the row records crf/kb/frames so quality can be judged).
+        Every animated sticker also gets its grey stand-in, `grey/{emoji full name}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
         Returns (zip bytes, a safe file stem)."""
         import hashlib
+        from . import grey as _grey
         from . import export_names as xn
         from . import export_resolutions as xr
         with self.lock:
@@ -961,8 +963,10 @@ class Library:
         pslug = xn.slug_snake(p.get("slug") or p["name"]) or "pack"
         rows, buf, used, gens = [], io.BytesIO(), set(), set()
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:             # webm / png are already compressed
+            greys = _grey.Writer(z)
             for ordinal, s in enumerate(p["stickers"], 1):
                 f = self.files / s["file"]
+                still = None
                 if not f.is_file():
                     raise LibraryError(f"the file of '{s['name']}' is missing from the library", 404)
                 data = f.read_bytes()
@@ -983,6 +987,8 @@ class Library:
                         if t:
                             key, tags, bemojis = t.get("key"), t.get("tags"), t.get("emoji")
                             created = st.get("created")
+                            if t.get("png"):
+                                still = pl.gen_dir(out, int(g[1:])) / t["png"]       # the image sheet's cell of this sticker, for its grey stand-in
                     except Exception:
                         pass
                 gid = int(g[1:]) if g != "own" else 0
@@ -1008,6 +1014,8 @@ class Library:
                         light_meta = None     # unreadable file: ship it as stored, like before
                 z.writestr(name, data)
                 media = "video" if s["type"] == "animated" else "static"
+                if media == "video":
+                    greys.add(desc["emoji"], still, f, s["id"])
                 rows.append({"sticker_id": s["id"], "source_generation": f"G{gid:03d}",
                              "source_cell": f"S{index}" if g != "own" else None, "action": desc["action"],
                              "emoji": desc["emoji"], "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]],
@@ -1018,7 +1026,7 @@ class Library:
             z.writestr("manifest.json", json.dumps({"schema_version": 1,
                              "pack": {"id": p["id"], "slug": pslug, "title": p["name"],
                                       "generations": sorted(gens)},
-                             "assets": rows}, indent=2, ensure_ascii=False))
+                             "assets": rows, **({"grey": greys.rows} if greys.rows else {})}, indent=2, ensure_ascii=False))
         return buf.getvalue(), slug(p["name"]) or "pack"
 
     def sticker_path(self, pid: str, sid: str) -> tuple[Path, dict]:

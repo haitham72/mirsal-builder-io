@@ -149,6 +149,7 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
     `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), plus a `manifest.json`
     (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
     `light` (default on): animations ship re-encoded small, as the pack's zip does (`library.light_webm`; the row records crf/kb/frames/fits).
+    Every animation also gets its grey stand-in, `grey/{emoji full name}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
     Returns (zip bytes, a safe file stem)."""
     import hashlib
     import io
@@ -159,6 +160,7 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
     from ..media import export_names as xn
     from ..media import export_resolutions as xr
     from ..media.library import LibraryError, light_webm
+    from ..media import grey as _grey
     from ..engine.config import EngineConfig
     gid = int(gid)
     r = pipeline.read_result(out, gid)
@@ -173,6 +175,7 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
     exclude = slug.split("_")
     rows, buf, used = [], io.BytesIO(), set()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:                     # webm / png are already compressed
+        greys = _grey.Writer(z)
         for s in r.get("stickers") or []:
             rev = s.get("review") or {}
             if s.get("status") != "READY" or rev.get("still") == "REJECTED" or not s.get("png"):
@@ -199,6 +202,8 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
                     pass                                                         # unreadable file: ship it as stored
             z.writestr(name, data)
             media = "video" if animated else "static"
+            if animated:
+                greys.add(desc["emoji"], d / s["png"], f, f"G{gid:03d}/S{s.get('index')}")
             rows.append({"sticker_id": f"G{gid:03d}/S{s.get('index')}", "source_generation": f"G{gid:03d}",
                          "source_cell": f"S{s.get('index')}", "action": desc["action"], "emoji": desc["emoji"],
                          "emojis": desc["emojis"], "tags": [*desc["tokens"], desc["emoji"]], "media": media,
@@ -210,6 +215,6 @@ def export_zip(out: Path, gid: int, light: bool = True) -> tuple[bytes, str]:
             raise ValueError("this batch has no accepted sticker yet")
         z.writestr("manifest.json", json.dumps({"schema_version": 1,
                          "pack": {"slug": slug, "title": r.get("prompt"), "generations": [f"G{gid:03d}"]},
-                         "assets": rows}, indent=2, ensure_ascii=False))
+                         "assets": rows, **({"grey": greys.rows} if greys.rows else {})}, indent=2, ensure_ascii=False))
     stem = re.sub(r"[^a-z0-9]+", "-", f"{r.get('generation_id') or gid}-{r.get('task_slug') or 'stickers'}".lower()).strip("-")
     return buf.getvalue(), stem or "batch"
