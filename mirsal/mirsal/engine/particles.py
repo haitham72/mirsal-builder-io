@@ -483,3 +483,54 @@ def preview_webp(frames: np.ndarray, size: int = 256, fps: float = 30.0) -> byte
     buf = io.BytesIO()
     ims[0].save(buf, "WEBP", save_all=True, append_images=ims[1:], duration=durations, loop=0, quality=80, method=2, exact=True)
     return buf.getvalue()
+
+
+# ---- lottie (optional web export; Telegram stays WebM) ---------------------------------------------------------------
+def export_lottie(p: ParticleParams, n_sprites: int = 1, size: int = 512) -> dict:
+    """A Lottie JSON skeleton of one burst (web use only, optional third output).
+
+    Maps the deterministic `trajectories()` (positions, scale, angle, opacity
+    per particle per frame) onto Lottie transform keyframes. Sprites themselves
+    are not embedded here (the caller attaches PNG assets by sprite index);
+    each particle is an ellipse placeholder rect of its mean size so the motion
+    reads without assets. Pure (no dependency beyond numpy); the JSON is
+    stdlib-serialisable.
+    """
+    tr = trajectories(p, n_sprites)
+    F, N = tr.frames, int(p.clamped().count)
+    fps = float(p.clamped().fps)
+    W = H = int(size)
+    layers = []
+    for i in range(N):
+        px = (tr.pos[:, i, 0] * W).tolist()
+        py = (tr.pos[:, i, 1] * H).tolist()
+        sc = (tr.scale[:, i] * 100.0).tolist()
+        rot = (tr.angle[:, i] * 180.0 / math.pi).tolist()
+        op = (tr.opacity[:, i] * 100.0).tolist()
+
+        def _keys(vals):
+            return {"a": 1, "k": [{"t": f, "s": [round(float(v), 3)]} for f, v in enumerate(vals)]}
+
+        mean_frac = float(tr.size_frac[i]) if len(tr.size_frac) > i else 0.15
+        d = max(4.0, round(mean_frac * W, 1))
+        layers.append({
+            "ddd": 0, "ind": i + 1, "ty": 4, "nm": f"particle {i + 1} (sprite {int(tr.sprite[i])})",
+            "sr": 1,
+            "ks": {
+                "o": _keys(op),
+                "r": _keys(rot),
+                "p": {"a": 1, "k": [{"t": f, "s": [round(float(px[f]), 1), round(float(py[f]), 1), 0.0]} for f in range(F)]},
+                "a": {"a": 0, "k": [0.0, 0.0, 0.0]},
+                "s": {"a": 1, "k": [{"t": f, "s": [round(float(sc[f]), 2)] * 3} for f in range(F)]},
+            },
+            "shapes": [{"ty": "gr", "nm": "sprite placeholder", "it": [
+                {"ty": "el", "p": {"a": 0, "k": [0.0, 0.0]}, "s": {"a": 0, "k": [d, d]}},
+                {"ty": "fl", "c": {"a": 0, "k": [1, 1, 1, 1]}, "o": {"a": 0, "k": 100}},
+                {"ty": "tr", "p": {"a": 0, "k": [0.0, 0.0]}, "a": {"a": 0, "k": [0.0, 0.0]},
+                 "s": {"a": 0, "k": [100, 100]}, "r": {"a": 0, "k": 0}, "o": {"a": 0, "k": 100}},
+            ]}],
+            "ip": 0, "op": F, "st": 0,
+        })
+    return {"v": "5.7.4", "fr": fps, "ip": 0, "op": F, "w": W, "h": H,
+            "nm": f"reaction burst ({p.clamped().count} particles)",
+            "ddd": 0, "assets": [], "layers": layers}
