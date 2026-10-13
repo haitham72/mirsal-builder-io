@@ -55,7 +55,8 @@ Not listed here row by row (it would rot): the full table is §6b of the export 
 
 ## Who reads the bank
 
-- **Reaction effects entry** (`#/effects`): search + pick emojis → one free simulator set (`POST /api/particles {from_request, grid}`, elements are bank token names) → opened in the Studio.
+- **Reaction effects entry** (`#/effects`): search, click ONE emoji → its fixed motion flies as the literal glyph (`engine/particles.render_emoji`, the system's colour emoji font) → Size in / Size out / Hue / preset → **Download Lottie** (`POST /api/particles/emoji-preview`, `/emoji-lottie`; a token name or the glyph itself, resolved by `token_for_emoji`). No set, no pack ([reaction.md](reaction.md) §13).
+- **Library > Reactions > Create** (`GET /api/particles/bank`): multi-select up to 9 → one stand-alone set per emoji ([reaction.md](reaction.md) §12).
 - **Per-emoji motion** (`engine/emoji_motion.py`, `GET /api/particles/emoji-motions`): every token owns one fixed animation ([reaction.md](reaction.md) §8).
 - **Planner** (`generation/tasks.py`, `generation/prompter.py`): predefined batches draw `next_tokens()` in bank order; named grids keep their cells.
 - **Exporter**: filename tags and unresolved-cell picker ([export to team/mirsal-export-architecture.md](export%20to%20team/mirsal-export-architecture.md) §6–§6b, §10).

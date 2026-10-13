@@ -55,6 +55,11 @@ Interactive elements share hover, press, selected and `:focus-visible` states. C
    **Create's tabs** (`#ctabs`, `drawCtabs`, D7): above `agent`, `generate`, `create` and `effects`, a segmented **Chat | Studio** control and a **+ New** menu
    (a `<details>`) with **From a photo** (`#/create`) and **Particle effects** (`#/effects`); the full-screen tools have none. The chat preview (`#/chat`) is
    reached from the pack and the Library's sticker viewer (D6).
+   **Reaction effects** (`#/effects`, `effects.js` `fxSetup` / `fxEkOpen`, 2026-10-13): the emoji bank only. The wall (`.ps-wall`, `.ps-emo` static glyphs, search, first
+   120 matches) opens ONE emoji on a click; the open emoji is the burst panel's layout (`.ps-burst` > `.ps-sim`: the looping preview in `.fx-pvbox` on the left,
+   `.fx-ctl` on the right) with exactly three controls: the preset row (`.fx-pre`, **its own · <preset>** first, then the five presets), the **Size in**,
+   **Size out** and **Hue** sliders (`.fx-sl`; 0.4 s, 0.4 s, 25°), and **Download Lottie** (`.btn.pri`). No pack picker, no sticker grid, no `<video>`, no Kling,
+   no Generate more; one line says Hue 0 keeps the emoji's own colours. No new CSS.
 3. **A persistent second column on every screen that has a list** — Library, Chat, AI for sure, and **Studio and Create** because both have real lists
    (Studio: the batches; Create: the pack/prepared sheets). `COL2` and `drawCol2()` (`app.js`) select the routes with lists; the shared column scrolls and can collapse, becoming a drawer below 900px.
 4. **Same geometry everywhere:** same gutters, same card radius, same header height, same place the page title sits. If a screen needs to break the

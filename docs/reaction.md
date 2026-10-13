@@ -92,7 +92,7 @@ Legacy `/api/effects/*`, `packs` input and `/assign`/`unassign` remain for one r
 
 ## 7. How it is tested, and what is open
 
-Fake providers, temporary libraries and scratch copies of `out/` only; the browser on a spare port, never the live server; nothing is generated for a check (`docs/testing.md`, the test budget). The guards: `tests/test_particle_rows.py` (rows, Save / Save as new, Add to pack and its parent link, adopting older runs and drawn sheets), `tests/test_particle_sets.py`, `tests/test_particle_owner.py`, `tests/test_particle_animated.py`, `tests/test_emoji_motion.py` (the per-emoji map, Lottie keyframes), and the node tests `pack_particles`, `particles`, `particle_editor`.
+Fake providers, temporary libraries and scratch copies of `out/` only; the browser on a spare port, never the live server; nothing is generated for a check (`docs/testing.md`, the test budget). The guards: `tests/test_particle_rows.py` (rows, Save / Save as new, Add to pack and its parent link, adopting older runs and drawn sheets), `tests/test_particle_sets.py`, `tests/test_particle_owner.py`, `tests/test_particle_animated.py`, `tests/test_emoji_motion.py` (the per-emoji map, the preset signatures, Size in / out, hue, the glyph, Lottie image layers), `tests/test_emoji_lottie.py` (the Reaction effects routes), and the node tests `pack_particles`, `particles`, `particle_editor`.
 
 Ordinary animated stickers in the destination pack are the settled delivery. Open (`backlog.md`): separate Telegram effect delivery, sprite refinement from the chat, a permanent purge of deleted sets, and burst creation across packs (W27, [burst_plan.md](burst_plan.md)).
 
@@ -100,13 +100,25 @@ Ordinary animated stickers in the destination pack are the settled delivery. Ope
 
 **The rule (Haitham).** Every predefined emoji owns **one fixed animation**, shared by every pack; a pack varies only sprite art plus Size/Energy. This closes W25 (per-emoji vs shared motion) as per-emoji motion with locked type. Batch create/recreate is untouched. The bank's human home is [emoji-bank.md](emoji-bank.md).
 
-**The map.** `engine/emoji_motion.py` (pure, rule 3): `CORE_MOTIONS` pins the 36 mood tokens to a preset + param overrides; any other bank token falls back deterministically by hash onto the five simulator presets. Motion sentences come from the existing `FACE_SENTENCES` / `BODY_SENTENCES` (`generation/actions.py`). `flow/particle_sets.emoji_motions()` merges the map with `generation_bank()` (>1800, glyph + order) for the read-only wall: `GET /api/particles/emoji-motions` (alias `/api/particles/reactions`).
+**The map.** `engine/emoji_motion.py` (pure, rule 3): `CORE_MOTIONS` pins the 36 mood tokens to a preset + param overrides; any other bank token falls back deterministically by hash onto the five simulator presets.
+
+**The five presets are measurably distinct** (`engine/particles.PRESETS`; `tests/test_emoji_motion.py` checks every preset and every pinned token on `trajectories()`, numbers only):
+
+| preset | signature | measured on the preset (median) |
+| --- | --- | --- |
+| `burst` | radial outward, a 360° fan from the centre | tangential/radial speed ratio ≈ 0.3 |
+| `fountain` | origin (0.5, 0.8), spread ≤ 90°, launched upward, falls back | mean vertical speed over the first 0.2 s < 0 (up) |
+| `vortex` | `|vortex|` ≥ 1.5, magnitude ≤ 0.6; tangential ≫ radial; stays on the canvas | ratio ≈ 5, ≥ 2 turns, 90% of samples within 0.5 of the origin |
+| `rain` | origin (0.5, 0.1), magnitude ≤ 0.5, gravity down, spread ≤ 120° | > 80% of visible motion goes down |
+| `confetti` | ≥ 48 particles, gravity ≤ 0.5, spin ≥ 2.5, spread ≥ 150° | under 60% of motion goes down: it scatters |
+
+**Swirl is a flow field** (2026-10-13). Before, `vortex` added a tangential push proportional to the distance from the origin, so particles flung off the canvas (1.5 canvas widths) after less than half a turn: a burst that started elsewhere. Now a particle's velocity relaxes toward a rotation about the origin (`VORTEX_W` 7.5 rad/s per unit of `vortex`, rate `VORTEX_RELAX` 2.5/s, weaker swirls in proportion) and a centripetal term keeps the orbit. At `vortex` 0 the step is exactly the old one: a burst, fountain, rain or confetti with no swirl renders **byte-identical** frames to the previous engine (checked against the committed engine on 2026-10-13). A saved set with a non-zero Swirl renders the new swirl from now on; its stored WebM files are untouched. The vortex, rain and confetti preset values and the 36 pinned rows were retuned to their signatures (vortex rows `scared`, `confused`, `think`, `eye-roll`, `scheme`, `shrug`; `eye-roll` and `scheme` turn counter-clockwise). Motion sentences come from the existing `FACE_SENTENCES` / `BODY_SENTENCES` (`generation/actions.py`). `flow/particle_sets.emoji_motions()` merges the map with `generation_bank()` (>1800, glyph + order) for the read-only wall: `GET /api/particles/emoji-motions` (alias `/api/particles/reactions`).
 
 **The two views (the anti-chaos).** The pack's Reaction studio has a scope switch: **This pack** (default) shows `GET /api/packs/{id}/reactions` (`reactions_for_pack`): one row per emoji in the pack — glyph, token, inherited preset + motion sentence (locked), its stickers and sets; art is changed per row, Size/Energy are the only tunable sliders. **All 1800** shows the generic wall (glyph + token + preset chip, search, first 120 matches): read-only, no Edit/Duplicate/Delete, motion never tunable there. Five legacy surfaces (Library cards, pack studio cards, sticker rows, batch section, `#/effects`) keep working; new work goes through these two views.
 
 ## 9. Three outputs, all optional (2026-10-13)
 
-WebM VP9+alpha stays the primary and only Telegram delivery. Kling-animated sprites stay the paid path. **Lottie JSON** is the third, web-only output: `engine/particles.export_lottie()` maps deterministic trajectories onto position/scale/rotation/opacity keyframes (placeholder shapes; sprites attach by index); `POST /api/particles/{id}/export-lottie` stores `renders/L###.lottie.json`; the burst panel's **Lottie** button downloads it. No new dependency (stdlib JSON). Documented limits: large files for many particles × frames, renderer differences, Telegram never reads it.
+WebM VP9+alpha stays the primary and only Telegram delivery. Kling-animated sprites stay the paid path. **Lottie JSON** is the third, web-only output: `engine/particles.export_lottie(p, png_or_pngs, size=512)` maps the deterministic trajectories onto **image layers** (`ty: 2`) over the real sprite, embedded once as a base64 PNG asset (`e: 1`), so a standard player (lottie-web, the LottieFiles preview) plays the picture flying. Before 2026-10-13 it emitted white ellipse placeholders, which is why players showed shapes or nothing. Each layer lives from its particle's birth to its death (`ip`/`op`) with one hold keyframe per frame for position, scale, rotation and opacity; layers are ordered biggest on top, as `simulate()` draws them. Lottie cannot turn an image's hue, so with `hue_var` > 0 each particle's hue is rounded to `HUE_STEP` (10°) and every step in use is one more tinted asset. `POST /api/particles/{id}/export-lottie` embeds the set's picked sprites (an animated sprite as its fullest frame: Lottie image layers are stills) and is a 409 when the set has none; it stores `renders/L###.lottie.json`; the burst panel's **Lottie** button downloads it. No new dependency (stdlib JSON + Pillow). Limits: 300-750 KB per file (keyframes per frame per particle, plus one PNG per hue step), renderer differences, Telegram never reads it.
 
 ## 10. Migrating random sets onto the map (2026-10-13)
 
@@ -119,3 +131,26 @@ WebM VP9+alpha stays the primary and only Telegram delivery. Kling-animated spri
 ## 12. Library Create flow (2026-10-13)
 
 Library > Reactions > **Create** offers two paths. **Predefined** is the emoji bank (`GET /api/particles/bank`): every token with `finished` (a covering set holds a READY render) or `unclaimed` state, multi-select up to 9, then **Build**: one stand-alone set per emoji (`from_request` with the bank token name), the free procedural sparkle when it has no drawn cells (`default-sprite`, idempotent), and the default animation presented as a preview with the fixed per-emoji motion. **Approve** renders (free) and the build card collapses into the finished list, exactly like a finished reaction; custom sprites remain available later through the set card's Generate more. A finished token rebuilds as a new take. **Stickers** picks one of your stickers and continues in the Studio Particles tab. Nothing here spends without the priced Generate-more step, which stays inside the set card.
+
+## 13. Reaction effects: one emoji, flying as itself, to Lottie (2026-10-13)
+
+**The product decision.** Create > New > **Reaction effects** (`#/effects`) is the emoji bank **only**: no packs, no stickers, no Kling, no sheets, no "create from sheet" (all of those stay in the Studio). The one flow: **open an emoji → its fixed animation plays, flying as the literal emoji → Download Lottie**.
+
+**The sprite is the glyph.** `engine/particles.render_emoji(glyph, px)` draws the Win+. glyph with the system's colour emoji font (`EMOJI_FONTS`: Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji; a bitmap font is opened at its own strike size) and trims it to its alpha box like `trim_sprite`. Exactly one sprite exists: no picker, no Generate more. Without a text-shaping library a ZWJ sequence draws as its parts side by side. The glyph art belongs to the font's vendor: check its licence before a file leaves the office. A machine with no colour emoji font answers 503.
+
+**The only controls** (strict `ParticleParams` fields, unknown key → `ValueError`):
+
+| field | range | screen default | effect |
+| --- | --- | --- | --- |
+| `size_in_dur` | 0–1.5 s, ≤ lifetime/2 | 0.4 | each particle's scale ramps 0 → 100% over this long after birth |
+| `size_out_dur` | 0–1.5 s, ≤ lifetime/2 | 0.4 | … and 100% → 0 over this long before death |
+| `hue_var` | 0–180° | 25 | each particle's colours turn by a seeded hue in [−hue_var, +hue_var] |
+| preset | its own, or one of the five | its own | an override takes that preset's own look (the token's pinned values belong to its own preset) |
+
+The envelope multiplies the pop-in and the flight growth, never replaces them. The hue is one draw per particle from the same `default_rng(seed)` stream, drawn **last**, so every earlier draw (positions, sizes, spin) is unchanged; it is the CSS `hue-rotate()` matrix (a turn about the grey axis: linear, so exact on premultiplied colour; alpha untouched). Hue-shifted emoji are stylised, not the platform glyph; `hue_var` 0 is the glyph's native colours. The dataclass defaults are 0 / 0 / 0, so every older set, preview and render is unchanged; only this screen starts at 0.4 / 0.4 / 25.
+
+**Deterministic.** Same emoji + options + seed → the same params, the same preview file and byte-identical Lottie JSON on the same machine (the glyph comes from that machine's emoji font).
+
+**The contract.** `flow/particle_sets.py`: `emoji_token` (a token name or the glyph, `actions.token_for_emoji`; 409 outside the bank), `emoji_burst` (motion + override + options → `ParticleParams`), `emoji_preview` (cached WebP under `out/particles/emoji/<token>/previews/`), `export_emoji_lottie` (stores `out/particles/emoji/<token>/renders/L###.lottie.json` + `L###.png`, appends to that emoji's `emoji.json` with history `LOTTIE`; no `P###` set is made, and the set scans never see the `emoji/` folder). Routes: `POST /api/particles/emoji-preview`, `POST /api/particles/emoji-lottie` ([api.md](api.md)). The screen is `effects.js` `fxSetup` / `fxEkOpen` ([design.md](design.md) §4, Create's tabs). Tests: `tests/test_emoji_lottie.py`, `tests/test_emoji_motion.py`, node `effects_core`.
+
+**Verified** (2026-10-13): `kiss` (burst, 28 layers, 329 KB), `scared` (vortex, 36 layers, 314 KB) and `celebrate` (confetti, hue 90°, 64 layers, 19 assets, 742 KB) played in lottie-web 5.12.2 (canvas renderer): at frame 30 each frame held 400-840 distinct colours, the glyph itself.
