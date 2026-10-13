@@ -243,3 +243,34 @@ test('the video price is on its own line too, and the estimator fills that line'
   assert.doesNotMatch(h, /Make the video ·/, 'no price inside the button');
   assert.match(h, /data-fxest=g1/);
 });
+
+test('the entry is the emoji bank: static glyphs picked by click, no packs, nothing auto-plays', () => {
+  run("FX.ekBank=[{token:'laugh',emoji:'🤣',preset:'fountain',motion:'tears fly'},{token:'school',emoji:'🏫',preset:'burst',motion:''}];FX.past=[{id:'E001',pack_name:'Fruits',status:'READY'}];FX.ekSel=new Set()");
+  const h = run("fxSetup()");
+  assert.match(h, /Reaction effects/);
+  assert.match(h, /data-fxekq/);
+  assert.match(h, /data-act=fxek data-t="laugh"/);
+  assert.match(h, /fountain/);
+  assert.match(h, /data-act=fxekgo/);
+  assert.match(h, /E001/);
+  assert.doesNotMatch(h, /<video|<img|data-act=fxpack|data-act=fxgo|data-act=fxst|data-act=fxmode/, 'no pack picker and nothing auto-plays');
+});
+
+test('bank picks toggle, cap at nine, and create posts one free set of token names', async () => {
+  const picks = code => JSON.parse(run(`JSON.stringify(${code})`));
+  run("FX.ekSel=new Set()");
+  run("ACT.fxek({dataset:{t:'laugh'}})");
+  assert.deepEqual(picks("[...FX.ekSel]"), ['laugh']);
+  run("ACT.fxek({dataset:{t:'laugh'}})");
+  assert.deepEqual(picks("[...FX.ekSel]"), []);
+  run("FX.ekSel=new Set(['a','b','c','d','e','f','g','h','i'])");
+  run("ACT.fxek({dataset:{t:'j'}})");
+  assert.equal(run("FX.ekSel.size"), 9);
+  const run2 = loadConsole(['effects.js'], { extra: `const location={hash:''};` });
+  run2("FX.ekSel=new Set(['laugh','cry'])");
+  run2("POSTREPLIES.push({ok:true,j:{id:'P009'}})");
+  await run2("ACT.fxekgo({disabled:false})");
+  assert.deepEqual(JSON.parse(run2("JSON.stringify(POSTS)")), [['/api/particles', { from_request: 'reactions for laugh, cry', grid: '2x2' }]]);
+  assert.equal(run2("location.hash"), '#/studio');
+  assert.deepEqual(JSON.parse(run2("JSON.stringify([...FX.ekSel])")), [], 'a successful create clears the picks');
+});

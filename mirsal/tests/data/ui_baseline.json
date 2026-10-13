@@ -611,7 +611,15 @@
   "routes": {}
  },
  "retired": {
-  "actions": {},
+  "actions": {
+   "fxpack": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
+   "fxst": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
+   "fxall": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
+   "fxmode": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
+   "fxgrid": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
+   "fxgo": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
+   "fxnovlm": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed."
+  },
   "screens": {},
   "routes": {}
  }

@@ -348,7 +348,7 @@ class ShellTests(unittest.TestCase):
         self.assertNotIn("#ai-sheet", js)
 
     def test_the_particle_effects_screen_is_wired_into_create_and_calls_the_api(self):
-        """docs/effects.md: Create has a Particle effects tool that opens #/effects; the screen reads and writes only /api/effects and, for the burst, /api/particles (nothing is decided in the browser), a paid video needs
+        """docs/effects.md: Create has a Reaction effects tool that opens #/effects; the entry is the emoji bank (no auto-playing stickers) and reads GET /api/particles/emoji-motions; the screen reads and writes only /api/effects and, for the burst, /api/particles (nothing is decided in the browser), a paid video needs
         `go`, and the fixed Queue pill must not be able to cover its last buttons."""
         import re
         ui = self.ui()
@@ -360,7 +360,7 @@ class ShellTests(unittest.TestCase):
         app = read_console(ui / "app.js")
         self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("effects:'agent'", app, "the rail keeps Create lit on the effects screen")
-        self.assertNotIn("data-act=fxopen", read_console(ui / "editor.js"), "Create no longer offers Particle effects: particles start in the Studio (Haitham, 2026-10-05)")
+        self.assertNotIn("data-act=fxopen", read_console(ui / "editor.js"), "Create no longer offers Reaction effects: reactions start in the Studio (Haitham, 2026-10-05)")
         for route in ("/api/effects", "/estimate", "/video", "/add", "/plan"):
             self.assertIn(route, fx)
         # docs/particles.md section 4: the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes
@@ -369,6 +369,12 @@ class ShellTests(unittest.TestCase):
             self.assertIn(route, pt)
         for gone in ("/preview`", "/render`", "sticker_id:sid"):
             self.assertNotIn(gone, fx, "effects.js has no per-sticker preview or render any more")
+        for act in ("data-act=fxek", "data-act=fxekgo"):
+            self.assertIn(act, fx, "the entry is the emoji bank: pick emojis, then create")
+        self.assertIn("/api/particles/emoji-motions", fx, "the bank comes from the per-emoji motion map")
+        self.assertIn("from_request", fx, "picked bank tokens become one free simulator set")
+        for gone in ("data-act=fxpack", "data-act=fxgo", "data-act=fxst", "coverMedia", "fx-cv"):
+            self.assertNotIn(gone, fx, "no pack picker and no auto-playing stickers on the entry")
         self.assertIn("go:true", fx.replace(" ", ""), "the click on 'Make the video' is the go-ahead, and it shows the price")
         self.assertIn(".page.fx{padding-bottom", read_console(ui / "studio.css"))
 
