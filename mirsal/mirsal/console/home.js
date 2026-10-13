@@ -21,9 +21,9 @@ const hmHero=packs=>{const out=[];for(const p of [...packs].sort((a,b)=>(b.creat
 const hmIc=n=>`<span class=hm-ti>${ic(n)}</span>`;
 /* The landing page shows individual stickers; Library keeps the complete collection. */
 const hmStickers=(packs,q,filter)=>[...packs].sort((a,b)=>(b.created||0)-(a.created||0))
- .flatMap(p=>(p.stickers||[]).filter(s=>
+ .flatMap(p=>(p.stickers||[]).filter(s=>!((s.source||{}).particle_set)&&(
   (filter==='all'||filter==='animated'&&s.type==='animated'||filter==='static'&&s.type!=='animated'||filter==='particles'&&s.particles?.length)
-  &&(!q||`${p.name} ${s.name||''} ${s.emoji||''}`.toLowerCase().includes(q))).map(s=>({p,s}))).slice(0,24);
+  &&(!q||`${p.name} ${s.name||''} ${s.emoji||''}`.toLowerCase().includes(q)))).map(s=>({p,s}))).slice(0,24);
 const hmColumns=width=>width>=1220?6:width>=1000?5:width>=780?4:width>=560?3:2;
 const hmBands=(items,cols)=>[items.slice(0,cols*2),items.slice(cols*2,cols*4)];
 let hmResize=null;

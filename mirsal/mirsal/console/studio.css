@@ -670,6 +670,8 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .pk-ps-bursts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .pk-ps-b{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:var(--r-m);background:var(--sf);box-shadow:inset 0 0 0 1px var(--aline)}
 .pk-psline{margin-top:14px;padding:10px 14px;border-top:1px solid var(--bd);text-align:left;font-size:var(--fs-s)}
+.pk-reactions{margin-top:18px;padding:14px 16px;border-radius:var(--r-l);background:var(--glass);box-shadow:inset 0 0 0 1px var(--aline)}
+.pk-reactions .pk-ps-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.pk-reactions .pk-ps-h h2{display:flex;align-items:center;gap:6px;margin:0}
 .ps-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin:10px 0}
 .ps-emo{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:var(--r-m);background:var(--sf);box-shadow:inset 0 0 0 1px var(--aline);text-align:center}
 .ps-emo .ps-glyph{font-size:var(--fs-2xl);line-height:1}

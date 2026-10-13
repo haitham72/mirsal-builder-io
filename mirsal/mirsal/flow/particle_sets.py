@@ -1219,11 +1219,13 @@ def render(out: Path, lib, pid: str, cfg, *, pack_id=None, preset=None, params=N
 
 
 def _pack_emoji(lib, pack_id: str) -> str:
-    """The emoji tag of a burst: the pack's own emoji, commonest first (Telegram needs at least one, and takes at most 20)."""
+    """The emoji tag of a burst: the pack's own emoji, commonest first (Telegram needs at least one, and takes at most 20). Added bursts (reactions, source.particle_set) never count: they would echo the burst emoji back."""
     from collections import Counter
     from ..services import telegram
     c: Counter = Counter()
     for st in _lib_pack(lib, pack_id).get("stickers") or []:
+        if (st.get("source") or {}).get("particle_set"):
+            continue
         c.update(telegram.split_emoji(st.get("emoji")))
     return "".join(e for e, _ in c.most_common(MAX_EMOJI)) or "🙂"
 

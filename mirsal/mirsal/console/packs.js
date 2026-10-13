@@ -7,28 +7,32 @@ ACT.pktab=el=>{PKTAB.id=PACK_ID;PKTAB.t=el.dataset.t;drawPack()};
 function drawPack(){
  const p=packById(PACK_ID),el=$('s-pack');
  if(!p){el.innerHTML='<div class=card>Pack not found. <a href="#/library">Back to library</a></div>';return}
- const n=p.stickers.length,anim=p.stickers.filter(s=>s.type==='animated').length;
+ const{stickers,reactions}=pkSplit(p);
+ const n=stickers.length,nr=reactions.length,total=n+nr,anim=stickers.filter(s=>s.type==='animated').length;
  const owner=typeof ME==='undefined'||!ME||ME.role==='owner',tab=PKTAB.id===p.id?PKTAB.t:'stickers';
  /* the pack screen (redesign phase 8, mockup pack.html): one header (cover, name, counts; Send to Telegram first, then Preview, Download, Try it in a chat, Add;
     ⋯ Rename, Share, Export to collection, Delete), then two tabs: Stickers and Particles. Every button is the one it always was. */
  el.innerHTML=`<div class="page pk-page">
   <nav class=pm-crumbs aria-label="Where you are"><button data-act=nav data-to=library>Library</button><i>›</i><span>${esc(p.name)}</span></nav>
   <header class=pk-head><div class=cover>${coverMedia(p)}</div>
-   <div class=pk-ttl><h1>${esc(p.name)}</h1><small>${n} sticker${n===1?'':'s'}${anim?` · ${anim} animated`:''} · a Telegram set takes up to 120</small></div>
-   <div class=pk-acts>${owner?`<button class="btn pri" data-act=tgsend ${n?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
-    <button class=btn data-act=pkpreview ${n?'':'disabled'}>${ic('eye')} Preview</button>
-    ${n?`<button class=btn data-act=pkzip data-l=1 title="Every sticker file of this pack in one zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json): .webm for the animated ones, .png / .webp for the static ones, a grey silhouette PNG beside each animated one ({its name}_grey.png), and a manifest.json">${ic('download')} Download .zip</button><button class=link data-act=pkzip data-l=0 title="The same zip with the full-size animation files">full quality</button>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
+   <div class=pk-ttl><h1>${esc(p.name)}</h1><small>${n} sticker${n===1?'':'s'}${anim?` · ${anim} animated`:''}${nr?` · ${nr} reaction${nr===1?'':'s'}`:''} · a Telegram set takes up to 120</small></div>
+   <div class=pk-acts>${owner?`<button class="btn pri" data-act=tgsend ${total?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
+    <button class=btn data-act=pkpreview ${total?'':'disabled'}>${ic('eye')} Preview</button>
+    ${total?`<button class=btn data-act=pkzip data-l=1 title="Every sticker file of this pack in one zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json): .webm for the animated ones, .png / .webp for the static ones, a grey silhouette PNG beside each animated one ({its name}_grey.png), and a manifest.json">${ic('download')} Download .zip</button><button class=link data-act=pkzip data-l=0 title="The same zip with the full-size animation files">full quality</button>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
     <button class=btn data-act=nav data-to=chat title="Try the stickers in a phone chat preview">${ic('chat')} Try it in a chat</button>
     <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button>
     <details class=gh-more><summary class="btn" aria-label="More for this pack" title="More for this pack">⋯</summary><div class=gh-pop role=menu>
-     <button class=btn data-act=pkrename>${ic('edit')} Rename</button>${n&&typeof trShareBtn==='function'?trShareBtn(p.id):''}${colBtn('pack',p.id,n,p.name)}
+     <button class=btn data-act=pkrename>${ic('edit')} Rename</button>${total&&typeof trShareBtn==='function'?trShareBtn(p.id):''}${colBtn('pack',p.id,total,p.name)}
      <button class="btn dng" data-act=pkdel title="Move this pack to the trash. You can restore it, or delete it for good, from Settings, Trash.">${ic('trash')} Delete pack</button></div></details></div></header>
   <div class="gseg pk-tabs" role=tablist aria-label="This pack"><button type=button role=tab data-act=pktab data-t=stickers aria-pressed=${tab==='stickers'}>Stickers <small>${n}</small></button><button type=button role=tab data-act=pktab data-t=particles aria-pressed=${tab==='particles'}>Reactions</button></div>
   ${tab==='particles'?pkPsHtml(p):`  <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
-   ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${p.stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
+   ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stedit data-id=${s.id} title="${(s.source&&s.source.generation)?'Edit in the Studio (text, emoji; image and animation together)':s.type==='static'?'Edit a copy in the editor':'Edit: add text or emoji, trim'}">${ic('edit')}</button>${s.type==='animated'?`<button data-act=stanim data-id=${s.id} title="Timeline (trim, frame rate, export)">${ic('play')}</button>`:''}<button data-act=stcover data-id=${s.id} title="Set as cover">${ic('star')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
     <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div>`
-   :`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}`}</div>`;
+   :nr?'':`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}
+   ${nr?`<section class=pk-reactions><div class=pk-ps-h><h2>${ic('fx')} Reactions in this pack</h2></div><div class="grid" id=pkreactions>${reactions.map(s=>`<div class="cell" data-act=stview data-id=${s.id} title="Reaction burst: click to view"><span class=badge2>reaction</span>${media(s)}
+    <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
+    <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div></section>`:''}`}</div>`;
  ptCounts(p.id);pkWallLoad(p.id);pkReactionsLoad(p.id)}
 /* Export to collection (services/collection.py, docs/api.md "Export to the AddCollection API"): the same stickers as Download .zip, in the same order, sent to the
    external emoji CMS as one collection. Owner only, like Telegram; free but outward, so it always asks first (name, optional description, where it goes). */
@@ -136,7 +140,7 @@ function lcDraw(){const s=LCL[LCI];if(!s)return lcClose();
   <div style="flex:1;min-width:0"><b>${esc(s.emoji)} ${esc(s.name)}</b><div class=mut>${LCI+1}/${LCL.length} · in <a href="#/pack/${s.pack_id}" data-act=lcpack data-id=${s.pack_id}>${esc(s.pack)}</a> · ${s.type} · ${s.w}×${s.h} · ${s.kb}KB</div></div>
   <div class=toggles>${bgs}</div><button class="btn nav" data-act=lcnext>›</button><button class=btn data-act=lcclose>✕</button></div>
   <div class="pvbox bg-${LCBG}" style="margin-top:10px;min-height:0">${media(s)}</div>
-  <div class=row style="justify-content:center">${s.source&&s.source.generation?`<button class="btn pri" data-act=lcstudioedit>${ic('edit')} Edit in Studio</button><button class=btn data-act=lcopenstudio>${ic('gen')} Open in Studio</button>`:s.type==='static'?`<button class=btn data-act=lcedit>${ic('edit')} Edit a copy</button>`:`<button class=btn data-act=lcedit>${ic('edit')} Edit (text, trim…)</button><button class=btn data-act=lctimeline>${ic('play')} Timeline</button>`}<button class=btn data-act=psrecover data-p=${s.pack_id} data-s=${s.id}>Use as particle pack</button><button class=btn data-act=lcmove>${ic('plus')} Move to pack…</button><button class=btn data-act=lcpack data-id=${s.pack_id}>Open pack</button><button class="btn pri" data-act=lcsend>${ic('chat')} Send to chat</button></div>
+  <div class=row style="justify-content:center">${s.source&&s.source.generation?`<button class="btn pri" data-act=lcstudioedit>${ic('edit')} Edit in Studio</button><button class=btn data-act=lcopenstudio>${ic('gen')} Open in Studio</button>`:s.type==='static'?`<button class=btn data-act=lcedit>${ic('edit')} Edit a copy</button>`:`<button class=btn data-act=lcedit>${ic('edit')} Edit (text, trim…)</button><button class=btn data-act=lctimeline>${ic('play')} Timeline</button>`}${pkIsReaction(s)?'':`<button class=btn data-act=psrecover data-p=${s.pack_id} data-s=${s.id}>Use as reaction pack</button>`}<button class=btn data-act=lcmove>${ic('plus')} Move to pack…</button><button class=btn data-act=lcpack data-id=${s.pack_id}>Open pack</button><button class="btn pri" data-act=lcsend>${ic('chat')} Send to chat</button></div>
   <div id=pk-psline class=pk-psline>${pkStickerLine(s)}</div>
   <div class=thumbs style="justify-content:center;max-height:130px;overflow:auto">${th}</div><div class=mut style="text-align:center">← → to browse, Esc to close</div></div>`;
  $('modal').classList.add('on');$('modal').onclick=e=>{if(e.target.id==='modal')lcClose()};
@@ -214,14 +218,17 @@ ACT.ptadd=async el=>{const pid=el.dataset.p,sid=el.dataset.s;el.disabled=true;
  ptForget();await loadLib();toast('Added to '+ptPackName(pid)+', saved under the sticker');if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();else if(route_==='generate'&&typeof spSecSync==='function')spSecSync(true);
    const cur=LCI===null?null:LCL[LCI];if(cur&&cur.id===sid)ptLoad(cur)};
 
-/* ---------- the pack's particle studio (docs/particles.md 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
+/* ---------- the pack's reaction studio (docs/reaction.md 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
    the pack: a sticker shows one line linking here (pkStickerLine), never a gallery of its own. The set cards are shared with the Library (particles.js).
    The bursts rendered FOR this pack are listed with Add (POST /api/particles/{id}/add, the same handler as the set card's burst maker: particles.js psbadd); making one is in the set's card. */
+/* an added burst is a reaction, not a sticker: it lives in the Reactions section, never in the grid, and never gets reactions of its own (no loop) */
+const pkIsReaction=s=>!!(s&&s.source&&s.source.particle_set);
+const pkSplit=p=>{const stickers=[],reactions=[];for(const s of (p&&p.stickers)||[])(pkIsReaction(s)?reactions:stickers).push(s);return{stickers,reactions}};
 function pkPsHtml(p){const sets=PKPT.sets[p.id];
  if(sets===undefined||sets===null)return `<section class=pk-ps><div class=pk-ps-h><h2>${ic('fx')} Reaction studio</h2></div><div class=pk-pt-load><div class=spin></div><span class=mut>Reading the pack's reaction sets…</span></div></section>`;
  const bursts=PKPT.bursts[p.id]||[];
  const scope=(typeof PKPT.scope!=='undefined'&&PKPT.scope)||'pack';
- return `<section class=pk-ps><div class=pk-ps-h><h2>${ic('fx')} Reaction studio</h2><span class=mut>reactions made for the stickers in this pack</span><span class=gspace></span>
+ return `<section class=pk-ps><div class=pk-ps-h><h2>${ic('fx')} Reaction studio</h2><span class=gspace></span>
   <div class=tabs style="margin:0"><button class="tab${scope==='pack'?' on':''}" data-act=psscope data-v=pack data-p=${p.id}>This pack</button><button class="tab${scope==='all'?' on':''}" data-act=psscope data-v=all data-p=${p.id}>All 1800</button></div>
   <button class="btn sm pri" data-act=psmakepack data-p=${p.id}>Make reactions for this pack</button><button class="btn sm" data-act=pspickpack data-p=${p.id}>Use reactions of another sticker</button></div>
   <div data-pswall=${p.id}><span class=mut>Reading the emoji map...</span></div>
@@ -235,6 +242,7 @@ function pkBurst(b,pid){const ws=b.warnings||[],bl=b.blocks||[],ok=b.status==='R
   ${!b.added_to&&ok?`<button class="btn sm pri" data-act=psbadd data-id=${esc(b.set)} data-r=${esc(b.id)} data-p=${esc(pid||'')}>${ws.length?'Add anyway':'Add to this pack'}</button>`:''}</div>`}
 /* one line on the sticker, linking to the pack's reaction studio (the gallery lives there now) */
 function pkStickerLine(s){if(!s.pack_id)return '<span class=mut>No pack.</span>';
+ if(pkIsReaction(s))return `<span>Reaction burst${s.source&&s.source.preset?' · '+esc(s.source.preset):''}${s.source&&s.source.particle_set?' · from '+esc(s.source.particle_set):''}</span> <span class=mut>Reactions do not get reactions.</span>`;
  const sets=PKPT.sets[s.pack_id];if(!sets){ptCounts(s.pack_id);return '<span class=mut>Reading the sticker’s reactions…</span>'}
  const mine=sets.filter(x=>(x.owner||[]).some(o=>o.sticker_id===s.id));PKPT.d=PKPT.d||{};const detail=PKPT.d[s.id];if(!detail&&typeof ptLoad==='function'){PKPT.d[s.id]={loading:true};ptLoad(s)}
  if(!detail||detail.loading)return `<span class=mut>${mine.length?'Reading the sticker’s reactions…':'No reactions yet'}</span> <button class=link data-act=ptmake data-p=${esc(s.pack_id)} data-s=${esc(s.id)}>${mine.length?'New version':'Create reactions'}</button>`;
@@ -242,7 +250,7 @@ function pkStickerLine(s){if(!s.pack_id)return '<span class=mut>No pack.</span>'
  const n=(detail.rows||[]).length,count=ptCount(detail);
  return `<span>${count?`Reactions · ${n} saved version${n===1?'':'s'}`:'No reactions yet'}</span> <button class=link data-act=ptmake data-p=${esc(s.pack_id)} data-s=${esc(s.id)}>${count?'New version':'Create reactions'}</button>${count?ptBody(detail,s):''}`};
 ACT.psshow=async el=>{spOpenFor(el.dataset.p,el.dataset.s);const r=await api('/api/particles/'+el.dataset.id);if(r.ok){SP.entry=(SP.entry||0)+1;SP.set=r.j;SP.target=r.j.id;SP.eid='';spDraw();spBurstPreview(r.j.id)}};
-/* reactions scope toggle + emoji wall (generic 1800) + pack reaction rows (one row per emoji, motion locked) */
+/* reactions scope toggle + emoji wall (generic 1800) + this pack's compact emoji wall (motion locked) */
 PKPT.scope='pack';PKPT.wall=null;PKPT.reactions={};
 ACT.psscope=async el=>{PKPT.scope=el.dataset.v==='all'?'all':'pack';drawPack();pkWallLoad(el.dataset.p);pkReactionsLoad(el.dataset.p)};
 async function pkWallLoad(pid){const el=document.querySelector&&document.querySelector(`[data-pswall="${pid}"]`);if(!el)return;
@@ -251,5 +259,5 @@ async function pkWallLoad(pid){const el=document.querySelector&&document.querySe
  el.innerHTML=((PKPT.scope==='all')?`<div class=row><input type=text data-pswallq=${pid} placeholder="Search 1800 reactions..." value="${esc(PKPT.wallQ||'')}" aria-label="Search reactions"></div>`:'')+((PKPT.scope==='all')?`<div class=ps-wall>${list.map(m=>`<div class=ps-emo title="${esc(m.motion||m.preset)}"><span class=ps-glyph>${esc(m.emoji||'o')}</span><b>${esc(m.token)}</b><small class=mut>${esc(m.preset)}</small></div>`).join('')||'<span class=mut>No match.</span>'}</div><small class=mut>Showing ${list.length} of ${(PKPT.wall||[]).length} · motion locked · pick This pack to vary art + Size/Energy.</small>`:'')}
 async function pkReactionsLoad(pid){const el=document.querySelector&&document.querySelector(`[data-psreactions="${pid}"]`);if(!el||PKPT.scope!=='pack')return;
  const r=await api(`/api/packs/${encodeURIComponent(pid)}/reactions`);if(!r.ok)return;PKPT.reactions[pid]=r.j.reactions||[];
- el.innerHTML=`<div class=pk-rows>${(PKPT.reactions[pid]||[]).map(w=>`<div class=pk-row data-reaction-row=${esc(w.token)}><span class=pk-row-v>${esc(w.emoji||'o')}</span><div class=pk-row-id><b>${esc(w.token)}</b><small>${esc(w.preset)} · motion locked${w.motion?' · '+esc(w.motion):''}</small></div><div class=pk-row-a><span class=mut>${(w.stickers||[]).length} sticker${(w.stickers||[]).length===1?'':'s'} · ${(w.sets||[]).length} set${(w.sets||[]).length===1?'':'s'}</span></div></div>`).join('')||'<span class=mut>No reactions in this pack yet.</span>'}</div>`}
+ el.innerHTML=(PKPT.scope==='all'?'':`<div class=ps-wall>${(PKPT.reactions[pid]||[]).map(w=>`<div class=ps-emo title="${esc(((w.motion||w.preset||'')+' · motion locked'))}"><span class=ps-glyph>${esc(w.emoji||'o')}</span><b>${esc(w.token)}</b><small class=mut>${esc(w.preset||'')}</small></div>`).join('')||'<span class=mut>No reactions in this pack yet.</span>'}</div>`)}
 document.addEventListener('input',ev=>{const t=ev.target;if(t&&t.dataset&&t.dataset.pswallq!==undefined){PKPT.wallQ=t.value;clearTimeout(PKPT.wallT);const pid=t.dataset.pswallq;PKPT.wallT=setTimeout(()=>pkWallLoad(pid),300)}});

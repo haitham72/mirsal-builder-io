@@ -407,7 +407,7 @@ function drawCol2() {
       .sort((a, b) => (Number(b.created) || 0) - (Number(a.created) || 0)))
       .map((e) => {
         const row = (p, sub) =>
-          `<div class="crow${sub ? ' sub' : ''} ${p.id === cur ? 'on' : ''}" data-act=openpack data-id=${p.id} draggable=true title="Click to open; drag onto another pack to put it there as a sub-pack"><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${p.stickers.length} stickers</small></div><span class=meta>${p.stickers.some((s) => s.type === 'animated') ? 'animated' : ''}</span></div>`;
+          `<div class="crow${sub ? ' sub' : ''} ${p.id === cur ? 'on' : ''}" data-act=openpack data-id=${p.id} draggable=true title="Click to open; drag onto another pack to put it there as a sub-pack"><div class=cv>${coverMedia(p)}</div><div><b>${esc(p.name)}</b><small>${(()=>{const r=(p.stickers||[]).filter(s=>(s.source||{}).particle_set).length,n=(p.stickers||[]).length-r;return n+' sticker'+(n===1?'':'s')+(r?' · '+r+' reaction'+(r===1?'':'s'):'')})()}</small></div><span class=meta>${p.stickers.some((s) => s.type === 'animated') ? 'animated' : ''}</span></div>`;
         if (e.pack) return row(e.pack);
         const open = PKFOLD.has(e.group) ? PKFOLD.get(e.group) : e.packs.some((p) => p.id === cur),
           f = e.packs[0];
