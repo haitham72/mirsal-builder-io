@@ -163,6 +163,37 @@ class CollectionTests(unittest.TestCase):
             self.assertEqual((s, j["ok"]), (200, True), j)
             self.assertEqual(FakeCMS.seen[-1]["auth"], "Bearer sk-test-key-123")
 
+    def test_the_developer_key_api_answers(self):
+        """docs/Api/AddCollection-API .md: 200 {Success: true, Result}; a 200 {Success: false} is a refusal; 400 explains in ErrorMessages; 401 is the key."""
+        g = f"G{self.gid:03d}"
+        FakeCMS.answer = (200, b'{"Success": true, "Result": {"CollectionId": 42, "Status": "Pending"}, "ErrorMessages": []}', "application/json")
+        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})
+        self.assertEqual((s, j["ok"], j["result"]), (200, True, {"CollectionId": 42, "Status": "Pending"}), j)
+        FakeCMS.answer = (200, b'{"Success": false, "Result": null, "ErrorMessages": ["Collection name already exists"]}', "application/json")
+        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})
+        self.assertEqual((s, j["ok"], j["error"]), (200, False, "Collection name already exists"), "a 200 that says Success: false is a refusal")
+        FakeCMS.answer = (400, b'{"Success": false, "ErrorMessages": ["Description is required", "Media is required"]}', "application/json")
+        j = self.req(f"/api/generations/{g}/export-collection", {"name": "x"})[1]
+        self.assertEqual((j["ok"], j["status"], j["error"]), (False, 400, "Description is required; Media is required"))
+        FakeCMS.answer = (401, b"", "application/json")
+        j = self.req(f"/api/generations/{g}/export-collection", {"name": "x"})[1]
+        self.assertEqual((j["ok"], j["status"]), (False, 401))
+        self.assertIn("developer key", j["error"])
+        self.assertIn("Developer Keys page", j["error"])
+
+    def test_the_api_limits_are_a_sentence_before_anything_is_uploaded(self):
+        g = f"G{self.gid:03d}"
+        FakeCMS.answer = (200, b'{"Success": true, "Result": {}}', "application/json")
+        before = len(FakeCMS.seen)
+        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "n" * 41})
+        self.assertEqual(s, 400)
+        self.assertIn("at most 40", j["error"])
+        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "ok", "description": "d" * 161})
+        self.assertEqual(s, 400)
+        self.assertIn("at most 160", j["error"])
+        self.assertEqual(len(FakeCMS.seen), before, "nothing was uploaded")
+        self.assertEqual(self.req(f"/api/generations/{g}/export-collection", {"name": "n" * 40, "description": "d" * 160})[1]["ok"], True, "the limits themselves are fine")
+
     def test_tags_are_the_action_tokens_without_the_emoji(self):
         self.assertEqual(col.tags_of({"tags": ["laugh", "rofl", "LMAO", "🤣", "eye-roll", "laugh"]}), "laugh_rofl_lmao_eye_roll")
 

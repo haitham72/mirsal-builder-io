@@ -1,152 +1,69 @@
-# AddCollection API
+# Mirsal Creator API: Submit a Pack for Approval
 
-Creates an emoji collection with animated media files (e.g. `.webm`) and per-file emoji metadata.
+The external emoji CMS that **Export to collection** sends packs to. This page is the CMS's own reference (developer keys, the endpoint, its answers) followed by how Mirsal calls it (`mirsal/mirsal/services/collection.py`; routes in [../api.md](../api.md) "Export to the AddCollection API").
 
-## Endpoint
+## Developer keys
 
-```
-POST /api/v1/Upload/AddCollection
-Content-Type: multipart/form-data
-Authorization: Basic <base64(username:password)>
-```
+Developer keys let an integration call the Mirsal Creator API on your behalf, with the same permissions as your account.
 
-Base URL: `https://emojicms.ehub.ae` (local: `http://localhost:5189`)
-
-> Do not set `Content-Type` manually. `fetch` + `FormData` sets it with the correct multipart boundary.
-
-## Request Model (multipart/form-data)
-
-|Field|Type|Required|Repeatable|Description|
-|-|-|-|-|-|
-|`CollectionName`|string|Yes|No|Display name of the collection|
-|`Description`|string|No\*|No|Description of the collection|
-|`Media`|file (binary)|Yes|**Yes**|One part per media file. Same field name repeated for each file|
-|`MediaMetadata`|string (JSON)|Yes|No|JSON array of metadata objects, one per `Media` file|
-
-\* Sent in the example; adjust if the server enforces it.
-
-### `MediaMetadata` item
-
-```json
-{
-  "emoji\_utf": "😀",
-  "tags": "grinning\_smile\_happy"
-}
-```
-
-|Field|Type|Description|
-|-|-|-|
-|`emoji\_utf`|string|The emoji character (UTF) the media represents|
-|`tags`|string|Search tags, underscore-separated in the example|
-
-## Critical Rule: Ordering
-
-`Media\[i]` is paired with `MediaMetadata\[i]` **by index**, not by filename.
-
-```
-Media #0  happy.webm  <->  MediaMetadata\[0]  { emoji\_utf: "😀", ... }
-Media #1  sad.webm    <->  MediaMetadata\[1]  { emoji\_utf: "😂", ... }
-```
-
-Rules:
-
-* `MediaMetadata.length` must equal the number of `Media` parts.
-* Append `Media` parts in the same order as the metadata array.
-* Mismatched count or order will attach wrong emoji/tags to files (or fail validation).
-
-## Example Request (Node.js)
-
-```js
-import fs from "fs";
-
-async function addCollection() {
-  const formData = new FormData();
-
-  formData.append("CollectionName", "Test Emoji Collection3");
-  formData.append("Description", "Test emoji collection3");
-
-  // Media files - order must match MediaMetadata
-  formData.append(
-    "Media",
-    new Blob(\[fs.readFileSync("./happy.webm")], { type: "video/webm" }),
-    "happy.webm"
-  );
-  formData.append(
-    "Media",
-    new Blob(\[fs.readFileSync("./sad.webm")], { type: "video/webm" }),
-    "sad.webm"
-  );
-
-  formData.append(
-    "MediaMetadata",
-    JSON.stringify(\[
-      { emoji\_utf: "😀", tags: "grinning\_smile\_happy" },
-      { emoji\_utf: "😂", tags: "laugh\_funny\_joy" }
-    ])
-  );
-
-  const credentials = process.env.COLLECTION_API_CREDENTIALS; // base64(username:password), never hardcoded
-
-  const baseUrl = "https://emojicms.ehub.ae";
-
-  const response = await fetch(`${baseUrl}/api/v1/Upload/AddCollection`, {
-    method: "POST",
-    headers: { Authorization: `Basic ${credentials}` },
-    body: formData
-  });
-
-  // Read the body once as text, then parse
-  const raw = await response.text();
-  const result = JSON.parse(raw);
-
-  if (!response.ok) throw new Error(result.message || JSON.stringify(result));
-
-  console.log(result);
-}
-
-await addCollection();
-```
+1. On the CMS, open the **Developer Keys** page and click **Generate New Key**.
+2. Give the key a label you will recognise, and choose how long it stays valid: a number of days, months or years, or **No expiration**.
+3. Copy the key immediately. It is shown only once and cannot be retrieved again; if you lose it, delete it and generate a new one.
+4. Store it somewhere safe: anyone who has it can act on your account through the API. For Mirsal that place is `mirsal/.env` only (`MIRSAL_COLLECTION_API_CREDENTIALS`), never a file in the repo.
 
 ## Authentication
 
-HTTP Basic: `Authorization: Basic base64("username:password")`.
+Every request carries the key in the `Authorization` header with the Bearer scheme:
 
-Load credentials from environment variables or a secret store. Do not hardcode them in source or commit them.
-
-## Responses
-
-|Status|Body|Meaning|
-|-|-|-|
-|2xx|JSON (created collection)|Collection created|
-|non-2xx|JSON, with `message` field if available|Validation / auth / server error|
-
-The client reads the body with `response.text()` and then `JSON.parse`. `JSON.parse` throws if the server returns a non-JSON body (e.g. an HTML error page), so wrap it in `try/catch` if you need the raw text. On failure it reads `result.message` and falls back to the full JSON body. The exact success schema is not defined by the client call. Document it from the server DTO.
-
-## Server-side Model (ASP.NET, inferred from the request)
-
-```csharp
-public class AddCollectionRequest
-{
-    public string CollectionName { get; set; } = default!;
-    public string? Description { get; set; }
-    public List<IFormFile> Media { get; set; } = new();
-    public string MediaMetadata { get; set; } = default!; // JSON string
-}
-
-public class MediaMetadataItem
-{
-    \[JsonPropertyName("emoji\_utf")] public string EmojiUtf { get; set; } = default!;
-    \[JsonPropertyName("tags")]      public string Tags { get; set; } = default!;
-}
+```
+Authorization: Bearer sk-xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-Controller binding: `\[FromForm] AddCollectionRequest request`, then deserialize `MediaMetadata` into `List<MediaMetadataItem>` and validate `Media.Count == metadata.Count`.
+A request with no key, or with an expired, deleted or unknown key, gets **401 Unauthorized**.
 
-## Checklist
+## Submit a Pack for Approval
 
-* \[ ] `Media` repeated once per file
-* \[ ] `MediaMetadata` is a JSON **string** (stringified array)
-* \[ ] Counts and order match between `Media` and `MediaMetadata`
-* \[ ] Correct MIME type per file (`video/webm`)
-* \[ ] `Authorization` header present; no manual `Content-Type`
+Creates a new collection from uploaded emoji media and submits it into the approval workflow, the same as publishing through the website.
 
+```
+POST /api/v1/Upload/AddCollection
+Authorization: Bearer <your-developer-key>
+Content-Type: multipart/form-data
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `CollectionName` | string | yes | Name of the new collection, **at most 40 characters**. |
+| `Description` | string | yes | Short description of the pack, **at most 160 characters**. |
+| `ContentSubType` | string | yes | Media sub-type, for example `webm`. |
+| `Media` | file[] | yes | One or more emoji media files; the same field name repeated once per file. |
+| `MediaMetadata` | string (JSON) | yes | A JSON array with one entry per file in `Media`, **in the same order**. Each entry needs `emoji_utf` and `tags`. |
+
+`Media[i]` is paired with `MediaMetadata[i]` **by index**, never by file name: the array's length must equal the number of `Media` parts.
+
+```bash
+curl -X POST "https://emojicms.devinprocess.com/api/v1/Upload/AddCollection" \
+  -H "Authorization: Bearer sk-xxxxxxxxxxxxxxxxxxxxxxxx" \
+  -F "CollectionName=My Pack" \
+  -F "Description=A short description" \
+  -F "ContentSubType=webm" \
+  -F 'MediaMetadata=[{"emoji_utf":"😀","tags":"smile,happy"}]' \
+  -F "Media=@smile.webm"
+```
+
+| Status | Meaning |
+|---|---|
+| 200 OK | `Success: true` and the created pack's details in `Result`. |
+| 400 Bad Request | Validation failed; `ErrorMessages` explains why. |
+| 401 Unauthorized | The developer key is missing, invalid or expired. |
+| 500 Internal Server Error | Something went wrong while processing the upload. |
+
+More endpoints will be added to the CMS's reference as they become available.
+
+## How Mirsal calls it
+
+- **What is sent** is exactly what the pack's (or batch's) Download .zip holds, in its order: `Media` once per asset (`.webm` animated, `.png` / `.webp` static), `MediaMetadata` one JSON string `[{emoji_utf, tags}]` of the same length (`emoji_utf` the asset's first grapheme cluster, `tags` its action tokens joined by `_`, never empty), `ContentSubType` `webm` for animated packs (and a mix), else the stills' own type.
+- **Limits are checked before anything is uploaded**: a name over 40 or a description over 160 characters is a 400 with a sentence; the dialog caps both fields, offers a longer pack name cut at a word for you to edit, and asks for the description. An API caller who sends no description gets the collection's name as the description.
+- **Answers**: a 2xx counts as accepted unless its JSON says `Success: false`; the refusal's words come from `ErrorMessages` (a list is joined with `; `), else an older `message` / validation answer, else the status. A 401 says the developer key was not accepted and how to replace it. The created pack's `Result` is returned as `result`.
+- **Configuration** (`mirsal/.env`): `MIRSAL_COLLECTION_API_CREDENTIALS` = the `sk-...` developer key (sent as Bearer; a legacy `user:password` or its base64 still sends HTTP Basic), `MIRSAL_COLLECTION_API_URL` = the CMS (the code's default is `https://emojicms.ehub.ae`; the example above uses `https://emojicms.devinprocess.com`). Every export, ok or not, is a line in `out/collection_exports.jsonl`, never the key.
+- **Losing or leaking a key**: delete it on the Developer Keys page, generate a new one, put it in `.env`, restart the server.

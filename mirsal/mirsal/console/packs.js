@@ -50,16 +50,19 @@ ACT.rtans=el=>{const r=RTA;RTA=null;closeDlg();r&&r(el.dataset.v==='x'?null:el.d
 const packShort=async id=>{const r=await api(`/api/packs/${encodeURIComponent(id)}/short`);return r.ok?r.j.short:[]};
 const genShort=n=>{const g=GM.get(+n);return g?(g.stickers||[]).filter(s=>s.anim_status==='READY'&&s.webm&&(s.review||{}).anim!=='REJECTED').map(s=>{const m=s.anim_metrics||{};return{name:String(s.key||'').replace(/_/g,' '),emoji:s.emoji,seconds:m.fps?(m.frames_out||m.frames||0)/m.fps:3}}).filter(s=>s.seconds<2.95):[]};
 ACT.pkzip=async el=>{const rt=await retimeAsk(await packShort(PACK_ID),'zip');if(rt===null)return;location.href=`/api/packs/${PACK_ID}/export.zip?light=${el.dataset.l}${rt?'&retime=1':''}`};
+/* the API's limits (40 for the name): a longer pack name is offered cut at a word, visibly, for the person to edit */
+const colFit=(s,n)=>{s=String(s).trim();if(s.length<=n)return s;const cut=s.slice(0,n+1).lastIndexOf(' ');return (cut>n/2?s.slice(0,cut):s.slice(0,n)).trim()};
 function colBtn(kind,id,n,name){return colOwner()?`<button class=btn data-act=colopen data-k=${kind} data-id="${esc(String(id))}" data-n="${esc(name||'')}" ${n?'':'disabled'} title="Send these stickers (the same as Download .zip) to the collection API as one collection">${ic('upload')} Export to collection</button>`:''}
 ACT.colopen=async el=>{const k=el.dataset.k,id=el.dataset.id,st=await api('/api/collection'),cfg=st.ok?st.j:{configured:false,url:''},
   short=k==='pack'?await packShort(id):genShort(String(id).replace(/^G/i,''));
  dlg(`<h2>Export to collection</h2><p class=mut>The stickers of Download .zip (animated where ready), in the same order, each with its emoji and tags, are sent as ONE new collection${cfg.url?` to <b>${esc(cfg.url)}</b>`:''}. Nothing in Mirsal changes.</p>
-  ${cfg.configured?'':`<div class=warn>The collection API is not set up: put <code>MIRSAL_COLLECTION_API_CREDENTIALS</code> (base64 of user:password) in <code>.env</code> and restart the server.</div>`}
-  <div class=fld><label>Collection name</label><input id=col-name maxlength=120 value="${esc(el.dataset.n||'')}"></div>
-  <div class=fld><label>Description (optional)</label><input id=col-desc maxlength=2000></div>
+  ${cfg.configured?'':`<div class=warn>The collection API is not set up: generate a developer key (<code>sk-…</code>) on its Developer Keys page, put it in <code>MIRSAL_COLLECTION_API_CREDENTIALS</code> in <code>.env</code> and restart the server.</div>`}
+  <div class=fld><label>Collection name <small class=mut>at most 40 characters</small></label><input id=col-name maxlength=40 value="${esc(colFit(el.dataset.n||'',40))}"></div>
+  <div class=fld><label>Description <small class=mut>at most 160 characters</small></label><input id=col-desc maxlength=160 required placeholder="A short description of the pack"></div>
   ${short.length?`<div class=fld><label>${short.length} animation${short.length===1?' is':'s are'} shorter than 3 s (${short.slice(0,6).map(s=>`${esc(s.emoji||'')} ${(+s.seconds).toFixed(1)} s`).join(', ')}${short.length>6?' …':''})</label><select id=col-retime><option value=1>Retime to 3 s (the same frames, slower)</option><option value=0>Keep their length</option></select></div>`:''}
   <div id=col-res></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class="btn pri" data-act=colsend data-k=${k} data-id="${esc(id)}" ${cfg.configured?'':'disabled'}>Send</button></div>`)};
 ACT.colsend=async el=>{const url=el.dataset.k==='pack'?`/api/packs/${encodeURIComponent(el.dataset.id)}/export-collection`:`/api/generations/${encodeURIComponent(el.dataset.id)}/export-collection`,box=$('col-res');
+ if(!(($('col-desc')||{}).value||'').trim()){if(box)box.innerHTML='<div class=warn>The collection API needs a short description of the pack.</div>';return}
  el.disabled=true;el.textContent='Sending…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim(),retime:(($('col-retime')||{}).value)==='1'});
  el.textContent='Send';el.disabled=false;
  if(!r.ok){if(box)box.innerHTML=`<div class=warn>${esc(r.j.error||'Could not send')}</div>`;return}

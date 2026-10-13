@@ -82,8 +82,8 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 **39. Do you want the 3D text templates and the 3D parallax photos built at all?** Both are unstarted (`docs/backlog.md`, store and search 3D / 3E): CapCut-style flashing text-slot stickers with 30+ procedural starters, and photo depth with a gyroscope WebGL viewer. Recommendation: no for now; both are large and neither is on the golden path. Unblocks: deleting or scheduling two large backlog items.
 
-**49. Rotate the AddCollection credential, then try two things for real.** The credential pasted in `docs/Api/AddCollection-API .md` is in git
-history (commit dd17f61, pushed): change that password and keep the new one only in `mirsal/.env` (`MIRSAL_COLLECTION_API_CREDENTIALS`). Then, with
+**49. Rotate the AddCollection credential, then try two things for real.** The old password pasted in `docs/Api/AddCollection-API .md` is in git
+history (commit dd17f61, pushed): change it, and use a developer key instead (the CMS's Developer Keys page, `sk-...`), kept only in `mirsal/.env` (`MIRSAL_COLLECTION_API_CREDENTIALS`). Then, with
 `serve --lan` restarted: one Export to collection of a small pack (the chat's last stop, **Export**, makes the same call after Telegram, so it waits on this too), and the Telegram chat (`/start`, `/model`, a request: real stickers, the album, a
 creator run's edited message). Recommendation: both now, they cost nothing but a pack's credits. Unblocks: the backlog's Telegram chat and export items.
 

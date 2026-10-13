@@ -1,7 +1,8 @@
-"""Export a pack (or one Studio batch) to the AddCollection API, an external emoji CMS (`docs/Api/AddCollection-API .md`).
+"""Export a pack (or one Studio batch) to the Mirsal Creator API's "Submit a Pack for Approval", an external emoji CMS (`docs/Api/AddCollection-API .md`).
 
-`POST {base}/api/v1/Upload/AddCollection`, multipart/form-data, `Authorization: Bearer <api key>`:
-- `CollectionName` (the pack's name), `Description` (optional),
+`POST {base}/api/v1/Upload/AddCollection`, multipart/form-data, `Authorization: Bearer <developer key>` (an `sk-...` key from the CMS's Developer Keys page):
+- `CollectionName` (the pack's name, at most 40 characters), `Description` (required, at most 160; the collection's name when none is given),
+- `ContentSubType` (`webm` for animated packs),
 - `Media` repeated once per file (`.webm` animated, `.png` / `.webp` static),
 - `MediaMetadata`: ONE JSON string, an array of `{emoji_utf, tags}` paired with `Media` BY INDEX (never by file name).
 
@@ -10,7 +11,8 @@ stickers (accepted, animated where ready) and resolve each one's emoji and actio
 can never disagree. `emoji_utf` is the asset's first grapheme cluster, `tags` its action tokens joined by `_` (`laugh_rofl_lmao`).
 
 Configuration lives in the environment only (`.env`), never in a file in the repo: `MIRSAL_COLLECTION_API_URL` (default the CMS below) and
-`MIRSAL_COLLECTION_API_CREDENTIALS` (an `sk-...` API key, sent as `Authorization: Bearer`; a legacy `user:password` or its base64 still sends HTTP Basic). Every export, ok or not, is a line in
+`MIRSAL_COLLECTION_API_CREDENTIALS` (the `sk-...` developer key, sent as `Authorization: Bearer`; a legacy `user:password` or its base64 still sends HTTP Basic).
+The answer is `{Success, Result, ErrorMessages}`: a 200 with `Success: false` is a refusal too; 401 means the key is missing, invalid or expired. Every export, ok or not, is a line in
 `out/collection_exports.jsonl` (who, what, how many, the answer's status), never the credentials. Stdlib only; tests talk to a fake server."""
 from __future__ import annotations
 
@@ -29,6 +31,8 @@ from pathlib import Path
 DEFAULT_URL = "https://emojicms.ehub.ae"
 ENDPOINT = "/api/v1/Upload/AddCollection"
 TIMEOUT = 120
+NAME_MAX = 40            # the API's limits (docs/Api/AddCollection-API .md): checked here, so a refusal is a sentence before anything is uploaded
+DESCRIPTION_MAX = 160
 MIME = {".webm": "video/webm", ".png": "image/png", ".webp": "image/webp"}
 
 
@@ -155,9 +159,25 @@ def _log(out: Path, row: dict) -> None:
     atomic.write_text(p, old + json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def accepted(status: int, res) -> bool:
+    """The API took the pack: a 2xx whose JSON does not say `Success: false` (`{Success, Result, ErrorMessages}`; an older answer without `Success` counts by its status)."""
+    if not 200 <= status < 300:
+        return False
+    return not (isinstance(res, dict) and res.get("Success", res.get("success", True)) is False)
+
+
 def reason(status: int, res) -> str:
-    """The refusal in words: the CMS's `message`, else an ASP.NET validation answer (`title` + each field's errors), else its text, else the status."""
+    """The refusal in words: 401 is the developer key; else the API's `ErrorMessages` (a list or a string), its `message`, an ASP.NET validation
+    answer (`title` + each field's errors), its text, or the status."""
+    if status == 401:
+        return ("The collection API did not accept the developer key (missing, invalid or expired): generate a new key on its Developer Keys page, "
+                "put it in MIRSAL_COLLECTION_API_CREDENTIALS in .env and restart the server")
     if isinstance(res, dict):
+        em = res.get("ErrorMessages", res.get("errorMessages"))
+        if isinstance(em, list) and any(em):
+            return "; ".join(str(x) for x in em if x)[:500]
+        if isinstance(em, str) and em.strip():
+            return em.strip()[:500]
         if res.get("message"):
             return str(res["message"])[:500]
         errs = res.get("errors")
@@ -175,10 +195,14 @@ def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: 
     """Export the stickers of a Download .zip (`what`: `pack P…` or `G###`) as one collection. The answer:
     {ok, status, collection, count, response, error?}; a refusal by the CMS is an answer (ok false, its message), not an exception."""
     pack, items = items_from_zip(zip_bytes)
-    title = " ".join(str(name or pack.get("title") or pack.get("slug") or "Mirsal stickers").split())[:120]
-    desc = " ".join(str(description or "").split())[:2000] or title      # the CMS may require a description: an empty one is the collection's name
+    title = " ".join(str(name or pack.get("title") or pack.get("slug") or "Mirsal stickers").split())
+    desc = " ".join(str(description or "").split()) or title            # the API requires a description: an empty one is the collection's name
     row = {"at": round(time.time(), 3), "by": by, "what": what, "collection": title, "count": len(items), "url": base_url()}
     try:
+        if len(title) > NAME_MAX:
+            raise CollectionError(f"The collection name is {len(title)} characters; the collection API takes at most {NAME_MAX}. Shorten it and send again.", 400)
+        if len(desc) > DESCRIPTION_MAX:
+            raise CollectionError(f"The description is {len(desc)} characters; the collection API takes at most {DESCRIPTION_MAX}. Shorten it and send again.", 400)
         r = post(title, desc, items)
     except CollectionError as e:
         from ..runtime import activity
@@ -186,8 +210,10 @@ def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: 
         _log(out, {**row, "ok": False, "error": str(e)})
         raise
     res = r["response"]
-    err = None if r["ok"] else reason(r["status"], res)
+    ok = accepted(r["status"], res)
+    err = None if ok else reason(r["status"], res)
     from ..runtime import activity
-    activity.say(f'exported "{title}" ({what}): {len(items)} stickers' if r["ok"] else f'export "{title}" ({what}) refused {r["status"]}: {err}', error=not r["ok"])
-    _log(out, {**row, "ok": r["ok"], "status": r["status"], **({"error": err, "response": res if isinstance(res, dict) else str(res)[:1000]} if err else {})})
-    return {"ok": r["ok"], "status": r["status"], "collection": title, "count": len(items), "response": res, **({"error": err} if err else {})}
+    activity.say(f'exported "{title}" ({what}): {len(items)} stickers' if ok else f'export "{title}" ({what}) refused {r["status"]}: {err}', error=not ok)
+    _log(out, {**row, "ok": ok, "status": r["status"], **({"error": err, "response": res if isinstance(res, dict) else str(res)[:1000]} if err else {})})
+    result = res.get("Result", res.get("result")) if isinstance(res, dict) else None          # the created pack's details, as the API returns them
+    return {"ok": ok, "status": r["status"], "collection": title, "count": len(items), "response": res, "result": result, **({"error": err} if err else {})}
