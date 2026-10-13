@@ -111,3 +111,7 @@ WebM VP9+alpha stays the primary and only Telegram delivery. Kling-animated spri
 ## 10. Migrating random sets onto the map (2026-10-13)
 
 `particle_sets.adopt_emoji_map()` (CLI `python -m mirsal particles adopt-emoji-map`): idempotent, free. Keeps every byte; replaces free motion with the emoji map's motion for the set's first owner sticker's emoji token (else its first element); preserves tuned Size/Energy; writes `set.json.pre-emoji-map` once; history `ADOPT_EMOJI`. Sets already mapped (`emoji_motion.version: 1`) are skipped.
+
+## 11. Added bursts are reactions, not stickers (2026-10-13)
+
+`Add to pack` still delivers the burst as an ordinary animated pack sticker (Telegram and zip include it), but the screens never mix it into the stickers: the pack grid, its counts, the Library rows, the Home showcase and the burst-emoji vote (`_pack_emoji`) all skip stickers whose `source.particle_set` is set. Added bursts live in **Reactions in this pack** (view + delete). They carry no reaction rows, no creation buttons, no recovery entry and are never offered as reaction sources — a reaction never gets reactions of its own, so the sticker → reaction → sticker loop is gone.

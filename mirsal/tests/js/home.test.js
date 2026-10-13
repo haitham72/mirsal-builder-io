@@ -77,6 +77,7 @@ test('the showcase filters individual stickers and bounds media to twenty-four; 
   assert.deepEqual(ids('', 'particles'), ['c']);
   assert.deepEqual(ids('cat b', 'all'), ['b']);
   assert.equal(run(`hmStickers([{name:'Many',stickers:Array.from({length:30},(_,id)=>({id}))}],'','all').length`), 24);
+  assert.deepEqual(JSON.parse(run(`JSON.stringify(hmStickers([{name:'P',stickers:[{id:'a'},{id:'r',source:{particle_set:'P001'}}]}],'','all').map(x=>x.s.id))`)), ['a'], 'an added burst is a reaction, not a sticker: never in the showcase');
   assert.match(run(`hmFilm()`), /autoplay/);
   assert.doesNotMatch(run(`reducedMotion=true;hmFilm()`), /autoplay/);
   assert.doesNotMatch(run(`hmFilm(true)`), /autoplay/);

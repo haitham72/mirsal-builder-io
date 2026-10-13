@@ -55,6 +55,12 @@ test('a scope preselects only its batch or sticker, never another pack', () => {
   assert.deepEqual(run(withPacks("spScopeStickers({sticker_id:'a2'},LIB.packs).map(r=>r.sticker.id)")), ['a2']);
 });
 
+test('an added burst is never a source: reactions do not get reactions', () => {
+  const packs = [{id:'p1',stickers:[{id:'a1'},{id:'r1',source:{particle_set:'P001'}}]}];
+  assert.deepEqual(run(`spScopeStickers({pack_id:'p1'},${JSON.stringify(packs)}).map(r=>r.sticker.id)`), ['a1']);
+  assert.deepEqual(run(`spScopeStickers({sticker_id:'r1'},${JSON.stringify(packs)})`), []);
+});
+
 test('three creation cards (sticker sprites, AI images, Kling) and scoped slices', () => {
   const h=run(withPacks("spSetupHtml(Object.assign(fxNew('sp'),{scope:{generation:'G012'},pack:'p1',kind:'drawn',sel:new Set(['a1','a2']),grid:'2x2'}),LIB.packs,['G012'])"));
   for(const label of ['Sprites from the sticker','AI image sprites','Kling animated · from scratch'])assert.match(h,new RegExp(label));
@@ -64,13 +70,13 @@ test('three creation cards (sticker sprites, AI images, Kling) and scoped slices
   assert.doesNotMatch(h,/Nothing is drawn or spent yet/);
 });
 
-test('the Studio’s header gets a Particles step after Animation, and only once an animation exists', () => {
+test('the Studio’s header gets a Reactions step after Animation, and only once an animation exists', () => {
   const done = t => `<button class="gst done " data-act=gtab data-t=${t}><span class=gsm><svg></svg></span><span class=gsl><b>${t}</b></span></button>`;
   const steps = '<div class=gsteps>' + done('request') + done('plan') + done('stickers')
     + '<button class="gst todo " data-act=gtab data-t=anim><span class=gsm>4</span><span class=gsl><b>Animation</b></span></button>'
     + '<button class="gst todo " data-act=gadd ><span class=gsm>5</span><span class=gsl><b>Pack</b></span></button></div>';
   const anim = [{generation_id:'G012',stickers:[{anim_status:'READY'}]}];
-  assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[])`)), steps, 'no animation yet: no Particles step anywhere');
+  assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[])`)), steps, 'no animation yet: no Reactions step anywhere');
   assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[{generation_id:'G012'}])`)), steps, 'a batch without stickers is not animated either');
   const h = run(withPacks(`spSteps(${JSON.stringify(steps)},${JSON.stringify(anim)})`));
   assert.ok(h.indexOf('data-t=particles') > h.indexOf('data-t=anim') && h.indexOf('data-t=particles') < h.indexOf('data-act=gadd'), 'between Animation and Pack');
@@ -132,7 +138,7 @@ test('the section: a heading with the one button that opens the tab, and nothing
 
 test('the tab replaces the body only while it is current, and a person can leave the flow at any point', () => {
   assert.equal(run("(GS.tab='stickers',gbodyHtml([],{}))"), 'ORIGINAL BODY');
-  assert.equal(run("(GS.tab='particles',gbodyHtml([{generation_id:'G012'}],{}))"), 'ORIGINAL BODY', 'no animation yet: no Particles tab either');
+  assert.equal(run("(GS.tab='particles',gbodyHtml([{generation_id:'G012'}],{}))"), 'ORIGINAL BODY', 'no animation yet: no Reactions tab either');
   const h = run(withPacks("(GS.tab='particles',SP.scope={generation:'G012'},SP.eid='',SP.pack='p1',SP.sel=new Set(['a1','a2']),gbodyHtml([{generation_id:'G012',stickers:[{anim_status:'READY'}]}],{}))"));
   assert.match(h, /^<section class="gplan sp fx" id=sp-root data-fxx=sp>/, 'the root every handler finds its state from');
   assert.match(h, /<h2>Reactions<\/h2>/);

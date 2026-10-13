@@ -25,8 +25,8 @@ function load(pkpt) {
     ptCounts: pid => { counts.push(pid); },
     spSetCard: s => `<setcard data-for=${s.id}>`,
   };
-  const body = ['const ptWhy=', 'const ptPackName=', 'function pkPsHtml(', 'function pkBurst(', 'function pkStickerLine('].map(statement).join('\n');
-  const f = new Function(...Object.keys(sandbox), body + '\nreturn {pkPsHtml,pkBurst,pkStickerLine};')(...Object.values(sandbox));
+  const body = ['const pkIsReaction=', 'const pkSplit=', 'const ptWhy=', 'const ptPackName=', 'function pkPsHtml(', 'function pkBurst(', 'function pkStickerLine('].map(statement).join('\n');
+  const f = new Function(...Object.keys(sandbox), body + '\nreturn {pkPsHtml,pkBurst,pkStickerLine,pkIsReaction,pkSplit};')(...Object.values(sandbox));
   return { ...f, counts };
 }
 
@@ -44,7 +44,7 @@ test('while the pack’s sets are not read yet the studio says so and asks for n
 test('the studio shows the pack’s sets as shared cards and both ways to get one', () => {
   const h = load({ sets: { p1: SETS }, bursts: {} });
   const s = h.pkPsHtml({ id: 'p1', name: 'Barbie' });
-  assert.match(s, /reactions made for the stickers in this pack/);
+  assert.doesNotMatch(s, /reactions made for the stickers in this pack/, 'the header stays clean: title, scope, actions');
   assert.match(s, /data-act=psmakepack data-p=p1>Make reactions for this pack</);
   assert.match(s, /data-act=pspickpack data-p=p1>Use reactions of another sticker</);
   assert.match(s, /<setcard data-for=P001>/);
@@ -78,6 +78,17 @@ test('a burst’s warnings are sentences, a missing file says so', () => {
   assert.match(h.pkBurst({ ...BURSTS[0], url: null, missing: true }), /file missing/);
 });
 
+test('an added burst is a reaction, not a sticker: split out of the grid and loop-free',()=>{
+ const h=load({sets:{},bursts:{}});
+ const pack={id:'p1',stickers:[{id:'a1'},{id:'r1',source:{particle_set:'P001',preset:'burst'}}]};
+ assert.deepEqual(h.pkSplit(pack).stickers.map(s=>s.id),['a1']);
+ assert.deepEqual(h.pkSplit(pack).reactions.map(s=>s.id),['r1']);
+ assert.equal(h.pkIsReaction({id:'a1'}),false);
+ const line=h.pkStickerLine({id:'r1',pack_id:'p1',source:{particle_set:'P001',preset:'burst'}});
+ assert.match(line,/Reaction burst/);assert.match(line,/P001/);
+ assert.doesNotMatch(line,/data-act=ptmake|Create reactions|New version/,'a reaction never offers reactions of its own');
+});
+
 test('a sticker shows only its own reactions and scoped creation',()=>{
  const h=load({sets:{},bursts:{}});assert.match(h.pkStickerLine({id:'a1',pack_id:'p1'}),/Reading the sticker/);
  const none=load({sets:{p1:[]},bursts:{}});assert.match(none.pkStickerLine({id:'a1',pack_id:'p1'}),/data-act=ptmake data-p=p1 data-s=a1>Create reactions/);
@@ -104,5 +115,5 @@ test('the chrome says particles, not pieces, on every screen', () => {
     const m = code.match(/\bpieces?\b/i);
     if (m) bad.push(`${f}: ${m[0]}`);
   }
-  assert.deepEqual(bad, [], 'a person reads particles everywhere (identifiers like fxPieces are not chrome)');
+  assert.deepEqual(bad, [], 'a person reads reactions everywhere (identifiers like fxPieces are not chrome)');
 });
