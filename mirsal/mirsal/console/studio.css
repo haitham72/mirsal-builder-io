@@ -690,7 +690,7 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .rx-ed{display:grid;grid-template-columns:220px 1fr;gap:18px;padding:14px;border-radius:var(--r-l);background:var(--sf);box-shadow:var(--sh),inset 0 0 0 1px var(--aline)}
 .rx-ctl{display:flex;flex-direction:column;gap:10px;min-width:0}
 .rx-h{display:flex;align-items:center;gap:8px}.rx-h .rx-g{font-size:var(--fs-2xl)}.rx-h b{font-size:var(--fs-l)}.rx-h .link{margin-left:auto}
-.rx-sl{display:grid;grid-template-columns:72px 1fr 44px;align-items:center;gap:10px;font-size:var(--fs-s);max-width:420px}
+.rx-sl{display:grid;grid-template-columns:96px 1fr 44px;align-items:center;gap:10px;font-size:var(--fs-s);max-width:420px}
 .rx-sl input{width:100%;accent-color:var(--pri)}.rx-sl output{font-variant-numeric:tabular-nums;color:var(--ink)}
 .rx-sl select{grid-column:2/4;padding:5px 8px;border-radius:var(--r-s);border:1px solid var(--bd);background:var(--sf);color:var(--ink);font-size:var(--fs-s)}
 .rx-made .sh{margin:0 0 10px}

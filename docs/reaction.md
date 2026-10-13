@@ -142,6 +142,8 @@ Library > Reactions > **Create** offers two paths. **Predefined** is the emoji b
 
 | field | range | screen default | effect |
 | --- | --- | --- | --- |
+| `particle_size` (**Size**) | 0.25–3× | ×1 | how big every emoji looks (the existing engine field) |
+| `size_var` (**Size variation**) | 0–1 | the motion's own | how much the emojis differ: the motion's `size_min`–`size_max` is re-spread around its own average to `mid × (1 ± size_var)` (0 = all one size, 1 = from almost nothing to twice the average); left out, the motion keeps its range exactly. A flow option, not an engine field: the stored params carry the resulting `size_min` / `size_max` |
 | `size_in_dur` | 0–1.5 s, ≤ lifetime/2 | 0.4 | each particle's scale ramps 0 → 100% over this long after birth |
 | `size_out_dur` | 0–1.5 s, ≤ lifetime/2 | 0.4 | … and 100% → 0 over this long before death |
 | `hue_var` | 0–180° | 25 | each particle's colours turn by a seeded hue in [−hue_var, +hue_var] |

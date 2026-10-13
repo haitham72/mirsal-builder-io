@@ -458,11 +458,11 @@ Each action row names its source, line, scripts drawing its button and routes it
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `rxpick` | 75 | reactions.js | `/api/particles/emoji-preview` |
-| `rxclose` | 76 | reactions.js | none (browser only) |
-| `rxedit` | 77 | reactions.js | `/api/particles/emoji-preview` |
-| `rxdl` | 80 | reactions.js | none (browser only) |
-| `rxcreate` | 81 | reactions.js | `/api/particles/emoji-lottie` |
+| `rxpick` | 78 | reactions.js | `/api/particles/emoji-preview` |
+| `rxclose` | 79 | reactions.js | none (browser only) |
+| `rxedit` | 80 | reactions.js | `/api/particles/emoji-preview` |
+| `rxdl` | 83 | reactions.js | none (browser only) |
+| `rxcreate` | 84 | reactions.js | `/api/particles/emoji-lottie` |
 
 ### `settings.js` (3)
 

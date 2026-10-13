@@ -60,7 +60,7 @@ Interactive elements share hover, press, selected and `:focus-visible` states. C
    (1) a search box and **two rows** of small emoji glyphs (`.rx-grid`, 44 px tiles, no names; `rxClip` counts the grid's columns and hides every tile past the
    second row, so a search narrows the rows rather than growing them); pointing at a glyph plays its reaction over it, 160 px, in place. (2) The picked emoji in
    ONE editor card (`.rx-ed`): its reaction looping in a 220 px stage (`.rx-stage`) beside the emoji, its motion sentence, **Motion** (a select, **its own ·
-   <preset>** first), **Size in**, **Size out**, **Hue** (`.rx-sl`; 0.4 s, 0.4 s, 25°; one line says Hue 0 keeps the emoji's own colours) and **Create reaction**.
+   <preset>** first), **Size** (×1), **Size variation** (the motion's own until moved, shown as a percent), **Size in**, **Size out**, **Hue** (`.rx-sl`; 0.4 s, 0.4 s, 25°; one line says Hue 0 keeps the emoji's own colours) and **Create reaction**.
    (3) **Your reactions**: only what was created, newest first, one simple card each (`.rx-card`: the loop on a square stage, the emoji + name, motion · L###,
    **Lottie** (download) and **Edit** (reopens the editor with that card's options)); nothing else from the bank is ever a card. No pack picker, no sticker
    grid, no `<video>`, no Kling, no Generate more.

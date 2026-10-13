@@ -84,6 +84,22 @@ class EmojiLottieTests(Base):
         self.assertEqual(j["params"], plain, "laugh's pinned fountain, nothing else")
         self.assertEqual(j["assets"], 1, "no hue variation: the glyph is embedded once")
 
+    def test_size_and_size_variation(self):
+        own = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss"})[1]["params"]
+        self.assertEqual((own["size_min"], own["size_max"], own["particle_size"]), (0.1, 0.22, 1.0), "untouched: the motion's own sizes")
+        same = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", "size_var": 0, "particle_size": 2})[1]["params"]
+        self.assertAlmostEqual(same["size_min"], 0.16)
+        self.assertAlmostEqual(same["size_max"], 0.16, msg="variation 0: every emoji the same size, the motion's average")
+        self.assertEqual(same["particle_size"], 2.0, "Size scales them all")
+        wide = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", "size_var": 1})[1]["params"]
+        self.assertEqual((round(wide["size_min"], 3), round(wide["size_max"], 3)), (0.02, 0.32), "variation 1: from (almost) nothing to twice the average")
+        mid = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", "size_var": 0.375})[1]["params"]
+        self.assertEqual((round(mid["size_min"], 6), round(mid["size_max"], 6)), (0.1, 0.22), "its own variation reproduces its own range")
+        tr = particles.trajectories(particles.ParticleParams.from_dict({**same, "origin": tuple(same["origin"])}))
+        self.assertAlmostEqual(float(tr.size_frac.min()), float(tr.size_frac.max()), msg="the simulator draws them all one size")
+        for bad in ({"size_var": "big"}, {"particle_size": True}):
+            self.assertEqual(self.req("POST", "/api/particles/emoji-preview", {"token": "kiss", **bad})[0], 400, bad)
+
     def test_unknown_emoji_is_409_and_bad_options_are_400(self):
         for token in ("not-a-token", "", None, "abc"):
             code, j = self.req("POST", "/api/particles/emoji-lottie", {"token": token})

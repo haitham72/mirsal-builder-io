@@ -1685,11 +1685,13 @@ def emoji_token(token) -> tuple[str, str]:
     return t, gen[t]["emoji"]
 
 
-def emoji_burst(token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, size=512) -> tuple[str, str, str, object]:
+def emoji_burst(token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, particle_size=None, size_var=None, size=512) -> tuple[str, str, str, object]:
     """(token, glyph, preset name, ParticleParams) of one bank emoji: its fixed motion (`emoji_motion.motion_for_token`), or a
     preset override (the override takes the preset's own look: the token's pinned values belong to its own preset), with the
-    three options on top (None = the screen's default). Deterministic: same emoji + options + seed -> the same params. 400 for a
-    bad option."""
+    options on top (None = the screen's default). `particle_size` is how big every emoji looks (0.25-3, None = the motion's own, 1);
+    `size_var` is how much the emojis differ in size (0 = all the same, 1 = from almost nothing to twice the average; None = the
+    motion's own range): the motion's size range is re-spread around its own average. Deterministic: same emoji + options + seed
+    -> the same params. 400 for a bad option."""
     from ..engine import emoji_motion as em, particles as _p
     t, glyph = emoji_token(token)
     motion = em.motion_for_token(t)
@@ -1698,11 +1700,17 @@ def emoji_burst(token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=No
         raise SetError(f"unknown preset {name!r}; choose one of {', '.join(_p.PRESETS)}")
     over = dict(motion["params"]) if name == motion["preset"] else {}
     opts = {k: (EMOJI_OPTIONS[k] if v is None else v) for k, v in (("size_in_dur", size_in_dur), ("size_out_dur", size_out_dur), ("hue_var", hue_var))}
-    for k, v in (*opts.items(), ("seed", seed), ("size", size)):
+    if particle_size is not None:
+        opts["particle_size"] = particle_size
+    for k, v in (*opts.items(), ("seed", seed), ("size", size), *((("size_var", size_var),) if size_var is not None else ())):
         if isinstance(v, bool) or not isinstance(v, (int, float)):
             raise SetError(f"{k} must be a number")
     try:
-        return t, glyph, name, _p.preset(name, **over, **opts, seed=int(seed), size=int(size))
+        p = _p.preset(name, **over, **opts, seed=int(seed), size=int(size))
+        if size_var is not None:
+            mid, v = (p.size_min + p.size_max) / 2, min(max(float(size_var), 0.0), 1.0)
+            p = _p.ParticleParams.from_dict({**p.to_dict(), "origin": p.origin, "size_min": mid * (1 - v), "size_max": mid * (1 + v)}).clamped()
+        return t, glyph, name, p
     except ValueError as ex:
         raise SetError(str(ex))
 
@@ -1715,14 +1723,15 @@ def _glyph(glyph: str):
         raise SetError(str(ex), 503)
 
 
-def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, size=256) -> dict:
+def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, particle_size=None, size_var=None, size=256) -> dict:
     """The emoji's burst as a small looping WebP for the screen, by the same simulator as the Lottie (free). Cached by what it was
     made from, so the same options are the same file."""
     import hashlib
     from ..engine import particles as _p
     if isinstance(size, bool) or not isinstance(size, (int, float)) or not 64 <= size <= 512:
         raise SetError("size must be a whole number from 64 to 512")
-    t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var, size=int(size))
+    t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var,
+                                  particle_size=particle_size, size_var=size_var, size=int(size))
     img = _glyph(glyph)
     key = hashlib.sha256(json.dumps({"p": p.to_dict(), "glyph": glyph}, sort_keys=True).encode() + img.tobytes()).hexdigest()[:16]
     f = emoji_dir(out, t) / "previews" / f"{key}-{int(size)}.webp"
@@ -1732,7 +1741,7 @@ def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, si
     return {"token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "url": f"/out/particles/emoji/{t}/previews/{f.name}"}
 
 
-def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, size=512, user: str = "local") -> dict:
+def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, particle_size=None, size_var=None, size=512, user: str = "local") -> dict:
     """The end of the Reaction effects flow: one bank emoji's fixed motion, flying as the literal glyph, as a playable Lottie JSON
     (web only; Telegram stays WebM). Stores `out/particles/emoji/<token>/renders/L###.lottie.json`, `L###.png` (the glyph asset,
     for inspection) and `L###.webp` (the same burst as a 256 px loop, for its card) and appends to that emoji's `emoji.json` (`lottie[]`, history `LOTTIE`). Same emoji + options + seed -> the same
@@ -1740,7 +1749,8 @@ def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=No
     from ..engine import particles as _p
     if isinstance(size, bool) or not isinstance(size, (int, float)) or not 128 <= size <= 1024:
         raise SetError("size must be a whole number from 128 to 1024")
-    t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var, size=int(size))
+    t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var,
+                                  particle_size=particle_size, size_var=size_var, size=int(size))
     img = _glyph(glyph)
     png = _p.png_bytes(img)
     doc = _p.export_lottie(p, png, size=p.size)
