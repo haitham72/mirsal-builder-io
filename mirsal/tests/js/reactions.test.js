@@ -41,10 +41,13 @@ test('picking opens ONE editor card with honest defaults, and Create posts the t
   assert.match(h, /data-rxed/);
   assert.match(h, /src="\/out\/particles\/emoji\/kiss\/previews\/a-256.webp"/, 'the reaction plays in the editor');
   assert.match(h, /<option value="" selected>its own · burst<\/option>/);
-  for (const k of ['particle_size', 'size_var', 'size_in_dur', 'size_out_dur', 'hue_var']) assert.match(h, new RegExp(`data-rxo=${k}`));
-  assert.equal((h.match(/type=range/g) || []).length, 5, 'Size, Size variation, Size in, Size out, Hue');
-  assert.match(h, /<span class=mut>Size<\/span>.*?<output>×1<\/output>/s);
-  assert.match(h, /data-rxo=size_var[^>]*><output>35%<\/output>/, 'its own range, shown (the preview reply had no params here)');
+  const [sim, shape] = h.split('<b>Shape</b>');
+  assert.match(sim, /<b>Simulation<\/b>/);
+  for (const k of ['magnitude', 'gravity', 'vortex', 'spin', 'count', 'spread']) assert.match(sim, new RegExp(`data-rxo=${k}`), `Simulation has ${k}`);
+  for (const k of ['particle_size', 'size_var', 'size_in_dur', 'size_out_dur', 'hue_var']) assert.match(shape, new RegExp(`data-rxo=${k}`), `Shape has ${k}`);
+  assert.equal((h.match(/type=range/g) || []).length, 11, 'six Simulation sliders and five Shape sliders');
+  assert.match(shape, /<span class=mut>Size<\/span>.*?<output>×1<\/output>/s);
+  assert.match(sim, /data-rxo=magnitude[^>]*><output>…<\/output>/, "the motion's own speed is not known until the server answers: never a made-up number");
   assert.match(h, /Hue 0 keeps the emoji's own colours/);
   assert.match(h, /data-act=rxcreate/);
 
@@ -69,4 +72,38 @@ test('Edit reopens a card with its own options; Download fetches the stored file
   assert.deepEqual(J(r, 'DL'), ['/out/particles/emoji/cry/renders/L002.lottie.json|cry L002.lottie.json']);
   r('ACT.rxclose()');
   assert.equal(r('RXS.ek'), null);
+});
+
+test('Simulation shows the motion values, sends only what was moved, and Reset / another motion go back to the motion', async () => {
+  const r = loadConsole(['reactions.js']);
+  r(`RXS.bank=${BANK};RXS.made=[]`);
+  r("POSTREPLIES.push({ok:true,j:{url:'/a.webp',params:{magnitude:0.8,gravity:0.5,vortex:0,spin:1,count:28,spread:360,size_min:0.1,size_max:0.22}}})");
+  await r("ACT.rxpick({dataset:{t:'kiss'}})");
+  const h = r('rxEditor()');
+  assert.match(h, /data-rxo=magnitude[^>]*><output>×0.8<\/output>/, 'its own speed');
+  assert.match(h, /data-rxo=count[^>]*><output>28<\/output>/);
+  assert.match(h, /data-rxo=spread[^>]*><output>360°<\/output>/);
+  assert.match(h, /data-rxo=size_var[^>]*><output>38%<\/output>/, 'its own size range, 0.10-0.22');
+  assert.match(h, /data-act=rxreset data-g=sim disabled/, 'nothing to reset yet');
+  r("POSTS.length=0;RXS.ek.sim.magnitude=2;RXS.ek.sim.count=12");
+  r("POSTREPLIES.push({ok:true,j:{url:'/b.webp',params:{}}})");
+  await r("rxPlay('kiss')");
+  assert.deepEqual(J(r, 'POSTS[0][1]'), { token: 'kiss', magnitude: 2, count: 12, particle_size: 1, size_in_dur: 0.4, size_out_dur: 0.4, hue_var: 25, size: 256 }, 'only the moved settings go to the server');
+  r("POSTS.length=0;POSTREPLIES.push({ok:true,j:{url:'/c.webp',params:{}}})");
+  await r("ACT.rxreset({dataset:{g:'sim'}})");
+  assert.deepEqual(J(r, 'RXS.ek.sim'), {});
+  r("RXS.ek.sim.spin=3;RXS.ek.particle_size=2");
+  await r("ACT.rxreset({dataset:{g:'shape'}})");
+  assert.deepEqual(J(r, '[RXS.ek.sim,RXS.ek.particle_size,RXS.ek.hue_var]'), [{ spin: 3 }, 1, 25], 'Shape reset leaves Simulation alone');
+  const before = r('POSTS.length');
+  r("RXS.ek.preset='vortex';RXS.ek.sim={};");
+  assert.equal(r('Object.keys(RXS.ek.sim).length'), 0, 'another motion starts from its own simulation');
+  assert.ok(before >= 1);
+});
+
+test('Edit restores the Simulation of a created reaction', () => {
+  const r = loadConsole(['reactions.js']);
+  r(`RXS.bank=${BANK};RXS.made=[{id:'L004',token:'kiss',emoji:'😘',preset:'burst',params:{magnitude:2.5,gravity:-1,vortex:0.5,spin:0,count:40,spread:180,particle_size:1,size_min:0.1,size_max:0.22},url:'/x.json',preview:null}]`);
+  r("ACT.rxedit({dataset:{t:'kiss',id:'L004'}})");
+  assert.deepEqual(J(r, 'RXS.ek.sim'), { magnitude: 2.5, gravity: -1, vortex: 0.5, spin: 0, count: 40, spread: 180 });
 });

@@ -1348,6 +1348,7 @@ def make_handler(c: Console):
                     if method == "POST" and pid in ("emoji-preview", "emoji-lottie"):
                         # Reaction effects (Create > New): one bank emoji flying as its own glyph; a looping WebP, or the playable Lottie (free, no set)
                         opts = {k: body.get(k) for k in ("preset", "size_in_dur", "size_out_dur", "hue_var", "particle_size", "size_var")}
+                        opts["sim"] = {k: body[k] for k in ps.EMOJI_SIM if body.get(k) is not None}
                         if pid == "emoji-preview":
                             return self._json(200, ps.emoji_preview(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 256), **opts))
                         return self._json(200, ps.export_emoji_lottie(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 512),

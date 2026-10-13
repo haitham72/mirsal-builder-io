@@ -100,6 +100,15 @@ class EmojiLottieTests(Base):
         for bad in ({"size_var": "big"}, {"particle_size": True}):
             self.assertEqual(self.req("POST", "/api/particles/emoji-preview", {"token": "kiss", **bad})[0], 400, bad)
 
+    def test_simulation_overrides_only_what_is_sent(self):
+        own = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss"})[1]["params"]
+        j = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", "magnitude": 2, "spin": 0, "count": 12, "spread": 90, "gravity": -0.5, "vortex": 1})[1]["params"]
+        self.assertEqual((j["magnitude"], j["spin"], j["count"], j["spread"], j["gravity"], j["vortex"]), (2.0, 0.0, 12, 90.0, -0.5, 1.0))
+        part = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", "count": 12})[1]["params"]
+        self.assertEqual({k: part[k] for k in ("magnitude", "gravity", "spin")}, {k: own[k] for k in ("magnitude", "gravity", "spin")}, "a setting left out keeps the motion's value")
+        self.assertEqual(self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", "count": 999})[1]["params"]["count"], 80, "the engine clamps")
+        self.assertEqual(self.req("POST", "/api/particles/emoji-preview", {"token": "kiss", "spin": "fast"})[0], 400)
+
     def test_unknown_emoji_is_409_and_bad_options_are_400(self):
         for token in ("not-a-token", "", None, "abc"):
             code, j = self.req("POST", "/api/particles/emoji-lottie", {"token": token})

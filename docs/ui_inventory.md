@@ -2,7 +2,7 @@
 
 Generated from `console/*.js` on 2026-10-13 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is its own screen #/reactions in reactions.js: search + two rows of emoji, one editor card, the created reactions as cards). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**461 actions** (462 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **168 named server routes**.
+**462 actions** (463 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **168 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -454,15 +454,16 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `pmlist` | 49 | projmap.js | `/api/generations/removed`<br>`/api/history` |
 | `pmopen` | 51 | projmap.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/history` |
 
-### `reactions.js` (5)
+### `reactions.js` (6)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `rxpick` | 78 | reactions.js | `/api/particles/emoji-preview` |
-| `rxclose` | 79 | reactions.js | none (browser only) |
-| `rxedit` | 80 | reactions.js | `/api/particles/emoji-preview` |
-| `rxdl` | 83 | reactions.js | none (browser only) |
-| `rxcreate` | 84 | reactions.js | `/api/particles/emoji-lottie` |
+| `rxreset` | 90 | reactions.js | `/api/particles/emoji-preview` |
+| `rxpick` | 95 | reactions.js | `/api/particles/emoji-preview` |
+| `rxclose` | 96 | reactions.js | none (browser only) |
+| `rxedit` | 97 | reactions.js | `/api/particles/emoji-preview` |
+| `rxdl` | 100 | reactions.js | none (browser only) |
+| `rxcreate` | 101 | reactions.js | `/api/particles/emoji-lottie` |
 
 ### `settings.js` (3)
 
