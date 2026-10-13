@@ -109,6 +109,33 @@ class EmojiLottieTests(Base):
         self.assertEqual(self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", "count": 999})[1]["params"]["count"], 80, "the engine clamps")
         self.assertEqual(self.req("POST", "/api/particles/emoji-preview", {"token": "kiss", "spin": "fast"})[0], 400)
 
+    def test_save_preset_then_apply_it_to_many_emojis(self):
+        code, p1 = self.req("POST", "/api/particles/emoji-presets", {"settings": {"preset": "vortex", "magnitude": 0.4, "particle_size": 1.5, "hue_var": 0}})
+        self.assertEqual(code, 201, p1)
+        self.assertEqual((p1["id"], p1["name"]), ("preset01", "Preset 01"))
+        p2 = self.req("POST", "/api/particles/emoji-presets", {"settings": {"count": 12}})[1]
+        self.assertEqual((p2["id"], p2["name"]), ("preset02", "Preset 02"))
+        self.assertEqual([p["id"] for p in self.req("GET", "/api/particles/emoji-presets")[1]["presets"]], ["preset01", "preset02"])
+        code, j = self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": ["kiss", "cry", "kiss", "nope"], "preset_id": "preset01"})
+        self.assertEqual(code, 200, j)
+        self.assertEqual([r["token"] for r in j["reactions"]], ["kiss", "cry"], "repeats dropped, order kept")
+        self.assertEqual([e["token"] for e in j["errors"]], ["nope"], "one bad emoji does not stop the others")
+        for r in j["reactions"]:
+            self.assertEqual((r["preset"], r["params"]["magnitude"], r["params"]["particle_size"], r["params"]["hue_var"]), ("vortex", 0.4, 1.5, 0.0))
+        own = self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": ["cry"]})[1]["reactions"][0]
+        self.assertEqual((own["preset"], own["params"]["hue_var"]), ("rain", 25.0), "no preset: each emoji's own motion with the screen's defaults")
+        counted = self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": ["cry"], "preset_id": "preset02"})[1]["reactions"][0]
+        self.assertEqual((counted["preset"], counted["params"]["count"]), ("rain", 12), "a preset without a motion keeps each emoji's own motion")
+        self.assertEqual(self.req("POST", "/api/particles/emoji-presets/preset01/delete", {})[1]["deleted"], "preset01")
+        self.assertEqual(self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": ["cry"], "preset_id": "preset01"})[0], 404)
+        p3 = self.req("POST", "/api/particles/emoji-presets", {"settings": {}})[1]
+        self.assertEqual(p3["id"], "preset03", "ids are never reused")
+        for bad in ({"settings": {"wind": 1}}, {"settings": {"preset": "spiral"}}, {"settings": {"spin": "fast"}}, {"settings": "x"}):
+            self.assertEqual(self.req("POST", "/api/particles/emoji-presets", bad)[0], 400, bad)
+        self.assertEqual(self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": []})[0], 400)
+        self.assertEqual(self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": ["cry"] * 25})[0], 400)
+        self.assertEqual(self.req("POST", "/api/particles/emoji-presets/preset99/delete", {})[0], 404)
+
     def test_unknown_emoji_is_409_and_bad_options_are_400(self):
         for token in ("not-a-token", "", None, "abc"):
             code, j = self.req("POST", "/api/particles/emoji-lottie", {"token": token})

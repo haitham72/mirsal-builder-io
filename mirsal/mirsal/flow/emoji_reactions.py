@@ -152,3 +152,86 @@ def emoji_lotties(out: Path) -> list[dict]:
                          "bytes": x.get("bytes"), "created": x.get("created")})
     rows.sort(key=lambda r: (r.get("created") or 0, r["token"], r["id"] or ""), reverse=True)
     return rows
+
+
+# ---------- presets: a saved set of editor settings ("Save preset"), applied to many emojis at once ----------
+# A preset holds the request settings without the emoji: `preset` (a motion override; absent = each emoji keeps its own motion), the Simulation keys
+# that were moved (EMOJI_SIM) and the Shape values. Applied to an emoji it is exactly what the editor would have sent for it. Stored in
+# out/particles/emoji/presets.json (a file, so the per-emoji folder scan never sees it); ids preset01, preset02 ... are never reused.
+PRESET_KEYS = ("preset", "particle_size", "size_var", "size_in_dur", "size_out_dur", "hue_var", *EMOJI_SIM)
+MANY_MAX = 24                                                                   # emojis per Create: one request, a few seconds of simulation each
+
+
+def _presets_file(out: Path) -> Path:
+    return sets_dir(out) / "emoji" / "presets.json"
+
+
+def _read_presets(out: Path) -> dict:
+    f = _presets_file(out)
+    return json.loads(atomic.read_text(f)) if f.is_file() else {"presets": [], "next": 1}
+
+
+def _kwargs(settings: dict) -> dict:
+    """A preset's (or a request's) settings as emoji_burst keywords: the Simulation keys go into `sim`."""
+    s = dict(settings or {})
+    return {**{k: s[k] for k in PRESET_KEYS if k in s and k not in EMOJI_SIM}, "sim": {k: s[k] for k in EMOJI_SIM if s.get(k) is not None}}
+
+
+def emoji_presets(out: Path) -> list[dict]:
+    """The saved presets, oldest first: [{id, name, settings, created}]. Read-only, free."""
+    return list(_read_presets(out)["presets"])
+
+
+def save_emoji_preset(out: Path, settings: dict, *, name=None, user: str = "local") -> dict:
+    """Save the editor's settings as the next preset (Preset 01, Preset 02 ...). Strict: an unknown key or a bad value is a 400, checked by
+    building the burst once (for the core `happy`), so a preset that saves always applies."""
+    if not isinstance(settings, dict):
+        raise SetError("settings must be an object")
+    bad = sorted(set(settings) - set(PRESET_KEYS))
+    if bad:
+        raise SetError(f"unknown preset setting(s): {', '.join(bad)}")
+    clean = {k: v for k, v in settings.items() if v is not None and v != ""}
+    emoji_burst("happy", **_kwargs(clean))
+    with _LOCK:
+        data = _read_presets(out)
+        n = int(data.get("next") or 1)
+        rec = {"id": f"preset{n:02d}", "name": (str(name).strip()[:40] if name else "") or f"Preset {n:02d}", "settings": clean,
+               "created": round(time.time(), 3), "user": user}
+        data["presets"].append(rec)
+        data["next"] = n + 1
+        _presets_file(out).parent.mkdir(parents=True, exist_ok=True)
+        atomic.write_text(_presets_file(out), json.dumps(data, ensure_ascii=False, indent=1))
+    return rec
+
+
+def delete_emoji_preset(out: Path, pid: str) -> dict:
+    """Remove one preset (the reactions made with it keep their own params). 404 for an unknown id."""
+    with _LOCK:
+        data = _read_presets(out)
+        keep = [p for p in data["presets"] if p["id"] != pid]
+        if len(keep) == len(data["presets"]):
+            raise SetError(f"no preset {pid}", 404)
+        data["presets"] = keep
+        atomic.write_text(_presets_file(out), json.dumps(data, ensure_ascii=False, indent=1))
+    return {"deleted": pid, "presets": keep}
+
+
+def export_many(out: Path, tokens, *, preset_id=None, user: str = "local") -> dict:
+    """Create one reaction per emoji with the same settings: a saved preset's, or none (each emoji's own motion with the screen's defaults).
+    One emoji that fails does not stop the others: {reactions: [...as export_emoji_lottie, newest last], errors: [{token, error}]}."""
+    if not isinstance(tokens, list) or not tokens:
+        raise SetError("tokens must be a non-empty list")
+    if len(tokens) > MANY_MAX:
+        raise SetError(f"at most {MANY_MAX} emojis at once")
+    settings = {}
+    if preset_id:
+        settings = next((p["settings"] for p in emoji_presets(out) if p["id"] == preset_id), None)
+        if settings is None:
+            raise SetError(f"no preset {preset_id}", 404)
+    made, errors = [], []
+    for token in dict.fromkeys(str(t) for t in tokens):                    # order kept, repeats dropped
+        try:
+            made.append(export_emoji_lottie(out, token, user=user, **_kwargs(settings)))
+        except SetError as ex:
+            errors.append({"token": token, "error": str(ex)})
+    return {"reactions": made, "errors": errors, "preset": preset_id or None}

@@ -1,9 +1,11 @@
 /* Reaction effects (#/reactions, Create > + New): the emoji bank ONLY. docs/reaction.md section 13, docs/design.md section 4 (Create's tabs).
    Its own screen and state (prefix rx); it shares nothing with effects.js / particles.js (the Studio's pack particles keep #/effects).
-   Top to bottom: search + two rows of small emojis (pointing at one plays its reaction over it) -> the picked emoji in ONE editor card
-   (Simulation: how they move; Shape: how each emoji looks; Create reaction) -> Your reactions: only what was created, one card each.
+   Top to bottom: search + two rows of small emojis (pointing at one plays its reaction from its right edge, Telegram-like) -> the picked emoji in ONE
+   editor card (Simulation: how they move; Shape: how each emoji looks; Create reaction | Save preset) -> Your reactions: only what was created, one card each.
+   Select several: ticks emojis instead of opening one, then one bar applies each emoji's own look or a saved preset to all of them (one request).
    Everything is the server's (flow/emoji_reactions.py): GET /api/particles/emoji-motions (the bank), POST /api/particles/emoji-preview (a looping WebP),
-   POST /api/particles/emoji-lottie (create: the Lottie + its loop), GET /api/particles/emoji-lottie (the created). Nothing is decided in the browser. */
+   POST /api/particles/emoji-lottie (create: the Lottie + its loop), GET /api/particles/emoji-lottie (the created), /api/particles/emoji-presets (Save preset, list,
+   delete), POST /api/particles/emoji-lottie/batch (many emojis, one preset). Nothing is decided in the browser. */
 'use strict';
 
 /* ---------- settings: [key, label, min, max, step, unit] ---------- */
@@ -13,12 +15,15 @@ const RXO=[['particle_size','Size',.25,3,.05,'×'],['size_var','Size variation',
 const RXD={particle_size:1,size_var:null,size_in_dur:.4,size_out_dur:.4,hue_var:25};   /* Shape's defaults; size_var null = the motion's own range */
 const RXPX=256;                                  /* a reaction loop's side: sharp at the 220 CSS px it is shown at */
 const RXN=48;                                    /* tiles drawn; rxClip shows exactly two rows of them, whatever the width */
+const RXHOV=64;                                  /* the hover reaction's side: 60% smaller than the 160 px it was (Haitham, 2026-10-13) */
+const RXMANY=24;                                 /* emojis per Create (the server's MANY_MAX) */
 
 /* ---------- state ----------
    bank: the emoji bank (server); made: the created reactions (server); ek: the picked emoji in the editor; hover: the emoji pointed at;
-   pv / par: preview url and params per request (the server caches the files too); q: the search. */
+   pv / par: preview url and params per request (the server caches the files too); q: the search;
+   multi: Select several is on; sel: the ticked emojis; presets: the saved presets (server); apply: the preset the bar applies ('' = each emoji's own). */
 const RXQ={q:''};
-const RXS={bank:null,made:null,ek:null,hover:'',pv:{},par:{},hT:0,t:0};
+const RXS={bank:null,made:null,ek:null,hover:'',pv:{},par:{},hT:0,t:0,multi:false,sel:new Set(),presets:null,apply:'',busyMany:false};
 /* one picked emoji: its motion override, the Simulation keys the person moved (sim), the Shape values, and the server's last answer (own) */
 const rxNew=(t,par)=>({token:t,preset:'',sim:{},...RXD,...(par||{}),own:null,shown:'',err:'',busy:false});
 
@@ -35,6 +40,7 @@ function rxBody(k){
  return {token:k.token,...sim,particle_size:+k.particle_size,...(k.size_var!=null?{size_var:+k.size_var}:{}),
   size_in_dur:+k.size_in_dur,size_out_dur:+k.size_out_dur,hue_var:+k.hue_var,...(k.preset?{preset:k.preset}:{})}}
 const rxKey=b=>JSON.stringify(b);
+const rxSettings=k=>{const b=rxBody(k);delete b.token;return b};
 const rxFor=t=>RXS.ek&&RXS.ek.token===t?rxBody(RXS.ek):rxBody(rxNew(t));
 /* a motion's own size variation, from its size range */
 const rxOwnVar=p=>p&&p.size_max+p.size_min>0?Math.round((p.size_max-p.size_min)/(p.size_max+p.size_min)*1e4)/1e4:.35;
@@ -51,15 +57,30 @@ function rxAgo(ts){
  return new Date(ts*1000).toLocaleDateString()}
 
 /* ---------- views ---------- */
+/* the hover reaction leaves from the tile's right edge, like Telegram's: the burst's own origin (a fountain starts low, rain at the top) sits on that edge */
+function rxFxStyle(par){const [ox,oy]=(par&&par.origin)||[.5,.5];return `width:${RXHOV}px;height:${RXHOV}px;left:calc(100% - ${Math.round(ox*RXHOV)}px);top:calc(50% - ${Math.round(oy*RXHOV)}px)`}
 function rxTile(m){
- const on=!!RXS.ek&&RXS.ek.token===m.token,pv=RXS.hover===m.token&&!on?RXS.pv[rxKey(rxFor(m.token))]:'';
- return `<button class="rx-e${on?' on':''}${pv?' play':''}" data-act=rxpick data-t="${esc(m.token)}" title="${esc(m.token)}" aria-label="${esc(m.token)}" aria-pressed=${on}>`+
-  `<span class=rx-g>${esc(m.emoji||'?')}</span>${pv?`<img class=rx-fx src="${esc(pv)}" alt="">`:''}</button>`}
+ const key=rxKey(rxFor(m.token)),ticked=RXS.multi&&RXS.sel.has(m.token),on=!RXS.multi&&!!RXS.ek&&RXS.ek.token===m.token;
+ const pv=RXS.hover===m.token&&!on?RXS.pv[key]:'';
+ return `<button class="rx-e${on||ticked?' on':''}${pv?' play':''}" data-act=rxpick data-t="${esc(m.token)}" title="${esc(m.token)}" aria-label="${esc(m.token)}" aria-pressed=${on||ticked}>`+
+  `<span class=rx-g>${esc(m.emoji||'?')}</span>${ticked?`<span class=rx-tick>${ic('check')}</span>`:''}${pv?`<img class=rx-fx src="${esc(pv)}" style="${rxFxStyle(RXS.par[key])}" alt="">`:''}</button>`}
 function rxPick(){
  const list=rxList();
  return `<section class=rx-pick><div class=rx-top><input type=search data-rxq placeholder="Search ${(RXS.bank||[]).length} emoji" value="${esc(RXQ.q)}" aria-label="Search the emoji bank">`+
-  `<small class=mut>Pick an emoji: it flies as itself.</small></div>`+
-  `<div class=rx-grid data-rxwall>${list.map(rxTile).join('')||'<span class=mut>No match.</span>'}</div></section>`}
+  `<button class="btn sm${RXS.multi?' pri':''}" data-act=rxmulti aria-pressed=${RXS.multi}>${ic('check')} Select several</button>`+
+  `<small class=mut>${RXS.multi?'Tick emojis, then create them all with one look.':'Pick an emoji: it flies as itself.'}</small></div>`+
+  `<div class=rx-grid data-rxwall>${list.map(rxTile).join('')||'<span class=mut>No match.</span>'}</div>${rxMany()}</section>`}
+/* Select several: the ticked emojis and one look for all of them (each emoji's own, or a saved preset) */
+function rxMany(){
+ if(!RXS.multi)return '';
+ const n=RXS.sel.size,ps=RXS.presets||[],cur=ps.find(p=>p.id===RXS.apply);
+ const glyphs=[...RXS.sel].map(t=>esc(rxRow(t).emoji)).join('');
+ return `<div class=rx-many data-rxmany><span class=rx-many-sel>${n?`<b>${n}</b> <span class=rx-many-g>${glyphs}</span>`:'<span class=mut>Nothing ticked yet</span>'}</span>`+
+  `<label class=rx-pre><span class=mut>Look</span><select data-rxapply aria-label="Look for the ticked emojis"><option value=""${RXS.apply?'':' selected'}>Each emoji's own</option>`+
+  `${ps.map(p=>`<option value="${esc(p.id)}"${p.id===RXS.apply?' selected':''}>${esc(p.name)}</option>`).join('')}</select></label>`+
+  `${cur?`<button class=link data-act=rxpdel data-id="${esc(cur.id)}">Delete ${esc(cur.name)}</button>`:''}`+
+  `<button class="btn pri" data-act=rxmany ${n&&!RXS.busyMany?'':'disabled'}>${RXS.busyMany?'<span class=spin></span> Creating…':`Create ${n||''} reaction${n===1?'':'s'}`}</button>`+
+  `${n?'<button class=link data-act=rxclear>Clear</button>':''}</div>`}
 /* a stage: the emoji, faint, at the centre (a loop starts and ends empty) and its reaction looping over it */
 const rxStageHtml=(emoji,url,alt)=>`<span class=rx-ghost aria-hidden=true>${esc(emoji)}</span>${url?`<img src="${esc(url)}" alt="${esc(alt)}" loading=lazy>`:''}`;
 function rxStage(k){const url=RXS.pv[rxKey(rxBody(k))]||k.shown;return rxStageHtml(rxRow(k.token).emoji,url,k.token+' reaction')+(url||k.err?'':'<span class=spin></span>')}
@@ -80,10 +101,11 @@ function rxEditor(){
    ${rxGroup('Simulation','sim',!!Object.keys(k.sim).length||!!k.preset,rxMotion(k,m)+RXSIM.map(o=>rxSlider(k,o)).join(''))}
    ${rxGroup('Shape','shape',true,RXO.map(o=>rxSlider(k,o)).join('')+'<small class=mut>Hue 0 keeps the emoji\'s own colours.</small>')}
   </div>${k.err?`<span class=fx-warn>${esc(k.err)}</span>`:''}
-  <div class=rx-foot><button class="btn pri" data-act=rxcreate ${k.busy?'disabled':''}>${k.busy?'<span class=spin></span> Creating…':'Create reaction'}</button></div></div></section>`}
+  <div class=rx-foot><button class="btn pri" data-act=rxcreate ${k.busy?'disabled':''}>${k.busy?'<span class=spin></span> Creating…':'Create reaction'}</button>`+
+  `<button class=btn data-act=rxsave title="Keep these settings to apply them to many emojis (Select several)">Save preset</button></div></div></section>`}
 function rxCard(r){
  return `<article class=rx-card title="${esc(r.id||'')}"><div class=rx-stage>${rxStageHtml(r.emoji,r.preview,r.token+' reaction')}</div>
-  <div class=rx-meta><span class=rx-g>${esc(r.emoji)}</span><b>${esc(r.token)}</b><small class=mut>${esc(r.preset||'')}${r.created?' · '+esc(rxAgo(r.created)):''}</small></div>
+  <div class=rx-meta><span class=rx-g>${esc(r.emoji)}</span><span class=rx-mt><b>${esc(r.token)}</b><small class=mut>${esc(r.preset||'')}${r.created?' · '+esc(rxAgo(r.created)):''}</small></span></div>
   <div class=rx-acts><button class="btn sm pri" data-act=rxdl data-u="${esc(r.url)}" data-n="${esc(r.token+' '+r.id)}">${ic('download')} Lottie</button>`+
   `<button class="btn sm" data-act=rxedit data-t="${esc(r.token)}" data-id="${esc(r.id)}">Edit</button></div></article>`}
 function rxMade(){
@@ -111,6 +133,7 @@ function rxTileRedraw(t){
  const el=document.querySelector&&document.querySelector(`.rx-e[data-t="${t}"]`);if(!el)return;
  const shown=el.style.display;el.outerHTML=rxTile(rxRow(t));
  const nu=document.querySelector(`.rx-e[data-t="${t}"]`);if(nu)nu.style.display=shown}
+function rxManyRedraw(){const el=document.querySelector&&document.querySelector('[data-rxmany]');if(el)el.outerHTML=rxMany()}
 function rxEdRedraw(){const el=document.querySelector&&document.querySelector('[data-rxed]');if(el&&RXS.ek)el.outerHTML=rxEditor();else rxDraw()}
 /* a preview answer: swap the picture and the values nobody is touching; the slider being dragged stays as it is */
 function rxEdSync(){
@@ -131,8 +154,11 @@ async function rxPlay(t){
  if(ed()){if(key!==rxKey(rxBody(RXS.ek)))return;RXS.ek.own=RXS.par[key];RXS.ek.shown=RXS.pv[key];RXS.ek.err='';rxEdSync()}     /* an older answer than the sliders: ignored */
  else if(RXS.hover===t)rxTileRedraw(t)}
 async function rxLoadMade(){const r=await api('/api/particles/emoji-lottie');RXS.made=r.ok?(r.j.reactions||[]):[];if(route_==='reactions')rxDraw()}
+async function rxLoadPresets(){const r=await api('/api/particles/emoji-presets');RXS.presets=r.ok?(r.j.presets||[]):[];if(route_==='reactions')rxManyRedraw()}
+/* the newest created first */
+function rxAddMade(rs){RXS.made=[...rs.map(r=>({id:r.id,token:r.token,emoji:r.emoji,preset:r.preset,params:r.params,url:r.url,preview:r.preview,bytes:r.bytes,created:Date.now()/1000})).reverse(),...(RXS.made||[])]}
 RENDER.reactions=async()=>{
- rxDraw();if(RXS.made===null)rxLoadMade();
+ rxDraw();if(RXS.made===null)rxLoadMade();if(RXS.presets===null)rxLoadPresets();
  if(!RXS.bank){const b=await api('/api/particles/emoji-motions');if(b.ok){RXS.bank=b.j.motions||[];if(route_==='reactions')rxDraw()}}};
 
 /* ---------- events ---------- */
@@ -144,7 +170,10 @@ document.addEventListener('input',ev=>{
  const out=t.parentNode&&t.parentNode.querySelector('output');if(out)out.textContent=rxFmt(o,t.value);
  clearTimeout(RXS.t);const tok=RXS.ek.token;RXS.t=setTimeout(()=>rxPlay(tok),300)});
 /* another motion: its own simulation, not the old one's tweaks */
-document.addEventListener('change',ev=>{const t=ev.target;if(!t||!t.dataset||t.dataset.rxpre===undefined||!RXS.ek)return;RXS.ek.preset=t.value||'';RXS.ek.sim={};rxPlay(RXS.ek.token)});
+document.addEventListener('change',ev=>{
+ const t=ev.target;if(!t||!t.dataset)return;
+ if(t.dataset.rxapply!==undefined){RXS.apply=t.value||'';rxManyRedraw();return}
+ if(t.dataset.rxpre===undefined||!RXS.ek)return;RXS.ek.preset=t.value||'';RXS.ek.sim={};rxPlay(RXS.ek.token)});
 /* pointing at an emoji plays its reaction over it, after a short pause, so sweeping across the rows asks for nothing */
 document.addEventListener('mouseover',ev=>{
  const b=ev.target&&ev.target.closest&&ev.target.closest('.rx-e');if(!b||route_!=='reactions')return;
@@ -157,7 +186,28 @@ document.addEventListener('mouseout',ev=>{
 if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('resize',()=>{if(route_==='reactions')rxClip()});
 
 /* ---------- actions ---------- */
-ACT.rxpick=el=>{const t=el.dataset.t;if(RXS.ek&&RXS.ek.token===t)return;RXS.ek=rxNew(t);RXS.hover='';rxDraw();rxPlay(t)};
+/* a click opens the emoji in the editor; with Select several on it ticks it instead */
+ACT.rxpick=el=>{
+ const t=el.dataset.t;
+ if(RXS.multi){if(RXS.sel.has(t))RXS.sel.delete(t);else{if(RXS.sel.size>=RXMANY)return toast(`At most ${RXMANY} at once`,1);RXS.sel.add(t)}rxTileRedraw(t);rxManyRedraw();return}
+ if(RXS.ek&&RXS.ek.token===t)return;RXS.ek=rxNew(t);RXS.hover='';rxDraw();rxPlay(t)};
+ACT.rxmulti=()=>{RXS.multi=!RXS.multi;RXS.sel.clear();if(RXS.multi)RXS.ek=null;rxDraw()};
+ACT.rxclear=()=>{RXS.sel.clear();rxDraw()};
+ACT.rxmany=async el=>{
+ const tokens=[...RXS.sel];if(!tokens.length||RXS.busyMany)return;RXS.busyMany=true;rxManyRedraw();
+ const r=await post('/api/particles/emoji-lottie/batch',{tokens,...(RXS.apply?{preset_id:RXS.apply}:{})});RXS.busyMany=false;
+ if(!r.ok){rxManyRedraw();return toast(r.j.error||'Could not create them',1)}
+ rxAddMade(r.j.reactions||[]);RXS.sel.clear();rxDraw();
+ const bad=r.j.errors||[];toast(`${(r.j.reactions||[]).length} reaction${(r.j.reactions||[]).length===1?'':'s'} created`+(bad.length?`; ${bad.length} could not be made (${bad.map(e=>e.token).join(', ')})`:''),bad.length?1:0)};
+/* Save preset: the editor's settings, kept on the server as the next Preset NN */
+ACT.rxsave=async()=>{
+ const k=RXS.ek;if(!k)return;
+ const r=await post('/api/particles/emoji-presets',{settings:rxSettings(k)});
+ if(!r.ok)return toast(r.j.error||'Could not save the preset',1);
+ RXS.presets=[...(RXS.presets||[]),r.j];toast(`Saved as ${r.j.name}: use it with Select several`)};
+ACT.rxpdel=async el=>{
+ const r=await post(`/api/particles/emoji-presets/${el.dataset.id}/delete`,{});if(!r.ok)return toast(r.j.error||'Could not delete it',1);
+ RXS.presets=r.j.presets||[];RXS.apply='';rxManyRedraw()};
 ACT.rxclose=()=>{RXS.ek=null;rxDraw()};
 ACT.rxreset=el=>{const k=RXS.ek;if(!k)return;if(el.dataset.g==='sim'){k.sim={};k.preset=''}else Object.assign(k,RXD);rxEdRedraw();rxPlay(k.token)};
 /* Edit: the editor again, with that reaction's motion, simulation and shape */
@@ -173,5 +223,5 @@ ACT.rxcreate=async()=>{
  const k=RXS.ek;if(!k||k.busy)return;k.busy=true;rxEdRedraw();
  const r=await post('/api/particles/emoji-lottie',rxBody(k));k.busy=false;
  if(!r.ok){k.err=r.j.error||'Could not create the reaction';return rxEdRedraw()}
- RXS.made=[{id:r.j.id,token:r.j.token,emoji:r.j.emoji,preset:r.j.preset,params:r.j.params,url:r.j.url,preview:r.j.preview,bytes:r.j.bytes,created:Date.now()/1000},...(RXS.made||[])];
+ rxAddMade([r.j]);
  RXS.ek=null;rxDraw();toast(`${r.j.emoji} ${r.j.token} created: download its Lottie from its card`)};

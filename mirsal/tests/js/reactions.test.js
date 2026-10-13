@@ -107,3 +107,48 @@ test('Edit restores the Simulation of a created reaction', () => {
   r("ACT.rxedit({dataset:{t:'kiss',id:'L004'}})");
   assert.deepEqual(J(r, 'RXS.ek.sim'), { magnitude: 2.5, gravity: -1, vortex: 0.5, spin: 0, count: 40, spread: 180 });
 });
+
+test('Select several: clicks tick emojis instead of opening one, and one Create makes them all with each emoji\'s own look or a saved preset', async () => {
+  const r = loadConsole(['reactions.js']);
+  r(`RXS.bank=${BANK};RXS.made=[];RXS.presets=[{id:'preset01',name:'Preset 01',settings:{preset:'vortex'}}]`);
+  r('ACT.rxmulti()');
+  assert.equal(r('RXS.multi'), true);
+  r("ACT.rxpick({dataset:{t:'kiss'}});ACT.rxpick({dataset:{t:'cry'}});ACT.rxpick({dataset:{t:'school'}});ACT.rxpick({dataset:{t:'school'}})");
+  assert.deepEqual(J(r, '[...RXS.sel]'), ['kiss', 'cry'], 'a second click unticks');
+  assert.equal(r('RXS.ek'), null, 'nothing opens in the editor while ticking');
+  const h = r('rxPick()');
+  assert.match(h, /data-act=rxmulti aria-pressed=true/);
+  assert.match(h, /<b>2<\/b> <span class=rx-many-g>😘😭<\/span>/);
+  assert.match(h, /<option value="" selected>Each emoji's own<\/option><option value="preset01">Preset 01<\/option>/);
+  assert.match(h, /data-act=rxmany >Create 2 reactions/);
+  assert.equal((h.match(/class=rx-tick/g) || []).length, 2, 'ticked tiles carry a check');
+  r("POSTREPLIES.push({ok:true,j:{reactions:[{id:'L001',token:'kiss',emoji:'😘',preset:'vortex',params:{}},{id:'L001',token:'cry',emoji:'😭',preset:'vortex',params:{}}],errors:[]}})");
+  r("RXS.apply='preset01'");
+  await r('ACT.rxmany({})');
+  assert.deepEqual(J(r, 'POSTS'), [['/api/particles/emoji-lottie/batch', { tokens: ['kiss', 'cry'], preset_id: 'preset01' }]]);
+  assert.deepEqual(J(r, 'RXS.made.map(x=>x.token)'), ['cry', 'kiss'], 'their cards come first, newest first');
+  assert.equal(r('RXS.sel.size'), 0);
+  r("POSTS.length=0;RXS.apply='';RXS.sel.add('cry');POSTREPLIES.push({ok:true,j:{reactions:[],errors:[{token:'cry',error:'x'}]}})");
+  await r('ACT.rxmany({})');
+  assert.deepEqual(J(r, 'POSTS[0][1]'), { tokens: ['cry'] }, "each emoji's own: no preset is sent");
+  r("RXS.sel=new Set(Array.from({length:24},(_,i)=>'t'+i))");
+  r("ACT.rxpick({dataset:{t:'kiss'}})");
+  assert.equal(r('RXS.sel.size'), 24, 'at most 24 at once');
+  r('ACT.rxmulti()');
+  assert.deepEqual(J(r, '[RXS.multi,RXS.sel.size]'), [false, 0], 'leaving Select several clears the ticks');
+});
+
+test('Save preset keeps the editor settings without the emoji; the hover reaction is 64 px from the tile right edge', async () => {
+  const r = loadConsole(['reactions.js']);
+  r(`RXS.bank=${BANK};RXS.made=[];RXS.presets=[]`);
+  r("RXS.ek=rxNew('kiss');RXS.ek.preset='rain';RXS.ek.sim.count=12;RXS.ek.hue_var=0");
+  assert.match(r('rxEditor()'), /data-act=rxcreate[^>]*>Create reaction<\/button><button class=btn data-act=rxsave/);
+  r("POSTREPLIES.push({ok:true,j:{id:'preset01',name:'Preset 01',settings:{}}})");
+  await r('ACT.rxsave()');
+  assert.deepEqual(J(r, 'POSTS'), [['/api/particles/emoji-presets', { settings: { count: 12, particle_size: 1, size_in_dur: 0.4, size_out_dur: 0.4, hue_var: 0, preset: 'rain' } }]]);
+  assert.deepEqual(J(r, 'RXS.presets.map(p=>p.name)'), ['Preset 01']);
+  r("RXS.ek=null;RXS.hover='cry';const k=rxKey(rxFor('cry'));RXS.pv[k]='/r.webp';RXS.par[k]={origin:[0.5,0.1]}");
+  const t = r("rxTile(rxRow('cry'))");
+  assert.match(t, /class=rx-fx src="\/r.webp" style="width:64px;height:64px;left:calc\(100% - 32px\);top:calc\(50% - 6px\)"/,
+    "the rain's origin (top centre) sits on the tile's right edge");
+});

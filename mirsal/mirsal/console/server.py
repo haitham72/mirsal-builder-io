@@ -1343,6 +1343,11 @@ def make_handler(c: Console):
                     if method == "GET" and pid == "bank":
                         # the bank with build state for Library > Reactions > Create (finished/unclaimed per token)
                         return self._json(200, {"bank": ps.bank_states(c.out, c.lib)})
+                    if pid == "emoji-presets":
+                        # Reaction effects: the saved presets ("Save preset"); GET lists, POST {settings, name?} saves the next one
+                        if method == "GET":
+                            return self._json(200, {"presets": er.emoji_presets(c.out)})
+                        return self._json(201, er.save_emoji_preset(c.out, body.get("settings"), name=body.get("name"), user=self.user["id"]))
                     if method == "GET" and pid == "emoji-lottie":
                         # Reaction effects: every created reaction, newest first (one per Lottie export), for its cards
                         return self._json(200, {"reactions": er.emoji_lotties(c.out)})
@@ -1362,6 +1367,12 @@ def make_handler(c: Console):
                 act = parts[3]
                 if method != "POST":
                     raise pl.PipelineError(NO_ROUTE, 404)
+                if pid == "emoji-presets":                         # /api/particles/emoji-presets/{preset id}/delete
+                    if len(parts) == 5 and parts[4] == "delete":
+                        return self._json(200, er.delete_emoji_preset(c.out, act))
+                    raise pl.PipelineError(NO_ROUTE, 404)
+                if pid == "emoji-lottie" and act == "batch":        # Reaction effects: many emojis, one preset (or each emoji's own), one request
+                    return self._json(200, er.export_many(c.out, body.get("tokens"), preset_id=body.get("preset_id"), user=self.user["id"]))
                 if act in ("link", "unlink"):
                     return self._json(200, ps.link(c.out, c.lib, pid, body.get("sticker_ids"), self.user["id"], unlink=act == "unlink"))
                 if act == "assign":
